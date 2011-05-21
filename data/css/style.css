@@ -1,0 +1,114 @@
+body{
+	font-family:"Lucida Grande", "Lucida Sans Unicode", Verdana, Arial,
+	Helvetica, sans-serif;
+	font-size:16px;
+	background-color: #ebf4fb;
+	padding: 5px;
+	}
+	
+h1{
+	font-family:"Lucida Grande", "Lucida Sans Unicode", Verdana, Arial,
+	Helvetica, sans-serif;
+	size:30px;
+	color: #8B8989;
+	}
+.container{
+	width: 95%;
+	}	
+.header{
+	background-color: #EEB4B4;
+	width: 80%;
+	}
+.config{
+	font-size:14px;
+	margin-left: 30px;
+	}
+.configtable{
+	background-color: #eeeeee;
+	width: 95%;
+	padding: 15px;
+	line-height: 12px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	}
+.logo{
+	font-family:"Lucida Grande", "Lucida Sans Unicode", Verdana, Arial,
+	Helvetica, sans-serif;
+	font-size:20px;
+	color: #8B8989;
+	margin-left: 30px;
+	margin-top: 0px;
+	}
+.search{
+	margin-top: -40px;
+	margin-right: 30px;
+	}
+.data{
+	background-color: #ebf4fb;
+	font-size:24px;
+	}
+.datanil{
+	background-color: #ebf4fb;
+	font-size:36px;
+	text-align: center;
+	position: relative;
+	top:150px;
+	}
+.table{
+	padding: 10px;
+	font-size:24px;
+	background-color: #ffffff;
+	width: 95%;
+	margin-top: 25px;
+	margin-left: auto;
+	margin-right: 0px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	}
+.nav{
+	padding: 2px;
+	font-size:20px;
+	color: grey;
+	background-color: #bbbbbb;
+	width: 95%;
+	text-align: center;
+	margin-left: auto;
+	margin-right: 10px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	word-spacing: 18px;
+	}
+.center{
+	text-align: center;
+	font-size: 28px;
+	}
+.smalltext{
+	font-size: 11px;
+	}
+a:link {
+	color: #5E2612; 
+  	text-decoration: none; 
+  	}
+a:visited {
+  	color: #5E2612; 
+	text-decoration: none; 
+	}
+a:hover { /*this effect is not shown in NN4.xx*/
+  	color: #999999; 
+	text-decoration: underline;
+  	}
+a:active {/*colour in NN4.xx is red*/ 
+  	color: #5E2612; 
+  	text-decoration: underline; 
+	}
+a.external {
+	color: blue;
+	font-size:12px;
+	}
+a.blue {
+	color: blue;
+	}
+a.externalred {
+	color: red;
+	font-size:12px;
+	}
