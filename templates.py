@@ -1,8 +1,10 @@
 _header = '''
 	<html>
 	<head>
-		<title>headphones</title>
+		<title>Headphones</title>
 		<link rel="stylesheet" type="text/css" href="data/css/style.css" />
+		<link rel="icon" type="image/png" href="data/images/headphoneslogo.png" />
+		<link rel="apple-touch-icon" href="data/images/headphoneslogo.png" />
 	</head>
 	<body>
 	<div class="container">'''

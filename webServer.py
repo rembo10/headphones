@@ -1,7 +1,6 @@
 import templates
 import config
 import cherrypy
-import search
 import musicbrainz2.webservice as ws
 import musicbrainz2.model as m
 import musicbrainz2.utils as u
@@ -11,10 +10,9 @@ import time
 import sqlite3
 import sys
 import configobj
+from headphones import FULL_PATH, config_file
 
-
-
-database = os.path.join(os.path.dirname(__file__), 'headphones.db')
+database = os.path.join(FULL_PATH, 'headphones.db')
 
 class Headphones:
 
@@ -32,7 +30,7 @@ class Headphones:
 			i = 0
 			page.append('''<div class="table"><table border="0" cellpadding="3">
 						<tr>
-						<th align="left" width="150">Artist Name</th>
+						<th align="left" width="170">Artist Name</th>
 						<th align="center" width="100">Status</th>
 						<th align="center" width="300">Upcoming Albums</th>
 						<th>      </th>
@@ -41,7 +39,7 @@ class Headphones:
 				c.execute('''SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumID from albums WHERE ArtistName="%s" order by ReleaseDate DESC''' % results[i][0])
 				latestalbum = c.fetchall()
 				if latestalbum[0][1] > latestalbum[0][2]:
-					newalbumName = '<font color="#5DFC0A" size="3px"><a href="albumPage?name=%s">%s' % (latestalbum[0][3], latestalbum[0][0])
+					newalbumName = '<font color="#5DFC0A" size="3px"><a href="albumPage?name=%s"><i>%s</i>' % (latestalbum[0][3], latestalbum[0][0])
 					releaseDate = '(%s)</a></font>' % latestalbum[0][1]
 				else:
 					newalbumName = '<font color="#CFCFCF">None</font>'
@@ -50,10 +48,10 @@ class Headphones:
 					newStatus = '''<font color="red"><b>%s</b></font>(<A class="external" href="resumeArtist?ArtistID=%s">resume</a>)''' % (results[i][2], results[i][1])
 				else:
 					newStatus = '''%s(<A class="external" href="pauseArtist?ArtistID=%s">pause</a>)''' % (results[i][2], results[i][1])
-				page.append('''<tr><td align="left" width="280"><a href="artistPage?ArtistID=%s">%s</a> 
+				page.append('''<tr><td align="left" width="300"><a href="artistPage?ArtistID=%s">%s</a> 
 								(<A class="external" href="http://musicbrainz.org/artist/%s">link</a>) [<A class="externalred" href="deleteArtist?ArtistID=%s">delete</a>]</td>
 								<td align="center" width="160">%s</td>
-								<td align="center"><b><i>%s %s</i></b> </td></tr>''' % (results[i][1], results[i][0], results[i][1], results[i][1], newStatus, newalbumName, releaseDate))	
+								<td align="center">%s %s</td></tr>''' % (results[i][1], results[i][0], results[i][1], results[i][1], newStatus, newalbumName, releaseDate))	
 				i = i+1
 			page.append('''</table></div>''')
 		else:
@@ -88,6 +86,8 @@ class Headphones:
 			elif results[i][3] == 'Wanted':
 				newStatus = '''<b>%s</b>[<A class="external" href="unqueueAlbum?AlbumID=%s&ArtistID=%s">skip</a>]''' % (results[i][3], results[i][2], ArtistID)				
 			elif results[i][3] == 'Downloaded':
+				newStatus = '''<b>%s</b>[<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">retry</a>]''' % (results[i][3], results[i][2], ArtistID)
+			elif results[i][3] == 'Snatched':
 				newStatus = '''<b>%s</b>[<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">retry</a>]''' % (results[i][3], results[i][2], ArtistID)
 			else:
 				newStatus = '%s' % (results[i][3])
@@ -257,7 +257,10 @@ class Headphones:
 		c.execute('UPDATE albums SET status = "Wanted" WHERE AlbumID="%s"' % AlbumID)
 		conn.commit()
 		c.close()
+		import searcher
+		searcher.searchNZB(AlbumID)
 		raise cherrypy.HTTPRedirect("/artistPage?ArtistID=%s" % ArtistID)
+
 		
 	queueAlbum.exposed = True
 
@@ -270,9 +273,6 @@ class Headphones:
 		raise cherrypy.HTTPRedirect("/artistPage?ArtistID=%s" % ArtistID)
 		
 	unqueueAlbum.exposed = True
-	
-	
-	
 	
 	def upcoming(self):
 		page = [templates._header]
@@ -308,15 +308,16 @@ class Headphones:
 					
 	config.exposed = True
 	
-	def configUpdate(self, http_host='localhost', http_username=None, http_port=8181, http_password=None, launch_browser=0,
+	
+	def configUpdate(self, http_host='127.0.0.1', http_username=None, http_port=8181, http_password=None, launch_browser=0,
 		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, music_download_dir=None,
 		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, include_lossless=0, 
-		move_to_itunes=0, path_to_itunes=None, rename_mp3s=0, add_album_art=0):
+		flac_to_mp3=0, move_to_itunes=0, path_to_itunes=None, rename_mp3s=0, cleanup=0, add_album_art=0):
 		
-		configs = configobj.ConfigObj(os.path.join(os.path.dirname(__file__), 'config.ini'))
+		configs = configobj.ConfigObj(config_file)
 		SABnzbd = configs['SABnzbd']
 		General = configs['General']
-		NZBMatrix = configs['NZBMatrix']
+		NZBMatrix = configs['NZBMatrix']	
 		General['http_host'] = http_host
 		General['http_port'] = http_port
 		General['http_username'] = http_username
@@ -333,12 +334,15 @@ class Headphones:
 		NZBMatrix['nzbmatrix_username'] = nzbmatrix_username
 		NZBMatrix['nzbmatrix_apikey'] = nzbmatrix_apikey
 		General['include_lossless'] = include_lossless
+		General['flac_to_mp3'] = flac_to_mp3
 		General['move_to_itunes'] = move_to_itunes
 		General['path_to_itunes'] = path_to_itunes
 		General['rename_mp3s'] = rename_mp3s
+		General['cleanup'] = cleanup
 		General['add_album_art'] = add_album_art
 		
 		configs.write()
+		
 		reload(config)
 		raise cherrypy.HTTPRedirect("/config")
 		
@@ -346,5 +350,6 @@ class Headphones:
 	configUpdate.exposed = True
 
 	def shutdown(self):
-		sys.exit('Headphones is shutting down')
+		sys.exit()
+
 	shutdown.exposed = True

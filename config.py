@@ -1,7 +1,8 @@
 import os
 from configobj import ConfigObj
+from headphones import config_file
 
-config = ConfigObj(os.path.join(os.path.dirname(__file__), 'config.ini'))
+config = ConfigObj(config_file)
 
 General = config['General']
 http_host = General['http_host']
@@ -11,9 +12,11 @@ http_password = General['http_password']
 launch_browser = General['launch_browser']
 usenet_retention = General['usenet_retention']
 include_lossless = General['include_lossless']
+flac_to_mp3 = General['flac_to_mp3']
 move_to_itunes = General['move_to_itunes']
 path_to_itunes = General['path_to_itunes']
 rename_mp3s = General['rename_mp3s']
+cleanup = General['cleanup']
 add_album_art = General['add_album_art']
 music_download_dir = General['music_download_dir']
 NZBMatrix = config['NZBMatrix']
@@ -74,18 +77,20 @@ form = '''<div class="table"><div class="config">
     <input type="text" name="nzbmatrix_apikey" value="%s" size="46" maxlength="40"/></td></tr></table>
     <h1><u>Quality & Post Processing</u></h1>
     <table class="configtable"><tr><td><p>Album Quality:</p>
-    <input type="checkbox" name="include_lossless" value="1" %s/>Include lossless</td>
+    <input type="checkbox" name="include_lossless" value="1" %s/>Include lossless 
+    <input type="checkbox" name="flac_to_mp3" value="1" %s/>Convert lossless to mp3</td>
     <td><p>iTunes:</p>
     <input type="checkbox" name="move_to_itunes" value="1" %s/>Move downloads to iTunes</td></tr>
     <tr><td><br /><p>Path to iTunes folder:</p>
     <input type="text" name="path_to_itunes" value="%s" size="60" maxlength="40"/><br />
     <p class="smalltext">i.e. Music/iTunes or /Users/name/Music/iTunes</p></td>
     <td><p>Renaming & Metadata:</p>
-    <input type="checkbox" name="rename_mp3s" value="1" %s/>Rename & add metadata</td></tr>
+    <input type="checkbox" name="rename_mp3s" value="1" %s/>Rename & add metadata<br /><br />
+    <input type="checkbox" name="cleanup" value="1" %s/>Delete leftover files</td></td></tr>
     <tr><td><br /><p>Album Art:</p>
     <input type="checkbox" name="add_album_art" value="1" %s/>Add album art</td></tr></table>
     <p class="center"><input type="submit" value="     Save Changes    "/></p></form></div></div>''' % (http_host, http_username, 
     http_port, http_password, var_to_chk(launch_browser), sab_host, sab_username, sab_apikey, sab_password,
     sab_category, music_download_dir, usenet_retention, var_to_chk(nzbmatrix), nzbmatrix_username, nzbmatrix_apikey,
-    var_to_chk(include_lossless), var_to_chk(move_to_itunes), path_to_itunes, var_to_chk(rename_mp3s),
-    var_to_chk(add_album_art))
+    var_to_chk(include_lossless), var_to_chk(flac_to_mp3), var_to_chk(move_to_itunes), path_to_itunes, var_to_chk(rename_mp3s),
+    var_to_chk(cleanup), var_to_chk(add_album_art))
