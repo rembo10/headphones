@@ -38,10 +38,10 @@ def itunesImport(pathtoxml):
 			else:
 				c.execute('INSERT INTO artists VALUES( ?, ?, ?, CURRENT_DATE, ?)', (artistid, artist.name, artist.sortName, 'Active'))
 				for release in artist.getReleases():
+					time.sleep(1)
 					releaseid = u.extractUuid(release.id)
 					inc = ws.ReleaseIncludes(artist=True, releaseEvents= True, tracks= True, releaseGroup=True)
 					results = ws.Query().getReleaseById(releaseid, inc)
-					time.sleep(1)
 					for event in results.releaseEvents:
 						if event.country == 'US':
 							c.execute('INSERT INTO albums VALUES( ?, ?, ?, ?, ?, CURRENT_DATE, ?, ?)', (artistid, results.artist.name, results.title, results.asin, results.getEarliestReleaseDate(), u.extractUuid(results.id), 'Skipped'))

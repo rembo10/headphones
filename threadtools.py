@@ -36,6 +36,6 @@ class threadtool(SimplePlugin):
 		import mover
 		from webServer import database
 		if os.path.exists(database):
-			self.sched.add_cron_job(updater.dbUpdate, hour=3)
-			self.sched.add_interval_job(searcher.searchNZB, hours=18)
+			self.sched.add_cron_job(updater.dbUpdate, hour=4, minute=0, second=0)
+			self.sched.add_interval_job(searcher.searchNZB, hours=12)
 			#self.sched.add_interval_job(mover.moveFiles, minutes=10)

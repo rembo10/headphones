@@ -77,10 +77,11 @@ def searchNZB(albumid=None):
 			except:
 				print '''No results found'''
 			
+		if len(resultlist):	
 			bestqual = sorted(resultlist, key=lambda title: title[1], reverse=True)[0]
-	
+		
 			downloadurl = bestqual[2]
-			
+				
 			linkparams = {	"mode": "addurl",
 							"apikey": sab_apikey,
 							"ma_username": sab_username,
@@ -88,13 +89,16 @@ def searchNZB(albumid=None):
 							"cat": sab_category,
 							"name": downloadurl
 						}
-			
+				
 			saburl = 'http://' + sab_host + '/sabnzbd/api?' + urllib.urlencode(linkparams)
-	
+		
 			urllib.urlopen(saburl)
-			
+				
 			c.execute('UPDATE albums SET status = "Snatched" WHERE AlbumID="%s"' % albums[2])
 			conn.commit()
-
+		
+		else:
+			pass
+			
 	c.close()
 	
