@@ -97,8 +97,4 @@ def searchNZB(albumid=None):
 			conn.commit()
 
 	c.close()
-		
-		
-
-
 	

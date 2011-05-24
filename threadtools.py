@@ -18,16 +18,15 @@ class threadtool(SimplePlugin):
 			self.thread = threading.Thread(target=self.run)
 			self.thread.start()
 		self.sched.start()
+	start.priority = 80
 		
 	def stop(self):
 		self.running = False
-		print '''Shutting down'''
-			
 		if self.thread:
 			self.thread.join()
 			self.thread = None
-		self.running = False
 		self.sched.shutdown()
+	stop.priority = 10
 		
 	def run(self):
 		import updater

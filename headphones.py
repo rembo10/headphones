@@ -70,6 +70,7 @@ def serverstart():
     				{settings['http_username']:settings['http_password']})
 		})
 		
+	
 	if options.daemonize:
 		Daemonizer(cherrypy.engine).subscribe()
 
