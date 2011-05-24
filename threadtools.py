@@ -1,5 +1,7 @@
 from cherrypy.process.plugins import SimplePlugin
 from apscheduler.scheduler import Scheduler
+
+import os
 import time
 import threading
 import Queue
@@ -32,6 +34,8 @@ class threadtool(SimplePlugin):
 		import updater
 		import searcher
 		import mover
-		#self.sched.add_cron_job(updater.dbUpdate, hour=3)
-		#self.sched.add_interval_job(searcher.searchNZB, hours=18)
-		#self.sched.add_interval_job(mover.moveFiles, minutes=10)
+		from webServer import database
+		if os.path.exists(database):
+			self.sched.add_cron_job(updater.dbUpdate, hour=3)
+			self.sched.add_interval_job(searcher.searchNZB, hours=18)
+			#self.sched.add_interval_job(mover.moveFiles, minutes=10)
