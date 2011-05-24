@@ -15,7 +15,6 @@ import os
 
 FULL_PATH = os.path.dirname(os.path.abspath(__file__))
 config_file = os.path.join(FULL_PATH, 'config.ini')
-db = os.path.join(FULL_PATH, 'headphones.db')
 
 
 if os.path.exists(config_file):
@@ -77,7 +76,7 @@ def serverstart():
 
 	#Start threads
 	threadtool(cherrypy.engine).subscribe()
-	
+	cherrypy.engine.timeout_monitor.unsubscribe()
 	cherrypy.quickstart(webServer.Headphones(), config = conf)
 	
 

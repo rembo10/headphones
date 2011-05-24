@@ -286,9 +286,24 @@ class Headphones:
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
+		page.append('''<div class="table"><div class="config"><h1>Import or Sync Your iTunes Library</h1><br />
+		Enter the full path to your iTunes XML file.
+		i.e. /Users/"username"/Music/iTunes/iTunes Music Library.xml<br />
+		note: This process can take a LONG time!<br /><br /><br />
+		<form action="importItunes" method="GET" align="center">
+			<input type="text" value="Absolute Path to Itunes XML" onfocus="if
+			(this.value==this.defaultValue) this.value='';" name="path" size="70" />
+			<input type="submit" /></form><br /><br /><br /></div></div>''')
 		page.append(templates._footer)
 		return page
 	manage.exposed = True
+	
+	def importItunes(self, path):
+		import itunesimport
+		itunesimport.itunesImport(path)
+		raise cherrypy.HTTPRedirect("/")
+	importItunes.exposed = True
+		
 	
 	def history(self):
 		page = [templates._header]

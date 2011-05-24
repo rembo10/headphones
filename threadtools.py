@@ -31,5 +31,7 @@ class threadtool(SimplePlugin):
 	def run(self):
 		import updater
 		import searcher
-		self.sched.add_cron_job(updater.dbUpdate, hour=3)
-		self.sched.add_interval_job(searcher.searchNZB, hours=18)
+		import mover
+		#self.sched.add_cron_job(updater.dbUpdate, hour=3)
+		#self.sched.add_interval_job(searcher.searchNZB, hours=18)
+		#self.sched.add_interval_job(mover.moveFiles, minutes=10)

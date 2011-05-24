@@ -30,8 +30,9 @@ else:
 
 def searchNZB(albumid=None):
 	
-	conn=sqlite3.connect(database)
-	c=conn.cursor()
+	if os.path.exists(database):
+		conn=sqlite3.connect(database)
+		c=conn.cursor()
 	
 	if albumid:
 		c.execute('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted" AND AlbumID="%s"' % albumid)
