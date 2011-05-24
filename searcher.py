@@ -95,6 +95,8 @@ def searchNZB(albumid=None):
 			urllib.urlopen(saburl)
 				
 			c.execute('UPDATE albums SET status = "Snatched" WHERE AlbumID="%s"' % albums[2])
+			c.execute('CREATE TABLE IF NOT EXISTS snatched (Title TEXT UNIQUE, Size INTEGER, URL TEXT, DateAdded TEXT)')
+			c.execute('INSERT INTO snatched VALUES( ?, ?, ?, CURRENT_DATE)', (bestqual[0], bestqual[1], bestqual[2]))
 			conn.commit()
 		
 		else:

@@ -119,17 +119,18 @@ class Headphones:
 		c.close()
 		i = 0
 		page.append('''<div class="table" align="center"><table border="0" cellpadding="3">
-					<tr><a href="artistPage?ArtistID=%s">%s</a> - %s<br />%s</tr>
+					<tr><a href="artistPage?ArtistID=%s">%s</a> - %s<br />
+					<a href="queueAlbum?AlbumID=%s&ArtistID=%s">Download<br />%s</tr>
 					<br /><tr>
 					<th align="left" width="100">Track #</th>
 					<th align="left" width="100">Track Title</th>
 					<th align="center" width="300">Duration</th>
 					<th>      </th>
-					</tr>''' % (results[0][0], results[0][1], results[0][2], albumart))
+					</tr>''' % (results[0][0], results[0][1], results[0][2], AlbumID, results[0][0], albumart))
 		while i < len(results):
 			page.append('''<tr><td align="left" width="120">%s</td>
 							<td align="left" width="240">%s (<A class="external" href="http://musicbrainz.org/recording/%s.html">link</a>)</td>
-							<td align="center">%s</td></tr>''' % (i+1, results[i][3], results[i][5], results[i][4]))	
+							<td align="center">%s</td></tr>''' % (i+1, results[i][3], results[i][5], time.strftime("%M:%S", time.gmtime(int(results[i][4])/1000))))	
 			i = i+1
 		page.append('''</table></div>''')
 
@@ -182,7 +183,7 @@ class Headphones:
 		c=conn.cursor()
 		c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT)')
 		c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT)')
-		c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration TEXT, TrackID TEXT)')
+		c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT)')
 		c.execute('SELECT ArtistID from artists')
 		artistlist = c.fetchall()
 		if any(artistid in x for x in artistlist):
