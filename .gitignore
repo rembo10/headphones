@@ -1,0 +1,14 @@
+# Compiled source #
+###################
+*.pyc
+
+# Logs & Databases #
+####################
+*.db
+*.log
+
+# OS generated files #
+######################
+.DS_Store?
+Thumbs.db
+
