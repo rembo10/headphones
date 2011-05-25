@@ -7,6 +7,7 @@ import musicbrainz2.utils as u
 import os
 import string
 import time
+import datetime
 import sqlite3
 import sys
 import configobj
@@ -24,7 +25,7 @@ class Headphones:
 		if os.path.exists(database):
 			conn=sqlite3.connect(database)
 			c=conn.cursor()
-			c.execute('SELECT ArtistName, ArtistID, Status from artists order by ArtistSortName')
+			c.execute('SELECT ArtistName, ArtistID, Status from artists order by ArtistSortName collate nocase')
 			results = c.fetchall()
 			c.close()
 			i = 0
@@ -38,8 +39,9 @@ class Headphones:
 			while i < len(results):
 				c.execute('''SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumID from albums WHERE ArtistName="%s" order by ReleaseDate DESC''' % results[i][0])
 				latestalbum = c.fetchall()
-				if latestalbum[0][1] > latestalbum[0][2]:
-					newalbumName = '<font color="#5DFC0A" size="3px"><a href="albumPage?name=%s"><i>%s</i>' % (latestalbum[0][3], latestalbum[0][0])
+				today = datetime.date.today()
+				if latestalbum[0][1] > datetime.date.isoformat(today):
+					newalbumName = '<font color="#5DFC0A" size="3px"><a href="albumPage?AlbumID=%s"><i>%s</i>' % (latestalbum[0][3], latestalbum[0][0])
 					releaseDate = '(%s)</a></font>' % latestalbum[0][1]
 				else:
 					newalbumName = '<font color="#CFCFCF">None</font>'
@@ -128,9 +130,13 @@ class Headphones:
 					<th>      </th>
 					</tr>''' % (results[0][0], results[0][1], results[0][2], AlbumID, results[0][0], albumart))
 		while i < len(results):
+			if results[i][4]:
+				duration = time.strftime("%M:%S", time.gmtime(int(results[i][4])/1000))
+			else:
+				duration = 'n/a'
 			page.append('''<tr><td align="left" width="120">%s</td>
 							<td align="left" width="240">%s (<A class="external" href="http://musicbrainz.org/recording/%s.html">link</a>)</td>
-							<td align="center">%s</td></tr>''' % (i+1, results[i][3], results[i][5], time.strftime("%M:%S", time.gmtime(int(results[i][4])/1000))))	
+							<td align="center">%s</td></tr>''' % (i+1, results[i][3], results[i][5], duration))	
 			i = i+1
 		page.append('''</table></div>''')
 
@@ -325,7 +331,7 @@ class Headphones:
 	config.exposed = True
 	
 	
-	def configUpdate(self, http_host='127.0.0.1', http_username=None, http_port=8181, http_password=None, launch_browser=0,
+	def configUpdate(self, http_host='127.0.0.1', http_username=None, http_port=8181, http_password=None, launch_browser=1,
 		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, music_download_dir=None,
 		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, include_lossless=0, 
 		flac_to_mp3=0, move_to_itunes=0, path_to_itunes=None, rename_mp3s=0, cleanup=0, add_album_art=0):

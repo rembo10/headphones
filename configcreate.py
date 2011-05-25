@@ -8,7 +8,7 @@ def configCreate(path):
 	config['General']['http_port'] = 8181
 	config['General']['http_username'] = ''
 	config['General']['http_password'] = ''
-	config['General']['launch_browser'] = 0
+	config['General']['launch_browser'] = 1
 	config['General']['include_lossless'] = 0
 	config['General']['flac_to_mp3'] = 0
 	config['General']['move_to_itunes'] = 0
