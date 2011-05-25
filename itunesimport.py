@@ -42,20 +42,26 @@ def itunesImport(pathtoxml):
 					releaseid = u.extractUuid(release.id)
 					inc = ws.ReleaseIncludes(artist=True, releaseEvents= True, tracks= True, releaseGroup=True)
 					results = ws.Query().getReleaseById(releaseid, inc)
+					
 					for event in results.releaseEvents:
+						
 						if event.country == 'US':
+							
 							c.execute('INSERT INTO albums VALUES( ?, ?, ?, ?, ?, CURRENT_DATE, ?, ?)', (artistid, results.artist.name, results.title, results.asin, results.getEarliestReleaseDate(), u.extractUuid(results.id), 'Skipped'))
 							conn.commit()
 							c.execute('SELECT ReleaseDate, DateAdded from albums WHERE AlbumID="%s"' % u.extractUuid(results.id))
+							
 							latestrelease = c.fetchall()
+							
 							if latestrelease[0][0] > latestrelease[0][1]:
 								c.execute('UPDATE albums SET Status = "Wanted" WHERE AlbumID="%s"' % u.extractUuid(results.id))
 							else:
 								pass
 							for track in results.tracks:
 								c.execute('INSERT INTO tracks VALUES( ?, ?, ?, ?, ?, ?, ?, ?)', (artistid, results.artist.name, results.title, results.asin, u.extractUuid(results.id), track.title, track.duration, u.extractUuid(track.id)))
-								conn.commit()
-								c.close()
+							conn.commit()
+
 						else:
 							pass
 		
+			c.close()
