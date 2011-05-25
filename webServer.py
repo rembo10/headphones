@@ -296,11 +296,13 @@ class Headphones:
 		page.append('''<div class="table"><div class="config"><h1>Import or Sync Your iTunes Library</h1><br />
 		Enter the full path to your iTunes XML file.
 		i.e. /Users/"username"/Music/iTunes/iTunes Music Library.xml<br />
-		note: This process can take a LONG time!<br /><br /><br />
+		note: This process can take a LONG time!<br /><br />
+		Once you click "Submit" you can navigate away from this
+			page while the process runs.<br /><br /><br />
 		<form action="importItunes" method="GET" align="center">
 			<input type="text" value="Absolute Path to Itunes XML" onfocus="if
 			(this.value==this.defaultValue) this.value='';" name="path" size="70" />
-			<input type="submit" /></form><br /><br /><br /></div></div>''')
+			<input type="submit" /></form><br /><br /></div></div>''')
 		page.append(templates._footer)
 		return page
 	manage.exposed = True
