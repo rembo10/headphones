@@ -38,7 +38,6 @@ class Headphones:
 			while i < len(results):
 				c.execute('''SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumID from albums WHERE ArtistName="%s" order by ReleaseDate DESC''' % results[i][0])
 				latestalbum = c.fetchall()
-				c.close()
 				today = datetime.date.today()
 				if latestalbum[0][1] > datetime.date.isoformat(today):
 					newalbumName = '<font color="#5DFC0A" size="3px"><a href="albumPage?AlbumID=%s"><i>%s</i>' % (latestalbum[0][3], latestalbum[0][0])
@@ -55,7 +54,9 @@ class Headphones:
 								<td align="center" width="160">%s</td>
 								<td align="center">%s %s</td></tr>''' % (results[i][1], results[i][0], results[i][1], results[i][1], newStatus, newalbumName, releaseDate))	
 				i = i+1
+			c.close()
 			page.append('''</table></div>''')
+			
 		else:
 			page.append("""<div class="datanil">Add some artists to the database!</div>""")
 		page.append(templates._footer)
