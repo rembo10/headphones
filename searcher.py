@@ -1,5 +1,6 @@
 import urllib
-from webServer import database, config_file
+from webServer import database
+from headphones import config_file
 from configobj import ConfigObj
 import string
 import feedparser
