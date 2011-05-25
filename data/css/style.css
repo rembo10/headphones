@@ -40,8 +40,9 @@ h1{
 	margin-top: 0px;
 	}
 .search{
-	margin-top: -40px;
-	margin-right: 30px;
+	position: absolute;
+	top: 50px;
+	right: 70px;
 	}
 .data{
 	background-color: #ebf4fb;

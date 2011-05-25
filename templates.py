@@ -10,8 +10,8 @@ _header = '''
 	<div class="container">'''
 			
 _logobar = '''
-		<div class="logo"><a href="/"><img src="data/images/headphoneslogo.png">headphones</div><a>
-			<div class="search"><form action="findArtist" method="GET" align="right">
+		<div class="logo"><a href="/"><img src="data/images/headphoneslogo.png">headphones<a></div>
+			<div class="search"><form action="findArtist" method="GET">
 			<input type="text" value="Add an artist" onfocus="if
 			(this.value==this.defaultValue) this.value='';" name="name" />
 			<input type="submit" /></form></div><br />
