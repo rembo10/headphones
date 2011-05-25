@@ -27,7 +27,6 @@ class Headphones:
 			c=conn.cursor()
 			c.execute('SELECT ArtistName, ArtistID, Status from artists order by ArtistSortName collate nocase')
 			results = c.fetchall()
-			c.close()
 			i = 0
 			page.append('''<div class="table"><table border="0" cellpadding="3">
 						<tr>
@@ -39,6 +38,7 @@ class Headphones:
 			while i < len(results):
 				c.execute('''SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumID from albums WHERE ArtistName="%s" order by ReleaseDate DESC''' % results[i][0])
 				latestalbum = c.fetchall()
+				c.close()
 				today = datetime.date.today()
 				if latestalbum[0][1] > datetime.date.isoformat(today):
 					newalbumName = '<font color="#5DFC0A" size="3px"><a href="albumPage?AlbumID=%s"><i>%s</i>' % (latestalbum[0][3], latestalbum[0][0])
