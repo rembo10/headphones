@@ -7,6 +7,7 @@ import feedparser
 import sqlite3
 import re
 
+
 config = ConfigObj(config_file)
 General = config['General']
 NZBMatrix = config['NZBMatrix']
@@ -30,7 +31,7 @@ else:
 	maxsize = 250000000
 
 def searchNZB(albumid=None):
-	
+
 	conn=sqlite3.connect(database)
 	c=conn.cursor()
 	

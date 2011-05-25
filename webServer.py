@@ -373,7 +373,6 @@ class Headphones:
 		General['add_album_art'] = add_album_art
 		
 		configs.write()
-		
 		reload(config)
 		raise cherrypy.HTTPRedirect("/config")
 		

@@ -89,7 +89,8 @@ form = '''<div class="table"><div class="config">
     <input type="checkbox" name="cleanup" value="1" %s/>Delete leftover files</td></td></tr>
     <tr><td><br /><p>Album Art:</p>
     <input type="checkbox" name="add_album_art" value="1" %s/>Add album art</td></tr></table>
-    <p class="center"><input type="submit" value="     Save Changes    "/></p></form></div></div>''' % (http_host, http_username, 
+    <p class="center"><input type="submit" value="     Save Changes    "/><br />
+    (For now, all changes require a restart to take effect)</p></form></div></div>''' % (http_host, http_username, 
     http_port, http_password, var_to_chk(launch_browser), sab_host, sab_username, sab_apikey, sab_password,
     sab_category, music_download_dir, usenet_retention, var_to_chk(nzbmatrix), nzbmatrix_username, nzbmatrix_apikey,
     var_to_chk(include_lossless), var_to_chk(flac_to_mp3), var_to_chk(move_to_itunes), path_to_itunes, var_to_chk(rename_mp3s),
