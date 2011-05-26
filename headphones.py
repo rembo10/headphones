@@ -4,6 +4,7 @@ from cherrypy.process.plugins import Daemonizer
 from optparse import OptionParser
 from configobj import ConfigObj
 from configcreate import configCreate
+import webbrowser
 import webServer
 import time
 from threadtools import threadtool
@@ -77,6 +78,16 @@ def serverstart():
 	#Start threads
 	threadtool(cherrypy.engine).subscribe()
 	cherrypy.engine.timeout_monitor.unsubscribe()
+	
+	
+	def browser():
+		webbrowser.open('http://' + settings['http_host'] + ':' + settings['http_port'])
+		
+	
+	if settings['launch_browser'] == '1':
+		cherrypy.engine.subscribe('start', browser, priority=90)
+	
+	
 	cherrypy.quickstart(webServer.Headphones(), config = conf)
 	
 
