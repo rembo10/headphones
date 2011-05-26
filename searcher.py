@@ -84,13 +84,20 @@ def searchNZB(albumid=None):
 		
 			downloadurl = bestqual[2]
 				
-			linkparams = {	"mode": "addurl",
-							"apikey": sab_apikey,
-							"ma_username": sab_username,
-							"ma_password": sab_password,
-							"cat": sab_category,
-							"name": downloadurl
-						}
+			linkparams = {}
+			
+			linkparams["mode"] = "addurl"
+			
+			if sab_apikey != '':
+				linkparams["apikey"] = sab_apikey
+			if sab_username != '':
+				linkparams["ma_username"] = sab_username
+			if sab_password != '':
+				linkparams["ma_password"] = sab_password
+			if sab_category != '':
+				linkparams["cat"] = sab_category
+							
+			linkparams["name"] = downloadurl
 				
 			saburl = 'http://' + sab_host + '/sabnzbd/api?' + urllib.urlencode(linkparams)
 		
