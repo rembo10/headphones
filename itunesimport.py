@@ -21,8 +21,10 @@ def itunesImport(pathtoxml):
 	rawlist = {}.fromkeys(lst).keys()
 	artistlist = [f for f in rawlist if f != None]
 	for name in artistlist:
+		time.sleep(1)
 		artistResults = ws.Query().getArtists(ws.ArtistFilter(string.replace(name, '&#38;', '%38'), limit=1))		
 		for result in artistResults:
+			time.sleep(1)
 			artistid = u.extractUuid(result.artist.id)
 			inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), ratings=False, releaseGroups=False)
 			artist = ws.Query().getArtistById(artistid, inc)
