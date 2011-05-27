@@ -342,13 +342,15 @@ class Headphones:
 	
 	def configUpdate(self, http_host='127.0.0.1', http_username=None, http_port=8181, http_password=None, launch_browser=0,
 		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, music_download_dir=None,
-		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, include_lossless=0, 
-		flac_to_mp3=0, move_to_itunes=0, path_to_itunes=None, rename_mp3s=0, cleanup=0, add_album_art=0):
+		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
+		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, include_lossless=0,flac_to_mp3=0, move_to_itunes=0, path_to_itunes=None, rename_mp3s=0, cleanup=0, add_album_art=0):
 		
 		configs = configobj.ConfigObj(config_file)
 		SABnzbd = configs['SABnzbd']
 		General = configs['General']
 		NZBMatrix = configs['NZBMatrix']	
+		Newznab = configs['Newznab']
+		NZBsorg = configs['NZBsorg']
 		General['http_host'] = http_host
 		General['http_port'] = http_port
 		General['http_username'] = http_username
@@ -364,6 +366,12 @@ class Headphones:
 		NZBMatrix['nzbmatrix'] = nzbmatrix
 		NZBMatrix['nzbmatrix_username'] = nzbmatrix_username
 		NZBMatrix['nzbmatrix_apikey'] = nzbmatrix_apikey
+		Newznab['newznab'] = newznab
+		Newznab['newznab_host'] = newznab_host
+		Newznab['newznab_apikey'] = newznab_apikey
+		NZBsorg['nzbsorg'] = nzbsorg
+		NZBsorg['nzbsorg_uid'] = nzbsorg_uid
+		NZBsorg['nzbsorg_hash'] = nzbsorg_hash
 		General['include_lossless'] = include_lossless
 		General['flac_to_mp3'] = flac_to_mp3
 		General['move_to_itunes'] = move_to_itunes

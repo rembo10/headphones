@@ -28,5 +28,13 @@ def configCreate(path):
 	config['NZBMatrix']['nzbmatrix'] = 0
 	config['NZBMatrix']['nzbmatrix_username'] = ''
 	config['NZBMatrix']['nzbmatrix_apikey'] = ''
+	config['Newznab'] = {}
+	config['Newznab']['newznab'] = 0
+	config['Newznab']['newznab_host'] = ''
+	config['Newznab']['newznab_apikey'] = ''
+	config['NZBsorg'] = {}
+	config['NZBsorg']['nzbsorg'] = 0
+	config['NZBsorg']['nzbsorg_uid'] = ''
+	config['NZBsorg']['nzbsorg_hash'] = ''
 
 	config.write()

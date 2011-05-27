@@ -23,6 +23,14 @@ NZBMatrix = config['NZBMatrix']
 nzbmatrix = NZBMatrix['nzbmatrix']
 nzbmatrix_username = NZBMatrix['nzbmatrix_username']
 nzbmatrix_apikey = NZBMatrix['nzbmatrix_apikey']
+Newznab = config['Newznab']
+newznab = Newznab['newznab']
+newznab_host = Newznab['newznab_host']
+newznab_apikey = Newznab['newznab_apikey']
+NZBsorg = config['NZBsorg']
+nzbsorg = NZBsorg['nzbsorg']
+nzbsorg_uid = NZBsorg['nzbsorg_uid']
+nzbsorg_hash = NZBsorg['nzbsorg_hash']
 SABnzbd = config['SABnzbd']
 sab_username = SABnzbd['sab_username']
 sab_password = SABnzbd['sab_password']
@@ -74,7 +82,20 @@ form = '''<div class="table"><div class="config">
     <td><p>NZBMatrix Username:</p>
     <input type="text" name="nzbmatrix_username" value="%s" size="30" maxlength="40"/><br /></td>
     <td><p>NZBMatrix API:</p>
-    <input type="text" name="nzbmatrix_apikey" value="%s" size="46" maxlength="40"/></td></tr></table>
+    <input type="text" name="nzbmatrix_apikey" value="%s" size="46" maxlength="40"/></td></tr>
+    <tr><td><br /><br /><p>Enable Newznab:</p>
+    <input type="checkbox" name="newznab" value="1" %s/>Enabled<br /></td>
+    <td><br /><br /><p>Newznab Host:</p>
+    <input type="text" name="newznab_host" value="%s" size="30" maxlength="40"/><br />
+    <p class="smalltext"> i.e. http://nzb.su</p></td>
+    <td><br /><br /><p>Newznab API:</p>
+    <input type="text" name="newznab_apikey" value="%s" size="46" maxlength="40"/></td></tr>
+    <tr><td><br /><br /><p>Enable NZBs.org:</p>
+    <input type="checkbox" name="nzbsorg" value="1" %s/>Enabled<br /></td>
+    <td><br /><br /><p>NZBs.org UID:</p>
+    <input type="text" name="nzbsorg_uid" value="%s" size="30" maxlength="40"/><br /></td>
+    <td><br /><br /><p>NZBs.org Hash:</p>
+    <input type="text" name="nzbsorg_hash" value="%s" size="46" maxlength="40"/></td></tr></table>
     <h1><u>Quality & Post Processing</u></h1>
     <table class="configtable"><tr><td><p>Album Quality:</p>
     <input type="checkbox" name="include_lossless" value="1" %s/>Include lossless 
@@ -93,5 +114,6 @@ form = '''<div class="table"><div class="config">
     (For now, all changes require a restart to take effect)</p></form></div></div>''' % (http_host, http_username, 
     http_port, http_password, var_to_chk(launch_browser), sab_host, sab_username, sab_apikey, sab_password,
     sab_category, music_download_dir, usenet_retention, var_to_chk(nzbmatrix), nzbmatrix_username, nzbmatrix_apikey,
+    var_to_chk(newznab), newznab_host, newznab_apikey, var_to_chk(nzbsorg), nzbsorg_uid, nzbsorg_hash,
     var_to_chk(include_lossless), var_to_chk(flac_to_mp3), var_to_chk(move_to_itunes), path_to_itunes, var_to_chk(rename_mp3s),
     var_to_chk(cleanup), var_to_chk(add_album_art))

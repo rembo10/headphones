@@ -12,10 +12,19 @@ config = ConfigObj(config_file)
 General = config['General']
 NZBMatrix = config['NZBMatrix']
 SABnzbd = config['SABnzbd']
+Newznab = config['Newznab']
+NZBsorg = config['NZBsorg']
+usenet_retention = General['usenet_retention']
+include_lossless = General['include_lossless']
 nzbmatrix = NZBMatrix['nzbmatrix']
 nzbmatrix_username = NZBMatrix['nzbmatrix_username']
 nzbmatrix_apikey = NZBMatrix['nzbmatrix_apikey']
-usenet_retention = General['usenet_retention']
+newznab = Newznab['newznab']
+newznab_host = Newznab['newznab_host']
+newznab_apikey = Newznab['newznab_apikey']
+nzbsorg = NZBsorg['nzbsorg']
+nzbsorg_uid = NZBsorg['nzbsorg_uid']
+nzbsorg_hash = NZBsorg['nzbsorg_hash']
 sab_host = SABnzbd['sab_host']
 sab_username = SABnzbd['sab_username']
 sab_password = SABnzbd['sab_password']
@@ -23,12 +32,6 @@ sab_apikey = SABnzbd['sab_apikey']
 sab_category = SABnzbd['sab_category']
 
 
-if General['include_lossless'] == '1':
-	categories = "23, 22"
-	maxsize = 2000000000
-else:
-	categories = "22"
-	maxsize = 250000000
 
 def searchNZB(albumid=None):
 
@@ -49,36 +52,108 @@ def searchNZB(albumid=None):
 		clname = string.replace(albums[0], ' & ', ' ')	
 		clalbum = string.replace(albums[1], ' & ', ' ')
 		term = re.sub('[\.\-]', ' ', '%s %s %s' % (clname, clalbum, year)).encode('utf-8')
-
-		params = {	"page": "download",
-					"username": nzbmatrix_username,
-					"apikey": nzbmatrix_apikey,
-					"subcat": categories,
-					"age": usenet_retention,
-					"english": 1,
-					"ssl": 1,
-					"scenename": 1,
-					"term": term
-					}
-					
-		searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
-		
-		d = feedparser.parse(searchURL)
-
 		
 		resultlist = []
 		
-		for item in d.entries:
-			try:
-				url = item.link
-				title = item.title
-				size = int(item.links[1]['length'])
-				if size < maxsize:
-					resultlist.append((title, size, url))
+		if nzbmatrix == '1':
+
+			if include_lossless == '1':
+				categories = "23,22"
+				maxsize = 2000000000
+			else:
+				categories = "22"
+				maxsize = 250000000
 			
-			except:
-				print '''No results found'''
 			
+			params = {	"page": "download",
+						"username": nzbmatrix_username,
+						"apikey": nzbmatrix_apikey,
+						"subcat": categories,
+						"age": usenet_retention,
+						"english": 1,
+						"ssl": 1,
+						"scenename": 1,
+						"term": term
+						}
+						
+			searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
+			
+			d = feedparser.parse(searchURL)
+			
+			for item in d.entries:
+				try:
+					url = item.link
+					title = item.title
+					size = int(item.links[1]['length'])
+					if size < maxsize:
+						resultlist.append((title, size, url))
+				
+				except:
+					print '''No results found'''
+			
+		if newznab == '1':
+		
+			if include_lossless == '1':
+				categories = "3040,3010"
+				maxsize = 2000000000
+			else:
+				categories = "3010"
+				maxsize = 250000000		
+
+			params = {	"t": "search",
+						"apikey": newznab_apikey,
+						"cat": categories,
+						"maxage": usenet_retention,
+						"q": term
+						}
+		
+			searchURL = newznab_host + '/api?' + urllib.urlencode(params)
+			
+			d = feedparser.parse(searchURL)
+			
+			for item in d.entries:
+				try:
+					url = item.link
+					title = item.title
+					size = int(item.links[1]['length'])
+					if size < maxsize:
+						resultlist.append((title, size, url))
+				
+				except:
+					print '''No results found'''
+					
+		if nzbsorg == '1':
+		
+			if include_lossless == '1':
+				categories = "3040,3010"
+				maxsize = 2000000000
+			else:
+				categories = "3010"
+				maxsize = 250000000		
+
+			params = {	"action": "search",
+						"dl": 1,
+						"i": nzbsorg_uid,
+						"h": nzbsorg_hash,
+						"age": usenet_retention,
+						"q": term
+						}
+		
+			searchURL = 'https://secure.nzbs.org/rss.php?' + urllib.urlencode(params)
+			
+			d = feedparser.parse(searchURL)
+			
+			for item in d.entries:
+				try:
+					url = item.link
+					title = item.title
+					size = int(item.links[1]['length'])
+					if size < maxsize:
+						resultlist.append((title, size, url))
+				
+				except:
+					print '''No results found'''
+		
 		if len(resultlist):	
 			bestqual = sorted(resultlist, key=lambda title: title[1], reverse=True)[0]
 		
