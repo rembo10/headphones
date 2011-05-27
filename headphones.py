@@ -81,7 +81,11 @@ def serverstart():
 	
 	
 	def browser():
-		webbrowser.open('http://' + settings['http_host'] + ':' + settings['http_port'])
+		if settings['http_host'] == '0.0.0.0':
+			host = 'localhost'
+		else:
+			host = settings['http_host']
+		webbrowser.open('http://' + host + ':' + settings['http_port'])
 		
 	
 	if settings['launch_browser'] == '1':
