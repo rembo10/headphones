@@ -39,12 +39,16 @@ class Headphones:
 				c.execute('''SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumID from albums WHERE ArtistName="%s" order by ReleaseDate DESC''' % results[i][0])
 				latestalbum = c.fetchall()
 				today = datetime.date.today()
-				if latestalbum[0][1] > datetime.date.isoformat(today):
-					newalbumName = '<font color="#5DFC0A" size="3px"><a href="albumPage?AlbumID=%s"><i>%s</i>' % (latestalbum[0][3], latestalbum[0][0])
-					releaseDate = '(%s)</a></font>' % latestalbum[0][1]
-				else:
-					newalbumName = '<font color="#CFCFCF">None</font>'
-					releaseDate = ""
+				if len(latestalbum) > 0:
+					if latestalbum[0][1] > datetime.date.isoformat(today):
+						newalbumName = '<font color="#5DFC0A" size="3px"><a href="albumPage?AlbumID=%s"><i>%s</i>' % (latestalbum[0][3], latestalbum[0][0])
+						releaseDate = '(%s)</a></font>' % latestalbum[0][1]
+					else:
+						newalbumName = '<font color="#CFCFCF">None</font>'
+						releaseDate = ""
+				if len(latestalbum) == 0:
+						newalbumName = '<font color="#CFCFCF">None</font>'
+						releaseDate = ""					
 				if results[i][2] == 'Paused':
 					newStatus = '''<font color="red"><b>%s</b></font>(<A class="external" href="resumeArtist?ArtistID=%s">resume</a>)''' % (results[i][2], results[i][1])
 				else:
@@ -70,6 +74,8 @@ class Headphones:
 		page.append(templates._nav)
 		conn=sqlite3.connect(database)
 		c=conn.cursor()
+		c.execute('''SELECT ArtistName from artists WHERE ArtistID="%s"''' % ArtistID)
+		artistname = c.fetchall()
 		c.execute('''SELECT AlbumTitle, ReleaseDate, AlbumID, Status, ArtistName, AlbumASIN from albums WHERE ArtistID="%s" order by ReleaseDate DESC''' % ArtistID)
 		results = c.fetchall()
 		c.close()
@@ -82,7 +88,7 @@ class Headphones:
 						<th align="center" width="100">Release Date</th>
 						<th align="center" width="300">Status</th>
 						<th>      </th>
-						</tr>''' % (results[0][4]))
+						</tr>''' % (artistname[0]))
 		while i < len(results):
 			if results[i][3] == 'Skipped':
 				newStatus = '''%s [<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">want</a>]''' % (results[i][3], results[i][2], ArtistID)
@@ -388,6 +394,6 @@ class Headphones:
 	configUpdate.exposed = True
 
 	def shutdown(self):
-		sys.exit()
+		sys.exit(0)
 
 	shutdown.exposed = True
