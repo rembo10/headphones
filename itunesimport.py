@@ -13,13 +13,17 @@ database = os.path.join(FULL_PATH, 'headphones.db')
 
 
 def itunesImport(pathtoxml):
-	pl = XMLLibraryParser(pathtoxml)
-	l = Library(pl.dictionary)
-	lst = []
-	for song in l.songs:
-		lst.append(song.artist)
-	rawlist = {}.fromkeys(lst).keys()
-	artistlist = [f for f in rawlist if f != None]
+	if os.path.splitext(pathtoxml)[1] == '.xml':
+		pl = XMLLibraryParser(pathtoxml)
+		l = Library(pl.dictionary)
+		lst = []
+		for song in l.songs:
+			lst.append(song.artist)
+		rawlist = {}.fromkeys(lst).keys()
+		artistlist = [f for f in rawlist if f != None]
+	else:
+		rawlist = os.listdir(pathtoxml)
+		artistlist = [f for f in rawlist if f != '.DS_STORE']
 	for name in artistlist:
 		time.sleep(1)
 		artistResults = ws.Query().getArtists(ws.ArtistFilter(string.replace(name, '&#38;', '%38'), limit=1))		

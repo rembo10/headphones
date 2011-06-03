@@ -306,10 +306,11 @@ class Headphones:
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
-		page.append('''<div class="table"><div class="config"><h1>Import or Sync Your iTunes Library</h1><br />
-		Enter the full path to your iTunes XML file.
+		page.append('''<div class="table"><div class="config"><h1>Import or Sync Your iTunes Library/Music Folder</h1><br />
+		Enter the full path to your iTunes XML file or music folder<br /><br />
 		i.e. /Users/"username"/Music/iTunes/iTunes Music Library.xml<br />
-		note: This process can take a LONG time!<br /><br />
+		<i>or</i> /Users/"username"/Music/iTunes/iTunes Media/Music <br /><br />(artists should have their own directories for folder import to work)
+		<br /><br />note: This process can take a LONG time!<br /><br />
 		Once you click "Submit" you can navigate away from this
 			page while the process runs.<br /><br /><br />
 		<form action="importItunes" method="GET" align="center">
