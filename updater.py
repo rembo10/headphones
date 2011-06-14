@@ -16,8 +16,12 @@ def dbUpdate():
 	i = 0
 	
 	while i < len(activeartists):
-		
+			
 		artistid = activeartists[i][0]
+		
+		c.execute('SELECT AlbumID from albums WHERE ArtistID="%s"' % artistid)
+		albumlist = c.fetchall()
+		
 		inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), ratings=False, releaseGroups=False)
 		artist = ws.Query().getArtistById(artistid, inc)
 		
@@ -32,7 +36,7 @@ def dbUpdate():
 				
 				if event.country == 'US':
 					
-					if (u.extractUuid(results.id) in x for x in activeartists):
+					if any(releaseid in x for x in albumlist):
 						
 						c.execute('UPDATE albums SET AlbumASIN="%s", ReleaseDate="%s" WHERE AlbumID="%s"' % (results.asin, results.getEarliestReleaseDate(), u.extractUuid(results.id)))
 		
@@ -61,7 +65,7 @@ def dbUpdate():
 							conn.commit()
 						
 				else:
-					print '''%s is not a US release''' % results.title
+					pass
 		i += 1
 	
 	conn.commit()
