@@ -316,7 +316,10 @@ class Headphones:
 		<form action="importItunes" method="GET" align="center">
 			<input type="text" value="Absolute Path to Itunes XML" onfocus="if
 			(this.value==this.defaultValue) this.value='';" name="path" size="70" />
-			<input type="submit" /></form><br /><br /></div></div>''')
+			<input type="submit" /></form><br /><br /></div></div>
+			<div class="table"><div class="config"><h1>Force Search</h1><br />
+			<a href="forceSearch">Force Check for Wanted Albums</a><br /><br />
+			<a href="forceUpdate">Force Update Active Artists </a><br /><br /><br /></div></div>''')
 		page.append(templates._footer)
 		return page
 	manage.exposed = True
@@ -326,6 +329,18 @@ class Headphones:
 		itunesimport.itunesImport(path)
 		raise cherrypy.HTTPRedirect("/")
 	importItunes.exposed = True
+	
+	def forceUpdate(self):
+		import updater
+		updater.dbUpdate()
+		raise cherrypy.HTTPRedirect("/")
+	forceUpdate.exposed = True
+	
+	def forceSearch(self):
+		import searcher
+		searcher.searchNZB()
+		raise cherrypy.HTTPRedirect("/")
+	forceSearch.exposed = True
 		
 	
 	def history(self):
