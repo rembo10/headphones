@@ -23,7 +23,8 @@ def itunesImport(pathtoxml):
 		artistlist = [f for f in rawlist if f != None]
 	else:
 		rawlist = os.listdir(pathtoxml)
-		artistlist = [f for f in rawlist if f != '.DS_STORE']
+		exclude = ['.ds_store', 'various artists']
+		artistlist = [f for f in rawlist if f.lower() not in exclude]
 	for name in artistlist:
 		time.sleep(1)
 		artistResults = ws.Query().getArtists(ws.ArtistFilter(string.replace(name, '&#38;', '%38'), limit=1))		
