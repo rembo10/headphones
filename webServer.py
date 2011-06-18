@@ -36,7 +36,7 @@ class Headphones:
 						<th>      </th>
 						</tr>''')
 			while i < len(results):
-				c.execute('''SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumID from albums WHERE ArtistName="%s" order by ReleaseDate DESC''' % results[i][0])
+				c.execute('''SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumID from albums WHERE ArtistName='%s' order by ReleaseDate DESC''' % results[i][0])
 				latestalbum = c.fetchall()
 				today = datetime.date.today()
 				if len(latestalbum) > 0:
