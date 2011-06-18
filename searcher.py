@@ -51,7 +51,8 @@ def searchNZB(albumid=None):
 		year = reldate[:4]
 		clname = string.replace(albums[0], ' & ', ' ')	
 		clalbum = string.replace(albums[1], ' & ', ' ')
-		term = re.sub('[\.\-]', ' ', '%s %s %s' % (clname, clalbum, year)).encode('utf-8')
+		term1 = re.sub('[\.\-]', ' ', '%s %s %s' % (clname, clalbum, year)).encode('utf-8')
+		term = string.replace(term1, '"', '')
 		
 		resultlist = []
 		
@@ -125,10 +126,10 @@ def searchNZB(albumid=None):
 		if nzbsorg == '1':
 		
 			if include_lossless == '1':
-				categories = "3040,3010"
+				categories = "5,3010"
 				maxsize = 2000000000
 			else:
-				categories = "3010"
+				categories = "5"
 				maxsize = 250000000		
 
 			params = {	"action": "search",
