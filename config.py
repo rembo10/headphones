@@ -45,7 +45,7 @@ def var_to_chk(variable):
 		return ''
 
 form = '''
-  <div class="table">
+<br>
   	<center>
 	  	<div class="smalltext">
 		  	<a href="#web_interface" >Web Interface</a> |
@@ -54,6 +54,7 @@ form = '''
 		  	<a href="#post_processing" class="smalltext">Quality &amp; Post Processing</a>
 		  </div>
   	</center>
+  <div class="table">
     <div class="config">
 	    <form action="configUpdate" method="post">
         <a name="web_interface"><h1><u>Web Interface</u></h1></a>
