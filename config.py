@@ -46,9 +46,17 @@ def var_to_chk(variable):
 
 form = '''
   <div class="table">
+  	<center>
+	  	<div class="smalltext">
+		  	<a href="#web_interface" >Web Interface</a> |
+		  	<a href="#download" class="smalltext">Download Settings</a> |
+		  	<a href="#providers" class="smalltext">Search Providers</a> |
+		  	<a href="#post_processing" class="smalltext">Quality &amp; Post Processing</a>
+		  </div>
+  	</center>
     <div class="config">
 	    <form action="configUpdate" method="post">
-        <h1><u>Web Interface</u></h1>
+        <a name="web_interface"><h1><u>Web Interface</u></h1></a>
 
         <table class="configtable" summary="Web Interface">
             <tr>
@@ -90,7 +98,7 @@ form = '''
             </tr>
         </table>
 
-        <h1><u>Download Settings</u></h1>
+        <a name="download"><h1><u>Download Settings</u></h1></a>
 
         <table class="configtable" summary="Download Settings">
             <tr>
@@ -145,7 +153,7 @@ form = '''
             </tr>
         </table>
 
-        <h1><u>Search Providers</u></h1>
+        <a name="providers"><h1><u>Search Providers</u></h1></a>
 
         <table class="configtable" summary="Search Providers">
             <tr>
@@ -222,7 +230,7 @@ form = '''
             </tr>
         </table>
 
-        <h1><u>Quality &amp; Post Processing</u></h1>
+        <a name="post_processing"><h1><u>Quality &amp; Post Processing</u></h1></a>
 
         <table class="configtable" summary="Quality & Post Processing">
             <tr>
