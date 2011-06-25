@@ -6,6 +6,7 @@ from configobj import ConfigObj
 from configcreate import configCreate
 import webbrowser
 import webServer
+import logger
 import time
 from threadtools import threadtool
 import os
@@ -16,6 +17,7 @@ import os
 
 FULL_PATH = os.path.dirname(os.path.abspath(__file__))
 config_file = os.path.join(FULL_PATH, 'config.ini')
+LOG_DIR = os.path.join(FULL_PATH, 'logs')
 
 
 if os.path.exists(config_file):
@@ -25,6 +27,13 @@ else:
 
 settings = ConfigObj(config_file)['General']
 
+if not os.access(LOG_DIR, os.F_OK):
+	try:
+		os.makedirs(LOG_DIR, 0744)
+	except:
+		print 'Unable to create log dir, logging to screen only'
+
+
 
 def serverstart():  
 
@@ -33,9 +42,12 @@ def serverstart():
 	parser.add_option("-q", "--quiet", action="store_true", dest="quiet")
 	
 	(options, args) = parser.parse_args()
+
+	consoleLogging=True
 	
 	if options.quiet or options.daemonize:
 		cherrypy.config.update({'log.screen': False})
+		consoleLogging=False
 
 	cherrypy.config.update({
 			'server.thread_pool': 10,
@@ -78,6 +90,8 @@ def serverstart():
 	#Start threads
 	threadtool(cherrypy.engine).subscribe()
 	cherrypy.engine.timeout_monitor.unsubscribe()
+
+	logger.sb_log_instance.initLogging(consoleLogging=consoleLogging)
 	
 	
 	def browser():
@@ -91,7 +105,7 @@ def serverstart():
 	if settings['launch_browser'] == '1':
 		cherrypy.engine.subscribe('start', browser, priority=90)
 	
-	
+	logger.log(u"Starting Headphones on port:" + settings['http_port'])
 	cherrypy.quickstart(webServer.Headphones(), config = conf)
 	
 

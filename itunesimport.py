@@ -8,12 +8,14 @@ import time
 import os
 import sqlite3
 from headphones import FULL_PATH
+import logger
 
 database = os.path.join(FULL_PATH, 'headphones.db')
 
 
 def itunesImport(pathtoxml):
 	if os.path.splitext(pathtoxml)[1] == '.xml':
+		logger.log(u"Loading xml file from"+ pathtoxml)
 		pl = XMLLibraryParser(pathtoxml)
 		l = Library(pl.dictionary)
 		lst = []
@@ -23,12 +25,15 @@ def itunesImport(pathtoxml):
 		artistlist = [f for f in rawlist if f != None]
 	else:
 		rawlist = os.listdir(pathtoxml)
-		exclude = ['.ds_store', 'various artists']
+		logger.log(u"Loading artists from directory:" +pathtoxml)
+		exclude = ['.ds_store', 'various artists', 'untitled folder', 'va']
 		artistlist = [f for f in rawlist if f.lower() not in exclude]
 	for name in artistlist:
+		logger.log(u"Querying MusicBrainz for: "+name)
 		time.sleep(1)
 		artistResults = ws.Query().getArtists(ws.ArtistFilter(string.replace(name, '&#38;', '%38'), limit=1))		
 		for result in artistResults:
+			logger.log(u"Found best match: "+result.artist.name+". Gathering album information...")
 			time.sleep(1)
 			artistid = u.extractUuid(result.artist.id)
 			inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), ratings=False, releaseGroups=False)
@@ -41,7 +46,7 @@ def itunesImport(pathtoxml):
 			c.execute('SELECT ArtistID from artists')
 			artistlist = c.fetchall()
 			if any(artistid in x for x in artistlist):
-				pass
+				logger.log(result.artist.name + u" is already in the database, skipping")
 			else:
 				c.execute('INSERT INTO artists VALUES( ?, ?, ?, CURRENT_DATE, ?)', (artistid, artist.name, artist.sortName, 'Active'))
 				for release in artist.getReleases():
@@ -69,6 +74,6 @@ def itunesImport(pathtoxml):
 							conn.commit()
 
 						else:
-							pass
+							logger.log(results.title + u" is not a US release. Skipping for now")
 		
 			c.close()

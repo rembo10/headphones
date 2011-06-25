@@ -6,6 +6,7 @@ import string
 import feedparser
 import sqlite3
 import re
+import logger
 
 
 config = ConfigObj(config_file)
@@ -54,6 +55,8 @@ def searchNZB(albumid=None):
 		term1 = re.sub('[\.\-]', ' ', '%s %s %s' % (clname, clalbum, year)).encode('utf-8')
 		term = string.replace(term1, '"', '')
 		
+		logger.log(u"Searching for "+term+" since it was marked as wanted")
+		
 		resultlist = []
 		
 		if nzbmatrix == '1':
@@ -78,7 +81,7 @@ def searchNZB(albumid=None):
 						}
 						
 			searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
-			
+			logger.log(u"Parsing results from "+searchURL)
 			d = feedparser.parse(searchURL)
 			
 			for item in d.entries:
@@ -88,9 +91,13 @@ def searchNZB(albumid=None):
 					size = int(item.links[1]['length'])
 					if size < maxsize:
 						resultlist.append((title, size, url))
+						logger.log(u"Found " + title +" : " + url + " (Size: " + size + ")")
+					else:
+						logger.log(title + u" is larger than the maxsize for this category, skipping. (Size: " + size+")", logger.WARNING)
+						
 				
 				except:
-					print '''No results found'''
+					logger.log(u"No results found", logger.WARNING)
 			
 		if newznab == '1':
 		
@@ -109,6 +116,7 @@ def searchNZB(albumid=None):
 						}
 		
 			searchURL = newznab_host + '/api?' + urllib.urlencode(params)
+			logger.log(u"Parsing results from "+searchURL)
 			
 			d = feedparser.parse(searchURL)
 			
@@ -119,9 +127,12 @@ def searchNZB(albumid=None):
 					size = int(item.links[1]['length'])
 					if size < maxsize:
 						resultlist.append((title, size, url))
+						logger.log(u"Found " + title +" : " + url + " (Size: " + size + ")")
+					else:
+						logger.log(title + u" is larger than the maxsize for this category, skipping. (Size: " + size+")", logger.WARNING)
 				
 				except:
-					print '''No results found'''
+					logger.log(u"No results found", logger.WARNING)
 					
 		if nzbsorg == '1':
 		
@@ -142,6 +153,7 @@ def searchNZB(albumid=None):
 		
 			searchURL = 'https://secure.nzbs.org/rss.php?' + urllib.urlencode(params)
 			
+			logger.log(u"Parsing results from "+searchURL)
 			d = feedparser.parse(searchURL)
 			
 			for item in d.entries:
@@ -151,13 +163,18 @@ def searchNZB(albumid=None):
 					size = int(item.links[1]['length'])
 					if size < maxsize:
 						resultlist.append((title, size, url))
+						logger.log(u"Found " + title +" : " + url + " (Size: " + size + ")")
+					else:
+						logger.log(title + u" is larger than the maxsize for this category, skipping. (Size: " + size +")", logger.WARNING)
+						
 				
 				except:
-					print '''No results found'''
+					logger.log(u"No results found", logger.WARNING)
 		
 		if len(resultlist):	
 			bestqual = sorted(resultlist, key=lambda title: title[1], reverse=True)[0]
 		
+			logger.log(bestqual[0] + u" seems to be the best quality at: " + bestqual[1])
 			downloadurl = bestqual[2]
 				
 			linkparams = {}
@@ -176,8 +193,13 @@ def searchNZB(albumid=None):
 			linkparams["name"] = downloadurl
 				
 			saburl = 'http://' + sab_host + '/sabnzbd/api?' + urllib.urlencode(linkparams)
-		
-			urllib.urlopen(saburl)
+			logger.log(u"Sending link to SABNZBD: " + saburl)
+			
+			try:
+				urllib.urlopen(saburl)
+				
+			except:
+				logger.log(u"Unable to send link. Are you sure the host address is correct?", logger.ERROR)
 				
 			c.execute('UPDATE albums SET status = "Snatched" WHERE AlbumID="%s"' % albums[2])
 			c.execute('CREATE TABLE IF NOT EXISTS snatched (AlbumID, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT)')

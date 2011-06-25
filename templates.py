@@ -3,7 +3,7 @@ _header = '''
 	<head>
 		<title>Headphones</title>
 		<link rel="stylesheet" type="text/css" href="data/css/style.css" />
-		<link rel="icon" type="image/png" href="data/images/headphoneslogo.png" />
+		<link rel="icon" type="image/x-icon" href="data/images/favicon.ico" /> 
 		<link rel="apple-touch-icon" href="data/images/headphoneslogo.png" />
 	</head>
 	<body>

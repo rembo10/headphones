@@ -5,11 +5,13 @@ import musicbrainz2.utils as u
 import sqlite3
 import time
 
+import logger
+
 def dbUpdate():
 
 	conn=sqlite3.connect(database)
 	c=conn.cursor()
-	c.execute('SELECT ArtistID from artists WHERE Status="Active"')
+	c.execute('SELECT ArtistID, ArtistName from artists WHERE Status="Active"')
 	
 	activeartists = c.fetchall()
 	
@@ -18,6 +20,8 @@ def dbUpdate():
 	while i < len(activeartists):
 			
 		artistid = activeartists[i][0]
+		artistname = activeartists[i][1]
+		logger.log(u"Updating album information for artist: " + artistname)
 		
 		c.execute('SELECT AlbumID from albums WHERE ArtistID="%s"' % artistid)
 		albumlist = c.fetchall()
@@ -37,6 +41,8 @@ def dbUpdate():
 				if event.country == 'US':
 					
 					if any(releaseid in x for x in albumlist):
+					
+						logger.log(results.title + " already exists in the database. Updating ASIN, Release Date, Tracks")
 						
 						c.execute('UPDATE albums SET AlbumASIN="%s", ReleaseDate="%s" WHERE AlbumID="%s"' % (results.asin, results.getEarliestReleaseDate(), u.extractUuid(results.id)))
 		
@@ -46,6 +52,7 @@ def dbUpdate():
 						
 					else:
 						
+						logger.log(u"New album found! Adding "+results.title+"to the database...")
 						c.execute('INSERT INTO albums VALUES( ?, ?, ?, ?, ?, CURRENT_DATE, ?, ?)', (artistid, results.artist.name, results.title, results.asin, results.getEarliestReleaseDate(), u.extractUuid(results.id), 'Skipped'))
 						conn.commit()
 						c.execute('SELECT ReleaseDate, DateAdded from albums WHERE AlbumID="%s"' % u.extractUuid(results.id))
@@ -65,7 +72,7 @@ def dbUpdate():
 							conn.commit()
 						
 				else:
-					pass
+					logger.log(results.title + " is not a US release. Skipping it for now")
 		i += 1
 	
 	conn.commit()

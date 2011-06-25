@@ -12,6 +12,7 @@ import sqlite3
 import sys
 import configobj
 from headphones import FULL_PATH, config_file
+import logger
 
 database = os.path.join(FULL_PATH, 'headphones.db')
 
@@ -23,6 +24,7 @@ class Headphones:
 		page.append(templates._nav)
 		#Display Database if it exists:
 		if os.path.exists(database):
+			logger.log(u"Loading artists from the database...")
 			conn=sqlite3.connect(database)
 			c=conn.cursor()
 			c.execute('SELECT ArtistName, ArtistID, Status from artists order by ArtistSortName collate nocase')
@@ -162,6 +164,7 @@ class Headphones:
 		else:
 			artistResults = ws.Query().getArtists(ws.ArtistFilter(string.replace(name, '&', '%38'), limit=8))
 			if len(artistResults) == 0:
+				logger.log("No results found for" + name)
 				page.append('''No results!<a class="blue" href="/">Go back</a>''')
 				
 			elif len(artistResults) > 1:
@@ -172,6 +175,7 @@ class Headphones:
 				return page
 			else:
 				for result in artistResults:
+					logger.log(u"Found one artist matching your search term: " + result.artist, result.id)
 					artist = result.artist
 					raise cherrypy.HTTPRedirect("/addArtist?artistid=%s" % u.extractUuid(artist.id))
 		
@@ -202,10 +206,12 @@ class Headphones:
 		if any(artistid in x for x in artistlist):
 			page = [templates._header]
 			page.append('''%s has already been added. Go <a href="/">back</a>.''' % artist.name)
+			logger.log(artist.name + u" is already in the database!", logger.WARNING)
 			c.close()
 			return page
 		
 		else:
+			logger.log(u"Adding " + artist.name + " to the database.")
 			c.execute('INSERT INTO artists VALUES( ?, ?, ?, CURRENT_DATE, ?)', (artistid, artist.name, artist.sortName, 'Active'))
 			
 			for release in artist.getReleases():
@@ -216,11 +222,13 @@ class Headphones:
 				
 				for event in results.releaseEvents:
 					if event.country == 'US':
+						logger.log(u"Now adding album: " + results.title+ " to the database")
 						c.execute('INSERT INTO albums VALUES( ?, ?, ?, ?, ?, CURRENT_DATE, ?, ?)', (artistid, results.artist.name, results.title, results.asin, results.getEarliestReleaseDate(), u.extractUuid(results.id), 'Skipped'))
 						c.execute('SELECT ReleaseDate, DateAdded from albums WHERE AlbumID="%s"' % u.extractUuid(results.id))
 						latestrelease = c.fetchall()
 						
 						if latestrelease[0][0] > latestrelease[0][1]:
+							logger.log(results.title + u" is an upcoming album. Setting its status to 'Wanted'...")
 							c.execute('UPDATE albums SET Status = "Wanted" WHERE AlbumID="%s"' % u.extractUuid(results.id))
 						else:
 							pass
@@ -228,7 +236,7 @@ class Headphones:
 						for track in results.tracks:
 							c.execute('INSERT INTO tracks VALUES( ?, ?, ?, ?, ?, ?, ?, ?)', (artistid, results.artist.name, results.title, results.asin, u.extractUuid(results.id), track.title, track.duration, u.extractUuid(track.id)))
 					else:
-						pass
+						logger.log(results.title + " is not a US release. Skipping it for now", logger.DEBUG)
 			
 			conn.commit()
 			c.close()
@@ -241,6 +249,7 @@ class Headphones:
 	def pauseArtist(self, ArtistID):
 		conn=sqlite3.connect(database)
 		c=conn.cursor()
+		logger.log(u"Pausing artist: " + ArtistID)
 		c.execute('UPDATE artists SET status = "Paused" WHERE ArtistId="%s"' % ArtistID)
 		conn.commit()
 		c.close()
@@ -251,6 +260,7 @@ class Headphones:
 	def resumeArtist(self, ArtistID):
 		conn=sqlite3.connect(database)
 		c=conn.cursor()
+		logger.log(u"Resuming artist: " + ArtistID)
 		c.execute('UPDATE artists SET status = "Active" WHERE ArtistId="%s"' % ArtistID)
 		conn.commit()
 		c.close()
@@ -261,6 +271,7 @@ class Headphones:
 	def deleteArtist(self, ArtistID):
 		conn=sqlite3.connect(database)
 		c=conn.cursor()
+		logger.log(u"Deleting all traces of artist: " + ArtistID)
 		c.execute('''DELETE from artists WHERE ArtistID="%s"''' % ArtistID)
 		c.execute('''DELETE from albums WHERE ArtistID="%s"''' % ArtistID)
 		c.execute('''DELETE from tracks WHERE ArtistID="%s"''' % ArtistID)
@@ -274,6 +285,7 @@ class Headphones:
 	def queueAlbum(self, AlbumID, ArtistID):
 		conn=sqlite3.connect(database)
 		c=conn.cursor()
+		logger.log(u"Marking album: " + AlbumID + "as wanted...")
 		c.execute('UPDATE albums SET status = "Wanted" WHERE AlbumID="%s"' % AlbumID)
 		conn.commit()
 		c.close()
@@ -287,6 +299,7 @@ class Headphones:
 	def unqueueAlbum(self, AlbumID, ArtistID):
 		conn=sqlite3.connect(database)
 		c=conn.cursor()
+		logger.log(u"Marking album: " + AlbumID + "as skipped...")
 		c.execute('UPDATE albums SET status = "Skipped" WHERE AlbumID="%s"' % AlbumID)
 		conn.commit()
 		c.close()
