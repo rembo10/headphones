@@ -24,7 +24,7 @@ class Headphones:
 		page.append(templates._nav)
 		#Display Database if it exists:
 		if os.path.exists(database):
-			logger.log(u"Loading artists from the database...")
+			#logger.log(u"Loading artists from the database...")
 			conn=sqlite3.connect(database)
 			c=conn.cursor()
 			c.execute('SELECT ArtistName, ArtistID, Status from artists order by ArtistSortName collate nocase')
