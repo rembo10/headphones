@@ -164,9 +164,9 @@ class Headphones:
 		else:
 			artistResults = ws.Query().getArtists(ws.ArtistFilter(string.replace(name, '&', '%38'), limit=8))
 			if len(artistResults) == 0:
-				logger.log("No results found for" + name)
+				logger.log(u"No results found for " + name)
 				page.append('''No results!<a class="blue" href="/">Go back</a>''')
-				
+				return page
 			elif len(artistResults) > 1:
 				page.append('''Search returned multiple artists. Click the artist you want to add:<br /><br />''')
 				for result in artistResults:
@@ -175,8 +175,8 @@ class Headphones:
 				return page
 			else:
 				for result in artistResults:
-					logger.log(u"Found one artist matching your search term: " + result.artist, result.id)
 					artist = result.artist
+					logger.log(u"Found one artist matching your search term: " + artist.name +" ("+ artist.id+")")			
 					raise cherrypy.HTTPRedirect("/addArtist?artistid=%s" % u.extractUuid(artist.id))
 		
 	findArtist.exposed = True
