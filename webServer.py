@@ -316,6 +316,11 @@ class Headphones:
 	upcoming.exposed = True
 	
 	def manage(self):
+		config = configobj.ConfigObj(config_file)
+		try:
+			path = config['General']['path_to_xml']
+		except:
+			path = 'Absolute path to iTunes XML or Top-Level Music Directory'
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
@@ -327,17 +332,20 @@ class Headphones:
 		Once you click "Submit" you can navigate away from this
 			page while the process runs.<br /><br /><br />
 		<form action="importItunes" method="GET" align="center">
-			<input type="text" value="Absolute Path to Itunes XML" onfocus="if
+			<input type="text" value="%s" onfocus="if
 			(this.value==this.defaultValue) this.value='';" name="path" size="70" />
 			<input type="submit" /></form><br /><br /></div></div>
 			<div class="table"><div class="config"><h1>Force Search</h1><br />
 			<a href="forceSearch">Force Check for Wanted Albums</a><br /><br />
-			<a href="forceUpdate">Force Update Active Artists </a><br /><br /><br /></div></div>''')
+			<a href="forceUpdate">Force Update Active Artists </a><br /><br /><br /></div></div>''' % path)
 		page.append(templates._footer)
 		return page
 	manage.exposed = True
 	
 	def importItunes(self, path):
+		config = configobj.ConfigObj(config_file)
+		config['General']['path_to_xml'] = path
+		config.write()
 		import itunesimport
 		itunesimport.itunesImport(path)
 		raise cherrypy.HTTPRedirect("/")
