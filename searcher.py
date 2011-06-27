@@ -174,7 +174,7 @@ def searchNZB(albumid=None):
 		if len(resultlist):	
 			bestqual = sorted(resultlist, key=lambda title: title[1], reverse=True)[0]
 		
-			logger.log(bestqual[0] + u" seems to be the best quality at: " + bestqual[1])
+			logger.log(u"Downloading: " + bestqual[0])
 			downloadurl = bestqual[2]
 				
 			linkparams = {}
