@@ -33,47 +33,50 @@ def itunesImport(pathtoxml):
 		time.sleep(1)
 		artistResults = ws.Query().getArtists(ws.ArtistFilter(string.replace(name, '&#38;', '%38'), limit=1))		
 		for result in artistResults:
-			logger.log(u"Found best match: "+result.artist.name+". Gathering album information...")
-			time.sleep(1)
-			artistid = u.extractUuid(result.artist.id)
-			inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), ratings=False, releaseGroups=False)
-			artist = ws.Query().getArtistById(artistid, inc)
-			conn=sqlite3.connect(database)
-			c=conn.cursor()
-			c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT)')
-			c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT)')
-			c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration TEXT, TrackID TEXT)')
-			c.execute('SELECT ArtistID from artists')
-			artistlist = c.fetchall()
-			if any(artistid in x for x in artistlist):
-				logger.log(result.artist.name + u" is already in the database, skipping")
+			if result.artist.name == 'Various Artists':
+				logger.log(u"Top result is Various Artists. Skipping.", logger.WARNING)
 			else:
-				c.execute('INSERT INTO artists VALUES( ?, ?, ?, CURRENT_DATE, ?)', (artistid, artist.name, artist.sortName, 'Active'))
-				for release in artist.getReleases():
-					time.sleep(1)
-					releaseid = u.extractUuid(release.id)
-					inc = ws.ReleaseIncludes(artist=True, releaseEvents= True, tracks= True, releaseGroup=True)
-					results = ws.Query().getReleaseById(releaseid, inc)
-					
-					for event in results.releaseEvents:
+				logger.log(u"Found best match: "+result.artist.name+". Gathering album information...")
+				time.sleep(1)
+				artistid = u.extractUuid(result.artist.id)
+				inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), ratings=False, releaseGroups=False)
+				artist = ws.Query().getArtistById(artistid, inc)
+				conn=sqlite3.connect(database)
+				c=conn.cursor()
+				c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT)')
+				c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT)')
+				c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration TEXT, TrackID TEXT)')
+				c.execute('SELECT ArtistID from artists')
+				artistlist = c.fetchall()
+				if any(artistid in x for x in artistlist):
+					logger.log(result.artist.name + u" is already in the database, skipping")
+				else:
+					c.execute('INSERT INTO artists VALUES( ?, ?, ?, CURRENT_DATE, ?)', (artistid, artist.name, artist.sortName, 'Active'))
+					for release in artist.getReleases():
+						time.sleep(1)
+						releaseid = u.extractUuid(release.id)
+						inc = ws.ReleaseIncludes(artist=True, releaseEvents= True, tracks= True, releaseGroup=True)
+						results = ws.Query().getReleaseById(releaseid, inc)
 						
-						if event.country == 'US':
+						for event in results.releaseEvents:
 							
-							c.execute('INSERT INTO albums VALUES( ?, ?, ?, ?, ?, CURRENT_DATE, ?, ?)', (artistid, results.artist.name, results.title, results.asin, results.getEarliestReleaseDate(), u.extractUuid(results.id), 'Skipped'))
-							conn.commit()
-							c.execute('SELECT ReleaseDate, DateAdded from albums WHERE AlbumID="%s"' % u.extractUuid(results.id))
-							
-							latestrelease = c.fetchall()
-							
-							if latestrelease[0][0] > latestrelease[0][1]:
-								c.execute('UPDATE albums SET Status = "Wanted" WHERE AlbumID="%s"' % u.extractUuid(results.id))
+							if event.country == 'US':
+								
+								c.execute('INSERT INTO albums VALUES( ?, ?, ?, ?, ?, CURRENT_DATE, ?, ?)', (artistid, results.artist.name, results.title, results.asin, results.getEarliestReleaseDate(), u.extractUuid(results.id), 'Skipped'))
+								conn.commit()
+								c.execute('SELECT ReleaseDate, DateAdded from albums WHERE AlbumID="%s"' % u.extractUuid(results.id))
+								
+								latestrelease = c.fetchall()
+								
+								if latestrelease[0][0] > latestrelease[0][1]:
+									c.execute('UPDATE albums SET Status = "Wanted" WHERE AlbumID="%s"' % u.extractUuid(results.id))
+								else:
+									pass
+								for track in results.tracks:
+									c.execute('INSERT INTO tracks VALUES( ?, ?, ?, ?, ?, ?, ?, ?)', (artistid, results.artist.name, results.title, results.asin, u.extractUuid(results.id), track.title, track.duration, u.extractUuid(track.id)))
+								conn.commit()
+	
 							else:
-								pass
-							for track in results.tracks:
-								c.execute('INSERT INTO tracks VALUES( ?, ?, ?, ?, ?, ?, ?, ?)', (artistid, results.artist.name, results.title, results.asin, u.extractUuid(results.id), track.title, track.duration, u.extractUuid(track.id)))
-							conn.commit()
-
-						else:
-							logger.log(results.title + u" is not a US release. Skipping for now")
-		
-			c.close()
+								logger.log(results.title + u" is not a US release. Skipping for now")
+			
+				c.close()
