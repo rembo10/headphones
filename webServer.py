@@ -436,6 +436,7 @@ class Headphones:
 	shutdown.exposed = True
 
 	def restart(self):
+		logger.log(u"Restarting Headphones.")
 		restart = True
 		#answer = raw_input("Do you want to restart this program ? ")
 		#if answer.strip() in "y Y yes Yes YES".split():
