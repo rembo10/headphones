@@ -24,8 +24,8 @@ _nav = '''<div class="nav">
 					<a href="/history">HISTORY</a>
 					<a href="/config">SETTINGS</a>
 					<div style="float:right">
-					  <a href="/restart"><img src="data/images/restart.png" height="15px" width="15px"></a>
-					  <a href="/shutdown"><img src="data/images/shutdown.png" height="15px" width="15px"></a>
+					  <a href="/restart" title="Restart"><img src="data/images/restart.png" height="15px" width="15px"></a>
+					  <a href="/shutdown" title="Shutdown"><img src="data/images/shutdown.png" height="15px" width="15px"></a>
 					</div>
 			</div>'''
 	
