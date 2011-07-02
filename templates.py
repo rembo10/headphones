@@ -23,7 +23,10 @@ _nav = '''<div class="nav">
 					<a href="/manage">MANAGE</a>    
 					<a href="/history">HISTORY</a>
 					<a href="/config">SETTINGS</a>
-					<a href="/shutdown"><font color="red">SHUTDOWN</font></a>
+					<div style="float:right">
+					  <a href="/restart"><img src="data/images/restart.png" height="15px" width="15px"></a>
+					  <a href="/shutdown"><img src="data/images/shutdown.png" height="15px" width="15px"></a>
+					</div>
 			</div>'''
 	
 _footer = '''
