@@ -1,0 +1,45 @@
+#attr $albumASIN = ""
+#attr $albumTitle = ""
+#attr $albumID = ""
+#attr $artitstID = ""
+#attr $artistName = ""
+#import os.path
+#import time
+#include os.path.abspath($appPath+"/data/interfaces/default/_inc_header.tmpl")
+
+<table border="0" cellpadding="3">
+	<tr>
+		<td colspan="4" align="center">
+			#if $albumASIN:
+				<img src="http://ec1.images-amazon.com/images/P/${albumASIN}.01.LZZZZZZZ.jpg" height="200" width="200">
+				<br />
+			#end if
+			<br />
+			<a href="artistPage?ArtistID=$artistID">${artistName}</a> -${albumTitle}<br />
+			<a href="queueAlbum?AlbumID=${albumID}&ArtistID=${artistID}">Download <br />
+		</td>
+	</tr>
+	<tr>
+		<th align="left" width="100">Track #</th>
+		<th align="left" width="100">Track Title</th>
+		<th align="center" width="300">Duration</th>
+		<th></th>
+	</tr>
+	#for $track in $tracks
+	<tr>
+		<td align="left" width="120">${track[7]}</td>
+		<td align="left" width="240">
+			${track[3]}(<a class="external" href="http://musicbrainz.org/recording/${track[5]}.html">link</a>)
+		</td>
+		<td align="center">
+			#try
+				#echo time.strftime("%M:%S", time.gmtime(int($track[4])/1000))
+			#except
+				n/a
+			#end try
+		</td>
+	</tr>
+	#end for
+</table>
+
+#include os.path.abspath($appPath+"/data/interfaces/default/_inc_footer.tmpl")

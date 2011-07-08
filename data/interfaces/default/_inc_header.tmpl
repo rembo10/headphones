@@ -1,0 +1,37 @@
+#attr title = ""
+#attr rootPath = ""
+#attr scripts = ""
+#attr styles = ""
+<html> 
+	<head> 
+		<title>Headphones $title</title> 
+		<link rel="stylesheet" type="text/css" href="$rootPath/data/css/style.css" /> 
+		<link rel="icon" type="image/x-icon" href="$rootPath/data/images/favicon.ico" /> 
+		<link rel="apple-touch-icon" href="$rootPath/data/images/headphoneslogo.png" />
+		<script src="$rootPath/data/js/jquery-1.6.2.min.js" type="text/javascript"></script>
+		<script src="$rootPath/data/js/jquery-ui-1.8.14.min.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			$scripts
+		</script>
+		<style>
+			$styles
+		</style>
+	</head> 
+	<body> 
+	<div class="container">
+		<div class="logo"><a href="/">
+			<img src="$rootPath/data/images/headphoneslogo.png" border="0">headphones<a></div> 
+			<div class="search">
+				version check
+			</div>
+		</div>
+		<br />
+		<div class="nav">
+					<a href="/">HOME</a> 
+					<a href="/upcoming">UPCOMING</a> 
+					<a href="/manage">MANAGE</a>    
+					<a href="/history">HISTORY</a> 
+					<a href="/config">SETTINGS</a> 
+					<a href="/shutdown"><font color="red">SHUTDOWN</font></a> 
+		</div>
+		<div class="table">
