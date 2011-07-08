@@ -106,8 +106,9 @@ def serverstart():
 		cherrypy.engine.subscribe('start', browser, priority=90)
 	
 	logger.log(u"Starting Headphones on port:" + settings['http_port'])
-	cherrypy.quickstart(webServer.Headphones(), config = conf)
-	
+	root = webServer.Headphones("data/interfaces/default/")
+	cherrypy.quickstart(root, config = conf)
 
+	
 if __name__ == '__main__':
 	serverstart()
