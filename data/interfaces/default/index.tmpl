@@ -1,0 +1,33 @@
+#import os.path
+#include os.path.abspath($appPath+"/data/interfaces/default/_inc_header.tmpl")
+<table border="0" cellpadding="3">
+	<tr>
+		<th align="left" width="170">Artist Name</th>
+		<th align="center" width="100">Status</th>
+		<th align="center" width="300">Upcoming Albums</th>
+	</tr>
+	#for $artist in $artists
+	<tr>
+		<td align="left" width="300">
+			<a href="artistPage?ArtistID=$artist[1]">$artist[0]</a> 
+			(<a class="external" href="http://musicbrainz.org/artist/$artist[1]">link</a>) 
+			[<a class="externalred" href="deleteArtist?ArtistID=$artist[1]">delete</a>]
+		</td>
+		<td align="center" width="160">
+			#if $artist[2] == 'Active':
+				$artist[2] (<a class="external" href="pauseArtist?ArtistID=$artist[1]">pause</a>)
+			#else:
+				<font color="red"><b>$artist[2]</b></font>(<A class="external" href="resumeArtist?ArtistID=$artist[1]">resume</a>)
+			#end if
+		</td>
+		<td align="center">
+			#try
+				$artist[3] $artist[4]
+			#except
+				<font color="#CFCFCF">None</font>
+			#end try
+		</td>
+	</tr>
+	#end for
+</table>
+#include os.path.abspath($appPath+"/data/interfaces/default/_inc_footer.tmpl")
