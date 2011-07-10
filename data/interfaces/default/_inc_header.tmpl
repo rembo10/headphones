@@ -8,22 +8,15 @@
 		<link rel="stylesheet" type="text/css" href="$rootPath/data/css/style.css" /> 
 		<link rel="icon" type="image/x-icon" href="$rootPath/data/images/favicon.ico" /> 
 		<link rel="apple-touch-icon" href="$rootPath/data/images/headphoneslogo.png" />
-		<script src="$rootPath/data/js/jquery-1.6.2.min.js" type="text/javascript"></script>
-		<script src="$rootPath/data/js/jquery-ui-1.8.14.min.js" type="text/javascript"></script>
-		<script type="text/javascript">
-			$scripts
-		</script>
-		<style>
-			$styles
-		</style>
 	</head> 
 	<body> 
 	<div class="container">
 		<div class="logo"><a href="/">
 			<img src="$rootPath/data/images/headphoneslogo.png" border="0">headphones<a></div> 
-			<div class="search">
-				version check
-			</div>
+			<div class="search"><form action="findArtist" method="GET">
+			<input type="text" value="Add an artist" onfocus="if
+			(this.value==this.defaultValue) this.value='';" name="name" />
+			<input type="submit" /></form></div>
 		</div>
 		<br />
 		<div class="nav">
