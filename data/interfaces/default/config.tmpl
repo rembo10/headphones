@@ -1,4 +1,5 @@
 #import os.path
+#import config
 #include os.path.abspath($appPath+"/data/interfaces/default/_inc_header.tmpl")
 <center>
   	<div class="smalltext">
@@ -17,14 +18,14 @@
             <td>
               <p>
                 HTTP Host: <br><br>
-                <input type="text" name="http_host" value="%s" size="30" maxlength="40"><br>
+                <input type="text" name="http_host" value="${config.General['http_host']}" size="30" maxlength="40"><br>
                 <i class="smalltext">i.e. localhost or 0.0.0.0</i>
               </p>
             </td>
             <td>
               <p>
                 HTTP Username: <br><br>
-                <input type="text" name="http_username" value="%s" size="30" maxlength="40">
+                <input type="text" name="http_username" value="${config.General['http_username']}" size="30" maxlength="40">
               </p>
             </td>
         </tr>
@@ -33,21 +34,21 @@
             <td>
                 <p>
                   HTTP Port: <br><br>
-                  <input type="text" name="http_port" value="%s" size="20" maxlength="40">
+                  <input type="text" name="http_port" value="${config.General['http_port']}" size="20" maxlength="40">
                 </p>
             </td>
 
             <td>
                 <p>
                   HTTP Password: <br><br>
-                  <input type="password" name="http_password" value="%s" size="30" maxlength="40">
+                  <input type="password" name="http_password" value="${config.General['http_password']}" size="30" maxlength="40">
                 </p>
             </td>
         </tr>
 
         <tr>
             <td>
-                <p>Launch Browser on Startup:<input type="checkbox" name="launch_browser" value="1" %s /></p>
+                <p>Launch Browser on Startup:<input type="checkbox" name="launch_browser" value="1" #if (config.General['launch_browser'] == '1') then "CHECKED" else ""#/></p>
             </td>
         </tr>
     </table>
@@ -57,13 +58,13 @@
     <table class="configtable" summary="Download Settings">
         <tr>
             <td>
-                <p>SABnzbd Host:</p><input type="text" name="sab_host" value="%s" size="30" maxlength="40"><br>
+                <p>SABnzbd Host:</p><input type="text" name="sab_host" value="${config.SABnzbd['sab_host']}" size="30" maxlength="40"><br>
 
                 <i class="smalltext">usually localhost:8080</i>
             </td>
 
             <td>
-                <p>SABnzbd Username:</p><input type="text" name="sab_username" value="%s" size="20" maxlength="40">
+                <p>SABnzbd Username:</p><input type="text" name="sab_username" value="${config.SABnzbd['sab_username']}" size="20" maxlength="40">
             </td>
         </tr>
 
@@ -71,13 +72,13 @@
             <td>
                 <br>
 
-                <p>SABnzbd API:</p><input type="text" name="sab_apikey" value="%s" size="46" maxlength="40">
+                <p>SABnzbd API:</p><input type="text" name="sab_apikey" value="${config.SABnzbd['sab_apikey']}" size="46" maxlength="40">
             </td>
 
             <td>
                 <br>
 
-                <p>SABnzbd Password:</p><input type="password" name="sab_password" value="%s" size="20" maxlength="40">
+                <p>SABnzbd Password:</p><input type="password" name="sab_password" value="${config.SABnzbd['sab_password']}" size="20" maxlength="40">
             </td>
         </tr>
 
@@ -85,13 +86,13 @@
             <td>
                 <br>
 
-                <p>SABnzbd Category:</p><input type="text" name="sab_category" value="%s" size="20" maxlength="40">
+                <p>SABnzbd Category:</p><input type="text" name="sab_category" value="${config.SABnzbd['sab_category']}" size="20" maxlength="40">
             </td>
 
             <td>
                 <br>
 
-                <p>Music Download Directory:</p><input type="text" name="music_download_dir" value="%s" size="60" maxlength="40"><br>
+                <p>Music Download Directory:</p><input type="text" name="music_download_dir" value="${config.General['music_download_dir']}" size="60" maxlength="40"><br>
 
                 <i class="smalltext">Absolute or relative path to the dir where SAB downloads your music<br>
                 i.e. Downloads/music or /Users/name/Downloads/music</i>
@@ -102,7 +103,7 @@
             <td>
                 <br>
 
-                <p>Usenet Retention:</p><input type="text" name="usenet_retention" value="%s" size="20" maxlength="40">
+                <p>Usenet Retention:</p><input type="text" name="usenet_retention" value="${config.General['usenet_retention']}" size="20" maxlength="40">
             </td>
         </tr>
     </table>
@@ -112,20 +113,20 @@
     <table class="configtable" summary="Search Providers">
         <tr>
             <td>
-                <p>NZBMatrix: <input type="checkbox" name="nzbmatrix" value="1" %s /></p>
+                <p>NZBMatrix: <input type="checkbox" name="nzbmatrix" value="1" #if (config.NZBMatrix['nzbmatrix'] == '1') then "checked" else ""#/></p>
             </td>
 
             <td>
                 <p>
                   NZBMatrix Username: <br>
-                  <input type="text" name="nzbmatrix_username" value="%s" size="30" maxlength="40">
+                  <input type="text" name="nzbmatrix_username" value="${config.NZBMatrix['nzbmatrix_username']}" size="30" maxlength="40">
                 </p>
             </td>
 
             <td>
                 <p>
                   NZBMatrix API: <br>
-                  <input type="text" name="nzbmatrix_apikey" value="%s" size="46" maxlength="40">
+                  <input type="text" name="nzbmatrix_apikey" value="${config.NZBMatrix['nzbmatrix_apikey']}" size="46" maxlength="40">
                 </p>
             </td>
         </tr>
@@ -134,7 +135,7 @@
             <td>
                 <br>
 
-                <p>Newznab: <input type="checkbox" name="newznab" value="1" %s /></p>
+                <p>Newznab: <input type="checkbox" name="newznab" value="1" #if (config.Newznab['newznab'] == '1') then "checked" else ""# /></p>
             </td>
 
             <td>
@@ -142,7 +143,7 @@
 
                 <p>
                   Newznab Host:<br>
-                  <input type="text" name="newznab_host" value="%s" size="30" maxlength="40"><br>
+                  <input type="text" name="newznab_host" value="${config.Newznab['newznab_host']}" size="30" maxlength="40"><br>
                   <i class="smalltext">i.e. http://nzb.su</i>
                 </p>
             </td>
@@ -152,7 +153,7 @@
 
                 <p>
                   Newznab API:<br>
-                  <input type="text" name="newznab_apikey" value="%s" size="46" maxlength="40">
+                  <input type="text" name="newznab_apikey" value="${config.Newznab['newznab_apikey']}" size="46" maxlength="40">
                 </p>
             </td>
         </tr>
@@ -161,7 +162,7 @@
             <td>
                 <br>
 
-                <p>NZBs.org:<input type="checkbox" name="nzbsorg" value="1" %s /></p>
+                <p>NZBs.org:<input type="checkbox" name="nzbsorg" value="1" #if (config.NZBsorg['nzbsorg'] == '1') then "CHECKED" else ""# /></p>
             </td>
 
             <td>
@@ -169,7 +170,7 @@
 
                 <p>
                   NZBs.org UID:<br>
-                  <input type="text" name="nzbsorg_uid" value="%s" size="30" maxlength="40">
+                  <input type="text" name="nzbsorg_uid" value="${config.NZBsorg['nzbsorg_uid']}" size="30" maxlength="40">
                 </p>
             </td>
 
@@ -178,7 +179,7 @@
 
                 <p>
                   NZBs.org Hash:<br>
-                  <input type="text" name="nzbsorg_hash" value="%s" size="46" maxlength="40">
+                  <input type="text" name="nzbsorg_hash" value="${config.NZBsorg['nzbsorg_hash']}" size="46" maxlength="40">
                 </p>
             </td>
         </tr>
@@ -190,14 +191,14 @@
         <tr>
             <td>
                 <p><b>Album Quality:</b></p>
-                <input type="checkbox" name="include_lossless" value="1" %s />Include lossless <br>
-                <input type="checkbox" name="flac_to_mp3" value="1" %s />Convert lossless to mp3
+                <input type="checkbox" name="include_lossless" value="1" #if (config.General['include_lossless'] == '1') then "CHECKED" else ""# />Include lossless <br>
+                <input type="checkbox" name="flac_to_mp3" value="1" #if (config.General['flac_to_mp3'] == '1') then "CHECKED" else ""# />Convert lossless to mp3
             </td>
 
             <td>
                 <p>
                   <p><b>iTunes:</b></p>
-                  <input type="checkbox" name="move_to_itunes" value="1" %s />Move downloads to iTunes
+                  <input type="checkbox" name="move_to_itunes" value="1" #if (config.General['move_to_itunes'] == '1') then "CHECKED" else ""# />Move downloads to iTunes
                 </p>
             </td>
         </tr>
@@ -206,7 +207,7 @@
             <td>
                 <br>
 
-                <p><b>Path to iTunes folder</b>:<br><input type="text" name="path_to_itunes" value="%s" size="60" maxlength="40">
+                <p><b>Path to iTunes folder</b>:<br><input type="text" name="path_to_itunes" value="${config.General['path_to_itunes']}" size="60" maxlength="40">
                   <br>
                   <i class="smalltext">i.e. Music/iTunes or /Users/name/Music/iTunes</i>
                 </p>
@@ -214,9 +215,9 @@
             <td>
                   <b>Renaming &amp; Metadata:</b>
                   <p>
-                    <input type="checkbox" name="rename_mp3s" value="1" %s />Rename &amp; add metadata
+                    <input type="checkbox" name="rename_mp3s" value="1" #if (config.General['rename_mp3s'] == '1') then "CHECKED" else ""# />Rename &amp; add metadata
                     <br>
-                    <input type="checkbox" name="cleanup" value="1" %s />Delete leftover files
+                    <input type="checkbox" name="cleanup" value="1" #if (config.General['cleanup'] == '1') then "CHECKED" else ""# />Delete leftover files
                   </p>
             </td>
         </tr>
@@ -225,7 +226,7 @@
             <td>
                 <br>
                 <p><b>Album Art:</b></p>
-                <input type="checkbox" name="add_album_art" value="1" %s>Add album art
+                <input type="checkbox" name="add_album_art" value="1" #if (config.General['add_album_art'] == '1') then "CHECKED" else ""#>Add album art
             </td>
         </tr>
     </table>

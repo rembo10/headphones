@@ -311,13 +311,11 @@ class Headphones:
 	history.exposed = True
 	
 	def config(self):
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		page.append(config.form)
-		page.append(templates._footer)
-		return page
-					
+		filename = os.path.join(self.templatePath,"config.tmpl")
+		template = Template(file=filename)
+		template.rootPath = "."
+		template.appPath = "."
+		return str(template)
 	config.exposed = True
 	
 	
