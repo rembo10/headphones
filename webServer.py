@@ -65,7 +65,8 @@ class Headphones:
 			
 		else:
 			page.append("""<div class="datanil">Add some artists to the database!</div>""")
-		page.append(templates._footer)
+		if os.path.exists(database):
+			page.append(templates._footer)
 		return page
 	index.exposed = True
 	
@@ -311,7 +312,7 @@ class Headphones:
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
-		page.append(templates._footer)
+		#page.append(templates._footer)
 		return page
 	upcoming.exposed = True
 	
@@ -368,7 +369,7 @@ class Headphones:
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
-		page.append(templates._footer)
+		#page.append(templates._footer)
 		return page
 	history.exposed = True
 	
@@ -377,7 +378,7 @@ class Headphones:
 		page.append(templates._logobar)
 		page.append(templates._nav)
 		page.append(config.form)
-		page.append(templates._footer)
+		#page.append(templates._footer)
 		return page
 					
 	config.exposed = True
