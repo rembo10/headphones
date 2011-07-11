@@ -435,7 +435,7 @@ class Headphones:
 		c.execute('''DELETE from snatched''')
 		conn.commit()
 		c.close()
-		raise cherrypy.HTTPRedirect("/history")
+		raise cherrypy.HTTPRedirect("history")
 	clearhistory.exposed = True
 	
 	def config(self):
