@@ -1,0 +1,39 @@
+#attr $artistName = ""
+#attr $artistID = ""
+#import os.path
+#include os.path.abspath($appPath+"/data/interfaces/default/_inc_header.tmpl")
+<table border="0" cellpadding="3">
+	<tr>
+		<th colspan="4">
+			<p align="center">$artistName <br /></p>
+		</th>
+	</tr>
+	<tr>
+		<td align="left" width="50"></td>
+		<td align="left" width="120">Album Name</td>
+		<td align="center" width="100">Release Date</td>
+		<td align="center" width="300">Status</td>
+	</tr>
+	#for $album in $albums
+	<tr>
+		<td align="left">
+			<img src="http://ec1.images-amazon.com/images/P/$album[5].01.MZZZZZZZ.jpg" height="50" widtd="50">
+		</td>
+		<td align="left" width="240"><a href="albumPage?AlbumID=$album[2]">$album[0]</a> 
+		(<A class="external" href="http://musicbrainz.org/release/${album[2]}.html">link</a>)</td>
+		<td align="center" widtd="160">$album[1]</td>
+		<td align="center">
+			#if $album[3] == 'Skipped':
+				<b>$album[3]</b>[<A class="external" href="queueAlbum?AlbumID=${album[2]}&ArtistID=$artistID">want</a>]
+			#elif $album[3] == 'Wanted':
+				<b>$album[3]</b>[<a class="external" href="unqueueAlbum?AlbumID=$album[2]&ArtistID=$artistID">skip</a>]				
+			#elif $album[3] == 'Downloaded' or $album[3] == 'Snatched':
+				<b>$album[3]</b>[<a class="external" href="queueAlbum?AlbumID=$album[2]&ArtistID=$artistID">retry</a>]
+			#else:
+				$album[3]
+			#end if
+		</td>
+	</tr>
+	#end for
+</table>				
+#include os.path.abspath($appPath+"/data/interfaces/default/_inc_footer.tmpl")
