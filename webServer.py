@@ -19,6 +19,10 @@ database = os.path.join(FULL_PATH, 'headphones.db')
 class Headphones:
 
 	def index(self):
+		raise cherrypy.HTTPRedirect("home")
+	index.exposed=True
+
+	def home(self):
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
@@ -66,7 +70,7 @@ class Headphones:
 		else:
 			page.append("""<div class="datanil">Add some artists to the database!</div>""")
 		return page
-	index.exposed = True
+	home.exposed = True
 	
 
 	def artistPage(self, ArtistID):
@@ -158,12 +162,12 @@ class Headphones:
 	
 		page = [templates._header]
 		if len(name) == 0 or name == 'Add an artist':
-			raise cherrypy.HTTPRedirect("/")
+			raise cherrypy.HTTPRedirect("home")
 		else:
 			artistResults = ws.Query().getArtists(ws.ArtistFilter(string.replace(name, '&', '%38'), limit=8))
 			if len(artistResults) == 0:
 				logger.log(u"No results found for " + name)
-				page.append('''No results!<a class="blue" href="">Go back</a>''')
+				page.append('''No results!<a class="blue" href="home">Go back</a>''')
 				return page
 			elif len(artistResults) > 1:
 				page.append('''Search returned multiple artists. Click the artist you want to add:<br /><br />''')
@@ -200,7 +204,7 @@ class Headphones:
 		artistlist = c.fetchall()
 		if any(artistid in x for x in artistlist):
 			page = [templates._header]
-			page.append('''%s has already been added. Go <a href="">back</a>.''' % artist.name)
+			page.append('''%s has already been added. Go <a href="home">back</a>.''' % artist.name)
 			logger.log(artist.name + u" is already in the database!", logger.WARNING)
 			c.close()
 			return page

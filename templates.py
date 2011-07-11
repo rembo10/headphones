@@ -12,7 +12,7 @@ _header = '''
 	<div class="container">'''
 			
 _logobar = '''
-		<div class="logo"><a href=""><img src="data/images/headphoneslogo.png" border="0">headphones<a></div>
+		<div class="logo"><a href="home"><img src="data/images/headphoneslogo.png" border="0">headphones<a></div>
 			<div class="search"><form action="findArtist" method="GET">
 			<input type="text" value="Add an artist" onfocus="if
 			(this.value==this.defaultValue) this.value='';" name="name" />
@@ -20,7 +20,7 @@ _logobar = '''
 	'''
 
 _nav = '''<div class="nav">
-					<a href="">HOME</a>
+					<a href="home">HOME</a>
 					<a href="upcoming">UPCOMING</a>
 					<a href="manage">MANAGE</a>    
 					<a href="history">HISTORY</a>
