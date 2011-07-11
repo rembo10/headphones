@@ -37,8 +37,8 @@ def dbUpdate():
 			time.sleep(2)
 			
 			for event in results.releaseEvents:
-				
-				if event.country == 'US':
+				releasecountry = ['US','GB']
+				if event.country in releasecountry:
 					
 					if any(releaseid in x for x in albumlist):
 					
@@ -72,7 +72,7 @@ def dbUpdate():
 							conn.commit()
 						
 				else:
-					logger.log(results.title + " is not a US release. Skipping it for now")
+					logger.log(results.title + " is not a US or GB release. Skipping it for now")
 		i += 1
 	
 	conn.commit()

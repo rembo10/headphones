@@ -220,7 +220,8 @@ class Headphones:
 				time.sleep(0.6)
 				
 				for event in results.releaseEvents:
-					if event.country == 'US':
+					releasecountry = ['US','GB']
+					if event.country in releasecountry:
 						logger.log(u"Now adding album: " + results.title+ " to the database")
 						c.execute('INSERT INTO albums VALUES( ?, ?, ?, ?, ?, CURRENT_DATE, ?, ?)', (artistid, results.artist.name, results.title, results.asin, results.getEarliestReleaseDate(), u.extractUuid(results.id), 'Skipped'))
 						c.execute('SELECT ReleaseDate, DateAdded from albums WHERE AlbumID="%s"' % u.extractUuid(results.id))
@@ -235,7 +236,7 @@ class Headphones:
 						for track in results.tracks:
 							c.execute('INSERT INTO tracks VALUES( ?, ?, ?, ?, ?, ?, ?, ?)', (artistid, results.artist.name, results.title, results.asin, u.extractUuid(results.id), track.title, track.duration, u.extractUuid(track.id)))
 					else:
-						logger.log(results.title + " is not a US release. Skipping it for now", logger.DEBUG)
+						logger.log(results.title + " is not a US or GB release. Skipping it for now", logger.DEBUG)
 			
 			conn.commit()
 			c.close()
