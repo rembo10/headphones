@@ -258,9 +258,9 @@ form = '''
                 <td>
                     <br>
 
-                    <p><b>Path to iTunes folder</b>:<br><input type="text" name="path_to_itunes" value="%s" size="60" maxlength="40">
+                    <p><b>Path to Music folder</b>:<br><input type="text" name="path_to_itunes" value="%s" size="60" maxlength="40">
                       <br>
-                      <i class="smalltext">i.e. Music/iTunes or /Users/name/Music/iTunes</i>
+                      <i class="smalltext">i.e. /Users/name/Music/iTunes or /Volumes/share/music</i>
                     </p>
                 </td>
                 <td>

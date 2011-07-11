@@ -217,7 +217,7 @@ class Headphones:
 				releaseid = u.extractUuid(release.id)
 				inc = ws.ReleaseIncludes(artist=True, releaseEvents= True, tracks= True, releaseGroup=True)
 				results = ws.Query().getReleaseById(releaseid, inc)
-				time.sleep(0.6)
+				time.sleep(1)
 				
 				for event in results.releaseEvents:
 					if event.country == 'US':
@@ -350,23 +350,37 @@ class Headphones:
 			path = config['General']['path_to_xml']
 		except:
 			path = 'Absolute path to iTunes XML or Top-Level Music Directory'
+		try:
+			path2 = config['General']['path_to_itunes']
+		except:
+			path2 = 'Enter a directory to scan'
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
-		page.append('''<div class="table"><div class="config"><h1>Import or Sync Your iTunes Library/Music Folder</h1><br />
-		Enter the full path to your iTunes XML file or music folder<br /><br />
-		i.e. /Users/"username"/Music/iTunes/iTunes Music Library.xml<br />
-		<i>or</i> /Users/"username"/Music/iTunes/iTunes Media/Music <br /><br />(artists should have their own directories for folder import to work)
-		<br /><br />note: This process can take a LONG time!<br /><br />
-		Once you click "Submit" you can navigate away from this
-			page while the process runs.<br /><br /><br />
+		page.append('''
+		<div class="table"><div class="config"><h1>Scan Music Library</h1><br />
+		Where do you keep your music?<br /><br />
+		You can put in any directory, and it will scan for audio files in that folder
+		(including all subdirectories)<br /><br />		For example: '/Users/name/Music'
+		<br /> <br />
+		It may take a while depending on how many files you have. You can navigate away from the page<br />
+		as soon as you click 'Submit'
+		<br /><br />
+
+		<form action="musicScan" method="GET" align="center">
+			<input type="text" value="%s" onfocus="if
+			(this.value==this.defaultValue) this.value='';" name="path" size="70" />
+			<input type="submit" /></form><br /><br /></div></div>
+		<div class="table"><div class="config"><h1>Import or Sync Your iTunes Library/Music Folder</h1><br />
+		This is here for legacy purposes (try the Music Scanner above!) <br /><br />
+		If you'd rather import an iTunes .xml file, you can enter the full path here. <br /><br />
 		<form action="importItunes" method="GET" align="center">
 			<input type="text" value="%s" onfocus="if
 			(this.value==this.defaultValue) this.value='';" name="path" size="70" />
 			<input type="submit" /></form><br /><br /></div></div>
 			<div class="table"><div class="config"><h1>Force Search</h1><br />
 			<a href="forceSearch">Force Check for Wanted Albums</a><br /><br />
-			<a href="forceUpdate">Force Update Active Artists </a><br /><br /><br /></div></div>''' % path)
+			<a href="forceUpdate">Force Update Active Artists </a><br /><br /><br /></div></div>''' % (path2, path))
 		page.append(templates._footer)
 		return page
 	manage.exposed = True
@@ -379,6 +393,15 @@ class Headphones:
 		itunesimport.itunesImport(path)
 		raise cherrypy.HTTPRedirect("home")
 	importItunes.exposed = True
+	
+	def musicScan(self, path):
+		config = configobj.ConfigObj(config_file)
+		config['General']['path_to_itunes'] = path
+		config.write()
+		import itunesimport
+		itunesimport.scanMusic(path)
+		raise cherrypy.HTTPRedirect("home")
+	musicScan.exposed = True
 	
 	def forceUpdate(self):
 		import updater

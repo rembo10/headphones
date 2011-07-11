@@ -8,9 +8,42 @@ import time
 import os
 import sqlite3
 from headphones import FULL_PATH
+from lib.beets.mediafile import MediaFile
+
 import logger
 
 database = os.path.join(FULL_PATH, 'headphones.db')
+
+
+def scanMusic(dir):
+
+	results = []
+	
+	for r,d,f in os.walk(dir):
+		for files in f:
+			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape")):
+				results.append(os.path.join(r,files))
+	
+	logger.log(u'%i music files found' % len(results))
+	
+	lst = []
+	
+	for song in results:
+		try:
+			f = MediaFile(song)
+		except:
+			logger.log("Could not read file: '" + song + "'", logger.ERROR)
+		else:	
+			if not f.artist:
+				pass
+			else:
+				lst.append(f.artist)
+	
+	artistlist = {}.fromkeys(lst).keys()
+	logger.log(u"Preparing to import %i artists" % len(artistlist))
+	importartist(artistlist)
+	
+	
 
 
 def itunesImport(pathtoxml):
@@ -23,11 +56,17 @@ def itunesImport(pathtoxml):
 			lst.append(song.artist)
 		rawlist = {}.fromkeys(lst).keys()
 		artistlist = [f for f in rawlist if f != None]
+		importartist(artistlist)
 	else:
 		rawlist = os.listdir(pathtoxml)
 		logger.log(u"Loading artists from directory:" +pathtoxml)
 		exclude = ['.ds_store', 'various artists', 'untitled folder', 'va']
 		artistlist = [f for f in rawlist if f.lower() not in exclude]
+		importartist(artistlist)
+		
+
+
+def importartist(artistlist):
 	for name in artistlist:
 		logger.log(u"Querying MusicBrainz for: "+name)
 		time.sleep(1)
@@ -43,9 +82,6 @@ def itunesImport(pathtoxml):
 				artist = ws.Query().getArtistById(artistid, inc)
 				conn=sqlite3.connect(database)
 				c=conn.cursor()
-				c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT)')
-				c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT)')
-				c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration TEXT, TrackID TEXT)')
 				c.execute('SELECT ArtistID from artists')
 				artistlist = c.fetchall()
 				if any(artistid in x for x in artistlist):
