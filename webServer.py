@@ -417,7 +417,8 @@ class Headphones:
 								''' % (snatched[i][5], snatched[i][1], size, snatched[i][4]))
 			i += 1
 		page.append('''</table></div>''')
-		#page.append(templates._footer)
+		if len(snatched):
+			page.append(templates._footer)
 		return page
 	history.exposed = True
 	
@@ -425,7 +426,9 @@ class Headphones:
 		conn=sqlite3.connect(database)
 		c=conn.cursor()
 		logger.log(u"Clearing history")
-		c.execute('''DELETE from snatched WHERE Status="Snatched"''')
+		c.execute('''DELETE from snatched''')
+		conn.commit()
+		c.close()
 		raise cherrypy.HTTPRedirect("/history")
 	clearhistory.exposed = True
 	
