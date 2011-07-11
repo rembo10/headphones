@@ -86,6 +86,9 @@ h1{
 .smalltext{
 	font-size: 11px;
 	}
+.bigtext{
+	font-size: 22px;
+	}
 a:link {
 	color: #5E2612; 
   	text-decoration: none; 

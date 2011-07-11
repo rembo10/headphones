@@ -163,19 +163,19 @@ class Headphones:
 			artistResults = ws.Query().getArtists(ws.ArtistFilter(string.replace(name, '&', '%38'), limit=8))
 			if len(artistResults) == 0:
 				logger.log(u"No results found for " + name)
-				page.append('''No results!<a class="blue" href="/">Go back</a>''')
+				page.append('''No results!<a class="blue" href="">Go back</a>''')
 				return page
 			elif len(artistResults) > 1:
 				page.append('''Search returned multiple artists. Click the artist you want to add:<br /><br />''')
 				for result in artistResults:
 					artist = result.artist
-					page.append('''<a href="/addArtist?artistid=%s">%s</a> (<a class="externalred" href="/artistInfo?artistid=%s">more info</a>)<br />''' % (u.extractUuid(artist.id), artist.name, u.extractUuid(artist.id)))
+					page.append('''<a href="addArtist?artistid=%s">%s</a> (<a class="externalred" href="/artistInfo?artistid=%s">more info</a>)<br />''' % (u.extractUuid(artist.id), artist.name, u.extractUuid(artist.id)))
 				return page
 			else:
 				for result in artistResults:
 					artist = result.artist
 					logger.log(u"Found one artist matching your search term: " + artist.name +" ("+ artist.id+")")			
-					raise cherrypy.HTTPRedirect("/addArtist?artistid=%s" % u.extractUuid(artist.id))
+					raise cherrypy.HTTPRedirect("addArtist?artistid=%s" % u.extractUuid(artist.id))
 		
 	findArtist.exposed = True
 
@@ -200,7 +200,7 @@ class Headphones:
 		artistlist = c.fetchall()
 		if any(artistid in x for x in artistlist):
 			page = [templates._header]
-			page.append('''%s has already been added. Go <a href="/">back</a>.''' % artist.name)
+			page.append('''%s has already been added. Go <a href="">back</a>.''' % artist.name)
 			logger.log(artist.name + u" is already in the database!", logger.WARNING)
 			c.close()
 			return page
@@ -334,7 +334,9 @@ class Headphones:
 								''' % (albumart, albums[i][6], albums[i][5], albums[i][4], albums[i][0], albums[i][1]))
 			i += 1
 		page.append('''</table></div>''')
-		page.append(templates._footer)
+		if len(albums):
+			page.append(templates._footer)
+		
 		return page
 	upcoming.exposed = True
 	

@@ -20,6 +20,7 @@ FULL_PATH = os.path.dirname(os.path.abspath(__file__))
 config_file = os.path.join(FULL_PATH, 'config.ini')
 LOG_DIR = os.path.join(FULL_PATH, 'logs')
 
+web_root = None
 
 if os.path.exists(config_file):
 	pass
@@ -105,20 +106,28 @@ def serverstart():
 
 	logger.sb_log_instance.initLogging(consoleLogging=consoleLogging)
 	
-	
+	global web_root
+	try:
+		web_root = settings['http_root']
+	except KeyError:
+		web_root = '/'	
+
 	def browser():
 		if settings['http_host'] == '0.0.0.0':
 			host = 'localhost'
 		else:
 			host = settings['http_host']
-		webbrowser.open('http://' + host + ':' + settings['http_port'])
+		webbrowser.open('http://' + host + ':' + settings['http_port'] + web_root)
 		
 	
 	if settings['launch_browser'] == '1':
 		cherrypy.engine.subscribe('start', browser, priority=90)
 	
 	logger.log(u"Starting Headphones on port:" + settings['http_port'])
-	cherrypy.quickstart(webServer.Headphones(), config = conf)
+
+	
+
+	cherrypy.quickstart(webServer.Headphones(), web_root, config = conf)
 	
 
 if __name__ == '__main__':

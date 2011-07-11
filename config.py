@@ -9,6 +9,11 @@ http_host = General['http_host']
 http_port = General['http_port']
 http_username = General['http_username']
 http_password = General['http_password']
+try:
+	http_root = General['http_root']
+except KeyError:
+	General['http_root'] = ''
+	config.write()
 launch_browser = General['launch_browser']
 usenet_retention = General['usenet_retention']
 include_lossless = General['include_lossless']

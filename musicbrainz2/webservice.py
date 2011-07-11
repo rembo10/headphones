@@ -241,7 +241,7 @@ class WebService(IWebService):
 		query = urllib.urlencode(params)
 
 		url = urlparse.urlunparse(('http', netloc, path, '', query,''))
-
+		
 		return url
 
 
