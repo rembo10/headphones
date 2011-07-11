@@ -22,13 +22,12 @@ class Headphones:
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
-		#Display Database if it exists:
-		if os.path.exists(database):
-			#logger.log(u"Loading artists from the database...")
-			conn=sqlite3.connect(database)
-			c=conn.cursor()
-			c.execute('SELECT ArtistName, ArtistID, Status from artists order by ArtistSortName collate nocase')
-			results = c.fetchall()
+
+		conn=sqlite3.connect(database)
+		c=conn.cursor()
+		c.execute('SELECT ArtistName, ArtistID, Status from artists order by ArtistSortName collate nocase')
+		results = c.fetchall()
+		if len(results):
 			i = 0
 			page.append('''<div class="table"><table border="0" cellpadding="3">
 						<tr>
@@ -62,11 +61,10 @@ class Headphones:
 				i = i+1
 			c.close()
 			page.append('''</table></div>''')
+			page.append(templates._footer)
 			
 		else:
 			page.append("""<div class="datanil">Add some artists to the database!</div>""")
-		if os.path.exists(database):
-			page.append(templates._footer)
 		return page
 	index.exposed = True
 	
@@ -198,9 +196,6 @@ class Headphones:
 		artist = ws.Query().getArtistById(artistid, inc)
 		conn=sqlite3.connect(database)
 		c=conn.cursor()
-		c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT)')
-		c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT)')
-		c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT)')
 		c.execute('SELECT ArtistID from artists')
 		artistlist = c.fetchall()
 		if any(artistid in x for x in artistlist):
@@ -242,11 +237,10 @@ class Headphones:
 			c.close()
 			raise cherrypy.HTTPRedirect("/")
 		
-		
 	addArtist.exposed = True
 	
-		#page for pausing an artist
 	def pauseArtist(self, ArtistID):
+	
 		conn=sqlite3.connect(database)
 		c=conn.cursor()
 		logger.log(u"Pausing artist: " + ArtistID)
@@ -281,7 +275,6 @@ class Headphones:
 		
 	deleteArtist.exposed = True
 	
-	
 	def queueAlbum(self, AlbumID, ArtistID):
 		conn=sqlite3.connect(database)
 		c=conn.cursor()
@@ -292,7 +285,6 @@ class Headphones:
 		import searcher
 		searcher.searchNZB(AlbumID)
 		raise cherrypy.HTTPRedirect("/artistPage?ArtistID=%s" % ArtistID)
-
 		
 	queueAlbum.exposed = True
 
@@ -317,14 +309,17 @@ class Headphones:
 		c=conn.cursor()
 		c.execute('''SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumASIN, AlbumID, ArtistName, ArtistID from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC''')
 		albums = c.fetchall()
-		if len(albums) > 0:
-			page.append('''<div class="table"><table border="0" cellpadding="3">
+		page.append('''<div class="table"><table border="0" cellpadding="3">
 						<tr>
 						<th align="center" width="300"></th>
 						<th align="center" width="300"><div class="bigtext">Upcoming Albums<br /><br /></div></th>
 						<th align="center" width="300"></th>
 						<th>      </th>
 						</tr>''')
+		if len(albums) == 0:
+			page.append("""</table><div class="center">No albums are coming out soon :(<br />
+							(try adding some more artists!)</div><table>""")
+
 		i = 0
 		while i < len(albums):
 		
@@ -396,9 +391,43 @@ class Headphones:
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
+		conn=sqlite3.connect(database)
+		c=conn.cursor()
+		c.execute('''SELECT AlbumID, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT from snatched order by DateAdded DESC''')
+		snatched = c.fetchall()
+		page.append('''<div class="table"><table border="0" cellpadding="3">
+						<tr>
+						<th align="center" width="300"></th>
+						<th align="center" width="300"><div class="bigtext">History <a class="external" href="clearhistory">clear all</a><br /><br /></div></th>
+						<th align="center" width="300"></th>
+						<th>      </th>
+						</tr>''')
+		if len(snatched) == 0:
+			page.append("""</table><div class="center"></div><table>""")
+
+		i = 0
+		while i < len(snatched):
+			mb = snatched[i][2] / 1048576
+			size = '%.2fM' % mb
+			page.append('''<tr><td align="center" width="300">%s</td>
+								<td align="center" width="300">%s</td>
+								<td align="center" width="300">%s</td>
+								<td align="center" width="300">%s</td>
+								</tr>
+								''' % (snatched[i][5], snatched[i][1], size, snatched[i][4]))
+			i += 1
+		page.append('''</table></div>''')
 		#page.append(templates._footer)
 		return page
 	history.exposed = True
+	
+	def clearhistory(self):
+		conn=sqlite3.connect(database)
+		c=conn.cursor()
+		logger.log(u"Clearing history")
+		c.execute('''DELETE from snatched WHERE Status="Snatched"''')
+		raise cherrypy.HTTPRedirect("/history")
+	clearhistory.exposed = True
 	
 	def config(self):
 		page = [templates._header]
