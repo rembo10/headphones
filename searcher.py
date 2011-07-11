@@ -97,7 +97,7 @@ def searchNZB(albumid=None):
 						
 				
 				except:
-					logger.log(u"No results found", logger.WARNING)
+					logger.log(u"No results found")
 			
 		if newznab == '1':
 		
@@ -132,7 +132,7 @@ def searchNZB(albumid=None):
 						logger.log(title + u" is larger than the maxsize for this category, skipping. (Size: " + size+")", logger.WARNING)
 				
 				except:
-					logger.log(u"No results found", logger.WARNING)
+					logger.log(u"No results found")
 					
 		if nzbsorg == '1':
 		
@@ -169,7 +169,7 @@ def searchNZB(albumid=None):
 						
 				
 				except:
-					logger.log(u"No results found", logger.WARNING)
+					logger.log(u"No results found")
 		
 		if len(resultlist):	
 			bestqual = sorted(resultlist, key=lambda title: title[1], reverse=True)[0]
@@ -202,7 +202,6 @@ def searchNZB(albumid=None):
 				logger.log(u"Unable to send link. Are you sure the host address is correct?", logger.ERROR)
 				
 			c.execute('UPDATE albums SET status = "Snatched" WHERE AlbumID="%s"' % albums[2])
-			c.execute('CREATE TABLE IF NOT EXISTS snatched (AlbumID, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT)')
 			c.execute('INSERT INTO snatched VALUES( ?, ?, ?, ?, CURRENT_DATE, ?)', (albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched"))
 			conn.commit()
 		
