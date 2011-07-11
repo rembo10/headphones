@@ -4,9 +4,6 @@
 
 This is a pretty early release of a third-party add-on for SABnzbd.
 
-Requirements: Python 2.5+, Cheetah (The Cheetah requirement may not be permanent. But if
-you're running Sick Beard, Headphones will run just fine)
-
 To run it, just double-click the headphones.py file (in Windows) or launch a terminal, cd into the Headphones directory and run 'python headphones.py' (it takes -q and -d as optional arguments). 
 
 If you run into any issues while upgrading, try dumping your config.ini file and starting over. I'll fix this so any future settings changes will just be added to your existing file.
