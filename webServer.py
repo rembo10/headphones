@@ -119,7 +119,6 @@ class Headphones:
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
-		
 		conn=sqlite3.connect(database)
 		c=conn.cursor()
 		c.execute('''SELECT ArtistID, ArtistName, AlbumTitle, TrackTitle, TrackDuration, TrackID, AlbumASIN from tracks WHERE AlbumID="%s"''' % AlbumID)
@@ -312,7 +311,35 @@ class Headphones:
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
-		#page.append(templates._footer)
+		today = datetime.date.today()
+		todaysql = datetime.date.isoformat(today)
+		conn=sqlite3.connect(database)
+		c=conn.cursor()
+		c.execute('''SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumASIN, AlbumID, ArtistName, ArtistID from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC''')
+		albums = c.fetchall()
+		if len(albums) > 0:
+			page.append('''<div class="table"><table border="0" cellpadding="3">
+						<tr>
+						<th align="center" width="300"></th>
+						<th align="center" width="300"><div class="bigtext">Upcoming Albums<br /><br /></div></th>
+						<th align="center" width="300"></th>
+						<th>      </th>
+						</tr>''')
+		i = 0
+		while i < len(albums):
+		
+			if albums[i][3]:
+				albumart = '''<br /><a href="http://www.amazon.com/dp/%s"><img src="http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg" height="200" width="200"></a><br /><br />''' % (albums[i][3], albums[i][3])
+			else:
+				albumart = 'No Album Art... yet.'
+
+			page.append('''<tr><td align="center" width="300">%s</td>
+								<td align="center" width="300"><a href="artistPage?ArtistID=%s">%s</a></td>
+								<td align="center" width="300"><a href="albumPage?AlbumID=%s"><i>%s</i> (%s)</a></td></tr>
+								''' % (albumart, albums[i][6], albums[i][5], albums[i][4], albums[i][0], albums[i][1]))
+			i += 1
+		page.append('''</table></div>''')
+		page.append(templates._footer)
 		return page
 	upcoming.exposed = True
 	
