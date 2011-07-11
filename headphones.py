@@ -35,6 +35,7 @@ if not os.access(LOG_DIR, os.F_OK):
 		print 'Unable to create log dir, logging to screen only'
 
 def initialize():
+
 	database = os.path.join(FULL_PATH, 'headphones.db')
 	conn=sqlite3.connect(database)
 	c=conn.cursor()
@@ -42,6 +43,8 @@ def initialize():
 	c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT)')
 	c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT)')
 	c.execute('CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT)')
+	conn.commit()
+	c.close()
 
 
 def serverstart():  
