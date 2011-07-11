@@ -173,7 +173,12 @@ class Headphones:
 				page.append('''Search returned multiple artists. Click the artist you want to add:<br /><br />''')
 				for result in artistResults:
 					artist = result.artist
-					page.append('''<a href="addArtist?artistid=%s">%s</a> (<a class="externalred" href="artistInfo?artistid=%s">more info</a>)<br />''' % (u.extractUuid(artist.id), artist.name, u.extractUuid(artist.id)))
+					detail = artist.getDisambiguation()
+					if detail:
+						disambiguation = '(%s)' % detail
+					else:
+						disambiguation = ''
+					page.append('''<a href="addArtist?artistid=%s">%s %s</a> (<a class="externalred" href="artistInfo?artistid=%s">more info</a>)<br />''' % (u.extractUuid(artist.id), artist.name, disambiguation, u.extractUuid(artist.id)))
 				return page
 			else:
 				for result in artistResults:
