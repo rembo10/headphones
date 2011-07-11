@@ -173,7 +173,7 @@ class Headphones:
 				page.append('''Search returned multiple artists. Click the artist you want to add:<br /><br />''')
 				for result in artistResults:
 					artist = result.artist
-					page.append('''<a href="addArtist?artistid=%s">%s</a> (<a class="externalred" href="/artistInfo?artistid=%s">more info</a>)<br />''' % (u.extractUuid(artist.id), artist.name, u.extractUuid(artist.id)))
+					page.append('''<a href="addArtist?artistid=%s">%s</a> (<a class="externalred" href="artistInfo?artistid=%s">more info</a>)<br />''' % (u.extractUuid(artist.id), artist.name, u.extractUuid(artist.id)))
 				return page
 			else:
 				for result in artistResults:
@@ -239,7 +239,7 @@ class Headphones:
 			
 			conn.commit()
 			c.close()
-			raise cherrypy.HTTPRedirect("/")
+			raise cherrypy.HTTPRedirect("home")
 		
 	addArtist.exposed = True
 	
@@ -251,7 +251,7 @@ class Headphones:
 		c.execute('UPDATE artists SET status = "Paused" WHERE ArtistId="%s"' % ArtistID)
 		conn.commit()
 		c.close()
-		raise cherrypy.HTTPRedirect("/")
+		raise cherrypy.HTTPRedirect("home")
 		
 	pauseArtist.exposed = True
 	
@@ -262,7 +262,7 @@ class Headphones:
 		c.execute('UPDATE artists SET status = "Active" WHERE ArtistId="%s"' % ArtistID)
 		conn.commit()
 		c.close()
-		raise cherrypy.HTTPRedirect("/")
+		raise cherrypy.HTTPRedirect("home")
 		
 	resumeArtist.exposed = True
 	
@@ -275,7 +275,7 @@ class Headphones:
 		c.execute('''DELETE from tracks WHERE ArtistID="%s"''' % ArtistID)
 		conn.commit()
 		c.close()
-		raise cherrypy.HTTPRedirect("/")
+		raise cherrypy.HTTPRedirect("home")
 		
 	deleteArtist.exposed = True
 	
@@ -288,7 +288,7 @@ class Headphones:
 		c.close()
 		import searcher
 		searcher.searchNZB(AlbumID)
-		raise cherrypy.HTTPRedirect("/artistPage?ArtistID=%s" % ArtistID)
+		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 		
 	queueAlbum.exposed = True
 
@@ -299,7 +299,7 @@ class Headphones:
 		c.execute('UPDATE albums SET status = "Skipped" WHERE AlbumID="%s"' % AlbumID)
 		conn.commit()
 		c.close()
-		raise cherrypy.HTTPRedirect("/artistPage?ArtistID=%s" % ArtistID)
+		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 		
 	unqueueAlbum.exposed = True
 	
@@ -377,19 +377,19 @@ class Headphones:
 		config.write()
 		import itunesimport
 		itunesimport.itunesImport(path)
-		raise cherrypy.HTTPRedirect("/")
+		raise cherrypy.HTTPRedirect("home")
 	importItunes.exposed = True
 	
 	def forceUpdate(self):
 		import updater
 		updater.dbUpdate()
-		raise cherrypy.HTTPRedirect("/")
+		raise cherrypy.HTTPRedirect("home")
 	forceUpdate.exposed = True
 	
 	def forceSearch(self):
 		import searcher
 		searcher.searchNZB()
-		raise cherrypy.HTTPRedirect("/")
+		raise cherrypy.HTTPRedirect("home")
 	forceSearch.exposed = True
 		
 	
@@ -491,7 +491,7 @@ class Headphones:
 		
 		configs.write()
 		reload(config)
-		raise cherrypy.HTTPRedirect("/config")
+		raise cherrypy.HTTPRedirect("config")
 		
 		
 	configUpdate.exposed = True
