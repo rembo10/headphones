@@ -13,22 +13,15 @@ import sys
 import configobj
 from headphones import FULL_PATH, config_file
 import logger
-from Cheetah.Template import Template
 
 database = os.path.join(FULL_PATH, 'headphones.db')
 
 class Headphones:
-	
-	def __init__(self,templatePath):
-		"""docstring for __init__"""
-		self.templatePath = templatePath
 
 	def index(self):
-		
-		filename = os.path.join(self.templatePath,"index.tmpl")
-		template = Template(file=filename)
-		template.rootPath = "."
-		template.appPath = "."
+		page = [templates._header]
+		page.append(templates._logobar)
+		page.append(templates._nav)
 		#Display Database if it exists:
 		if os.path.exists(database):
 			#logger.log(u"Loading artists from the database...")
@@ -37,71 +30,129 @@ class Headphones:
 			c.execute('SELECT ArtistName, ArtistID, Status from artists order by ArtistSortName collate nocase')
 			results = c.fetchall()
 			i = 0
-			template.artists = []
+			page.append('''<div class="table"><table border="0" cellpadding="3">
+						<tr>
+						<th align="left" width="170">Artist Name</th>
+						<th align="center" width="100">Status</th>
+						<th align="center" width="300">Upcoming Albums</th>
+						<th>      </th>
+						</tr>''')
 			while i < len(results):
 				c.execute('''SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumID from albums WHERE ArtistID='%s' order by ReleaseDate DESC''' % results[i][1])
 				latestalbum = c.fetchall()
 				today = datetime.date.today()
+				if len(latestalbum) > 0:
+					if latestalbum[0][1] > datetime.date.isoformat(today):
+						newalbumName = '<font color="#5DFC0A" size="3px"><a href="albumPage?AlbumID=%s"><i>%s</i>' % (latestalbum[0][3], latestalbum[0][0])
+						releaseDate = '(%s)</a></font>' % latestalbum[0][1]
+					else:
+						newalbumName = '<font color="#CFCFCF">None</font>'
+						releaseDate = ""
 				if len(latestalbum) == 0:
-					results[i][3] = '<font color="#CFCFCF">None</font>'
-					results[i][4] = ""
-				elif latestalbum[0][1] > datetime.date.isoformat(today):
-					results[i][3] = '<font color="#5DFC0A" size="3px"><a href="albumPage?AlbumID=%s"><i>%s</i>' % (latestalbum[0][3], latestalbum[0][0])
-					results[i][4] = '(%s)</a></font>' % latestalbum[0][1]
-					
-				template.artists.append(results[i])
+						newalbumName = '<font color="#CFCFCF">None</font>'
+						releaseDate = ""					
+				if results[i][2] == 'Paused':
+					newStatus = '''<font color="red"><b>%s</b></font>(<A class="external" href="resumeArtist?ArtistID=%s">resume</a>)''' % (results[i][2], results[i][1])
+				else:
+					newStatus = '''%s(<A class="external" href="pauseArtist?ArtistID=%s">pause</a>)''' % (results[i][2], results[i][1])
+				page.append('''<tr><td align="left" width="300"><a href="artistPage?ArtistID=%s">%s</a> 
+								(<A class="external" href="http://musicbrainz.org/artist/%s">link</a>) [<A class="externalred" href="deleteArtist?ArtistID=%s">delete</a>]</td>
+								<td align="center" width="160">%s</td>
+								<td align="center">%s %s</td></tr>''' % (results[i][1], results[i][0], results[i][1], results[i][1], newStatus, newalbumName, releaseDate))	
 				i = i+1
 			c.close()
-		return str(template)
+			page.append('''</table></div>''')
+			
+		else:
+			page.append("""<div class="datanil">Add some artists to the database!</div>""")
+		page.append(templates._footer)
+		return page
 	index.exposed = True
+	
 
 	def artistPage(self, ArtistID):
-		filename = os.path.join(self.templatePath,"artistPage.tmpl")
-		template = Template(file=filename)
-		template.rootPath = "."
-		template.appPath = "."
-		template.artistID = ArtistID
+		page = [templates._header]
+		page.append(templates._logobar)
+		page.append(templates._nav)
 		conn=sqlite3.connect(database)
 		c=conn.cursor()
 		c.execute('''SELECT ArtistName from artists WHERE ArtistID="%s"''' % ArtistID)
 		artistname = c.fetchall()
-		template.artistName = artistname[0]
 		c.execute('''SELECT AlbumTitle, ReleaseDate, AlbumID, Status, ArtistName, AlbumASIN from albums WHERE ArtistID="%s" order by ReleaseDate DESC''' % ArtistID)
 		results = c.fetchall()
 		c.close()
 		i = 0
-		template.albums = []
+		page.append('''<div class="table"><table border="0" cellpadding="3">
+						<tr><p align="center">%s <br /></p></tr>
+						<tr>
+						<th align="left" width="50"></th>
+						<th align="left" width="120">Album Name</th>
+						<th align="center" width="100">Release Date</th>
+						<th align="center" width="300">Status</th>
+						<th>      </th>
+						</tr>''' % (artistname[0]))
 		while i < len(results):
-			template.albums.append(results[i])
+			if results[i][3] == 'Skipped':
+				newStatus = '''%s [<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">want</a>]''' % (results[i][3], results[i][2], ArtistID)
+			elif results[i][3] == 'Wanted':
+				newStatus = '''<b>%s</b>[<A class="external" href="unqueueAlbum?AlbumID=%s&ArtistID=%s">skip</a>]''' % (results[i][3], results[i][2], ArtistID)				
+			elif results[i][3] == 'Downloaded':
+				newStatus = '''<b>%s</b>[<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">retry</a>]''' % (results[i][3], results[i][2], ArtistID)
+			elif results[i][3] == 'Snatched':
+				newStatus = '''<b>%s</b>[<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">retry</a>]''' % (results[i][3], results[i][2], ArtistID)
+			else:
+				newStatus = '%s' % (results[i][3])
+			page.append('''<tr><td align="left"><img src="http://ec1.images-amazon.com/images/P/%s.01.MZZZZZZZ.jpg" height="50" width="50"></td>
+							<td align="left" width="240"><a href="albumPage?AlbumID=%s">%s</a> 
+							(<A class="external" href="http://musicbrainz.org/release/%s.html">link</a>)</td>
+							<td align="center" width="160">%s</td>
+							<td align="center">%s</td></tr>''' % (results[i][5], results[i][2], results[i][0], results[i][2], results[i][1], newStatus))	
 			i = i+1
-		return str(template)
+		page.append('''</table></div>''')
+		page.append(templates._footer)
+		return page
 	artistPage.exposed = True
 	
 	
 	def albumPage(self, AlbumID):
+		page = [templates._header]
+		page.append(templates._logobar)
+		page.append(templates._nav)
 		
-		filename = os.path.join(self.templatePath,"albumPage.tmpl")
-		template = Template(file=filename)
-		template.rootPath = "."
-		template.appPath = "."
 		conn=sqlite3.connect(database)
 		c=conn.cursor()
 		c.execute('''SELECT ArtistID, ArtistName, AlbumTitle, TrackTitle, TrackDuration, TrackID, AlbumASIN from tracks WHERE AlbumID="%s"''' % AlbumID)
 		results = c.fetchall()
+		if results[0][6]:
+			albumart = '''<br /><img src="http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg" height="200" width="200"><br /><br />''' % results[0][6]
+		else:
+			albumart = ''
 		c.close()
-		template.albumASIN = results[0][6]
-		template.artistID = results[0][0]
-		template.artistName = results[0][1]
-		template.albumTitle = results[0][2]
-		template.tracks = []
 		i = 0
+		page.append('''<div class="table" align="center"><table border="0" cellpadding="3">
+					<tr><a href="artistPage?ArtistID=%s">%s</a> - %s<br />
+					<a href="queueAlbum?AlbumID=%s&ArtistID=%s">Download<br />%s</tr>
+					<br /><tr>
+					<th align="left" width="100">Track #</th>
+					<th align="left" width="100">Track Title</th>
+					<th align="center" width="300">Duration</th>
+					<th>      </th>
+					</tr>''' % (results[0][0], results[0][1], results[0][2], AlbumID, results[0][0], albumart))
 		while i < len(results):
-			track = list(results[i])
-			track.append(i+1)
-			template.tracks.append(track)
+			if results[i][4]:
+				duration = time.strftime("%M:%S", time.gmtime(int(results[i][4])/1000))
+			else:
+				duration = 'n/a'
+			page.append('''<tr><td align="left" width="120">%s</td>
+							<td align="left" width="240">%s (<A class="external" href="http://musicbrainz.org/recording/%s.html">link</a>)</td>
+							<td align="center">%s</td></tr>''' % (i+1, results[i][3], results[i][5], duration))	
 			i = i+1
+		page.append('''</table></div>''')
 
-		return str(template)
+		
+		page.append(templates._footer)
+		return page
+	
 	albumPage.exposed = True
 	
 	
@@ -131,17 +182,15 @@ class Headphones:
 	findArtist.exposed = True
 
 	def artistInfo(self, artistid):
-		
-		filename = os.path.join(self.templatePath,"artistInfo.tmpl")
-		template = Template(file=filename)
-		template.rootPath = "."
-		template.appPath = "."
+		page = [templates._header]
 		inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), releaseGroups=True)
 		artist = ws.Query().getArtistById(artistid, inc)
-		template.artistName = artist.name
-		template.artistUuid = artistid
-		template.releaseGroups = artist.getReleaseGroups()
-		return str(template)
+		page.append('''Artist Name: %s </br> ''' % artist.name)
+		page.append('''Unique ID: %s </br></br>Albums:<br />''' % u.extractUuid(artist.id))
+		for rg in artist.getReleaseGroups():
+			page.append('''%s <br />''' % rg.title)
+		return page
+		
 	artistInfo.exposed = True
 
 	def addArtist(self, artistid):
@@ -259,25 +308,38 @@ class Headphones:
 	unqueueAlbum.exposed = True
 	
 	def upcoming(self):
-		filename = os.path.join(self.templatePath,"upcoming.tmpl")
-		template = Template(file=filename)
-		template.rootPath = "."
-		template.appPath = "."
-		return str(template)
+		page = [templates._header]
+		page.append(templates._logobar)
+		page.append(templates._nav)
+		page.append(templates._footer)
+		return page
 	upcoming.exposed = True
 	
 	def manage(self):
-		filename = os.path.join(self.templatePath,"manage.tmpl")
-		template = Template(file=filename)
-		template.rootPath = "."
-		template.appPath = "."
 		config = configobj.ConfigObj(config_file)
 		try:
 			path = config['General']['path_to_xml']
 		except:
 			path = 'Absolute path to iTunes XML or Top-Level Music Directory'
-		template.path = path
-		return str(template)
+		page = [templates._header]
+		page.append(templates._logobar)
+		page.append(templates._nav)
+		page.append('''<div class="table"><div class="config"><h1>Import or Sync Your iTunes Library/Music Folder</h1><br />
+		Enter the full path to your iTunes XML file or music folder<br /><br />
+		i.e. /Users/"username"/Music/iTunes/iTunes Music Library.xml<br />
+		<i>or</i> /Users/"username"/Music/iTunes/iTunes Media/Music <br /><br />(artists should have their own directories for folder import to work)
+		<br /><br />note: This process can take a LONG time!<br /><br />
+		Once you click "Submit" you can navigate away from this
+			page while the process runs.<br /><br /><br />
+		<form action="importItunes" method="GET" align="center">
+			<input type="text" value="%s" onfocus="if
+			(this.value==this.defaultValue) this.value='';" name="path" size="70" />
+			<input type="submit" /></form><br /><br /></div></div>
+			<div class="table"><div class="config"><h1>Force Search</h1><br />
+			<a href="forceSearch">Force Check for Wanted Albums</a><br /><br />
+			<a href="forceUpdate">Force Update Active Artists </a><br /><br /><br /></div></div>''' % path)
+		page.append(templates._footer)
+		return page
 	manage.exposed = True
 	
 	def importItunes(self, path):
@@ -303,19 +365,21 @@ class Headphones:
 		
 	
 	def history(self):
-		filename = os.path.join(self.templatePath,"history.tmpl")
-		template = Template(file=filename)
-		template.rootPath = "."
-		template.appPath = "."
-		return str(template)
+		page = [templates._header]
+		page.append(templates._logobar)
+		page.append(templates._nav)
+		page.append(templates._footer)
+		return page
 	history.exposed = True
 	
 	def config(self):
-		filename = os.path.join(self.templatePath,"config.tmpl")
-		template = Template(file=filename)
-		template.rootPath = "."
-		template.appPath = "."
-		return str(template)
+		page = [templates._header]
+		page.append(templates._logobar)
+		page.append(templates._nav)
+		page.append(config.form)
+		page.append(templates._footer)
+		return page
+					
 	config.exposed = True
 	
 	
