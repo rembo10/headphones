@@ -12,6 +12,7 @@ import sqlite3
 import sys
 import configobj
 from headphones import FULL_PATH, config_file
+from mb import getReleaseGroup
 import logger
 
 database = os.path.join(FULL_PATH, 'headphones.db')
@@ -46,10 +47,10 @@ class Headphones:
 				today = datetime.date.today()
 				if len(latestalbum) > 0:
 					if latestalbum[0][1] > datetime.date.isoformat(today):
-						newalbumName = '<font color="#5DFC0A" size="3px"><a href="albumPage?AlbumID=%s"><i>%s</i>' % (latestalbum[0][3], latestalbum[0][0])
-						releaseDate = '(%s)</a></font>' % latestalbum[0][1]
+						newalbumName = '<a class="green" href="albumPage?AlbumID=%s"><i><b>%s</b></i>' % (latestalbum[0][3], latestalbum[0][0])
+						releaseDate = '(%s)</a>' % latestalbum[0][1]
 					else:
-						newalbumName = '<font color="#CFCFCF">None</font>'
+						newalbumName = '<a class="gray" href="albumPage?AlbumID=%s"><i>%s</i>' % (latestalbum[0][3], latestalbum[0][0])
 						releaseDate = ""
 				if len(latestalbum) == 0:
 						newalbumName = '<font color="#CFCFCF">None</font>'
@@ -201,7 +202,7 @@ class Headphones:
 	artistInfo.exposed = True
 
 	def addArtist(self, artistid):
-		inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), ratings=False, releaseGroups=False)
+		inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), releaseGroups=True)
 		artist = ws.Query().getArtistById(artistid, inc)
 		conn=sqlite3.connect(database)
 		c=conn.cursor()
@@ -217,30 +218,28 @@ class Headphones:
 		else:
 			logger.log(u"Adding " + artist.name + " to the database.")
 			c.execute('INSERT INTO artists VALUES( ?, ?, ?, CURRENT_DATE, ?)', (artistid, artist.name, artist.sortName, 'Active'))
-			
-			for release in artist.getReleases():
-				releaseid = u.extractUuid(release.id)
+			for rg in artist.getReleaseGroups():
+				rgid = u.extractUuid(rg.id)
+				
+				releaseid = getReleaseGroup(rgid)
+				
 				inc = ws.ReleaseIncludes(artist=True, releaseEvents= True, tracks= True, releaseGroup=True)
 				results = ws.Query().getReleaseById(releaseid, inc)
-				time.sleep(1)
 				
-				for event in results.releaseEvents:
-					if event.country == 'US':
-						logger.log(u"Now adding album: " + results.title+ " to the database")
-						c.execute('INSERT INTO albums VALUES( ?, ?, ?, ?, ?, CURRENT_DATE, ?, ?)', (artistid, results.artist.name, results.title, results.asin, results.getEarliestReleaseDate(), u.extractUuid(results.id), 'Skipped'))
-						c.execute('SELECT ReleaseDate, DateAdded from albums WHERE AlbumID="%s"' % u.extractUuid(results.id))
-						latestrelease = c.fetchall()
+				logger.log(u"Now adding album: " + results.title+ " to the database")
+				c.execute('INSERT INTO albums VALUES( ?, ?, ?, ?, ?, CURRENT_DATE, ?, ?)', (artistid, results.artist.name, results.title, results.asin, results.getEarliestReleaseDate(), u.extractUuid(results.id), 'Skipped'))
+				c.execute('SELECT ReleaseDate, DateAdded from albums WHERE AlbumID="%s"' % u.extractUuid(results.id))
+				latestrelease = c.fetchall()
 						
-						if latestrelease[0][0] > latestrelease[0][1]:
-							logger.log(results.title + u" is an upcoming album. Setting its status to 'Wanted'...")
-							c.execute('UPDATE albums SET Status = "Wanted" WHERE AlbumID="%s"' % u.extractUuid(results.id))
-						else:
-							pass
-						
-						for track in results.tracks:
-							c.execute('INSERT INTO tracks VALUES( ?, ?, ?, ?, ?, ?, ?, ?)', (artistid, results.artist.name, results.title, results.asin, u.extractUuid(results.id), track.title, track.duration, u.extractUuid(track.id)))
-					else:
-						logger.log(results.title + " is not a US release. Skipping it for now", logger.DEBUG)
+				if latestrelease[0][0] > latestrelease[0][1]:
+					logger.log(results.title + u" is an upcoming album. Setting its status to 'Wanted'...")
+					c.execute('UPDATE albums SET Status = "Wanted" WHERE AlbumID="%s"' % u.extractUuid(results.id))
+				else:
+					pass
+					
+				for track in results.tracks:
+					c.execute('INSERT INTO tracks VALUES( ?, ?, ?, ?, ?, ?, ?, ?)', (artistid, results.artist.name, results.title, results.asin, u.extractUuid(results.id), track.title, track.duration, u.extractUuid(track.id)))
+				time.sleep(1)
 			
 			conn.commit()
 			c.close()

@@ -3,6 +3,7 @@ from configobj import ConfigObj
 import musicbrainz2.webservice as ws
 import musicbrainz2.model as m
 import musicbrainz2.utils as u
+from mb import getReleaseGroup
 import string
 import time
 import os
@@ -69,7 +70,6 @@ def itunesImport(pathtoxml):
 def importartist(artistlist):
 	for name in artistlist:
 		logger.log(u"Querying MusicBrainz for: "+name)
-		time.sleep(1)
 		artistResults = ws.Query().getArtists(ws.ArtistFilter(string.replace(name, '&#38;', '%38'), limit=1))		
 		for result in artistResults:
 			if result.artist.name == 'Various Artists':
@@ -78,7 +78,7 @@ def importartist(artistlist):
 				logger.log(u"Found best match: "+result.artist.name+". Gathering album information...")
 				time.sleep(1)
 				artistid = u.extractUuid(result.artist.id)
-				inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), ratings=False, releaseGroups=False)
+				inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), releaseGroups=True)
 				artist = ws.Query().getArtistById(artistid, inc)
 				conn=sqlite3.connect(database)
 				c=conn.cursor()
@@ -88,31 +88,31 @@ def importartist(artistlist):
 					logger.log(result.artist.name + u" is already in the database, skipping")
 				else:
 					c.execute('INSERT INTO artists VALUES( ?, ?, ?, CURRENT_DATE, ?)', (artistid, artist.name, artist.sortName, 'Active'))
-					for release in artist.getReleases():
-						time.sleep(1)
-						releaseid = u.extractUuid(release.id)
+					for rg in artist.getReleaseGroups():
+						rgid = u.extractUuid(rg.id)
+						
+						releaseid = getReleaseGroup(rgid)
+						
 						inc = ws.ReleaseIncludes(artist=True, releaseEvents= True, tracks= True, releaseGroup=True)
 						results = ws.Query().getReleaseById(releaseid, inc)
+
+						logger.log(u"Now adding album: " + results.title+ " to the database")
+						c.execute('INSERT INTO albums VALUES( ?, ?, ?, ?, ?, CURRENT_DATE, ?, ?)', (artistid, results.artist.name, results.title, results.asin, results.getEarliestReleaseDate(), u.extractUuid(results.id), 'Skipped'))
+						conn.commit()
+						c.execute('SELECT ReleaseDate, DateAdded from albums WHERE AlbumID="%s"' % u.extractUuid(results.id))
+								
+						latestrelease = c.fetchall()
 						
-						for event in results.releaseEvents:
+						if latestrelease[0][0] > latestrelease[0][1]:
+							logger.log(results.title + u" is an upcoming album. Setting its status to 'Wanted'...")
+							c.execute('UPDATE albums SET Status = "Wanted" WHERE AlbumID="%s"' % u.extractUuid(results.id))
+						else:
+							pass
 							
-							if event.country == 'US':
-								
-								c.execute('INSERT INTO albums VALUES( ?, ?, ?, ?, ?, CURRENT_DATE, ?, ?)', (artistid, results.artist.name, results.title, results.asin, results.getEarliestReleaseDate(), u.extractUuid(results.id), 'Skipped'))
-								conn.commit()
-								c.execute('SELECT ReleaseDate, DateAdded from albums WHERE AlbumID="%s"' % u.extractUuid(results.id))
-								
-								latestrelease = c.fetchall()
-								
-								if latestrelease[0][0] > latestrelease[0][1]:
-									c.execute('UPDATE albums SET Status = "Wanted" WHERE AlbumID="%s"' % u.extractUuid(results.id))
-								else:
-									pass
-								for track in results.tracks:
-									c.execute('INSERT INTO tracks VALUES( ?, ?, ?, ?, ?, ?, ?, ?)', (artistid, results.artist.name, results.title, results.asin, u.extractUuid(results.id), track.title, track.duration, u.extractUuid(track.id)))
-								conn.commit()
-	
-							else:
-								logger.log(results.title + u" is not a US release. Skipping for now")
-			
+						for track in results.tracks:
+							c.execute('INSERT INTO tracks VALUES( ?, ?, ?, ?, ?, ?, ?, ?)', (artistid, results.artist.name, results.title, results.asin, u.extractUuid(results.id), track.title, track.duration, u.extractUuid(track.id)))
+						time.sleep(1)
+				time.sleep(1)
+
+				conn.commit()		
 				c.close()
