@@ -10,15 +10,17 @@ import webServer
 import logger
 import time
 from threadtools import threadtool
-import os
-	
-
+import os, sys
 
 #set up paths
+if hasattr(sys, 'frozen'):
+	FULL_PATH = os.path.dirname(os.path.abspath(sys.executable))
+else:
+	FULL_PATH = os.path.dirname(os.path.abspath(__file__))
 
-FULL_PATH = os.path.dirname(os.path.abspath(__file__))
 config_file = os.path.join(FULL_PATH, 'config.ini')
 LOG_DIR = os.path.join(FULL_PATH, 'logs')
+DATA_DIR = os.path.join(FULL_PATH, 'data')
 
 web_root = None
 
@@ -70,19 +72,19 @@ def serverstart():
 
 	conf = {
 		'/': {
-            'tools.staticdir.root': FULL_PATH
+            'tools.staticdir.root': ''
         },
         '/data/images':{
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': "data/images"
+            'tools.staticdir.dir': os.path.join(DATA_DIR, 'images')
         },
         '/data/css':{
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': "data/css"
+            'tools.staticdir.dir': os.path.join(DATA_DIR, 'css')
         },
         '/data/js':{
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': "data/js"
+            'tools.staticdir.dir': os.path.join(DATA_DIR, 'js')
         }
     }
     
