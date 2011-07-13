@@ -10,15 +10,21 @@ import webServer
 import logger
 import time
 from threadtools import threadtool
-import os
-	
-
+import os, sys
 
 #set up paths
+global Win32Exe
 
-FULL_PATH = os.path.dirname(os.path.abspath(__file__))
+if hasattr(sys, 'frozen'):
+	FULL_PATH = os.path.dirname(os.path.abspath(sys.executable))
+	Win32Exe=True
+else:
+	FULL_PATH = os.path.dirname(os.path.abspath(__file__))
+	Win32Exe=False
+
 config_file = os.path.join(FULL_PATH, 'config.ini')
 LOG_DIR = os.path.join(FULL_PATH, 'logs')
+DATA_DIR = os.path.join(FULL_PATH, 'data')
 
 web_root = None
 
@@ -62,37 +68,45 @@ def serverstart():
 		cherrypy.config.update({'log.screen': False})
 		consoleLogging=False
 
-	cherrypy.config.update({
+	if Win32Exe:
+		cherrypy.config.update({
 			'server.thread_pool': 10,
 			'server.socket_port': int(settings['http_port']),
-			'server.socket_host': settings['http_host']
-    	})
+			'server.socket_host': settings['http_host'],
+			'engine.autoreload_on': False
+			})
+	else:
+		cherrypy.config.update({
+				'server.thread_pool': 10,
+				'server.socket_port': int(settings['http_port']),
+				'server.socket_host': settings['http_host']
+			})
 
 	conf = {
 		'/': {
-            'tools.staticdir.root': FULL_PATH
-        },
-        '/data/images':{
-            'tools.staticdir.on': True,
-            'tools.staticdir.dir': "data/images"
-        },
-        '/data/css':{
-            'tools.staticdir.on': True,
-            'tools.staticdir.dir': "data/css"
-        },
-        '/data/js':{
-            'tools.staticdir.on': True,
-            'tools.staticdir.dir': "data/js"
-        }
-    }
-    
-    
+			'tools.staticdir.root': ''
+		},
+		'/data/images':{
+			'tools.staticdir.on': True,
+			'tools.staticdir.dir': os.path.join(DATA_DIR, 'images')
+		},
+		'/data/css':{
+			'tools.staticdir.on': True,
+			'tools.staticdir.dir': os.path.join(DATA_DIR, 'css')
+		},
+		'/data/js':{
+			'tools.staticdir.on': True,
+			'tools.staticdir.dir': os.path.join(DATA_DIR, 'js')
+		}
+	}
+	
+	
 	if settings['http_password'] != "":
 		conf['/'].update({
 			'tools.auth_basic.on': True,
-    		'tools.auth_basic.realm': 'mordor',
-    		'tools.auth_basic.checkpassword':  cherrypy.lib.auth_basic.checkpassword_dict(
-    				{settings['http_username']:settings['http_password']})
+			'tools.auth_basic.realm': 'mordor',
+			'tools.auth_basic.checkpassword':  cherrypy.lib.auth_basic.checkpassword_dict(
+					{settings['http_username']:settings['http_password']})
 		})
 		
 	
