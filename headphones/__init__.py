@@ -373,8 +373,11 @@ def shutdown(restart=False, update=False):
 	config_write()
 	
 	if update:
-		versioncheck.update()
-	
+		try:
+			versioncheck.update()
+		except Exception, e:
+			logger.warn('Headphones failed to update: %s. Restarting.' % e) 
+			
 	if restart:
 	
 		popen_list = [sys.executable, FULL_PATH]

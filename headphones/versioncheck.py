@@ -89,7 +89,7 @@ def checkGithub():
 	
 def update():
 		
-	output, err = runGit('pull origin '+headphones.LATEST_VERSION)
+	output, err = runGit('pull origin master')
 	
 	if not output:
 		logger.error('Couldn\'t download latest version')
