@@ -99,11 +99,16 @@ def importartist(artistlist):
 				if any(artistid in x for x in artistlist):
 					logger.info(result.artist.name + u" is already in the database, skipping")
 				else:
-					c.execute('INSERT INTO artists VALUES( ?, ?, ?, CURRENT_DATE, ?)', (artistid, artist.name, artist.sortName, 'Active'))
+					if artist.name.startswith('The '):
+						sortname = artist.name[4:]
+					else:
+						sortname = artist.name
+					c.execute('INSERT INTO artists VALUES( ?, ?, ?, CURRENT_DATE, ?)', (artistid, artist.name, sortname, 'Active'))
 					for rg in artist.getReleaseGroups():
 						rgid = u.extractUuid(rg.id)
 						
 						releaseid = getReleaseGroup(rgid)
+						time.sleep(1)
 						
 						inc = ws.ReleaseIncludes(artist=True, releaseEvents= True, tracks= True, releaseGroup=True)
 						results = ws.Query().getReleaseById(releaseid, inc)

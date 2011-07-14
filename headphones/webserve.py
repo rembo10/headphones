@@ -259,7 +259,11 @@ class WebInterface(object):
 		
 		else:
 			logger.info(u"Adding " + artist.name + " to the database.")
-			c.execute('INSERT INTO artists VALUES( ?, ?, ?, CURRENT_DATE, ?)', (artistid, artist.name, artist.sortName, 'Active'))
+			if artist.name.startswith('The '):
+				sortname = artist.name[4:]
+			else:
+				sortname = artist.name
+			c.execute('INSERT INTO artists VALUES( ?, ?, ?, CURRENT_DATE, ?)', (artistid, artist.name, sortname, 'Active'))
 			for rg in artist.getReleaseGroups():
 				rgid = u.extractUuid(rg.id)
 				
