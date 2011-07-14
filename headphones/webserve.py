@@ -2,9 +2,9 @@ import os, sys
 
 import cherrypy
 
-import lib.musicbrainz2.webservice as ws
-import lib.musicbrainz2.model as m
-import lib.musicbrainz2.utils as u
+import musicbrainz2.webservice as ws
+import musicbrainz2.model as m
+import musicbrainz2.utils as u
 
 import string
 import time
@@ -12,10 +12,11 @@ import datetime
 import sqlite3
 from threading import Thread
 
-import headphones
 from headphones.mb import getReleaseGroup
 from headphones import templates, logger, searcher
 from headphones.helpers import checked
+
+import headphones
 
 
 class WebInterface(object):
@@ -198,7 +199,7 @@ class WebInterface(object):
 		else:
 			artistResults = ws.Query().getArtists(ws.ArtistFilter(string.replace(name, '&', '%38'), limit=8))
 			if len(artistResults) == 0:
-				logger.log(u"No results found for " + name)
+				logger.info(u"No results found for " + name)
 				page.append('''No results!<a class="blue" href="home">Go back</a>''')
 				return page
 			elif len(artistResults) > 1:

@@ -1,6 +1,6 @@
 import urllib
 import string
-import lib.feedparser as feedparser
+import feedparser as feedparser
 import sqlite3
 import re
 

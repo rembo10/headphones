@@ -3,7 +3,7 @@ import platform, subprocess, re
 import headphones
 from headphones import logger
 
-from lib.pygithub import github
+from pygithub import github
 
 
 def runGit(args):
