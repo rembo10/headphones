@@ -30,6 +30,7 @@ def dbUpdate():
 		
 		inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), releaseGroups=True)
 		artist = ws.Query().getArtistById(artistid, inc)
+		time.sleep(1)
 		
 		for rg in artist.getReleaseGroups():
 			
@@ -37,7 +38,7 @@ def dbUpdate():
 			releaseid = getReleaseGroup(rgid)
 			inc = ws.ReleaseIncludes(artist=True, releaseEvents= True, tracks= True, releaseGroup=True)
 			results = ws.Query().getReleaseById(releaseid, inc)
-			
+			time.sleep(1)
 			if any(releaseid in x for x in albumlist):
 					
 				logger.info(results.title + " already exists in the database. Updating ASIN, Release Date, Tracks")
@@ -68,7 +69,6 @@ def dbUpdate():
 							
 					c.execute('INSERT INTO tracks VALUES( ?, ?, ?, ?, ?, ?, ?, ?)', (artistid, results.artist.name, results.title, results.asin, u.extractUuid(results.id), track.title, track.duration, u.extractUuid(track.id)))
 					conn.commit()
-			time.sleep(1)
 		i += 1
 	
 	conn.commit()
