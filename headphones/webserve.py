@@ -204,7 +204,7 @@ class WebInterface(object):
 				page.append('''No results!<a class="blue" href="home">Go back</a>''')
 				return page
 			elif len(artistResults) > 1:
-				page.append('''Search returned multiple artists. Click the artist you want to add:<br /><br />''')
+				page.append('''<div class="table">Search returned multiple artists. Click the artist you want to add:<br /><br />''')
 				for result in artistResults:
 					artist = result.artist
 					detail = artist.getDisambiguation()
@@ -213,6 +213,7 @@ class WebInterface(object):
 					else:
 						disambiguation = ''
 					page.append('''<a href="addArtist?artistid=%s">%s %s</a> (<a class="externalred" href="artistInfo?artistid=%s">more info</a>)<br />''' % (u.extractUuid(artist.id), artist.name, disambiguation, u.extractUuid(artist.id)))
+				page.append('''</div>''')xs
 				return page
 			else:
 				for result in artistResults:
@@ -389,10 +390,10 @@ class WebInterface(object):
 						<th>      </th>
 						</tr>''')
 			i = 0
-			while i < len(albums):
+			while i < len(wanted):
 		
-				if albums[i][3]:
-					albumart = '''<br /><a href="http://www.amazon.com/dp/%s"><img src="http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg" height="200" width="200"></a><br /><br />''' % (albums[i][3], albums[i][3])
+				if wanted[i][3]:
+					albumart = '''<br /><a href="http://www.amazon.com/dp/%s"><img src="http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg" height="200" width="200"></a><br /><br />''' % (wanted[i][3], wanted[i][3])
 				else:
 					albumart = 'No Album Art... yet.'
 
