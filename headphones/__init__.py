@@ -4,8 +4,8 @@ import threading
 import webbrowser
 import sqlite3
 
-from lib.apscheduler.scheduler import Scheduler
-from lib.configobj import ConfigObj
+from apscheduler.scheduler import Scheduler
+from configobj import ConfigObj
 
 import cherrypy
 

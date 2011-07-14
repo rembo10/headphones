@@ -1,10 +1,10 @@
 import time
 
-import lib.musicbrainz2.webservice as ws
-import lib.musicbrainz2.model as m
-import lib.musicbrainz2.utils as u
+import musicbrainz2.webservice as ws
+import musicbrainz2.model as m
+import musicbrainz2.utils as u
 
-from lib.musicbrainz2.webservice import WebServiceError
+from musicbrainz2.webservice import WebServiceError
 
 from headphones.helpers import multikeysort
 

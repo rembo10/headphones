@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import os, sys
 
-from lib.configobj import ConfigObj
+sys.path.append(os.path.join(os.path.abspath(__file__),'lib'))
+
+from configobj import ConfigObj
 
 import headphones
 

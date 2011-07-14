@@ -1,14 +1,14 @@
-from lib.pyItunes import *
-from lib.configobj import ConfigObj
-import lib.musicbrainz2.webservice as ws
-import lib.musicbrainz2.model as m
-import lib.musicbrainz2.utils as u
+from pyItunes import *
+from configobj import ConfigObj
+import musicbrainz2.webservice as ws
+import musicbrainz2.model as m
+import musicbrainz2.utils as u
 from headphones.mb import getReleaseGroup
 import string
 import time
 import os
 import sqlite3
-from lib.beets.mediafile import MediaFile
+from beets.mediafile import MediaFile
 
 import headphones
 from headphones import logger

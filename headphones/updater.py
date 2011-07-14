@@ -1,6 +1,6 @@
-import lib.musicbrainz2.webservice as ws
-import lib.musicbrainz2.model as m
-import lib.musicbrainz2.utils as u
+import musicbrainz2.webservice as ws
+import musicbrainz2.model as m
+import musicbrainz2.utils as u
 from headphones.mb import getReleaseGroup
 import sqlite3
 import time
