@@ -39,7 +39,7 @@ class RotatingLogger(object):
 			consolehandler = logging.StreamHandler()
 			consolehandler.setLevel(logging.DEBUG)
 			
-			consoleformatter = logging.Formatter('%(asctime)s - %(levelname)-7s :: %(message)s', '%d-%b-%Y %H:%M:%S')
+			consoleformatter = logging.Formatter('%(asctime)s - %(levelname)s :: %(message)s', '%d-%b-%Y %H:%M:%S')
 			
 			consolehandler.setFormatter(consoleformatter)
 			l.addHandler(consolehandler)	
