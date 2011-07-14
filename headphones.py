@@ -1,135 +1,105 @@
 #!/usr/bin/env python
-import cherrypy
-from cherrypy.process.plugins import Daemonizer
-from optparse import OptionParser
-from configobj import ConfigObj
-from configcreate import configCreate
-import webbrowser
-import sqlite3
-import webServer
-import logger
-import time
-from threadtools import threadtool
-import os
+import os, sys
+
+from lib.configobj import ConfigObj
+
+import headphones
+
+from headphones import webstart, logger
+
+try:
+	import argparse
+except ImportError:
+	import lib.argparse as argparse
 	
 
+def main():
 
-#set up paths
-
-FULL_PATH = os.path.dirname(os.path.abspath(__file__))
-config_file = os.path.join(FULL_PATH, 'config.ini')
-LOG_DIR = os.path.join(FULL_PATH, 'logs')
-
-web_root = None
-
-if os.path.exists(config_file):
-	pass
-else:
-	configCreate(config_file)
-
-settings = ConfigObj(config_file)['General']
-
-if not os.access(LOG_DIR, os.F_OK):
-	try:
-		os.makedirs(LOG_DIR, 0744)
-	except:
-		print 'Unable to create log dir, logging to screen only'
-
-def initialize():
-
-	database = os.path.join(FULL_PATH, 'headphones.db')
-	conn=sqlite3.connect(database)
-	c=conn.cursor()
-	c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT)')
-	c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT)')
-	c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT)')
-	c.execute('CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT)')
-	conn.commit()
-	c.close()
-
-
-def serverstart():  
-
-	parser = OptionParser()
-	parser.add_option("-d", "--daemonize", action="store_true", dest="daemonize")
-	parser.add_option("-q", "--quiet", action="store_true", dest="quiet")
+	# Fixed paths to Headphones
+	if hasattr(sys, 'frozen'):
+		headphones.FULL_PATH = os.path.abspath(sys.executable)
+	else:
+		headphones.FULL_PATH = os.path.abspath(__file__)
 	
-	(options, args) = parser.parse_args()
-
-	consoleLogging=True
+	headphones.PROG_DIR = os.path.dirname(headphones.FULL_PATH)
+	headphones.ARGS = sys.argv[1:]
 	
-	if options.quiet or options.daemonize:
-		cherrypy.config.update({'log.screen': False})
-		consoleLogging=False
+	# Set up and gather command line arguments
+	parser = argparse.ArgumentParser(description='Music add-on for SABnzbd+')
 
-	cherrypy.config.update({
-			'server.thread_pool': 10,
-			'server.socket_port': int(settings['http_port']),
-			'server.socket_host': settings['http_host']
-    	})
-
-	conf = {
-		'/': {
-            'tools.staticdir.root': FULL_PATH
-        },
-        '/data/images':{
-            'tools.staticdir.on': True,
-            'tools.staticdir.dir': "data/images"
-        },
-        '/data/css':{
-            'tools.staticdir.on': True,
-            'tools.staticdir.dir': "data/css"
-        },
-        '/data/js':{
-            'tools.staticdir.on': True,
-            'tools.staticdir.dir': "data/js"
-        }
-    }
-    
-    
-	if settings['http_password'] != "":
-		conf['/'].update({
-			'tools.auth_basic.on': True,
-    		'tools.auth_basic.realm': 'mordor',
-    		'tools.auth_basic.checkpassword':  cherrypy.lib.auth_basic.checkpassword_dict(
-    				{settings['http_username']:settings['http_password']})
-		})
+	parser.add_argument('-q', '--quiet', action='store_true', help='Turn off console logging')
+	parser.add_argument('-d', '--daemon', action='store_true', help='Run as a daemon')
+	parser.add_argument('-p', '--port', type=int, help='Force Headphones to run on a specified port')
+	parser.add_argument('--datadir', help='Specify a directory where to store your data files')
+	parser.add_argument('--config', help='Specify a config file to use')
+	parser.add_argument('--nolaunch', action='store_true', help='Prevent browser from launching on startup')
+	
+	args = parser.parse_args()
+	
+	if args.quiet:
+		headphones.QUIET=True
+	
+	if args.daemon:
+		headphones.DAEMON=True
+		headphones.QUIET=True
 		
-	
-	if options.daemonize:
-		Daemonizer(cherrypy.engine).subscribe()
-
-
-	#Start threads
-	threadtool(cherrypy.engine).subscribe()
-	cherrypy.engine.timeout_monitor.unsubscribe()
-
-	logger.sb_log_instance.initLogging(consoleLogging=consoleLogging)
-	
-	global web_root
-	try:
-		web_root = settings['http_root']
-	except KeyError:
-		web_root = '/'	
-
-	def browser():
-		if settings['http_host'] == '0.0.0.0':
-			host = 'localhost'
-		else:
-			host = settings['http_host']
-		webbrowser.open('http://' + host + ':' + settings['http_port'] + web_root)
+	if args.datadir:
+		headphones.DATA_DIR = args.datadir
+	else:
+		headphones.DATA_DIR = headphones.PROG_DIR
+			
+	if args.config:
+		headphones.CONFIG_FILE = args.config
+	else:
+		headphones.CONFIG_FILE = os.path.join(headphones.DATA_DIR, 'config.ini')
 		
+	# Try to create the DATA_DIR if it doesn't exist
+	if not os.path.exists(headphones.DATA_DIR):
+		try:
+			os.makedirs(headphones.DATA_DIR)
+		except OSError:
+			raise SystemExit('Could not create data directory: ' + headphones.DATA_DIR + '. Exiting....')
 	
-	if settings['launch_browser'] == '1':
-		cherrypy.engine.subscribe('start', browser, priority=90)
+	# Make sure the DATA_DIR is writeable
+	if not os.access(headphones.DATA_DIR, os.W_OK):
+		raise SystemExit('Cannot write to the data directory: ' + headphones.DATA_DIR + '. Exiting...')
 	
-	logger.log(u"Starting Headphones on port:" + settings['http_port'])
+	# Put the database in the DATA_DIR
+	headphones.DB_FILE = os.path.join(headphones.DATA_DIR, 'headphones.db')
+	
+	headphones.CFG = ConfigObj(headphones.CONFIG_FILE)
+	
+	# Read config & start logging
+	headphones.initialize()
+		
+	if headphones.DAEMON:
+		headphones.daemonize()
+		
+	# Force the http port if neccessary
+	if args.port:
+		http_port = args.port
+		logger.info('Starting Headphones on foced port: %i' % http_port)
+	else:
+		http_port = int(headphones.HTTP_PORT)
+		
+	# Try to start the server. 
+	webstart.initialize({
+					'http_port':		http_port,
+					'http_host':		headphones.HTTP_HOST,
+					'http_root':		headphones.HTTP_ROOT,
+					'http_username':	headphones.HTTP_USERNAME,
+					'http_password':	headphones.HTTP_PASSWORD,
+			})
+	
+	logger.info('Starting Headphones on port: %i' % http_port)
+	
+	if headphones.LAUNCH_BROWSER and not args.nolaunch:
+		headphones.launch_browser(headphones.HTTP_HOST, http_port, headphones.HTTP_ROOT)
 
+	# Start the background threads
+	headphones.start()
 	
+	return
 
-	cherrypy.quickstart(webServer.Headphones(), web_root, config = conf)
-	
-
-if __name__ == '__main__':
-	initialize()
-	serverstart()
+if __name__ == "__main__":
+	main()

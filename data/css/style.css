@@ -89,6 +89,9 @@ h1{
 .bigtext{
 	font-size: 22px;
 	}
+.updatebar{
+	text-align: center;
+	}
 a:link {
 	color: #5E2612; 
   	text-decoration: none; 
@@ -122,3 +125,16 @@ a.externalred {
 	color: red;
 	font-size:12px;
 	}
+div.progress-container {
+  border: 1px solid #ccc; 
+  width: 100px; 
+  margin: 2px 5px 2px 0; 
+  padding: 1px; 
+  float: left; 
+  background: white;
+}
+
+div.progress-container > div {
+  background-color: #ACE97C; 
+  height: 12px
+}

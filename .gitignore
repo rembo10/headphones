@@ -1,2 +1,17 @@
+# Compiled source #
+###################
 *.pyc
+
+# Logs and databases #
+######################
 *.log
+*.db
+*.ini
+logs/*
+
+# OS generated files #
+######################
+.DS_Store?
+ehthumbs.db
+Icon?
+Thumbs.db
