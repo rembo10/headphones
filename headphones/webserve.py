@@ -56,6 +56,8 @@ class WebInterface(object):
 				havetracks = len(c.fetchall())
 				try:
 					percent = (havetracks*100)/totaltracks
+					if percent > 100:
+						percent = 100
 				except ZeroDivisionError:
 					percent = 100
 				today = datetime.date.today()
@@ -117,6 +119,8 @@ class WebInterface(object):
 			havetracks = len(c.fetchall())
 			try:
 				percent = (havetracks*100)/totaltracks
+				if percent > 100:
+					percent = 100
 			except ZeroDivisionError:
 					percent = 100
 			if results[i][3] == 'Skipped':
@@ -201,10 +205,10 @@ class WebInterface(object):
 			artistResults = ws.Query().getArtists(ws.ArtistFilter(string.replace(name, '&', '%38'), limit=8))
 			if len(artistResults) == 0:
 				logger.info(u"No results found for " + name)
-				page.append('''No results!<a class="blue" href="home">Go back</a>''')
+				page.append('''<div class="table"><p class="center">No results! <a class="blue" href="home">Go back</a></p></div>''')
 				return page
 			elif len(artistResults) > 1:
-				page.append('''<div class="table">Search returned multiple artists. Click the artist you want to add:<br /><br />''')
+				page.append('''<div class="table"><p class="center">Search returned multiple artists. Click the artist you want to add:</p>''')
 				for result in artistResults:
 					artist = result.artist
 					detail = artist.getDisambiguation()
@@ -212,8 +216,8 @@ class WebInterface(object):
 						disambiguation = '(%s)' % detail
 					else:
 						disambiguation = ''
-					page.append('''<a href="addArtist?artistid=%s">%s %s</a> (<a class="externalred" href="artistInfo?artistid=%s">more info</a>)<br />''' % (u.extractUuid(artist.id), artist.name, disambiguation, u.extractUuid(artist.id)))
-				page.append('''</div>''')xs
+					page.append('''<p class="mediumtext"><a href="addArtist?artistid=%s">%s %s</a> (<a class="externalred" href="artistInfo?artistid=%s">more info</a>)</p>''' % (u.extractUuid(artist.id), artist.name, disambiguation, u.extractUuid(artist.id)))
+				page.append('''</div>''')
 				return page
 			else:
 				for result in artistResults:

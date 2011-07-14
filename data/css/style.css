@@ -86,6 +86,10 @@ h1{
 .smalltext{
 	font-size: 11px;
 	}
+.mediumtext{
+	font-size: 16px;
+	margin-left: 100px;
+	}
 .bigtext{
 	font-size: 22px;
 	}
