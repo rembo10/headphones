@@ -40,7 +40,7 @@ def scanMusic(dir=None):
 			try:
 				f = MediaFile(song)
 			except:
-				logger.info("Could not read file: '" + song + "'", logger.ERROR)
+				logger.info("Could not read file: '" + song + "'")
 			else:	
 				if not f.artist:
 					pass
