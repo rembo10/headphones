@@ -113,7 +113,7 @@ class WebInterface(object):
 		while i < len(results):
 			c.execute('''SELECT TrackTitle from tracks WHERE AlbumID="%s"''' % results[i][2])
 			totaltracks = len(c.fetchall())
-			c.execute('''SELECT TrackTitle from have WHERE ArtistName like "%s" AND AlbumTitle like "%s"''' % (results[i][4], results[i][0]))
+			c.execute('''SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ?''', (results[i][4], results[i][0]))
 			havetracks = len(c.fetchall())
 			try:
 				percent = (havetracks*100)/totaltracks
@@ -167,7 +167,7 @@ class WebInterface(object):
 					<th>      </th>
 					</tr>''' % (results[0][0], results[0][1], results[0][2], AlbumID, results[0][0], albumart))
 		while i < len(results):
-			c.execute('''SELECT TrackTitle from have WHERE ArtistName like "%s" AND AlbumTitle like "%s" AND TrackTitle like "%s"''' % (results[i][1], results[i][2], results[i][3]))
+			c.execute('''SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ? AND TrackTitle like ?''', (results[i][1], results[i][2], results[i][3]))
 			trackmatches = c.fetchall()
 			if len(trackmatches):
 				have = '<img src="images/checkmark.png" width="20px">'
@@ -193,12 +193,14 @@ class WebInterface(object):
 	def findArtist(self, name):
 	
 		page = [templates._header]
+		page.append(templates._logobar)
+		page.append(templates._nav)
 		if len(name) == 0 or name == 'Add an artist':
 			raise cherrypy.HTTPRedirect("home")
 		else:
 			artistResults = ws.Query().getArtists(ws.ArtistFilter(string.replace(name, '&', '%38'), limit=8))
 			if len(artistResults) == 0:
-				logger.log(u"No results found for " + name)
+				logger.info(u"No results found for " + name)
 				page.append('''No results!<a class="blue" href="home">Go back</a>''')
 				return page
 			elif len(artistResults) > 1:
@@ -222,6 +224,8 @@ class WebInterface(object):
 
 	def artistInfo(self, artistid):
 		page = [templates._header]
+		page.append(templates._logobar)
+		page.append(templates._nav)
 		inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), releaseGroups=True)
 		artist = ws.Query().getArtistById(artistid, inc)
 		page.append('''Artist Name: %s </br> ''' % artist.name)
@@ -235,12 +239,14 @@ class WebInterface(object):
 	def addArtist(self, artistid):
 		inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), releaseGroups=True)
 		artist = ws.Query().getArtistById(artistid, inc)
+		time.sleep(1)
 		conn=sqlite3.connect(headphones.DB_FILE)
 		c=conn.cursor()
 		c.execute('SELECT ArtistID from artists')
 		artistlist = c.fetchall()
 		if any(artistid in x for x in artistlist):
 			page = [templates._header]
+			page.append
 			page.append('''%s has already been added. Go <a href="home">back</a>.''' % artist.name)
 			logger.info(artist.name + u" is already in the database!")
 			c.close()
@@ -256,7 +262,7 @@ class WebInterface(object):
 				
 				inc = ws.ReleaseIncludes(artist=True, releaseEvents= True, tracks= True, releaseGroup=True)
 				results = ws.Query().getReleaseById(releaseid, inc)
-				
+				time.sleep(1)
 				logger.info(u"Now adding album: " + results.title+ " to the database")
 				c.execute('INSERT INTO albums VALUES( ?, ?, ?, ?, ?, CURRENT_DATE, ?, ?)', (artistid, results.artist.name, results.title, results.asin, results.getEarliestReleaseDate(), u.extractUuid(results.id), 'Skipped'))
 				c.execute('SELECT ReleaseDate, DateAdded from albums WHERE AlbumID="%s"' % u.extractUuid(results.id))
@@ -270,7 +276,6 @@ class WebInterface(object):
 					
 				for track in results.tracks:
 					c.execute('INSERT INTO tracks VALUES( ?, ?, ?, ?, ?, ?, ?, ?)', (artistid, results.artist.name, results.title, results.asin, u.extractUuid(results.id), track.title, track.duration, u.extractUuid(track.id)))
-				time.sleep(1)
 			
 			conn.commit()
 			c.close()

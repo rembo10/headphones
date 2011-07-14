@@ -82,6 +82,7 @@ def importartist(artistlist):
 	for name in artistlist:
 		logger.info(u"Querying MusicBrainz for: "+name)
 		artistResults = ws.Query().getArtists(ws.ArtistFilter(string.replace(name, '&#38;', '%38'), limit=1))		
+		time.sleep(1)
 		for result in artistResults:
 			if result.artist.name == 'Various Artists':
 				logger.info(u"Top result is Various Artists. Skipping.")
@@ -90,6 +91,7 @@ def importartist(artistlist):
 				artistid = u.extractUuid(result.artist.id)
 				inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), releaseGroups=True)
 				artist = ws.Query().getArtistById(artistid, inc)
+				time.sleep(1)
 				conn=sqlite3.connect(headphones.DB_FILE)
 				c=conn.cursor()
 				c.execute('SELECT ArtistID from artists')
@@ -105,7 +107,7 @@ def importartist(artistlist):
 						
 						inc = ws.ReleaseIncludes(artist=True, releaseEvents= True, tracks= True, releaseGroup=True)
 						results = ws.Query().getReleaseById(releaseid, inc)
-
+						time.sleep(1)
 						logger.info(u"Now adding album: " + results.title+ " to the database")
 						c.execute('INSERT INTO albums VALUES( ?, ?, ?, ?, ?, CURRENT_DATE, ?, ?)', (artistid, results.artist.name, results.title, results.asin, results.getEarliestReleaseDate(), u.extractUuid(results.id), 'Skipped'))
 						conn.commit()
@@ -121,8 +123,6 @@ def importartist(artistlist):
 							
 						for track in results.tracks:
 							c.execute('INSERT INTO tracks VALUES( ?, ?, ?, ?, ?, ?, ?, ?)', (artistid, results.artist.name, results.title, results.asin, u.extractUuid(results.id), track.title, track.duration, u.extractUuid(track.id)))
-						time.sleep(1)
-				time.sleep(1)
 
 				conn.commit()		
 				c.close()

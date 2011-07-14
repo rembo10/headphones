@@ -46,7 +46,7 @@ def getReleaseGroup(rgid):
 	
 	inc = ws.ReleaseGroupIncludes(releases=True)
 	releaseGroup = q.getReleaseGroupById(rgid, inc)
-	
+	time.sleep(1)
 	# I think for now we have to make separate queries for each release, in order
 	# to get more detailed release info (ASIN, track count, etc.)
 	for release in releaseGroup.releases:
@@ -55,6 +55,7 @@ def getReleaseGroup(rgid):
 		inc = ws.ReleaseIncludes(tracks=True)
 		
 		releaseResult = q.getReleaseById(releaseid, inc)
+		time.sleep(1)
 		
 		release_dict = {
 			'asin':			bool(releaseResult.asin),
@@ -63,7 +64,6 @@ def getReleaseGroup(rgid):
 		}
 		
 		releaselist.append(release_dict)
-		time.sleep(1)
 
 	a = multikeysort(releaselist, ['-asin', '-tracks'])
 

@@ -200,9 +200,6 @@ def initialize():
 		NZBSORG = bool(check_setting_int(CFG, 'NZBsorg', 'nzbsorg', 0))
 		NZBSORG_UID = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_uid', '')
 		NZBSORG_HASH = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_hash', '')
-		
-		# Get the currently installed version
-		CURRENT_VERSION = versioncheck.getVersion()
 	
 		# Put the log dir in the data dir for now
 		LOG_DIR = os.path.join(DATA_DIR, 'logs')
@@ -222,6 +219,9 @@ def initialize():
 			dbcheck()
 		except Exception, e:
 			logger.error("Can't connect to the database: %s" % e)
+			
+		# Get the currently installed version
+		CURRENT_VERSION = versioncheck.getVersion()
 
 		__INITIALIZED__ = True
 		return True
@@ -340,14 +340,19 @@ def start():
 	global __INITIALIZED__, started
 	
 	if __INITIALIZED__:
+	
+		# Start our scheduled background tasks
 
 		SCHED.add_cron_job(updater.dbUpdate, hour=4, minute=0, second=0)
 		SCHED.add_interval_job(searcher.searchNZB, minutes=NZB_SEARCH_INTERVAL)
 		SCHED.add_interval_job(itunesimport.scanMusic, minutes=LIBRARYSCAN_INTERVAL)
-		
-		SCHED.add_interval_job(versioncheck.checkGithub, minutes=60)
+		SCHED.add_interval_job(versioncheck.checkGithub, minutes=300)
 
 		SCHED.start()
+		
+		# Check for new versions
+		versioncheck.checkGithub()
+		
 		
 		started = True
 	
