@@ -100,7 +100,6 @@ class WebInterface(object):
 		artistname = c.fetchall()
 		c.execute('''SELECT AlbumTitle, ReleaseDate, AlbumID, Status, ArtistName, AlbumASIN from albums WHERE ArtistID="%s" order by ReleaseDate DESC''' % ArtistID)
 		results = c.fetchall()
-		c.close()
 		i = 0
 		page.append('''<div class="table"><table border="0" cellpadding="3">
 						<tr><p align="center">%s <br /></p></tr>
@@ -137,6 +136,7 @@ class WebInterface(object):
 							<td align="center">%s</td>
 							<td><div class="progress-container"><div style="width: %s%%"></div></div></td></tr>''' % (results[i][5], results[i][2], results[i][0], results[i][2], results[i][1], newStatus, percent))	
 			i = i+1
+		c.close()
 		page.append('''</table></div>''')
 		page.append(templates._footer)
 		return page
@@ -156,7 +156,6 @@ class WebInterface(object):
 			albumart = '''<br /><img src="http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg" height="200" width="200"><br /><br />''' % results[0][6]
 		else:
 			albumart = ''
-		c.close()
 		i = 0
 		page.append('''<div class="table" align="center"><table border="0" cellpadding="3">
 					<tr><a href="artistPage?ArtistID=%s">%s</a> - %s<br />
@@ -183,9 +182,8 @@ class WebInterface(object):
 							<td align="center">%s</td>
 							<td>%s</td></tr>''' % (i+1, results[i][3], results[i][5], duration, have))	
 			i = i+1
+		c.close()
 		page.append('''</table></div>''')
-
-		
 		page.append(templates._footer)
 		return page
 	
