@@ -26,7 +26,7 @@ class WebInterface(object):
 
 	def home(self):
 		page = [templates._header]
-		if headphones.LATEST_VERSION:
+		if headphones.LATEST_VERSION and headphones.CURRENT_VERSION:
 			if headphones.CURRENT_VERSION != headphones.LATEST_VERSION:
 				page.append('''<div class="updatebar">A <a class="blue" href="http://github.com/rembo10/headphones/compare/%s...%s">
 					newer version</a> is available. You're %s commits behind. <a class="blue" href="update">Click here to update</a></div>
@@ -626,3 +626,5 @@ class WebInterface(object):
 		logger.info('Headphones is updating...')
 		headphones.shutdown(restart=True, update=True)
 		return 'Updating Headphones...'
+		
+	update.exposed = True
