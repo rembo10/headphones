@@ -84,7 +84,7 @@ def importartist(artistlist):
 		artistResults = ws.Query().getArtists(ws.ArtistFilter(string.replace(name, '&#38;', '%38'), limit=1))		
 		for result in artistResults:
 			if result.artist.name == 'Various Artists':
-				logger.info(u"Top result is Various Artists. Skipping.", logger.WARNING)
+				logger.info(u"Top result is Various Artists. Skipping.")
 			else:
 				logger.info(u"Found best match: "+result.artist.name+". Gathering album information...")
 				artistid = u.extractUuid(result.artist.id)
