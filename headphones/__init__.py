@@ -1,3 +1,5 @@
+from __future__ import with_statement
+
 import os, sys, subprocess
 
 import threading
@@ -361,7 +363,6 @@ def start():
 		# Check for new versions
 		versioncheck.checkGithub()
 		
-		
 		started = True
 	
 def dbcheck():
@@ -395,13 +396,9 @@ def shutdown(restart=False, update=False):
 	
 		popen_list = [sys.executable, FULL_PATH]
 		popen_list += ARGS
-		#if '--nolaunch' not in popen_list:
-		#	popen_list += ['--nolaunch']
+		if '--nolaunch' not in popen_list:
+			popen_list += ['--nolaunch']
 		logger.info('Restarting Headphones with ' + str(popen_list))
 		subprocess.Popen(popen_list, cwd=os.getcwd())
 		
 	os._exit(0)
-	
-def refresh():
-	
-	raise cherrypy.HTTPRedirect("home")

@@ -98,7 +98,6 @@ def main():
 		
 	# Start the background threads
 	headphones.start()
-
 	
 	return
 

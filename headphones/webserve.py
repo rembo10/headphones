@@ -10,7 +10,7 @@ import string
 import time
 import datetime
 import sqlite3
-from threading import Thread
+import threading
 
 import headphones
 from headphones.mb import getReleaseGroup
@@ -26,7 +26,7 @@ class WebInterface(object):
 
 	def home(self):
 		page = [templates._header]
-		if not headphones.LATEST_VERSION:
+		if not headphones.CURRENT_VERSION:
 			page.append('''<div class="updatebar">You're running an unknown version of Heapdhones. <a class="blue" href="update">Click here to update</a></div>''')
 		elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
 			page.append('''<div class="updatebar">A <a class="blue" href="http://github.com/rembo10/headphones/compare/%s...%s">
@@ -627,21 +627,24 @@ class WebInterface(object):
 
 	def shutdown(self):
 		logger.info(u"Headphones is shutting down...")
-		headphones.shutdown()
-		return 'Shutting down Headphones...'
+		threading.Timer(2, headphones.shutdown).start()
+		return '''<head></head>
+				Shutting Down Headphones....'''
 
 	shutdown.exposed = True
 
 	def restart(self):
 		logger.info(u"Headphones is restarting...")
-		headphones.shutdown(restart=True)
-		return 'Restarting Headphones...'
+		threading.Timer(2, headphones.shutdown, [True]).start()
+		return '''<head><meta http-equiv="refresh" content="20;url=home"></head>
+				Restarting Headphones....'''
 	 
 	restart.exposed = True
 	
 	def update(self):
 		logger.info('Headphones is updating...')
-		headphones.shutdown(restart=True, update=True)
-		return 'Updating Headphones...'
+		threading.Timer(2, headphones.shutdown, [True, True]).start()
+		return '''<head><meta http-equiv="refresh" content="60;url=home"></head>
+				Updating Headphones....'''
 		
 	update.exposed = True
