@@ -8,6 +8,18 @@ _header = '''
 	</head>
 	<body>
 	<div class="container">'''
+	
+_shutdownheader = '''
+	<html>
+	<head>
+		<title>Headphones</title>
+		<link rel="stylesheet" type="text/css" href="css/style.css" />
+		<link rel="icon" type="image/x-icon" href="images/favicon.ico" /> 
+		<link rel="apple-touch-icon" href="images/headphoneslogo.png" />
+		<meta http-equiv="refresh" content="%s;url=home"></head>
+	</head>
+	<body>
+	<div class="container">'''
 			
 _logobar = '''
 		<div class="logo"><a href="home"><img src="images/headphoneslogo.png" border="0">headphones<a></div>

@@ -628,23 +628,26 @@ class WebInterface(object):
 	def shutdown(self):
 		logger.info(u"Headphones is shutting down...")
 		threading.Timer(2, headphones.shutdown).start()
-		return '''<head></head>
-				Shutting Down Headphones....'''
+		page = [templates._shutdownheader % 10]
+		page.append('Shutting down Headphones...')
+		return page
 
 	shutdown.exposed = True
 
 	def restart(self):
 		logger.info(u"Headphones is restarting...")
 		threading.Timer(2, headphones.shutdown, [True]).start()
-		return '''<head><meta http-equiv="refresh" content="20;url=home"></head>
-				Restarting Headphones....'''
+		page = [templates._shutdownheader % 20]
+		page.append('Restarting Headphones...')
+		return page
 	 
 	restart.exposed = True
 	
 	def update(self):
 		logger.info('Headphones is updating...')
 		threading.Timer(2, headphones.shutdown, [True, True]).start()
-		return '''<head><meta http-equiv="refresh" content="60;url=home"></head>
-				Updating Headphones....'''
+		page = [templates._shutdownheader % 60]
+		page.append('Updating Headphones...')
+		return page
 		
 	update.exposed = True
