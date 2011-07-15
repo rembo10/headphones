@@ -225,7 +225,8 @@ def initialize():
 		except Exception, e:
 			logger.error("Can't connect to the database: %s" % e)
 			
-		# Get the currently installed version
+		# Get the currently installed version - returns None, 'win32' or the git hash
+		# Also sets INSTALL_TYPE variable to 'win', 'git' or 'source'
 		CURRENT_VERSION = versioncheck.getVersion()
 
 		__INITIALIZED__ = True
@@ -394,9 +395,13 @@ def shutdown(restart=False, update=False):
 	
 		popen_list = [sys.executable, FULL_PATH]
 		popen_list += ARGS
-		if '--nolaunch' not in popen_list:
-			popen_list += ['--nolaunch']
+		#if '--nolaunch' not in popen_list:
+		#	popen_list += ['--nolaunch']
 		logger.info('Restarting Headphones with ' + str(popen_list))
 		subprocess.Popen(popen_list, cwd=os.getcwd())
 		
 	os._exit(0)
+	
+def refresh():
+	
+	raise cherrypy.HTTPRedirect("home")

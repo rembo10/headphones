@@ -36,6 +36,6 @@ There are still a few things that I'm working on:
 
 If you run into any more issues, visit http://github.com/rembo10/headphones and report an issue. 
 
-This is free software so feel free to use it/modify it as you wish. The code is messy, but it works :-)
+This is free software so feel free to use it/modify it as you wish. 
 
 If you have any ideas for the next release, also make sure to post that here!

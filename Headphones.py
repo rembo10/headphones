@@ -95,9 +95,10 @@ def main():
 	
 	if headphones.LAUNCH_BROWSER and not args.nolaunch:
 		headphones.launch_browser(headphones.HTTP_HOST, http_port, headphones.HTTP_ROOT)
-
+		
 	# Start the background threads
 	headphones.start()
+
 	
 	return
 
