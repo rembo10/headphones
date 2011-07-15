@@ -11,7 +11,7 @@ import sqlite3
 from lib.beets.mediafile import MediaFile
 
 import headphones
-from headphones import logger
+from headphones import logger, helpers
 
 def scanMusic(dir=None):
 
@@ -20,7 +20,7 @@ def scanMusic(dir=None):
 
 	results = []
 	
-	for r,d,f in os.walk(dir):
+	for r,d,f in os.walk(unicode(dir)):
 		for files in f:
 			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape")):
 				results.append(os.path.join(r,files))
