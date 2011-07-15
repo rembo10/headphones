@@ -4,9 +4,9 @@
 
 This is a pretty early release of a third-party add-on for SABnzbd.
 
-To run it, just double-click the headphones.py file (in Windows) or launch a terminal, cd into the Headphones directory and run 'python headphones.py' (it takes -q and -d as optional arguments). 
+To run it, just double-click the Headphones.py file (in Windows - you may need to right click and click 'Open With' -> Python) or launch a terminal, cd into the Headphones directory and run 'python headphones.py'.
 
-If you run into any issues while upgrading, try dumping your config.ini file and starting over. I'll fix this so any future settings changes will just be added to your existing file.
+For additional startup options, type 'python Headphones.py -h' or 'python Headphones.py --help'
 
 ###Screenshots
 First Run
