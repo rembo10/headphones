@@ -144,7 +144,7 @@ def update():
 				
 	else:
 	
-		tar_download_url = 'http://github.com/rembo10/headphones/tarball'+version.HEADPHONES_VERSION
+		tar_download_url = 'http://github.com/rembo10/headphones/tarball/'+version.HEADPHONES_VERSION
 		update_dir = os.path.join(headphones.PROG_DIR, 'update')
 		version_path = os.path.join(headphones.PROG_DIR, 'version.txt')
 		
