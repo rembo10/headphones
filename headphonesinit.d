@@ -18,7 +18,7 @@ APP_PATH=/usr/local/sbin/headphones
 DAEMON=/usr/bin/python
 
 # startup args
-DAEMON_OPTS="headphones.py -q"
+DAEMON_OPTS="Headphones.py -q"
 
 # script name
 NAME=headphones
