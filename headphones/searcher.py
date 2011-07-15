@@ -2,7 +2,7 @@ import urllib
 import string
 import lib.feedparser as feedparser
 import sqlite3
-import re
+import os, re
 
 import headphones
 from headphones import logger
@@ -64,13 +64,12 @@ def searchNZB(albumid=None):
 					size = int(item.links[1]['length'])
 					if size < maxsize:
 						resultlist.append((title, size, url))
-						logger.info(u"Found " + title +" : " + url + " (Size: " + size + ")")
+						logger.info('Found %s. Size: %i' % (title, size))
 					else:
-						logger.info(title + u" is larger than the maxsize for this category, skipping. (Size: " + size+")")
-						
+						logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))	
 				
-				except:
-					logger.info(u"No results found")
+				except Exception, e:
+					logger.info(u"No results found. %s" % e)
 			
 		if headphones.NEWZNAB:
 		
@@ -100,12 +99,12 @@ def searchNZB(albumid=None):
 					size = int(item.links[1]['length'])
 					if size < maxsize:
 						resultlist.append((title, size, url))
-						logger.info(u"Found " + title +" : " + url + " (Size: " + size + ")")
+						logger.info('Found %s. Size: %i' % (title, size))
 					else:
-						logger.info(title + u" is larger than the maxsize for this category, skipping. (Size: " + size+")")
+						logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))	
 				
-				except:
-					logger.info(u"No results found")
+				except Exception, e:
+					logger.info(u"No results found. %s" % e)
 					
 		if headphones.NZBSORG:
 		
@@ -137,50 +136,68 @@ def searchNZB(albumid=None):
 					size = int(item.links[1]['length'])
 					if size < maxsize:
 						resultlist.append((title, size, url))
-						logger.info(u"Found " + title +" : " + url + " (Size: " + size + ")")
+						logger.info('Found %s. Size: %i' % (title, size))
 					else:
-						logger.info(title + u" is larger than the maxsize for this category, skipping. (Size: " + size +")")
-						
+						logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))	
 				
-				except:
-					logger.info(u"No results found")
+				except Exception, e:
+					logger.info(u"No results found. %s" % e)
 		
 		if len(resultlist):	
 			bestqual = sorted(resultlist, key=lambda title: title[1], reverse=True)[0]
 		
-			logger.info(u"Downloading: " + bestqual[0])
+			logger.info(u"Found best result: %s (%s) - %s bytes" % (bestqual[0], bestqual[2], bestqual[1]))
 			downloadurl = bestqual[2]
 				
-			linkparams = {}
-			
-			linkparams["mode"] = "addurl"
-			
-			if headphones.SAB_APIKEY:
-				linkparams["apikey"] = headphones.SAB_APIKEY
-			if headphones.SAB_USERNAME:
-				linkparams["ma_username"] = headphones.SAB_USERNAME
-			if headphones.SAB_PASSWORD:
-				linkparams["ma_password"] = headphones.SAB_PASSWORD
-			if headphones.SAB_CATEGORY:
-				linkparams["cat"] = headphones.SAB_CATEGORY
-							
-			linkparams["name"] = downloadurl
+			if headphones.SAB_HOST and not headphones.BLACKHOLE:
+				linkparams = {}
 				
-			saburl = 'http://' + headphones.SAB_HOST + '/sabnzbd/api?' + urllib.urlencode(linkparams)
-			logger.info(u"Sending link to SABNZBD: " + saburl)
-			
-			try:
-				urllib.urlopen(saburl)
+				linkparams["mode"] = "addurl"
 				
-			except:
-				logger.error(u"Unable to send link. Are you sure the host address is correct?")
+				if headphones.SAB_APIKEY:
+					linkparams["apikey"] = headphones.SAB_APIKEY
+				if headphones.SAB_USERNAME:
+					linkparams["ma_username"] = headphones.SAB_USERNAME
+				if headphones.SAB_PASSWORD:
+					linkparams["ma_password"] = headphones.SAB_PASSWORD
+				if headphones.SAB_CATEGORY:
+					linkparams["cat"] = headphones.SAB_CATEGORY
+								
+				linkparams["name"] = downloadurl
+				linkparams["nzbname"] = ('%s - %s [%s]' % (albums[0], albums[1], year))
+					
+				saburl = 'http://' + headphones.SAB_HOST + '/sabnzbd/api?' + urllib.urlencode(linkparams)
+				logger.info(u"Sending link to SABNZBD: " + saburl)
 				
-			c.execute('UPDATE albums SET status = "Snatched" WHERE AlbumID="%s"' % albums[2])
-			c.execute('INSERT INTO snatched VALUES( ?, ?, ?, ?, CURRENT_DATE, ?)', (albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched"))
-			conn.commit()
-		
-		else:
-			pass
+				try:
+					urllib.urlopen(saburl)
+					
+				except:
+					logger.error(u"Unable to send link. Are you sure the host address is correct?")
+					break
+					
+				c.execute('UPDATE albums SET status = "Snatched" WHERE AlbumID="%s"' % albums[2])
+				c.execute('INSERT INTO snatched VALUES( ?, ?, ?, ?, CURRENT_DATE, ?)', (albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched"))
+				conn.commit()
+				c.close()
 			
-	c.close()
+			elif headphones.BLACKHOLE:
+			
+				nzb_name = ('%s - %s [%s].nzb' % (albums[0], albums[1], year))
+				download_path = os.path.join(headphones.BLACKHOLE_DIR, nzb_name)
+				
+				try:
+					urllib.urlretrieve(downloadurl, download_path)
+				except Exception, e:
+					logger.error('Couldn\'t retrieve NZB: %s' % e)
+					break
+					
+				c.execute('UPDATE albums SET status = "Snatched" WHERE AlbumID="%s"' % albums[2])
+				c.execute('INSERT INTO snatched VALUES( ?, ?, ?, ?, CURRENT_DATE, ?)', (albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched"))
+				conn.commit()
+				c.close()
+				
+				
+			
+			
 	

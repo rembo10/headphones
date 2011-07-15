@@ -26,9 +26,10 @@ class WebInterface(object):
 
 	def home(self):
 		page = [templates._header]
-		if headphones.LATEST_VERSION and headphones.CURRENT_VERSION:
-			if headphones.CURRENT_VERSION != headphones.LATEST_VERSION:
-				page.append('''<div class="updatebar">A <a class="blue" href="http://github.com/rembo10/headphones/compare/%s...%s">
+		if not headphones.LATEST_VERSION:
+			page.append('''<div class="updatebar">You're running an unknown version of Heapdhones. <a class="blue" href="update">Click here to update</a></div>''')
+		elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
+			page.append('''<div class="updatebar">A <a class="blue" href="http://github.com/rembo10/headphones/compare/%s...%s">
 					newer version</a> is available. You're %s commits behind. <a class="blue" href="update">Click here to update</a></div>
 					''' % (headphones.CURRENT_VERSION, headphones.LATEST_VERSION, headphones.COMMITS_BEHIND))
 		page.append(templates._logobar)
@@ -556,6 +557,8 @@ class WebInterface(object):
 		headphones.SAB_PASSWORD,
 		headphones.SAB_CATEGORY,
 		headphones.DOWNLOAD_DIR,
+		checked(headphones.BLACKHOLE),
+		headphones.BLACKHOLE_DIR,
 		headphones.USENET_RETENTION,
 		checked(headphones.NZBMATRIX),
 		headphones.NZBMATRIX_USERNAME,
@@ -581,7 +584,7 @@ class WebInterface(object):
 	
 	
 	def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0,
-		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None,
+		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
 		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
 		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, prefer_lossless=0, flac_to_mp3=0, move_files=0, music_dir=None, rename_files=0, cleanup_files=0, add_album_art=0):
 		
@@ -596,6 +599,8 @@ class WebInterface(object):
 		headphones.SAB_APIKEY = sab_apikey
 		headphones.SAB_CATEGORY = sab_category
 		headphones.DOWNLOAD_DIR = download_dir
+		headphones.BLACKHOLE = blackhole
+		headphones.BLACKHOLE_DIR = blackhole_dir
 		headphones.USENET_RETENTION = usenet_retention
 		headphones.NZBMATRIX = nzbmatrix
 		headphones.NZBMATRIX_USERNAME = nzbmatrix_username

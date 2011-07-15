@@ -43,6 +43,7 @@ HTTP_ROOT = None
 LAUNCH_BROWSER = False
 
 GIT_PATH = None
+INSTALL_TYPE = None
 CURRENT_VERSION = None
 LATEST_VERSION = None
 COMMITS_BEHIND = None
@@ -58,6 +59,8 @@ RENAME_FILES = False
 CLEANUP_FILES = False
 ADD_ALBUM_ART = False
 DOWNLOAD_DIR = None
+BLACKHOLE = None
+BLACKHOLE_DIR = None
 USENET_RETENTION = None
 
 NZB_SEARCH_INTERVAL = 360
@@ -135,7 +138,7 @@ def initialize():
 				HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, GIT_PATH, \
 				CURRENT_VERSION, \
 				MUSIC_DIR, PREFER_LOSSLESS, FLAC_TO_MP3, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, \
-				FILE_FORMAT, CLEANUP_FILES, ADD_ALBUM_ART, DOWNLOAD_DIR, USENET_RETENTION, \
+				FILE_FORMAT, CLEANUP_FILES, ADD_ALBUM_ART, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, \
 				NZB_SEARCH_INTERVAL, LIBRARYSCAN_INTERVAL, \
 				SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
 				NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, \
@@ -178,6 +181,8 @@ def initialize():
 		CLEANUP_FILES = bool(check_setting_int(CFG, 'General', 'cleanup_files', 0))
 		ADD_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'add_album_art', 0))
 		DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'download_dir', '')
+		BLACKHOLE = bool(check_setting_int(CFG, 'General', 'blackhole', 0))
+		BLACKHOLE_DIR = check_setting_str(CFG, 'General', 'blackhole_dir', '')
 		USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', '')
 		
 		NZB_SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'nzb_search_interval', 360)
@@ -305,6 +310,8 @@ def config_write():
 	new_config['General']['cleanup_files'] = int(CLEANUP_FILES)
 	new_config['General']['add_album_art'] = int(ADD_ALBUM_ART)
 	new_config['General']['download_dir'] = DOWNLOAD_DIR
+	new_config['General']['blackhole'] = int(BLACKHOLE)
+	new_config['General']['blackhole_dir'] = BLACKHOLE_DIR
 	new_config['General']['usenet_retention'] = USENET_RETENTION
 	
 	new_config['General']['nzb_search_interval'] = NZB_SEARCH_INTERVAL

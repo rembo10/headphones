@@ -140,6 +140,23 @@ configform = form = '''
                     i.e. Downloads/music or /Users/name/Downloads/music</i>
                 </td>
             </tr>
+            
+            <tr>
+                <td>
+                    <br>
+
+                    <p>Use Black Hole:</p><input type="checkbox" name="blackhole" value=1 %s />
+                </td>
+
+                <td>
+                    <br>
+
+                    <p>Black Hole Directory:</p><input type="text" name="blackhole_dir" value="%s" size="60"><br>
+
+                    <i class="smalltext">Folder your Download program watches for NZBs</i>
+                </td>
+            </tr>
+
 
             <tr>
                 <td>
@@ -249,7 +266,7 @@ configform = form = '''
                 <td>
                     <br>
 
-                    <p><b>Path to Music folder</b>:<br><input type="text" name="music_dir" value="%s" size="60" maxlength="40">
+                    <p><b>Path to Music folder</b>:<br><input type="text" name="music_dir" value="%s" size="60" maxlength="200">
                       <br>
                       <i class="smalltext">i.e. /Users/name/Music/iTunes or /Volumes/share/music</i>
                     </p>
