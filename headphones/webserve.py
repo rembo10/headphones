@@ -6,15 +6,13 @@ import lib.musicbrainz2.webservice as ws
 import lib.musicbrainz2.model as m
 import lib.musicbrainz2.utils as u
 
-import string
 import time
 import datetime
-import sqlite3
 import threading
 
 import headphones
 from headphones.mb import getReleaseGroup
-from headphones import templates, logger, searcher
+from headphones import templates, logger, searcher, db, importer, helpers, mb
 from headphones.helpers import checked
 
 
@@ -34,11 +32,8 @@ class WebInterface(object):
 					''' % (headphones.CURRENT_VERSION, headphones.LATEST_VERSION, headphones.COMMITS_BEHIND))
 		page.append(templates._logobar)
 		page.append(templates._nav)
-
-		conn=sqlite3.connect(headphones.DB_FILE)
-		c=conn.cursor()
-		c.execute('SELECT ArtistName, ArtistID, Status from artists order by ArtistSortName collate nocase')
-		results = c.fetchall()
+		myDB = db.DBConnection()
+		results = myDB.select('SELECT ArtistName, ArtistID, Status from artists order by ArtistSortName collate nocase')
 		if len(results):
 			i = 0
 			page.append('''<div class="table"><table border="0" cellpadding="3">
@@ -49,14 +44,11 @@ class WebInterface(object):
 						<th align="center">Have</th>
 						</tr>''')
 			while i < len(results):
-				c.execute('''SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumID from albums WHERE ArtistID='%s' order by ReleaseDate DESC''' % results[i][1])
-				latestalbum = c.fetchall()
-				c.execute('''SELECT TrackTitle from tracks WHERE ArtistID="%s"''' % results[i][1])
-				totaltracks = len(c.fetchall())
-				c.execute('''SELECT TrackTitle from have WHERE ArtistName like "%s"''' % results[i][0])
-				havetracks = len(c.fetchall())
+				latestalbum = myDB.select('SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [results[i][1]])
+				totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [results[i][1]]))
+				havetracks = len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [results[i][0]]))
 				try:
-					percent = (havetracks*100)/totaltracks
+					percent = (havetracks*100.0)/totaltracks
 					if percent > 100:
 						percent = 100
 				except ZeroDivisionError:
@@ -74,6 +66,8 @@ class WebInterface(object):
 						releaseDate = ""					
 				if results[i][2] == 'Paused':
 					newStatus = '''<font color="red"><b>%s</b></font>(<A class="external" href="resumeArtist?ArtistID=%s">resume</a>)''' % (results[i][2], results[i][1])
+				elif results[i][2] == 'Loading':
+					newStatus = '''<a class="gray">Loading...</a>'''
 				else:
 					newStatus = '''%s(<A class="external" href="pauseArtist?ArtistID=%s">pause</a>)''' % (results[i][2], results[i][1])
 				page.append('''<tr><td align="left" width="300"><a href="artistPage?ArtistID=%s">%s</a> 
@@ -83,9 +77,9 @@ class WebInterface(object):
 								<td><div class="progress-container"><div style="width: %s%%"></div></div></td></tr>
 								''' % (results[i][1], results[i][0], results[i][1], results[i][1], newStatus, newalbumName, releaseDate, percent))	
 				i = i+1
-			c.close()
+
 			page.append('''</table></div>''')
-			page.append(templates._footer)
+			page.append(templates._footer % headphones.CURRENT_VERSION)
 			
 		else:
 			page.append("""<div class="datanil">Add some artists to the database!</div>""")
@@ -97,12 +91,10 @@ class WebInterface(object):
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
-		conn=sqlite3.connect(headphones.DB_FILE)
-		c=conn.cursor()
-		c.execute('''SELECT ArtistName from artists WHERE ArtistID="%s"''' % ArtistID)
-		artistname = c.fetchall()
-		c.execute('''SELECT AlbumTitle, ReleaseDate, AlbumID, Status, ArtistName, AlbumASIN from albums WHERE ArtistID="%s" order by ReleaseDate DESC''' % ArtistID)
-		results = c.fetchall()
+		myDB = db.DBConnection()
+		
+		results = myDB.select('SELECT AlbumTitle, ReleaseDate, AlbumID, Status, ArtistName, AlbumASIN from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
+		
 		i = 0
 		page.append('''<div class="table"><table border="0" cellpadding="3">
 						<tr><p align="center">%s <br /></p></tr>
@@ -112,12 +104,10 @@ class WebInterface(object):
 						<th align="center" width="100">Release Date</th>
 						<th align="center" width="180">Status</th>
 						<th align="center">Have</th>
-						</tr>''' % (artistname[0]))
+						</tr>''' % (results[0][4]))
 		while i < len(results):
-			c.execute('''SELECT TrackTitle from tracks WHERE AlbumID="%s"''' % results[i][2])
-			totaltracks = len(c.fetchall())
-			c.execute('''SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ?''', (results[i][4], results[i][0]))
-			havetracks = len(c.fetchall())
+			totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=?', [results[i][2]]))
+			havetracks = len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ?', [results[i][4], results[i][0]]))
 			try:
 				percent = (havetracks*100)/totaltracks
 				if percent > 100:
@@ -141,9 +131,9 @@ class WebInterface(object):
 							<td align="center">%s</td>
 							<td><div class="progress-container"><div style="width: %s%%"></div></div></td></tr>''' % (results[i][5], results[i][2], results[i][0], results[i][2], results[i][1], newStatus, percent))	
 			i = i+1
-		c.close()
+
 		page.append('''</table></div>''')
-		page.append(templates._footer)
+		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
 	artistPage.exposed = True
 	
@@ -152,10 +142,8 @@ class WebInterface(object):
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
-		conn=sqlite3.connect(headphones.DB_FILE)
-		c=conn.cursor()
-		c.execute('''SELECT ArtistID, ArtistName, AlbumTitle, TrackTitle, TrackDuration, TrackID, AlbumASIN from tracks WHERE AlbumID="%s"''' % AlbumID)
-		results = c.fetchall()
+		myDB = db.DBConnection()
+		results = myDB.select('SELECT ArtistID, ArtistName, AlbumTitle, TrackTitle, TrackDuration, TrackID, AlbumASIN from tracks WHERE AlbumID=?', [AlbumID])
 		
 		if results[0][6]:
 			albumart = '''<br /><img src="http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg" height="200" width="200"><br /><br />''' % results[0][6]
@@ -172,14 +160,14 @@ class WebInterface(object):
 					<th>      </th>
 					</tr>''' % (results[0][0], results[0][1], results[0][2], AlbumID, results[0][0], albumart))
 		while i < len(results):
-			c.execute('''SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ? AND TrackTitle like ?''', (results[i][1], results[i][2], results[i][3]))
-			trackmatches = c.fetchall()
+			trackmatches = myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ? AND TrackTitle like ?', [results[i][1], results[i][2], results[i][3]])
+
 			if len(trackmatches):
 				have = '<img src="images/checkmark.png" width="20px">'
 			else:
 				have = ''
 			if results[i][4]:
-				duration = time.strftime("%M:%S", time.gmtime(int(results[i][4])/1000))
+				duration = helpers.convert_milliseconds(results[i][4])
 			else:
 				duration = 'n/a'
 			page.append('''<tr><td align="left" width="120">%s</td>
@@ -187,9 +175,9 @@ class WebInterface(object):
 							<td align="center">%s</td>
 							<td>%s</td></tr>''' % (i+1, results[i][3], results[i][5], duration, have))	
 			i = i+1
-		c.close()
+
 		page.append('''</table></div>''')
-		page.append(templates._footer)
+		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
 	
 	albumPage.exposed = True
@@ -203,7 +191,7 @@ class WebInterface(object):
 		if len(name) == 0 or name == 'Add an artist':
 			raise cherrypy.HTTPRedirect("home")
 		else:
-			artistResults = ws.Query().getArtists(ws.ArtistFilter(string.replace(name, '&', '%38'), limit=8))
+			artistResults = mb.findArtist(name, limit=10)
 			if len(artistResults) == 0:
 				logger.info(u"No results found for " + name)
 				page.append('''<div class="table"><p class="center">No results! <a class="blue" href="home">Go back</a></p></div>''')
@@ -211,20 +199,13 @@ class WebInterface(object):
 			elif len(artistResults) > 1:
 				page.append('''<div class="table"><p class="center">Search returned multiple artists. Click the artist you want to add:</p>''')
 				for result in artistResults:
-					artist = result.artist
-					detail = artist.getDisambiguation()
-					if detail:
-						disambiguation = '(%s)' % detail
-					else:
-						disambiguation = ''
-					page.append('''<p class="mediumtext"><a href="addArtist?artistid=%s">%s %s</a> (<a class="externalred" href="artistInfo?artistid=%s">more info</a>)</p>''' % (u.extractUuid(artist.id), artist.name, disambiguation, u.extractUuid(artist.id)))
+					page.append('''<p class="mediumtext"><a href="addArtist?artistid=%s">%s</a> (<a class="externalred" href="artistInfo?artistid=%s">more info</a>)</p>''' % (result['id'], result['uniquename'], result['id']))
 				page.append('''</div>''')
 				return page
 			else:
 				for result in artistResults:
-					artist = result.artist
-					logger.info(u"Found one artist matching your search term: " + artist.name +" ("+ artist.id+")")			
-					raise cherrypy.HTTPRedirect("addArtist?artistid=%s" % u.extractUuid(artist.id))
+					logger.info(u"Found one artist matching your search term: " + result['name'] +" ("+ result['id']+")")			
+					raise cherrypy.HTTPRedirect("addArtist?artistid=%s" % result['id'])
 		
 	findArtist.exposed = True
 
@@ -232,123 +213,83 @@ class WebInterface(object):
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
-		inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), releaseGroups=True)
-		artist = ws.Query().getArtistById(artistid, inc)
-		page.append('''Artist Name: %s </br> ''' % artist.name)
-		page.append('''Unique ID: %s </br></br>Albums:<br />''' % u.extractUuid(artist.id))
-		for rg in artist.getReleaseGroups():
-			page.append('''%s <br />''' % rg.title)
+		artist = mb.getArtist(artistid)
+		page.append('''<div class="table"><p class="center">Artist Information:</p>''')
+		page.append('''<p class="mediumtext">Artist Name: %s </br> ''' % artist['artist_name'])
+		page.append('''Unique ID: %s </br></br>Albums:<br />''' % artist['artist_id'])
+		for rg in artist['releasegroups']:
+			page.append('''%s <br />''' % rg['title'])
 		return page
 		
 	artistInfo.exposed = True
 
 	def addArtist(self, artistid):
-		inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), releaseGroups=True)
-		artist = ws.Query().getArtistById(artistid, inc)
-		time.sleep(1)
-		conn=sqlite3.connect(headphones.DB_FILE)
-		c=conn.cursor()
-		c.execute('SELECT ArtistID from artists')
-		artistlist = c.fetchall()
-		if any(artistid in x for x in artistlist):
-			page = [templates._header]
-			page.append
-			page.append('''%s has already been added. Go <a href="home">back</a>.''' % artist.name)
-			logger.info(artist.name + u" is already in the database!")
-			c.close()
-			return page
 		
-		else:
-			logger.info(u"Adding " + artist.name + " to the database.")
-			if artist.name.startswith('The '):
-				sortname = artist.name[4:]
-			else:
-				sortname = artist.name
-			c.execute('INSERT INTO artists VALUES( ?, ?, ?, CURRENT_DATE, ?)', (artistid, artist.name, sortname, 'Active'))
-			for rg in artist.getReleaseGroups():
-				rgid = u.extractUuid(rg.id)
-				
-				releaseid = getReleaseGroup(rgid)
-				
-				inc = ws.ReleaseIncludes(artist=True, releaseEvents= True, tracks= True, releaseGroup=True)
-				results = ws.Query().getReleaseById(releaseid, inc)
-				time.sleep(1)
-				logger.info(u"Now adding album: " + results.title+ " to the database")
-				c.execute('INSERT INTO albums VALUES( ?, ?, ?, ?, ?, CURRENT_DATE, ?, ?)', (artistid, results.artist.name, results.title, results.asin, results.getEarliestReleaseDate(), u.extractUuid(results.id), 'Skipped'))
-				c.execute('SELECT ReleaseDate, DateAdded from albums WHERE AlbumID="%s"' % u.extractUuid(results.id))
-				latestrelease = c.fetchall()
-						
-				if latestrelease[0][0] > latestrelease[0][1]:
-					logger.info(results.title + u" is an upcoming album. Setting its status to 'Wanted'...")
-					c.execute('UPDATE albums SET Status = "Wanted" WHERE AlbumID="%s"' % u.extractUuid(results.id))
-				else:
-					pass
-					
-				for track in results.tracks:
-					c.execute('INSERT INTO tracks VALUES( ?, ?, ?, ?, ?, ?, ?, ?)', (artistid, results.artist.name, results.title, results.asin, u.extractUuid(results.id), track.title, track.duration, u.extractUuid(track.id)))
-			
-			conn.commit()
-			c.close()
-			raise cherrypy.HTTPRedirect("home")
+		threading.Thread(target=importer.addArtisttoDB, args=[artistid]).start()
+		time.sleep(2)
+		raise cherrypy.HTTPRedirect("home")
 		
 	addArtist.exposed = True
 	
 	def pauseArtist(self, ArtistID):
 	
-		conn=sqlite3.connect(headphones.DB_FILE)
-		c=conn.cursor()
 		logger.info(u"Pausing artist: " + ArtistID)
-		c.execute('UPDATE artists SET status = "Paused" WHERE ArtistId="%s"' % ArtistID)
-		conn.commit()
-		c.close()
+		myDB = db.DBConnection()
+		controlValueDict = {'ArtistID': ArtistID}
+		newValueDict = {'Status': 'Paused'}
+		myDB.upsert("artists", newValueDict, controlValueDict)
+		
 		raise cherrypy.HTTPRedirect("home")
 		
 	pauseArtist.exposed = True
 	
 	def resumeArtist(self, ArtistID):
-		conn=sqlite3.connect(headphones.DB_FILE)
-		c=conn.cursor()
+
 		logger.info(u"Resuming artist: " + ArtistID)
-		c.execute('UPDATE artists SET status = "Active" WHERE ArtistId="%s"' % ArtistID)
-		conn.commit()
-		c.close()
+		myDB = db.DBConnection()
+		controlValueDict = {'ArtistID': ArtistID}
+		newValueDict = {'Status': 'Active'}
+		myDB.upsert("artists", newValueDict, controlValueDict)
+
 		raise cherrypy.HTTPRedirect("home")
 		
 	resumeArtist.exposed = True
 	
 	def deleteArtist(self, ArtistID):
-		conn=sqlite3.connect(headphones.DB_FILE)
-		c=conn.cursor()
+
 		logger.info(u"Deleting all traces of artist: " + ArtistID)
-		c.execute('''DELETE from artists WHERE ArtistID="%s"''' % ArtistID)
-		c.execute('''DELETE from albums WHERE ArtistID="%s"''' % ArtistID)
-		c.execute('''DELETE from tracks WHERE ArtistID="%s"''' % ArtistID)
-		conn.commit()
-		c.close()
+		myDB = db.DBConnection()
+		myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
+		myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
+		myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+
 		raise cherrypy.HTTPRedirect("home")
 		
 	deleteArtist.exposed = True
 	
 	def queueAlbum(self, AlbumID, ArtistID):
-		conn=sqlite3.connect(headphones.DB_FILE)
-		c=conn.cursor()
+
 		logger.info(u"Marking album: " + AlbumID + "as wanted...")
-		c.execute('UPDATE albums SET status = "Wanted" WHERE AlbumID="%s"' % AlbumID)
-		conn.commit()
-		c.close()
+		myDB = db.DBConnection()
+		controlValueDict = {'AlbumID': AlbumID}
+		newValueDict = {'Status': 'Wanted'}
+		myDB.upsert("albums", newValueDict, controlValueDict)
+		
 		import searcher
 		searcher.searchNZB(AlbumID)
+		
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 		
 	queueAlbum.exposed = True
 
 	def unqueueAlbum(self, AlbumID, ArtistID):
-		conn=sqlite3.connect(headphones.DB_FILE)
-		c=conn.cursor()
+
 		logger.info(u"Marking album: " + AlbumID + "as skipped...")
-		c.execute('UPDATE albums SET status = "Skipped" WHERE AlbumID="%s"' % AlbumID)
-		conn.commit()
-		c.close()
+		myDB = db.DBConnection()
+		controlValueDict = {'AlbumID': AlbumID}
+		newValueDict = {'Status': 'Skipped'}
+		myDB.upsert("albums", newValueDict, controlValueDict)
+		
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 		
 	unqueueAlbum.exposed = True
@@ -357,14 +298,11 @@ class WebInterface(object):
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
-		today = datetime.date.today()
-		todaysql = datetime.date.isoformat(today)
-		conn=sqlite3.connect(headphones.DB_FILE)
-		c=conn.cursor()
-		c.execute('''SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumASIN, AlbumID, ArtistName, ArtistID from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC''')
-		albums = c.fetchall()
-		c.execute('''SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumASIN, AlbumID, ArtistName, ArtistID from albums WHERE Status="Wanted"''')
-		wanted = c.fetchall()
+		myDB = db.DBConnection()
+		albums = myDB.select("SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumASIN, AlbumID, ArtistName, ArtistID from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC")
+
+		wanted = myDB.select("SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumASIN, AlbumID, ArtistName, ArtistID from albums WHERE Status='Wanted'")
+
 		page.append('''<div class="table"><table border="0" cellpadding="3">
 						<tr>
 						<th align="center" width="300"></th>
@@ -413,7 +351,7 @@ class WebInterface(object):
 				i += 1
 		page.append('''</table></div>''')
 		if len(albums):
-			page.append(templates._footer)
+			page.append(templates._footer % headphones.CURRENT_VERSION)
 		
 		return page
 	upcoming.exposed = True
@@ -455,38 +393,40 @@ class WebInterface(object):
 			<a href="forceSearch">Force Check for Wanted Albums</a><br /><br />
 			<a href="forceUpdate">Force Update Active Artists</a><br /><br />
 			<a href="checkGithub">Check for Headphones Updates</a><br /><br /><br /></div></div>''' % (path2, path))
-		page.append(templates._footer)
+		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
 	manage.exposed = True
 	
 	def importItunes(self, path):
 		headphones.PATH_TO_XML = path
 		headphones.config_write()
-		from headphones import itunesimport
-		itunesimport.itunesImport(path)
+		threading.Thread(target=importer.itunesImport, args=[path]).start()
+		time.sleep(10)
 		raise cherrypy.HTTPRedirect("home")
 	importItunes.exposed = True
 	
 	def musicScan(self, path):
-		from headphones import itunesimport
 		headphones.MUSIC_DIR = path
 		headphones.config_write()
 		try:	
-			itunesimport.scanMusic(path)
+			threading.Thread(target=importer.scanMusic, args=[path]).start()
 		except Exception, e:
 			logger.error('Unable to complete the scan: %s' % e)
+		time.sleep(10)
 		raise cherrypy.HTTPRedirect("home")
 	musicScan.exposed = True
 	
 	def forceUpdate(self):
 		from headphones import updater
-		updater.dbUpdate()
+		threading.Thread(target=updater.dbUpdate).start()
+		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 	forceUpdate.exposed = True
 	
 	def forceSearch(self):
 		from headphones import searcher
-		searcher.searchNZB()
+		threading.Thread(target=searcher.searchNZB).start()
+		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 	forceSearch.exposed = True
 	
@@ -500,10 +440,9 @@ class WebInterface(object):
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
-		conn=sqlite3.connect(headphones.DB_FILE)
-		c=conn.cursor()
-		c.execute('''SELECT AlbumID, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT from snatched order by DateAdded DESC''')
-		snatched = c.fetchall()
+		myDB = db.DBConnection()
+		snatched = myDB.select('''SELECT AlbumID, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT from snatched order by DateAdded DESC''')
+
 		page.append('''<div class="table"><table border="0" cellpadding="3">
 						<tr>
 						<th align="center" width="300"></th>
@@ -527,17 +466,16 @@ class WebInterface(object):
 			i += 1
 		page.append('''</table></div>''')
 		if len(snatched):
-			page.append(templates._footer)
+			page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
 	history.exposed = True
 	
 	def clearhistory(self):
-		conn=sqlite3.connect(headphones.DB_FILE)
-		c=conn.cursor()
+
 		logger.info(u"Clearing history")
-		c.execute('''DELETE from snatched''')
-		conn.commit()
-		c.close()
+		myDB = db.DBConnection()
+		myDB.action('''DELETE from snatched''')
+
 		raise cherrypy.HTTPRedirect("history")
 	clearhistory.exposed = True
 	
@@ -577,7 +515,7 @@ class WebInterface(object):
 		checked(headphones.CLEANUP_FILES),
 		checked(headphones.ADD_ALBUM_ART)
 		))
-		#page.append(templates._footer)
+		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
 					
 	config.exposed = True

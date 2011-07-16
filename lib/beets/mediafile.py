@@ -788,7 +788,7 @@ class MediaFile(object):
                 etc = StorageStyle('compilation')
             )
     albumartist = MediaField(
-                mp3 = StorageStyle('TXXX', id3_desc=u'Album Artist'),
+                mp3 = StorageStyle('TPE2'),
                 mp4 = StorageStyle(
                     '----:com.apple.iTunes:Album Artist',
                     as_type=str),

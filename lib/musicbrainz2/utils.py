@@ -141,7 +141,7 @@ def getReleaseTypeName(releaseType):
 
 	@see: L{musicbrainz2.model.Release}
 	"""
-	from musicbrainz2.data.releasetypenames import releaseTypeNames
+	from lib.musicbrainz2.data.releasetypenames import releaseTypeNames
 	return releaseTypeNames.get(releaseType)
 
 

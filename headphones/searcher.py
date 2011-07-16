@@ -1,23 +1,19 @@
 import urllib
 import string
 import lib.feedparser as feedparser
-import sqlite3
 import os, re
 
 import headphones
-from headphones import logger
+from headphones import logger, db
 
 def searchNZB(albumid=None):
 
-	conn=sqlite3.connect(headphones.DB_FILE)
-	c=conn.cursor()
+	myDB = db.DBConnection()
 	
 	if albumid:
-		c.execute('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted" AND AlbumID="%s"' % albumid)
+		results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted" AND AlbumID=?', [albumid])
 	else:
-		c.execute('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted"')
-	
-	results = c.fetchall()
+		results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted"')
 	
 	for albums in results:
 		
@@ -176,10 +172,9 @@ def searchNZB(albumid=None):
 					logger.error(u"Unable to send link. Are you sure the host address is correct?")
 					break
 					
-				c.execute('UPDATE albums SET status = "Snatched" WHERE AlbumID="%s"' % albums[2])
-				c.execute('INSERT INTO snatched VALUES( ?, ?, ?, ?, CURRENT_DATE, ?)', (albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched"))
-				conn.commit()
-				c.close()
+				myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
+				myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, CURRENT_DATE, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched"])
+
 			
 			elif headphones.BLACKHOLE:
 			
@@ -192,10 +187,9 @@ def searchNZB(albumid=None):
 					logger.error('Couldn\'t retrieve NZB: %s' % e)
 					break
 					
-				c.execute('UPDATE albums SET status = "Snatched" WHERE AlbumID="%s"' % albums[2])
-				c.execute('INSERT INTO snatched VALUES( ?, ?, ?, ?, CURRENT_DATE, ?)', (albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched"))
-				conn.commit()
-				c.close()
+				myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
+				myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, CURRENT_DATE, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched"])
+
 				
 				
 			

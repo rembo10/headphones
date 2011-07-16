@@ -37,7 +37,7 @@ class RotatingLogger(object):
 		if not quiet:
 		
 			consolehandler = logging.StreamHandler()
-			consolehandler.setLevel(logging.DEBUG)
+			consolehandler.setLevel(logging.INFO)
 			
 			consoleformatter = logging.Formatter('%(asctime)s - %(levelname)s :: %(message)s', '%d-%b-%Y %H:%M:%S')
 			

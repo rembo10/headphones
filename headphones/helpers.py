@@ -1,6 +1,11 @@
+import time
+from operator import itemgetter
+import datetime
+
 def multikeysort(items, columns):
-    from operator import itemgetter
+
     comparers = [ ((itemgetter(col[1:].strip()), -1) if col.startswith('-') else (itemgetter(col.strip()), 1)) for col in columns]  
+    
     def comparer(left, right):
         for fn, mult in comparers:
             result = cmp(fn(left), fn(right))
@@ -8,6 +13,7 @@ def multikeysort(items, columns):
                 return mult * result
         else:
             return 0
+    
     return sorted(items, cmp=comparer)
     
 def checked(variable):
@@ -56,3 +62,17 @@ def latinToAscii(unicrap):
 		else:
 			r += str(i)
 	return r
+	
+def convert_milliseconds(ms):
+
+	seconds = ms/1000
+	gmtime = time.gmtime(seconds)
+	
+	minutes = time.strftime("%M:%S", gmtime)
+
+	return minutes
+	
+def today():
+	today = datetime.date.today()
+	yyyymmdd = datetime.date.isoformat(today)
+	return yyyymmdd

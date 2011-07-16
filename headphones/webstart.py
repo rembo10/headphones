@@ -33,6 +33,10 @@ def initialize(options={}):
         '/js':{
             'tools.staticdir.on': True,
             'tools.staticdir.dir': "js"
+        },
+        '/favicon.ico':{
+        	'tools.staticfile.on': True,
+        	'tools.staticfile.filename': "images/favicon.ico"
         }
     }
     
