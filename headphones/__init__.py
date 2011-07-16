@@ -36,6 +36,7 @@ CFG = None
 DB_FILE = None
 
 LOG_DIR = None
+CACHE_DIR = None
 
 HTTP_PORT = None
 HTTP_HOST = None
@@ -136,7 +137,7 @@ def initialize():
 
 	with INIT_LOCK:
 	
-		global __INITIALIZED__, FULL_PATH, PROG_DIR, QUIET, DAEMON, DATA_DIR, CONFIG_FILE, CFG, LOG_DIR, \
+		global __INITIALIZED__, FULL_PATH, PROG_DIR, QUIET, DAEMON, DATA_DIR, CONFIG_FILE, CFG, LOG_DIR, CACHE_DIR, \
 				HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, GIT_PATH, \
 				CURRENT_VERSION, LATEST_VERSION,\
 				MUSIC_DIR, PREFER_LOSSLESS, FLAC_TO_MP3, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, \
@@ -219,6 +220,17 @@ def initialize():
 		
 		# Start the logger, silence console logging if we need to
 		logger.headphones_log.initLogger(quiet=QUIET)
+		
+		
+		# Put the cache dir in the data dir for now
+		CACHE_DIR = os.path.join(DATA_DIR, 'cache')
+		if not os.path.exists(CACHE_DIR):
+			try:
+				os.makedirs(CACHE_DIR)
+			except OSError:
+				logger.error('Could not create cache dir. Check permissions of datadir: ' + DATA_DIR)
+		
+		
 		
 		# Initialize the database
 		logger.info('Checking to see if the database has all tables....')

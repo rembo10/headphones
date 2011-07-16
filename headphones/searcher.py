@@ -4,7 +4,7 @@ import lib.feedparser as feedparser
 import os, re
 
 import headphones
-from headphones import logger, db
+from headphones import logger, db, helpers
 
 def searchNZB(albumid=None):
 
@@ -19,12 +19,12 @@ def searchNZB(albumid=None):
 		
 		reldate = albums[3]
 		year = reldate[:4]
-		clname = string.replace(albums[0], ' & ', ' ')	
-		clalbum = string.replace(albums[1], ' & ', ' ')
+		clname = string.replace(helpers.latinToAscii(albums[0]), ' & ', ' ')	
+		clalbum = string.replace(helpers.latinToAscii(albums[1]), ' & ', ' ')
 		term1 = re.sub('[\.\-]', ' ', '%s %s %s' % (clname, clalbum, year)).encode('utf-8')
 		term = string.replace(term1, '"', '')
 		
-		logger.info(u"Searching for "+term+" since it was marked as wanted")
+		logger.info("Searching for %s since it was marked as wanted" % term)
 		
 		resultlist = []
 		

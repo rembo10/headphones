@@ -93,8 +93,9 @@ class WebInterface(object):
 		page.append(templates._nav)
 		myDB = db.DBConnection()
 		
+		artist = myDB.select('SELECT ArtistName from artists WHERE ArtistID=?', [ArtistID])
 		results = myDB.select('SELECT AlbumTitle, ReleaseDate, AlbumID, Status, ArtistName, AlbumASIN from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
-		
+
 		i = 0
 		page.append('''<div class="table"><table border="0" cellpadding="3">
 						<tr><p align="center">%s <br /></p></tr>
@@ -104,7 +105,7 @@ class WebInterface(object):
 						<th align="center" width="100">Release Date</th>
 						<th align="center" width="180">Status</th>
 						<th align="center">Have</th>
-						</tr>''' % (results[0][4]))
+						</tr>''' % artist[0][0])
 		while i < len(results):
 			totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=?', [results[i][2]]))
 			havetracks = len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ?', [results[i][4], results[i][0]]))
@@ -126,7 +127,7 @@ class WebInterface(object):
 				newStatus = '%s' % (results[i][3])
 			page.append('''<tr><td align="left"><img src="http://ec1.images-amazon.com/images/P/%s.01.MZZZZZZZ.jpg" height="50" width="50"></td>
 							<td align="left" width="240"><a href="albumPage?AlbumID=%s">%s</a> 
-							(<A class="external" href="http://musicbrainz.org/release/%s.html">link</a>)</td>
+							(<A class="external" href="http://musicbrainz.org/release-group/%s.html">link</a>)</td>
 							<td align="center" width="160">%s</td>
 							<td align="center">%s</td>
 							<td><div class="progress-container"><div style="width: %s%%"></div></div></td></tr>''' % (results[i][5], results[i][2], results[i][0], results[i][2], results[i][1], newStatus, percent))	
@@ -143,6 +144,7 @@ class WebInterface(object):
 		page.append(templates._logobar)
 		page.append(templates._nav)
 		myDB = db.DBConnection()
+		
 		results = myDB.select('SELECT ArtistID, ArtistName, AlbumTitle, TrackTitle, TrackDuration, TrackID, AlbumASIN from tracks WHERE AlbumID=?', [AlbumID])
 		
 		if results[0][6]:
@@ -226,7 +228,7 @@ class WebInterface(object):
 	def addArtist(self, artistid):
 		
 		threading.Thread(target=importer.addArtisttoDB, args=[artistid]).start()
-		time.sleep(2)
+		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 		
 	addArtist.exposed = True
