@@ -11,7 +11,7 @@ from lib.configobj import ConfigObj
 
 import cherrypy
 
-from headphones import updater, searcher, itunesimport, versioncheck, logger
+from headphones import updater, searcher, importer, versioncheck, logger
 
 FULL_PATH = None
 PROG_DIR = None
@@ -355,7 +355,7 @@ def start():
 
 		SCHED.add_cron_job(updater.dbUpdate, hour=4, minute=0, second=0)
 		SCHED.add_interval_job(searcher.searchNZB, minutes=NZB_SEARCH_INTERVAL)
-		SCHED.add_interval_job(itunesimport.scanMusic, minutes=LIBRARYSCAN_INTERVAL)
+		SCHED.add_interval_job(importer.scanMusic, minutes=LIBRARYSCAN_INTERVAL)
 		SCHED.add_interval_job(versioncheck.checkGithub, minutes=300)
 
 		SCHED.start()
