@@ -138,7 +138,7 @@ def initialize():
 	
 		global __INITIALIZED__, FULL_PATH, PROG_DIR, QUIET, DAEMON, DATA_DIR, CONFIG_FILE, CFG, LOG_DIR, \
 				HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, GIT_PATH, \
-				CURRENT_VERSION, \
+				CURRENT_VERSION, LATEST_VERSION,\
 				MUSIC_DIR, PREFER_LOSSLESS, FLAC_TO_MP3, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, \
 				FILE_FORMAT, CLEANUP_FILES, ADD_ALBUM_ART, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, \
 				NZB_SEARCH_INTERVAL, LIBRARYSCAN_INTERVAL, \
@@ -230,6 +230,9 @@ def initialize():
 		# Get the currently installed version - returns None, 'win32' or the git hash
 		# Also sets INSTALL_TYPE variable to 'win', 'git' or 'source'
 		CURRENT_VERSION = versioncheck.getVersion()
+		
+		# Check for new versions
+		LATEST_VERSION = versioncheck.checkGithub()
 
 		__INITIALIZED__ = True
 		return True
@@ -359,9 +362,6 @@ def start():
 		SCHED.add_interval_job(versioncheck.checkGithub, minutes=300)
 
 		SCHED.start()
-		
-		# Check for new versions
-		versioncheck.checkGithub()
 		
 		started = True
 	

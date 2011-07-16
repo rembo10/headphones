@@ -115,6 +115,8 @@ def checkGithub():
 	if headphones.LATEST_VERSION == headphones.CURRENT_VERSION:
 		logger.info('Headphones is already up-to-date.')
 		
+	return latest_commit
+		
 
 	
 def update():
