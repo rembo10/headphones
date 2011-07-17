@@ -16,14 +16,16 @@ def scanMusic(dir=None):
 
 	results = []
 	
-	for r,d,f in os.walk(unicode(dir)):
+	for r,d,f in os.walk(str(dir)):
 		for files in f:
-			try:
-				if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape")):
-					results.append(os.path.join(r,files))
-			except Exception, e:
-				logger.warn('Can not decode file %s. Error: ' % (files, e))
-				continue
+			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape")):
+					try:
+						file = unicode(files)
+						root = unicode(r)
+						results.append(os.path.join(root,file))
+					except UnicodeDecodeError, e:
+						logger.error('Can not decode file %s. Error: %s' % (str(files), str(e)))
+						continue
 				
 	logger.info(u'%i music files found' % len(results))
 	
