@@ -87,7 +87,10 @@ def searchNZB(albumid=None):
 			searchURL = headphones.NEWZNAB_HOST + '/api?' + urllib.urlencode(params)
 			logger.info(u"Parsing results from "+searchURL)
 			
-			d = feedparser.parse(searchURL)
+			try:	
+				d = feedparser.parse(searchURL)
+			except Exception, e:
+				logger.error('Error parsing data from ' + headphones.NEWZNAB_HOST + ' : ' + str(e))
 			
 			for item in d.entries:
 				try:
