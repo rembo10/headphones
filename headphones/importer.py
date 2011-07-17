@@ -18,14 +18,19 @@ def scanMusic(dir=None):
 	
 	for r,d,f in os.walk(unicode(dir)):
 		for files in f:
-			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape")):
-				results.append(os.path.join(r,files))
-	
+			try:
+				if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape")):
+					results.append(os.path.join(r,files))
+			except Exception, e:
+				logger.warn('Can not decode file %s. Error: ' % (files, e))
+				continue
+				
 	logger.info(u'%i music files found' % len(results))
 	
 	if results:
 	
 		lst = []
+		bitrates = []
 	
 		myDB = db.DBConnection()
 		myDB.action('''DELETE from have''')
@@ -45,9 +50,15 @@ def scanMusic(dir=None):
 				
 				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?)', [artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid])
 				lst.append(artist)
+				bitrates.append(f.bitrate)
+				
+		# Get the average bitrate if the option is selected
+		if headphones.DETECT_BITRATE:
+			headphones.PREFERRED_BITRATE = sum(bitrates)/len(bitrates)/1000
 	
 		artistlist = {}.fromkeys(lst).keys()
 		logger.info(u"Preparing to import %i artists" % len(artistlist))
+		
 		artistlist_to_mbids(artistlist)
 
 def itunesImport(pathtoxml):
@@ -68,33 +79,43 @@ def itunesImport(pathtoxml):
 		exclude = ['.ds_store', 'various artists', 'untitled folder', 'va']
 		artistlist = [f for f in rawlist if f.lower() not in exclude]
 		
+	logger.info('Starting directory/xml import...')
 	artistlist_to_mbids(artistlist)
 	
+		
+def is_exists(artistid):
+
+	myDB = db.DBConnection()
 	
+	# See if the artist is already in the database
+	artistlist = myDB.select('SELECT ArtistID, ArtistName from artists WHERE ArtistID=?', [artistid])
+	
+	if any(artistid in x for x in artistlist):
+		logger.info(artistlist[0][1] + u" is already in the database, skipping")
+		return True
+	else:
+		return False
+
+
 def artistlist_to_mbids(artistlist):
 
 	for artist in artistlist:
 	
 		results = mb.findArtist(artist, limit=1)
 		artistid = results[0]['id']
-		if artistid != various_artists_mbid:
+		if artistid != various_artists_mbid and not is_exists(artistid):
 			addArtisttoDB(artistid)
 
 
 def addArtisttoDB(artistid):
-
+	
+	# Can't add various artists - throws an error from MB
 	if artistid == various_artists_mbid:
 		logger.warn('Cannot import Various Artists.')
 		return
 		
 	myDB = db.DBConnection()
-	
-	artistlist = myDB.select('SELECT ArtistID, ArtistName from artists WHERE ArtistID=?', [artistid])
-	
-	if any(artistid in x for x in artistlist):
-		logger.info(artistlist[0][1] + u" is already in the database, skipping")
-		return
-	
+		
 	artist = mb.getArtist(artistid)
 	
 	if artist['artist_name'].startswith('The '):
@@ -103,7 +124,7 @@ def addArtisttoDB(artistid):
 		sortname = artist['artist_name']
 		
 
-	
+	logger.info(u"Now adding/updating: " + artist['artist_name'])
 	controlValueDict = {"ArtistID": 	artistid}
 	newValueDict = {"ArtistName": 		artist['artist_name'],
 					"ArtistSortName": 	sortname,
@@ -124,8 +145,8 @@ def addArtisttoDB(artistid):
 			
 		release = mb.getRelease(releaseid)
 	
-		logger.info(u"Now adding album: " + release['title']+ " to the database")
-		controlValueDict = {"AlbumID": 	release['id']}
+		logger.info(u"Now adding/updating album: " + rg['title'])
+		controlValueDict = {"AlbumID": 	rg['id']}
 		newValueDict = {"ArtistID":			artistid,
 						"ArtistName": 		artist['artist_name'],
 						"AlbumTitle":		rg['title'],
@@ -136,8 +157,11 @@ def addArtisttoDB(artistid):
 						}
 		
 		myDB.upsert("albums", newValueDict, controlValueDict)
+		
+		# I changed the albumid from releaseid -> rgid, so might need to delete albums that have a releaseid
+		myDB.action('DELETE from albums WHERE AlbumID=?', [release['id']])
 
-		latestrelease = myDB.select("SELECT ReleaseDate, DateAdded from albums WHERE AlbumID=?", [release['id']])		
+		latestrelease = myDB.select("SELECT ReleaseDate, DateAdded from albums WHERE AlbumID=?", [rg['id']])		
 		
 		if latestrelease[0][0] > latestrelease[0][1]:
 			logger.info(release['title'] + u" is an upcoming album. Setting its status to 'Wanted'...")
@@ -147,7 +171,17 @@ def addArtisttoDB(artistid):
 						
 		for track in release['tracks']:
 		
-			myDB.action('INSERT INTO tracks VALUES( ?, ?, ?, ?, ?, ?, ?, ?)', [artistid, artist['artist_name'], rg['title'], release['asin'], release['id'], track['title'], track['duration'], track['id']])
+			controlValueDict = {"TrackID": 	track['id'],
+								"AlbumID":	rg['id']}
+			newValueDict = {"ArtistID":		artistid,
+						"ArtistName": 		artist['artist_name'],
+						"AlbumTitle":		rg['title'],
+						"AlbumASIN":		release['asin'],
+						"TrackTitle":		track['title'],
+						"TrackDuration":	track['duration'],
+						}
+		
+			myDB.upsert("tracks", newValueDict, controlValueDict)
 			
 	controlValueDict = {"ArtistID": 	artistid}
 	newValueDict = {"Status": 			"Active"}

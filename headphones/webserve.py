@@ -13,7 +13,7 @@ import threading
 import headphones
 from headphones.mb import getReleaseGroup
 from headphones import templates, logger, searcher, db, importer, helpers, mb
-from headphones.helpers import checked
+from headphones.helpers import checked, radio
 
 
 class WebInterface(object):
@@ -93,8 +93,9 @@ class WebInterface(object):
 		page.append(templates._nav)
 		myDB = db.DBConnection()
 		
+		artist = myDB.select('SELECT ArtistName from artists WHERE ArtistID=?', [ArtistID])
 		results = myDB.select('SELECT AlbumTitle, ReleaseDate, AlbumID, Status, ArtistName, AlbumASIN from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
-		
+
 		i = 0
 		page.append('''<div class="table"><table border="0" cellpadding="3">
 						<tr><p align="center">%s <br /></p></tr>
@@ -104,7 +105,7 @@ class WebInterface(object):
 						<th align="center" width="100">Release Date</th>
 						<th align="center" width="180">Status</th>
 						<th align="center">Have</th>
-						</tr>''' % (results[0][4]))
+						</tr>''' % artist[0][0])
 		while i < len(results):
 			totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=?', [results[i][2]]))
 			havetracks = len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ?', [results[i][4], results[i][0]]))
@@ -126,7 +127,7 @@ class WebInterface(object):
 				newStatus = '%s' % (results[i][3])
 			page.append('''<tr><td align="left"><img src="http://ec1.images-amazon.com/images/P/%s.01.MZZZZZZZ.jpg" height="50" width="50"></td>
 							<td align="left" width="240"><a href="albumPage?AlbumID=%s">%s</a> 
-							(<A class="external" href="http://musicbrainz.org/release/%s.html">link</a>)</td>
+							(<A class="external" href="http://musicbrainz.org/release-group/%s.html">link</a>)</td>
 							<td align="center" width="160">%s</td>
 							<td align="center">%s</td>
 							<td><div class="progress-container"><div style="width: %s%%"></div></div></td></tr>''' % (results[i][5], results[i][2], results[i][0], results[i][2], results[i][1], newStatus, percent))	
@@ -143,6 +144,7 @@ class WebInterface(object):
 		page.append(templates._logobar)
 		page.append(templates._nav)
 		myDB = db.DBConnection()
+		
 		results = myDB.select('SELECT ArtistID, ArtistName, AlbumTitle, TrackTitle, TrackDuration, TrackID, AlbumASIN from tracks WHERE AlbumID=?', [AlbumID])
 		
 		if results[0][6]:
@@ -226,7 +228,7 @@ class WebInterface(object):
 	def addArtist(self, artistid):
 		
 		threading.Thread(target=importer.addArtisttoDB, args=[artistid]).start()
-		time.sleep(2)
+		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 		
 	addArtist.exposed = True
@@ -507,13 +509,17 @@ class WebInterface(object):
 		checked(headphones.NZBSORG),
 		headphones.NZBSORG_UID,
 		headphones.NZBSORG_HASH,
-		checked(headphones.PREFER_LOSSLESS),
-		checked(headphones.FLAC_TO_MP3),
+		radio(headphones.PREFERRED_QUALITY, 0),
+		radio(headphones.PREFERRED_QUALITY, 1),
+		radio(headphones.PREFERRED_QUALITY, 2),
+		headphones.PREFERRED_BITRATE,
+		checked(headphones.DETECT_BITRATE),
 		checked(headphones.MOVE_FILES),
-		headphones.MUSIC_DIR,
+		checked(headphones.FLAC_TO_MP3),
 		checked(headphones.RENAME_FILES),
 		checked(headphones.CLEANUP_FILES),
-		checked(headphones.ADD_ALBUM_ART)
+		checked(headphones.ADD_ALBUM_ART),
+		headphones.MUSIC_DIR
 		))
 		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
@@ -524,7 +530,7 @@ class WebInterface(object):
 	def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0,
 		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
 		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
-		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, prefer_lossless=0, flac_to_mp3=0, move_files=0, music_dir=None, rename_files=0, cleanup_files=0, add_album_art=0):
+		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, flac_to_mp3=0, move_files=0, music_dir=None, rename_files=0, cleanup_files=0, add_album_art=0):
 		
 		headphones.HTTP_HOST = http_host
 		headphones.HTTP_PORT = http_port
@@ -549,7 +555,9 @@ class WebInterface(object):
 		headphones.NZBSORG = nzbsorg
 		headphones.NZBSORG_UID = nzbsorg_uid
 		headphones.NZBSORG_HASH = nzbsorg_hash
-		headphones.PREFER_LOSSLESS = prefer_lossless
+		headphones.PREFERRED_QUALITY = int(preferred_quality)
+		headphones.PREFERRED_BITRATE = preferred_bitrate
+		headphones.DETECT_BITRATE = detect_bitrate
 		headphones.FLAC_TO_MP3 = flac_to_mp3
 		headphones.MOVE_FILES = move_files
 		headphones.MUSIC_DIR = music_dir
@@ -567,7 +575,10 @@ class WebInterface(object):
 		logger.info(u"Headphones is shutting down...")
 		threading.Timer(2, headphones.shutdown).start()
 		page = [templates._shutdownheader % 10]
-		page.append('Shutting down Headphones...')
+		page.append(templates._logobar)
+		page.append(templates._nav)
+		page.append('<div class="table"><div class="configtable">Shutting down Headphones...</div></div>')
+		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
 
 	shutdown.exposed = True
@@ -576,7 +587,10 @@ class WebInterface(object):
 		logger.info(u"Headphones is restarting...")
 		threading.Timer(2, headphones.shutdown, [True]).start()
 		page = [templates._shutdownheader % 20]
-		page.append('Restarting Headphones...')
+		page.append(templates._logobar)
+		page.append(templates._nav)
+		page.append('<div class="table"><div class="configtable">Restarting Headphones...</div></div>')
+		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
 	 
 	restart.exposed = True
@@ -585,7 +599,10 @@ class WebInterface(object):
 		logger.info('Headphones is updating...')
 		threading.Timer(2, headphones.shutdown, [True, True]).start()
 		page = [templates._shutdownheader % 60]
-		page.append('Updating Headphones...')
+		page.append(templates._logobar)
+		page.append(templates._nav)
+		page.append('<div class="table"><div class="configtable">Updating Headphones...</div></div>')
+		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
 		
 	update.exposed = True

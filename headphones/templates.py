@@ -146,7 +146,7 @@ configform = form = '''
                 <td>
                     <br>
 
-                    <p>Music Download Directory:</p><input type="text" name="download_dir" value="%s" size="60" maxlength="40"><br>
+                    <p>Music Download Directory:</p><input type="text" name="download_dir" value="%s" size="60"><br>
 
                     <i class="smalltext">Absolute or relative path to the dir where SAB downloads your music<br>
                     i.e. Downloads/music or /Users/name/Downloads/music</i>
@@ -261,16 +261,24 @@ configform = form = '''
         <table class="configtable" summary="Quality & Post Processing">
             <tr>
                 <td>
-                    <p><b>Album Quality:</b></p>
-                    <input type="checkbox" name="prefer_lossless" value="1" %s />Prefer lossless <br>
-                    <input type="checkbox" name="flac_to_mp3" value="1" %s />Convert lossless to mp3
+                	<b>Album Quality:</b>
+                   	  <p>
+                   	  <input type="radio" name="preferred_quality" value="0" %s />Highest Quality<br /><br />
+                      <input type="radio" name="preferred_quality" value="1" %s />Highest Quality including Lossless<br /><br />
+                      <input type="radio" name="preferred_quality" value="2" %s />Preferred Bitrate: 
+    					<input type="text" name="preferred_bitrate" value="%s" size="5" maxlength="5" />kbps <br>
+                      	<i class="smalltext2"><input type="checkbox" name="detect_bitrate" value="1" %s />Auto-Detect Preferred Bitrate </i>
+                	  </p>
                 </td>
-
                 <td>
-                    <p>
-                      <p><b>iTunes:</b></p>
-                      <input type="checkbox" name="move_files" value="1" %s />Move downloads to Music Folder
-                    </p>
+                      <b>Post-Processing:</b>
+                      <p>
+                      	<input type="checkbox" name="move_files" value="1" %s />Move downloads to Music Folder<br />
+                      	<input type="checkbox" name="flac_to_mp3" value="1" %s />Convert lossless to mp3<br>
+                        <input type="checkbox" name="rename_files" value="1" %s />Rename &amp; add metadata<br>
+                        <input type="checkbox" name="cleanup_files" value="1" %s />Delete leftover files<br>
+                      	<input type="checkbox" name="add_album_art" value="1" %s>Add album art
+                      </p>
                 </td>
             </tr>
 
@@ -283,23 +291,8 @@ configform = form = '''
                       <i class="smalltext">i.e. /Users/name/Music/iTunes or /Volumes/share/music</i>
                     </p>
                 </td>
-                <td>
-                      <b>Renaming &amp; Metadata:</b>
-                      <p>
-                        <input type="checkbox" name="rename_files" value="1" %s />Rename &amp; add metadata
-                        <br>
-                        <input type="checkbox" name="cleanup_files" value="1" %s />Delete leftover files
-                      </p>
-                </td>
             </tr>
 
-            <tr>
-                <td>
-                    <br>
-                    <p><b>Album Art:</b></p>
-                    <input type="checkbox" name="add_album_art" value="1" %s>Add album art
-                </td>
-            </tr>
         </table>
 
         <p class="center"><input type="submit" value="Save Changes"><br>
