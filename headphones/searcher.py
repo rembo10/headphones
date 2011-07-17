@@ -125,8 +125,11 @@ def searchNZB(albumid=None):
 		
 			searchURL = 'https://secure.nzbs.org/rss.php?' + urllib.urlencode(params)
 			
+			data = urllib.urlopen(searchURL).read()
+			
 			logger.info(u"Parsing results from "+searchURL)
-			d = minidom.parse(searchURL)
+			d = minidom.parseString(data)
+
 			node = d.documentElement
 			items = d.getElementsByTagName("item")
 			
@@ -162,6 +165,7 @@ def searchNZB(albumid=None):
 				bestqual = helpers.sortNZBList(resultlist, albumid)
 			
 			else:
+			
 				bestqual = sorted(resultlist, key=lambda title: title[1], reverse=True)[0]
 			
 			logger.info(u"Found best result: %s (%s) - %s" % (bestqual[0], bestqual[2], helpers.bytes_to_mb(bestqual[1])))
