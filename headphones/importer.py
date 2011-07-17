@@ -171,12 +171,12 @@ def addArtisttoDB(artistid):
 						
 		for track in release['tracks']:
 		
-			controlValueDict = {"TrackID": 	track['id']}
+			controlValueDict = {"TrackID": 	track['id'],
+								"AlbumID":	rg['id']}
 			newValueDict = {"ArtistID":		artistid,
 						"ArtistName": 		artist['artist_name'],
 						"AlbumTitle":		rg['title'],
 						"AlbumASIN":		release['asin'],
-						"AlbumID":			rg['id'],
 						"TrackTitle":		track['title'],
 						"TrackDuration":	track['duration'],
 						}

@@ -86,11 +86,9 @@ def searchNZB(albumid=None):
 		
 			searchURL = headphones.NEWZNAB_HOST + '/api?' + urllib.urlencode(params)
 			logger.info(u"Parsing results from "+searchURL)
-			
-			try:	
-				d = feedparser.parse(searchURL)
-			except Exception, e:
-				logger.error('Error parsing data from ' + headphones.NEWZNAB_HOST + ' : ' + str(e))
+				
+			d = feedparser.parse(searchURL)
+			logger.debug('Parsing complete. Found %i results' % len(d.entries))
 			
 			for item in d.entries:
 				try:
@@ -154,7 +152,7 @@ def searchNZB(albumid=None):
 			
 			logger.info(u"Found best result: %s (%s) - %s" % (bestqual[0], bestqual[2], helpers.bytes_to_mb(bestqual[1])))
 			downloadurl = bestqual[2]
-				
+
 			if headphones.SAB_HOST and not headphones.BLACKHOLE:
 				linkparams = {}
 				

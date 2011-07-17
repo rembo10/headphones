@@ -575,7 +575,10 @@ class WebInterface(object):
 		logger.info(u"Headphones is shutting down...")
 		threading.Timer(2, headphones.shutdown).start()
 		page = [templates._shutdownheader % 10]
-		page.append('Shutting down Headphones...')
+		page.append(templates._logobar)
+		page.append(templates._nav)
+		page.append('<div class="table"><div class="configtable">Shutting down Headphones...</div></div>')
+		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
 
 	shutdown.exposed = True
@@ -584,7 +587,10 @@ class WebInterface(object):
 		logger.info(u"Headphones is restarting...")
 		threading.Timer(2, headphones.shutdown, [True]).start()
 		page = [templates._shutdownheader % 20]
-		page.append('Restarting Headphones...')
+		page.append(templates._logobar)
+		page.append(templates._nav)
+		page.append('<div class="table"><div class="configtable">Restarting Headphones...</div></div>')
+		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
 	 
 	restart.exposed = True
@@ -593,7 +599,10 @@ class WebInterface(object):
 		logger.info('Headphones is updating...')
 		threading.Timer(2, headphones.shutdown, [True, True]).start()
 		page = [templates._shutdownheader % 60]
-		page.append('Updating Headphones...')
+		page.append(templates._logobar)
+		page.append(templates._nav)
+		page.append('<div class="table"><div class="configtable">Updating Headphones...</div></div>')
+		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
 		
 	update.exposed = True
