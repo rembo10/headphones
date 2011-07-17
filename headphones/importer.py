@@ -30,6 +30,7 @@ def scanMusic(dir=None):
 	if results:
 	
 		lst = []
+		bitrates = []
 	
 		myDB = db.DBConnection()
 		myDB.action('''DELETE from have''')
@@ -49,6 +50,11 @@ def scanMusic(dir=None):
 				
 				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?)', [artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid])
 				lst.append(artist)
+				bitrates.append(f.bitrate)
+				
+		# Get the average bitrate if the option is selected
+		if headphones.DETECT_BITRATE:
+			headphones.PREFERRED_BITRATE = sum(bitrates)/len(bitrates)/1000
 	
 		artistlist = {}.fromkeys(lst).keys()
 		logger.info(u"Preparing to import %i artists" % len(artistlist))

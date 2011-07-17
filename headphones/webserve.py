@@ -13,7 +13,7 @@ import threading
 import headphones
 from headphones.mb import getReleaseGroup
 from headphones import templates, logger, searcher, db, importer, helpers, mb
-from headphones.helpers import checked
+from headphones.helpers import checked, radio
 
 
 class WebInterface(object):
@@ -509,13 +509,17 @@ class WebInterface(object):
 		checked(headphones.NZBSORG),
 		headphones.NZBSORG_UID,
 		headphones.NZBSORG_HASH,
-		checked(headphones.PREFER_LOSSLESS),
-		checked(headphones.FLAC_TO_MP3),
+		radio(headphones.PREFERRED_QUALITY, 0),
+		radio(headphones.PREFERRED_QUALITY, 1),
+		radio(headphones.PREFERRED_QUALITY, 2),
+		headphones.PREFERRED_BITRATE,
+		checked(headphones.DETECT_BITRATE),
 		checked(headphones.MOVE_FILES),
-		headphones.MUSIC_DIR,
+		checked(headphones.FLAC_TO_MP3),
 		checked(headphones.RENAME_FILES),
 		checked(headphones.CLEANUP_FILES),
-		checked(headphones.ADD_ALBUM_ART)
+		checked(headphones.ADD_ALBUM_ART),
+		headphones.MUSIC_DIR
 		))
 		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
@@ -526,7 +530,7 @@ class WebInterface(object):
 	def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0,
 		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
 		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
-		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, prefer_lossless=0, flac_to_mp3=0, move_files=0, music_dir=None, rename_files=0, cleanup_files=0, add_album_art=0):
+		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, flac_to_mp3=0, move_files=0, music_dir=None, rename_files=0, cleanup_files=0, add_album_art=0):
 		
 		headphones.HTTP_HOST = http_host
 		headphones.HTTP_PORT = http_port
@@ -551,7 +555,9 @@ class WebInterface(object):
 		headphones.NZBSORG = nzbsorg
 		headphones.NZBSORG_UID = nzbsorg_uid
 		headphones.NZBSORG_HASH = nzbsorg_hash
-		headphones.PREFER_LOSSLESS = prefer_lossless
+		headphones.PREFERRED_QUALITY = int(preferred_quality)
+		headphones.PREFERRED_BITRATE = int(preferred_bitrate)
+		headphones.DETECT_BITRATE = detect_bitrate
 		headphones.FLAC_TO_MP3 = flac_to_mp3
 		headphones.MOVE_FILES = move_files
 		headphones.MUSIC_DIR = music_dir

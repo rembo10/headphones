@@ -55,7 +55,9 @@ MUSIC_DIR = None
 FOLDER_FORMAT = None
 FILE_FORMAT = None
 PATH_TO_XML = None
-PREFER_LOSSLESS = False
+PREFERRED_QUALITY = None
+PREFERRED_BITRATE = None
+DETECT_BITRATE = False
 FLAC_TO_MP3 = False
 MOVE_FILES = False
 RENAME_FILES = False
@@ -139,13 +141,11 @@ def initialize():
 	
 		global __INITIALIZED__, FULL_PATH, PROG_DIR, QUIET, DAEMON, DATA_DIR, CONFIG_FILE, CFG, LOG_DIR, CACHE_DIR, \
 				HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, GIT_PATH, \
-				CURRENT_VERSION, LATEST_VERSION,\
-				MUSIC_DIR, PREFER_LOSSLESS, FLAC_TO_MP3, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, \
-				FILE_FORMAT, CLEANUP_FILES, ADD_ALBUM_ART, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, \
-				NZB_SEARCH_INTERVAL, LIBRARYSCAN_INTERVAL, \
-				SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
-				NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, \
-				NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
+				CURRENT_VERSION, LATEST_VERSION, MUSIC_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
+				FLAC_TO_MP3, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, \
+				ADD_ALBUM_ART, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, NZB_SEARCH_INTERVAL, \
+				LIBRARYSCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
+				NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
 				NZBSORG, NZBSORG_UID, NZBSORG_HASH
 				
 		if __INITIALIZED__:
@@ -175,7 +175,9 @@ def initialize():
 		GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 		
 		MUSIC_DIR = check_setting_str(CFG, 'General', 'music_dir', '')
-		PREFER_LOSSLESS = bool(check_setting_int(CFG, 'General', 'prefer_lossless', 0))
+		PREFERRED_QUALITY = check_setting_int(CFG, 'General', 'preferred_quality', 0)
+		PREFERRED_BITRATE = check_setting_int(CFG, 'General', 'preferred_bitrate', '')
+		DETECT_BITRATE = bool(check_setting_int(CFG, 'General', 'detect_bitrate', 0))
 		FLAC_TO_MP3 = bool(check_setting_int(CFG, 'General', 'flac_to_mp3', 0))
 		MOVE_FILES = bool(check_setting_int(CFG, 'General', 'move_files', 0))
 		RENAME_FILES = bool(check_setting_int(CFG, 'General', 'rename_files', 0))
@@ -319,7 +321,9 @@ def config_write():
 	new_config['General']['git_path'] = GIT_PATH
 
 	new_config['General']['music_dir'] = MUSIC_DIR
-	new_config['General']['prefer_lossless'] = int(PREFER_LOSSLESS)
+	new_config['General']['preferred_quality'] = PREFERRED_QUALITY
+	new_config['General']['preferred_bitrate'] = PREFERRED_BITRATE
+	new_config['General']['detect_bitrate'] = int(DETECT_BITRATE)
 	new_config['General']['flac_to_mp3'] = int(FLAC_TO_MP3)
 	new_config['General']['move_files'] = int(MOVE_FILES)
 	new_config['General']['rename_files'] = int(RENAME_FILES)
