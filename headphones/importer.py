@@ -102,7 +102,14 @@ def artistlist_to_mbids(artistlist):
 	for artist in artistlist:
 	
 		results = mb.findArtist(artist, limit=1)
-		artistid = results[0]['id']
+		
+		try:	
+			artistid = results[0]['id']
+		
+		except IndexError:
+			logger.info('MusicBrainz query turned up no matches for: %s' % artist)
+			continue
+		
 		if artistid != various_artists_mbid and not is_exists(artistid):
 			addArtisttoDB(artistid)
 

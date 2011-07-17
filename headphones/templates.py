@@ -16,7 +16,7 @@ _shutdownheader = '''
 		<link rel="stylesheet" type="text/css" href="css/style.css" />
 		<link rel="icon" type="image/x-icon" href="images/favicon.ico" /> 
 		<link rel="apple-touch-icon" href="images/headphoneslogo.png" />
-		<meta http-equiv="refresh" content="%s;url=home"></head>
+		<meta http-equiv="refresh" content="%s;url=index"></head>
 	</head>
 	<body>
 	<div class="container">'''

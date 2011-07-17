@@ -74,8 +74,8 @@ class WebInterface(object):
 								(<A class="external" href="http://musicbrainz.org/artist/%s">link</a>) [<A class="externalred" href="deleteArtist?ArtistID=%s">delete</a>]</td>
 								<td align="center" width="160">%s</td>
 								<td align="center">%s %s</td>
-								<td><div class="progress-container"><div style="width: %s%%"></div></div></td></tr>
-								''' % (results[i][1], results[i][0], results[i][1], results[i][1], newStatus, newalbumName, releaseDate, percent))	
+								<td><div class="progress-container"><div style="width: %s%%"><div class="smalltext3">%s/%s</div></div></div></td></tr>
+								''' % (results[i][1], results[i][0], results[i][1], results[i][1], newStatus, newalbumName, releaseDate, percent, havetracks, totaltracks))	
 				i = i+1
 
 			page.append('''</table></div>''')
@@ -130,7 +130,7 @@ class WebInterface(object):
 							(<A class="external" href="http://musicbrainz.org/release-group/%s.html">link</a>)</td>
 							<td align="center" width="160">%s</td>
 							<td align="center">%s</td>
-							<td><div class="progress-container"><div style="width: %s%%"></div></div></td></tr>''' % (results[i][5], results[i][2], results[i][0], results[i][2], results[i][1], newStatus, percent))	
+							<td><div class="progress-container"><div style="width: %s%%"><div class="smalltext3">%s/%s</div></div></div></td></tr>''' % (results[i][5], results[i][2], results[i][0], results[i][2], results[i][1], newStatus, percent, havetracks, totaltracks))	
 			i = i+1
 
 		page.append('''</table></div>''')
@@ -574,7 +574,7 @@ class WebInterface(object):
 	def shutdown(self):
 		logger.info(u"Headphones is shutting down...")
 		threading.Timer(2, headphones.shutdown).start()
-		page = [templates._shutdownheader % 10]
+		page = [templates._shutdownheader % 15]
 		page.append(templates._logobar)
 		page.append(templates._nav)
 		page.append('<div class="table"><div class="configtable">Shutting down Headphones...</div></div>')
@@ -586,7 +586,7 @@ class WebInterface(object):
 	def restart(self):
 		logger.info(u"Headphones is restarting...")
 		threading.Timer(2, headphones.shutdown, [True]).start()
-		page = [templates._shutdownheader % 20]
+		page = [templates._shutdownheader % 30]
 		page.append(templates._logobar)
 		page.append(templates._nav)
 		page.append('<div class="table"><div class="configtable">Restarting Headphones...</div></div>')
@@ -598,7 +598,7 @@ class WebInterface(object):
 	def update(self):
 		logger.info('Headphones is updating...')
 		threading.Timer(2, headphones.shutdown, [True, True]).start()
-		page = [templates._shutdownheader % 60]
+		page = [templates._shutdownheader % 120]
 		page.append(templates._logobar)
 		page.append(templates._nav)
 		page.append('<div class="table"><div class="configtable">Updating Headphones...</div></div>')

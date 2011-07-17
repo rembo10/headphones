@@ -1,6 +1,7 @@
 import urllib
 import string
 import lib.feedparser as feedparser
+from xml.dom import minidom
 import os, re
 
 import headphones
@@ -125,21 +126,34 @@ def searchNZB(albumid=None):
 			searchURL = 'https://secure.nzbs.org/rss.php?' + urllib.urlencode(params)
 			
 			logger.info(u"Parsing results from "+searchURL)
-			d = feedparser.parse(searchURL)
+			d = minidom.parse(searchURL)
+			node = d.documentElement
+			items = d.getElementsByTagName("item")
 			
-			for item in d.entries:
-				try:
-					url = item.link
-					title = item.title
-					size = int(item.report_size)
+			if len(items):
+			
+				for item in items:
+		
+					sizenode = item.getElementsByTagName("report:size")[0].childNodes
+					titlenode = item.getElementsByTagName("title")[0].childNodes
+					linknode = item.getElementsByTagName("link")[0].childNodes
+	
+					for node in sizenode:
+						size = int(node.data)
+					for node in titlenode:
+						title = node.data
+					for node in linknode:
+						url = node.data
+	
 					if size < maxsize:
 						resultlist.append((title, size, url))
 						logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
 					else:
 						logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))	
 				
-				except Exception, e:
-					logger.info(u"No results found. %s" % e)
+			else:
+			
+				logger.info(u"Nothing found.")
 		
 		if len(resultlist):	
 			
