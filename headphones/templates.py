@@ -146,7 +146,7 @@ configform = form = '''
                 <td>
                     <br>
 
-                    <p>Music Download Directory:</p><input type="text" name="download_dir" value="%s" size="60" maxlength="40"><br>
+                    <p>Music Download Directory:</p><input type="text" name="download_dir" value="%s" size="60"><br>
 
                     <i class="smalltext">Absolute or relative path to the dir where SAB downloads your music<br>
                     i.e. Downloads/music or /Users/name/Downloads/music</i>

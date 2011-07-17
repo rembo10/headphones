@@ -90,7 +90,7 @@ def today():
 	
 def bytes_to_mb(bytes):
 
-	mb = bytes/1048576
+	mb = int(bytes)/1048576
 	size = '%.1f MB' % mb
 	return size
 	

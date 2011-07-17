@@ -130,7 +130,7 @@ def searchNZB(albumid=None):
 				try:
 					url = item.link
 					title = item.title
-					size = int(item.links[1]['length'])
+					size = int(item.report_size)
 					if size < maxsize:
 						resultlist.append((title, size, url))
 						logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
