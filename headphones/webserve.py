@@ -556,7 +556,7 @@ class WebInterface(object):
 		headphones.NZBSORG_UID = nzbsorg_uid
 		headphones.NZBSORG_HASH = nzbsorg_hash
 		headphones.PREFERRED_QUALITY = int(preferred_quality)
-		headphones.PREFERRED_BITRATE = int(preferred_bitrate)
+		headphones.PREFERRED_BITRATE = preferred_bitrate
 		headphones.DETECT_BITRATE = detect_bitrate
 		headphones.FLAC_TO_MP3 = flac_to_mp3
 		headphones.MOVE_FILES = move_files
