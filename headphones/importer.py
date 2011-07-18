@@ -30,7 +30,7 @@ def scanMusic(dir=None):
 	
 	if results:
 	
-		lst = []
+		
 		bitrates = []
 	
 		myDB = db.DBConnection()
@@ -50,7 +50,7 @@ def scanMusic(dir=None):
 					continue
 				
 				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?)', [artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid])
-				lst.append(artist)
+				
 				bitrates.append(f.bitrate)
 				
 		# Get the average bitrate if the option is selected
@@ -60,7 +60,7 @@ def scanMusic(dir=None):
 			except ZeroDivisionError:
 				logger.error('No bitrates found - cannot automatically detect preferred bitrate')
 			
-		artistlist = {}.fromkeys(lst).keys()
+		artistlist = myDB.action('SELECT DISTINCT ArtistName FROM have').fetchall()
 		logger.info(u"Preparing to import %i artists" % len(artistlist))
 		
 		artistlist_to_mbids(artistlist)
