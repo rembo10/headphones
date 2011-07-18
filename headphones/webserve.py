@@ -74,8 +74,8 @@ class WebInterface(object):
 								(<A class="external" href="http://musicbrainz.org/artist/%s">link</a>) [<A class="externalred" href="deleteArtist?ArtistID=%s">delete</a>]</td>
 								<td align="center" width="160">%s</td>
 								<td align="center">%s %s</td>
-								<td><div class="progress-container"><div style="width: %s%%"></div></div></td></tr>
-								''' % (results[i][1], results[i][0], results[i][1], results[i][1], newStatus, newalbumName, releaseDate, percent))	
+								<td><div class="progress-container"><div style="width: %s%%"><div class="smalltext3">%s/%s</div></div></div></td></tr>
+								''' % (results[i][1], results[i][0], results[i][1], results[i][1], newStatus, newalbumName, releaseDate, percent, havetracks, totaltracks))	
 				i = i+1
 
 			page.append('''</table></div>''')
@@ -130,7 +130,7 @@ class WebInterface(object):
 							(<A class="external" href="http://musicbrainz.org/release-group/%s.html">link</a>)</td>
 							<td align="center" width="160">%s</td>
 							<td align="center">%s</td>
-							<td><div class="progress-container"><div style="width: %s%%"></div></div></td></tr>''' % (results[i][5], results[i][2], results[i][0], results[i][2], results[i][1], newStatus, percent))	
+							<td><div class="progress-container"><div style="width: %s%%"><div class="smalltext3">%s/%s</div></div></div></td></tr>''' % (results[i][5], results[i][2], results[i][0], results[i][2], results[i][1], newStatus, percent, havetracks, totaltracks))	
 			i = i+1
 
 		page.append('''</table></div>''')
@@ -216,11 +216,21 @@ class WebInterface(object):
 		page.append(templates._logobar)
 		page.append(templates._nav)
 		artist = mb.getArtist(artistid)
+		if artist['artist_begindate']:
+			begindate = artist['artist_begindate']
+		else:
+			begindate = ''
+		if artist['artist_enddate']:
+			enddate = artist['artist_enddate']
+		else:
+			enddate = ''
 		page.append('''<div class="table"><p class="center">Artist Information:</p>''')
-		page.append('''<p class="mediumtext">Artist Name: %s </br> ''' % artist['artist_name'])
-		page.append('''Unique ID: %s </br></br>Albums:<br />''' % artist['artist_id'])
+		page.append('''<p class="mediumtext">Artist Name: %s (%s)</br> ''' % (artist['artist_name'], artist['artist_type']))
+		page.append('''<p class="mediumtext">Years Active: %s - %s <br /><br />''' % (begindate, enddate))
+		page.append('''MusicBrainz Link: <a class="external" href="http://www.musicbrainz.org/artist/%s">http://www.musicbrainz.org/artist/%s</a></br></br><b>Albums:</b><br />''' % (artistid, artistid))
 		for rg in artist['releasegroups']:
 			page.append('''%s <br />''' % rg['title'])
+		page.append('''<div class="center"><a href="addArtist?artistid=%s">Add this artist!</a></div>''' % artistid)
 		return page
 		
 	artistInfo.exposed = True
@@ -278,7 +288,8 @@ class WebInterface(object):
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		
 		import searcher
-		searcher.searchNZB(AlbumID)
+		threading.Thread(target=searcher.searchNZB, args=[AlbumID]).start()
+		time.sleep(5)
 		
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 		
@@ -574,7 +585,7 @@ class WebInterface(object):
 	def shutdown(self):
 		logger.info(u"Headphones is shutting down...")
 		threading.Timer(2, headphones.shutdown).start()
-		page = [templates._shutdownheader % 10]
+		page = [templates._shutdownheader % 15]
 		page.append(templates._logobar)
 		page.append(templates._nav)
 		page.append('<div class="table"><div class="configtable">Shutting down Headphones...</div></div>')
@@ -586,7 +597,7 @@ class WebInterface(object):
 	def restart(self):
 		logger.info(u"Headphones is restarting...")
 		threading.Timer(2, headphones.shutdown, [True]).start()
-		page = [templates._shutdownheader % 20]
+		page = [templates._shutdownheader % 30]
 		page.append(templates._logobar)
 		page.append(templates._nav)
 		page.append('<div class="table"><div class="configtable">Restarting Headphones...</div></div>')
@@ -598,7 +609,7 @@ class WebInterface(object):
 	def update(self):
 		logger.info('Headphones is updating...')
 		threading.Timer(2, headphones.shutdown, [True, True]).start()
-		page = [templates._shutdownheader % 60]
+		page = [templates._shutdownheader % 120]
 		page.append(templates._logobar)
 		page.append(templates._nav)
 		page.append('<div class="table"><div class="configtable">Updating Headphones...</div></div>')

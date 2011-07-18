@@ -1,6 +1,7 @@
 import urllib
 import string
 import lib.feedparser as feedparser
+from xml.dom import minidom
 import os, re
 
 import headphones
@@ -19,7 +20,10 @@ def searchNZB(albumid=None):
 		
 		albumid = albums[2]
 		reldate = albums[3]
-		year = reldate[:4]
+		try:
+			year = reldate[:4]
+		except TypeError:
+			year = ''
 		clname = string.replace(helpers.latinToAscii(albums[0]), ' & ', ' ')	
 		clalbum = string.replace(helpers.latinToAscii(albums[1]), ' & ', ' ')
 		term1 = re.sub('[\.\-]', ' ', '%s %s %s' % (clname, clalbum, year)).encode('utf-8')
@@ -65,8 +69,8 @@ def searchNZB(albumid=None):
 					else:
 						logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))	
 				
-				except Exception, e:
-					logger.info(u"No results found. %s" % e)
+				except AttributeError, e:
+					logger.info(u"No results found from NZBMatrix for %s" % term)
 			
 		if headphones.NEWZNAB:
 		
@@ -88,21 +92,26 @@ def searchNZB(albumid=None):
 			logger.info(u"Parsing results from "+searchURL)
 				
 			d = feedparser.parse(searchURL)
-			logger.debug('Parsing complete. Found %i results' % len(d.entries))
 			
-			for item in d.entries:
-				try:
-					url = item.link
-					title = item.title
-					size = int(item.links[1]['length'])
-					if size < maxsize:
-						resultlist.append((title, size, url))
-						logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-					else:
-						logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))	
-				
-				except Exception, e:
-					logger.info(u"No results found. %s" % e)
+			
+			if not len(d.entries):
+				logger.info(u"No results found from %s for %s" % (headphones.NEWZNAB_HOST, term))
+				pass
+			
+			else:
+				for item in d.entries:
+					try:
+						url = item.link
+						title = item.title
+						size = int(item.links[1]['length'])
+						if size < maxsize:
+							resultlist.append((title, size, url))
+							logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+						else:
+							logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))	
+					
+					except Exception, e:
+						logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
 					
 		if headphones.NZBSORG:
 		
@@ -124,30 +133,52 @@ def searchNZB(albumid=None):
 		
 			searchURL = 'https://secure.nzbs.org/rss.php?' + urllib.urlencode(params)
 			
-			logger.info(u"Parsing results from "+searchURL)
-			d = feedparser.parse(searchURL)
+			data = urllib.urlopen(searchURL).read()
 			
-			for item in d.entries:
-				try:
-					url = item.link
-					title = item.title
-					size = int(item.report_size)
+			logger.info(u"Parsing results from "+searchURL)
+			d = minidom.parseString(data)
+
+			node = d.documentElement
+			items = d.getElementsByTagName("item")
+			
+			if len(items):
+			
+				for item in items:
+		
+					sizenode = item.getElementsByTagName("report:size")[0].childNodes
+					titlenode = item.getElementsByTagName("title")[0].childNodes
+					linknode = item.getElementsByTagName("link")[0].childNodes
+	
+					for node in sizenode:
+						size = int(node.data)
+					for node in titlenode:
+						title = node.data
+					for node in linknode:
+						url = node.data
+	
 					if size < maxsize:
 						resultlist.append((title, size, url))
 						logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
 					else:
 						logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))	
 				
-				except Exception, e:
-					logger.info(u"No results found. %s" % e)
+			else:
+			
+				logger.info('No results found from NZBs.org for %s' % term)
 		
 		if len(resultlist):	
 			
 			if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
 				
+				logger.debug('Sorting results list')
 				bestqual = helpers.sortNZBList(resultlist, albumid)
+				
+				if not bestqual:
+					logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
+					bestqual = sorted(resultlist, key=lambda title: title[1], reverse=True)[0]
 			
 			else:
+			
 				bestqual = sorted(resultlist, key=lambda title: title[1], reverse=True)[0]
 			
 			logger.info(u"Found best result: %s (%s) - %s" % (bestqual[0], bestqual[2], helpers.bytes_to_mb(bestqual[1])))
@@ -168,7 +199,8 @@ def searchNZB(albumid=None):
 					linkparams["cat"] = headphones.SAB_CATEGORY
 								
 				linkparams["name"] = downloadurl
-				linkparams["nzbname"] = ('%s - %s [%s]' % (albums[0], albums[1], year))
+
+				linkparams["nzbname"] = ('%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8'), helpers.latinToAscii(albums[1]).encode('UTF-8'), year))
 					
 				saburl = 'http://' + headphones.SAB_HOST + '/sabnzbd/api?' + urllib.urlencode(linkparams)
 				logger.info(u"Sending link to SABNZBD: " + saburl)

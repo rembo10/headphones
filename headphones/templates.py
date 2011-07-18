@@ -16,7 +16,7 @@ _shutdownheader = '''
 		<link rel="stylesheet" type="text/css" href="css/style.css" />
 		<link rel="icon" type="image/x-icon" href="images/favicon.ico" /> 
 		<link rel="apple-touch-icon" href="images/headphoneslogo.png" />
-		<meta http-equiv="refresh" content="%s;url=home"></head>
+		<meta http-equiv="refresh" content="%s;url=index"></head>
 	</head>
 	<body>
 	<div class="container">'''
@@ -36,8 +36,8 @@ _nav = '''<div class="nav">
 					<a href="history">HISTORY</a>
 					<a href="config">SETTINGS</a>
 					<div style="float:right">
-					  <a href="restart" title="Restart"><img src="images/restart.png" height="15px" width="15px"></a>
-					  <a href="shutdown" title="Shutdown"><img src="images/shutdown.png" height="15px" width="15px"></a>
+					  <a href="restart" title="Restart"><img src="images/restart.png" height="15px" width="15px" border="0"></a>
+					  <a href="shutdown" title="Shutdown"><img src="images/shutdown.png" height="15px" width="15px" border="0"></a>
 					</div>
 			</div>'''
 	

@@ -90,6 +90,11 @@ h1{
 	font-size: 11px;
 	margin-left: 45px;
 	}
+.smalltext3{
+	font-size: 11px;
+	margin-left: 30px;
+	color: #867970;
+	}
 .mediumtext{
 	font-size: 16px;
 	margin-left: 100px;
@@ -139,6 +144,7 @@ a.externalred {
 div.progress-container {
   border: 1px solid #ccc; 
   width: 100px; 
+  height: 12px;
   margin: 2px 5px 2px 0; 
   padding: 1px; 
   float: left; 

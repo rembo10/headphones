@@ -16,14 +16,15 @@ def scanMusic(dir=None):
 
 	results = []
 	
-	for r,d,f in os.walk(unicode(dir)):
+	for r,d,f in os.walk(dir):
 		for files in f:
-			try:
-				if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape")):
-					results.append(os.path.join(r,files))
-			except Exception, e:
-				logger.warn('Can not decode file %s. Error: ' % (files, e))
-				continue
+			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape")):
+				logger.debug('File found: %s' % files)	
+				try:
+					results.append(os.path.join(r.encode('UTF-8'), files.encode('UTF-8')))
+				except UnicodeDecodeError, e:
+					logger.error('Can not decode file %s. Error: %s' % (str(files), str(e)))
+					continue
 				
 	logger.info(u'%i music files found' % len(results))
 	
@@ -54,8 +55,11 @@ def scanMusic(dir=None):
 				
 		# Get the average bitrate if the option is selected
 		if headphones.DETECT_BITRATE:
-			headphones.PREFERRED_BITRATE = sum(bitrates)/len(bitrates)/1000
-	
+			try:
+				headphones.PREFERRED_BITRATE = sum(bitrates)/len(bitrates)/1000
+			except ZeroDivisionError:
+				logger.error('No bitrates found - cannot automatically detect preferred bitrate')
+			
 		artistlist = {}.fromkeys(lst).keys()
 		logger.info(u"Preparing to import %i artists" % len(artistlist))
 		
@@ -102,7 +106,14 @@ def artistlist_to_mbids(artistlist):
 	for artist in artistlist:
 	
 		results = mb.findArtist(artist, limit=1)
-		artistid = results[0]['id']
+		
+		try:	
+			artistid = results[0]['id']
+		
+		except IndexError:
+			logger.info('MusicBrainz query turned up no matches for: %s' % artist)
+			continue
+		
 		if artistid != various_artists_mbid and not is_exists(artistid):
 			addArtisttoDB(artistid)
 

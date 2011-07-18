@@ -2911,7 +2911,7 @@ def _open_resource(url_file_stream_or_string, etag, modified, agent, referrer, h
         opener = apply(urllib2.build_opener, tuple(handlers + [_FeedURLHandler()]))
         opener.addheaders = [] # RMK - must clear so we only send our custom User-Agent
         try:
-            return opener.open(request)
+            return opener.open(request, timeout=15)
         finally:
             opener.close() # JohnD
     
