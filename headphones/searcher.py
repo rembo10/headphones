@@ -97,6 +97,7 @@ def searchNZB(albumid=None):
 			
 			if not len(d.entries):
 				logger.info(u"No results found from %s for %s" % (headphones.NEWZNAB_HOST, term))
+				pass
 			
 			else:
 				for item in d.entries:
@@ -170,6 +171,7 @@ def searchNZB(albumid=None):
 			
 			if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
 				
+				logger.debug('Sorting results list')
 				bestqual = helpers.sortNZBList(resultlist, albumid)
 			
 			else:
@@ -194,7 +196,8 @@ def searchNZB(albumid=None):
 					linkparams["cat"] = headphones.SAB_CATEGORY
 								
 				linkparams["name"] = downloadurl
-				linkparams["nzbname"] = ('%s - %s [%s]' % (albums[0].encode('UTF-8'), albums[1].encode('UTF-8'), year))
+
+				linkparams["nzbname"] = ('%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8'), helpers.latinToAscii(albums[1]).encode('UTF-8'), year))
 					
 				saburl = 'http://' + headphones.SAB_HOST + '/sabnzbd/api?' + urllib.urlencode(linkparams)
 				logger.info(u"Sending link to SABNZBD: " + saburl)
