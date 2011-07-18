@@ -74,7 +74,7 @@ def getArtist(artistid):
 		artist_dict['artist_uniquename'] = artist.getUniqueName()
 		artist_dict['artist_type'] = u.extractFragment(artist.type)
 		artist_dict['artist_begindate'] = artist.beginDate
-		artist_dict['artist_endDate'] = artist.endDate
+		artist_dict['artist_enddate'] = artist.endDate
 		
 		releasegroups = []
 		

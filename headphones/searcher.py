@@ -20,7 +20,10 @@ def searchNZB(albumid=None):
 		
 		albumid = albums[2]
 		reldate = albums[3]
-		year = reldate[:4]
+		try:
+			year = reldate[:4]
+		except TypeError:
+			year = ''
 		clname = string.replace(helpers.latinToAscii(albums[0]), ' & ', ' ')	
 		clalbum = string.replace(helpers.latinToAscii(albums[1]), ' & ', ' ')
 		term1 = re.sub('[\.\-]', ' ', '%s %s %s' % (clname, clalbum, year)).encode('utf-8')
@@ -66,8 +69,8 @@ def searchNZB(albumid=None):
 					else:
 						logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))	
 				
-				except Exception, e:
-					logger.info(u"No results found. %s" % e)
+				except AttributeError, e:
+					logger.info(u"No results found.")
 			
 		if headphones.NEWZNAB:
 		
@@ -91,19 +94,24 @@ def searchNZB(albumid=None):
 			d = feedparser.parse(searchURL)
 			logger.debug('Parsing complete. Found %i results' % len(d.entries))
 			
-			for item in d.entries:
-				try:
-					url = item.link
-					title = item.title
-					size = int(item.links[1]['length'])
-					if size < maxsize:
-						resultlist.append((title, size, url))
-						logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-					else:
-						logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))	
-				
-				except Exception, e:
-					logger.info(u"No results found. %s" % e)
+			
+			if not len(d.entries):
+				logger.info(u"No results found.")
+			
+			else:
+				for item in d.entries:
+					try:
+						url = item.link
+						title = item.title
+						size = int(item.links[1]['length'])
+						if size < maxsize:
+							resultlist.append((title, size, url))
+							logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+						else:
+							logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))	
+					
+					except Exception, e:
+						logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
 					
 		if headphones.NZBSORG:
 		
