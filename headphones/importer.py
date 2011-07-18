@@ -30,9 +30,6 @@ def scanMusic(dir=None):
 	
 	if results:
 	
-		
-		bitrates = []
-	
 		myDB = db.DBConnection()
 		myDB.action('''DELETE from have''')
 	
@@ -51,12 +48,11 @@ def scanMusic(dir=None):
 				
 				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?)', [artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid])
 				
-				bitrates.append(f.bitrate)
 				
 		# Get the average bitrate if the option is selected
 		if headphones.DETECT_BITRATE:
 			try:
-				headphones.PREFERRED_BITRATE = sum(bitrates)/len(bitrates)/1000
+				headphones.PREFERRED_BITRATE = myDB.action("SELECT ROUND(AVG(BitRate)/1000) FROM have").fetchone()[0]
 			except ZeroDivisionError:
 				logger.error('No bitrates found - cannot automatically detect preferred bitrate')
 			
