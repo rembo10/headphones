@@ -70,7 +70,7 @@ def searchNZB(albumid=None):
 						logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))	
 				
 				except AttributeError, e:
-					logger.info(u"No results found.")
+					logger.info(u"No results found from NZBMatrix for %s" % term)
 			
 		if headphones.NEWZNAB:
 		
@@ -96,7 +96,7 @@ def searchNZB(albumid=None):
 			
 			
 			if not len(d.entries):
-				logger.info(u"No results found.")
+				logger.info(u"No results found from %s for %s" % (headphones.NEWZNAB_HOST, term))
 			
 			else:
 				for item in d.entries:
@@ -164,7 +164,7 @@ def searchNZB(albumid=None):
 				
 			else:
 			
-				logger.info(u"Nothing found.")
+				logger.info('No results found from NZBs.org for %s' % term)
 		
 		if len(resultlist):	
 			
@@ -194,7 +194,7 @@ def searchNZB(albumid=None):
 					linkparams["cat"] = headphones.SAB_CATEGORY
 								
 				linkparams["name"] = downloadurl
-				linkparams["nzbname"] = ('%s - %s [%s]' % (albums[0], albums[1], year))
+				linkparams["nzbname"] = ('%s - %s [%s]' % (albums[0].encode('UTF-8'), albums[1].encode('UTF-8'), year))
 					
 				saburl = 'http://' + headphones.SAB_HOST + '/sabnzbd/api?' + urllib.urlencode(linkparams)
 				logger.info(u"Sending link to SABNZBD: " + saburl)

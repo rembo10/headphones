@@ -230,6 +230,7 @@ class WebInterface(object):
 		page.append('''MusicBrainz Link: <a class="external" href="http://www.musicbrainz.org/artist/%s">http://www.musicbrainz.org/artist/%s</a></br></br><b>Albums:</b><br />''' % (artistid, artistid))
 		for rg in artist['releasegroups']:
 			page.append('''%s <br />''' % rg['title'])
+		page.append('''<div class="center"><a href="addArtist?artistid=%s">Add this artist!</a></div>''' % artistid)
 		return page
 		
 	artistInfo.exposed = True
@@ -287,7 +288,8 @@ class WebInterface(object):
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		
 		import searcher
-		searcher.searchNZB(AlbumID)
+		threading.Thread(target=searcher.searchNZB, args=[AlbumID]).start()
+		time.sleep(5)
 		
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 		

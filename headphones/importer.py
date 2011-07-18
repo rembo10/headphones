@@ -21,7 +21,7 @@ def scanMusic(dir=None):
 			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape")):
 				logger.debug('File found: %s' % files)	
 				try:
-					results.append(os.path.join(r, files))
+					results.append(os.path.join(r.encode('UTF-8'), files.encode('UTF-8')))
 				except UnicodeDecodeError, e:
 					logger.error('Can not decode file %s. Error: %s' % (str(files), str(e)))
 					continue
