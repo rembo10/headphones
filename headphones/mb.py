@@ -172,6 +172,7 @@ def getRelease(releaseid):
 				logger.warn('Attempt to retrieve information from MusicBrainz failed: %s' % e)
 				attempt += 1
 				time.sleep(1)	
+				return False
 		
 		time.sleep(1)
 		
