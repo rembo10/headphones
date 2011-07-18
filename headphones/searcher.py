@@ -92,7 +92,6 @@ def searchNZB(albumid=None):
 			logger.info(u"Parsing results from "+searchURL)
 				
 			d = feedparser.parse(searchURL)
-			logger.debug('Parsing complete. Found %i results' % len(d.entries))
 			
 			
 			if not len(d.entries):
@@ -173,6 +172,10 @@ def searchNZB(albumid=None):
 				
 				logger.debug('Sorting results list')
 				bestqual = helpers.sortNZBList(resultlist, albumid)
+				
+				if not bestqual:
+					logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
+					bestqual = sorted(resultlist, key=lambda title: title[1], reverse=True)[0]
 			
 			else:
 			

@@ -105,8 +105,11 @@ def sortNZBList(resultlist, albumid):
 	myDB = db.DBConnection()
 	tracks = myDB.select('SELECT TrackDuration from tracks WHERE AlbumID=?', [albumid])
 	
-	# album length in milliseconds
-	albumlength = sum([pair[0] for pair in tracks])
+	# album length in milliseconds - if there is no track info, return False
+	try:
+		albumlength = sum([pair[0] for pair in tracks])
+	except TypeError:
+		return False
 	
 	# target size, in bytes
 	targetsize = albumlength/1000 * bitrate * 128
