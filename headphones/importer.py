@@ -101,7 +101,7 @@ def artistlist_to_mbids(artistlist):
 
 	for artist in artistlist:
 	
-		results = mb.findArtist(artist, limit=1)
+		results = mb.findArtist(artist['ArtistName'], limit=1)
 		
 		try:	
 			artistid = results[0]['id']
