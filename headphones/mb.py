@@ -20,17 +20,12 @@ def findArtist(name, limit=1):
 	with mb_lock:
 
 		artistlist = []
-		attempt = 0
-		
-		while attempt < 5:
-		
-			try:
-				artistResults = q.getArtists(ws.ArtistFilter(query=name, limit=limit))
-				break
-			except WebServiceError, e:
-				logger.warn('Attempt to retrieve information from MusicBrainz failed: %s' % e)
-				attempt += 1
-				time.sleep(1)
+
+		try:
+			artistResults = q.getArtists(ws.ArtistFilter(query=name, limit=limit))
+			break
+		except WebServiceError, e:
+			logger.warn('Attempt to retrieve information from MusicBrainz failed: %s' % e)
 		
 		time.sleep(1)
 		
@@ -55,17 +50,12 @@ def getArtist(artistid):
 		#Get all official release groups
 		inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), releaseGroups=True)
 		
-		attempt = 0
-		
-		while attempt < 5:
-		
-			try:
-				artist = q.getArtistById(artistid, inc)
-				break
-			except WebServiceError, e:
-				logger.warn('Attempt to retrieve information from MusicBrainz failed: %s' % e)
-				attempt += 1
-				time.sleep(1)
+
+		try:
+			artist = q.getArtistById(artistid, inc)
+			break
+		except WebServiceError, e:
+			logger.warn('Attempt to retrieve information from MusicBrainz failed: %s' % e)
 				
 		time.sleep(1)
 				
@@ -100,18 +90,12 @@ def getReleaseGroup(rgid):
 		releaselist = []
 		
 		inc = ws.ReleaseGroupIncludes(releases=True)
-		
-		attempt = 0
-		
-		while attempt < 5:
-		
-			try:
-				releaseGroup = q.getReleaseGroupById(rgid, inc)
-				break
-			except WebServiceError, e:
-				logger.warn('Attempt to retrieve information from MusicBrainz failed: %s' % e)
-				attempt += 1
-				time.sleep(1)
+
+		try:
+			releaseGroup = q.getReleaseGroupById(rgid, inc)
+			break
+		except WebServiceError, e:
+			logger.warn('Attempt to retrieve information from MusicBrainz failed: %s' % e)
 	
 		time.sleep(1)
 		# I think for now we have to make separate queries for each release, in order
@@ -120,17 +104,11 @@ def getReleaseGroup(rgid):
 	
 			inc = ws.ReleaseIncludes(tracks=True)		
 	
-			attempt = 0
-			
-			while attempt < 5:
-			
-				try:
-					releaseResult = q.getReleaseById(release.id, inc)
-					break
-				except WebServiceError, e:
-					logger.warn('Attempt to retrieve information for %s from MusicBrainz failed: %s' % (releaseResult.title, e))
-					attempt += 1
-					time.sleep(1)		
+			try:
+				releaseResult = q.getReleaseById(release.id, inc)
+				break
+			except WebServiceError, e:
+				logger.warn('Attempt to retrieve information for %s from MusicBrainz failed: %s' % (releaseResult.title, e))	
 			
 			if not releaseResult:
 				continue
@@ -160,19 +138,13 @@ def getRelease(releaseid):
 		release = {}
 	
 		inc = ws.ReleaseIncludes(tracks=True, releaseEvents=True)
-		
-		attempt = 0
-			
-		while attempt < 5:
-		
-			try:
-				results = q.getReleaseById(releaseid, inc)
-				break
-			except WebServiceError, e:
-				logger.warn('Attempt to retrieve information from MusicBrainz failed: %s' % e)
-				attempt += 1
-				time.sleep(1)	
-				return False
+				
+		try:
+			results = q.getReleaseById(releaseid, inc)
+			break
+		except WebServiceError, e:
+			logger.warn('Attempt to retrieve information from MusicBrainz failed: %s' % e)	
+			return False
 		
 		time.sleep(1)
 		
