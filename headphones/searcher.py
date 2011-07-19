@@ -169,12 +169,29 @@ def searchNZB(albumid=None):
 		if len(resultlist):	
 			
 			if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
+
+				logger.debug('Target bitrate: %i kbps' % headphones.PREFERRED_BITRATE)
+
+				tracks = myDB.select('SELECT TrackDuration from tracks WHERE AlbumID=?', [albumid])
+
+				try:
+					albumlength = sum([pair[0] for pair in tracks])
+					
+					targetsize = albumlength/1000 * headphones.PREFERRED_BITRATE * 128
+					logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
+	
+					newlist = []
+
+					for result in resultlist:
+						delta = abs(targetsize - result[1])
+						newlist.append((result[0], result[1], result[2], delta))
+		
+					bestqual = sorted(newlist, key=lambda title: title[3])[0]
 				
-				logger.debug('Sorting results list')
-				bestqual = helpers.sortNZBList(resultlist, albumid)
-				
-				if not bestqual:
+				except TypeError:
+					
 					logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
+					
 					bestqual = sorted(resultlist, key=lambda title: title[1], reverse=True)[0]
 			
 			else:
@@ -213,7 +230,7 @@ def searchNZB(albumid=None):
 					break
 					
 				myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
-				myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, CURRENT_DATE, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched"])
+				myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched"])
 
 			
 			elif headphones.BLACKHOLE:
@@ -228,10 +245,4 @@ def searchNZB(albumid=None):
 					break
 					
 				myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
-				myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, CURRENT_DATE, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched"])
-
-				
-				
-			
-			
-	
+				myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATEIME("NOW", "localtime"), ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched"])

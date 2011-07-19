@@ -26,12 +26,9 @@ def scanMusic(dir=None):
 					logger.error('Can not decode file %s. Error: %s' % (str(files), str(e)))
 					continue
 				
-	logger.info(u'%i music files found' % len(results))
+	logger.info(u'%i music files found. Reading metadata....' % len(results))
 	
 	if results:
-	
-		lst = []
-		bitrates = []
 	
 		myDB = db.DBConnection()
 		myDB.action('''DELETE from have''')
@@ -39,8 +36,9 @@ def scanMusic(dir=None):
 		for song in results:
 			try:
 				f = MediaFile(song)
+				logger.debug('Reading: %s' % song.decode('UTF-8'))
 			except:
-				logger.info("Could not read file: '" + song + "'")
+				logger.warn('Could not read file: %s' % song.decode('UTF-8'))
 			else:	
 				if f.albumartist:
 					artist = f.albumartist
@@ -50,17 +48,17 @@ def scanMusic(dir=None):
 					continue
 				
 				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?)', [artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid])
-				lst.append(artist)
-				bitrates.append(f.bitrate)
 				
 		# Get the average bitrate if the option is selected
 		if headphones.DETECT_BITRATE:
 			try:
-				headphones.PREFERRED_BITRATE = sum(bitrates)/len(bitrates)/1000
-			except ZeroDivisionError:
-				logger.error('No bitrates found - cannot automatically detect preferred bitrate')
+				avgbitrate = myDB.action("SELECT AVG(BitRate) FROM have").fetchone()[0]
+				headphones.PREFERRED_BITRATE = int(avgbitrate)/1000
+				
+			except Exception, e:
+				logger.error('Error detecting preferred bitrate:' + str(e))
 			
-		artistlist = {}.fromkeys(lst).keys()
+		artistlist = myDB.action('SELECT DISTINCT ArtistName FROM have').fetchall()
 		logger.info(u"Preparing to import %i artists" % len(artistlist))
 		
 		artistlist_to_mbids(artistlist)
@@ -105,7 +103,10 @@ def artistlist_to_mbids(artistlist):
 
 	for artist in artistlist:
 	
-		results = mb.findArtist(artist, limit=1)
+		results = mb.findArtist(artist['ArtistName'], limit=1)
+		
+		if not results:
+			continue
 		
 		try:	
 			artistid = results[0]['id']
@@ -128,6 +129,9 @@ def addArtisttoDB(artistid):
 	myDB = db.DBConnection()
 		
 	artist = mb.getArtist(artistid)
+	
+	if not artist:
+		return
 	
 	if artist['artist_name'].startswith('The '):
 		sortname = artist['artist_name'][4:]
@@ -154,7 +158,14 @@ def addArtisttoDB(artistid):
 			logger.info('Unable to get release information for %s - it may not be a valid release group' % rg['title'])
 			continue
 			
+		if not releaseid:
+			continue
+		
 		release = mb.getRelease(releaseid)
+		
+		if not release:
+			logger.warn('Unable to get release information for %s. Skipping for now.' % rg['title'])
+			continue
 	
 		logger.info(u"Now adding/updating album: " + rg['title'])
 		controlValueDict = {"AlbumID": 	rg['id']}

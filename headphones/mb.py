@@ -34,6 +34,10 @@ def findArtist(name, limit=1):
 		
 		time.sleep(1)
 		
+		if not artistResults:
+			return False
+		
+		
 		for result in artistResults:
 			
 			artistlist.append({
@@ -67,6 +71,9 @@ def getArtist(artistid):
 				attempt += 1
 				time.sleep(1)
 				
+		if not artist:
+			return False
+		
 		time.sleep(1)
 				
 		artist_dict['artist_name'] = artist.name
@@ -113,6 +120,9 @@ def getReleaseGroup(rgid):
 				attempt += 1
 				time.sleep(1)
 	
+		if not releaseGroup:
+			return False
+			
 		time.sleep(1)
 		# I think for now we have to make separate queries for each release, in order
 		# to get more detailed release info (ASIN, track count, etc.)
@@ -172,6 +182,9 @@ def getRelease(releaseid):
 				logger.warn('Attempt to retrieve information from MusicBrainz failed: %s' % e)
 				attempt += 1
 				time.sleep(1)	
+		
+		if not results:
+			return False
 		
 		time.sleep(1)
 		

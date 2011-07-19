@@ -4,7 +4,7 @@ import datetime
 
 import headphones
 
-from headphones import db, logger
+from headphones import logger
 
 def multikeysort(items, columns):
 
@@ -93,41 +93,3 @@ def bytes_to_mb(bytes):
 	mb = int(bytes)/1048576
 	size = '%.1f MB' % mb
 	return size
-	
-def sortNZBList(resultlist, albumid):
-	"""
-	Takes a list of NZBresults from searcher.py and sorts them by distance to
-	a target size based on bitrate * album duration
-	"""
-
-	bitrate = headphones.PREFERRED_BITRATE
-	
-	myDB = db.DBConnection()
-	tracks = myDB.select('SELECT TrackDuration from tracks WHERE AlbumID=?', [albumid])
-	
-	# album length in milliseconds - if there is no track info, return False
-	try:
-		albumlength = sum([pair[0] for pair in tracks])
-	except TypeError:
-		return False
-	
-	# target size, in bytes
-	targetsize = albumlength/1000 * bitrate * 128
-	
-	logger.info('Target size: %s' % bytes_to_mb(targetsize))
-	
-	newlist = []
-	# resultlist = [(title, size, url), (title2, size2, url2)...]
-
-	for result in resultlist:
-	
-		delta = abs(targetsize - result[1])
-		newlist.append((result[0], result[1], result[2], delta))
-		
-	bestqual = sorted(newlist, key=lambda title: title[3])[0]
-	
-	return bestqual
-	
-		
-	
-	

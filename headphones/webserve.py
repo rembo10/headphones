@@ -289,7 +289,6 @@ class WebInterface(object):
 		
 		import searcher
 		threading.Thread(target=searcher.searchNZB, args=[AlbumID]).start()
-		time.sleep(5)
 		
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 		
@@ -457,11 +456,12 @@ class WebInterface(object):
 		snatched = myDB.select('''SELECT AlbumID, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT from snatched order by DateAdded DESC''')
 
 		page.append('''<div class="table"><table border="0" cellpadding="3">
+						<tr><p align="center">History <a class="external" href="clearhistory">clear all</a><br /><br /></p></tr>
 						<tr>
+						<th align="center" width="150"></th>
 						<th align="center" width="300"></th>
-						<th align="center" width="300"><div class="bigtext">History <a class="external" href="clearhistory">clear all</a><br /><br /></div></th>
-						<th align="center" width="300"></th>
-						<th>      </th>
+						<th align="center" width="200"></th>
+						<th align="right" width="200"></th>
 						</tr>''')
 		if len(snatched) == 0:
 			page.append("""</table><div class="center"></div><table>""")
@@ -470,10 +470,10 @@ class WebInterface(object):
 		while i < len(snatched):
 			mb = snatched[i][2] / 1048576
 			size = '%.2fM' % mb
-			page.append('''<tr><td align="center" width="300">%s</td>
+			page.append('''<tr><td align="center" width="150">%s</td>
 								<td align="center" width="300">%s</td>
-								<td align="center" width="300">%s</td>
-								<td align="center" width="300">%s</td>
+								<td align="center" width="200">%s</td>
+								<td align="center" width="200">%s</td>
 								</tr>
 								''' % (snatched[i][5], snatched[i][1], size, snatched[i][4]))
 			i += 1
