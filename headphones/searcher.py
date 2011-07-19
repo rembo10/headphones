@@ -29,18 +29,25 @@ def searchNZB(albumid=None):
 		term1 = re.sub('[\.\-]', ' ', '%s %s %s' % (clname, clalbum, year)).encode('utf-8')
 		term = string.replace(term1, '"', '')
 		
+		altterm1 = re.sub('[\.\-]', ' ', '%s %s' % (clname, clalbum)).encode('utf-8')
+		altterm = string.replace(altterm1, '"', '')
+		
 		logger.info("Searching for %s since it was marked as wanted" % term)
 		
 		resultlist = []
 		
 		if headphones.NZBMATRIX:
 
-			if headphones.PREFERRED_QUALITY:
+			if headphones.PREFERRED_QUALITY == 3:
+				categories = "23"
+				maxsize = 10000000000	
+				term = altterm
+			elif headphones.PREFERRED_QUALITY:
 				categories = "23,22"
 				maxsize = 2000000000
 			else:
 				categories = "22"
-				maxsize = 250000000
+				maxsize = 300000000
 			
 			
 			params = {	"page": "download",
@@ -74,12 +81,16 @@ def searchNZB(albumid=None):
 			
 		if headphones.NEWZNAB:
 		
-			if headphones.PREFERRED_QUALITY:
+			if headphones.PREFERRED_QUALITY == 3:
+				categories = "3040"
+				maxsize = 10000000000
+				term = altterm
+			elif headphones.PREFERRED_QUALITY:
 				categories = "3040,3010"
 				maxsize = 2000000000
 			else:
 				categories = "3010"
-				maxsize = 250000000		
+				maxsize = 300000000		
 
 			params = {	"t": "search",
 						"apikey": headphones.NEWZNAB_APIKEY,
@@ -115,12 +126,16 @@ def searchNZB(albumid=None):
 					
 		if headphones.NZBSORG:
 		
-			if headphones.PREFERRED_QUALITY:
+			if headphones.PREFERRED_QUALITY == 3:
+				categories = "3010"
+				maxsize = 10000000000
+				term = altterm
+			elif headphones.PREFERRED_QUALITY:
 				categories = "5,3010"
 				maxsize = 2000000000
 			else:
 				categories = "5"
-				maxsize = 250000000		
+				maxsize = 300000000		
 
 			params = {	"action": "search",
 						"dl": 1,

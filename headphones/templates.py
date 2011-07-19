@@ -263,8 +263,9 @@ configform = form = '''
                 <td>
                 	<b>Album Quality:</b>
                    	  <p>
-                   	  <input type="radio" name="preferred_quality" value="0" %s />Highest Quality<br /><br />
+                   	  <input type="radio" name="preferred_quality" value="0" %s />Highest Quality excluding Lossless<br /><br />
                       <input type="radio" name="preferred_quality" value="1" %s />Highest Quality including Lossless<br /><br />
+                      <input type="radio" name="preferred_quality" value="3" %s />Lossless Only<br /><br />
                       <input type="radio" name="preferred_quality" value="2" %s />Preferred Bitrate: 
     					<input type="text" name="preferred_bitrate" value="%s" size="5" maxlength="5" />kbps <br>
                       	<i class="smalltext2"><input type="checkbox" name="detect_bitrate" value="1" %s />Auto-Detect Preferred Bitrate </i>

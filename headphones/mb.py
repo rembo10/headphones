@@ -29,9 +29,9 @@ def findArtist(name, limit=1):
 				artistResults = q.getArtists(ws.ArtistFilter(query=name, limit=limit))
 				break
 			except WebServiceError, e:
-				logger.warn('Attempt to retrieve information from MusicBrainz failed: %s' % e)
+				logger.warn('Attempt to query MusicBrainz for %s failed: %s' % (name, e))
 				attempt += 1
-				time.sleep(1)
+				time.sleep(10)
 		
 		time.sleep(1)
 		
@@ -79,9 +79,9 @@ def getArtist(artistid):
 				artist = q.getArtistById(artistid, inc)
 				break
 			except WebServiceError, e:
-				logger.warn('Attempt to retrieve information from MusicBrainz failed: %s' % e)
+				logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s. Sleeping 10 seconds' % artistid)
 				attempt += 1
-				time.sleep(1)
+				time.sleep(10)
 				
 		if not artist:
 			return False
@@ -128,9 +128,9 @@ def getReleaseGroup(rgid):
 				releaseGroup = q.getReleaseGroupById(rgid, inc)
 				break
 			except WebServiceError, e:
-				logger.warn('Attempt to retrieve information from MusicBrainz failed: %s' % e)
+				logger.warn('Attempt to retrieve information from MusicBrainz for release group "%s" failed. Sleeping 10 seconds' % rgid)
 				attempt += 1
-				time.sleep(1)
+				time.sleep(10)
 	
 		if not releaseGroup:
 			return False
@@ -150,9 +150,9 @@ def getReleaseGroup(rgid):
 					releaseResult = q.getReleaseById(release.id, inc)
 					break
 				except WebServiceError, e:
-					logger.warn('Attempt to retrieve information for %s from MusicBrainz failed: %s' % (releaseResult.title, e))
+					logger.warn('Attempt to retrieve release information for %s from MusicBrainz failed: %s. Sleeping 10 seconds' % (releaseResult.title, e))
 					attempt += 1
-					time.sleep(1)		
+					time.sleep(10)		
 			
 			if not releaseResult:
 				continue
@@ -191,9 +191,9 @@ def getRelease(releaseid):
 				results = q.getReleaseById(releaseid, inc)
 				break
 			except WebServiceError, e:
-				logger.warn('Attempt to retrieve information from MusicBrainz failed: %s' % e)
+				logger.warn('Attempt to retrieve information from MusicBrainz for release "%s" failed: %s. SLeeping 10 seconds' % (releaseid, e))
 				attempt += 1
-				time.sleep(1)	
+				time.sleep(10)	
 		
 		if not results:
 			return False
@@ -240,9 +240,9 @@ def findArtistbyAlbum(name):
 			results = q.getReleaseGroups(f)
 			break
 		except WebServiceError, e:
-			logger.warn('Attempt to retrieve information for %s from MusicBrainz failed: %s' % (releaseResult.title, e))
+			logger.warn('Attempt to query MusicBrainz for %s failed: %s. Sleeping 10 seconds.' % (name, e))
 			attempt += 1
-			time.sleep(1)	
+			time.sleep(10)	
 	
 	time.sleep(1)
 	

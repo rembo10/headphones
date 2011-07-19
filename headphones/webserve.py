@@ -526,6 +526,7 @@ class WebInterface(object):
 		headphones.NZBSORG_HASH,
 		radio(headphones.PREFERRED_QUALITY, 0),
 		radio(headphones.PREFERRED_QUALITY, 1),
+		radio(headphones.PREFERRED_QUALITY, 3),
 		radio(headphones.PREFERRED_QUALITY, 2),
 		headphones.PREFERRED_BITRATE,
 		checked(headphones.DETECT_BITRATE),
