@@ -54,7 +54,7 @@ class DBConnection:
 						logger.error('Database error: %s' % e)
 						raise
 				except sqlite3.DatabaseError, e:
-					logger.error('Fatal Error executing %s :: %s' % (command, e))
+					logger.error('Fatal Error executing %s :: %s' % (query, e))
 					raise
 			
 			return sqlResult
