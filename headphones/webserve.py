@@ -82,7 +82,11 @@ class WebInterface(object):
 			page.append(templates._footer % headphones.CURRENT_VERSION)
 			
 		else:
-			page.append("""<div class="datanil">Add some artists to the database!</div>""")
+			have = myDB.select('SELECT ArtistName from have')
+			if len(have):
+				page.append("""<div class="datanil">Scanning...</div>""")
+			else:
+				page.append("""<div class="datanil">Add some artists to the database!</div>""")
 		return page
 	home.exposed = True
 	

@@ -188,8 +188,9 @@ def searchNZB(albumid=None):
 		
 					bestqual = sorted(newlist, key=lambda title: title[3])[0]
 				
-				except TypeError:
+				except Exception, e:
 					
+					logger.debug('Error: %s' % str(e))
 					logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
 					
 					bestqual = sorted(resultlist, key=lambda title: title[1], reverse=True)[0]

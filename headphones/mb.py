@@ -9,7 +9,7 @@ import lib.musicbrainz2.utils as u
 
 from lib.musicbrainz2.webservice import WebServiceError
 
-from headphones import logger
+from headphones import logger, db
 from headphones.helpers import multikeysort
 
 q = ws.Query()
@@ -21,6 +21,7 @@ def findArtist(name, limit=1):
 
 		artistlist = []
 		attempt = 0
+		artistResults = None
 		
 		while attempt < 5:
 		
@@ -35,18 +36,29 @@ def findArtist(name, limit=1):
 		time.sleep(1)
 		
 		if not artistResults:
-			return False
-		
+			return False		
 		
 		for result in artistResults:
+		
+			if result.artist.name != result.artist.getUniqueName() and limit == 1:
+				
+				logger.info('Found an artist with a disambiguation: %s - doing an album based search' % name)
+				artistdict = findArtistbyAlbum(name)
+				
+				if not artistdict:
+					return False
+					
+				else:
+					artistlist.append(artistdict)
 			
-			artistlist.append({
-					'name': 			result.artist.name,
-					'uniquename':		result.artist.getUniqueName(),
-					'id':				u.extractUuid(result.artist.id),
-					'url': 				result.artist.id,
-					'score':			result.score
-					})
+			else:
+				artistlist.append({
+						'name': 			result.artist.name,
+						'uniquename':		result.artist.getUniqueName(),
+						'id':				u.extractUuid(result.artist.id),
+						'url': 				result.artist.id,
+						'score':			result.score
+						})
 			
 		return artistlist
 
@@ -58,7 +70,7 @@ def getArtist(artistid):
 	
 		#Get all official release groups
 		inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), releaseGroups=True)
-		
+		artist = None
 		attempt = 0
 		
 		while attempt < 5:
@@ -107,7 +119,7 @@ def getReleaseGroup(rgid):
 		releaselist = []
 		
 		inc = ws.ReleaseGroupIncludes(releases=True)
-		
+		releaseGroup = None
 		attempt = 0
 		
 		while attempt < 5:
@@ -129,7 +141,7 @@ def getReleaseGroup(rgid):
 		for release in releaseGroup.releases:
 	
 			inc = ws.ReleaseIncludes(tracks=True)		
-	
+			releaseResult = None
 			attempt = 0
 			
 			while attempt < 5:
@@ -170,7 +182,7 @@ def getRelease(releaseid):
 		release = {}
 	
 		inc = ws.ReleaseIncludes(tracks=True, releaseEvents=True)
-		
+		results = None
 		attempt = 0
 			
 		while attempt < 5:
@@ -209,7 +221,45 @@ def getRelease(releaseid):
 		release['tracks'] = tracks
 		
 		return release
+		
+def findArtistbyAlbum(name):
+
+	myDB = db.DBConnection()
 	
+	artist = myDB.action('SELECT AlbumTitle from have WHERE ArtistName=?', [name]).fetchone()
+	
+	term = '"'+artist['AlbumTitle']+'" AND artist:"'+name+'"'
+	
+	f = ws.ReleaseGroupFilter(query=term, limit=1)
+	results = None
+	attempt = 0
+			
+	while attempt < 5:
+			
+		try:
+			results = q.getReleaseGroups(f)
+			break
+		except WebServiceError, e:
+			logger.warn('Attempt to retrieve information for %s from MusicBrainz failed: %s' % (releaseResult.title, e))
+			attempt += 1
+			time.sleep(1)	
+	
+	time.sleep(1)
+	
+	if not results:
+		return False
+
+	artist_dict = {}
+	
+	for result in results:
+		releaseGroup = result.releaseGroup
+		artist_dict['name'] = releaseGroup.artist.name
+		artist_dict['uniquename'] = releaseGroup.artist.getUniqueName()
+		artist_dict['id'] = u.extractUuid(releaseGroup.artist.id)
+		artist_dict['url'] = releaseGroup.artist.id
+		artist_dict['score'] = result.score
+	
+	return artist_dict
 
 def getExtras(artistid):
 
