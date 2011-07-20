@@ -198,7 +198,7 @@ class WebInterface(object):
 			raise cherrypy.HTTPRedirect("home")
 		else:
 			artistResults = mb.findArtist(name, limit=10)
-			if len(artistResults) == 0:
+			if not artistResults:
 				logger.info(u"No results found for " + name)
 				page.append('''<div class="table"><p class="center">No results! <a class="blue" href="home">Go back</a></p></div>''')
 				return page

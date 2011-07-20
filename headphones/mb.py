@@ -18,11 +18,16 @@ mb_lock = threading.Lock()
 def findArtist(name, limit=1):
 
 	with mb_lock:
-
+	
 		artistlist = []
 		attempt = 0
 		artistResults = None
-		term = '"'+name+'"'
+		
+		chars = set('!?')
+		if any((c in chars) for c in name):
+			term = '"'+name+'"'
+		else:
+			term = name
 		
 		while attempt < 5:
 		

@@ -261,4 +261,4 @@ def searchNZB(albumid=None):
 					break
 					
 				myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
-				myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATEIME("NOW", "localtime"), ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched"])
+				myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched"])
