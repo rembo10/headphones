@@ -146,6 +146,9 @@ def addArtisttoDB(artistid):
 	for rg in artist['releasegroups']:
 		
 		rgid = rg['id']
+		
+		# check if the album already exists
+		rg_exists = myDB.select("SELECT * from albums WHERE AlbumID=?", [rg['id']])
 					
 		try:	
 			releaseid = mb.getReleaseGroup(rgid)
@@ -164,27 +167,32 @@ def addArtisttoDB(artistid):
 	
 		logger.info(u"Now adding/updating album: " + rg['title'])
 		controlValueDict = {"AlbumID": 	rg['id']}
-		newValueDict = {"ArtistID":			artistid,
-						"ArtistName": 		artist['artist_name'],
-						"AlbumTitle":		rg['title'],
-						"AlbumASIN":		release['asin'],
-						"ReleaseDate":		release['date'],
-						"DateAdded":		helpers.today(),
-						"Status":			"Skipped"
-						}
+		
+		if len(rg_exists):
+		
+			newValueDict = {"AlbumASIN":		release['asin'],
+							"ReleaseDate":		release['date'],
+							}
+		
+		else:
+		
+			newValueDict = {"ArtistID":			artistid,
+							"ArtistName": 		artist['artist_name'],
+							"AlbumTitle":		rg['title'],
+							"AlbumASIN":		release['asin'],
+							"ReleaseDate":		release['date'],
+							"DateAdded":		helpers.today(),
+							}
+							
+			if release['date'] > helpers.today():
+				newValueDict['Status'] = "Wanted"
+			else:
+				newValueDict['Status'] = "Skipped"
 		
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		
 		# I changed the albumid from releaseid -> rgid, so might need to delete albums that have a releaseid
-		myDB.action('DELETE from albums WHERE AlbumID=?', [release['id']])
-
-		latestrelease = myDB.select("SELECT ReleaseDate, DateAdded from albums WHERE AlbumID=?", [rg['id']])		
-		
-		if latestrelease[0][0] > latestrelease[0][1]:
-			logger.info(release['title'] + u" is an upcoming album. Setting its status to 'Wanted'...")
-			controlValueDict = {"AlbumID": 	release['id']}
-			newValueDict = {"Status":	"Wanted"}
-			myDB.upsert("albums", newValueDict, controlValueDict)
+		myDB.action('DELETE from albums WHERE AlbumID=?', [release['id']])	
 						
 		for track in release['tracks']:
 		

@@ -7,7 +7,7 @@ import os, re
 import headphones
 from headphones import logger, db, helpers
 
-def searchNZB(albumid=None):
+def searchNZB(albumid=None, new=False):
 
 	myDB = db.DBConnection()
 	
@@ -185,7 +185,7 @@ def searchNZB(albumid=None):
 			
 			if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
 
-				logger.debug('Target bitrate: %i kbps' % headphones.PREFERRED_BITRATE)
+				logger.debug('Target bitrate: %s kbps' % headphones.PREFERRED_BITRATE)
 
 				tracks = myDB.select('SELECT TrackDuration from tracks WHERE AlbumID=?', [albumid])
 
@@ -201,18 +201,38 @@ def searchNZB(albumid=None):
 						delta = abs(targetsize - result[1])
 						newlist.append((result[0], result[1], result[2], delta))
 		
-					bestqual = sorted(newlist, key=lambda title: title[3])[0]
+					nzblist = sorted(newlist, key=lambda title: title[3])
 				
 				except Exception, e:
 					
 					logger.debug('Error: %s' % str(e))
 					logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
 					
-					bestqual = sorted(resultlist, key=lambda title: title[1], reverse=True)[0]
+					nzblist = sorted(resultlist, key=lambda title: title[1], reverse=True)
 			
 			else:
 			
-				bestqual = sorted(resultlist, key=lambda title: title[1], reverse=True)[0]
+				nzblist = sorted(resultlist, key=lambda title: title[1], reverse=True)
+			
+			
+			if new:
+				# Checks to see if it's already downloaded
+				i = 0
+	
+				while i < len(nzblist):
+					alreadydownloaded = myDB.select('SELECT * from snatched WHERE URL=?', [nzblist[i][2]])
+					
+					if len(alreadydownloaded) >= 1:
+						logger.info('%s has already been downloaded. Skipping.' % nzblist[i][0])
+						i += 1
+					
+					else:
+						bestqual = nzblist[i]
+						break
+						
+			else:
+				bestqual = nzblist[0]
+			
 			
 			logger.info(u"Found best result: %s (%s) - %s" % (bestqual[0], bestqual[2], helpers.bytes_to_mb(bestqual[1])))
 			downloadurl = bestqual[2]

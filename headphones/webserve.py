@@ -126,7 +126,7 @@ class WebInterface(object):
 			elif results[i][3] == 'Downloaded':
 				newStatus = '''<b>%s</b>[<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">retry</a>]''' % (results[i][3], results[i][2], ArtistID)
 			elif results[i][3] == 'Snatched':
-				newStatus = '''<b>%s</b>[<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">retry</a>]''' % (results[i][3], results[i][2], ArtistID)
+				newStatus = '''<b>%s</b>[<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">retry</a>][<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s&new=True">new</a>]''' % (results[i][3], results[i][2], ArtistID, results[i][2], ArtistID)
 			else:
 				newStatus = '%s' % (results[i][3])
 			page.append('''<tr><td align="left"><img src="http://ec1.images-amazon.com/images/P/%s.01.MZZZZZZZ.jpg" height="50" width="50"></td>
@@ -283,7 +283,7 @@ class WebInterface(object):
 		
 	deleteArtist.exposed = True
 	
-	def queueAlbum(self, AlbumID, ArtistID):
+	def queueAlbum(self, AlbumID, ArtistID, new=False):
 
 		logger.info(u"Marking album: " + AlbumID + "as wanted...")
 		myDB = db.DBConnection()
@@ -292,7 +292,7 @@ class WebInterface(object):
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		
 		import searcher
-		threading.Thread(target=searcher.searchNZB, args=[AlbumID]).start()
+		threading.Thread(target=searcher.searchNZB, args=[AlbumID, new]).start()
 		
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 		
