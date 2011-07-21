@@ -175,10 +175,9 @@ def getReleaseGroup(rgid):
 			releaselist.append(release_dict)
 	
 		a = multikeysort(releaselist, ['-asin', '-tracks'])
-		b = sorted(releaselist, key=lambda item: item['releasedate'])
-	
+		
 		release_dict = {'releaseid' :a[0]['releaseid'],
-						'releasedate'	: b[0]['releasedate']}
+						'releasedate'	: releaselist[0]['releasedate']}
 		
 		return release_dict
 	
