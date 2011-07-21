@@ -19,17 +19,17 @@
     </head>
     <body>
         <div id="header">
-            <% if not $headphones.CURRENT_VERSION: %>
+            % if not headphones.CURRENT_VERSION:
             <div id="updatebar">
-                You're running an unknown version of Heapdhones. <a class="blue" href="update">Click here to update</a>
+                You're running an unknown version of Headphones. <a class="blue" href="update">Click here to update</a>
             </div>
-            <% elif $headphones.CURRENT_VERSION != $headphones.LATEST_VERSION and $headphones.INSTALL_TYPE != 'win': %>
+            % elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
             <div id="updatebar">
                 A <a class="blue" href="http://github.com/rembo10/headphones/compare/$headphones.CURRENT_VERSION...$headphones.LATEST_VERSION"> newer version</a> is available. You're $headphones.COMMITS_BEHIND commits behind. <a class="blue" href="update">Click here to update</a>
             </div>
-            <% endif %>
+            % endif
             <div class="logo">
-                <a href="/"><img src="${hpRoot}/images/headphoneslogo.png" border="0">headphones</a>
+                <a href="/"><img src="${hpRoot}/images/headphoneslogo.png" border="0" />headphones</a>
             </div>
             <br />
         </div>
@@ -41,14 +41,14 @@
             <a href="/config">SETTINGS</a>
             <a href="/shutdown"><font color="red">SHUTDOWN</font></a>
             <div id="searchbar">
-                <form action="findArtist" method="GET">
+                <form action="findArtist" method="get">
                     <input type="text" value="Add an artist" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" />
                     <input type="submit" />
                 </form>
             </div>
         </div>
         <div id="content">
-        	${next.body()}
+        	${self.body()}
 		</div>
 		<div id="footer">
 			<b>${numArtist} Artists</b>
