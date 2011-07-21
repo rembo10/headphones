@@ -17,85 +17,26 @@ from headphones.mb import getReleaseGroup
 from headphones import templates, logger, searcher, db, importer, helpers, mb
 from headphones.helpers import checked, radio
 
-hplookup = TemplateLookup(directories=[os.path.join(headphones.PROG_DIR, 'data/interfaces/default/')], output_encodig='utf-8')
-
-def serve_template(templatename, **kwargs):
-	template = hplookup.get(templatename)
-	print template.render(**kwargs)
-	
 
 class WebInterface(object):
+	
+	_templatedir = os.path.join(str(headphones.PROG_DIR), 'data/interfaces/default')
+	_hplookup = TemplateLookup(directories=[_templatedir], output_encoding='utf-8')
+
+	def serve_template(self, templatename,*args, **kwargs):
+		kwargs['templatedir'] = self._templatedir
+		template = self._hplookup.get_template(templatename)
+		
+		print template.render(*args, **kwargs)
 
 	def index(self):
 		raise cherrypy.HTTPRedirect("home")
 	index.exposed=True
 
 	def home(self):
-		page = [templates._header]
-		if not headphones.CURRENT_VERSION:
-			page.append('''<div class="updatebar">You're running an unknown version of Heapdhones. <a class="blue" href="update">Click here to update</a></div>''')
-		elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
-			page.append('''<div class="updatebar">A <a class="blue" href="http://github.com/rembo10/headphones/compare/%s...%s">
-					newer version</a> is available. You're %s commits behind. <a class="blue" href="update">Click here to update</a></div>
-					''' % (headphones.CURRENT_VERSION, headphones.LATEST_VERSION, headphones.COMMITS_BEHIND))
-		page.append(templates._logobar)
-		page.append(templates._nav)
 		myDB = db.DBConnection()
 		results = myDB.select('SELECT ArtistName, ArtistID, Status from artists order by ArtistSortName collate nocase')
-		if len(results):
-			i = 0
-			page.append('''<div class="table"><table border="0" cellpadding="3">
-						<tr>
-						<th align="left" width="170">Artist Name</th>
-						<th align="center" width="100">Status</th>
-						<th align="center" width="300">Upcoming Albums</th>
-						<th align="center">Have</th>
-						</tr>''')
-			while i < len(results):
-				latestalbum = myDB.select('SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [results[i][1]])
-				totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [results[i][1]]))
-				havetracks = len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [results[i][0]]))
-				try:
-					percent = (havetracks*100.0)/totaltracks
-					if percent > 100:
-						percent = 100
-				except ZeroDivisionError:
-					percent = 100
-				today = datetime.date.today()
-				if len(latestalbum) > 0:
-					if latestalbum[0][1] > datetime.date.isoformat(today):
-						newalbumName = '<a class="green" href="albumPage?AlbumID=%s"><i><b>%s</b></i>' % (latestalbum[0][3], latestalbum[0][0])
-						releaseDate = '(%s)</a>' % latestalbum[0][1]
-					else:
-						newalbumName = '<a class="gray" href="albumPage?AlbumID=%s"><i>%s</i>' % (latestalbum[0][3], latestalbum[0][0])
-						releaseDate = ""
-				if len(latestalbum) == 0:
-						newalbumName = '<font color="#CFCFCF">None</font>'
-						releaseDate = ""					
-				if results[i][2] == 'Paused':
-					newStatus = '''<font color="red"><b>%s</b></font>(<A class="external" href="resumeArtist?ArtistID=%s">resume</a>)''' % (results[i][2], results[i][1])
-				elif results[i][2] == 'Loading':
-					newStatus = '''<a class="gray">Loading...</a>'''
-				else:
-					newStatus = '''%s(<A class="external" href="pauseArtist?ArtistID=%s">pause</a>)''' % (results[i][2], results[i][1])
-				page.append('''<tr><td align="left" width="300"><a href="artistPage?ArtistID=%s">%s</a> 
-								(<A class="external" href="http://musicbrainz.org/artist/%s">link</a>) [<A class="externalred" href="deleteArtist?ArtistID=%s">delete</a>]</td>
-								<td align="center" width="160">%s</td>
-								<td align="center">%s %s</td>
-								<td><div class="progress-container"><div style="width: %s%%"><div class="smalltext3">%s/%s</div></div></div></td></tr>
-								''' % (results[i][1], results[i][0], results[i][1], results[i][1], newStatus, newalbumName, releaseDate, percent, havetracks, totaltracks))	
-				i = i+1
-
-			page.append('''</table></div>''')
-			page.append(templates._footer % headphones.CURRENT_VERSION)
-			
-		else:
-			have = myDB.select('SELECT ArtistName from have')
-			if len(have):
-				page.append("""<div class="datanil">Scanning...</div>""")
-			else:
-				page.append("""<div class="datanil">Add some artists to the database!</div>""")
-		return page
+		return self.serve_template(templatename="index.html", title="Headphones",artists=results)
 	home.exposed = True
 	
 

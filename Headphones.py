@@ -5,7 +5,7 @@ from lib.configobj import ConfigObj
 
 import headphones
 
-from headphones import webstart, logger
+from headphones import logger
 
 try:
 	import argparse
@@ -82,6 +82,7 @@ def main():
 	else:
 		http_port = int(headphones.HTTP_PORT)
 		
+	from headphones import webstart
 	# Try to start the server. 
 	webstart.initialize({
 					'http_port':		http_port,
