@@ -292,7 +292,7 @@ class WebInterface(object):
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		
 		import searcher
-		threading.Thread(target=searcher.searchNZB, args=[AlbumID, new]).start()
+		searcher.searchNZB(AlbumID, new)
 		
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 		

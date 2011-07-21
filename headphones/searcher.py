@@ -127,11 +127,11 @@ def searchNZB(albumid=None, new=False):
 		if headphones.NZBSORG:
 		
 			if headphones.PREFERRED_QUALITY == 3:
-				categories = "3010"
+				categories = "5"
 				maxsize = 10000000000
 				term = altterm
 			elif headphones.PREFERRED_QUALITY:
-				categories = "5,3010"
+				categories = "5"
 				maxsize = 2000000000
 			else:
 				categories = "5"
@@ -191,8 +191,8 @@ def searchNZB(albumid=None, new=False):
 
 				try:
 					albumlength = sum([pair[0] for pair in tracks])
-					
-					targetsize = albumlength/1000 * headphones.PREFERRED_BITRATE * 128
+					lgger.debug('Album length = %s' % albumlength)
+					targetsize = albumlength/1000 * int(headphones.PREFERRED_BITRATE) * 128
 					logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
 	
 					newlist = []

@@ -1,5 +1,4 @@
 from lib.pyItunes import *
-from lib.configobj import ConfigObj
 import time
 import os
 from lib.beets.mediafile import MediaFile
@@ -13,6 +12,9 @@ def scanMusic(dir=None):
 
 	if not dir:
 		dir = headphones.MUSIC_DIR
+
+	if type(dir) != unicode:
+		dir = unicode(dir)
 
 	results = []
 	
