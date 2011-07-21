@@ -1,0 +1,57 @@
+<%! 
+	import headphones 
+	from headphones import db
+
+	myDB = db.DBConnection()
+	numArtists = myDB.select("SELECT COUNT(*) FROM artists")[0][0]
+ 	numAlbums = myDB.select("SELECT COUNT(*) FROM albums")[0][0]
+%>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+        <title>Headphones - ${title}</title>
+        <link rel="icon" type="image/x-icon" href="${hpRoot}/images/favicon.ico" />
+        <link rel="apple-touch-icon" href="${hpRoot}/images/headphoneslogo.png" />
+        <link rel="stylesheet" type="text/css" href="${hpRoot}/css/style.css" />
+        <link rel="stylesheet" type="text/css" href="${hpRoot}/css/headphones-main.css" />
+    </head>
+    <body>
+        <div id="header">
+            <% if not $headphones.CURRENT_VERSION:>
+            <div id="updatebar">
+                You're running an unknown version of Heapdhones. <a class="blue" href="update">Click here to update</a>
+            </div>
+            <% elif $headphones.CURRENT_VERSION != $headphones.LATEST_VERSION and $headphones.INSTALL_TYPE != 'win': />
+            <div id="updatebar">
+                A <a class="blue" href="http://github.com/rembo10/headphones/compare/$headphones.CURRENT_VERSION...$headphones.LATEST_VERSION"> newer version</a> is available. You're $headphones.COMMITS_BEHIND commits behind. <a class="blue" href="update">Click here to update</a>
+            </div>
+            <% endif />
+            <div class="logo">
+                <a href="/"><img src="$hpRoot/images/headphoneslogo.png" border="0">headphones</a>
+            </div>
+            <br />
+        </div>
+        <div id="nav">
+            <a href="/">HOME</a>
+            <a href="/upcoming">UPCOMING</a>
+            <a href="/manage">MANAGE</a>
+            <a href="/history">HISTORY</a>
+            <a href="/config">SETTINGS</a>
+            <a href="/shutdown"><font color="red">SHUTDOWN</font></a>
+            <div id="searchbar">
+                <form action="findArtist" method="GET">
+                    <input type="text" value="Add an artist" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" />
+                    <input type="submit" />
+                </form>
+            </div>
+        </div>
+        <div id="content">
+        	${next.body()}
+		</div>
+		<div id="footer">
+			<b>${numArtist} Artists</b>
+		</div>
+	</body> 
+</html>
