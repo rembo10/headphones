@@ -13,9 +13,6 @@ def scanMusic(dir=None):
 	if not dir:
 		dir = headphones.MUSIC_DIR
 
-	if type(dir) != unicode:
-		dir = unicode(dir)
-
 	results = []
 	
 	for r,d,f in os.walk(dir):

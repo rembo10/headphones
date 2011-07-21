@@ -93,3 +93,8 @@ def bytes_to_mb(bytes):
 	mb = int(bytes)/1048576
 	size = '%.1f MB' % mb
 	return size
+	
+def replace_all(text, dic):
+	for i, j in dic.iteritems():
+		text = text.replace(i, j)
+	return text

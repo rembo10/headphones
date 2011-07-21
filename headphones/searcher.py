@@ -20,18 +20,24 @@ def searchNZB(albumid=None, new=False):
 		
 		albumid = albums[2]
 		reldate = albums[3]
+		
 		try:
 			year = reldate[:4]
 		except TypeError:
 			year = ''
-		clname = string.replace(helpers.latinToAscii(albums[0]), ' & ', ' ')	
-		clalbum = string.replace(helpers.latinToAscii(albums[1]), ' & ', ' ')
-		term1 = re.sub('[\.\-]', ' ', '%s %s %s' % (clname, clalbum, year)).encode('utf-8')
-		term = string.replace(term1, '"', '')
 		
-		altterm1 = re.sub('[\.\-]', ' ', '%s %s' % (clname, clalbum)).encode('utf-8')
-		altterm = string.replace(altterm1, '"', '')
+		dic = {'... ':' ', ' & ':' ', ' = ': ' ', '?':'', '!':'', ' + ':' ', '(':'', ')':'', '"':'', ',':''}
+
+		cleanartistalbum = helpers.latinToAscii(helpers.replace_all(albums[0]+' '+albums[1], dic))
+
+		# FLAC usually doesn't have a year for some reason so I'll leave it out:
+		term = re.sub('[\.\-]', ' ', '%s' % (cleanartistalbum)).encode('utf-8')
+		altterm = re.sub('[\.\-]', ' ', '%s %s' % (cleanartistalbum, year)).encode('utf-8')
 		
+		# Only use the year if the term could return a bunch of different albums, i.e. self-titled albums
+		if albums[0] in albums[1]:
+			term = altterm	
+			
 		logger.info("Searching for %s since it was marked as wanted" % term)
 		
 		resultlist = []
@@ -41,7 +47,6 @@ def searchNZB(albumid=None, new=False):
 			if headphones.PREFERRED_QUALITY == 3:
 				categories = "23"
 				maxsize = 10000000000	
-				term = altterm
 			elif headphones.PREFERRED_QUALITY:
 				categories = "23,22"
 				maxsize = 2000000000
@@ -84,7 +89,6 @@ def searchNZB(albumid=None, new=False):
 			if headphones.PREFERRED_QUALITY == 3:
 				categories = "3040"
 				maxsize = 10000000000
-				term = altterm
 			elif headphones.PREFERRED_QUALITY:
 				categories = "3040,3010"
 				maxsize = 2000000000
@@ -129,7 +133,7 @@ def searchNZB(albumid=None, new=False):
 			if headphones.PREFERRED_QUALITY == 3:
 				categories = "5"
 				maxsize = 10000000000
-				term = altterm
+				term = term + ' flac'
 			elif headphones.PREFERRED_QUALITY:
 				categories = "5"
 				maxsize = 2000000000
@@ -191,7 +195,7 @@ def searchNZB(albumid=None, new=False):
 
 				try:
 					albumlength = sum([pair[0] for pair in tracks])
-					lgger.debug('Album length = %s' % albumlength)
+					logger.debug('Album length = %s' % albumlength)
 					targetsize = albumlength/1000 * int(headphones.PREFERRED_BITRATE) * 128
 					logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
 	
