@@ -1,5 +1,4 @@
 import urllib
-import string
 import lib.feedparser as feedparser
 from xml.dom import minidom
 import os, re
@@ -26,7 +25,7 @@ def searchNZB(albumid=None, new=False):
 		except TypeError:
 			year = ''
 		
-		dic = {'... ':' ', ' & ':' ', ' = ': ' ', '?':'', '!':'', ' + ':' ', '(':'', ')':'', '"':'', ',':''}
+		dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '!':'', ' + ':' ', '"':'', ',':''}
 
 		cleanartistalbum = helpers.latinToAscii(helpers.replace_all(albums[0]+' '+albums[1], dic))
 
@@ -35,9 +34,9 @@ def searchNZB(albumid=None, new=False):
 		altterm = re.sub('[\.\-]', ' ', '%s %s' % (cleanartistalbum, year)).encode('utf-8')
 		
 		# Only use the year if the term could return a bunch of different albums, i.e. self-titled albums
-		if albums[0] in albums[1]:
+		if albums[0] in albums[1] or len(albums[0]) < 4 or len(albums[1]) < 4:
 			term = altterm	
-			
+		
 		logger.info("Searching for %s since it was marked as wanted" % term)
 		
 		resultlist = []

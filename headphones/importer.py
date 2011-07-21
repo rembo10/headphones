@@ -150,15 +150,15 @@ def addArtisttoDB(artistid):
 		rg_exists = myDB.select("SELECT * from albums WHERE AlbumID=?", [rg['id']])
 					
 		try:	
-			releaseid = mb.getReleaseGroup(rgid)
+			release_dict = mb.getReleaseGroup(rgid)
 		except Exception, e:
 			logger.info('Unable to get release information for %s - it may not be a valid release group' % rg['title'])
 			continue
 			
-		if not releaseid:
+		if not release_dict:
 			continue
 		
-		release = mb.getRelease(releaseid)
+		release = mb.getRelease(release_dict['releaseid'])
 		
 		if not release:
 			logger.warn('Unable to get release information for %s. Skipping for now.' % rg['title'])
@@ -170,7 +170,7 @@ def addArtisttoDB(artistid):
 		if len(rg_exists):
 		
 			newValueDict = {"AlbumASIN":		release['asin'],
-							"ReleaseDate":		release['date'],
+							"ReleaseDate":		release_dict['releasedate'],
 							}
 		
 		else:
@@ -179,7 +179,7 @@ def addArtisttoDB(artistid):
 							"ArtistName": 		artist['artist_name'],
 							"AlbumTitle":		rg['title'],
 							"AlbumASIN":		release['asin'],
-							"ReleaseDate":		release['date'],
+							"ReleaseDate":		release_dict['releasedate'],
 							"DateAdded":		helpers.today(),
 							}
 							

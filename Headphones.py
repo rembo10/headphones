@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os, sys
+import os, sys, locale
 
 from lib.configobj import ConfigObj
 
@@ -23,6 +23,11 @@ def main():
 	
 	headphones.PROG_DIR = os.path.dirname(headphones.FULL_PATH)
 	headphones.ARGS = sys.argv[1:]
+	
+	try:
+		locale.setlocale(locale.LC_ALL, "")
+	except Exception, e:
+		pass
 	
 	# Set up and gather command line arguments
 	parser = argparse.ArgumentParser(description='Music add-on for SABnzbd+')

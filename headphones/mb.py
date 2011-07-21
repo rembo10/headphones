@@ -146,7 +146,7 @@ def getReleaseGroup(rgid):
 		# to get more detailed release info (ASIN, track count, etc.)
 		for release in releaseGroup.releases:
 	
-			inc = ws.ReleaseIncludes(tracks=True)		
+			inc = ws.ReleaseIncludes(tracks=True, releaseEvents=True)		
 			releaseResult = None
 			attempt = 0
 			
@@ -168,16 +168,19 @@ def getReleaseGroup(rgid):
 			release_dict = {
 				'asin':			bool(releaseResult.asin),
 				'tracks':		len(releaseResult.getTracks()),
-				'releaseid':	u.extractUuid(releaseResult.id)
+				'releaseid':	u.extractUuid(releaseResult.id),
+				'releasedate':	releaseResult.getEarliestReleaseDate()
 				}
 			
 			releaselist.append(release_dict)
 	
 		a = multikeysort(releaselist, ['-asin', '-tracks'])
+		b = sorted(releaselist, key=lambda item: item['releasedate'])
 	
-		releaseid = a[0]['releaseid']
+		release_dict = {'releaseid' :a[0]['releaseid'],
+						'releasedate'	: b[0]['releasedate']}
 		
-		return releaseid
+		return release_dict
 	
 def getRelease(releaseid):
 	"""
