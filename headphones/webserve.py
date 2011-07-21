@@ -1,6 +1,8 @@
 import os, sys
 
 import cherrypy
+from mako.template import Template
+from mako.lookup import TemplateLookup
 
 import lib.musicbrainz2.webservice as ws
 import lib.musicbrainz2.model as m
@@ -15,6 +17,12 @@ from headphones.mb import getReleaseGroup
 from headphones import templates, logger, searcher, db, importer, helpers, mb
 from headphones.helpers import checked, radio
 
+hplookup = TemplateLookup(directories=[os.path.join(headphones.PROG_DIR, 'data/interfaces/default/')], output_encodig='utf-8')
+
+def serve_template(templatename, **kwargs):
+	template = hplookup.get(templatename)
+	print template.render(**kwargs)
+	
 
 class WebInterface(object):
 
