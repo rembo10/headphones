@@ -12,6 +12,13 @@ def scanMusic(dir=None):
 
 	if not dir:
 		dir = headphones.MUSIC_DIR
+		
+	try:
+		dir = str(dir)
+	except UnicodeEncodeError:
+		dir = unicode(dir).encode('unicode_escape')
+		
+	logger.info('Starting Music Scan with directory: %s' % dir)
 
 	results = []
 	
@@ -32,7 +39,8 @@ def scanMusic(dir=None):
 				f = MediaFile(song)
 				#logger.debug('Reading: %s' % song.decode('UTF-8'))
 			except:
-				logger.warn('Could not read file: %s' % song.decode('UTF-8'))
+				logger.warn('Could not read file: %s' % song)
+				continue
 			else:	
 				if f.albumartist:
 					artist = f.albumartist

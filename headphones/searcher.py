@@ -14,7 +14,8 @@ def searchNZB(albumid=None, new=False):
 		results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted" AND AlbumID=?', [albumid])
 	else:
 		results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted"')
-	
+		new = True
+		
 	for albums in results:
 		
 		albumid = albums[2]
@@ -106,7 +107,6 @@ def searchNZB(albumid=None, new=False):
 			logger.info(u"Parsing results from "+searchURL)
 				
 			d = feedparser.parse(searchURL)
-			
 			
 			if not len(d.entries):
 				logger.info(u"No results found from %s for %s" % (headphones.NEWZNAB_HOST, term))
@@ -232,6 +232,12 @@ def searchNZB(albumid=None, new=False):
 					else:
 						bestqual = nzblist[i]
 						break
+						
+				try:
+					x = bestqual[0]
+				except UnboundLocalError:
+					logger.info('No more matches for %s' % term)
+					return
 						
 			else:
 				bestqual = nzblist[0]
