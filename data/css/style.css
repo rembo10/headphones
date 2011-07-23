@@ -99,6 +99,10 @@ h1{
 	font-size: 16px;
 	margin-left: 100px;
 	}
+.logtext{
+	font-size: 14px;
+	padding: 4px
+	}
 .bigtext{
 	font-size: 22px;
 	}

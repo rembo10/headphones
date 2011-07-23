@@ -487,6 +487,24 @@ class WebInterface(object):
 		return page
 	history.exposed = True
 	
+	def logs(self):
+		page = [templates._header]
+		page.append(templates._logobar)
+		page.append(templates._nav)
+		page.append('''<div class="table"><p class="logtext">''')
+		fileHandle = open(os.path.join(headphones.LOG_DIR, 'headphones.log'))
+		lineList = fileHandle.readlines()
+		fileHandle.close()
+		i = -1
+		while i > -100:
+			page.append(lineList[i] + '<br /><br />')
+			i -= 1
+		page.append('''</p></div>''')
+		page.append(templates._footer % headphones.CURRENT_VERSION)
+		return page
+	
+	logs.exposed = True
+	
 	def clearhistory(self):
 
 		logger.info(u"Clearing history")

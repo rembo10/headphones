@@ -25,14 +25,12 @@ def findArtist(name, limit=1):
 		
 		chars = set('!?')
 		if any((c in chars) for c in name):
-			term = '"'+name+'"'
-		else:
-			term = name
+			name = '"'+name+'"'
 		
 		while attempt < 5:
 		
 			try:
-				artistResults = q.getArtists(ws.ArtistFilter(query=term, limit=limit))
+				artistResults = q.getArtists(ws.ArtistFilter(query=name, limit=limit))
 				break
 			except WebServiceError, e:
 				logger.warn('Attempt to query MusicBrainz for %s failed: %s' % (name, e))

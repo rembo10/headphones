@@ -34,6 +34,7 @@ _nav = '''<div class="nav">
 					<a href="upcoming">UPCOMING</a>
 					<a href="manage">MANAGE</a>    
 					<a href="history">HISTORY</a>
+					<a href="logs">LOGS</a>
 					<a href="config">SETTINGS</a>
 					<div style="float:right">
 					  <a href="restart" title="Restart"><img src="images/restart.png" height="15px" width="15px" border="0"></a>
@@ -148,7 +149,7 @@ configform = form = '''
 
                     <p>Music Download Directory:</p><input type="text" name="download_dir" value="%s" size="60"><br>
 
-                    <i class="smalltext">Absolute or relative path to the dir where SAB downloads your music<br>
+                    <i class="smalltext">Full path to the directory where SAB downloads your music<br>
                     i.e. Downloads/music or /Users/name/Downloads/music</i>
                 </td>
             </tr>
