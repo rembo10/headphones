@@ -121,7 +121,7 @@ def artistlist_to_mbids(artistlist):
 			addArtisttoDB(artistid)
 
 
-def addArtisttoDB(artistid):
+def addArtisttoDB(artistid, extrasonly=False):
 	
 	# Can't add various artists - throws an error from MB
 	if artistid == various_artists_mbid:
@@ -130,7 +130,7 @@ def addArtisttoDB(artistid):
 		
 	myDB = db.DBConnection()
 		
-	artist = mb.getArtist(artistid)
+	artist = mb.getArtist(artistid, extrasonly)
 	
 	if not artist:
 		return
@@ -189,6 +189,7 @@ def addArtisttoDB(artistid):
 							"AlbumASIN":		release['asin'],
 							"ReleaseDate":		release_dict['releasedate'],
 							"DateAdded":		helpers.today(),
+							"Type":				rg['type']
 							}
 							
 			if release['date'] > helpers.today():
@@ -219,3 +220,4 @@ def addArtisttoDB(artistid):
 	newValueDict = {"Status": 			"Active"}
 	
 	myDB.upsert("artists", newValueDict, controlValueDict)
+	logger.info(u"Updating complete for: " + artist['artist_name'])

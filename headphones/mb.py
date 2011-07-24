@@ -66,7 +66,7 @@ def findArtist(name, limit=1):
 			
 		return artistlist
 
-def getArtist(artistid):
+def getArtist(artistid, extrasonly=False):
 
 	with mb_lock:
 	
@@ -101,14 +101,54 @@ def getArtist(artistid):
 		
 		releasegroups = []
 		
-		for rg in artist.getReleaseGroups():
+		if not extrasonly:
+		
+			for rg in artist.getReleaseGroups():
+				
+				releasegroups.append({
+							'title':		rg.title,
+							'id':			u.extractUuid(rg.id),
+							'url':			rg.id,
+							'type':			u.getReleaseTypeName(rg.type)
+					})
+				
+		# See if we need to grab extras
+		myDB = db.DBConnection()
+
+		try:
+			includeExtras = myDB.select('SELECT IncludeExtras from artists WHERE ArtistID=?', [artistid])[0][0]
+		except IndexError:
+			includeExtras = False
+		
+		if includeExtras:
+			includes = [m.Release.TYPE_COMPILATION, m.Release.TYPE_REMIX, m.Release.TYPE_SINGLE, m.Release.TYPE_LIVE, m.Release.TYPE_EP]
+			for include in includes:
+				inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, include), releaseGroups=True)
+		
+				artist = None
+				attempt = 0
 			
-			releasegroups.append({
-						'title':		rg.title,
-						'id':			u.extractUuid(rg.id),
-						'url':			rg.id,
-						'type':			u.getReleaseTypeName(rg.type)
-				})
+				while attempt < 5:
+		
+					try:
+						artist = q.getArtistById(artistid, inc)
+						break
+					except WebServiceError, e:
+						logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s. Sleeping 10 seconds' % artistid)
+						attempt += 1
+						time.sleep(5)
+						
+				if not artist:
+					continue
+					
+				for rg in artist.getReleaseGroups():
+			
+					releasegroups.append({
+							'title':		rg.title,
+							'id':			u.extractUuid(rg.id),
+							'url':			rg.id,
+							'type':			u.getReleaseTypeName(rg.type)
+						})
 				
 		artist_dict['releasegroups'] = releasegroups
 		
@@ -266,25 +306,4 @@ def findArtistbyAlbum(name):
 		artist_dict['score'] = result.score
 	
 	return artist_dict
-
-def getExtras(artistid):
-
-	types = [m.Release.TYPE_EP, m.Release.TYPE_SINGLE, m.Release.TYPE_LIVE, m.Release.TYPE_REMIX,
-			m.Release.TYPE_COMPILATION]
-			
-	for type in types:
-	
-		inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, type), releaseGroups=True)
-		artist = q.getArtistById(artistid, inc)
-		
-		for rg in artist.getReleaseGroups():
-		
-			rgid = u.extractUuid(rg.id)
-			releaseid = getReleaseGroup(rgid)
-			
-			inc = ws.ReleaseIncludes(artist=True, releaseEvents= True, tracks= True, releaseGroup=True)
-			results = ws.Query().getReleaseById(releaseid, inc)
-			
-			print results.title
-			print u.getReleaseTypeName(results.releaseGroup.type)
 	

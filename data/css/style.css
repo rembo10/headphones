@@ -99,9 +99,18 @@ h1{
 	font-size: 16px;
 	margin-left: 100px;
 	}
+.mediumcentered{
+	font-size: 18px;
+	text-align: center;
+	}
+.bluecenter{
+	color: #0000FF;
+	text-align: center;
+	font-size: 14px;
+	}
 .logtext{
 	font-size: 14px;
-	padding: 4px
+	white-space: normal;
 	}
 .bigtext{
 	font-size: 22px;

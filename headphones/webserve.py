@@ -97,47 +97,25 @@ class WebInterface(object):
 		page.append(templates._nav)
 		myDB = db.DBConnection()
 		
-		artist = myDB.select('SELECT ArtistName from artists WHERE ArtistID=?', [ArtistID])
-		results = myDB.select('SELECT AlbumTitle, ReleaseDate, AlbumID, Status, ArtistName, AlbumASIN from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
+		artist = myDB.select('SELECT ArtistName, IncludeExtras from artists WHERE ArtistID=?', [ArtistID])
 
-		i = 0
-		page.append('''<div class="table"><table border="0" cellpadding="3">
-						<tr><p align="center">%s <br /></p></tr>
-						<tr>
-						<th align="left" width="30"></th>
-						<th align="left" width="120">Album Name</th>
-						<th align="center" width="100">Release Date</th>
-						<th align="center" width="180">Status</th>
-						<th align="center">Have</th>
-						</tr>''' % artist[0][0])
-		while i < len(results):
-			totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=?', [results[i][2]]))
-			havetracks = len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ?', [results[i][4], results[i][0]]))
-			try:
-				percent = (havetracks*100)/totaltracks
-				if percent > 100:
-					percent = 100
-			except ZeroDivisionError:
-					percent = 100
-			if results[i][3] == 'Skipped':
-				newStatus = '''%s [<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">want</a>]''' % (results[i][3], results[i][2], ArtistID)
-			elif results[i][3] == 'Wanted':
-				newStatus = '''<b>%s</b>[<A class="external" href="unqueueAlbum?AlbumID=%s&ArtistID=%s">skip</a>]''' % (results[i][3], results[i][2], ArtistID)				
-			elif results[i][3] == 'Downloaded':
-				newStatus = '''<b>%s</b>[<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">retry</a>]''' % (results[i][3], results[i][2], ArtistID)
-			elif results[i][3] == 'Snatched':
-				newStatus = '''<b>%s</b>[<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">retry</a>][<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s&new=True">new</a>]''' % (results[i][3], results[i][2], ArtistID, results[i][2], ArtistID)
-			else:
-				newStatus = '%s' % (results[i][3])
-			page.append('''<tr><td align="left"><img src="http://ec1.images-amazon.com/images/P/%s.01.MZZZZZZZ.jpg" height="50" width="50"></td>
-							<td align="left" width="240"><a href="albumPage?AlbumID=%s">%s</a> 
-							(<A class="external" href="http://musicbrainz.org/release-group/%s.html">link</a>)</td>
-							<td align="center" width="160">%s</td>
-							<td align="center">%s</td>
-							<td><div class="progress-container"><div style="width: %s%%"><div class="smalltext3">%s/%s</div></div></div></td></tr>''' % (results[i][5], results[i][2], results[i][0], results[i][2], results[i][1], newStatus, percent, havetracks, totaltracks))	
-			i = i+1
+		page.append('''<div class="table"><table><p align="center">%s</p>
+						''' % artist[0][0])
+		
+		page.append(templates.displayAlbums(ArtistID, 'Album'))
+		
+		releasetypes = ['Compilation', 'EP', 'Single', 'Live', 'Remix']
+		
+		for type in releasetypes:
+			if templates.displayAlbums(ArtistID, type):
+				page.append(templates.displayAlbums(ArtistID, type))
+				
+		page.append('</table>')
+		
+		if not artist[0][1]:
+			page.append('''<br /><div class="bluecenter"><a href="getExtras?ArtistID=%s">Get Extras for %s!</a></div>'''
+							% (ArtistID, artist[0][0]))
 
-		page.append('''</table></div>''')
 		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
 	artistPage.exposed = True
@@ -246,6 +224,19 @@ class WebInterface(object):
 		raise cherrypy.HTTPRedirect("home")
 		
 	addArtist.exposed = True
+	
+	def getExtras(self, ArtistID):
+		
+		myDB = db.DBConnection()
+		controlValueDict = {'ArtistID': ArtistID}
+		newValueDict = {'IncludeExtras': 1}
+		myDB.upsert("artists", newValueDict, controlValueDict)
+		
+		threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True]).start()
+		time.sleep(10)
+		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
+		
+	getExtras.exposed = True
 	
 	def pauseArtist(self, ArtistID):
 	
