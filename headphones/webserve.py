@@ -102,7 +102,8 @@ class WebInterface(object):
 		page.append('''<div class="table"><table><p align="center">%s</p>
 						''' % artist[0][0])
 		
-		page.append(templates.displayAlbums(ArtistID, 'Album'))
+		if templates.displayAlbums(ArtistID, 'Album'):
+			page.append(templates.displayAlbums(ArtistID, 'Album'))
 		
 		releasetypes = ['Compilation', 'EP', 'Single', 'Live', 'Remix']
 		
