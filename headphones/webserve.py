@@ -33,9 +33,8 @@ class WebInterface(object):
 		page.append(templates._logobar)
 		page.append(templates._nav)
 		myDB = db.DBConnection()
-		results = myDB.select('SELECT ArtistName, ArtistID, Status from artists order by ArtistSortName collate nocase')
+		results = myDB.select('SELECT ArtistName, ArtistID, Status, LatestAlbum, ReleaseDate, AlbumID, TotalTracks, HaveTracks from artists order by ArtistSortName collate nocase')
 		if len(results):
-			i = 0
 			page.append('''<div class="table"><table border="0" cellpadding="3">
 						<tr>
 						<th align="left" width="170">Artist Name</th>
@@ -43,40 +42,45 @@ class WebInterface(object):
 						<th align="center" width="300">Upcoming Albums</th>
 						<th align="center">Have</th>
 						</tr>''')
-			while i < len(results):
-				latestalbum = myDB.select('SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [results[i][1]])
-				totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [results[i][1]]))
-				havetracks = len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [results[i][0]]))
+			for artist in results:
+				totaltracks = artist['TotalTracks']
+				havetracks = artist['HaveTracks']
+				if not havetracks:
+					havetracks = 0
 				try:
 					percent = (havetracks*100.0)/totaltracks
 					if percent > 100:
 						percent = 100
-				except ZeroDivisionError:
-					percent = 100
-				today = datetime.date.today()
-				if len(latestalbum) > 0:
-					if latestalbum[0][1] > datetime.date.isoformat(today):
-						newalbumName = '<a class="green" href="albumPage?AlbumID=%s"><i><b>%s</b></i>' % (latestalbum[0][3], latestalbum[0][0])
-						releaseDate = '(%s)</a>' % latestalbum[0][1]
+				except (ZeroDivisionError, TypeError):
+					percent = 0
+					totaltracks = '?'
+
+				if artist['LatestAlbum']:
+					if artist['ReleaseDate'] > helpers.today():
+						newalbumName = '<a class="green" href="albumPage?AlbumID=%s"><i><b>%s</b></i>' % (artist['AlbumID'], artist['LatestAlbum'])
+						releaseDate = '(%s)</a>' % artist['ReleaseDate']
 					else:
-						newalbumName = '<a class="gray" href="albumPage?AlbumID=%s"><i>%s</i>' % (latestalbum[0][3], latestalbum[0][0])
+						newalbumName = '<a class="gray" href="albumPage?AlbumID=%s"><i>%s</i>' % (artist['AlbumID'], artist['LatestAlbum'])
 						releaseDate = ""
-				if len(latestalbum) == 0:
+				else:
 						newalbumName = '<font color="#CFCFCF">None</font>'
 						releaseDate = ""					
-				if results[i][2] == 'Paused':
-					newStatus = '''<font color="red"><b>%s</b></font>(<A class="external" href="resumeArtist?ArtistID=%s">resume</a>)''' % (results[i][2], results[i][1])
-				elif results[i][2] == 'Loading':
+				
+				if artist['Status'] == 'Paused':
+					newStatus = '''<font color="red"><b>%s</b></font>(<A class="external" href="resumeArtist?ArtistID=%s">resume</a>)''' % (artist['Status'], artist['ArtistID'])
+				elif artist['Status'] == 'Loading':
 					newStatus = '''<a class="gray">Loading...</a>'''
 				else:
-					newStatus = '''%s(<A class="external" href="pauseArtist?ArtistID=%s">pause</a>)''' % (results[i][2], results[i][1])
+					newStatus = '''%s(<A class="external" href="pauseArtist?ArtistID=%s">pause</a>)''' % (artist['Status'], artist['ArtistID'])
+				
 				page.append('''<tr><td align="left" width="300"><a href="artistPage?ArtistID=%s">%s</a> 
 								(<A class="external" href="http://musicbrainz.org/artist/%s">link</a>) [<A class="externalred" href="deleteArtist?ArtistID=%s">delete</a>]</td>
 								<td align="center" width="160">%s</td>
 								<td align="center">%s %s</td>
 								<td><div class="progress-container"><div style="width: %s%%"><div class="smalltext3">%s/%s</div></div></div></td></tr>
-								''' % (results[i][1], results[i][0], results[i][1], results[i][1], newStatus, newalbumName, releaseDate, percent, havetracks, totaltracks))	
-				i = i+1
+								''' % (artist['ArtistID'], artist['ArtistName'], artist['ArtistID'], 
+										artist['ArtistID'], newStatus, newalbumName, releaseDate, 
+										percent, havetracks, totaltracks))	
 
 			page.append('''</table></div>''')
 			page.append(templates._footer % headphones.CURRENT_VERSION)
@@ -484,13 +488,18 @@ class WebInterface(object):
 		page.append(templates._logobar)
 		page.append(templates._nav)
 		page.append('''<div class="table"><p class="logtext">''')
-		fileHandle = open(os.path.join(headphones.LOG_DIR, 'headphones.log'))
-		lineList = fileHandle.readlines()
-		fileHandle.close()
-		i = -1
-		while i > -100:
-			page.append(lineList[i] + '<br /><br />')
-			i -= 1
+		if os.path.isfile(os.path.join(headphones.LOG_DIR, 'headphones.log')):
+			fileHandle = open(os.path.join(headphones.LOG_DIR, 'headphones.log'))
+			lineList = fileHandle.readlines()
+			fileHandle.close()
+			i = -1
+			if len(lineList) < 100:
+				limit = -len(lineList)
+			else:
+				limit = -100
+			while i > limit:
+				page.append(lineList[i] + '<br /><br />')
+				i -= 1
 		page.append('''</p></div>''')
 		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page

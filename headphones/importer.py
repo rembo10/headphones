@@ -93,9 +93,9 @@ def is_exists(artistid):
 	
 	# See if the artist is already in the database
 	artistlist = myDB.select('SELECT ArtistID, ArtistName from artists WHERE ArtistID=?', [artistid])
-	
+
 	if any(artistid in x for x in artistlist):
-		logger.info(artistlist[0][1] + u" is already in the database, skipping")
+		logger.info(artistlist[0][1] + u" is already in the database. Updating 'have tracks', but not artist information")
 		return True
 	else:
 		return False
@@ -117,9 +117,19 @@ def artistlist_to_mbids(artistlist):
 			logger.info('MusicBrainz query turned up no matches for: %s' % artist)
 			continue
 		
+		# Add to database if it doesn't exist
 		if artistid != various_artists_mbid and not is_exists(artistid):
 			addArtisttoDB(artistid)
-
+			
+		# Update track count regardless of whether it already exists
+		if artistid != various_artists_mbid:
+	
+			myDB = db.DBConnection()
+			havetracks = len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['ArtistName']]))
+			
+			controlValueDict = {"ArtistID": 	artistid}
+			newValueDict = {"HaveTracks": 		havetracks}
+			myDB.upsert("artists", newValueDict, controlValueDict)
 
 def addArtisttoDB(artistid, extrasonly=False):
 	
@@ -216,8 +226,19 @@ def addArtisttoDB(artistid, extrasonly=False):
 		
 			myDB.upsert("tracks", newValueDict, controlValueDict)
 			
+	latestalbum = myDB.action('SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [artistid]).fetchone()
+	totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid]))
+	
 	controlValueDict = {"ArtistID": 	artistid}
-	newValueDict = {"Status": 			"Active"}
+	
+	if latestalbum:
+		newValueDict = {"Status": 			"Active",
+						"LatestAlbum":		latestalbum['AlbumTitle'],
+						"ReleaseDate":		latestalbum['ReleaseDate'],
+						"AlbumID":			latestalbum['AlbumID'],
+						"TotalTracks":		totaltracks}
+	else:
+		newValueDict = {"Status":			"Active"}
 	
 	myDB.upsert("artists", newValueDict, controlValueDict)
 	logger.info(u"Updating complete for: " + artist['artist_name'])
