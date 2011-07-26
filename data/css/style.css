@@ -1,11 +1,4 @@
-body{
-	font-family:"Lucida Grande", "Lucida Sans Unicode", Verdana, Arial,
-	Helvetica, sans-serif;
-	font-size:16px;
-	background-color: #ebf4fb;
-	padding: 5px;
-	}
-	
+
 h1{
 	font-family:"Lucida Grande", "Lucida Sans Unicode", Verdana, Arial,
 	Helvetica, sans-serif;
@@ -15,10 +8,7 @@ h1{
 .container{
 	width: 95%;
 	}	
-.header{
-	background-color: #EEB4B4;
-	width: 80%;
-	}
+
 .config{
 	font-size:14px;
 	margin-left: 30px;
@@ -31,19 +21,7 @@ h1{
 	-moz-border-radius: 10px;
 	border-radius: 10px;
 	}
-.logo{
-	font-family:"Lucida Grande", "Lucida Sans Unicode", Verdana, Arial,
-	Helvetica, sans-serif;
-	font-size:20px;
-	color: #8B8989;
-	margin-left: 30px;
-	margin-top: 0px;
-	}
-.search{
-	position: absolute;
-	top: 50px;
-	right: 70px;
-	}
+
 .data{
 	background-color: #ebf4fb;
 	font-size:24px;
@@ -66,19 +44,7 @@ h1{
 	-moz-border-radius: 20px;
 	border-radius: 20px;
 	}
-.nav{
-	padding: 2px;
-	font-size:19px;
-	color: grey;
-	background-color: #bbbbbb;
-	width: 95%;
-	text-align: center;
-	margin-left: auto;
-	margin-right: 10px;
-	-moz-border-radius: 20px;
-	border-radius: 20px;
-	word-spacing: 18px;
-	}
+
 .center{
 	text-align: center;
 	font-size: 18px;
@@ -102,9 +68,7 @@ h1{
 .bigtext{
 	font-size: 22px;
 	}
-.updatebar{
-	text-align: center;
-	}
+
 .version{
 	font-size: 12px;
 	}
