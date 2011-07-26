@@ -3,6 +3,7 @@ import os
 import cherrypy
 from mako.template import Template
 from mako.lookup import TemplateLookup
+from mako import exceptions
 
 import time
 import threading
@@ -14,9 +15,12 @@ from headphones.helpers import checked, radio
 _hplookup = TemplateLookup(directories=[os.path.join(str(headphones.PROG_DIR), 'data/interfaces/default/')], output_encoding='utf-8')
 
 def serve_template(templatename, **kwargs):
+	try:
 		template = _hplookup.get_template(templatename)
 		kwargs['hpRoot'] = headphones.HTTP_ROOT
 		return template.render(**kwargs)
+	except:
+		return exceptions.html_error_template().render()
 	
 class WebInterface(object):
 	
@@ -32,127 +36,37 @@ class WebInterface(object):
 	
 
 	def artistPage(self, ArtistID):
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
 		myDB = db.DBConnection()
 		
-		artist = myDB.select('SELECT ArtistName from artists WHERE ArtistID=?', [ArtistID])
-		results = myDB.select('SELECT AlbumTitle, ReleaseDate, AlbumID, Status, ArtistName, AlbumASIN from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
+		artist = myDB.action('SELECT ArtistName from artists WHERE ArtistID=?', [ArtistID]).fetchone()
+		albums = myDB.select('SELECT AlbumTitle, ReleaseDate, AlbumID, Status, ArtistName, AlbumASIN from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
 
-		i = 0
-		page.append('''<div class="table"><table border="0" cellpadding="3">
-						<tr><p align="center">%s <br /></p></tr>
-						<tr>
-						<th align="left" width="30"></th>
-						<th align="left" width="120">Album Name</th>
-						<th align="center" width="100">Release Date</th>
-						<th align="center" width="180">Status</th>
-						<th align="center">Have</th>
-						</tr>''' % artist[0][0])
-		while i < len(results):
-			totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=?', [results[i][2]]))
-			havetracks = len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ?', [results[i][4], results[i][0]]))
-			try:
-				percent = (havetracks*100)/totaltracks
-				if percent > 100:
-					percent = 100
-			except ZeroDivisionError:
-					percent = 100
-			if results[i][3] == 'Skipped':
-				newStatus = '''%s [<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">want</a>]''' % (results[i][3], results[i][2], ArtistID)
-			elif results[i][3] == 'Wanted':
-				newStatus = '''<b>%s</b>[<A class="external" href="unqueueAlbum?AlbumID=%s&ArtistID=%s">skip</a>]''' % (results[i][3], results[i][2], ArtistID)				
-			elif results[i][3] == 'Downloaded':
-				newStatus = '''<b>%s</b>[<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">retry</a>]''' % (results[i][3], results[i][2], ArtistID)
-			elif results[i][3] == 'Snatched':
-				newStatus = '''<b>%s</b>[<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">retry</a>][<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s&new=True">new</a>]''' % (results[i][3], results[i][2], ArtistID, results[i][2], ArtistID)
-			else:
-				newStatus = '%s' % (results[i][3])
-			page.append('''<tr><td align="left"><img src="http://ec1.images-amazon.com/images/P/%s.01.MZZZZZZZ.jpg" height="50" width="50"></td>
-							<td align="left" width="240"><a href="albumPage?AlbumID=%s">%s</a> 
-							(<A class="external" href="http://musicbrainz.org/release-group/%s.html">link</a>)</td>
-							<td align="center" width="160">%s</td>
-							<td align="center">%s</td>
-							<td><div class="progress-container"><div style="width: %s%%"><div class="smalltext3">%s/%s</div></div></div></td></tr>''' % (results[i][5], results[i][2], results[i][0], results[i][2], results[i][1], newStatus, percent, havetracks, totaltracks))	
-			i = i+1
-
-		page.append('''</table></div>''')
-		page.append(templates._footer % headphones.CURRENT_VERSION)
-		return page
+		return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums, artistID=ArtistID)
 	artistPage.exposed = True
 	
 	
 	def albumPage(self, AlbumID):
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
+
 		myDB = db.DBConnection()
 		
-		results = myDB.select('SELECT ArtistID, ArtistName, AlbumTitle, TrackTitle, TrackDuration, TrackID, AlbumASIN from tracks WHERE AlbumID=?', [AlbumID])
+		album = myDB.action('SELECT * FROM albums WHERE AlbumID=?', [AlbumID]).fetchone()
+		tracks = myDB.select('SELECT ArtistID, ArtistName, AlbumTitle, TrackTitle, TrackDuration, TrackID, AlbumASIN FROM tracks WHERE AlbumID=?', [AlbumID])
 		
-		if results[0][6]:
-			albumart = '''<br /><img src="http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg" height="200" width="200"><br /><br />''' % results[0][6]
-		else:
-			albumart = ''
-		i = 0
-		page.append('''<div class="table" align="center"><table border="0" cellpadding="3">
-					<tr><a href="artistPage?ArtistID=%s">%s</a> - %s<br />
-					<a href="queueAlbum?AlbumID=%s&ArtistID=%s">Download<br />%s</tr>
-					<br /><tr>
-					<th align="left" width="100">Track #</th>
-					<th align="left" width="300">Track Title</th>
-					<th align="center" width="100">Duration</th>
-					<th>      </th>
-					</tr>''' % (results[0][0], results[0][1], results[0][2], AlbumID, results[0][0], albumart))
-		while i < len(results):
-			trackmatches = myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ? AND TrackTitle like ?', [results[i][1], results[i][2], results[i][3]])
-
-			if len(trackmatches):
-				have = '<img src="images/checkmark.png" width="20px">'
-			else:
-				have = ''
-			if results[i][4]:
-				duration = helpers.convert_milliseconds(results[i][4])
-			else:
-				duration = 'n/a'
-			page.append('''<tr><td align="left" width="120">%s</td>
-							<td align="left" width="240">%s (<A class="external" href="http://musicbrainz.org/recording/%s.html">link</a>)</td>
-							<td align="center">%s</td>
-							<td>%s</td></tr>''' % (i+1, results[i][3], results[i][5], duration, have))	
-			i = i+1
-
-		page.append('''</table></div>''')
-		page.append(templates._footer % headphones.CURRENT_VERSION)
-		return page
+		return serve_template(templatename="album.html", title=album['AlbumTitle'],tracks=tracks, album=album)
 	
 	albumPage.exposed = True
 	
 	
 	def findArtist(self, name):
-	
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
+
 		if len(name) == 0 or name == 'Add an artist':
 			raise cherrypy.HTTPRedirect("home")
 		else:
 			artistResults = mb.findArtist(name, limit=10)
-			if not artistResults:
-				logger.info(u"No results found for " + name)
-				page.append('''<div class="table"><p class="center">No results! <a class="blue" href="home">Go back</a></p></div>''')
-				return page
-			elif len(artistResults) > 1:
-				page.append('''<div class="table"><p class="center">Search returned multiple artists. Click the artist you want to add:</p>''')
-				for result in artistResults:
-					page.append('''<p class="mediumtext"><a href="addArtist?artistid=%s">%s</a> (<a class="externalred" href="artistInfo?artistid=%s">more info</a>)</p>''' % (result['id'], result['uniquename'], result['id']))
-				page.append('''</div>''')
-				return page
-			else:
-				for result in artistResults:
-					logger.info(u"Found one artist matching your search term: " + result['name'] +" ("+ result['id']+")")			
-					raise cherrypy.HTTPRedirect("addArtist?artistid=%s" % result['id'])
-		
+			if len(artistResults) == 1:
+				logger.info(u"Found one artist matching your search term: " + artistResults[0]['name'] +" ("+ artistResults[0]['id']+")")			
+				raise cherrypy.HTTPRedirect("addArtist?artistid=%s" % artistResults[0]['id'])
+		return serve_template(templatename="artistsearch.html", title="Search", results=artistResults)
 	findArtist.exposed = True
 
 	def artistInfo(self, artistid):
