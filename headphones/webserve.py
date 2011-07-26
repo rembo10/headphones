@@ -1,42 +1,33 @@
-import os, sys
+import os
 
 import cherrypy
 from mako.template import Template
 from mako.lookup import TemplateLookup
 
-import lib.musicbrainz2.webservice as ws
-import lib.musicbrainz2.model as m
-import lib.musicbrainz2.utils as u
-
 import time
-import datetime
 import threading
 
 import headphones
-from headphones.mb import getReleaseGroup
-from headphones import templates, logger, searcher, db, importer, helpers, mb
+from headphones import templates, logger, db, importer, helpers, mb
 from headphones.helpers import checked, radio
 
+_hplookup = TemplateLookup(directories=[os.path.join(str(headphones.PROG_DIR), 'data/interfaces/default/')], output_encoding='utf-8')
 
+def serve_template(templatename, **kwargs):
+		template = _hplookup.get_template(templatename)
+		kwargs['hpRoot'] = headphones.HTTP_ROOT
+		return template.render(**kwargs)
+	
 class WebInterface(object):
 	
-	_templatedir = os.path.join(str(headphones.PROG_DIR), 'data/interfaces/default')
-	_hplookup = TemplateLookup(directories=[_templatedir], output_encoding='utf-8')
-
-	def serve_template(self, templatename,*args, **kwargs):
-		kwargs['templatedir'] = self._templatedir
-		template = self._hplookup.get_template(templatename)
-		
-		print template.render(*args, **kwargs)
-
 	def index(self):
 		raise cherrypy.HTTPRedirect("home")
 	index.exposed=True
 
 	def home(self):
 		myDB = db.DBConnection()
-		results = myDB.select('SELECT ArtistName, ArtistID, Status from artists order by ArtistSortName collate nocase')
-		return self.serve_template(templatename="index.html", title="Headphones",artists=results)
+		results = myDB.select('SELECT ArtistName, ArtistID, Status FROM artists ORDER BY ArtistSortName COLLATE NOCASE')
+		return serve_template(templatename="index.html", title='Home', artists=results)
 	home.exposed = True
 	
 
