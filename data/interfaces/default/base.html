@@ -1,4 +1,4 @@
-<%! 
+<%
 	import headphones 
 	from headphones import db
 
@@ -25,7 +25,7 @@
             </div>
             % elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
             <div id="updatebar">
-                A <a class="blue" href="http://github.com/rembo10/headphones/compare/$headphones.CURRENT_VERSION...$headphones.LATEST_VERSION"> newer version</a> is available. You're $headphones.COMMITS_BEHIND commits behind. <a class="blue" href="update">Click here to update</a>
+                A <a class="blue" href="http://github.com/rembo10/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}"> newer version</a> is available. You're ${headphones.COMMITS_BEHIND} commits behind. <a class="blue" href="update">Click here to update</a>
             </div>
             % endif
             <div class="logo">
@@ -48,10 +48,10 @@
             </div>
         </div>
         <div id="content">
-        	${self.body()}
+        	${next.body()}
 		</div>
 		<div id="footer">
-			<b>${numArtist} Artists</b>
+			<b>${numArtists} Artists</b>
 		</div>
 	</body> 
 </html>
