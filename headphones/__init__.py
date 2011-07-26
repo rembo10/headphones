@@ -385,12 +385,47 @@ def dbcheck():
 
 	conn=sqlite3.connect(DB_FILE)
 	c=conn.cursor()
-	c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT)')
-	c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT)')
+	c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT, IncludeExtras INTEGER, LatestAlbum TEXT, ReleaseDate TEXT, AlbumID TEXT, HaveTracks INTEGER, TotalTracks INTEGER)')
+	c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT, Type TEXT)')
 	c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT)')
 	c.execute('CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT)')
-	c.execute('CREATE TABLE IF NOT EXISTS extras (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT)')
 	c.execute('CREATE TABLE IF NOT EXISTS have (ArtistName TEXT, AlbumTitle TEXT, TrackNumber TEXT, TrackTitle TEXT, TrackLength TEXT, BitRate TEXT, Genre TEXT, Date TEXT, TrackID TEXT)')
+	
+	try:
+		c.execute('SELECT IncludeExtras from artists')
+	except sqlite3.OperationalError:
+		c.execute('ALTER TABLE artists ADD COLUMN IncludeExtras INTEGER DEFAULT 0')
+		
+	try:
+		c.execute('SELECT LatestAlbum from artists')
+	except sqlite3.OperationalError:
+		c.execute('ALTER TABLE artists ADD COLUMN LatestAlbum TEXT')
+		
+	try:
+		c.execute('SELECT ReleaseDate from artists')
+	except sqlite3.OperationalError:
+		c.execute('ALTER TABLE artists ADD COLUMN ReleaseDate TEXT')
+		
+	try:
+		c.execute('SELECT AlbumID from artists')
+	except sqlite3.OperationalError:
+		c.execute('ALTER TABLE artists ADD COLUMN AlbumID TEXT')
+		
+	try:
+		c.execute('SELECT HaveTracks from artists')
+	except sqlite3.OperationalError:
+		c.execute('ALTER TABLE artists ADD COLUMN HaveTracks INTEGER DEFAULT 0')
+		
+	try:
+		c.execute('SELECT TotalTracks from artists')
+	except sqlite3.OperationalError:
+		c.execute('ALTER TABLE artists ADD COLUMN TotalTracks INTEGER DEFAULT 0')
+		
+	try:
+		c.execute('SELECT Type from albums')
+	except sqlite3.OperationalError:
+		c.execute('ALTER TABLE albums ADD COLUMN Type TEXT DEFAULT "Album"')
+	
 	conn.commit()
 	c.close()
 

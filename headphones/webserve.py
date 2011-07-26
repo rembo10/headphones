@@ -30,7 +30,7 @@ class WebInterface(object):
 
 	def home(self):
 		myDB = db.DBConnection()
-		results = myDB.select('SELECT ArtistName, ArtistID, Status FROM artists ORDER BY ArtistSortName COLLATE NOCASE')
+		results = myDB.select('SELECT ArtistName, ArtistID, Status, LatestAlbum, ReleaseDate, AlbumID, TotalTracks, HaveTracks from artists order by ArtistSortName COLLATE NOCASE')
 		return serve_template(templatename="index.html", title='Home', artists=results)
 	home.exposed = True
 	
@@ -38,7 +38,7 @@ class WebInterface(object):
 	def artistPage(self, ArtistID):
 		myDB = db.DBConnection()
 		
-		artist = myDB.action('SELECT ArtistName from artists WHERE ArtistID=?', [ArtistID]).fetchone()
+		artist = myDB.action('SELECT ArtistName, IncludeExtras FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
 		albums = myDB.select('SELECT AlbumTitle, ReleaseDate, AlbumID, Status, ArtistName, AlbumASIN from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
 
 		return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums, artistID=ArtistID)
@@ -100,6 +100,19 @@ class WebInterface(object):
 		raise cherrypy.HTTPRedirect("home")
 		
 	addArtist.exposed = True
+	
+	def getExtras(self, ArtistID):
+		
+		myDB = db.DBConnection()
+		controlValueDict = {'ArtistID': ArtistID}
+		newValueDict = {'IncludeExtras': 1}
+		myDB.upsert("artists", newValueDict, controlValueDict)
+		
+		threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True]).start()
+		time.sleep(10)
+		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
+		
+	getExtras.exposed = True
 	
 	def pauseArtist(self, ArtistID):
 	
@@ -340,6 +353,29 @@ class WebInterface(object):
 			page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
 	history.exposed = True
+	
+	def logs(self):
+		page = [templates._header]
+		page.append(templates._logobar)
+		page.append(templates._nav)
+		page.append('''<div class="table"><p class="logtext">''')
+		if os.path.isfile(os.path.join(headphones.LOG_DIR, 'headphones.log')):
+			fileHandle = open(os.path.join(headphones.LOG_DIR, 'headphones.log'))
+			lineList = fileHandle.readlines()
+			fileHandle.close()
+			i = -1
+			if len(lineList) < 100:
+				limit = -len(lineList)
+			else:
+				limit = -100
+			while i > limit:
+				page.append(lineList[i] + '<br /><br />')
+				i -= 1
+		page.append('''</p></div>''')
+		page.append(templates._footer % headphones.CURRENT_VERSION)
+		return page
+	
+	logs.exposed = True
 	
 	def clearhistory(self):
 

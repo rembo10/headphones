@@ -25,14 +25,12 @@ def findArtist(name, limit=1):
 		
 		chars = set('!?')
 		if any((c in chars) for c in name):
-			term = '"'+name+'"'
-		else:
-			term = name
+			name = '"'+name+'"'
 		
 		while attempt < 5:
 		
 			try:
-				artistResults = q.getArtists(ws.ArtistFilter(query=term, limit=limit))
+				artistResults = q.getArtists(ws.ArtistFilter(query=name, limit=limit))
 				break
 			except WebServiceError, e:
 				logger.warn('Attempt to query MusicBrainz for %s failed: %s' % (name, e))
@@ -68,7 +66,7 @@ def findArtist(name, limit=1):
 			
 		return artistlist
 
-def getArtist(artistid):
+def getArtist(artistid, extrasonly=False):
 
 	with mb_lock:
 	
@@ -103,14 +101,54 @@ def getArtist(artistid):
 		
 		releasegroups = []
 		
-		for rg in artist.getReleaseGroups():
+		if not extrasonly:
+		
+			for rg in artist.getReleaseGroups():
+				
+				releasegroups.append({
+							'title':		rg.title,
+							'id':			u.extractUuid(rg.id),
+							'url':			rg.id,
+							'type':			u.getReleaseTypeName(rg.type)
+					})
+				
+		# See if we need to grab extras
+		myDB = db.DBConnection()
+
+		try:
+			includeExtras = myDB.select('SELECT IncludeExtras from artists WHERE ArtistID=?', [artistid])[0][0]
+		except IndexError:
+			includeExtras = False
+		
+		if includeExtras:
+			includes = [m.Release.TYPE_COMPILATION, m.Release.TYPE_REMIX, m.Release.TYPE_SINGLE, m.Release.TYPE_LIVE, m.Release.TYPE_EP]
+			for include in includes:
+				inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, include), releaseGroups=True)
+		
+				artist = None
+				attempt = 0
 			
-			releasegroups.append({
-						'title':		rg.title,
-						'id':			u.extractUuid(rg.id),
-						'url':			rg.id,
-						'type':			u.getReleaseTypeName(rg.type)
-				})
+				while attempt < 5:
+		
+					try:
+						artist = q.getArtistById(artistid, inc)
+						break
+					except WebServiceError, e:
+						logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s. Sleeping 10 seconds' % artistid)
+						attempt += 1
+						time.sleep(5)
+						
+				if not artist:
+					continue
+					
+				for rg in artist.getReleaseGroups():
+			
+					releasegroups.append({
+							'title':		rg.title,
+							'id':			u.extractUuid(rg.id),
+							'url':			rg.id,
+							'type':			u.getReleaseTypeName(rg.type)
+						})
 				
 		artist_dict['releasegroups'] = releasegroups
 		
@@ -146,7 +184,7 @@ def getReleaseGroup(rgid):
 		# to get more detailed release info (ASIN, track count, etc.)
 		for release in releaseGroup.releases:
 	
-			inc = ws.ReleaseIncludes(tracks=True)		
+			inc = ws.ReleaseIncludes(tracks=True, releaseEvents=True)		
 			releaseResult = None
 			attempt = 0
 			
@@ -168,16 +206,18 @@ def getReleaseGroup(rgid):
 			release_dict = {
 				'asin':			bool(releaseResult.asin),
 				'tracks':		len(releaseResult.getTracks()),
-				'releaseid':	u.extractUuid(releaseResult.id)
+				'releaseid':	u.extractUuid(releaseResult.id),
+				'releasedate':	releaseResult.getEarliestReleaseDate()
 				}
 			
 			releaselist.append(release_dict)
 	
 		a = multikeysort(releaselist, ['-asin', '-tracks'])
-	
-		releaseid = a[0]['releaseid']
 		
-		return releaseid
+		release_dict = {'releaseid' :a[0]['releaseid'],
+						'releasedate'	: releaselist[0]['releasedate']}
+		
+		return release_dict
 	
 def getRelease(releaseid):
 	"""
@@ -266,25 +306,4 @@ def findArtistbyAlbum(name):
 		artist_dict['score'] = result.score
 	
 	return artist_dict
-
-def getExtras(artistid):
-
-	types = [m.Release.TYPE_EP, m.Release.TYPE_SINGLE, m.Release.TYPE_LIVE, m.Release.TYPE_REMIX,
-			m.Release.TYPE_COMPILATION]
-			
-	for type in types:
-	
-		inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, type), releaseGroups=True)
-		artist = q.getArtistById(artistid, inc)
-		
-		for rg in artist.getReleaseGroups():
-		
-			rgid = u.extractUuid(rg.id)
-			releaseid = getReleaseGroup(rgid)
-			
-			inc = ws.ReleaseIncludes(artist=True, releaseEvents= True, tracks= True, releaseGroup=True)
-			results = ws.Query().getReleaseById(releaseid, inc)
-			
-			print results.title
-			print u.getReleaseTypeName(results.releaseGroup.type)
 	

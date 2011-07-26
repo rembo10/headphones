@@ -1,5 +1,4 @@
 import urllib
-import string
 import lib.feedparser as feedparser
 from xml.dom import minidom
 import os, re
@@ -15,7 +14,8 @@ def searchNZB(albumid=None, new=False):
 		results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted" AND AlbumID=?', [albumid])
 	else:
 		results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted"')
-	
+		new = True
+		
 	for albums in results:
 		
 		albumid = albums[2]
@@ -26,7 +26,7 @@ def searchNZB(albumid=None, new=False):
 		except TypeError:
 			year = ''
 		
-		dic = {'... ':' ', ' & ':' ', ' = ': ' ', '?':'', '!':'', ' + ':' ', '(':'', ')':'', '"':'', ',':''}
+		dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '!':'', ' + ':' ', '"':'', ',':''}
 
 		cleanartistalbum = helpers.latinToAscii(helpers.replace_all(albums[0]+' '+albums[1], dic))
 
@@ -35,9 +35,9 @@ def searchNZB(albumid=None, new=False):
 		altterm = re.sub('[\.\-]', ' ', '%s %s' % (cleanartistalbum, year)).encode('utf-8')
 		
 		# Only use the year if the term could return a bunch of different albums, i.e. self-titled albums
-		if albums[0] in albums[1]:
+		if albums[0] in albums[1] or len(albums[0]) < 4 or len(albums[1]) < 4:
 			term = altterm	
-			
+		
 		logger.info("Searching for %s since it was marked as wanted" % term)
 		
 		resultlist = []
@@ -107,7 +107,6 @@ def searchNZB(albumid=None, new=False):
 			logger.info(u"Parsing results from "+searchURL)
 				
 			d = feedparser.parse(searchURL)
-			
 			
 			if not len(d.entries):
 				logger.info(u"No results found from %s for %s" % (headphones.NEWZNAB_HOST, term))
@@ -233,6 +232,12 @@ def searchNZB(albumid=None, new=False):
 					else:
 						bestqual = nzblist[i]
 						break
+						
+				try:
+					x = bestqual[0]
+				except UnboundLocalError:
+					logger.info('No more matches for %s' % term)
+					return
 						
 			else:
 				bestqual = nzblist[0]

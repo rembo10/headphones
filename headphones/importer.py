@@ -12,6 +12,13 @@ def scanMusic(dir=None):
 
 	if not dir:
 		dir = headphones.MUSIC_DIR
+		
+	try:
+		dir = str(dir)
+	except UnicodeEncodeError:
+		dir = unicode(dir).encode('unicode_escape')
+		
+	logger.info('Starting Music Scan with directory: %s' % dir)
 
 	results = []
 	
@@ -32,7 +39,8 @@ def scanMusic(dir=None):
 				f = MediaFile(song)
 				#logger.debug('Reading: %s' % song.decode('UTF-8'))
 			except:
-				logger.warn('Could not read file: %s' % song.decode('UTF-8'))
+				logger.warn('Could not read file: %s' % song)
+				continue
 			else:	
 				if f.albumartist:
 					artist = f.albumartist
@@ -85,9 +93,9 @@ def is_exists(artistid):
 	
 	# See if the artist is already in the database
 	artistlist = myDB.select('SELECT ArtistID, ArtistName from artists WHERE ArtistID=?', [artistid])
-	
+
 	if any(artistid in x for x in artistlist):
-		logger.info(artistlist[0][1] + u" is already in the database, skipping")
+		logger.info(artistlist[0][1] + u" is already in the database. Updating 'have tracks', but not artist information")
 		return True
 	else:
 		return False
@@ -109,11 +117,21 @@ def artistlist_to_mbids(artistlist):
 			logger.info('MusicBrainz query turned up no matches for: %s' % artist)
 			continue
 		
+		# Add to database if it doesn't exist
 		if artistid != various_artists_mbid and not is_exists(artistid):
 			addArtisttoDB(artistid)
+			
+		# Update track count regardless of whether it already exists
+		if artistid != various_artists_mbid:
+	
+			myDB = db.DBConnection()
+			havetracks = len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['ArtistName']]))
+			
+			controlValueDict = {"ArtistID": 	artistid}
+			newValueDict = {"HaveTracks": 		havetracks}
+			myDB.upsert("artists", newValueDict, controlValueDict)
 
-
-def addArtisttoDB(artistid):
+def addArtisttoDB(artistid, extrasonly=False):
 	
 	# Can't add various artists - throws an error from MB
 	if artistid == various_artists_mbid:
@@ -122,7 +140,7 @@ def addArtisttoDB(artistid):
 		
 	myDB = db.DBConnection()
 		
-	artist = mb.getArtist(artistid)
+	artist = mb.getArtist(artistid, extrasonly)
 	
 	if not artist:
 		return
@@ -150,15 +168,15 @@ def addArtisttoDB(artistid):
 		rg_exists = myDB.select("SELECT * from albums WHERE AlbumID=?", [rg['id']])
 					
 		try:	
-			releaseid = mb.getReleaseGroup(rgid)
+			release_dict = mb.getReleaseGroup(rgid)
 		except Exception, e:
 			logger.info('Unable to get release information for %s - it may not be a valid release group' % rg['title'])
 			continue
 			
-		if not releaseid:
+		if not release_dict:
 			continue
 		
-		release = mb.getRelease(releaseid)
+		release = mb.getRelease(release_dict['releaseid'])
 		
 		if not release:
 			logger.warn('Unable to get release information for %s. Skipping for now.' % rg['title'])
@@ -170,7 +188,7 @@ def addArtisttoDB(artistid):
 		if len(rg_exists):
 		
 			newValueDict = {"AlbumASIN":		release['asin'],
-							"ReleaseDate":		release['date'],
+							"ReleaseDate":		release_dict['releasedate'],
 							}
 		
 		else:
@@ -179,8 +197,9 @@ def addArtisttoDB(artistid):
 							"ArtistName": 		artist['artist_name'],
 							"AlbumTitle":		rg['title'],
 							"AlbumASIN":		release['asin'],
-							"ReleaseDate":		release['date'],
+							"ReleaseDate":		release_dict['releasedate'],
 							"DateAdded":		helpers.today(),
+							"Type":				rg['type']
 							}
 							
 			if release['date'] > helpers.today():
@@ -207,7 +226,19 @@ def addArtisttoDB(artistid):
 		
 			myDB.upsert("tracks", newValueDict, controlValueDict)
 			
+	latestalbum = myDB.action('SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [artistid]).fetchone()
+	totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid]))
+	
 	controlValueDict = {"ArtistID": 	artistid}
-	newValueDict = {"Status": 			"Active"}
+	
+	if latestalbum:
+		newValueDict = {"Status": 			"Active",
+						"LatestAlbum":		latestalbum['AlbumTitle'],
+						"ReleaseDate":		latestalbum['ReleaseDate'],
+						"AlbumID":			latestalbum['AlbumID'],
+						"TotalTracks":		totaltracks}
+	else:
+		newValueDict = {"Status":			"Active"}
 	
 	myDB.upsert("artists", newValueDict, controlValueDict)
+	logger.info(u"Updating complete for: " + artist['artist_name'])
