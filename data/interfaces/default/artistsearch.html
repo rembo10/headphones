@@ -1,0 +1,13 @@
+<table class="artistsearchresults">
+<thead>
+<tr>
+</tr>
+</thead>
+% for result in results:
+	<tr class="mediumtext">
+		<td><a href="addArtist?artistid=${result['id']}">${result['uniquename']}</a> (<a class="externalred" href="artistInfo?artistid=${result['id']}">more info</a>)</td>
+	</tr>
+% endfor
+</table>
+
+<%inherit file="base.html" />

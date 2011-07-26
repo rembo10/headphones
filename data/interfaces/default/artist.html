@@ -1,0 +1,33 @@
+<div class="artistName">${artist['ArtistName']}</div>
+<table border="0" cellpadding="3">
+	<thead>
+		<tr>
+			<td align="left" width="50"></td>
+			<td align="left" width="120">Album Name</td>
+			<td align="center" width="100">Release Date</td>
+			<td align="center" width="300">Status</td>
+		</tr>
+	</thead>
+	% for album in albums:
+	<tr>
+		<td align="left">
+			<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50">
+		</td>
+		<td align="left" width="240"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a> 
+		(<A class="mbexternallink" href="http://musicbrainz.org/release-group/${album['AlbumID']}" target="_blank">link</a>)</td>
+		<td align="center" width="160">${album['ReleaseDate']}</td>
+		<td align="center">
+			% if album['Status'] == 'Skipped':
+				<b>${album['Status']}</b>[<A class="external" href="queueAlbum?AlbumID=${album[2]}&ArtistID=${artistID}">want</a>]
+			% elif album['Status'] == 'Wanted':
+				<b>${album['Status']}</b>[<a class="external" href="unqueueAlbum?AlbumID=${album[2]}&ArtistID=${artistID}">skip</a>]				
+			% elif album['Status'] == 'Downloaded' or album['Status'] == 'Snatched':
+				<b>${album['Status']}</b>[<a class="external" href="queueAlbum?AlbumID=${album[2]}&ArtistID=${artistID}">retry</a>]
+			% else:
+				${album['Status']}
+			% endif
+		</td>
+	</tr>
+	% endfor
+</table>	
+<%inherit file="base.html" />
