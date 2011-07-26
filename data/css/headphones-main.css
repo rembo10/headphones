@@ -1,0 +1,103 @@
+@CHARSET "UTF-8";
+body {
+    font-family:"Lucida Grande", "Lucida Sans Unicode", "Verdana", "Arial", "Helvetica", "sans-serif";
+    font-size:12px;
+    background-color: #ebf4fb;
+    padding: 0;
+    margin: 0;
+}
+div#header {
+    position: relative;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+div#content {
+    position: relative;
+    background: white;
+    margin-left: 5%;
+    margin-right: 5%;
+    -moz-border-radius-bottomleft: 10px;
+	border-bottom-left-radius: 10px;
+	-moz-border-radius-bottomright: 10px;
+	border-bottom-right-radius: 10px;
+	clear: both;
+	border-left: thin solid;
+	border-right: thin solid;
+	border-bottom: thin solid;
+}
+div#footer {
+    position: relative;
+    margin-left: 5%;
+    margin-right: 5%;
+    text-align: center;
+    padding: 10px;
+}
+div#logo {
+    font-size: 20px;
+    font-weight: 100;
+    color: #8B8989;
+    margin-left: 30px;
+    margin-top: 0px;
+}
+div#searchbar {
+    position: right;
+    float: right;
+}
+div#navbar {
+    padding: 5px;
+    font-size: 19px;
+    margin-left: 5%;
+    margin-right: 5%;
+    background-color: #bbbbbb;
+	-moz-border-radius-topleft: 10px;
+	border-top-left-radius: 10px;
+	-moz-border-radius-topright: 10px;
+	border-top-right-radius: 10px;
+	border-right: thin solid;
+	border-left: thin solid;
+	border-top: thin solid;
+}
+.navbuttonimage {
+	height: 15px;
+	width: 15px;
+	border: 0;
+	padding-bottom: 4px;
+}
+div#updatebar {
+    background-color: #DBDBDB;
+    align: center;
+    float: center;
+    text-align: center;
+    position: relative;
+    width: 500px;
+    z-index: 100;
+}
+img {
+    border: 0 none;
+    vertical-align: middle;
+}
+div.logo {
+	font-size: 25px;
+}
+table.artistListTable {
+    width: 100%;
+    padding: 50px;
+}
+
+table.artistListTable td.artistname { 
+    text-align: left;
+    width: 300px;
+}
+
+table.artistListTable td.status {
+    text-align: center;
+    width: 160px;
+}
+table.artistListTable td.upcomingalbum {
+    text-align: center;
+    
+}
+
+table.artistListTable td.have {
+    text-align: center;
+}
