@@ -105,3 +105,14 @@ div.manageSection {
 	text-align: left;
 	padding: 25px;
 }
+div.noResultsMessages {
+	text-align: center;
+	font-size: 18px;
+	padding-top: 50px;
+	padding-bottom: 50px;
+}
+table#logTable {
+	padding-left: 20px;
+	padding-top: 20px;
+	padding-bottom: 20px;
+}

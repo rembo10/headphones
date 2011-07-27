@@ -1,61 +1,63 @@
 % if not albums:
-	<div class="center">No albums are coming out soon :(<br />(try adding some more artists!)</div>
+<div class="noResultsMessages">
+	No albums are coming out soon :(<br />(try adding some more artists!)
+</div>
 % else:
-	<table border="0" cellpadding="3">
-		<tr>
-			<th align="center" width="300"></th>
-			<th align="center" width="300"><div class="bigtext">Upcoming Albums<br /><br /></div></th>
-			<th align="center" width="300"></th>
-			<th>      </th>
-		</tr>
-		% for album in upcoming:
-		<tr>
-			<td>
-				% if album['AlbumASIN']:
-					<a href="http://www.amazon.com/dp/${album['AlbumASIN']}">
-						<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" height="200" width="200">
-					</a>
-				% else:
-					No Album Art... yet!
-				% endif
-			</td>
-			<td align="center" width="300">
-				<a href="artistPage?ArtistID=%{album['ArtistID']">${album['ArtistName']}</a>
-			</td>
-			<td align="center" width="300">
-				<a href="albumPage?AlbumID=${album['AlbumID']}"><i>${album['AlbumTitle']}</i> (${album['ReleaseDate']})</a>
-			</td>
-		</tr>
-		% endfor
-	</table>
-	
-	<table border="0" cellpadding="3">
-		<tr>
-			<th align="center" width="300"></th>
-			<th align="center" width="300"><div class="bigtext">Wanted Albums<br /><br /></div></th>
-			<th align="center" width="300"></th>
-			<th>      </th>
-		</tr>
-		% for album in wanted:
-		<tr>
-			<td>
-				% if album['AlbumASIN']:
-					<a href="http://www.amazon.com/dp/${album['AlbumASIN']}">
-						<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" height="200" width="200">
-					</a>
-				% else:
-					No Album Art... yet!
-				% endif
-			</td>
-			<td align="center" width="300">
-				<a href="artistPage?ArtistID=%{album['ArtistID']">${album['ArtistName']}</a>
-			</td>
-			<td align="center" width="300">
-				<a href="albumPage?AlbumID=${album['AlbumID']}"><i>${album['AlbumTitle']}</i> (${album['ReleaseDate']})</a>
-			</td>
-		</tr>
-		% endfor
-	</table>
-% endif
+<table border="0" cellpadding="3">
+	<tr>
+		<th align="center" width="300"></th>
+		<th align="center" width="300"><div class="bigtext">
+				Upcoming Albums<br /> <br />
+			</div>
+		</th>
+		<th align="center" width="300"></th>
+		<th></th>
+	</tr>
+	% for album in upcoming:
+	<tr>
+		<td>% if album['AlbumASIN']: <a
+			href="http://www.amazon.com/dp/${album['AlbumASIN']}"> <img
+				src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg"
+				height="200" width="200"> </a> % else: No Album Art... yet! %
+			endif</td>
+		<td align="center" width="300"><a
+			href="artistPage?ArtistID=%{album['ArtistID']">${album['ArtistName']}</a>
+		</td>
+		<td align="center" width="300"><a
+			href="albumPage?AlbumID=${album['AlbumID']}"><i>${album['AlbumTitle']}</i>
+				(${album['ReleaseDate']})</a></td>
+	</tr>
+	% endfor
+</table>
+% endif 
 
-<%inherit file="base.html" />
+%if wanted:
+
+<table border="0" cellpadding="3">
+	<tr>
+		<th align="center" width="300"></th>
+		<th align="center" width="300"><div class="bigtext">
+				Wanted Albums<br /> <br />
+			</div>
+		</th>
+		<th align="center" width="300"></th>
+		<th></th>
+	</tr>
+	% for album in wanted:
+	<tr>
+		<td>% if album['AlbumASIN']: <a
+			href="http://www.amazon.com/dp/${album['AlbumASIN']}"> <img
+				src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg"
+				height="200" width="200"> </a> % else: No Album Art... yet! %
+			endif</td>
+		<td align="center" width="300"><a
+			href="artistPage?ArtistID=%{album['ArtistID']">${album['ArtistName']}</a>
+		</td>
+		<td align="center" width="300"><a
+			href="albumPage?AlbumID=${album['AlbumID']}"><i>${album['AlbumTitle']}</i>
+				(${album['ReleaseDate']})</a></td>
+	</tr>
+	% endfor
+</table>
+% endif
+ <%inherit file="base.html" />
