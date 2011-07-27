@@ -389,7 +389,6 @@ def start():
 		SCHED.add_interval_job(importer.scanMusic, minutes=LIBRARYSCAN_INTERVAL)
 		SCHED.add_interval_job(versioncheck.checkGithub, minutes=300)
 		SCHED.add_interval_job(postprocessor.checkFolder, minutes=5)
-		postprocessor.checkFolder()
 
 		SCHED.start()
 		

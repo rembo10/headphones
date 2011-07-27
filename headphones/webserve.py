@@ -25,7 +25,7 @@ class WebInterface(object):
 	def home(self):
 		page = [templates._header]
 		if not headphones.CURRENT_VERSION:
-			page.append('''<div class="updatebar">You're running an unknown version of Heapdhones. <a class="blue" href="update">Click here to update</a></div>''')
+			page.append('''<div class="updatebar">You're running an unknown version of Headphones. <a class="blue" href="update">Click here to update</a></div>''')
 		elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
 			page.append('''<div class="updatebar">A <a class="blue" href="http://github.com/rembo10/headphones/compare/%s...%s">
 					newer version</a> is available. You're %s commits behind. <a class="blue" href="update">Click here to update</a></div>

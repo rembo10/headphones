@@ -1,7 +1,7 @@
 import os
 import time
 
-import urllib, shutil
+import urllib, shutil, re
 
 from lib.beets.mediafile import MediaFile
 import lib.musicbrainz2.webservice as ws
@@ -33,12 +33,9 @@ def verify(albumid, albumpath):
 	for r,d,f in os.walk(albumpath):
 		for files in f:
 			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape")):
-				downloaded_track_list.append(os.path.join(r, files))
-
-	# test #1: filenames
+				downloaded_track_list.append(os.path.join(r, files))	
 	
-	
-	# test #2: metadata. 
+	# test #1: metadata - usually works
 	for downloaded_track in downloaded_track_list:
 		try:
 			f = MediaFile(downloaded_track)
@@ -48,30 +45,41 @@ def verify(albumid, albumpath):
 			doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 			return
 			
+	# test #2: filenames
+	for downloaded_track in downloaded_track_list:
+		track_name = os.path.splitext(downloaded_track)[0]
+		split_track_name = re.sub('[\.\-\_]', ' ', track_name).lower()
+		for track in tracks:
+			if helpers.latinToAscii(track['TrackTitle'].lower()).encode('UTF-8') in helpers.latinToAscii(split_track_name).encode('UTF-8'):
+				doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
+				return
+			
 	# test #3: number of songs and duration
 	db_track_duration = 0
 	downloaded_track_duration = 0
 	
-	for track in tracks:
-		try:
-			db_track_duration += track['TrackDuration']/1000
-		except:
-			downloaded_track_duration = False
-			break
+	if len(tracks) == len(downloaded_track_list):
+	
+		for track in tracks:
+			try:
+				db_track_duration += track['TrackDuration']/1000
+			except:
+				downloaded_track_duration = False
+				break
+				
+		for downloaded_track in downloaded_track_list:
+			try:
+				f = MediaFile(downloaded_track)
+				downloaded_track_duration += f.length
+			except:
+				downloaded_track_duration = False
+				break
 			
-	for downloaded_track in downloaded_track_list:
-		try:
-			f = MediaFile(downloaded_track)
-			downloaded_track_duration += f.length
-		except:
-			downloaded_track_duration = False
-			break
-		
-	if downloaded_track_duration and db_track_duration:
-		delta = abs(downloaded_track_duration - db_track_duration)
-		if len(tracks) == len(downloaded_track_list) and delta < 100:
-			doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
-			return
+		if downloaded_track_duration and db_track_duration:
+			delta = abs(downloaded_track_duration - db_track_duration)
+			if delta < 240:
+				doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
+				return
 			
 	logger.warn('Could not identify album: %s. It may not be the intended album.' % albumpath)
 	myDB.action('UPDATE snatched SET status = "Unprocessed" WHERE AlbumID=?', [albumid])
