@@ -156,7 +156,7 @@ class WebInterface(object):
 			else:
 				have = ''
 			if results[i][4]:
-				duration = helpers.convert_milliseconds(results[i][4])
+				duration = helpers.convert_milliseconds(int(results[i][4]))
 			else:
 				duration = 'n/a'
 			page.append('''<tr><td align="left" width="120">%s</td>
