@@ -154,7 +154,11 @@ def searchNZB(albumid=None, new=False):
 			data = urllib.urlopen(searchURL).read()
 			
 			logger.info(u"Parsing results from "+searchURL)
-			d = minidom.parseString(data)
+			
+			try:	
+				d = minidom.parseString(data)
+			except ExpatError:
+				logger.error('Unable to get the NZBs.org feed. Check that your settings are correct - post a bug if they are')
 
 			node = d.documentElement
 			items = d.getElementsByTagName("item")

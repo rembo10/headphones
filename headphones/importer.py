@@ -173,17 +173,10 @@ def addArtisttoDB(artistid, extrasonly=False):
 		try:	
 			release_dict = mb.getReleaseGroup(rgid)
 		except Exception, e:
-			logger.info('Unable to get release information for %s - it may not be a valid release group \
-				(or it might just not be tagged right in MusicBrainz)' % rg['title'])
+			logger.info('Unable to get release information for %s - it may not be a valid release group (or it might just not be tagged right in MusicBrainz)' % rg['title'])
 			continue
 			
 		if not release_dict:
-			continue
-		
-		release = mb.getRelease(release_dict['releaseid'])
-		
-		if not release:
-			logger.warn('Unable to get release information for %s. Skipping for now.' % rg['title'])
 			continue
 	
 		logger.info(u"Now adding/updating album: " + rg['title'])
@@ -206,7 +199,7 @@ def addArtisttoDB(artistid, extrasonly=False):
 							"Type":				rg['type']
 							}
 							
-			if release['date'] > helpers.today():
+			if release_dict['releasedate'] > helpers.today():
 				newValueDict['Status'] = "Wanted"
 			else:
 				newValueDict['Status'] = "Skipped"
@@ -214,9 +207,12 @@ def addArtisttoDB(artistid, extrasonly=False):
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		
 		# I changed the albumid from releaseid -> rgid, so might need to delete albums that have a releaseid
-		myDB.action('DELETE from albums WHERE AlbumID=?', [release['id']])	
-						
-		for track in release['tracks']:
+		for release in release_dict['releaselist']:
+			myDB.action('DELETE from albums WHERE AlbumID=?', [release['releaseid']])
+			myDB.action('DELETE from tracks WHERE AlbumID=?', [release['releaseid']])
+		
+		myDB.action('DELETE from tracks WHERE AlbumID=?', [rg['id']])
+		for track in release_dict['tracks']:
 		
 			controlValueDict = {"TrackID": 	track['id'],
 								"AlbumID":	rg['id']}
@@ -226,6 +222,7 @@ def addArtisttoDB(artistid, extrasonly=False):
 						"AlbumASIN":		release_dict['asin'],
 						"TrackTitle":		track['title'],
 						"TrackDuration":	track['duration'],
+						"TrackNumber":		track['number']
 						}
 		
 			myDB.upsert("tracks", newValueDict, controlValueDict)

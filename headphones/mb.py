@@ -162,7 +162,6 @@ def getReleaseGroup(rgid):
 	with mb_lock:
 	
 		releaselist = []
-		asinlist = []
 		
 		inc = ws.ReleaseGroupIncludes(releases=True)
 		releaseGroup = None
@@ -237,24 +236,39 @@ def getReleaseGroup(rgid):
 			release_dict = {
 				'hasasin':		bool(releaseResult.asin),
 				'asin':			releaseResult.asin,
-				'tracks':		len(releaseResult.getTracks()),
+				'trackscount':	len(releaseResult.getTracks()),
 				'releaseid':	u.extractUuid(releaseResult.id),
 				'releasedate':	releaseResult.getEarliestReleaseDate(),
 				'format':		format,
 				'country':		country
 				}
-				
-			releaselist.append(release_dict)
 			
-			if releaseResult.asin:
-				asinlist.append(releaseResult.asin)
+			tracks = []
+			
+			i = 1
+			for track in releaseResult.tracks:
+				
+				tracks.append({
+						'number':		i,
+						'title':		track.title,
+						'id':			u.extractUuid(track.id),
+						'url':			track.id,
+						'duration':		track.duration
+						})
+				i += 1
+			
+			release_dict['tracks'] = tracks		
+			
+			releaselist.append(release_dict)
 	
-		a = multikeysort(releaselist, ['-hasasin', 'country', 'format', 'tracks'])
+		a = multikeysort(releaselist, ['-hasasin', 'country', 'format', 'trackscount'])
 		
 		release_dict = {'releaseid' :a[0]['releaseid'],
 						'releasedate'	: releaselist[0]['releasedate'],
-						'trackcount'	: a[0]['tracks'],
-						'asin'	:	a[0]['asin']
+						'trackcount'	: a[0]['trackscount'],
+						'tracks'		: a[0]['tracks'],
+						'asin'			: a[0]['asin'],
+						'releaselist'	: releaselist
 						}
 		
 		return release_dict

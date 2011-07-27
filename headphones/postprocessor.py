@@ -110,7 +110,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 	
 		
 def addAlbumArt(albumid, downloaded_track_list):
-
+	logger.info('Adding album art')
 	album_art_path = albumart.getAlbumArt(albumid)
 	
 	artwork = urllib.urlopen(album_art_path).read()
@@ -125,14 +125,13 @@ def addAlbumArt(albumid, downloaded_track_list):
 		f.save()
 	
 def cleanupFiles(albumpath):
-
+	logger.info('Cleaning up files')
 	for r,d,f in os.walk(albumpath):
 		for files in f:
 			if not any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape", ".m4a")):
 				os.remove(os.path.join(r, files))
 				
 def moveFiles(albumpath, release, tracks):
-
 	try:
 		year = release['ReleaseDate'][:4]
 	except TypeError:
@@ -147,6 +146,7 @@ def moveFiles(albumpath, release, tracks):
 	folder = helpers.replace_all(headphones.FOLDER_FORMAT, values)
 	
 	destination_path = os.path.join(headphones.DESTINATION_DIR, folder)
+	logger.info('Moving files from %s to %s' % (folder, destination_path))
 	
 	try:
 		os.makedirs(destination_path)
@@ -159,7 +159,7 @@ def moveFiles(albumpath, release, tracks):
 			shutil.move(os.path.join(r, files), destination_path)
 			
 	try:
-		os.rmdir(albumpath)
+		os.removedirs(albumpath)
 	except Exception, e:
 		logger.error('Could not remove directory: %s. %s' % (albumpath, e))
 		
