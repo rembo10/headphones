@@ -12,7 +12,7 @@ from headphones import db, albumart, logger, helpers
 def checkFolder():
 
 	myDB = db.DBConnection()
-	snatched = myDB.select('SELECT * from snatched WHERE Status="Snatched" or Status="Unprocessed"')
+	snatched = myDB.select('SELECT * from snatched WHERE Status="Snatched"')
 
 	for album in snatched:
 		
