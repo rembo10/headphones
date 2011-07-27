@@ -187,44 +187,7 @@ class WebInterface(object):
 	upcoming.exposed = True
 	
 	def manage(self):
-		if headphones.PATH_TO_XML:
-			path = headphones.PATH_TO_XML
-		else:
-			path = 'Absolute path to iTunes XML or Top-Level Music Directory'
-		if headphones.MUSIC_DIR:
-			path2 = headphones.MUSIC_DIR
-		else:
-			path2 = 'Enter a directory to scan'
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		page.append('''
-		<div class="table"><div class="config"><h1>Scan Music Library</h1><br />
-		Where do you keep your music?<br /><br />
-		You can put in any directory, and it will scan for audio files in that folder
-		(including all subdirectories)<br /><br />		For example: '/Users/name/Music'
-		<br /> <br />
-		It may take a while depending on how many files you have. You can navigate away from the page<br />
-		as soon as you click 'Submit'
-		<br /><br />
-
-		<form action="musicScan" method="GET" align="center">
-			<input type="text" value="%s" onfocus="if
-			(this.value==this.defaultValue) this.value='';" name="path" size="70" />
-			<input type="submit" /></form><br /><br /></div></div>
-		<div class="table"><div class="config"><h1>Import or Sync Your iTunes Library/Music Folder</h1><br />
-		This is here for legacy purposes (try the Music Scanner above!) <br /><br />
-		If you'd rather import an iTunes .xml file, you can enter the full path here. <br /><br />
-		<form action="importItunes" method="GET" align="center">
-			<input type="text" value="%s" onfocus="if
-			(this.value==this.defaultValue) this.value='';" name="path" size="70" />
-			<input type="submit" /></form><br /><br /></div></div>
-			<div class="table"><div class="config"><h1>Force Search</h1><br />
-			<a href="forceSearch">Force Check for Wanted Albums</a><br /><br />
-			<a href="forceUpdate">Force Update Active Artists</a><br /><br />
-			<a href="checkGithub">Check for Headphones Updates</a><br /><br /><br /></div></div>''' % (path2, path))
-		page.append(templates._footer % headphones.CURRENT_VERSION)
-		return page
+		return serve_template(templatename="manage.html", title="Manage")
 	manage.exposed = True
 	
 	def importItunes(self, path):
@@ -267,61 +230,19 @@ class WebInterface(object):
 	checkGithub.exposed = True
 	
 	def history(self):
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
 		myDB = db.DBConnection()
 		snatched = myDB.select('''SELECT AlbumID, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT from snatched order by DateAdded DESC''')
-
-		page.append('''<div class="table"><table border="0" cellpadding="3">
-						<tr><p align="center">History <a class="external" href="clearhistory">clear all</a><br /><br /></p></tr>
-						<tr>
-						<th align="center" width="150"></th>
-						<th align="center" width="300"></th>
-						<th align="center" width="200"></th>
-						<th align="right" width="200"></th>
-						</tr>''')
-		if len(snatched) == 0:
-			page.append("""</table><div class="center"></div><table>""")
-
-		i = 0
-		while i < len(snatched):
-			mb = snatched[i][2] / 1048576
-			size = '%.2fM' % mb
-			page.append('''<tr><td align="center" width="150">%s</td>
-								<td align="center" width="300">%s</td>
-								<td align="center" width="200">%s</td>
-								<td align="center" width="200">%s</td>
-								</tr>
-								''' % (snatched[i][5], snatched[i][1], size, snatched[i][4]))
-			i += 1
-		page.append('''</table></div>''')
-		if len(snatched):
-			page.append(templates._footer % headphones.CURRENT_VERSION)
-		return page
+		return serve_template(templatename="history.html", title="History", snatched=snatched)
 	history.exposed = True
 	
 	def logs(self):
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		page.append('''<div class="table"><p class="logtext">''')
 		if os.path.isfile(os.path.join(headphones.LOG_DIR, 'headphones.log')):
 			fileHandle = open(os.path.join(headphones.LOG_DIR, 'headphones.log'))
 			lineList = fileHandle.readlines()
 			fileHandle.close()
-			i = -1
-			if len(lineList) < 100:
-				limit = -len(lineList)
-			else:
-				limit = -100
-			while i > limit:
-				page.append(lineList[i] + '<br /><br />')
-				i -= 1
-		page.append('''</p></div>''')
-		page.append(templates._footer % headphones.CURRENT_VERSION)
-		return page
-	
+			lineList.reverse()
+			
+		return serve_template(templatename="logs.html",title="Logs", log=lineList)
 	logs.exposed = True
 	
 	def clearhistory(self):
