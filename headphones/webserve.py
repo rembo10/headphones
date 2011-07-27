@@ -296,8 +296,7 @@ class WebInterface(object):
 		headphones.MUSIC_DIR
 		))
 		page.append(templates._footer % headphones.CURRENT_VERSION)
-		return page
-					
+		return serve_template(templatename="config.html", title="Config")
 	config.exposed = True
 	
 	

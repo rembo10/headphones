@@ -116,3 +116,8 @@ table#logTable {
 	padding-top: 20px;
 	padding-bottom: 20px;
 }
+div.configHeader {
+	font-size: 11px;
+	text-align: center;
+	padding: 25px;
+}

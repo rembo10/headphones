@@ -1,0 +1,189 @@
+<div class="configHeader">
+	<a href="#web_interface">Web Interface</a> | 
+	<a href="#download"	class="smalltext">Download Settings</a> | 
+	<a href="#providers" class="smalltext">Search Providers</a> | 
+	<a href="#post_processing" class="smalltext">Quality &amp; Post Processing</a>
+</div>
+<div class="table">
+	<div class="config">
+		<form action="configUpdate" method="post">
+			<a name="web_interface">
+				<h1>
+					<u>Web Interface</u>
+				</h1>
+			</a>
+			<table class="configtable" summary="Web Interface">
+				<tr>
+					<td>
+						<p>	HTTP Host: <br />
+							<input type="text" name="http_host" value="%s" size="30" maxlength="40"><br /> 
+							<i class="smalltext">e.g. localhost or 0.0.0.0</i>
+						</p>
+					</td>
+					<td>
+						<p>HTTP Username: <br />
+							<input type="text" name="http_username" value="%s" size="30" maxlength="40">
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<p>HTTP Port: <br />
+							<input type="text" name="http_port" value="%s" size="20" maxlength="40">
+						</p>
+					</td>
+					<td>
+						<p>HTTP Password: <br />
+							<input type="password" name="http_password" value="%s" size="30" maxlength="40">
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<p>Launch Browser on Startup:<input type="checkbox"	name="launch_browser" value="1" %s /></p>
+					</td>
+				</tr>
+			</table>
+			<a name="download">
+				<h1>
+					<u>Download Settings</u>
+				</h1>
+			</a>
+			<table class="configtable" summary="Download Settings">
+				<tr>
+					<td>
+						<p>SABnzbd Host:</p>
+						<input type="text" name="sab_host" value="%s" size="30"	maxlength="40"><br />
+						<i class="smalltext">e.g. localhost:8080</i>
+					</td>
+					<td>
+						<p>SABnzbd Username:</p>
+						<input type="text" name="sab_username" value="%s" size="20" maxlength="40">
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<p>SABnzbd API:</p>
+						<input type="text" name="sab_apikey" value="%s" size="46" maxlength="40">
+					</td>
+					<td>
+						<p>SABnzbd Password:</p>
+						<input type="password" name="sab_password" value="%s" size="20"	maxlength="40">
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<p>SABnzbd Category:</p>
+						<input type="text" name="sab_category" value="%s" size="20"	maxlength="40"></td>
+					<td>
+						<p>Music Download Directory:</p>
+						<input type="text" name="download_dir" value="%s" size="60"><br />
+						<i class="smalltext">Full path to the directory where SAB downloads your music<br /> 
+						e.g. Downloads/music or	/Users/name/Downloads/music</i>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<p>Use Black Hole:</p>
+						<input type="checkbox" name="blackhole" value=1 %s />
+					</td>
+					<td>
+						<p>Black Hole Directory:</p>
+						<input type="text" name="blackhole_dir" value="%s" size="60"><br />
+						<i class="smalltext">Folder your Download program watches for NZBs</i>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<p>Usenet Retention:</p>
+						<input type="text" name="usenet_retention" value="%s" size="20"	maxlength="40">
+					</td>
+				</tr>
+			</table>
+			<a name="providers">
+				<h1>
+					<u>Search Providers</u>
+				</h1>
+			</a>
+			<table class="configtable" summary="Search Providers">
+				<tr>
+					<td>
+						<p>NZBMatrix: <input type="checkbox" name="nzbmatrix" value="1" %s /></p>
+					</td>
+					<td>
+						<p>NZBMatrix Username: <br> <input type="text" name="nzbmatrix_username" value="%s" size="30" maxlength="40"></p>
+					</td>
+					<td>
+						<p>NZBMatrix API: <br> <input type="text" name="nzbmatrix_apikey" value="%s" size="46" maxlength="40"></p>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<p>Newznab: <input type="checkbox" name="newznab" value="1" %s /></p>
+					</td>
+					<td>
+						<p>Newznab Host:<br> <input type="text" name="newznab_host"	value="%s" size="30" maxlength="40"><br /> 
+						<i class="smalltext">i.e. http://nzb.su</i></p>
+					</td>
+					<td>
+						<p>Newznab API:<br> <input type="text" name="newznab_apikey" value="%s" size="46" maxlength="40"></p>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<p>NZBs.org:<input type="checkbox" name="nzbsorg" value="1" %s /></p>
+					</td>
+					<td>
+						<p>NZBs.org UID:<br> <input type="text" name="nzbsorg_uid" value="%s" size="30" maxlength="40"></p>
+					</td>
+					<td>
+						<p>NZBs.org Hash:<br> <input type="text" name="nzbsorg_hash" value="%s" size="46" maxlength="40"></p>
+					</td>
+				</tr>
+			</table>
+			<a name="post_processing">
+				<h1>
+					<u>Quality &amp; Post Processing</u>
+				</h1>
+			</a>
+			<table class="configtable" summary="Quality & Post Processing">
+				<tr>
+					<td>
+						<b>Album Quality:</b>
+							<p>
+								<input type="radio" name="preferred_quality" value="0" %s />Highest	Quality excluding Lossless<br />
+								<input type="radio" name="preferred_quality" value="1" %s />Highest	Quality including Lossless<br />
+								<input type="radio" name="preferred_quality" value="3" %s />Lossless Only<br />
+								<input type="radio" name="preferred_quality" value="2" %s />Preferred Bitrate: <input type="text" name="preferred_bitrate" value="%s" size="5" maxlength="5" />kbps <br />
+								<i class="smalltext2"><input type="checkbox" name="detect_bitrate" value="1" %s />Auto-Detect Preferred Bitrate </i>
+							</p>
+					</td>
+					<td>
+						<b>Post-Processing:</b>
+							<p>
+								<input type="checkbox" name="move_files" value="1" %s />Move downloads to Music Folder<br />
+								<input type="checkbox" name="flac_to_mp3" value="1" %s />Convert lossless to mp3<br />
+								<input type="checkbox" name="rename_files" value="1" %s />Rename &amp; add metadata<br /> 
+								<input type="checkbox" name="cleanup_files" value="1" %s />Delete leftover files<br />
+								<input type="checkbox" name="add_album_art" value="1" %s>Add album art
+							</p>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<p>
+							<b>Path to Music folder</b>:<br />
+							<input type="text" name="music_dir" value="%s" size="60" maxlength="200"> <br /> 
+							<i class="smalltext">e.g. /Users/name/Music/iTunes or /Volumes/share/music</i>
+						</p>
+					</td>
+				</tr>
+			</table>
+			<p class="center">
+				<input type="submit" value="Save Changes"><br /> 
+				(Web Interface changes require a restart to take effect)
+			</p>
+		</form>
+	</div>
+</div>
+<%inherit file="base.html" />
