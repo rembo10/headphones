@@ -9,8 +9,9 @@ import lib.musicbrainz2.utils as u
 
 from lib.musicbrainz2.webservice import WebServiceError
 
+import headphones
 from headphones import logger, db
-from headphones.helpers import multikeysort
+from headphones.helpers import multikeysort, replace_all
 
 q = ws.Query()
 mb_lock = threading.Lock()
@@ -83,7 +84,7 @@ def getArtist(artistid, extrasonly=False):
 				artist = q.getArtistById(artistid, inc)
 				break
 			except WebServiceError, e:
-				logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s. Sleeping 10 seconds' % artistid)
+				logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s. Sleeping 5 seconds' % artistid)
 				attempt += 1
 				time.sleep(5)
 				
@@ -120,7 +121,7 @@ def getArtist(artistid, extrasonly=False):
 		except IndexError:
 			includeExtras = False
 		
-		if includeExtras:
+		if includeExtras or headphones.INCLUDE_EXTRAS:
 			includes = [m.Release.TYPE_COMPILATION, m.Release.TYPE_REMIX, m.Release.TYPE_SINGLE, m.Release.TYPE_LIVE, m.Release.TYPE_EP]
 			for include in includes:
 				inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, include), releaseGroups=True)
@@ -134,7 +135,7 @@ def getArtist(artistid, extrasonly=False):
 						artist = q.getArtistById(artistid, inc)
 						break
 					except WebServiceError, e:
-						logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s. Sleeping 10 seconds' % artistid)
+						logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s. Sleeping 5 seconds' % artistid)
 						attempt += 1
 						time.sleep(5)
 						
@@ -161,6 +162,7 @@ def getReleaseGroup(rgid):
 	with mb_lock:
 	
 		releaselist = []
+		asinlist = []
 		
 		inc = ws.ReleaseGroupIncludes(releases=True)
 		releaseGroup = None
@@ -172,7 +174,7 @@ def getReleaseGroup(rgid):
 				releaseGroup = q.getReleaseGroupById(rgid, inc)
 				break
 			except WebServiceError, e:
-				logger.warn('Attempt to retrieve information from MusicBrainz for release group "%s" failed. Sleeping 10 seconds' % rgid)
+				logger.warn('Attempt to retrieve information from MusicBrainz for release group "%s" failed. Sleeping 5 seconds' % rgid)
 				attempt += 1
 				time.sleep(5)
 	
@@ -194,28 +196,66 @@ def getReleaseGroup(rgid):
 					releaseResult = q.getReleaseById(release.id, inc)
 					break
 				except WebServiceError, e:
-					logger.warn('Attempt to retrieve release information for %s from MusicBrainz failed: %s. Sleeping 10 seconds' % (releaseResult.title, e))
+					logger.warn('Attempt to retrieve release information for %s from MusicBrainz failed: %s. Sleeping 5 seconds' % (releaseResult.title, e))
 					attempt += 1
 					time.sleep(5)		
 			
 			if not releaseResult:
 				continue
 				
+			if releaseResult.title.lower() != releaseGroup.title.lower():
+				continue
+				
 			time.sleep(1)
 			
+			formats = {
+				'2xVinyl':			'2',
+				'Vinyl':			'2',
+				'CD':				'0',
+				'Cassette':			'3',			
+				'2xCD':				'1',
+				'Digital Media':	'0'
+				}
+				
+			country = {
+				'US':	'0',
+				'GB':	'1',
+				'JP':	'1',
+				}
+
+			
+			try:
+				format = int(replace_all(u.extractFragment(releaseResult.releaseEvents[0].format), formats))
+			except:
+				format = 3
+				
+			try:
+				country = int(replace_all(releaseResult.releaseEvents[0].country, country))
+			except:
+				country = 2
+			
 			release_dict = {
-				'asin':			bool(releaseResult.asin),
+				'hasasin':		bool(releaseResult.asin),
+				'asin':			releaseResult.asin,
 				'tracks':		len(releaseResult.getTracks()),
 				'releaseid':	u.extractUuid(releaseResult.id),
-				'releasedate':	releaseResult.getEarliestReleaseDate()
+				'releasedate':	releaseResult.getEarliestReleaseDate(),
+				'format':		format,
+				'country':		country
 				}
-			
+				
 			releaselist.append(release_dict)
+			
+			if releaseResult.asin:
+				asinlist.append(releaseResult.asin)
 	
-		a = multikeysort(releaselist, ['-asin', '-tracks'])
+		a = multikeysort(releaselist, ['-hasasin', 'country', 'format', 'tracks'])
 		
 		release_dict = {'releaseid' :a[0]['releaseid'],
-						'releasedate'	: releaselist[0]['releasedate']}
+						'releasedate'	: releaselist[0]['releasedate'],
+						'trackcount'	: a[0]['tracks'],
+						'asin'	:	a[0]['asin']
+						}
 		
 		return release_dict
 	
@@ -237,7 +277,7 @@ def getRelease(releaseid):
 				results = q.getReleaseById(releaseid, inc)
 				break
 			except WebServiceError, e:
-				logger.warn('Attempt to retrieve information from MusicBrainz for release "%s" failed: %s. SLeeping 10 seconds' % (releaseid, e))
+				logger.warn('Attempt to retrieve information from MusicBrainz for release "%s" failed: %s. SLeeping 5 seconds' % (releaseid, e))
 				attempt += 1
 				time.sleep(5)	
 		
@@ -286,7 +326,7 @@ def findArtistbyAlbum(name):
 			results = q.getReleaseGroups(f)
 			break
 		except WebServiceError, e:
-			logger.warn('Attempt to query MusicBrainz for %s failed: %s. Sleeping 10 seconds.' % (name, e))
+			logger.warn('Attempt to query MusicBrainz for %s failed: %s. Sleeping 5 seconds.' % (name, e))
 			attempt += 1
 			time.sleep(5)	
 	

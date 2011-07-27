@@ -4,7 +4,7 @@ import os
 from lib.beets.mediafile import MediaFile
 
 import headphones
-from headphones import logger, helpers, db, mb
+from headphones import logger, helpers, db, mb, albumart
 
 various_artists_mbid = '89ad4ac3-39f7-470e-963a-56509c546377'
 
@@ -158,6 +158,9 @@ def addArtisttoDB(artistid, extrasonly=False):
 					"DateAdded": 		helpers.today(),
 					"Status": 			"Loading"}
 	
+	if headphones.INCLUDE_EXTRAS:
+		newValueDict['IncludeExtras'] = 1
+	
 	myDB.upsert("artists", newValueDict, controlValueDict)
 
 	for rg in artist['releasegroups']:
@@ -170,7 +173,8 @@ def addArtisttoDB(artistid, extrasonly=False):
 		try:	
 			release_dict = mb.getReleaseGroup(rgid)
 		except Exception, e:
-			logger.info('Unable to get release information for %s - it may not be a valid release group' % rg['title'])
+			logger.info('Unable to get release information for %s - it may not be a valid release group \
+				(or it might just not be tagged right in MusicBrainz)' % rg['title'])
 			continue
 			
 		if not release_dict:
@@ -187,7 +191,7 @@ def addArtisttoDB(artistid, extrasonly=False):
 		
 		if len(rg_exists):
 		
-			newValueDict = {"AlbumASIN":		release['asin'],
+			newValueDict = {"AlbumASIN":		release_dict['asin'],
 							"ReleaseDate":		release_dict['releasedate'],
 							}
 		
@@ -196,7 +200,7 @@ def addArtisttoDB(artistid, extrasonly=False):
 			newValueDict = {"ArtistID":			artistid,
 							"ArtistName": 		artist['artist_name'],
 							"AlbumTitle":		rg['title'],
-							"AlbumASIN":		release['asin'],
+							"AlbumASIN":		release_dict['asin'],
 							"ReleaseDate":		release_dict['releasedate'],
 							"DateAdded":		helpers.today(),
 							"Type":				rg['type']
@@ -219,7 +223,7 @@ def addArtisttoDB(artistid, extrasonly=False):
 			newValueDict = {"ArtistID":		artistid,
 						"ArtistName": 		artist['artist_name'],
 						"AlbumTitle":		rg['title'],
-						"AlbumASIN":		release['asin'],
+						"AlbumASIN":		release_dict['asin'],
 						"TrackTitle":		track['title'],
 						"TrackDuration":	track['duration'],
 						}

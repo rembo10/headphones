@@ -62,7 +62,8 @@ configform = form = '''
 		  	<a href="#web_interface" >Web Interface</a> |
 		  	<a href="#download" class="smalltext">Download Settings</a> |
 		  	<a href="#providers" class="smalltext">Search Providers</a> |
-		  	<a href="#post_processing" class="smalltext">Quality &amp; Post Processing</a>
+		  	<a href="#post_processing" class="smalltext">Quality &amp; Post Processing</a> |
+		  	<a href="#advanced_settings" class="smalltext">Advanced Settings</a>
 		  </div>
   	</center>
   <div class="table">
@@ -152,7 +153,7 @@ configform = form = '''
                     <p>Music Download Directory:</p><input type="text" name="download_dir" value="%s" size="60"><br>
 
                     <i class="smalltext">Full path to the directory where SAB downloads your music<br>
-                    i.e. Downloads/music or /Users/name/Downloads/music</i>
+                    i.e. /Users/name/Downloads/music</i>
                 </td>
             </tr>
             
@@ -277,10 +278,10 @@ configform = form = '''
                 <td>
                       <b>Post-Processing:</b>
                       <p>
-                      	<input type="checkbox" name="move_files" value="1" %s />Move downloads to Music Folder<br />
-                      	<input type="checkbox" name="flac_to_mp3" value="1" %s />Convert lossless to mp3<br>
-                        <input type="checkbox" name="rename_files" value="1" %s />Rename &amp; add metadata<br>
-                        <input type="checkbox" name="cleanup_files" value="1" %s />Delete leftover files<br>
+                      	<input type="checkbox" name="move_files" value="1" %s />Move downloads to Destination Folder<br />
+                      	<input type="checkbox" name="rename_files" value="1" %s />Rename files<br>
+                        <input type="checkbox" name="correct_metadata" value="1" %s />Correct metadata<br>
+                        <input type="checkbox" name="cleanup_files" value="1" %s />Delete leftover files (.m3u, .nfo, .sfv, .nzb, etc.)<br>
                       	<input type="checkbox" name="add_album_art" value="1" %s>Add album art
                       </p>
                 </td>
@@ -290,9 +291,39 @@ configform = form = '''
                 <td>
                     <br>
 
-                    <p><b>Path to Music folder</b>:<br><input type="text" name="music_dir" value="%s" size="60" maxlength="200">
+                    <p><b>Path to Destination folder</b>:<br><input type="text" name="destination_dir" value="%s" size="60">
                       <br>
                       <i class="smalltext">i.e. /Users/name/Music/iTunes or /Volumes/share/music</i>
+                    </p>
+                </td>
+            </tr>
+		</table>
+		
+        <a name="advanced_settings"><h1><u>Advanced Settings</u></h1></a>
+        
+        <table class="configtable" summary="Advanced Settings">
+            <tr>
+                <td>
+                	<b>Renaming Options:</b>
+                    <br>
+
+                    <p><b>Folder Format</b>:<br><input type="text" name="folder_format" value="%s" size="60">
+                      <br>
+                      <i class="smalltext">Use: artist, album and year</i>
+                    </p>
+                    
+                    <p><b>File Format</b>:<br><input type="text" name="file_format" value="%s" size="60">
+                      <br>
+                      <i class="smalltext">Use: tracknumber, title, artist, album and year</i>
+                    </p>
+                </td>
+                <td>
+                      <b>Miscellaneous:</b>
+                      <p>
+                      	<input type="checkbox" name="include_extras" value="1" %s />Automatically Include Extras When Adding an Artist<br />
+                      <i class="smalltext">Extras includes: EPs, Compilations, Live Albums, Remix Albums and Singles</i>
+                      </p>
+                    <p><b>Log Directory</b>:<br><input type="text" name="log_dir" value="%s" size="60">
                     </p>
                 </td>
             </tr>
@@ -346,7 +377,7 @@ def displayAlbums(ArtistID, Type=None):
 		elif results[i][3] == 'Wanted':
 			newStatus = '''<b>%s</b>[<A class="external" href="unqueueAlbum?AlbumID=%s&ArtistID=%s">skip</a>]''' % (results[i][3], results[i][2], ArtistID)				
 		elif results[i][3] == 'Downloaded':
-			newStatus = '''<b>%s</b>[<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">retry</a>]''' % (results[i][3], results[i][2], ArtistID)
+			newStatus = '''<b>%s</b>[<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">retry</a>][<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s&new=True">new</a>]''' % (results[i][3], results[i][2], ArtistID, results[i][2], ArtistID)
 		elif results[i][3] == 'Snatched':
 			newStatus = '''<b>%s</b>[<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s">retry</a>][<A class="external" href="queueAlbum?AlbumID=%s&ArtistID=%s&new=True">new</a>]''' % (results[i][3], results[i][2], ArtistID, results[i][2], ArtistID)
 		else:
