@@ -101,3 +101,7 @@ table.artistListTable td.upcomingalbum {
 table.artistListTable td.have {
     text-align: center;
 }
+div.manageSection {
+	text-align: left;
+	padding: 25px;
+}
