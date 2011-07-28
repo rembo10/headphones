@@ -309,7 +309,7 @@ configform = form = '''
 
                     <p><b>Folder Format</b>:<br><input type="text" name="folder_format" value="%s" size="60">
                       <br>
-                      <i class="smalltext">Use: artist, album and year</i>
+                      <i class="smalltext">Use: artist, album and year, '/' for directories. <br />E.g.: artist/album [year]</i>
                     </p>
                     
                     <p><b>File Format</b>:<br><input type="text" name="file_format" value="%s" size="60">

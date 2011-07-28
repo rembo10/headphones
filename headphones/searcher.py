@@ -157,11 +157,11 @@ def searchNZB(albumid=None, new=False):
 			
 			try:	
 				d = minidom.parseString(data)
+				node = d.documentElement
+				items = d.getElementsByTagName("item")
 			except ExpatError:
 				logger.error('Unable to get the NZBs.org feed. Check that your settings are correct - post a bug if they are')
-
-			node = d.documentElement
-			items = d.getElementsByTagName("item")
+				items = None
 			
 			if len(items):
 			

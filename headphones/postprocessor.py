@@ -3,8 +3,9 @@ import time
 
 import urllib, shutil, re
 
+import lib.beets as beets
+from lib.beets import autotag
 from lib.beets.mediafile import MediaFile
-import lib.musicbrainz2.webservice as ws
 
 import headphones
 from headphones import db, albumart, logger, helpers
@@ -165,7 +166,19 @@ def moveFiles(albumpath, release, tracks):
 		
 def correctMetadata(albumid, release, downloaded_track_list):
 	
-	pass
+	logger.info('Writing metadata')
+	items = []
+	for downloaded_track in downloaded_track_list:
+		items.append(beets.library.Item.from_path(downloaded_track))
+		
+	cur_artist, cur_album, out_tuples, rec = autotag.tag_album(items, search_artist=release['ArtistName'], search_album=release['AlbumTitle'])
+	
+	distance, items, info = out_tuples[0]
+	
+	autotag.apply_metadata(items, info)
+	
+	for item in items:
+		item.write()
 
 def renameFiles(albumpath, downloaded_track_list, release):
 
