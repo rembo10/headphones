@@ -84,6 +84,7 @@ def verify(albumid, albumpath):
 			
 	logger.warn('Could not identify album: %s. It may not be the intended album.' % albumpath)
 	myDB.action('UPDATE snatched SET status = "Unprocessed" WHERE AlbumID=?', [albumid])
+	renameUnprocessedFolder(albumpath)
 			
 def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list):
 
@@ -102,14 +103,15 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 		renameFiles(albumpath, downloaded_track_list, release)
 	
 	if headphones.MOVE_FILES and headphones.DESTINATION_DIR:
-		moveFiles(albumpath, release, tracks)
-		
+		albumpath = moveFiles(albumpath, release, tracks)
+	
 	myDB = db.DBConnection()
 	myDB.action('UPDATE albums SET status = "Downloaded" WHERE AlbumID=?', [albumid])
 	myDB.action('UPDATE snatched SET status = "Processed" WHERE AlbumID=?', [albumid])
+	updateHave(albumpath)
+	
 	logger.info('Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
 	
-		
 def addAlbumArt(albumid, downloaded_track_list):
 	logger.info('Adding album art')
 	album_art_path = albumart.getAlbumArt(albumid)
@@ -133,6 +135,7 @@ def cleanupFiles(albumpath):
 				os.remove(os.path.join(r, files))
 				
 def moveFiles(albumpath, release, tracks):
+	
 	try:
 		year = release['ReleaseDate'][:4]
 	except TypeError:
@@ -151,18 +154,21 @@ def moveFiles(albumpath, release, tracks):
 	
 	try:
 		os.makedirs(destination_path)
+		
 	except Exception, e:
 		logger.error('Could not create folder for %s. Not moving' % release['AlbumName'])
-		return
+		return albumpath
 		
 	for r,d,f in os.walk(albumpath):
 		for files in f:
 			shutil.move(os.path.join(r, files), destination_path)
 			
 	try:
-		os.removedirs(albumpath)
+		shutil.rmtree(albumpath)
 	except Exception, e:
 		logger.error('Could not remove directory: %s. %s' % (albumpath, e))
+	
+	return destination_path
 		
 def correctMetadata(albumid, release, downloaded_track_list):
 	
@@ -209,3 +215,49 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		new_file = os.path.join(albumpath, new_file_name)
 		
 		shutil.move(downloaded_track, new_file)
+		
+def updateHave(albumpath):
+
+	results = []
+	
+	for r,d,f in os.walk(albumpath):
+		for files in f:
+			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape")):
+				results.append(os.path.join(r, files))
+	
+	if results:
+	
+		myDB = db.DBConnection()
+	
+		for song in results:
+			try:
+				f = MediaFile(song)
+				#logger.debug('Reading: %s' % song.decode('UTF-8'))
+			except:
+				logger.warn('Could not read file: %s' % song)
+				continue
+			else:	
+				if f.albumartist:
+					artist = f.albumartist
+				elif f.artist:
+					artist = f.artist
+				else:
+					continue
+				
+				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?)', [artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid])
+				
+def renameUnprocessedFolder(albumpath):
+	
+	i = 0
+	while True:
+		if i == 0:
+			new_folder_name = albumpath + ' (Unprocessed)'
+		else:
+			new_folder_name = albumpath + ' (Unprocessed)[%i]' % i
+		
+		if os.path.exists(new_folder_name):
+			i += 1
+			
+		else:
+			os.rename(albumpath, new_folder_name)
+			return
