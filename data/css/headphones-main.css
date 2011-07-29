@@ -66,11 +66,11 @@ div#navbar {
 div#updatebar {
     background-color: #DBDBDB;
     align: center;
-    float: center;
     text-align: center;
-    position: relative;
     width: 500px;
     z-index: 100;
+    margin-right: auto;
+    margin-left: auto;
 }
 img {
     border: 0 none;
