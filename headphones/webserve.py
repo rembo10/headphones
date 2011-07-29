@@ -12,7 +12,7 @@ import threading
 
 import headphones
 from headphones.mb import getReleaseGroup
-from headphones import templates, logger, searcher, db, importer, helpers, mb
+from headphones import templates, logger, searcher, db, importer, helpers, mb, lastfm
 from headphones.helpers import checked, radio
 
 
@@ -222,11 +222,12 @@ class WebInterface(object):
 		
 	artistInfo.exposed = True
 
-	def addArtist(self, artistid):
+	def addArtist(self, artistid, redirect='home'):
 		
 		threading.Thread(target=importer.addArtisttoDB, args=[artistid]).start()
 		time.sleep(5)
-		raise cherrypy.HTTPRedirect("home")
+		threading.Thread(target=lastfm.getSimilar).start()
+		raise cherrypy.HTTPRedirect(redirect)
 		
 	addArtist.exposed = True
 	
@@ -650,3 +651,28 @@ class WebInterface(object):
 		return page
 		
 	update.exposed = True
+		
+	def extras(self):
+		myDB = db.DBConnection()
+		cloudlist = myDB.select('SELECT * from lastfmcloud')
+		page = [templates._header]
+		page.append(templates._logobar)
+		page.append(templates._nav)
+		if len(cloudlist):
+			page.append('''
+			<div class="table"><div class="config"><h1>Artists You Might Like:</h1><br /><br />
+			<div class="cloud">
+				<ul id="cloud">''')
+			for item in cloudlist:
+				page.append('<li><a href="addArtist?artistid=%s&redirect=extras" class="tag%i">%s</a></li>' % (item['ArtistID'], item['Count'], item['ArtistName']))
+			page.append('</ul><br /><br /></div></div>')	
+			page.append(templates._footer % headphones.CURRENT_VERSION)
+		return page
+	extras.exposed = True
+	
+	def updateCloud(self):
+		
+		lastfm.getSimilar()
+		raise cherrypy.HTTPRedirect("extras")
+		
+	updateCloud.exposed = True

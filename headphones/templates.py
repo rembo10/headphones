@@ -34,6 +34,7 @@ _logobar = '''
 _nav = '''<div class="nav">
 					<a href="home">HOME</a>
 					<a href="upcoming">UPCOMING</a>
+					<a href="extras">EXTRAS</a>
 					<a href="manage">MANAGE</a>    
 					<a href="history">HISTORY</a>
 					<a href="logs">LOGS</a>

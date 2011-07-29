@@ -4,7 +4,7 @@ import os
 from lib.beets.mediafile import MediaFile
 
 import headphones
-from headphones import logger, helpers, db, mb, albumart
+from headphones import logger, helpers, db, mb, albumart, lastfm
 
 various_artists_mbid = '89ad4ac3-39f7-470e-963a-56509c546377'
 
@@ -130,6 +130,14 @@ def artistlist_to_mbids(artistlist):
 			controlValueDict = {"ArtistID": 	artistid}
 			newValueDict = {"HaveTracks": 		havetracks}
 			myDB.upsert("artists", newValueDict, controlValueDict)
+			
+	# Update the cloud:
+	logger.info('Updating the cloud')
+	try:
+		lastfm.findSimilar()
+	except Exception, e:
+		logger.warn('Updating the cloud failed: %s' % e)
+		
 
 def addArtisttoDB(artistid, extrasonly=False):
 	
