@@ -132,11 +132,11 @@ def artistlist_to_mbids(artistlist):
 			myDB.upsert("artists", newValueDict, controlValueDict)
 			
 	# Update the cloud:
-	logger.info('Updating the cloud')
+	logger.info('Updating artist information from Last.fm')
 	try:
 		lastfm.getSimilar()
 	except Exception, e:
-		logger.warn('Updating the cloud failed: %s' % e)
+		logger.warn('Failed to update arist information from Last.fm: %s' % e)
 		
 
 def addArtisttoDB(artistid, extrasonly=False):

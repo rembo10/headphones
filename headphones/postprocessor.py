@@ -135,7 +135,7 @@ def cleanupFiles(albumpath):
 				os.remove(os.path.join(r, files))
 				
 def moveFiles(albumpath, release, tracks):
-	
+
 	try:
 		year = release['ReleaseDate'][:4]
 	except TypeError:
@@ -187,7 +187,7 @@ def correctMetadata(albumid, release, downloaded_track_list):
 		item.write()
 
 def renameFiles(albumpath, downloaded_track_list, release):
-
+	logger.info('Renaming files')
 	try:
 		year = release['ReleaseDate'][:4]
 	except TypeError:
@@ -214,7 +214,11 @@ def renameFiles(albumpath, downloaded_track_list, release):
 
 		new_file = os.path.join(albumpath, new_file_name)
 		
-		shutil.move(downloaded_track, new_file)
+		try:
+			shutil.move(downloaded_track, new_file)
+		except Exception, e:
+			logger.error('Error renaming file: %s. Error: %s' % (downloaded_track, e))
+			continue
 		
 def updateHave(albumpath):
 
