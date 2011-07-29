@@ -134,7 +134,7 @@ def artistlist_to_mbids(artistlist):
 	# Update the cloud:
 	logger.info('Updating the cloud')
 	try:
-		lastfm.findSimilar()
+		lastfm.getSimilar()
 	except Exception, e:
 		logger.warn('Updating the cloud failed: %s' % e)
 		
