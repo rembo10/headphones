@@ -11,6 +11,7 @@ import threading
 import headphones
 from headphones import templates, logger, db, importer, helpers, mb
 from headphones.helpers import checked, radio
+from twisted.names.test.test_dns import MessageTestCase
 
 _hplookup = TemplateLookup(directories=[os.path.join(str(headphones.PROG_DIR), 'data/interfaces/default/')], output_encoding='utf-8')
 
@@ -53,7 +54,6 @@ class WebInterface(object):
 		tracks = myDB.select('SELECT ArtistID, ArtistName, AlbumTitle, TrackTitle, TrackDuration, TrackID, AlbumASIN FROM tracks WHERE AlbumID=?', [AlbumID])
 		
 		return serve_template(templatename="album.html", title=album['AlbumTitle'],tracks=tracks, album=album)
-	
 	albumPage.exposed = True
 	
 	
@@ -90,7 +90,6 @@ class WebInterface(object):
 			page.append('''%s <br />''' % rg['title'])
 		page.append('''<div class="center"><a href="addArtist?artistid=%s">Add this artist!</a></div>''' % artistid)
 		return page
-		
 	artistInfo.exposed = True
 
 	def addArtist(self, artistid):
@@ -98,7 +97,6 @@ class WebInterface(object):
 		threading.Thread(target=importer.addArtisttoDB, args=[artistid]).start()
 		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
-		
 	addArtist.exposed = True
 	
 	def getExtras(self, ArtistID):
@@ -111,7 +109,6 @@ class WebInterface(object):
 		threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True]).start()
 		time.sleep(10)
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
-		
 	getExtras.exposed = True
 	
 	def pauseArtist(self, ArtistID):
@@ -123,7 +120,6 @@ class WebInterface(object):
 		myDB.upsert("artists", newValueDict, controlValueDict)
 		
 		raise cherrypy.HTTPRedirect("home")
-		
 	pauseArtist.exposed = True
 	
 	def resumeArtist(self, ArtistID):
@@ -135,7 +131,6 @@ class WebInterface(object):
 		myDB.upsert("artists", newValueDict, controlValueDict)
 
 		raise cherrypy.HTTPRedirect("home")
-		
 	resumeArtist.exposed = True
 	
 	def deleteArtist(self, ArtistID):
@@ -147,7 +142,6 @@ class WebInterface(object):
 		myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
 
 		raise cherrypy.HTTPRedirect("home")
-		
 	deleteArtist.exposed = True
 	
 	def queueAlbum(self, AlbumID, ArtistID, new=False):
@@ -162,7 +156,6 @@ class WebInterface(object):
 		searcher.searchNZB(AlbumID, new)
 		
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
-		
 	queueAlbum.exposed = True
 
 	def unqueueAlbum(self, AlbumID, ArtistID):
@@ -174,7 +167,6 @@ class WebInterface(object):
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
-		
 	unqueueAlbum.exposed = True
 	
 	def upcoming(self):
@@ -340,41 +332,23 @@ class WebInterface(object):
 		headphones.config_write()
 
 		raise cherrypy.HTTPRedirect("config")
-		
 	configUpdate.exposed = True
 
 	def shutdown(self):
 		logger.info(u"Headphones is shutting down...")
 		threading.Timer(2, headphones.shutdown).start()
-		page = [templates._shutdownheader % 15]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		page.append('<div class="table"><div class="configtable">Shutting down Headphones...</div></div>')
-		page.append(templates._footer % headphones.CURRENT_VERSION)
-		return page
-
+		return serve_template(templatename="shutdown.html", title="Shutdown", messageText="Shutting down Headphones...")
 	shutdown.exposed = True
 
 	def restart(self):
 		logger.info(u"Headphones is restarting...")
 		threading.Timer(2, headphones.shutdown, [True]).start()
-		page = [templates._shutdownheader % 30]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		page.append('<div class="table"><div class="configtable">Restarting Headphones...</div></div>')
-		page.append(templates._footer % headphones.CURRENT_VERSION)
-		return page
-	 
+		return serve_template(templatename="shutdown.html", title="Restart", messageText="Restarting Headphones...")
 	restart.exposed = True
 	
 	def update(self):
 		logger.info('Headphones is updating...')
 		threading.Timer(2, headphones.shutdown, [True, True]).start()
-		page = [templates._shutdownheader % 120]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		page.append('<div class="table"><div class="configtable">Updating Headphones...</div></div>')
-		page.append(templates._footer % headphones.CURRENT_VERSION)
-		return page
-		
+		return serve_template(templatename="shutdown.html", title="Update", messageText="Updating Headphones...")
 	update.exposed = True
+	
