@@ -11,7 +11,6 @@ import threading
 import headphones
 from headphones import templates, logger, db, importer, helpers, mb
 from headphones.helpers import checked, radio
-from twisted.names.test.test_dns import MessageTestCase
 
 _hplookup = TemplateLookup(directories=[os.path.join(str(headphones.PROG_DIR), 'data/interfaces/default/')], output_encoding='utf-8')
 
