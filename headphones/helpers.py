@@ -8,7 +8,7 @@ from headphones import logger
 
 def multikeysort(items, columns):
 
-    comparers = [ ((itemgetter(col[1:].strip()), -1) if col.startswith('-') else (itemgetter(col.strip()), 1)) for col in columns]  
+    comparers = [ ((itemgetter(col[1:].strip()), -1) if col.startswith('-') else (itemgetter(col.strip()), 1)) for col in columns]
     
     def comparer(left, right):
         for fn, mult in comparers:

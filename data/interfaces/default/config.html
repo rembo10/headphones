@@ -162,7 +162,6 @@
 						<b>Post-Processing:</b>
 							<p>
 								<input type="checkbox" name="move_files" value="1" ${config['move_files']} />Move downloads to Music Folder<br />
-								<input type="checkbox" name="flac_to_mp3" value="1" ${config['flac_to_mp3']} />Convert lossless to mp3<br />
 								<input type="checkbox" name="rename_files" value="1" ${config['rename_files']} />Rename &amp; add metadata<br /> 
 								<input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} />Delete leftover files<br />
 								<input type="checkbox" name="add_album_art" value="1" ${config['add_album_art']}>Add album art
@@ -179,6 +178,34 @@
 					</td>
 				</tr>
 			</table>
+			<table class="configtable" summary="Advanced Settings">
+            <tr>
+                <td>
+                	<b>Renaming Options:</b>
+                    <p>
+                    	<b>Folder Format</b>:<br />
+                    	<input type="text" name="folder_format" value="${config['folder_format']}" size="60">
+                    	<br />
+                      	<i class="smalltext">Use: artist, album and year, '/' for directories. <br />E.g.: artist/album [year]</i>
+                    </p>
+                    <p>
+                    	<b>File Format</b>:<br />
+                    		<input type="text" name="file_format" value="${config['file_format']}" size="60">
+                      	<br>
+                      	<i class="smalltext">Use: tracknumber, title, artist, album and year</i>
+                    </p>
+                </td>
+                <td>
+                      <b>Miscellaneous:</b>
+                      <p>
+                      	<input type="checkbox" name="include_extras" value="1" ${config['include_extras']} />Automatically Include Extras When Adding an Artist<br />
+                      <i class="smalltext">Extras includes: EPs, Compilations, Live Albums, Remix Albums and Singles</i>
+                      </p>
+                    <p><b>Log Directory</b>:<br><input type="text" name="log_dir" value="${config['log_dir']}" size="60">
+                    </p>
+                </td>
+            </tr>
+        </table>
 			<p class="center">
 				<input type="submit" value="Save Changes"><br /> 
 				(Web Interface changes require a restart to take effect)

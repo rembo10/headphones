@@ -19,7 +19,7 @@ import logging
 from collections import defaultdict
 import re
 from lib.munkres import Munkres
-from unidecode import unidecode
+from lib.unidecode import unidecode
 
 from lib.beets.autotag import mb
 from lib.beets import library, mediafile, plugins

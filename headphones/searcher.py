@@ -154,10 +154,14 @@ def searchNZB(albumid=None, new=False):
 			data = urllib.urlopen(searchURL).read()
 			
 			logger.info(u"Parsing results from "+searchURL)
-			d = minidom.parseString(data)
-
-			node = d.documentElement
-			items = d.getElementsByTagName("item")
+			
+			try:	
+				d = minidom.parseString(data)
+				node = d.documentElement
+				items = d.getElementsByTagName("item")
+			except ExpatError:
+				logger.error('Unable to get the NZBs.org feed. Check that your settings are correct - post a bug if they are')
+				items = None
 			
 			if len(items):
 			
@@ -244,7 +248,9 @@ def searchNZB(albumid=None, new=False):
 			
 			
 			logger.info(u"Found best result: %s (%s) - %s" % (bestqual[0], bestqual[2], helpers.bytes_to_mb(bestqual[1])))
+			
 			downloadurl = bestqual[2]
+			nzb_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8'), helpers.latinToAscii(albums[1]).encode('UTF-8'), year)
 
 			if headphones.SAB_HOST and not headphones.BLACKHOLE:
 				linkparams = {}
@@ -262,7 +268,7 @@ def searchNZB(albumid=None, new=False):
 								
 				linkparams["name"] = downloadurl
 
-				linkparams["nzbname"] = ('%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8'), helpers.latinToAscii(albums[1]).encode('UTF-8'), year))
+				linkparams["nzbname"] = nzb_folder_name
 					
 				saburl = 'http://' + headphones.SAB_HOST + '/sabnzbd/api?' + urllib.urlencode(linkparams)
 				logger.info(u"Sending link to SABNZBD: " + saburl)
@@ -275,12 +281,12 @@ def searchNZB(albumid=None, new=False):
 					break
 					
 				myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
-				myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched"])
+				myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", nzb_folder_name])
 
 			
 			elif headphones.BLACKHOLE:
 			
-				nzb_name = ('%s - %s [%s].nzb' % (albums[0], albums[1], year))
+				nzb_name = nzb_folder_name + '.nzb'
 				download_path = os.path.join(headphones.BLACKHOLE_DIR, nzb_name)
 				
 				try:
@@ -290,4 +296,4 @@ def searchNZB(albumid=None, new=False):
 					break
 					
 				myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
-				myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched"])
+				myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", nzb_folder_name])

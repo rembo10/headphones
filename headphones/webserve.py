@@ -9,7 +9,9 @@ import time
 import threading
 
 import headphones
-from headphones import templates, logger, db, importer, helpers, mb
+
+from headphones.mb import getReleaseGroup
+from headphones import templates, logger, searcher, db, importer, helpers, mb, lastfm
 from headphones.helpers import checked, radio
 
 _hplookup = TemplateLookup(directories=[os.path.join(str(headphones.PROG_DIR), 'data/interfaces/default/')], output_encoding='utf-8')
@@ -53,6 +55,7 @@ class WebInterface(object):
 		tracks = myDB.select('SELECT ArtistID, ArtistName, AlbumTitle, TrackTitle, TrackDuration, TrackID, AlbumASIN FROM tracks WHERE AlbumID=?', [AlbumID])
 		
 		return serve_template(templatename="album.html", title=album['AlbumTitle'],tracks=tracks, album=album)
+
 	albumPage.exposed = True
 	
 	
@@ -81,11 +84,12 @@ class WebInterface(object):
 		return serve_template(templatename="artistinfo.html", artist=artist, begindate=begindate, enddate=enddate)
 	artistInfo.exposed = True
 
-	def addArtist(self, artistid):
+	def addArtist(self, artistid, redirect='home'):
 		
 		threading.Thread(target=importer.addArtisttoDB, args=[artistid]).start()
 		time.sleep(5)
-		raise cherrypy.HTTPRedirect("home")
+		threading.Thread(target=lastfm.getSimilar).start()
+		raise cherrypy.HTTPRedirect(redirect)
 	addArtist.exposed = True
 	
 	def getExtras(self, ArtistID):
@@ -269,11 +273,15 @@ class WebInterface(object):
 					"pref_bitrate" : headphones.PREFERRED_BITRATE,
 					"detect_bitrate" : checked(headphones.DETECT_BITRATE),
 					"move_files" : checked(headphones.MOVE_FILES),
-					"flac_to_mp3" : checked(headphones.FLAC_TO_MP3),
 					"rename_files" : checked(headphones.RENAME_FILES),
 					"cleanup_files" : checked(headphones.CLEANUP_FILES),
 					"add_album_art" : checked(headphones.ADD_ALBUM_ART),
 					"music_dir" : headphones.MUSIC_DIR,
+					"dest_dir" : headphones.DESTINATION_DIR,
+					"folder_format" : headphones.FOLDER_FORMAT,
+					"file_format" : headphones.FILE_FORMAT,
+					"include_extras" : checked(headphones.INCLUDE_EXTRAS),
+					"log_dir" : headphones.LOG_DIR
 				}
 
 		return serve_template(templatename="config.html", title="Config", config=config)
@@ -283,7 +291,8 @@ class WebInterface(object):
 	def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0,
 		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
 		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
-		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, flac_to_mp3=0, move_files=0, music_dir=None, rename_files=0, cleanup_files=0, add_album_art=0):
+		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
+		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, log_dir=None):
 		
 		headphones.HTTP_HOST = http_host
 		headphones.HTTP_PORT = http_port
@@ -311,12 +320,16 @@ class WebInterface(object):
 		headphones.PREFERRED_QUALITY = int(preferred_quality)
 		headphones.PREFERRED_BITRATE = preferred_bitrate
 		headphones.DETECT_BITRATE = detect_bitrate
-		headphones.FLAC_TO_MP3 = flac_to_mp3
 		headphones.MOVE_FILES = move_files
-		headphones.MUSIC_DIR = music_dir
+		headphones.CORRECT_METADATA = correct_metadata
 		headphones.RENAME_FILES = rename_files
 		headphones.CLEANUP_FILES = cleanup_files
 		headphones.ADD_ALBUM_ART = add_album_art
+		headphones.DESTINATION_DIR = destination_dir
+		headphones.FOLDER_FORMAT = folder_format
+		headphones.FILE_FORMAT = file_format
+		headphones.INCLUDE_EXTRAS = include_extras
+		headphones.LOG_DIR = log_dir
 		
 		headphones.config_write()
 
@@ -340,4 +353,27 @@ class WebInterface(object):
 		threading.Timer(2, headphones.shutdown, [True, True]).start()
 		return serve_template(templatename="shutdown.html", title="Update", messageText="Updating Headphones...")
 	update.exposed = True
+		
+	def extras(self):
+		myDB = db.DBConnection()
+		cloudlist = myDB.select('SELECT * from lastfmcloud')
+		page = [templates._header]
+		page.append(templates._logobar)
+		page.append(templates._nav)
+		if len(cloudlist):
+			page.append('''
+			<div class="table"><div class="config"><h1>Artists You Might Like:</h1><br /><br />
+			<div class="cloud">
+				<ul id="cloud">''')
+			for item in cloudlist:
+				page.append('<li><a href="addArtist?artistid=%s&redirect=extras" class="tag%i">%s</a></li>' % (item['ArtistID'], item['Count'], item['ArtistName']))
+			page.append('</ul><br /><br /></div></div>')	
+			page.append(templates._footer % headphones.CURRENT_VERSION)
+		return page
+	extras.exposed = True
 	
+	def updateCloud(self):
+		
+		lastfm.getSimilar()
+		raise cherrypy.HTTPRedirect("extras")
+	updateCloud.exposed = True

@@ -11,7 +11,7 @@ from lib.configobj import ConfigObj
 
 import cherrypy
 
-from headphones import updater, searcher, importer, versioncheck, logger
+from headphones import updater, searcher, importer, versioncheck, logger, postprocessor
 
 FULL_PATH = None
 PROG_DIR = None
@@ -52,13 +52,14 @@ LATEST_VERSION = None
 COMMITS_BEHIND = None
 
 MUSIC_DIR = None
+DESTINATION_DIR = None
 FOLDER_FORMAT = None
 FILE_FORMAT = None
 PATH_TO_XML = None
 PREFERRED_QUALITY = None
 PREFERRED_BITRATE = None
 DETECT_BITRATE = False
-FLAC_TO_MP3 = False
+CORRECT_METADATA = False
 MOVE_FILES = False
 RENAME_FILES = False
 CLEANUP_FILES = False
@@ -67,6 +68,7 @@ DOWNLOAD_DIR = None
 BLACKHOLE = None
 BLACKHOLE_DIR = None
 USENET_RETENTION = None
+INCLUDE_EXTRAS = False
 
 NZB_SEARCH_INTERVAL = 360
 LIBRARYSCAN_INTERVAL = 60
@@ -141,8 +143,8 @@ def initialize():
 	
 		global __INITIALIZED__, FULL_PATH, PROG_DIR, QUIET, DAEMON, DATA_DIR, CONFIG_FILE, CFG, LOG_DIR, CACHE_DIR, \
 				HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, GIT_PATH, \
-				CURRENT_VERSION, LATEST_VERSION, MUSIC_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
-				FLAC_TO_MP3, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, \
+				CURRENT_VERSION, LATEST_VERSION, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
+				CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, \
 				ADD_ALBUM_ART, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, NZB_SEARCH_INTERVAL, \
 				LIBRARYSCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
 				NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
@@ -173,22 +175,25 @@ def initialize():
 		HTTP_ROOT = check_setting_str(CFG, 'General', 'http_root', '/')
 		LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
 		GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
+		LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', '')
 		
 		MUSIC_DIR = check_setting_str(CFG, 'General', 'music_dir', '')
+		DESTINATION_DIR = check_setting_str(CFG, 'General', 'destination_dir', '')
 		PREFERRED_QUALITY = check_setting_int(CFG, 'General', 'preferred_quality', 0)
 		PREFERRED_BITRATE = check_setting_int(CFG, 'General', 'preferred_bitrate', '')
 		DETECT_BITRATE = bool(check_setting_int(CFG, 'General', 'detect_bitrate', 0))
-		FLAC_TO_MP3 = bool(check_setting_int(CFG, 'General', 'flac_to_mp3', 0))
+		CORRECT_METADATA = bool(check_setting_int(CFG, 'General', 'correct_metadata', 0))
 		MOVE_FILES = bool(check_setting_int(CFG, 'General', 'move_files', 0))
 		RENAME_FILES = bool(check_setting_int(CFG, 'General', 'rename_files', 0))
-		FOLDER_FORMAT = check_setting_str(CFG, 'General', 'folder_format', '%artist/%album/%track')
-		FILE_FORMAT = check_setting_str(CFG, 'General', 'file_format', '%tracknumber %artist - %album - %title')
+		FOLDER_FORMAT = check_setting_str(CFG, 'General', 'folder_format', 'artist/album [year]')
+		FILE_FORMAT = check_setting_str(CFG, 'General', 'file_format', 'tracknumber artist - album [year]- title')
 		CLEANUP_FILES = bool(check_setting_int(CFG, 'General', 'cleanup_files', 0))
 		ADD_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'add_album_art', 0))
 		DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'download_dir', '')
 		BLACKHOLE = bool(check_setting_int(CFG, 'General', 'blackhole', 0))
 		BLACKHOLE_DIR = check_setting_str(CFG, 'General', 'blackhole_dir', '')
 		USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', '')
+		INCLUDE_EXTRAS = bool(check_setting_int(CFG, 'General', 'include_extras', 0))
 		
 		NZB_SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'nzb_search_interval', 360)
 		LIBRARYSCAN_INTERVAL = check_setting_int(CFG, 'General', 'libraryscan_interval', 180)
@@ -211,8 +216,9 @@ def initialize():
 		NZBSORG_UID = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_uid', '')
 		NZBSORG_HASH = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_hash', '')
 	
-		# Put the log dir in the data dir for now
-		LOG_DIR = os.path.join(DATA_DIR, 'logs')
+		if not LOG_DIR:
+			LOG_DIR = os.path.join(DATA_DIR, 'logs')
+		
 		if not os.path.exists(LOG_DIR):
 			try:
 				os.makedirs(LOG_DIR)
@@ -223,6 +229,11 @@ def initialize():
 		# Start the logger, silence console logging if we need to
 		logger.headphones_log.initLogger(quiet=QUIET)
 		
+		# Update some old config code:
+		if FOLDER_FORMAT == '%artist/%album/%track':
+			FOLDER_FORMAT = 'artist/album [year]'
+		if FILE_FORMAT == '%tracknumber %artist - %album - %title':
+			FILE_FORMAT = 'tracknumber artist - album - title'
 		
 		# Put the cache dir in the data dir for now
 		CACHE_DIR = os.path.join(DATA_DIR, 'cache')
@@ -231,8 +242,6 @@ def initialize():
 				os.makedirs(CACHE_DIR)
 			except OSError:
 				logger.error('Could not create cache dir. Check permissions of datadir: ' + DATA_DIR)
-		
-		
 		
 		# Initialize the database
 		logger.info('Checking to see if the database has all tables....')
@@ -318,13 +327,15 @@ def config_write():
 	new_config['General']['http_password'] = HTTP_PASSWORD
 	new_config['General']['http_root'] = HTTP_ROOT
 	new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
+	new_config['General']['log_dir'] = LOG_DIR
 	new_config['General']['git_path'] = GIT_PATH
 
 	new_config['General']['music_dir'] = MUSIC_DIR
+	new_config['General']['destination_dir'] = DESTINATION_DIR
 	new_config['General']['preferred_quality'] = PREFERRED_QUALITY
 	new_config['General']['preferred_bitrate'] = PREFERRED_BITRATE
 	new_config['General']['detect_bitrate'] = int(DETECT_BITRATE)
-	new_config['General']['flac_to_mp3'] = int(FLAC_TO_MP3)
+	new_config['General']['correct_metadata'] = int(CORRECT_METADATA)
 	new_config['General']['move_files'] = int(MOVE_FILES)
 	new_config['General']['rename_files'] = int(RENAME_FILES)
 	new_config['General']['folder_format'] = FOLDER_FORMAT
@@ -335,6 +346,7 @@ def config_write():
 	new_config['General']['blackhole'] = int(BLACKHOLE)
 	new_config['General']['blackhole_dir'] = BLACKHOLE_DIR
 	new_config['General']['usenet_retention'] = USENET_RETENTION
+	new_config['General']['include_extras'] = int(INCLUDE_EXTRAS)
 	
 	new_config['General']['nzb_search_interval'] = NZB_SEARCH_INTERVAL
 	new_config['General']['libraryscan_interval'] = LIBRARYSCAN_INTERVAL
@@ -376,6 +388,7 @@ def start():
 		SCHED.add_interval_job(searcher.searchNZB, minutes=NZB_SEARCH_INTERVAL)
 		SCHED.add_interval_job(importer.scanMusic, minutes=LIBRARYSCAN_INTERVAL)
 		SCHED.add_interval_job(versioncheck.checkGithub, minutes=300)
+		SCHED.add_interval_job(postprocessor.checkFolder, minutes=5)
 
 		SCHED.start()
 		
@@ -387,9 +400,10 @@ def dbcheck():
 	c=conn.cursor()
 	c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT, IncludeExtras INTEGER, LatestAlbum TEXT, ReleaseDate TEXT, AlbumID TEXT, HaveTracks INTEGER, TotalTracks INTEGER)')
 	c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT, Type TEXT)')
-	c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT)')
-	c.execute('CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT)')
+	c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER)')
+	c.execute('CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT, FolderName TEXT)')
 	c.execute('CREATE TABLE IF NOT EXISTS have (ArtistName TEXT, AlbumTitle TEXT, TrackNumber TEXT, TrackTitle TEXT, TrackLength TEXT, BitRate TEXT, Genre TEXT, Date TEXT, TrackID TEXT)')
+	c.execute('CREATE TABLE IF NOT EXISTS lastfmcloud (ArtistName TEXT, ArtistID TEXT, Count INTEGER)')
 	
 	try:
 		c.execute('SELECT IncludeExtras from artists')
@@ -425,6 +439,16 @@ def dbcheck():
 		c.execute('SELECT Type from albums')
 	except sqlite3.OperationalError:
 		c.execute('ALTER TABLE albums ADD COLUMN Type TEXT DEFAULT "Album"')
+
+	try:
+		c.execute('SELECT TrackNumber from tracks')
+	except sqlite3.OperationalError:
+		c.execute('ALTER TABLE tracks ADD COLUMN TrackNumber INTEGER')
+		
+	try:
+		c.execute('SELECT FolderName from snatched')
+	except sqlite3.OperationalError:
+		c.execute('ALTER TABLE snatched ADD COLUMN FolderName TEXT')	
 	
 	conn.commit()
 	c.close()

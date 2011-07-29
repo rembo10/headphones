@@ -4,7 +4,7 @@ import os
 from lib.beets.mediafile import MediaFile
 
 import headphones
-from headphones import logger, helpers, db, mb
+from headphones import logger, helpers, db, mb, albumart, lastfm
 
 various_artists_mbid = '89ad4ac3-39f7-470e-963a-56509c546377'
 
@@ -130,6 +130,14 @@ def artistlist_to_mbids(artistlist):
 			controlValueDict = {"ArtistID": 	artistid}
 			newValueDict = {"HaveTracks": 		havetracks}
 			myDB.upsert("artists", newValueDict, controlValueDict)
+			
+	# Update the cloud:
+	logger.info('Updating the cloud')
+	try:
+		lastfm.getSimilar()
+	except Exception, e:
+		logger.warn('Updating the cloud failed: %s' % e)
+		
 
 def addArtisttoDB(artistid, extrasonly=False):
 	
@@ -158,6 +166,9 @@ def addArtisttoDB(artistid, extrasonly=False):
 					"DateAdded": 		helpers.today(),
 					"Status": 			"Loading"}
 	
+	if headphones.INCLUDE_EXTRAS:
+		newValueDict['IncludeExtras'] = 1
+	
 	myDB.upsert("artists", newValueDict, controlValueDict)
 
 	for rg in artist['releasegroups']:
@@ -170,16 +181,10 @@ def addArtisttoDB(artistid, extrasonly=False):
 		try:	
 			release_dict = mb.getReleaseGroup(rgid)
 		except Exception, e:
-			logger.info('Unable to get release information for %s - it may not be a valid release group' % rg['title'])
+			logger.info('Unable to get release information for %s - it may not be a valid release group (or it might just not be tagged right in MusicBrainz)' % rg['title'])
 			continue
 			
 		if not release_dict:
-			continue
-		
-		release = mb.getRelease(release_dict['releaseid'])
-		
-		if not release:
-			logger.warn('Unable to get release information for %s. Skipping for now.' % rg['title'])
 			continue
 	
 		logger.info(u"Now adding/updating album: " + rg['title'])
@@ -187,7 +192,7 @@ def addArtisttoDB(artistid, extrasonly=False):
 		
 		if len(rg_exists):
 		
-			newValueDict = {"AlbumASIN":		release['asin'],
+			newValueDict = {"AlbumASIN":		release_dict['asin'],
 							"ReleaseDate":		release_dict['releasedate'],
 							}
 		
@@ -196,13 +201,13 @@ def addArtisttoDB(artistid, extrasonly=False):
 			newValueDict = {"ArtistID":			artistid,
 							"ArtistName": 		artist['artist_name'],
 							"AlbumTitle":		rg['title'],
-							"AlbumASIN":		release['asin'],
+							"AlbumASIN":		release_dict['asin'],
 							"ReleaseDate":		release_dict['releasedate'],
 							"DateAdded":		helpers.today(),
 							"Type":				rg['type']
 							}
 							
-			if release['date'] > helpers.today():
+			if release_dict['releasedate'] > helpers.today():
 				newValueDict['Status'] = "Wanted"
 			else:
 				newValueDict['Status'] = "Skipped"
@@ -210,18 +215,22 @@ def addArtisttoDB(artistid, extrasonly=False):
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		
 		# I changed the albumid from releaseid -> rgid, so might need to delete albums that have a releaseid
-		myDB.action('DELETE from albums WHERE AlbumID=?', [release['id']])	
-						
-		for track in release['tracks']:
+		for release in release_dict['releaselist']:
+			myDB.action('DELETE from albums WHERE AlbumID=?', [release['releaseid']])
+			myDB.action('DELETE from tracks WHERE AlbumID=?', [release['releaseid']])
+		
+		myDB.action('DELETE from tracks WHERE AlbumID=?', [rg['id']])
+		for track in release_dict['tracks']:
 		
 			controlValueDict = {"TrackID": 	track['id'],
 								"AlbumID":	rg['id']}
 			newValueDict = {"ArtistID":		artistid,
 						"ArtistName": 		artist['artist_name'],
 						"AlbumTitle":		rg['title'],
-						"AlbumASIN":		release['asin'],
+						"AlbumASIN":		release_dict['asin'],
 						"TrackTitle":		track['title'],
 						"TrackDuration":	track['duration'],
+						"TrackNumber":		track['number']
 						}
 		
 			myDB.upsert("tracks", newValueDict, controlValueDict)
