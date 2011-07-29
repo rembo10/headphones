@@ -19,7 +19,7 @@ import logging
 from collections import defaultdict
 import re
 from lib.munkres import Munkres
-#from unidecode import unidecode
+from lib.unidecode import unidecode
 
 from lib.beets.autotag import mb
 from lib.beets import library, mediafile, plugins
@@ -119,8 +119,8 @@ def _string_dist_basic(str1, str2):
     transliteration/lowering to ASCII characters. Normalized by string
     length.
     """
-    # str1 = unidecode(str1)
-    # str2 = unidecode(str2)
+    str1 = unidecode(str1)
+    str2 = unidecode(str2)
     str1 = re.sub(r'[^a-z0-9]', '', str1.lower())
     str2 = re.sub(r'[^a-z0-9]', '', str2.lower())
     if not str1 and not str2:
