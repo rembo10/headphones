@@ -69,9 +69,6 @@ class WebInterface(object):
 	findArtist.exposed = True
 
 	def artistInfo(self, artistid):
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
 		artist = mb.getArtist(artistid)
 		if artist['artist_begindate']:
 			begindate = artist['artist_begindate']
@@ -81,14 +78,7 @@ class WebInterface(object):
 			enddate = artist['artist_enddate']
 		else:
 			enddate = ''
-		page.append('''<div class="table"><p class="center">Artist Information:</p>''')
-		page.append('''<p class="mediumtext">Artist Name: %s (%s)</br> ''' % (artist['artist_name'], artist['artist_type']))
-		page.append('''<p class="mediumtext">Years Active: %s - %s <br /><br />''' % (begindate, enddate))
-		page.append('''MusicBrainz Link: <a class="external" href="http://www.musicbrainz.org/artist/%s">http://www.musicbrainz.org/artist/%s</a></br></br><b>Albums:</b><br />''' % (artistid, artistid))
-		for rg in artist['releasegroups']:
-			page.append('''%s <br />''' % rg['title'])
-		page.append('''<div class="center"><a href="addArtist?artistid=%s">Add this artist!</a></div>''' % artistid)
-		return page
+		return serve_template(templatename="artistinfo.html", artist=artist, begindate=begindate, enddate=enddate)
 	artistInfo.exposed = True
 
 	def addArtist(self, artistid):

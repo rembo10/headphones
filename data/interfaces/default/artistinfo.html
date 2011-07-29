@@ -1,0 +1,11 @@
+<p class="center">Artist Information:</p>
+<p class="mediumtext">Artist Name: ${artist['artist_name']} (${artist['artist_type']})</p>
+<p class="mediumtext">Years Active: ${begindate} - ${enddate} 
+MusicBrainz Link: <a class="external" href="http://www.musicbrainz.org/artist/${artist['artistid']}">http://www.musicbrainz.org/artist/${artist['artistid']}</a></br></br><b>Albums:</b><br />
+
+% for rg in artist['releasegroups']:
+	${rg['title']} <br />
+% endfor
+
+<div class="center"><a href="addArtist?artistid=${artist['artistid']}">Add this artist!</a></div>
+<%inherit file="base.html" />
