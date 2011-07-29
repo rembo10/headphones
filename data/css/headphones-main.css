@@ -95,11 +95,34 @@ table.artistListTable td.status {
 }
 table.artistListTable td.upcomingalbum {
     text-align: center;
-    
 }
 
 table.artistListTable td.have {
     text-align: center;
+}
+table.albumListTable {
+	width: 100%;
+	padding: 50px;
+}
+thead.albumTableHeaders{
+	font-weight: bold;
+}
+table.upcomingAlbumTable {
+    width: 100%;
+    padding: 50px;
+}
+table.wantedAlbumTable {
+    width: 100%;
+    padding: 50px;
+}
+table.historyTable {
+    width: 100%;
+    padding: 50px;
+}
+.artistName {
+	text-align: center;
+	font-size: large;
+	padding-top: 20px;
 }
 div.manageSection {
 	text-align: left;
@@ -117,6 +140,11 @@ table#logTable {
 	padding-bottom: 20px;
 }
 div.configHeader {
+	font-size: 11px;
+	text-align: center;
+	padding: 25px;
+}
+.shutdownText {
 	font-size: 11px;
 	text-align: center;
 	padding: 25px;
