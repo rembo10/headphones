@@ -255,48 +255,47 @@ class WebInterface(object):
 	clearhistory.exposed = True
 	
 	def config(self):
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		page.append(templates.configform % (
-		headphones.HTTP_HOST,
-		headphones.HTTP_USERNAME,
-		headphones.HTTP_PORT,
-		headphones.HTTP_PASSWORD,
-		checked(headphones.LAUNCH_BROWSER),
-		headphones.SAB_HOST,
-		headphones.SAB_USERNAME,
-		headphones.SAB_APIKEY,
-		headphones.SAB_PASSWORD,
-		headphones.SAB_CATEGORY,
-		headphones.DOWNLOAD_DIR,
-		checked(headphones.BLACKHOLE),
-		headphones.BLACKHOLE_DIR,
-		headphones.USENET_RETENTION,
-		checked(headphones.NZBMATRIX),
-		headphones.NZBMATRIX_USERNAME,
-		headphones.NZBMATRIX_APIKEY,
-		checked(headphones.NEWZNAB),
-		headphones.NEWZNAB_HOST,
-		headphones.NEWZNAB_APIKEY,
-		checked(headphones.NZBSORG),
-		headphones.NZBSORG_UID,
-		headphones.NZBSORG_HASH,
-		radio(headphones.PREFERRED_QUALITY, 0),
-		radio(headphones.PREFERRED_QUALITY, 1),
-		radio(headphones.PREFERRED_QUALITY, 3),
-		radio(headphones.PREFERRED_QUALITY, 2),
-		headphones.PREFERRED_BITRATE,
-		checked(headphones.DETECT_BITRATE),
-		checked(headphones.MOVE_FILES),
-		checked(headphones.FLAC_TO_MP3),
-		checked(headphones.RENAME_FILES),
-		checked(headphones.CLEANUP_FILES),
-		checked(headphones.ADD_ALBUM_ART),
-		headphones.MUSIC_DIR
-		))
-		page.append(templates._footer % headphones.CURRENT_VERSION)
-		return serve_template(templatename="config.html", title="Config")
+		# FIXME: this is all temporary until the way the config is handled is rewritten. 
+		# should be able to just add
+		config = { 
+					"http_host" : headphones.HTTP_HOST,
+					"http_user" : headphones.HTTP_USERNAME,
+		 			"http_port" : headphones.HTTP_PORT,
+				 	"http_pass" : headphones.HTTP_PASSWORD,
+					"launch_browser" : checked(headphones.LAUNCH_BROWSER),
+					"sab_host" : headphones.SAB_HOST,
+					"sab_user" : headphones.SAB_USERNAME,
+					"sab_api" : headphones.SAB_APIKEY,
+					"sab_pass" : headphones.SAB_PASSWORD,
+					"sab_cat" : headphones.SAB_CATEGORY,
+					"download_dir" : headphones.DOWNLOAD_DIR,
+					"use_blackhole" : checked(headphones.BLACKHOLE),
+					"blackhole_dir" : headphones.BLACKHOLE_DIR,
+					"usenet_retention" : headphones.USENET_RETENTION,
+					"use_nzbmatrix" : checked(headphones.NZBMATRIX),
+					"nzbmatrix_user" : headphones.NZBMATRIX_USERNAME,
+					"nzbmatrix_api" : headphones.NZBMATRIX_APIKEY,
+					"use_newznab" : checked(headphones.NEWZNAB),
+					"newznab_host" : headphones.NEWZNAB_HOST,
+					"newznab_api" : headphones.NEWZNAB_APIKEY,
+					"use_nzbsorg" : checked(headphones.NZBSORG),
+					"nzbsorg_uid" : headphones.NZBSORG_UID,
+					"nzbsorg_hash" : headphones.NZBSORG_HASH,
+					"pref_qual_0" : radio(headphones.PREFERRED_QUALITY, 0),
+					"pref_qual_1" : radio(headphones.PREFERRED_QUALITY, 1),
+					"pref_qual_2" : radio(headphones.PREFERRED_QUALITY, 3),
+					"pref_qual_3" : radio(headphones.PREFERRED_QUALITY, 2),
+					"pref_bitrate" : headphones.PREFERRED_BITRATE,
+					"detect_bitrate" : checked(headphones.DETECT_BITRATE),
+					"move_files" : checked(headphones.MOVE_FILES),
+					"flac_to_mp3" : checked(headphones.FLAC_TO_MP3),
+					"rename_files" : checked(headphones.RENAME_FILES),
+					"cleanup_files" : checked(headphones.CLEANUP_FILES),
+					"add_album_art" : checked(headphones.ADD_ALBUM_ART),
+					"music_dir" : headphones.MUSIC_DIR,
+				}
+
+		return serve_template(templatename="config.html", title="Config", config=config)
 	config.exposed = True
 	
 	

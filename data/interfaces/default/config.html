@@ -16,31 +16,31 @@
 				<tr>
 					<td>
 						<p>	HTTP Host: <br />
-							<input type="text" name="http_host" value="%s" size="30" maxlength="40"><br /> 
+							<input type="text" name="http_host" value="${config['http_host']}" size="30" maxlength="40"><br /> 
 							<i class="smalltext">e.g. localhost or 0.0.0.0</i>
 						</p>
 					</td>
 					<td>
 						<p>HTTP Username: <br />
-							<input type="text" name="http_username" value="%s" size="30" maxlength="40">
+							<input type="text" name="http_username" value="${config['http_user']}" size="30" maxlength="40">
 						</p>
 					</td>
 				</tr>
 				<tr>
 					<td>
 						<p>HTTP Port: <br />
-							<input type="text" name="http_port" value="%s" size="20" maxlength="40">
+							<input type="text" name="http_port" value="${config['http_port']}" size="20" maxlength="40">
 						</p>
 					</td>
 					<td>
 						<p>HTTP Password: <br />
-							<input type="password" name="http_password" value="%s" size="30" maxlength="40">
+							<input type="password" name="http_password" value="${config['http_pass']}" size="30" maxlength="40">
 						</p>
 					</td>
 				</tr>
 				<tr>
 					<td>
-						<p>Launch Browser on Startup:<input type="checkbox"	name="launch_browser" value="1" %s /></p>
+						<p>Launch Browser on Startup:<input type="checkbox"	name="launch_browser" value="1" ${config['launch_browser']} /></p>
 					</td>
 				</tr>
 			</table>
@@ -53,31 +53,31 @@
 				<tr>
 					<td>
 						<p>SABnzbd Host:</p>
-						<input type="text" name="sab_host" value="%s" size="30"	maxlength="40"><br />
+						<input type="text" name="sab_host" value="${config['sab_host']}" size="30"	maxlength="40"><br />
 						<i class="smalltext">e.g. localhost:8080</i>
 					</td>
 					<td>
 						<p>SABnzbd Username:</p>
-						<input type="text" name="sab_username" value="%s" size="20" maxlength="40">
+						<input type="text" name="sab_username" value="${config['sab_user']}" size="20" maxlength="40">
 					</td>
 				</tr>
 				<tr>
 					<td>
 						<p>SABnzbd API:</p>
-						<input type="text" name="sab_apikey" value="%s" size="46" maxlength="40">
+						<input type="text" name="sab_apikey" value="${config['sab_api']}" size="46" maxlength="40">
 					</td>
 					<td>
 						<p>SABnzbd Password:</p>
-						<input type="password" name="sab_password" value="%s" size="20"	maxlength="40">
+						<input type="password" name="sab_password" value="${config['sab_pass']}" size="20"	maxlength="40">
 					</td>
 				</tr>
 				<tr>
 					<td>
 						<p>SABnzbd Category:</p>
-						<input type="text" name="sab_category" value="%s" size="20"	maxlength="40"></td>
+						<input type="text" name="sab_category" value="${config['sab_cat']}" size="20"	maxlength="40"></td>
 					<td>
 						<p>Music Download Directory:</p>
-						<input type="text" name="download_dir" value="%s" size="60"><br />
+						<input type="text" name="download_dir" value="${config['download_dir']}" size="60"><br />
 						<i class="smalltext">Full path to the directory where SAB downloads your music<br /> 
 						e.g. Downloads/music or	/Users/name/Downloads/music</i>
 					</td>
@@ -85,18 +85,18 @@
 				<tr>
 					<td>
 						<p>Use Black Hole:</p>
-						<input type="checkbox" name="blackhole" value=1 %s />
+						<input type="checkbox" name="blackhole" value=1 ${config['use_blackhole']} />
 					</td>
 					<td>
 						<p>Black Hole Directory:</p>
-						<input type="text" name="blackhole_dir" value="%s" size="60"><br />
+						<input type="text" name="blackhole_dir" value="${config['blackhole_dir']}" size="60"><br />
 						<i class="smalltext">Folder your Download program watches for NZBs</i>
 					</td>
 				</tr>
 				<tr>
 					<td>
 						<p>Usenet Retention:</p>
-						<input type="text" name="usenet_retention" value="%s" size="20"	maxlength="40">
+						<input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="20"	maxlength="40">
 					</td>
 				</tr>
 			</table>
@@ -108,36 +108,36 @@
 			<table class="configtable" summary="Search Providers">
 				<tr>
 					<td>
-						<p>NZBMatrix: <input type="checkbox" name="nzbmatrix" value="1" %s /></p>
+						<p>NZBMatrix: <input type="checkbox" name="nzbmatrix" value="1" ${config['use_nzbmatrix']} /></p>
 					</td>
 					<td>
-						<p>NZBMatrix Username: <br> <input type="text" name="nzbmatrix_username" value="%s" size="30" maxlength="40"></p>
+						<p>NZBMatrix Username: <br> <input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30" maxlength="40"></p>
 					</td>
 					<td>
-						<p>NZBMatrix API: <br> <input type="text" name="nzbmatrix_apikey" value="%s" size="46" maxlength="40"></p>
+						<p>NZBMatrix API: <br> <input type="text" name="nzbmatrix_apikey" value="${config['nzbmatrix_api']}" size="46" maxlength="40"></p>
 					</td>
 				</tr>
 				<tr>
 					<td>
-						<p>Newznab: <input type="checkbox" name="newznab" value="1" %s /></p>
+						<p>Newznab: <input type="checkbox" name="newznab" value="1" ${config['use_newznab']} /></p>
 					</td>
 					<td>
-						<p>Newznab Host:<br> <input type="text" name="newznab_host"	value="%s" size="30" maxlength="40"><br /> 
+						<p>Newznab Host:<br> <input type="text" name="newznab_host"	value="${config['newznab_host']}" size="30" maxlength="40"><br /> 
 						<i class="smalltext">i.e. http://nzb.su</i></p>
 					</td>
 					<td>
-						<p>Newznab API:<br> <input type="text" name="newznab_apikey" value="%s" size="46" maxlength="40"></p>
+						<p>Newznab API:<br> <input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="46" maxlength="40"></p>
 					</td>
 				</tr>
 				<tr>
 					<td>
-						<p>NZBs.org:<input type="checkbox" name="nzbsorg" value="1" %s /></p>
+						<p>NZBs.org:<input type="checkbox" name="nzbsorg" value="1" ${config['use_nzbsorg']} /></p>
 					</td>
 					<td>
-						<p>NZBs.org UID:<br> <input type="text" name="nzbsorg_uid" value="%s" size="30" maxlength="40"></p>
+						<p>NZBs.org UID:<br> <input type="text" name="nzbsorg_uid" value="${config['nzbsorg_uid']}" size="30" maxlength="40"></p>
 					</td>
 					<td>
-						<p>NZBs.org Hash:<br> <input type="text" name="nzbsorg_hash" value="%s" size="46" maxlength="40"></p>
+						<p>NZBs.org Hash:<br> <input type="text" name="nzbsorg_hash" value="${config['nzbsorg_hash']}" size="46" maxlength="40"></p>
 					</td>
 				</tr>
 			</table>
@@ -151,21 +151,21 @@
 					<td>
 						<b>Album Quality:</b>
 							<p>
-								<input type="radio" name="preferred_quality" value="0" %s />Highest	Quality excluding Lossless<br />
-								<input type="radio" name="preferred_quality" value="1" %s />Highest	Quality including Lossless<br />
-								<input type="radio" name="preferred_quality" value="3" %s />Lossless Only<br />
-								<input type="radio" name="preferred_quality" value="2" %s />Preferred Bitrate: <input type="text" name="preferred_bitrate" value="%s" size="5" maxlength="5" />kbps <br />
-								<i class="smalltext2"><input type="checkbox" name="detect_bitrate" value="1" %s />Auto-Detect Preferred Bitrate </i>
+								<input type="radio" name="preferred_quality" value="0" ${config['pref_qual_0']} />Highest	Quality excluding Lossless<br />
+								<input type="radio" name="preferred_quality" value="1" ${config['pref_qual_1']} />Highest	Quality including Lossless<br />
+								<input type="radio" name="preferred_quality" value="3" ${config['pref_qual_2']} />Lossless Only<br />
+								<input type="radio" name="preferred_quality" value="2" ${config['pref_qual_3']} />Preferred Bitrate: <input type="text" name="preferred_bitrate" value="${config['pref_bitrate']}" size="5" maxlength="5" />kbps <br />
+								<i class="smalltext2"><input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />Auto-Detect Preferred Bitrate </i>
 							</p>
 					</td>
 					<td>
 						<b>Post-Processing:</b>
 							<p>
-								<input type="checkbox" name="move_files" value="1" %s />Move downloads to Music Folder<br />
-								<input type="checkbox" name="flac_to_mp3" value="1" %s />Convert lossless to mp3<br />
-								<input type="checkbox" name="rename_files" value="1" %s />Rename &amp; add metadata<br /> 
-								<input type="checkbox" name="cleanup_files" value="1" %s />Delete leftover files<br />
-								<input type="checkbox" name="add_album_art" value="1" %s>Add album art
+								<input type="checkbox" name="move_files" value="1" ${config['move_files']} />Move downloads to Music Folder<br />
+								<input type="checkbox" name="flac_to_mp3" value="1" ${config['flac_to_mp3']} />Convert lossless to mp3<br />
+								<input type="checkbox" name="rename_files" value="1" ${config['rename_files']} />Rename &amp; add metadata<br /> 
+								<input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} />Delete leftover files<br />
+								<input type="checkbox" name="add_album_art" value="1" ${config['add_album_art']}>Add album art
 							</p>
 					</td>
 				</tr>
@@ -173,7 +173,7 @@
 					<td>
 						<p>
 							<b>Path to Music folder</b>:<br />
-							<input type="text" name="music_dir" value="%s" size="60" maxlength="200"> <br /> 
+							<input type="text" name="music_dir" value="${config['music_dir']}" size="60" maxlength="200"> <br /> 
 							<i class="smalltext">e.g. /Users/name/Music/iTunes or /Volumes/share/music</i>
 						</p>
 					</td>
