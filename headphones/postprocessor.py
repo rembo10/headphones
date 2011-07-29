@@ -90,11 +90,19 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 
 	logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
 
-	if headphones.ADD_ALBUM_ART:
-		addAlbumArt(albumid, downloaded_track_list)
+	if headphones.EMBED_ALBUM_ART or headphones.ADD_ALBUM_ART:
+	
+		album_art_path = albumart.getAlbumArt(albumid)
+		artwork = urllib.urlopen(album_art_path).read()
+	
+	if headphones.EMBED_ALBUM_ART:
+		embedAlbumArt(artwork, downloaded_track_list)
 	
 	if headphones.CLEANUP_FILES:
 		cleanupFiles(albumpath)
+		
+	if headphones.ADD_ALBUM_ART:
+		addAlbumArt(artwork, albumpath)
 		
 	if headphones.CORRECT_METADATA:
 		correctMetadata(albumid, release, downloaded_track_list)
@@ -112,11 +120,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 	
 	logger.info('Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
 	
-def addAlbumArt(albumid, downloaded_track_list):
-	logger.info('Adding album art')
-	album_art_path = albumart.getAlbumArt(albumid)
-	
-	artwork = urllib.urlopen(album_art_path).read()
+def embedAlbumArt(artwork, downloaded_track_list):
+	logger.info('Embedding album art')
 	
 	for downloaded_track in downloaded_track_list:
 		try:
@@ -126,6 +131,14 @@ def addAlbumArt(albumid, downloaded_track_list):
 			
 		f.art = artwork
 		f.save()
+		
+def addAlbumArt(artwork, albumpath):
+	logger.info('Adding album art to folder')
+	
+	artwork_file_name = os.path.join(albumpath, 'folder.jpg')
+	file = open(artwork_file_name, 'w')
+	file.write(artwork)
+	file.close()
 	
 def cleanupFiles(albumpath):
 	logger.info('Cleaning up files')
@@ -150,11 +163,20 @@ def moveFiles(albumpath, release, tracks):
 	folder = helpers.replace_all(headphones.FOLDER_FORMAT, values)
 	
 	destination_path = os.path.join(headphones.DESTINATION_DIR, folder)
+	destination_path = destination_path.replace('?','_')
+	
 	logger.info('Moving files from %s to %s' % (folder, destination_path))
 	
 	try:
 		os.makedirs(destination_path)
 		
+		# Chmod the directories using the folder_format (script courtesy of premiso!)
+		folder_list = folder.split('/')
+		temp_f = os.path.join(headphones.DESTINATION_DIR);
+		for f in folder_list:
+			temp_f = os.path.join(temp_f, f)
+			os.chmod(temp_f, 0755)
+	
 	except Exception, e:
 		logger.error('Could not create folder for %s. Not moving' % release['AlbumName'])
 		return albumpath
@@ -178,6 +200,10 @@ def correctMetadata(albumid, release, downloaded_track_list):
 		items.append(beets.library.Item.from_path(downloaded_track))
 		
 	cur_artist, cur_album, out_tuples, rec = autotag.tag_album(items, search_artist=release['ArtistName'], search_album=release['AlbumTitle'])
+	
+	if rec == 'RECOMMEND_NONE':
+		logger.warn('No accurate match found  -  not writing metadata')
+		return
 	
 	distance, items, info = out_tuples[0]
 	
@@ -211,6 +237,8 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		ext = os.path.splitext(downloaded_track)[1]
 		
 		new_file_name = helpers.replace_all(headphones.FILE_FORMAT, values).replace('/','_') + ext
+		
+		new_file_name = new_file_name.replace('?','_')	
 
 		new_file = os.path.join(albumpath, new_file_name)
 		

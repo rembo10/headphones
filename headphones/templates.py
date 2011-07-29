@@ -283,7 +283,8 @@ configform = form = '''
                       	<input type="checkbox" name="rename_files" value="1" %s />Rename files<br>
                         <input type="checkbox" name="correct_metadata" value="1" %s />Correct metadata<br>
                         <input type="checkbox" name="cleanup_files" value="1" %s />Delete leftover files (.m3u, .nfo, .sfv, .nzb, etc.)<br>
-                      	<input type="checkbox" name="add_album_art" value="1" %s>Add album art
+                      	<input type="checkbox" name="add_album_art" value="1" %s>Add album art as 'folder.jpg' to album folder<br>
+                      	<input type="checkbox" name="embed_album_art" value="1" %s>Embed album art in each file
                       </p>
                 </td>
             </tr>

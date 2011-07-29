@@ -555,6 +555,7 @@ class WebInterface(object):
 		checked(headphones.CORRECT_METADATA),
 		checked(headphones.CLEANUP_FILES),
 		checked(headphones.ADD_ALBUM_ART),
+		checked(headphones.EMBED_ALBUM_ART),
 		headphones.DESTINATION_DIR,
 		headphones.FOLDER_FORMAT,
 		headphones.FILE_FORMAT,
@@ -571,7 +572,7 @@ class WebInterface(object):
 		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
 		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
 		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
-		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, log_dir=None):
+		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, log_dir=None):
 		
 		headphones.HTTP_HOST = http_host
 		headphones.HTTP_PORT = http_port
@@ -604,6 +605,7 @@ class WebInterface(object):
 		headphones.RENAME_FILES = rename_files
 		headphones.CLEANUP_FILES = cleanup_files
 		headphones.ADD_ALBUM_ART = add_album_art
+		headphones.EMBED_ALBUM_ART = embed_album_art
 		headphones.DESTINATION_DIR = destination_dir
 		headphones.FOLDER_FORMAT = folder_format
 		headphones.FILE_FORMAT = file_format
