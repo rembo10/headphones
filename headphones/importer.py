@@ -24,7 +24,7 @@ def scanMusic(dir=None):
 	
 	for r,d,f in os.walk(dir):
 		for files in f:
-			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape")):
+			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape", ".m4a")):
 				results.append(os.path.join(r, files))
 				
 	logger.info(u'%i music files found. Reading metadata....' % len(results))

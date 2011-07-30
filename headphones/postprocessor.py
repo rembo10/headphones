@@ -33,7 +33,7 @@ def verify(albumid, albumpath):
 	downloaded_track_list = []
 	for r,d,f in os.walk(albumpath):
 		for files in f:
-			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape")):
+			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape", ".m4a")):
 				downloaded_track_list.append(os.path.join(r, files))	
 	
 	# test #1: metadata - usually works
