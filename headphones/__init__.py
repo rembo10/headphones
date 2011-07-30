@@ -92,6 +92,8 @@ NZBSORG = False
 NZBSORG_UID = None
 NZBSORG_HASH = None
 
+LASTFM_USERNAME = None
+
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
     try:
@@ -149,7 +151,7 @@ def initialize():
 				ADD_ALBUM_ART, EMBED_ALBUM_ART, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, NZB_SEARCH_INTERVAL, \
 				LIBRARYSCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
 				NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
-				NZBSORG, NZBSORG_UID, NZBSORG_HASH
+				NZBSORG, NZBSORG_UID, NZBSORG_HASH, LASTFM_USERNAME
 				
 		if __INITIALIZED__:
 			return False
@@ -217,6 +219,8 @@ def initialize():
 		NZBSORG = bool(check_setting_int(CFG, 'NZBsorg', 'nzbsorg', 0))
 		NZBSORG_UID = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_uid', '')
 		NZBSORG_HASH = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_hash', '')
+		
+		LASTFM_USERNAME = check_setting_str(CFG, 'General', 'lastfm_username', '')
 	
 		if not LOG_DIR:
 			LOG_DIR = os.path.join(DATA_DIR, 'logs')
@@ -375,6 +379,8 @@ def config_write():
 	new_config['NZBsorg']['nzbsorg'] = int(NZBSORG)
 	new_config['NZBsorg']['nzbsorg_uid'] = NZBSORG_UID
 	new_config['NZBsorg']['nzbsorg_hash'] = NZBSORG_HASH
+	
+	new_config['General']['lastfm_username'] = LASTFM_USERNAME
 	
 	new_config.write()
 

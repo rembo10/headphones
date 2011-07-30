@@ -132,7 +132,7 @@ def artistlist_to_mbids(artistlist):
 			newValueDict = {"HaveTracks": 		havetracks}
 			myDB.upsert("artists", newValueDict, controlValueDict)
 			
-	# Update the cloud:
+	# Update the similar artist tag cloud:
 	logger.info('Updating artist information from Last.fm')
 	try:
 		lastfm.getSimilar()

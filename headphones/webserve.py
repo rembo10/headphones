@@ -370,14 +370,14 @@ class WebInterface(object):
 	upcoming.exposed = True
 	
 	def manage(self):
-		if headphones.PATH_TO_XML:
-			path = headphones.PATH_TO_XML
+		if headphones.LASTFM_USERNAME:
+			lastfm_user_text = headphones.LASTFM_USERNAME
 		else:
-			path = 'Absolute path to iTunes XML or Top-Level Music Directory'
+			lastfm_user_text = 'Last.FM Username'
 		if headphones.MUSIC_DIR:
-			path2 = headphones.MUSIC_DIR
+			music_dir_text = headphones.MUSIC_DIR
 		else:
-			path2 = 'Enter a directory to scan'
+			music_dir_text = 'Enter a directory to scan'
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
@@ -395,20 +395,26 @@ class WebInterface(object):
 			<input type="text" value="%s" onfocus="if
 			(this.value==this.defaultValue) this.value='';" name="path" size="70" />
 			<input type="submit" /></form><br /><br /></div></div>
-		<div class="table"><div class="config"><h1>Import or Sync Your iTunes Library/Music Folder</h1><br />
-		This is here for legacy purposes (try the Music Scanner above!) <br /><br />
-		If you'd rather import an iTunes .xml file, you can enter the full path here. <br /><br />
-		<form action="importItunes" method="GET" align="center">
+		<div class="table"><div class="config"><h1>Import Your Last.FM Artists</h1><br />
+		<form action="importLastFM" method="GET" align="center">
 			<input type="text" value="%s" onfocus="if
-			(this.value==this.defaultValue) this.value='';" name="path" size="70" />
+			(this.value==this.defaultValue) this.value='';" name="username" size="18" />
 			<input type="submit" /></form><br /><br /></div></div>
 			<div class="table"><div class="config"><h1>Force Search</h1><br />
 			<a href="forceSearch">Force Check for Wanted Albums</a><br /><br />
 			<a href="forceUpdate">Force Update Active Artists</a><br /><br />
-			<a href="checkGithub">Check for Headphones Updates</a><br /><br /><br /></div></div>''' % (path2, path))
+			<a href="checkGithub">Check for Headphones Updates</a><br /><br /><br /></div></div>''' % (music_dir_text, lastfm_user_text))
 		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
 	manage.exposed = True
+	
+	def importLastFM(self, username):
+		headphones.LASTFM_USERNAME = username
+		headphones.config_write()
+		threading.Thread(target=lastfm.getArtists).start()
+		time.sleep(10)
+		raise cherrypy.HTTPRedirect("home")
+	importLastFM.exposed = True
 	
 	def importItunes(self, path):
 		headphones.PATH_TO_XML = path

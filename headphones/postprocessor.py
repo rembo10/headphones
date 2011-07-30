@@ -165,6 +165,17 @@ def moveFiles(albumpath, release, tracks):
 	destination_path = os.path.join(headphones.DESTINATION_DIR, folder)
 	destination_path = destination_path.replace('?','_')
 	
+	if os.path.exists(destination_path):
+		i = 1
+		while True:
+			new_folder_name = destination_path + '[%i]' % i
+			if os.path.exists(new_folder_name):
+				i += 1
+			else:
+				destination_path = new_folder_name
+				break
+	
+	
 	logger.info('Moving files from %s to %s' % (folder, destination_path))
 	
 	try:
@@ -206,7 +217,7 @@ def correctMetadata(albumid, release, downloaded_track_list):
 		return
 	
 	distance, items, info = out_tuples[0]
-	
+	logger.debug('Beets recommendation: %s' % rec)
 	autotag.apply_metadata(items, info)
 	
 	for item in items:
