@@ -175,6 +175,14 @@ class WebInterface(object):
 		return serve_template(templatename="manage.html", title="Manage")
 	manage.exposed = True
 	
+	def importLastFM(self, username):
+		headphones.LASTFM_USERNAME = username
+		headphones.config_write()
+		threading.Thread(target=lastfm.getArtists).start()
+		time.sleep(10)
+		raise cherrypy.HTTPRedirect("home")
+	importLastFM.exposed = True
+	
 	def importItunes(self, path):
 		headphones.PATH_TO_XML = path
 		headphones.config_write()
@@ -207,6 +215,13 @@ class WebInterface(object):
 		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 	forceSearch.exposed = True
+	
+	def forcePostProcess(self):
+		from headphones import postprocessor
+		threading.Thread(target=postprocessor.forcePostProcess).start()
+		time.sleep(5)
+		raise cherrypy.HTTPRedirect("home")
+	forcePostProcess.exposed = True
 	
 	def checkGithub(self):
 		from headphones import versioncheck
@@ -274,9 +289,10 @@ class WebInterface(object):
 					"detect_bitrate" : checked(headphones.DETECT_BITRATE),
 					"move_files" : checked(headphones.MOVE_FILES),
 					"rename_files" : checked(headphones.RENAME_FILES),
+					"correct_metadata" : checked(headphones.CORRECT_METADATA),
 					"cleanup_files" : checked(headphones.CLEANUP_FILES),
 					"add_album_art" : checked(headphones.ADD_ALBUM_ART),
-					"music_dir" : headphones.MUSIC_DIR,
+					"embed_album_art" : checked(headphones.EMBED_ALBUM_ART),
 					"dest_dir" : headphones.DESTINATION_DIR,
 					"folder_format" : headphones.FOLDER_FORMAT,
 					"file_format" : headphones.FILE_FORMAT,
@@ -292,7 +308,7 @@ class WebInterface(object):
 		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
 		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
 		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
-		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, log_dir=None):
+		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, log_dir=None):
 		
 		headphones.HTTP_HOST = http_host
 		headphones.HTTP_PORT = http_port
@@ -325,6 +341,7 @@ class WebInterface(object):
 		headphones.RENAME_FILES = rename_files
 		headphones.CLEANUP_FILES = cleanup_files
 		headphones.ADD_ALBUM_ART = add_album_art
+		headphones.EMBED_ALBUM_ART = embed_album_art
 		headphones.DESTINATION_DIR = destination_dir
 		headphones.FOLDER_FORMAT = folder_format
 		headphones.FILE_FORMAT = file_format

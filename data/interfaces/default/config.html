@@ -2,7 +2,8 @@
 	<a href="#web_interface">Web Interface</a> | 
 	<a href="#download"	class="smalltext">Download Settings</a> | 
 	<a href="#providers" class="smalltext">Search Providers</a> | 
-	<a href="#post_processing" class="smalltext">Quality &amp; Post Processing</a>
+	<a href="#post_processing" class="smalltext">Quality &amp; Post Processing</a> | 
+	<a href="#advanced_settings" class="smalltext">Advanced Settings</a>
 </div>
 <div class="table">
 	<div class="config">
@@ -162,9 +163,11 @@
 						<b>Post-Processing:</b>
 							<p>
 								<input type="checkbox" name="move_files" value="1" ${config['move_files']} />Move downloads to Music Folder<br />
-								<input type="checkbox" name="rename_files" value="1" ${config['rename_files']} />Rename &amp; add metadata<br /> 
+								<input type="checkbox" name="rename_files" value="1" ${config['rename_files']} />Rename &amp; add metadata<br />
+								<input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} />Correct metadata<br/> 
 								<input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} />Delete leftover files<br />
-								<input type="checkbox" name="add_album_art" value="1" ${config['add_album_art']}>Add album art
+								<input type="checkbox" name="add_album_art" value="1" ${config['add_album_art']} />Add album art<br />
+								<input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']} />Embed album art in each file<br />
 							</p>
 					</td>
 				</tr>
@@ -172,12 +175,17 @@
 					<td>
 						<p>
 							<b>Path to Music folder</b>:<br />
-							<input type="text" name="music_dir" value="${config['music_dir']}" size="60" maxlength="200"> <br /> 
+							<input type="text" name="destination_dir" value="${config['dest_dir']}" size="60" maxlength="200"> <br /> 
 							<i class="smalltext">e.g. /Users/name/Music/iTunes or /Volumes/share/music</i>
 						</p>
 					</td>
 				</tr>
 			</table>
+			<a name="advanced_settings">
+				<h1>
+					<u>Advanced Settings</u>
+				</h1>
+			</a>
 			<table class="configtable" summary="Advanced Settings">
             <tr>
                 <td>
@@ -196,12 +204,14 @@
                     </p>
                 </td>
                 <td>
-                      <b>Miscellaneous:</b>
-                      <p>
-                      	<input type="checkbox" name="include_extras" value="1" ${config['include_extras']} />Automatically Include Extras When Adding an Artist<br />
-                      <i class="smalltext">Extras includes: EPs, Compilations, Live Albums, Remix Albums and Singles</i>
-                      </p>
-                    <p><b>Log Directory</b>:<br><input type="text" name="log_dir" value="${config['log_dir']}" size="60">
+                    <b>Miscellaneous:</b>
+                    <p>
+                    	<input type="checkbox" name="include_extras" value="1" ${config['include_extras']} />Automatically Include Extras When Adding an Artist<br />
+                    <i class="smalltext">Extras includes: EPs, Compilations, Live Albums, Remix Albums and Singles</i>
+                    </p>
+                    <b>Log Directory</b>:
+                    <p>
+                    	<input type="text" name="log_dir" value="${config['log_dir']}" size="40" />
                     </p>
                 </td>
             </tr>

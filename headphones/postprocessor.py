@@ -33,7 +33,7 @@ def verify(albumid, albumpath):
 	downloaded_track_list = []
 	for r,d,f in os.walk(albumpath):
 		for files in f:
-			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape")):
+			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape", ".m4a")):
 				downloaded_track_list.append(os.path.join(r, files))	
 	
 	# test #1: metadata - usually works
@@ -90,11 +90,19 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 
 	logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
 
-	if headphones.ADD_ALBUM_ART:
-		addAlbumArt(albumid, downloaded_track_list)
+	if headphones.EMBED_ALBUM_ART or headphones.ADD_ALBUM_ART:
+	
+		album_art_path = albumart.getAlbumArt(albumid)
+		artwork = urllib.urlopen(album_art_path).read()
+	
+	if headphones.EMBED_ALBUM_ART:
+		embedAlbumArt(artwork, downloaded_track_list)
 	
 	if headphones.CLEANUP_FILES:
 		cleanupFiles(albumpath)
+		
+	if headphones.ADD_ALBUM_ART:
+		addAlbumArt(artwork, albumpath)
 		
 	if headphones.CORRECT_METADATA:
 		correctMetadata(albumid, release, downloaded_track_list)
@@ -112,30 +120,40 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 	
 	logger.info('Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
 	
-def addAlbumArt(albumid, downloaded_track_list):
-	logger.info('Adding album art')
-	album_art_path = albumart.getAlbumArt(albumid)
-	
-	artwork = urllib.urlopen(album_art_path).read()
+def embedAlbumArt(artwork, downloaded_track_list):
+	logger.info('Embedding album art')
 	
 	for downloaded_track in downloaded_track_list:
 		try:
 			f = MediaFile(downloaded_track)
 		except:
-			continue
-			
+			logger.error('Could not read %s. Not adding album art' % downloaded_track)
+		
+		logger.debug('Adding album art to: %s' % downloaded_track)
 		f.art = artwork
 		f.save()
+		
+def addAlbumArt(artwork, albumpath):
+	logger.info('Adding album art to folder')
+	
+	artwork_file_name = os.path.join(albumpath, 'folder.jpg')
+	file = open(artwork_file_name, 'wb')
+	file.write(artwork)
+	file.close()
 	
 def cleanupFiles(albumpath):
 	logger.info('Cleaning up files')
 	for r,d,f in os.walk(albumpath):
 		for files in f:
 			if not any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape", ".m4a")):
-				os.remove(os.path.join(r, files))
-				
+				logger.debug('Removing: %s' % files)
+				try:
+					os.remove(os.path.join(r, files))
+				except Exception, e:
+					logger.error('Could not remove file: %s. Error: %s' % (files, e))
+					
 def moveFiles(albumpath, release, tracks):
-	
+
 	try:
 		year = release['ReleaseDate'][:4]
 	except TypeError:
@@ -148,13 +166,37 @@ def moveFiles(albumpath, release, tracks):
 			
 	
 	folder = helpers.replace_all(headphones.FOLDER_FORMAT, values)
+	folder = folder.replace('./', '_/')
+	
+	if folder.endswith('.'):
+		folder = folder.replace(folder[len(folder)-1], '_')
 	
 	destination_path = os.path.join(headphones.DESTINATION_DIR, folder)
+	destination_path = destination_path.replace('?','_').replace(':','_')
+	
+	if os.path.exists(destination_path):
+		i = 1
+		while True:
+			new_folder_name = destination_path + '[%i]' % i
+			if os.path.exists(new_folder_name):
+				i += 1
+			else:
+				destination_path = new_folder_name
+				break
+	
+	
 	logger.info('Moving files from %s to %s' % (folder, destination_path))
 	
 	try:
 		os.makedirs(destination_path)
 		
+		# Chmod the directories using the folder_format (script courtesy of premiso!)
+		folder_list = folder.split('/')
+		temp_f = os.path.join(headphones.DESTINATION_DIR);
+		for f in folder_list:
+			temp_f = os.path.join(temp_f, f)
+			os.chmod(temp_f, 0755)
+	
 	except Exception, e:
 		logger.error('Could not create folder for %s. Not moving' % release['AlbumName'])
 		return albumpath
@@ -179,30 +221,44 @@ def correctMetadata(albumid, release, downloaded_track_list):
 		
 	cur_artist, cur_album, out_tuples, rec = autotag.tag_album(items, search_artist=release['ArtistName'], search_album=release['AlbumTitle'])
 	
-	distance, items, info = out_tuples[0]
+	if rec == 'RECOMMEND_NONE':
+		logger.warn('No accurate match found  -  not writing metadata')
+		return
 	
+	distance, items, info = out_tuples[0]
+	logger.debug('Beets recommendation: %s' % rec)
 	autotag.apply_metadata(items, info)
 	
 	for item in items:
 		item.write()
 
 def renameFiles(albumpath, downloaded_track_list, release):
-
+	logger.info('Renaming files')
 	try:
 		year = release['ReleaseDate'][:4]
 	except TypeError:
 		year = ''
 	# Until tagging works better I'm going to rely on the already provided metadata
+
 	for downloaded_track in downloaded_track_list:
 		try:
 			f = MediaFile(downloaded_track)
 		except:
 			continue
 			
-		tracknumber = '%02d' % f.track
+		if not f.track:
+			tracknumber = ''
+		else:
+			tracknumber = '%02d' % f.track
+		
+		if not f.title:
+			basename = os.path.basename(downloaded_track)
+			title = os.path.splitext(basename)[0]
+		else:
+			title = f.title
 			
 		values = {	'tracknumber':	tracknumber,
-					'title':		f.title,
+					'title':		title,
 					'artist':		release['ArtistName'],
 					'album':		release['AlbumTitle'],
 					'year':			year
@@ -211,10 +267,17 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		ext = os.path.splitext(downloaded_track)[1]
 		
 		new_file_name = helpers.replace_all(headphones.FILE_FORMAT, values).replace('/','_') + ext
+		
+		new_file_name = new_file_name.replace('?','_').replace(':', '_')
 
 		new_file = os.path.join(albumpath, new_file_name)
 		
-		shutil.move(downloaded_track, new_file)
+		logger.debug('Renaming %s ---> %s' % (downloaded_track, new_file_name))
+		try:
+			shutil.move(downloaded_track, new_file)
+		except Exception, e:
+			logger.error('Error renaming file: %s. Error: %s' % (downloaded_track, e))
+			continue
 		
 def updateHave(albumpath):
 
@@ -261,3 +324,41 @@ def renameUnprocessedFolder(albumpath):
 		else:
 			os.rename(albumpath, new_folder_name)
 			return
+			
+def forcePostProcess():
+	
+	if not headphones.DOWNLOAD_DIR:
+		return
+	else:
+		download_dir = headphones.DOWNLOAD_DIR
+		
+	logger.info('Checking to see if there are any folders to process in download_dir: %s' % download_dir)
+	# Get a list of folders in the download_dir
+	folders = [d for d in os.listdir(download_dir) if os.path.isdir(os.path.join(download_dir, d))]
+	
+	if len(folders):
+		logger.info('Found %i folders: %s' % (len(folders), str(folders)))
+		pass
+	else:
+		logger.info('Found no folders to process in: %s' % download_dir)
+		return
+	
+	# Parse the folder names to get artist album info
+	for folder in folders:
+	
+		albumpath = unicode(os.path.join(download_dir, folder))
+		name, album, year = helpers.extract_data(folder)
+		
+		myDB = db.DBConnection()
+		release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName=? and AlbumTitle=?', [name, album]).fetchone()
+		if release:
+			logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
+			verify(release['AlbumID'], albumpath)
+		else:
+			logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (name, album))
+			from headphones import mb
+			rgid = unicode(mb.findAlbumID(name, album))
+			if rgid:
+				verify(rgid, albumpath)
+			
+	

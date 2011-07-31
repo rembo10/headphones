@@ -1,6 +1,7 @@
 import time
 from operator import itemgetter
 import datetime
+import re
 
 import headphones
 
@@ -98,3 +99,14 @@ def replace_all(text, dic):
 	for i, j in dic.iteritems():
 		text = text.replace(i, j)
 	return text
+	
+def extract_data(s):
+    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
+    
+    match = pattern.match(s)
+
+    name = match.group("name")
+    album = match.group("album")
+    year = match.group("year")
+
+    return (name, album, year)

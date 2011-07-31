@@ -44,7 +44,46 @@ h1{
 	-moz-border-radius: 20px;
 	border-radius: 20px;
 	}
+<<<<<<< HEAD
 
+=======
+.tableleft{
+	padding: 3px;
+	background-color: #ffffff;
+	float: left;
+	width: 46%;
+	height: 200px;
+	margin-top: 25px;
+	margin-left: 25px;
+	margin-right: auto;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	}
+.tableright{
+	padding: 3px;
+	background-color: #ffffff;
+	width: 46%;
+	height: 200px;
+	margin-top: 25px;
+	margin-left: auto;
+	margin-right: 0px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	}
+.nav{
+	padding: 2px;
+	font-size:19px;
+	color: grey;
+	background-color: #bbbbbb;
+	width: 95%;
+	text-align: center;
+	margin-left: auto;
+	margin-right: 10px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	word-spacing: 18px;
+	}
+>>>>>>> upstream/master
 .center{
 	text-align: center;
 	font-size: 18px;

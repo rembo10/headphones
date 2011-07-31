@@ -64,6 +64,7 @@ MOVE_FILES = False
 RENAME_FILES = False
 CLEANUP_FILES = False
 ADD_ALBUM_ART = False
+EMBED_ALBUM_ART = False
 DOWNLOAD_DIR = None
 BLACKHOLE = None
 BLACKHOLE_DIR = None
@@ -90,6 +91,8 @@ NEWZNAB_APIKEY = None
 NZBSORG = False
 NZBSORG_UID = None
 NZBSORG_HASH = None
+
+LASTFM_USERNAME = None
 
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
@@ -145,10 +148,10 @@ def initialize():
 				HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, GIT_PATH, \
 				CURRENT_VERSION, LATEST_VERSION, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
 				CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, \
-				ADD_ALBUM_ART, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, NZB_SEARCH_INTERVAL, \
+				ADD_ALBUM_ART, EMBED_ALBUM_ART, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, NZB_SEARCH_INTERVAL, \
 				LIBRARYSCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
 				NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
-				NZBSORG, NZBSORG_UID, NZBSORG_HASH
+				NZBSORG, NZBSORG_UID, NZBSORG_HASH, LASTFM_USERNAME
 				
 		if __INITIALIZED__:
 			return False
@@ -189,6 +192,7 @@ def initialize():
 		FILE_FORMAT = check_setting_str(CFG, 'General', 'file_format', 'tracknumber artist - album [year]- title')
 		CLEANUP_FILES = bool(check_setting_int(CFG, 'General', 'cleanup_files', 0))
 		ADD_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'add_album_art', 0))
+		EMBED_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'embed_album_art', 0))
 		DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'download_dir', '')
 		BLACKHOLE = bool(check_setting_int(CFG, 'General', 'blackhole', 0))
 		BLACKHOLE_DIR = check_setting_str(CFG, 'General', 'blackhole_dir', '')
@@ -215,6 +219,8 @@ def initialize():
 		NZBSORG = bool(check_setting_int(CFG, 'NZBsorg', 'nzbsorg', 0))
 		NZBSORG_UID = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_uid', '')
 		NZBSORG_HASH = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_hash', '')
+		
+		LASTFM_USERNAME = check_setting_str(CFG, 'General', 'lastfm_username', '')
 	
 		if not LOG_DIR:
 			LOG_DIR = os.path.join(DATA_DIR, 'logs')
@@ -342,6 +348,7 @@ def config_write():
 	new_config['General']['file_format'] = FILE_FORMAT
 	new_config['General']['cleanup_files'] = int(CLEANUP_FILES)
 	new_config['General']['add_album_art'] = int(ADD_ALBUM_ART)
+	new_config['General']['embed_album_art'] = int(EMBED_ALBUM_ART)
 	new_config['General']['download_dir'] = DOWNLOAD_DIR
 	new_config['General']['blackhole'] = int(BLACKHOLE)
 	new_config['General']['blackhole_dir'] = BLACKHOLE_DIR
@@ -372,6 +379,8 @@ def config_write():
 	new_config['NZBsorg']['nzbsorg'] = int(NZBSORG)
 	new_config['NZBsorg']['nzbsorg_uid'] = NZBSORG_UID
 	new_config['NZBsorg']['nzbsorg_hash'] = NZBSORG_HASH
+	
+	new_config['General']['lastfm_username'] = LASTFM_USERNAME
 	
 	new_config.write()
 

@@ -24,7 +24,7 @@ def scanMusic(dir=None):
 	
 	for r,d,f in os.walk(dir):
 		for files in f:
-			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape")):
+			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape", ".m4a")):
 				results.append(os.path.join(r, files))
 				
 	logger.info(u'%i music files found. Reading metadata....' % len(results))
@@ -37,15 +37,16 @@ def scanMusic(dir=None):
 		for song in results:
 			try:
 				f = MediaFile(song)
-				#logger.debug('Reading: %s' % song.decode('UTF-8'))
+				albumartist = f.albumartist
+				artist = f.artist
 			except:
 				logger.warn('Could not read file: %s' % song)
 				continue
 			else:	
-				if f.albumartist:
-					artist = f.albumartist
-				elif f.artist:
-					artist = f.artist
+				if albumartist and albumartist != 'Various Artists':
+					artist = albumartist
+				elif artist:
+					pass
 				else:
 					continue
 				
@@ -131,12 +132,12 @@ def artistlist_to_mbids(artistlist):
 			newValueDict = {"HaveTracks": 		havetracks}
 			myDB.upsert("artists", newValueDict, controlValueDict)
 			
-	# Update the cloud:
-	logger.info('Updating the cloud')
+	# Update the similar artist tag cloud:
+	logger.info('Updating artist information from Last.fm')
 	try:
 		lastfm.getSimilar()
 	except Exception, e:
-		logger.warn('Updating the cloud failed: %s' % e)
+		logger.warn('Failed to update arist information from Last.fm: %s' % e)
 		
 
 def addArtisttoDB(artistid, extrasonly=False):
