@@ -375,9 +375,10 @@ class WebInterface(object):
 		else:
 			lastfm_user_text = 'Last.FM Username'
 		if headphones.MUSIC_DIR:
-			music_dir_text = headphones.MUSIC_DIR
+			music_dir_input = '''<input type="text" value="%s" name="path" size="70" />''' % headphones.MUSIC_DIR
 		else:
-			music_dir_text = 'Enter a directory to scan'
+			music_dir_input = '''<input type="text" value="Enter a Music Directory to scan" onfocus="if
+			(this.value==this.defaultValue) this.value='';" name="path" size="70" />'''
 		page = [templates._header]
 		page.append(templates._logobar)
 		page.append(templates._nav)
@@ -392,18 +393,25 @@ class WebInterface(object):
 		<br /><br />
 
 		<form action="musicScan" method="GET" align="center">
-			<input type="text" value="%s" onfocus="if
-			(this.value==this.defaultValue) this.value='';" name="path" size="70" />
+			%s
 			<input type="submit" /></form><br /><br /></div></div>
-		<div class="table"><div class="config"><h1>Import Your Last.FM Artists</h1><br />
+		<div class="tableleft"><div class="config"><h1>Import Last.FM Artists</h1><br />
+		Enter the username whose artists you want to import:<br /><br />
 		<form action="importLastFM" method="GET" align="center">
 			<input type="text" value="%s" onfocus="if
 			(this.value==this.defaultValue) this.value='';" name="username" size="18" />
 			<input type="submit" /></form><br /><br /></div></div>
+		<div class="tableright"><div class="config"><h1>Placeholder :-)</h1><br />
+		<br /><br />
+		<form action="" method="GET" align="center">
+			<input type="text" value="" onfocus="if
+			(this.value==this.defaultValue) this.value='';" name="" size="18" />
+			<input type="submit" /></form><br /><br /></div></div><br />
 			<div class="table"><div class="config"><h1>Force Search</h1><br />
 			<a href="forceSearch">Force Check for Wanted Albums</a><br /><br />
 			<a href="forceUpdate">Force Update Active Artists</a><br /><br />
-			<a href="checkGithub">Check for Headphones Updates</a><br /><br /><br /></div></div>''' % (music_dir_text, lastfm_user_text))
+			<a href="forcePostProcess">Force Post-Process Albums in Download Folder</a><br /><br /><br />
+			<a href="checkGithub">Check for Headphones Updates</a><br /><br /><br /></div></div>''' % (music_dir_input, lastfm_user_text))
 		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
 	manage.exposed = True
@@ -448,6 +456,13 @@ class WebInterface(object):
 		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 	forceSearch.exposed = True
+	
+	def forcePostProcess(self):
+		from headphones import postprocessor
+		threading.Thread(target=postprocessor.forcePostProcess).start()
+		time.sleep(5)
+		raise cherrypy.HTTPRedirect("home")
+	forcePostProcess.exposed = True
 	
 	def checkGithub(self):
 		from headphones import versioncheck

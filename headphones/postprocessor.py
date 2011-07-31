@@ -127,8 +127,9 @@ def embedAlbumArt(artwork, downloaded_track_list):
 		try:
 			f = MediaFile(downloaded_track)
 		except:
-			continue
-			
+			logger.error('Could not read %s. Not adding album art' % downloaded_track)
+		
+		logger.debug('Adding album art to: %s' % downloaded_track)
 		f.art = artwork
 		f.save()
 		
@@ -136,7 +137,7 @@ def addAlbumArt(artwork, albumpath):
 	logger.info('Adding album art to folder')
 	
 	artwork_file_name = os.path.join(albumpath, 'folder.jpg')
-	file = open(artwork_file_name, 'w')
+	file = open(artwork_file_name, 'wb')
 	file.write(artwork)
 	file.close()
 	
@@ -145,8 +146,12 @@ def cleanupFiles(albumpath):
 	for r,d,f in os.walk(albumpath):
 		for files in f:
 			if not any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape", ".m4a")):
-				os.remove(os.path.join(r, files))
-				
+				logger.debug('Removing: %s' % files)
+				try:
+					os.remove(os.path.join(r, files))
+				except Exception, e:
+					logger.error('Could not remove file: %s. Error: %s' % (files, e))
+					
 def moveFiles(albumpath, release, tracks):
 
 	try:
@@ -253,6 +258,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
 
 		new_file = os.path.join(albumpath, new_file_name)
 		
+		logger.debug('Renaming %s ---> %s' % (downloaded_track, new_file_name))
 		try:
 			shutil.move(downloaded_track, new_file)
 		except Exception, e:
@@ -304,3 +310,41 @@ def renameUnprocessedFolder(albumpath):
 		else:
 			os.rename(albumpath, new_folder_name)
 			return
+			
+def forcePostProcess():
+	
+	if not headphones.DOWNLOAD_DIR:
+		return
+	else:
+		download_dir = headphones.DOWNLOAD_DIR
+		
+	logger.info('Checking to see if there are any folders to process in download_dir: %s' % download_dir)
+	# Get a list of folders in the download_dir
+	folders = [d for d in os.listdir(download_dir) if os.path.isdir(os.path.join(download_dir, d))]
+	
+	if len(folders):
+		logger.info('Found %i folders: %s' % (len(folders), str(folders)))
+		pass
+	else:
+		logger.info('Found no folders to process in: %s' % download_dir)
+		return
+	
+	# Parse the folder names to get artist album info
+	for folder in folders:
+	
+		albumpath = unicode(os.path.join(download_dir, folder))
+		name, album, year = helpers.extract_data(folder)
+		
+		myDB = db.DBConnection()
+		release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName=? and AlbumTitle=?', [name, album]).fetchone()
+		if release:
+			logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
+			verify(release['AlbumID'], albumpath)
+		else:
+			logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (name, album))
+			from headphones import mb
+			rgid = unicode(mb.findAlbumID(name, album))
+			if rgid:
+				verify(rgid, albumpath)
+			
+	

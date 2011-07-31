@@ -361,3 +361,28 @@ def findArtistbyAlbum(name):
 	
 	return artist_dict
 	
+def findAlbumID(artist=None, album=None):
+
+	term = '"'+album+'" AND artist:"'+artist+'"'
+
+	f = ws.ReleaseGroupFilter(query=term, limit=1)
+	results = None
+	attempt = 0
+			
+	while attempt < 5:
+			
+		try:
+			results = q.getReleaseGroups(f)
+			break
+		except WebServiceError, e:
+			logger.warn('Attempt to query MusicBrainz for %s failed: %s. Sleeping 5 seconds.' % (name, e))
+			attempt += 1
+			time.sleep(5)	
+	
+	time.sleep(1)
+	
+	if not results:
+		return False
+		
+	rgid = u.extractUuid(results[0].releaseGroup.id)
+	return rgid
