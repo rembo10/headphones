@@ -147,6 +147,11 @@ table.albumHeaderTable {
 	width: 100%;
 	padding: 50px;
 }
+.manage h1 {
+	padding-left: 100px;
+	text-align: left;
+	text-decoration: underline;
+}
 .albumArt {
 	float: left;
 	padding-left: 50px;
