@@ -119,6 +119,44 @@ table.historyTable {
     width: 100%;
     padding: 50px;
 }
+table.trackListTable {
+	width: 100%;
+	padding: 50px;
+	padding-right: 150px;
+}
+thead.trackTableHeaders {
+	font-weight: bold;
+}
+table.trackListTable td.trackNumber {
+	text-align: left;
+	width: 120px;
+}
+table.trackListTable td.trackTitle {
+	text-align: left;
+}
+table.trackListTable td.trackDuration {
+	text-align: right;
+	width: 40px;
+}
+table.trackListTable td.haveTrack {
+	width: 30px;
+	text-align: right;
+	
+}
+table.albumHeaderTable {
+	width: 100%;
+	padding: 50px;
+}
+.albumArt {
+	float: left;
+	padding-left: 50px;
+	padding-top: 24px;
+}
+table.albumHeaderTable td {
+	text-align: left;
+	font-size: 20px;
+	padding-left: 50px;
+}
 .artistName {
 	text-align: center;
 	font-size: large;
