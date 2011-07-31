@@ -166,9 +166,13 @@ def moveFiles(albumpath, release, tracks):
 			
 	
 	folder = helpers.replace_all(headphones.FOLDER_FORMAT, values)
+	folder = folder.replace('./', '_/')
+	
+	if folder.endswith('.'):
+		folder = folder.replace(folder[len(folder)-1], '_')
 	
 	destination_path = os.path.join(headphones.DESTINATION_DIR, folder)
-	destination_path = destination_path.replace('?','_')
+	destination_path = destination_path.replace('?','_').replace(':','_')
 	
 	if os.path.exists(destination_path):
 		i = 1
@@ -248,7 +252,8 @@ def renameFiles(albumpath, downloaded_track_list, release):
 			tracknumber = '%02d' % f.track
 		
 		if not f.title:
-			title = os.path.splitext(downloaded_track)[0]
+			basename = os.path.basename(downloaded_track)
+			title = os.path.splitext(basename)[0]
 		else:
 			title = f.title
 			
@@ -263,7 +268,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		
 		new_file_name = helpers.replace_all(headphones.FILE_FORMAT, values).replace('/','_') + ext
 		
-		new_file_name = new_file_name.replace('?','_')	
+		new_file_name = new_file_name.replace('?','_').replace(':', '_')
 
 		new_file = os.path.join(albumpath, new_file_name)
 		
