@@ -26,7 +26,7 @@ def searchNZB(albumid=None, new=False):
 		except TypeError:
 			year = ''
 		
-		dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '!':'', ' + ':' ', '"':'', ',':''}
+		dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':''}
 
 		cleanartistalbum = helpers.latinToAscii(helpers.replace_all(albums[0]+' '+albums[1], dic))
 
