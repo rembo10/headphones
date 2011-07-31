@@ -374,19 +374,7 @@ class WebInterface(object):
 	def extras(self):
 		myDB = db.DBConnection()
 		cloudlist = myDB.select('SELECT * from lastfmcloud')
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		if len(cloudlist):
-			page.append('''
-			<div class="table"><div class="config"><h1>Artists You Might Like:</h1><br /><br />
-			<div class="cloud">
-				<ul id="cloud">''')
-			for item in cloudlist:
-				page.append('<li><a href="addArtist?artistid=%s&redirect=extras" class="tag%i">%s</a></li>' % (item['ArtistID'], item['Count'], item['ArtistName']))
-			page.append('</ul><br /><br /></div></div>')	
-			page.append(templates._footer % headphones.CURRENT_VERSION)
-		return page
+		return serve_template(templatename="extras.html", title="Extras", cloudList=cloudlist)
 	extras.exposed = True
 	
 	def updateCloud(self):

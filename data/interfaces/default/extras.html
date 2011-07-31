@@ -1,0 +1,10 @@
+Artists you might like:
+<ul class="cloud">
+% for item in cloudList:
+	<li>
+		<a href="addArtist?artistid=${item['ArtistID']}&redirst=extras" class=tag${item['Count']}>${item['ArtistName']}</a>
+	</li>
+% endfor
+</ul>	
+
+<%inherit file="base.html" />
