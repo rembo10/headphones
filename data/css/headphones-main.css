@@ -163,8 +163,16 @@ table.albumHeaderTable td {
 	padding-top: 20px;
 }
 div.manageSection {
+	margin-left: auto;
+	margin-right: auto;
 	text-align: left;
-	padding: 25px;
+	padding: 20px;
+	background-color: #eeeeee;
+	width: 80%;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	line-height: 12px;
+	
 }
 div.noResultsMessages {
 	text-align: center;
