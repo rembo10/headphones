@@ -263,7 +263,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		
 		new_file_name = helpers.replace_all(headphones.FILE_FORMAT, values).replace('/','_') + ext
 		
-		new_file_name = new_file_name.replace('?','_')	
+		new_file_name = new_file_name.replace('?','_').replace(':','_')	
 
 		new_file = os.path.join(albumpath, new_file_name)
 		
