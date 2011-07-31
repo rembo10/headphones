@@ -166,13 +166,12 @@ def moveFiles(albumpath, release, tracks):
 			
 	
 	folder = helpers.replace_all(headphones.FOLDER_FORMAT, values)
-	folder = folder.replace('./', '_/')
+	folder = folder.replace('./', '_/').replace(':','_').replace('?','_')
 	
 	if folder.endswith('.'):
 		folder = folder.replace(folder[len(folder)-1], '_')
 	
 	destination_path = os.path.join(headphones.DESTINATION_DIR, folder)
-	destination_path = destination_path.replace('?','_').replace(':','_')
 	
 	if os.path.exists(destination_path):
 		i = 1
