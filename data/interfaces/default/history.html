@@ -1,0 +1,29 @@
+% if snatched:
+		<table class=historyTable>
+			<tr><p align="center">History <a class="external" href="clearhistory">clear all</a><br /><br /></p></tr>
+			<tr>
+				<th align="center" width="150"></th>
+				<th align="center" width="300"></th>
+				<th align="center" width="200"></th>
+				<th align="right" width="200"></th>
+			</tr>
+			% for result in snatched:
+			<%
+				mb = snatched[i][2] / 1048576
+				size = '%.2fM' % mb
+			%>
+			<tr>
+				<td align="center" width="150">${result['Status']}</td>
+				<td align="center" width="300">${result['Title']}</td>
+				<td align="center" width="200">${size}</td>
+				<td align="center" width="200">${result['DateAdded']}</td>
+			</tr>
+			% endfor
+		</table>
+% else:
+<div class="noResultsMessages">
+No History to display
+</div>
+% endif
+
+<%inherit file="base.html" />

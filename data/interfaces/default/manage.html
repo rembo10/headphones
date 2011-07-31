@@ -1,0 +1,63 @@
+<%
+	import headphones
+%>
+<br />
+<div class="manage">
+<h1>Scan Music Library</h1>
+<div class="manageSection">
+	<p>Where do you keep your music?</p>
+	<p>You can put in any directory, and it will scan for audio files
+	in that folder (including all sub-directories)</p>
+	<p>For example: '/Users/name/Music'</p>
+	<p>It may take a while depending on how many files you have. You can navigate away from
+	the page as soon as you click 'Submit'</p> <br />
+
+	<form action="musicScan" method="GET" align="center">
+		<input type="text" value="${headphones.MUSIC_DIR}"
+			onfocus="if(this.value==this.defaultValue) this.value='';"
+			name="path" size="70" /> <input type="submit" value="Scan"/>
+	</form>
+</div>
+<br />
+<h1>Import or Sync Your iTunes Library/Music Folder</h1>
+<div class="manageSection">
+	<p>This is here for legacy purposes (try the Music Scanner above!)</p>
+	<p>If you'd rather import an iTunes .xml file, you can enter the full path here. </p><br />
+
+	<form action="importItunes" method="GET" align="center">
+		<input type="text" value=""
+			onfocus="if(this.value==this.defaultValue) this.value='';"
+			name="path" size="70" /> <input type="submit" value="Import" />
+	</form>
+</div>
+<br />
+<h1>Last.fm Import</h1>
+<div class="manageSection">
+	<p>Enter the username whose artists you want to import:</p>
+	
+	<form action="importLastFM" method="GET" align="center">
+		<input type="text" value="${headphones.LASTFM_USERNAME}" onfocus="if(this.value==this.defaultValue) this.value='';" name="username" size="18" />
+		<input type="submit" value="Import" />
+	</form>
+</div>
+<br />
+<h1>Force Search</h1>
+<div class="manageSection">
+	<ul>
+		<li>
+			<a href="forceSearch">Force Check for Wanted Albums</a>
+		</li>
+		<li>
+			<a href="forceUpdate">Force Update Active Artists</a>
+		</li>
+		<li>
+			<a href="forcePostProcess">Force Post-Process Albums in Download Folder</a>
+		</li>
+		<li>	
+			<a href="checkGithub">Check for Headphones Updates</a>
+		</li>
+	</ul>
+</div>
+<br />
+</div>
+<%inherit file="base.html" />

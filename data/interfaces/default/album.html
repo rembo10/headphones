@@ -1,0 +1,61 @@
+<% 
+	from headphones import db, helpers
+	
+	myDB = db.DBConnection()
+%>
+
+<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" height="200" width="200" class="albumArt">
+
+<table class="albumHeaderTable">
+	<tr>
+		<td>
+			<a href="artistPage?ArtistID=${album['ArtistID']}">${tracks[0]['ArtistName']}</a>
+		</td>
+	</tr>
+	<tr>
+		<td>
+		 ${album['AlbumTitle']}
+		</td>
+	</tr>
+	<tr>
+		<td>
+			Release Date: ${album['ReleaseDate']}
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=%{album['ArtistID']}">Download</a><br />
+		</td>
+	</tr>
+</table>
+<table class="trackListTable">
+	<thead class="trackTableHeaders">
+		<tr>
+			<td>Track</td>
+			<td>Title</td>
+			<td text-align="right">Duration</td>
+		</tr>
+	</thead>
+	<%i = 1 %>
+	% for track in tracks:
+	<% havetrack = myDB.action("SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ? AND TrackTitle like ?", [track['ArtistName'], track['AlbumTitle'], track['TrackTitle']]).fetchone() %> 
+	<tr>
+		<td class="trackNumber">${i}</td>
+		<td class="trackTitle">${track['TrackTitle']} (<A class="external" href="http://musicbrainz.org/recording/${track['TrackID']}.html" target="_blank">link</a>)</td>
+		<td class="trackDuration">
+		% if track['TrackDuration']:
+			${helpers.convert_milliseconds(track['TrackDuration'])}
+		% endif
+		</td>
+		<td class="haveTrack">
+			% if havetrack:
+			<img src="${hpRoot}images/checkmark.png" width="20px">
+			%endif
+		</td>
+		<%
+			i = i + 1
+		%>
+	</tr>
+	%endfor
+</table>
+<%inherit file="base.html" />

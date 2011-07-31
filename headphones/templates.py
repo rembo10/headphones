@@ -300,7 +300,6 @@ configform = form = '''
                 </td>
             </tr>
 		</table>
-		
         <a name="advanced_settings"><h1><u>Advanced Settings</u></h1></a>
         
         <table class="configtable" summary="Advanced Settings">

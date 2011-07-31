@@ -1,0 +1,40 @@
+<%
+	from headphones import db
+	myDB = db.DBConnection()
+%>
+<table class="artistListTable" border="0" cellpadding="0" cellspacing="1">
+    <thead><tr><th class="nowrap">Artist</th><th>Status</th><th>Upcoming Album</th><th>Have</th></tr></thead>
+    <tbody>
+	% for artist in artists:
+	   <%
+	   latestAlbum = myDB.select("SELECT AlbumTitle FROM albums WHERE ArtistID=? ORDER BY ReleaseDate DESC LIMIT 1", [artist['ArtistID']])
+	   allAlbums = myDB.select("SELECT COUNT(*) FROM albums WHERE ArtistID=?",[artist['ArtistID']])
+	   haveAlbums = myDB.select("SELECT COUNT(DISTINCT AlbumTitle) FROM have WHERE ArtistName=?", [artist['ArtistName']]) 
+	   %>
+	<tr>
+		<td class="artistname" align="left" width="300">
+			<a href="${hpRoot}/artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a> 
+			(<a class="external" href="http://musicbrainz.org/artist/${artist['ArtistID']}" target="_blank">link</a>) 
+			[<a class="externalred" href="deleteArtist?ArtistID=${artist['ArtistID']}">delete</a>]
+		</td>
+		<td class="status" align="center" width="160">
+			% if artist['status'] == 'Active':
+				${artist['status']} (<a class="external" href="pauseArtist?ArtistID=${artist['ArtistID']}">pause</a>)
+			% else:
+				<font color="red"><b>${artist['status']}</b></font>(<A class="external" href="resumeArtist?ArtistID=${artist['ArtistID']}">resume</a>)
+			% endif
+		</td>
+		<td class="upcomingalbum">
+		% if latestAlbum:
+			${latestAlbum[0][0]}
+		% else:
+			None
+		% endif
+		</td>
+		<td class="have">
+				${haveAlbums[0][0]}/${allAlbums[0][0]}
+		</td>
+	</tr>
+	% endfor
+</table>
+<%inherit file="base.html" />
