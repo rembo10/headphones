@@ -235,16 +235,25 @@ def renameFiles(albumpath, downloaded_track_list, release):
 	except TypeError:
 		year = ''
 	# Until tagging works better I'm going to rely on the already provided metadata
+
 	for downloaded_track in downloaded_track_list:
 		try:
 			f = MediaFile(downloaded_track)
 		except:
 			continue
 			
-		tracknumber = '%02d' % f.track
+		if not f.track:
+			tracknumber = ''
+		else:
+			tracknumber = '%02d' % f.track
+		
+		if not f.title:
+			title = os.path.splitext(downloaded_track)[0]
+		else:
+			title = f.title
 			
 		values = {	'tracknumber':	tracknumber,
-					'title':		f.title,
+					'title':		title,
 					'artist':		release['ArtistName'],
 					'album':		release['AlbumTitle'],
 					'year':			year
