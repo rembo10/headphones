@@ -565,6 +565,9 @@ class WebInterface(object):
 		checked(headphones.NZBSORG),
 		headphones.NZBSORG_UID,
 		headphones.NZBSORG_HASH,
+		checked(headphones.NEWZBIN),
+		headphones.NEWZBIN_UID,
+		headphones.NEWZBIN_PASSWORD,
 		radio(headphones.PREFERRED_QUALITY, 0),
 		radio(headphones.PREFERRED_QUALITY, 1),
 		radio(headphones.PREFERRED_QUALITY, 3),
@@ -592,7 +595,7 @@ class WebInterface(object):
 	def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0,
 		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
 		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
-		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
+		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
 		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, log_dir=None):
 		
 		headphones.HTTP_HOST = http_host
@@ -618,6 +621,9 @@ class WebInterface(object):
 		headphones.NZBSORG = nzbsorg
 		headphones.NZBSORG_UID = nzbsorg_uid
 		headphones.NZBSORG_HASH = nzbsorg_hash
+		headphones.NEWZBIN = newzbin
+		headphones.NEWZBIN_UID = newzbin_uid
+		headphones.NEWZBIN_PASSWORD = newzbin_password
 		headphones.PREFERRED_QUALITY = int(preferred_quality)
 		headphones.PREFERRED_BITRATE = preferred_bitrate
 		headphones.DETECT_BITRATE = detect_bitrate
