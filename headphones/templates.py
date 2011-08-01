@@ -259,6 +259,32 @@ configform = form = '''
                     </p>
                 </td>
             </tr>
+			
+			<tr>
+                <td>
+                    <br>
+
+                    <p>Newzbin:<input type="checkbox" name="newzbin" value="1" %s /></p>
+                </td>
+
+                <td>
+                    <br>
+
+                    <p>
+                      Newzbin UID:<br>
+                      <input type="text" name="newzbin_uid" value="%s" size="30" maxlength="40">
+                    </p>
+                </td>
+
+                <td>
+                    <br>
+
+                    <p>
+                      Newzbin Password:<br>
+                      <input type="text" name="newzbin_password" value="%s" size="46" maxlength="40">
+                    </p>
+                </td>
+            </tr>
         </table>
 
         <a name="post_processing"><h1><u>Quality &amp; Post Processing</u></h1></a>
