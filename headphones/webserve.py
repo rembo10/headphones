@@ -1,13 +1,8 @@
-import os, sys
+import os
 
 import cherrypy
 
-import lib.musicbrainz2.webservice as ws
-import lib.musicbrainz2.model as m
-import lib.musicbrainz2.utils as u
-
 import time
-import datetime
 import threading
 
 import headphones
@@ -101,10 +96,13 @@ class WebInterface(object):
 		page.append(templates._nav)
 		myDB = db.DBConnection()
 		
-		artist = myDB.select('SELECT ArtistName, IncludeExtras from artists WHERE ArtistID=?', [ArtistID])
-
+		artist = myDB.select('SELECT ArtistName, IncludeExtras, Status from artists WHERE ArtistID=?', [ArtistID])
+		while not artist:
+			time.sleep(1)
 		page.append('''<div class="table"><table><p align="center">%s</p>
 						''' % artist[0][0])
+		if artist[0][2] == 'Loading':
+			page.append('<p align="center"><i>Loading...</i></p>')
 		
 		if templates.displayAlbums(ArtistID, 'Album'):
 			page.append(templates.displayAlbums(ArtistID, 'Album'))
@@ -222,12 +220,12 @@ class WebInterface(object):
 		
 	artistInfo.exposed = True
 
-	def addArtist(self, artistid, redirect='home'):
+	def addArtist(self, artistid):
 		
 		threading.Thread(target=importer.addArtisttoDB, args=[artistid]).start()
 		time.sleep(5)
 		threading.Thread(target=lastfm.getSimilar).start()
-		raise cherrypy.HTTPRedirect(redirect)
+		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % artistid)
 		
 	addArtist.exposed = True
 	
@@ -693,7 +691,7 @@ class WebInterface(object):
 			<div class="cloud">
 				<ul id="cloud">''')
 			for item in cloudlist:
-				page.append('<li><a href="addArtist?artistid=%s&redirect=extras" class="tag%i">%s</a></li>' % (item['ArtistID'], item['Count'], item['ArtistName']))
+				page.append('<li><a href="addArtist?artistid=%s" class="tag%i">%s</a></li>' % (item['ArtistID'], item['Count'], item['ArtistName']))
 			page.append('</ul><br /><br /></div></div>')	
 			page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page

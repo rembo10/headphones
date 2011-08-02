@@ -114,6 +114,17 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 		albumpath = moveFiles(albumpath, release, tracks)
 	
 	myDB = db.DBConnection()
+	# There's gotta be a better way to update the have tracks - sqlite
+	
+	trackcount = myDB.select('SELECT HaveTracks from artists WHERE ArtistID=?', [release['ArtistID']])
+	
+	if not trackcount[0][0]:
+		cur_track_count = 0
+	else:
+		cur_track_count = trackcount[0][0]
+		
+	new_track_count = cur_track_count + len(downloaded_track_list)
+	myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [new_track_count, release['ArtistID']])
 	myDB.action('UPDATE albums SET status = "Downloaded" WHERE AlbumID=?', [albumid])
 	myDB.action('UPDATE snatched SET status = "Processed" WHERE AlbumID=?', [albumid])
 	updateHave(albumpath)
@@ -158,10 +169,20 @@ def moveFiles(albumpath, release, tracks):
 		year = release['ReleaseDate'][:4]
 	except TypeError:
 		year = ''
+		
+	artist = release['ArtistName'].replace('/', '_')
+	album = release['AlbumTitle'].replace('/', '_')
+	
+	if artist[0].isdigit():
+		firstchar = '0-9'
+	else:
+		firstchar = artist[0]
+	
 
-	values = {	'artist':	release['ArtistName'],
-				'album':	release['AlbumTitle'],
-				'year':		year
+	values = {	'artist':	artist,
+				'album':	album,
+				'year':		year,
+				'first':	firstchar,
 			}
 			
 	
@@ -171,7 +192,7 @@ def moveFiles(albumpath, release, tracks):
 	if folder.endswith('.'):
 		folder = folder.replace(folder[len(folder)-1], '_')
 	
-	destination_path = os.path.join(headphones.DESTINATION_DIR, folder)
+	destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, folder))
 	
 	if os.path.exists(destination_path):
 		i = 1
@@ -183,8 +204,7 @@ def moveFiles(albumpath, release, tracks):
 				destination_path = new_folder_name
 				break
 	
-	
-	logger.info('Moving files from %s to %s' % (folder, destination_path))
+	logger.info('Moving files from %s to %s' % (albumpath, destination_path))
 	
 	try:
 		os.makedirs(destination_path)
@@ -356,7 +376,10 @@ def forcePostProcess():
 		else:
 			logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (name, album))
 			from headphones import mb
-			rgid = unicode(mb.findAlbumID(name, album))
+			try:
+				rgid = unicode(mb.findAlbumID(name, album))
+			except:
+				logger.error('Can not get release information for this album')
 			if rgid:
 				verify(rgid, albumpath)
 			

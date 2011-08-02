@@ -182,7 +182,7 @@ def addArtisttoDB(artistid, extrasonly=False):
 		try:	
 			release_dict = mb.getReleaseGroup(rgid)
 		except Exception, e:
-			logger.info('Unable to get release information for %s - it may not be a valid release group (or it might just not be tagged right in MusicBrainz)' % rg['title'])
+			logger.info('Unable to get release information for %s - there may not be any official releases in this release group' % rg['title'])
 			continue
 			
 		if not release_dict:

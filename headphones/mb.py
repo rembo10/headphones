@@ -157,7 +157,7 @@ def getArtist(artistid, extrasonly=False):
 	
 def getReleaseGroup(rgid):
 	"""
-	Returns the best release out of any given release group
+	Returns a dictionary of the best stuff from a release group
 	"""
 	with mb_lock:
 	
@@ -185,7 +185,7 @@ def getReleaseGroup(rgid):
 		# to get more detailed release info (ASIN, track count, etc.)
 		for release in releaseGroup.releases:
 	
-			inc = ws.ReleaseIncludes(tracks=True, releaseEvents=True)		
+			inc = ws.ReleaseIncludes(tracks=True, releaseEvents=True)	
 			releaseResult = None
 			attempt = 0
 			
@@ -201,9 +201,13 @@ def getReleaseGroup(rgid):
 			
 			if not releaseResult:
 				continue
-				
-			if releaseResult.title.lower() != releaseGroup.title.lower():
-				continue
+			
+			# Release filter for non-official live albums
+			types = releaseResult.getTypes()
+			if any('Live' in type for type in types):
+				if not any('Official' in type for type in types):
+					logger.debug('%s is not an official live album. Skipping' % releaseResult.name)
+					continue
 				
 			time.sleep(1)
 			
@@ -219,7 +223,7 @@ def getReleaseGroup(rgid):
 			country = {
 				'US':	'0',
 				'GB':	'1',
-				'JP':	'1',
+				'JP':	'2',
 				}
 
 			
@@ -231,7 +235,7 @@ def getReleaseGroup(rgid):
 			try:
 				country = int(replace_all(releaseResult.releaseEvents[0].country, country))
 			except:
-				country = 2
+				country = 3
 			
 			release_dict = {
 				'hasasin':		bool(releaseResult.asin),
@@ -260,8 +264,13 @@ def getReleaseGroup(rgid):
 			release_dict['tracks'] = tracks		
 			
 			releaselist.append(release_dict)
-	
-		a = multikeysort(releaselist, ['-hasasin', 'country', 'format', 'trackscount'])
+		
+		average_tracks = sum(x['trackscount'] for x in releaselist) / len(releaselist)
+		
+		for item in releaselist:
+			item['trackscount_delta'] = abs(average_tracks - item['trackscount'])
+			
+		a = multikeysort(releaselist, ['-hasasin', 'country', 'format', 'trackscount_delta'])
 		
 		release_dict = {'releaseid' :a[0]['releaseid'],
 						'releasedate'	: releaselist[0]['releasedate'],

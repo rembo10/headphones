@@ -77,8 +77,8 @@ def searchNZB(albumid=None, new=False):
         cleanartistalbum = helpers.latinToAscii(helpers.replace_all(albums[0]+' '+albums[1], dic))
 
         # FLAC usually doesn't have a year for some reason so I'll leave it out:
-        term = re.sub('[\.\-]', ' ', '%s' % (cleanartistalbum)).encode('utf-8')
-        altterm = re.sub('[\.\-]', ' ', '%s %s' % (cleanartistalbum, year)).encode('utf-8')
+        term = re.sub('[\.\-\/]', ' ', '%s' % (cleanartistalbum)).encode('utf-8')
+        altterm = re.sub('[\.\-\/]', ' ', '%s %s' % (cleanartistalbum, year)).encode('utf-8')
         
         # Only use the year if the term could return a bunch of different albums, i.e. self-titled albums
         if albums[0] in albums[1] or len(albums[0]) < 4 or len(albums[1]) < 4:
@@ -381,7 +381,7 @@ def searchNZB(albumid=None, new=False):
                 data = urllib.urlopen(url, data=params).read()
                 nzb = classes.NZBDataSearchResult()
                 nzb.extraInfo.append(data)
-                nzb_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8'), helpers.latinToAscii(albums[1]).encode('UTF-8'), year)
+                nzb_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year)
                 nzb.name = nzb_folder_name
                 logger.info(u"Sending FILE to SABNZBD: " + nzb.name)
                 sab.sendNZB(nzb)
@@ -390,8 +390,8 @@ def searchNZB(albumid=None, new=False):
                 myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", nzb_folder_name])
             else:
                 downloadurl = bestqual[2]
-                nzb_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8'), helpers.latinToAscii(albums[1]).encode('UTF-8'), year)
-    
+                nzb_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year)
+    																	
                 if headphones.SAB_HOST and not headphones.BLACKHOLE:
                     linkparams = {}
                     
