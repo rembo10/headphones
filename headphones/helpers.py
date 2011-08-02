@@ -104,9 +104,12 @@ def extract_data(s):
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
     
     match = pattern.match(s)
-
-    name = match.group("name")
-    album = match.group("album")
-    year = match.group("year")
-
-    return (name, album, year)
+    
+    if match:
+        name = match.group("name")
+        album = match.group("album")
+        year = match.group("year")
+    
+        return (name, album, year)
+    else:
+        return (None, None, None)

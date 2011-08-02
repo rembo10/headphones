@@ -237,7 +237,7 @@ def correctMetadata(albumid, release, downloaded_track_list):
 	items = []
 	for downloaded_track in downloaded_track_list:
 		items.append(beets.library.Item.from_path(downloaded_track))
-		
+	
 	cur_artist, cur_album, out_tuples, rec = autotag.tag_album(items, search_artist=release['ArtistName'], search_album=release['AlbumTitle'])
 	
 	if rec == 'RECOMMEND_NONE':
@@ -367,21 +367,23 @@ def forcePostProcess():
 	
 		albumpath = unicode(os.path.join(download_dir, folder))
 		name, album, year = helpers.extract_data(folder)
-		
-		myDB = db.DBConnection()
-		release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName=? and AlbumTitle=?', [name, album]).fetchone()
-		if release:
-			logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
-			verify(release['AlbumID'], albumpath)
-		else:
-			logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (name, album))
-			from headphones import mb
-			try:
-				rgid = mb.findAlbumID(name, album)
-			except:
-				logger.error('Can not get release information for this album')
-			if rgid:
-				rgid = unicode(rgid)
-				verify(rgid, albumpath)
+		if name and album and year:
+			
+			myDB = db.DBConnection()
+			release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName=? and AlbumTitle=?', [name, album]).fetchone()
+			if release:
+				logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
+				verify(release['AlbumID'], albumpath)
+			else:
+				logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (name, album))
+				from headphones import mb
+				try:
+					rgid = mb.findAlbumID(name, album)
+				except:
+					logger.error('Can not get release information for this album')
+					continue
+				if rgid:
+					rgid = unicode(rgid)
+					verify(rgid, albumpath)
 			
 	
