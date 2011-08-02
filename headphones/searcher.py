@@ -210,7 +210,7 @@ def searchNZB(albumid=None, new=False):
                 logger.error('Unable to get the NZBs.org feed. Check that your settings are correct - post a bug if they are')
                 items = None
             
-            if len(items):
+            if items:
             
                 for item in items:
         

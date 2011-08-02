@@ -374,7 +374,7 @@ def findAlbumID(artist=None, album=None):
 
 	
 
-	term = album + '" AND artist:"'+artist+'"'
+	term = album + ' AND artist:"'+artist+'"'
 
 	f = ws.ReleaseGroupFilter(query=term, limit=1)
 	results = None
