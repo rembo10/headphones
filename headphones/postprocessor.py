@@ -377,10 +377,11 @@ def forcePostProcess():
 			logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (name, album))
 			from headphones import mb
 			try:
-				rgid = unicode(mb.findAlbumID(name, album))
+				rgid = mb.findAlbumID(name, album)
 			except:
 				logger.error('Can not get release information for this album')
 			if rgid:
+				rgid = unicode(rgid)
 				verify(rgid, albumpath)
 			
 	

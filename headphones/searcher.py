@@ -237,7 +237,7 @@ def searchNZB(albumid=None, new=False):
 
         if headphones.NEWZBIN:
             provider = "newzbin"    
-            providerurl = "https:/www.newzbin.com/"
+            providerurl = "https://www.newzbin.com/"
             if headphones.PREFERRED_QUALITY == 3:
                 categories = "7"        #music
                 format = "2"             #flac
