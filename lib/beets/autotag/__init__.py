@@ -378,6 +378,7 @@ def apply_metadata(items, info):
         
         # Compilation flag.
         item.comp = info['va']
+	item.comments = 'tagged by headphones/beets'
 
 def match_by_id(items):
     """If the items are tagged with a MusicBrainz album ID, returns an

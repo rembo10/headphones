@@ -293,7 +293,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		
 		logger.debug('Renaming %s ---> %s' % (downloaded_track, new_file_name))
 		try:
-			shutil.move(downloaded_track, new_file)
+			os.rename(downloaded_track, new_file)
 		except Exception, e:
 			logger.error('Error renaming file: %s. Error: %s' % (downloaded_track, e))
 			continue
