@@ -162,7 +162,7 @@ def syspath(path, pathmod=None):
             path = path.decode('utf8', 'replace')
 
     # Add the magic prefix if it isn't already there
-    if not path.startswith(u'\\\\?\\'):
+    if not path.startswith(u'\\\\?\\') and not path.startswith(u'\\'):
         path = u'\\\\?\\' + path
 
     return path

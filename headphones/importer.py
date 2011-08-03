@@ -269,7 +269,6 @@ def addReleaseById(rid):
 		return
 	
 	rgid = release_dict['rgid']
-	logger.info("rgid:" + str(rgid))
 	
 	#we don't want to make more calls to MB here unless we have to, could be happening quite a lot
 	#TODO: why do I have to str() this here? I don't get it.

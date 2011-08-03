@@ -30,6 +30,84 @@ def verify(albumid, albumpath):
 	release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
 	tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
 	
+	if not release or not tracks:
+		#the result of a manual post-process on an album that hasn't been inserted
+		#from an RSS feed or etc
+		#TODO: This should be a call to a class method.. copied it out of importer with only minor changes
+		import mb
+		try:	
+			release_dict = mb.getReleaseGroup(albumid)
+		except Exception, e:
+			logger.info('Unable to get release information for manual album with rgid: ' + albumid)
+		if not release_dict:
+			logger.warn('Unable to get release information for manual album with rgid: ' + albumid)
+			return
+
+		logger.info(u"Now adding/updating artist: " + release_dict['artist_name'])
+		
+		if release_dict['artist_name'].startswith('The '):
+			sortname = release_dict['artist_name'][4:]
+		else:
+			sortname = release_dict['artist_name']
+			
+	
+		controlValueDict = {"ArtistID": 	release_dict['artist_id']}
+		newValueDict = {"ArtistName": 		release_dict['artist_name'],
+						"ArtistSortName": 	sortname,
+						"DateAdded": 		helpers.today(),
+						"Status": 			"Paused"}
+		
+		if headphones.INCLUDE_EXTRAS:
+			newValueDict['IncludeExtras'] = 1
+		
+		myDB.upsert("artists", newValueDict, controlValueDict)
+
+		logger.info(u"Now adding album: " + release_dict['title'])
+		controlValueDict = {"AlbumID": 	albumid}
+		
+		newValueDict = {"ArtistID":			release_dict['artist_id'],
+						"ArtistName": 		release_dict['artist_name'],
+						"AlbumTitle":		release_dict['title'],
+						"AlbumASIN":		release_dict['asin'],
+						"ReleaseDate":		release_dict['releasedate'],
+						"DateAdded":		helpers.today(),
+						"Type":				release_dict['type']
+						}
+						
+		newValueDict['Status'] = "Snatched"
+		
+		myDB.upsert("albums", newValueDict, controlValueDict)
+		
+		# I changed the albumid from releaseid -> rgid, so might need to delete albums that have a releaseid
+		for rel in release_dict['releaselist']:
+			myDB.action('DELETE from albums WHERE AlbumID=?', [rel['releaseid']])
+			myDB.action('DELETE from tracks WHERE AlbumID=?', [rel['releaseid']])
+		
+		myDB.action('DELETE from tracks WHERE AlbumID=?', [albumid])
+		for track in release_dict['tracks']:
+		
+			controlValueDict = {"TrackID": 	track['id'],
+								"AlbumID":	albumid}
+			newValueDict = {"ArtistID":		release_dict['artist_id'],
+						"ArtistName": 		release_dict['artist_name'],
+						"AlbumTitle":		release_dict['title'],
+						"AlbumASIN":		release_dict['asin'],
+						"TrackTitle":		track['title'],
+						"TrackDuration":	track['duration'],
+						"TrackNumber":		track['number']
+						}
+		
+			myDB.upsert("tracks", newValueDict, controlValueDict)
+			
+		controlValueDict = {"ArtistID": 	albumid}
+		newValueDict = {"Status":			"Paused"}
+		
+		myDB.upsert("artists", newValueDict, controlValueDict)
+		logger.info(u"Addition complete for: " + release_dict['title'] + " - " + release_dict['artist_name'])
+
+		release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
+		tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
+
 	downloaded_track_list = []
 	for r,d,f in os.walk(albumpath):
 		for files in f:
@@ -366,7 +444,11 @@ def forcePostProcess():
 	for folder in folders:
 	
 		albumpath = unicode(os.path.join(download_dir, folder))
-		name, album, year = helpers.extract_data(folder)
+		try:
+			name, album, year = helpers.extract_data(folder)
+		except:
+			logger.info("Couldn't parse " + folder + " into any valid format.")
+			continue
 		
 		myDB = db.DBConnection()
 		release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName=? and AlbumTitle=?', [name, album]).fetchone()
@@ -378,10 +460,8 @@ def forcePostProcess():
 			from headphones import mb
 			try:
 				rgid = mb.findAlbumID(name, album)
-			except:
-				logger.error('Can not get release information for this album')
-			if rgid:
-				rgid = unicode(rgid)
-				verify(rgid, albumpath)
-			
-	
+			except Exception:
+				logger.info("Couldn't get release information for the album: " + name + " - " + album + " [" + year + "]")
+				continue
+			rgid = unicode(rgid)
+			verify(rgid, albumpath)

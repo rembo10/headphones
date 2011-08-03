@@ -1,7 +1,7 @@
 import time
 from operator import itemgetter
 import datetime
-import re
+import re, sys
 
 import headphones
 
@@ -101,12 +101,28 @@ def replace_all(text, dic):
 	return text
 	
 def extract_data(s):
+    #headphones default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
-    
     match = pattern.match(s)
+    
+    if match:
+        name = match.group("name")
+        album = match.group("album")
+        year = match.group("year")
+        return (name, album, year)
+    else:
+        logger.info("Couldn't parse " + s + " into a valid default format")
+    
+    #newzbin default format
+    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
+    match = pattern.match(s)
+    if match:
+        name = match.group("name")
+        album = match.group("album")
+        year = match.group("year")
+        return (name, album, year)
+    else:
+        logger.info("Couldn't parse " + s + " into a valid Newbin format")
+        return (name, album, year)
 
-    name = match.group("name")
-    album = match.group("album")
-    year = match.group("year")
-
-    return (name, album, year)
+    #TODO: add scene parsing formats (ick)
