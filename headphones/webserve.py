@@ -697,6 +697,13 @@ class WebInterface(object):
 		return page
 	extras.exposed = True
 	
+	def addReleaseById(self, rid):
+		threading.Thread(target=importer.addReleaseById, args=[rid]).start()
+		time.sleep(5)
+		threading.Thread(target=lastfm.getSimilar).start()
+		raise cherrypy.HTTPRedirect("home")
+	addReleaseById.exposed = True
+	
 	def updateCloud(self):
 		
 		lastfm.getSimilar()
