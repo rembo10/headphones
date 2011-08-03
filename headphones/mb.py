@@ -289,8 +289,10 @@ def getRelease(releaseid):
 	with mb_lock:
 	
 		release = {}
-	
-		inc = ws.ReleaseIncludes(tracks=True, releaseEvents=True)
+
+		#need this extended information if we lookup by ID alone
+		#getting it all at once saves future calls
+		inc = ws.ReleaseIncludes(tracks=True, releaseEvents=True, releaseGroup=True, artist=True)
 		results = None
 		attempt = 0
 			
@@ -313,6 +315,21 @@ def getRelease(releaseid):
 		release['id'] = u.extractUuid(results.id)
 		release['asin'] = results.asin
 		release['date'] = results.getEarliestReleaseDate()
+		
+		#so we can start with a releaseID from somewhere else and still get the 
+		#releaseGroupId for the DB
+		rg = results.getReleaseGroup()
+		if rg:
+			release['rgid'] = u.extractUuid(rg.id)
+			release['rg_title'] = rg.title
+			release['rg_type'] = u.extractFragment(rg.type)
+		else:
+			logger.warn("Release " + releaseid + "had no ReleaseGroup associated")
+		
+		#so we can start with a releaseID from anywhere and get the artist info
+		#it looks like MB api v1 only returns 1 artist object - 2.0 returns more...
+		release['artist_name'] = results.artist.name
+		release['artist_id'] = u.extractUuid(results.artist.id)
 		
 		tracks = []
 		
