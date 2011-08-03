@@ -34,6 +34,7 @@ def verify(albumid, albumpath):
 		#the result of a manual post-process on an album that hasn't been inserted
 		#from an RSS feed or etc
 		#TODO: This should be a call to a class method.. copied it out of importer with only minor changes
+		#TODO: odd things can happen when there are diacritic characters in the folder name, need to translate them?
 		import mb
 		try:	
 			release_dict = mb.getReleaseGroup(albumid)
@@ -56,7 +57,8 @@ def verify(albumid, albumpath):
 						"ArtistSortName": 	sortname,
 						"DateAdded": 		helpers.today(),
 						"Status": 			"Paused"}
-		
+		logger.info("ArtistID:ArtistName: " + release_dict['artist_id'] + " : " + release_dict['artist_name'])
+
 		if headphones.INCLUDE_EXTRAS:
 			newValueDict['IncludeExtras'] = 1
 		
@@ -71,11 +73,10 @@ def verify(albumid, albumpath):
 						"AlbumASIN":		release_dict['asin'],
 						"ReleaseDate":		release_dict['releasedate'],
 						"DateAdded":		helpers.today(),
-						"Type":				release_dict['type']
+						"Type":				release_dict['type'],
+						"Status":			"Snatched"
 						}
-						
-		newValueDict['Status'] = "Snatched"
-		
+
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		
 		# I changed the albumid from releaseid -> rgid, so might need to delete albums that have a releaseid

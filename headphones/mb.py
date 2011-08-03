@@ -281,7 +281,7 @@ def getReleaseGroup(rgid):
 						'artist_name'	: releaseGroup.artist.name,
 						'artist_id'		: u.extractUuid(releaseGroup.artist.id),
 						'title'			: releaseGroup.title,
-						'type'			: releaseGroup.type
+						'type'			: u.extractFragment(releaseGroup.type)
 						}
 
 		return release_dict
