@@ -16,25 +16,30 @@ class NewzbinDownloader(urllib.FancyURLopener):
 
         # if newzbin is throttling us, wait seconds and try again
         if errcode == 400:
-
-            newzbinErrCode = int(headers.getheader('X-DNZB-RCode'))
-
-            if newzbinErrCode == 450:
-                rtext = str(headers.getheader('X-DNZB-RText'))
-                result = re.search("wait (\d+) seconds", rtext)
-
-            elif newzbinErrCode == 401:
-                logger.info("Newzbin error 401")
-                #raise exceptions.AuthException("Newzbin username or password incorrect")
-
-            elif newzbinErrCode == 402:
-                #raise exceptions.AuthException("Newzbin account not premium status, can't download NZBs")
-                logger.info("Newzbin error 402")
-
-            logger.info("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + "seconds")
-
-            time.sleep(int(result.group(1)))
-
+            if headers.has_key('x-dnzb-rcode') or headers.has_key('X-DNZB-RCode'):
+                newzbinErrCode = int(headers.getheader('X-DNZB-RCode'))
+    
+                if newzbinErrCode == 450:
+                    rtext = str(headers.getheader('X-DNZB-RText'))
+                    result = re.search("wait (\d+) seconds", rtext)
+    
+                elif newzbinErrCode == 401:
+                    logger.info("Newzbin error 401")
+                    #raise exceptions.AuthException("Newzbin username or password incorrect")
+    
+                elif newzbinErrCode == 402:
+                    #raise exceptions.AuthException("Newzbin account not premium status, can't download NZBs")
+                    logger.info("Newzbin error 402")
+    
+                logger.info("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + "seconds")
+    
+                time.sleep(int(result.group(1)))
+            elif headers.has_key('X-Cache') or headers.has_key('X-Cache-Lookup'):
+                result = re.search("MISS from (.*)", rtext)
+                logger.warn("Received 400 from url: " + url)
+            else:
+                logger.warn("URL: " + url + " Received status: 400 without a valid x-dnzb-rcode. Dumping headers: " + str(headers))
+                time.sleep(1)
             #raise exceptions.NewzbinAPIThrottled()
 
 #this should be in a class somewhere
