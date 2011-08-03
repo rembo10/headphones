@@ -288,7 +288,7 @@ def addReleaseById(rid):
 		newValueDict = {"ArtistName": 		release_dict['artist_name'],
 						"ArtistSortName": 	sortname,
 						"DateAdded": 		helpers.today(),
-						"Status": 			"Manual"}
+						"Status": 			"Paused"}
 		
 		if headphones.INCLUDE_EXTRAS:
 			newValueDict['IncludeExtras'] = 1
