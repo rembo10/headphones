@@ -16,30 +16,25 @@ class NewzbinDownloader(urllib.FancyURLopener):
 
         # if newzbin is throttling us, wait seconds and try again
         if errcode == 400:
-            if headers.has_key('x-dnzb-rcode') or headers.has_key('X-DNZB-RCode'):
-                newzbinErrCode = int(headers.getheader('X-DNZB-RCode'))
-    
-                if newzbinErrCode == 450:
-                    rtext = str(headers.getheader('X-DNZB-RText'))
-                    result = re.search("wait (\d+) seconds", rtext)
-    
-                elif newzbinErrCode == 401:
-                    logger.info("Newzbin error 401")
-                    #raise exceptions.AuthException("Newzbin username or password incorrect")
-    
-                elif newzbinErrCode == 402:
-                    #raise exceptions.AuthException("Newzbin account not premium status, can't download NZBs")
-                    logger.info("Newzbin error 402")
-    
-                logger.info("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + "seconds")
-    
-                time.sleep(int(result.group(1)))
-            elif headers.has_key('X-Cache') or headers.has_key('X-Cache-Lookup'):
-                result = re.search("MISS from (.*)", rtext)
-                logger.warn("Received 400 from url: " + url)
-            else:
-                logger.warn("URL: " + url + " Received status: 400 without a valid x-dnzb-rcode. Dumping headers: " + str(headers))
-                time.sleep(1)
+
+            newzbinErrCode = int(headers.getheader('X-DNZB-RCode'))
+
+            if newzbinErrCode == 450:
+                rtext = str(headers.getheader('X-DNZB-RText'))
+                result = re.search("wait (\d+) seconds", rtext)
+
+            elif newzbinErrCode == 401:
+                logger.info("Newzbin error 401")
+                #raise exceptions.AuthException("Newzbin username or password incorrect")
+
+            elif newzbinErrCode == 402:
+                #raise exceptions.AuthException("Newzbin account not premium status, can't download NZBs")
+                logger.info("Newzbin error 402")
+
+            logger.info("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + "seconds")
+
+            time.sleep(int(result.group(1)))
+
             #raise exceptions.NewzbinAPIThrottled()
 
 #this should be in a class somewhere
@@ -120,27 +115,28 @@ def searchNZB(albumid=None, new=False):
             searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
             logger.info(u"Parsing results from "+searchURL)
             try:
-            	data = urllib2.urlopen(searchURL, timeout=20).read()
+                data = urllib2.urlopen(searchURL, timeout=20).read()
             except urllib2.URLError, e:
-            	logger.warn('Error fetching data from NZBMatrix: %s' % e)
-            	data = False   
-            	
+                logger.warn('Error fetching data from NZBMatrix: %s' % e)
+                data = False   
+                
             if data:
-				d = feedparser.parse(data)
-				
-				for item in d.entries:
-					try:
-						url = item.link
-						title = item.title
-						size = int(item.links[1]['length'])
-						if size < maxsize:
-							resultlist.append((title, size, url, provider))
-							logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-						else:
-							logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
-					
-					except AttributeError, e:
-						logger.info(u"No results found from NZBMatrix for %s" % term)
+            
+                d = feedparser.parse(data)
+                
+                for item in d.entries:
+                    try:
+                        url = item.link
+                        title = item.title
+                        size = int(item.links[1]['length'])
+                        if size < maxsize:
+                            resultlist.append((title, size, url, provider))
+                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                        else:
+                            logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
+                    
+                    except AttributeError, e:
+                        logger.info(u"No results found from NZBMatrix for %s" % term)
             
         if headphones.NEWZNAB:
             provider = "newznab"
@@ -170,37 +166,15 @@ def searchNZB(albumid=None, new=False):
             except urllib2.URLError, e:
                 logger.warn('Error fetching data from %s: %s' % (headphones.NEWZNAB_HOST, e))
                 data = False
-            try:
-            	data = urllib2.urlopen(searchURL, timeout=20).read()
-            except urllib2.URLError, e:
-            	logger.warn('Error fetching data from %s: %s' % (headphones.NEWZNAB_HOST, e))
-            	data = False
-            	
+                
             if data:
-                logger.info(u"No results found from %s for %s" % (headphones.NEWZNAB_HOST, term))
-                pass
             
-            else:
-                for item in d.entries:
-                    try:
-                        url = item.link
-                        title = item.title
-                        size = int(item.links[1]['length'])
-                        if size < maxsize:
-                            resultlist.append((title, size, url, provider))
-                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-                        else:
-                            logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
-                    
-                    except Exception, e:
-                        logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
-
                 d = feedparser.parse(data)
-
+                
                 if not len(d.entries):
                     logger.info(u"No results found from %s for %s" % (headphones.NEWZNAB_HOST, term))
                     pass
-
+                
                 else:
                     for item in d.entries:
                         try:
@@ -212,30 +186,9 @@ def searchNZB(albumid=None, new=False):
                                 logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                             else:
                                 logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
-
+                        
                         except Exception, e:
                             logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
-			
-				d = feedparser.parse(data)
-				
-				if not len(d.entries):
-					logger.info(u"No results found from %s for %s" % (headphones.NEWZNAB_HOST, term))
-					pass
-				
-				else:
-					for item in d.entries:
-						try:
-							url = item.link
-							title = item.title
-							size = int(item.links[1]['length'])
-							if size < maxsize:
-								resultlist.append((title, size, url, provider))
-								logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-							else:
-								logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
-						
-						except Exception, e:
-							logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
                     
         if headphones.NZBSORG:
             provider = "nzbsorg"
@@ -263,14 +216,7 @@ def searchNZB(albumid=None, new=False):
             logger.info(u"Parsing results from "+searchURL)
             
             try:
-                d = minidom.parseString(data)
-                node = d.documentElement
-                items = d.getElementsByTagName("item")
-            except ExpatError:
-                logger.error('Unable to get the NZBs.org feed. Check that your settings are correct - post a bug if they are')
-                items = None
                 data = urllib2.urlopen(searchURL, timeout=20).read()
-            	data = urllib2.urlopen(searchURL, timeout=20).read()
             except urllib2.URLError, e:
                 logger.warn('Error fetching data from NZBs.org: %s' % e)
                 data = False
@@ -284,18 +230,6 @@ def searchNZB(albumid=None, new=False):
                 except ExpatError:
                     logger.error('Unable to get the NZBs.org feed. Check that your settings are correct - post a bug if they are')
                     items = None
-            	logger.warn('Error fetching data from NZBs.org: %s' % e)
-            	data = False
-            	items = False
-            	
-            if data:
-				try:    
-					d = minidom.parseString(data)
-					node = d.documentElement
-					items = d.getElementsByTagName("item")
-				except ExpatError:
-					logger.error('Unable to get the NZBs.org feed. Check that your settings are correct - post a bug if they are')
-					items = None
             
             if items:
             
@@ -341,9 +275,9 @@ def searchNZB(albumid=None, new=False):
             params = {   
                         "fpn": "p",
                         'u_nfo_posts_only': 0,
-						'u_url_posts_only': 0,
-						'u_comment_posts_only': 0,
-						'u_show_passworded': 0,
+                        'u_url_posts_only': 0,
+                        'u_comment_posts_only': 0,
+                        'u_show_passworded': 0,
                         "searchaction": "Search",
                         #"dl": 1,
                         "category": categories,
@@ -478,7 +412,7 @@ def searchNZB(albumid=None, new=False):
             else:
                 downloadurl = bestqual[2]
                 nzb_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year)
-    																	
+                                                                        
                 if headphones.SAB_HOST and not headphones.BLACKHOLE:
                     linkparams = {}
                     
