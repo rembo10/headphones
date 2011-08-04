@@ -1,0 +1,32 @@
+<%inherit file="base.html"/>
+
+<%def name="body()">
+	<table class="display" id="artist_table">
+		<thead>
+			<tr>
+				<th>Artist Name</th>
+				<th>Status</th>
+				<th>Latest Album</th>
+				<th>Have</th>
+			</tr>
+		</thead>
+		<tbody>
+		%for artist in artists:
+			<tr>
+				<td><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
+				<td>${artist['Status']}</td>
+				<td><a href="albumPage?AlbumID=${artist['AlbumID']}">${artist['LatestAlbum']}</a></td>
+				<td>${artist['HaveTracks']}/${artist['TotalTracks']}</td>
+			</tr>
+		%endfor
+		</tbody>
+	</table>
+</%def>
+
+<%def name="headerIncludes()">
+	<link rel="stylesheet" href="css/data_table.css">
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script src="js/libs/jquery.dataTables.min.js"></script>
+</%def>

@@ -1,0 +1,76 @@
+<%
+	import headphones
+%>
+<!doctype html>
+<!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]-->
+<!--[if IE 7 ]>    <html lang="en" class="no-js ie7"> <![endif]-->
+<!--[if IE 8 ]>    <html lang="en" class="no-js ie8"> <![endif]-->
+<!--[if IE 9 ]>    <html lang="en" class="no-js ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+	<title>Headphones - ${title}</title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="shortcut icon" href="images/favicon.ico">
+	<link rel="apple-touch-icon" href="images/headphoneslogo.png">
+	<link rel="stylesheet" href="css/style.css?v=2">
+	${next.headerIncludes()}
+
+	<script src="js/libs/modernizr-1.7.min.js"></script>
+</head>
+<body>
+	<div id="container">
+		<header>
+			<div id="logo">
+				<a href="home"><img src="images/headphoneslogo.png" alt="headphones"></a>
+			</div>
+			<div id="search">
+				
+			</div>
+			<ul id="nav">
+				<li><a href="upcoming">upcoming</a></li>
+				<li><a href="extras">extras</a></li>
+				<li><a href="manage">manage</a></li>
+				<li><a href="history">history</a></li>
+				<li><a href="logs">logs</a></li>
+				<li><a href="config">settings</a></li>
+			</ul>
+		</header>
+
+		<div id="main" role="main">
+		${next.body()}
+		</div>
+
+		<footer>
+			<div class="version">Version: ${headphones.CURRENT_VERSION}</div>
+					<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+					<input type="hidden" name="cmd" value="_s-xclick">
+					<input type="hidden" name="hosted_button_id" value="93FFC6WDV97QS">
+					<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+					<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+				</form>
+			</div>
+		</footer>
+	</div>
+
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+	<script>!window.jQuery && document.write(unescape('%3Cscript src="js/libs/jquery-1.6.2.min.js"%3E%3C/script%3E'))</script>
+	${next.javascriptIncludes()}
+	<script src="js/plugins.js"></script>
+	<script src="js/script.js"></script>
+
+	<!--[if lt IE 7 ]>
+	<script src="js/libs/dd_belatedpng.js"></script>
+	<script> DD_belatedPNG.fix('img, .png_bg');</script>
+	<![endif]-->
+</body>
+</html>
+
+<%def name="javascriptIncludes()"></%def>
+<%def name="headerIncludes()"></%def>

@@ -1,23 +1,43 @@
 import os
-
 import cherrypy
+
+from mako.template import Template
+from mako.lookup import TemplateLookup
+from mako import exceptions
 
 import time
 import threading
 
 import headphones
+
 from headphones.mb import getReleaseGroup
 from headphones import templates, logger, searcher, db, importer, helpers, mb, lastfm
 from headphones.helpers import checked, radio
 
+def serve_template(templatename, **kwargs):
 
+	template_dir = os.path.join(str(headphones.PROG_DIR), 'data/interfaces/default/')
+	_hplookup = TemplateLookup(directories=[template_dir])
+	
+	try:
+		template = _hplookup.get_template(templatename)
+		return template.render(**kwargs)
+	except:
+		return exceptions.html_error_template().render()
+	
 class WebInterface(object):
-
+	
 	def index(self):
 		raise cherrypy.HTTPRedirect("home")
 	index.exposed=True
 
 	def home(self):
+		myDB = db.DBConnection()
+		artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
+		return serve_template(templatename="index.html", title='Home', artists=artists)
+	home.exposed = True
+
+	def homeold(self):
 		page = [templates._header]
 		if not headphones.CURRENT_VERSION:
 			page.append('''<div class="updatebar">You're running an unknown version of Headphones. <a class="blue" href="update">Click here to update</a></div>''')
