@@ -508,18 +508,14 @@ class WebInterface(object):
 		page.append(templates._logobar)
 		page.append(templates._nav)
 		page.append('''<div class="table"><p class="logtext">''')
-		if os.path.isfile(os.path.join(headphones.LOG_DIR, 'headphones.log')):
-			fileHandle = open(os.path.join(headphones.LOG_DIR, 'headphones.log'))
+		log_file = os.path.join(headphones.LOG_DIR, 'headphones.log')
+		if os.path.isfile(log_file):
+			fileHandle = open(log_file)
 			lineList = fileHandle.readlines()
 			fileHandle.close()
-			i = -1
-			if len(lineList) < 100:
-				limit = -len(lineList)
-			else:
-				limit = -100
-			while i > limit:
-				page.append(lineList[i] + '<br /><br />')
-				i -= 1
+			lineList.reverse()
+			for line in lineList[1:200]:
+				page.append(line.decode('utf-8') + '<br /><br />')
 		page.append('''</p></div>''')
 		page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
