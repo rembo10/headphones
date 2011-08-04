@@ -172,11 +172,16 @@ def moveFiles(albumpath, release, tracks):
 		
 	artist = release['ArtistName'].replace('/', '_')
 	album = release['AlbumTitle'].replace('/', '_')
+
+	if release['ArtistName'].startswith('The '):
+		sortname = release['ArtistName'][4:]
+	else:
+		sortname = release['ArtistName']
 	
-	if artist[0].isdigit():
+	if sortname.isdigit():
 		firstchar = '0-9'
 	else:
-		firstchar = artist[0]
+		firstchar = sortname[0]
 	
 
 	values = {	'artist':	artist,
