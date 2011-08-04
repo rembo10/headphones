@@ -1,4 +1,4 @@
-import urllib
+import urllib, urllib2
 import lib.feedparser as feedparser
 from xml.dom import minidom
 from xml.parsers.expat import ExpatError
@@ -119,22 +119,30 @@ def searchNZB(albumid=None, new=False):
                         
             searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
             logger.info(u"Parsing results from "+searchURL)
-            d = feedparser.parse(searchURL)
-            
-            for item in d.entries:
-                try:
-                    url = item.link
-                    title = item.title
-                    size = int(item.links[1]['length'])
-                    if size < maxsize:
-                        resultlist.append((title, size, url, provider))
-                        logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-                    else:
-                        logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
+            try:
+                data = urllib2.urlopen(searchURL, timeout=20).read()
+            except urllib2.URLError, e:
+                logger.warn('Error fetching data from NZBMatrix: %s' % e)
+                data = False   
                 
-                except AttributeError, e:
-                    logger.info(u"No results found from NZBMatrix for %s" % term)
+            if data:
             
+                d = feedparser.parse(data)
+
+                for item in d.entries:
+                    try:
+                        url = item.link
+                        title = item.title
+                        size = int(item.links[1]['length'])
+                        if size < maxsize:
+                            resultlist.append((title, size, url, provider))
+                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                        else:
+                            logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
+
+                    except AttributeError, e:
+                        logger.info(u"No results found from NZBMatrix for %s" % term)
+                        
         if headphones.NEWZNAB:
             provider = "newznab"
             if headphones.PREFERRED_QUALITY == 3:
@@ -155,28 +163,37 @@ def searchNZB(albumid=None, new=False):
                         }
         
             searchURL = headphones.NEWZNAB_HOST + '/api?' + urllib.urlencode(params)
-            logger.info(u"Parsing results from "+searchURL)
                 
-            d = feedparser.parse(searchURL)
+            logger.info(u"Parsing results from "+searchURL)
             
-            if not len(d.entries):
-                logger.info(u"No results found from %s for %s" % (headphones.NEWZNAB_HOST, term))
-                pass
-            
-            else:
-                for item in d.entries:
-                    try:
-                        url = item.link
-                        title = item.title
-                        size = int(item.links[1]['length'])
-                        if size < maxsize:
-                            resultlist.append((title, size, url, provider))
-                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-                        else:
-                            logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
-                    
-                    except Exception, e:
-                        logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
+            try:
+                data = urllib2.urlopen(searchURL, timeout=20).read()
+            except urllib2.URLError, e:
+                logger.warn('Error fetching data from %s: %s' % (headphones.NEWZNAB_HOST, e))
+                data = False
+                
+            if data:
+
+                d = feedparser.parse(data)
+
+                if not len(d.entries):
+                    logger.info(u"No results found from %s for %s" % (headphones.NEWZNAB_HOST, term))
+                    pass
+
+                else:
+                    for item in d.entries:
+                        try:
+                            url = item.link
+                            title = item.title
+                            size = int(item.links[1]['length'])
+                            if size < maxsize:
+                                resultlist.append((title, size, url, provider))
+                                logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                            else:
+                                logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
+
+                        except Exception, e:
+                            logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
                     
         if headphones.NZBSORG:
             provider = "nzbsorg"
@@ -201,21 +218,25 @@ def searchNZB(albumid=None, new=False):
                         }
         
             searchURL = 'https://secure.nzbs.org/rss.php?' + urllib.urlencode(params)
-            
-            #data = urllib.urlopen(searchURL).read()
-            data = urllib.urlopen(searchURL).read()
-            
             logger.info(u"Parsing results from "+searchURL)
             
-            try:    
-                d = minidom.parseString(data)
-                node = d.documentElement
-                items = d.getElementsByTagName("item")
-            except ExpatError:
-                logger.error('Unable to get the NZBs.org feed. Check that your settings are correct - post a bug if they are')
-                items = None
+            try:
+                data = urllib2.urlopen(searchURL, timeout=20).read()
+            except urllib2.URLError, e:
+                logger.warn('Error fetching data from NZBs.org: %s' % e)
+                data = False
+                items = False
+                
+            if data:
+                try:    
+                    d = minidom.parseString(data)
+                    node = d.documentElement
+                    items = d.getElementsByTagName("item")
+                except ExpatError:
+                    logger.error('Unable to get the NZBs.org feed. Check that your settings are correct - post a bug if they are')
+                    items = None
             
-            if len(items):
+            if items:
             
                 for item in items:
         
