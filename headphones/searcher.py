@@ -120,29 +120,28 @@ def searchNZB(albumid=None, new=False):
             searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
             logger.info(u"Parsing results from "+searchURL)
             try:
-                data = urllib2.urlopen(searchURL, timeout=20).read()
+            	data = urllib2.urlopen(searchURL, timeout=20).read()
             except urllib2.URLError, e:
-                logger.warn('Error fetching data from NZBMatrix: %s' % e)
-                data = False   
-                
+            	logger.warn('Error fetching data from NZBMatrix: %s' % e)
+            	data = False   
+            	
             if data:
+				d = feedparser.parse(data)
+				
+				for item in d.entries:
+					try:
+						url = item.link
+						title = item.title
+						size = int(item.links[1]['length'])
+						if size < maxsize:
+							resultlist.append((title, size, url, provider))
+							logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+						else:
+							logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
+					
+					except AttributeError, e:
+						logger.info(u"No results found from NZBMatrix for %s" % term)
             
-                d = feedparser.parse(data)
-
-                for item in d.entries:
-                    try:
-                        url = item.link
-                        title = item.title
-                        size = int(item.links[1]['length'])
-                        if size < maxsize:
-                            resultlist.append((title, size, url, provider))
-                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-                        else:
-                            logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
-
-                    except AttributeError, e:
-                        logger.info(u"No results found from NZBMatrix for %s" % term)
-                        
         if headphones.NEWZNAB:
             provider = "newznab"
             if headphones.PREFERRED_QUALITY == 3:
@@ -171,8 +170,30 @@ def searchNZB(albumid=None, new=False):
             except urllib2.URLError, e:
                 logger.warn('Error fetching data from %s: %s' % (headphones.NEWZNAB_HOST, e))
                 data = False
-                
+            try:
+            	data = urllib2.urlopen(searchURL, timeout=20).read()
+            except urllib2.URLError, e:
+            	logger.warn('Error fetching data from %s: %s' % (headphones.NEWZNAB_HOST, e))
+            	data = False
+            	
             if data:
+                logger.info(u"No results found from %s for %s" % (headphones.NEWZNAB_HOST, term))
+                pass
+            
+            else:
+                for item in d.entries:
+                    try:
+                        url = item.link
+                        title = item.title
+                        size = int(item.links[1]['length'])
+                        if size < maxsize:
+                            resultlist.append((title, size, url, provider))
+                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                        else:
+                            logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
+                    
+                    except Exception, e:
+                        logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
 
                 d = feedparser.parse(data)
 
@@ -194,6 +215,27 @@ def searchNZB(albumid=None, new=False):
 
                         except Exception, e:
                             logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
+			
+				d = feedparser.parse(data)
+				
+				if not len(d.entries):
+					logger.info(u"No results found from %s for %s" % (headphones.NEWZNAB_HOST, term))
+					pass
+				
+				else:
+					for item in d.entries:
+						try:
+							url = item.link
+							title = item.title
+							size = int(item.links[1]['length'])
+							if size < maxsize:
+								resultlist.append((title, size, url, provider))
+								logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+							else:
+								logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
+						
+						except Exception, e:
+							logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
                     
         if headphones.NZBSORG:
             provider = "nzbsorg"
@@ -221,7 +263,14 @@ def searchNZB(albumid=None, new=False):
             logger.info(u"Parsing results from "+searchURL)
             
             try:
+                d = minidom.parseString(data)
+                node = d.documentElement
+                items = d.getElementsByTagName("item")
+            except ExpatError:
+                logger.error('Unable to get the NZBs.org feed. Check that your settings are correct - post a bug if they are')
+                items = None
                 data = urllib2.urlopen(searchURL, timeout=20).read()
+            	data = urllib2.urlopen(searchURL, timeout=20).read()
             except urllib2.URLError, e:
                 logger.warn('Error fetching data from NZBs.org: %s' % e)
                 data = False
@@ -235,6 +284,18 @@ def searchNZB(albumid=None, new=False):
                 except ExpatError:
                     logger.error('Unable to get the NZBs.org feed. Check that your settings are correct - post a bug if they are')
                     items = None
+            	logger.warn('Error fetching data from NZBs.org: %s' % e)
+            	data = False
+            	items = False
+            	
+            if data:
+				try:    
+					d = minidom.parseString(data)
+					node = d.documentElement
+					items = d.getElementsByTagName("item")
+				except ExpatError:
+					logger.error('Unable to get the NZBs.org feed. Check that your settings are correct - post a bug if they are')
+					items = None
             
             if items:
             

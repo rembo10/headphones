@@ -321,7 +321,7 @@ def correctMetadata(albumid, release, downloaded_track_list):
 	items = []
 	for downloaded_track in downloaded_track_list:
 		items.append(beets.library.Item.from_path(downloaded_track))
-		
+	
 	cur_artist, cur_album, out_tuples, rec = autotag.tag_album(items, search_artist=release['ArtistName'], search_album=release['AlbumTitle'])
 	
 	if rec == 'RECOMMEND_NONE':
@@ -471,3 +471,4 @@ def forcePostProcess():
 				continue
 			rgid = unicode(rgid)
 			verify(rgid, albumpath)
+

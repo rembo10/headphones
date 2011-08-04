@@ -393,9 +393,7 @@ def findArtistbyAlbum(name):
 	
 def findAlbumID(artist=None, album=None):
 
-	#title=None, releaseTypes=None, artistName=None,
-
-	f = ws.ReleaseGroupFilter(title=album, artistName=artist, limit=1)
+	f = ws.ReleaseGroupFilter(query=term, limit=1)
 	results = None
 	attempt = 0
 			
