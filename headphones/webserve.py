@@ -34,7 +34,7 @@ class WebInterface(object):
 	def home(self):
 		myDB = db.DBConnection()
 		artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
-		return serve_template(templatename="index.html", title='Home', artists=artists)
+		return serve_template(templatename="index.html", title="Home", artists=artists)
 	home.exposed = True
 
 	def homeold(self):

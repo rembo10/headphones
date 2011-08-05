@@ -87,20 +87,12 @@ a:hover { color: #036; }
 */
 
 body { background-color: #EBF4FB }
-div#logo { float: left; margin-left: 10px; }
+header { height: 68px; padding: 0 10px 0 10px; background-color: #F5F5F5; margin-bottom: 20px; }
 
-ul#nav { font-family: Arial, Verdana; font-size: 14px; padding: 0; list-style: none; float: left; }
-ul#nav li { display: inline; margin-top: 25px; }
-ul#nav li a { text-decoration: none; border-top: 1px solid #ffffff; padding: 5px 15px 5px 15px; margin-left: 1px; white-space: nowrap; }
-ul#nav li a:hover { background: #22eeff }
-
-table#artist_table { margin-left: auto; margin-right: auto; }
-
-footer { margin-top: 40px; text-align: center; padding: 20px; }
-
-
-
-
+table#artist_table th#name { width: 30%; }
+table#artist_table th#status { width: 10%; }
+table#artist_table th#latestalbum { width: 35%; }
+table#artist_table th#have { width: 20%; }
 
 
 

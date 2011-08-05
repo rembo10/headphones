@@ -21,47 +21,28 @@
 	<link rel="apple-touch-icon" href="images/headphoneslogo.png">
 	<link rel="stylesheet" href="css/style.css?v=2">
 	${next.headerIncludes()}
-
+	
 	<script src="js/libs/modernizr-1.7.min.js"></script>
 </head>
 <body>
 	<div id="container">
 		<header>
-			<div id="logo">
-				<a href="home"><img src="images/headphoneslogo.png" alt="headphones"></a>
-			</div>
-			<div id="search">
-				
-			</div>
-			<ul id="nav">
-				<li><a href="upcoming">upcoming</a></li>
-				<li><a href="extras">extras</a></li>
-				<li><a href="manage">manage</a></li>
-				<li><a href="history">history</a></li>
-				<li><a href="logs">logs</a></li>
-				<li><a href="config">settings</a></li>
-			</ul>
+			<img src="images/headphoneslogo.png" alt="headphones">
 		</header>
 
-		<div id="main" role="main">
-		${next.body()}
+		<div id="main" class="main">
+			${next.body()}
 		</div>
 
 		<footer>
-			<div class="version">Version: ${headphones.CURRENT_VERSION}</div>
-					<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
-					<input type="hidden" name="cmd" value="_s-xclick">
-					<input type="hidden" name="hosted_button_id" value="93FFC6WDV97QS">
-					<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-					<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
-				</form>
-			</div>
+
 		</footer>
 	</div>
 
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
 	<script>!window.jQuery && document.write(unescape('%3Cscript src="js/libs/jquery-1.6.2.min.js"%3E%3C/script%3E'))</script>
 	${next.javascriptIncludes()}
+	
 	<script src="js/plugins.js"></script>
 	<script src="js/script.js"></script>
 
