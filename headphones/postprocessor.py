@@ -164,7 +164,11 @@ def verify(albumid, albumpath):
 			
 	logger.warn('Could not identify album: %s. It may not be the intended album.' % albumpath)
 	myDB.action('UPDATE snatched SET status = "Unprocessed" WHERE AlbumID=?', [albumid])
-	renameUnprocessedFolder(albumpath)
+	processed = re.search(r' \(Unprocessed\)(?:\[\d+\])?', albumpath)
+	if not processed:
+		renameUnprocessedFolder(albumpath)
+	else:
+		logger.info("Already marked as unprocessed: " + albumpath)
 			
 def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list):
 
