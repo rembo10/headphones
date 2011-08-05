@@ -105,11 +105,11 @@ a:active {/*colour in NN4.xx is red*/
 
 container {  }
 
-body { background-color: #EBF4FB }
-header { height: 68px; width: 100%; padding: 0 10px 0 10px; background-color: #CDC9C9; position: fixed; top: 0; z-index: 999; }
+body { background-color: #EBF4FB; min-width: 906px; }
+header { height: 68px; width: 100%; min-width: 906px; padding: 0 10px 0 10px; background-color: #CDC9C9; position: fixed; top: 0; z-index: 999; }
 div#logo { float: left; }
 
-ul#nav { margin-top: 25px; float: left; white-space: nowrap; list-style-type: none; }
+ul#nav { margin-top: 25px; float: left; list-style-type: none; }
 ul#nav li { margin: 40px 5px auto 15px;  display: inline; }
 ul#nav li a { font-size: 16px; font-weight: bold; color: #330000; text-decoration: none; }
 ul#nav li a:hover { background-color: #EE0000; }
