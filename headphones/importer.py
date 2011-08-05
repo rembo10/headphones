@@ -252,3 +252,81 @@ def addArtisttoDB(artistid, extrasonly=False):
 	
 	myDB.upsert("artists", newValueDict, controlValueDict)
 	logger.info(u"Updating complete for: " + artist['artist_name'])
+	
+def addReleaseById(rid):
+
+	myDB = db.DBConnection()
+	
+	#we have to make a call to get the release no matter what so we can get the RGID
+	#need a way around this - a local cache maybe in the future maybe? 
+	try:
+		release_dict = mb.getRelease(rid)
+	except Exception, e:
+		logger.info('Unable to get release information for Release: ' + str(rid) + " " + str(e))
+		return
+	if not release_dict:
+		logger.info('Unable to get release information for Release: ' + str(rid) + " no dict")
+		return
+	
+	rgid = release_dict['rgid']
+	
+	#we don't want to make more calls to MB here unless we have to, could be happening quite a lot
+	#TODO: why do I have to str() this here? I don't get it.
+	rg_exists = myDB.select("SELECT * from albums WHERE AlbumID=?", [rid])
+	
+	#make sure the artist exists since I don't know what happens later if it doesn't
+	artist_exists = myDB.select("SELECT * from artists WHERE ArtistID=?", [release_dict['artist_id']])
+	if not artist_exists:
+		if release_dict['artist_name'].startswith('The '):
+			sortname = release_dict['artist_name'][4:]
+		else:
+			sortname = release_dict['artist_name']
+			
+	
+		logger.info(u"Now manually adding: " + release_dict['artist_name'] + " - with status Paused")
+		controlValueDict = {"ArtistID": 	release_dict['artist_id']}
+		newValueDict = {"ArtistName": 		release_dict['artist_name'],
+						"ArtistSortName": 	sortname,
+						"DateAdded": 		helpers.today(),
+						"Status": 			"Paused"}
+		
+		if headphones.INCLUDE_EXTRAS:
+			newValueDict['IncludeExtras'] = 1
+		
+		myDB.upsert("artists", newValueDict, controlValueDict)
+
+	if not rg_exists:	
+		logger.info(u"Now adding-by-id album (" + release_dict['title'] + ") from id: " + rgid)
+		controlValueDict = {"AlbumID": 	rgid}
+
+		newValueDict = {"ArtistID":			release_dict['artist_id'],
+						"ArtistName": 		release_dict['artist_name'],
+						"AlbumTitle":		release_dict['rg_title'],
+						"AlbumASIN":		release_dict['asin'],
+						"ReleaseDate":		release_dict['date'],
+						"DateAdded":		helpers.today(),
+						"Status":			'Wanted',
+						"Type":				release_dict['rg_type']
+						}
+		
+		myDB.upsert("albums", newValueDict, controlValueDict)
+		
+		for track in release_dict['tracks']:
+		
+			controlValueDict = {"TrackID": 	track['id'],
+								"AlbumID":	release_dict['rgid']}
+			newValueDict = {"ArtistID":		release_dict['artist_id'],
+						"ArtistName": 		release_dict['artist_name'],
+						"AlbumTitle":		release_dict['rg_title'],
+						"AlbumASIN":		release_dict['asin'],
+						"TrackTitle":		track['title'],
+						"TrackDuration":	track['duration'],
+						"TrackNumber":		track['number']
+						}
+		
+			myDB.upsert("tracks", newValueDict, controlValueDict)
+
+		
+		#start a search for the album
+		import searcher
+		searcher.searchNZB(rgid, False)

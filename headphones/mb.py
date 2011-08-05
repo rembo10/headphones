@@ -163,7 +163,7 @@ def getReleaseGroup(rgid):
 	
 		releaselist = []
 		
-		inc = ws.ReleaseGroupIncludes(releases=True)
+		inc = ws.ReleaseGroupIncludes(releases=True, artist=True)
 		releaseGroup = None
 		attempt = 0
 		
@@ -277,7 +277,11 @@ def getReleaseGroup(rgid):
 						'trackcount'	: a[0]['trackscount'],
 						'tracks'		: a[0]['tracks'],
 						'asin'			: a[0]['asin'],
-						'releaselist'	: releaselist
+						'releaselist'	: releaselist,
+						'artist_name'	: releaseGroup.artist.name,
+						'artist_id'		: u.extractUuid(releaseGroup.artist.id),
+						'title'			: releaseGroup.title,
+						'type'			: u.extractFragment(releaseGroup.type)
 						}
 		
 		return release_dict
@@ -290,7 +294,7 @@ def getRelease(releaseid):
 	
 		release = {}
 	
-		inc = ws.ReleaseIncludes(tracks=True, releaseEvents=True)
+		inc = ws.ReleaseIncludes(tracks=True, releaseEvents=True, releaseGroup=True, artist=True)
 		results = None
 		attempt = 0
 			
@@ -313,6 +317,19 @@ def getRelease(releaseid):
 		release['id'] = u.extractUuid(results.id)
 		release['asin'] = results.asin
 		release['date'] = results.getEarliestReleaseDate()
+
+
+		rg = results.getReleaseGroup()
+		if rg:
+			release['rgid'] = u.extractUuid(rg.id)
+			release['rg_title'] = rg.title
+			release['rg_type'] = u.extractFragment(rg.type)
+		else:
+			logger.warn("Release " + releaseid + "had no ReleaseGroup associated")
+		#so we can start with a releaseID from anywhere and get the artist info
+		#it looks like MB api v1 only returns 1 artist object - 2.0 returns more...
+		release['artist_name'] = results.artist.name
+		release['artist_id'] = u.extractUuid(results.artist.id)
 		
 		tracks = []
 		
@@ -372,11 +389,7 @@ def findArtistbyAlbum(name):
 	
 def findAlbumID(artist=None, album=None):
 
-	
-
-	term = album + ' AND artist:"'+artist+'"'
-
-	f = ws.ReleaseGroupFilter(query=term, limit=1)
+	f = ws.ReleaseGroupFilter(title=album, artistName=artist, limit=1)
 	results = None
 	attempt = 0
 			
@@ -386,7 +399,7 @@ def findAlbumID(artist=None, album=None):
 			results = q.getReleaseGroups(f)
 			break
 		except WebServiceError, e:
-			logger.warn('Attempt to query MusicBrainz for %s failed: %s. Sleeping 5 seconds.' % (name, e))
+			logger.warn('Attempt to query MusicBrainz for %s - %s failed: %s. Sleeping 5 seconds.' % (artist, album, e))
 			attempt += 1
 			time.sleep(5)	
 	
