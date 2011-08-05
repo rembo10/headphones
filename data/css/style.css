@@ -86,6 +86,23 @@ a:hover { color: #036; }
     \\ ========================================== //
 */
 
+a:link {
+	color: #5E2612; 
+  	text-decoration: none; 
+  	}
+a:visited {
+  	color: #5E2612; 
+	text-decoration: none; 
+	}
+a:hover { /*this effect is not shown in NN4.xx*/
+  	color: #999999; 
+	text-decoration: underline;
+  	}
+a:active {/*colour in NN4.xx is red*/ 
+  	color: #5E2612; 
+  	text-decoration: underline; 
+	}
+
 container {  }
 
 body { background-color: #EBF4FB }
@@ -99,19 +116,23 @@ ul#nav li a:hover { background-color: #EE0000; }
 
 div#searchbar { margin: 24px auto auto 30px; float: left; }
 
-table#artist_table th#name { width: 30%; }
-table#artist_table th#status { width: 10%; }
-table#artist_table th#latestalbum { width: 35%; }
-table#artist_table th#have { width: 20%; }
+table#artist_table { background-color: white; }
+
+table#artist_table th#name { text-align: center; }
+table#artist_table th#album { text-align: center; }
+table#artist_table th#reldate { width: 125px; text-align: center; }
+table#artist_table th#center { text-align: center; }
+table#artist_table td#name { text-align: left; }
+table#artist_table td#album { text-align: center; }
+table#artist_table td#reldate { width: 125px; text-align: center; }
+
+div.progress-container { border: 1px solid #ccc; width: 100px; height: 14px; margin: 2px 5px 2px 0; padding: 1px; float: left; background: white; }
+div.progress-container > div { background-color: #ACE97C; height: 14px; }
+.havetracks { font-size: 13px; margin-left: 36px; }
 
 footer { margin: 20px auto 20px auto; }
 div#version { text-align: center; font-weight: bold; }
 div#donate { text-align: center; margin: 20px auto 20px auto; }
-
-
-
-
-
 
 .ir { display: block; text-indent: -999em; overflow: hidden; background-repeat: no-repeat; text-align: left; direction: ltr; }
 .hidden { display: none; visibility: hidden; }

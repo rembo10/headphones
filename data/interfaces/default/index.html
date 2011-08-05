@@ -1,3 +1,6 @@
+<%
+	from headphones import helpers
+%>
 <%inherit file="base.html"/>
 
 <%def name="body()">
@@ -5,18 +8,37 @@
 		<thead>
 			<tr>
 				<th id="name">Artist Name</th>
-				<th id="status">Status</th>
-				<th id="latestalbum">Latest Album</th>
+				<th id="album">Latest Album</th>
+				<th id="reldate">Release Date</th>
 				<th id="have">Have</th>
 			</tr>
 		</thead>
 		<tbody>
 		%for artist in artists:
+			<%
+				totaltracks = artist['TotalTracks']
+				havetracks = artist['HaveTracks']
+				if not havetracks:
+					havetracks = 0
+				try:
+					percent = (havetracks*100.0)/totaltracks
+					if percent > 100:
+						percent = 100
+				except (ZeroDivisionError, TypeError):
+					percent = 0
+					totaltracks = '?'
+				
+				if artist['ReleaseDate']:
+					releasedate = artist['ReleaseDate']
+				else:
+					releasedate = ''
+				
+			%>
 			<tr>
-				<td><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
-				<td>${artist['Status']}</td>
-				<td><a href="albumPage?AlbumID=${artist['AlbumID']}">${artist['LatestAlbum']}</a></td>
-				<td>${artist['HaveTracks']}/${artist['TotalTracks']}</td>
+				<td id="name"><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']} </td>
+				<td id="album"><a href="albumPage?AlbumID=${artist['AlbumID']}">${artist['LatestAlbum']}</td>
+				<td id="reldate">${releasedate}</td>
+				<td id="have"><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
 			</tr>
 		%endfor
 		</tbody>

@@ -4,7 +4,7 @@
 	-moz-border-radius: 20px;
 	width: 88%;
 	margin: 20px auto 0 auto;
-	padding: 30px;
+	padding: 25px;
 	background-color: white;
 	position: relative;
 	min-height: 302px;
@@ -38,7 +38,7 @@
 	width: 50%;
 	float: right;
 	text-align: right;
-	margin-bottom: 25px;
+	margin-bottom: 15px;
 }
 
 .dataTables_info {
@@ -87,7 +87,6 @@
  */
 table.display {
 	margin: 20px auto;
-	width: 95%;
 	clear: both;
 	
 	/* Note Firefox 3.5 and before have a bug with border-collapse
@@ -203,7 +202,7 @@ tr.odd {
 }
 
 tr.even {
-	background-color: #F5F5F5;
+	background-color: white;
 }
 
 
