@@ -1,8 +1,10 @@
 .dataTables_wrapper {
-	border-radius: 10px;
-	width: 90%;
-	margin: 0 auto 0 auto;
-	padding: 20px;
+	border-radius: 20px;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	width: 88%;
+	margin: 20px auto 0 auto;
+	padding: 30px;
 	background-color: white;
 	position: relative;
 	min-height: 302px;
@@ -85,6 +87,7 @@
  */
 table.display {
 	margin: 20px auto;
+	width: 95%;
 	clear: both;
 	
 	/* Note Firefox 3.5 and before have a bug with border-collapse
