@@ -272,7 +272,7 @@ def addReleaseById(rid):
 	
 	#we don't want to make more calls to MB here unless we have to, could be happening quite a lot
 	#TODO: why do I have to str() this here? I don't get it.
-	rg_exists = myDB.select("SELECT * from albums WHERE AlbumID=?", [rid])
+	rg_exists = myDB.select("SELECT * from albums WHERE AlbumID=?", [rgid])
 	
 	#make sure the artist exists since I don't know what happens later if it doesn't
 	artist_exists = myDB.select("SELECT * from artists WHERE ArtistID=?", [release_dict['artist_id']])
