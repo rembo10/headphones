@@ -101,7 +101,7 @@ def verify(albumid, albumpath):
 		
 			myDB.upsert("tracks", newValueDict, controlValueDict)
 			
-		controlValueDict = {"ArtistID": 	albumid}
+		controlValueDict = {"ArtistID": 	release_dict['artist_id']}
 		newValueDict = {"Status":			"Paused"}
 		
 		myDB.upsert("artists", newValueDict, controlValueDict)
