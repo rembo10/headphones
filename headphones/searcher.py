@@ -75,10 +75,12 @@ def searchNZB(albumid=None, new=False):
         dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':''}
 
         cleanartistalbum = helpers.latinToAscii(helpers.replace_all(albums[0]+' '+albums[1], dic))
+        cleanartist = helpers.latinToAscii(helpers.replace_all(albums[0], dic))
 
         # FLAC usually doesn't have a year for some reason so I'll leave it out:
         term = re.sub('[\.\-\/]', ' ', '%s' % (cleanartistalbum)).encode('utf-8')
         altterm = re.sub('[\.\-\/]', ' ', '%s %s' % (cleanartistalbum, year)).encode('utf-8')
+        artistterm = re.sub('[\.\-\/]', ' ', '%s' % (cleanartist)).encode('utf-8')
         
         # Only use the year if the term could return a bunch of different albums, i.e. self-titled albums
         if albums[0] in albums[1] or len(albums[0]) < 4 or len(albums[1]) < 4:
@@ -331,9 +333,22 @@ def searchNZB(albumid=None, new=False):
                 
             else:
                 logger.info('No results found from NEWZBIN for %s' % term)
+
+        #attempt to verify that this isn't a substring result
+        #when looking for "Avant - Avant" we don't want "Avantasia"
+        #this should be less of an issue when it isn't a self-titled album so we'll only check vs artist
+        #for reasons I can't explain this still fails on "Lavanttaler" - maybe you have a better regex?
+        if resultlist:
+            for result in resultlist:
+                if re.search('\w' + re.escape(artistterm), result[0], re.IGNORECASE):
+                    logger.info("Removed from results: " + result[0] + " (substring result).")
+                    resultlist.remove(result)
+                elif re.search(re.escape(artistterm) + '\w', result[0], re.IGNORECASE):
+                    logger.info("Removed from results: " + result[0] + " (substring result).")
+                    resultlist.remove(result)
         
         if len(resultlist):    
-            
+                       
             if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
 
                 logger.debug('Target bitrate: %s kbps' % headphones.PREFERRED_BITRATE)
