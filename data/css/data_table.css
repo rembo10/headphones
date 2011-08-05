@@ -4,10 +4,10 @@
 	-moz-border-radius: 20px;
 	width: 88%;
 	margin: 20px auto 0 auto;
-	padding: 25px;
+	padding: 20px;
 	background-color: white;
 	position: relative;
-	min-height: 302px;
+	min-height: 125px;
 	clear: both;
 	_height: 302px;
 	zoom: 1; /* Feeling sorry for IE */
@@ -198,7 +198,7 @@ table.display tr.even.gradeU {
 
 
 tr.odd {
-	background-color: white;
+	background-color: #eeeeee;
 }
 
 tr.even {
@@ -238,7 +238,8 @@ tr.even {
 	font-size: 24px;
 	text-align: center;
 	vertical-align: middle;
-	height: 200px;
+	background-color: white; 
+	height: 50px;
 	width: 90%;
 }
 

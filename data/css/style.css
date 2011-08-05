@@ -105,14 +105,14 @@ a:active {/*colour in NN4.xx is red*/
 
 container {  }
 
-body { background-color: #EBF4FB; min-width: 906px; }
-header { height: 68px; width: 100%; min-width: 906px; padding: 0 10px 0 10px; background-color: #CDC9C9; position: fixed; top: 0; z-index: 999; }
+body { background-color: #EBF4FB; min-width: 907px; }
+header { height: 68px; width: 100%; min-width: 907px; padding: 0 10px 0 10px; background-color: #CDC9C9; position: fixed; top: 0; z-index: 999; }
 div#logo { float: left; }
 
 ul#nav { margin-top: 25px; float: left; list-style-type: none; }
-ul#nav li { margin: 40px 5px auto 15px;  display: inline; }
+ul#nav li { margin: 40px 5px auto 12px;  display: inline; }
 ul#nav li a { font-size: 16px; font-weight: bold; color: #330000; text-decoration: none; }
-ul#nav li a:hover { background-color: #EE0000; }
+ul#nav li a:hover { background-color: #E133A5; }
 
 div#searchbar { margin: 24px auto auto 30px; float: left; }
 
@@ -120,9 +120,9 @@ div#main { margin: 0; padding: 68px 0 0 0; }
 
 table#artist_table { background-color: white; }
 
-table#artist_table th#name { text-align: center; }
-table#artist_table th#album { text-align: center; }
-table#artist_table th#reldate { width: 125px; text-align: center; }
+table#artist_table th#name { text-align: center; min-width: 225px; }
+table#artist_table th#album { text-align: center; min-width: 200px; }
+table#artist_table th#reldate { width: 175px; text-align: center; min-width: 100px; }
 table#artist_table th#center { text-align: center; }
 table#artist_table td#name { text-align: left; }
 table#artist_table td#album { text-align: center; }
