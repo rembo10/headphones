@@ -712,6 +712,11 @@ class WebInterface(object):
 			page.append(templates._footer % headphones.CURRENT_VERSION)
 		return page
 	extras.exposed = True
+
+	def addReleaseById(self, rid):
+		threading.Thread(target=importer.addReleaseById, args=[rid]).start()
+		raise cherrypy.HTTPRedirect("home")
+	addReleaseById.exposed = True
 	
 	def updateCloud(self):
 		
