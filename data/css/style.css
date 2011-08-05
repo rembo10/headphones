@@ -106,7 +106,7 @@ a:active {/*colour in NN4.xx is red*/
 container {  }
 
 body { background-color: #EBF4FB }
-header { height: 68px; padding: 0 10px 0 10px; background-color: #CDC9C9; }
+header { height: 68px; width: 100%; padding: 0 10px 0 10px; background-color: #CDC9C9; position: fixed; top: 0; z-index: 999; }
 div#logo { float: left; }
 
 ul#nav { margin-top: 25px; float: left; white-space: nowrap; list-style-type: none; }
@@ -115,6 +115,8 @@ ul#nav li a { font-size: 16px; font-weight: bold; color: #330000; text-decoratio
 ul#nav li a:hover { background-color: #EE0000; }
 
 div#searchbar { margin: 24px auto auto 30px; float: left; }
+
+div#main { margin: 0; padding: 68px 0 0 0; }
 
 table#artist_table { background-color: white; }
 
