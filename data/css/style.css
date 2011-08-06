@@ -124,15 +124,15 @@ div#searchbar { margin: 24px 30px auto auto; float: right; }
 
 div#main { margin: 0; padding: 80px 0 0 0; }
 
-table#artist_table { background-color: white; width: 88%; padding: 20px; }
+table#artist_table { background-color: white; width: 100%; padding: 20px; }
 
 table#artist_table th#name { text-align: left; min-width: 200px; }
+table#artist_table th#status { text-align: center; }
 table#artist_table th#album { text-align: center; min-width: 300px; }
-table#artist_table th#reldate { width: 175px; text-align: center; min-width: 100px; }
 table#artist_table th#have { text-align: center; }
 table#artist_table td#name { vertical-align: middle; text-align: left; min-width:200px; }
+table#artist_table td#status { vertical-align: middle; text-align: center; }
 table#artist_table td#album { vertical-align: middle; text-align: center; min-width: 300px; }
-table#artist_table td#reldate { vertical-align: middle; text-align: center; min-width: 100px; }
 table#artist_table td#have { vertical-align: middle; }
 
 div#paddingheader { padding-top: 48px; font-size: 24px; font-weight: bold; text-align: center; }
@@ -150,7 +150,7 @@ table#album_table td#status { vertical-align: middle; text-align: center; }
 table#album_table td#type { vertical-align: middle; text-align: center; }
 table#album_table td#have { vertical-align: middle; }
 
-table#history_table { background-color: white; width: 88%;  }
+table#history_table { background-color: white; width: 100%;  }
 
 table#log_table { background-color: white; }
 

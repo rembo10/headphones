@@ -1,15 +1,15 @@
-<%
+<%inherit file="base.html"/>
+<%!
 	from headphones import helpers
 %>
-<%inherit file="base.html"/>
 
 <%def name="body()">
 	<table class="display" id="artist_table">
 		<thead>
 			<tr>
 				<th id="name">Artist Name</th>
+				<th id="status">Status</th>
 				<th id="album">Latest Album</th>
-				<th id="reldate">Release Date</th>
 				<th id="have">Have</th>
 			</tr>
 		</thead>
@@ -30,14 +30,22 @@
 				
 				if artist['ReleaseDate']:
 					releasedate = artist['ReleaseDate']
+					if releasedate > helpers.today():
+						grade = 'A'
+					else:
+						grade = 'Z'
 				else:
 					releasedate = ''
+					grade = 'Z'
+				
+				if artist['Status'] == 'Paused':
+					grade = 'X'
 				
 			%>
-			<tr>
+			<tr class="grade${grade}">
 				<td id="name"><span title="${artist['ArtistSortName']}"><span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
-				<td id="album"><a href="albumPage?AlbumID=${artist['AlbumID']}">${artist['LatestAlbum']}</a></td>
-				<td id="reldate">${releasedate}</td>
+				<td id="status">${artist['Status']}</td>
+				<td id="album"><span title="${releasedate}"><span><a href="albumPage?AlbumID=${artist['AlbumID']}">${artist['LatestAlbum']} ${releasedate}</a></td>
 				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
 			</tr>
 		%endfor
@@ -59,7 +67,7 @@
 				"aoColumns": [
 					{ "sType": "title-string"},
 					null,
-					null,
+					{ "sType": "title-string"},
 					{ "sType": "title-numeric"}
 				],
 				"bStateSave": true,

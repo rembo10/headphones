@@ -169,7 +169,7 @@ table.display tr.odd.gradeA {
 }
 
 table.display tr.even.gradeA {
-	background-color: #eeffee;
+	background-color: #ddffdd;
 }
 
 table.display tr.odd.gradeC {
@@ -177,7 +177,7 @@ table.display tr.odd.gradeC {
 }
 
 table.display tr.even.gradeC {
-	background-color: #eeeeff;
+	background-color: #ddddff;
 }
 
 table.display tr.odd.gradeX {
@@ -185,7 +185,7 @@ table.display tr.odd.gradeX {
 }
 
 table.display tr.even.gradeX {
-	background-color: #ffeeee;
+	background-color: #ffdddd;
 }
 
 table.display tr.odd.gradeU {
@@ -197,11 +197,11 @@ table.display tr.even.gradeU {
 }
 
 
-tr.odd {
-	background-color: #eeeeee;
+table.display tr.odd.gradeZ {
+	background-color: #FCFAFA;
 }
 
-tr.even {
+table.display tr.even.gradeZ {
 	background-color: white;
 }
 

@@ -1,11 +1,19 @@
 <%inherit file="base.html"/>
+<%!
+	from headphones import db
+%>
 
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<ul id="subhead_menu">
-			<li><a href="refresh?ArtistID=${artist['ArtistID']}">Refresh Artist</a></li>
-			<li><a href="delete?ArtistID=${artist['ArtistID']}">Delete Artist</a></li>
-			<li><a href="pause?ArtistID=${artist['ArtistID']}">Pause Artist</a></li>
+			<li><a href="refreshArtist?ArtistID=${artist['ArtistID']}">Refresh Artist</a></li>
+			<li><a href="deleteArtist?ArtistID=${artist['ArtistID']}">Delete Artist</a></li>
+			%if artist['Status'] == 'Paused':
+				<li><a href="resumeArtist?ArtistID=${artist['ArtistID']}">Resume Artist</a></li>
+			%else:
+				<li><a href="pauseArtist?ArtistID=${artist['ArtistID']}">Pause Artist</a></li>
+			%endif
+			<li><a href="getExtras?ArtistID=${artist['ArtistID']}">Get Extras</a></li>
 		</ul>
 	</div>	
 </%def>
@@ -27,13 +35,36 @@
 		</thead>
 		<tbody>
 		%for album in albums:
-			<tr>
+			<%
+				if album['Status'] == 'Skipped':
+					grade = 'Z'
+				elif album['Status'] == 'Wanted':
+					grade = 'X'
+				elif album['Status'] == 'Snatched':
+					grade = 'C'
+				else:
+					grade = 'A'
+
+				myDB = db.DBConnection()					
+				totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=?', [album['AlbumID']]))
+				havetracks = len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ?', [album['ArtistName'], album['AlbumTitle']]))
+				
+				try:
+					percent = (havetracks*100.0)/totaltracks
+					if percent > 100:
+						percent = 100
+				except (ZeroDivisionError, TypeError):
+					percent = 0
+					totaltracks = '?'
+				
+			%>
+			<tr class="grade${grade}">
 				<td id="albumart"><img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
 				<td id="status">${album['Status']}</td>
-				<td id="have"><div class="progress-container"><div style="width:100%"><div class="havetracks">tracks</div></div></div></td>
+				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
 			</tr>
 		%endfor
 		</tbody>
@@ -51,6 +82,14 @@
 	{
 		$('#album_table').dataTable(
 			{
+				"aoColumns": [
+					null,
+					null,
+					null,
+					null,
+					null,
+					{ "sType": "title-numeric"}
+				],
 				"oLanguage": {
 					"sLengthMenu":"Show _MENU_ albums per page",
 					"sEmptyTable": "No album information available",
