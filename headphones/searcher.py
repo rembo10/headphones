@@ -469,7 +469,7 @@ def searchNZB(albumid=None, new=False):
 
 def verifyresult(title, term):
 	
-	title = re.sub('[\.\-\/]', ' ', title)
+    title = re.sub('[\.\-\/]', ' ', title)
 	
     if not re.search('^' + re.escape(term), re.subtitle, re.IGNORECASE):
         logger.info("Removed from results: " + title + " (artist not at string start).")
