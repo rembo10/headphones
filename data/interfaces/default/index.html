@@ -38,14 +38,14 @@
 				<td id="name"><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
 				<td id="album"><a href="albumPage?AlbumID=${artist['AlbumID']}">${artist['LatestAlbum']}</a></td>
 				<td id="reldate">${releasedate}</td>
-				<td id="have"><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
+				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
 			</tr>
 		%endfor
 		</tbody>
 	</table>
 </%def>
 
-<%def name="headerIncludes()">
+<%def name="headIncludes()">
 	<link rel="stylesheet" href="css/data_table.css">
 </%def>
 
@@ -56,8 +56,12 @@
 	{
 		$('#artist_table').dataTable(
 			{
-				"aoColumnDefs": [
-					{ "bSOtrable": false, "aTargets": [ 1 ] } ],
+				"aoColumns": [
+					{ "sType": "anti-the" },
+					null,
+					null,
+					{ "sType": "title-numeric"}
+				],
 				"bStateSave": true,
 				"iDisplayLength": 50,
 				"sPaginationType": "full_numbers",

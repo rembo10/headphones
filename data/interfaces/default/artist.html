@@ -1,6 +1,6 @@
 <%inherit file="base.html"/>
 
-<%def name="subhead()">
+<%def name="headerIncludes()">
 	<div id="subhead_container">
 		<ul id="subhead_menu">
 			<li><a href="refresh?ArtistID=${artist['ArtistID']}">Refresh Artist</a></li>
@@ -11,7 +11,7 @@
 </%def>
 
 <%def name="body()">
-	<div id="artistheader">
+	<div id="paddingheader">
 		${artist['ArtistName']}
 	</div>
 	<table class="display" id="album_table">
@@ -40,7 +40,7 @@
 	</table>
 </%def>
 
-<%def name="headerIncludes()">
+<%def name="headIncludes()">
 	<link rel="stylesheet" href="css/data_table.css">
 </%def>
 

@@ -1,6 +1,3 @@
-
-/* ==== Scroll down to find where to put your styles :) ==== */
-
 /*  HTML5 ✰ Boilerplate  */
 
 html, body, div, span, object, iframe,
@@ -68,20 +65,17 @@ input:invalid, textarea:invalid { border-radius: 1px; -moz-box-shadow: 0px 0px 5
 
 ::-moz-selection{ background: grey; color:#fff; text-shadow: none; }
 ::selection { background: grey; color:#fff; text-shadow: none; }
-a:link { -webkit-tap-highlight-color: #FF5E99; }
 
 button {  width: auto; overflow: visible; }
 .ie7 img { -ms-interpolation-mode: bicubic; }
 
 body, select, input, textarea {  color: #444; }
 h1, h2, h3, h4, h5, h6 { font-weight: bold; }
-a, a:active, a:visited { color: #607890; }
-a:hover { color: #036; }
 
 /*
     // ========================================== \\
    ||                                              ||
-   ||               Your styles !                  ||
+   ||               Custom Styles                  ||
    ||                                              ||
     \\ ========================================== //
 */
@@ -102,19 +96,25 @@ a:active {/*colour in NN4.xx is red*/
   	color: #5E2612; 
   	text-decoration: underline; 
 	}
+a.blue {
+	color: blue;
+	}
 
 container {  }
 
 body { background-color: #EBF4FB; min-width: 907px; }
-header { height: 68px; width: 100%; min-width: 907px; padding: 0 10px 0 10px; background-color: #CDC9C9; position: fixed; top: 0; z-index: 999; }
-div#logo { float: left; }
 
-ul#nav { margin-top: 25px; float: left; list-style-type: none; }
+header { min-height: 68px; width: 100%; min-width: 907px; padding-left: 0px; padding-right: 10px; background-color: #CDC9C9; position: fixed; z-index: 998; }
+
+div#updatebar { text-align: center; min-width: 970px; width: 100%; background-color: light-blue; float: left; }
+div#logo { float: left; padding-left: 10px; }
+
+ul#nav { margin: 25px 0 0 0; float: left; list-style-type: none; }
 ul#nav li { margin: 40px 0px auto 10px;  display: inline; }
 ul#nav li a { padding: 5px; font-size: 16px; font-weight: bold; color: #330000; text-decoration: none; }
 ul#nav li a:hover { background-color: #a3e532; }
 
-div#subhead_container { margin-top: 68px; height: 30px; width:100%; min-width: 907px; background-color:#330000; position: fixed; float: left; list-style-type: none; top: 0; z-index: 999; overflow: hidden; }
+div#subhead_container { height: 30px; width:100%; min-width: 907px; background-color:#330000; float: left; list-style-type: none; z-index: 998; overflow: hidden; }
 ul#subhead_menu { margin-top: 5px; }
 ul#subhead_menu li { width: 100%; height: 100%; display: inline; }
 ul#subhead_menu li a { padding: 5px 15px 10px 15px; vertical-align: middle; color: white; font-size: 16px; text-decoration: none; }
@@ -124,7 +124,7 @@ div#searchbar { margin: 24px 30px auto auto; float: right; }
 
 div#main { margin: 0; padding: 80px 0 0 0; }
 
-table#artist_table { background-color: white; }
+table#artist_table { background-color: white; width: 88%; padding: 20px; }
 
 table#artist_table th#name { text-align: left; min-width: 200px; }
 table#artist_table th#album { text-align: center; min-width: 300px; }
@@ -135,7 +135,7 @@ table#artist_table td#album { vertical-align: middle; text-align: center; min-wi
 table#artist_table td#reldate { vertical-align: middle; text-align: center; min-width: 100px; }
 table#artist_table td#have { vertical-align: middle; }
 
-div#artistheader { padding-top: 48px; font-size: 24px; font-weight: bold; text-align: center; }
+div#paddingheader { padding-top: 48px; font-size: 24px; font-weight: bold; text-align: center; }
 table#album_table { background-color: white; }
 
 table#album_table th#albumart { text-align: left; min-width: 50px; }
@@ -149,6 +149,8 @@ table#album_table td#reldate { vertical-align: middle; text-align: center; }
 table#album_table td#status { vertical-align: middle; text-align: center; }
 table#album_table td#type { vertical-align: middle; text-align: center; }
 table#album_table td#have { vertical-align: middle; }
+
+table#history_table { background-color: white; width: 88%;  }
 
 table#log_table { background-color: white; }
 

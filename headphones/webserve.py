@@ -390,37 +390,9 @@ class WebInterface(object):
 	checkGithub.exposed = True
 	
 	def history(self):
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
 		myDB = db.DBConnection()
-		snatched = myDB.select('''SELECT AlbumID, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT from snatched order by DateAdded DESC''')
-
-		page.append('''<div class="table"><table border="0" cellpadding="3">
-						<tr><p align="center">History <a class="external" href="clearhistory">clear all</a><br /><br /></p></tr>
-						<tr>
-						<th align="center" width="150"></th>
-						<th align="center" width="300"></th>
-						<th align="center" width="200"></th>
-						<th align="right" width="200"></th>
-						</tr>''')
-		if len(snatched) == 0:
-			page.append("""</table><div class="center"></div><table>""")
-
-		i = 0
-		while i < len(snatched):
-			mb = snatched[i][2] / 1048576
-			size = '%.2fM' % mb
-			page.append('''<tr><td align="center" width="150">%s</td>
-								<td align="center" width="300">%s</td>
-								<td align="center" width="200">%s</td>
-								<td align="center" width="200">%s</td>
-								</tr>
-								''' % (snatched[i][5], snatched[i][1], size, snatched[i][4]))
-			i += 1
-		page.append('''</table></div>''')
-		if len(snatched):
-			page.append(templates._footer % headphones.CURRENT_VERSION)
+		history = myDB.select('''SELECT * from snatched order by DateAdded DESC''')
+		return serve_template(templatename="history.html", title="History", history=history)
 		return page
 	history.exposed = True
 	
@@ -554,11 +526,7 @@ class WebInterface(object):
 	def shutdown(self):
 		logger.info(u"Headphones is shutting down...")
 		threading.Timer(2, headphones.shutdown).start()
-		page = [templates._shutdownheader % 15]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		page.append('<div class="table"><div class="configtable">Shutting down Headphones...</div></div>')
-		page.append(templates._footer % headphones.CURRENT_VERSION)
+		return serve_template(templatename="shutdown.html", title="Shutting Down")
 		return page
 
 	shutdown.exposed = True
@@ -566,23 +534,13 @@ class WebInterface(object):
 	def restart(self):
 		logger.info(u"Headphones is restarting...")
 		threading.Timer(2, headphones.shutdown, [True]).start()
-		page = [templates._shutdownheader % 30]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		page.append('<div class="table"><div class="configtable">Restarting Headphones...</div></div>')
-		page.append(templates._footer % headphones.CURRENT_VERSION)
-		return page
-	 
+		return serve_template(templatename="restart.html", title="Restarting")
 	restart.exposed = True
 	
 	def update(self):
 		logger.info('Headphones is updating...')
 		threading.Timer(2, headphones.shutdown, [True, True]).start()
-		page = [templates._shutdownheader % 120]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		page.append('<div class="table"><div class="configtable">Updating Headphones...</div></div>')
-		page.append(templates._footer % headphones.CURRENT_VERSION)
+		return serve_template(templatename="update.html", title="Updating")
 		return page
 		
 	update.exposed = True
@@ -590,18 +548,7 @@ class WebInterface(object):
 	def extras(self):
 		myDB = db.DBConnection()
 		cloudlist = myDB.select('SELECT * from lastfmcloud')
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		if len(cloudlist):
-			page.append('''
-			<div class="table"><div class="config"><h1>Artists You Might Like:</h1><br /><br />
-			<div class="cloud">
-				<ul id="cloud">''')
-			for item in cloudlist:
-				page.append('<li><a href="addArtist?artistid=%s" class="tag%i">%s</a></li>' % (item['ArtistID'], item['Count'], item['ArtistName']))
-			page.append('</ul><br /><br /></div></div>')	
-			page.append(templates._footer % headphones.CURRENT_VERSION)
+		return serve_template(templatename="extras.html", title="Extras", cloudlist=cloudlist)
 		return page
 	extras.exposed = True
 

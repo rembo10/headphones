@@ -20,13 +20,22 @@
 	<link rel="shortcut icon" href="images/favicon.ico">
 	<link rel="apple-touch-icon" href="images/headphoneslogo.png">
 	<link rel="stylesheet" href="css/style.css?v=2">
-	${next.headerIncludes()}
+	${next.headIncludes()}
 	
 	<script src="js/libs/modernizr-1.7.min.js"></script>
 </head>
 <body>
 	<div id="container">
 		<header>
+			% if not headphones.CURRENT_VERSION:
+            <div id="updatebar">
+                You're running an unknown version of Headphones. <a class="blue" href="update">Click here to update</a>
+            </div>
+            % elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
+            <div id="updatebar">
+                A <a class="blue" href="http://github.com/rembo10/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}"> newer version</a> is available. You're ${headphones.COMMITS_BEHIND} commits behind. <a class="blue" href="update">Click here to update</a>
+            </div>
+			% endif
 			<div id="logo">
 				<img src="images/headphoneslogo.png" alt="headphones">
 			</div>
@@ -45,10 +54,11 @@
                     <input type="submit" value="Add Artist"/>
                 </form>
             </div>
+            <div id="subhead">
+				${next.headerIncludes()}
+			</div>
 		</header>
-		<div id="subhead">
-			${next.subhead()}
-		</div>
+
 		<div id="main" class="main">
 			${next.body()}
 		</div>
@@ -83,5 +93,5 @@
 </html>
 
 <%def name="javascriptIncludes()"></%def>
+<%def name="headIncludes()"></%def>
 <%def name="headerIncludes()"></%def>
-<%def name="subhead()"></%def>

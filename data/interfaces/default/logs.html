@@ -14,7 +14,9 @@
 		%for line in lineList:
 			<%
 				from headphones import helpers
-				timestamp, level, thread, message = helpers.extract_logline(line)
+				out_tuple = helpers.extract_logline(line)
+				if out_tuple:
+					timestamp, level, thread, message = out_tuple
 			%>
 			%if timestamp and level and thread and message:
 				<tr>
@@ -29,7 +31,7 @@
 	</table>
 </%def>
 
-<%def name="headerIncludes()">
+<%def name="headIncludes()">
 	<link rel="stylesheet" href="css/data_table.css">
 </%def>
 
