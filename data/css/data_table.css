@@ -4,7 +4,7 @@
 	-moz-border-radius: 20px;
 	width: 88%;
 	margin: 20px auto 0 auto;
-	padding: 22px;
+	padding: 25px;
 	background-color: white;
 	position: relative;
 	min-height: 155px;
@@ -42,7 +42,7 @@
 }
 
 .dataTables_info {
-	width: 40%;
+	width: 50%;
 	float: left;
 	background-color: white;
 	font-weight: bold;
@@ -86,7 +86,7 @@
  * DataTables display
  */
 table.display {
-	margin: 20px auto;
+	margin: 20px auto; 
 	clear: both;
 	
 	/* Note Firefox 3.5 and before have a bug with border-collapse

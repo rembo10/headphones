@@ -46,7 +46,9 @@
                 </form>
             </div>
 		</header>
-
+		<div id="subhead">
+			${next.subhead()}
+		</div>
 		<div id="main" class="main">
 			${next.body()}
 		</div>
@@ -82,3 +84,4 @@
 
 <%def name="javascriptIncludes()"></%def>
 <%def name="headerIncludes()"></%def>
+<%def name="subhead()"></%def>

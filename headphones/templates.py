@@ -412,7 +412,7 @@ def displayAlbums(ArtistID, Type=None):
 		else:
 			newStatus = '%s' % (results[i][3])
 		page.append('''<tr>
-							<td align="left"><img src="http://ec1.images-amazon.com/images/P/%s.01.MZZZZZZZ.jpg" height="50" width="50"></td>
+							<td align="left">
 							<td align="left" width="240"><a href="albumPage?AlbumID=%s">%s</a> 
 									(<A class="external" href="http://musicbrainz.org/release-group/%s.html">link</a>)</td>
 							<td align="center" width="160">%s</td>

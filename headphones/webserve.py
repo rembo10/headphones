@@ -37,110 +37,11 @@ class WebInterface(object):
 		return serve_template(templatename="index.html", title="Home", artists=artists)
 	home.exposed = True
 
-	def homeold(self):
-		page = [templates._header]
-		if not headphones.CURRENT_VERSION:
-			page.append('''<div class="updatebar">You're running an unknown version of Headphones. <a class="blue" href="update">Click here to update</a></div>''')
-		elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
-			page.append('''<div class="updatebar">A <a class="blue" href="http://github.com/rembo10/headphones/compare/%s...%s">
-					newer version</a> is available. You're %s commits behind. <a class="blue" href="update">Click here to update</a></div>
-					''' % (headphones.CURRENT_VERSION, headphones.LATEST_VERSION, headphones.COMMITS_BEHIND))
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		myDB = db.DBConnection()
-		results = myDB.select('SELECT ArtistName, ArtistID, Status, LatestAlbum, ReleaseDate, AlbumID, TotalTracks, HaveTracks from artists order by ArtistSortName collate nocase')
-		if len(results):
-			page.append('''<div class="table"><table border="0" cellpadding="3">
-						<tr>
-						<th align="left" width="170">Artist Name</th>
-						<th align="center" width="100">Status</th>
-						<th align="center" width="300">Upcoming Albums</th>
-						<th align="center">Have</th>
-						</tr>''')
-			for artist in results:
-				totaltracks = artist['TotalTracks']
-				havetracks = artist['HaveTracks']
-				if not havetracks:
-					havetracks = 0
-				try:
-					percent = (havetracks*100.0)/totaltracks
-					if percent > 100:
-						percent = 100
-				except (ZeroDivisionError, TypeError):
-					percent = 0
-					totaltracks = '?'
-
-				if artist['LatestAlbum']:
-					if artist['ReleaseDate'] > helpers.today():
-						newalbumName = '<a class="green" href="albumPage?AlbumID=%s"><i><b>%s</b></i>' % (artist['AlbumID'], artist['LatestAlbum'])
-						releaseDate = '(%s)</a>' % artist['ReleaseDate']
-					else:
-						newalbumName = '<a class="gray" href="albumPage?AlbumID=%s"><i>%s</i>' % (artist['AlbumID'], artist['LatestAlbum'])
-						releaseDate = ""
-				else:
-						newalbumName = '<font color="#CFCFCF">None</font>'
-						releaseDate = ""					
-				
-				if artist['Status'] == 'Paused':
-					newStatus = '''<font color="red"><b>%s</b></font>(<A class="external" href="resumeArtist?ArtistID=%s">resume</a>)''' % (artist['Status'], artist['ArtistID'])
-				elif artist['Status'] == 'Loading':
-					newStatus = '''<a class="gray">Loading...</a>'''
-				else:
-					newStatus = '''%s(<A class="external" href="pauseArtist?ArtistID=%s">pause</a>)''' % (artist['Status'], artist['ArtistID'])
-				
-				page.append('''<tr><td align="left" width="300"><a href="artistPage?ArtistID=%s">%s</a> 
-								(<A class="external" href="http://musicbrainz.org/artist/%s">link</a>) [<A class="externalred" href="deleteArtist?ArtistID=%s">delete</a>]</td>
-								<td align="center" width="160">%s</td>
-								<td align="center">%s %s</td>
-								<td><div class="progress-container"><div style="width: %s%%"><div class="smalltext3">%s/%s</div></div></div></td></tr>
-								''' % (artist['ArtistID'], artist['ArtistName'], artist['ArtistID'], 
-										artist['ArtistID'], newStatus, newalbumName, releaseDate, 
-										percent, havetracks, totaltracks))	
-
-			page.append('''</table></div>''')
-			page.append(templates._footer % headphones.CURRENT_VERSION)
-			
-		else:
-			have = myDB.select('SELECT ArtistName from have')
-			if len(have):
-				page.append("""<div class="datanil">Scanning...</div>""")
-			else:
-				page.append("""<div class="datanil">Add some artists to the database!</div>""")
-		return page
-	home.exposed = True
-	
-
 	def artistPage(self, ArtistID):
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
 		myDB = db.DBConnection()
-		
-		artist = myDB.select('SELECT ArtistName, IncludeExtras, Status from artists WHERE ArtistID=?', [ArtistID])
-		while not artist:
-			time.sleep(1)
-		page.append('''<div class="table"><table><p align="center">%s</p>
-						''' % artist[0][0])
-		if artist[0][2] == 'Loading':
-			page.append('<p align="center"><i>Loading...</i></p>')
-		
-		if templates.displayAlbums(ArtistID, 'Album'):
-			page.append(templates.displayAlbums(ArtistID, 'Album'))
-		
-		releasetypes = ['Compilation', 'EP', 'Single', 'Live', 'Remix']
-		
-		for type in releasetypes:
-			if templates.displayAlbums(ArtistID, type):
-				page.append(templates.displayAlbums(ArtistID, type))
-				
-		page.append('</table>')
-		
-		if not artist[0][1]:
-			page.append('''<br /><div class="bluecenter"><a href="getExtras?ArtistID=%s">Get Extras for %s!</a></div>'''
-							% (ArtistID, artist[0][0]))
-
-		page.append(templates._footer % headphones.CURRENT_VERSION)
-		return page
+		artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
+		albums = myDB.select('SELECT * from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
+		return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums)
 	artistPage.exposed = True
 	
 	
@@ -524,22 +425,13 @@ class WebInterface(object):
 	history.exposed = True
 	
 	def logs(self):
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		page.append('''<div class="table"><p class="logtext">''')
 		log_file = os.path.join(headphones.LOG_DIR, 'headphones.log')
 		if os.path.isfile(log_file):
 			fileHandle = open(log_file)
 			lineList = fileHandle.readlines()
 			fileHandle.close()
 			lineList.reverse()
-			for line in lineList[1:200]:
-				page.append(line.decode('utf-8') + '<br /><br />')
-		page.append('''</p></div>''')
-		page.append(templates._footer % headphones.CURRENT_VERSION)
-		return page
-	
+		return serve_template(templatename="logs.html", title="Log", lineList=lineList[0:1000])
 	logs.exposed = True
 	
 	def clearhistory(self):

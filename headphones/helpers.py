@@ -124,3 +124,16 @@ def extract_data(s):
     else:
         logger.info("Couldn't parse " + s + " into a valid Newbin format")
         return (name, album, year)
+        
+def extract_logline(s):
+	# Default log format
+	pattern = re.compile(r'(?P<timestamp>.*?)\s\-\s(?P<level>.*?)\s*\:\:\s(?P<thread>.*?)\s\:\s(?P<message>.*)', re.VERBOSE)
+	match = pattern.match(s)
+	if match:
+		timestamp = match.group("timestamp")
+		level = match.group("level")
+		thread = match.group("thread")
+		message = match.group("message")
+		return (timestamp, level, thread, message)
+	else:
+		return None

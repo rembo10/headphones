@@ -66,8 +66,8 @@ input:valid, textarea:valid   {  }
 input:invalid, textarea:invalid { border-radius: 1px; -moz-box-shadow: 0px 0px 5px red; -webkit-box-shadow: 0px 0px 5px red; box-shadow: 0px 0px 5px red; }
 .no-boxshadow input:invalid, .no-boxshadow textarea:invalid { background-color: #f0dddd; }
 
-::-moz-selection{ background: #FF5E99; color:#fff; text-shadow: none; }
-::selection { background:#FF5E99; color:#fff; text-shadow: none; }
+::-moz-selection{ background: grey; color:#fff; text-shadow: none; }
+::selection { background: grey; color:#fff; text-shadow: none; }
 a:link { -webkit-tap-highlight-color: #FF5E99; }
 
 button {  width: auto; overflow: visible; }
@@ -110,28 +110,56 @@ header { height: 68px; width: 100%; min-width: 907px; padding: 0 10px 0 10px; ba
 div#logo { float: left; }
 
 ul#nav { margin-top: 25px; float: left; list-style-type: none; }
-ul#nav li { margin: 40px 5px auto 12px;  display: inline; }
-ul#nav li a { font-size: 16px; font-weight: bold; color: #330000; text-decoration: none; }
+ul#nav li { margin: 40px 0px auto 10px;  display: inline; }
+ul#nav li a { padding: 5px; font-size: 16px; font-weight: bold; color: #330000; text-decoration: none; }
 ul#nav li a:hover { background-color: #a3e532; }
 
-div#searchbar { margin: 24px auto auto 30px; float: left; }
+div#subhead_container { margin-top: 68px; height: 30px; width:100%; min-width: 907px; background-color:#330000; position: fixed; float: left; list-style-type: none; top: 0; z-index: 999; overflow: hidden; }
+ul#subhead_menu { margin-top: 5px; }
+ul#subhead_menu li { width: 100%; height: 100%; display: inline; }
+ul#subhead_menu li a { padding: 5px 15px 10px 15px; vertical-align: middle; color: white; font-size: 16px; text-decoration: none; }
+ul#subhead_menu li a:hover { width: 100%; height: 100%; background-color: #grey; }
 
-div#main { margin: 0; padding: 68px 0 0 0; }
+div#searchbar { margin: 24px 30px auto auto; float: right; }
+
+div#main { margin: 0; padding: 80px 0 0 0; }
 
 table#artist_table { background-color: white; }
 
-table#artist_table th#name { text-align: left; min-width: 225px; }
-table#artist_table th#album { text-align: center; min-width: 250px; }
+table#artist_table th#name { text-align: left; min-width: 200px; }
+table#artist_table th#album { text-align: center; min-width: 300px; }
 table#artist_table th#reldate { width: 175px; text-align: center; min-width: 100px; }
-table#artist_table th#center { text-align: center; }
-table#artist_table td#name { vertical-align: middle; text-align: left; }
-table#artist_table td#album { vertical-align: middle; text-align: center; }
-table#artist_table td#reldate { vertical-align: middle; width: 125px; text-align: center; }
-table#artist_table td#have { vertical-align: middle; text-align: center; }
+table#artist_table th#have { text-align: center; }
+table#artist_table td#name { vertical-align: middle; text-align: left; min-width:200px; }
+table#artist_table td#album { vertical-align: middle; text-align: center; min-width: 300px; }
+table#artist_table td#reldate { vertical-align: middle; text-align: center; min-width: 100px; }
+table#artist_table td#have { vertical-align: middle; }
+
+div#artistheader { padding-top: 48px; font-size: 24px; font-weight: bold; text-align: center; }
+table#album_table { background-color: white; }
+
+table#album_table th#albumart { text-align: left; min-width: 50px; }
+table#album_table th#albumname { text-align: center; min-width: 150px; }
+table#album_table th#reldate { width: 175px; text-align: center; min-width: 100px; }
+table#album_table th#status { width: 175px; text-align: center; min-width: 100px; }
+table#album_table th#type { width: 175px; text-align: center; min-width: 100px; }
+table#album_table td#albumart { vertical-align: middle; text-align: left; }
+table#album_table td#albumname { vertical-align: middle; text-align: center; }
+table#album_table td#reldate { vertical-align: middle; text-align: center; }
+table#album_table td#status { vertical-align: middle; text-align: center; }
+table#album_table td#type { vertical-align: middle; text-align: center; }
+table#album_table td#have { vertical-align: middle; }
+
+table#log_table { background-color: white; }
+
+table#log_table th#timestamp { text-align: left; min-width: 100px; }
+table#log_table th#level { text-align: left; min-width: 100px; }
+table#log_table th#thread { text-align: left; min-width: 100px; }
+table#log_table th#message { text-align: left; min-width: 200px; }
 
 div.progress-container { border: 1px solid #ccc; width: 100px; height: 14px; margin: 2px 5px 2px 0; padding: 1px; float: left; background: white; }
 div.progress-container > div { background-color: #a3e532; height: 14px; }
-.havetracks { font-size: 13px; margin-left: 36px; }
+.havetracks { font-size: 13px; margin-left: 36px; padding-bottom: 3px; vertical-align: middle; }
 
 footer { margin: 20px auto 20px auto; }
 div#version { text-align: center; font-weight: bold; }

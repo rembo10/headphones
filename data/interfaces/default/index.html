@@ -35,8 +35,8 @@
 				
 			%>
 			<tr>
-				<td id="name"><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']} </td>
-				<td id="album"><a href="albumPage?AlbumID=${artist['AlbumID']}">${artist['LatestAlbum']}</td>
+				<td id="name"><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
+				<td id="album"><a href="albumPage?AlbumID=${artist['AlbumID']}">${artist['LatestAlbum']}</a></td>
 				<td id="reldate">${releasedate}</td>
 				<td id="have"><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
 			</tr>
@@ -51,4 +51,18 @@
 
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script>
+	$(document).ready(function()
+	{
+		$('#artist_table').dataTable(
+			{
+				"aoColumnDefs": [
+					{ "bSOtrable": false, "aTargets": [ 1 ] } ],
+				"bStateSave": true,
+				"iDisplayLength": 50,
+				"sPaginationType": "full_numbers",
+				
+			});
+	});
+	</script>
 </%def>
