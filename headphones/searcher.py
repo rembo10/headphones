@@ -468,7 +468,10 @@ def searchNZB(albumid=None, new=False):
                     myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", nzb_folder_name])
 
 def verifyresult(title, term):
-    if not re.search('^' + re.escape(term), title, re.IGNORECASE):
+	
+	title = re.sub('[\.\-\/]', ' ', title)
+	
+    if not re.search('^' + re.escape(term), re.subtitle, re.IGNORECASE):
         logger.info("Removed from results: " + title + " (artist not at string start).")
         return False
     elif re.search(re.escape(term) + '\w', title, re.IGNORECASE | re.UNICODE):
