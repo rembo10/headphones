@@ -330,3 +330,5 @@ def addReleaseById(rid):
 		#start a search for the album
 		import searcher
 		searcher.searchNZB(rgid, False)
+	else:
+		logger.info('Release ' + str(rid) + " already exists in the database!")

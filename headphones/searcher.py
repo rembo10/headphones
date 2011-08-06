@@ -335,17 +335,10 @@ def searchNZB(albumid=None, new=False):
                 logger.info('No results found from NEWZBIN for %s' % term)
 
         #attempt to verify that this isn't a substring result
-        #when looking for "Avant - Avant" we don't want "Avantasia"
+        #when looking for "Foo - Foo" we don't want "Foobar"
         #this should be less of an issue when it isn't a self-titled album so we'll only check vs artist
-        #for reasons I can't explain this still fails on "Lavanttaler" - maybe you have a better regex?
-        if resultlist:
-            for result in resultlist:
-                if re.search('\w' + re.escape(artistterm), result[0], re.IGNORECASE):
-                    logger.info("Removed from results: " + result[0] + " (substring result).")
-                    resultlist.remove(result)
-                elif re.search(re.escape(artistterm) + '\w', result[0], re.IGNORECASE):
-                    logger.info("Removed from results: " + result[0] + " (substring result).")
-                    resultlist.remove(result)
+        if len(resultlist):
+            resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm)]
         
         if len(resultlist):    
                        
@@ -473,3 +466,16 @@ def searchNZB(albumid=None, new=False):
                         
                     myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
                     myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", nzb_folder_name])
+
+def verifyresult(title, term):
+    if not re.search('^' + re.escape(term), title, re.IGNORECASE):
+        logger.info("Removed from results: " + title + " (artist not at string start).")
+        return False
+    elif re.search(re.escape(term) + '\w', title, re.IGNORECASE | re.UNICODE):
+        logger.info("Removed from results: " + title + " (post substring result).")
+        return False
+    elif re.search('\w' + re.escape(term), title, re.IGNORECASE | re.UNICODE):
+        logger.info("Removed from results: " + title + " (pre substring result).")
+        return False
+    else:
+        return True
