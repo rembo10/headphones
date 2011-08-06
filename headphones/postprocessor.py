@@ -113,7 +113,7 @@ def verify(albumid, albumpath):
 	downloaded_track_list = []
 	for r,d,f in os.walk(albumpath):
 		for files in f:
-			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape", ".m4a")):
+			if any(files.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
 				downloaded_track_list.append(os.path.join(r, files))	
 	
 	# test #1: metadata - usually works
@@ -240,7 +240,7 @@ def cleanupFiles(albumpath):
 	logger.info('Cleaning up files')
 	for r,d,f in os.walk(albumpath):
 		for files in f:
-			if not any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape", ".m4a")):
+			if not any(files.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
 				logger.debug('Removing: %s' % files)
 				try:
 					os.remove(os.path.join(r, files))
@@ -393,7 +393,7 @@ def updateHave(albumpath):
 	
 	for r,d,f in os.walk(albumpath):
 		for files in f:
-			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape")):
+			if any(files.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
 				results.append(os.path.join(r, files))
 	
 	if results:
