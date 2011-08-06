@@ -35,7 +35,7 @@
 				
 			%>
 			<tr>
-				<td id="name"><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
+				<td id="name"><span title="${artist['ArtistSortName']}"><span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
 				<td id="album"><a href="albumPage?AlbumID=${artist['AlbumID']}">${artist['LatestAlbum']}</a></td>
 				<td id="reldate">${releasedate}</td>
 				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
@@ -57,7 +57,7 @@
 		$('#artist_table').dataTable(
 			{
 				"aoColumns": [
-					{ "sType": "anti-the" },
+					{ "sType": "title-string"},
 					null,
 					null,
 					{ "sType": "title-numeric"}

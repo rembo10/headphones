@@ -1,4 +1,7 @@
 <%inherit file="base.html"/>
+<%!
+	from headphones import helpers
+%>
 
 <%def name="body()">
 	<table class="display" id="log_table">
@@ -13,17 +16,14 @@
 		<tbody>
 		%for line in lineList:
 			<%
-				from headphones import helpers
 				out_tuple = helpers.extract_logline(line)
-				if out_tuple:
-					timestamp, level, thread, message = out_tuple
 			%>
-			%if timestamp and level and thread and message:
+			%if out_tuple:
 				<tr>
-					<td id="timestamp">${timestamp}</td>
-					<td id="level">${level}</td>
-					<td id="thread">${thread}</td>
-					<td id="message">${message.decode('utf-8')}</td>
+					<td id="timestamp">${out_tuple[0]}</td>
+					<td id="level">${out_tuple[1]}</td>
+					<td id="thread">${out_tuple[2]}</td>
+					<td id="message">${out_tuple[3].decode('utf-8')}</td>
 				</tr>
 			%endif
 		%endfor

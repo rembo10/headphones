@@ -403,7 +403,7 @@ class WebInterface(object):
 			lineList = fileHandle.readlines()
 			fileHandle.close()
 			lineList.reverse()
-		return serve_template(templatename="logs.html", title="Log", lineList=lineList[0:1000])
+		return serve_template(templatename="logs.html", title="Log", lineList=lineList[0:500])
 	logs.exposed = True
 	
 	def clearhistory(self):
