@@ -75,10 +75,12 @@ def searchNZB(albumid=None, new=False):
         dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':''}
 
         cleanartistalbum = helpers.latinToAscii(helpers.replace_all(albums[0]+' '+albums[1], dic))
+        cleanartist = helpers.latinToAscii(helpers.replace_all(albums[0], dic))
 
         # FLAC usually doesn't have a year for some reason so I'll leave it out:
         term = re.sub('[\.\-\/]', ' ', '%s' % (cleanartistalbum)).encode('utf-8')
         altterm = re.sub('[\.\-\/]', ' ', '%s %s' % (cleanartistalbum, year)).encode('utf-8')
+        artistterm = re.sub('[\.\-\/]', ' ', '%s' % (cleanartist)).encode('utf-8')
         
         # Only use the year if the term could return a bunch of different albums, i.e. self-titled albums
         if albums[0] in albums[1] or len(albums[0]) < 4 or len(albums[1]) < 4:
@@ -331,9 +333,15 @@ def searchNZB(albumid=None, new=False):
                 
             else:
                 logger.info('No results found from NEWZBIN for %s' % term)
+
+        #attempt to verify that this isn't a substring result
+        #when looking for "Foo - Foo" we don't want "Foobar"
+        #this should be less of an issue when it isn't a self-titled album so we'll only check vs artist
+        if len(resultlist):
+            resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm)]
         
         if len(resultlist):    
-            
+                       
             if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
 
                 logger.debug('Target bitrate: %s kbps' % headphones.PREFERRED_BITRATE)
@@ -458,3 +466,19 @@ def searchNZB(albumid=None, new=False):
                         
                     myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
                     myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", nzb_folder_name])
+
+def verifyresult(title, term):
+	
+    title = re.sub('[\.\-\/]', ' ', title)
+	
+    if not re.search('^' + re.escape(term), title, re.IGNORECASE):
+        logger.info("Removed from results: " + title + " (artist not at string start).")
+        return False
+    elif re.search(re.escape(term) + '\w', title, re.IGNORECASE | re.UNICODE):
+        logger.info("Removed from results: " + title + " (post substring result).")
+        return False
+    elif re.search('\w' + re.escape(term), title, re.IGNORECASE | re.UNICODE):
+        logger.info("Removed from results: " + title + " (pre substring result).")
+        return False
+    else:
+        return True
