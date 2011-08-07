@@ -206,8 +206,8 @@ class WebInterface(object):
 	
 	def upcoming(self):
 		myDB = db.DBConnection()
-		upcoming = myDB.select("SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumASIN, AlbumID, ArtistName, ArtistID from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC")
-		wanted = myDB.select("SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumASIN, AlbumID, ArtistName, ArtistID from albums WHERE Status='Wanted'")
+		upcoming = myDB.select("SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC")
+		wanted = myDB.select("SELECT * from albums WHERE Status='Wanted'")
 		return serve_template(templatename="upcoming.html", title="Upcoming", upcoming=upcoming, wanted=wanted)
 	upcoming.exposed = True
 	
@@ -287,9 +287,13 @@ class WebInterface(object):
 	logs.exposed = True
 	
 	def clearhistory(self, type=None):
-		logger.info(u"Clearing history where status is %s" % type)
 		myDB = db.DBConnection()
-		myDB.action('DELETE from snatched WHERE Status=?', [type])
+		if type == 'all':
+			logger.info(u"Clearing all history")
+			myDB.action('DELETE from snatched')
+		else:
+			logger.info(u"Clearing history where status is %s" % type)
+			myDB.action('DELETE from snatched WHERE Status=?', [type])
 		raise cherrypy.HTTPRedirect("history")
 	clearhistory.exposed = True
 	
@@ -396,7 +400,8 @@ class WebInterface(object):
 	def shutdown(self):
 		logger.info(u"Headphones is shutting down...")
 		threading.Timer(2, headphones.shutdown).start()
-		return serve_template(templatename="shutdown.html", title="Shutting Down")
+		message = 'Shutting Down'
+		return serve_template(templatename="shutdown.html", title="Shutting Down", message=message)
 		return page
 
 	shutdown.exposed = True
@@ -404,13 +409,15 @@ class WebInterface(object):
 	def restart(self):
 		logger.info(u"Headphones is restarting...")
 		threading.Timer(2, headphones.shutdown, [True]).start()
-		return serve_template(templatename="restart.html", title="Restarting")
+		message = 'Restarting'
+		return serve_template(templatename="shutdown.html", title="Restarting", message=message)
 	restart.exposed = True
 	
 	def update(self):
 		logger.info('Headphones is updating...')
 		threading.Timer(2, headphones.shutdown, [True, True]).start()
-		return serve_template(templatename="update.html", title="Updating")
+		message = 'Updating'
+		return serve_template(templatename="shutdown.html", title="Updating", message=message)
 		return page
 		
 	update.exposed = True

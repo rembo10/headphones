@@ -19,7 +19,9 @@
 			%>
 			%if out_tuple:
 				<%
-					if out_tuple[1] == 'WARNING' or out_tuple[1] == 'ERROR':
+					if out_tuple[1] == 'DEBUG':
+						continue
+					elif out_tuple[1] == 'WARNING' or out_tuple[1] == 'ERROR':
 						grade = 'X'
 					else:
 						grade = 'Z'

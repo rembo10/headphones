@@ -1,46 +1,42 @@
 <%inherit file="base.html"/>
 <form action="configUpdate" method="post">
 	<div class="table_wrapper">
-
-			<table class="configtable" summary="Web Interface">
-				<tr>
-					<td>
-						<p>	HTTP Host: <br />
-							<input type="text" name="http_host" value="${config['http_host']}" size="30" maxlength="40"><br /> 
-							<i class="smalltext">e.g. localhost or 0.0.0.0</i>
-						</p>
-					</td>
-					<td>
-						<p>HTTP Username: <br />
-							<input type="text" name="http_username" value="${config['http_user']}" size="30" maxlength="40">
-						</p>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<p>HTTP Port: <br />
-							<input type="text" name="http_port" value="${config['http_port']}" size="20" maxlength="40">
-						</p>
-					</td>
-					<td>
-						<p>HTTP Password: <br />
-							<input type="password" name="http_password" value="${config['http_pass']}" size="30" maxlength="40">
-						</p>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<p>Launch Browser on Startup:<input type="checkbox"	name="launch_browser" value="1" ${config['launch_browser']} /></p>
-					</td>
-				</tr>
-			</table>
+		<h1>Web Interface</h1>
+		<table>
+			<tr>
+				<td>
+					<p>	HTTP Host: <br />
+						<input type="text" name="http_host" value="${config['http_host']}" size="30" maxlength="40"><br /> 
+						<i class="smalltext">e.g. localhost or 0.0.0.0</i>
+					</p>
+				</td>
+				<td>
+					<p>HTTP Username: <br />
+						<input type="text" name="http_username" value="${config['http_user']}" size="30" maxlength="40">
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<p>HTTP Port: <br />
+						<input type="text" name="http_port" value="${config['http_port']}" size="20" maxlength="40">
+					</p>
+				</td>
+				<td>
+					<p>HTTP Password: <br />
+						<input type="password" name="http_password" value="${config['http_pass']}" size="30" maxlength="40">
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<p>Launch Browser on Startup:<input type="checkbox"	name="launch_browser" value="1" ${config['launch_browser']} /></p>
+				</td>
+			</tr>
+		</table>
 	</div>
 	<div class="table_wrapper">
-			<a name="download">
-				<h1>
-					<u>Download Settings</u>
-				</h1>
-			</a>
+		<h1>Download Settings</h1>
 			<table class="configtable" summary="Download Settings">
 				<tr>
 					<td>
