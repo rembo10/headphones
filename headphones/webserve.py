@@ -55,29 +55,14 @@ class WebInterface(object):
 	albumPage.exposed = True
 	
 	
-	def findArtist(self, name):
+	def search(self, name, type):
 	
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		if len(name) == 0 or name == 'Add an artist':
+		if len(name) == 0:
 			raise cherrypy.HTTPRedirect("home")
+		if type == 'artist':
+			searchresults = mb.findArtist(name, limit=10)
 		else:
-			artistResults = mb.findArtist(name, limit=10)
-			if not artistResults:
-				logger.info(u"No results found for " + name)
-				page.append('''<div class="table"><p class="center">No results! <a class="blue" href="home">Go back</a></p></div>''')
-				return page
-			elif len(artistResults) > 1:
-				page.append('''<div class="table"><p class="center">Search returned multiple artists. Click the artist you want to add:</p>''')
-				for result in artistResults:
-					page.append('''<p class="mediumtext"><a href="addArtist?artistid=%s">%s</a> (<a class="externalred" href="artistInfo?artistid=%s">more info</a>)</p>''' % (result['id'], result['uniquename'], result['id']))
-				page.append('''</div>''')
-				return page
-			else:
-				for result in artistResults:
-					logger.info(u"Found one artist matching your search term: " + result['name'] +" ("+ result['id']+")")			
-					raise cherrypy.HTTPRedirect("addArtist?artistid=%s" % result['id'])
+			searchresults = mb.findRelease(name, limit=10)
 		
 	findArtist.exposed = True
 
@@ -164,8 +149,7 @@ class WebInterface(object):
 	deleteArtist.exposed = True
 	
 	def refreshArtist(self, ArtistID):
-		import importer
-		importer.addArtisttoDB(artistid)	
+		importer.addArtisttoDB(ArtistID)	
 	refreshArtist.exposed=True	
 	
 	def markAlbums(self, ArtistID=None, action=None, **args):
@@ -175,7 +159,6 @@ class WebInterface(object):
 			newValueDict = {'Status': action}
 			myDB.upsert("albums", newValueDict, controlValueDict)
 			if action == 'Wanted':
-				import searcher
 				searcher.searchNZB(mbid, new=False)
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 	markAlbums.exposed = True
@@ -187,7 +170,6 @@ class WebInterface(object):
 		controlValueDict = {'AlbumID': AlbumID}
 		newValueDict = {'Status': 'Wanted'}
 		myDB.upsert("albums", newValueDict, controlValueDict)
-		import searcher
 		searcher.searchNZB(AlbumID, new)
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 	queueAlbum.exposed = True

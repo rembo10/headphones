@@ -6,6 +6,7 @@
 		<thead>
 			<tr>
 				<th id="albumart"></th>
+				<th id="artistname">Artist</th>
 				<th id="albumname">Album Name</th>
 				<th id="reldate">Release Date</th>
 				<th id="type">Release Type</th>
@@ -16,10 +17,11 @@
 		%for album in upcoming:
 			<tr class="gradeZ">
 				<td id="albumart"><img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
+				<td id="artistname">${album['ArtistName']}</td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
-				<td id="type"></td>
-				<td id="status"></td>
+				<td id="type">${album['Type']}</td>
+				<td id="status">${album['Status']}</td>
 			</tr>
 		%endfor
 		</tbody>
@@ -28,6 +30,30 @@
 	</div>
 	<div class="table_wrapper">
 		<h1>Wanted Albums</h1>
+		<table class="display" id="upcoming_table">
+		<thead>
+			<tr>
+				<th id="albumart"></th>
+				<th id="artistname">Artist</th>
+				<th id="albumname">Album Name</th>
+				<th id="reldate">Release Date</th>
+				<th id="type">Release Type</th>
+				<th id="status">Status</th>
+			</tr>
+		</thead>
+		<tbody>
+		%for album in wanted:
+			<tr class="gradeZ">
+				<td id="albumart"><img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
+				<td id="artistname">${album['ArtistName']}</td>
+				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
+				<td id="reldate">${album['ReleaseDate']}</td>
+				<td id="type">${album['Type']}</td>
+				<td id="status">${album['Status']}</td>
+			</tr>
+		%endfor
+		</tbody>
+	</table>
 		
 	</div>
 </%def>
