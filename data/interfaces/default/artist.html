@@ -22,9 +22,11 @@
 	<div id="paddingheader">
 		${artist['ArtistName']}
 	</div>
+	<form action="markAlbums" method="post">
 	<table class="display" id="album_table">
 		<thead>
 			<tr>
+				<th class="checkbox"><input type="checkbox" onClick="toggle(this)" /></th>
 				<th id="albumart"></th>
 				<th id="albumname">Album Name</th>
 				<th id="reldate">Release Date</th>
@@ -59,6 +61,7 @@
 				
 			%>
 			<tr class="grade${grade}">
+				<td id="checkbox"><input type="checkbox" name="mbid" value="${album['AlbumID']}" /></th>
 				<td id="albumart"><img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
@@ -83,6 +86,7 @@
 		$('#album_table').dataTable(
 			{
 				"aoColumns": [
+					null,
 					null,
 					null,
 					null,

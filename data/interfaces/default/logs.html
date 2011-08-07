@@ -19,7 +19,13 @@
 				out_tuple = helpers.extract_logline(line)
 			%>
 			%if out_tuple:
-				<tr>
+				<%
+					if out_tuple[1] == 'WARNING' or out_tuple[1] == 'ERROR':
+						grade = 'X'
+					else:
+						grade = 'Z'
+				%>
+				<tr class="grade${grade}">
 					<td id="timestamp">${out_tuple[0]}</td>
 					<td id="level">${out_tuple[1]}</td>
 					<td id="thread">${out_tuple[2]}</td>

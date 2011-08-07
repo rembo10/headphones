@@ -28,15 +28,21 @@
 					percent = 0
 					totaltracks = '?'
 				
-				if artist['ReleaseDate']:
+				if artist['ReleaseDate'] and artist['LatestAlbum']:
 					releasedate = artist['ReleaseDate']
+					albumdisplay = '%s (%s)' % (artist['LatestAlbum'], artist['ReleaseDate'])
 					if releasedate > helpers.today():
 						grade = 'A'
 					else:
 						grade = 'Z'
+				elif artist['LatestAlbum']:
+					releasedate = ''
+					grade = 'Z'
+					albumdisplay = artist['LatestAlbum']
 				else:
 					releasedate = ''
 					grade = 'Z'
+					albumdisplay = 'None'
 				
 				if artist['Status'] == 'Paused':
 					grade = 'X'
@@ -45,7 +51,7 @@
 			<tr class="grade${grade}">
 				<td id="name"><span title="${artist['ArtistSortName']}"><span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
 				<td id="status">${artist['Status']}</td>
-				<td id="album"><span title="${releasedate}"><span><a href="albumPage?AlbumID=${artist['AlbumID']}">${artist['LatestAlbum']} ${releasedate}</a></td>
+				<td id="album"><span title="${releasedate}"><span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
 				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
 			</tr>
 		%endfor

@@ -46,48 +46,11 @@ class WebInterface(object):
 	
 	
 	def albumPage(self, AlbumID):
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
 		myDB = db.DBConnection()
-		
-		results = myDB.select('SELECT ArtistID, ArtistName, AlbumTitle, TrackTitle, TrackDuration, TrackID, AlbumASIN from tracks WHERE AlbumID=?', [AlbumID])
-		
-		if results[0][6]:
-			albumart = '''<br /><img src="http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg" height="200" width="200"><br /><br />''' % results[0][6]
-		else:
-			albumart = ''
-		i = 0
-		page.append('''<div class="table" align="center"><table border="0" cellpadding="3">
-					<tr><a href="artistPage?ArtistID=%s">%s</a> - %s<br />
-					<a href="queueAlbum?AlbumID=%s&ArtistID=%s">Download<br />%s</tr>
-					<br /><tr>
-					<th align="left" width="100">Track #</th>
-					<th align="left" width="300">Track Title</th>
-					<th align="center" width="100">Duration</th>
-					<th>      </th>
-					</tr>''' % (results[0][0], results[0][1], results[0][2], AlbumID, results[0][0], albumart))
-		while i < len(results):
-			trackmatches = myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ? AND TrackTitle like ?', [results[i][1], results[i][2], results[i][3]])
-
-			if len(trackmatches):
-				have = '<img src="images/checkmark.png" width="20px">'
-			else:
-				have = ''
-			if results[i][4]:
-				duration = helpers.convert_milliseconds(int(results[i][4]))
-			else:
-				duration = 'n/a'
-			page.append('''<tr><td align="left" width="120">%s</td>
-							<td align="left" width="240">%s (<A class="external" href="http://musicbrainz.org/recording/%s.html">link</a>)</td>
-							<td align="center">%s</td>
-							<td>%s</td></tr>''' % (i+1, results[i][3], results[i][5], duration, have))	
-			i = i+1
-
-		page.append('''</table></div>''')
-		page.append(templates._footer % headphones.CURRENT_VERSION)
-		return page
-	
+		album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
+		tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [AlbumID])
+		title = album['ArtistName'] + ' - ' + album['AlbumTitle']
+		return serve_template(templatename="album.html", title=title, album=album, tracks=tracks)
 	albumPage.exposed = True
 	
 	

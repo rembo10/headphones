@@ -33,3 +33,9 @@ jQuery.fn.dataTableExt.oSort['title-numeric-desc'] = function(a,b) {
 	y = parseFloat( y );
 	return ((x < y) ?  1 : ((x > y) ? -1 : 0));
 };
+
+function toggle(source) {
+  checkboxes = document.getElementsByName('mbid');
+  for(var i in checkboxes)
+    checkboxes[i].checked = source.checked;
+}

@@ -166,10 +166,12 @@ table.display td.center {
  */
 table.display tr.odd.gradeA {
 	background-color: #ddffdd;
+	font-weight: bold;
 }
 
 table.display tr.even.gradeA {
 	background-color: #ddffdd;
+	font-weight: bold;
 }
 
 table.display tr.odd.gradeC {
