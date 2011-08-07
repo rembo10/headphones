@@ -9,7 +9,6 @@
 			<tr>
 				<th id="timestamp">Timestamp</th>
 				<th id="level">Level</th>
-				<th id="thread">Thread</th>
 				<th id="message">Message</th>
 			</tr>
 		</thead>
@@ -28,7 +27,6 @@
 				<tr class="grade${grade}">
 					<td id="timestamp">${out_tuple[0]}</td>
 					<td id="level">${out_tuple[1]}</td>
-					<td id="thread">${out_tuple[2]}</td>
 					<td id="message">${out_tuple[3].decode('utf-8')}</td>
 				</tr>
 			%endif

@@ -110,6 +110,8 @@ h1 { font-size: 24px; }
 h2 { font-size: 20px; }
 h3 { font-size: 16px; }
 
+p.indented { margin-left: 20px; font-size: 14px; }
+
 div#updatebar { text-align: center; min-width: 970px; width: 100%; background-color: light-blue; float: left; }
 div#logo { float: left; padding-left: 10px; }
 
@@ -144,13 +146,13 @@ table#artist_table td#have { vertical-align: middle; }
 div#paddingheader { padding-top: 48px; font-size: 24px; font-weight: bold; text-align: center; }
 table#album_table { background-color: white; }
 
-table#album_table th#checkbox { text-align: left; min-width: 25px; }
+table#album_table th#select { text-align: left; min-width: 25px; }
 table#album_table th#albumart { text-align: left; min-width: 50px; }
 table#album_table th#albumname { text-align: center; min-width: 150px; }
 table#album_table th#reldate { width: 175px; text-align: center; min-width: 100px; }
 table#album_table th#status { width: 175px; text-align: center; min-width: 100px; }
 table#album_table th#type { width: 175px; text-align: center; min-width: 100px; }
-table#album_table td#checkbox { vertical-align: middle; text-align: left; }
+table#album_table td#select { vertical-align: middle; text-align: left; }
 table#album_table td#albumart { vertical-align: middle; text-align: left; }
 table#album_table td#albumname { vertical-align: middle; text-align: center; }
 table#album_table td#reldate { vertical-align: middle; text-align: center; }
@@ -176,9 +178,8 @@ table#history_table { background-color: white; width: 100%;  }
 
 table#log_table { background-color: white; }
 
-table#log_table th#timestamp { text-align: left; min-width: 200px; }
+table#log_table th#timestamp { text-align: left; min-width: 165px; }
 table#log_table th#level { text-align: left; min-width: 75px; }
-table#log_table th#thread { text-align: left; min-width: 75px; }
 table#log_table th#message { text-align: left; min-width: 200px; }
 
 div.progress-container { border: 1px solid #ccc; width: 100px; height: 14px; margin: 2px 5px 2px 0; padding: 1px; float: left; background: white; }

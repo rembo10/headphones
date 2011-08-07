@@ -35,7 +35,7 @@ jQuery.fn.dataTableExt.oSort['title-numeric-desc'] = function(a,b) {
 };
 
 function toggle(source) {
-  checkboxes = document.getElementsByName('mbid');
+  checkboxes = document.getElementsByClassName('checkbox');
   for(var i in checkboxes)
     checkboxes[i].checked = source.checked;
 }

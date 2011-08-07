@@ -20,13 +20,21 @@
 
 <%def name="body()">
 	<div id="paddingheader">
-		${artist['ArtistName']}
+		<h1>${artist['ArtistName']}<h1>
 	</div>
-	<form action="markAlbums" method="post">
+	<form action="markAlbums" method="get"><input type="hidden" name="ArtistID" value=${artist['ArtistID']}>
+	<p class="indented">Mark selected albums as 
+		<select name="action">
+  			<option value="Wanted">Wanted</option>
+  			<option value="Skipped">Skipped</option>
+  			<option value="Downloaded">Downloaded</option>
+		</select>
+		<input type="submit" value="Go">
+	</p>
 	<table class="display" id="album_table">
 		<thead>
 			<tr>
-				<th class="checkbox"><input type="checkbox" onClick="toggle(this)" /></th>
+				<th class="select"><input type="checkbox" onClick="toggle(this)" /></th>
 				<th id="albumart"></th>
 				<th id="albumname">Album Name</th>
 				<th id="reldate">Release Date</th>
@@ -61,7 +69,7 @@
 				
 			%>
 			<tr class="grade${grade}">
-				<td id="checkbox"><input type="checkbox" name="mbid" value="${album['AlbumID']}" /></th>
+				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></th>
 				<td id="albumart"><img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
@@ -72,6 +80,7 @@
 		%endfor
 		</tbody>
 	</table>
+	</form>
 </%def>
 
 <%def name="headIncludes()">
@@ -97,12 +106,10 @@
 				"oLanguage": {
 					"sLengthMenu":"Show _MENU_ albums per page",
 					"sEmptyTable": "No album information available",
-					"sInfo":"Showing _START_ to _END_ of _TOTAL_ albums",
+					"sInfo":"Showing _TOTAL_ albums",
 					"sInfoEmpty":"Showing 0 to 0 of 0 albums",
 					"sInfoFiltered":"(filtered from _MAX_ total albums)"},
-				"bStateSave": true,
-				"iDisplayLength": 25,
-				"sPaginationType": "full_numbers",
+				"bPaginate": false,
 				"aaSorting": [[3, 'asc'],[2,'desc']]
 
 			});

@@ -162,6 +162,24 @@ class WebInterface(object):
 		
 	deleteArtist.exposed = True
 	
+	def refreshArtist(self, ArtistID):
+		import importer
+		importer.addArtisttoDB(artistid)	
+	refreshArtist.exposed=True	
+	
+	def markAlbums(self, ArtistID=None, action=None, **args):
+		myDB = db.DBConnection()
+		for mbid in args:
+			controlValueDict = {'AlbumID': mbid}
+			newValueDict = {'Status': action}
+			myDB.upsert("albums", newValueDict, controlValueDict)
+			if action == 'Wanted':
+				import searcher
+				searcher.searchNZB(mbid, new=False)
+		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
+	markAlbums.exposed = True
+			
+	
 	def queueAlbum(self, AlbumID, ArtistID, new=False):
 
 		logger.info(u"Marking album: " + AlbumID + "as wanted...")

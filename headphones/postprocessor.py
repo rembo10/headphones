@@ -330,7 +330,7 @@ def correctMetadata(albumid, release, downloaded_track_list):
 	cur_artist, cur_album, out_tuples, rec = autotag.tag_album(items, search_artist=release['ArtistName'], search_album=release['AlbumTitle'])
 	
 	if rec == 'RECOMMEND_NONE':
-		logger.warn('No accurate match found  -  not writing metadata')
+		logger.warn('No accurate album match found for %s, %s -  not writing metadata' % (release['ArtistName'], release['AlbumTitle']))
 		return
 	
 	distance, items, info = out_tuples[0]
