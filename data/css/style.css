@@ -146,7 +146,7 @@ table#artist_table td#have { vertical-align: middle; }
 div#paddingheader { padding-top: 48px; font-size: 24px; font-weight: bold; text-align: center; }
 table#album_table { background-color: white; }
 
-table#album_table th#select { text-align: left; min-width: 25px; }
+table#album_table th#select { vertical-align: middle; text-align: left; min-width: 25px; }
 table#album_table th#albumart { text-align: left; min-width: 50px; }
 table#album_table th#albumname { text-align: center; min-width: 150px; }
 table#album_table th#reldate { width: 175px; text-align: center; min-width: 100px; }
