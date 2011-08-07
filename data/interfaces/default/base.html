@@ -27,9 +27,17 @@
 <body>
 	<div id="container">
 		<header>
-
+			% if not headphones.CURRENT_VERSION:
+            <div id="updatebar">
+                You're running an unknown version of Headphones. <a class="blue" href="update">Click here to update</a>
+            </div>
+            % elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
+            <div id="updatebar">
+                A <a class="blue" href="http://github.com/rembo10/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}"> newer version</a> is available. You're ${headphones.COMMITS_BEHIND} commits behind. <a class="blue" href="update">Click here to update</a>
+            </div>
+			% endif
 			<div id="logo">
-				<img src="images/headphoneslogo.png" alt="headphones">
+				<a href="home"><img src="images/headphoneslogo.png" alt="headphones"></a>
 			</div>
 			<ul id="nav">
 				<li><a href="home">home</a></li>

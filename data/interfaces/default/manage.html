@@ -1,0 +1,33 @@
+<%inherit file="base.html" />
+<%def name="body()">
+	<div class="table_wrapper">
+		<h1>Scan Music Library</h1><br />
+		Where do you keep your music?<br /><br />
+		You can put in any directory, and it will scan for audio files in that folder
+		(including all subdirectories)<br /><br />		For example: '/Users/name/Music'
+		<br /> <br />
+		It may take a while depending on how many files you have. You can navigate away from the page<br />
+		as soon as you click 'Submit'
+		<br /><br />
+		<form action="musicScan" method="GET" align="center">
+		<input type="submit" /></form>
+	</div>
+	<div class="table_wrapper">
+		<h1>Import Last.FM Artists</h1><br />
+		Enter the username whose artists you want to import:<br /><br />
+		<form action="importLastFM" method="GET" align="center">
+			<input type="text" value="%s" onfocus="if
+			(this.value==this.defaultValue) this.value='';" name="username" size="18" />
+			<input type="submit" /></form><br /><br /></div></div>
+		<div class="tableright"><div class="config"><h1>Placeholder :-)</h1><br />
+		<br /><br />
+		<form action="" method="GET" align="center">
+			<input type="text" value="" onfocus="if
+			(this.value==this.defaultValue) this.value='';" name="" size="18" />
+			<input type="submit" /></form><br /><br /></div></div><br />
+			<div class="table"><div class="config"><h1>Force Search</h1><br />
+			<a href="forceSearch">Force Check for Wanted Albums</a><br /><br />
+			<a href="forceUpdate">Force Update Active Artists</a><br /><br />
+			<a href="forcePostProcess">Force Post-Process Albums in Download Folder</a><br /><br /><br />
+			<a href="checkGithub">Check for Headphones Updates</a><br /><br /><br /></div></div>''' % (music_dir_input, lastfm_user_text))
+</%def>

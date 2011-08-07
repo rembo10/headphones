@@ -1,0 +1,82 @@
+<%inherit file="base.html" />
+<%! 
+	from headphones import db, helpers
+	myDB = db.DBConnection()
+%>
+
+<%def name="headerIncludes()">
+	<div id="subhead_container">
+		<ul id="subhead_menu">
+			<li><a href="refreshArtist?ArtistID=${album['ArtistID']}">Mark Album as Wanted</a></li>
+			<li><a href="deleteArtist?ArtistID=${album['ArtistID']}">Delete Artist</a></li>
+			%if album['Status'] == 'Paused':
+				<li><a href="resumeArtist?ArtistID=${album['ArtistID']}">Resume Artist</a></li>
+			%else:
+				<li><a href="pauseArtist?ArtistID=${album['ArtistID']}">Pause Artist</a></li>
+			%endif
+			<li><a href="getExtras?ArtistID=${album['ArtistID']}">Get Extras</a></li>
+		</ul>
+	</div>	
+</%def>
+
+<%def name="body()">
+	<div class="table_wrapper">
+		<div id="albumheader">	
+			<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" height="200" width="200" alt="albumart" class="albumArt">
+			<h1>${album['AlbumTitle']}</h1>
+			<h2>${album['ArtistName']}</h2>
+			<br>
+			<h3>Description: </h3>
+		</div>
+		<div id="track_wrapper">
+			<table class="display" id="track_table">
+				<thead>
+					<tr>
+						<th id="number">#</th>
+						<th id="name">Track Title</th>
+						<th id="duration">Duration</th>
+						<th id="have">Have</th>
+					</tr>
+				</thead>
+				<tbody>
+				%for track in tracks:
+					<%
+						trackmatch = 'asd'
+						if len(trackmatch):
+							grade = 'A'
+							check = '<img src="images/checkmark.png" alt="checkmark">'
+						else:
+							grade = 'Z'
+							check = ''
+					%>
+					<tr class="grade${grade}">
+						<td id="number">#</td>
+						<td id="name">${track['TrackTitle']}</td>
+						<td id="duration">${track['TrackDuration']}</td>
+						<td id="have">${check}</td>
+					</tr>
+				%endfor
+				</tbody>
+			</table>
+		</div>
+	</div>
+</%def>
+
+<%def name="headIncludes()">
+	<link rel="stylesheet" href="css/data_table.css">
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script>
+	$(document).ready(function()
+	{
+		$('#track_table').dataTable(
+			{
+				"bFilter": false,
+				"bInfo": false,
+				"bPaginate": false
+			});
+	});
+	</script>
+</%def>

@@ -10,9 +10,10 @@ import threading
 
 import headphones
 
-from headphones.mb import getReleaseGroup
-from headphones import templates, logger, searcher, db, importer, helpers, mb, lastfm
+from headphones import logger, searcher, db, importer, lastfm
 from headphones.helpers import checked, radio
+
+
 
 def serve_template(templatename, **kwargs):
 
@@ -181,18 +182,14 @@ class WebInterface(object):
 			
 	
 	def queueAlbum(self, AlbumID, ArtistID, new=False):
-
 		logger.info(u"Marking album: " + AlbumID + "as wanted...")
 		myDB = db.DBConnection()
 		controlValueDict = {'AlbumID': AlbumID}
 		newValueDict = {'Status': 'Wanted'}
 		myDB.upsert("albums", newValueDict, controlValueDict)
-		
 		import searcher
 		searcher.searchNZB(AlbumID, new)
-		
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
-		
 	queueAlbum.exposed = True
 
 	def unqueueAlbum(self, AlbumID, ArtistID):
@@ -208,112 +205,14 @@ class WebInterface(object):
 	unqueueAlbum.exposed = True
 	
 	def upcoming(self):
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
 		myDB = db.DBConnection()
-		albums = myDB.select("SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumASIN, AlbumID, ArtistName, ArtistID from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC")
-
+		upcoming = myDB.select("SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumASIN, AlbumID, ArtistName, ArtistID from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC")
 		wanted = myDB.select("SELECT AlbumTitle, ReleaseDate, DateAdded, AlbumASIN, AlbumID, ArtistName, ArtistID from albums WHERE Status='Wanted'")
-
-		page.append('''<div class="table"><table border="0" cellpadding="3">
-						<tr>
-						<th align="center" width="300"></th>
-						<th align="center" width="300"><div class="bigtext">Upcoming Albums<br /><br /></div></th>
-						<th align="center" width="300"></th>
-						<th>      </th>
-						</tr>''')
-		if len(albums) == 0:
-			page.append("""</table><div class="center">No albums are coming out soon :(<br />
-							(try adding some more artists!)</div><table>""")
-
-		i = 0
-		while i < len(albums):
-		
-			if albums[i][3]:
-				albumart = '''<br /><a href="http://www.amazon.com/dp/%s"><img src="http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg" height="200" width="200"></a><br /><br />''' % (albums[i][3], albums[i][3])
-			else:
-				albumart = 'No Album Art... yet.'
-
-			page.append('''<tr><td align="center" width="300">%s</td>
-								<td align="center" width="300"><a href="artistPage?ArtistID=%s">%s</a></td>
-								<td align="center" width="300"><a href="albumPage?AlbumID=%s"><i>%s</i> (%s)</a></td></tr>
-								''' % (albumart, albums[i][6], albums[i][5], albums[i][4], albums[i][0], albums[i][1]))
-			i += 1
-		page.append('''</table></div>''')
-		if len(wanted):
-			page.append('''<div class="table"><table border="0" cellpadding="3">
-						<tr>
-						<th align="center" width="300"></th>
-						<th align="center" width="300"><div class="bigtext">Wanted Albums<br /><br /></div></th>
-						<th align="center" width="300"></th>
-						<th>      </th>
-						</tr>''')
-			i = 0
-			while i < len(wanted):
-		
-				if wanted[i][3]:
-					albumart = '''<br /><a href="http://www.amazon.com/dp/%s"><img src="http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg" height="200" width="200"></a><br /><br />''' % (wanted[i][3], wanted[i][3])
-				else:
-					albumart = 'No Album Art... yet.'
-
-				page.append('''<tr><td align="center" width="300">%s</td>
-								<td align="center" width="300"><a href="artistPage?ArtistID=%s">%s</a></td>
-								<td align="center" width="300"><a href="albumPage?AlbumID=%s"><i>%s</i> (%s)</a></td></tr>
-								''' % (albumart, wanted[i][6], wanted[i][5], wanted[i][4], wanted[i][0], wanted[i][1]))
-				i += 1
-		page.append('''</table></div>''')
-		if len(albums):
-			page.append(templates._footer % headphones.CURRENT_VERSION)
-		
-		return page
+		return serve_template(templatename="upcoming.html", title="Upcoming", upcoming=upcoming, wanted=wanted)
 	upcoming.exposed = True
 	
 	def manage(self):
-		if headphones.LASTFM_USERNAME:
-			lastfm_user_text = headphones.LASTFM_USERNAME
-		else:
-			lastfm_user_text = 'Last.FM Username'
-		if headphones.MUSIC_DIR:
-			music_dir_input = '''<input type="text" value="%s" name="path" size="70" />''' % headphones.MUSIC_DIR
-		else:
-			music_dir_input = '''<input type="text" value="Enter a Music Directory to scan" onfocus="if
-			(this.value==this.defaultValue) this.value='';" name="path" size="70" />'''
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		page.append('''
-		<div class="table"><div class="config"><h1>Scan Music Library</h1><br />
-		Where do you keep your music?<br /><br />
-		You can put in any directory, and it will scan for audio files in that folder
-		(including all subdirectories)<br /><br />		For example: '/Users/name/Music'
-		<br /> <br />
-		It may take a while depending on how many files you have. You can navigate away from the page<br />
-		as soon as you click 'Submit'
-		<br /><br />
-
-		<form action="musicScan" method="GET" align="center">
-			%s
-			<input type="submit" /></form><br /><br /></div></div>
-		<div class="tableleft"><div class="config"><h1>Import Last.FM Artists</h1><br />
-		Enter the username whose artists you want to import:<br /><br />
-		<form action="importLastFM" method="GET" align="center">
-			<input type="text" value="%s" onfocus="if
-			(this.value==this.defaultValue) this.value='';" name="username" size="18" />
-			<input type="submit" /></form><br /><br /></div></div>
-		<div class="tableright"><div class="config"><h1>Placeholder :-)</h1><br />
-		<br /><br />
-		<form action="" method="GET" align="center">
-			<input type="text" value="" onfocus="if
-			(this.value==this.defaultValue) this.value='';" name="" size="18" />
-			<input type="submit" /></form><br /><br /></div></div><br />
-			<div class="table"><div class="config"><h1>Force Search</h1><br />
-			<a href="forceSearch">Force Check for Wanted Albums</a><br /><br />
-			<a href="forceUpdate">Force Update Active Artists</a><br /><br />
-			<a href="forcePostProcess">Force Post-Process Albums in Download Folder</a><br /><br /><br />
-			<a href="checkGithub">Check for Headphones Updates</a><br /><br /><br /></div></div>''' % (music_dir_input, lastfm_user_text))
-		page.append(templates._footer % headphones.CURRENT_VERSION)
-		return page
+		return serve_template(templatename="manage.html", title="Manage")
 	manage.exposed = True
 	
 	def importLastFM(self, username):
@@ -387,67 +286,57 @@ class WebInterface(object):
 		return serve_template(templatename="logs.html", title="Log", lineList=lineList[0:500])
 	logs.exposed = True
 	
-	def clearhistory(self):
-
-		logger.info(u"Clearing history")
+	def clearhistory(self, type=None):
+		logger.info(u"Clearing history where status is %s" % type)
 		myDB = db.DBConnection()
-		myDB.action('''DELETE from snatched''')
-
+		myDB.action('DELETE from snatched WHERE Status=?', [type])
 		raise cherrypy.HTTPRedirect("history")
 	clearhistory.exposed = True
 	
 	def config(self):
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		page.append(templates.configform % (
-		headphones.HTTP_HOST,
-		headphones.HTTP_USERNAME,
-		headphones.HTTP_PORT,
-		headphones.HTTP_PASSWORD,
-		checked(headphones.LAUNCH_BROWSER),
-		headphones.SAB_HOST,
-		headphones.SAB_USERNAME,
-		headphones.SAB_APIKEY,
-		headphones.SAB_PASSWORD,
-		headphones.SAB_CATEGORY,
-		headphones.DOWNLOAD_DIR,
-		checked(headphones.BLACKHOLE),
-		headphones.BLACKHOLE_DIR,
-		headphones.USENET_RETENTION,
-		checked(headphones.NZBMATRIX),
-		headphones.NZBMATRIX_USERNAME,
-		headphones.NZBMATRIX_APIKEY,
-		checked(headphones.NEWZNAB),
-		headphones.NEWZNAB_HOST,
-		headphones.NEWZNAB_APIKEY,
-		checked(headphones.NZBSORG),
-		headphones.NZBSORG_UID,
-		headphones.NZBSORG_HASH,
-		checked(headphones.NEWZBIN),
-		headphones.NEWZBIN_UID,
-		headphones.NEWZBIN_PASSWORD,
-		radio(headphones.PREFERRED_QUALITY, 0),
-		radio(headphones.PREFERRED_QUALITY, 1),
-		radio(headphones.PREFERRED_QUALITY, 3),
-		radio(headphones.PREFERRED_QUALITY, 2),
-		headphones.PREFERRED_BITRATE,
-		checked(headphones.DETECT_BITRATE),
-		checked(headphones.MOVE_FILES),
-		checked(headphones.RENAME_FILES),
-		checked(headphones.CORRECT_METADATA),
-		checked(headphones.CLEANUP_FILES),
-		checked(headphones.ADD_ALBUM_ART),
-		checked(headphones.EMBED_ALBUM_ART),
-		headphones.DESTINATION_DIR,
-		headphones.FOLDER_FORMAT,
-		headphones.FILE_FORMAT,
-		checked(headphones.INCLUDE_EXTRAS),
-		headphones.LOG_DIR
-		))
-		page.append(templates._footer % headphones.CURRENT_VERSION)
-		return page
-					
+		config = { 
+					"http_host" : headphones.HTTP_HOST,
+					"http_user" : headphones.HTTP_USERNAME,
+		 			"http_port" : headphones.HTTP_PORT,
+				 	"http_pass" : headphones.HTTP_PASSWORD,
+					"launch_browser" : checked(headphones.LAUNCH_BROWSER),
+					"sab_host" : headphones.SAB_HOST,
+					"sab_user" : headphones.SAB_USERNAME,
+					"sab_api" : headphones.SAB_APIKEY,
+					"sab_pass" : headphones.SAB_PASSWORD,
+					"sab_cat" : headphones.SAB_CATEGORY,
+					"download_dir" : headphones.DOWNLOAD_DIR,
+					"use_blackhole" : checked(headphones.BLACKHOLE),
+					"blackhole_dir" : headphones.BLACKHOLE_DIR,
+					"usenet_retention" : headphones.USENET_RETENTION,
+					"use_nzbmatrix" : checked(headphones.NZBMATRIX),
+					"nzbmatrix_user" : headphones.NZBMATRIX_USERNAME,
+					"nzbmatrix_api" : headphones.NZBMATRIX_APIKEY,
+					"use_newznab" : checked(headphones.NEWZNAB),
+					"newznab_host" : headphones.NEWZNAB_HOST,
+					"newznab_api" : headphones.NEWZNAB_APIKEY,
+					"use_nzbsorg" : checked(headphones.NZBSORG),
+					"nzbsorg_uid" : headphones.NZBSORG_UID,
+					"nzbsorg_hash" : headphones.NZBSORG_HASH,
+					"pref_qual_0" : radio(headphones.PREFERRED_QUALITY, 0),
+					"pref_qual_1" : radio(headphones.PREFERRED_QUALITY, 1),
+					"pref_qual_2" : radio(headphones.PREFERRED_QUALITY, 3),
+					"pref_qual_3" : radio(headphones.PREFERRED_QUALITY, 2),
+					"pref_bitrate" : headphones.PREFERRED_BITRATE,
+					"detect_bitrate" : checked(headphones.DETECT_BITRATE),
+					"move_files" : checked(headphones.MOVE_FILES),
+					"rename_files" : checked(headphones.RENAME_FILES),
+					"correct_metadata" : checked(headphones.CORRECT_METADATA),
+					"cleanup_files" : checked(headphones.CLEANUP_FILES),
+					"add_album_art" : checked(headphones.ADD_ALBUM_ART),
+					"embed_album_art" : checked(headphones.EMBED_ALBUM_ART),
+					"dest_dir" : headphones.DESTINATION_DIR,
+					"folder_format" : headphones.FOLDER_FORMAT,
+					"file_format" : headphones.FILE_FORMAT,
+					"include_extras" : checked(headphones.INCLUDE_EXTRAS),
+					"log_dir" : headphones.LOG_DIR
+				}
+		return serve_template(templatename="config.html", title="Settings", config=config)	
 	config.exposed = True
 	
 	

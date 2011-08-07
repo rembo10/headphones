@@ -30,7 +30,7 @@
 				
 				if artist['ReleaseDate'] and artist['LatestAlbum']:
 					releasedate = artist['ReleaseDate']
-					albumdisplay = '%s (%s)' % (artist['LatestAlbum'], artist['ReleaseDate'])
+					albumdisplay = '<i>%s</i> (%s)' % (artist['LatestAlbum'], artist['ReleaseDate'])
 					if releasedate > helpers.today():
 						grade = 'A'
 					else:
@@ -38,21 +38,21 @@
 				elif artist['LatestAlbum']:
 					releasedate = ''
 					grade = 'Z'
-					albumdisplay = artist['LatestAlbum']
+					albumdisplay = '<i>%s</i>' % artist['LatestAlbum']
 				else:
 					releasedate = ''
 					grade = 'Z'
-					albumdisplay = 'None'
+					albumdisplay = '<i>None</i>'
 				
 				if artist['Status'] == 'Paused':
 					grade = 'X'
 				
 			%>
 			<tr class="grade${grade}">
-				<td id="name"><span title="${artist['ArtistSortName']}"><span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
+				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
 				<td id="status">${artist['Status']}</td>
-				<td id="album"><span title="${releasedate}"><span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
-				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
+				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
+				<td id="have"><span title="${percent}"></span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
 			</tr>
 		%endfor
 		</tbody>
