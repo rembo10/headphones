@@ -306,7 +306,7 @@ def getReleaseGroup(rgid):
 			
 			releaselist.append(release_dict)
 		
-		average_tracks = sum(x['trackscount'] for x in releaselist) / len(releaselist)
+		average_tracks = sum(x['trackscount'] for x in releaselist) / float(len(releaselist))
 		
 		for item in releaselist:
 			item['trackscount_delta'] = abs(average_tracks - item['trackscount'])
