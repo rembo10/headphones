@@ -115,7 +115,7 @@ def searchNZB(albumid=None, new=False):
                         }
                         
             searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
-            logger.debug(u'Parsing results from <a href="%s">NZBMatrix</a>' % searchURL)
+            logger.info(u'Parsing results from <a href="%s">NZBMatrix</a>' % searchURL)
             try:
             	data = urllib2.urlopen(searchURL, timeout=20).read()
             except urllib2.URLError, e:
@@ -161,7 +161,7 @@ def searchNZB(albumid=None, new=False):
         
             searchURL = headphones.NEWZNAB_HOST + '/api?' + urllib.urlencode(params)
                 
-            logger.debug(u'Parsing results from <a href="%s">%s</a>' % (searchURL, headphones.NEWZNAB_HOST))
+            logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, headphones.NEWZNAB_HOST))
             
             try:
             	data = urllib2.urlopen(searchURL, timeout=20).read()
@@ -215,7 +215,7 @@ def searchNZB(albumid=None, new=False):
                         }
         
             searchURL = 'https://secure.nzbs.org/rss.php?' + urllib.urlencode(params)
-            logger.debug(u'Parsing results from <a href="%s">%s</a>' % (searchURL, provider))
+            logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, provider))
             
             try:
             	data = urllib2.urlopen(searchURL, timeout=20).read()
@@ -293,7 +293,7 @@ def searchNZB(albumid=None, new=False):
             searchURL = providerurl + "search/?%s" % urllib.urlencode(params)
             data = getNewzbinURL(searchURL)    
             if data:
-                logger.debug(u'Parsing results from <a href="%s">%s</a>' % (searchURL, providerurl))
+                logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, providerurl))
                 
                 try:    
                     d = minidom.parseString(data)
@@ -350,7 +350,7 @@ def searchNZB(albumid=None, new=False):
 
                 try:
                     albumlength = sum([pair[0] for pair in tracks])
-                    logger.debug('Album length = %s' % albumlength)
+
                     targetsize = albumlength/1000 * int(headphones.PREFERRED_BITRATE) * 128
                     logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
     
@@ -440,7 +440,7 @@ def searchNZB(albumid=None, new=False):
                     linkparams["nzbname"] = nzb_folder_name
                         
                     saburl = 'http://' + headphones.SAB_HOST + '/sabnzbd/api?' + urllib.urlencode(linkparams)
-                    logger.debug(u"Sending link to SABNZBD: " + saburl)
+                    logger.info(u'Sending link to SABNZBD: <a href="%s">SabNZBD link</a>' % saburl)
                     
                     try:
                         urllib.urlopen(saburl)
