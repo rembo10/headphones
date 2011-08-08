@@ -10,7 +10,7 @@ import threading
 
 import headphones
 
-from headphones import logger, searcher, db, importer, lastfm
+from headphones import logger, searcher, db, importer, mb, lastfm
 from headphones.helpers import checked, radio
 
 
@@ -50,140 +50,112 @@ class WebInterface(object):
 		myDB = db.DBConnection()
 		album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
 		tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [AlbumID])
+		description = myDB.action('SELECT * from descriptions WHERE ReleaseGroupID=?', [AlbumID]).fetchone()
 		title = album['ArtistName'] + ' - ' + album['AlbumTitle']
-		return serve_template(templatename="album.html", title=title, album=album, tracks=tracks)
+		return serve_template(templatename="album.html", title=title, album=album, tracks=tracks, description=description)
 	albumPage.exposed = True
 	
 	
 	def search(self, name, type):
-	
 		if len(name) == 0:
 			raise cherrypy.HTTPRedirect("home")
 		if type == 'artist':
-			searchresults = mb.findArtist(name, limit=10)
+			searchresults = mb.findArtist(name, limit=20)
 		else:
-			searchresults = mb.findRelease(name, limit=10)
-		
-	findArtist.exposed = True
-
-	def artistInfo(self, artistid):
-		page = [templates._header]
-		page.append(templates._logobar)
-		page.append(templates._nav)
-		artist = mb.getArtist(artistid)
-		if artist['artist_begindate']:
-			begindate = artist['artist_begindate']
-		else:
-			begindate = ''
-		if artist['artist_enddate']:
-			enddate = artist['artist_enddate']
-		else:
-			enddate = ''
-		page.append('''<div class="table"><p class="center">Artist Information:</p>''')
-		page.append('''<p class="mediumtext">Artist Name: %s (%s)</br> ''' % (artist['artist_name'], artist['artist_type']))
-		page.append('''<p class="mediumtext">Years Active: %s - %s <br /><br />''' % (begindate, enddate))
-		page.append('''MusicBrainz Link: <a class="external" href="http://www.musicbrainz.org/artist/%s">http://www.musicbrainz.org/artist/%s</a></br></br><b>Albums:</b><br />''' % (artistid, artistid))
-		for rg in artist['releasegroups']:
-			page.append('''%s <br />''' % rg['title'])
-		page.append('''<div class="center"><a href="addArtist?artistid=%s">Add this artist!</a></div>''' % artistid)
-		return page
-		
-	artistInfo.exposed = True
+			searchresults = mb.findRelease(name, limit=20)
+		return serve_template(templatename="searchresults.html", title='Search Results for: "' + name + '"', searchresults=searchresults, type=type)
+	search.exposed = True
 
 	def addArtist(self, artistid):
-		
 		threading.Thread(target=importer.addArtisttoDB, args=[artistid]).start()
 		time.sleep(5)
 		threading.Thread(target=lastfm.getSimilar).start()
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % artistid)
-		
 	addArtist.exposed = True
 	
 	def getExtras(self, ArtistID):
-		
 		myDB = db.DBConnection()
 		controlValueDict = {'ArtistID': ArtistID}
 		newValueDict = {'IncludeExtras': 1}
 		myDB.upsert("artists", newValueDict, controlValueDict)
-		
 		threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True]).start()
 		time.sleep(10)
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
-		
 	getExtras.exposed = True
 	
 	def pauseArtist(self, ArtistID):
-	
 		logger.info(u"Pausing artist: " + ArtistID)
 		myDB = db.DBConnection()
 		controlValueDict = {'ArtistID': ArtistID}
 		newValueDict = {'Status': 'Paused'}
 		myDB.upsert("artists", newValueDict, controlValueDict)
-		
-		raise cherrypy.HTTPRedirect("home")
-		
+		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 	pauseArtist.exposed = True
 	
 	def resumeArtist(self, ArtistID):
-
 		logger.info(u"Resuming artist: " + ArtistID)
 		myDB = db.DBConnection()
 		controlValueDict = {'ArtistID': ArtistID}
 		newValueDict = {'Status': 'Active'}
 		myDB.upsert("artists", newValueDict, controlValueDict)
-
-		raise cherrypy.HTTPRedirect("home")
-		
+		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 	resumeArtist.exposed = True
 	
 	def deleteArtist(self, ArtistID):
-
 		logger.info(u"Deleting all traces of artist: " + ArtistID)
 		myDB = db.DBConnection()
 		myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
 		myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
 		myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
-
 		raise cherrypy.HTTPRedirect("home")
-		
 	deleteArtist.exposed = True
 	
 	def refreshArtist(self, ArtistID):
 		importer.addArtisttoDB(ArtistID)	
+		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 	refreshArtist.exposed=True	
 	
 	def markAlbums(self, ArtistID=None, action=None, **args):
 		myDB = db.DBConnection()
+		if action == 'WantedNew':
+			newaction = 'Wanted'
+		else:
+			newaction = action
 		for mbid in args:
 			controlValueDict = {'AlbumID': mbid}
-			newValueDict = {'Status': action}
+			newValueDict = {'Status': newaction}
 			myDB.upsert("albums", newValueDict, controlValueDict)
 			if action == 'Wanted':
 				searcher.searchNZB(mbid, new=False)
-		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
+			if action == 'WantedNew':
+				searcher.searchNZB(mbid, new=True)
+		if ArtistID:
+			raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
+		else:
+			raise cherrypy.HTTPRedirect("upcoming")
 	markAlbums.exposed = True
 			
 	
-	def queueAlbum(self, AlbumID, ArtistID, new=False):
+	def queueAlbum(self, AlbumID, ArtistID=None, new=False, redirect=None):
 		logger.info(u"Marking album: " + AlbumID + "as wanted...")
 		myDB = db.DBConnection()
 		controlValueDict = {'AlbumID': AlbumID}
 		newValueDict = {'Status': 'Wanted'}
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		searcher.searchNZB(AlbumID, new)
-		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
+		if ArtistID:
+			raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
+		else:
+			raise cherrypy.HTTPRedirect(redirect)
 	queueAlbum.exposed = True
 
 	def unqueueAlbum(self, AlbumID, ArtistID):
-
 		logger.info(u"Marking album: " + AlbumID + "as skipped...")
 		myDB = db.DBConnection()
 		controlValueDict = {'AlbumID': AlbumID}
 		newValueDict = {'Status': 'Skipped'}
 		myDB.upsert("albums", newValueDict, controlValueDict)
-		
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
-		
 	unqueueAlbum.exposed = True
 	
 	def upcoming(self):

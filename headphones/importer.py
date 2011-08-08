@@ -215,6 +215,8 @@ def addArtisttoDB(artistid, extrasonly=False):
 		
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		
+		lastfm.getAlbumDescription(rg['id'], release_dict['releaselist'])
+		
 		# I changed the albumid from releaseid -> rgid, so might need to delete albums that have a releaseid
 		for release in release_dict['releaselist']:
 			myDB.action('DELETE from albums WHERE AlbumID=?', [release['releaseid']])

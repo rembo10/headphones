@@ -4,7 +4,7 @@ from collections import defaultdict
 import random
 
 import headphones
-from headphones import db
+from headphones import db, logger
 
 api_key = '395e6ec6bb557382fc41fde867bce66f'
 
@@ -91,4 +91,47 @@ def getArtists():
 	for artistid in artistlist:
 		importer.addArtisttoDB(artistid)
 	
+def getAlbumDescription(rgid, releaselist):
+
+	myDB = db.DBConnection()	
+	result = myDB.select('SELECT Summary from descriptions WHERE ReleaseGroupID=?', [rgid])
+	
+	if result:
+		return
+	
+	for release in releaselist:
+		
+		mbid = release['releaseid']
+		url = 'http://ws.audioscrobbler.com/2.0/?method=album.getInfo&mbid=%s&api_key=%s' % (mbid, api_key)
+		logger.info('Checking last.fm for: ' + mbid)
+		data = urllib.urlopen(url).read()
+		
+		if data == 'Album not found':
+			logger.info('Release id not on last fm, skipping')
+			continue
+		
+		try:
+			d = minidom.parseString(data)
+	
+			albuminfo = d.getElementsByTagName("album")
+			
+			for item in albuminfo:
+				summarynode = item.getElementsByTagName("summary")[0].childNodes
+				contentnode = item.getElementsByTagName("content")[0].childNodes
+				for node in summarynode:
+					summary = node.data
+				for node in contentnode:
+					content = node.data
+					
+			controlValueDict = {'ReleaseGroupID': rgid}
+			newValueDict = {'ReleaseID': mbid,
+							'Summary': summary,
+							'Content': content}
+			myDB.upsert("descriptions", newValueDict, controlValueDict)	
+			logger.info('Inserted description')
+			break
+		
+		except:
+			continue
+		
 	

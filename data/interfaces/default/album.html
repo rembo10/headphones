@@ -7,26 +7,36 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<ul id="subhead_menu">
-			<li><a href="refreshArtist?ArtistID=${album['ArtistID']}">Mark Album as Wanted</a></li>
-			<li><a href="deleteArtist?ArtistID=${album['ArtistID']}">Delete Artist</a></li>
-			%if album['Status'] == 'Paused':
-				<li><a href="resumeArtist?ArtistID=${album['ArtistID']}">Resume Artist</a></li>
+			%if album['Status'] == 'Skipped':
+			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False">Mark Album as Wanted</a></li>
+			%elif album['Status'] == 'Snatched' or 'Downloaded':
+			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False">Retry Download</a></li>
+			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True">Try New Version</a></li>
 			%else:
-				<li><a href="pauseArtist?ArtistID=${album['ArtistID']}">Pause Artist</a></li>
-			%endif
-			<li><a href="getExtras?ArtistID=${album['ArtistID']}">Get Extras</a></li>
+			<li><a href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False">Mark Album as Skipped</a></li>
+			%endif			
 		</ul>
 	</div>	
 </%def>
 
 <%def name="body()">
 	<div class="table_wrapper">
+		<h2><a href="artistPage?ArtistID=${album['ArtistID']}"><- Back to ${album['ArtistName']}</a></h2>
 		<div id="albumheader">	
 			<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" height="200" width="200" alt="albumart" class="albumArt">
 			<h1>${album['AlbumTitle']}</h1>
 			<h2>${album['ArtistName']}</h2>
 			<br>
+			<%
+				totalduration = myDB.action("SELECT SUM(TrackDuration) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
+				totaltracks = len(myDB.select("SELECT TrackTitle from tracks WHERE AlbumID=?", [album['AlbumID']]))
+			%>
+			<h3>Tracks: ${totaltracks}</h3>
+			<h3>Duration: ${helpers.convert_milliseconds(totalduration)}</h3>
+			%if description:
 			<h3>Description: </h3>
+			${description['Summary']}
+			%endif
 		</div>
 		<div id="track_wrapper">
 			<table class="display" id="track_table">
@@ -35,14 +45,18 @@
 						<th id="number">#</th>
 						<th id="name">Track Title</th>
 						<th id="duration">Duration</th>
-						<th id="have">Have</th>
+						<th id="have"></th>
 					</tr>
 				</thead>
 				<tbody>
+				<%
+					i = 0
+				%>
 				%for track in tracks:
 					<%
-						trackmatch = 'asd'
-						if len(trackmatch):
+						i += 1
+						have = myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ? AND TrackTitle like ?', [album['ArtistName'], album['AlbumTitle'], track['TrackTitle']])
+						if len(have):
 							grade = 'A'
 							check = '<img src="images/checkmark.png" alt="checkmark">'
 						else:
@@ -50,9 +64,9 @@
 							check = ''
 					%>
 					<tr class="grade${grade}">
-						<td id="number">#</td>
+						<td id="number">${i}</td>
 						<td id="name">${track['TrackTitle']}</td>
-						<td id="duration">${track['TrackDuration']}</td>
+						<td id="duration">${helpers.convert_milliseconds(track['TrackDuration'])}</td>
 						<td id="have">${check}</td>
 					</tr>
 				%endfor

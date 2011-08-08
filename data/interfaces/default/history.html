@@ -1,4 +1,7 @@
 <%inherit file="base.html"/>
+<%!
+	from headphones import helpers
+%>
 
 <%def name="headerIncludes()">
 	<div id="subhead_container">
@@ -22,6 +25,7 @@
 				<th id="filename">File Name</th>
 				<th id="size">Size</th>
 				<th id="status">Status</th>
+				<th id="action"></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -39,8 +43,9 @@
 			<tr class="grade${grade}">
 				<td id="dateadded">${item['DateAdded']}</td>
 				<td id="filename"><a href="${item['URL']}">${item['Title']}</a></td>
-				<td id="size">${item['Size']}</td>
+				<td id="size">${helpers.bytes_to_mb(item['Size'])}</td>
 				<td id="status">${item['Status']}</td>
+				<td id="action">[<a href="queueAlbum?AlbumID=${item['AlbumID']}&redirect=history">retry</a>][<a href="queueAlbum?AlbumID=${item['AlbumID']}&new=True&redirect=history">new</a>]</td>
 			</tr>
 		%endfor
 		</tbody>

@@ -102,15 +102,15 @@ a.blue {
 
 container {  }
 
-body { background-color: #EBF4FB; min-width: 907px; }
+body { background-color: #EBF4FB; min-width: 930px; }
 
-header { min-height: 68px; width: 100%; min-width: 907px; padding-left: 0px; padding-right: 10px; background-color: #CDC9C9; position: fixed; z-index: 998; }
+header { min-height: 68px; width: 100%; min-width: 930px; padding-left: 0px; padding-right: 10px; background-color: #CDC9C9; position: fixed; z-index: 998; }
 
 h1 { font-size: 24px; }
 h2 { font-size: 20px; }
 h3 { font-size: 16px; }
 
-p.indented { margin-left: 20px; font-size: 14px; }
+p.indented { padding-top: 20px; margin-left: 20px; font-size: 14px; }
 
 div#updatebar { text-align: center; min-width: 970px; width: 100%; background-color: light-blue; float: left; }
 div#logo { float: left; padding-left: 10px; }
@@ -120,7 +120,7 @@ ul#nav li { margin: 40px 0px auto 10px;  display: inline; }
 ul#nav li a { padding: 5px; font-size: 16px; font-weight: bold; color: #330000; text-decoration: none; }
 ul#nav li a:hover { background-color: #a3e532; }
 
-div#subhead_container { height: 30px; width:100%; min-width: 907px; background-color:#330000; float: left; list-style-type: none; z-index: 998; overflow: hidden; }
+div#subhead_container { height: 30px; width:100%; min-width: 930px; background-color:#330000; float: left; list-style-type: none; z-index: 998; overflow: hidden; }
 ul#subhead_menu { margin-top: 5px; }
 ul#subhead_menu li { width: 100%; height: 100%; display: inline; }
 ul#subhead_menu li a { padding: 5px 15px 10px 15px; vertical-align: middle; color: white; font-size: 16px; text-decoration: none; }
@@ -131,6 +131,9 @@ div#searchbar { margin: 24px 30px auto auto; float: right; }
 div#main { margin: 0; padding: 80px 0 0 0; }
 
 .table_wrapper { border-radius: 20px; -webkit-border-radius: 20px; -moz-border-radius: 20px; width: 88%; margin: 20px auto 0 auto; padding: 25px; background-color: white; position: relative; min-height: 200px; clear: both; _height: 302px; zoom: 1; }
+.manage_wrapper { width: 88%; margin: 20px auto 0 auto; padding: 25px; min-height: 150px; clear: both; _height: 302px; zoom: 1; }
+.table_wrapper_left { padding: 25px; background-color: #ffffff; float: left; width: 40%; height: 200px; margin-top: 25px; margin-left: 30px; margin-right: auto; -moz-border-radius: 20px; border-radius: 20px; }
+.table_wrapper_right{ padding: 25px; background-color: #ffffff; width: 40%; height: 200px; margin-top: 25px; margin-left: auto; margin-right: 30px; -moz-border-radius: 20px; border-radius: 20px; }
 
 table#artist_table { background-color: white; width: 100%; padding: 20px; }
 
@@ -144,6 +147,7 @@ table#artist_table td#album { vertical-align: middle; text-align: left; min-widt
 table#artist_table td#have { vertical-align: middle; }
 
 div#paddingheader { padding-top: 48px; font-size: 24px; font-weight: bold; text-align: center; }
+div#nopaddingheader { font-size: 24px; font-weight: bold; text-align: center; }
 table#album_table { background-color: white; }
 
 table#album_table th#select { vertical-align: middle; text-align: left; min-width: 25px; }
@@ -161,15 +165,15 @@ table#album_table td#type { vertical-align: middle; text-align: center; }
 table#album_table td#have { vertical-align: middle; }
 
 img.albumArt { float: left; padding-right: 5px; }
-div#albumheader { height: 200px; }
+div#albumheader { padding-top: 48px; height: 200px; }
 div#track_wrapper { padding-top: 20px; text-align: center; font-size: 16px; }
 
-table#track_table th#number { text-align: left; min-width: 50px; }
+table#track_table th#number { text-align: right; min-width: 20px; }
 table#track_table th#name { text-align: center; min-width: 350px; }
 table#track_table th#duration { width: 175px; text-align: center; min-width: 100px; }
 table#track_table th#have { width: 175px; text-align: center; min-width: 100px; }
 
-table#track_table td#number { vertical-align: middle; text-align: left; }
+table#track_table td#number { vertical-align: middle; text-align: right; }
 table#track_table td#name { vertical-align: middle; text-align: center; }
 table#track_table td#duration { vertical-align: middle; text-align: center; }
 table#track_table td#have { vertical-align: middle; text-align: center; }
@@ -181,6 +185,27 @@ table#log_table { background-color: white; }
 table#log_table th#timestamp { text-align: left; min-width: 165px; }
 table#log_table th#level { text-align: left; min-width: 75px; }
 table#log_table th#message { text-align: left; min-width: 200px; }
+
+table#upcoming_table th#albumart { text-align: center; min-width: 50px; }
+table#upcoming_table th#albumname { text-align: center; min-width: 200px; }
+table#upcoming_table th#artistname { text-align: center; min-width: 150px; }
+table#upcoming_table th#reldate { text-align: center; min-width: 100px; }
+table#upcoming_table th#type { text-align: center; min-width: 75px; }
+
+table#upcoming_table td#albumart { vertical-align: middle; text-align: center; min-width: 50px; }
+table#upcoming_table td#albumname { vertical-align: middle; text-align: center; min-width: 200px; }
+table#upcoming_table td#artistname { vertical-align: middle; text-align: center; min-width: 150px; }
+table#upcoming_table td#reldate { vertical-align: middle; text-align: center; min-width: 100px; }
+table#upcoming_table td#type { vertical-align: middle; text-align: center; min-width: 75px; }
+table#upcoming_table td#status { vertical-align: middle; text-align: center; }
+
+table#searchresults_table th#albumname { text-align: left; min-width: 225px; }
+table#searchresults_table th#artistname { text-align: center; min-width: 325px; }
+table#searchresults_table th#score { text-align: center; min-width: 75px; }
+
+table#searchresults_table td#albumname { vertical-align: middle; text-align: left; min-width: 200px; }
+table#searchresults_table td#artistname { vertical-align: middle; text-align: left; min-width: 300px; }
+table#searchresults_table td#score { vertical-align: middle; text-align: center; min-width: 75px; }
 
 div.progress-container { border: 1px solid #ccc; width: 100px; height: 14px; margin: 2px 5px 2px 0; padding: 1px; float: left; background: white; }
 div.progress-container > div { background-color: #a3e532; height: 14px; }

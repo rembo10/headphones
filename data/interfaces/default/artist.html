@@ -26,6 +26,7 @@
 	<p class="indented">Mark selected albums as 
 		<select name="action">
   			<option value="Wanted">Wanted</option>
+  			<option value="WantedNew">Wanted (new only)</option>
   			<option value="Skipped">Skipped</option>
   			<option value="Downloaded">Downloaded</option>
 		</select>
@@ -74,7 +75,15 @@
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
-				<td id="status">${album['Status']}</td>
+				<td id="status">${album['Status']}
+				%if album['Status'] == 'Skipped':
+					[<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">want</a>]
+				%elif album['Status'] == 'Wanted':
+					[<a href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">skip</a>]
+				%else:
+					[<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Retry the same download again">retry</a>][<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True" title="Try a new download, skipping all previously tried nzbs">new</a>]
+				%endif
+				</td>
 				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
 			</tr>
 		%endfor
@@ -110,7 +119,7 @@
 					"sInfoEmpty":"Showing 0 to 0 of 0 albums",
 					"sInfoFiltered":"(filtered from _MAX_ total albums)"},
 				"bPaginate": false,
-				"aaSorting": [[3, 'asc'],[2,'desc']]
+				"aaSorting": [[4, 'asc'],[3,'desc']]
 
 			});
 	});
