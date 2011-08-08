@@ -407,7 +407,7 @@ def searchNZB(albumid=None, new=False):
                 if headphones.SAB_HOST and not headphones.BLACKHOLE:
 
                     nzb = classes.NZBDataSearchResult()
-					nzb.extraInfo.append(data)
+                    nzb.extraInfo.append(data)
                     nzb.name = nzb_folder_name
                     sab.sendNZB(nzb)
 
