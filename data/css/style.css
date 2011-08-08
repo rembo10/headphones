@@ -102,9 +102,9 @@ a.blue {
 
 container {  }
 
-body { background-color: #EBF4FB; min-width: 930px; }
+body { background-color: #EBF4FB; min-width: 935px; }
 
-header { min-height: 68px; width: 100%; min-width: 930px; padding-left: 0px; padding-right: 10px; background-color: #CDC9C9; position: fixed; z-index: 998; }
+header { min-height: 68px; width: 100%; min-width: 935px; padding-left: 0px; padding-right: 10px; background-color: #CDC9C9; position: fixed; z-index: 998; }
 
 h1 { font-size: 24px; }
 h2 { font-size: 20px; }
@@ -198,12 +198,27 @@ table#upcoming_table th#artistname { text-align: center; min-width: 150px; }
 table#upcoming_table th#reldate { text-align: center; min-width: 100px; }
 table#upcoming_table th#type { text-align: center; min-width: 75px; }
 
+table#upcoming_table td#select { vertical-align: middle; text-align: center; }
 table#upcoming_table td#albumart { vertical-align: middle; text-align: center; min-width: 50px; }
 table#upcoming_table td#albumname { vertical-align: middle; text-align: center; min-width: 200px; }
 table#upcoming_table td#artistname { vertical-align: middle; text-align: center; min-width: 150px; }
 table#upcoming_table td#reldate { vertical-align: middle; text-align: center; min-width: 100px; }
 table#upcoming_table td#type { vertical-align: middle; text-align: center; min-width: 75px; }
 table#upcoming_table td#status { vertical-align: middle; text-align: center; }
+
+table#wanted_table th#albumart { text-align: center; min-width: 50px; }
+table#wanted_table th#albumname { text-align: center; min-width: 200px; }
+table#wanted_table th#artistname { text-align: center; min-width: 150px; }
+table#wanted_table th#reldate { text-align: center; min-width: 100px; }
+table#wanted_table th#type { text-align: center; min-width: 75px; }
+
+table#wanted_table td#select { vertical-align: middle; text-align: center; }
+table#wanted_table td#albumart { vertical-align: middle; text-align: center; min-width: 50px; }
+table#wanted_table td#albumname { vertical-align: middle; text-align: center; min-width: 200px; }
+table#wanted_table td#artistname { vertical-align: middle; text-align: center; min-width: 150px; }
+table#wanted_table td#reldate { vertical-align: middle; text-align: center; min-width: 100px; }
+table#wanted_table td#type { vertical-align: middle; text-align: center; min-width: 75px; }
+table#wanted_table td#status { vertical-align: middle; text-align: center; }
 
 table#searchresults_table th#albumname { text-align: left; min-width: 225px; }
 table#searchresults_table th#artistname { text-align: center; min-width: 325px; }
