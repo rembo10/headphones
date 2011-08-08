@@ -1,0 +1,64 @@
+<%inherit file="base.html"/>
+<%!
+	from headphones import helpers
+%>
+
+<%def name="body()">
+	<table class="display" id="log_table">
+		<thead>
+			<tr>
+				<th id="timestamp">Timestamp</th>
+				<th id="level">Level</th>
+				<th id="message">Message</th>
+			</tr>
+		</thead>
+		<tbody>
+		%for line in lineList:
+			<%
+				out_tuple = helpers.extract_logline(line)
+			%>
+			%if out_tuple:
+				<%
+					if out_tuple[1] == 'DEBUG':
+						continue
+					elif out_tuple[1] == 'WARNING' or out_tuple[1] == 'ERROR':
+						grade = 'X'
+					else:
+						grade = 'Z'
+				%>
+				<tr class="grade${grade}">
+					<td id="timestamp">${out_tuple[0]}</td>
+					<td id="level">${out_tuple[1]}</td>
+					<td id="message">${out_tuple[3].decode('utf-8')}</td>
+				</tr>
+			%endif
+		%endfor
+		</tbody>
+	</table>
+</%def>
+
+<%def name="headIncludes()">
+	<link rel="stylesheet" href="css/data_table.css">
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script>
+	$(document).ready(function()
+	{
+		$('#log_table').dataTable(
+			{
+				"oLanguage": {
+					"sLengthMenu":"Show _MENU_ lines per page",
+					"sEmptyTable": "No log information available",
+					"sInfo":"Showing _START_ to _END_ of _TOTAL_ lines",
+					"sInfoEmpty":"Showing 0 to 0 of 0 lines",
+					"sInfoFiltered":"(filtered from _MAX_ total lines)"},
+				"bStateSave": true,
+				"iDisplayLength": 100,
+				"sPaginationType": "full_numbers",
+
+			});
+	});
+	</script>
+</%def>

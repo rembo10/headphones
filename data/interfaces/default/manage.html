@@ -1,0 +1,57 @@
+<%inherit file="base.html" />
+<%!
+	import headphones
+%>
+
+<%def name="body()">
+	<div class="table_wrapper">
+		<h1>Scan Music Library</h1><br />
+		Where do you keep your music?<br /><br />
+		You can put in any directory, and it will scan for audio files in that folder
+		(including all subdirectories)<br /><br />		For example: '/Users/name/Music'
+		<br /> <br />
+		It may take a while depending on how many files you have. You can navigate away from the page<br />
+		as soon as you click 'Submit'
+		<br /><br />
+		<form action="musicScan" method="GET" align="center">
+		%if headphones.MUSIC_DIR:
+			<input type="text" value="${headphones.MUSIC_DIR}" name="path" size="70" />
+		%else:
+			<input type="text" value="Enter a Music Directory to scan" onfocus="if
+			(this.value==this.defaultValue) this.value='';" name="path" size="70" />
+		%endif
+		<input type="submit" /></form>
+	</div>
+
+	<div class="table_wrapper_left">
+		<h1>Import Last.FM Artists</h1><br />
+		Enter the username whose artists you want to import:<br /><br />
+		<form action="importLastFM" method="GET" align="center">
+			<%
+				if headphones.LASTFM_USERNAME:
+					lastfmvalue = headphones.LASTFM_USERNAME
+				else:
+					lastfmvalue = 'Last.fm Username'
+			%>
+			<input type="text" value="${lastfmvalue}" onfocus="if
+			(this.value==this.defaultValue) this.value='';" name="username" size="18" />
+			<input type="submit" /></form><br /><br />
+	</div>
+	
+	<div class="table_wrapper_right">
+		<h1>Placeholder :-)</h1><br />
+		<br /><br />
+		<form action="" method="GET" align="center">
+			<input type="text" value="" onfocus="if
+			(this.value==this.defaultValue) this.value='';" name="" size="18" />
+			<input type="submit" /></form><br /><br />
+	</div>
+	
+	<div class="table_wrapper">
+		<h1>Force Search</h1><br />
+			<h3><a href="forceSearch">Force Check for Wanted Albums</a></h3>
+			<h3><a href="forceUpdate">Force Update Active Artists</a></h3>
+			<h3><a href="forcePostProcess">Force Post-Process Albums in Download Folder</a></h3><br><br>
+			<h3><a href="checkGithub">Check for Headphones Updates</a></h3>
+	</div>
+</%def>

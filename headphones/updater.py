@@ -16,9 +16,3 @@ def dbUpdate():
 		importer.addArtisttoDB(artistid)
 		
 	logger.info('Update complete')
-		
-		
-
-		
-			
-

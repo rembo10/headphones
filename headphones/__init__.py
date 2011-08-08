@@ -429,6 +429,7 @@ def dbcheck():
     c.execute('CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT, FolderName TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS have (ArtistName TEXT, AlbumTitle TEXT, TrackNumber TEXT, TrackTitle TEXT, TrackLength TEXT, BitRate TEXT, Genre TEXT, Date TEXT, TrackID TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS lastfmcloud (ArtistName TEXT, ArtistID TEXT, Count INTEGER)')
+    c.execute('CREATE TABLE IF NOT EXISTS descriptions (ReleaseGroupID TEXT, ReleaseID TEXT, Summary TEXT, Content TEXT)')
     
     try:
         c.execute('SELECT IncludeExtras from artists')

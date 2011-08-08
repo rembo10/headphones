@@ -66,6 +66,47 @@ def findArtist(name, limit=1):
 						})
 			
 		return artistlist
+		
+def findRelease(name, limit=1):
+
+	with mb_lock:
+	
+		releaselist = []
+		attempt = 0
+		releaseResults = None
+		
+		chars = set('!?')
+		if any((c in chars) for c in name):
+			name = '"'+name+'"'
+		
+		while attempt < 5:
+		
+			try:
+				releaseResults = q.getReleases(ws.ReleaseFilter(query=name, limit=limit))
+				break
+			except WebServiceError, e:
+				logger.warn('Attempt to query MusicBrainz for %s failed: %s' % (name, e))
+				attempt += 1
+				time.sleep(5)
+		
+		time.sleep(1)
+		
+		if not releaseResults:
+			return False		
+		
+		for result in releaseResults:
+			
+			releaselist.append({
+						'uniquename':		result.release.artist.name,
+						'title': 			result.release.title,
+						'id':				u.extractUuid(result.release.artist.id),
+						'albumid':			u.extractUuid(result.release.id),
+						'url': 				result.release.artist.id,
+						'albumurl':			result.release.id,
+						'score':			result.score
+						})
+			
+		return releaselist
 
 def getArtist(artistid, extrasonly=False):
 
