@@ -398,7 +398,6 @@ def searchNZB(albumid=None, new=False):
             else:
                 bestqual = nzblist[0]
             
-            
             logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
             logger.info(u"Pre-processing result")
             (data, bestqual) = preprocess(nzblist)
