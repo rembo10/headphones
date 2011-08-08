@@ -99,6 +99,7 @@ NEWZBIN_PASSWORD = None
 
 LASTFM_USERNAME = None
 
+MEDIA_FORMATS = ["mp3", "flac", "aac", "ogg", "ape", "m4a"]
 
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
