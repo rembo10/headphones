@@ -1,6 +1,16 @@
 <%inherit file="base.html"/>
-
+<%def name="headerIncludes()">
+	<div id="subhead_container">
+		<ul id="subhead_menu">
+			<li><a href="shutdown">Shut Down</a></li>
+			<li><a href="restart">Restart</a></li>
+		</ul>
+	</div>	
+</%def>
 <%def name="body()">
+	<div id="paddingheader">
+		<h1><h1>
+	</div>
 	<div class="table_wrapper">
 		<form action="configUpdate" method="post">
         <a name="web_interface"><h1><u>Web Interface</u></h1></a>

@@ -79,8 +79,10 @@ def convert_milliseconds(ms):
 
 	seconds = ms/1000
 	gmtime = time.gmtime(seconds)
-	
-	minutes = time.strftime("%M:%S", gmtime)
+	if seconds > 3600:
+		minutes = time.strftime("%H:%M:%S", gmtime)
+	else:
+		minutes = time.strftime("%M:%S", gmtime)
 
 	return minutes
 	

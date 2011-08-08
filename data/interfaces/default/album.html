@@ -30,9 +30,14 @@
 			<%
 				totalduration = myDB.action("SELECT SUM(TrackDuration) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
 				totaltracks = len(myDB.select("SELECT TrackTitle from tracks WHERE AlbumID=?", [album['AlbumID']]))
+				try:
+					albumduration = helpers.convert_milliseconds(totalduration)
+				except:
+					albumduration = 'n/a'
+			
 			%>
 			<h3>Tracks: ${totaltracks}</h3>
-			<h3>Duration: ${helpers.convert_milliseconds(totalduration)}</h3>
+			<h3>Duration: ${albumduration}</h3>
 			%if description:
 			<h3>Description: </h3>
 			${description['Summary']}
@@ -55,18 +60,22 @@
 				%for track in tracks:
 					<%
 						i += 1
-						have = myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ? AND TrackTitle like ?', [album['ArtistName'], album['AlbumTitle'], track['TrackTitle']])
+						have = myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ? AND TrackTitle like ?', [track['ArtistName'], track['AlbumTitle'], track['TrackTitle']])
 						if len(have):
 							grade = 'A'
 							check = '<img src="images/checkmark.png" alt="checkmark">'
 						else:
 							grade = 'Z'
 							check = ''
+						try:
+							trackduration = helpers.convert_milliseconds(track['TrackDuration'])
+						except:
+							trackduration = 'n/a'
 					%>
 					<tr class="grade${grade}">
 						<td id="number">${i}</td>
 						<td id="name">${track['TrackTitle']}</td>
-						<td id="duration">${helpers.convert_milliseconds(track['TrackDuration'])}</td>
+						<td id="duration">${trackduration}</td>
 						<td id="have">${check}</td>
 					</tr>
 				%endfor

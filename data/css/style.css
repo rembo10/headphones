@@ -221,6 +221,8 @@ footer { margin: 20px auto 20px auto; }
 div#version { text-align: center; font-weight: bold; }
 div#donate { text-align: center; margin: 20px auto 20px auto; }
 
+div#shutdown{ text-align: center; vertical-align: middle; }
+
 .cloudtag { padding-top: 30px; font-size:16px; }
 #cloud a.tag1 { font-size: 0.7em; font-weight: 100; }
 #cloud a.tag2 { font-size: 0.8em; font-weight: 200; }
