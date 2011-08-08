@@ -256,21 +256,26 @@ def addArtisttoDB(artistid, extrasonly=False):
 	logger.info(u"Updating complete for: " + artist['artist_name'])
 	
 def addReleaseById(rid):
-
+	
 	myDB = db.DBConnection()
+
+	rgid = myDB.select("SELECT * from releases WHERE ReleaseID=?", [rid])
+	if not rgid:
+		#we have to make a call to get the release no matter what so we can get the RGID
+		#need a way around this - a local cache maybe in the future maybe? 
+		try:
+			release_dict = mb.getRelease(rid)
+			#keep a local cache of these so that external programs that are adding releasesByID don't hammer MB
+			myDB.action('INSERT INTO releases VALUES( ?, ?)', [rid, release_dict['rgid']])
+		except Exception, e:
+			logger.info('Unable to get release information for Release: ' + str(rid) + " " + str(e))
+			return
+		if not release_dict:
+			logger.info('Unable to get release information for Release: ' + str(rid) + " no dict")
+			return
+		
+		rgid = release_dict['rgid']
 	
-	#we have to make a call to get the release no matter what so we can get the RGID
-	#need a way around this - a local cache maybe in the future maybe? 
-	try:
-		release_dict = mb.getRelease(rid)
-	except Exception, e:
-		logger.info('Unable to get release information for Release: ' + str(rid) + " " + str(e))
-		return
-	if not release_dict:
-		logger.info('Unable to get release information for Release: ' + str(rid) + " no dict")
-		return
-	
-	rgid = release_dict['rgid']
 	
 	#we don't want to make more calls to MB here unless we have to, could be happening quite a lot
 	#TODO: why do I have to str() this here? I don't get it.
@@ -316,7 +321,7 @@ def addReleaseById(rid):
 		for track in release_dict['tracks']:
 		
 			controlValueDict = {"TrackID": 	track['id'],
-								"AlbumID":	release_dict['rgid']}
+								"AlbumID":	rgid}
 			newValueDict = {"ArtistID":		release_dict['artist_id'],
 						"ArtistName": 		release_dict['artist_name'],
 						"AlbumTitle":		release_dict['rg_title'],
