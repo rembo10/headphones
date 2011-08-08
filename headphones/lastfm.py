@@ -103,11 +103,9 @@ def getAlbumDescription(rgid, releaselist):
 		
 		mbid = release['releaseid']
 		url = 'http://ws.audioscrobbler.com/2.0/?method=album.getInfo&mbid=%s&api_key=%s' % (mbid, api_key)
-		logger.info('Checking last.fm for: ' + mbid)
 		data = urllib.urlopen(url).read()
 		
-		if data == 'Album not found':
-			logger.info('Release id not on last fm, skipping')
+		if data == '<?xml version="1.0" encoding="utf-8"?><lfm status="failed"><error code="6">Album not found</error></lfm>':
 			continue
 		
 		try:
@@ -128,7 +126,6 @@ def getAlbumDescription(rgid, releaselist):
 							'Summary': summary,
 							'Content': content}
 			myDB.upsert("descriptions", newValueDict, controlValueDict)	
-			logger.info('Inserted description')
 			break
 		
 		except:

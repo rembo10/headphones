@@ -111,6 +111,8 @@ h2 { font-size: 20px; }
 h3 { font-size: 16px; }
 
 p.indented { padding-top: 20px; margin-left: 20px; font-size: 14px; }
+p.center { text-align: center; font-size: 18px; }
+.smalltext2 { font-size: 11px; margin-left: 45px; }
 
 div#updatebar { text-align: center; min-width: 970px; width: 100%; background-color: light-blue; float: left; }
 div#logo { float: left; padding-left: 10px; }
@@ -120,7 +122,7 @@ ul#nav li { margin: 40px 0px auto 10px;  display: inline; }
 ul#nav li a { padding: 5px; font-size: 16px; font-weight: bold; color: #330000; text-decoration: none; }
 ul#nav li a:hover { background-color: #a3e532; }
 
-div#subhead_container { height: 30px; width:100%; min-width: 930px; background-color:#330000; float: left; list-style-type: none; z-index: 998; overflow: hidden; }
+div#subhead_container { height: 30px; width:100%; min-width: 1000px; background-color:#330000; float: left; list-style-type: none; z-index: 998; overflow: hidden; }
 ul#subhead_menu { margin-top: 5px; }
 ul#subhead_menu li { width: 100%; height: 100%; display: inline; }
 ul#subhead_menu li a { padding: 5px 15px 10px 15px; vertical-align: middle; color: white; font-size: 16px; text-decoration: none; }
@@ -132,8 +134,12 @@ div#main { margin: 0; padding: 80px 0 0 0; }
 
 .table_wrapper { border-radius: 20px; -webkit-border-radius: 20px; -moz-border-radius: 20px; width: 88%; margin: 20px auto 0 auto; padding: 25px; background-color: white; position: relative; min-height: 200px; clear: both; _height: 302px; zoom: 1; }
 .manage_wrapper { width: 88%; margin: 20px auto 0 auto; padding: 25px; min-height: 150px; clear: both; _height: 302px; zoom: 1; }
-.table_wrapper_left { padding: 25px; background-color: #ffffff; float: left; width: 40%; height: 200px; margin-top: 25px; margin-left: 30px; margin-right: auto; -moz-border-radius: 20px; border-radius: 20px; }
-.table_wrapper_right{ padding: 25px; background-color: #ffffff; width: 40%; height: 200px; margin-top: 25px; margin-left: auto; margin-right: 30px; -moz-border-radius: 20px; border-radius: 20px; }
+.table_wrapper_left { padding: 25px; background-color: #ffffff; float: left; width: 40%; min-height: 100px; margin-top: 25px; margin-left: 30px; margin-right: auto; -moz-border-radius: 20px; border-radius: 20px; }
+.table_wrapper_right{ padding: 25px; background-color: #ffffff; width: 40%; min-height: 100px; margin-top: 25px; margin-left: auto; margin-right: 30px; -moz-border-radius: 20px; border-radius: 20px; }
+
+.configtable { font-size: 14px; line-height:18px; }
+.configtable td { width: 350px; padding: 10px; vertical-align: middle; }
+.configtable tr { vertical-align: text-top; }
 
 table#artist_table { background-color: white; width: 100%; padding: 20px; }
 

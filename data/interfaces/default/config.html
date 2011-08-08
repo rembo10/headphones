@@ -1,220 +1,247 @@
 <%inherit file="base.html"/>
-<form action="configUpdate" method="post">
-	<div id="config">
+
+<%def name="body()">
 	<div class="table_wrapper">
-		<h1>Web Interface</h1>
-		<table>
+		<form action="configUpdate" method="post">
+        <a name="web_interface"><h1><u>Web Interface</u></h1></a>
+
+        <table class="configtable" summary="Web Interface">
+            <tr>
+                <td>
+                  <h3>HTTP Host:</h3>
+                    <input type="text" name="http_host" value="${config['http_host']}" size="30" maxlength="40"><br>
+                    <i class="smalltext">i.e. localhost or 0.0.0.0</i>
+                </td>
+                <td>
+                    <h3>HTTP Username:</h3>
+                    <input type="text" name="http_username" value="${config['http_user']}" size="30" maxlength="40">
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                      <h3>HTTP Port:</h3>
+                      <input type="text" name="http_port" value="${config['http_port']}" size="10" maxlength="40">
+                </td>
+
+                <td>
+                      <h3>HTTP Password:</h3>
+                      <input type="password" name="http_password" value="${config['http_pass']}" size="30" maxlength="40">
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <h3>Launch Browser on Startup: <input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} /></h3>
+                </td>
+            </tr>
+        </table>
+	</div>
+	<div class="table_wrapper">
+        <a name="download"><h1><u>Download Settings</u></h1></a>
+        <table class="configtable" summary="Download Settings">
+            <tr>
+                <td>
+                    <h3>SABnzbd Host:</h3><input type="text" name="sab_host" value="${config['sab_host']}" size="30" maxlength="40"><br>
+
+                    <i class="smalltext">usually localhost:8080</i>
+                </td>
+
+                <td>
+                    <h3>SABnzbd Username:</h3><input type="text" name="sab_username" value="${config['sab_user']}" size="20" maxlength="40">
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <h3>SABnzbd API:</h3><input type="text" name="sab_apikey" value="${config['sab_api']}" size="36" maxlength="40">
+                </td>
+
+                <td>
+                    <h3>SABnzbd Password:</h3><input type="password" name="sab_password" value="${config['sab_pass']}" size="20" maxlength="40">
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <h3>SABnzbd Category:</h3><input type="text" name="sab_category" value="${config['sab_cat']}" size="20" maxlength="40">
+                </td>
+
+                <td>
+                    <h3>Music Download Directory:</h3><input type="text" name="download_dir" value="${config['download_dir']}" size="50"><br>
+
+                    <i class="smalltext">Full path to the directory where SAB downloads your music<br>
+                    i.e. /Users/name/Downloads/music</i>
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <h3>Use Black Hole:</h3><input type="checkbox" name="blackhole" value=1 ${config['use_blackhole']} />
+                </td>
+
+                <td>
+                    <h3>Black Hole Directory:</h3><input type="text" name="blackhole_dir" value="${config['blackhole_dir']}" size="50"><br>
+
+                    <i class="smalltext">Folder your Download program watches for NZBs</i>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td>
+                    <h3>Usenet Retention:</h3><input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="20" maxlength="40">
+                </td>
+            </tr>
+        </table>
+	</div>
+	<div class="table_wrapper">
+        <a name="providers"><h1><u>Search Providers</u></h1></a>
+        <table class="configtable" summary="Search Providers">
+            <tr>
+                <td>
+                    <h3>NZBMatrix: <input type="checkbox" name="nzbmatrix" value="1" ${config['use_nzbmatrix']} /></h3>
+                </td>
+
+                <td>
+                    <h3>NZBMatrix Username: </h3>
+                      <input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30" maxlength="40">
+                </td>
+
+                <td>
+                    <h3>NZBMatrix API: </h3>
+                      <input type="text" name="nzbmatrix_apikey" value="${config['nzbmatrix_api']}" size="36" maxlength="40">
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <h3>Newznab: <input type="checkbox" name="newznab" value="1" ${config['use_newznab']} /></h3>
+                </td>
+
+                <td>
+                    <h3>Newznab Host:</h3>
+                      <input type="text" name="newznab_host" value="${config['newznab_host']}" size="30" maxlength="40"><br>
+                      <i class="smalltext">i.e. http://nzb.su</i>
+                </td>
+
+                <td>
+                    <br>
+
+                    <h3>
+                      Newznab API:</h3>
+                      <input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36" maxlength="40">
+                    
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+
+                    <h3>NZBs.org:<input type="checkbox" name="nzbsorg" value="1" ${config['use_nzbsorg']} /></h3>
+                </td>
+
+                <td>
+
+                    <h3>NZBs.org UID:</h3>
+                      <input type="text" name="nzbsorg_uid" value="${config['nzbsorg_uid']}" size="30" maxlength="40">
+                    
+                </td>
+
+                <td>
+
+                    <h3>NZBs.org Hash:</h3>
+                      <input type="text" name="nzbsorg_hash" value="${config['nzbsorg_hash']}" size="36" maxlength="40">
+                    
+                </td>
+            </tr>
+			
 			<tr>
-				<td>
-					<p>	HTTP Host: <br />
-						<input type="text" name="http_host" value="${config['http_host']}" size="30" maxlength="40"><br /> 
-						<i class="smalltext">e.g. localhost or 0.0.0.0</i>
-					</p>
-				</td>
-				<td>
-					<p>HTTP Username: <br />
-						<input type="text" name="http_username" value="${config['http_user']}" size="30" maxlength="40">
-					</p>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<p>HTTP Port: <br />
-						<input type="text" name="http_port" value="${config['http_port']}" size="20" maxlength="40">
-					</p>
-				</td>
-				<td>
-					<p>HTTP Password: <br />
-						<input type="password" name="http_password" value="${config['http_pass']}" size="30" maxlength="40">
-					</p>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<p>Launch Browser on Startup:<input type="checkbox"	name="launch_browser" value="1" ${config['launch_browser']} /></p>
-				</td>
-			</tr>
+                <td>
+                    <h3>Newzbin:<input type="checkbox" name="newzbin" value="1" ${config['use_newzbin']} /></h3>
+                </td>
+
+                <td>
+                    <h3>Newzbin UID:</h3>
+                      <input type="text" name="newzbin_uid" value="${config['newzbin_uid']}" size="30" maxlength="40">
+                    
+                </td>
+
+                <td>
+                    <br>
+
+                    <h3>Newzbin Password:</h3>
+                      <input type="text" name="newzbin_password" value="${config['newzbin_pass']}" size="36" maxlength="40">
+                </td>
+            </tr>
+        </table>
+	</div>
+	<div class="table_wrapper">
+        <a name="post_processing"><h1><u>Quality &amp; Post Processing</u></h1></a>
+
+        <table class="configtable" summary="Quality & Post Processing">
+            <tr>
+                <td>
+                	<h2>Album Quality:</h2><br>
+                   	  <input type="radio" name="preferred_quality" value="0" ${config['pref_qual_0']} />Highest Quality excluding Lossless<br>
+                      <input type="radio" name="preferred_quality" value="1" ${config['pref_qual_1']} />Highest Quality including Lossless<br>
+                      <input type="radio" name="preferred_quality" value="3" ${config['pref_qual_3']} />Lossless Only<br>
+                      <input type="radio" name="preferred_quality" value="2" ${config['pref_qual_2']} />Preferred Bitrate:
+    					<input type="text" name="preferred_bitrate" value="${config['pref_bitrate']}" size="5" maxlength="5" />kbps <br>
+                      	<i class="smalltext2"><input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />Auto-Detect Preferred Bitrate </i>
+                </td>
+                <td>
+                      <h2>Post-Processing:</h2>
+                      	<input type="checkbox" name="move_files" value="1" ${config['move_files']} />Move downloads to Destination Folder<br />
+                      	<input type="checkbox" name="rename_files" value="1" ${config['rename_files']} />Rename files<br>
+                        <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} />Correct metadata<br>
+                        <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} />Delete leftover files (.m3u, .nfo, .sfv, .nzb, etc.)<br>
+                      	<input type="checkbox" name="add_album_art" value="1" ${config['add_album_art']}>Add album art as 'folder.jpg' to album folder<br>
+                      	<input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}>Embed album art in each file
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <br>
+
+                    <h3>Path to Destination folder:</h3><input type="text" name="destination_dir" value="${config['dest_dir']}" size="50">
+                      <br>
+                      <i class="smalltext">i.e. /Users/name/Music/iTunes or /Volumes/share/music</i>
+                </td>
+            </tr>
 		</table>
 	</div>
 	<div class="table_wrapper">
-		<h1>Download Settings</h1>
-			<table class="configtable" summary="Download Settings">
-				<tr>
-					<td>
-						<p>SABnzbd Host:</p>
-						<input type="text" name="sab_host" value="${config['sab_host']}" size="30"	maxlength="40"><br />
-						<i class="smalltext">e.g. localhost:8080</i>
-					</td>
-					<td>
-						<p>SABnzbd Username:</p>
-						<input type="text" name="sab_username" value="${config['sab_user']}" size="20" maxlength="40">
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<p>SABnzbd API:</p>
-						<input type="text" name="sab_apikey" value="${config['sab_api']}" size="46" maxlength="40">
-					</td>
-					<td>
-						<p>SABnzbd Password:</p>
-						<input type="password" name="sab_password" value="${config['sab_pass']}" size="20"	maxlength="40">
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<p>SABnzbd Category:</p>
-						<input type="text" name="sab_category" value="${config['sab_cat']}" size="20"	maxlength="40"></td>
-					<td>
-						<p>Music Download Directory:</p>
-						<input type="text" name="download_dir" value="${config['download_dir']}" size="60"><br />
-						<i class="smalltext">Full path to the directory where SAB downloads your music<br /> 
-						e.g. Downloads/music or	/Users/name/Downloads/music</i>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<p>Use Black Hole:</p>
-						<input type="checkbox" name="blackhole" value=1 ${config['use_blackhole']} />
-					</td>
-					<td>
-						<p>Black Hole Directory:</p>
-						<input type="text" name="blackhole_dir" value="${config['blackhole_dir']}" size="60"><br />
-						<i class="smalltext">Folder your Download program watches for NZBs</i>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<p>Usenet Retention:</p>
-						<input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="20"	maxlength="40">
-					</td>
-				</tr>
-			</table>
-		</div>
-		<div class="table_wrapper">
-			<a name="providers">
-				<h1>
-					<u>Search Providers</u>
-				</h1>
-			</a>
-			<table class="configtable" summary="Search Providers">
-				<tr>
-					<td>
-						<p>NZBMatrix: <input type="checkbox" name="nzbmatrix" value="1" ${config['use_nzbmatrix']} /></p>
-					</td>
-					<td>
-						<p>NZBMatrix Username: <br> <input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30" maxlength="40"></p>
-					</td>
-					<td>
-						<p>NZBMatrix API: <br> <input type="text" name="nzbmatrix_apikey" value="${config['nzbmatrix_api']}" size="46" maxlength="40"></p>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<p>Newznab: <input type="checkbox" name="newznab" value="1" ${config['use_newznab']} /></p>
-					</td>
-					<td>
-						<p>Newznab Host:<br> <input type="text" name="newznab_host"	value="${config['newznab_host']}" size="30" maxlength="40"><br /> 
-						<i class="smalltext">i.e. http://nzb.su</i></p>
-					</td>
-					<td>
-						<p>Newznab API:<br> <input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="46" maxlength="40"></p>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<p>NZBs.org:<input type="checkbox" name="nzbsorg" value="1" ${config['use_nzbsorg']} /></p>
-					</td>
-					<td>
-						<p>NZBs.org UID:<br> <input type="text" name="nzbsorg_uid" value="${config['nzbsorg_uid']}" size="30" maxlength="40"></p>
-					</td>
-					<td>
-						<p>NZBs.org Hash:<br> <input type="text" name="nzbsorg_hash" value="${config['nzbsorg_hash']}" size="46" maxlength="40"></p>
-					</td>
-				</tr>
-			</table>
-		</div>
-		<div class="table_wrapper">
-			<a name="post_processing">
-				<h1>
-					<u>Quality &amp; Post Processing</u>
-				</h1>
-			</a>
-			<table class="configtable" summary="Quality & Post Processing">
-				<tr>
-					<td>
-						<b>Album Quality:</b>
-							<p>
-								<input type="radio" name="preferred_quality" value="0" ${config['pref_qual_0']} />Highest	Quality excluding Lossless<br />
-								<input type="radio" name="preferred_quality" value="1" ${config['pref_qual_1']} />Highest	Quality including Lossless<br />
-								<input type="radio" name="preferred_quality" value="3" ${config['pref_qual_2']} />Lossless Only<br />
-								<input type="radio" name="preferred_quality" value="2" ${config['pref_qual_3']} />Preferred Bitrate: <input type="text" name="preferred_bitrate" value="${config['pref_bitrate']}" size="5" maxlength="5" />kbps <br />
-								<i class="smalltext2"><input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />Auto-Detect Preferred Bitrate </i>
-							</p>
-					</td>
-					<td>
-						<b>Post-Processing:</b>
-							<p>
-								<input type="checkbox" name="move_files" value="1" ${config['move_files']} />Move downloads to Music Folder<br />
-								<input type="checkbox" name="rename_files" value="1" ${config['rename_files']} />Rename &amp; add metadata<br />
-								<input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} />Correct metadata<br/> 
-								<input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} />Delete leftover files<br />
-								<input type="checkbox" name="add_album_art" value="1" ${config['add_album_art']} />Add album art<br />
-								<input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']} />Embed album art in each file<br />
-							</p>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<p>
-							<b>Path to Music folder</b>:<br />
-							<input type="text" name="destination_dir" value="${config['dest_dir']}" size="60" maxlength="200"> <br /> 
-							<i class="smalltext">e.g. /Users/name/Music/iTunes or /Volumes/share/music</i>
-						</p>
-					</td>
-				</tr>
-			</table>
-		</div>
-		<div class="table_wrapper">
-			<a name="advanced_settings">
-				<h1>
-					<u>Advanced Settings</u>
-				</h1>
-			</a>
-			<table class="configtable" summary="Advanced Settings">
+        <a name="advanced_settings"><h1><u>Advanced Settings</u></h1></a>
+        
+        <table class="configtable" summary="Advanced Settings">
             <tr>
                 <td>
-                	<b>Renaming Options:</b>
-                    <p>
-                    	<b>Folder Format</b>:<br />
-                    	<input type="text" name="folder_format" value="${config['folder_format']}" size="60">
-                    	<br />
-                      	<i class="smalltext">Use: artist, album and year, '/' for directories. <br />E.g.: artist/album [year]</i>
-                    </p>
-                    <p>
-                    	<b>File Format</b>:<br />
-                    		<input type="text" name="file_format" value="${config['file_format']}" size="60">
-                      	<br>
-                      	<i class="smalltext">Use: tracknumber, title, artist, album and year</i>
-                    </p>
+                	<h2>Renaming Options:</h2>
+					<br>
+                    <h3>Folder Format:</h3><input type="text" name="folder_format" value="${config['folder_format']}" size="43">
+                      <i class="smalltext">Use: artist, album, year and first (first letter in artist name)<br />
+                      				E.g.: first/artist/album [year] = G/Girl Talk/All Day [2010]</i>
+                    <br><br>
+                    <h3>File Format:</h3><input type="text" name="file_format" value="${config['file_format']}" size="43">
+                      <br>
+                      <i class="smalltext">Use: tracknumber, title, artist, album and year</i>
                 </td>
                 <td>
-                    <b>Miscellaneous:</b>
-                    <p>
-                    	<input type="checkbox" name="include_extras" value="1" ${config['include_extras']} />Automatically Include Extras When Adding an Artist<br />
-                    <i class="smalltext">Extras includes: EPs, Compilations, Live Albums, Remix Albums and Singles</i>
-                    </p>
-                    <b>Log Directory</b>:
-                    <p>
-                    	<input type="text" name="log_dir" value="${config['log_dir']}" size="40" />
-                    </p>
+                      <h2>Miscellaneous:</h2>
+						<br>
+                      	<h3><input type="checkbox" name="include_extras" value="1" ${config['include_extras']} />Automatically Include Extras When Adding an Artist</h3><br />
+                      <i class="smalltext">Extras includes: EPs, Compilations, Live Albums, Remix Albums and Singles</i>
+					<br><br><br>
+                    <h3>Log Directory:</h3><input type="text" name="log_dir" value="${config['log_dir']}" size="50">
                 </td>
             </tr>
         </table>
     </div>
-			<p class="center">
-				<input type="submit" value="Save Changes"><br /> 
-				(Web Interface changes require a restart to take effect)
-			</p>
-		</form>
-	</div>
+
+        <p class="center"><input type="submit" value="Save Changes"><br>
+        (Web Interface changes require a restart to take effect)</h3>
+      </form>
+</%def>
 <%inherit file="base.html" />
