@@ -399,7 +399,7 @@ def searchNZB(albumid=None, new=False):
                 bestqual = nzblist[0]
             
             
-            logger.info(u"Found best result: %s (%s) - %s" % (bestqual[0], bestqual[2], helpers.bytes_to_mb(bestqual[1])))
+            logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
             
             if bestqual[3] == "newzbin":
                 #logger.info("Found a newzbin result")
@@ -469,7 +469,7 @@ def searchNZB(albumid=None, new=False):
 
 def verifyresult(title, term):
 	
-    title = re.sub('[\.\-\/]', ' ', title)
+    title = re.sub('[\.\-\/\_]', ' ', title)
 	
     if not re.search('^' + re.escape(term), title, re.IGNORECASE):
         logger.info("Removed from results: " + title + " (artist not at string start).")
