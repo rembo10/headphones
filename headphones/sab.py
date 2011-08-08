@@ -67,10 +67,6 @@ def sendNZB(nzb):
 
     url = "http://" + headphones.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
 
-    logger.info(u"Sending NZB to SABnzbd")
-
-    logger.info(u"URL: " + url)
-
     try:
 
         if nzb.resultType == "nzb":
