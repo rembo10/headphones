@@ -96,7 +96,7 @@ def is_exists(artistid):
 	artistlist = myDB.select('SELECT ArtistID, ArtistName from artists WHERE ArtistID=?', [artistid])
 
 	if any(artistid in x for x in artistlist):
-		logger.info(artistlist[0][1] + u" is already in the database. Updating 'have tracks', but not artist information")
+		logger.debug(artistlist[0][1] + u" is already in the database. Updating 'have tracks', but not artist information")
 		return True
 	else:
 		return False
