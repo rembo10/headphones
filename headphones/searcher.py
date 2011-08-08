@@ -115,7 +115,7 @@ def searchNZB(albumid=None, new=False):
                         }
                         
             searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
-            logger.info(u"Parsing results from "+searchURL)
+            logger.info(u'Parsing results from <a href="%s">NZBMatrix</a>' % searchURL)
             try:
             	data = urllib2.urlopen(searchURL, timeout=20).read()
             except urllib2.URLError, e:
@@ -161,7 +161,7 @@ def searchNZB(albumid=None, new=False):
         
             searchURL = headphones.NEWZNAB_HOST + '/api?' + urllib.urlencode(params)
                 
-            logger.info(u"Parsing results from "+searchURL)
+            logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, headphones.NEWZNAB_HOST))
             
             try:
             	data = urllib2.urlopen(searchURL, timeout=20).read()
@@ -215,7 +215,7 @@ def searchNZB(albumid=None, new=False):
                         }
         
             searchURL = 'https://secure.nzbs.org/rss.php?' + urllib.urlencode(params)
-            logger.info(u"Parsing results from "+searchURL)
+            logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, provider))
             
             try:
             	data = urllib2.urlopen(searchURL, timeout=20).read()
@@ -293,7 +293,7 @@ def searchNZB(albumid=None, new=False):
             searchURL = providerurl + "search/?%s" % urllib.urlencode(params)
             data = getNewzbinURL(searchURL)    
             if data:
-                logger.info(u"Parsing results from "+searchURL)
+                logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, providerurl))
                 
                 try:    
                     d = minidom.parseString(data)
@@ -350,7 +350,7 @@ def searchNZB(albumid=None, new=False):
 
                 try:
                     albumlength = sum([pair[0] for pair in tracks])
-                    logger.debug('Album length = %s' % albumlength)
+
                     targetsize = albumlength/1000 * int(headphones.PREFERRED_BITRATE) * 128
                     logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
     
@@ -399,7 +399,7 @@ def searchNZB(albumid=None, new=False):
                 bestqual = nzblist[0]
             
             
-            logger.info(u"Found best result: %s (%s) - %s" % (bestqual[0], bestqual[2], helpers.bytes_to_mb(bestqual[1])))
+            logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
             logger.info(u"Pre-processing result")
             (data, bestqual) = preprocess(nzblist)
             if data and bestqual:
@@ -407,7 +407,7 @@ def searchNZB(albumid=None, new=False):
                 if headphones.SAB_HOST and not headphones.BLACKHOLE:
 
                     nzb = classes.NZBDataSearchResult()
-                    nzb.extraInfo.append(data)
+					nzb.extraInfo.append(data)
                     nzb.name = nzb_folder_name
                     sab.sendNZB(nzb)
 
@@ -428,7 +428,7 @@ def searchNZB(albumid=None, new=False):
 
 def verifyresult(title, term):
 	
-    title = re.sub('[\.\-\/]', ' ', title)
+    title = re.sub('[\.\-\/\_]', ' ', title)
 	
     if not re.search('^' + re.escape(term), title, re.IGNORECASE):
         logger.info("Removed from results: " + title + " (artist not at string start).")
