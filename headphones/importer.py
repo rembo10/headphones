@@ -259,7 +259,9 @@ def addReleaseById(rid):
 	
 	myDB = db.DBConnection()
 
-	rgid = myDB.select("SELECT * from releases WHERE ReleaseID=?", [rid])
+	results = myDB.select("SELECT ReleaseGroupID from releases WHERE ReleaseID=?", [rid])
+	for result in results:
+		rgid = result['ReleaseGroupID']
 	if not rgid:
 		#we have to make a call to get the release no matter what so we can get the RGID
 		#need a way around this - a local cache maybe in the future maybe? 
