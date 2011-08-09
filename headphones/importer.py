@@ -269,7 +269,7 @@ def addReleaseById(rid):
 		logger.debug("Found a cached releaseid : releasegroupid relationship: " + rid + " : " + rgid)
 	if not rgid:
 		#didn't find it in the cache, get the information from MB
-		logger.debug("Didn't find releaseID %s in the cache. Looking up its ReleaseGroupID", [rid])
+		logger.debug("Didn't find releaseID " + rid + " in the cache. Looking up its ReleaseGroupID")
 		try:
 			release_dict = mb.getRelease(rid)
 		except Exception, e:
