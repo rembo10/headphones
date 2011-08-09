@@ -215,8 +215,11 @@ def addArtisttoDB(artistid, extrasonly=False):
 		
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		
-		lastfm.getAlbumDescription(rg['id'], artist['artist_name'], rg['title'])
-		
+		try:
+			lastfm.getAlbumDescription(rg['id'], artist['artist_name'], rg['title'])
+		except Exception, e:
+			logger.error('Attempt to retrieve album description from Last.fm failed: %s' % e)
+			
 		# I changed the albumid from releaseid -> rgid, so might need to delete albums that have a releaseid
 		for release in release_dict['releaselist']:
 			myDB.action('DELETE from albums WHERE AlbumID=?', [release['releaseid']])

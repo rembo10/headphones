@@ -4,6 +4,7 @@ import logging
 from logging import handlers
 
 import headphones
+from headphones import helpers
 
 MAX_SIZE = 1000000 # 1mb
 MAX_FILES = 5
@@ -45,33 +46,36 @@ class RotatingLogger(object):
 			l.addHandler(consolehandler)	
 		
 	def log(self, message, level):
-	
+
 		logger = logging.getLogger('headphones')
 		
 		threadname = threading.currentThread().getName()
-		message = threadname + ' : ' + message
 		
-		if level == 'debug':
+		if level != 'DEBUG':
+			headphones.LOG_LIST.insert(0, (helpers.now(), message, level, threadname))
+		
+		message = threadname + ' : ' + message
+
+		if level == 'DEBUG':
 			logger.debug(message)
-		elif level == 'info':
+		elif level == 'INFO':
 			logger.info(message)
-		elif level == 'warn':
+		elif level == 'WARN':
 			logger.warn(message)
 		else:
 			logger.error(message)
 
-
 headphones_log = RotatingLogger('headphones.log', MAX_SIZE, MAX_FILES)
 
 def debug(message):
-	headphones_log.log(message, level='debug')
+	headphones_log.log(message, level='DEBUG')
 
 def info(message):
-	headphones_log.log(message, level='info')
+	headphones_log.log(message, level='INFO')
 	
 def warn(message):
-	headphones_log.log(message, level='warn')
+	headphones_log.log(message, level='WARN')
 	
 def error(message):
-	headphones_log.log(message, level='error')
+	headphones_log.log(message, level='ERROR')
 	
