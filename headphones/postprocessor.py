@@ -306,7 +306,7 @@ def moveFiles(albumpath, release, tracks):
 			os.chmod(temp_f, 0755)
 	
 	except Exception, e:
-		logger.error('Could not create folder for %s. Not moving' % release['AlbumName'])
+		logger.error('Could not create folder for %s. Not moving: %s' % (release['AlbumTitle'], e))
 		return albumpath
 		
 	for r,d,f in os.walk(albumpath):
