@@ -415,7 +415,7 @@ def searchNZB(albumid=None, new=False):
                     nzb_name = nzb_folder_name + '.nzb'
                     download_path = os.path.join(headphones.BLACKHOLE_DIR, nzb_name)
                     try:
-                        f = open(download_path)
+                        f = open(download_path, 'w')
                         f.write(data)
                         f.close()
                     except Exception, e:
