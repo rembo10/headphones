@@ -76,6 +76,7 @@ INCLUDE_EXTRAS = False
 
 NZB_SEARCH_INTERVAL = 360
 LIBRARYSCAN_INTERVAL = 60
+DOWNLOAD_SCAN_INTERVAL = 5
 
 SAB_HOST = None
 SAB_USERNAME = None
@@ -158,7 +159,7 @@ def initialize():
                 CURRENT_VERSION, LATEST_VERSION, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
                 CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, \
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, NZB_SEARCH_INTERVAL, \
-                LIBRARYSCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
+                LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME
                 
@@ -211,6 +212,7 @@ def initialize():
         
         NZB_SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'nzb_search_interval', 360)
         LIBRARYSCAN_INTERVAL = check_setting_int(CFG, 'General', 'libraryscan_interval', 180)
+        DOWNLOAD_SCAN_INTERVAL = check_setting_int(CFG, 'General', 'download_scan_interval', 5)
         
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
@@ -371,6 +373,7 @@ def config_write():
     
     new_config['General']['nzb_search_interval'] = NZB_SEARCH_INTERVAL
     new_config['General']['libraryscan_interval'] = LIBRARYSCAN_INTERVAL
+    new_config['General']['download_scan_interval'] = DOWNLOAD_SCAN_INTERVAL
 
     new_config['SABnzbd'] = {}
     new_config['SABnzbd']['sab_host'] = SAB_HOST
@@ -416,7 +419,7 @@ def start():
         SCHED.add_interval_job(searcher.searchNZB, minutes=NZB_SEARCH_INTERVAL)
         SCHED.add_interval_job(importer.scanMusic, minutes=LIBRARYSCAN_INTERVAL)
         SCHED.add_interval_job(versioncheck.checkGithub, minutes=300)
-        SCHED.add_interval_job(postprocessor.checkFolder, minutes=5)
+        SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
 
         SCHED.start()
         
