@@ -259,16 +259,19 @@ def addReleaseById(rid):
 	
 	myDB = db.DBConnection()
 
-	results = myDB.select("SELECT ReleaseGroupID from releases WHERE ReleaseID=?", [rid])
+	rgid = None
+	artistid = None
+	release_dict = None
+	results = myDB.select("SELECT albums.ArtistID, releases.ReleaseGroupID from releases, albums WHERE releases.ReleaseID=? and releases.ReleaseGroupID=albums.AlbumID LIMIT 1", [rid])
 	for result in results:
 		rgid = result['ReleaseGroupID']
+		artistid = result['ArtistID']
+		logger.debug("Found a cached releaseid : releasegroupid relationship: " + rid + " : " + rgid)
 	if not rgid:
-		#we have to make a call to get the release no matter what so we can get the RGID
-		#need a way around this - a local cache maybe in the future maybe? 
+		#didn't find it in the cache, get the information from MB
+		logger.debug("Didn't find releaseID %s in the cache. Looking up its ReleaseGroupID", [rid])
 		try:
 			release_dict = mb.getRelease(rid)
-			#keep a local cache of these so that external programs that are adding releasesByID don't hammer MB
-			myDB.action('INSERT INTO releases VALUES( ?, ?)', [rid, release_dict['rgid']])
 		except Exception, e:
 			logger.info('Unable to get release information for Release: ' + str(rid) + " " + str(e))
 			return
@@ -277,15 +280,15 @@ def addReleaseById(rid):
 			return
 		
 		rgid = release_dict['rgid']
-	
+		artistid = release_dict['artist_id']
 	
 	#we don't want to make more calls to MB here unless we have to, could be happening quite a lot
-	#TODO: why do I have to str() this here? I don't get it.
 	rg_exists = myDB.select("SELECT * from albums WHERE AlbumID=?", [rgid])
 	
 	#make sure the artist exists since I don't know what happens later if it doesn't
-	artist_exists = myDB.select("SELECT * from artists WHERE ArtistID=?", [release_dict['artist_id']])
-	if not artist_exists:
+	artist_exists = myDB.select("SELECT * from artists WHERE ArtistID=?", [artistid])
+	
+	if not artist_exists and release_dict:
 		if release_dict['artist_name'].startswith('The '):
 			sortname = release_dict['artist_name'][4:]
 		else:
@@ -303,8 +306,13 @@ def addReleaseById(rid):
 			newValueDict['IncludeExtras'] = 1
 		
 		myDB.upsert("artists", newValueDict, controlValueDict)
-
-	if not rg_exists:	
+		
+	elif not artist_exists and not release_dict:
+		logger.error("Artist does not exist in the database and did not get a valid response from MB. Skipping release.")
+		return
+	
+	if not rg_exists and release_dict:	#it should never be the case that we have an rg and not the artist
+										#but if it is this will fail
 		logger.info(u"Now adding-by-id album (" + release_dict['title'] + ") from id: " + rgid)
 		controlValueDict = {"AlbumID": 	rgid}
 
@@ -319,6 +327,9 @@ def addReleaseById(rid):
 						}
 		
 		myDB.upsert("albums", newValueDict, controlValueDict)
+
+		#keep a local cache of these so that external programs that are adding releasesByID don't hammer MB
+		myDB.action('INSERT INTO releases VALUES( ?, ?)', [rid, release_dict['rgid']])
 		
 		for track in release_dict['tracks']:
 		
@@ -334,10 +345,12 @@ def addReleaseById(rid):
 						}
 		
 			myDB.upsert("tracks", newValueDict, controlValueDict)
-
-		
+				
 		#start a search for the album
 		import searcher
 		searcher.searchNZB(rgid, False)
+	elif not rg_exists and not release_dict:
+		logger.error("ReleaseGroup does not exist in the database and did not get a valid response from MB. Skipping release.")
+		return
 	else:
 		logger.info('Release ' + str(rid) + " already exists in the database!")
