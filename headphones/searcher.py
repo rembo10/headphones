@@ -398,74 +398,32 @@ def searchNZB(albumid=None, new=False):
             else:
                 bestqual = nzblist[0]
             
-            
             logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
-            
-            if bestqual[3] == "newzbin":
-                #logger.info("Found a newzbin result")
-                reportid = bestqual[2]
-                params = urllib.urlencode({"username": headphones.NEWZBIN_UID, "password": headphones.NEWZBIN_PASSWORD, "reportid": reportid})
-                url = providerurl + "/api/dnzb/"
-                urllib._urlopener = NewzbinDownloader()
-                data = urllib.urlopen(url, data=params).read()
-                nzb = classes.NZBDataSearchResult()
-                nzb.extraInfo.append(data)
-                nzb_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year)
-                nzb.name = nzb_folder_name
-                logger.info(u"Sending FILE to SABNZBD: " + nzb.name)
-                sab.sendNZB(nzb)
-                
-                myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
-                myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", nzb_folder_name])
-            else:
-                downloadurl = bestqual[2]
-                nzb_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year)
-    																	
+            logger.info(u"Pre-processing result")
+            (data, bestqual) = preprocess(nzblist)
+            if data and bestqual:
+                nzb_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year) 
                 if headphones.SAB_HOST and not headphones.BLACKHOLE:
-                    linkparams = {}
-                    
-                    linkparams["mode"] = "addurl"
-                    
-                    if headphones.SAB_APIKEY:
-                        linkparams["apikey"] = headphones.SAB_APIKEY
-                    if headphones.SAB_USERNAME:
-                        linkparams["ma_username"] = headphones.SAB_USERNAME
-                    if headphones.SAB_PASSWORD:
-                        linkparams["ma_password"] = headphones.SAB_PASSWORD
-                    if headphones.SAB_CATEGORY:
-                        linkparams["cat"] = headphones.SAB_CATEGORY
-                                    
-                    linkparams["name"] = downloadurl
-    
-                    linkparams["nzbname"] = nzb_folder_name
-                        
-                    saburl = 'http://' + headphones.SAB_HOST + '/sabnzbd/api?' + urllib.urlencode(linkparams)
-                    logger.info(u'Sending link to SABNZBD: <a href="%s">SabNZBD link</a>' % saburl)
-                    
-                    try:
-                        urllib.urlopen(saburl)
-                        
-                    except:
-                        logger.error(u"Unable to send link. Are you sure the host address is correct?")
-                        break
-                        
-                    myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
-                    myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", nzb_folder_name])
-    
-                
+
+                    nzb = classes.NZBDataSearchResult()
+                    nzb.extraInfo.append(data)
+                    nzb.name = nzb_folder_name
+                    sab.sendNZB(nzb)
+
                 elif headphones.BLACKHOLE:
                 
                     nzb_name = nzb_folder_name + '.nzb'
                     download_path = os.path.join(headphones.BLACKHOLE_DIR, nzb_name)
-                    
                     try:
-                        urllib.urlretrieve(downloadurl, download_path)
+                        f = open(download_path, 'w')
+                        f.write(data)
+                        f.close()
                     except Exception, e:
-                        logger.error('Couldn\'t retrieve NZB: %s' % e)
+                        logger.error('Couldn\'t write NZB file: %s' % e)
                         break
                         
-                    myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
-                    myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", nzb_folder_name])
+                myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
+                myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", nzb_folder_name])
 
 def verifyresult(title, term):
 	
@@ -482,3 +440,41 @@ def verifyresult(title, term):
         return False
     else:
         return True
+
+def getresultNZB(result):
+    if result[3] == 'Newzbin':
+        params = urllib.urlencode({"username": headphones.NEWZBIN_UID, "password": headphones.NEWZBIN_PASSWORD, "reportid": result[2]})
+        url = "https://www.newzbin.com" + "/api/dnzb/"
+        urllib._urlopener = NewzbinDownloader()
+        try:
+            nzb = urllib.urlopen(url, data=params).read()
+        except urllib2.URLError, e:
+            logger.warn('Error fetching nzb from url: ' + url + ' %s' % e)
+    else:
+        try:
+            nzb = urllib2.urlopen(result[2], timeout=20).read()
+        except:
+            logger.warn('Error fetching nzb from url: ' + result[2] + ' %s' % e)
+    return nzb
+    
+def preprocess(resultlist):
+    for result in resultlist:
+        nzb = getresultNZB(result)
+        if nzb:
+            try:    
+                d = minidom.parseString(nzb)
+                node = d.documentElement
+                nzbfiles = d.getElementsByTagName("file")
+                for nzbfile in nzbfiles:
+                    if nzbfile.getAttribute("date") < (time.time() - int(headphones.USENET_RETENTION) * 86400):
+                        logger.error('NZB contains a file out of your retention. Skipping.')
+                        continue
+                    #TODO: Do we want rar checking in here to try to keep unknowns out?
+                    #or at least the option to do so?
+            except ExpatError:
+                logger.error('Unable to parse the best result NZB. Skipping.')
+                continue
+            return nzb, result
+        else:
+            logger.error("Couldn't retrieve the best nzb. Skipping.")
+    return (False, False)

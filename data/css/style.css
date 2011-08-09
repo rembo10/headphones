@@ -138,8 +138,8 @@ div#main { margin: 0; padding: 80px 0 0 0; }
 .table_wrapper_right{ padding: 25px; background-color: #ffffff; width: 40%; min-height: 100px; margin-top: 25px; margin-left: auto; margin-right: 30px; -moz-border-radius: 20px; border-radius: 20px; }
 
 .configtable { font-size: 14px; line-height:18px; }
-.configtable td { width: 350px; padding: 10px; vertical-align: middle; }
-.configtable tr { vertical-align: text-top; }
+.configtable td { width: 350px; padding: 10px; }
+.configtable td#middle { vertical-align: middle; }
 
 table#artist_table { background-color: white; width: 100%; padding: 20px; }
 

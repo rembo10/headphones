@@ -91,7 +91,52 @@ def getArtists():
 	for artistid in artistlist:
 		importer.addArtisttoDB(artistid)
 	
-def getAlbumDescription(rgid, releaselist):
+def getAlbumDescription(rgid, artist, album):
+	
+	myDB = db.DBConnection()	
+	result = myDB.select('SELECT Summary from descriptions WHERE ReleaseGroupID=?', [rgid])
+	
+	if result:
+		return
+		
+	params = {  "method": 'album.getInfo',
+				"api_key": api_key,
+                "artist": artist.encode('utf-8'),
+                "album": album.encode('utf-8')
+            }
+
+	searchURL = 'http://ws.audioscrobbler.com/2.0/?' + urllib.urlencode(params)
+	data = urllib.urlopen(searchURL).read()
+	
+	if data == '<?xml version="1.0" encoding="utf-8"?><lfm status="failed"><error code="6">Album not found</error></lfm>':
+		return
+		
+	try:
+		d = minidom.parseString(data)
+
+		albuminfo = d.getElementsByTagName("album")
+		
+		for item in albuminfo:
+			summarynode = item.getElementsByTagName("summary")[0].childNodes
+			contentnode = item.getElementsByTagName("content")[0].childNodes
+			for node in summarynode:
+				summary = node.data
+			for node in contentnode:
+				content = node.data
+				
+		controlValueDict = {'ReleaseGroupID': rgid}
+		newValueDict = {'Summary': summary,
+						'Content': content}
+		myDB.upsert("descriptions", newValueDict, controlValueDict)	
+		
+	except:
+		return
+
+def getAlbumDescriptionOld(rgid, releaselist):
+	"""
+	This was a dumb way to do it - going to just use artist & album name but keeping this here
+	because I may use it to fetch and cache album art
+	"""
 
 	myDB = db.DBConnection()	
 	result = myDB.select('SELECT Summary from descriptions WHERE ReleaseGroupID=?', [rgid])

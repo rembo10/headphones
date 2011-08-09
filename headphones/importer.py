@@ -24,7 +24,7 @@ def scanMusic(dir=None):
 	
 	for r,d,f in os.walk(dir):
 		for files in f:
-			if any(files.endswith(x) for x in (".mp3", ".flac", ".aac", ".ogg", ".ape", ".m4a")):
+			if any(files.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
 				results.append(os.path.join(r, files))
 				
 	logger.info(u'%i music files found. Reading metadata....' % len(results))
@@ -96,7 +96,7 @@ def is_exists(artistid):
 	artistlist = myDB.select('SELECT ArtistID, ArtistName from artists WHERE ArtistID=?', [artistid])
 
 	if any(artistid in x for x in artistlist):
-		logger.info(artistlist[0][1] + u" is already in the database. Updating 'have tracks', but not artist information")
+		logger.debug(artistlist[0][1] + u" is already in the database. Updating 'have tracks', but not artist information")
 		return True
 	else:
 		return False
@@ -215,7 +215,7 @@ def addArtisttoDB(artistid, extrasonly=False):
 		
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		
-		lastfm.getAlbumDescription(rg['id'], release_dict['releaselist'])
+		lastfm.getAlbumDescription(rg['id'], artist['artist_name'], rg['title'])
 		
 		# I changed the albumid from releaseid -> rgid, so might need to delete albums that have a releaseid
 		for release in release_dict['releaselist']:
