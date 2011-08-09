@@ -15,23 +15,18 @@
 		<tbody>
 		%for line in lineList:
 			<%
-				out_tuple = helpers.extract_logline(line)
+				timestamp, message, level, threadname = line
+				
+				if level == 'WARNING' or level == 'ERROR':
+					grade = 'X'
+				else:
+					grade = 'Z'
 			%>
-			%if out_tuple:
-				<%
-					if out_tuple[1] == 'DEBUG':
-						continue
-					elif out_tuple[1] == 'WARNING' or out_tuple[1] == 'ERROR':
-						grade = 'X'
-					else:
-						grade = 'Z'
-				%>
 				<tr class="grade${grade}">
-					<td id="timestamp">${out_tuple[0]}</td>
-					<td id="level">${out_tuple[1]}</td>
-					<td id="message">${out_tuple[3].decode('utf-8')}</td>
+					<td id="timestamp">${timestamp}</td>
+					<td id="level">${level}</td>
+					<td id="message">${message}</td>
 				</tr>
-			%endif
 		%endfor
 		</tbody>
 	</table>

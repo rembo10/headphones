@@ -231,13 +231,7 @@ class WebInterface(object):
 	history.exposed = True
 	
 	def logs(self):
-		log_file = os.path.join(headphones.LOG_DIR, 'headphones.log')
-		if os.path.isfile(log_file):
-			fileHandle = open(log_file)
-			lineList = fileHandle.readlines()
-			fileHandle.close()
-			lineList.reverse()
-		return serve_template(templatename="logs.html", title="Log", lineList=lineList[0:500])
+		return serve_template(templatename="logs.html", title="Log", lineList=headphones.LOG_LIST)
 	logs.exposed = True
 	
 	def clearhistory(self, type=None):

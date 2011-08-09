@@ -5,8 +5,6 @@ import re
 
 import headphones
 
-from headphones import logger
-
 def multikeysort(items, columns):
 
     comparers = [ ((itemgetter(col[1:].strip()), -1) if col.startswith('-') else (itemgetter(col.strip()), 1)) for col in columns]
@@ -91,6 +89,10 @@ def today():
 	yyyymmdd = datetime.date.isoformat(today)
 	return yyyymmdd
 	
+def now():
+	now = datetime.datetime.now()
+	return now.strftime("%Y-%m-%d %H:%M:%S")
+	
 def bytes_to_mb(bytes):
 
 	mb = int(bytes)/1048576
@@ -103,6 +105,9 @@ def replace_all(text, dic):
 	return text
 	
 def extract_data(s):
+	
+    from headphones import logger
+
     #headphones default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
     match = pattern.match(s)

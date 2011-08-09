@@ -37,6 +37,8 @@ CFG = None
 DB_FILE = None
 
 LOG_DIR = None
+LOG_LIST = []
+
 CACHE_DIR = None
 
 HTTP_PORT = None
