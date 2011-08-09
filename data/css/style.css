@@ -190,7 +190,7 @@ table#log_table { background-color: white; }
 
 table#log_table th#timestamp { text-align: left; min-width: 165px; }
 table#log_table th#level { text-align: left; min-width: 75px; }
-table#log_table th#message { text-align: left; min-width: 200px; }
+table#log_table th#message { text-align: left; min-width: 500px; }
 
 table#upcoming_table th#albumart { text-align: center; min-width: 50px; }
 table#upcoming_table th#albumname { text-align: center; min-width: 200px; }
