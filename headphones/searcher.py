@@ -453,7 +453,7 @@ def getresultNZB(result):
     else:
         try:
             nzb = urllib2.urlopen(result[2], timeout=20).read()
-        except:
+        except urllib2.URLError, e:
             logger.warn('Error fetching nzb from url: ' + result[2] + ' %s' % e)
     return nzb
     
