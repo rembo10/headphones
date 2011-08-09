@@ -418,6 +418,7 @@ def searchNZB(albumid=None, new=False):
                         f = open(download_path, 'w')
                         f.write(data)
                         f.close()
+                        logger.info('File saved to: %s' % nzb_name)
                     except Exception, e:
                         logger.error('Couldn\'t write NZB file: %s' % e)
                         break
@@ -449,12 +450,12 @@ def getresultNZB(result):
         try:
             nzb = urllib.urlopen(url, data=params).read()
         except urllib2.URLError, e:
-            logger.warn('Error fetching nzb from url: ' + url + ' %s' % e)
+            logger.warn('Error fetching nzb from url: %s. Error: %s' % (url, e))
     else:
         try:
             nzb = urllib2.urlopen(result[2], timeout=20).read()
         except Exception, e:
-            logger.warn('Error fetching nzb from url: ' + result[2] + ' %s' % e)
+            logger.warn('Error fetching nzb from url: %s. Error: %s' % (result[2], e))
     return nzb
     
 def preprocess(resultlist):
