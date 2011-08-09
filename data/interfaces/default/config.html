@@ -109,7 +109,7 @@
         <a name="providers"><h1><u>Search Providers</u></h1></a>
         <table class="configtable" summary="Search Providers">
             <tr>
-                <td>
+                <td id="middle">
                     <h3>NZBMatrix: <input type="checkbox" name="nzbmatrix" value="1" ${config['use_nzbmatrix']} /></h3>
                 </td>
 
@@ -125,59 +125,55 @@
             </tr>
 
             <tr>
-                <td>
+                <td id="middle">
                     <h3>Newznab: <input type="checkbox" name="newznab" value="1" ${config['use_newznab']} /></h3>
                 </td>
 
                 <td>
-                    <h3>Newznab Host:</h3>
+                    <h3>Newznab Host: </h3>
                       <input type="text" name="newznab_host" value="${config['newznab_host']}" size="30" maxlength="40"><br>
                       <i class="smalltext">i.e. http://nzb.su</i>
                 </td>
 
                 <td>
-
-                    <h3>
-                      Newznab API:</h3>
+                    <h3>Newznab API: </h3>
                       <input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36" maxlength="40">
-                    
                 </td>
             </tr>
 
             <tr>
-                <td>
-
-                    <h3>NZBs.org:<input type="checkbox" name="nzbsorg" value="1" ${config['use_nzbsorg']} /></h3>
+                <td id="middle">
+                    <h3>NZBs.org: <input type="checkbox" name="nzbsorg" value="1" ${config['use_nzbsorg']} /></h3>
                 </td>
 
                 <td>
 
-                    <h3>NZBs.org UID:</h3>
+                    <h3>NZBs.org UID: </h3>
                       <input type="text" name="nzbsorg_uid" value="${config['nzbsorg_uid']}" size="30" maxlength="40">
                     
                 </td>
 
                 <td>
 
-                    <h3>NZBs.org Hash:</h3>
+                    <h3>NZBs.org Hash: </h3>
                       <input type="text" name="nzbsorg_hash" value="${config['nzbsorg_hash']}" size="36" maxlength="40">
                     
                 </td>
             </tr>
 			
 			<tr>
-                <td>
-                    <h3>Newzbin:<input type="checkbox" name="newzbin" value="1" ${config['use_newzbin']} /></h3>
+                <td id="middle">
+                    <h3>Newzbin: <input type="checkbox" name="newzbin" value="1" ${config['use_newzbin']} /></h3>
                 </td>
 
                 <td>
-                    <h3>Newzbin UID:</h3>
+                    <h3>Newzbin UID: </h3>
                       <input type="text" name="newzbin_uid" value="${config['newzbin_uid']}" size="30" maxlength="40">
                     
                 </td>
 
                 <td>
-                    <h3>Newzbin Password:</h3>
+                    <h3>Newzbin Password: </h3>
                       <input type="text" name="newzbin_password" value="${config['newzbin_pass']}" size="36" maxlength="40">
                 </td>
             </tr>
@@ -190,21 +186,21 @@
             <tr>
                 <td>
                 	<h2>Album Quality:</h2><br>
-                   	  <input type="radio" name="preferred_quality" value="0" ${config['pref_qual_0']} />Highest Quality excluding Lossless<br>
-                      <input type="radio" name="preferred_quality" value="1" ${config['pref_qual_1']} />Highest Quality including Lossless<br>
-                      <input type="radio" name="preferred_quality" value="3" ${config['pref_qual_3']} />Lossless Only<br>
-                      <input type="radio" name="preferred_quality" value="2" ${config['pref_qual_2']} />Preferred Bitrate:
+                   	  <input type="radio" name="preferred_quality" value="0" ${config['pref_qual_0']} /> Highest Quality excluding Lossless<br>
+                      <input type="radio" name="preferred_quality" value="1" ${config['pref_qual_1']} /> Highest Quality including Lossless<br>
+                      <input type="radio" name="preferred_quality" value="3" ${config['pref_qual_3']} /> Lossless Only<br>
+                      <input type="radio" name="preferred_quality" value="2" ${config['pref_qual_2']} /> Preferred Bitrate:
     					<input type="text" name="preferred_bitrate" value="${config['pref_bitrate']}" size="5" maxlength="5" />kbps <br>
                       	<i class="smalltext2"><input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />Auto-Detect Preferred Bitrate </i>
                 </td>
                 <td>
                       <h2>Post-Processing:</h2>
-                      	<input type="checkbox" name="move_files" value="1" ${config['move_files']} />Move downloads to Destination Folder<br />
-                      	<input type="checkbox" name="rename_files" value="1" ${config['rename_files']} />Rename files<br>
-                        <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} />Correct metadata<br>
-                        <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} />Delete leftover files (.m3u, .nfo, .sfv, .nzb, etc.)<br>
-                      	<input type="checkbox" name="add_album_art" value="1" ${config['add_album_art']}>Add album art as 'folder.jpg' to album folder<br>
-                      	<input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}>Embed album art in each file
+                      	<input type="checkbox" name="move_files" value="1" ${config['move_files']} /> Move downloads to Destination Folder<br />
+                      	<input type="checkbox" name="rename_files" value="1" ${config['rename_files']} /> Rename files<br>
+                        <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} /> Correct metadata<br>
+                        <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} /> Delete leftover files (.m3u, .nfo, .sfv, .nzb, etc.)<br>
+                      	<input type="checkbox" name="add_album_art" value="1" ${config['add_album_art']}> Add album art as 'folder.jpg' to album folder<br>
+                      	<input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}> Embed album art in each file
                 </td>
             </tr>
 
@@ -251,4 +247,3 @@
         (Web Interface changes require a restart to take effect)</h3>
       </form>
 </%def>
-<%inherit file="base.html" />
