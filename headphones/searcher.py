@@ -304,7 +304,7 @@ def searchNZB(albumid=None, new=False):
                     items = d.getElementsByTagName("item")
                 except ExpatError:
                     logger.info('Unable to get the NEWZBIN feed. Check that your settings are correct - post a bug if they are')
-                    items = None
+                    items = []
             
             if len(items):
             
