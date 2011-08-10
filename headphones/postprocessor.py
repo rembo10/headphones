@@ -111,6 +111,12 @@ def verify(albumid, albumpath):
 		tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
 	
 	downloaded_track_list = []
+
+	try:
+		albumpath = str(albumpath)
+	except UnicodeEncodeError:
+		albumpath = unicode(albumpath).encode('unicode_escape')
+	
 	for r,d,f in os.walk(albumpath):
 		for files in f:
 			if any(files.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
