@@ -17,7 +17,9 @@ from headphones.helpers import checked, radio
 
 def serve_template(templatename, **kwargs):
 
-	template_dir = os.path.join(str(headphones.PROG_DIR), 'data/interfaces/default/')
+	interface_dir = os.path.join(str(headphones.PROG_DIR), 'data/interfaces/')
+	template_dir = os.path.join(str(interface_dir), headphones.INTERFACE)
+	
 	_hplookup = TemplateLookup(directories=[template_dir])
 	
 	try:
@@ -246,6 +248,10 @@ class WebInterface(object):
 	clearhistory.exposed = True
 	
 	def config(self):
+	
+		interface_dir = os.path.join(headphones.PROG_DIR, 'data/interfaces/')
+		interface_list = [ name for name in os.listdir(interface_dir) if os.path.isdir(os.path.join(interface_dir, name)) ]
+		
 		config = { 
 					"http_host" : headphones.HTTP_HOST,
 					"http_user" : headphones.HTTP_USERNAME,
@@ -289,7 +295,8 @@ class WebInterface(object):
 					"folder_format" : headphones.FOLDER_FORMAT,
 					"file_format" : headphones.FILE_FORMAT,
 					"include_extras" : checked(headphones.INCLUDE_EXTRAS),
-					"log_dir" : headphones.LOG_DIR
+					"log_dir" : headphones.LOG_DIR,
+					"interface_list" : interface_list
 				}
 		return serve_template(templatename="config.html", title="Settings", config=config)	
 	config.exposed = True
@@ -299,7 +306,7 @@ class WebInterface(object):
 		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
 		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
 		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
-		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, log_dir=None):
+		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, interface=None, log_dir=None):
 		
 		headphones.HTTP_HOST = http_host
 		headphones.HTTP_PORT = http_port
@@ -340,6 +347,7 @@ class WebInterface(object):
 		headphones.FOLDER_FORMAT = folder_format
 		headphones.FILE_FORMAT = file_format
 		headphones.INCLUDE_EXTRAS = include_extras
+		headphones.INTERFACE = interface
 		headphones.LOG_DIR = log_dir
 		
 		headphones.config_write()

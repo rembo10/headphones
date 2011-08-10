@@ -1,0 +1,105 @@
+<%inherit file="base.html" />
+<%! 
+	from headphones import db, helpers
+	myDB = db.DBConnection()
+%>
+
+<%def name="headerIncludes()">
+	<div id="subhead_container">
+		<ul id="subhead_menu">
+			%if album['Status'] == 'Skipped':
+			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False">Mark Album as Wanted</a></li>
+			%elif album['Status'] == 'Wanted':
+			<li><a href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False">Mark Album as Skipped</a></li>
+			%else:
+			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False">Retry Download</a></li>
+			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True">Try New Version</a></li>
+			%endif			
+		</ul>
+	</div>	
+</%def>
+
+<%def name="body()">
+	<div class="table_wrapper">
+		<h2><a href="artistPage?ArtistID=${album['ArtistID']}"><- Back to ${album['ArtistName']}</a></h2>
+		<div id="albumheader">	
+			<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" height="200" width="200" alt="albumart" class="albumArt">
+			<h1>${album['AlbumTitle']}</h1>
+			<h2>${album['ArtistName']}</h2>
+			<br>
+			<%
+				totalduration = myDB.action("SELECT SUM(TrackDuration) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
+				totaltracks = len(myDB.select("SELECT TrackTitle from tracks WHERE AlbumID=?", [album['AlbumID']]))
+				try:
+					albumduration = helpers.convert_milliseconds(totalduration)
+				except:
+					albumduration = 'n/a'
+			
+			%>
+			<h3>Tracks: ${totaltracks}</h3>
+			<h3>Duration: ${albumduration}</h3>
+			%if description:
+			<h3>Description: </h3>
+			${description['Summary']}
+			%endif
+		</div>
+		<div id="track_wrapper">
+			<table class="display" id="track_table">
+				<thead>
+					<tr>
+						<th id="number">#</th>
+						<th id="name">Track Title</th>
+						<th id="duration">Duration</th>
+						<th id="have"></th>
+					</tr>
+				</thead>
+				<tbody>
+				<%
+					i = 0
+				%>
+				%for track in tracks:
+					<%
+						i += 1
+						have = myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ? AND TrackTitle like ?', [track['ArtistName'], track['AlbumTitle'], track['TrackTitle']])
+						if len(have):
+							grade = 'A'
+							check = '<img src="images/checkmark.png" alt="checkmark">'
+						else:
+							grade = 'Z'
+							check = ''
+						try:
+							trackduration = helpers.convert_milliseconds(track['TrackDuration'])
+						except:
+							trackduration = 'n/a'
+					%>
+					<tr class="grade${grade}">
+						<td id="number">${i}</td>
+						<td id="name">${track['TrackTitle']}</td>
+						<td id="duration">${trackduration}</td>
+						<td id="have">${check}</td>
+					</tr>
+				%endfor
+				</tbody>
+			</table>
+		</div>
+	</div>
+</%def>
+
+<%def name="headIncludes()">
+	<link rel="stylesheet" href="css/data_table.css">
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script>
+	$(document).ready(function()
+	{
+		$('#track_table').dataTable(
+			{
+				"bFilter": false,
+				"bInfo": false,
+				"bPaginate": false
+			});
+	});
+	</script>
+</%def>

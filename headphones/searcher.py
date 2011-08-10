@@ -74,17 +74,22 @@ def searchNZB(albumid=None, new=False):
         
         dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':''}
 
-        cleanartistalbum = helpers.latinToAscii(helpers.replace_all(albums[0]+' '+albums[1], dic))
+        cleanalbum = helpers.latinToAscii(helpers.replace_all(albums[1], dic))
         cleanartist = helpers.latinToAscii(helpers.replace_all(albums[0], dic))
 
-        # FLAC usually doesn't have a year for some reason so I'll leave it out:
-        term = re.sub('[\.\-\/]', ' ', '%s' % (cleanartistalbum)).encode('utf-8')
-        altterm = re.sub('[\.\-\/]', ' ', '%s %s' % (cleanartistalbum, year)).encode('utf-8')
-        artistterm = re.sub('[\.\-\/]', ' ', '%s' % (cleanartist)).encode('utf-8')
-        
+        # FLAC usually doesn't have a year for some reason so I'll leave it out
+        # Various Artist albums might be listed as VA, so I'll leave that out too
         # Only use the year if the term could return a bunch of different albums, i.e. self-titled albums
         if albums[0] in albums[1] or len(albums[0]) < 4 or len(albums[1]) < 4:
-            term = altterm    
+            term = cleanartist + ' ' + cleanalbum + ' ' + year
+        elif albums[0] == 'Various Artists':
+        	term = cleanalbum + ' ' + year
+        else:
+        	term = cleanartist + ' ' + cleanalbum
+            
+        # Replace bad characters in the term and unicode it
+        term = re.sub('[\.\-\/]', ' ', term).encode('utf-8')
+        artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8')
         
         logger.info("Searching for %s since it was marked as wanted" % term)
         
@@ -443,7 +448,7 @@ def verifyresult(title, term):
         return True
 
 def getresultNZB(result):
-    if result[3] == 'Newzbin':
+    if result[3] == 'newzbin':
         params = urllib.urlencode({"username": headphones.NEWZBIN_UID, "password": headphones.NEWZBIN_PASSWORD, "reportid": result[2]})
         url = "https://www.newzbin.com" + "/api/dnzb/"
         urllib._urlopener = NewzbinDownloader()
@@ -453,12 +458,18 @@ def getresultNZB(result):
             logger.warn('Error fetching nzb from url: %s. Error: %s' % (url, e))
     else:
         try:
-            nzb = urllib2.urlopen(result[2], timeout=20).read()
-        except Exception, e:
-            logger.warn('Error fetching nzb from url: %s. Error: %s' % (result[2], e))
+            nzb = urllib2.urlopen(result[2], timeout=30).read()
+        except urllib2.URLError, e:
+            logger.warn('Error fetching nzb from url: ' + result[2] + ' %s' % e)
     return nzb
     
 def preprocess(resultlist):
+
+    if not headphones.USENET_RETENTION:
+        usenet_retention = 1000
+    else:
+        usenet_retention = int(headphones.USENET_RETENTION)
+	
     for result in resultlist:
         nzb = getresultNZB(result)
         if nzb:
@@ -467,7 +478,7 @@ def preprocess(resultlist):
                 node = d.documentElement
                 nzbfiles = d.getElementsByTagName("file")
                 for nzbfile in nzbfiles:
-                    if nzbfile.getAttribute("date") < (time.time() - int(headphones.USENET_RETENTION) * 86400):
+                    if nzbfile.getAttribute("date") < (time.time() - usenet_retention * 86400):
                         logger.error('NZB contains a file out of your retention. Skipping.')
                         continue
                     #TODO: Do we want rar checking in here to try to keep unknowns out?
