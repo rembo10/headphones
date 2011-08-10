@@ -443,7 +443,7 @@ def verifyresult(title, term):
         return True
 
 def getresultNZB(result):
-    if result[3] == 'Newzbin':
+    if result[3] == 'newzbin':
         params = urllib.urlencode({"username": headphones.NEWZBIN_UID, "password": headphones.NEWZBIN_PASSWORD, "reportid": result[2]})
         url = "https://www.newzbin.com" + "/api/dnzb/"
         urllib._urlopener = NewzbinDownloader()
@@ -453,9 +453,9 @@ def getresultNZB(result):
             logger.warn('Error fetching nzb from url: %s. Error: %s' % (url, e))
     else:
         try:
-            nzb = urllib2.urlopen(result[2], timeout=20).read()
-        except Exception, e:
-            logger.warn('Error fetching nzb from url: %s. Error: %s' % (result[2], e))
+            nzb = urllib2.urlopen(result[2], timeout=30).read()
+        except urllib2.URLError, e:
+            logger.warn('Error fetching nzb from url: ' + result[2] + ' %s' % e)
     return nzb
     
 def preprocess(resultlist):
