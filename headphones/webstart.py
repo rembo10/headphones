@@ -22,6 +22,10 @@ def initialize(options={}):
 		'/': {
             'tools.staticdir.root': os.path.join(headphones.PROG_DIR, 'data')
         },
+        '/interfaces':{
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': "interfaces"
+        },
         '/images':{
             'tools.staticdir.on': True,
             'tools.staticdir.dir': "images"
