@@ -435,6 +435,9 @@ def verifyresult(title, term):
 	
     title = re.sub('[\.\-\/\_]', ' ', title)
 	
+    if term == 'Various Artists':
+    	return True
+    
     if not re.search('^' + re.escape(term), title, re.IGNORECASE):
         logger.info("Removed from results: " + title + " (artist not at string start).")
         return False
