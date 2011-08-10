@@ -4,7 +4,7 @@ from xml.dom import minidom
 from xml.parsers.expat import ExpatError
 import os, re, time
 
-import headphones
+import headphones, exceptions
 from headphones import logger, db, helpers, classes, sab
 
 class NewzbinDownloader(urllib.FancyURLopener):
@@ -31,11 +31,9 @@ class NewzbinDownloader(urllib.FancyURLopener):
                 #raise exceptions.AuthException("Newzbin account not premium status, can't download NZBs")
                 logger.info("Newzbin error 402")
 
-            logger.info("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + "seconds")
-
+            logger.info("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + " seconds")
             time.sleep(int(result.group(1)))
-
-            #raise exceptions.NewzbinAPIThrottled()
+            raise exceptions.NewzbinAPIThrottled()
 
 #this should be in a class somewhere
 def getNewzbinURL(url):
@@ -459,6 +457,12 @@ def getresultNZB(result):
             nzb = urllib.urlopen(url, data=params).read()
         except urllib2.URLError, e:
             logger.warn('Error fetching nzb from url: %s. Error: %s' % (url, e))
+        except exceptions.NewzbinAPIThrottled:
+            #TODO: This has created a potentially infinite loop? As long as they keep throttling we keep trying.
+            logger.info("Done waiting for Newzbin API throttle limit, starting downloads again")
+            getresultNZB(result)
+        except AttributeError:
+            logger.warn("AttributeError in getresultNZB.")
     else:
         try:
             nzb = urllib2.urlopen(result[2], timeout=30).read()
