@@ -453,6 +453,9 @@ def verifyresult(title, term):
         return True
 
 def getresultNZB(result):
+    
+    nzb = None
+    
     if result[3] == 'newzbin':
         params = urllib.urlencode({"username": headphones.NEWZBIN_UID, "password": headphones.NEWZBIN_PASSWORD, "reportid": result[2]})
         url = "https://www.newzbin.com" + "/api/dnzb/"
