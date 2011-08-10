@@ -23,6 +23,10 @@ class NewzbinDownloader(urllib.FancyURLopener):
                 rtext = str(headers.getheader('X-DNZB-RText'))
                 result = re.search("wait (\d+) seconds", rtext)
 
+                logger.info("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + " seconds")
+                time.sleep(int(result.group(1)))
+                raise exceptions.NewzbinAPIThrottled()
+
             elif newzbinErrCode == 401:
                 logger.info("Newzbin error 401")
                 #raise exceptions.AuthException("Newzbin username or password incorrect")
@@ -30,10 +34,6 @@ class NewzbinDownloader(urllib.FancyURLopener):
             elif newzbinErrCode == 402:
                 #raise exceptions.AuthException("Newzbin account not premium status, can't download NZBs")
                 logger.info("Newzbin error 402")
-
-            logger.info("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + " seconds")
-            time.sleep(int(result.group(1)))
-            raise exceptions.NewzbinAPIThrottled()
 
 #this should be in a class somewhere
 def getNewzbinURL(url):
@@ -294,7 +294,11 @@ def searchNZB(albumid=None, new=False):
                         "q": term
                       }
             searchURL = providerurl + "search/?%s" % urllib.urlencode(params)
-            data = getNewzbinURL(searchURL)    
+            try:
+                data = getNewzbinURL(searchURL)
+            except exceptions.NewzbinAPIThrottled:
+                #try again if we were throttled
+                data = getNewzbinURL(searchURL)
             if data:
                 logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, providerurl))
                 
