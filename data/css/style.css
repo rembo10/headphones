@@ -138,8 +138,8 @@ div#main { margin: 0; padding: 80px 0 0 0; }
 .table_wrapper_right{ padding: 25px; background-color: #ffffff; width: 40%; min-height: 100px; margin-top: 25px; margin-left: auto; margin-right: 30px; -moz-border-radius: 20px; border-radius: 20px; }
 
 .configtable { font-size: 14px; line-height:18px; }
-.configtable td { width: 350px; padding: 10px; vertical-align: middle; }
-.configtable tr { vertical-align: text-top; }
+.configtable td { width: 350px; padding: 10px; }
+.configtable td#middle { vertical-align: middle; }
 
 table#artist_table { background-color: white; width: 100%; padding: 20px; }
 
@@ -188,9 +188,9 @@ table#history_table { background-color: white; width: 100%;  }
 
 table#log_table { background-color: white; }
 
-table#log_table th#timestamp { text-align: left; min-width: 165px; }
-table#log_table th#level { text-align: left; min-width: 75px; }
-table#log_table th#message { text-align: left; min-width: 200px; }
+table#log_table th#timestamp { text-align: left; min-width: 150px; }
+table#log_table th#level { text-align: left; min-width: 60px; }
+table#log_table th#message { text-align: left; min-width: 500px; }
 
 table#upcoming_table th#albumart { text-align: center; min-width: 50px; }
 table#upcoming_table th#albumname { text-align: center; min-width: 200px; }
