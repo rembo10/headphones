@@ -1,0 +1,86 @@
+<%inherit file="base.html" />
+<%def name="body()">
+	<div class="table_wrapper">
+		<h1>Upcoming Albums</h1>
+		<table class="display" id="upcoming_table">
+		<thead>
+			<tr>
+				<th id="albumart"></th>
+				<th id="artistname">Artist</th>
+				<th id="albumname">Album Name</th>
+				<th id="reldate">Release Date</th>
+				<th id="type">Type</th>
+				<th id="status">Status</th>
+			</tr>
+		</thead>
+		<tbody>
+		%for album in upcoming:
+			<tr class="gradeZ">
+				<td id="albumart"><img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
+				<td id="artistname">${album['ArtistName']}</td>
+				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
+				<td id="reldate">${album['ReleaseDate']}</td>
+				<td id="type">${album['Type']}</td>
+				<td id="status">${album['Status']}</td>
+			</tr>
+		%endfor
+		</tbody>
+	</table>
+	</div>
+	
+	<form action="markAlbums" method="get">
+	<p class="indented">Mark selected albums as 
+		<select name="action">
+  			<option value="Skipped">Skipped</option>
+  			<option value="Downloaded">Downloaded</option>
+		</select>
+		<input type="submit" value="Go">
+	</p>
+	<div class="table_wrapper">
+		<h1>Wanted Albums</h1>
+		<table class="display" id="wanted_table">
+		<thead>
+			<tr>
+				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
+				<th id="albumart"></th>
+				<th id="artistname">Artist</th>
+				<th id="albumname">Album Name</th>
+				<th id="reldate">Release Date</th>
+				<th id="type">Type</th>
+			</tr>
+		</thead>
+		<tbody>
+		%for album in wanted:
+			<tr class="gradeZ">
+				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></th>
+				<td id="albumart"><img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
+				<td id="artistname">${album['ArtistName']}</td>
+				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
+				<td id="reldate">${album['ReleaseDate']}</td>
+				<td id="type">${album['Type']}</td>
+			</tr>
+		%endfor
+		</tbody>
+	</table>
+		
+	</div>
+</%def>
+
+<%def name="headIncludes()">
+	<link rel="stylesheet" href="css/data_table.css">
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script>
+	$(document).ready(function()
+	{
+		$('#wanted_table').dataTable(
+			{
+				"bFilter": false,
+				"bInfo": false,
+				"bPaginate": false
+			});
+	});
+	</script>
+</%def>
