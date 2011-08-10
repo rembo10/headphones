@@ -4,7 +4,7 @@ from xml.dom import minidom
 from xml.parsers.expat import ExpatError
 import os, re, time
 
-import headphones
+import headphones, exceptions
 from headphones import logger, db, helpers, classes, sab
 
 class NewzbinDownloader(urllib.FancyURLopener):
@@ -23,6 +23,10 @@ class NewzbinDownloader(urllib.FancyURLopener):
                 rtext = str(headers.getheader('X-DNZB-RText'))
                 result = re.search("wait (\d+) seconds", rtext)
 
+                logger.info("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + " seconds")
+                time.sleep(int(result.group(1)))
+                raise exceptions.NewzbinAPIThrottled()
+
             elif newzbinErrCode == 401:
                 logger.info("Newzbin error 401")
                 #raise exceptions.AuthException("Newzbin username or password incorrect")
@@ -30,12 +34,6 @@ class NewzbinDownloader(urllib.FancyURLopener):
             elif newzbinErrCode == 402:
                 #raise exceptions.AuthException("Newzbin account not premium status, can't download NZBs")
                 logger.info("Newzbin error 402")
-
-            logger.info("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + "seconds")
-
-            time.sleep(int(result.group(1)))
-
-            #raise exceptions.NewzbinAPIThrottled()
 
 #this should be in a class somewhere
 def getNewzbinURL(url):
@@ -296,7 +294,11 @@ def searchNZB(albumid=None, new=False):
                         "q": term
                       }
             searchURL = providerurl + "search/?%s" % urllib.urlencode(params)
-            data = getNewzbinURL(searchURL)    
+            try:
+                data = getNewzbinURL(searchURL)
+            except exceptions.NewzbinAPIThrottled:
+                #try again if we were throttled
+                data = getNewzbinURL(searchURL)
             if data:
                 logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, providerurl))
                 
@@ -306,7 +308,7 @@ def searchNZB(albumid=None, new=False):
                     items = d.getElementsByTagName("item")
                 except ExpatError:
                     logger.info('Unable to get the NEWZBIN feed. Check that your settings are correct - post a bug if they are')
-                    items = None
+                    items = []
             
             if len(items):
             
@@ -459,6 +461,12 @@ def getresultNZB(result):
             nzb = urllib.urlopen(url, data=params).read()
         except urllib2.URLError, e:
             logger.warn('Error fetching nzb from url: %s. Error: %s' % (url, e))
+        except exceptions.NewzbinAPIThrottled:
+            #TODO: This has created a potentially infinite loop? As long as they keep throttling we keep trying.
+            logger.info("Done waiting for Newzbin API throttle limit, starting downloads again")
+            getresultNZB(result)
+        except AttributeError:
+            logger.warn("AttributeError in getresultNZB.")
     else:
         try:
             nzb = urllib2.urlopen(result[2], timeout=30).read()
