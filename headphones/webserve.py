@@ -85,6 +85,18 @@ class WebInterface(object):
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 	getExtras.exposed = True
 	
+	def removeExtras(self, ArtistID):
+		myDB = db.DBConnection()
+		controlValueDict = {'ArtistID': ArtistID}
+		newValueDict = {'IncludeExtras': 0}
+		myDB.upsert("artists", newValueDict, controlValueDict)
+		extraalbums = myDB.select('SELECT AlbumID from albums WHERE ArtistID=? AND Type!="Album"', [ArtistID])
+		for album in extraalbums:
+			myDB.action('DELETE from tracks WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
+			myDB.action('DELETE from albums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
+		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
+	removeExtras.exposed = True
+	
 	def pauseArtist(self, ArtistID):
 		logger.info(u"Pausing artist: " + ArtistID)
 		myDB = db.DBConnection()

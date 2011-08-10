@@ -13,7 +13,11 @@
 			%else:
 				<li><a href="pauseArtist?ArtistID=${artist['ArtistID']}">Pause Artist</a></li>
 			%endif
-			<li><a href="getExtras?ArtistID=${artist['ArtistID']}">Get Extras</a></li>
+			%if artist['IncludeExtras']:
+				<li><a href="removeExtras?ArtistID=${artist['ArtistID']}">Remove Extras</a></li>
+			%else:	
+				<li><a href="getExtras?ArtistID=${artist['ArtistID']}">Get Extras</a></li>
+			%endif
 		</ul>
 	</div>	
 </%def>
