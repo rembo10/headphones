@@ -104,6 +104,8 @@ LASTFM_USERNAME = None
 
 MEDIA_FORMATS = ["mp3", "flac", "aac", "ogg", "ape", "m4a"]
 
+INTERFACE = None
+
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
     try:
@@ -161,7 +163,7 @@ def initialize():
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, NZB_SEARCH_INTERVAL, \
                 LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
-                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME
+                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE
                 
         if __INITIALIZED__:
             return False
@@ -237,6 +239,8 @@ def initialize():
         NEWZBIN_PASSWORD = check_setting_str(CFG, 'Newzbin', 'newzbin_password', '')
 
         LASTFM_USERNAME = check_setting_str(CFG, 'General', 'lastfm_username', '')
+        
+        INTERFACE = check_setting_str(CFG, 'General', 'interface', 'default')
     
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
@@ -403,6 +407,7 @@ def config_write():
     new_config['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
     
     new_config['General']['lastfm_username'] = LASTFM_USERNAME
+    new_config['General']['interface'] = INTERFACE
     
     new_config.write()
 
