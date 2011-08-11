@@ -461,8 +461,11 @@ def forcePostProcess():
 	
 	# Parse the folder names to get artist album info
 	for folder in folders:
+
+		folder = unicode(folder)
 	
-		albumpath = unicode(os.path.join(download_dir, folder))
+		albumpath = os.path.join(download_dir, folder)
+		
 		try:
 			name, album, year = helpers.extract_data(folder)
 		except:
@@ -484,7 +487,6 @@ def forcePostProcess():
 					logger.error('Can not get release information for this album')
 					continue
 				if rgid:
-					rgid = unicode(rgid)
 					verify(rgid, albumpath)
 			
 	
