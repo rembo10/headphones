@@ -24,7 +24,7 @@ def findArtist(name, limit=1):
 		attempt = 0
 		artistResults = None
 		
-		chars = set('!?')
+		chars = set('!?*')
 		if any((c in chars) for c in name):
 			name = '"'+name+'"'
 		
