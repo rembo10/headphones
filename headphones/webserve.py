@@ -183,6 +183,34 @@ class WebInterface(object):
 		return serve_template(templatename="manage.html", title="Manage")
 	manage.exposed = True
 	
+	def manageArtists(self):
+		myDB = db.DBConnection()
+		artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
+		return serve_template(templatename="manageartists.html", title="Manage Artists", artists=artists)
+	manageArtists.exposed = True	
+	
+	def markArtists(self, action=None, **args):
+		myDB = db.DBConnection()
+		for ArtistID in args:
+			if action == 'delete':
+				myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
+				myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
+				myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+			elif action == 'pause':
+				controlValueDict = {'ArtistID': ArtistID}
+				newValueDict = {'Status': 'Paused'}
+				myDB.upsert("artists", newValueDict, controlValueDict)
+			elif action == 'resume':
+				controlValueDict = {'ArtistID': ArtistID}
+				newValueDict = {'Status': 'Active'}
+				myDB.upsert("artists", newValueDict, controlValueDict)				
+			else:
+				# These may and probably will collide - need to make a better way to queue musicbrainz queries
+				threading.Thread(target=importer.addArtisttoDB, args=[ArtistID]).start()
+				time.sleep(30)
+		raise cherrypy.HTTPRedirect("home")
+	markArtists.exposed = True
+	
 	def importLastFM(self, username):
 		headphones.LASTFM_USERNAME = username
 		headphones.config_write()

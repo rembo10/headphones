@@ -111,11 +111,6 @@ def verify(albumid, albumpath):
 		tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
 	
 	downloaded_track_list = []
-
-	try:
-		albumpath = str(albumpath)
-	except UnicodeEncodeError:
-		albumpath = unicode(albumpath).encode('unicode_escape')
 	
 	for r,d,f in os.walk(albumpath):
 		for files in f:
@@ -203,6 +198,10 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 	if headphones.MOVE_FILES and headphones.DESTINATION_DIR:
 		albumpath = moveFiles(albumpath, release, tracks)
 	
+	if headphones.MOVE_FILES and not headphones.DESTINATION_DIR:
+		logger.error('No DESTINATION_DIR has been set. Set "Destination Directory" to the parent directory you want to move the files to')
+		pass
+		
 	myDB = db.DBConnection()
 	# There's gotta be a better way to update the have tracks - sqlite
 	
@@ -306,10 +305,12 @@ def moveFiles(albumpath, release, tracks):
 		
 		# Chmod the directories using the folder_format (script courtesy of premiso!)
 		folder_list = folder.split('/')
+		
+		
 		temp_f = os.path.join(headphones.DESTINATION_DIR);
 		for f in folder_list:
 			temp_f = os.path.join(temp_f, f)
-			os.chmod(temp_f, 0755)
+			os.chmod(temp_f, int(headphones.FOLDER_PERMISSIONS, 8))
 	
 	except Exception, e:
 		logger.error('Could not create folder for %s. Not moving: %s' % (release['AlbumTitle'], e))
@@ -442,6 +443,7 @@ def renameUnprocessedFolder(albumpath):
 def forcePostProcess():
 	
 	if not headphones.DOWNLOAD_DIR:
+		logger.error('No DOWNLOAD_DIR has been set. Set "Music Download Directory:" to your SAB download directory on the settings page.')
 		return
 	else:
 		download_dir = headphones.DOWNLOAD_DIR
@@ -459,8 +461,11 @@ def forcePostProcess():
 	
 	# Parse the folder names to get artist album info
 	for folder in folders:
+
+		folder = unicode(folder)
 	
-		albumpath = unicode(os.path.join(download_dir, folder))
+		albumpath = os.path.join(download_dir, folder)
+		
 		try:
 			name, album, year = helpers.extract_data(folder)
 		except:
@@ -482,7 +487,6 @@ def forcePostProcess():
 					logger.error('Can not get release information for this album')
 					continue
 				if rgid:
-					rgid = unicode(rgid)
 					verify(rgid, albumpath)
 			
 	

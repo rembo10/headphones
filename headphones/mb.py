@@ -24,7 +24,7 @@ def findArtist(name, limit=1):
 		attempt = 0
 		artistResults = None
 		
-		chars = set('!?')
+		chars = set('!?*')
 		if any((c in chars) for c in name):
 			name = '"'+name+'"'
 		
@@ -47,7 +47,7 @@ def findArtist(name, limit=1):
 		
 			if result.artist.name != result.artist.getUniqueName() and limit == 1:
 				
-				logger.info('Found an artist with a disambiguation: %s - doing an album based search' % name)
+				logger.debug('Found an artist with a disambiguation: %s - doing an album based search' % name)
 				artistdict = findArtistbyAlbum(name)
 				
 				if not artistdict:
