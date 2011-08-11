@@ -70,7 +70,7 @@ def searchNZB(albumid=None, new=False):
         except TypeError:
             year = ''
         
-        dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':''}
+        dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':'', '*':''}
 
         cleanalbum = helpers.latinToAscii(helpers.replace_all(albums[1], dic))
         cleanartist = helpers.latinToAscii(helpers.replace_all(albums[0], dic))
@@ -345,7 +345,7 @@ def searchNZB(albumid=None, new=False):
         #when looking for "Foo - Foo" we don't want "Foobar"
         #this should be less of an issue when it isn't a self-titled album so we'll only check vs artist
         if len(resultlist):
-            resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm)]
+            resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm, term)]
         
         if len(resultlist):    
                        
@@ -433,24 +433,31 @@ def searchNZB(albumid=None, new=False):
                 myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
                 myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", nzb_folder_name])
 
-def verifyresult(title, term):
+def verifyresult(title, artistterm, term):
 	
     title = re.sub('[\.\-\/\_]', ' ', title)
 	
-    if term == 'Various Artists':
-    	return True
-    
-    if not re.search('^' + re.escape(term), title, re.IGNORECASE):
-        logger.info("Removed from results: " + title + " (artist not at string start).")
-        return False
-    elif re.search(re.escape(term) + '\w', title, re.IGNORECASE | re.UNICODE):
-        logger.info("Removed from results: " + title + " (post substring result).")
-        return False
-    elif re.search('\w' + re.escape(term), title, re.IGNORECASE | re.UNICODE):
-        logger.info("Removed from results: " + title + " (pre substring result).")
-        return False
-    else:
-        return True
+    if artistterm <> 'Various Artists':
+        
+        if not re.search('^' + re.escape(artistterm), title, re.IGNORECASE):
+            logger.info("Removed from results: " + title + " (artist not at string start).")
+            return False
+        elif re.search(re.escape(artistterm) + '\w', title, re.IGNORECASE | re.UNICODE):
+            logger.info("Removed from results: " + title + " (post substring result).")
+            return False
+        elif re.search('\w' + re.escape(artistterm), title, re.IGNORECASE | re.UNICODE):
+            logger.info("Removed from results: " + title + " (pre substring result).")
+            return False
+
+    #another attempt to weed out substrings. We don't want "Vol III" when we were looking for "Vol II"
+    tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
+    for token in tokens:
+        if token == 'Various' or token == 'Artists' or token == 'VA':
+            continue
+        if not re.search('(?:\W|^)+' + token + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
+            logger.info("Removed from results: " + title + " (missing token: " + token + ")")
+            return False
+    return True
 
 def getresultNZB(result):
     if result[3] == 'newzbin':
