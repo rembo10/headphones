@@ -37,16 +37,14 @@ def scanMusic(dir=None):
 		for song in results:
 			try:
 				f = MediaFile(song)
-				albumartist = f.albumartist
-				artist = f.artist
 			except:
 				logger.warn('Could not read file: %s' % song)
 				continue
 			else:	
-				if albumartist and albumartist != 'Various Artists':
-					artist = albumartist
-				elif artist:
-					pass
+				if f.albumartist:
+					artist = f.albumartist
+				elif f.artist:
+					artist = f.artist
 				else:
 					continue
 				
