@@ -143,6 +143,7 @@ div#main { margin: 0; padding: 80px 0 0 0; }
 
 table#artist_table { background-color: white; width: 100%; padding: 20px; }
 
+table#artist_table th#select { text-align: left; }
 table#artist_table th#name { text-align: left; min-width: 200px; }
 table#artist_table th#status { text-align: left; min-width: 50px; }
 table#artist_table th#album { text-align: left; min-width: 300px; }

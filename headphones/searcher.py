@@ -4,7 +4,7 @@ from xml.dom import minidom
 from xml.parsers.expat import ExpatError
 import os, re, time
 
-import headphones
+import headphones, exceptions
 from headphones import logger, db, helpers, classes, sab
 
 class NewzbinDownloader(urllib.FancyURLopener):
@@ -23,6 +23,10 @@ class NewzbinDownloader(urllib.FancyURLopener):
                 rtext = str(headers.getheader('X-DNZB-RText'))
                 result = re.search("wait (\d+) seconds", rtext)
 
+                logger.info("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + " seconds")
+                time.sleep(int(result.group(1)))
+                raise exceptions.NewzbinAPIThrottled()
+
             elif newzbinErrCode == 401:
                 logger.info("Newzbin error 401")
                 #raise exceptions.AuthException("Newzbin username or password incorrect")
@@ -30,12 +34,6 @@ class NewzbinDownloader(urllib.FancyURLopener):
             elif newzbinErrCode == 402:
                 #raise exceptions.AuthException("Newzbin account not premium status, can't download NZBs")
                 logger.info("Newzbin error 402")
-
-            logger.info("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + "seconds")
-
-            time.sleep(int(result.group(1)))
-
-            #raise exceptions.NewzbinAPIThrottled()
 
 #this should be in a class somewhere
 def getNewzbinURL(url):
@@ -72,7 +70,7 @@ def searchNZB(albumid=None, new=False):
         except TypeError:
             year = ''
         
-        dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':''}
+        dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':'', '*':''}
 
         cleanalbum = helpers.latinToAscii(helpers.replace_all(albums[1], dic))
         cleanartist = helpers.latinToAscii(helpers.replace_all(albums[0], dic))
@@ -296,7 +294,11 @@ def searchNZB(albumid=None, new=False):
                         "q": term
                       }
             searchURL = providerurl + "search/?%s" % urllib.urlencode(params)
-            data = getNewzbinURL(searchURL)    
+            try:
+                data = getNewzbinURL(searchURL)
+            except exceptions.NewzbinAPIThrottled:
+                #try again if we were throttled
+                data = getNewzbinURL(searchURL)
             if data:
                 logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, providerurl))
                 
@@ -306,7 +308,7 @@ def searchNZB(albumid=None, new=False):
                     items = d.getElementsByTagName("item")
                 except ExpatError:
                     logger.info('Unable to get the NEWZBIN feed. Check that your settings are correct - post a bug if they are')
-                    items = None
+                    items = []
             
             if len(items):
             
@@ -343,7 +345,7 @@ def searchNZB(albumid=None, new=False):
         #when looking for "Foo - Foo" we don't want "Foobar"
         #this should be less of an issue when it isn't a self-titled album so we'll only check vs artist
         if len(resultlist):
-            resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm)]
+            resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm, term)]
         
         if len(resultlist):    
                        
@@ -431,26 +433,36 @@ def searchNZB(albumid=None, new=False):
                 myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
                 myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", nzb_folder_name])
 
-def verifyresult(title, term):
+def verifyresult(title, artistterm, term):
 	
     title = re.sub('[\.\-\/\_]', ' ', title)
 	
-    if term == 'Various Artists':
-    	return True
-    
-    if not re.search('^' + re.escape(term), title, re.IGNORECASE):
-        logger.info("Removed from results: " + title + " (artist not at string start).")
-        return False
-    elif re.search(re.escape(term) + '\w', title, re.IGNORECASE | re.UNICODE):
-        logger.info("Removed from results: " + title + " (post substring result).")
-        return False
-    elif re.search('\w' + re.escape(term), title, re.IGNORECASE | re.UNICODE):
-        logger.info("Removed from results: " + title + " (pre substring result).")
-        return False
-    else:
-        return True
+    if artistterm != 'Various Artists':
+        
+        if not re.search('^' + re.escape(artistterm), title, re.IGNORECASE):
+            logger.info("Removed from results: " + title + " (artist not at string start).")
+            return False
+        elif re.search(re.escape(artistterm) + '\w', title, re.IGNORECASE | re.UNICODE):
+            logger.info("Removed from results: " + title + " (post substring result).")
+            return False
+        elif re.search('\w' + re.escape(artistterm), title, re.IGNORECASE | re.UNICODE):
+            logger.info("Removed from results: " + title + " (pre substring result).")
+            return False
+
+    #another attempt to weed out substrings. We don't want "Vol III" when we were looking for "Vol II"
+    tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
+    for token in tokens:
+        if token == 'Various' or token == 'Artists' or token == 'VA':
+            continue
+        if not re.search('(?:\W|^)+' + token + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
+            logger.info("Removed from results: " + title + " (missing token: " + token + ")")
+            return False
+    return True
 
 def getresultNZB(result):
+    
+    nzb = None
+    
     if result[3] == 'newzbin':
         params = urllib.urlencode({"username": headphones.NEWZBIN_UID, "password": headphones.NEWZBIN_PASSWORD, "reportid": result[2]})
         url = "https://www.newzbin.com" + "/api/dnzb/"
@@ -459,6 +471,12 @@ def getresultNZB(result):
             nzb = urllib.urlopen(url, data=params).read()
         except urllib2.URLError, e:
             logger.warn('Error fetching nzb from url: %s. Error: %s' % (url, e))
+        except exceptions.NewzbinAPIThrottled:
+            #TODO: This has created a potentially infinite loop? As long as they keep throttling we keep trying.
+            logger.info("Done waiting for Newzbin API throttle limit, starting downloads again")
+            getresultNZB(result)
+        except AttributeError:
+            logger.warn("AttributeError in getresultNZB.")
     else:
         try:
             nzb = urllib2.urlopen(result[2], timeout=30).read()
@@ -469,7 +487,7 @@ def getresultNZB(result):
 def preprocess(resultlist):
 
     if not headphones.USENET_RETENTION:
-        usenet_retention = 1000
+        usenet_retention = 2000
     else:
         usenet_retention = int(headphones.USENET_RETENTION)
 	
