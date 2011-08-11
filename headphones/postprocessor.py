@@ -442,6 +442,7 @@ def renameUnprocessedFolder(albumpath):
 def forcePostProcess():
 	
 	if not headphones.DOWNLOAD_DIR:
+		logger.error('No DOWNLOAD_DIR has been set. Set "Music Download Directory:" to your SAB download directory on the settings page.')
 		return
 	else:
 		download_dir = headphones.DOWNLOAD_DIR
