@@ -437,7 +437,7 @@ def verifyresult(title, artistterm, term):
 	
     title = re.sub('[\.\-\/\_]', ' ', title)
 	
-    if artistterm <> 'Various Artists':
+    if artistterm != 'Various Artists':
         
         if not re.search('^' + re.escape(artistterm), title, re.IGNORECASE):
             logger.info("Removed from results: " + title + " (artist not at string start).")
@@ -487,7 +487,7 @@ def getresultNZB(result):
 def preprocess(resultlist):
 
     if not headphones.USENET_RETENTION:
-        usenet_retention = 1000
+        usenet_retention = 2000
     else:
         usenet_retention = int(headphones.USENET_RETENTION)
 	

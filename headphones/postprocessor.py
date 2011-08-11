@@ -111,11 +111,6 @@ def verify(albumid, albumpath):
 		tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
 	
 	downloaded_track_list = []
-
-	try:
-		albumpath = str(albumpath)
-	except UnicodeEncodeError:
-		albumpath = unicode(albumpath).encode('unicode_escape')
 	
 	for r,d,f in os.walk(albumpath):
 		for files in f:
@@ -203,6 +198,10 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 	if headphones.MOVE_FILES and headphones.DESTINATION_DIR:
 		albumpath = moveFiles(albumpath, release, tracks)
 	
+	if headphones.MOVE_FILES and not headphones.DESTINATION_DIR:
+		logger.error('No DESTINATION_DIR has been set. Set "Destination Directory" to the parent directory you want to move the files to')
+		pass
+		
 	myDB = db.DBConnection()
 	# There's gotta be a better way to update the have tracks - sqlite
 	
