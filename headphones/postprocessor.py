@@ -306,10 +306,12 @@ def moveFiles(albumpath, release, tracks):
 		
 		# Chmod the directories using the folder_format (script courtesy of premiso!)
 		folder_list = folder.split('/')
+		
+		
 		temp_f = os.path.join(headphones.DESTINATION_DIR);
 		for f in folder_list:
 			temp_f = os.path.join(temp_f, f)
-			os.chmod(temp_f, 0755)
+			os.chmod(temp_f, int(headphones.FOLDER_PERMISSIONS, 8))
 	
 	except Exception, e:
 		logger.error('Could not create folder for %s. Not moving: %s' % (release['AlbumTitle'], e))
