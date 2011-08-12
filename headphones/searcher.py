@@ -437,17 +437,17 @@ def verifyresult(title, artistterm, term):
 	
     title = re.sub('[\.\-\/\_]', ' ', title)
 	
-    if artistterm != 'Various Artists':
-        
-        if not re.search('^' + re.escape(artistterm), title, re.IGNORECASE):
-            logger.info("Removed from results: " + title + " (artist not at string start).")
-            return False
-        elif re.search(re.escape(artistterm) + '\w', title, re.IGNORECASE | re.UNICODE):
-            logger.info("Removed from results: " + title + " (post substring result).")
-            return False
-        elif re.search('\w' + re.escape(artistterm), title, re.IGNORECASE | re.UNICODE):
-            logger.info("Removed from results: " + title + " (pre substring result).")
-            return False
+    #if artistterm != 'Various Artists':
+    #    
+    #    if not re.search('^' + re.escape(artistterm), title, re.IGNORECASE):
+    #        #logger.info("Removed from results: " + title + " (artist not at string start).")
+    #        #return False
+    #    elif re.search(re.escape(artistterm) + '\w', title, re.IGNORECASE | re.UNICODE):
+    #        logger.info("Removed from results: " + title + " (post substring result).")
+    #        return False
+    #    elif re.search('\w' + re.escape(artistterm), title, re.IGNORECASE | re.UNICODE):
+    #        logger.info("Removed from results: " + title + " (pre substring result).")
+    #        return False
 
     #another attempt to weed out substrings. We don't want "Vol III" when we were looking for "Vol II"
     tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)

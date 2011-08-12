@@ -60,7 +60,7 @@ class RotatingLogger(object):
 			logger.debug(message)
 		elif level == 'INFO':
 			logger.info(message)
-		elif level == 'WARN':
+		elif level == 'WARNING':
 			logger.warn(message)
 		else:
 			logger.error(message)
@@ -74,7 +74,7 @@ def info(message):
 	headphones_log.log(message, level='INFO')
 	
 def warn(message):
-	headphones_log.log(message, level='WARN')
+	headphones_log.log(message, level='WARNING')
 	
 def error(message):
 	headphones_log.log(message, level='ERROR')

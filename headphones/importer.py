@@ -37,20 +37,23 @@ def scanMusic(dir=None):
 		for song in results:
 			try:
 				f = MediaFile(song)
-				albumartist = f.albumartist
-				artist = f.artist
 			except:
 				logger.warn('Could not read file: %s' % song)
 				continue
 			else:	
-				if albumartist and albumartist != 'Various Artists':
-					artist = albumartist
-				elif artist:
-					pass
+				if f.albumartist:
+					artist = f.albumartist
+				elif f.artist:
+					artist = f.artist
 				else:
 					continue
 				
-				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?)', [artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid])
+				if not f.album:
+					album = None
+				else:
+					album = f.album
+				
+				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?)', [artist, album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid])
 				
 		# Get the average bitrate if the option is selected
 		if headphones.DETECT_BITRATE:
