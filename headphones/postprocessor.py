@@ -121,7 +121,8 @@ def verify(albumid, albumpath):
 	for downloaded_track in downloaded_track_list:
 		try:
 			f = MediaFile(downloaded_track)
-		except:
+		except Exception, e:
+			logger.info("Exception from MediaFile for: " + downloaded_track + " : " + str(e))
 			continue
 		if helpers.latinToAscii(f.artist.lower()).encode('UTF-8') == helpers.latinToAscii(release['ArtistName'].lower()).encode('UTF-8') and helpers.latinToAscii(f.album.lower()).encode('UTF-8') == helpers.latinToAscii(release['AlbumTitle'].lower()).encode('UTF-8'):
 			doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
