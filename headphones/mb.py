@@ -400,7 +400,7 @@ def findArtistbyAlbum(name):
 
 	myDB = db.DBConnection()
 	
-	artist = myDB.action('SELECT AlbumTitle from have WHERE ArtistName=? AND AlbumTitle IS NOT NULL', [name]).fetchone()
+	artist = myDB.action('SELECT AlbumTitle from have WHERE ArtistName=? AND AlbumTitle IS NOT NULL ORDER BY RANDOM()', [name]).fetchone()
 	
 	if not artist:
 		return False

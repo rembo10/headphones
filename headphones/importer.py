@@ -48,7 +48,12 @@ def scanMusic(dir=None):
 				else:
 					continue
 				
-				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?)', [artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid])
+				if not f.album:
+					album = None
+				else:
+					album = f.album
+				
+				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?)', [artist, album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid])
 				
 		# Get the average bitrate if the option is selected
 		if headphones.DETECT_BITRATE:
