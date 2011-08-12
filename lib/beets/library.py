@@ -204,7 +204,8 @@ class Item(object):
         """
         f = MediaFile(syspath(self.path))
         for key in ITEM_KEYS_WRITABLE:
-            setattr(f, key, getattr(self, key))
+            if getattr(self, key):  #make sure it has a value before we set it and create blank tags with wrong types
+                setattr(f, key, getattr(self, key))
         f.save()
     
     
