@@ -51,7 +51,14 @@ def findArtist(name, limit=1):
 				artistdict = findArtistbyAlbum(name)
 				
 				if not artistdict:
-					return False
+					logger.debug('Cannot determine the best match from an artist/album search. Using top match instead')
+					artistlist.append({
+						'name': 			result.artist.name,
+						'uniquename':		result.artist.getUniqueName(),
+						'id':				u.extractUuid(result.artist.id),
+						'url': 				result.artist.id,
+						'score':			result.score
+						})
 					
 				else:
 					artistlist.append(artistdict)
@@ -393,7 +400,14 @@ def findArtistbyAlbum(name):
 
 	myDB = db.DBConnection()
 	
-	artist = myDB.action('SELECT AlbumTitle from have WHERE ArtistName=?', [name]).fetchone()
+	artist = myDB.action('SELECT AlbumTitle from have WHERE ArtistName=? AND AlbumTitle IS NOT NULL ORDER BY RANDOM()', [name]).fetchone()
+	
+	if not artist:
+		return False
+		
+	# Probably not neccessary but just want to double check
+	if not artist['AlbumTitle']:
+		return False
 	
 	term = '"'+artist['AlbumTitle']+'" AND artist:"'+name+'"'
 	

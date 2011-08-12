@@ -10,7 +10,8 @@
 			%if album['Status'] == 'Skipped':
 			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False">Mark Album as Wanted</a></li>
 			%elif album['Status'] == 'Wanted':
-			<li><a href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False">Mark Album as Skipped</a></li>
+			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True">Force Check</a></li>
+			<li><a href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">Mark Album as Skipped</a></li>
 			%else:
 			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False">Retry Download</a></li>
 			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True">Try New Version</a></li>
