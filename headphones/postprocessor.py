@@ -120,20 +120,21 @@ def verify(albumid, albumpath):
 	
 	# test #1: metadata - usually works
 	logger.debug('Verifying metadata...')
-	
-	metaartist = helpers.latinToAscii(f.artist.lower()).encode('UTF-8')
-	dbartist = helpers.latinToAscii(release['ArtistName'].lower()).encode('UTF-8')
-	metaalbum = helpers.latinToAscii(f.album.lower()).encode('UTF-8')
-	dbalbum = helpers.latinToAscii(release['AlbumTitle'].lower()).encode('UTF-8')
-	
-	logger.debug('Matching metadata artist: %s with artist name: %s' % (metaartist, dbartist))
-	logger.debug('Matching metadata album: %s with album name: %s' % (metaalbum, dbalbum))
-	
+
 	for downloaded_track in downloaded_track_list:
 		try:
 			f = MediaFile(downloaded_track)
 		except:
 			continue
+			
+		metaartist = helpers.latinToAscii(f.artist.lower()).encode('UTF-8')
+		dbartist = helpers.latinToAscii(release['ArtistName'].lower()).encode('UTF-8')
+		metaalbum = helpers.latinToAscii(f.album.lower()).encode('UTF-8')
+		dbalbum = helpers.latinToAscii(release['AlbumTitle'].lower()).encode('UTF-8')
+		
+		logger.debug('Matching metadata artist: %s with artist name: %s' % (metaartist, dbartist))
+		logger.debug('Matching metadata album: %s with album name: %s' % (metaalbum, dbalbum))
+		
 		if metaartist == dbartist and metaalbum == dbalbum:
 			doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 			return
