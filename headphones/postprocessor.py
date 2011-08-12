@@ -46,7 +46,7 @@ def verify(albumid, albumpath):
 			logger.warn('Unable to get release information for manual album with rgid: ' + albumid)
 			return
 
-		logger.info(u"Now adding/updating artist: " + release_dict['artist_name'])
+		logger.info(u"Now adding/updating artist: " + helpers.latinToAscii(release_dict['artist_name']))
 		
 		if release_dict['artist_name'].startswith('The '):
 			sortname = release_dict['artist_name'][4:]
@@ -59,7 +59,7 @@ def verify(albumid, albumpath):
 						"ArtistSortName": 	sortname,
 						"DateAdded": 		helpers.today(),
 						"Status": 			"Paused"}
-		logger.info("ArtistID:ArtistName: " + release_dict['artist_id'] + " : " + release_dict['artist_name'])
+		logger.info("ArtistID:ArtistName: " + release_dict['artist_id'] + " : " + helpers.latinToAscii(release_dict['artist_name']))
 
 		if headphones.INCLUDE_EXTRAS:
 			newValueDict['IncludeExtras'] = 1
@@ -106,7 +106,7 @@ def verify(albumid, albumpath):
 		newValueDict = {"Status":			"Paused"}
 		
 		myDB.upsert("artists", newValueDict, controlValueDict)
-		logger.info(u"Addition complete for: " + release_dict['title'] + " - " + release_dict['artist_name'])
+		logger.info(u"Addition complete for: " + release_dict['title'] + " - " + helpers.latinToAscii(release_dict['artist_name']))
 
 		release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
 		tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
@@ -196,7 +196,7 @@ def verify(albumid, albumpath):
 			
 def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list):
 
-	logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
+	logger.info('Starting post-processing for: %s - %s' % (helpers.latinToAscii(release['ArtistName']),helpers.latinToAscii(release['AlbumTitle'])))
 
 	if headphones.EMBED_ALBUM_ART or headphones.ADD_ALBUM_ART:
 	
@@ -241,7 +241,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 	myDB.action('UPDATE snatched SET status = "Processed" WHERE AlbumID=?', [albumid])
 	updateHave(albumpath)
 	
-	logger.info('Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
+	logger.info('Post-processing for %s - %s complete' % (helpers.latinToAscii(release['ArtistName']),helpers.latinToAscii(release['AlbumTitle'])))
 	
 def embedAlbumArt(artwork, downloaded_track_list):
 	logger.info('Embedding album art')
@@ -309,7 +309,9 @@ def moveFiles(albumpath, release, tracks):
 	if folder.endswith('.'):
 		folder = folder.replace(folder[len(folder)-1], '_')
 	
-	destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, folder))
+	destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, helpers.latinToAscii(folder)))
+	
+	destination_path = helpers.latinToAscii(destination_path)
 	
 	if os.path.exists(destination_path):
 		i = 1
@@ -321,7 +323,7 @@ def moveFiles(albumpath, release, tracks):
 				destination_path = new_folder_name
 				break
 	
-	logger.info('Moving files from %s to %s' % (albumpath, destination_path))
+	logger.info('Moving files from %s to %s' % (helpers.latinToAscii(albumpath), helpers.latinToAscii(destination_path)))
 	
 	try:
 		os.makedirs(destination_path)
@@ -331,13 +333,17 @@ def moveFiles(albumpath, release, tracks):
 		
 		
 		temp_f = os.path.join(headphones.DESTINATION_DIR);
+		
+		temp_f = helpers.latinToAscii(temp_f)
+		
 		for f in folder_list:
 			temp_f = os.path.join(temp_f, f)
+			temp_f = helpers.latinToAscii(temp_f)
 			os.chmod(temp_f, int(headphones.FOLDER_PERMISSIONS, 8))
 	
 	except Exception, e:
-		logger.error('Could not create folder for %s. Not moving: %s' % (release['AlbumTitle'], e))
-		return albumpath
+		logger.error('Could not create folder for %s. Not moving: %s' % (helpers.latinToAscii(release['AlbumTitle']), e))
+		return helpers.latinToAscii(albumpath)
 		
 	for r,d,f in os.walk(albumpath):
 		for files in f:
@@ -360,7 +366,7 @@ def correctMetadata(albumid, release, downloaded_track_list):
 	cur_artist, cur_album, out_tuples, rec = autotag.tag_album(items, search_artist=release['ArtistName'], search_album=release['AlbumTitle'])
 	
 	if rec == 'RECOMMEND_NONE':
-		logger.warn('No accurate album match found for %s, %s -  not writing metadata' % (release['ArtistName'], release['AlbumTitle']))
+		logger.warn('No accurate album match found for %s, %s -  not writing metadata' % (helpers.latinToAscii(release['ArtistName']), helpers.latinToAscii(release['AlbumTitle'])))
 		return
 	
 	distance, items, info = out_tuples[0]
@@ -406,10 +412,10 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		
 		new_file_name = helpers.replace_all(headphones.FILE_FORMAT, values).replace('/','_') + ext
 		
-		new_file_name = new_file_name.replace('?','_').replace(':', '_')
-
+		new_file_name = helpers.latinToAscii(new_file_name.replace('?','_').replace(':', '_'))
+		 
 		new_file = os.path.join(albumpath, new_file_name)
-		
+
 		logger.debug('Renaming %s ---> %s' % (downloaded_track, new_file_name))
 		try:
 			os.rename(downloaded_track, new_file)
@@ -488,7 +494,7 @@ def forcePostProcess():
 		folder = unicode(folder)
 	
 		albumpath = os.path.join(download_dir, folder)
-		
+		albumpath = helpers.latinToAscii(albumpath)	
 		try:
 			name, album, year = helpers.extract_data(folder)
 		except:
@@ -499,10 +505,10 @@ def forcePostProcess():
 			myDB = db.DBConnection()
 			release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName=? and AlbumTitle=?', [name, album]).fetchone()
 			if release:
-				logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
+				logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (helpers.latinToAscii(release['ArtistName']), helpers.latinToAscii(release['AlbumTitle'])))
 				verify(release['AlbumID'], albumpath)
 			else:
-				logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (name, album))
+				logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (helpers.latinToAscii(name), helpers.latinToAscii(album)))
 				from headphones import mb
 				try:
 					rgid = mb.findAlbumID(name, album)
