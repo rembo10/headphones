@@ -163,7 +163,7 @@ class WebInterface(object):
 			raise cherrypy.HTTPRedirect(redirect)
 	queueAlbum.exposed = True
 
-	def unqueueAlbum(self, AlbumID, ArtistID):
+	def unqueueAlbum(self, AlbumID, ArtistID, new):
 		logger.info(u"Marking album: " + AlbumID + "as skipped...")
 		myDB = db.DBConnection()
 		controlValueDict = {'AlbumID': AlbumID}
