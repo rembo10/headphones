@@ -397,8 +397,7 @@ class WebInterface(object):
 	configUpdate.exposed = True
 
 	def shutdown(self):
-		logger.info(u"Headphones is shutting down...")
-		threading.Timer(2, headphones.shutdown).start()
+		headphones.SIGNAL = 'shutdown'
 		message = 'Shutting Down...'
 		return serve_template(templatename="shutdown.html", title="Shutting Down", message=message, timer=15)
 		return page
@@ -406,19 +405,16 @@ class WebInterface(object):
 	shutdown.exposed = True
 
 	def restart(self):
-		logger.info(u"Headphones is restarting...")
-		threading.Timer(2, headphones.shutdown, [True]).start()
+		headphones.SIGNAL = 'restart'
 		message = 'Restarting...'
 		return serve_template(templatename="shutdown.html", title="Restarting", message=message, timer=30)
 	restart.exposed = True
 	
 	def update(self):
-		logger.info('Headphones is updating...')
-		threading.Timer(2, headphones.shutdown, [True, True]).start()
+		headphones.SIGNAL = 'update'
 		message = 'Updating...'
 		return serve_template(templatename="shutdown.html", title="Updating", message=message, timer=120)
 		return page
-		
 	update.exposed = True
 		
 	def extras(self):
