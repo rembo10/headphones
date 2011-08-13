@@ -18,7 +18,7 @@ FULL_PATH = None
 PROG_DIR = None
 
 ARGS = None
-INVOKED_COMMAND = None
+SIGNAL = None
 
 QUIET = False
 DAEMON = False
@@ -496,20 +496,23 @@ def dbcheck():
 
     
 def shutdown(restart=False, update=False):
-    
+
     cherrypy.engine.exit()
     SCHED.shutdown(wait=False)
     
     config_write()
     
+    if not restart and not update:
+    	logger.info('Headphones is shutting down...')
     if update:
+    	logger.info('Headphones is updating...')
         try:
             versioncheck.update()
         except Exception, e:
             logger.warn('Headphones failed to update: %s. Restarting.' % e) 
             
     if restart:
-    
+    	logger.info('Headphones is restarting...')
         popen_list = [sys.executable, FULL_PATH]
         popen_list += ARGS
         if '--nolaunch' not in popen_list:
