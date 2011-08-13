@@ -315,26 +315,18 @@ def moveFiles(albumpath, release, tracks):
 	if os.path.exists(destination_path):
 		i = 1
 		while True:
-			new_folder_name = destination_path + '[%i]' % i
-			if os.path.exists(new_folder_name):
+			newfolder = folder + '[%i]' % i
+			destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, newfolder))
+			if os.path.exists(destination_path):
 				i += 1
 			else:
-				destination_path = new_folder_name
+				folder = newfolder
 				break
 	
 	logger.info('Moving files from %s to %s' % (albumpath, destination_path))
 	
 	try:
 		os.makedirs(destination_path)
-		
-		# Chmod the directories using the folder_format (script courtesy of premiso!)
-		folder_list = folder.split('/')
-		
-		
-		temp_f = os.path.join(headphones.DESTINATION_DIR);
-		for f in folder_list:
-			temp_f = os.path.join(temp_f, f)
-			os.chmod(temp_f, int(headphones.FOLDER_PERMISSIONS, 8))
 	
 	except Exception, e:
 		logger.error('Could not create folder for %s. Not moving: %s' % (release['AlbumTitle'], e))
@@ -344,6 +336,14 @@ def moveFiles(albumpath, release, tracks):
 		for files in f:
 			shutil.move(os.path.join(r, files), destination_path)
 			
+	# Chmod the directories using the folder_format (script courtesy of premiso!)
+	folder_list = folder.split('/')
+	
+	temp_f = headphones.DESTINATION_DIR
+	for f in folder_list:
+		temp_f = os.path.join(temp_f, f)
+		os.chmod(temp_f, int(headphones.FOLDER_PERMISSIONS, 8))
+	
 	try:
 		shutil.rmtree(albumpath)
 	except Exception, e:
