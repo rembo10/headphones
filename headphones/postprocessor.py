@@ -356,7 +356,10 @@ def correctMetadata(albumid, release, downloaded_track_list):
 	logger.info('Writing metadata')
 	items = []
 	for downloaded_track in downloaded_track_list:
-		items.append(beets.library.Item.from_path(downloaded_track))
+		try:
+			items.append(beets.library.Item.from_path(downloaded_track))
+		except Exception, e:
+			logger.error("Beets couldn't create an Item from: " + downloaded_track + " - not a media file?" + str(e))
 	
 	cur_artist, cur_album, out_tuples, rec = autotag.tag_album(items, search_artist=release['ArtistName'], search_album=release['AlbumTitle'])
 	
@@ -383,6 +386,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		try:
 			f = MediaFile(downloaded_track)
 		except:
+			logger.info("MediaFile couldn't parse: " + downloaded_track)
 			continue
 			
 		if not f.track:
