@@ -124,7 +124,8 @@ def verify(albumid, albumpath):
 	for downloaded_track in downloaded_track_list:
 		try:
 			f = MediaFile(downloaded_track)
-		except:
+		except Exception, e:
+			logger.info("Exception from MediaFile for: " + downloaded_track + " : " + str(e))
 			continue
 			
 		metaartist = helpers.latinToAscii(f.artist.lower()).encode('UTF-8')
@@ -355,7 +356,10 @@ def correctMetadata(albumid, release, downloaded_track_list):
 	logger.info('Writing metadata')
 	items = []
 	for downloaded_track in downloaded_track_list:
-		items.append(beets.library.Item.from_path(downloaded_track))
+		try:
+			items.append(beets.library.Item.from_path(downloaded_track))
+		except Exception, e:
+			logger.error("Beets couldn't create an Item from: " + downloaded_track + " - not a media file?" + str(e))
 	
 	cur_artist, cur_album, out_tuples, rec = autotag.tag_album(items, search_artist=release['ArtistName'], search_album=release['AlbumTitle'])
 	
@@ -382,6 +386,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		try:
 			f = MediaFile(downloaded_track)
 		except:
+			logger.info("MediaFile couldn't parse: " + downloaded_track)
 			continue
 			
 		if not f.track:
