@@ -382,33 +382,29 @@ def searchNZB(albumid=None, new=False):
             
             
             if new:
-                # Checks to see if it's already downloaded
-                i = 0
     
-                while i < len(nzblist):
-                    alreadydownloaded = myDB.select('SELECT * from snatched WHERE URL=?', [nzblist[i][2]])
-                    
-                    if len(alreadydownloaded) >= 1:
-                        logger.info('%s has already been downloaded. Skipping.' % nzblist[i][0])
-                        i += 1
-                    
-                    else:
-                        bestqual = nzblist[i]
-                        break
-                        
-                try:
-                    x = bestqual[0]
-                except UnboundLocalError:
-                    logger.info('No more matches for %s' % term)
-                    return
-                        
-            else:
-                bestqual = nzblist[0]
-            
-            logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
+				while True:
+                	
+					if len(nzblist):
+                	
+						alreadydownloaded = myDB.select('SELECT * from snatched WHERE URL=?', [nzblist[0][2]])
+						
+						if len(alreadydownloaded):
+							logger.info('%s has already been downloaded. Skipping.' % nzblist[0][0])
+							nzblist.pop(0)
+						
+						else:
+							break
+					else:
+						logger.info('No more results found for %s' % term)
+						return
+
             logger.info(u"Pre-processing result")
+            
             (data, bestqual) = preprocess(nzblist)
+            
             if data and bestqual:
+            	logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
                 nzb_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year) 
                 if headphones.SAB_HOST and not headphones.BLACKHOLE:
 
