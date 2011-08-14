@@ -111,11 +111,6 @@ def verify(albumid, albumpath):
 		release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
 		tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
 	
-	try:
-		albumpath = str(albumpath)
-	except UnicodeEncodeError:
-		albumpath = unicode(albumpath).encode('unicode_escape')
-	
 	downloaded_track_list = []
 	
 	for r,d,f in os.walk(albumpath):
