@@ -51,7 +51,7 @@
 						<th id="number">#</th>
 						<th id="name">Track Title</th>
 						<th id="duration">Duration</th>
-						<th id="have"></th>
+						<th id="location"></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -61,13 +61,11 @@
 				%for track in tracks:
 					<%
 						i += 1
-						have = myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ? AND TrackTitle like ?', [track['ArtistName'], track['AlbumTitle'], track['TrackTitle']])
-						if len(have):
+						if track['Location']:
 							grade = 'A'
-							check = '<img src="images/checkmark.png" alt="checkmark">'
 						else:
 							grade = 'Z'
-							check = ''
+
 						try:
 							trackduration = helpers.convert_milliseconds(track['TrackDuration'])
 						except:
@@ -77,7 +75,7 @@
 						<td id="number">${i}</td>
 						<td id="name">${track['TrackTitle']}</td>
 						<td id="duration">${trackduration}</td>
-						<td id="have">${check}</td>
+						<td id="location">${track['Location']}</td>
 					</tr>
 				%endfor
 				</tbody>
