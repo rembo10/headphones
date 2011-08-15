@@ -144,3 +144,34 @@ def extract_logline(s):
 		return (timestamp, level, thread, message)
 	else:
 		return None
+		
+def extract_song_data(s):
+
+    #headphones default format
+    music_dir = headphones.MUSIC_DIR
+    folder_format = headphones.FOLDER_FORMAT
+    file_format = headphones.FILE_FORMAT
+    
+    full_format = os.path.join(headphones.MUSIC_DIR)
+    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
+    match = pattern.match(s)
+    
+    if match:
+        name = match.group("name")
+        album = match.group("album")
+        year = match.group("year")
+        return (name, album, year)
+    else:
+        logger.info("Couldn't parse " + s + " into a valid default format")
+    
+    #newzbin default format
+    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
+    match = pattern.match(s)
+    if match:
+        name = match.group("name")
+        album = match.group("album")
+        year = match.group("year")
+        return (name, album, year)
+    else:
+        logger.info("Couldn't parse " + s + " into a valid Newbin format")
+        return (name, album, year)

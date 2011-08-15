@@ -173,17 +173,19 @@ table#album_table td#have { vertical-align: middle; }
 
 img.albumArt { float: left; padding-right: 5px; }
 div#albumheader { padding-top: 48px; height: 200px; }
-div#track_wrapper { padding-top: 20px; text-align: center; font-size: 16px; }
+div#track_wrapper { margin-left: -50px; padding-top: 20px; font-size: 16px; width: 100%; }
 
 table#track_table th#number { text-align: right; min-width: 20px; }
 table#track_table th#name { text-align: center; min-width: 350px; }
 table#track_table th#duration { width: 175px; text-align: center; min-width: 100px; }
-table#track_table th#have { width: 175px; text-align: center; min-width: 100px; }
+table#track_table th#location { text-align: center; min-width: 200px; }
+table#track_table th#bitrate { text-align: center; min-width: 75px; }
 
 table#track_table td#number { vertical-align: middle; text-align: right; }
 table#track_table td#name { vertical-align: middle; text-align: center; }
 table#track_table td#duration { vertical-align: middle; text-align: center; }
-table#track_table td#have { vertical-align: middle; text-align: center; }
+table#track_table td#location { vertical-align: middle; text-align: center; font-size: 11px; }
+table#track_table td#location { vertical-align: middle; text-align: center; }
 
 table#history_table { background-color: white; width: 100%;  }
 
