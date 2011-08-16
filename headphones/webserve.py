@@ -236,7 +236,7 @@ class WebInterface(object):
 		raise cherrypy.HTTPRedirect("home")
 	importItunes.exposed = True
 	
-	def musicScan(self, path):
+	def musicScan(self, path, redirect=None):
 		headphones.MUSIC_DIR = path
 		headphones.config_write()
 		try:	
@@ -244,7 +244,10 @@ class WebInterface(object):
 		except Exception, e:
 			logger.error('Unable to complete the scan: %s' % e)
 		time.sleep(10)
-		raise cherrypy.HTTPRedirect("home")
+		if redirect:
+			raise cherrypy.HTTPRedirect(redirect)
+		else:
+			raise cherrypy.HTTPRedirect("home")
 	musicScan.exposed = True
 	
 	def forceUpdate(self):
