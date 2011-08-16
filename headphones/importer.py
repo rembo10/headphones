@@ -22,10 +22,13 @@ def is_exists(artistid):
 		return False
 
 
-def artistlist_to_mbids(artistlist):
+def artistlist_to_mbids(artistlist, forced=False):
 
 	for artist in artistlist:
-	
+		
+		if forced:
+			artist = unicode(artist, 'utf-8')
+			
 		results = mb.findArtist(artist, limit=1)
 		
 		if not results:

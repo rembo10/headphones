@@ -150,7 +150,7 @@ class WebInterface(object):
 	markAlbums.exposed = True
 	
 	def addArtists(self, **args):
-		threading.Thread(target=importer.artistlist_to_mbids, args=[args]).start()
+		threading.Thread(target=importer.artistlist_to_mbids, args=[args, True]).start()
 		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 	addArtists.exposed = True

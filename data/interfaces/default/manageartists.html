@@ -1,14 +1,18 @@
 <%inherit file="base.html" />
-<%!
-	import headphones
-%>
+
 <%def name="body()">
 	<div id="paddingheader">
-		<h1>Manage New Artists<h1>
+		<h1>Manage Artists<h1>
 	</div>
-	<form action="addArtists" method="get">
+	<form action="markArtists" method="get">
 	<p class="indented">
-		Add selected artists
+		<select name="action">
+  			<option value="pause">Pause</option>
+  			<option value="resume">Resume</option>
+  			<option value="refresh">Refresh</option>
+  			<option value="delete">Delete</option>
+		</select>
+		selected artists
 		<input type="submit" value="Go">
 	</p>
 	<table class="display" id="artist_table">
@@ -16,13 +20,23 @@
 			<tr>
 				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
 				<th id="name">Artist Name</th>
+				<th id="status">Status</th>
 			</tr>
 		</thead>
 		<tbody>
-		%for artist in headphones.NEW_ARTISTS:
-			<tr class="gradeZ">
+		%for artist in artists:
+			<%
+				if artist['Status'] == 'Paused':
+					grade = 'X'
+				elif artist['Status'] == 'Loading':
+					grade = 'C'
+				else:
+					grade = 'Z'
+			%>
+			<tr class="grade${grade}">
 				<td id="select"><input type="checkbox" name="${artist['ArtistID']}" class="checkbox" /></td>
 				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
+				<td id="status">${artist['Status']}</td>	
 			</tr>
 		%endfor
 		</tbody>
@@ -44,6 +58,7 @@
 				"aoColumns": [
 					null,
 					{ "sType": "title-string"},
+					null
 				],
 				"bStateSave": true,
 				"bPaginate": false
