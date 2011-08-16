@@ -10,7 +10,7 @@ import threading
 
 import headphones
 
-from headphones import logger, searcher, db, importer, mb, lastfm
+from headphones import logger, searcher, db, importer, mb, lastfm, librarysync
 from headphones.helpers import checked, radio
 
 
@@ -148,7 +148,12 @@ class WebInterface(object):
 		else:
 			raise cherrypy.HTTPRedirect("upcoming")
 	markAlbums.exposed = True
-			
+	
+	def addArtists(self, **args):
+		threading.Thread(target=importer.artistlist_to_mbids, args=[args]).start()
+		time.sleep(5)
+		raise cherrypy.HTTPRedirect("home")
+	addArtists.exposed = True
 	
 	def queueAlbum(self, AlbumID, ArtistID=None, new=False, redirect=None):
 		logger.info(u"Marking album: " + AlbumID + "as wanted...")
@@ -188,6 +193,10 @@ class WebInterface(object):
 		artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
 		return serve_template(templatename="manageartists.html", title="Manage Artists", artists=artists)
 	manageArtists.exposed = True	
+	
+	def manageNew(self):
+		return serve_template(templatename="managenew.html", title="Manage New Artists")
+	manageNew.exposed = True	
 	
 	def markArtists(self, action=None, **args):
 		myDB = db.DBConnection()
@@ -231,7 +240,7 @@ class WebInterface(object):
 		headphones.MUSIC_DIR = path
 		headphones.config_write()
 		try:	
-			threading.Thread(target=importer.scanMusic, args=[path]).start()
+			threading.Thread(target=librarysync.libraryScan).start()
 		except Exception, e:
 			logger.error('Unable to complete the scan: %s' % e)
 		time.sleep(10)

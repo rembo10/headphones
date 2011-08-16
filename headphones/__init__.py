@@ -63,7 +63,7 @@ PREFERRED_QUALITY = None
 PREFERRED_BITRATE = None
 DETECT_BITRATE = False
 ADD_ARTISTS = False
-NEW_ARTISTS = None
+NEW_ARTISTS = []
 CORRECT_METADATA = False
 MOVE_FILES = False
 RENAME_FILES = False
@@ -432,7 +432,7 @@ def start():
         SCHED.add_interval_job(librarysync.libraryScan, minutes=LIBRARYSCAN_INTERVAL)
         SCHED.add_interval_job(versioncheck.checkGithub, minutes=300)
         SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
-        librarysync.libraryScan()
+
         SCHED.start()
         
         started = True

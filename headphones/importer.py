@@ -141,7 +141,6 @@ def addArtisttoDB(artistid, extrasonly=False):
 			myDB.action('DELETE from albums WHERE AlbumID=?', [release['releaseid']])
 			myDB.action('DELETE from tracks WHERE AlbumID=?', [release['releaseid']])
 		
-		myDB.action('DELETE from tracks WHERE AlbumID=?', [rg['id']])
 		for track in release_dict['tracks']:
 		
 			cleanname = helpers.cleanName(artist['artist_name'] + ' ' + rg['title'] + ' ' + track['title'])
@@ -158,18 +157,16 @@ def addArtisttoDB(artistid, extrasonly=False):
 						"CleanName":		cleanname
 						}
 			
-			location = myDB.action('SELECT Location, BitRate from have WHERE TrackID=?', [track['id']]).fetchone()
-						
-			if not location:
-				location = myDB.action('SELECT Location, BitRate from have WHERE CleanName=?', [cleanname]).fetchone()
+			match = myDB.action('SELECT Location, BitRate from have WHERE TrackID=?', [track['id']]).fetchone()
 			
-			if not location:
-				location = myDB.action('SELECT Location, BitRate from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [artist['artist_name'], rg['title'], track['title']]).fetchone()
-					
-			if location:
-				newValueDict['Location'] = location['Location']
-				newValueDict['BitRate'] = location['BitRate']
-				myDB.action('DELETE from have WHERE Location=?', [location['location']])
+			if not match:
+				match = myDB.action('SELECT Location, BitRate from have WHERE CleanName=?', [cleanname]).fetchone()
+			if not match:
+				match = myDB.action('SELECT Location, BitRate from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [artist['artist_name'], rg['title'], track['title']]).fetchone()
+			if match:
+				newValueDict['Location'] = match['Location']
+				newValueDict['BitRate'] = match['BitRate']
+				myDB.action('DELETE from have WHERE Location=?', [match['Location']])
 				
 			myDB.upsert("tracks", newValueDict, controlValueDict)
 			
@@ -187,7 +184,9 @@ def addArtisttoDB(artistid, extrasonly=False):
 						"TotalTracks":		totaltracks,
 						"HaveTracks":		havetracks}
 	else:
-		newValueDict = {"Status":			"Active"}
+		newValueDict = {"Status":			"Active",
+						"TotalTracks":		totaltracks,
+						"HaveTracks":		havetracks}
 	
 	myDB.upsert("artists", newValueDict, controlValueDict)
 	logger.info(u"Updating complete for: " + artist['artist_name'])
@@ -284,17 +283,17 @@ def addReleaseById(rid):
 						"CleanName":		cleanname
 						}
 						
-			location = myDB.action('SELECT Location, BitRate from have WHERE TrackID=?', [track['id']]).fetchone()
+			match = myDB.action('SELECT Location, BitRate from have WHERE TrackID=?', [track['id']]).fetchone()
 						
-			if not location:
-				location = myDB.action('SELECT Location, BitRate from have WHERE CleanName=?', [cleanname]).fetchone()
+			if not match:
+				match = myDB.action('SELECT Location, BitRate from have WHERE CleanName=?', [cleanname]).fetchone()
 			
-			if not location:
-				location = myDB.action('SELECT Location, BitRate from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [release_dict['artist_name'], release_dict['rg_title'], track['title']]).fetchone()
+			if not match:
+				match = myDB.action('SELECT Location, BitRate from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [release_dict['artist_name'], release_dict['rg_title'], track['title']]).fetchone()
 					
-			if location:
-				newValueDict['Location'] = location['Location']
-				newValueDict['BitRate'] = location['BitRate']
+			if match:
+				newValueDict['Location'] = match['Location']
+				newValueDict['BitRate'] = match['BitRate']
 		
 			myDB.upsert("tracks", newValueDict, controlValueDict)
 				

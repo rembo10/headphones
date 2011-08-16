@@ -21,8 +21,8 @@
 		<tbody>
 		%for artist in headphones.NEW_ARTISTS:
 			<tr class="gradeZ">
-				<td id="select"><input type="checkbox" name="${artist['ArtistID']}" class="checkbox" /></td>
-				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
+				<td id="select"><input type="checkbox" name="${artist}" class="checkbox" /></td>
+				<td id="name">${artist}</a></td>
 			</tr>
 		%endfor
 		</tbody>
@@ -41,11 +41,8 @@
 	{
 		$('#artist_table').dataTable(
 			{
-				"aoColumns": [
-					null,
-					{ "sType": "title-string"},
-				],
-				"bStateSave": true,
+				"aaSorting": [[1, 'asc']],
+				"bStateSave": false,
 				"bPaginate": false
 				
 			});
