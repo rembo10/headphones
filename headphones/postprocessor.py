@@ -240,7 +240,6 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 	myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [new_track_count, release['ArtistID']])
 	myDB.action('UPDATE albums SET status = "Downloaded" WHERE AlbumID=?', [albumid])
 	myDB.action('UPDATE snatched SET status = "Processed" WHERE AlbumID=?', [albumid])
-	updateHave(albumpath)
 	
 	logger.info('Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
 	
@@ -421,36 +420,6 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		except Exception, e:
 			logger.error('Error renaming file: %s. Error: %s' % (downloaded_track, e))
 			continue
-		
-def updateHave(albumpath):
-
-	results = []
-	
-	for r,d,f in os.walk(albumpath):
-		for files in f:
-			if any(files.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
-				results.append(os.path.join(r, files))
-	
-	if results:
-	
-		myDB = db.DBConnection()
-	
-		for song in results:
-			try:
-				f = MediaFile(song)
-				#logger.debug('Reading: %s' % song.decode('UTF-8'))
-			except:
-				logger.warn('Could not read file: %s' % song)
-				continue
-			else:	
-				if f.albumartist:
-					artist = f.albumartist
-				elif f.artist:
-					artist = f.artist
-				else:
-					continue
-				
-				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?)', [artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid])
 				
 def renameUnprocessedFolder(albumpath):
 	
