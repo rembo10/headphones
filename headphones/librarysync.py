@@ -4,17 +4,18 @@ import glob
 from lib.beets.mediafile import MediaFile
 
 import headphones
-from headphones import db, logger
+from headphones import db, logger, helpers, importer
 
-def LibraryScan():
+def libraryScan():
 
 	if not headphones.MUSIC_DIR:
 		return
 
-	unmatched_files = []
 	new_artists = []
+	bitrates = []
 	
 	myDB = db.DBConnection()
+	myDB.action('''DELETE from have''')
 	
 	for r,d,f in os.walk(headphones.MUSIC_DIR):
 		for files in f:
@@ -22,63 +23,58 @@ def LibraryScan():
 			if any(files.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
 				
 				file = unicode(os.path.join(r, files), "utf-8")
-				print repr(file)
+
 				# Try to read the metadata
 				try:
 					f = MediaFile(file)
 				except:
 					logger.error('Cannot read file: ' + file)
-					continue				
+					continue
+					
+				# Grab the bitrates for the auto detect bit rate option
+				if f.bitrate:
+					bitrates.append(f.bitrate)
 				
-				# Try to match on metadata first, 
+				# Try to match on metadata first, starting with the track id
 				if f.mb_trackid:
-					print 'has track id:' + repr(f.mb_trackid)
+
 					# Wondering if theres a better way to do this -> do one thing if the row exists,
 					# do something else if it doesn't
 					track = myDB.action('SELECT TrackID from tracks WHERE TrackID=?', [f.mb_trackid]).fetchone()
 		
-					if not track:
-						if f.albumartist:
-							new_artists.append(f.albumartist)
-						elif f.artist:
-							new_artists.append(f.artist)
-						else:
-							unmatched_files.append(file)
-					
-					else:
+					if track:
 						myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE TrackID=?', [file, f.bitrate, track['TrackID']])
 						continue
 				
-				elif f.albumartist and f.album and f.title:
-
-					track = myDB.action('SELECT TrackID from tracks WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [f.albumartist, f.album, f.title]).fetchone()
-					
-					if not track:
-						new_artists.append(f.albumartist)
-						
-					else:
-						myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE TrackID=?', [file, f.bitrate, track['TrackID']])
-						
-				elif f.artist and f.album and f.title:
-
-					track = myDB.action('SELECT TrackID from tracks WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [f.artist, f.album, f.title]).fetchone()
-					
-					if not track:
-						new_artists.append(file)
-					else:
-						myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE TrackID=?', [file, f.bitrate, track['TrackID']])
-						
+				# Try to find a match based on artist/album/tracktitle
+				if f.albumartist:
+					f_artist = f.albumartist
+				elif f.artist:
+					f_artist = f.artist
 				else:
 					continue
+				
+				if f_artist and f.album and f.title:
+
+					track = myDB.action('SELECT TrackID from tracks WHERE CleanName LIKE ?', [helpers.cleanName(f_artist +' '+f.album+' '+f.title)]).fetchone()
+						
+					if not track:
+						track = myDB.action('SELECT TrackID from tracks WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [f_artist, f.album, f.title]).fetchone()
 					
-	# Try to parse the unmatched files based on the folder & file formats in the config
-	for file in unmatched_files:
-		# Will do later
-		pass
+					if track:
+						myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE TrackID=?', [file, f.bitrate, track['TrackID']])
+						continue		
+				
+				# if we can't find a match in the database on a track level, it might be a new artist or it might be on a non-mb release
+				new_artists.append(f_artist)
+				
+				# The have table will become the new database for unmatched tracks (i.e. tracks with no associated links in the database
+				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [f_artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid, file, helpers.cleanName(f_artist+' '+f.album+' '+f.title)])
 	
 	# Now check empty file paths to see if we can find a match based on their folder format
-	tracks = myDB.select('SELECT * from tracks WHERE Location=NULL')
+	tracks = myDB.select('SELECT * from tracks WHERE Location IS NULL')
 	for track in tracks:
+	
 		release = myDB.action('SELECT * from albums WHERE AlbumID=?', [track['AlbumID']]).fetchone()
 
 		try:
@@ -129,32 +125,48 @@ def LibraryScan():
 		
 		new_file_name = new_file_name.replace('?','_').replace(':', '_')
 		
-		full_path_to_file = os.path.join(headphones.MUSIC_DIR, folder, new_file_name)
+		full_path_to_file = os.path.normpath(os.path.join(headphones.MUSIC_DIR, folder, new_file_name))
+
+		match = glob.glob(full_path_to_file)
 		
-		print 'Full path to file is: ' + repr(full_path_to_file)
-		
-		if glob.glob(full_path_to_file):
-			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [full_path_to_file, track['TrackID']])
+		if match:
+
+			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [match[0], track['TrackID']])
 			
 			# Try to insert the appropriate track id so we don't have to keep doing this
 			try:
-				f = MediaFile(full_path_to_file)
+				f = MediaFile(match[0])
 				f.mb_trackid = track['TrackID']
 				myDB.action('UPDATE tracks SET BitRate=? WHERE TrackID=?', [f.bitrate, track['TrackID']])
 				f.save()
+				logger.info('Wrote mbid to track: %s' % match[0])
 			except:
-				logger.error('Error embedding track id into: %s' % full_path_to_file)
+				logger.error('Error embedding track id into: %s' % match[0])
 				
-	# Lastly, clean up any old paths that don't exist
+	# Clean up bad filepaths
 	tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
+	
 	for track in tracks:
 		if not os.path.isfile(track['Location']):
 			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [None, track['TrackID']])
-	
+			
 	# Clean up the new artist list
 	unique_artists = {}.fromkeys(new_artists).keys()
-	current_artists = myDB.action('SELECT ArtistName from artists').fetchall()
+	current_artists = myDB.select('SELECT ArtistName from artists')
 	
-	artist_list = [f for f in unique_artists if f not in current_artists]
+	artist_list = [f for f in unique_artists if f.lower() not in [x[0].lower() for x in current_artists]]
 	
-	logger.info('Found %i artists to import: ' % len(artist_list))
+	logger.info('Found %i new artists to import.' % len(artist_list))
+	
+	# Update track counts
+	for artist in current_artists:
+		havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID like ?', [artist['ArtistID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['ArtistName']]))
+		myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, artist['ArtistID']])
+		
+	if headphones.ADD_ARTISTS:
+		importer.artistlist_to_mbids(artist_list)
+	else:
+		headphones.NEW_ARTISTS = artist_list
+	
+	if headphones.DETECT_BITRATE:
+		headphones.PREFERRED_BITRATE = float(sum(bitrates))/len(bitrates)/1000

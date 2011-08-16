@@ -157,19 +157,21 @@ div#paddingheader { padding-top: 48px; font-size: 24px; font-weight: bold; text-
 div#nopaddingheader { font-size: 24px; font-weight: bold; text-align: center; }
 table#album_table { background-color: white; }
 
-table#album_table th#select { vertical-align: middle; text-align: left; min-width: 25px; }
+table#album_table th#select { vertical-align: middle; text-align: left; min-width: 10px; }
 table#album_table th#albumart { text-align: left; min-width: 50px; }
 table#album_table th#albumname { text-align: center; min-width: 150px; }
-table#album_table th#reldate { width: 175px; text-align: center; min-width: 100px; }
-table#album_table th#status { width: 175px; text-align: center; min-width: 100px; }
+table#album_table th#reldate { width: 175px; text-align: center; min-width: 70px; }
+table#album_table th#status { width: 175px; text-align: center; min-width: 80px; }
 table#album_table th#type { width: 175px; text-align: center; min-width: 100px; }
+table#album_table th#bitrate { text-align: center; min-width: 60px; }
 table#album_table td#select { vertical-align: middle; text-align: left; }
 table#album_table td#albumart { vertical-align: middle; text-align: left; }
 table#album_table td#albumname { vertical-align: middle; text-align: center; }
 table#album_table td#reldate { vertical-align: middle; text-align: center; }
-table#album_table td#status { vertical-align: middle; text-align: center; }
+table#album_table td#status { vertical-align: middle; text-align: center; font-size: 13px; }
 table#album_table td#type { vertical-align: middle; text-align: center; }
 table#album_table td#have { vertical-align: middle; }
+table#album_table td#bitrate { vertical-align: middle; text-align: center; font-size: 13px; }
 
 img.albumArt { float: left; padding-right: 5px; }
 div#albumheader { padding-top: 48px; height: 200px; }
@@ -185,7 +187,7 @@ table#track_table td#number { vertical-align: middle; text-align: right; }
 table#track_table td#name { vertical-align: middle; text-align: center; }
 table#track_table td#duration { vertical-align: middle; text-align: center; }
 table#track_table td#location { vertical-align: middle; text-align: center; font-size: 11px; }
-table#track_table td#location { vertical-align: middle; text-align: center; }
+table#track_table td#bitrate { vertical-align: middle; text-align: center; font-size: 12px; }
 
 table#history_table { background-color: white; width: 100%;  }
 

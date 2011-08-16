@@ -85,6 +85,33 @@
 				%endfor
 				</tbody>
 			</table>
+			<%
+				unmatched = myDB.select('SELECT * from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ?', [album['ArtistName'], album['AlbumTitle']])
+			%>
+			%if unmatched:
+			<table class="display" id="track_table">
+				<thead>
+					<tr>
+						<th id="number">#</th>
+						<th id="name">Track Title</th>
+						<th id="duration">Duration</th>
+						<th id="location">Local File</th>
+						<th id="bitrate">Bit Rate</th>
+					</tr>
+				</thead>
+				<tbody>
+				%for track in unmatched:
+					<tr class="gradeZ">
+						<td id="number">${track['TrackNumber']}</td>
+						<td id="name">${track['TrackTitle']}</td>
+						<td id="duration">${track['TrackLength']}</td>
+						<td id="location">${track['Location']}</td>
+						<td id="bitrate">${track['BitRate']}</td>
+					</tr>
+				%endfor
+				</tbody>
+			</table>
+			%endif
 		</div>
 	</div>
 </%def>

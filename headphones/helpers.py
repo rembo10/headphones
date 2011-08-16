@@ -104,6 +104,13 @@ def replace_all(text, dic):
 		text = text.replace(i, j)
 	return text
 	
+def cleanName(string):
+
+	pass1 = latinToAscii(string).lower()
+	out_string = re.sub('[\.\-\/\!\@\#\$\%\^\&\*\(\)\+\-\"\'\,\;\:\[\]\{\}\<\>\=\_]', '', pass1).encode('utf-8')
+	
+	return out_string
+	
 def extract_data(s):
 	
     from headphones import logger
