@@ -6,10 +6,17 @@ from lib.beets.mediafile import MediaFile
 import headphones
 from headphones import db, logger, helpers, importer
 
-def libraryScan():
+def libraryScan(dir=None):
 
-	if not headphones.MUSIC_DIR:
-		return
+	if not dir:
+		dir = headphones.MUSIC_DIR
+		
+	try:
+		dir = str(dir)
+	except UnicodeEncodeError:
+		dir = unicode(dir).encode('unicode_escape')
+		
+	logger.info('Scanning music directory: %s' % dir)
 
 	new_artists = []
 	bitrates = []
@@ -17,7 +24,7 @@ def libraryScan():
 	myDB = db.DBConnection()
 	myDB.action('''DELETE from have''')
 	
-	for r,d,f in os.walk(headphones.MUSIC_DIR):
+	for r,d,f in os.walk(dir):
 		for files in f:
 			# MEDIA_FORMATS = music file extensions, e.g. mp3, flac, etc
 			if any(files.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
@@ -132,17 +139,19 @@ def libraryScan():
 		if match:
 
 			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [match[0], track['TrackID']])
+			myDB.action('DELETE from have WHERE Location=?', [match[0]])
 			
 			# Try to insert the appropriate track id so we don't have to keep doing this
 			try:
 				f = MediaFile(match[0])
 				f.mb_trackid = track['TrackID']
-				myDB.action('UPDATE tracks SET BitRate=? WHERE TrackID=?', [f.bitrate, track['TrackID']])
 				f.save()
-				logger.info('Wrote mbid to track: %s' % match[0])
+				myDB.action('UPDATE tracks SET BitRate=? WHERE TrackID=?', [f.bitrate, track['TrackID']])
+				logger.debug('Wrote mbid to track: %s' % match[0])
 			except:
 				logger.error('Error embedding track id into: %s' % match[0])
-				
+				continue
+			
 	# Clean up bad filepaths
 	tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
 	
@@ -168,4 +177,4 @@ def libraryScan():
 		headphones.NEW_ARTISTS = artist_list
 	
 	if headphones.DETECT_BITRATE:
-		headphones.PREFERRED_BITRATE = round(sum(bitrates))/len(bitrates)/1000
+		headphones.PREFERRED_BITRATE = sum(bitrates)/len(bitrates)/1000

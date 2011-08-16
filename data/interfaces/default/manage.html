@@ -5,7 +5,10 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<ul id="subhead_menu">
-			<li><a href="manageArtists">Manage Artists</a></li>		
+			<li><a href="manageArtists">Manage Artists</a></li>
+			%if not headphones.ADD_ARTISTS:
+			<li><a href="manageNew">Manage New Artists</a></li>
+			%endif
 		</ul>
 	</div>	
 </%def>
