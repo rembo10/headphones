@@ -168,4 +168,4 @@ def libraryScan():
 		headphones.NEW_ARTISTS = artist_list
 	
 	if headphones.DETECT_BITRATE:
-		headphones.PREFERRED_BITRATE = float(sum(bitrates))/len(bitrates)/1000
+		headphones.PREFERRED_BITRATE = round(sum(bitrates))/len(bitrates)/1000
