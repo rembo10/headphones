@@ -84,6 +84,16 @@ def convert_milliseconds(ms):
 
 	return minutes
 	
+def convert_seconds(s):
+
+	gmtime = time.gmtime(s)
+	if s > 3600:
+		minutes = time.strftime("%H:%M:%S", gmtime)
+	else:
+		minutes = time.strftime("%M:%S", gmtime)
+
+	return minutes
+	
 def today():
 	today = datetime.date.today()
 	yyyymmdd = datetime.date.isoformat(today)

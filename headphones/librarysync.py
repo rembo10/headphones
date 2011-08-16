@@ -152,18 +152,17 @@ def libraryScan():
 			
 	# Clean up the new artist list
 	unique_artists = {}.fromkeys(new_artists).keys()
-	current_artists = myDB.select('SELECT ArtistName from artists')
+	current_artists = myDB.select('SELECT ArtistName, ArtistID from artists')
 	
 	artist_list = [f for f in unique_artists if f.lower() not in [x[0].lower() for x in current_artists]]
 	
-	logger.info('Found %i new artists to import.' % len(artist_list))
-	
 	# Update track counts
 	for artist in current_artists:
-		havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID like ?', [artist['ArtistID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['ArtistName']]))
+		havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID like ? AND Location IS NOT NULL', [artist['ArtistID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['ArtistName']]))
 		myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, artist['ArtistID']])
 		
 	if headphones.ADD_ARTISTS:
+		logger.info('Found %i new artists to import.' % len(artist_list))
 		importer.artistlist_to_mbids(artist_list)
 	else:
 		headphones.NEW_ARTISTS = artist_list

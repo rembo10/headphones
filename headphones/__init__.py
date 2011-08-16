@@ -429,7 +429,7 @@ def start():
 
         SCHED.add_cron_job(updater.dbUpdate, hour=4, minute=0, second=0)
         SCHED.add_interval_job(searcher.searchNZB, minutes=NZB_SEARCH_INTERVAL)
-        SCHED.add_interval_job(librarysync.libraryScan(), minutes=LIBRARYSCAN_INTERVAL)
+        SCHED.add_interval_job(librarysync.libraryScan, minutes=LIBRARYSCAN_INTERVAL)
         SCHED.add_interval_job(versioncheck.checkGithub, minutes=300)
         SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
         librarysync.libraryScan()
