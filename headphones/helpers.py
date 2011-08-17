@@ -84,6 +84,16 @@ def convert_milliseconds(ms):
 
 	return minutes
 	
+def convert_seconds(s):
+
+	gmtime = time.gmtime(s)
+	if s > 3600:
+		minutes = time.strftime("%H:%M:%S", gmtime)
+	else:
+		minutes = time.strftime("%M:%S", gmtime)
+
+	return minutes
+	
 def today():
 	today = datetime.date.today()
 	yyyymmdd = datetime.date.isoformat(today)
@@ -103,6 +113,13 @@ def replace_all(text, dic):
 	for i, j in dic.iteritems():
 		text = text.replace(i, j)
 	return text
+	
+def cleanName(string):
+
+	pass1 = latinToAscii(string).lower()
+	out_string = re.sub('[\.\-\/\!\@\#\$\%\^\&\*\(\)\+\-\"\'\,\;\:\[\]\{\}\<\>\=\_]', '', pass1).encode('utf-8')
+	
+	return out_string
 	
 def extract_data(s):
 	
@@ -144,3 +161,34 @@ def extract_logline(s):
 		return (timestamp, level, thread, message)
 	else:
 		return None
+		
+def extract_song_data(s):
+
+    #headphones default format
+    music_dir = headphones.MUSIC_DIR
+    folder_format = headphones.FOLDER_FORMAT
+    file_format = headphones.FILE_FORMAT
+    
+    full_format = os.path.join(headphones.MUSIC_DIR)
+    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
+    match = pattern.match(s)
+    
+    if match:
+        name = match.group("name")
+        album = match.group("album")
+        year = match.group("year")
+        return (name, album, year)
+    else:
+        logger.info("Couldn't parse " + s + " into a valid default format")
+    
+    #newzbin default format
+    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
+    match = pattern.match(s)
+    if match:
+        name = match.group("name")
+        album = match.group("album")
+        year = match.group("year")
+        return (name, album, year)
+    else:
+        logger.info("Couldn't parse " + s + " into a valid Newbin format")
+        return (name, album, year)
