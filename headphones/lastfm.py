@@ -27,7 +27,7 @@ def getSimilar():
 			time.sleep(1)
 			continue
 			
-		len(data) < 200:
+		if len(data) < 200:
 			continue
 			
 		d = minidom.parseString(data)
