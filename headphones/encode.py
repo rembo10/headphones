@@ -4,6 +4,7 @@ import shutil
 import time
 
 from subprocess import call
+from headphones import logger
 
 
 def encode(albumPath):
@@ -33,16 +34,19 @@ def encode(albumPath):
 	i=0
 	for music in musicFiles:
 		return_code=1
-		if headphones.ENCODER == 'lame':			
-			cmd=encoder+' -h --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
-			cmd=cmd+' "'+os.path.join(music)+'"'
-			cmd=cmd+' "'+os.path.join(musicTempFiles[i])+'"'
-			return_code = call(cmd, shell=True)
-			if return_code==0:
-				os.remove(music)
-				shutil.move(musicTempFiles[i],os.path.join(albumPath))
-			i=i+1	
-		else:			
+		if headphones.ENCODER == 'lame':
+			if not any(music.endswith('.' + x) for x in ["mp3", "wav"]):
+				logger.warn('Lame cant encode "%s" format for "%s", use ffmpeg' % (os.path.splitext(music)[1],music))
+			else:
+				cmd=encoder+' -h --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
+				cmd=cmd+' "'+os.path.join(music)+'"'
+				cmd=cmd+' "'+os.path.join(musicTempFiles[i])+'"'
+				return_code = call(cmd, shell=True)
+				if return_code==0:
+					os.remove(music)
+					shutil.move(musicTempFiles[i],os.path.join(albumPath))
+				i=i+1	
+		else:
 			cmd=encoder+' -i'
 			cmd=cmd+' "'+os.path.join(music)+'"'
 			cmd=cmd+' -ac 2 -vn -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) +'k'
@@ -56,3 +60,4 @@ def encode(albumPath):
 			
 	shutil.rmtree(tempDirEncode)
 	time.sleep(1)
+	logger.info('Encoding for folder "%s" is completed' % (albumPath))
