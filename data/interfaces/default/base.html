@@ -1,5 +1,6 @@
 <%
 	import headphones
+	from headphones import version
 %>
 <!doctype html>
 <!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]-->
@@ -70,6 +71,9 @@
 		<footer>
 			<div id="version">
 				Version: ${headphones.CURRENT_VERSION}
+				%if version.HEADPHONES_VERSION != 'master':
+				(${version.HEADPHONES_VERSION})
+				%endif
 			</div>
 			<div id="donate">
 				<form action="https://www.paypal.com/cgi-bin/webscr" method="post">

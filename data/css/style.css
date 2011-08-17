@@ -109,10 +109,11 @@ header { min-height: 68px; width: 100%; min-width: 935px; padding-left: 0px; pad
 h1 { font-size: 24px; }
 h2 { font-size: 20px; }
 h3 { font-size: 16px; }
+h4 { font-size: 14px; }
 
 p.indented { padding-top: 20px; margin-left: 20px; font-size: 14px; }
 p.center { text-align: center; font-size: 18px; }
-.smalltext2 { font-size: 11px; margin-left: 45px; }
+.smalltext2 { font-size: 12px; margin-left: 45px; }
 
 div#updatebar { text-align: center; min-width: 970px; width: 100%; background-color: light-blue; float: left; }
 div#logo { float: left; padding-left: 10px; }
@@ -157,35 +158,45 @@ div#paddingheader { padding-top: 48px; font-size: 24px; font-weight: bold; text-
 div#nopaddingheader { font-size: 24px; font-weight: bold; text-align: center; }
 table#album_table { background-color: white; }
 
-table#album_table th#select { vertical-align: middle; text-align: left; min-width: 25px; }
+table#album_table th#select { vertical-align: middle; text-align: left; min-width: 10px; }
 table#album_table th#albumart { text-align: left; min-width: 50px; }
 table#album_table th#albumname { text-align: center; min-width: 150px; }
-table#album_table th#reldate { width: 175px; text-align: center; min-width: 100px; }
-table#album_table th#status { width: 175px; text-align: center; min-width: 100px; }
+table#album_table th#reldate { width: 175px; text-align: center; min-width: 70px; }
+table#album_table th#status { width: 175px; text-align: center; min-width: 80px; }
 table#album_table th#type { width: 175px; text-align: center; min-width: 100px; }
+table#album_table th#bitrate { text-align: center; min-width: 60px; }
 table#album_table td#select { vertical-align: middle; text-align: left; }
 table#album_table td#albumart { vertical-align: middle; text-align: left; }
 table#album_table td#albumname { vertical-align: middle; text-align: center; }
 table#album_table td#reldate { vertical-align: middle; text-align: center; }
-table#album_table td#status { vertical-align: middle; text-align: center; }
+table#album_table td#status { vertical-align: middle; text-align: center; font-size: 13px; }
 table#album_table td#type { vertical-align: middle; text-align: center; }
 table#album_table td#have { vertical-align: middle; }
+table#album_table td#bitrate { vertical-align: middle; text-align: center; font-size: 13px; }
 
 img.albumArt { float: left; padding-right: 5px; }
 div#albumheader { padding-top: 48px; height: 200px; }
-div#track_wrapper { padding-top: 20px; text-align: center; font-size: 16px; }
+div#track_wrapper { margin-left: -50px; padding-top: 20px; font-size: 16px; width: 100%; }
 
-table#track_table th#number { text-align: right; min-width: 20px; }
+table#track_table th#number { text-align: right; min-width: 10px; }
 table#track_table th#name { text-align: center; min-width: 350px; }
 table#track_table th#duration { width: 175px; text-align: center; min-width: 100px; }
-table#track_table th#have { width: 175px; text-align: center; min-width: 100px; }
+table#track_table th#location { text-align: center; width: 250px; }
+table#track_table th#bitrate { text-align: center; min-width: 75px; }
 
 table#track_table td#number { vertical-align: middle; text-align: right; }
-table#track_table td#name { vertical-align: middle; text-align: center; }
+table#track_table td#name { vertical-align: middle; text-align: center; font-size: 15px; }
 table#track_table td#duration { vertical-align: middle; text-align: center; }
-table#track_table td#have { vertical-align: middle; text-align: center; }
+table#track_table td#location { vertical-align: middle; text-align: center; font-size: 11px; }
+table#track_table td#bitrate { vertical-align: middle; text-align: center; font-size: 12px; }
 
-table#history_table { background-color: white; width: 100%;  }
+table#history_table { background-color: white; width: 100%; font-size: 13px; }
+
+table#history_table td#dateadded { vertical-align: middle; text-align: center; min-width: 150px; font-size: 14px; }
+table#history_table td#filename { vertical-align: middle; text-align: center; min-width: 100px; font-size: 15px; }
+table#history_table td#size { vertical-align: middle; text-align: center; min-width: 75px; font-size: 14px; }
+table#history_table td#status { vertical-align: middle; text-align: center; font-size: 14px; }
+table#history_table td#action { vertical-align: middle; text-align: center; font-size: 14px; }
 
 table#log_table { background-color: white; }
 

@@ -41,11 +41,12 @@
 			<tr>
 				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
 				<th id="albumart"></th>
-				<th id="albumname">Album Name</th>
-				<th id="reldate">Release Date</th>
-				<th id="type">Release Type</th>
+				<th id="albumname">Name</th>
+				<th id="reldate">Date</th>
+				<th id="type">Type</th>
 				<th id="status">Status</th>
 				<th id="have">Have</th>
+				<th id="bitrate">Bitrate</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -62,7 +63,7 @@
 
 				myDB = db.DBConnection()					
 				totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=?', [album['AlbumID']]))
-				havetracks = len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ?', [album['ArtistName'], album['AlbumTitle']]))
+				havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=? AND Location IS NOT NULL', [album['AlbumID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle LIKE ?', [album['ArtistName'], album['AlbumTitle']]))
 				
 				try:
 					percent = (havetracks*100.0)/totaltracks
@@ -71,6 +72,12 @@
 				except (ZeroDivisionError, TypeError):
 					percent = 0
 					totaltracks = '?'
+					
+				avgbitrate = myDB.action("SELECT AVG(BitRate) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
+				if avgbitrate:
+					bitrate = str(int(avgbitrate)/1000) + ' kbps'
+				else:
+					bitrate = ''
 				
 			%>
 			<tr class="grade${grade}">
@@ -89,6 +96,7 @@
 				%endif
 				</td>
 				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
+				<td id="bitrate">${bitrate}</td>
 			</tr>
 		%endfor
 		</tbody>
@@ -114,7 +122,8 @@
 					null,
 					null,
 					null,
-					{ "sType": "title-numeric"}
+					{ "sType": "title-numeric"},
+					null
 				],
 				"oLanguage": {
 					"sLengthMenu":"Show _MENU_ albums per page",
