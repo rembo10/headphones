@@ -2,6 +2,7 @@ import urllib
 from xml.dom import minidom
 from collections import defaultdict
 import random
+import time
 
 import headphones
 from headphones import db, logger
@@ -19,7 +20,16 @@ def getSimilar():
 	for result in results[:12]:
 		
 		url = 'http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&mbid=%s&api_key=%s' % (result['ArtistID'], api_key)
-		data = urllib.urlopen(url).read()
+		
+		try:
+			data = urllib.urlopen(url).read()
+		except:
+			time.sleep(1)
+			continue
+			
+		len(data) < 200:
+			continue
+			
 		d = minidom.parseString(data)
 		node = d.documentElement
 		artists = d.getElementsByTagName("artist")

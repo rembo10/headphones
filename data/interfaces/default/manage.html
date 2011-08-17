@@ -1,6 +1,7 @@
 <%inherit file="base.html" />
 <%!
 	import headphones
+	from headphones.helpers import checked
 %>
 <%def name="headerIncludes()">
 	<div id="subhead_container">
@@ -33,6 +34,9 @@
 			<input type="text" value="Enter a Music Directory to scan" onfocus="if
 			(this.value==this.defaultValue) this.value='';" name="path" size="70" />
 		%endif
+		<br>
+		<h3><input type="checkbox" name="autoadd" value="1" ${checked(headphones.ADD_ARTISTS)}>Automatically add new artists</h3>
+		<br><br>
 		<input type="submit" /></form>
 	</div>
 
