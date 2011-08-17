@@ -91,7 +91,7 @@
             
             <tr>
                 <td>
-                    <h3>Use Black Hole:</h3><input type="checkbox" name="blackhole" value=1 ${config['use_blackhole']} />
+                    <h3>Use Black Hole: <input type="checkbox" name="blackhole" value=1 ${config['use_blackhole']} /></h3>
                 </td>
 
                 <td>
@@ -104,7 +104,7 @@
 
             <tr>
                 <td>
-                    <h3>Usenet Retention:</h3><input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="20" maxlength="40">
+                    <h3>Usenet Retention:<input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="20" maxlength="40"></h3>
                 </td>
             </tr>
         </table>
@@ -266,14 +266,14 @@
 					<%
 						if config['encoder'] == 'lame':
 							lameselect = 'selected="selected"'
-							ffdshowselect = ''
+							ffmpegselect = ''
 						else:
 							lameselect = ''
-							ffdshowselect = 'selected="selected"'							
+							ffmpegselect = 'selected="selected"'							
 					%>
 					<h3>Encoder: <select name="encoder">
 						<option value="lame" ${lameselect}>lame</option>
-						<option value="ffdshow" ${ffdshowselect}>ffdshow</option>
+						<option value="ffmpeg" ${ffmpegselect}>ffmpeg</option>
 					</select>
 					Bitrate: <input type="text" name="bitrate" value="${config['bitrate']}" size="3" maxlength="5" />kbps <br>
 					<br>

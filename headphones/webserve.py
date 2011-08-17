@@ -304,8 +304,7 @@ class WebInterface(object):
 	
 		interface_dir = os.path.join(headphones.PROG_DIR, 'data/interfaces/')
 		interface_list = [ name for name in os.listdir(interface_dir) if os.path.isdir(os.path.join(interface_dir, name)) ]
-		print 'Value going in: '
-		print headphones.ENCODER
+
 		config = { 
 					"http_host" : headphones.HTTP_HOST,
 					"http_user" : headphones.HTTP_USERNAME,
