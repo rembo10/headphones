@@ -25,10 +25,11 @@ def encode(albumPath):
 		
 	for r,d,f in os.walk(albumPath):
 		for music in f:
-			if any(music.endswith('.' + x) for x in ["flac", "m4a", "wav"]):
+			if any(music.endswith('.' + x) for x in ["mp3", "flac", "m4a", "wav"]):
 				musicFiles.append(os.path.join(r, music))
-				musicTempFiles.append(os.path.join(tempDirEncode, music))
-	
+				musicTemp = os.path.join(os.path.splitext(music)[0])+'.mp3'
+				musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
+				
 	if headphones.ENCODER=='lame':
 		encoder=os.path.join(headphones.ENCODERFOLDER,'lame')
 	else:
@@ -37,24 +38,24 @@ def encode(albumPath):
 	for music in musicFiles:
 		return_code=1
 		if headphones.ENCODER == 'lame':			
-			cmd=encoder+' -h --resample ' + headphones.SAMPLINGFREQUENCY + ' -b ' + headphones.BITRATE
+			cmd=encoder+' -h --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
 			cmd=cmd+' "'+os.path.join(music)+'"'
 			cmd=cmd+' "'+os.path.join(musicTempFiles[i])+'"'
 			return_code = call(cmd, shell=True)
 			if return_code==0:
 				os.remove(music)
-				os.rename(musicTempFiles[i],music)
+				shutil.move(musicTempFiles[i],os.path.join(albumPath))
 			i=i+1	
 		else:			
 			cmd=encoder+' -i'
 			cmd=cmd+' "'+os.path.join(music)+'"'
-			cmd=cmd+' -ac 2 -vn -ar ' + headphones.SAMPLINGFREQUENCY + ' -ab ' + headphones.BITRATE +'k'
+			cmd=cmd+' -ac 2 -vn -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) +'k'
 			cmd=cmd+' "'+os.path.join(musicTempFiles[i])+'"'
 			return_code = call(cmd, shell=True)
 			print return_code
 			if return_code==0:
 				os.remove(music)
-				os.rename(musicTempFiles[i],music)
+				shutil.move(musicTempFiles[i],os.path.join(albumPath))
 			i=i+1
 			
 	shutil.rmtree(tempDirEncode)
