@@ -25,7 +25,7 @@ def encode(albumPath):
 		
 	for r,d,f in os.walk(albumPath):
 		for music in f:
-			if any(music.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
+			if any(music.endswith('.' + x) for x in ["flac", "m4a", "wav"]):
 				musicFiles.append(os.path.join(r, music))
 				musicTempFiles.append(os.path.join(tempDirEncode, music))
 	
