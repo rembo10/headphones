@@ -11,7 +11,7 @@ from lib.configobj import ConfigObj
 
 import cherrypy
 
-from headphones import updater, searcher, importer, versioncheck, logger, postprocessor, version, sab
+from headphones import updater, searcher, importer, versioncheck, logger, postprocessor, version, sab, librarysync
 from headphones.common import *
 
 FULL_PATH = None
@@ -62,6 +62,8 @@ PATH_TO_XML = None
 PREFERRED_QUALITY = None
 PREFERRED_BITRATE = None
 DETECT_BITRATE = False
+ADD_ARTISTS = False
+NEW_ARTISTS = []
 CORRECT_METADATA = False
 MOVE_FILES = False
 RENAME_FILES = False
@@ -160,7 +162,7 @@ def initialize():
         global __INITIALIZED__, FULL_PATH, PROG_DIR, QUIET, DAEMON, DATA_DIR, CONFIG_FILE, CFG, LOG_DIR, CACHE_DIR, \
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, GIT_PATH, \
                 CURRENT_VERSION, LATEST_VERSION, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
-                CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, \
+                ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, \
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, NZB_SEARCH_INTERVAL, \
                 LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
@@ -199,6 +201,7 @@ def initialize():
         PREFERRED_QUALITY = check_setting_int(CFG, 'General', 'preferred_quality', 0)
         PREFERRED_BITRATE = check_setting_int(CFG, 'General', 'preferred_bitrate', '')
         DETECT_BITRATE = bool(check_setting_int(CFG, 'General', 'detect_bitrate', 0))
+        ADD_ARTISTS = bool(check_setting_int(CFG, 'General', 'auto_add_artists', 1))
         CORRECT_METADATA = bool(check_setting_int(CFG, 'General', 'correct_metadata', 0))
         MOVE_FILES = bool(check_setting_int(CFG, 'General', 'move_files', 0))
         RENAME_FILES = bool(check_setting_int(CFG, 'General', 'rename_files', 0))
@@ -363,6 +366,7 @@ def config_write():
     new_config['General']['preferred_quality'] = PREFERRED_QUALITY
     new_config['General']['preferred_bitrate'] = PREFERRED_BITRATE
     new_config['General']['detect_bitrate'] = int(DETECT_BITRATE)
+    new_config['General']['auto_add_artists'] = int(ADD_ARTISTS)
     new_config['General']['correct_metadata'] = int(CORRECT_METADATA)
     new_config['General']['move_files'] = int(MOVE_FILES)
     new_config['General']['rename_files'] = int(RENAME_FILES)
@@ -425,7 +429,7 @@ def start():
 
         SCHED.add_cron_job(updater.dbUpdate, hour=4, minute=0, second=0)
         SCHED.add_interval_job(searcher.searchNZB, minutes=NZB_SEARCH_INTERVAL)
-        SCHED.add_interval_job(importer.scanMusic, minutes=LIBRARYSCAN_INTERVAL)
+        SCHED.add_interval_job(librarysync.libraryScan, minutes=LIBRARYSCAN_INTERVAL)
         SCHED.add_interval_job(versioncheck.checkGithub, minutes=300)
         SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
 
@@ -439,9 +443,9 @@ def dbcheck():
     c=conn.cursor()
     c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT, IncludeExtras INTEGER, LatestAlbum TEXT, ReleaseDate TEXT, AlbumID TEXT, HaveTracks INTEGER, TotalTracks INTEGER)')
     c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT, Type TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER)')
+    c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT, FolderName TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS have (ArtistName TEXT, AlbumTitle TEXT, TrackNumber TEXT, TrackTitle TEXT, TrackLength TEXT, BitRate TEXT, Genre TEXT, Date TEXT, TrackID TEXT)')
+    c.execute('CREATE TABLE IF NOT EXISTS have (ArtistName TEXT, AlbumTitle TEXT, TrackNumber TEXT, TrackTitle TEXT, TrackLength TEXT, BitRate TEXT, Genre TEXT, Date TEXT, TrackID TEXT, Location TEXT, CleanName TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS lastfmcloud (ArtistName TEXT, ArtistID TEXT, Count INTEGER)')
     c.execute('CREATE TABLE IF NOT EXISTS descriptions (ReleaseGroupID TEXT, ReleaseID TEXT, Summary TEXT, Content TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS releases (ReleaseID TEXT, ReleaseGroupID TEXT, UNIQUE(ReleaseID, ReleaseGroupID))')
@@ -489,7 +493,32 @@ def dbcheck():
     try:
         c.execute('SELECT FolderName from snatched')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE snatched ADD COLUMN FolderName TEXT')    
+        c.execute('ALTER TABLE snatched ADD COLUMN FolderName TEXT')
+    
+    try:
+        c.execute('SELECT Location from tracks')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE tracks ADD COLUMN Location TEXT')
+        
+    try:
+        c.execute('SELECT Location from have')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE have ADD COLUMN Location TEXT')
+    
+    try:
+        c.execute('SELECT BitRate from tracks')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE tracks ADD COLUMN BitRate INTEGER')  
+        
+    try:
+        c.execute('SELECT CleanName from tracks')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE tracks ADD COLUMN CleanName TEXT')  
+        
+    try:
+        c.execute('SELECT CleanName from have')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE have ADD COLUMN CleanName TEXT')  
     
     conn.commit()
     c.close()

@@ -51,35 +51,55 @@
 						<th id="number">#</th>
 						<th id="name">Track Title</th>
 						<th id="duration">Duration</th>
-						<th id="have"></th>
+						<th id="location">Local File</th>
+						<th id="bitrate">Bit Rate</th>
 					</tr>
 				</thead>
 				<tbody>
-				<%
-					i = 0
-				%>
 				%for track in tracks:
 					<%
-						i += 1
-						have = myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle like ? AND TrackTitle like ?', [track['ArtistName'], track['AlbumTitle'], track['TrackTitle']])
-						if len(have):
+						if track['Location']:
 							grade = 'A'
-							check = '<img src="images/checkmark.png" alt="checkmark">'
+							location = track['Location']
 						else:
-							grade = 'Z'
-							check = ''
+							grade = 'X'
+							location = ''
+							
+						if track['BitRate']:
+							bitrate = str(track['BitRate']/1000) + ' kbps'
+						else:
+							bitrate = ''
+
 						try:
 							trackduration = helpers.convert_milliseconds(track['TrackDuration'])
 						except:
 							trackduration = 'n/a'
 					%>
 					<tr class="grade${grade}">
-						<td id="number">${i}</td>
+						<td id="number">${track['TrackNumber']}</td>
 						<td id="name">${track['TrackTitle']}</td>
 						<td id="duration">${trackduration}</td>
-						<td id="have">${check}</td>
+						<td id="location">${location}</td>
+						<td id="bitrate">${bitrate}</td>
 					</tr>
 				%endfor
+				<%
+				unmatched = myDB.select('SELECT * from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ?', [album['ArtistName'], album['AlbumTitle']])			
+				%>
+				%if unmatched:
+					 %for track in unmatched:
+					 <%
+					 	duration = helpers.convert_seconds(float(track['TrackLength']))
+					 %>
+					<tr class="gradeC">
+						<td id="number">${track['TrackNumber']}</td>
+						<td id="name">${track['TrackTitle']}</td>
+						<td id="duration">${duration}</td>
+						<td id="location">${track['Location']}</td>
+						<td id="bitrate">${int(track['BitRate'])/1000} kbps</td>
+					</tr>
+					%endfor
+				%endif
 				</tbody>
 			</table>
 		</div>
@@ -97,6 +117,7 @@
 	{
 		$('#track_table').dataTable(
 			{
+				"aaSorting": [],
 				"bFilter": false,
 				"bInfo": false,
 				"bPaginate": false

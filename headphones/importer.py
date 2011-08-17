@@ -7,89 +7,6 @@ import headphones
 from headphones import logger, helpers, db, mb, albumart, lastfm
 
 various_artists_mbid = '89ad4ac3-39f7-470e-963a-56509c546377'
-
-def scanMusic(dir=None):
-
-	if not dir:
-		dir = headphones.MUSIC_DIR
-		
-	try:
-		dir = str(dir)
-	except UnicodeEncodeError:
-		dir = unicode(dir).encode('unicode_escape')
-		
-	logger.info('Starting Music Scan with directory: %s' % dir)
-
-	results = []
-	
-	for r,d,f in os.walk(dir):
-		for files in f:
-			if any(files.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
-				results.append(os.path.join(r, files))
-				
-	logger.info(u'%i music files found. Reading metadata....' % len(results))
-	
-	if results:
-	
-		myDB = db.DBConnection()
-		myDB.action('''DELETE from have''')
-	
-		for song in results:
-			try:
-				f = MediaFile(song)
-			except:
-				logger.warn('Could not read file: %s' % song)
-				continue
-			else:	
-				if f.albumartist:
-					artist = f.albumartist
-				elif f.artist:
-					artist = f.artist
-				else:
-					continue
-				
-				if not f.album:
-					album = None
-				else:
-					album = f.album
-				
-				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?)', [artist, album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid])
-				
-		# Get the average bitrate if the option is selected
-		if headphones.DETECT_BITRATE:
-			try:
-				avgbitrate = myDB.action("SELECT AVG(BitRate) FROM have").fetchone()[0]
-				headphones.PREFERRED_BITRATE = int(avgbitrate)/1000
-				
-			except Exception, e:
-				logger.error('Error detecting preferred bitrate:' + str(e))
-			
-		artistlist = myDB.action('SELECT DISTINCT ArtistName FROM have').fetchall()
-		logger.info(u"Preparing to import %i artists" % len(artistlist))
-		
-		artistlist_to_mbids(artistlist)
-
-def itunesImport(pathtoxml):
-	
-	if os.path.splitext(pathtoxml)[1] == '.xml':
-		logger.info(u"Loading xml file from"+ pathtoxml)
-		pl = XMLLibraryParser(pathtoxml)
-		l = Library(pl.dictionary)
-		lst = []
-		for song in l.songs:
-			lst.append(song.artist)
-		rawlist = {}.fromkeys(lst).keys()
-		artistlist = [f for f in rawlist if f != None]
-	
-	else:
-		rawlist = os.listdir(pathtoxml)
-		logger.info(u"Loading artists from directory:" +pathtoxml)
-		exclude = ['.ds_store', 'various artists', 'untitled folder', 'va']
-		artistlist = [f for f in rawlist if f.lower() not in exclude]
-		
-	logger.info('Starting directory/xml import...')
-	artistlist_to_mbids(artistlist)
-	
 		
 def is_exists(artistid):
 
@@ -99,19 +16,23 @@ def is_exists(artistid):
 	artistlist = myDB.select('SELECT ArtistID, ArtistName from artists WHERE ArtistID=?', [artistid])
 
 	if any(artistid in x for x in artistlist):
-		logger.debug(artistlist[0][1] + u" is already in the database. Updating 'have tracks', but not artist information")
+		logger.info(artistlist[0][1] + u" is already in the database. Updating 'have tracks', but not artist information")
 		return True
 	else:
 		return False
 
 
-def artistlist_to_mbids(artistlist):
+def artistlist_to_mbids(artistlist, forced=False):
 
 	for artist in artistlist:
-	
-		results = mb.findArtist(artist['ArtistName'], limit=1)
+		
+		if forced:
+			artist = unicode(artist, 'utf-8')
+			
+		results = mb.findArtist(artist, limit=1)
 		
 		if not results:
+			logger.info('No results found for: %' % artist)
 			continue
 		
 		try:	
@@ -124,16 +45,12 @@ def artistlist_to_mbids(artistlist):
 		# Add to database if it doesn't exist
 		if artistid != various_artists_mbid and not is_exists(artistid):
 			addArtisttoDB(artistid)
-			
-		# Update track count regardless of whether it already exists
-		if artistid != various_artists_mbid:
-	
+		
+		# Just update the tracks if it does
+		else:
 			myDB = db.DBConnection()
-			havetracks = len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['ArtistName']]))
-			
-			controlValueDict = {"ArtistID": 	artistid}
-			newValueDict = {"HaveTracks": 		havetracks}
-			myDB.upsert("artists", newValueDict, controlValueDict)
+			havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist]))
+			myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, artistid])
 			
 	# Update the similar artist tag cloud:
 	logger.info('Updating artist information from Last.fm')
@@ -228,8 +145,9 @@ def addArtisttoDB(artistid, extrasonly=False):
 			myDB.action('DELETE from albums WHERE AlbumID=?', [release['releaseid']])
 			myDB.action('DELETE from tracks WHERE AlbumID=?', [release['releaseid']])
 		
-		myDB.action('DELETE from tracks WHERE AlbumID=?', [rg['id']])
 		for track in release_dict['tracks']:
+		
+			cleanname = helpers.cleanName(artist['artist_name'] + ' ' + rg['title'] + ' ' + track['title'])
 		
 			controlValueDict = {"TrackID": 	track['id'],
 								"AlbumID":	rg['id']}
@@ -239,14 +157,27 @@ def addArtisttoDB(artistid, extrasonly=False):
 						"AlbumASIN":		release_dict['asin'],
 						"TrackTitle":		track['title'],
 						"TrackDuration":	track['duration'],
-						"TrackNumber":		track['number']
+						"TrackNumber":		track['number'],
+						"CleanName":		cleanname
 						}
-		
+			
+			match = myDB.action('SELECT Location, BitRate from have WHERE TrackID=?', [track['id']]).fetchone()
+			
+			if not match:
+				match = myDB.action('SELECT Location, BitRate from have WHERE CleanName=?', [cleanname]).fetchone()
+			if not match:
+				match = myDB.action('SELECT Location, BitRate from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [artist['artist_name'], rg['title'], track['title']]).fetchone()
+			if match:
+				newValueDict['Location'] = match['Location']
+				newValueDict['BitRate'] = match['BitRate']
+				myDB.action('DELETE from have WHERE Location=?', [match['Location']])
+				
 			myDB.upsert("tracks", newValueDict, controlValueDict)
 			
 	latestalbum = myDB.action('SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [artistid]).fetchone()
 	totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid]))
-	
+	havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['artist_name']]))
+
 	controlValueDict = {"ArtistID": 	artistid}
 	
 	if latestalbum:
@@ -254,9 +185,12 @@ def addArtisttoDB(artistid, extrasonly=False):
 						"LatestAlbum":		latestalbum['AlbumTitle'],
 						"ReleaseDate":		latestalbum['ReleaseDate'],
 						"AlbumID":			latestalbum['AlbumID'],
-						"TotalTracks":		totaltracks}
+						"TotalTracks":		totaltracks,
+						"HaveTracks":		havetracks}
 	else:
-		newValueDict = {"Status":			"Active"}
+		newValueDict = {"Status":			"Active",
+						"TotalTracks":		totaltracks,
+						"HaveTracks":		havetracks}
 	
 	myDB.upsert("artists", newValueDict, controlValueDict)
 	logger.info(u"Updating complete for: " + artist['artist_name'])
@@ -339,6 +273,8 @@ def addReleaseById(rid):
 		
 		for track in release_dict['tracks']:
 		
+			cleanname = helpers.cleanName(release_dict['artist_name'] + ' ' + release_dict['rg_title'] + ' ' + track['title'])
+			
 			controlValueDict = {"TrackID": 	track['id'],
 								"AlbumID":	rgid}
 			newValueDict = {"ArtistID":		release_dict['artist_id'],
@@ -347,8 +283,22 @@ def addReleaseById(rid):
 						"AlbumASIN":		release_dict['asin'],
 						"TrackTitle":		track['title'],
 						"TrackDuration":	track['duration'],
-						"TrackNumber":		track['number']
+						"TrackNumber":		track['number'],
+						"CleanName":		cleanname
 						}
+						
+			match = myDB.action('SELECT Location, BitRate from have WHERE TrackID=?', [track['id']]).fetchone()
+						
+			if not match:
+				match = myDB.action('SELECT Location, BitRate from have WHERE CleanName=?', [cleanname]).fetchone()
+			
+			if not match:
+				match = myDB.action('SELECT Location, BitRate from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [release_dict['artist_name'], release_dict['rg_title'], track['title']]).fetchone()
+					
+			if match:
+				newValueDict['Location'] = match['Location']
+				newValueDict['BitRate'] = match['BitRate']
+				myDB.action('DELETE from have WHERE Location=?', [match['Location']])
 		
 			myDB.upsert("tracks", newValueDict, controlValueDict)
 				
