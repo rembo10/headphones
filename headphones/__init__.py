@@ -109,7 +109,7 @@ MEDIA_FORMATS = ["mp3", "flac", "aac", "ogg", "ape", "m4a"]
 INTERFACE = None
 FOLDER_PERMISSIONS = None
 
-ENCODE = None
+ENCODE = False
 ENCODERFOLDER = None
 ENCODER = None
 BITRATE = None
@@ -256,9 +256,9 @@ def initialize():
 		
         ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')        
         ENCODER = check_setting_str(CFG, 'General', 'encoder', 'ffmpeg')
-        BITRATE = check_setting_str(CFG, 'General', 'bitrate', '128')
-        SAMPLINGFREQUENCY= check_setting_str(CFG, 'General', 'samplingfrequency', '44100')
-        ENCODE = check_setting_str(CFG, 'General', 'encode', 'false')
+        BITRATE = check_setting_int(CFG, 'General', 'bitrate', 128)
+        SAMPLINGFREQUENCY= check_setting_int(CFG, 'General', 'samplingfrequency', 44100)
+        ENCODE = bool(check_setting_int(CFG, 'General', 'encode', 0))
 		
 		
 		
@@ -431,7 +431,7 @@ def config_write():
     new_config['General']['interface'] = INTERFACE
     new_config['General']['folder_permissions'] = FOLDER_PERMISSIONS
 
-    new_config['General']['encode'] = ENCODE	
+    new_config['General']['encode'] = int(ENCODE)
     new_config['General']['encoder'] = ENCODER
     new_config['General']['bitrate'] = BITRATE
     new_config['General']['samplingfrequency'] = SAMPLINGFREQUENCY
