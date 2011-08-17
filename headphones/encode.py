@@ -1,10 +1,14 @@
 import os
 import headphones
-import argparse
 import shutil
 import time
 
 from subprocess import call
+
+try:
+    import argparse
+except ImportError:
+    import lib.argparse as argparse
 
 def encode(albumPath):
 
