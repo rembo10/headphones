@@ -109,6 +109,7 @@ header { min-height: 68px; width: 100%; min-width: 935px; padding-left: 0px; pad
 h1 { font-size: 24px; }
 h2 { font-size: 20px; }
 h3 { font-size: 16px; }
+h4 { font-size: 13px; }
 
 p.indented { padding-top: 20px; margin-left: 20px; font-size: 14px; }
 p.center { text-align: center; font-size: 18px; }
