@@ -2,10 +2,12 @@ import os
 import headphones
 import shutil
 import time
+import sys
 
 from subprocess import call
 from headphones import logger
 from lib.mutagen.mp3 import MP3
+from lib.mutagen.easyid3 import EasyID3
 
 def encode(albumPath):
 
@@ -45,25 +47,25 @@ def encode(albumPath):
 					cmd=encoder+' -h --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
 					cmd=cmd+' "'+os.path.join(music)+'"'
 					cmd=cmd+' "'+os.path.join(musicTempFiles[i])+'"'
-					return_code = call(cmd, shell=True)
-					print ('Return_code: ' + str(return_code))
+					return_code = call(cmd, shell=True)					
 					if return_code==0:
+						#copyID3(music,musicTempFiles[i])
 						os.remove(music)
 						shutil.move(musicTempFiles[i],os.path.join(albumPath))
 		else:
-			if (music.endswith('.mp3')):
-				if ((MP3(music).info.bitrate/1000<=headphones.BITRATE)):
-					logger.warn('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))
+			if (music.endswith('.mp3') and (MP3(music).info.bitrate/1000<=headphones.BITRATE)):
+				logger.warn('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))
 			else:
 				cmd=encoder+' -i'
 				cmd=cmd+' "'+os.path.join(music)+'"'
 				cmd=cmd+' -ac 2 -vn -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) +'k'
 				cmd=cmd+' "'+os.path.join(musicTempFiles[i])+'"'
 				return_code = call(cmd, shell=True)
-				print return_code
 				if return_code==0:
+					#copyID3(music,musicTempFiles[i])
 					os.remove(music)
 					shutil.move(musicTempFiles[i],os.path.join(albumPath))
+		
 		i=i+1
 				
 	shutil.rmtree(tempDirEncode)
@@ -74,3 +76,17 @@ def encode(albumPath):
 			if any(music.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
 				musicFinalFiles.append(os.path.join(r, music))
 	return musicFinalFiles
+	
+def copyID3 (src,dst):
+	try:
+		source = EasyID3(src)
+		try:
+			dest = EasyID3(dst)
+		except:
+			dest = ID3()
+			dest.save(dst)
+		for key in source:
+			dest[key] = source[key]
+		dest.save()
+	except:
+		return()
