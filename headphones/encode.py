@@ -5,10 +5,6 @@ import time
 
 from subprocess import call
 
-try:
-    import argparse
-except ImportError:
-    import lib.argparse as argparse
 
 def encode(albumPath):
 
@@ -59,3 +55,4 @@ def encode(albumPath):
 			i=i+1
 			
 	shutil.rmtree(tempDirEncode)
+	time.sleep(1)
