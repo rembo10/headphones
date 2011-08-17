@@ -109,6 +109,12 @@ MEDIA_FORMATS = ["mp3", "flac", "aac", "ogg", "ape", "m4a"]
 INTERFACE = None
 FOLDER_PERMISSIONS = None
 
+ENCODE = None
+ENCODERFOLDER = None
+ENCODER = None
+BITRATE = None
+SAMPLINGFREQUENCY = None
+
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
     try:
@@ -166,7 +172,8 @@ def initialize():
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, NZB_SEARCH_INTERVAL, \
                 LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
-                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS
+                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
+				ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, ENCODE
                 
         if __INITIALIZED__:
             return False
@@ -246,7 +253,15 @@ def initialize():
         
         INTERFACE = check_setting_str(CFG, 'General', 'interface', 'default')
         FOLDER_PERMISSIONS = check_setting_str(CFG, 'General', 'folder_permissions', '0755')
-    
+		
+        ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')        
+        ENCODER = check_setting_str(CFG, 'General', 'encoder', 'ffmpeg')
+        BITRATE = check_setting_str(CFG, 'General', 'bitrate', '128')
+        SAMPLINGFREQUENCY= check_setting_str(CFG, 'General', 'samplingfrequency', '44100')
+        ENCODE = check_setting_str(CFG, 'General', 'encode', 'false')
+		
+		
+		
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
         
@@ -415,7 +430,13 @@ def config_write():
     new_config['General']['lastfm_username'] = LASTFM_USERNAME
     new_config['General']['interface'] = INTERFACE
     new_config['General']['folder_permissions'] = FOLDER_PERMISSIONS
-    
+
+    new_config['General']['encode'] = ENCODE	
+    new_config['General']['encoder'] = ENCODER
+    new_config['General']['bitrate'] = BITRATE
+    new_config['General']['samplingfrequency'] = SAMPLINGFREQUENCY
+    new_config['General']['encoderfolder'] = ENCODERFOLDER
+	
     new_config.write()
 
     
