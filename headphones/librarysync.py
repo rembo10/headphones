@@ -11,11 +11,6 @@ def libraryScan(dir=None):
 	if not dir:
 		dir = headphones.MUSIC_DIR
 		
-	try:
-		dir = str(dir)
-	except UnicodeEncodeError:
-		dir = unicode(dir).encode('unicode_escape')
-		
 	logger.info('Scanning music directory: %s' % dir)
 
 	new_artists = []
@@ -28,7 +23,7 @@ def libraryScan(dir=None):
 		for files in f:
 			# MEDIA_FORMATS = music file extensions, e.g. mp3, flac, etc
 			if any(files.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
-				file = os.path.join(r, files).decode('utf-8')
+				file = os.path.join(r, files)
 				# Try to read the metadata
 				try:
 					f = MediaFile(file)
