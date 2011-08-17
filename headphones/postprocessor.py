@@ -1,8 +1,7 @@
 import os
 import time
-
+import encode
 import urllib, shutil, re
-
 import lib.beets as beets
 from lib.beets import autotag
 from lib.beets.mediafile import MediaFile
@@ -198,7 +197,10 @@ def verify(albumid, albumpath):
 def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list):
 
 	logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
-
+	#start enconding
+	if headphones.ENCODE=='1':
+		encode.encode(albumpath)
+	
 	if headphones.EMBED_ALBUM_ART or headphones.ADD_ALBUM_ART:
 	
 		album_art_path = albumart.getAlbumArt(albumid)
