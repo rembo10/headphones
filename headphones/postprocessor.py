@@ -450,7 +450,7 @@ def updateHave(albumpath):
 				else:
 					continue
 				
-				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?)', [artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid])
+				myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [song, f.bitrate, artist, f.album, f.title])
 				
 def renameUnprocessedFolder(albumpath):
 	
