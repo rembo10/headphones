@@ -22,7 +22,6 @@ def libraryScan(dir=None):
 	bitrates = []
 	
 	myDB = db.DBConnection()
-	myDB.action('''DELETE from have''')
 	
 	for r,d,f in os.walk(dir):
 		for files in f:
@@ -75,8 +74,21 @@ def libraryScan(dir=None):
 				# if we can't find a match in the database on a track level, it might be a new artist or it might be on a non-mb release
 				new_artists.append(f_artist)
 				
-				# The have table will become the new database for unmatched tracks (i.e. tracks with no associated links in the database
-				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [f_artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid, file, helpers.cleanName(f_artist+' '+f.album+' '+f.title)])
+				# The have table will become the new database for unmatched tracks (i.e. tracks with no associated links in the database				
+				controlValueDict = {"Location": 	file}
+				newValueDict = {"ArtistName":		f_artist,
+							"AlbumTitle": 		f.album,
+							"TrackNumber":		f.track,
+							"TrackTitle":		f.title,
+							"TrackLength":		f.length,
+							"BitRate":			f.bitrate,
+							"Genre":			f.genre,
+							"Date":				f.date,
+							"TrackID":			f.mb_trackid,
+							"CleanName":		helpers.cleanName(f_artist+' '+f.album+' '+f.title)
+							}
+
+				myDB.upsert("have", newValueDict, controlValueDict)
 	
 	# Now check empty file paths to see if we can find a match based on their folder format
 	tracks = myDB.select('SELECT * from tracks WHERE Location IS NULL')

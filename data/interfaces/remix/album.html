@@ -62,7 +62,7 @@
 							grade = 'A'
 							location = track['Location']
 						else:
-							grade = 'Z'
+							grade = 'X'
 							location = ''
 							
 						if track['BitRate']:
@@ -83,6 +83,23 @@
 						<td id="bitrate">${bitrate}</td>
 					</tr>
 				%endfor
+				<%
+				unmatched = myDB.select('SELECT * from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ?', [album['ArtistName'], album['AlbumTitle']])			
+				%>
+				%if unmatched:
+					 %for track in unmatched:
+					 <%
+					 	duration = helpers.convert_seconds(float(track['TrackLength']))
+					 %>
+					<tr class="gradeC">
+						<td id="number">${track['TrackNumber']}</td>
+						<td id="name">${track['TrackTitle']}</td>
+						<td id="duration">${duration}</td>
+						<td id="location">${track['Location']}</td>
+						<td id="bitrate">${int(track['BitRate'])/1000} kbps</td>
+					</tr>
+					%endfor
+				%endif
 				</tbody>
 			</table>
 		</div>
@@ -100,6 +117,7 @@
 	{
 		$('#track_table').dataTable(
 			{
+				"aaSorting": [],
 				"bFilter": false,
 				"bInfo": false,
 				"bPaginate": false
