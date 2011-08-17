@@ -178,9 +178,9 @@ div#albumheader { padding-top: 48px; height: 200px; }
 div#track_wrapper { margin-left: -50px; padding-top: 20px; font-size: 16px; width: 100%; }
 
 table#track_table th#number { text-align: right; min-width: 10px; }
-table#track_table th#name { text-align: center; min-width: 300px; }
+table#track_table th#name { text-align: center; min-width: 350px; }
 table#track_table th#duration { width: 175px; text-align: center; min-width: 100px; }
-table#track_table th#location { text-align: center; width: 200px; }
+table#track_table th#location { text-align: center; width: 250px; }
 table#track_table th#bitrate { text-align: center; min-width: 75px; }
 
 table#track_table td#number { vertical-align: middle; text-align: right; }

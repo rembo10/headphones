@@ -16,7 +16,7 @@ def is_exists(artistid):
 	artistlist = myDB.select('SELECT ArtistID, ArtistName from artists WHERE ArtistID=?', [artistid])
 
 	if any(artistid in x for x in artistlist):
-		logger.debug(artistlist[0][1] + u" is already in the database. Updating 'have tracks', but not artist information")
+		logger.info(artistlist[0][1] + u" is already in the database. Updating 'have tracks', but not artist information")
 		return True
 	else:
 		return False
@@ -32,6 +32,7 @@ def artistlist_to_mbids(artistlist, forced=False):
 		results = mb.findArtist(artist, limit=1)
 		
 		if not results:
+			logger.info('No results found for: %' % artist)
 			continue
 		
 		try:	
@@ -297,6 +298,7 @@ def addReleaseById(rid):
 			if match:
 				newValueDict['Location'] = match['Location']
 				newValueDict['BitRate'] = match['BitRate']
+				myDB.action('DELETE from have WHERE Location=?', [match['Location']])
 		
 			myDB.upsert("tracks", newValueDict, controlValueDict)
 				

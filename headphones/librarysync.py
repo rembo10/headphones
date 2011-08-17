@@ -158,7 +158,9 @@ def libraryScan(dir=None):
 	for track in tracks:
 		if not os.path.isfile(track['Location']):
 			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [None, track['TrackID']])
-			
+	
+	logger.info('Completed scanning of directory: %s. Updating track counts' % dir)
+	
 	# Clean up the new artist list
 	unique_artists = {}.fromkeys(new_artists).keys()
 	current_artists = myDB.select('SELECT ArtistName, ArtistID from artists')
@@ -170,10 +172,13 @@ def libraryScan(dir=None):
 		havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID like ? AND Location IS NOT NULL', [artist['ArtistID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['ArtistName']]))
 		myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, artist['ArtistID']])
 		
+	logger.info('Found %i new artists' % len(artist_list))
+	
 	if headphones.ADD_ARTISTS:
-		logger.info('Found %i new artists to import.' % len(artist_list))
+		logger.info('Importing %i new artists' % len(artist_list))
 		importer.artistlist_to_mbids(artist_list)
 	else:
+		logger.info('To add these artists, go to Manage->Manage New Artists')
 		headphones.NEW_ARTISTS = artist_list
 	
 	if headphones.DETECT_BITRATE:

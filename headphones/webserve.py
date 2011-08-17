@@ -236,7 +236,8 @@ class WebInterface(object):
 		raise cherrypy.HTTPRedirect("home")
 	importItunes.exposed = True
 	
-	def musicScan(self, path, redirect=None):
+	def musicScan(self, path, redirect=None, autoadd=0):
+		headphones.ADD_ARTISTS = autoadd
 		headphones.MUSIC_DIR = path
 		headphones.config_write()
 		try:	
