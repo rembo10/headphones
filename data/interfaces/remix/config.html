@@ -58,7 +58,7 @@
                 <td>
                     <h3>SABnzbd Host:</h3><input type="text" name="sab_host" value="${config['sab_host']}" size="30" maxlength="40"><br>
 
-                    <i class="smalltext">usually localhost:8080</i>
+                    <i class="smalltext">usually http://localhost:8080</i>
                 </td>
 
                 <td>
@@ -91,7 +91,7 @@
             
             <tr>
                 <td>
-                    <h3>Use Black Hole:</h3><input type="checkbox" name="blackhole" value=1 ${config['use_blackhole']} />
+                    <h3>Use Black Hole: <input type="checkbox" name="blackhole" value=1 ${config['use_blackhole']} /></h3>
                 </td>
 
                 <td>
@@ -104,7 +104,7 @@
 
             <tr>
                 <td>
-                    <h3>Usenet Retention:</h3><input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="20" maxlength="40">
+                    <h3>Usenet Retention:<input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="20" maxlength="40"></h3>
                 </td>
             </tr>
         </table>
@@ -190,21 +190,21 @@
             <tr>
                 <td>
                 	<h2>Album Quality:</h2><br>
-                   	  <input type="radio" name="preferred_quality" value="0" ${config['pref_qual_0']} /> Highest Quality excluding Lossless<br>
-                      <input type="radio" name="preferred_quality" value="1" ${config['pref_qual_1']} /> Highest Quality including Lossless<br>
-                      <input type="radio" name="preferred_quality" value="3" ${config['pref_qual_3']} /> Lossless Only<br>
-                      <input type="radio" name="preferred_quality" value="2" ${config['pref_qual_2']} /> Preferred Bitrate:
-    					<input type="text" name="preferred_bitrate" value="${config['pref_bitrate']}" size="5" maxlength="5" />kbps <br>
+                   	  <h4><input type="radio" name="preferred_quality" value="0" ${config['pref_qual_0']} /> Highest Quality excluding Lossless</h4>
+                      <h4><input type="radio" name="preferred_quality" value="1" ${config['pref_qual_1']} /> Highest Quality including Lossless</h4>
+                      <h4><input type="radio" name="preferred_quality" value="3" ${config['pref_qual_3']} /> Lossless Only</h4>
+                      <h4><input type="radio" name="preferred_quality" value="2" ${config['pref_qual_2']} /> Preferred Bitrate:
+    					<input type="text" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3" maxlength="5" />kbps</h4>
                       	<i class="smalltext2"><input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />Auto-Detect Preferred Bitrate </i>
                 </td>
                 <td>
                       <h2>Post-Processing:</h2>
-                      	<input type="checkbox" name="move_files" value="1" ${config['move_files']} /> Move downloads to Destination Folder<br />
-                      	<input type="checkbox" name="rename_files" value="1" ${config['rename_files']} /> Rename files<br>
-                        <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} /> Correct metadata<br>
-                        <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} /> Delete leftover files (.m3u, .nfo, .sfv, .nzb, etc.)<br>
-                      	<input type="checkbox" name="add_album_art" value="1" ${config['add_album_art']}> Add album art as 'folder.jpg' to album folder<br>
-                      	<input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}> Embed album art in each file
+                      	<h4><input type="checkbox" name="move_files" value="1" ${config['move_files']} /> Move downloads to Destination Folder</h4>
+                      	<h4><input type="checkbox" name="rename_files" value="1" ${config['rename_files']} /> Rename files</h4>
+                        <h4><input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} /> Correct metadata</h4>
+                        <h4><input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} /> Delete leftover files (.m3u, .nfo, .sfv, .nzb, etc.)</h4>
+                      	<h4><input type="checkbox" name="add_album_art" value="1" ${config['add_album_art']}> Add album art as 'folder.jpg' to album folder</h4>
+                      	<h4><input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}> Embed album art in each file</h4>
                 </td>
             </tr>
 
@@ -227,7 +227,7 @@
                 <td>
                 	<h2>Renaming Options:</h2>
 					<br>
-                    <h3>Folder Format:</h3><input type="text" name="folder_format" value="${config['folder_format']}" size="43">
+                    <h3>Folder Format:</h3><input type="text" name="folder_format" value="${config['folder_format']}" size="43"><br>
                       <i class="smalltext">Use: artist, album, year and first (first letter in artist name)<br />
                       				E.g.: first/artist/album [year] = G/Girl Talk/All Day [2010]</i>
                     <br><br>
@@ -254,6 +254,30 @@
 					</select>
 					<br><br>
                     <h3>Log Directory:</h3><input type="text" name="log_dir" value="${config['log_dir']}" size="50">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                      <h2>Re-Encoding Options:</h2>
+						<br>
+                      	<h3><input type="checkbox" name="encode" value="1" ${config['encode']}/>Convert Lossless to mp3</h3>
+                      <i class="smalltext">Note: this option requires the lame or ffdshow encoder</i>
+					<br><br>
+					<%
+						if config['encoder'] == 'lame':
+							lameselect = 'selected="selected"'
+							ffmpegselect = ''
+						else:
+							lameselect = ''
+							ffmpegselect = 'selected="selected"'							
+					%>
+					<h3>Encoder: <select name="encoder">
+						<option value="lame" ${lameselect}>lame</option>
+						<option value="ffmpeg" ${ffmpegselect}>ffmpeg</option>
+					</select>
+					Bitrate: <input type="text" name="bitrate" value="${config['bitrate']}" size="3" maxlength="5" />kbps <br>
+					<br>
+                    <h3>Path to Encoder:</h3><input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43">
                 </td>
             </tr>
         </table>
