@@ -58,7 +58,7 @@
                 <td>
                     <h3>SABnzbd Host:</h3><input type="text" name="sab_host" value="${config['sab_host']}" size="30" maxlength="40"><br>
 
-                    <i class="smalltext">usually localhost:8080</i>
+                    <i class="smalltext">usually http://localhost:8080</i>
                 </td>
 
                 <td>
@@ -260,16 +260,24 @@
                 <td>
                       <h2>Re-Encoding Options:</h2>
 						<br>
-                      	<h3><input type="checkbox" name="reencode" value="1" />Convert Lossless to mp3</h3>
+                      	<h3><input type="checkbox" name="encode" value="1" ${config['encode']}/>Convert Lossless to mp3</h3>
                       <i class="smalltext">Note: this option requires the lame or ffdshow encoder</i>
 					<br><br>
+					<%
+						if config['encoder'] == 'lame':
+							lameselect = 'selected="selected"'
+							ffdshowselect = ''
+						else:
+							lameselect = ''
+							ffdshowselect = 'selected="selected"'							
+					%>
 					<h3>Encoder: <select name="encoder">
-						<option value="lame">lame</option>
-						<option value="ffdshow">ffdshow</option>
+						<option value="lame" ${lameselect}>lame</option>
+						<option value="ffdshow" ${ffdshowselect}>ffdshow</option>
 					</select>
-					Bitrate: <input type="text" name="encode_bitrate" value="" size="3" maxlength="5" />kbps <br>
+					Bitrate: <input type="text" name="bitrate" value="${config['bitrate']}" size="3" maxlength="5" />kbps <br>
 					<br>
-                    <h3>Path to Encoder:</h3><input type="text" name="encoder" value="" size="43">
+                    <h3>Path to Encoder:</h3><input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43">
                 </td>
             </tr>
         </table>
