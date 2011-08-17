@@ -98,7 +98,7 @@ def checkGithub():
 
 	gh = github.GitHub()
 	
-	for curCommit in gh.commits.forBranch('rembo10', 'headphones', 'master'):
+	for curCommit in gh.commits.forBranch('rembo10', 'headphones', version.HEADPHONES_VERSION):
 		if not latest_commit:
 			latest_commit = curCommit.id
 			if not cur_commit:
@@ -200,5 +200,5 @@ def update():
 			ver_file.write(headphones.LATEST_VERSION)
 			ver_file.close()
 		except IOError, e:
-			logger.error(u"Unable to write version file, update not complete: "+ex(e))
+			logger.error(u"Unable to write for curCommit in gh.commits.forBranch file, update not complete: "+ex(e))
 			return
