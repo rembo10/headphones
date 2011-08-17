@@ -256,11 +256,9 @@ def initialize():
 		
         ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')        
         ENCODER = check_setting_str(CFG, 'General', 'encoder', 'ffmpeg')
-        BITRATE = check_setting_int(CFG, 'General', 'bitrate', 128)
+        BITRATE = check_setting_int(CFG, 'General', 'bitrate', 192)
         SAMPLINGFREQUENCY= check_setting_int(CFG, 'General', 'samplingfrequency', 44100)
         ENCODE = bool(check_setting_int(CFG, 'General', 'encode', 0))
-		
-		
 		
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
