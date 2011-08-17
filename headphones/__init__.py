@@ -77,7 +77,7 @@ USENET_RETENTION = None
 INCLUDE_EXTRAS = False
 
 NZB_SEARCH_INTERVAL = 360
-LIBRARYSCAN_INTERVAL = 60
+LIBRARYSCAN_INTERVAL = 300
 DOWNLOAD_SCAN_INTERVAL = 5
 
 SAB_HOST = None
@@ -224,7 +224,7 @@ def initialize():
         INCLUDE_EXTRAS = bool(check_setting_int(CFG, 'General', 'include_extras', 0))
         
         NZB_SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'nzb_search_interval', 360)
-        LIBRARYSCAN_INTERVAL = check_setting_int(CFG, 'General', 'libraryscan_interval', 180)
+        LIBRARYSCAN_INTERVAL = check_setting_int(CFG, 'General', 'libraryscan_interval', 300)
         DOWNLOAD_SCAN_INTERVAL = check_setting_int(CFG, 'General', 'download_scan_interval', 5)
         
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
