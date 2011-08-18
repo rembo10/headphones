@@ -47,6 +47,7 @@ def main():
     parser.add_argument('--datadir', help='Specify a directory where to store your data files')
     parser.add_argument('--config', help='Specify a config file to use')
     parser.add_argument('--nolaunch', action='store_true', help='Prevent browser from launching on startup')
+    parser.add_argument('--pidfile', help='Create a pid file (only relevant when running as a daemon)')
     
     args = parser.parse_args()
     
@@ -56,7 +57,9 @@ def main():
     if args.daemon:
         headphones.DAEMON=True
         headphones.QUIET=True
-        
+        if args.pidfile :
+            headphones.PIDFILE = args.pidfile
+
     if args.datadir:
         headphones.DATA_DIR = args.datadir
     else:
@@ -88,7 +91,7 @@ def main():
         
     if headphones.DAEMON:
         headphones.daemonize()
-        
+
     # Force the http port if neccessary
     if args.port:
         http_port = args.port

@@ -24,6 +24,7 @@ SYS_ENCODING = None
 
 QUIET = False
 DAEMON = False
+PIDFILE= None
 
 SCHED = Scheduler()
 
@@ -348,9 +349,13 @@ def daemonize():
     os.dup2(si.fileno(), sys.stdin.fileno())
     os.dup2(so.fileno(), sys.stdout.fileno())
     os.dup2(se.fileno(), sys.stderr.fileno())
-    
-    logger.info('Daemonized to PID: %s' % os.getpid())
-    
+
+    pid = os.getpid()
+    logger.info('Daemonized to PID: %s' % pid)
+    if PIDFILE:
+        logger.info('Writing PID %s to %s' % (pid, PIDFILE))
+        file(PIDFILE, 'w').write("%s\n" % pid)
+
 def launch_browser(host, port, root):
 
     if host == '0.0.0.0':
@@ -560,7 +565,11 @@ def shutdown(restart=False, update=False):
             versioncheck.update()
         except Exception, e:
             logger.warn('Headphones failed to update: %s. Restarting.' % e) 
-            
+
+    if PIDFILE :
+        logger.info ('Removing pidfile %s' % PIDFILE)
+        os.remove(PIDFILE)
+        
     if restart:
     	logger.info('Headphones is restarting...')
         popen_list = [sys.executable, FULL_PATH]
