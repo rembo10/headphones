@@ -118,6 +118,7 @@ ENCODER = None
 BITRATE = None
 SAMPLINGFREQUENCY = None
 ADVANCEDENCODER = None
+ENCODEROUTPUTFORMAT = None
 
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
@@ -177,7 +178,7 @@ def initialize():
                 LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
-                ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, ENCODE, ADVANCEDENCODER
+                ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, ENCODE, ADVANCEDENCODER, ENCODEROUTPUTFORMAT
                 
         if __INITIALIZED__:
             return False
@@ -264,7 +265,8 @@ def initialize():
         SAMPLINGFREQUENCY= check_setting_int(CFG, 'General', 'samplingfrequency', 44100)
         ENCODE = bool(check_setting_int(CFG, 'General', 'encode', 0))
         ADVANCEDENCODER = check_setting_int(CFG, 'General', 'advancedencoder', '')
-		
+        ENCODEROUTPUTFORMAT = check_setting_int(CFG, 'General', 'encoderoutputformat', 'mp3')
+        
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
         
@@ -444,6 +446,7 @@ def config_write():
     new_config['General']['samplingfrequency'] = SAMPLINGFREQUENCY
     new_config['General']['encoderfolder'] = ENCODERFOLDER
     new_config['General']['advancedencoder'] = ADVANCEDENCODER
+    new_config['General']['encoderoutputformat'] = ENCODEROUTPUTFORMAT
 	
     new_config.write()
 
