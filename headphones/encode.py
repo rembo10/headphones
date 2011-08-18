@@ -49,27 +49,27 @@ def encode(albumPath):
 				if (music.endswith('.mp3') and (MP3(music).info.bitrate/1000<=headphones.BITRATE)): 
 					logger.warn('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))
 				else:
-					cmd=encoder+' -h --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
-					cmd=cmd+' '+headphones.ADVANCEDENCODER
-					cmd=cmd+' "'+os.path.join(music)+'"'
-					cmd=cmd+' "'+os.path.join(musicTempFiles[i])+'"'
+					cmd=encoder + ' -h --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
+					cmd=cmd+ ' ' + headphones.ADVANCEDENCODER
+					cmd=cmd+ ' "' + music + '"'
+					cmd=cmd+ ' "' + musicTempFiles[i] +'"'
 					return_code = call(cmd, shell=True)					
 					if return_code==0:
 						os.remove(music)
-						shutil.move(musicTempFiles[i],os.path.join(albumPath))
+						shutil.move(musicTempFiles[i],albumPath)
 		else:
 			if (music.endswith('.mp3') and (MP3(music).info.bitrate/1000<=headphones.BITRATE)):
 				logger.warn('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))
 			else:
-				cmd=encoder+' -i'
-				cmd=cmd+' "'+os.path.join(music)+'"'
-				cmd=cmd+' -ac 2 -vn -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) +'k'
-				cmd=cmd+' '+headphones.ADVANCEDENCODER
-				cmd=cmd+' "'+os.path.join(musicTempFiles[i])+'"'
+				cmd=encoder+ ' -i'
+				cmd=cmd+ ' "' + music + '"'
+				cmd=cmd+ ' -ac 2 -vn -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) + 'k'
+				cmd=cmd+ ' ' + headphones.ADVANCEDENCODER
+				cmd=cmd+ ' "' + musicTempFiles[i] + '"'
 				return_code = call(cmd, shell=True)
 				if return_code==0:
 					os.remove(music)
-					shutil.move(musicTempFiles[i],os.path.join(albumPath))
+					shutil.move(musicTempFiles[i],albumPath)
 		
 		i=i+1
 				
