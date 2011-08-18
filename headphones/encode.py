@@ -2,12 +2,10 @@ import os
 import headphones
 import shutil
 import time
-import sys
 
 from subprocess import call
 from headphones import logger
-from lib.mutagen.mp3 import MP3
-from lib.mutagen.easyid3 import EasyID3
+from lib.beets.mediafile import MediaFile
 
 try:
     import argparse
@@ -30,47 +28,38 @@ def encode(albumPath):
 		
 	for r,d,f in os.walk(albumPath):
 		for music in f:
-			if any(music.endswith('.' + x) for x in ["mp3", "flac", "m4a", "wav"]):
+			if any(music.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
 				musicFiles.append(os.path.join(r, music))
-				musicTemp = os.path.join(os.path.splitext(music)[0])+'.mp3'
+				musicTemp = os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT
 				musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
 				
 	if headphones.ENCODER=='lame':
 		encoder=os.path.join(headphones.ENCODERFOLDER,'lame')
-	else:
+	elif headphones.ENCODER=='ffmpeg':
 		encoder=os.path.join(headphones.ENCODERFOLDER,'ffmpeg')
 	i=0
-	for music in musicFiles:
-		return_code=1
+	for music in musicFiles:		
+		infoMusic=MediaFile(music)
+
 		if headphones.ENCODER == 'lame':
-			if not any(music.endswith('.' + x) for x in ["mp3", "wav"]):
+			if not any(music.endswith('.' +headphones.ENCODEROUTPUTFORMAT) for x in ["mp3", "wav"]):
 				logger.warn('Lame cant encode "%s" format for "%s", use ffmpeg' % (os.path.splitext(music)[1],music))
 			else:
-				if (music.endswith('.mp3') and (MP3(music).info.bitrate/1000<=headphones.BITRATE)): 
+				if (music.endswith('.mp3') and (infoMusic.bitrate/1000<=headphones.BITRATE)): 
 					logger.warn('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))
 				else:
-					cmd=encoder+' -h --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
-					cmd=cmd+' "'+os.path.join(music)+'"'
-					cmd=cmd+' "'+os.path.join(musicTempFiles[i])+'"'
-					return_code = call(cmd, shell=True)					
-					if return_code==0:
-						#copyID3(music,musicTempFiles[i])
-						os.remove(music)
-						shutil.move(musicTempFiles[i],os.path.join(albumPath))
+					command(encoder,music,musicTempFiles[i],albumPath)
 		else:
-			if (music.endswith('.mp3') and (MP3(music).info.bitrate/1000<=headphones.BITRATE)):
-				logger.warn('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))
-			else:
-				cmd=encoder+' -i'
-				cmd=cmd+' "'+os.path.join(music)+'"'
-				cmd=cmd+' -ac 2 -vn -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) +'k'
-				cmd=cmd+' "'+os.path.join(musicTempFiles[i])+'"'
-				return_code = call(cmd, shell=True)
-				if return_code==0:
-					#copyID3(music,musicTempFiles[i])
-					os.remove(music)
-					shutil.move(musicTempFiles[i],os.path.join(albumPath))
-		
+			if headphones.ENCODEROUTPUTFORMAT=='ogg':
+				if music.endswith('.ogg'):
+					logger.warn('Can not reencode .ogg music "%s"' % (music))
+				else:
+					command(encoder,music,musicTempFiles[i],albumPath)
+			elif (headphones.ENCODEROUTPUTFORMAT=='mp3'):
+				if (music.endswith('.mp3') and (infoMusic.bitrate/1000<=headphones.BITRATE)):
+					logger.warn('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))		
+				else:
+					command(encoder,music,musicTempFiles[i],albumPath)
 		i=i+1
 				
 	shutil.rmtree(tempDirEncode)
@@ -82,16 +71,23 @@ def encode(albumPath):
 				musicFinalFiles.append(os.path.join(r, music))
 	return musicFinalFiles
 	
-def copyID3 (src,dst):
-	try:
-		source = EasyID3(src)
-		try:
-			dest = EasyID3(dst)
-		except:
-			dest = ID3()
-			dest.save(dst)
-		for key in source:
-			dest[key] = source[key]
-		dest.save()
-	except:
-		return()
+def command(encoder,musicSource,musicDest,albumPath):
+	return_code=1
+	cmd=''
+	if headphones.ENCODER == 'lame':
+		cmd=encoder + ' -h --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
+		cmd=cmd+ ' ' + headphones.ADVANCEDENCODER
+		cmd=cmd+ ' "' + musicSource + '"'
+		cmd=cmd+ ' "' + musicDest +'"'
+	elif headphones.ENCODER == 'ffmpeg':
+		cmd=encoder+ ' -i'
+		cmd=cmd+ ' "' + musicSource + '"'
+		if headphones.ENCODEROUTPUTFORMAT=='ogg':
+			cmd=cmd+ ' -acodec vorbis -strict experimental'
+		cmd=cmd+ ' -ac 2 -map_metadata 0:0,s0 -vn -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) + 'k'
+		cmd=cmd+ ' ' + headphones.ADVANCEDENCODER
+		cmd=cmd+ ' "' + musicDest + '"'
+	return_code = call(cmd, shell=True)
+	if (return_code==0) and (os.path.exists(musicDest)):
+		os.remove(musicSource)
+		shutil.move(musicDest,albumPath)
