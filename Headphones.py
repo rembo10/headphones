@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os, sys
+import os, sys, locale
 import time
 
 from lib.configobj import ConfigObj
@@ -24,6 +24,19 @@ def main():
     
     headphones.PROG_DIR = os.path.dirname(headphones.FULL_PATH)
     headphones.ARGS = sys.argv[1:]
+    
+    # From sickbeard
+    headphones.SYS_ENCODING = None
+
+    try:
+        locale.setlocale(locale.LC_ALL, "")
+        headphones.SYS_ENCODING = locale.getpreferredencoding()
+    except (locale.Error, IOError):
+        pass
+
+    # for OSes that are poorly configured I'll just force UTF-8
+    if not headphones.SYS_ENCODING or headphones.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII', 'ASCII'):
+        headphones.SYS_ENCODING = 'UTF-8'
     
     # Set up and gather command line arguments
     parser = argparse.ArgumentParser(description='Music add-on for SABnzbd+')

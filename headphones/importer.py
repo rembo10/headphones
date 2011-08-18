@@ -32,7 +32,7 @@ def artistlist_to_mbids(artistlist, forced=False):
 		results = mb.findArtist(artist, limit=1)
 		
 		if not results:
-			logger.info('No results found for: %' % artist)
+			logger.info('No results found for: %s' % artist)
 			continue
 		
 		try:	

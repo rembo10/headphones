@@ -20,6 +20,8 @@ PROG_DIR = None
 ARGS = None
 SIGNAL = None
 
+SYS_ENCODING = None
+
 QUIET = False
 DAEMON = False
 
