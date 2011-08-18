@@ -263,7 +263,7 @@ def initialize():
         BITRATE = check_setting_int(CFG, 'General', 'bitrate', 192)
         SAMPLINGFREQUENCY= check_setting_int(CFG, 'General', 'samplingfrequency', 44100)
         ENCODE = bool(check_setting_int(CFG, 'General', 'encode', 0))
-        ADVANCEDENCODER = = check_setting_int(CFG, 'General', 'advancedencoder', '')
+        ADVANCEDENCODER = check_setting_int(CFG, 'General', 'advancedencoder', '')
 		
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
