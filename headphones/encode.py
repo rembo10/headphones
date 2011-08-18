@@ -50,11 +50,11 @@ def encode(albumPath):
 					logger.warn('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))
 				else:
 					cmd=encoder+' -h --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
+					cmd=cmd+' '+headphones.ADVANCEDENCODER
 					cmd=cmd+' "'+os.path.join(music)+'"'
 					cmd=cmd+' "'+os.path.join(musicTempFiles[i])+'"'
 					return_code = call(cmd, shell=True)					
 					if return_code==0:
-						#copyID3(music,musicTempFiles[i])
 						os.remove(music)
 						shutil.move(musicTempFiles[i],os.path.join(albumPath))
 		else:
@@ -64,10 +64,10 @@ def encode(albumPath):
 				cmd=encoder+' -i'
 				cmd=cmd+' "'+os.path.join(music)+'"'
 				cmd=cmd+' -ac 2 -vn -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) +'k'
+				cmd=cmd+' '+headphones.ADVANCEDENCODER
 				cmd=cmd+' "'+os.path.join(musicTempFiles[i])+'"'
 				return_code = call(cmd, shell=True)
 				if return_code==0:
-					#copyID3(music,musicTempFiles[i])
 					os.remove(music)
 					shutil.move(musicTempFiles[i],os.path.join(albumPath))
 		
