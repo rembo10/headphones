@@ -198,11 +198,10 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 
 	logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
 	#start enconding
-	if headphones.ENCODE=='1':
-		encode.encode(albumpath)
+	if headphones.ENCODE:
+		downloaded_track_list=encode.encode(albumpath)
 	
 	if headphones.EMBED_ALBUM_ART or headphones.ADD_ALBUM_ART:
-	
 		album_art_path = albumart.getAlbumArt(albumid)
 		artwork = urllib.urlopen(album_art_path).read()
 	

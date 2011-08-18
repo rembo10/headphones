@@ -15,7 +15,7 @@ def libraryScan(dir=None):
 		dir = str(dir)
 	except UnicodeEncodeError:
 		dir = unicode(dir).encode('unicode_escape')
-		
+
 	logger.info('Scanning music directory: %s' % dir)
 
 	new_artists = []
@@ -28,12 +28,14 @@ def libraryScan(dir=None):
 		for files in f:
 			# MEDIA_FORMATS = music file extensions, e.g. mp3, flac, etc
 			if any(files.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
+
 				song = os.path.join(r, files)
 				file = unicode(os.path.join(r, files), headphones.SYS_ENCODING, errors='replace')
 
 				# Try to read the metadata
 				try:
 					f = MediaFile(song)
+
 				except:
 					logger.error('Cannot read file: ' + file)
 					continue
@@ -77,10 +79,10 @@ def libraryScan(dir=None):
 				
 				# The have table will become the new database for unmatched tracks (i.e. tracks with no associated links in the database				
 				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [f_artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid, file, helpers.cleanName(f_artist+' '+f.album+' '+f.title)])
-				
+
 	logger.info('Completed scanning of directory: %s' % dir)
 	logger.info('Checking filepaths to see if we can find any matches')
-	
+
 	# Now check empty file paths to see if we can find a match based on their folder format
 	tracks = myDB.select('SELECT * from tracks WHERE Location IS NULL')
 	for track in tracks:
@@ -142,6 +144,7 @@ def libraryScan(dir=None):
 		if match:
 
 			logger.info('Found a match: %s. Writing MBID to metadata' % match[0])
+
 			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [match[0], track['TrackID']])
 			myDB.action('DELETE from have WHERE Location=?', [match[0]])
 			
@@ -151,11 +154,15 @@ def libraryScan(dir=None):
 				f.mb_trackid = track['TrackID']
 				f.save()
 				myDB.action('UPDATE tracks SET BitRate=? WHERE TrackID=?', [f.bitrate, track['TrackID']])
+
+				logger.debug('Wrote mbid to track: %s' % match[0])
+
 			except:
 				logger.error('Error embedding track id into: %s' % match[0])
 				continue
-			
+
 	logger.info('Done checking empty filepaths')
+
 	# Clean up bad filepaths
 	tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
 	
@@ -173,12 +180,13 @@ def libraryScan(dir=None):
 	
 	# Update track counts
 	logger.info('Updating track counts')
+
 	for artist in current_artists:
 		havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID like ? AND Location IS NOT NULL', [artist['ArtistID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['ArtistName']]))
 		myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, artist['ArtistID']])
 		
 	logger.info('Found %i new artists' % len(artist_list))
-	
+
 	if len(artist_list):
 		if headphones.ADD_ARTISTS:
 			logger.info('Importing %i new artists' % len(artist_list))
