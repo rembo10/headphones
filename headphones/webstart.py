@@ -20,7 +20,9 @@ def initialize(options={}):
 
 	conf = {
 		'/': {
-            'tools.staticdir.root': os.path.join(headphones.PROG_DIR, 'data')
+            'tools.staticdir.root': os.path.join(headphones.PROG_DIR, 'data'),
+            'tools.encode.on': True,
+        	'tools.encode.encoding': 'utf-8'          
         },
         '/interfaces':{
             'tools.staticdir.on': True,
