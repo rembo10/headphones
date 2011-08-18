@@ -2,12 +2,10 @@ import os
 import headphones
 import shutil
 import time
-import sys
 
 from subprocess import call
 from headphones import logger
-from lib.mutagen.mp3 import MP3
-from lib.mutagen.easyid3 import EasyID3
+from lib.beets.mediafile import MediaFile
 
 try:
     import argparse
@@ -42,11 +40,12 @@ def encode(albumPath):
 	i=0
 	for music in musicFiles:
 		return_code=1
+		infoMusic=MediaFile(music)
 		if headphones.ENCODER == 'lame':
 			if not any(music.endswith('.' + x) for x in ["mp3", "wav"]):
 				logger.warn('Lame cant encode "%s" format for "%s", use ffmpeg' % (os.path.splitext(music)[1],music))
 			else:
-				if (music.endswith('.mp3') and (MP3(music).info.bitrate/1000<=headphones.BITRATE)): 
+				if (music.endswith('.mp3') and (infoMusic.bitrate/1000<=headphones.BITRATE)): 
 					logger.warn('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))
 				else:
 					cmd=encoder + ' -h --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
@@ -58,7 +57,7 @@ def encode(albumPath):
 						os.remove(music)
 						shutil.move(musicTempFiles[i],albumPath)
 		else:
-			if (music.endswith('.mp3') and (MP3(music).info.bitrate/1000<=headphones.BITRATE)):
+			if (music.endswith('.mp3') and (infoMusic.bitrate/1000<=headphones.BITRATE)):
 				logger.warn('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))
 			else:
 				cmd=encoder+ ' -i'
@@ -81,17 +80,3 @@ def encode(albumPath):
 			if any(music.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
 				musicFinalFiles.append(os.path.join(r, music))
 	return musicFinalFiles
-	
-def copyID3 (src,dst):
-	try:
-		source = EasyID3(src)
-		try:
-			dest = EasyID3(dst)
-		except:
-			dest = ID3()
-			dest.save(dst)
-		for key in source:
-			dest[key] = source[key]
-		dest.save()
-	except:
-		return()
