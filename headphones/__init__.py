@@ -308,7 +308,10 @@ def initialize():
         CURRENT_VERSION = versioncheck.getVersion()
         
         # Check for new versions
-        LATEST_VERSION = versioncheck.checkGithub()
+        try:
+            LATEST_VERSION = versioncheck.checkGithub()
+        except:
+            LATEST_VERSION = CURRENT_VERSION
 
         __INITIALIZED__ = True
         return True
