@@ -260,7 +260,7 @@
                 <td>
                       <h2>Re-Encoding Options:</h2>
 						<br>
-                      	<h3><input type="checkbox" name="encode" value="1" ${config['encode']}/>Convert Lossless to mp3</h3>
+                      	<h3><input type="checkbox" name="encode" value="1" ${config['encode']}/>Re-encode Postprocessed Albuns</h3>
                       <i class="smalltext">Note: this option requires the lame or ffmpeg encoder</i>
 					<br><br>
 					<%
@@ -275,8 +275,77 @@
 						<option value="lame" ${lameselect}>lame</option>
 						<option value="ffmpeg" ${ffmpegselect}>ffmpeg</option>
 					</select>
-					Bitrate: <input type="text" name="bitrate" value="${config['bitrate']}" size="3" maxlength="5" />kbps <br>
 					<br>
+					<br>
+					<%
+						if config['encoderoutputformat'] == 'mp3':
+							mp3select = 'selected="selected"'
+							oggselect = ''
+						else:
+							mp3select = ''
+							oggselect = 'selected="selected"'							
+					%>
+					<h3>Format: <select name="encoderoutputformat">
+						<option value="mp3" ${mp3select}>mp3</option>
+						<option value="ogg" ${oggselect}>ogg</option>
+					</select>
+					<br>
+					<br>
+					<%
+						if config["bitrate"] == 64:
+							bitrate64select = 'selected="selected"'
+							bitrate128select = ''
+							bitrate192select = ''
+							bitrate256select = ''
+							bitrate320select = ''
+						elif config["bitrate"] == 128:
+							bitrate64select = ''
+							bitrate128select = 'selected="selected"'
+							bitrate192select = ''
+							bitrate256select = ''
+							bitrate320select = ''
+						elif config["bitrate"] == 192:
+							bitrate64select = ''
+							bitrate128select = ''
+							bitrate192select = 'selected="selected"'
+							bitrate256select = ''
+							bitrate320select = ''
+						elif config["bitrate"] == 256:
+							bitrate64select = ''
+							bitrate128select = ''
+							bitrate192select = ''
+							bitrate256select = 'selected="selected"'
+							bitrate320select = ''
+						else:
+							bitrate64select = ''
+							bitrate128select = ''
+							bitrate192select = ''
+							bitrate256select = ''
+							bitrate320select = 'selected="selected"'							
+					%>
+					<h3>Bitrate: <select name="bitrate">
+						<option value=64 ${bitrate64select}>64</option>
+						<option value=128 ${bitrate128select}>128</option>
+						<option value=192 ${bitrate192select}>192</option>
+						<option value=256 ${bitrate256select}>256</option>
+						<option value=320 ${bitrate320select}>320</option>
+					</select>
+					<br>
+					<br>
+					<%
+						if config["samplingfrequency"] == 44100:
+							freq44100 = 'selected="selected"'
+							freq48000 = ''
+						else:
+							freq44100 = ''
+							freq48000 = 'selected="selected"'							
+					%>
+					<h3>Sampling: <select name="samplingfrequency">
+						<option value=44100 ${freq44100}>44100</option>
+						<option value=48000 ${freq48000}>48000</option>
+					</select>
+					<br>
+					<br>					
                     <h3>Advance Encode Options:</h3><input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43">
 					<br>
                     <h3>Path to Encoder:</h3><input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43">
