@@ -84,7 +84,7 @@ def main():
     # Put the database in the DATA_DIR
     headphones.DB_FILE = os.path.join(headphones.DATA_DIR, 'headphones.db')
     
-    headphones.CFG = ConfigObj(headphones.CONFIG_FILE)
+    headphones.CFG = ConfigObj(headphones.CONFIG_FILE, encoding='utf-8')
     
     # Read config & start logging
     headphones.initialize()
