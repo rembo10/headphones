@@ -12,7 +12,7 @@ def libraryScan(dir=None):
 	tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
 	
 	for track in tracks:
-		if not os.path.isfile(track['Location']):
+		if not os.path.isfile(track['Location'].encode(headphones.SYS_ENCODING)):
 			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [None, track['TrackID']])
 
 	if not dir:
