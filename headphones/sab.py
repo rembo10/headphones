@@ -65,7 +65,7 @@ def sendNZB(nzb):
         params['mode'] = 'addfile'
         multiPartParams = {"nzbfile": (nzb.name+".nzb", nzb.extraInfo[0])}
 
-    if not headphones.SAB_HOST.startswith('http://') or headphones.SAB_HOST.startswith('https://'):
+    if not headphones.SAB_HOST.startswith('http'):
     	headphones.SAB_HOST = 'http://' + headphones.SAB_HOST
     
     url = headphones.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
