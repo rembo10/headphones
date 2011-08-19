@@ -55,8 +55,8 @@ def encode(albumPath):
 					logger.warn('Can not reencode .ogg music "%s"' % (music))
 				else:
 					command(encoder,music,musicTempFiles[i],albumPath)
-			elif (headphones.ENCODEROUTPUTFORMAT=='mp3'):
-				if (music.endswith('.mp3') and (infoMusic.bitrate/1000<=headphones.BITRATE)):
+			elif (headphones.ENCODEROUTPUTFORMAT=='mp3' or headphones.ENCODEROUTPUTFORMAT=='m4a'):
+				if (music.endswith('.'+headphones.ENCODEROUTPUTFORMAT) and (infoMusic.bitrate/1000<=headphones.BITRATE)):
 					logger.warn('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))		
 				else:
 					command(encoder,music,musicTempFiles[i],albumPath)
@@ -83,8 +83,10 @@ def command(encoder,musicSource,musicDest,albumPath):
 		cmd=encoder+ ' -i'
 		cmd=cmd+ ' "' + musicSource + '"'
 		if headphones.ENCODEROUTPUTFORMAT=='ogg':
-			cmd=cmd+ ' -acodec vorbis -strict experimental'
-		cmd=cmd+ ' -ac 2 -map_metadata 0:0,s0 -vn -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) + 'k'
+			cmd=cmd+ ' -acodec libvorbis'
+		if headphones.ENCODEROUTPUTFORMAT=='m4a':
+			cmd=cmd+ ' -strict experimental'
+		cmd=cmd+ ' -y -ac 2 -map_metadata 0:0,s0 -vn -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) + 'k'
 		cmd=cmd+ ' ' + headphones.ADVANCEDENCODER
 		cmd=cmd+ ' "' + musicDest + '"'
 	return_code = call(cmd, shell=True)
