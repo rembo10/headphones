@@ -110,6 +110,11 @@ def verify(albumid, albumpath):
 		release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
 		tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
 	
+	try:
+		albumpath = str(albumpath)
+	except UnicodeEncodeError:
+		albumpath = unicode(albumpath).encode('unicode_escape')	
+	
 	downloaded_track_list = []
 	
 	for r,d,f in os.walk(albumpath):
@@ -324,7 +329,7 @@ def moveFiles(albumpath, release, tracks):
 				folder = newfolder
 				break
 	
-	logger.info('Moving files from %s to %s' % (albumpath, destination_path))
+	logger.info('Moving files from %s to %s' % (albumpath, destination_path.encode('utf-8')))
 	
 	try:
 		os.makedirs(destination_path)
@@ -416,7 +421,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
 
 		new_file = os.path.join(albumpath, new_file_name)
 		
-		logger.debug('Renaming %s ---> %s' % (downloaded_track, new_file_name))
+		logger.debug('Renaming %s ---> %s' % (downloaded_track, new_file_name.encode('utf-8')))
 		try:
 			os.rename(downloaded_track, new_file)
 		except Exception, e:

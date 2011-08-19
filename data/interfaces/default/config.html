@@ -260,7 +260,7 @@
                 <td>
                       <h2>Re-Encoding Options:</h2>
 						<br>
-                      	<h3><input type="checkbox" name="encode" value="1" ${config['encode']}/>Convert Lossless to mp3</h3>
+                      	<h3><input type="checkbox" name="encode" value="1" ${config['encode']}/> Re-encode downloads during postprocessing</h3>
                       <i class="smalltext">Note: this option requires the lame or ffmpeg encoder</i>
 					<br><br>
 					<%
@@ -269,14 +269,52 @@
 							ffmpegselect = ''
 						else:
 							lameselect = ''
-							ffmpegselect = 'selected="selected"'							
+							ffmpegselect = 'selected="selected"'
 					%>
-					<h3>Encoder: <select name="encoder">
+					<h4>Encoder: <select name="encoder">
 						<option value="lame" ${lameselect}>lame</option>
 						<option value="ffmpeg" ${ffmpegselect}>ffmpeg</option>
 					</select>
-					Bitrate: <input type="text" name="bitrate" value="${config['bitrate']}" size="3" maxlength="5" />kbps <br>
+
+					Format: <select name="encoderoutputformat">
+					%for x in ['mp3', 'ogg', 'm4a']:
+						<%
+							if config['encoderoutputformat'] == x:
+								outputselect = 'selected'
+							else:
+								outputselect = ''
+						%>
+						<option value=${x} ${outputselect}>${x}</option>
+					%endfor
+					</select></h4>
+
 					<br>
+					<h4>Bitrate: <select name="bitrate">
+					%for x in [64, 128, 192, 256, 320]:
+						<%
+							if config["bitrate"] == x:
+								bitrateselected = "selected"
+							else:
+								bitrateselected = ''
+						%>	
+						<option value=${x} ${bitrateselected}> ${x} kbps</option>
+					%endfor
+					</select>
+					
+					<%
+						if config["samplingfrequency"] == 44100:
+							freq44100 = 'selected="selected"'
+							freq48000 = ''
+						else:
+							freq44100 = ''
+							freq48000 = 'selected="selected"'
+					%>
+					Sampling: <select name="samplingfrequency">
+						<option value=44100 ${freq44100}>44.1 kHz</option>
+						<option value=48000 ${freq48000}>48.0 kHz</option>
+					</select></h4>
+					<br>
+					<br>					
                     <h3>Advance Encode Options:</h3><input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43">
 					<br>
                     <h3>Path to Encoder:</h3><input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43">
@@ -287,5 +325,5 @@
 
         <p class="center"><input type="submit" value="Save Changes"><br>
         (Web Interface changes require a restart to take effect)</h3>
-      </form>
+      </form>
 </%def>

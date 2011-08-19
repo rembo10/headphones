@@ -308,7 +308,10 @@ def initialize():
         CURRENT_VERSION = versioncheck.getVersion()
         
         # Check for new versions
-        LATEST_VERSION = versioncheck.checkGithub()
+        try:
+            LATEST_VERSION = versioncheck.checkGithub()
+        except:
+            LATEST_VERSION = CURRENT_VERSION
 
         __INITIALIZED__ = True
         return True
@@ -444,8 +447,8 @@ def config_write():
 
     new_config['General']['encode'] = int(ENCODE)
     new_config['General']['encoder'] = ENCODER
-    new_config['General']['bitrate'] = BITRATE
-    new_config['General']['samplingfrequency'] = SAMPLINGFREQUENCY
+    new_config['General']['bitrate'] = int(BITRATE)
+    new_config['General']['samplingfrequency'] = int(SAMPLINGFREQUENCY)
     new_config['General']['encoderfolder'] = ENCODERFOLDER
     new_config['General']['advancedencoder'] = ADVANCEDENCODER
     new_config['General']['encoderoutputformat'] = ENCODEROUTPUTFORMAT
