@@ -271,12 +271,11 @@
 							lameselect = ''
 							ffmpegselect = 'selected="selected"'
 					%>
-					<h3>Encoder: <select name="encoder">
+					<h4>Encoder: <select name="encoder">
 						<option value="lame" ${lameselect}>lame</option>
 						<option value="ffmpeg" ${ffmpegselect}>ffmpeg</option>
 					</select>
-					<br>
-					<br>
+					
 					<%
 						if config['encoderoutputformat'] == 'ogg':
 							oggselect = 'selected="selected"'
@@ -291,12 +290,12 @@
 							m4aselect = ''
 							mp3select = 'selected="selected"'						
 					%>
-					<h3>Format: <select name="encoderoutputformat">
+					Format: <select name="encoderoutputformat">
 						<option value="mp3" ${mp3select}>mp3</option>
 						<option value="ogg" ${oggselect}>ogg</option>
 						<option value="m4a" ${m4aselect}>m4a</option>
-					</select>
-					<br>
+					</select></h4>
+
 					<br>
 					<%
 						if config["bitrate"] == 64:
@@ -330,15 +329,14 @@
 							bitrate256select = ''
 							bitrate320select = 'selected="selected"'							
 					%>
-					<h3>Bitrate: <select name="bitrate">
-						<option value=64 ${bitrate64select}>64 kbps</option>
+					<h4>Bitrate: <select name="bitrate">
+						<option value=64 ${bitrate64select}> 64 kbps</option>
 						<option value=128 ${bitrate128select}>128 kbps</option>
 						<option value=192 ${bitrate192select}>192 kbps</option>
 						<option value=256 ${bitrate256select}>256 kbps</option>
 						<option value=320 ${bitrate320select}>320 kbps</option>
 					</select>
-					<br>
-					<br>
+					
 					<%
 						if config["samplingfrequency"] == 44100:
 							freq44100 = 'selected="selected"'
@@ -347,10 +345,10 @@
 							freq44100 = ''
 							freq48000 = 'selected="selected"'
 					%>
-					<h3>Sampling: <select name="samplingfrequency">
+					Sampling: <select name="samplingfrequency">
 						<option value=44100 ${freq44100}>44.1 kHz</option>
 						<option value=48000 ${freq48000}>48.0 kHz</option>
-					</select>
+					</select></h4>
 					<br>
 					<br>					
                     <h3>Advance Encode Options:</h3><input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43">
@@ -363,5 +361,5 @@
 
         <p class="center"><input type="submit" value="Save Changes"><br>
         (Web Interface changes require a restart to take effect)</h3>
-      </form>
+      </form>
 </%def>
