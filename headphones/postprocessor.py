@@ -110,10 +110,7 @@ def verify(albumid, albumpath):
 		release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
 		tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
 	
-	try:
-		albumpath = str(albumpath)
-	except UnicodeEncodeError:
-		albumpath = unicode(albumpath).encode('unicode_escape')	
+	albumpath = albumpath.encode(headphones.SYS_ENCODING)
 	
 	downloaded_track_list = []
 	
@@ -328,8 +325,8 @@ def moveFiles(albumpath, release, tracks):
 			else:
 				folder = newfolder
 				break
-	
-	logger.info('Moving files from %s to %s' % (unicode(albumpath, headphones.SYS_ENCODING, errors="replace"), destination_path))
+
+	logger.info('Moving files from %s to %s' % (unicode(albumpath, headphones.SYS_ENCODING, errors="replace"), unicode(destination_path, headphones.SYS_ENCODING, errors="replace")))
 	
 	try:
 		os.makedirs(destination_path)
@@ -421,11 +418,11 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		
 		new_file_name = helpers.replace_all(headphones.FILE_FORMAT, values).replace('/','_') + ext
 		
-		new_file_name = new_file_name.replace('?','_').replace(':', '_')
+		new_file_name = new_file_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING)
 
 		new_file = os.path.join(albumpath, new_file_name)
 
-		logger.debug('Renaming %s ---> %s' % (unicode(downloaded_track, headphones.SYS_ENCODING, errors="replace"), new_file_name))
+		logger.debug('Renaming %s ---> %s' % (downloaded_track, new_file_name))
 		try:
 			os.rename(downloaded_track, new_file)
 		except Exception, e:
