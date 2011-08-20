@@ -329,7 +329,9 @@ def moveFiles(albumpath, release, tracks):
 				folder = newfolder
 				break
 	
-	logger.info('Moving files from %s to %s' % (albumpath, destination_path.encode('utf-8')))
+	logger.info('Moving files from %s to %s' % (unicode(albumpath, headphones.SYS_ENCODING, errors="replace"), destination_path))
+	
+	destination_path = destination_path.encode(headphones.SYS_ENCODING)
 	
 	try:
 		os.makedirs(destination_path)
@@ -337,7 +339,7 @@ def moveFiles(albumpath, release, tracks):
 	except Exception, e:
 		logger.error('Could not create folder for %s. Not moving: %s' % (release['AlbumTitle'], e))
 		return albumpath
-		
+	
 	for r,d,f in os.walk(albumpath):
 		for files in f:
 			shutil.move(os.path.join(r, files), destination_path)
@@ -362,13 +364,17 @@ def correctMetadata(albumid, release, downloaded_track_list):
 	logger.info('Writing metadata')
 	items = []
 	for downloaded_track in downloaded_track_list:
+
 		try:
 			items.append(beets.library.Item.from_path(downloaded_track))
 		except Exception, e:
 			logger.error("Beets couldn't create an Item from: " + downloaded_track + " - not a media file?" + str(e))
 	
-	cur_artist, cur_album, out_tuples, rec = autotag.tag_album(items, search_artist=release['ArtistName'], search_album=release['AlbumTitle'])
-	
+	try:
+		cur_artist, cur_album, out_tuples, rec = autotag.tag_album(items, search_artist=helpers.latinToAscii(release['ArtistName']), search_album=helpers.latinToAscii(release['AlbumTitle']))
+	except Exception, e:
+		logger.error('Error getting recommendation: %s. Not writing metadata' % e)
+		return
 	if rec == 'RECOMMEND_NONE':
 		logger.warn('No accurate album match found for %s, %s -  not writing metadata' % (release['ArtistName'], release['AlbumTitle']))
 		return
@@ -420,8 +426,8 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		new_file_name = new_file_name.replace('?','_').replace(':', '_')
 
 		new_file = os.path.join(albumpath, new_file_name)
-		
-		logger.debug('Renaming %s ---> %s' % (downloaded_track, new_file_name.encode('utf-8')))
+
+		logger.debug('Renaming %s ---> %s' % (unicode(downloaded_track, headphones.SYS_ENCODING, errors="replace"), new_file_name))
 		try:
 			os.rename(downloaded_track, new_file)
 		except Exception, e:
@@ -456,7 +462,7 @@ def updateHave(albumpath):
 				else:
 					continue
 				
-				myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [song, f.bitrate, artist, f.album, f.title])
+				myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [unicode(song, headphones.SYS_ENCODING, errors="replace"), f.bitrate, artist, f.album, f.title])
 				
 def renameUnprocessedFolder(albumpath):
 	
