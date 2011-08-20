@@ -344,7 +344,7 @@ def moveFiles(albumpath, release, tracks):
 	
 	temp_f = headphones.DESTINATION_DIR
 	for f in folder_list:
-		temp_f = os.path.join(temp_f, f)
+		temp_f = os.path.join(temp_f, f).encode(headphones.SYS_ENCODING)
 		os.chmod(temp_f, int(headphones.FOLDER_PERMISSIONS, 8))
 	
 	try:
