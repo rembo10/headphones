@@ -8,6 +8,13 @@ from headphones import db, logger, helpers, importer
 
 def libraryScan(dir=None):
 
+	# Clean up bad filepaths
+	tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
+	
+	for track in tracks:
+		if not os.path.isfile(track['Location'].encode(headphones.SYS_ENCODING)):
+			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [None, track['TrackID']])
+
 	if not dir:
 		dir = headphones.MUSIC_DIR
 		
@@ -44,17 +51,6 @@ def libraryScan(dir=None):
 				if f.bitrate:
 					bitrates.append(f.bitrate)
 				
-				# Try to match on metadata first, starting with the track id
-				if f.mb_trackid:
-
-					# Wondering if theres a better way to do this -> do one thing if the row exists,
-					# do something else if it doesn't
-					track = myDB.action('SELECT TrackID from tracks WHERE TrackID=?', [f.mb_trackid]).fetchone()
-		
-					if track:
-						myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE TrackID=?', [file, f.bitrate, track['TrackID']])
-						continue
-				
 				# Try to find a match based on artist/album/tracktitle
 				if f.albumartist:
 					f_artist = f.albumartist
@@ -73,6 +69,17 @@ def libraryScan(dir=None):
 					if track:
 						myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE TrackID=?', [file, f.bitrate, track['TrackID']])
 						continue		
+				
+				# Try to match on mbid if available and we couldn't find a match based on metadata
+				if f.mb_trackid:
+
+					# Wondering if theres a better way to do this -> do one thing if the row exists,
+					# do something else if it doesn't
+					track = myDB.action('SELECT TrackID from tracks WHERE TrackID=?', [f.mb_trackid]).fetchone()
+		
+					if track:
+						myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE TrackID=?', [file, f.bitrate, track['TrackID']])
+						continue				
 				
 				# if we can't find a match in the database on a track level, it might be a new artist or it might be on a non-mb release
 				new_artists.append(f_artist)
@@ -162,14 +169,6 @@ def libraryScan(dir=None):
 				continue
 
 	logger.info('Done checking empty filepaths')
-
-	# Clean up bad filepaths
-	tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
-	
-	for track in tracks:
-		if not os.path.isfile(track['Location']):
-			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [None, track['TrackID']])
-	
 	logger.info('Done syncing library with directory: %s' % dir)
 	
 	# Clean up the new artist list
