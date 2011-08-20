@@ -316,13 +316,13 @@ def moveFiles(albumpath, release, tracks):
 	if folder.endswith('.'):
 		folder = folder.replace(folder[len(folder)-1], '_')
 	
-	destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, folder))
+	destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING)
 	
 	if os.path.exists(destination_path):
 		i = 1
 		while True:
 			newfolder = folder + '[%i]' % i
-			destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, newfolder))
+			destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING)
 			if os.path.exists(destination_path):
 				i += 1
 			else:
@@ -330,8 +330,6 @@ def moveFiles(albumpath, release, tracks):
 				break
 	
 	logger.info('Moving files from %s to %s' % (unicode(albumpath, headphones.SYS_ENCODING, errors="replace"), destination_path))
-	
-	destination_path = destination_path.encode(headphones.SYS_ENCODING)
 	
 	try:
 		os.makedirs(destination_path)
