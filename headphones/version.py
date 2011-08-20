@@ -1,1 +1,1 @@
-HEADPHONES_VERSION = "master"
+HEADPHONES_VERSION = "develop"

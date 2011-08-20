@@ -110,6 +110,8 @@ def verify(albumid, albumpath):
 		release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
 		tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
 	
+	albumpath = albumpath.encode(headphones.SYS_ENCODING)
+	
 	downloaded_track_list = []
 	
 	for r,d,f in os.walk(albumpath):
@@ -311,20 +313,20 @@ def moveFiles(albumpath, release, tracks):
 	if folder.endswith('.'):
 		folder = folder.replace(folder[len(folder)-1], '_')
 	
-	destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, folder))
+	destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING)
 	
 	if os.path.exists(destination_path):
 		i = 1
 		while True:
 			newfolder = folder + '[%i]' % i
-			destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, newfolder))
+			destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING)
 			if os.path.exists(destination_path):
 				i += 1
 			else:
 				folder = newfolder
 				break
-	
-	logger.info('Moving files from %s to %s' % (albumpath, destination_path))
+
+	logger.info('Moving files from %s to %s' % (unicode(albumpath, headphones.SYS_ENCODING, errors="replace"), unicode(destination_path, headphones.SYS_ENCODING, errors="replace")))
 	
 	try:
 		os.makedirs(destination_path)
@@ -332,7 +334,7 @@ def moveFiles(albumpath, release, tracks):
 	except Exception, e:
 		logger.error('Could not create folder for %s. Not moving: %s' % (release['AlbumTitle'], e))
 		return albumpath
-		
+	
 	for r,d,f in os.walk(albumpath):
 		for files in f:
 			shutil.move(os.path.join(r, files), destination_path)
@@ -342,7 +344,7 @@ def moveFiles(albumpath, release, tracks):
 	
 	temp_f = headphones.DESTINATION_DIR
 	for f in folder_list:
-		temp_f = os.path.join(temp_f, f)
+		temp_f = os.path.join(temp_f, f).encode(headphones.SYS_ENCODING)
 		os.chmod(temp_f, int(headphones.FOLDER_PERMISSIONS, 8))
 	
 	try:
@@ -357,13 +359,17 @@ def correctMetadata(albumid, release, downloaded_track_list):
 	logger.info('Writing metadata')
 	items = []
 	for downloaded_track in downloaded_track_list:
+
 		try:
 			items.append(beets.library.Item.from_path(downloaded_track))
 		except Exception, e:
 			logger.error("Beets couldn't create an Item from: " + downloaded_track + " - not a media file?" + str(e))
 	
-	cur_artist, cur_album, out_tuples, rec = autotag.tag_album(items, search_artist=release['ArtistName'], search_album=release['AlbumTitle'])
-	
+	try:
+		cur_artist, cur_album, out_tuples, rec = autotag.tag_album(items, search_artist=helpers.latinToAscii(release['ArtistName']), search_album=helpers.latinToAscii(release['AlbumTitle']))
+	except Exception, e:
+		logger.error('Error getting recommendation: %s. Not writing metadata' % e)
+		return
 	if rec == 'RECOMMEND_NONE':
 		logger.warn('No accurate album match found for %s, %s -  not writing metadata' % (release['ArtistName'], release['AlbumTitle']))
 		return
@@ -412,10 +418,10 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		
 		new_file_name = helpers.replace_all(headphones.FILE_FORMAT, values).replace('/','_') + ext
 		
-		new_file_name = new_file_name.replace('?','_').replace(':', '_')
+		new_file_name = new_file_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING)
 
 		new_file = os.path.join(albumpath, new_file_name)
-		
+
 		logger.debug('Renaming %s ---> %s' % (downloaded_track, new_file_name))
 		try:
 			os.rename(downloaded_track, new_file)
@@ -451,7 +457,7 @@ def updateHave(albumpath):
 				else:
 					continue
 				
-				myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [song, f.bitrate, artist, f.album, f.title])
+				myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [unicode(song, headphones.SYS_ENCODING, errors="replace"), f.bitrate, artist, f.album, f.title])
 				
 def renameUnprocessedFolder(albumpath):
 	
