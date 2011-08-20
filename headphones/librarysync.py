@@ -8,6 +8,13 @@ from headphones import db, logger, helpers, importer
 
 def libraryScan(dir=None):
 
+	# Clean up bad filepaths
+	tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
+	
+	for track in tracks:
+		if not os.path.isfile(track['Location'].encode(headphones.SYS_ENCODING)):
+			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [None, track['TrackID']])
+
 	if not dir:
 		dir = headphones.MUSIC_DIR
 		
@@ -162,14 +169,6 @@ def libraryScan(dir=None):
 				continue
 
 	logger.info('Done checking empty filepaths')
-
-	# Clean up bad filepaths
-	tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
-	
-	for track in tracks:
-		if not os.path.isfile(track['Location']):
-			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [None, track['TrackID']])
-	
 	logger.info('Done syncing library with directory: %s' % dir)
 	
 	# Clean up the new artist list
