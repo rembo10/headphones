@@ -161,12 +161,12 @@ def addArtisttoDB(artistid, extrasonly=False):
 						"CleanName":		cleanname
 						}
 			
-			match = myDB.action('SELECT Location, BitRate from have WHERE TrackID=?', [track['id']]).fetchone()
+			match = myDB.action('SELECT Location, BitRate from have WHERE CleanName=?', [cleanname]).fetchone()
 			
 			if not match:
-				match = myDB.action('SELECT Location, BitRate from have WHERE CleanName=?', [cleanname]).fetchone()
-			if not match:
 				match = myDB.action('SELECT Location, BitRate from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [artist['artist_name'], rg['title'], track['title']]).fetchone()
+			if not match:
+				match = myDB.action('SELECT Location, BitRate from have WHERE TrackID=?', [track['id']]).fetchone()			
 			if match:
 				newValueDict['Location'] = match['Location']
 				newValueDict['BitRate'] = match['BitRate']
@@ -286,14 +286,14 @@ def addReleaseById(rid):
 						"TrackNumber":		track['number'],
 						"CleanName":		cleanname
 						}
-						
-			match = myDB.action('SELECT Location, BitRate from have WHERE TrackID=?', [track['id']]).fetchone()
-						
-			if not match:
-				match = myDB.action('SELECT Location, BitRate from have WHERE CleanName=?', [cleanname]).fetchone()
 			
+			match = myDB.action('SELECT Location, BitRate from have WHERE CleanName=?', [cleanname]).fetchone()
+						
 			if not match:
 				match = myDB.action('SELECT Location, BitRate from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [release_dict['artist_name'], release_dict['rg_title'], track['title']]).fetchone()
+			
+			if not match:
+				match = myDB.action('SELECT Location, BitRate from have WHERE TrackID=?', [track['id']]).fetchone()
 					
 			if match:
 				newValueDict['Location'] = match['Location']
