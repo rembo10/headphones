@@ -8,6 +8,8 @@ from headphones import db, logger, helpers, importer
 
 def libraryScan(dir=None):
 
+	myDB = db.DBConnection()
+	
 	# Clean up bad filepaths
 	tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
 	
@@ -27,8 +29,7 @@ def libraryScan(dir=None):
 
 	new_artists = []
 	bitrates = []
-	
-	myDB = db.DBConnection()
+
 	myDB.action('DELETE from have')
 	
 	for r,d,f in os.walk(dir):
