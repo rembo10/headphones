@@ -62,9 +62,9 @@ class WebInterface(object):
 		if len(name) == 0:
 			raise cherrypy.HTTPRedirect("home")
 		if type == 'artist':
-			searchresults = mb.findArtist(name, limit=20)
+			searchresults = mb.findArtist(name, limit=100)
 		else:
-			searchresults = mb.findRelease(name, limit=20)
+			searchresults = mb.findRelease(name, limit=100)
 		return serve_template(templatename="searchresults.html", title='Search Results for: "' + name + '"', searchresults=searchresults, type=type)
 	search.exposed = True
 
