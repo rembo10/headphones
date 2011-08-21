@@ -86,11 +86,11 @@ def sendNZB(nzb):
             f = opener.open(req)
 
     except (EOFError, IOError), e:
-        logger.info(u"Unable to connect to SAB: ")
+        logger.error(u"Unable to connect to SAB with URL: %s" % url)
         return False
 
     except httplib.InvalidURL, e:
-        logger.info(u"Invalid SAB host, check your config: ")
+        logger.error(u"Invalid SAB host, check your config. Current host: %s" % headphones.SAB_HOST)
         return False
 
     if f == None:
