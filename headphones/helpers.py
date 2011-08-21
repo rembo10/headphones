@@ -121,6 +121,17 @@ def cleanName(string):
 	
 	return out_string
 	
+def cleanTitle(title):
+
+	title = re.sub('[\.\-\/\_]', ' ', title).lower()
+	
+	# Strip out extra whitespace
+	title = ' '.join(title.split())
+	
+	title = title.title()
+	
+	return title
+	
 def extract_data(s):
 	
     from headphones import logger
