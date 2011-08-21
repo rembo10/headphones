@@ -39,6 +39,7 @@ def getLyrics(artist, song):
 	m = re.compile('''<div class='lyricbox'><div class='rtMatcher'>.*?</div>(.*?)<!--''').search(lyricspage)
 	
 	lyrics = convert_html_entities(m.group(1)).replace('<br />', '\n')
+	lyrics = re.sub('<.*?>', '', lyrics)
 	
 	return lyrics
 
