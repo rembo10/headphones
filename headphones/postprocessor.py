@@ -302,12 +302,15 @@ def moveFiles(albumpath, release, tracks):
 		firstchar = '0-9'
 	else:
 		firstchar = sortname[0]
+		
+	lowerfirst = firstchar.lower()
 	
 
 	values = {	'artist':	artist,
 				'album':	album,
 				'year':		year,
 				'first':	firstchar,
+				'lowerfirst':	lowerfirst
 			}
 			
 	

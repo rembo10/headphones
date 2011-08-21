@@ -43,6 +43,7 @@ def getLyrics(artist, song):
 	m = re.compile('''<div class='lyricbox'><div class='rtMatcher'>.*?</div>(.*?)<!--''').search(lyricspage)
 	
 	if not m:
+		logger.warn('Cannot find lyrics on: %s' % lyricsurl)
 		return
 		
 	lyrics = convert_html_entities(m.group(1)).replace('<br />', '\n')
