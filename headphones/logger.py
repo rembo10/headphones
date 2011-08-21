@@ -20,7 +20,7 @@ class RotatingLogger(object):
 		self.max_files = max_files
 		
 		
-	def initLogger(self, quiet=False):
+	def initLogger(self, verbose=1):
 	
 		l = logging.getLogger('headphones')
 		l.setLevel(logging.DEBUG)
@@ -35,13 +35,13 @@ class RotatingLogger(object):
 		filehandler.setFormatter(fileformatter)
 		l.addHandler(filehandler)
 		
-		if not quiet:
-		
+		if verbose:
 			consolehandler = logging.StreamHandler()
-			consolehandler.setLevel(logging.INFO)
-			
+			if verbose == 1:
+				consolehandler.setLevel(logging.INFO)
+			if verbose == 2:
+				consolehandler.setLevel(logging.DEBUG)
 			consoleformatter = logging.Formatter('%(asctime)s - %(levelname)s :: %(message)s', '%d-%b-%Y %H:%M:%S')
-			
 			consolehandler.setFormatter(consoleformatter)
 			l.addHandler(consolehandler)	
 		
