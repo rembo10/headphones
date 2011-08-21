@@ -22,7 +22,7 @@ SIGNAL = None
 
 SYS_ENCODING = None
 
-QUIET = False
+VERBOSE = 1
 DAEMON = False
 PIDFILE= None
 
@@ -173,7 +173,7 @@ def initialize():
 
     with INIT_LOCK:
     
-        global __INITIALIZED__, FULL_PATH, PROG_DIR, QUIET, DAEMON, DATA_DIR, CONFIG_FILE, CFG, LOG_DIR, CACHE_DIR, \
+        global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, DATA_DIR, CONFIG_FILE, CFG, LOG_DIR, CACHE_DIR, \
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, GIT_PATH, \
                 CURRENT_VERSION, LATEST_VERSION, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
                 ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, \
@@ -280,11 +280,11 @@ def initialize():
             try:
                 os.makedirs(LOG_DIR)
             except OSError:
-                if not QUIET:
+                if VERBOSE:
                     print 'Unable to create the log directory. Logging to screen only.'
         
         # Start the logger, silence console logging if we need to
-        logger.headphones_log.initLogger(quiet=QUIET)
+        logger.headphones_log.initLogger(verbose=VERBOSE)
         
         # Update some old config code:
         if FOLDER_FORMAT == '%artist/%album/%track':
