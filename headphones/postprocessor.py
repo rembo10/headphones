@@ -36,13 +36,13 @@ def verify(albumid, albumpath):
 		#TODO: This should be a call to a class method.. copied it out of importer with only minor changes
 		#TODO: odd things can happen when there are diacritic characters in the folder name, need to translate them?
 		import mb
+		
+		release_dict = None
+		
 		try:	
 			release_dict = mb.getReleaseGroup(albumid)
 		except Exception, e:
-			logger.info('Unable to get release information for manual album with rgid: ' + albumid)
-
-		if not release_dict:
-			logger.warn('Unable to get release information for manual album with rgid: ' + albumid)
+			logger.info('Unable to get release information for manual album with rgid: %s. Error: %s' % (albumid, e))
 			return
 
 		logger.info(u"Now adding/updating artist: " + release_dict['artist_name'])
