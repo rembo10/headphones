@@ -344,8 +344,8 @@ def moveFiles(albumpath, release, tracks):
 	
 	temp_f = headphones.DESTINATION_DIR
 	for f in folder_list:
-		temp_f = os.path.join(temp_f, f).encode(headphones.SYS_ENCODING)
-		os.chmod(temp_f, int(headphones.FOLDER_PERMISSIONS, 8))
+		temp_f = os.path.join(temp_f, f)
+		os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING), int(headphones.FOLDER_PERMISSIONS, 8))
 	
 	try:
 		shutil.rmtree(albumpath)
@@ -497,7 +497,7 @@ def forcePostProcess():
 	# Parse the folder names to get artist album info
 	for folder in folders:
 
-		folder = unicode(folder)
+		folder = unicode(folder, headphones.SYS_ENCODING, errors="replace")
 	
 		albumpath = os.path.join(download_dir, folder)
 		
