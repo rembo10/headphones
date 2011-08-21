@@ -496,8 +496,6 @@ def forcePostProcess():
 	
 	# Parse the folder names to get artist album info
 	for folder in folders:
-
-		folder = unicode(folder, headphones.SYS_ENCODING, errors="replace")
 	
 		albumpath = os.path.join(download_dir, folder)
 		
