@@ -7,7 +7,7 @@ from lib.beets import autotag
 from lib.beets.mediafile import MediaFile
 
 import headphones
-from headphones import db, albumart, logger, helpers
+from headphones import db, albumart, lyrics, logger, helpers
 
 def checkFolder():
 
@@ -219,6 +219,9 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 	if headphones.CORRECT_METADATA:
 		correctMetadata(albumid, release, downloaded_track_list)
 		
+	if headphones.EMBED_LYRICS:
+		embedLyrics(downloaded_track_list)
+		
 	if headphones.RENAME_FILES:
 		renameFiles(albumpath, downloaded_track_list, release)
 	
@@ -255,7 +258,8 @@ def embedAlbumArt(artwork, downloaded_track_list):
 			f = MediaFile(downloaded_track)
 		except:
 			logger.error('Could not read %s. Not adding album art' % downloaded_track)
-		
+			continue
+			
 		logger.debug('Adding album art to: %s' % downloaded_track)
 		f.art = artwork
 		f.save()
@@ -380,6 +384,29 @@ def correctMetadata(albumid, release, downloaded_track_list):
 	
 	for item in items:
 		item.write()
+		
+def embedLyrics(downloaded_track_list):
+	logger.info('Adding lyrics')
+	
+	for downloaded_track in downloaded_track_list:
+		
+		try:
+			f = MediaFile(downloaded_track)
+		except:
+			logger.error('Could not read %s. Not checking lyrics' % downloaded_track)
+			
+		if f.albumartist and f.title:
+			metalyrics = lyrics.getLyrics(f.albumartist, f.title)
+		elif f.artist and f.title:
+			metalyrics = lyrics.getLyrics(f.artist, f.title)
+		else:
+			logger.info('No artist/track metadata found for track: %s. Not fetching lyrics' % downloaded_track)
+			metalyrics = None
+			
+		if lyrics:
+			logger.debug('Adding lyrics to: %s' % downloaded_track)
+			f.lyrics = metalyrics
+			f.save()
 
 def renameFiles(albumpath, downloaded_track_list, release):
 	logger.info('Renaming files')
