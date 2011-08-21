@@ -432,21 +432,27 @@ def renameFiles(albumpath, downloaded_track_list, release):
 			tracknumber = '%02d' % f.track
 		
 		if not f.title:
-			basename = os.path.basename(downloaded_track)
+			
+			basename = unicode(os.path.basename(downloaded_track), headphones.SYS_ENCODING, errors='replace')
 			title = os.path.splitext(basename)[0]
+			ext = os.path.splitext(basename)[1]
+			
+			new_file_name = helpers.cleanTitle(title) + ext
+			
 		else:
 			title = f.title
 			
-		values = {	'tracknumber':	tracknumber,
-					'title':		title,
-					'artist':		release['ArtistName'],
-					'album':		release['AlbumTitle'],
-					'year':			year
-					}
-					
-		ext = os.path.splitext(downloaded_track)[1]
+			values = {	'tracknumber':	tracknumber,
+						'title':		title,
+						'artist':		release['ArtistName'],
+						'album':		release['AlbumTitle'],
+						'year':			year
+						}
+						
+			ext = os.path.splitext(downloaded_track)[1]
+			
+			new_file_name = helpers.replace_all(headphones.FILE_FORMAT, values).replace('/','_') + ext
 		
-		new_file_name = helpers.replace_all(headphones.FILE_FORMAT, values).replace('/','_') + ext
 		
 		new_file_name = new_file_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING)
 
@@ -551,5 +557,3 @@ def forcePostProcess():
 					continue
 				if rgid:
 					verify(rgid, albumpath)
-			
-	
