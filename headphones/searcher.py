@@ -6,6 +6,7 @@ import os, re, time
 
 import headphones, exceptions
 from headphones import logger, db, helpers, classes, sab
+from headphones import encodingKludge as ek
 
 class NewzbinDownloader(urllib.FancyURLopener):
 
@@ -86,8 +87,8 @@ def searchNZB(albumid=None, new=False):
         	term = cleanartist + ' ' + cleanalbum
             
         # Replace bad characters in the term and unicode it
-        term = re.sub('[\.\-\/]', ' ', term).encode('utf-8')
-        artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8')
+        term = ek.fixStupidEncodings(re.sub('[\.\-\/]', ' ', term))
+        artistterm = ek.fixStupidEncodings(re.sub('[\.\-\/]', ' ', cleanartist))
         
         logger.info("Searching for %s since it was marked as wanted" % term)
         

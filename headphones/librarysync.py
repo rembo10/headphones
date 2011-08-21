@@ -5,6 +5,7 @@ from lib.beets.mediafile import MediaFile
 
 import headphones
 from headphones import db, logger, helpers, importer
+from headphones import encodingKludge as ek
 
 def libraryScan(dir=None):
 
@@ -14,38 +15,31 @@ def libraryScan(dir=None):
 	tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
 	
 	for track in tracks:
-		if not os.path.isfile(track['Location'].encode(headphones.SYS_ENCODING)):
+		if not ek.ek(os.path.isfile, track['Location']):
 			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [None, track['TrackID']])
 
 	if not dir:
 		dir = headphones.MUSIC_DIR
-		
-	try:
-		dir = str(dir)
-	except UnicodeEncodeError:
-		dir = unicode(dir).encode('unicode_escape')
 
-	logger.info('Scanning music directory: %s' % dir)
+	logger.info(u'Scanning music directory: %s' % dir)
 
 	new_artists = []
 	bitrates = []
 
 	myDB.action('DELETE from have')
 	
-	for r,d,f in os.walk(dir):
+	for r,d,f in ek.ek(os.walk, dir):
 		for files in f:
 			# MEDIA_FORMATS = music file extensions, e.g. mp3, flac, etc
 			if any(files.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
-
-				song = os.path.join(r, files)
-				file = unicode(os.path.join(r, files), headphones.SYS_ENCODING, errors='replace')
+				song = ek.ek(os.path.join, ek.fixStupidEncodings(r), ek.fixStupidEncodings(files))
 
 				# Try to read the metadata
+				logger.debug(u'Reading metadata from song %s' % song)
 				try:
-					f = MediaFile(song)
-
+					f = MediaFile(song.encode(headphones.SYS_ENCODING))
 				except:
-					logger.error('Cannot read file: ' + file)
+					logger.error(u'Cannot read file: %r' % song)
 					continue
 					
 				# Grab the bitrates for the auto detect bit rate option
@@ -68,7 +62,7 @@ def libraryScan(dir=None):
 						track = myDB.action('SELECT TrackID from tracks WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [f_artist, f.album, f.title]).fetchone()
 					
 					if track:
-						myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE TrackID=?', [file, f.bitrate, track['TrackID']])
+						myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE TrackID=?', [song, f.bitrate, track['TrackID']])
 						continue		
 				
 				# Try to match on mbid if available and we couldn't find a match based on metadata
@@ -79,14 +73,14 @@ def libraryScan(dir=None):
 					track = myDB.action('SELECT TrackID from tracks WHERE TrackID=?', [f.mb_trackid]).fetchone()
 		
 					if track:
-						myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE TrackID=?', [file, f.bitrate, track['TrackID']])
+						myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE TrackID=?', [song, f.bitrate, track['TrackID']])
 						continue				
 				
 				# if we can't find a match in the database on a track level, it might be a new artist or it might be on a non-mb release
 				new_artists.append(f_artist)
 				
 				# The have table will become the new database for unmatched tracks (i.e. tracks with no associated links in the database				
-				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [f_artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid, file, helpers.cleanName(f_artist+' '+f.album+' '+f.title)])
+				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [f_artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid, song, helpers.cleanName(f_artist+' '+f.album+' '+f.title)])
 
 	logger.info('Completed scanning of directory: %s' % dir)
 	logger.info('Checking filepaths to see if we can find any matches')
@@ -145,9 +139,9 @@ def libraryScan(dir=None):
 		
 		new_file_name = new_file_name.replace('?','_').replace(':', '_')
 		
-		full_path_to_file = os.path.normpath(os.path.join(headphones.MUSIC_DIR, folder, new_file_name))
+		full_path_to_file = ek.ek(os.path.normpath, ek.ek(os.path.join, headphones.MUSIC_DIR, folder, new_file_name))
 
-		match = glob.glob(full_path_to_file)
+		match = ek.ek(glob.glob, full_path_to_file)
 		
 		if match:
 
@@ -176,7 +170,7 @@ def libraryScan(dir=None):
 	unique_artists = {}.fromkeys(new_artists).keys()
 	current_artists = myDB.select('SELECT ArtistName, ArtistID from artists')
 	
-	artist_list = [f for f in unique_artists if f.lower() not in [x[0].lower() for x in current_artists]]
+	artist_list = [ek.fixStupidEncodings(f) for f in unique_artists if f.lower() not in [x[0].lower() for x in current_artists]]
 	
 	# Update track counts
 	logger.info('Updating track counts')

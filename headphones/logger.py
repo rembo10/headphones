@@ -54,6 +54,8 @@ class RotatingLogger(object):
 		if level != 'DEBUG':
 			headphones.LOG_LIST.insert(0, (helpers.now(), message, level, threadname))
 		
+		if isinstance(message, unicode):
+			message = message.encode(headphones.SYS_ENCODING)
 		message = threadname + ' : ' + message
 
 		if level == 'DEBUG':

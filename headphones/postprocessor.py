@@ -8,6 +8,7 @@ from lib.beets.mediafile import MediaFile
 
 import headphones
 from headphones import db, albumart, logger, helpers
+from headphones import encodingKludge as ek
 
 def checkFolder():
 
@@ -109,7 +110,7 @@ def verify(albumid, albumpath):
 
 		release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
 		tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
-	
+
 	albumpath = albumpath.encode(headphones.SYS_ENCODING)
 	
 	downloaded_track_list = []
@@ -128,11 +129,10 @@ def verify(albumid, albumpath):
 		except Exception, e:
 			logger.info("Exception from MediaFile for: " + downloaded_track + " : " + str(e))
 			continue
-			
-		metaartist = helpers.latinToAscii(f.artist.lower()).encode('UTF-8')
-		dbartist = helpers.latinToAscii(release['ArtistName'].lower()).encode('UTF-8')
-		metaalbum = helpers.latinToAscii(f.album.lower()).encode('UTF-8')
-		dbalbum = helpers.latinToAscii(release['AlbumTitle'].lower()).encode('UTF-8')
+		metaartist = ek.fixStupidEncodings(f.artist.lower())
+		dbartist = ek.fixStupidEncodings(release['ArtistName'].lower())
+		metaalbum = ek.fixStupidEncodings(f.album.lower())
+		dbalbum = ek.fixStupidEncodings(release['AlbumTitle'].lower())
 		
 		logger.debug('Matching metadata artist: %s with artist name: %s' % (metaartist, dbartist))
 		logger.debug('Matching metadata album: %s with album name: %s' % (metaalbum, dbalbum))
@@ -140,16 +140,17 @@ def verify(albumid, albumpath):
 		if metaartist == dbartist and metaalbum == dbalbum:
 			doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 			return
-			
+	
 	# test #2: filenames
 	logger.debug('Metadata check failed. Verifying filenames...')
 	for downloaded_track in downloaded_track_list:
+		logger.debug("%r" % downloaded_track)
 		track_name = os.path.splitext(downloaded_track)[0]
 		split_track_name = re.sub('[\.\-\_]', ' ', track_name).lower()
 		for track in tracks:
 			
-			dbtrack = helpers.latinToAscii(track['TrackTitle'].lower()).encode('UTF-8')
-			filetrack = helpers.latinToAscii(split_track_name).encode('UTF-8')
+			dbtrack = ek.fixStupidEncodings(track['TrackTitle'].lower())
+			filetrack = ek.fixStupidEncodings(split_track_name)
 			logger.debug('Checking if track title: %s is in file name: %s' % (dbtrack, filetrack))
 		
 			if dbtrack in filetrack:
@@ -313,23 +314,23 @@ def moveFiles(albumpath, release, tracks):
 	if folder.endswith('.'):
 		folder = folder.replace(folder[len(folder)-1], '_')
 	
-	destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING)
+	destination_path = ek.ek(os.path.normpath, ek.ek(os.path.join, headphones.DESTINATION_DIR, folder))
 	
-	if os.path.exists(destination_path):
+	if ek.ek(os.path.exists, destination_path):
 		i = 1
 		while True:
 			newfolder = folder + '[%i]' % i
-			destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING)
-			if os.path.exists(destination_path):
+			destination_path = ek.ek(os.path.normpath, ek.ek(os.path.join, headphones.DESTINATION_DIR, newfolder))
+			if ek.ek(os.path.exists, destination_path):
 				i += 1
 			else:
 				folder = newfolder
 				break
 
-	logger.info('Moving files from %s to %s' % (unicode(albumpath, headphones.SYS_ENCODING, errors="replace"), unicode(destination_path, headphones.SYS_ENCODING, errors="replace")))
+	logger.info('Moving files from %s to %s' % (albumpath, destination_path))
 	
 	try:
-		os.makedirs(destination_path)
+		ek.ek(os.makedirs, destination_path)
 	
 	except Exception, e:
 		logger.error('Could not create folder for %s. Not moving: %s' % (release['AlbumTitle'], e))
@@ -337,15 +338,15 @@ def moveFiles(albumpath, release, tracks):
 	
 	for r,d,f in os.walk(albumpath):
 		for files in f:
-			shutil.move(os.path.join(r, files), destination_path)
+			shutil.move(os.path.join(ek.fixStupidEncodings(r), ek.fixStupidEncodings(files)).encode(headphones.SYS_ENCODING), destination_path.encode(headphones.SYS_ENCODING))
 			
 	# Chmod the directories using the folder_format (script courtesy of premiso!)
 	folder_list = folder.split('/')
 	
 	temp_f = headphones.DESTINATION_DIR
 	for f in folder_list:
-		temp_f = os.path.join(temp_f, f).encode(headphones.SYS_ENCODING)
-		os.chmod(temp_f, int(headphones.FOLDER_PERMISSIONS, 8))
+		temp_f = ek.ek(os.path.join, temp_f, f)
+		ek.ek(os.chmod, temp_f, int(headphones.FOLDER_PERMISSIONS, 8))
 	
 	try:
 		shutil.rmtree(albumpath)
@@ -433,21 +434,22 @@ def updateHave(albumpath):
 
 	results = []
 	
-	for r,d,f in os.walk(albumpath):
+	for r,d,f in ek.ek(os.walk, albumpath):
 		for files in f:
 			if any(files.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
-				results.append(os.path.join(r, files))
+				results.append(ek.ek(os.path.join, ek.fixStupidEncodings(r), ek.fixStupidEncodings(files)))
 	
 	if results:
 	
 		myDB = db.DBConnection()
 	
 		for song in results:
+			logger.debug('Reading metadata from song %s' % song)
+			f = MediaFile(song.encode(headphones.SYS_ENCODING))
 			try:
-				f = MediaFile(song)
-				#logger.debug('Reading: %s' % song.decode('UTF-8'))
+				f = MediaFile(song.encode(headphones.SYS_ENCODING))
 			except:
-				logger.warn('Could not read file: %s' % song)
+				logger.warn('Could not read file: %r' % song)
 				continue
 			else:	
 				if f.albumartist:
@@ -457,7 +459,7 @@ def updateHave(albumpath):
 				else:
 					continue
 				
-				myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [unicode(song, headphones.SYS_ENCODING, errors="replace"), f.bitrate, artist, f.album, f.title])
+				myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [song, f.bitrate, artist, f.album, f.title])
 				
 def renameUnprocessedFolder(albumpath):
 	
@@ -468,11 +470,11 @@ def renameUnprocessedFolder(albumpath):
 		else:
 			new_folder_name = albumpath + ' (Unprocessed)[%i]' % i
 		
-		if os.path.exists(new_folder_name):
+		if ek.ek(os.path.exists, new_folder_name):
 			i += 1
 			
 		else:
-			os.rename(albumpath, new_folder_name)
+			ek.ek(os.rename, albumpath, new_folder_name)
 			return
 			
 def forcePostProcess():
@@ -485,7 +487,7 @@ def forcePostProcess():
 		
 	logger.info('Checking to see if there are any folders to process in download_dir: %s' % download_dir)
 	# Get a list of folders in the download_dir
-	folders = [d for d in os.listdir(download_dir) if os.path.isdir(os.path.join(download_dir, d))]
+	folders = [d for d in ek.ek(os.listdir, download_dir) if ek.ek(os.path.isdir, ek.ek(os.path.join, download_dir, d))]
 	
 	if len(folders):
 		logger.info('Found %i folders: %s' % (len(folders), str(folders)))
@@ -496,10 +498,7 @@ def forcePostProcess():
 	
 	# Parse the folder names to get artist album info
 	for folder in folders:
-
-		folder = unicode(folder)
-	
-		albumpath = os.path.join(download_dir, folder)
+		albumpath = ek.ek(os.path.join, download_dir, folder)
 		
 		try:
 			name, album, year = helpers.extract_data(folder)

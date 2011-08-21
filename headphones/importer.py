@@ -5,6 +5,7 @@ from lib.beets.mediafile import MediaFile
 
 import headphones
 from headphones import logger, helpers, db, mb, albumart, lastfm
+from headphones import encodingKludge as ek
 
 various_artists_mbid = '89ad4ac3-39f7-470e-963a-56509c546377'
 		
@@ -25,10 +26,6 @@ def is_exists(artistid):
 def artistlist_to_mbids(artistlist, forced=False):
 
 	for artist in artistlist:
-		
-		if forced:
-			artist = unicode(artist, 'utf-8')
-			
 		results = mb.findArtist(artist, limit=1)
 		
 		if not results:
