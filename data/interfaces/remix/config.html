@@ -205,6 +205,7 @@
                         <h4><input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} /> Delete leftover files (.m3u, .nfo, .sfv, .nzb, etc.)</h4>
                       	<h4><input type="checkbox" name="add_album_art" value="1" ${config['add_album_art']}> Add album art as 'folder.jpg' to album folder</h4>
                       	<h4><input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}> Embed album art in each file</h4>
+                      	<h4><input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}> Embed lyrics</h4>
                 </td>
             </tr>
 
@@ -260,7 +261,7 @@
                 <td>
                       <h2>Re-Encoding Options:</h2>
 						<br>
-                      	<h3><input type="checkbox" name="encode" value="1" ${config['encode']}/>Re-encode Postprocessed Albuns</h3>
+                      	<h3><input type="checkbox" name="encode" value="1" ${config['encode']}/> Re-encode downloads during postprocessing</h3>
                       <i class="smalltext">Note: this option requires the lame or ffmpeg encoder</i>
 					<br><br>
 					<%
@@ -275,66 +276,30 @@
 						<option value="lame" ${lameselect}>lame</option>
 						<option value="ffmpeg" ${ffmpegselect}>ffmpeg</option>
 					</select>
-					
-					<%
-						if config['encoderoutputformat'] == 'ogg':
-							oggselect = 'selected="selected"'
-							mp3select = ''
-							m4aselect = ''
-						elif config['encoderoutputformat'] == 'm4a':
-							oggselect = ''
-							m4aselect = 'selected="selected"'
-							mp3select = ''
-						else:
-							oggselect = ''
-							m4aselect = ''
-							mp3select = 'selected="selected"'						
-					%>
+
 					Format: <select name="encoderoutputformat">
-						<option value="mp3" ${mp3select}>mp3</option>
-						<option value="ogg" ${oggselect}>ogg</option>
-						<option value="m4a" ${m4aselect}>m4a</option>
+					%for x in ['mp3', 'ogg', 'm4a']:
+						<%
+							if config['encoderoutputformat'] == x:
+								outputselect = 'selected'
+							else:
+								outputselect = ''
+						%>
+						<option value=${x} ${outputselect}>${x}</option>
+					%endfor
 					</select></h4>
 
 					<br>
-					<%
-						if config["bitrate"] == 64:
-							bitrate64select = 'selected="selected"'
-							bitrate128select = ''
-							bitrate192select = ''
-							bitrate256select = ''
-							bitrate320select = ''
-						elif config["bitrate"] == 128:
-							bitrate64select = ''
-							bitrate128select = 'selected="selected"'
-							bitrate192select = ''
-							bitrate256select = ''
-							bitrate320select = ''
-						elif config["bitrate"] == 192:
-							bitrate64select = ''
-							bitrate128select = ''
-							bitrate192select = 'selected="selected"'
-							bitrate256select = ''
-							bitrate320select = ''
-						elif config["bitrate"] == 256:
-							bitrate64select = ''
-							bitrate128select = ''
-							bitrate192select = ''
-							bitrate256select = 'selected="selected"'
-							bitrate320select = ''
-						else:
-							bitrate64select = ''
-							bitrate128select = ''
-							bitrate192select = ''
-							bitrate256select = ''
-							bitrate320select = 'selected="selected"'							
-					%>
 					<h4>Bitrate: <select name="bitrate">
-						<option value=64 ${bitrate64select}> 64 kbps</option>
-						<option value=128 ${bitrate128select}>128 kbps</option>
-						<option value=192 ${bitrate192select}>192 kbps</option>
-						<option value=256 ${bitrate256select}>256 kbps</option>
-						<option value=320 ${bitrate320select}>320 kbps</option>
+					%for x in [64, 128, 192, 256, 320]:
+						<%
+							if config["bitrate"] == x:
+								bitrateselected = "selected"
+							else:
+								bitrateselected = ''
+						%>	
+						<option value=${x} ${bitrateselected}> ${x} kbps</option>
+					%endfor
 					</select>
 					
 					<%
@@ -361,5 +326,5 @@
 
         <p class="center"><input type="submit" value="Save Changes"><br>
         (Web Interface changes require a restart to take effect)</h3>
-      </form>
+      </form>
 </%def>
