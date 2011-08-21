@@ -20,7 +20,11 @@ def getLyrics(artist, song):
 		logger.warn('Error opening: %s. Error: %s' % (searchURL, e))
 		return
 	
-	parseddata = minidom.parseString(data)
+	try:
+		parseddata = minidom.parseString(data)
+	except Exception, e:
+		logger.warn('Error parsing data from url: %s. Error: %s' % (searchURL, e))
+		return
 	
 	url = parseddata.getElementsByTagName("url")
 	
@@ -38,6 +42,9 @@ def getLyrics(artist, song):
 		
 	m = re.compile('''<div class='lyricbox'><div class='rtMatcher'>.*?</div>(.*?)<!--''').search(lyricspage)
 	
+	if not m:
+		return
+		
 	lyrics = convert_html_entities(m.group(1)).replace('<br />', '\n')
 	lyrics = re.sub('<.*?>', '', lyrics)
 	
