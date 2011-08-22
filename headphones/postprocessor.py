@@ -18,7 +18,7 @@ def checkFolder():
 		
 		if album['FolderName']:
 		
-			album_path = os.path.join(headphones.DOWNLOAD_DIR, album['FolderName'])
+			album_path = os.path.join(headphones.DOWNLOAD_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
 
 			if os.path.exists(album_path):
 				logger.debug('Found %s. Verifying....' % album['FolderName'])
@@ -43,6 +43,10 @@ def verify(albumid, albumpath):
 			release_dict = mb.getReleaseGroup(albumid)
 		except Exception, e:
 			logger.info('Unable to get release information for manual album with rgid: %s. Error: %s' % (albumid, e))
+			return
+			
+		if not release_dict:
+			logger.info('Unable to get release information for manual album with rgid: %s' % albumid)
 			return
 
 		logger.info(u"Now adding/updating artist: " + release_dict['artist_name'])
@@ -109,8 +113,6 @@ def verify(albumid, albumpath):
 
 		release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
 		tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
-	
-	albumpath = albumpath.encode(headphones.SYS_ENCODING)
 	
 	downloaded_track_list = []
 	
@@ -517,14 +519,14 @@ def forcePostProcess():
 		logger.error('No DOWNLOAD_DIR has been set. Set "Music Download Directory:" to your SAB download directory on the settings page.')
 		return
 	else:
-		download_dir = headphones.DOWNLOAD_DIR
+		download_dir = headphones.DOWNLOAD_DIR.encode('utf-8')
 		
 	logger.info('Checking to see if there are any folders to process in download_dir: %s' % download_dir)
 	# Get a list of folders in the download_dir
 	folders = [d for d in os.listdir(download_dir) if os.path.isdir(os.path.join(download_dir, d))]
 	
 	if len(folders):
-		logger.info('Found %i folders: %s' % (len(folders), str(folders)))
+		logger.info('Found %i folders to process' % len(folders))
 		pass
 	else:
 		logger.info('Found no folders to process in: %s' % download_dir)
@@ -534,6 +536,9 @@ def forcePostProcess():
 	for folder in folders:
 	
 		albumpath = os.path.join(download_dir, folder)
+		folder = unicode(folder, headphones.SYS_ENCODING, errors='replace')
+		
+		logger.info('Processing: %s' % folder)
 		
 		try:
 			name, album, year = helpers.extract_data(folder)
@@ -543,7 +548,7 @@ def forcePostProcess():
 		if name and album and year:
 			
 			myDB = db.DBConnection()
-			release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName=? and AlbumTitle=?', [name, album]).fetchone()
+			release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
 			if release:
 				logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
 				verify(release['AlbumID'], albumpath)
@@ -551,9 +556,11 @@ def forcePostProcess():
 				logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (name, album))
 				from headphones import mb
 				try:
-					rgid = mb.findAlbumID(name, album)
+					rgid = mb.findAlbumID(helpers.latinToAscii(name), helpers.latinToAscii(album))
 				except:
 					logger.error('Can not get release information for this album')
 					continue
 				if rgid:
 					verify(rgid, albumpath)
+				else:
+					logger.info('No match found on MusicBrainz for: %s - %s' % (name, album))
