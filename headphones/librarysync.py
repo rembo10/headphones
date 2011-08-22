@@ -8,15 +8,6 @@ from headphones import db, logger, helpers, importer
 
 def libraryScan(dir=None):
 
-	myDB = db.DBConnection()
-	
-	# Clean up bad filepaths
-	tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
-	
-	for track in tracks:
-		if not os.path.isfile(track['Location'].encode(headphones.SYS_ENCODING)):
-			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [None, track['TrackID']])
-
 	if not dir:
 		dir = headphones.MUSIC_DIR
 		
@@ -24,6 +15,19 @@ def libraryScan(dir=None):
 		dir = str(dir)
 	except UnicodeEncodeError:
 		dir = unicode(dir).encode('unicode_escape')
+		
+	if not os.path.isdir(dir):
+		logger.warn('Cannot find directory: %s. Not scanning' % dir)
+		return
+
+	myDB = db.DBConnection()
+	
+	# Clean up bad filepaths
+	tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
+	
+	for track in tracks:
+		if not os.path.isfile(track['Location'].encode(headphones.SYS_ENCODING)):
+			myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE TrackID=?', [None, None, track['TrackID']])
 
 	logger.info('Scanning music directory: %s' % dir)
 
@@ -120,6 +124,7 @@ def libraryScan(dir=None):
 						'album':	album,
 						'year':		year,
 						'first':	firstchar,
+						'lowerfirst':	lowerfirst
 					}
 				
 		
@@ -145,7 +150,7 @@ def libraryScan(dir=None):
 		
 		new_file_name = new_file_name.replace('?','_').replace(':', '_')
 		
-		full_path_to_file = os.path.normpath(os.path.join(headphones.MUSIC_DIR, folder, new_file_name))
+		full_path_to_file = os.path.normpath(os.path.join(headphones.MUSIC_DIR, folder, new_file_name)).encode(headphones.SYS_ENCODING)
 
 		match = glob.glob(full_path_to_file)
 		
