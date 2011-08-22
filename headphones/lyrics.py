@@ -43,8 +43,12 @@ def getLyrics(artist, song):
 	m = re.compile('''<div class='lyricbox'><div class='rtMatcher'>.*?</div>(.*?)<!--''').search(lyricspage)
 	
 	if not m:
-		logger.warn('Cannot find lyrics on: %s (might be instrumental)' % lyricsurl)
-		return
+		m = re.compile('''<div class='lyricbox'><span style="padding:1em"><a href="/Category:Instrumental" title="Instrumental">''').search(lyricspage)
+		if m:
+			return u'(Instrumental)'
+		else:
+			logger.warn('Cannot find lyrics on: %s' % lyricsurl)
+			return
 		
 	lyrics = convert_html_entities(m.group(1)).replace('<br />', '\n')
 	lyrics = re.sub('<.*?>', '', lyrics)
