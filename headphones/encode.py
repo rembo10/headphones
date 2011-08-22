@@ -86,7 +86,11 @@ def command(encoder,musicSource,musicDest,albumPath):
 	cmd=''
 	startMusicTime=time.clock()
 	if headphones.ENCODER == 'lame':
-		cmd=encoder + ' -h --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
+		cmd=encoder + ' -h'
+		if headphones.ENCODERVBRCBR=='cbr':
+			cmd=cmd+ ' --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
+		elif headphones.ENCODERVBRCBR=='vbr':
+			cmd=cmd+''
 		cmd=cmd+ ' ' + headphones.ADVANCEDENCODER
 		cmd=cmd+ ' "' + musicSource + '"'
 		cmd=cmd+ ' "' + musicDest +'"'
@@ -97,7 +101,11 @@ def command(encoder,musicSource,musicDest,albumPath):
 			cmd=cmd+ ' -acodec libvorbis'
 		if headphones.ENCODEROUTPUTFORMAT=='m4a':
 			cmd=cmd+ ' -strict experimental'
-		cmd=cmd+ ' -y -ac 2 -map_metadata 0:0,s0 -vn -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) + 'k'
+		if headphones.ENCODERVBRCBR=='cbr':
+			cmd=cmd+ ' -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) + 'k'
+		elif headphones.ENCODERVBRCBR=='vbr':
+			cmd=cmd+''
+		cmd=cmd+ ' -y -ac 2 -map_metadata 0:0,s0 -vn'
 		cmd=cmd+ ' ' + headphones.ADVANCEDENCODER
 		cmd=cmd+ ' "' + musicDest + '"'
 	return_code = call(cmd, shell=True)
