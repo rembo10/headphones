@@ -118,8 +118,9 @@ def libraryScan(dir=None):
 			firstchar = '0-9'
 		else:
 			firstchar = sortname[0]
+			
+		lowerfirst = firstchar.lower()
 		
-	
 		albumvalues = {	'artist':	artist,
 						'album':	album,
 						'year':		year,
