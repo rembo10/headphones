@@ -151,16 +151,18 @@ def libraryScan(dir=None):
 		
 		new_file_name = new_file_name.replace('?','_').replace(':', '_')
 		
-		full_path_to_file = os.path.normpath(os.path.join(headphones.MUSIC_DIR, folder, new_file_name)).encode(headphones.SYS_ENCODING)
+		full_path_to_file = os.path.normpath(os.path.join(headphones.MUSIC_DIR, folder, new_file_name)).encode(headphones.SYS_ENCODING, 'replace')
 
 		match = glob.glob(full_path_to_file)
 		
 		if match:
 
 			logger.info('Found a match: %s. Writing MBID to metadata' % match[0])
+			
+			unipath = unicode(match[0], headphones.SYS_ENCODING, errors='replace')
 
-			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [match[0], track['TrackID']])
-			myDB.action('DELETE from have WHERE Location=?', [match[0]])
+			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [unipath, track['TrackID']])
+			myDB.action('DELETE from have WHERE Location=?', [unipath])
 			
 			# Try to insert the appropriate track id so we don't have to keep doing this
 			try:
