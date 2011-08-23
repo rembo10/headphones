@@ -41,6 +41,7 @@ def main():
     # Set up and gather command line arguments
     parser = argparse.ArgumentParser(description='Music add-on for SABnzbd+')
 
+    parser.add_argument('-v', '--verbose', action='store_true', help='Increase console logging verbosity')
     parser.add_argument('-q', '--quiet', action='store_true', help='Turn off console logging')
     parser.add_argument('-d', '--daemon', action='store_true', help='Run as a daemon')
     parser.add_argument('-p', '--port', type=int, help='Force Headphones to run on a specified port')
@@ -50,13 +51,15 @@ def main():
     parser.add_argument('--pidfile', help='Create a pid file (only relevant when running as a daemon)')
     
     args = parser.parse_args()
-    
-    if args.quiet:
-        headphones.QUIET=True
+
+    if args.verbose:
+        headphones.VERBOSE = 2
+    elif args.quiet:
+        headphones.VERBOSE = 0
     
     if args.daemon:
         headphones.DAEMON=True
-        headphones.QUIET=True
+        headphones.VERBOSE = 0
         if args.pidfile :
             headphones.PIDFILE = args.pidfile
 
