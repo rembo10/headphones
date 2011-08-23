@@ -453,7 +453,7 @@ def findAlbumID(artist=None, album=None):
 		try:
 			results = q.getReleaseGroups(f)
 			break
-		except WebServiceError, e:
+		except Exception, e:
 			logger.warn('Attempt to query MusicBrainz for %s - %s failed: %s. Sleeping 5 seconds.' % (artist, album, e))
 			attempt += 1
 			time.sleep(5)	
