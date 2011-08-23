@@ -448,6 +448,8 @@ def verifyresult(title, artistterm, term):
     #another attempt to weed out substrings. We don't want "Vol III" when we were looking for "Vol II"
     tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
     for token in tokens:
+    	if not token:
+    		continue
         if token == 'Various' or token == 'Artists' or token == 'VA':
             continue
         if not re.search('(?:\W|^)+' + token + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
