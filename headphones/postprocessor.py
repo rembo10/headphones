@@ -18,7 +18,7 @@ def checkFolder():
 		
 		if album['FolderName']:
 		
-			album_path = os.path.join(headphones.DOWNLOAD_DIR, album['FolderName'])
+			album_path = os.path.join(headphones.DOWNLOAD_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
 
 			if os.path.exists(album_path):
 				logger.debug('Found %s. Verifying....' % album['FolderName'])
@@ -36,13 +36,17 @@ def verify(albumid, albumpath):
 		#TODO: This should be a call to a class method.. copied it out of importer with only minor changes
 		#TODO: odd things can happen when there are diacritic characters in the folder name, need to translate them?
 		import mb
+		
+		release_dict = None
+		
 		try:	
 			release_dict = mb.getReleaseGroup(albumid)
 		except Exception, e:
-			logger.info('Unable to get release information for manual album with rgid: ' + albumid)
-
+			logger.info('Unable to get release information for manual album with rgid: %s. Error: %s' % (albumid, e))
+			return
+			
 		if not release_dict:
-			logger.warn('Unable to get release information for manual album with rgid: ' + albumid)
+			logger.info('Unable to get release information for manual album with rgid: %s' % albumid)
 			return
 
 		logger.info(u"Now adding/updating artist: " + release_dict['artist_name'])
@@ -109,8 +113,6 @@ def verify(albumid, albumpath):
 
 		release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
 		tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
-	
-	albumpath = albumpath.encode(headphones.SYS_ENCODING)
 	
 	downloaded_track_list = []
 	
@@ -302,12 +304,15 @@ def moveFiles(albumpath, release, tracks):
 		firstchar = '0-9'
 	else:
 		firstchar = sortname[0]
+		
+	lowerfirst = firstchar.lower()
 	
 
 	values = {	'artist':	artist,
 				'album':	album,
 				'year':		year,
 				'first':	firstchar,
+				'lowerfirst':	lowerfirst
 			}
 			
 	
@@ -429,21 +434,27 @@ def renameFiles(albumpath, downloaded_track_list, release):
 			tracknumber = '%02d' % f.track
 		
 		if not f.title:
-			basename = os.path.basename(downloaded_track)
+			
+			basename = unicode(os.path.basename(downloaded_track), headphones.SYS_ENCODING, errors='replace')
 			title = os.path.splitext(basename)[0]
+			ext = os.path.splitext(basename)[1]
+			
+			new_file_name = helpers.cleanTitle(title) + ext
+			
 		else:
 			title = f.title
 			
-		values = {	'tracknumber':	tracknumber,
-					'title':		title,
-					'artist':		release['ArtistName'],
-					'album':		release['AlbumTitle'],
-					'year':			year
-					}
-					
-		ext = os.path.splitext(downloaded_track)[1]
+			values = {	'tracknumber':	tracknumber,
+						'title':		title,
+						'artist':		release['ArtistName'],
+						'album':		release['AlbumTitle'],
+						'year':			year
+						}
+						
+			ext = os.path.splitext(downloaded_track)[1]
+			
+			new_file_name = helpers.replace_all(headphones.FILE_FORMAT, values).replace('/','_') + ext
 		
-		new_file_name = helpers.replace_all(headphones.FILE_FORMAT, values).replace('/','_') + ext
 		
 		new_file_name = new_file_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING)
 
@@ -508,14 +519,14 @@ def forcePostProcess():
 		logger.error('No DOWNLOAD_DIR has been set. Set "Music Download Directory:" to your SAB download directory on the settings page.')
 		return
 	else:
-		download_dir = headphones.DOWNLOAD_DIR
+		download_dir = headphones.DOWNLOAD_DIR.encode('utf-8')
 		
 	logger.info('Checking to see if there are any folders to process in download_dir: %s' % download_dir)
 	# Get a list of folders in the download_dir
 	folders = [d for d in os.listdir(download_dir) if os.path.isdir(os.path.join(download_dir, d))]
 	
 	if len(folders):
-		logger.info('Found %i folders: %s' % (len(folders), str(folders)))
+		logger.info('Found %i folders to process' % len(folders))
 		pass
 	else:
 		logger.info('Found no folders to process in: %s' % download_dir)
@@ -525,6 +536,9 @@ def forcePostProcess():
 	for folder in folders:
 	
 		albumpath = os.path.join(download_dir, folder)
+		folder = unicode(folder, headphones.SYS_ENCODING, errors='replace')
+		
+		logger.info('Processing: %s' % folder)
 		
 		try:
 			name, album, year = helpers.extract_data(folder)
@@ -534,7 +548,7 @@ def forcePostProcess():
 		if name and album and year:
 			
 			myDB = db.DBConnection()
-			release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName=? and AlbumTitle=?', [name, album]).fetchone()
+			release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
 			if release:
 				logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
 				verify(release['AlbumID'], albumpath)
@@ -542,11 +556,11 @@ def forcePostProcess():
 				logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (name, album))
 				from headphones import mb
 				try:
-					rgid = mb.findAlbumID(name, album)
+					rgid = mb.findAlbumID(helpers.latinToAscii(name), helpers.latinToAscii(album))
 				except:
 					logger.error('Can not get release information for this album')
 					continue
 				if rgid:
 					verify(rgid, albumpath)
-			
-	
+				else:
+					logger.info('No match found on MusicBrainz for: %s - %s' % (name, album))

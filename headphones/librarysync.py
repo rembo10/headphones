@@ -8,15 +8,6 @@ from headphones import db, logger, helpers, importer
 
 def libraryScan(dir=None):
 
-	myDB = db.DBConnection()
-	
-	# Clean up bad filepaths
-	tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
-	
-	for track in tracks:
-		if not os.path.isfile(track['Location'].encode(headphones.SYS_ENCODING)):
-			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [None, track['TrackID']])
-
 	if not dir:
 		dir = headphones.MUSIC_DIR
 		
@@ -24,6 +15,19 @@ def libraryScan(dir=None):
 		dir = str(dir)
 	except UnicodeEncodeError:
 		dir = unicode(dir).encode('unicode_escape')
+		
+	if not os.path.isdir(dir):
+		logger.warn('Cannot find directory: %s. Not scanning' % dir)
+		return
+
+	myDB = db.DBConnection()
+	
+	# Clean up bad filepaths
+	tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
+	
+	for track in tracks:
+		if not os.path.isfile(track['Location'].encode(headphones.SYS_ENCODING)):
+			myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE TrackID=?', [None, None, track['TrackID']])
 
 	logger.info('Scanning music directory: %s' % dir)
 
@@ -114,12 +118,14 @@ def libraryScan(dir=None):
 			firstchar = '0-9'
 		else:
 			firstchar = sortname[0]
+			
+		lowerfirst = firstchar.lower()
 		
-	
 		albumvalues = {	'artist':	artist,
 						'album':	album,
 						'year':		year,
 						'first':	firstchar,
+						'lowerfirst':	lowerfirst
 					}
 				
 		
@@ -145,16 +151,18 @@ def libraryScan(dir=None):
 		
 		new_file_name = new_file_name.replace('?','_').replace(':', '_')
 		
-		full_path_to_file = os.path.normpath(os.path.join(headphones.MUSIC_DIR, folder, new_file_name))
+		full_path_to_file = os.path.normpath(os.path.join(headphones.MUSIC_DIR, folder, new_file_name)).encode(headphones.SYS_ENCODING, 'replace')
 
 		match = glob.glob(full_path_to_file)
 		
 		if match:
 
 			logger.info('Found a match: %s. Writing MBID to metadata' % match[0])
+			
+			unipath = unicode(match[0], headphones.SYS_ENCODING, errors='replace')
 
-			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [match[0], track['TrackID']])
-			myDB.action('DELETE from have WHERE Location=?', [match[0]])
+			myDB.action('UPDATE tracks SET Location=? WHERE TrackID=?', [unipath, track['TrackID']])
+			myDB.action('DELETE from have WHERE Location=?', [unipath])
 			
 			# Try to insert the appropriate track id so we don't have to keep doing this
 			try:

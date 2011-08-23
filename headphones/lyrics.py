@@ -7,8 +7,8 @@ from headphones import logger
 
 def getLyrics(artist, song):
 
-	params = {	"artist": artist,
-				"song": song,
+	params = {	"artist": artist.encode('utf-8'),
+				"song": song.encode('utf-8'),
 				"fmt": 'xml'
                 }
                 
@@ -43,7 +43,12 @@ def getLyrics(artist, song):
 	m = re.compile('''<div class='lyricbox'><div class='rtMatcher'>.*?</div>(.*?)<!--''').search(lyricspage)
 	
 	if not m:
-		return
+		m = re.compile('''<div class='lyricbox'><span style="padding:1em"><a href="/Category:Instrumental" title="Instrumental">''').search(lyricspage)
+		if m:
+			return u'(Instrumental)'
+		else:
+			logger.warn('Cannot find lyrics on: %s' % lyricsurl)
+			return
 		
 	lyrics = convert_html_entities(m.group(1)).replace('<br />', '\n')
 	lyrics = re.sub('<.*?>', '', lyrics)
