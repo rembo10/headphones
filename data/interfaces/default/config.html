@@ -531,6 +531,10 @@
                 $("#detect_bitrate_details").toggle(!$("input#detect_bitrate")[0].checked);
                 
                 $("#preferred_bitrate_details").toggle($("#preferred_bitrate")[0].checked);
+                $("dl:has(input[type='checkbox']), dl:has(input[type='radio']), dl:has(select)").each(function() {
+                    this.className += " flow";
+                    });
+                
         });
         
         function submitForm() {

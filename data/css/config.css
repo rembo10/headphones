@@ -81,6 +81,18 @@
     dd {  
         margin:0 10px 10px 0;
     }
+    .flow {
+
+        
+    }
+    .flow dt {
+     clear: left;  
+     float:left;
+    }
+    .flow dd {
+        padding-top:2px;
+    }
+    
     
 
 
@@ -106,7 +118,7 @@
         color:#fff;
         text-align:left;
         font-size:12px;
-        z-index:10000;
+        
         /* outline radius for mozilla/firefox only */
         -moz-box-shadow:0 0 10px #000;
         -webkit-box-shadow:0 0 10px #000;
