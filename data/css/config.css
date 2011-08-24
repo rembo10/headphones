@@ -3,9 +3,22 @@
         background:#fff; 
         padding:20px; 
         border-radius:20px; 
-        margin:0 auto 36px; 
-        width:70%;
+        margin:0 auto 20px; 
+        width:55%;
     }
+    
+    .panes > div {
+        background-color:#fff;
+        border-radius:20px;
+        clear:both;
+        margin: auto;
+        padding: 0;
+        position: relative;
+        width: 100%;
+        display:none; 
+    }
+
+    
     input, textarea, select {font:12px/12px Arial, Helvetica, sans-serif; padding:0;}
 
     fieldset.action {
@@ -49,17 +62,7 @@
         padding: 160px 0 0;
     }
     
-    .panes > div {
-        background-color:#fff;
-        border-radius:20px;
-        clear:both;
-        margin: 20px auto 20px;
-        min-height: 200px;
-        padding: 25px 15px 0;
-        position: relative;
-        width: 88%;
-        display:none; 
-    }
+
     
     ul#subhead_menu li a.current {
         text-decoration:underline;
@@ -81,10 +84,7 @@
     dd {  
         margin:0 10px 10px 0;
     }
-    .flow {
 
-        
-    }
     .flow dt {
      clear: left;  
      float:left;
@@ -92,9 +92,6 @@
     .flow dd {
         padding-top:2px;
     }
-    
-    
-
 
     fieldset input[type="text"] {
         width:100%;
