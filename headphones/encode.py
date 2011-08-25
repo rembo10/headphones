@@ -91,38 +91,46 @@ def command(encoder,musicSource,musicDest,albumPath):
 	cmd=''
 	startMusicTime=time.clock()
 	if headphones.ENCODER == 'lame':
-		cmd=encoder + ' -h'
-		if headphones.ENCODERVBRCBR=='cbr':
-			cmd=cmd+ ' --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
-		elif headphones.ENCODERVBRCBR=='vbr':
-			if (ENCODERQUALITY>=0 and ENCODERQUALITY<=9):
-				cmd=cmd+' -V'+str(ENCODERQUALITY)
-			elif (ENCODERQUALITY<0):
-				cmd=cmd+' -V0'
-			elif (ENCODERQUALITY>9):
-				cmd=cmd+' -V9'
-		cmd=cmd+ ' ' + headphones.ADVANCEDENCODER
+		if headphones.ADVANCEDENCODER =='':
+			cmd=encoder + ' -h'		
+			if headphones.ENCODERVBRCBR=='cbr':
+				cmd=cmd+ ' --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
+			elif headphones.ENCODERVBRCBR=='vbr':
+				if (ENCODERQUALITY>=0 and ENCODERQUALITY<=9):
+					cmd=cmd+' -V'+str(ENCODERQUALITY)
+				elif (ENCODERQUALITY<0):
+					cmd=cmd+' -V0'
+				elif (ENCODERQUALITY>9):
+					cmd=cmd+' -V9'
+			cmd=cmd+ ' ' + headphones.ADVANCEDENCODER
+		else:
+			cmd=cmd+' '+ headphones.ADVANCEDENCODER
 		cmd=cmd+ ' "' + musicSource + '"'
 		cmd=cmd+ ' "' + musicDest +'"'
+		
 	elif headphones.ENCODER == 'ffmpeg':
 		cmd=encoder+ ' -i'
 		cmd=cmd+ ' "' + musicSource + '"'
-		if headphones.ENCODEROUTPUTFORMAT=='ogg':
-			cmd=cmd+ ' -acodec libvorbis'
-		if headphones.ENCODEROUTPUTFORMAT=='m4a':
-			cmd=cmd+ ' -strict experimental'
-		if headphones.ENCODERVBRCBR=='cbr':
-			cmd=cmd+ ' -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) + 'k'
-		elif headphones.ENCODERVBRCBR=='vbr':
-			if (ENCODERQUALITY>=0 and ENCODERQUALITY<=9):
-				cmd=cmd+' -aq '+str(ENCODERQUALITY)
-			elif (ENCODERQUALITY<0):
-				cmd=cmd+' -aq 0'
-			elif (ENCODERQUALITY>9):
-				cmd=cmd+' -aq 9'
-		cmd=cmd+ ' -y -ac 2 -map_metadata 0:0,s0 -vn'
-		cmd=cmd+ ' ' + headphones.ADVANCEDENCODER
+		if headphones.ADVANCEDENCODER =='':
+			if headphones.ENCODEROUTPUTFORMAT=='ogg':
+				cmd=cmd+ ' -acodec libvorbis'
+			if headphones.ENCODEROUTPUTFORMAT=='m4a':
+				cmd=cmd+ ' -strict experimental'
+			if headphones.ENCODERVBRCBR=='cbr':
+				cmd=cmd+ ' -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) + 'k'
+			elif headphones.ENCODERVBRCBR=='vbr':
+				if (ENCODERQUALITY>=0 and ENCODERQUALITY<=9):
+					cmd=cmd+' -aq '+str(ENCODERQUALITY)
+				elif (ENCODERQUALITY<0):
+					cmd=cmd+' -aq 0'
+				elif (ENCODERQUALITY>9):
+					cmd=cmd+' -aq 9'
+			cmd=cmd+ ' -y -ac 2 -map_metadata 0:0,s0 -vn'
+		else:
+			cmd=cmd+' '+ headphones.ADVANCEDENCODER
 		cmd=cmd+ ' "' + musicDest + '"'
+	print cmd
+	time.sleep(10)
 	return_code = call(cmd, shell=True)
 	if (return_code==0) and (os.path.exists(musicDest)):
 		os.remove(musicSource)

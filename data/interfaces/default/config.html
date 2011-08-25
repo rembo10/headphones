@@ -290,7 +290,9 @@
 						<option value=${x} ${outputselect}>${x}</option>
 					%endfor
 					</select></h4>
-
+					<br>
+					
+					<h3>Audio Properties:</h3>
 					<br>
 					<h4>VBR/CBR: <select name="encodervbrcbr">
 					%for x in ['cbr', 'vbr']:
@@ -343,7 +345,11 @@
 					</select></h4>
 					<br>
 					<br>					
-                    <h3>Advance Encode Options:</h3><input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43">
+                    <h3>Advance Encode Options:</h3>
+					<h4>
+					(ignores audio properties)
+					</h4>
+					<input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43">
 					<br>
                     <h3>Path to Encoder:</h3><input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43">
                 </td>
