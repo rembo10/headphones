@@ -224,7 +224,8 @@
                             </dl> 
                         </div>  
                         
-                         <p><button id="add_newznab">Add Newznab Site</button></p>
+                        <button rel="#add_newznab" type="button">Add Newznab Site</button> 
+                       
                     </div>
                 </fieldset>
             </div>
@@ -482,6 +483,35 @@
 
     <p class="center"><input type="submit" id="submit" value="Save Changes"></p>
     </form> 
+    
+    
+    <!-- yes/no dialog -->
+    <div class="overlay " id="add_newznab">
+        
+        
+        
+        <img src="images/headphoneslogo.png" style="float: left; margin:-5px 20px 0 -5px;" />
+        <h2>Add Newznab Site</h2>
+        <p>
+            Add the details of the Newznab site below.
+        </p>
+
+        <!-- input form. you can press enter too -->
+        <form style="clear:both; margin-top:10px;">
+            <label for="add_newznab_name">Name:</label>
+            <input id="add_newznab_name" type="text" /> <br />
+            
+            <label for="add_newznab_url">URL:</label>
+            <input id="add_newznab_url" type="text" /><br />
+            
+            <label for="add_newznab_apikey">API Key:</label>
+            <input id="add_newznab_apikey" type="text" /><br />
+            <p class="action"><button type="submit"> OK </button></p>
+        </form>
+        <br />
+
+    </div>
+    
 </%def>
 
 <%def name="javascriptIncludes()">
@@ -492,6 +522,7 @@
     <script src="js/libs/jquery.dataTables.min.js"></script>
     <!-- This JavaScript snippet activates those tabs -->
     <script>
+        var triggers;
 
         // perform JavaScript after the document is scriptable.
         $(function() {
@@ -540,8 +571,25 @@
                 $("dl:has(input[type='checkbox']), dl:has(input[type='radio']), dl:has(select)").each(function() {
                     this.className += " flow";
                     });
-                
+                    
+                triggers = $("button[rel]").overlay({mask: '#000', effect: 'apple'});
         });
+        
+        $("#add_newznab form").submit(function(e) {
+
+            // close the overlay
+            triggers.eq(0).overlay().close();
+
+            // get user input
+            var input = $("#add_newznab_name", this).val();
+
+            // do something with the answer
+            alert(input);
+
+            // do not submit the form
+            return e.preventDefault();
+        });
+        
         
         function submitForm() {
             var currentTab = $("ul#subhead_menu").data("tabs").getCurrentTab();

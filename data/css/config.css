@@ -180,3 +180,79 @@
         border:1px solid #a7d6fb;
         font-size:0.7em;
     }
+    
+    
+    /*
+     * styles for the modal popup box
+     * */
+    
+   
+    /* the overlayed element */
+    .overlay {
+        
+        /* initially overlay is hidden */
+        display:none;
+        
+        /* growing background image */
+        background-image:url(../images/white.png);
+             
+        
+        /* some padding to layout nested elements nicely  */
+        padding:20px 10px;
+        
+        /* a little styling */  
+        font-size:11px;
+    }
+    
+    /* default close button positioned on upper right corner */
+    .overlay .close {
+        background-image:url(../images/close.png);
+        position:absolute; right:5px; top:5px;
+        cursor:pointer;
+        height:35px;
+        width:35px;
+    }
+    .overlay label {
+            float:left;
+            clear:left;
+            display:block;
+            width:60px;
+            text-align:right;
+            padding-right:10px;
+            padding-top:3px;
+            margin-top:10px;
+            color:#fff;
+    }
+    .overlay h2 {
+            margin-top:10px;
+            
+    }
+    .overlay input[type="text"] {
+        float:left;
+        clear:right;
+        display:block;
+        width:250px;
+        margin-top:10px;
+    }
+    .overlay .action {
+        width:100%;
+        clear:both;
+        padding-top:20px;
+        
+    }
+    .overlay button {
+        float:right;
+        display:block;
+        margin-right:20px;
+        
+        
+        font-size:1.2em;
+        
+    }
+    
+    #add_newznab {
+        background-image:url(../images/apple.png);
+        color:#fff;
+        padding:40px 20px 20px 50px;
+        width:350px;
+        }
