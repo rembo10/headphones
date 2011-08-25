@@ -30,9 +30,9 @@ def encode(albumPath):
 		
 	for r,d,f in os.walk(albumPath):
 		for music in f:
-			if any(music.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
+			if any(music.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
 				if (headphones.ENCODERLOSSLESS):
-					if (music.endswith('.flac')):
+					if (music.lower().endswith('.flac')):
 						musicFiles.append(os.path.join(r, music))
 						musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT).encode(headphones.SYS_ENCODING)
 						musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
@@ -51,23 +51,23 @@ def encode(albumPath):
 	for music in musicFiles:		
 		infoMusic=MediaFile(music)
 		if headphones.ENCODER == 'lame':
-			if not any(music.endswith('.' +headphones.ENCODEROUTPUTFORMAT) for x in ["mp3", "wav"]):
+			if not any(music.lower().endswith('.' +headphones.ENCODEROUTPUTFORMAT) for x in ["mp3", "wav"]):
 				logger.warn('Lame cant encode "%s" format for "%s", use ffmpeg' % (os.path.splitext(music)[1],music))
 			else:
-				if (music.endswith('.mp3') and (infoMusic.bitrate/1000<=headphones.BITRATE)): 
+				if (music.lower().endswith('.mp3') and (infoMusic.bitrate/1000<=headphones.BITRATE)): 
 					logger.warn('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))
 				else:
 					command(encoder,music,musicTempFiles[i],albumPath)
 					ifencoded=1
 		else:
 			if headphones.ENCODEROUTPUTFORMAT=='ogg':
-				if music.endswith('.ogg'):
+				if music.lower().endswith('.ogg'):
 					logger.warn('Can not reencode .ogg music "%s"' % (music))
 				else:
 					command(encoder,music,musicTempFiles[i],albumPath)
 					ifencoded=1
 			elif (headphones.ENCODEROUTPUTFORMAT=='mp3' or headphones.ENCODEROUTPUTFORMAT=='m4a'):
-				if (music.endswith('.'+headphones.ENCODEROUTPUTFORMAT) and (infoMusic.bitrate/1000<=headphones.BITRATE)):
+				if (music.lower().endswith('.'+headphones.ENCODEROUTPUTFORMAT) and (infoMusic.bitrate/1000<=headphones.BITRATE)):
 					logger.warn('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))		
 				else:
 					command(encoder,music,musicTempFiles[i],albumPath)
@@ -78,7 +78,7 @@ def encode(albumPath):
 	time.sleep(1)	
 	for r,d,f in os.walk(albumPath):
 		for music in f:
-			if any(music.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
+			if any(music.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
 				musicFinalFiles.append(os.path.join(r, music))
 	
 	if ifencoded==0:
