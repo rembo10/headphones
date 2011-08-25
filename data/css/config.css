@@ -4,7 +4,7 @@
         padding:20px; 
         border-radius:20px; 
         margin:0 auto 20px; 
-        width:55%;
+        width:65%;
     }
     
     .panes > div {
@@ -68,14 +68,21 @@
         text-decoration:underline;
         border-width:0;
     }
-    fieldset > h2 {
-        clear:both;
-        width:100%;
-        border-bottom:1px solid #300;
-        color:#300;
-    }
+
     fieldset {
-        height:100%;
+        width:80%;
+        margin:auto;
+    }
+    fieldset .form_description {
+        float:left;
+        width:25%;
+    }
+    fieldset .form_content { 
+        width:300px;
+        float:left;
+        padding-left:20px;
+        margin-left:20px;
+        border-left:1px solid #300;
     }
 
     dt {  
@@ -93,7 +100,7 @@
         padding-top:2px;
     }
 
-    fieldset input[type="text"] {
+    fieldset input[type="text"], fieldset input[type="password"] {
         width:100%;
     }
     input#http_port, input#preferred_bitrate_input {
@@ -110,7 +117,7 @@
         background-color:#000;
         border:1px solid #fff;
         padding:10px 15px;
-        width:300px;
+        width:220px;
         display:none;
         color:#fff;
         text-align:left;
@@ -143,31 +150,19 @@
         display:block; 
         text-align:right;
     }
-    .form_description {
-        float:left;
-        width:30%;
-    }
-    .form_content { 
-        width:60%;
-        float:left;
-        padding-left:20px;
-        margin-left:20px;
-        border-left:1px solid #300;
-    }
+
     
     .form_content dl:nth-of-type(1) {
         margin-top: -4px;
         padding-top: 0;
     }
-    
-    .panes > div {
-        margin:0;
-        padding:0;
-    }
+
     .panes fieldset+fieldset, .panes fieldset+div fieldset, .panes div+fieldset {
         margin-top:10px;
     }
     .extra_detail {
+        margin:0;
+        padding:0;
         margin-left:5px;
         padding-left:5px;
         border-left:1px solid #300;

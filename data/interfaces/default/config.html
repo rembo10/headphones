@@ -207,7 +207,7 @@
                             </dl> 
                         </div>
 
-
+                       
                         <dl>
                                 <dt><label for="newznab">Enable Newznab:</label></dt>
                                 <dd><input type="checkbox" name="newznab" id="newznab" value="1" ${config['use_newznab']} /></dd>
@@ -222,7 +222,9 @@
                                 <dt><label for="newznab_apikey">API Key:</label></dt>
                                 <dd><input type="text" name="newznab_apikey" id="newznab_apikey" value="${config['newznab_api']}" maxlength="40" /></dd>
                             </dl> 
-                        </div>                     
+                        </div>  
+                        
+                         <p><button id="add_newznab">Add Newznab Site</button></p>
                     </div>
                 </fieldset>
             </div>
@@ -299,6 +301,7 @@
                                 <dt><label for="embed_lyrics">Embed lyrics:</label></dt>
                                 <dd><input type="checkbox" id="embed_lyrics" name="embed_lyrics" value="1" ${config['embed_lyrics']} /></dd>
                         </dl>  
+                    </div>
                 </fieldset> 
                 <fieldset>
                     <div class="form_description">
@@ -310,7 +313,8 @@
                                 <dt><label for="destination_dir">Path to Destination folder:</label></dt>
                                 <dd><input type="text" id="destination_dir" name="destination_dir" value="${config['dest_dir']}" 
                                 title="i.e. /Users/name/Music/iTunes or /Volumes/share/music" /></dd>
-                        </dl>               
+                        </dl>   
+                    </div>
                 </fieldset>
             </div>
             <div> 
@@ -340,7 +344,8 @@
                                 <strong>album</strong> = album name<br />
                                 <strong>year</strong> = release date" /></dd>
                         </dl>     
-                        <div id="file_format_example" class="display_example"></div>                        
+                        <div id="file_format_example" class="display_example"></div>  
+                    </div>
                 </fieldset>
                 <fieldset>
                     <div class="form_description">
@@ -371,6 +376,7 @@
                                 <dt><label for="log_dir">Log Directory:</label></dt>
                                 <dd><input type="text" id="log_dir" name="log_dir" value="${config['log_dir']}" /></dd>
                         </dl>  
+                    </div>
                 </fieldset>
                 <fieldset>
                     <div class="form_description">
