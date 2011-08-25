@@ -31,10 +31,18 @@ def encode(albumPath):
 	for r,d,f in os.walk(albumPath):
 		for music in f:
 			if any(music.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
-				musicFiles.append(os.path.join(r, music))
-				musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT).encode(headphones.SYS_ENCODING)
-				musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
-				
+				if (headphones.ENCODERLOSSLESS):
+					if (music.endswith('.flac')):
+						musicFiles.append(os.path.join(r, music))
+						musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT).encode(headphones.SYS_ENCODING)
+						musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
+					else:
+						logger.warn('Music "%s" is already encoded' % (music))
+				else:
+					musicFiles.append(os.path.join(r, music))
+					musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT).encode(headphones.SYS_ENCODING)
+					musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
+							
 	if headphones.ENCODER=='lame':
 		encoder=os.path.join(headphones.ENCODERFOLDER,'lame')
 	elif headphones.ENCODER=='ffmpeg':
@@ -42,7 +50,6 @@ def encode(albumPath):
 	i=0
 	for music in musicFiles:		
 		infoMusic=MediaFile(music)
-
 		if headphones.ENCODER == 'lame':
 			if not any(music.endswith('.' +headphones.ENCODEROUTPUTFORMAT) for x in ["mp3", "wav"]):
 				logger.warn('Lame cant encode "%s" format for "%s", use ffmpeg' % (os.path.splitext(music)[1],music))
@@ -65,8 +72,8 @@ def encode(albumPath):
 				else:
 					command(encoder,music,musicTempFiles[i],albumPath)
 					ifencoded=1
-		i=i+1
-				
+			i=i+1
+		
 	shutil.rmtree(tempDirEncode)
 	time.sleep(1)	
 	for r,d,f in os.walk(albumPath):
@@ -76,8 +83,6 @@ def encode(albumPath):
 	
 	if ifencoded==0:
 		logger.info('Encoding for folder "%s" is not needed' % (albumPath))
-	else:
-		logger.info('Encoding for folder "%s" is completed in %s' % (albumPath,getTimeEncode(startAlbumTime)))
 	
 	return musicFinalFiles
 	
