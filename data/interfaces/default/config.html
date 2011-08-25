@@ -516,8 +516,8 @@
 
 <%def name="javascriptIncludes()">
     <!-- replace for release -->
-    <!--script src="http://cdn.jquerytools.org/1.2.5/tiny/jquery.tools.min.js"></script-->
-    <script src="js/libs/jquery.tools.min.js"></script> 
+    <script src="http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js"></script>
+    <script>!window.jQuery.tools && document.write(unescape('%3Cscript src="js/libs/jquery.tools.min.js"%3E%3C/script%3E'))</script>
         
     <script src="js/libs/jquery.dataTables.min.js"></script>
     <!-- This JavaScript snippet activates those tabs -->
