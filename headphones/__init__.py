@@ -270,7 +270,7 @@ def initialize():
         ENCODE = bool(check_setting_int(CFG, 'General', 'encode', 0))
         ADVANCEDENCODER = check_setting_str(CFG, 'General', 'advancedencoder', '')
         ENCODEROUTPUTFORMAT = check_setting_str(CFG, 'General', 'encoderoutputformat', 'mp3')
-        ENCODERQUALITY = check_setting_int(CFG, 'General', 'vorbisquality', 60)
+        ENCODERQUALITY = check_setting_int(CFG, 'General', 'vorbisquality', 5)
         ENCODERVBRCBR = check_setting_str(CFG, 'General', 'encodervbrcbr', 'cbr')
         
         if not LOG_DIR:

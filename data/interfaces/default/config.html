@@ -290,6 +290,31 @@
 					</select></h4>
 
 					<br>
+					<h4>VBR/CBR: <select name="encodervbrcbr">
+					%for x in ['cbr', 'vbr']:
+						<%
+							if config['encodervbrcbr'] == x:
+								outputselect = 'selected'
+							else:
+								outputselect = ''
+						%>
+						<option value=${x} ${outputselect}>${x}</option>
+					%endfor
+					</select>
+
+					Quality: <select name="encoderquality">
+					%for x in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
+						<%
+							if config['encoderquality'] == x:
+								outputselect = 'selected'
+							else:
+								outputselect = ''
+						%>
+						<option value=${x} ${outputselect}>${x}</option>
+					%endfor
+					</select></h4>
+
+					<br>
 					<h4>Bitrate: <select name="bitrate">
 					%for x in [64, 128, 192, 256, 320]:
 						<%
