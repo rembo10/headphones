@@ -263,6 +263,8 @@
 						<br>
                       	<h3><input type="checkbox" name="encode" value="1" ${config['encode']}/> Re-encode downloads during postprocessing</h3>
                       <i class="smalltext">Note: this option requires the lame or ffmpeg encoder</i>
+					    <br>
+                      	<h3><input type="checkbox" name="encoderlossless" value="1" ${config['encoderlossless']}/> Re-encode only LossLess format (.flac)</h3>                      
 					<br><br>
 					<%
 						if config['encoder'] == 'lame':
