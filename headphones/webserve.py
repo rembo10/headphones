@@ -357,7 +357,9 @@ class WebInterface(object):
 					"encoderfolder":	headphones.ENCODERFOLDER,
 					"advancedencoder":	headphones.ADVANCEDENCODER,
 					"encoderoutputformat": headphones.ENCODEROUTPUTFORMAT,
-					"samplingfrequency": int(headphones.SAMPLINGFREQUENCY)
+					"samplingfrequency": int(headphones.SAMPLINGFREQUENCY),
+					"encodervbrcbr": (headphones.ENCODERVBRCBR),
+					"encoderquality": int(headphones.ENCODERQUALITY)
 				}
 		return serve_template(templatename="config.html", title="Settings", config=config)	
 	config.exposed = True
@@ -368,7 +370,7 @@ class WebInterface(object):
 		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
 		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
 		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, interface=None, log_dir=None,
-		encode=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None):
+		encode=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None):
 
 		headphones.HTTP_HOST = http_host
 		headphones.HTTP_PORT = http_port
@@ -419,6 +421,8 @@ class WebInterface(object):
 		headphones.ENCODERFOLDER = encoderfolder
 		headphones.ADVANCEDENCODER = advancedencoder
 		headphones.ENCODEROUTPUTFORMAT = encoderoutputformat
+		headphones.ENCODERVBRCBR = encodervbrcbr
+		headphones.ENCODERQUALITY = int(encoderquality)
 		
 		headphones.config_write()
 

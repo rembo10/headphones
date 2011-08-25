@@ -90,7 +90,12 @@ def command(encoder,musicSource,musicDest,albumPath):
 		if headphones.ENCODERVBRCBR=='cbr':
 			cmd=cmd+ ' --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
 		elif headphones.ENCODERVBRCBR=='vbr':
-			cmd=cmd+''
+			if (ENCODERQUALITY>=0 and ENCODERQUALITY<=9):
+				cmd=cmd+' -V'+str(ENCODERQUALITY)
+			elif (ENCODERQUALITY<0):
+				cmd=cmd+' -V0'
+			elif (ENCODERQUALITY>9):
+				cmd=cmd+' -V9'
 		cmd=cmd+ ' ' + headphones.ADVANCEDENCODER
 		cmd=cmd+ ' "' + musicSource + '"'
 		cmd=cmd+ ' "' + musicDest +'"'
@@ -104,7 +109,12 @@ def command(encoder,musicSource,musicDest,albumPath):
 		if headphones.ENCODERVBRCBR=='cbr':
 			cmd=cmd+ ' -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) + 'k'
 		elif headphones.ENCODERVBRCBR=='vbr':
-			cmd=cmd+''
+			if (ENCODERQUALITY>=0 and ENCODERQUALITY<=9):
+				cmd=cmd+' -V'+str(ENCODERQUALITY)
+			elif (ENCODERQUALITY<0):
+				cmd=cmd+' -V0'
+			elif (ENCODERQUALITY>9):
+				cmd=cmd+' -V9'
 		cmd=cmd+ ' -y -ac 2 -map_metadata 0:0,s0 -vn'
 		cmd=cmd+ ' ' + headphones.ADVANCEDENCODER
 		cmd=cmd+ ' "' + musicDest + '"'
