@@ -224,10 +224,13 @@
             color:#fff;
     }
     .overlay h2 {
-            margin-top:10px;
-            
+        margin-top:10px;
     }
-    .overlay input[type="text"] {
+    #add_newznab_form {
+        clear:both; 
+        margin-top:10px;
+    }
+    .overlay input[type="text"], .overlay input[type="url"] {
         float:left;
         clear:right;
         display:block;
@@ -255,4 +258,40 @@
         color:#fff;
         padding:40px 20px 20px 50px;
         width:350px;
+        }
+        
+        /* CSS3 border radius for various elements. yea - CSS isn't perfect */
+        .rounded, #sheet input, .error {
+            border-radius: 5px;
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            -o-border-radius: 5px;
+            -khtml-border-radius: 5px;
+        }
+        
+        /* validation error message */
+        .error {
+            background-color:#E8FF6D;
+            padding:4px;
+            -webkit-box-shadow: #000 0 0 12px;
+            -moz-box-shadow: #000 0 0 12px;
+        }
+        /* pure CSS arrow */
+        .error em {
+            display:block;
+            width:0;
+            height:0;
+            border:10px solid;
+            border-color:#FFFE36 transparent transparent;
+            
+            /* positioning */
+            position:absolute;
+            bottom:-17px;
+            left:60px;
+        }
+    
+        
+        /* input field that caused validation error */
+        .invalid {
+            background-color:rgba(221, 233, 255, 0.898) !important;
         }

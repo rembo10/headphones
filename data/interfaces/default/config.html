@@ -208,7 +208,7 @@
                         </div>
 
                        
-                        <dl>
+                        <!--dl>
                                 <dt><label for="newznab">Enable Newznab:</label></dt>
                                 <dd><input type="checkbox" name="newznab" id="newznab" value="1" ${config['use_newznab']} /></dd>
                         </dl> 
@@ -222,9 +222,32 @@
                                 <dt><label for="newznab_apikey">API Key:</label></dt>
                                 <dd><input type="text" name="newznab_apikey" id="newznab_apikey" value="${config['newznab_api']}" maxlength="40" /></dd>
                             </dl> 
-                        </div>  
+                        </div-->  
                         
-                        <button rel="#add_newznab" type="button">Add Newznab Site</button> 
+                        
+                        
+                        <input id="add_newznab_button" rel="#add_newznab" type="button" value="Add Newznab Site" />
+                        
+                        <div id="newznab_container"></div>
+                        
+                        <div id="newznab_template" style="display:none;">
+                            <div>
+                            <dl>
+                                <dt><label for="newznab">Delete NAME:</label></dt>
+                                <dd><input type="checkbox" name="newznab" id="newznab" value="1"/></dd>
+                            </dl> 
+                            <dl>
+                                <dt><label for="newznab_host">Host:</label></dt>
+                                <dd><input type="text" name="newznab_host" id="newznab_host" value="%2" maxlength="40" 
+                                title="i.e. http://nzb.su"/></dd>
+                            </dl> 
+                            <dl>
+                                <dt><label for="newznab_apikey">API Key:</label></dt>
+                                <dd><input type="text" name="newznab_apikey" id="newznab_apikey" value="%3" maxlength="40" /></dd>
+                            </dl>  
+                            </div>
+                        </div>
+                        
                        
                     </div>
                 </fieldset>
@@ -490,22 +513,26 @@
         
         
         
-        <img src="images/headphoneslogo.png" style="float: left; margin:-5px 20px 0 -5px;" />
+        <img src="images/headphoneslogo.png" style="float: left; margin:-5px 13px 0 -3px;" />
         <h2>Add Newznab Site</h2>
         <p>
             Add the details of the Newznab site below.
         </p>
 
         <!-- input form. you can press enter too -->
-        <form style="clear:both; margin-top:10px;">
-            <label for="add_newznab_name">Name:</label>
-            <input id="add_newznab_name" type="text" /> <br />
-            
-            <label for="add_newznab_url">URL:</label>
-            <input id="add_newznab_url" type="text" /><br />
-            
-            <label for="add_newznab_apikey">API Key:</label>
-            <input id="add_newznab_apikey" type="text" /><br />
+        <form id="add_newznab_form">
+            <p>
+                <label for="add_newznab_name">Name:</label>
+                <input id="add_newznab_name" type="text" required="required" pattern="[a-zA-Z ]{5,}" maxlength="30" value="testdata" />
+            </p>
+            <p>
+                <label for="add_newznab_url">URL:</label>
+                <input id="add_newznab_url" type="url" required="required" value="https://testdata" />
+            </p>
+            <p>    
+                <label for="add_newznab_apikey">API Key:</label>
+                <input id="add_newznab_apikey" type="text" required="required" pattern="[a-zA-Z ]{5,}" maxlength="30" value="sdfsdf"/>
+            </p>
             <p class="action"><button type="submit"> OK </button></p>
         </form>
         <br />
@@ -516,16 +543,16 @@
 
 <%def name="javascriptIncludes()">
     <!-- replace for release -->
-    <script src="http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js"></script>
+    <!--script src="http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js"></script-->
     <script>!window.jQuery.tools && document.write(unescape('%3Cscript src="js/libs/jquery.tools.min.js"%3E%3C/script%3E'))</script>
         
     <script src="js/libs/jquery.dataTables.min.js"></script>
-    <!-- This JavaScript snippet activates those tabs -->
+
     <script>
         var triggers;
 
         // perform JavaScript after the document is scriptable.
-        $(function() {
+         $(document).ready(function() {
                 // setup ul.tabs to work as tabs for each div directly under div.panes
                  $("ul#subhead_menu").tabs("div.panes > div");
                 $("div.panes :input").tooltip({
@@ -567,16 +594,28 @@
                 $("#encode_details").toggle($("input#encode")[0].checked);
                 $("#detect_bitrate_details").toggle(!$("input#detect_bitrate")[0].checked);
                 
+                $("#add_newznab_form").validator({ 
+                    position: 'top left', 
+                    offset: [-12, 0],
+                    message: '<div><em/></div>' // em element is the arrow
+                });
+                
                 $("#preferred_bitrate_details").toggle($("#preferred_bitrate")[0].checked);
                 $("dl:has(input[type='checkbox']), dl:has(input[type='radio']), dl:has(select)").each(function() {
                     this.className += " flow";
                     });
                     
-                triggers = $("button[rel]").overlay({mask: '#000', effect: 'apple'});
+                triggers = $("#add_newznab_button").overlay({mask: '#000', effect: 'apple'});
         });
         
         $("#add_newznab form").submit(function(e) {
-
+            var newznab_template = $("#newznab_template > div").clone();
+           
+            $("#newznab_container").append(newznab_template);
+           // var newznab_template_new = $("#newznab_template").clone().replaceAll("NAME", "HELLO!");
+            
+            
+           // $("#newznab_container").add(newznab_template_new);
             // close the overlay
             triggers.eq(0).overlay().close();
 
