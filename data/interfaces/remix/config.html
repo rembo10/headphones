@@ -260,10 +260,13 @@
             <tr>
                 <td>
                       <h2>Re-Encoding Options:</h2>
-						<br>
-                      	<h3><input type="checkbox" name="encode" value="1" ${config['encode']}/> Re-encode downloads during postprocessing</h3>
                       <i class="smalltext">Note: this option requires the lame or ffmpeg encoder</i>
-					<br><br>
+						<br><br>
+                      	<h3><input type="checkbox" name="encode" id="encode" value="1" ${config['encode']}/> Re-encode downloads during postprocessing</h3>
+                    	<br>
+                    <div id="encoderoptions">
+                      	<h4><input type="checkbox" name="encoderlossless" value="1" ${config['encoderlossless']}/> Only re-encode lossless files (.flac)</h4>                      
+					<br>
 					<%
 						if config['encoder'] == 'lame':
 							lameselect = 'selected="selected"'
@@ -281,6 +284,33 @@
 					%for x in ['mp3', 'ogg', 'm4a']:
 						<%
 							if config['encoderoutputformat'] == x:
+								outputselect = 'selected'
+							else:
+								outputselect = ''
+						%>
+						<option value=${x} ${outputselect}>${x}</option>
+					%endfor
+					</select></h4>
+					<br>
+					
+					<h3>Audio Properties:</h3>
+					<br>
+					<h4>VBR/CBR: <select name="encodervbrcbr">
+					%for x in ['cbr', 'vbr']:
+						<%
+							if config['encodervbrcbr'] == x:
+								outputselect = 'selected'
+							else:
+								outputselect = ''
+						%>
+						<option value=${x} ${outputselect}>${x}</option>
+					%endfor
+					</select>
+
+					Quality: <select name="encoderquality">
+					%for x in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
+						<%
+							if config['encoderquality'] == x:
 								outputselect = 'selected'
 							else:
 								outputselect = ''
@@ -316,9 +346,14 @@
 					</select></h4>
 					<br>
 					<br>					
-                    <h3>Advance Encode Options:</h3><input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43">
+                    <h3>Advanced Encoding Options:</h3>
+					<h4>
+					(ignores audio properties)
+					</h4>
+					<input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43">
 					<br>
                     <h3>Path to Encoder:</h3><input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43">
+                	</div>
                 </td>
             </tr>
         </table>
@@ -327,4 +362,31 @@
         <p class="center"><input type="submit" value="Save Changes"><br>
         (Web Interface changes require a restart to take effect)</h3>
       </form>
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script>
+	$(document).ready(function()
+	{
+		if ($("#encode").is(":checked"))
+			{
+				$("#encoderoptions").show();
+			}
+		else
+			{
+				$("#encoderoptions").hide();
+			}
+		
+		$("#encode").click(function(){
+			if ($("#encode").is(":checked"))
+			{
+				$("#encoderoptions").show("fast");
+			}
+			else
+			{
+				$("#encoderoptions").hide("fast");
+			}
+		});
+	});
+	</script>
 </%def>

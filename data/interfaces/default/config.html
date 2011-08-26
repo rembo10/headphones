@@ -409,13 +409,26 @@
                     </div>                     
                     <div class="form_content"> 
                         <dl>
-                                <dt><label for="encode">Re-encode downloads during postprocessing:</label></dt>
-                                <dd><input type="checkbox" id="encode" name="encode" value="1" ${config['encode']} 
-                                title="Note: this option requires the lame or ffmpeg encoder" /></dd>
+							<dt>
+								<label for="encode">Re-encode downloads during postprocessing:</label>
+							</dt>
+							<dd>
+								<input type="checkbox" id="encode" name="encode" value="1" ${config['encode']} title="Note: this option requires the lame or ffmpeg encoder" />
+							</dd>
                         </dl>  
                         <div id="encode_details" class="extra_detail">
-                             <dl>
-                                        <dt><label for="encoder">Encoder:</label></dt>
+                            <dl>
+								<dt>
+									<label for="encoderlossless">Only re-encode lossless files (.flac):</label>
+								</dt>
+								<dd>
+									<input type="checkbox" id="encoderlossless" name="encoderlossless" value="1" ${config['encoderlossless']}/>
+								</dd>
+                            </dl> 						
+                            <dl>
+                                        <dt>
+											<label for="encoder">Encoder:</label>
+										</dt>
                                         <dd><%
                                                     if config['encoder'] == 'lame':
                                                             lameselect = 'selected="selected"'
@@ -427,74 +440,128 @@
                                             <select name="encoder" id="encoder">
                                                     <option value="lame" ${lameselect}>lame</option>
                                                     <option value="ffmpeg" ${ffmpegselect}>ffmpeg</option>
-                                            </select></dd>
+                                            </select>
+										</dd>
                                 </dl> 
                                 <dl>
-                                        <dt><label for="encoderoutputformat">Format:</label></dt>
-                                        <dd><%
-                                                    if config['encoder'] == 'lame':
-                                                            lameselect = 'selected="selected"'
-                                                            ffmpegselect = ''
-                                                    else:
-                                                            lameselect = ''
-                                                            ffmpegselect = 'selected="selected"'
-                                            %>
+                                        <dt>
+											<label for="encoderoutputformat">Format:</label>
+										</dt>
+                                        <dd>
                                             <select name="encoderoutputformat" id="encoderoutputformat">
                                             %for x in ['mp3', 'ogg', 'm4a']:
                                                     <%
-                                                            if config['encoderoutputformat'] == x:
-                                                                    outputselect = 'selected'
-                                                            else:
-                                                                    outputselect = ''
+														if config['encoderoutputformat'] == x:
+															outputselect = 'selected="selected"'
+														else:
+															outputselect = ''
                                                     %>
-                                                    <option value=${x} ${outputselect}>${x}</option>
+                                                    <option value="${x}" ${outputselect}>${x}</option>
                                             %endfor
-                                            </select></dd>
+                                            </select>
+										</dd>
                                 </dl> 
+								<dl>
+									<dt>
+										<label for="use_advanced_encoding">Use advanced encoding options:</label>
+									</dt>
+									<dd>
+										<input type="checkbox" id="use_advanced_encoding" name="use_advanced_encoding" value="1" ${config['use_advanced_encoding']} />
+									</dd>
+								</dl> 
+								<div id="standard_audio_details">
+									<dl>
+										<dt>
+											<label for="encodervbrcbr">VBR/CBR:</label>
+										</dt>
+										<dd>
+											<select name="encodervbrcbr" id="encodervbrcbr">
+											%for x in ['cbr', 'vbr']:
+												<%
+													if config['encodervbrcbr'] == x:
+														outputselect = 'selected="selected"'
+													else:
+														outputselect = ''
+												%>
+												<option value="${x}" ${outputselect}>${x}</option>
+											%endfor
+											</select>
+										</dd>
+									</dl> 								
+									
+									<dl>
+										<dt>
+											<label for="encoderquality">Quality:</label>
+										</dt>
+										<dd>
+											<select name="encoderquality" id="encoderquality">
+											%for x in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
+												<%
+													if config['encoderquality'] == x:
+														outputselect = 'selected="selected"'
+													else:
+														outputselect = ''
+												%>
+												<option value="${x}" ${outputselect}>${x}</option>
+											%endfor
+											</select>
+										</dd>
+									</dl> 
+								
+									<dl>
+										<dt>
+											<label for="bitrate">Bitrate:</label>
+										</dt>
+										<dd>
+											<select name="bitrate" id="bitrate">
+											%for x in [64, 128, 192, 256, 320]:
+												<%
+													if config["bitrate"] == x:
+														outputselect = "selected"
+													else:
+														outputselect = ''
+												%>      
+												<option value="${x}" ${outputselect}> ${x} kbps</option>
+											%endfor
+											</select>
+										</dd>
+									</dl>     
+									<dl>
+										<dt>
+											<label for="encoder">Sampling:</label>
+										</dt>
+										<dd><%
+													if config["samplingfrequency"] == 44100:
+															freq44100 = 'selected="selected"'
+															freq48000 = ''
+													else:
+															freq44100 = ''
+															freq48000 = 'selected="selected"'
+											%>
+											<select name="samplingfrequency">
+													<option value="44100" ${freq44100}>44.1 kHz</option>
+													<option value="48000" ${freq48000}>48.0 kHz</option>
+											</select>
+										</dd>
+									</dl>  
+								</div>
+								<div id="advanced_encode_options_details">
+									<dl>
+										<dt>
+											<label for="advancedencoder">Advance Encode Options:</label>
+										</dt>
+										<dd>
+											<input type="text" id="advancedencoder" name="advancedencoder" value="${config['advancedencoder']}"  />
+										</dd>
+									</dl>
+								</div>
                                 <dl>
-                                        <dt><label for="bitrate">Bitrate:</label></dt>
-                                        <dd><%
-                                                    if config['encoder'] == 'lame':
-                                                            lameselect = 'selected="selected"'
-                                                            ffmpegselect = ''
-                                                    else:
-                                                            lameselect = ''
-                                                            ffmpegselect = 'selected="selected"'
-                                            %>
-                                            <select name="bitrate" id="bitrate">
-                                            %for x in [64, 128, 192, 256, 320]:
-                                                    <%
-                                                            if config["bitrate"] == x:
-                                                                    bitrateselected = "selected"
-                                                            else:
-                                                                    bitrateselected = ''
-                                                    %>      
-                                                    <option value=${x} ${bitrateselected}> ${x} kbps</option>
-                                            %endfor
-                                            </select></dd>
-                                </dl>     
-                                <dl>
-                                        <dt><label for="encoder">Sampling:</label></dt>
-                                        <dd><%
-                                                    if config["samplingfrequency"] == 44100:
-                                                            freq44100 = 'selected="selected"'
-                                                            freq48000 = ''
-                                                    else:
-                                                            freq44100 = ''
-                                                            freq48000 = 'selected="selected"'
-                                            %>
-                                            <select name="samplingfrequency">
-                                                    <option value=44100 ${freq44100}>44.1 kHz</option>
-                                                    <option value=48000 ${freq48000}>48.0 kHz</option>
-                                            </select></dd>
-                                </dl>  
-                                <dl>
-                                        <dt><label for="advancedencoder">Advance Encode Options:</label></dt>
-                                        <dd><input type="text" id="advancedencoder" name="advancedencoder" value="1" ${config['advancedencoder']}  /></dd>
-                                </dl>  
-                                <dl>
-                                        <dt><label for="encoderfolder">Path to Encoder:</label></dt>
-                                        <dd><input type="text" id="encoderfolder" name="encoderfolder" value="1" ${config['encoderfolder']}  /></dd>
+									<dt>
+										<label for="encoderfolder">Path to Encoder:</label>
+									</dt>
+									<dd>
+										<input type="text" id="encoderfolder" name="encoderfolder" value="${config['encoderfolder']}"  />
+									</dd>
                                 </dl>  
                             </div>
                         </div>
@@ -502,17 +569,12 @@
     
             </div>  
         </div>
-    
-
-    <p class="center"><input type="submit" id="submit" value="Save Changes"></p>
+		<p class="center"><input type="submit" id="submit" value="Save Changes"></p>
     </form> 
     
     
-    <!-- yes/no dialog -->
     <div class="overlay " id="add_newznab">
-        
-        
-        
+  
         <img src="images/headphoneslogo.png" style="float: left; margin:-5px 13px 0 -3px;" />
         <h2>Add Newznab Site</h2>
         <p>
@@ -576,6 +638,14 @@
                 $("input#newzbin").change(function() {toggleDetailsSection("newzbin");});
                 $("input#newznab").change(function() {toggleDetailsSection("newznab");});
                 $("input#detect_bitrate").change(function() {toggleDetailsSection("detect_bitrate", true);});
+				
+				
+                $("input#use_advanced_encoding").change(function() {
+						toggleDetailsSection("use_advanced_encoding", true, "standard_audio_details");
+						
+						toggleDetailsSection("use_advanced_encoding", false, "advanced_encode_options_details");
+					});
+				
                 
                 $("input#encode").change(function() {toggleDetailsSection("encode");});
                 $("input#folder_format").keyup(function() {generateFolderFormatExample();});
@@ -587,6 +657,10 @@
                 changeNzbHandler();
                 generateFolderFormatExample();
                 generateFileFormatExample();
+				
+				$("#standard_audio_details").toggle(!$("input#use_advanced_encoding")[0].checked);
+				$("#advanced_encode_options_details").toggle($("input#use_advanced_encoding")[0].checked);
+				
                 $("#nzbmatrix_details").toggle($("input#nzbmatrix")[0].checked);
                 $("#nzbsorg_details").toggle($("input#nzbsorg")[0].checked);
                 $("#newzbin_details").toggle($("input#newzbin")[0].checked);
@@ -606,8 +680,10 @@
                     });
                     
                 triggers = $("#add_newznab_button").overlay({mask: '#000', effect: 'apple'});
+		
         });
         
+
         $("#add_newznab form").submit(function(e) {
             var newznab_template = $("#newznab_template > div").clone();
            
@@ -655,15 +731,18 @@
             $("#file_format_example").text(formattedString + ".mp3");
         }
         
-        function toggleDetailsSection(checkboxName, inverse) {
+		
+        function toggleDetailsSection(checkboxName, inverse, detailName) {
             inverse = arguments.length > 1 ? inverse : false;
+			detailName = arguments.length > 2 ? detailName : checkboxName + "_details";
+			
             var checked = $("input#" + checkboxName)[0].checked;
             checked = inverse ? !checked : checked;
         
             if(checked) {
-                $("#" + checkboxName + "_details").slideDown();
+                $("#" + detailName).slideDown();
             } else {
-                $("#" + checkboxName + "_details").slideUp();
+                $("#" + detailName).slideUp();
             }
         }
         
@@ -676,3 +755,4 @@
         }
     </script>
 </%def>
+

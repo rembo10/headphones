@@ -361,9 +361,13 @@ class WebInterface(object):
 					"encoderfolder":	headphones.ENCODERFOLDER,
 					"advancedencoder":	headphones.ADVANCEDENCODER,
 					"encoderoutputformat": headphones.ENCODEROUTPUTFORMAT,
-					"samplingfrequency": int(headphones.SAMPLINGFREQUENCY),
+					"use_advanced_encoding": headphones.USE_ADVANCED_ENCODING,
+					"samplingfrequency": headphones.SAMPLINGFREQUENCY,
+					"encodervbrcbr": headphones.ENCODERVBRCBR,
+					"encoderquality": headphones.ENCODERQUALITY,
+					"encoderlossless": checked(headphones.ENCODERLOSSLESS),
 					"nzb_handler_list": nzb_handler_list,
-					"nzb_handler": headphones.NZB_HANDLER
+					"nzb_handler": headphones.NZB_HANDLER					
 				}
 		return serve_template(templatename="config.html", title="Settings", config=config)	
 	config.exposed = True
@@ -372,9 +376,12 @@ class WebInterface(object):
 	def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0,
 		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole_dir=None,
 		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
-		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
-		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, interface=None, log_dir=None,
-		encode=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, nzb_handler=None, selected_tab=''):
+		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, 
+		detect_bitrate=0, move_files=0, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, 
+		destination_dir=None, folder_format=None, file_format=None, include_extras=0, interface=None, log_dir=None,	encode=0, encoder=None, 
+		bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, 
+		encoderquality=None, encoderlossless=0, nzb_handler=None, selected_tab='', use_advanced_encoding=0):
+
 
 		headphones.HTTP_HOST = http_host
 		headphones.HTTP_PORT = http_port
@@ -425,6 +432,10 @@ class WebInterface(object):
 		headphones.ADVANCEDENCODER = advancedencoder
 		headphones.ENCODEROUTPUTFORMAT = encoderoutputformat
 		headphones.NZB_HANDLER = nzb_handler
+		headphones.ENCODERVBRCBR = encodervbrcbr
+		headphones.ENCODERQUALITY = int(encoderquality)
+		headphones.ENCODERLOSSLESS = encoderlossless
+		headphones.USE_ADVANCED_ENCODING = use_advanced_encoding
 		
 		headphones.config_write()
 

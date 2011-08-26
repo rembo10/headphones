@@ -22,7 +22,7 @@ SIGNAL = None
 
 SYS_ENCODING = None
 
-QUIET = False
+VERBOSE = 1
 DAEMON = False
 PIDFILE= None
 
@@ -120,8 +120,10 @@ BITRATE = None
 SAMPLINGFREQUENCY = None
 ADVANCEDENCODER = None
 ENCODEROUTPUTFORMAT = None
+USE_ADVANCED_ENCODING = False
 ENCODERQUALITY = None
 ENCODERVBRCBR = None
+ENCODERLOSSLESS = False
 
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
@@ -173,7 +175,7 @@ def initialize():
 
     with INIT_LOCK:
     
-        global __INITIALIZED__, FULL_PATH, PROG_DIR, QUIET, DAEMON, DATA_DIR, CONFIG_FILE, CFG, LOG_DIR, CACHE_DIR, \
+        global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, DATA_DIR, CONFIG_FILE, CFG, LOG_DIR, CACHE_DIR, \
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, GIT_PATH, \
                 CURRENT_VERSION, LATEST_VERSION, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
                 ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, \
@@ -181,8 +183,9 @@ def initialize():
                 LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
-                ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, ENCODE, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRVBR, \
-                NZB_HANDLER
+                ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, ENCODE, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
+                NZB_HANDLER, ENCODERLOSSLESS, USE_ADVANCED_ENCODING
+
                 
         if __INITIALIZED__:
             return False
@@ -271,9 +274,13 @@ def initialize():
         ENCODE = bool(check_setting_int(CFG, 'General', 'encode', 0))
         ADVANCEDENCODER = check_setting_str(CFG, 'General', 'advancedencoder', '')
         ENCODEROUTPUTFORMAT = check_setting_str(CFG, 'General', 'encoderoutputformat', 'mp3')
-        ENCODERQUALITY = check_setting_int(CFG, 'General', 'vorbisquality', 60)
+		
+        ENCODERQUALITY = check_setting_int(CFG, 'General', 'encoderquality', 2)
         ENCODERVBRCBR = check_setting_str(CFG, 'General', 'encodervbrcbr', 'cbr')
+        ENCODERLOSSLESS = bool(check_setting_int(CFG, 'General', 'encoderlossless', 1))
         
+        USE_ADVANCED_ENCODING = bool(check_setting_int(CFG, 'General', 'use_advanced_encoding', 1))
+		
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
         
@@ -281,11 +288,11 @@ def initialize():
             try:
                 os.makedirs(LOG_DIR)
             except OSError:
-                if not QUIET:
+                if VERBOSE:
                     print 'Unable to create the log directory. Logging to screen only.'
         
         # Start the logger, silence console logging if we need to
-        logger.headphones_log.initLogger(quiet=QUIET)
+        logger.headphones_log.initLogger(verbose=VERBOSE)
         
         # Update some old config code:
         if FOLDER_FORMAT == '%artist/%album/%track':
@@ -457,9 +464,11 @@ def config_write():
     new_config['General']['samplingfrequency'] = int(SAMPLINGFREQUENCY)
     new_config['General']['encoderfolder'] = ENCODERFOLDER
     new_config['General']['advancedencoder'] = ADVANCEDENCODER
+    new_config['General']['use_advanced_encoding'] = USE_ADVANCED_ENCODING
     new_config['General']['encoderoutputformat'] = ENCODEROUTPUTFORMAT
     new_config['General']['encoderquality'] = ENCODERQUALITY
     new_config['General']['encodervbrcbr'] = ENCODERVBRCBR
+    new_config['General']['encoderlossless'] = ENCODERLOSSLESS
     
     new_config.write()
 
