@@ -357,9 +357,9 @@ class WebInterface(object):
 					"encoderfolder":	headphones.ENCODERFOLDER,
 					"advancedencoder":	headphones.ADVANCEDENCODER,
 					"encoderoutputformat": headphones.ENCODEROUTPUTFORMAT,
-					"samplingfrequency": int(headphones.SAMPLINGFREQUENCY),
-					"encodervbrcbr": (headphones.ENCODERVBRCBR),
-					"encoderquality": int(headphones.ENCODERQUALITY),
+					"samplingfrequency": headphones.SAMPLINGFREQUENCY,
+					"encodervbrcbr": headphones.ENCODERVBRCBR,
+					"encoderquality": headphones.ENCODERQUALITY,
 					"encoderlossless": checked(headphones.ENCODERLOSSLESS)
 				}
 		return serve_template(templatename="config.html", title="Settings", config=config)	

@@ -260,12 +260,13 @@
             <tr>
                 <td>
                       <h2>Re-Encoding Options:</h2>
-						<br>
-                      	<h3><input type="checkbox" name="encode" value="1" ${config['encode']}/> Re-encode downloads during postprocessing</h3>
                       <i class="smalltext">Note: this option requires the lame or ffmpeg encoder</i>
-					    <br>
-                      	<h3><input type="checkbox" name="encoderlossless" value="1" ${config['encoderlossless']}/> Re-encode only LossLess format (.flac)</h3>  
-					<br><br>
+						<br><br>
+                      	<h3><input type="checkbox" name="encode" id="encode" value="1" ${config['encode']}/> Re-encode downloads during postprocessing</h3>
+                    	<br>
+                    <div id="encoderoptions">
+                      	<h4><input type="checkbox" name="encoderlossless" value="1" ${config['encoderlossless']}/> Only re-encode lossless files (.flac)</h4>                      
+					<br>
 					<%
 						if config['encoder'] == 'lame':
 							lameselect = 'selected="selected"'
@@ -291,6 +292,7 @@
 					%endfor
 					</select></h4>
 					<br>
+					
 					<h3>Audio Properties:</h3>
 					<br>
 					<h4>VBR/CBR: <select name="encodervbrcbr">
@@ -344,12 +346,14 @@
 					</select></h4>
 					<br>
 					<br>					
-                    <h3>Advance Encode Options:</h3>
+                    <h3>Advanced Encoding Options:</h3>
 					<h4>
 					(ignores audio properties)
 					</h4>
-					<input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43"><br>
+					<input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43">
+					<br>
                     <h3>Path to Encoder:</h3><input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43">
+                	</div>
                 </td>
             </tr>
         </table>
@@ -358,4 +362,31 @@
         <p class="center"><input type="submit" value="Save Changes"><br>
         (Web Interface changes require a restart to take effect)</h3>
       </form>
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script>
+	$(document).ready(function()
+	{
+		if ($("#encode").is(":checked"))
+			{
+				$("#encoderoptions").show();
+			}
+		else
+			{
+				$("#encoderoptions").hide();
+			}
+		
+		$("#encode").click(function(){
+			if ($("#encode").is(":checked"))
+			{
+				$("#encoderoptions").show("fast");
+			}
+			else
+			{
+				$("#encoderoptions").hide("fast");
+			}
+		});
+	});
+	</script>
 </%def>
