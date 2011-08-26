@@ -30,7 +30,7 @@ def encode(albumPath):
 		
 	for r,d,f in os.walk(albumPath):
 		for music in f:
-			if any(music.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
+			if any(music.endswith('.' + x) for x.lower() in headphones.MEDIA_FORMATS):
 				if (headphones.ENCODERLOSSLESS):
 					if (music.lower().endswith('.flac')):
 						musicFiles.append(os.path.join(r, music))
@@ -51,7 +51,7 @@ def encode(albumPath):
 	for music in musicFiles:		
 		infoMusic=MediaFile(music)
 		if headphones.ENCODER == 'lame':
-			if not any(music.lower().endswith('.' +headphones.ENCODEROUTPUTFORMAT) for x in ["mp3", "wav"]):
+			if not any(music.endswith('.' + x) for x.lower() in ["mp3", "wav"]):
 				logger.warn('Lame cant encode "%s" format for "%s", use ffmpeg' % (os.path.splitext(music)[1],music))
 			else:
 				if (music.lower().endswith('.mp3') and (infoMusic.bitrate/1000<=headphones.BITRATE)): 
@@ -72,13 +72,13 @@ def encode(albumPath):
 				else:
 					command(encoder,music,musicTempFiles[i],albumPath)
 					ifencoded=1
-			i=i+1
+		i=i+1
 		
 	shutil.rmtree(tempDirEncode)
 	time.sleep(1)	
 	for r,d,f in os.walk(albumPath):
 		for music in f:
-			if any(music.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
+			if any(music.endswith('.' + x) for x.lower() in headphones.MEDIA_FORMATS):
 				musicFinalFiles.append(os.path.join(r, music))
 	
 	if ifencoded==0:
@@ -96,12 +96,7 @@ def command(encoder,musicSource,musicDest,albumPath):
 			if headphones.ENCODERVBRCBR=='cbr':
 				cmd=cmd+ ' --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
 			elif headphones.ENCODERVBRCBR=='vbr':
-				if (ENCODERQUALITY>=0 and ENCODERQUALITY<=9):
-					cmd=cmd+' -V'+str(ENCODERQUALITY)
-				elif (ENCODERQUALITY<0):
-					cmd=cmd+' -V0'
-				elif (ENCODERQUALITY>9):
-					cmd=cmd+' -V9'
+				cmd=cmd+' -V'+str(headphones.ENCODERQUALITY)
 			cmd=cmd+ ' ' + headphones.ADVANCEDENCODER
 		else:
 			cmd=cmd+' '+ headphones.ADVANCEDENCODER
@@ -119,12 +114,7 @@ def command(encoder,musicSource,musicDest,albumPath):
 			if headphones.ENCODERVBRCBR=='cbr':
 				cmd=cmd+ ' -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) + 'k'
 			elif headphones.ENCODERVBRCBR=='vbr':
-				if (ENCODERQUALITY>=0 and ENCODERQUALITY<=9):
-					cmd=cmd+' -aq '+str(ENCODERQUALITY)
-				elif (ENCODERQUALITY<0):
-					cmd=cmd+' -aq 0'
-				elif (ENCODERQUALITY>9):
-					cmd=cmd+' -aq 9'
+				cmd=cmd+' -aq ' + str(headphones.ENCODERQUALITY)
 			cmd=cmd+ ' -y -ac 2 -map_metadata 0:0,s0 -vn'
 		else:
 			cmd=cmd+' '+ headphones.ADVANCEDENCODER
