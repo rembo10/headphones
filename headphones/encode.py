@@ -30,7 +30,7 @@ def encode(albumPath):
 		
 	for r,d,f in os.walk(albumPath):
 		for music in f:
-			if any(music.endswith('.' + x) for x.lower() in headphones.MEDIA_FORMATS):
+			if any(music.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
 				if (headphones.ENCODERLOSSLESS):
 					if (music.lower().endswith('.flac')):
 						musicFiles.append(os.path.join(r, music))
@@ -51,7 +51,7 @@ def encode(albumPath):
 	for music in musicFiles:		
 		infoMusic=MediaFile(music)
 		if headphones.ENCODER == 'lame':
-			if not any(music.endswith('.' + x) for x.lower() in ["mp3", "wav"]):
+			if not any(music.lower().endswith('.' + x) for x in ["mp3", "wav"]):
 				logger.warn('Lame cant encode "%s" format for "%s", use ffmpeg' % (os.path.splitext(music)[1],music))
 			else:
 				if (music.lower().endswith('.mp3') and (infoMusic.bitrate/1000<=headphones.BITRATE)): 
@@ -78,7 +78,7 @@ def encode(albumPath):
 	time.sleep(1)	
 	for r,d,f in os.walk(albumPath):
 		for music in f:
-			if any(music.endswith('.' + x) for x.lower() in headphones.MEDIA_FORMATS):
+			if any(music.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
 				musicFinalFiles.append(os.path.join(r, music))
 	
 	if ifencoded==0:
