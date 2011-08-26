@@ -435,7 +435,7 @@
                             <fieldset>  
                                 <div class="form_description">
                                     <legend>
-                                        Newznab: NAME
+                                        Newznab:<br />NAME
                                     </legend>
                                     <p class="legend_description">
                                         
@@ -1029,86 +1029,95 @@
 </script-->
     <script>!window.jQuery.tools && document.write(unescape('%3Cscript src="js/libs/jquery.tools.min.js"%3E%3C/script%3E'))</script>
     
-
     <script src="js/libs/jquery.dataTables.min.js"></script>
-    <script src="js/libs/jquery.ba-replacetext.min.js"></script>
 
     <script>
         var triggers;
+        
+        // generated in python, used to load saved newsnab sites
+        var existingNewznabName = [];
+        var existingNewznabUrl = [];
+        var existingNewznabApiKey = [];
+        var existingNewznabId = [];
 
         // perform JavaScript after the document is scriptable.
          $(document).ready(function() {
-                // setup ul.tabs to work as tabs for each div directly under div.panes
-                 $("ul#subhead_menu").tabs("div.panes > div");
-                $("div.panes :input").tooltip({
+            // setup ul.tabs to work as tabs for each div directly under div.panes
+            $("ul#subhead_menu").tabs("div.panes > div");
+            
+            // setup tooltips on inputs
+            $("div.panes :input").tooltip({
 
-                    // place tooltip on the right edge
-                    position: "center right",
+                // place tooltip on the right edge
+                position: "center right",
 
-                    // a little tweaking of the position
-                    offset: [-2, 10],
+                // a little tweaking of the position
+                offset: [-2, 10],
 
-                    // use the built-in fadeIn/fadeOut effect
-                    effect: "fade",
+                // use the built-in fadeIn/fadeOut effect
+                effect: "fade",
 
-                    // custom opacity setting
-                    opacity: 0.8
+                // custom opacity setting
+                opacity: 0.8
 
-                });
-                $("#nzb_handler").change(function() {changeNzbHandler();});
-                $("input#nzbmatrix").change(function() {toggleDetailsSection("nzbmatrix");});
-                $("input#nzbsorg").change(function() {toggleDetailsSection("nzbsorg");});
-                $("input#newzbin").change(function() {toggleDetailsSection("newzbin");});
-                $("input#newznab").change(function() {toggleDetailsSection("newznab");});
-                $("input#detect_bitrate").change(function() {toggleDetailsSection("detect_bitrate", true);});
-                
-                
-                $("input#use_advanced_encoding").change(function() {
-                    toggleDetailsSection("use_advanced_encoding", false, "advanced_encode_options_details");
-                    toggleDetailsSection("use_advanced_encoding", true, "standard_audio_details");
-                });
-                
-                
-                $("input#encode").change(function() {toggleDetailsSection("encode");});
-                $("input#folder_format").keyup(function() {generateFolderFormatExample();});
-                $("input#file_format").keyup(function() {generateFileFormatExample();});
-                
-                $("input#submit").click(function() {submitForm();});
-                
-                $("input[name='preferred_quality']").change(function() {toggleDetailsSection("preferred_bitrate");});
-                changeNzbHandler();
-                generateFolderFormatExample();
-                generateFileFormatExample();
-                
-                $("#standard_audio_details").toggle(!$("input#use_advanced_encoding")[0].checked);
-                $("#advanced_encode_options_details").toggle($("input#use_advanced_encoding")[0].checked);
-                
-                $("#nzbmatrix_details").toggle($("input#nzbmatrix")[0].checked);
-                $("#nzbsorg_details").toggle($("input#nzbsorg")[0].checked);
-                $("#newzbin_details").toggle($("input#newzbin")[0].checked);
-                /*$("#newznab_details").toggle($("input#newznab")[0].checked);*/
-                $("#encode_details").toggle($("input#encode")[0].checked);
-                $("#detect_bitrate_details").toggle(!$("input#detect_bitrate")[0].checked);
-                
-                $("#add_newznab_form").validator({ 
-                    position: 'top left', 
-                    offset: [-12, 0],
-                    message: '<div><em /></div>' // em element is the arrow
-                });
-                
-                $("#preferred_bitrate_details").toggle($("#preferred_bitrate")[0].checked);
-                $("dl:has(input[type='checkbox']), dl:has(input[type='radio']), dl:has(select)").each(function() {
-                    this.className += " flow";
-                    });
-                    
-                triggers = $("#add_newznab_button").overlay({mask: '#000', effect: 'apple'});
-        
+            });
+            
+            // setup form validator for newznab popup
+            $("#add_newznab_form").validator({ 
+                position: 'top left', 
+                offset: [-12, 0],
+                message: '<div><em /></div>' // em element is the arrow
+            });
+            
+            // config popup form for newznab
+            triggers = $("#add_newznab_button").overlay({mask: '#000', effect: 'apple'});
+            
+                            
+            // setup existing newznab sites 
+            var newznabNumber = existingNewznabName.length;
+            for(var i = 0; i < newznabNumber; i++) {
+                addNewNewzNabSite(existingNewznabName[i], existingNewznabUrl[i], existingNewznabApiKey[i], existingNewznabId[i]);
+            }
+            
+            // assign handlers to form items
+            $("#nzb_handler").change(function() {changeNzbHandler();});
+            $("input#nzbmatrix").change(function() {toggleDetailsSection("nzbmatrix");});
+            $("input#nzbsorg").change(function() {toggleDetailsSection("nzbsorg");});
+            $("input#newzbin").change(function() {toggleDetailsSection("newzbin");});
+            $("input#newznab").change(function() {toggleDetailsSection("newznab");});
+            $("input#detect_bitrate").change(function() {toggleDetailsSection("detect_bitrate", true);});        
+            $("input#use_advanced_encoding").change(function() {
+                toggleDetailsSection("use_advanced_encoding", false, "advanced_encode_options_details");
+                toggleDetailsSection("use_advanced_encoding", true, "standard_audio_details");
+            });
+            $("input#encode").change(function() {toggleDetailsSection("encode");});
+            $("input#folder_format").keyup(function() {generateFolderFormatExample();});
+            $("input#file_format").keyup(function() {generateFileFormatExample();});         
+            $("input#submit").click(function() {submitForm();});              
+            $("input[name='preferred_quality']").change(function() {toggleDetailsSection("preferred_bitrate");});
+
+            // set initial state of form items
+            changeNzbHandler();
+            generateFolderFormatExample();
+            generateFileFormatExample();
+            
+            $("#standard_audio_details").toggle(!$("input#use_advanced_encoding")[0].checked);
+            $("#advanced_encode_options_details").toggle($("input#use_advanced_encoding")[0].checked);             
+            $("#nzbmatrix_details").toggle($("input#nzbmatrix")[0].checked);
+            $("#nzbsorg_details").toggle($("input#nzbsorg")[0].checked);
+            $("#newzbin_details").toggle($("input#newzbin")[0].checked);
+            $("#encode_details").toggle($("input#encode")[0].checked);
+            $("#detect_bitrate_details").toggle(!$("input#detect_bitrate")[0].checked);
+
+            $("#preferred_bitrate_details").toggle($("#preferred_bitrate")[0].checked);
+            $("dl:has(input[type='checkbox']), dl:has(input[type='radio']), dl:has(select)").each(function() {
+                this.className += " flow";
+            });
         });
-        
+
 
         $("#add_newznab form").submit(function(e) {
-            var newznab_template = $("#newznab_template").html();
-        
+            
             // close the overlay
             triggers.eq(0).overlay().close();
 
@@ -1116,16 +1125,20 @@
             var name = $("#add_newznab_name", this).val();
             var url = $("#add_newznab_url", this).val();
             var apikey = $("#add_newznab_apikey", this).val();
-
-            newznab_template = newznab_template.replace(/NAME/g, name)
-                                .replace(/URL/g, url)
-                                .replace(/APIKEY/g, apikey);
-            $("#newznab_site_container").append($(newznab_template));
-
+            addNewNewzNabSite(name, url, apikey);
+            
             // do not submit the form
             return e.preventDefault();
         });
         
+        function addNewNewzNabSite(name, url, apikey) {
+            var newznab_template = $("#newznab_template").html();
+        
+            newznab_template = newznab_template.replace(/NAME/g, name)
+                                .replace(/URL/g, url)
+                                .replace(/APIKEY/g, apikey);
+            $("#newznab_site_container").append($(newznab_template));        
+        }
         
         function submitForm() {
             var currentTab = $("ul#subhead_menu").data("tabs").getCurrentTab();
