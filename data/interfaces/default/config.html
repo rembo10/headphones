@@ -1121,12 +1121,6 @@
             changeEncoderVbrCbrSettings();
             
         });
-        /*
-        When select lame as encoder, only show mp3 as format.
-        When selecr vbr, hide bitrate and samppling, and when select cbr, 
-        hide
-        quality, and show bitrate and sampling
-        */
         
         function changeEncoderSettings() {
             var selectedEncoderType = $("select#encoder option:selected").text().trim();
