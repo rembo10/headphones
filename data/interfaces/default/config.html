@@ -836,7 +836,7 @@
                                                     else:
                                                         outputselect = ''
                                                 %>
-                                                <option value="${x}" ${outputselect}>
+                                                <option id="encoderoutputformat_${x}" value="${x}" ${outputselect}>
                                                     ${x}
                                                 </option>
                                         %endfor
@@ -869,7 +869,7 @@
                                                     else:
                                                         outputselect = ''
                                                 %>
-                                                <option value="${x}" ${outputselect}>
+                                                <option id="encodervbrcbr_${x}" value="${x}" ${outputselect}>
                                                     ${x}
                                                 </option>
                                             %endfor
@@ -877,7 +877,7 @@
                                         </dd>
                                     </dl>                                 
                                     
-                                    <dl>
+                                    <dl id="encoderquality_container">
                                         <dt>
                                             <label for="encoderquality">
                                                 Quality:
@@ -900,7 +900,7 @@
                                         </dd>
                                     </dl> 
                                 
-                                    <dl>
+                                    <dl id="bitrate_container">
                                         <dt>
                                             <label for="bitrate">
                                                 Bitrate:
@@ -922,9 +922,9 @@
                                             </select>
                                         </dd>
                                     </dl>     
-                                    <dl>
+                                    <dl id="samplingfrequency_container">
                                         <dt>
-                                            <label for="encoder">
+                                            <label for="samplingfrequency">
                                                 Sampling:
                                             </label>
                                         </dt>
@@ -937,7 +937,7 @@
                                                             freq44100 = ''
                                                             freq48000 = 'selected="selected"'
                                             %>
-                                            <select name="samplingfrequency">
+                                            <select id="samplingfrequency" name="samplingfrequency">
                                                     <option value="44100" ${freq44100}>
                                                         44.1 kHz
                                                     </option>
@@ -1095,6 +1095,10 @@
             $("input#file_format").keyup(function() {generateFileFormatExample();});         
             $("input#submit").click(function() {submitForm();});              
             $("input[name='preferred_quality']").change(function() {toggleDetailsSection("preferred_bitrate");});
+            
+            $("select#encoder").change(function() {changeEncoderSettings();});
+            
+            $("select#encodervbrcbr").change(function() {changeEncoderVbrCbrSettings();});
 
             // set initial state of form items
             changeNzbHandler();
@@ -1113,8 +1117,40 @@
             $("dl:has(input[type='checkbox']), dl:has(input[type='radio']), dl:has(select)").each(function() {
                 this.className += " flow";
             });
+            changeEncoderSettings();
+            changeEncoderVbrCbrSettings();
+            
         });
-
+        /*
+        When select lame as encoder, only show mp3 as format.
+        When selecr vbr, hide bitrate and samppling, and when select cbr, 
+        hide
+        quality, and show bitrate and sampling
+        */
+        
+        function changeEncoderSettings() {
+            var selectedEncoderType = $("select#encoder option:selected").text().trim();
+            if(selectedEncoderType == "lame") {
+                $("#encoderoutputformat_mp3")[0].selected = "selected";
+                $("#encoderoutputformat_ogg")[0].style.display = "none";
+                $("#encoderoutputformat_m4a")[0].style.display = "none";
+            } else {
+                $("#encoderoutputformat_ogg")[0].style.display = "";
+                $("#encoderoutputformat_m4a")[0].style.display = "";           
+            }
+        }
+       function changeEncoderVbrCbrSettings() {     
+            var selectedEncoderVbrCbrType = $("select#encodervbrcbr option:selected").text().trim();
+            if(selectedEncoderVbrCbrType == "vbr") {
+                $("#bitrate_container").slideUp();
+                $("#samplingfrequency_container").slideUp();
+                $("#encoderquality_container").slideDown(); 
+            } else {
+                $("#bitrate_container").slideDown();
+                $("#samplingfrequency_container").slideDown();
+                $("#encoderquality_container").slideUp();
+            }
+        }
 
         $("#add_newznab form").submit(function(e) {
             
