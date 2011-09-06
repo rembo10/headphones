@@ -170,7 +170,7 @@ def getArtist(artistid, extrasonly=False):
 			includeExtras = False
 		
 		if includeExtras or headphones.INCLUDE_EXTRAS:
-			includes = [m.Release.TYPE_COMPILATION, m.Release.TYPE_REMIX, m.Release.TYPE_SINGLE, m.Release.TYPE_LIVE, m.Release.TYPE_EP]
+			includes = [m.Release.TYPE_COMPILATION, m.Release.TYPE_REMIX, m.Release.TYPE_SINGLE, m.Release.TYPE_LIVE, m.Release.TYPE_EP, m.Release.TYPE_SOUNDTRACK]
 			for include in includes:
 				inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, include), releaseGroups=True)
 		
