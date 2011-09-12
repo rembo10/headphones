@@ -130,7 +130,14 @@
                             </dd>
                         </dl>
                     </div>
-                </fieldset>                
+                </fieldset>     
+
+                <div class="navigation next"> 
+                    <p class="top"> NEXT </p>
+                    <p class="bottom"> NEXT </p>
+                </div>              
+
+    
             </div>
             <div>
                 <fieldset>
@@ -286,6 +293,18 @@
                         </dl>  
                     </div>
                 </fieldset> 
+                
+                
+                <div class="navigation previous"> 
+                    <p class="top"> PREVIOUS </p>
+                    
+                    <p class="bottom"> PREVIOUS </p>
+                </div>
+                <div class="navigation next"> 
+                    <p class="top"> NEXT </p>
+                    <p class="bottom"> NEXT </p>
+                </div>
+                
             </div>
             <div> 
                 <fieldset>
@@ -483,6 +502,15 @@
                 <div id="newznab_site_container">
                 </div>
                 
+                <div class="navigation previous"> 
+                    <p class="top"> PREVIOUS </p>
+                    
+                    <p class="bottom"> PREVIOUS </p>
+                </div>
+                <div class="navigation next"> 
+                    <p class="top"> NEXT </p>
+                    <p class="bottom"> NEXT </p>
+                </div>
             </div>
             <div> 
                 <fieldset>
@@ -666,6 +694,16 @@
                         </dl>   
                     </div>
                 </fieldset>
+                
+                <div class="navigation previous"> 
+                    <p class="top"> PREVIOUS </p>
+                    
+                    <p class="bottom"> PREVIOUS </p>
+                </div>
+                <div class="navigation next"> 
+                    <p class="top"> NEXT </p>
+                    <p class="bottom"> NEXT </p>
+                </div>
             </div>
             <div> 
                 <fieldset>
@@ -972,13 +1010,22 @@
                                 </dl>  
                             </div>
                         </div>
-                </fieldset>               
+                </fieldset>   
+                <div class="navigation previous"> 
+                    <p class="top"> PREVIOUS </p>
+                    
+                    <p class="bottom"> PREVIOUS </p>
+                </div>
             </div>  
         </div>
         <p class="center">
             <input type="submit" id="submit" value="Save Changes">
         </p>
     </form> 
+    
+    <!--div id="nextButton"> 
+        <p id="nextText"> NEXT </p>
+    </div-->
     
     
     <div class="overlay " id="add_newznab">
@@ -1020,6 +1067,7 @@
         <br />
 
     </div>
+    <p id="test_data"></p>
     
 </%def>
 
@@ -1119,6 +1167,58 @@
             });
             changeEncoderSettings();
             changeEncoderVbrCbrSettings();
+            
+            
+            // setup next & prev buttons
+            var currentTabIndex = $("ul#subhead_menu").data("tabs").getIndex();
+            var currentPane = $("ul#subhead_menu").data("tabs").getCurrentPane();
+            currentPane.mousemove(function() {
+             var args= arguments[0];
+               
+             $("#test_data")[0].innerHTML = args.layerX + " " + args.target.clientWidth + " " + args.originalEvent.layerX + " " + args.clientX;
+                
+            
+            
+            });
+            
+            var nextButton = $(".next");
+            nextButton.mousemove(function() {
+                var args= arguments[0];
+               var opacity = args.layerX/args.target.clientWidth;
+                opacity = ((opacity + 0.1) * 9) / 10;
+                args.currentTarget.style.opacity=opacity;
+                
+            });
+            nextButton.mouseout(function() {
+                var args= arguments[0];
+                args.currentTarget.style.opacity=0.1;
+            });
+            nextButton.click(function() {
+                $("ul#subhead_menu").data("tabs").next();
+            });
+            
+            
+            
+           var previousButton = $(".previous");
+            previousButton.mousemove(function() {
+                var args= arguments[0];
+               var opacity = (args.target.clientWidth-args.layerX)/args.target.clientWidth;
+                opacity = ((opacity + 0.1) * 9) / 10;
+                args.currentTarget.style.opacity=opacity;
+               
+            });
+            previousButton.mouseout(function() {
+                var args= arguments[0];
+                args.currentTarget.style.opacity=0.1;
+            });
+            previousButton.click(function() {
+                $("ul#subhead_menu").data("tabs").prev();
+            });
+            
+            if(currentTabIndex > 0) {
+                // setup prev button
+                
+            }
             
         });
         

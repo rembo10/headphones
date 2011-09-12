@@ -1,3 +1,49 @@
+.navigation {
+    /*filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff', endColorstr='#300');
+     b ackground:-*moz-linear-gradient(left, #fff, #300);
+     background:-webkit-gradient(linear, left center, right center, from(#fff), to(#300));*/
+    border-radius: 0 20px 20px 0;
+    height: 100%;
+    position: absolute;
+    right: 0;
+    top: 0;
+    vertical-align: middle;
+    width: 20%;
+    z-index:100;
+    opacity:0.1;
+}
+.navigation.next {
+    right: 0;
+    top: 0;
+}
+.navigation p {
+    position:absolute;
+    color:#000;
+    font-size:20px;
+    cursor:pointer;
+}
+
+.navigation.next p {
+    right:0;
+}
+.navigation.previous p {
+    left:0;
+}
+
+.navigation .top {
+    top:0;  
+}
+
+.navigation .bottom {
+    bottom:0;
+}
+
+.navigation.previous {
+
+    left: 0;
+    top: 0;
+}
+
 
     .panes  {
         background:#fff; 
@@ -72,6 +118,8 @@
     fieldset {
         width:80%;
         margin:auto;
+        position:relative;
+        z-index:2;
     }
     fieldset .form_description {
         float:left;
