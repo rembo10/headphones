@@ -108,7 +108,6 @@ var existingNewznabId = [];
        var PREV = 0;
        var NEXT = 1;
         var args = arguments[0];
-        $("#test_data")[0].innerHTML = ((args.clientX - args.currentTarget.offsetLeft) / args.currentTarget.clientWidth) + "%";
         var mousePositionWidthPercent = ((args.clientX - args.currentTarget.offsetLeft) / args.currentTarget.clientWidth);
         var targetElement;
         var navTarget;
