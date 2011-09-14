@@ -2,46 +2,53 @@
     /*filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff', endColorstr='#300');
      b ackground:-*moz-linear-gradient(left, #fff, #300);
      background:-webkit-gradient(linear, left center, right center, from(#fff), to(#300));*/
-    border-radius: 0 20px 20px 0;
     height: 100%;
     position: absolute;
-    right: 0;
-    top: 0;
-    vertical-align: middle;
-    width: 20%;
-    z-index:100;
-    opacity:0.1;
+    z-index:1;
+    opacity:0.2;
+    width:150px;
 }
-.navigation.next {
+.navigation.next, .next .click_container  {
     right: 0;
     top: 0;
+}
+.navigation.previous, .previous .click_container {
+    left: 0;
+    top: 0;
+}
+
+.navigation .click_container {
+    display: block;
+    height: 100%;
+    position: absolute;
+    width: 100px;
 }
 .navigation p {
     position:absolute;
     color:#000;
-    font-size:20px;
+    font-size:15px;
     cursor:pointer;
 }
 
 .navigation.next p {
-    right:0;
+    right:10px;
 }
 .navigation.previous p {
-    left:0;
+    left:10px;
 }
 
 .navigation .top {
-    top:0;  
+    top:10px;  
 }
 
 .navigation .bottom {
-    bottom:0;
+    bottom:10px;
 }
 
-.navigation.previous {
-
-    left: 0;
-    top: 0;
+#floating_next, #floating_prev{
+    position:absolute;
+    display:none;
+    text-align:center;
 }
 
 
@@ -51,6 +58,7 @@
         border-radius:20px; 
         margin:0 auto 20px; 
         width:65%;
+        position:relative;
     }
     
     .panes > div {

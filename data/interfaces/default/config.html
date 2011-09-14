@@ -57,7 +57,16 @@
 
     <form action="configUpdate" method="post">
         <input type="hidden" name="selected_tab" id="selected_tab" />
+
         <div class="panes">
+            <span class="navigation next"> 
+                    <p class="top"> NEXT </p>
+                    <p class="bottom"> NEXT </p>
+            </span>  
+            <span class="navigation previous"> 
+                    <p class="top"> PREVIOUS </p>
+                    <p class="bottom"> PREVIOUS </p>
+            </span>           
             <div style="display: block;" name="web_interface">
                 <fieldset>
                     <div class="form_description">
@@ -79,7 +88,7 @@
                             <dd>
                                 <input type="text" name="http_host" id="http_host" value="${config['http_host']}" maxlength="40" title="i.e. localhost or 0.0.0.0"/>
                             </dd>
-                        </dl>
+                    </dl>
                         <dl>
                             <dt>
                                 <label for="http_port">
@@ -132,10 +141,7 @@
                     </div>
                 </fieldset>     
 
-                <div class="navigation next"> 
-                    <p class="top"> NEXT </p>
-                    <p class="bottom"> NEXT </p>
-                </div>              
+            
 
     
             </div>
@@ -292,19 +298,7 @@
                             </dd>
                         </dl>  
                     </div>
-                </fieldset> 
-                
-                
-                <div class="navigation previous"> 
-                    <p class="top"> PREVIOUS </p>
-                    
-                    <p class="bottom"> PREVIOUS </p>
-                </div>
-                <div class="navigation next"> 
-                    <p class="top"> NEXT </p>
-                    <p class="bottom"> NEXT </p>
-                </div>
-                
+                </fieldset>                 
             </div>
             <div> 
                 <fieldset>
@@ -501,16 +495,7 @@
                 
                 <div id="newznab_site_container">
                 </div>
-                
-                <div class="navigation previous"> 
-                    <p class="top"> PREVIOUS </p>
-                    
-                    <p class="bottom"> PREVIOUS </p>
-                </div>
-                <div class="navigation next"> 
-                    <p class="top"> NEXT </p>
-                    <p class="bottom"> NEXT </p>
-                </div>
+
             </div>
             <div> 
                 <fieldset>
@@ -694,16 +679,7 @@
                         </dl>   
                     </div>
                 </fieldset>
-                
-                <div class="navigation previous"> 
-                    <p class="top"> PREVIOUS </p>
-                    
-                    <p class="bottom"> PREVIOUS </p>
-                </div>
-                <div class="navigation next"> 
-                    <p class="top"> NEXT </p>
-                    <p class="bottom"> NEXT </p>
-                </div>
+
             </div>
             <div> 
                 <fieldset>
@@ -1011,22 +987,14 @@
                             </div>
                         </div>
                 </fieldset>   
-                <div class="navigation previous"> 
-                    <p class="top"> PREVIOUS </p>
-                    
-                    <p class="bottom"> PREVIOUS </p>
-                </div>
+
             </div>  
         </div>
         <p class="center">
             <input type="submit" id="submit" value="Save Changes">
         </p>
     </form> 
-    
-    <!--div id="nextButton"> 
-        <p id="nextText"> NEXT </p>
-    </div-->
-    
+        
     
     <div class="overlay " id="add_newznab">
   
@@ -1068,7 +1036,9 @@
 
     </div>
     <p id="test_data"></p>
+    <div id="floating_next">Go to<br /><span /></div>
     
+    <div id="floating_prev">Go to<br /><span /></div>
 </%def>
 
 <%def name="javascriptIncludes()">
@@ -1079,244 +1049,6 @@
     
     <script src="js/libs/jquery.dataTables.min.js"></script>
 
-    <script>
-        var triggers;
-        
-        // generated in python, used to load saved newsnab sites
-        var existingNewznabName = [];
-        var existingNewznabUrl = [];
-        var existingNewznabApiKey = [];
-        var existingNewznabId = [];
-
-        // perform JavaScript after the document is scriptable.
-         $(document).ready(function() {
-            // setup ul.tabs to work as tabs for each div directly under div.panes
-            $("ul#subhead_menu").tabs("div.panes > div");
-            
-            // setup tooltips on inputs
-            $("div.panes :input").tooltip({
-
-                // place tooltip on the right edge
-                position: "center right",
-
-                // a little tweaking of the position
-                offset: [-2, 10],
-
-                // use the built-in fadeIn/fadeOut effect
-                effect: "fade",
-
-                // custom opacity setting
-                opacity: 0.8
-
-            });
-            
-            // setup form validator for newznab popup
-            $("#add_newznab_form").validator({ 
-                position: 'top left', 
-                offset: [-12, 0],
-                message: '<div><em /></div>' // em element is the arrow
-            });
-            
-            // config popup form for newznab
-            triggers = $("#add_newznab_button").overlay({mask: '#000', effect: 'apple'});
-            
-                            
-            // setup existing newznab sites 
-            var newznabNumber = existingNewznabName.length;
-            for(var i = 0; i < newznabNumber; i++) {
-                addNewNewzNabSite(existingNewznabName[i], existingNewznabUrl[i], existingNewznabApiKey[i], existingNewznabId[i]);
-            }
-            
-            // assign handlers to form items
-            $("#nzb_handler").change(function() {changeNzbHandler();});
-            $("input#nzbmatrix").change(function() {toggleDetailsSection("nzbmatrix");});
-            $("input#nzbsorg").change(function() {toggleDetailsSection("nzbsorg");});
-            $("input#newzbin").change(function() {toggleDetailsSection("newzbin");});
-            $("input#newznab").change(function() {toggleDetailsSection("newznab");});
-            $("input#detect_bitrate").change(function() {toggleDetailsSection("detect_bitrate", true);});        
-            $("input#use_advanced_encoding").change(function() {
-                toggleDetailsSection("use_advanced_encoding", false, "advanced_encode_options_details");
-                toggleDetailsSection("use_advanced_encoding", true, "standard_audio_details");
-            });
-            $("input#encode").change(function() {toggleDetailsSection("encode");});
-            $("input#folder_format").keyup(function() {generateFolderFormatExample();});
-            $("input#file_format").keyup(function() {generateFileFormatExample();});         
-            $("input#submit").click(function() {submitForm();});              
-            $("input[name='preferred_quality']").change(function() {toggleDetailsSection("preferred_bitrate");});
-            
-            $("select#encoder").change(function() {changeEncoderSettings();});
-            
-            $("select#encodervbrcbr").change(function() {changeEncoderVbrCbrSettings();});
-
-            // set initial state of form items
-            changeNzbHandler();
-            generateFolderFormatExample();
-            generateFileFormatExample();
-            
-            $("#standard_audio_details").toggle(!$("input#use_advanced_encoding")[0].checked);
-            $("#advanced_encode_options_details").toggle($("input#use_advanced_encoding")[0].checked);             
-            $("#nzbmatrix_details").toggle($("input#nzbmatrix")[0].checked);
-            $("#nzbsorg_details").toggle($("input#nzbsorg")[0].checked);
-            $("#newzbin_details").toggle($("input#newzbin")[0].checked);
-            $("#encode_details").toggle($("input#encode")[0].checked);
-            $("#detect_bitrate_details").toggle(!$("input#detect_bitrate")[0].checked);
-
-            $("#preferred_bitrate_details").toggle($("#preferred_bitrate")[0].checked);
-            $("dl:has(input[type='checkbox']), dl:has(input[type='radio']), dl:has(select)").each(function() {
-                this.className += " flow";
-            });
-            changeEncoderSettings();
-            changeEncoderVbrCbrSettings();
-            
-            
-            // setup next & prev buttons
-            var currentTabIndex = $("ul#subhead_menu").data("tabs").getIndex();
-            var currentPane = $("ul#subhead_menu").data("tabs").getCurrentPane();
-            currentPane.mousemove(function() {
-             var args= arguments[0];
-               
-             $("#test_data")[0].innerHTML = args.layerX + " " + args.target.clientWidth + " " + args.originalEvent.layerX + " " + args.clientX;
-                
-            
-            
-            });
-            
-            var nextButton = $(".next");
-            nextButton.mousemove(function() {
-                var args= arguments[0];
-               var opacity = args.layerX/args.target.clientWidth;
-                opacity = ((opacity + 0.1) * 9) / 10;
-                args.currentTarget.style.opacity=opacity;
-                
-            });
-            nextButton.mouseout(function() {
-                var args= arguments[0];
-                args.currentTarget.style.opacity=0.1;
-            });
-            nextButton.click(function() {
-                $("ul#subhead_menu").data("tabs").next();
-            });
-            
-            
-            
-           var previousButton = $(".previous");
-            previousButton.mousemove(function() {
-                var args= arguments[0];
-               var opacity = (args.target.clientWidth-args.layerX)/args.target.clientWidth;
-                opacity = ((opacity + 0.1) * 9) / 10;
-                args.currentTarget.style.opacity=opacity;
-               
-            });
-            previousButton.mouseout(function() {
-                var args= arguments[0];
-                args.currentTarget.style.opacity=0.1;
-            });
-            previousButton.click(function() {
-                $("ul#subhead_menu").data("tabs").prev();
-            });
-            
-            if(currentTabIndex > 0) {
-                // setup prev button
-                
-            }
-            
-        });
-        
-        function changeEncoderSettings() {
-            var selectedEncoderType = $("select#encoder option:selected").text().trim();
-            if(selectedEncoderType == "lame") {
-                $("#encoderoutputformat_mp3")[0].selected = "selected";
-                $("#encoderoutputformat_ogg")[0].style.display = "none";
-                $("#encoderoutputformat_m4a")[0].style.display = "none";
-            } else {
-                $("#encoderoutputformat_ogg")[0].style.display = "";
-                $("#encoderoutputformat_m4a")[0].style.display = "";           
-            }
-        }
-       function changeEncoderVbrCbrSettings() {     
-            var selectedEncoderVbrCbrType = $("select#encodervbrcbr option:selected").text().trim();
-            if(selectedEncoderVbrCbrType == "vbr") {
-                $("#bitrate_container").slideUp();
-                $("#samplingfrequency_container").slideUp();
-                $("#encoderquality_container").slideDown(); 
-            } else {
-                $("#bitrate_container").slideDown();
-                $("#samplingfrequency_container").slideDown();
-                $("#encoderquality_container").slideUp();
-            }
-        }
-
-        $("#add_newznab form").submit(function(e) {
-            
-            // close the overlay
-            triggers.eq(0).overlay().close();
-
-            // get user input
-            var name = $("#add_newznab_name", this).val();
-            var url = $("#add_newznab_url", this).val();
-            var apikey = $("#add_newznab_apikey", this).val();
-            addNewNewzNabSite(name, url, apikey);
-            
-            // do not submit the form
-            return e.preventDefault();
-        });
-        
-        function addNewNewzNabSite(name, url, apikey) {
-            var newznab_template = $("#newznab_template").html();
-        
-            newznab_template = newznab_template.replace(/NAME/g, name)
-                                .replace(/URL/g, url)
-                                .replace(/APIKEY/g, apikey);
-            $("#newznab_site_container").append($(newznab_template));        
-        }
-        
-        function submitForm() {
-            var currentTab = $("ul#subhead_menu").data("tabs").getCurrentTab();
-            $("input#selected_tab").val(currentTab[0].hash);
-            return true;
-        }
-        
-        function generateFolderFormatExample() {
-            var formattedString = $("input#folder_format").val();
-            formattedString = formattedString.replace(/lowerfirst/g, "p")
-                                             .replace(/first/g, "P")
-                                             .replace(/artist/g, "Propagandhi")
-                                             .replace(/album/g, "Today's Empires, Tomorrow's Ashes")
-                                             .replace(/year/g, "2001");
-            $("#folder_format_example").text(formattedString);
-        }        
-        function generateFileFormatExample() {        
-            var formattedString = $("input#file_format").val();
-            formattedString = formattedString.replace(/tracknumber/g, "4")
-                                             .replace(/title/g, "Back to the Motor League")
-                                             .replace(/artist/g, "Propagandhi")
-                                             .replace(/album/g, "Today's Empires, Tomorrow's Ashes")
-                                             .replace(/year/g, "2001");
-            $("#file_format_example").text(formattedString + ".mp3");
-        }
-        
-        
-        function toggleDetailsSection(checkboxName, inverse, detailName) {
-            inverse = arguments.length > 1 ? inverse : false;
-            detailName = arguments.length > 2 ? detailName : checkboxName + "_details";
-            
-            var checked = $("input#" + checkboxName)[0].checked;
-            checked = inverse ? !checked : checked;
-        
-            if(checked) {
-                $("#" + detailName).slideDown();
-            } else {
-                $("#" + detailName).slideUp();
-            }
-        }
-        
-        function changeNzbHandler() {
-            var handlerSections = $("#handler_sections > fieldset");
-            handlerSections.each(function() {
-                this.style.display = "none";
-            })
-            handlerSections[$("#nzb_handler")[0].selectedIndex].style.display = "block";
-        }
-    </script>
+    <script src="js/config.js"></script>
 </%def>
 
