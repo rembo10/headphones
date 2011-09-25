@@ -496,10 +496,15 @@ def preprocess(resultlist):
                 d = minidom.parseString(nzb)
                 node = d.documentElement
                 nzbfiles = d.getElementsByTagName("file")
+                skipping = False
                 for nzbfile in nzbfiles:
-                    if nzbfile.getAttribute("date") < (time.time() - usenet_retention * 86400):
-                        logger.error('NZB contains a file out of your retention. Skipping.')
-                        continue
+                    if int(nzbfile.getAttribute("date")) < (time.time() - usenet_retention * 86400):
+                        logger.info('NZB contains a file out of your retention. Skipping.')
+                        skipping = True
+                        break
+                if skipping:
+                    continue
+
                     #TODO: Do we want rar checking in here to try to keep unknowns out?
                     #or at least the option to do so?
             except ExpatError:
