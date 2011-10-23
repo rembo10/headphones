@@ -39,7 +39,7 @@ def libraryScan(dir=None):
 	for r,d,f in os.walk(dir):
 		for files in f:
 			# MEDIA_FORMATS = music file extensions, e.g. mp3, flac, etc
-			if any(files.endswith('.' + x) for x in headphones.MEDIA_FORMATS):
+			if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
 
 				song = os.path.join(r, files)
 				file = unicode(os.path.join(r, files), headphones.SYS_ENCODING, errors='replace')
