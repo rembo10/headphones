@@ -124,7 +124,11 @@ ul#nav li a { padding: 5px; font-size: 16px; font-weight: bold; color: #330000; 
 ul#nav li a:hover { background-color: #a3e532; }
 
 div#subhead_container { height: 30px; width:100%; min-width: 1000px; background-color:#330000; float: left; list-style-type: none; z-index: 998; overflow: hidden; }
-ul#subhead_menu { margin-top: 5px; }
+ul#subhead_menu { 
+    margin-top: 5px; 
+    clear:right;    
+    margin-left: 74px;
+}
 ul#subhead_menu li { width: 100%; height: 100%; display: inline; }
 ul#subhead_menu li a { padding: 5px 15px 10px 15px; vertical-align: middle; color: white; font-size: 16px; text-decoration: none; }
 ul#subhead_menu li a:hover { width: 100%; height: 100%; background-color: #grey; }
@@ -138,7 +142,7 @@ div#main { margin: 0; padding: 80px 0 0 0; }
 .table_wrapper_left { padding: 25px; background-color: #ffffff; float: left; width: 40%; min-height: 100px; margin-top: 25px; margin-left: 30px; margin-right: auto; -moz-border-radius: 20px; border-radius: 20px; }
 .table_wrapper_right{ padding: 25px; background-color: #ffffff; width: 40%; min-height: 100px; margin-top: 25px; margin-left: auto; margin-right: 30px; -moz-border-radius: 20px; border-radius: 20px; }
 
-.configtable { font-size: 14px; line-height:18px; }
+.configtable { font-size: 14px; line-height:18px; width:100%; }
 .configtable td { width: 350px; padding: 10px; }
 .configtable td#middle { vertical-align: middle; }
 
