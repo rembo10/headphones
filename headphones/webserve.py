@@ -177,6 +177,17 @@ class WebInterface(object):
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 	unqueueAlbum.exposed = True
 	
+	def deleteAlbum(self, AlbumID, ArtistID=None):
+		logger.info(u"Deleting all traces of album: " + AlbumID)
+		myDB = db.DBConnection()
+		myDB.action('DELETE from albums WHERE AlbumID=?', [AlbumID])
+		myDB.action('DELETE from tracks WHERE AlbumID=?', [AlbumID])
+		if ArtistID:
+			raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
+		else:
+			raise cherrypy.HTTPRedirect("home")
+	deleteAlbum.exposed = True
+
 	def upcoming(self):
 		myDB = db.DBConnection()
 		upcoming = myDB.select("SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC")
