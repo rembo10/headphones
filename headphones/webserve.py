@@ -90,7 +90,7 @@ class WebInterface(object):
 		controlValueDict = {'ArtistID': ArtistID}
 		newValueDict = {'IncludeExtras': 0}
 		myDB.upsert("artists", newValueDict, controlValueDict)
-		extraalbums = myDB.select('SELECT AlbumID from albums WHERE ArtistID=? AND Type!="Album"', [ArtistID])
+		extraalbums = myDB.select('SELECT AlbumID from albums WHERE ArtistID=? AND Status="Skipped" AND Type!="Album"', [ArtistID])
 		for album in extraalbums:
 			myDB.action('DELETE from tracks WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
 			myDB.action('DELETE from albums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
