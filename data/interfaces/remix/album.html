@@ -7,6 +7,7 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<ul id="subhead_menu">
+			<li><a href="deleteAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">Delete Album</a></li>
 			%if album['Status'] == 'Skipped':
 			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False">Mark Album as Wanted</a></li>
 			%elif album['Status'] == 'Wanted':
