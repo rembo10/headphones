@@ -27,9 +27,9 @@ import logging
 import sqlite3
 import errno
 
-from lib.beets import library
-from lib.beets import plugins
-from lib.beets import util
+from beets import library
+from beets import plugins
+from beets import util
 
 # Constants.
 CONFIG_PATH_VAR = 'BEETSCONFIG'

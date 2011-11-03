@@ -23,14 +23,14 @@ import time
 import itertools
 import re
 
-from lib.beets import ui
-from lib.beets.ui import print_, decargs
-from lib.beets import autotag
-import lib.beets.autotag.art
-from lib.beets import plugins
-from lib.beets import importer
-from lib.beets.util import syspath, normpath, ancestry
-from lib.beets import library
+from beets import ui
+from beets.ui import print_, decargs
+from beets import autotag
+import beets.autotag.art
+from beets import plugins
+from beets import importer
+from beets.util import syspath, normpath, ancestry
+from beets import library
 
 # Global logger.
 log = logging.getLogger('beets')

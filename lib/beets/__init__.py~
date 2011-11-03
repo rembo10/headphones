@@ -15,4 +15,5 @@
 __version__ = '1.0b11'
 __author__ = 'Adrian Sampson <adrian@radbox.org>'
 
-from lib.beets.library import Library
+import lib.beets.library as beetslibrary
+Library = beetslibrary.Library

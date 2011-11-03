@@ -17,13 +17,13 @@
 import logging
 
 from . import musicbrainz3
-import lib.beets.autotag.hooks
-import lib.beets
+import beets.autotag.hooks
+import beets
 
 SEARCH_LIMIT = 5
 VARIOUS_ARTISTS_ID = '89ad4ac3-39f7-470e-963a-56509c546377'
 
-musicbrainz3._useragent = 'beets/%s' % lib.beets.__version__
+musicbrainz3._useragent = 'beets/%s' % beets.__version__
 
 class ServerBusyError(Exception): pass
 class BadResponseError(Exception): pass
@@ -55,7 +55,7 @@ def track_info(recording):
     """Translates a MusicBrainz recording result dictionary into a beets
     ``TrackInfo`` object.
     """
-    info = lib.beets.autotag.hooks.TrackInfo(recording['title'],
+    info = beets.autotag.hooks.TrackInfo(recording['title'],
                                          recording['id'])
 
     if 'artist-credit' in recording: # XXX: when is this not included?
@@ -77,7 +77,7 @@ def album_info(release):
     tracks = []
     for medium in release['medium-list']:
         tracks.extend(i['recording'] for i in medium['track-list'])
-    info = lib.beets.autotag.hooks.AlbumInfo(
+    info = beets.autotag.hooks.AlbumInfo(
         release['title'],
         release['id'],
         artist['name'],
