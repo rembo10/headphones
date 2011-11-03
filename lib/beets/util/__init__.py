@@ -16,6 +16,8 @@
 import os
 import sys
 import re
+import shutil
+from collections import defaultdict
 
 MAX_FILENAME_LENGTH = 200
 
@@ -82,11 +84,12 @@ def mkdirall(path):
         if not os.path.isdir(syspath(ancestor)):
             os.mkdir(syspath(ancestor))
 
-def prune_dirs(path, root):
+def prune_dirs(path, root, clutter=('.DS_Store', 'Thumbs.db')):
     """If path is an empty directory, then remove it. Recursively
     remove path's ancestry up to root (which is never removed) where
     there are empty directories. If path is not contained in root, then
-    nothing is removed.
+    nothing is removed. Filenames in clutter are ignored when
+    determining emptiness.
     """
     path = normpath(path)
     root = normpath(root)
@@ -100,9 +103,18 @@ def prune_dirs(path, root):
         ancestors.append(path)
         ancestors.reverse()
         for directory in ancestors:
-            try:
-                os.rmdir(syspath(directory))
-            except OSError:
+            directory = syspath(directory)
+            if not os.path.exists(directory):
+                # Directory gone already.
+                continue
+
+            if all(fn in clutter for fn in os.listdir(directory)):
+                # Directory contains only clutter (or nothing).
+                try:
+                    shutil.rmtree(directory)
+                except OSError:
+                    break
+            else:
                 break
 
 def components(path, pathmod=None):
@@ -162,12 +174,14 @@ def syspath(path, pathmod=None):
             path = path.decode('utf8', 'replace')
 
     # Add the magic prefix if it isn't already there
-    # Not sure what the magic prefix he was adding actually does but if it's a network path
-    #  it breaks when we add the prefix - ignore the addition if the \\ is already there
-    if not path.startswith(u'\\\\?\\') and not path.startswith(u'\\'):
+    if not path.startswith(u'\\\\?\\'):
         path = u'\\\\?\\' + path
 
     return path
+
+def samefile(p1, p2):
+    """Safer equality for paths."""
+    return shutil._samefile(syspath(p1), syspath(p2))
 
 def soft_remove(path):
     """Remove the file if it exists."""
@@ -175,13 +189,44 @@ def soft_remove(path):
     if os.path.exists(path):
         os.remove(path)
 
+def _assert_not_exists(path, pathmod=None):
+    """Raises an OSError if the path exists."""
+    pathmod = pathmod or os.path
+    if pathmod.exists(path):
+        raise OSError('file exists: %s' % path)
+
+def copy(path, dest, replace=False, pathmod=None):
+    """Copy a plain file. Permissions are not copied. If dest already
+    exists, raises an OSError unless replace is True. Has no effect if
+    path is the same as dest. Paths are translated to system paths
+    before the syscall.
+    """
+    if samefile(path, dest):
+        return
+    path = syspath(path)
+    dest = syspath(dest)
+    _assert_not_exists(dest, pathmod)
+    return shutil.copyfile(path, dest)
+
+def move(path, dest, replace=False, pathmod=None):
+    """Rename a file. dest may not be a directory. If dest already
+    exists, raises an OSError unless replace is True. Hos no effect if
+    path is the same as dest. Paths are translated to system paths.
+    """
+    if samefile(path, dest):
+        return
+    path = syspath(path)
+    dest = syspath(dest)
+    _assert_not_exists(dest, pathmod)
+    return shutil.move(path, dest)
+
 # Note: POSIX actually supports \ and : -- I just think they're
 # a pain. And ? has caused problems for some.
 CHAR_REPLACE = [
     (re.compile(r'[\\/\?]|^\.'), '_'),
     (re.compile(r':'), '-'),
 ]
-CHAR_REPLACE_WINDOWS = re.compile('["\*<>\|]|^\.|\.$| +$'), '_'
+CHAR_REPLACE_WINDOWS = re.compile(r'["\*<>\|]|^\.|\.$| +$'), '_'
 def sanitize_path(path, pathmod=None):
     """Takes a path and makes sure that it is legal. Returns a new path.
     Only works with fragments; won't work reliably on Windows when a
@@ -255,3 +300,22 @@ def levenshtein(s1, s2):
         previous_row = current_row
  
     return previous_row[-1]
+
+def plurality(objs):
+    """Given a sequence of comparable objects, returns the object that
+    is most common in the set and the frequency of that object.
+    """
+    # Calculate frequencies.
+    freqs = defaultdict(int)
+    for obj in objs:
+        freqs[obj] += 1
+
+    # Find object with maximum frequency.
+    max_freq = 0
+    res = None
+    for obj, freq in freqs.items():
+        if freq > max_freq:
+            max_freq = freq
+            res = obj
+
+    return res, max_freq

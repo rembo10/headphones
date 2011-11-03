@@ -107,5 +107,3 @@ def apply_metadata(items, album_info):
         
         # Compilation flag.
         item.comp = album_info.va
-	# Uncomment to get rid of comments tag
-	item.comments = 'tagged by headphones/beets'

@@ -1,5 +1,5 @@
 # This file is part of beets.
-# Copyright 2010, Adrian Sampson.
+# Copyright 2011, Adrian Sampson.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -21,6 +21,9 @@ from collections import defaultdict
 
 PLUGIN_NAMESPACE = 'beetsplug'
 DEFAULT_PLUGINS = []
+
+# Plugins using the Last.fm API can share the same API key.
+LASTFM_KEY = '2dc3914abf35f0d9c92d97d8f8e42b43'
 
 # Global logger.
 log = logging.getLogger('beets')
@@ -52,14 +55,14 @@ class BeetsPlugin(object):
         return 0.0, 0.0
 
     def candidates(self, items):
-        """Should return a sequence of MusicBrainz info dictionaries
-        that match the album whose items are provided.
+        """Should return a sequence of AlbumInfo objects that match the
+        album whose items are provided.
         """
         return ()
 
     def item_candidates(self, item):
-        """Should return a sequence of MusicBrainz track info
-        dictionaries that match the item provided.
+        """Should return a sequence of TrackInfo objects that match the
+        item provided.
         """
         return ()
 

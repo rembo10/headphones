@@ -19,7 +19,7 @@ import sys
 import logging
 import os
 
-from lib.beets.autotag.mb import album_for_id
+from beets.autotag.mb import album_for_id
 
 IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg']
 COVER_NAMES = ['cover', 'front', 'art', 'album', 'folder']

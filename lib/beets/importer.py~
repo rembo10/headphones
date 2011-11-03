@@ -21,13 +21,13 @@ import logging
 import pickle
 from collections import defaultdict
 
-from lib.beets import autotag
-from lib.beets import library
-import lib.beets.autotag.art
-from lib.beets import plugins
-from lib.beets.util import pipeline
-from lib.beets.util import syspath, normpath, plurality
-from lib.beets.util.enumeration import enum
+from beets import autotag
+from beets import library
+import beets.autotag.art
+from beets import plugins
+from beets.util import pipeline
+from beets.util import syspath, normpath, plurality
+from beets.util.enumeration import enum
 
 action = enum(
     'SKIP', 'ASIS', 'TRACKS', 'MANUAL', 'APPLY', 'MANUAL_ID',
@@ -665,7 +665,7 @@ def fetch_art(config):
             continue
 
         if task.should_fetch_art():
-            artpath = lib.beets.autotag.art.art_for_album(task.info, task.path)
+            artpath = beets.autotag.art.art_for_album(task.info, task.path)
 
             # Save the art if any was found.
             if artpath:
