@@ -54,6 +54,11 @@
 	<div class="table_wrapper">
         <a name="download"><h1><u>Download Settings</u></h1></a>
         <table class="configtable" summary="Download Settings">
+	    <tr>
+                <td>
+                    <h2>SABnzbd:</h2>
+                </td>
+            </tr>
             <tr>
                 <td>
                     <h3>SABnzbd Host:</h3><input type="text" name="sab_host" value="${config['sab_host']}" size="30" maxlength="40"><br>
@@ -107,11 +112,48 @@
                     <h3>Usenet Retention:<input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="20" maxlength="40"></h3>
                 </td>
             </tr>
+            
+            
+		<tr>
+                <td>
+                    <br><br><br><br><h2>Torrent:</h2>
+                </td>
+            </tr>
+
+		<tr>
+                <td>
+                    <h3>Black Hole Directory:</h3><input type="text" name="torrentblackhole_dir" value="${config['torrentblackhole_dir']}" size="50"><br>
+
+                    <i class="smalltext">Folder your Download program watches for Torrents</i>
+                </td>
+
+                <td>
+                    <h3>Minimum seeders:</h3><input type="text" name="numberofseeders" value="${config['numberofseeders']}" size="5"><br>
+
+                    <i class="smalltext">Number of minimum seeders a torrent must have to be accepted</i>
+                </td>
+            </tr>
+
+		<tr>
+                <td>
+                    <h3>Music Download Directory:</h3><input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="50"><br>
+
+                    <i class="smalltext">Full path to the directory where your torrent client downloads your music<br>
+                    i.e. /Users/name/Downloads/music</i>
+                </td>
+
+                <td></td>
+            </tr>
         </table>
 	</div>
 	<div class="table_wrapper">
         <a name="providers"><h1><u>Search Providers</u></h1></a>
         <table class="configtable" summary="Search Providers">
+	    <tr>
+                <td>
+                    <h2>SABnzbd:</h2>
+                </td>
+            </tr>
             <tr>
                 <td id="middle">
                     <h3>NZBMatrix: <input type="checkbox" name="nzbmatrix" value="1" ${config['use_nzbmatrix']} /></h3>
@@ -179,6 +221,29 @@
                 <td>
                     <h3>Newzbin Password: </h3>
                       <input type="text" name="newzbin_password" value="${config['newzbin_pass']}" size="36" maxlength="40">
+                </td>
+            </tr>
+            
+            
+		<tr>
+                <td>
+                    <br><br><br><br><h2>Torrent:</h2><br>
+                </td>
+            </tr>
+
+		<tr>
+		    <td id="middle">
+                    <h3>Isohunt: <input type="checkbox" name="use_isohunt" value="1" ${config['use_isohunt']} /></h3><br>
+                </td>
+
+		    <td id="middle">
+                    <h3>Mininova: <input type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /></h3><br>
+                </td>
+            </tr>
+
+		<tr>
+		    <td id="middle">
+                    <h3>Kick Ass Torrents: <input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /></h3>
                 </td>
             </tr>
         </table>
