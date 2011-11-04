@@ -519,48 +519,61 @@ def forcePostProcess():
 		logger.error('No DOWNLOAD_DIR has been set. Set "Music Download Directory:" to your SAB download directory on the settings page.')
 		return
 	else:
-		download_dir = headphones.DOWNLOAD_DIR.encode('utf-8')
+		processing = "nzb"
+		processing_next = "torrent"
+		while processing != "done":
+			if headphones.DOWNLOAD_DIR and processing == "nzb":
+				download_dir = headphones.DOWNLOAD_DIR.encode('utf-8')
+				if not headphones.DOWNLOAD_TORRENT_DIR:
+					processing_next = "done"
+			if headphones.DOWNLOAD_TORRENT_DIR and processing == "torrent":
+				download_dir = headphones.DOWNLOAD_TORRENT_DIR.encode('utf-8')
+				processing_next = "done"
+			if not headphones.DOWNLOAD_DIR and processing == "nzb":
+				download_dir = headphones.DOWNLOAD_TORRENT_DIR.encode('utf-8')
+				processing_next = "done"
 		
-	logger.info('Checking to see if there are any folders to process in download_dir: %s' % download_dir)
-	# Get a list of folders in the download_dir
-	folders = [d for d in os.listdir(download_dir) if os.path.isdir(os.path.join(download_dir, d))]
+			logger.info('Checking to see if there are any folders to process in download_dir: %s' % download_dir)
+			# Get a list of folders in the download_dir
+			folders = [d for d in os.listdir(download_dir) if os.path.isdir(os.path.join(download_dir, d))]
 	
-	if len(folders):
-		logger.info('Found %i folders to process' % len(folders))
-		pass
-	else:
-		logger.info('Found no folders to process in: %s' % download_dir)
-		return
-	
-	# Parse the folder names to get artist album info
-	for folder in folders:
-	
-		albumpath = os.path.join(download_dir, folder)
-		folder = unicode(folder, headphones.SYS_ENCODING, errors='replace')
-		
-		logger.info('Processing: %s' % folder)
-		
-		try:
-			name, album, year = helpers.extract_data(folder)
-		except:
-			logger.info("Couldn't parse " + folder + " into any valid format.")
-			continue
-		if name and album and year:
-			
-			myDB = db.DBConnection()
-			release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
-			if release:
-				logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
-				verify(release['AlbumID'], albumpath)
+			if len(folders):
+				logger.info('Found %i folders to process' % len(folders))
+				pass
 			else:
-				logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (name, album))
-				from headphones import mb
+				logger.info('Found no folders to process in: %s' % download_dir)
+				return
+	
+			# Parse the folder names to get artist album info
+			for folder in folders:
+			
+				albumpath = os.path.join(download_dir, folder)
+				folder = unicode(folder, headphones.SYS_ENCODING, errors='replace')
+		
+				logger.info('Processing: %s' % folder)
+			
 				try:
-					rgid = mb.findAlbumID(helpers.latinToAscii(name), helpers.latinToAscii(album))
+					name, album, year = helpers.extract_data(folder)
 				except:
-					logger.error('Can not get release information for this album')
+					logger.info("Couldn't parse " + folder + " into any valid format.")
 					continue
-				if rgid:
-					verify(rgid, albumpath)
-				else:
-					logger.info('No match found on MusicBrainz for: %s - %s' % (name, album))
+				if name and album and year:
+					
+					myDB = db.DBConnection()
+					release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
+					if release:
+						logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
+						verify(release['AlbumID'], albumpath)
+					else:
+						logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (name, album))
+						from headphones import mb
+						try:
+							rgid = mb.findAlbumID(helpers.latinToAscii(name), helpers.latinToAscii(album))
+						except:
+							logger.error('Can not get release information for this album')
+							continue
+						if rgid:
+							verify(rgid, albumpath)
+						else:
+							logger.info('No match found on MusicBrainz for: %s - %s' % (name, album))
+			processing = processing_next			
