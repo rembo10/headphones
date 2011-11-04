@@ -140,9 +140,9 @@ class WebInterface(object):
 			newValueDict = {'Status': newaction}
 			myDB.upsert("albums", newValueDict, controlValueDict)
 			if action == 'Wanted':
-				searcher.searchNZB(mbid, new=False)
+				searcher.searchforalbum(mbid, new=False)
 			if action == 'WantedNew':
-				searcher.searchNZB(mbid, new=True)
+				searcher.searchforalbum(mbid, new=True)
 		if ArtistID:
 			raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 		else:
@@ -161,7 +161,7 @@ class WebInterface(object):
 		controlValueDict = {'AlbumID': AlbumID}
 		newValueDict = {'Status': 'Wanted'}
 		myDB.upsert("albums", newValueDict, controlValueDict)
-		searcher.searchNZB(AlbumID, new)
+		searcher.searchforalbum(AlbumID, new)
 		if ArtistID:
 			raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 		else:
@@ -271,7 +271,7 @@ class WebInterface(object):
 	
 	def forceSearch(self):
 		from headphones import searcher
-		threading.Thread(target=searcher.searchNZB).start()
+		threading.Thread(target=searcher.searchforalbum).start()
 		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 	forceSearch.exposed = True
