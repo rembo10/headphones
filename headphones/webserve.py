@@ -343,6 +343,12 @@ class WebInterface(object):
 					"use_newzbin" : checked(headphones.NEWZBIN),
 					"newzbin_uid" : headphones.NEWZBIN_UID,
 					"newzbin_pass" : headphones.NEWZBIN_PASSWORD,
+					"torrentblackhole_dir" : headphones.TORRENTBLACKHOLE_DIR,
+					"download_torrent_dir" : headphones.DOWNLOAD_TORRENT_DIR,
+					"numberofseeders" : headphones.NUMBEROFSEEDERS,
+					"use_isohunt" : checked(headphones.ISOHUNT),
+					"use_kat" : checked(headphones.KAT),
+					"use_mininova" : checked(headphones.MININOVA),
 					"pref_qual_0" : radio(headphones.PREFERRED_QUALITY, 0),
 					"pref_qual_1" : radio(headphones.PREFERRED_QUALITY, 1),
 					"pref_qual_3" : radio(headphones.PREFERRED_QUALITY, 3),
@@ -381,6 +387,7 @@ class WebInterface(object):
 		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
 		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
 		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
+		torrentblackhole_dir=None, download_torrent_dir=None, numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, 
 		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, interface=None, log_dir=None,
 		encode=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0):
 
@@ -410,6 +417,12 @@ class WebInterface(object):
 		headphones.NEWZBIN = newzbin
 		headphones.NEWZBIN_UID = newzbin_uid
 		headphones.NEWZBIN_PASSWORD = newzbin_password
+		headphones.TORRENTBLACKHOLE_DIR = torrentblackhole_dir
+		headphones.NUMBEROFSEEDERS = numberofseeders
+		headphones.DOWNLOAD_TORRENT_DIR = download_torrent_dir
+		headphones.ISOHUNT = use_isohunt
+		headphones.KAT = use_kat
+		headphones.MININOVA = use_mininova
 		headphones.PREFERRED_QUALITY = int(preferred_quality)
 		headphones.PREFERRED_BITRATE = preferred_bitrate
 		headphones.DETECT_BITRATE = detect_bitrate
