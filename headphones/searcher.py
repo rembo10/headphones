@@ -417,7 +417,7 @@ def searchNZB(albumid=None, new=False):
 							break
 					else:
 						logger.info('No more results found for %s' % term)
-						return
+						return "none"
 
             logger.info(u"Pre-processing result")
             
@@ -448,6 +448,11 @@ def searchNZB(albumid=None, new=False):
                         
                 myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
                 myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", nzb_folder_name])
+                return "found"
+        else:      
+            return "none"
+
+
 
 def verifyresult(title, artistterm, term):
 	
