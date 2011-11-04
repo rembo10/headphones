@@ -150,6 +150,11 @@
         <a name="providers"><h1><u>Search Providers</u></h1></a>
         <table class="configtable" summary="Search Providers">
             <tr>
+                <td>
+                    <h2>SABnzbd:</h2>
+                </td>
+            </tr>
+            <tr>
                 <td id="middle">
                     <h3>NZBMatrix: <input type="checkbox" name="nzbmatrix" value="1" ${config['use_nzbmatrix']} /></h3>
                 </td>
@@ -218,6 +223,31 @@
                       <input type="text" name="newzbin_password" value="${config['newzbin_pass']}" size="36" maxlength="40">
                 </td>
             </tr>
+            
+            
+		<tr>
+                <td>
+                    <br><br><br><br><h2>Torrent:</h2><br>
+                </td>
+            </tr>
+
+		<tr>
+		    <td id="middle">
+                    <h3>Isohunt: <input type="checkbox" name="use_isohunt" value="1" ${config['use_isohunt']} /></h3><br>
+                </td>
+
+		    <td id="middle">
+                    <h3>Mininova: <input type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /></h3><br>
+                </td>
+            </tr>
+
+		<tr>
+		    <td id="middle">
+                    <h3>Kick Ass Torrents: <input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /></h3>
+                </td>
+            </tr>
+            
+            
         </table>
 	</div>
 	<div class="table_wrapper">
