@@ -80,7 +80,7 @@ BLACKHOLE_DIR = None
 USENET_RETENTION = None
 INCLUDE_EXTRAS = False
 
-NZB_SEARCH_INTERVAL = 360
+SEARCH_INTERVAL = 360
 LIBRARYSCAN_INTERVAL = 300
 DOWNLOAD_SCAN_INTERVAL = 5
 
@@ -185,7 +185,7 @@ def initialize():
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, GIT_PATH, \
                 CURRENT_VERSION, LATEST_VERSION, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
                 ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, \
-                ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, NZB_SEARCH_INTERVAL, \
+                ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
@@ -242,7 +242,7 @@ def initialize():
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', '')
         INCLUDE_EXTRAS = bool(check_setting_int(CFG, 'General', 'include_extras', 0))
         
-        NZB_SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'nzb_search_interval', 360)
+        SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'search_interval', 360)
         LIBRARYSCAN_INTERVAL = check_setting_int(CFG, 'General', 'libraryscan_interval', 300)
         DOWNLOAD_SCAN_INTERVAL = check_setting_int(CFG, 'General', 'download_scan_interval', 5)
         
@@ -440,7 +440,7 @@ def config_write():
     new_config['General']['mininova'] = int(MININOVA)
     new_config['General']['download_torrent_dir'] = DOWNLOAD_TORRENT_DIR
     
-    new_config['General']['nzb_search_interval'] = NZB_SEARCH_INTERVAL
+    new_config['General']['search_interval'] = SEARCH_INTERVAL
     new_config['General']['libraryscan_interval'] = LIBRARYSCAN_INTERVAL
     new_config['General']['download_scan_interval'] = DOWNLOAD_SCAN_INTERVAL
 
@@ -498,7 +498,7 @@ def start():
         # Start our scheduled background tasks
 
         SCHED.add_cron_job(updater.dbUpdate, hour=4, minute=0, second=0)
-        SCHED.add_interval_job(searcher.searchNZB, minutes=NZB_SEARCH_INTERVAL)
+        SCHED.add_interval_job(searcher.searchforalbum, minutes=SEARCH_INTERVAL)
         SCHED.add_interval_job(librarysync.libraryScan, minutes=LIBRARYSCAN_INTERVAL)
         SCHED.add_interval_job(versioncheck.checkGithub, minutes=300)
         SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
