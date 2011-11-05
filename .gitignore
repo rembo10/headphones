@@ -1,6 +1,7 @@
 # Compiled source #
 ###################
 *.pyc
+*.py~
 
 # Logs and databases #
 ######################
