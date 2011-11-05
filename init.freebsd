@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # PROVIDE: headphones
-# REQUIRE: sabnzbd
+# REQUIRE: DAEMON sabnzbd
 # KEYWORD: shutdown
 #
 # Add the following lines to /etc/rc.conf.local or /etc/rc.conf
@@ -19,6 +19,7 @@
 #     Default is same as headphones_dir.
 # headphones_pid:  The name of the pidfile to create.
 #     Default is headphones.pid in headphones_dir.
+PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 
 . /etc/rc.subr
 
