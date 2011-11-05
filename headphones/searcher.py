@@ -1,4 +1,4 @@
-import urllib, urllib2
+import urllib, urllib2, urlparse
 import lib.feedparser as feedparser
 from xml.dom import minidom
 from xml.parsers.expat import ExpatError
