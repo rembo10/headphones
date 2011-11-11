@@ -378,6 +378,13 @@ class WebInterface(object):
 					"encodervbrcbr": headphones.ENCODERVBRCBR,
 					"encoderquality": headphones.ENCODERQUALITY,
 					"encoderlossless": checked(headphones.ENCODERLOSSLESS)
+					"autowant_album" : checked(headphones.AUTOWANT_ALBUM),
+					"autowant_single" : checked(headphones.AUTOWANT_SINGLE),
+					"autowant_compilation" : checked(headphones.AUTOWANT_COMPILATION),
+					"autowant_remix" : checked(headphones.AUTOWANT_REMIX),
+					"autowant_ep" : checked(headphones.AUTOWANT_EP),
+					"autowant_live" : checked(headphones.AUTOWANT_LIVE),
+					"autowant_soundtrack" : checked(headphones.AUTOWANT_SOUNDTRACK)
 				}
 		return serve_template(templatename="config.html", title="Settings", config=config)	
 	config.exposed = True
@@ -389,7 +396,8 @@ class WebInterface(object):
 		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
 		torrentblackhole_dir=None, download_torrent_dir=None, numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, 
 		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, interface=None, log_dir=None,
-		encode=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0):
+		encode=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
+		autowant_album=0, autowant_single=0, autowant_compilation=0, autowant_remix=0, autowant_ep=0, autowant_live=0, autowant_soundtrack=0):
 
 		headphones.HTTP_HOST = http_host
 		headphones.HTTP_PORT = http_port
@@ -449,6 +457,13 @@ class WebInterface(object):
 		headphones.ENCODERVBRCBR = encodervbrcbr
 		headphones.ENCODERQUALITY = int(encoderquality)
 		headphones.ENCODERLOSSLESS = encoderlossless
+		headphones.AUTOWANT_ALBUM = autowant_album
+		headphones.AUTOWANT_SINGLE = autowant_single
+		headphones.AUTOWANT_COMPILATION = autowant_compilation
+		headphones.AUTOWANT_REMIX = autowant_remix
+		headphones.AUTOWANT_EP = autowant_ep
+		headphones.AUTOWANT_LIVE = autowant_live
+		headphones.AUTOWANT_SOUNDTRACK = autowant_soundtrack
 		
 		headphones.config_write()
 
