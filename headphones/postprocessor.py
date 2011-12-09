@@ -294,6 +294,7 @@ def moveFiles(albumpath, release, tracks):
 		
 	artist = release['ArtistName'].replace('/', '_')
 	album = release['AlbumTitle'].replace('/', '_')
+	releasetype = release['Type'].replace('/', '_')
 
 	if release['ArtistName'].startswith('The '):
 		sortname = release['ArtistName'][4:]
@@ -312,7 +313,8 @@ def moveFiles(albumpath, release, tracks):
 				'album':	album,
 				'year':		year,
 				'first':	firstchar,
-				'lowerfirst':	lowerfirst
+				'lowerfirst':	lowerfirst,
+                                'releasetype':  releasetype
 			}
 			
 	
