@@ -68,6 +68,14 @@ def addArtisttoDB(artistid, extrasonly=False):
 		return
 		
 	myDB = db.DBConnection()
+
+	# We need the current minimal info in the database instantly
+	# so we don't throw a 500 error when we redirect to the artistPage
+
+	controlValueDict = {"ArtistID":		artistid}
+	newValueDict = {"ArtistName":	"Artist ID: %s" % (artistid),
+			"Status":	"Loading"}
+	myDB.upsert("artists", newValueDict, controlValueDict)
 		
 	artist = mb.getArtist(artistid, extrasonly)
 	
