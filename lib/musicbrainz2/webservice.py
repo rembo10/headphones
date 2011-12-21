@@ -247,6 +247,7 @@ class WebService(IWebService):
 
 	def _openUrl(self, url, data=None):
 		userAgent = 'python-musicbrainz/' + musicbrainz2.__version__
+		userAgent = userAgent + ' ( https://github.com/rembo10/headphones/ )'		
 		req = urllib2.Request(url)
 		req.add_header('User-Agent', userAgent)
 		return self._opener.open(req, data)
