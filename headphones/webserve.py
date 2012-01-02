@@ -44,6 +44,8 @@ class WebInterface(object):
 		myDB = db.DBConnection()
 		artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
 		albums = myDB.select('SELECT * from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
+		if artist is None:
+			raise cherrypy.HTTPRedirect("home")
 		return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums)
 	artistPage.exposed = True
 	
