@@ -73,13 +73,28 @@ def addArtisttoDB(artistid, extrasonly=False):
 	# so we don't throw a 500 error when we redirect to the artistPage
 
 	controlValueDict = {"ArtistID":		artistid}
-	newValueDict = {"ArtistName":	"Artist ID: %s" % (artistid),
-			"Status":	"Loading"}
+
+	# Don't replace a known artist name with an "Artist ID" placeholder
+
+	dbartist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [artistid]).fetchone()
+	if dbartist is None:
+		newValueDict = {"ArtistName":	"Artist ID: %s" % (artistid),
+				"Status":	"Loading"}
+	else:
+		newValueDict = {"Status":	"Loading"}
+
 	myDB.upsert("artists", newValueDict, controlValueDict)
 		
 	artist = mb.getArtist(artistid, extrasonly)
 	
 	if not artist:
+		logger.warn("Error fetching artist info. ID: " + artistid)
+		if dbartist is None:
+			newValueDict = {"ArtistName":	"Fetch failed, try refreshing. (%s)" % (artistid),
+					"Status":	"Active"}
+		else:
+			newValueDict = {"Status":	"Active"}
+		myDB.upsert("artists", newValueDict, controlValueDict)
 		return
 	
 	if artist['artist_name'].startswith('The '):
