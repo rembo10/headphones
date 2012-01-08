@@ -151,7 +151,6 @@ class WebInterface(object):
 	
 	def addArtists(self, **args):
 		threading.Thread(target=importer.artistlist_to_mbids, args=[args, True]).start()
-		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 	addArtists.exposed = True
 	
