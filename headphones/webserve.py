@@ -82,7 +82,6 @@ class WebInterface(object):
 		newValueDict = {'IncludeExtras': 1}
 		myDB.upsert("artists", newValueDict, controlValueDict)
 		threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True]).start()
-		time.sleep(10)
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 	getExtras.exposed = True
 	
