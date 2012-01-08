@@ -271,7 +271,6 @@ class WebInterface(object):
 	def forceSearch(self):
 		from headphones import searcher
 		threading.Thread(target=searcher.searchforalbum).start()
-		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 	forceSearch.exposed = True
 	
