@@ -485,7 +485,6 @@ class WebInterface(object):
 
 	def addReleaseById(self, rid):
 		threading.Thread(target=importer.addReleaseById, args=[rid]).start()
-		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 	addReleaseById.exposed = True
 	
