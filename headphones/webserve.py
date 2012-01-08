@@ -266,7 +266,6 @@ class WebInterface(object):
 	def forceUpdate(self):
 		from headphones import updater
 		threading.Thread(target=updater.dbUpdate).start()
-		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 	forceUpdate.exposed = True
 	
