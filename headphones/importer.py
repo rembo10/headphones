@@ -59,6 +59,11 @@ def artistlist_to_mbids(artistlist, forced=False):
 	except Exception, e:
 		logger.warn('Failed to update arist information from Last.fm: %s' % e)
 		
+def addArtistIDListToDB(artistidlist):
+	# Used to add a list of artist IDs to the database in a single thread
+	logger.debug("Importer: Adding artist ids %s" % artistidlist)
+	for artistid in artistidlist:
+		addArtisttoDB(artistid)
 
 def addArtisttoDB(artistid, extrasonly=False):
 	
