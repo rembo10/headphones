@@ -211,6 +211,7 @@ class WebInterface(object):
 	
 	def markArtists(self, action=None, **args):
 		myDB = db.DBConnection()
+		artistsToAdd = []
 		for ArtistID in args:
 			if action == 'delete':
 				myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
@@ -225,9 +226,10 @@ class WebInterface(object):
 				newValueDict = {'Status': 'Active'}
 				myDB.upsert("artists", newValueDict, controlValueDict)				
 			else:
-				# These may and probably will collide - need to make a better way to queue musicbrainz queries
-				threading.Thread(target=importer.addArtisttoDB, args=[ArtistID]).start()
-				time.sleep(30)
+				artistsToAdd.append(ArtistID)
+		if len(artistsToAdd) > 0:
+			logger.debug("Refreshing artists: %s" % artistsToAdd)
+			threading.Thread(target=importer.addArtistIDListToDB, args=[artistsToAdd]).start()
 		raise cherrypy.HTTPRedirect("home")
 	markArtists.exposed = True
 	
