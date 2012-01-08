@@ -277,7 +277,6 @@ class WebInterface(object):
 	def forcePostProcess(self):
 		from headphones import postprocessor
 		threading.Thread(target=postprocessor.forcePostProcess).start()
-		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 	forcePostProcess.exposed = True
 	
