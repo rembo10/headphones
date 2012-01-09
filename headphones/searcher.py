@@ -90,7 +90,7 @@ def searchNZB(albumid=None, new=False):
         except TypeError:
             year = ''
         
-        dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':'', '*':''}
+        dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':'', '*':'', '\'':'', '(':'', ')':''}
 
         cleanalbum = helpers.latinToAscii(helpers.replace_all(albums[1], dic))
         cleanartist = helpers.latinToAscii(helpers.replace_all(albums[0], dic))
@@ -218,9 +218,8 @@ def searchNZB(albumid=None, new=False):
         if headphones.NZBSORG:
             provider = "nzbsorg"
             if headphones.PREFERRED_QUALITY == 3:
-                categories = "5"
+                categories = "31"
                 maxsize = 10000000000
-                term = term + ' flac'
             elif headphones.PREFERRED_QUALITY:
                 categories = "5"
                 maxsize = 2000000000
