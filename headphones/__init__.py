@@ -130,6 +130,10 @@ ENCODEROUTPUTFORMAT = None
 ENCODERQUALITY = None
 ENCODERVBRCBR = None
 ENCODERLOSSLESS = False
+PROWL_ENABLED = True
+PROWL_PRIORITY = 1
+PROWL_KEYS = None
+PROWL_ONSNATCH = True
 
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
@@ -191,7 +195,7 @@ def initialize():
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, ENCODE, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
-                ENCODERLOSSLESS
+                ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH
                 
         if __INITIALIZED__:
             return False
@@ -203,6 +207,7 @@ def initialize():
         CheckSection('Newznab')
         CheckSection('NZBsorg')
         CheckSection('Newzbin')
+	CheckSection('Prowl')
         
         # Set global variables based on config file or use defaults
         try:
@@ -290,6 +295,11 @@ def initialize():
         ENCODERQUALITY = check_setting_int(CFG, 'General', 'encoderquality', 2)
         ENCODERVBRCBR = check_setting_str(CFG, 'General', 'encodervbrcbr', 'cbr')
         ENCODERLOSSLESS = bool(check_setting_int(CFG, 'General', 'encoderlossless', 1))
+
+	PROWL_ENABLED = bool(check_setting_int(CFG, 'Prowl', 'enabled', 0))
+	PROWL_KEYS = check_setting_str(CFG, 'Prowl', 'keys', '')
+	PROWL_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'onsnatch', 0)) 
+	PROWL_PRIORITY = check_setting_int(CFG, 'Prowl', 'priority', 1)
         
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
@@ -470,6 +480,11 @@ def config_write():
     new_config['Newzbin']['newzbin'] = int(NEWZBIN)
     new_config['Newzbin']['newzbin_uid'] = NEWZBIN_UID
     new_config['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
+    
+    new_config['Prowl']['enabled'] = PROWL_ENABLED
+    new_config['Prowl']['keys'] = PROWL_KEYS
+    new_config['Prowl']['onsnatch'] = PROWL_ONSNATCH
+    new_config['Prowl']['priority'] = PROWL_PRIORITY
     
     new_config['General']['lastfm_username'] = LASTFM_USERNAME
     new_config['General']['interface'] = INTERFACE
