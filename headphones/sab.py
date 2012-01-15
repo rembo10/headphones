@@ -25,7 +25,8 @@ import urllib2, cookielib
 
 from headphones.common import USER_AGENT
 from headphones import logger
-
+from headphones import prowl
+from headphones.prowl import PROWL
 
 def sendNZB(nzb):
 
@@ -116,6 +117,11 @@ def sendNZB(nzb):
 
     if sabText == "ok":
         logger.info(u"NZB sent to SAB successfully")
+        if headphones.PROWL_ONSNATCH:
+            logger.info(u"Prowl request")
+            prowl = PROWL()
+            prowl.notify(nzb.name,"Download started")
+
         return True
     elif sabText == "Missing authentication":
         logger.info(u"Incorrect username/password sent to SAB, NZB not sent")
