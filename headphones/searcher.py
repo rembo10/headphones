@@ -478,8 +478,9 @@ def verifyresult(title, artistterm, term):
         if token == 'Various' or token == 'Artists' or token == 'VA':
             continue
         if not re.search('(?:\W|^)+' + token + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
-            logger.info("Removed from results: " + title + " (missing token: " + token + ")")
-            return False
+			if not re.search('(?:\W|^)+' + token.replace("'","") + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):	
+				logger.info("Removed from results: " + title + " (missing tokens: " + token + " and " + token.replace("'","") + ")")
+				return False
     return True
 
 def getresultNZB(result):
