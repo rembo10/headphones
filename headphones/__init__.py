@@ -497,7 +497,7 @@ def start():
     
         # Start our scheduled background tasks
 
-        SCHED.add_cron_job(updater.dbUpdate, hour=4, minute=0, second=0)
+        SCHED.add_interval_job(updater.dbUpdate, hours=48)
         SCHED.add_interval_job(searcher.searchforalbum, minutes=SEARCH_INTERVAL)
         SCHED.add_interval_job(librarysync.libraryScan, minutes=LIBRARYSCAN_INTERVAL)
         SCHED.add_interval_job(versioncheck.checkGithub, minutes=300)
