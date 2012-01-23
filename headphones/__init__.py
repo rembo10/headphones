@@ -482,10 +482,10 @@ def config_write():
     new_config['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
     
     new_config['Prowl'] = {}
-    new_config['Prowl']['prowl_enabled'] = PROWL_ENABLED
+    new_config['Prowl']['prowl_enabled'] = int(PROWL_ENABLED)
     new_config['Prowl']['prowl_keys'] = PROWL_KEYS
-    new_config['Prowl']['prowl_onsnatch'] = PROWL_ONSNATCH
-    new_config['Prowl']['prowl_priority'] = PROWL_PRIORITY
+    new_config['Prowl']['prowl_onsnatch'] = int(PROWL_ONSNATCH)
+    new_config['Prowl']['prowl_priority'] = int(PROWL_PRIORITY)
     
     new_config['General']['lastfm_username'] = LASTFM_USERNAME
     new_config['General']['interface'] = INTERFACE
