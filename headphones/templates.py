@@ -355,6 +355,21 @@ configform = form = '''
                     <p><b>Log Directory</b>:<br><input type="text" name="log_dir" value="%s" size="60">
                     </p>
                 </td>
+                <td>
+                      <b>Prowl Notification:</b>
+                      <p>
+                        <input type="checkbox" name="prowl_enabled" value="1" %s />Enabled?
+                      </p>
+                      <p>
+                        <i class="smalltext">API key:</i>
+                        <input type="text" name="prowl_keys" value="%s" size="50">
+                      </p>
+                      <p>
+                        <input type="checkbox" name="prowl_onsnatch" value="1" %s />Notify on snatch?</p>
+                      <p><b>Priority (-2,-1,0,1 or 2):</b><input type="text" name="prowl_priority" value="%s" size="5">
+                      </p>
+                 </td>
+
             </tr>
 
         </table>
