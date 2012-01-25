@@ -852,7 +852,7 @@ def searchTorrent(albumid=None, new=False):
                     torrent_name = torrent_folder_name + '.torrent'
                     download_path = os.path.join(headphones.TORRENTBLACKHOLE_DIR, torrent_name)
                     try:
-                        f = open(download_path, 'w')
+                        f = open(download_path, 'wb')
                         f.write(data)
                         f.close()
                         logger.info('File saved to: %s' % torrent_name)
