@@ -4,6 +4,9 @@ from xml.dom import minidom
 from xml.parsers.expat import ExpatError
 import os, re, time
 
+from StringIO import StringIO
+import gzip
+
 import headphones, exceptions
 from headphones import logger, db, helpers, classes, sab
 
@@ -861,18 +864,32 @@ def searchTorrent(albumid=None, new=False):
                 myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", torrent_folder_name])
 
 
-
-
 def preprocesstorrent(resultlist):
     selresult = ""
     for result in resultlist:
         try:
             if selresult == "":
-                selresult = result 
-                torrent = urllib2.urlopen(result[2], timeout=30).read()
+                selresult = result
+                request = urllib2.Request(result[2])
+                request.add_header('Accept-encoding', 'gzip')
+                response = urllib2.urlopen(request)
+                if response.info().get('Content-Encoding') == 'gzip':
+                    buf = StringIO( response.read())
+                    f = gzip.GzipFile(fileobj=buf)
+                    torrent = f.read()
+                else:
+                    torrent = response.read()
             elif int(selresult[1]) < int(result[1]):
                 selresult = result
-                torrent = urllib2.urlopen(result[2], timeout=30).read()
+                request = urllib2.Request(result[2])
+                request.add_header('Accept-encoding', 'gzip')
+                response = urllib2.urlopen(request)
+                if response.info().get('Content-Encoding') == 'gzip':
+                    buf = StringIO( response.read())
+                    f = gzip.GzipFile(fileobj=buf)
+                    torrent = f.read()
+                else:
+                    torrent = response.read()
         except ExpatError:
             logger.error('Unable to torrent file. Skipping.')
             continue
