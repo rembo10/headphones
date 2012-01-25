@@ -60,12 +60,30 @@ def url_fix(s, charset='utf-8'):
     
     
 def searchforalbum(albumid=None, new=False):
-    foundNZB = "none"
-    if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN) and (headphones.SAB_HOST or headphones.BLACKHOLE):
-        foundNZB = searchNZB(albumid, new)
+    
+    if not albumid:
 
-    if foundNZB == "none":
-        searchTorrent(albumid, new)
+        myDB = db.DBConnection()
+    
+        results = myDB.select('SELECT AlbumID from albums WHERE Status="Wanted"')
+        new = True
+         
+        for result in results:
+            foundNZB = "none"
+            if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN) and (headphones.SAB_HOST or headphones.BLACKHOLE):
+                foundNZB = searchNZB(result['AlbumID'], new)
+
+            if foundNZB == "none":
+                searchTorrent(result['AlbumID'], new)
+            
+    else:        
+    
+        foundNZB = "none"
+        if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN) and (headphones.SAB_HOST or headphones.BLACKHOLE):
+            foundNZB = searchNZB(albumid, new)
+
+        if foundNZB == "none":
+            searchTorrent(albumid, new)
         
         
         
