@@ -648,6 +648,7 @@ def searchTorrent(albumid=None, new=False):
 							title = item.title
 							seeders = item.seeds
 							url = item.links[1]['url']
+							url = urllib2.urlopen(url, timeout=30).geturl()
 							size = int(item.links[1]['length'])
 							try:
 								if format == "2":

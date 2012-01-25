@@ -544,10 +544,8 @@ def forcePostProcess():
 	
 			if len(folders):
 				logger.info('Found %i folders to process' % len(folders))
-				pass
 			else:
 				logger.info('Found no folders to process in: %s' % download_dir)
-				return
 	
 			# Parse the folder names to get artist album info
 			for folder in folders:
