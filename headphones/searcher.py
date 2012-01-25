@@ -2,6 +2,9 @@ import urllib, urllib2, urlparse
 import lib.feedparser as feedparser
 from xml.dom import minidom
 from xml.parsers.expat import ExpatError
+from StringIO import StringIO
+import gzip
+
 import os, re, time
 
 import headphones, exceptions
@@ -82,11 +85,8 @@ def searchforalbum(albumid=None, new=False):
         if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN) and (headphones.SAB_HOST or headphones.BLACKHOLE):
             foundNZB = searchNZB(albumid, new)
 
-        if foundNZB == "none":
+        if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA) and foundNZB == "none":
             searchTorrent(albumid, new)
-        
-        
-        
 
 def searchNZB(albumid=None, new=False):
 
@@ -600,7 +600,7 @@ def searchTorrent(albumid=None, new=False):
         term = re.sub('[\.\-\/]', ' ', term).encode('utf-8')
         artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8')
         
-        logger.info("Searching for %s since it was marked as wanted" % term)
+        logger.info("Searching torrents for %s since it was marked as wanted" % term)
         
         resultlist = []
         minimumseeders = int(headphones.NUMBEROFSEEDERS) - 1
@@ -649,7 +649,6 @@ def searchTorrent(albumid=None, new=False):
 							title = item.title
 							seeders = item.seeds
 							url = item.links[1]['url']
-							url = urllib2.urlopen(url, timeout=30).geturl()
 							size = int(item.links[1]['length'])
 							try:
 								if format == "2":
@@ -881,19 +880,32 @@ def searchTorrent(albumid=None, new=False):
                 myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
                 myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", torrent_folder_name])
 
-
-
-
 def preprocesstorrent(resultlist):
     selresult = ""
     for result in resultlist:
         try:
             if selresult == "":
-                selresult = result 
-                torrent = urllib2.urlopen(result[2], timeout=30).read()
+                selresult = result
+                request = urllib2.Request(result[2])
+                request.add_header('Accept-encoding', 'gzip')
+                response = urllib2.urlopen(request)
+                if response.info().get('Content-Encoding') == 'gzip':
+                    buf = StringIO( response.read())
+                    f = gzip.GzipFile(fileobj=buf)
+                    torrent = f.read()
+                else:
+                    torrent = response.read()
             elif int(selresult[1]) < int(result[1]):
                 selresult = result
-                torrent = urllib2.urlopen(result[2], timeout=30).read()
+                request = urllib2.Request(result[2])
+                request.add_header('Accept-encoding', 'gzip')
+                response = urllib2.urlopen(request)
+                if response.info().get('Content-Encoding') == 'gzip':
+                    buf = StringIO( response.read())
+                    f = gzip.GzipFile(fileobj=buf)
+                    torrent = f.read()
+                else:
+                    torrent = response.read()
         except ExpatError:
             logger.error('Unable to torrent file. Skipping.')
             continue
