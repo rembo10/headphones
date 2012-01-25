@@ -211,13 +211,13 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 		album_art_path = albumart.getAlbumArt(albumid)
 		artwork = urllib.urlopen(album_art_path).read()
 	
-	if headphones.EMBED_ALBUM_ART:
+	if headphones.EMBED_ALBUM_ART and artwork:
 		embedAlbumArt(artwork, downloaded_track_list)
 	
 	if headphones.CLEANUP_FILES:
 		cleanupFiles(albumpath)
 		
-	if headphones.ADD_ALBUM_ART:
+	if headphones.ADD_ALBUM_ART and artwork:
 		addAlbumArt(artwork, albumpath)
 		
 	if headphones.CORRECT_METADATA:
