@@ -208,14 +208,17 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 	if headphones.EMBED_ALBUM_ART or headphones.ADD_ALBUM_ART:
 		album_art_path = albumart.getAlbumArt(albumid)
 		artwork = urllib.urlopen(album_art_path).read()
+		if len(artwork) < 100:
+			artwork = False
+			logger.info("No suitable album art found. Not adding album art")
 	
-	if headphones.EMBED_ALBUM_ART:
+	if headphones.EMBED_ALBUM_ART and artwork:
 		embedAlbumArt(artwork, downloaded_track_list)
 	
 	if headphones.CLEANUP_FILES:
 		cleanupFiles(albumpath)
 		
-	if headphones.ADD_ALBUM_ART:
+	if headphones.ADD_ALBUM_ART and artwork:
 		addAlbumArt(artwork, albumpath)
 		
 	if headphones.CORRECT_METADATA:
