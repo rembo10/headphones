@@ -651,7 +651,15 @@ def searchTorrent(albumid=None, new=False):
 							size = int(item.links[1]['length'])
 							try:
 								if format == "2":
-									torrent = urllib2.urlopen(url, timeout=30).read()
+                                                                        request = urllib2.Request(url)
+                                                                        request.add_header('Accept-encoding', 'gzip')
+                                                                        response = urllib2.urlopen(request)
+                                                                        if response.info().get('Content-Encoding') == 'gzip':
+                                                                            buf = StringIO( response.read())
+                                                                            f = gzip.GzipFile(fileobj=buf)
+                                                                            torrent = f.read()
+                                                                        else:
+                                                                            torrent = response.read()
 									if int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1:
 										rightformat = False
 							except Exception, e:
@@ -716,7 +724,15 @@ def searchTorrent(albumid=None, new=False):
 							size = int(item.links[1]['length'])
 							try:
 								if format == "2":
-									torrent = urllib2.urlopen(url, timeout=30).read()
+                                                                        request = urllib2.Request(url)
+                                                                        request.add_header('Accept-encoding', 'gzip')
+                                                                        response = urllib2.urlopen(request)
+                                                                        if response.info().get('Content-Encoding') == 'gzip':
+                                                                            buf = StringIO( response.read())
+                                                                            f = gzip.GzipFile(fileobj=buf)
+                                                                            torrent = f.read()
+                                                                        else:
+                                                                            torrent = response.read()
 									if int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1:
 										rightformat = False
 							except Exception, e:
@@ -775,7 +791,15 @@ def searchTorrent(albumid=None, new=False):
 							size = int(item.links[1]['length'])
 							try:
 								if format == "2":
-									torrent = urllib2.urlopen(url, timeout=30).read()
+                                                                        request = urllib2.Request(url)
+                                                                        request.add_header('Accept-encoding', 'gzip')
+                                                                        response = urllib2.urlopen(request)
+                                                                        if response.info().get('Content-Encoding') == 'gzip':
+                                                                            buf = StringIO( response.read())
+                                                                            f = gzip.GzipFile(fileobj=buf)
+                                                                            torrent = f.read()
+                                                                        else:
+                                                                            torrent = response.read()
 									if int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1:
 										rightformat = False
 							except Exception, e:
