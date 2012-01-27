@@ -54,7 +54,7 @@
 	<div class="table_wrapper">
         <a name="download"><h1><u>Download Settings</u></h1></a>
         <table class="configtable" summary="Download Settings">
-		<tr>
+	    <tr>
                 <td>
                     <h2>SABnzbd:</h2>
                 </td>
@@ -149,7 +149,7 @@
 	<div class="table_wrapper">
         <a name="providers"><h1><u>Search Providers</u></h1></a>
         <table class="configtable" summary="Search Providers">
-            <tr>
+	    <tr>
                 <td>
                     <h2>SABnzbd:</h2>
                 </td>
@@ -246,8 +246,6 @@
                     <h3>Kick Ass Torrents: <input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /></h3>
                 </td>
             </tr>
-            
-            
         </table>
 	</div>
 	<div class="table_wrapper">
@@ -296,7 +294,7 @@
                 	<h2>Renaming Options:</h2>
 					<br>
                     <h3>Folder Format:</h3><input type="text" name="folder_format" value="${config['folder_format']}" size="43"><br>
-                      <i class="smalltext">Use: artist, album, year and first (first letter in artist name)<br />
+                      <i class="smalltext">Use: artist, album, year, releasetype and first (first letter in artist name)<br />
                       				E.g.: first/artist/album [year] = G/Girl Talk/All Day [2010]</i>
                     <br><br>
                     <h3>File Format:</h3><input type="text" name="file_format" value="${config['file_format']}" size="43">
@@ -422,13 +420,23 @@
                     <h3>Path to Encoder:</h3><input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43">
                 	</div>
                 </td>
+		<td>
+                      <h2>Prowl Notification:</h2>
+		      <br>
+                      <h3><input type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} />Enabled Prowl Notification</h3><br>
+                      <div id="prowloptions">
+		      	<h3>API key:</h3><input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50"><br><br>
+                      	<h3><input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} />Notify on snatch?</h3><br>
+                      	<h3>Priority (-2,-1,0,1 or 2):</h3><input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2">
+                      </div>
+		</td>
             </tr>
         </table>
     </div>
 
         <p class="center"><input type="submit" value="Save Changes"><br>
         (Web Interface changes require a restart to take effect)</h3>
-      </form>
+      </form>
 </%def>
 
 <%def name="javascriptIncludes()">
@@ -452,6 +460,26 @@
 			else
 			{
 				$("#encoderoptions").hide("fast");
+			}
+		});
+
+		if ($("#prowl").is(":checked"))
+			{
+				$("#prowloptions").show();
+			}
+		else
+			{
+				$("#prowloptions").hide();
+			}
+		
+		$("#prowl").click(function(){
+			if ($("#prowl").is(":checked"))
+			{
+				$("#prowloptions").show("fast");
+			}
+			else
+			{
+				$("#prowloptions").hide("fast");
 			}
 		});
 	});
