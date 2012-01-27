@@ -321,14 +321,6 @@
 					<br><br>
                     <h3>Log Directory:</h3><input type="text" name="log_dir" value="${config['log_dir']}" size="50">
                 </td>
-                <td>
-                      <h2>Prowl Notification:</h2>
-		      <br>
-                      <h3><input type="checkbox" name="prowl_enabled" value="1" ${config['prowl_enabled']} />Enabled?</h3><br>
-                      <h3>API key:</h3><input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50"><br><br>
-                      <h3><input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} />Notify on snatch?</h3><br>
-                      <h3>Priority (-2,-1,0,1 or 2):</h3><input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2">
-                </td>
             </tr>
             <tr>
                 <td>
@@ -428,6 +420,16 @@
                     <h3>Path to Encoder:</h3><input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43">
                 	</div>
                 </td>
+		<td>
+                      <h2>Prowl Notification:</h2>
+		      <br>
+                      <h3><input type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} />Enabled Prowl Notification</h3><br>
+                      <div id="prowloptions">
+		      	<h3>API key:</h3><input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50"><br><br>
+                      	<h3><input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} />Notify on snatch?</h3><br>
+                      	<h3>Priority (-2,-1,0,1 or 2):</h3><input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2">
+                      </div>
+		</td>
             </tr>
         </table>
     </div>
@@ -458,6 +460,26 @@
 			else
 			{
 				$("#encoderoptions").hide("fast");
+			}
+		});
+
+		if ($("#prowl").is(":checked"))
+			{
+				$("#prowloptions").show();
+			}
+		else
+			{
+				$("#prowloptions").hide();
+			}
+		
+		$("#prowl").click(function(){
+			if ($("#prowl").is(":checked"))
+			{
+				$("#prowloptions").show("fast");
+			}
+			else
+			{
+				$("#prowloptions").hide("fast");
 			}
 		});
 	});
