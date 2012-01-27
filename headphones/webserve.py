@@ -378,7 +378,11 @@ class WebInterface(object):
 					"samplingfrequency": headphones.SAMPLINGFREQUENCY,
 					"encodervbrcbr": headphones.ENCODERVBRCBR,
 					"encoderquality": headphones.ENCODERQUALITY,
-					"encoderlossless": checked(headphones.ENCODERLOSSLESS)
+					"encoderlossless": checked(headphones.ENCODERLOSSLESS),
+					"prowl_enabled": checked(headphones.PROWL_ENABLED),
+					"prowl_onsnatch": checked(headphones.PROWL_ONSNATCH),
+					"prowl_keys": headphones.PROWL_KEYS,
+					"prowl_priority": headphones.PROWL_PRIORITY
 				}
 		return serve_template(templatename="config.html", title="Settings", config=config)	
 	config.exposed = True
@@ -390,7 +394,8 @@ class WebInterface(object):
 		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
 		torrentblackhole_dir=None, download_torrent_dir=None, numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, 
 		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, interface=None, log_dir=None,
-		encode=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0):
+		encode=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
+		prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0):
 
 		headphones.HTTP_HOST = http_host
 		headphones.HTTP_PORT = http_port
@@ -450,6 +455,10 @@ class WebInterface(object):
 		headphones.ENCODERVBRCBR = encodervbrcbr
 		headphones.ENCODERQUALITY = int(encoderquality)
 		headphones.ENCODERLOSSLESS = encoderlossless
+		headphones.PROWL_ENABLED = prowl_enabled
+		headphones.PROWL_ONSNATCH = prowl_onsnatch
+		headphones.PROWL_KEYS = prowl_keys
+		headphones.PROWL_PRIORITY = prowl_priority
 		
 		headphones.config_write()
 

@@ -2,6 +2,8 @@ import os
 import time
 import encode
 import urllib, shutil, re
+from headphones import prowl
+from headphones.prowl import PROWL
 import lib.beets as beets
 from lib.beets import autotag
 from lib.beets.mediafile import MediaFile
@@ -254,6 +256,13 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 	updateHave(albumpath)
 	
 	logger.info('Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
+        if headphones.PROWL_ONSNATCH:
+	    pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
+            logger.info(u"Prowl request")
+            prowl = PROWL()
+            prowl.notify(pushmessage,"Download and Postprocessing completed")
+        
+
 	
 def embedAlbumArt(artwork, downloaded_track_list):
 	logger.info('Embedding album art')
