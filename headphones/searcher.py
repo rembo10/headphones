@@ -76,7 +76,7 @@ def searchforalbum(albumid=None, new=False):
             if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN) and (headphones.SAB_HOST or headphones.BLACKHOLE):
                 foundNZB = searchNZB(result['AlbumID'], new)
 
-            if foundNZB == "none":
+            if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA) and foundNZB == "none":
                 searchTorrent(result['AlbumID'], new)
             
     else:        
