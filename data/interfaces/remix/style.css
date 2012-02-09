@@ -162,12 +162,17 @@ table#album_table th#albumname { text-align: center; min-width: 150px; }
 table#album_table th#reldate { width: 175px; text-align: center; min-width: 100px; }
 table#album_table th#status { width: 175px; text-align: center; min-width: 100px; }
 table#album_table th#type { width: 175px; text-align: center; min-width: 100px; }
+table#album_table th#bitrate { width: 175px; text-align: center; min-width: 60px; }
+table#album_table th#albumformat { width: 175px; text-align: center; min-width: 60px; }
 table#album_table td#select { vertical-align: middle; text-align: left; }
 table#album_table td#albumart { vertical-align: middle; text-align: left; }
 table#album_table td#albumname { vertical-align: middle; text-align: center; }
 table#album_table td#reldate { vertical-align: middle; text-align: center; }
 table#album_table td#status { vertical-align: middle; text-align: center; }
+table#album_table td#status a#wantlossless { white-space: nowrap; }
 table#album_table td#type { vertical-align: middle; text-align: center; }
+table#album_table td#bitrate { vertical-align: middle; text-align: center; }
+table#album_table td#albumformat { vertical-align: middle; text-align: center; }
 table#album_table td#have { vertical-align: middle; }
 
 img.albumArt { float: left; padding-right: 5px; }

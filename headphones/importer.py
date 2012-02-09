@@ -184,15 +184,16 @@ def addArtisttoDB(artistid, extrasonly=False):
 						"CleanName":		cleanname
 						}
 			
-			match = myDB.action('SELECT Location, BitRate from have WHERE CleanName=?', [cleanname]).fetchone()
+			match = myDB.action('SELECT Location, BitRate, Format from have WHERE CleanName=?', [cleanname]).fetchone()
 			
 			if not match:
-				match = myDB.action('SELECT Location, BitRate from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [artist['artist_name'], rg['title'], track['title']]).fetchone()
+				match = myDB.action('SELECT Location, BitRate, Format from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [artist['artist_name'], rg['title'], track['title']]).fetchone()
 			if not match:
-				match = myDB.action('SELECT Location, BitRate from have WHERE TrackID=?', [track['id']]).fetchone()			
+				match = myDB.action('SELECT Location, BitRate, Format from have WHERE TrackID=?', [track['id']]).fetchone()			
 			if match:
 				newValueDict['Location'] = match['Location']
 				newValueDict['BitRate'] = match['BitRate']
+				newValueDict['Format'] = match['Format']
 				myDB.action('DELETE from have WHERE Location=?', [match['Location']])
 				
 			myDB.upsert("tracks", newValueDict, controlValueDict)
@@ -310,17 +311,18 @@ def addReleaseById(rid):
 						"CleanName":		cleanname
 						}
 			
-			match = myDB.action('SELECT Location, BitRate from have WHERE CleanName=?', [cleanname]).fetchone()
+			match = myDB.action('SELECT Location, BitRate, Format from have WHERE CleanName=?', [cleanname]).fetchone()
 						
 			if not match:
-				match = myDB.action('SELECT Location, BitRate from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [release_dict['artist_name'], release_dict['rg_title'], track['title']]).fetchone()
+				match = myDB.action('SELECT Location, BitRate, Format from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [release_dict['artist_name'], release_dict['rg_title'], track['title']]).fetchone()
 			
 			if not match:
-				match = myDB.action('SELECT Location, BitRate from have WHERE TrackID=?', [track['id']]).fetchone()
+				match = myDB.action('SELECT Location, BitRate, Format from have WHERE TrackID=?', [track['id']]).fetchone()
 					
 			if match:
 				newValueDict['Location'] = match['Location']
 				newValueDict['BitRate'] = match['BitRate']
+				newValueDict['Format'] = match['Format']
 				myDB.action('DELETE from have WHERE Location=?', [match['Location']])
 		
 			myDB.upsert("tracks", newValueDict, controlValueDict)
@@ -333,3 +335,32 @@ def addReleaseById(rid):
 		return
 	else:
 		logger.info('Release ' + str(rid) + " already exists in the database!")
+
+def updateFormat():
+	myDB = db.DBConnection()
+	tracks = myDB.select('SELECT * from tracks WHERE Location IS NOT NULL and Format IS NULL')
+	if len(tracks) > 0:
+		logger.info('Finding media format for %s files' % len(tracks))
+		for track in tracks:
+			try:
+                        	f = MediaFile(track['Location'])
+	                except Exception, e:
+        	                logger.info("Exception from MediaFile for: " + downloaded_track + " : " + str(e))
+                	        continue
+			controlValueDict = {"TrackID":  track['TrackID']}
+			newValueDict = {"Format": f.format}
+			myDB.upsert("tracks", newValueDict, controlValueDict)
+		logger.info('Finished finding media format for %s files' % len(tracks))
+	havetracks = myDB.select('SELECT * from have WHERE Location IS NOT NULL and Format IS NULL')
+	if len(havetracks) > 0:
+		logger.info('Finding media format for %s files' % len(havetracks))
+		for track in havetracks:
+			try:
+                        	f = MediaFile(track['Location'])
+	                except Exception, e:
+        	                logger.info("Exception from MediaFile for: " + downloaded_track + " : " + str(e))
+                	        continue
+			controlValueDict = {"TrackID":  track['TrackID']}
+			newValueDict = {"Format": f.format}
+			myDB.upsert("have", newValueDict, controlValueDict)
+		logger.info('Finished finding media format for %s files' % len(havetracks))
