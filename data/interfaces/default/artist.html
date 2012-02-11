@@ -25,7 +25,7 @@
 
 <%def name="body()">
 	<div id="paddingheader">
-		<h1>${artist['ArtistName']}<h1>
+		<h1><a href="http://musicbrainz.org/artist/${artist['ArtistID']}">${artist['ArtistName']}</a><h1>
 		%if artist['Status'] == 'Loading':
 		<h3><i>(Album information for this artist is currently being loaded)</i></h3>
 		%endif		
