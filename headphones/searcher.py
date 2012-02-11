@@ -148,7 +148,7 @@ def searchNZB(albumid=None, new=False):
                         "username": headphones.NZBMATRIX_USERNAME,
                         "apikey": headphones.NZBMATRIX_APIKEY,
                         "subcat": categories,
-                        "age": headphones.USENET_RETENTION,
+                        "maxage": headphones.USENET_RETENTION,
                         "english": 1,
                         "ssl": 1,
                         "scenename": 1,
