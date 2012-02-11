@@ -509,7 +509,7 @@ def updateHave(albumpath):
 				else:
 					continue
 				
-				myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [unicode(song, headphones.SYS_ENCODING, errors="replace"), f.bitrate, artist, f.album, f.title])
+				myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [unicode(song, headphones.SYS_ENCODING, errors="replace"), f.bitrate, f.format, artist, f.album, f.title])
 				
 def renameUnprocessedFolder(albumpath):
 	
