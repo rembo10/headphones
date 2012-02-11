@@ -137,6 +137,14 @@ PROWL_PRIORITY = 1
 PROWL_KEYS = None
 PROWL_ONSNATCH = True
 
+AUTOWANT_ALBUM = False
+AUTOWANT_SINGLE = False
+AUTOWANT_COMPILATION = False
+AUTOWANT_REMIX = False
+AUTOWANT_EP = False
+AUTOWANT_LIVE = False
+AUTOWANT_SOUNDTRACK = False
+
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
     try:
@@ -197,7 +205,8 @@ def initialize():
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, ENCODE, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
-                ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH
+                ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH,
+                AUTOWANT_ALBUM, AUTOWANT_SINGLE, AUTOWANT_COMPILATION, AUTOWANT_REMIX, AUTOWANT_EP, AUTOWANT_LIVE, AUTOWANT_SOUNDTRACK
                 
         if __INITIALIZED__:
             return False
@@ -209,7 +218,7 @@ def initialize():
         CheckSection('Newznab')
         CheckSection('NZBsorg')
         CheckSection('Newzbin')
-	CheckSection('Prowl')
+        CheckSection('Prowl')
         
         # Set global variables based on config file or use defaults
         try:
@@ -298,10 +307,18 @@ def initialize():
         ENCODERVBRCBR = check_setting_str(CFG, 'General', 'encodervbrcbr', 'cbr')
         ENCODERLOSSLESS = bool(check_setting_int(CFG, 'General', 'encoderlossless', 1))
 
-	PROWL_ENABLED = bool(check_setting_int(CFG, 'Prowl', 'prowl_enabled', 0))
-	PROWL_KEYS = check_setting_str(CFG, 'Prowl', 'prowl_keys', '')
-	PROWL_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_onsnatch', 0)) 
-	PROWL_PRIORITY = check_setting_int(CFG, 'Prowl', 'prowl_priority', 0)
+        PROWL_ENABLED = bool(check_setting_int(CFG, 'Prowl', 'prowl_enabled', 0))
+        PROWL_KEYS = check_setting_str(CFG, 'Prowl', 'prowl_keys', '')
+        PROWL_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_onsnatch', 0)) 
+        PROWL_PRIORITY = check_setting_int(CFG, 'Prowl', 'prowl_priority', 0)
+        
+        AUTOWANT_ALBUM = bool(check_setting_int(CFG, 'General', 'autowant_album', 0))
+        AUTOWANT_SINGLE = bool(check_setting_int(CFG, 'General', 'autowant_single', 0))
+        AUTOWANT_COMPILATION = bool(check_setting_int(CFG, 'General', 'autowant_compilation', 0))
+        AUTOWANT_REMIX = bool(check_setting_int(CFG, 'General', 'autowant_remix', 0))
+        AUTOWANT_EP = bool(check_setting_int(CFG, 'General', 'autowant_ep', 0))
+        AUTOWANT_LIVE = bool(check_setting_int(CFG, 'General', 'autowant_live', 0))
+        AUTOWANT_SOUNDTRACK = bool(check_setting_int(CFG, 'General', 'autowant_soundtrack', 0))
         
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
@@ -503,6 +520,14 @@ def config_write():
     new_config['General']['encoderquality'] = ENCODERQUALITY
     new_config['General']['encodervbrcbr'] = ENCODERVBRCBR
     new_config['General']['encoderlossless'] = ENCODERLOSSLESS
+
+    new_config['General']['autowant_album'] = AUTOWANT_ALBUM
+    new_config['General']['autowant_single'] = AUTOWANT_SINGLE
+    new_config['General']['autowant_compilation'] = AUTOWANT_COMPILATION
+    new_config['General']['autowant_remix'] = AUTOWANT_REMIX
+    new_config['General']['autowant_ep'] = AUTOWANT_EP
+    new_config['General']['autowant_live'] = AUTOWANT_LIVE
+    new_config['General']['autowant_soundtrack'] = AUTOWANT_SOUNDTRACK
     
     new_config.write()
 

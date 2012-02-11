@@ -321,6 +321,18 @@
 					<br><br>
                     <h3>Log Directory:</h3><input type="text" name="log_dir" value="${config['log_dir']}" size="50">
                 </td>
+		<td>
+			<h2>Auto Wanted:</h2>
+			<br>
+                      	<h4><input type="checkbox" name="autowant_album" value="1" ${config['autowant_album']} /> Automatic set Albums as Wanted</h4>
+			<h4><input type="checkbox" name="autowant_single" value="1" ${config['autowant_single']} /> Automatic set Singles as Wanted</h4>
+                        <h4><input type="checkbox" name="autowant_compilation" value="1" ${config['autowant_compilation']} /> Automatic set Compilations as Wanted</h4>
+                        <h4><input type="checkbox" name="autowant_remix" value="1" ${config['autowant_remix']} /> Automatic set Remixes as Wanted</h4>
+                      	<h4><input type="checkbox" name="autowant_ep" value="1" ${config['autowant_ep']}> Automatic set EP's as Wanted</h4>
+                        <h4><input type="checkbox" name="autowant_live" value="1" ${config['autowant_live']} /> Automatic set Live album as Wanted</h4>
+                      	<h4><input type="checkbox" name="autowant_soundtrack" value="1" ${config['autowant_soundtrack']}> Automatic set Soundtracks as Wanted</h4>
+			<i class="smalltext">(When adding a new artist)</i>
+		</td>
             </tr>
             <tr>
                 <td>

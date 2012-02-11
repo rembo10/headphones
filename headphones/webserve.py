@@ -386,7 +386,14 @@ class WebInterface(object):
 					"prowl_enabled": checked(headphones.PROWL_ENABLED),
 					"prowl_onsnatch": checked(headphones.PROWL_ONSNATCH),
 					"prowl_keys": headphones.PROWL_KEYS,
-					"prowl_priority": headphones.PROWL_PRIORITY
+					"prowl_priority": headphones.PROWL_PRIORITY,
+					"autowant_album" : checked(headphones.AUTOWANT_ALBUM),
+					"autowant_single" : checked(headphones.AUTOWANT_SINGLE),
+					"autowant_compilation" : checked(headphones.AUTOWANT_COMPILATION),
+					"autowant_remix" : checked(headphones.AUTOWANT_REMIX),
+					"autowant_ep" : checked(headphones.AUTOWANT_EP),
+					"autowant_live" : checked(headphones.AUTOWANT_LIVE),
+					"autowant_soundtrack" : checked(headphones.AUTOWANT_SOUNDTRACK)
 				}
 		return serve_template(templatename="config.html", title="Settings", config=config)	
 	config.exposed = True
@@ -399,7 +406,8 @@ class WebInterface(object):
 		torrentblackhole_dir=None, download_torrent_dir=None, numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, 
 		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, interface=None, log_dir=None,
 		encode=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
-		prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0):
+		prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0,
+		autowant_album=0, autowant_single=0, autowant_compilation=0, autowant_remix=0, autowant_ep=0, autowant_live=0, autowant_soundtrack=0):
 
 		headphones.HTTP_HOST = http_host
 		headphones.HTTP_PORT = http_port
@@ -463,6 +471,13 @@ class WebInterface(object):
 		headphones.PROWL_ONSNATCH = prowl_onsnatch
 		headphones.PROWL_KEYS = prowl_keys
 		headphones.PROWL_PRIORITY = prowl_priority
+		headphones.AUTOWANT_ALBUM = autowant_album
+		headphones.AUTOWANT_SINGLE = autowant_single
+		headphones.AUTOWANT_COMPILATION = autowant_compilation
+		headphones.AUTOWANT_REMIX = autowant_remix
+		headphones.AUTOWANT_EP = autowant_ep
+		headphones.AUTOWANT_LIVE = autowant_live
+		headphones.AUTOWANT_SOUNDTRACK = autowant_soundtrack
 		
 		headphones.config_write()
 
