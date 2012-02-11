@@ -75,7 +75,6 @@ ADD_ALBUM_ART = False
 EMBED_ALBUM_ART = False
 EMBED_LYRICS = False
 DOWNLOAD_DIR = None
-BLACKHOLE = None
 BLACKHOLE_DIR = None
 USENET_RETENTION = None
 INCLUDE_EXTRAS = False
@@ -120,6 +119,7 @@ MININOVA = None
 DOWNLOAD_TORRENT_DIR = None
 
 INTERFACE = None
+NZB_HANDLER = None
 FOLDER_PERMISSIONS = None
 
 ENCODE = False
@@ -129,6 +129,7 @@ BITRATE = None
 SAMPLINGFREQUENCY = None
 ADVANCEDENCODER = None
 ENCODEROUTPUTFORMAT = None
+USE_ADVANCED_ENCODING = False
 ENCODERQUALITY = None
 ENCODERVBRCBR = None
 ENCODERLOSSLESS = False
@@ -253,7 +254,6 @@ def initialize():
         EMBED_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'embed_album_art', 0))
         EMBED_LYRICS = bool(check_setting_int(CFG, 'General', 'embed_lyrics', 0))
         DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'download_dir', '')
-        BLACKHOLE = bool(check_setting_int(CFG, 'General', 'blackhole', 0))
         BLACKHOLE_DIR = check_setting_str(CFG, 'General', 'blackhole_dir', '')
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', '')
         INCLUDE_EXTRAS = bool(check_setting_int(CFG, 'General', 'include_extras', 0))
@@ -294,6 +294,7 @@ def initialize():
         LASTFM_USERNAME = check_setting_str(CFG, 'General', 'lastfm_username', '')
         
         INTERFACE = check_setting_str(CFG, 'General', 'interface', 'default')
+        NZB_HANDLER = check_setting_str(CFG, 'General', 'nzb_handler', 'default')
         FOLDER_PERMISSIONS = check_setting_str(CFG, 'General', 'folder_permissions', '0755')
 		
         ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')        
@@ -303,6 +304,7 @@ def initialize():
         ENCODE = bool(check_setting_int(CFG, 'General', 'encode', 0))
         ADVANCEDENCODER = check_setting_str(CFG, 'General', 'advancedencoder', '')
         ENCODEROUTPUTFORMAT = check_setting_str(CFG, 'General', 'encoderoutputformat', 'mp3')
+		
         ENCODERQUALITY = check_setting_int(CFG, 'General', 'encoderquality', 2)
         ENCODERVBRCBR = check_setting_str(CFG, 'General', 'encodervbrcbr', 'cbr')
         ENCODERLOSSLESS = bool(check_setting_int(CFG, 'General', 'encoderlossless', 1))
@@ -320,6 +322,8 @@ def initialize():
         AUTOWANT_LIVE = bool(check_setting_int(CFG, 'General', 'autowant_live', 0))
         AUTOWANT_SOUNDTRACK = bool(check_setting_int(CFG, 'General', 'autowant_soundtrack', 0))
         
+        USE_ADVANCED_ENCODING = bool(check_setting_int(CFG, 'General', 'use_advanced_encoding', 1))
+		
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
         
@@ -457,7 +461,6 @@ def config_write():
     new_config['General']['embed_album_art'] = int(EMBED_ALBUM_ART)
     new_config['General']['embed_lyrics'] = int(EMBED_LYRICS)
     new_config['General']['download_dir'] = DOWNLOAD_DIR
-    new_config['General']['blackhole'] = int(BLACKHOLE)
     new_config['General']['blackhole_dir'] = BLACKHOLE_DIR
     new_config['General']['usenet_retention'] = USENET_RETENTION
     new_config['General']['include_extras'] = int(INCLUDE_EXTRAS)
@@ -508,6 +511,7 @@ def config_write():
     
     new_config['General']['lastfm_username'] = LASTFM_USERNAME
     new_config['General']['interface'] = INTERFACE
+    new_config['General']['nzb_handler'] = NZB_HANDLER
     new_config['General']['folder_permissions'] = FOLDER_PERMISSIONS
 
     new_config['General']['encode'] = int(ENCODE)
@@ -516,6 +520,7 @@ def config_write():
     new_config['General']['samplingfrequency'] = int(SAMPLINGFREQUENCY)
     new_config['General']['encoderfolder'] = ENCODERFOLDER
     new_config['General']['advancedencoder'] = ADVANCEDENCODER
+    new_config['General']['use_advanced_encoding'] = USE_ADVANCED_ENCODING
     new_config['General']['encoderoutputformat'] = ENCODEROUTPUTFORMAT
     new_config['General']['encoderquality'] = ENCODERQUALITY
     new_config['General']['encodervbrcbr'] = ENCODERVBRCBR

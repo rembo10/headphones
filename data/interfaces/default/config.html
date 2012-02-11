@@ -1,16 +1,12 @@
 <%inherit file="base.html"/>
 <%!
-	import headphones
+    import headphones
 %>
 
-<%def name="headerIncludes()">
-	<div id="subhead_container">
-		<ul id="subhead_menu">
-			<li><a href="shutdown">Shut Down</a></li>
-			<li><a href="restart">Restart</a></li>
-		</ul>
-	</div>	
+<%def name="headIncludes()">
+    <link rel="stylesheet" href="css/config.css" /> 
 </%def>
+<<<<<<< HEAD
 <%def name="body()">
 	<div id="paddingheader">
 		<h1><h1>
@@ -65,48 +61,348 @@
 
                     <i class="smalltext">usually http://localhost:8080</i>
                 </td>
+=======
+>>>>>>> martynhaigh/configUpdate
 
-                <td>
-                    <h3>SABnzbd Username:</h3><input type="text" name="sab_username" value="${config['sab_user']}" size="20" maxlength="40">
-                </td>
-            </tr>
+<%def name="headerIncludes()">
+    <div id="subhead_container">
+        <ul id="subhead_menu">
+            <li>
+                <a class="current" href="#web_interface">
+                    Web Interface
+                </a>
+            </li>
+            <li>
+                <a href="#download">
+                    Download Settings
+                </a>
+            </li>
+            <li>
+                <a href="#providers">
+                    Search Providers
+                </a>
+            </li>
+            <li>
+                <a href="#post_processing">
+                    Quality &amp; Post Processing
+                </a>
+            </li>
+            <li>
+                <a href="#advanced_settings">
+                    Advanced Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div id="pagemenu_container">
+        <ul id="page_menu">
+            <li>
+                <a href="shutdown">
+                    Shut Down
+                </a>
+            </li>
+            <li>
+                <a href="restart">
+                    Restart
+                </a>
+            </li>
+        </ul>
+    </div> 
 
-            <tr>
-                <td>
-                    <h3>SABnzbd API:</h3><input type="text" name="sab_apikey" value="${config['sab_api']}" size="36" maxlength="40">
-                </td>
+</%def>
+<%def name="body()">
 
-                <td>
-                    <h3>SABnzbd Password:</h3><input type="password" name="sab_password" value="${config['sab_pass']}" size="20" maxlength="40">
-                </td>
-            </tr>
+    <form action="configUpdate" method="post">
+        <input type="hidden" name="selected_tab" id="selected_tab" />
 
-            <tr>
-                <td>
-                    <h3>SABnzbd Category:</h3><input type="text" name="sab_category" value="${config['sab_cat']}" size="20" maxlength="40">
-                </td>
+        <div class="panes">
+            <span class="navigation next"> 
+                    <p class="top"> NEXT </p>
+                    <p class="bottom"> NEXT </p>
+            </span>  
+            <span class="navigation previous"> 
+                    <p class="top"> PREVIOUS </p>
+                    <p class="bottom"> PREVIOUS </p>
+            </span>           
+            <div style="display: block;" name="web_interface">
+                <fieldset>
+                    <div class="form_description">
+                        <legend>
+                            Web Interface
+                        </legend>
+                        <p class="legend_description">
+                            It is recommended that you enable a username and password to secure Headphones from being tampered with remotely.<br />
+                            <br />Some options may require a manual restart to take effect.
+                        </p>
+                    </div>
+                    <div class="form_content">
+                        <dl>
+                            <dt>
+                                <label for="http_host">
+                                    HTTP Host:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="text" name="http_host" id="http_host" value="${config['http_host']}" maxlength="40" title="i.e. localhost or 0.0.0.0"/>
+                            </dd>
+                    </dl>
+                        <dl>
+                            <dt>
+                                <label for="http_port">
+                                    HTTP Port:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="text" name="http_port" id="http_port" value="${config['http_port']}" maxlength="6" size="10"/>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label for="http_username">
+                                    HTTP Username:
+                                    </label>
+                            </dt>
+                            <dd>
+                                <input type="text" name="http_username" id="http_username" value="${config['http_user']}" maxlength="40" />
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label for="http_password">
+                                    HTTP Password:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="password" name="http_password" id="http_password" value="${config['http_pass']}"maxlength="40" />
+                            </dd>
+                        </dl>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <div class="form_description">
+                        <legend>
+                            Extras
+                        </legend>
+                    </div>
+                    <div class="form_content">
+                        <dl>
+                            <dt>
+                                <label for="launch_browser">
+                                    Launch Browser on Startup:
+                                </label>
+                            </dt>
+                                <dd>
+                                <input type="checkbox" name="launch_browser" id="launch_browser" value="1" ${config['launch_browser']}  />
+                            </dd>
+                        </dl>
+                    </div>
+                </fieldset>     
 
-                <td>
-                    <h3>Music Download Directory:</h3><input type="text" name="download_dir" value="${config['download_dir']}" size="50"><br>
-
-                    <i class="smalltext">Full path to the directory where SAB downloads your music<br>
-                    i.e. /Users/name/Downloads/music</i>
-                </td>
-            </tr>
             
-            <tr>
-                <td>
-                    <h3>Use Black Hole: <input type="checkbox" name="blackhole" value=1 ${config['use_blackhole']} /></h3>
-                </td>
 
-                <td>
-                    <h3>Black Hole Directory:</h3><input type="text" name="blackhole_dir" value="${config['blackhole_dir']}" size="50"><br>
+    
+            </div>
+            <div>
+                <fieldset>
+                    <div class="form_description">
+                        <legend
+                            Download Settings
+                        </legend>
+                        <p class="legend_description">
+                            Set how Headphones deals with NZB files
+                        </p>
+                    </div>                
+                    <div class="form_content">
+                        <dl>
+                            <dt>
+                                <label for="nzb_handler">
+                                    NZB handler:
+                                </label>
+                            </dt>
+                                <dd>
+                                    <select id="nzb_handler" name="nzb_handler">
+                                
+                                    %for nzb_handler in config['nzb_handler_list']:
+                                    <%
+                                            if nzb_handler == headphones.NZB_HANDLER:
+                                                    selected = 'selected="selected"'
+                                            else:
+                                                    selected = ''
+                                    %>
+                                        <option value="${nzb_handler}" ${selected}>
+                                            ${nzb_handler}
+                                        </option>
+                                    %endfor
+                                </select>
+                            </dd>
+                        </dl>
+                    </div>
+                 </fieldset>     
+                 <div id="handler_sections">
+                    <fieldset id="sab_download">   
+                        <div class="form_description">
+                            <legend>
+                                SABnzbd
+                            </legend>
+                            <p class="legend_description">
+                                Setup SABnzbd to download the NZB files
+                            </p>
+                        </div>                     
+                        <div class="form_content">
+                            <dl>
+                                <dt>
+                                    <label for="sab_host">
+                                        SABnzbd Host:
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="text" name="sab_host" id="sab_host" value="${config['sab_host']}"  maxlength="40" title="Usually http://localhost:8080" />
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label for="sab_username">
+                                        SABnzbd Username:
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="text" name="sab_username" id="sab_username" value="${config['sab_user']}"  maxlength="40" />
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label for="sab_apikey">
+                                        SABnzbd API:
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="text" name="sab_apikey" id="sab_apikey" value="${config['sab_api']}"  maxlength="40" />
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label for="sab_password">
+                                        SABnzbd Password:
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="password" name="sab_password" id="sab_password" value="${config['sab_pass']}"  maxlength="40" />
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label for="sab_category">
+                                        SABnzbd Category:
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="text" name="sab_category" id="sab_category" value="${config['sab_cat']}"  maxlength="40" />
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label for="download_dir">
+                                        Music Download Directory:
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="text" name="download_dir" id="download_dir" value="${config['download_dir']}" title="Full path to the directory where SAB downloads your music<br />i.e. /Users/name/Downloads/music" maxlength="40" />
+                                </dd>
+                            </dl>
+                        </div>
+                    </fieldset>   
+                    <fieldset id="black_hole_download"> 
+                        <div class="form_description">
+                            <legend>
+                                Black Hole
+                            </legend>
+                            <p class="legend_description">
+                                Send the NZB files to a black hole
+                            </p>
+                        </div>                     
+                        <div class="form_content">    
+                            <dl>
+                                <dt>
+                                    <label for="blackhole_dir">
+                                        Black Hole Directory:
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="text" name="blackhole_dir" id="blackhole_dir" value="${config['blackhole_dir']}" title="Folder your Download program watches for NZBs" maxlength="40" />
+                                </dd>
+                            </dl> 
+                        </div>
+                    </fieldset>                      
+                </div>
+                 <fieldset>   
+                    <div class="form_description">
+                        <legend>
+                            Extras
+                        </legend>
+                        <p class="legend_description">
+                            Other settings
+                        </p>
+                    </div>                     
+                    <div class="form_content"> 
+                        <dl>
+                            <dt>
+                                <label for="usenet_retention">
+                                    Usenet Retention:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="text" name="usenet_retention" id="usenet_retention" value="${config['usenet_retention']}" maxlength="40" />
+                            </dd>
+                        </dl>  
+                    </div>
+                </fieldset>                 
+            </div>
+            <div> 
+                <fieldset>
+                    <div class="form_description">
+                        <legend>
+                            Search Providers
+                        </legend>
+                        <p class="legend_description">
+                            At least one provider is required but two are recommended.
+                        </p>
+                    </div>                     
+                    <div class="form_content"> 
+                        <dl>
+                            <dt>
+                                <label for="nzbmatrix">
+                                    Enable NZBMatrix:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="checkbox" name="nzbmatrix" id="nzbmatrix" value="1" ${config['use_nzbmatrix']} />
+                            </dd>
+                        </dl>  
 
-                    <i class="smalltext">Folder your Download program watches for NZBs</i>
-                </td>
-            </tr>
+                        <div id="nzbmatrix_details" class="extra_detail">
+                            <dl>
+                                <dt>
+                                    <label for="nzbmatrix_username">
+                                        Username:
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="text" name="nzbmatrix_username" id="nzbmatrix_username" value="${config['nzbmatrix_user']}" maxlength="40" />
+                                </dd>
+                            </dl> 
+                            <dl>
+                                <dt>
+                                    <label for="nzbmatrix_apikey">
+                                        API Key:
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="text" name="nzbmatrix_apikey" id="nzbmatrix_apikey" value="${config['nzbmatrix_api']}" maxlength="40" title="Located in the <a href='http://nzbmatrix.com/account.php'>Account Page</a> on NZBMatrix" />
+                                </dd>
+                            </dl> 
+                        </div>
 
-
+<<<<<<< HEAD
             <tr>
                 <td>
                     <h3>Usenet Retention:<input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="20" maxlength="40"></h3>
@@ -158,40 +454,652 @@
                 <td id="middle">
                     <h3>NZBMatrix: <input type="checkbox" name="nzbmatrix" value="1" ${config['use_nzbmatrix']} /></h3>
                 </td>
+=======
+                        <dl>
+                            <dt>
+                                <label for="nzbsorg">
+                                    Enable NZBs.org:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="checkbox" name="nzbsorg" id="nzbsorg" value="1" ${config['use_nzbsorg']} />
+                            </dd>
+                        </dl> 
+                        <div id="nzbsorg_details" class="extra_detail">
+                            <dl>
+                                <dt>
+                                    <label for="nzbsorg_uid">
+                                        UID:
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="text" name="nzbsorg_uid" id="nzbsorg_uid" value="${config['nzbsorg_uid']}" maxlength="40" />
+                                </dd>
+                            </dl> 
+                            <dl>
+                                <dt>
+                                    <label for="nzbsorg_hash">
+                                        Hash:
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="text" name="nzbsorg_hash" id="nzbsorg_hash" value="${config['nzbsorg_hash']}" maxlength="40" />
+                                </dd>
+                            </dl> 
+                        </div>
+>>>>>>> martynhaigh/configUpdate
 
-                <td>
-                    <h3>NZBMatrix Username: </h3>
-                      <input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30" maxlength="40">
-                </td>
+                        <dl>
+                            <dt>
+                                <label for="newzbin">
+                                    Enable Newzbin:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="checkbox" name="newzbin" id="newzbin" value="1" ${config['use_newzbin']} />
+                            </dd>
+                        </dl> 
+                        <div id="newzbin_details" class="extra_detail">
+                            <dl>
+                                <dt>
+                                    <label for="newzbin_uid">
+                                        UID:
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="text" name="newzbin_uid" id="newzbin_uid" value="${config['newzbin_uid']}" maxlength="40" />
+                                </dd>
+                            </dl> 
+                            <dl>
+                                <dt>
+                                    <label for="newzbin_password">
+                                        Password:
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="text" name="newzbin_password" id="newzbin_password" value="${config['newzbin_pass']}" maxlength="40" />
+                                </dd>
+                            </dl> 
+                        </div>
 
-                <td>
-                    <h3>NZBMatrix API: </h3>
-                      <input type="text" name="nzbmatrix_apikey" value="${config['nzbmatrix_api']}" size="36" maxlength="40">
-                </td>
-            </tr>
 
-            <tr>
-                <td id="middle">
-                    <h3>Newznab: <input type="checkbox" name="newznab" value="1" ${config['use_newznab']} /></h3>
-                </td>
+                        <!--dl>
+                            <dt>
+                                <label for="newznab">
+                                    Enable Newznab:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="checkbox" name="newznab" id="newznab" value="1" ${config['use_newznab']} />
+                            </dd>
+                        </dl> 
+                        <div id="newznab_details" class="extra_detail">
+                            <dl>
+                                <dt>
+                                    <label for="newznab_host">
+                                        Host:
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="text" name="newznab_host" id="newznab_host" value="${config['newznab_host']}" maxlength="40" title="i.e. http://nzb.su"/>
+                                </dd>
+                            </dl> 
+                            <dl>
+                                <dt>
+                                    <label for="newznab_apikey">
+                                        API Key:
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="text" name="newznab_apikey" id="newznab_apikey" value="${config['newznab_api']}" maxlength="40" />
+                                </dd>
+                            </dl> 
+                        </div-->  
+                        <div id="newznab_template" style="display:none;">
+                            <fieldset>  
+                                <div class="form_description">
+                                    <legend>
+                                        Newznab:<br />NAME
+                                    </legend>
+                                    <p class="legend_description">
+                                        
+                                    </p>
+                                </div>                     
+                                <div class="form_content"> 
+                                    <dl>
+                                        <dt>
+                                            <label for="newznab_host">
+                                                Host:
+                                            </label>
+                                        </dt>
+                                        <dd>
+                                            <input type="text" name="newznab_host" id="newznab_host" value="URL" maxlength="40" title="i.e. http://nzb.su"/>
+                                        </dd>
+                                    </dl> 
+                                    <dl>
+                                        <dt>
+                                            <label for="newznab_apikey">
+                                                API Key:
+                                            </label>
+                                        </dt>
+                                        <dd>
+                                            <input type="text" name="newznab_apikey" id="newznab_apikey" value="APIKEY" maxlength="40" />
+                                        </dd>
+                                    </dl>  
+                                     <dl>
+                                        <dt>
+                                            <label for="newznab_delete">
+                                                Delete Site:
+                                            </label>
+                                        </dt>
+                                        <dd>
+                                            <input type="button" name="newznab_delete" id="newznab_delete" value="APIKEY" maxlength="40" />
+                                        </dd>
+                                    </dl>                                    
+                                </div>
+                            </fieldset>
+                        </div>
+                        <input id="add_newznab_button" rel="#add_newznab" type="button" value="Add Newznab Site" />
 
-                <td>
-                    <h3>Newznab Host: </h3>
-                      <input type="text" name="newznab_host" value="${config['newznab_host']}" size="30" maxlength="40"><br>
-                      <i class="smalltext">i.e. http://nzb.su</i>
-                </td>
+                    </div>
+                </fieldset>
+                
+                <div id="newznab_site_container">
+                </div>
 
-                <td>
-                    <h3>Newznab API: </h3>
-                      <input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36" maxlength="40">
-                </td>
-            </tr>
+            </div>
+            <div> 
+                <fieldset>
+                    <div class="form_description">
+                        <legend>
+                            Album Quality
+                        </legend>
+                        <p class="legend_description">
+                            Other settings
+                        </p>
+                    </div>                     
+                    <div class="form_content"> 
+                        <dl>
+                            <dt>
+                                <label for="highest_quality_exc_lossless">
+                                    Highest Quality excluding Lossless:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="radio" id="highest_quality_exc_lossless" name="preferred_quality" value="0" ${config['pref_qual_0']} />
+                            </dd>
+                        </dl>  
+                        <dl>
+                            <dt>
+                                <label for="highest_quality_inc_lossless">
+                                    Highest Quality including Lossless:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="radio" id="highest_quality_inc_lossless" name="preferred_quality" value="1" ${config['pref_qual_1']} />
+                            </dd>
+                        </dl>  
+                        <dl>
+                            <dt>
+                                <label for="lossless">
+                                    Lossless Only:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="radio" id="lossless" name="preferred_quality" value="2" ${config['pref_qual_2']} />
+                            </dd>
+                        </dl>  
+                        <dl>
+                            <dt>
+                                <label for="preferred_bitrate">
+                                    Preferred Bitrate:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="radio" id="preferred_bitrate" name="preferred_quality" value="3" ${config['pref_qual_3']} />
+                            </dd>
+                        </dl>  
+                        <div id="preferred_bitrate_details" class="extra_detail">
+                            <dl>
+                                <dt>
+                                    <label for="detect_bitrate">
+                                        Auto-Detect Preferred Bitrate:
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="checkbox" id="detect_bitrate" name="detect_bitrate" value="1" ${config['detect_bitrate']} />
+                                </dd>
+                            </dl>     
+                             <div id="detect_bitrate_details" class="extra_detail">
+                                <dl>
+                                    <dt>
+                                        <label for="preferred_bitrate_input">
+                                            Preferred Bitrate:
+                                        </label>
+                                    </dt>
+                                    <dd>
+                                        <input type="text" id="preferred_bitrate_input" name="preferred_bitrate" value="${config['pref_bitrate']}"  maxlength="5" />
+                                        kbps
+                                    </dd>
+                                </dl> 
+                            </div>
+                        </div>
+                    </div>
+                </fieldset> 
+                <fieldset>
+                    <div class="form_description">
+                        <legend>
+                            Post-Processing
+                        </legend>
+                        <p class="legend_description">
+                            Settings which adjust how Headphones should process completed downloads.
+                        </p>
+                    </div>                     
+                    <div class="form_content"> 
+                        <dl>
+                            <dt>
+                                <label for="move_files">
+                                    Move downloads to Destination Folder:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="checkbox" id="move_files" name="move_files" value="1" ${config['move_files']} />
+                            </dd>
+                        </dl> 
+                        <dl>
+                            <dt>
+                                <label for="rename_files">
+                                    Rename files:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="checkbox" id="rename_files" name="rename_files" value="1" ${config['rename_files']} />
+                            </dd>
+                        </dl>    
+                        <dl>
+                            <dt>
+                                <label for="correct_metadata">
+                                    Correct metadata:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="checkbox" id="correct_metadata" name="correct_metadata" value="1" ${config['correct_metadata']} />
+                            </dd>
+                        </dl>     
+                        <dl>
+                            <dt>
+                                <label for="cleanup_files">
+                                    Delete leftover files:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="checkbox" id="cleanup_files" name="cleanup_files" value="1" ${config['cleanup_files']} title="Deletes files normally found in downloaded archives (.m3u, .nfo, .sfv, .nzb, etc.)" />
+                            </dd>
+                        </dl> 
+                           
+                        <dl>
+                            <dt>
+                                <label for="add_album_art">
+                                    Add album art as 'folder.jpg' to album folder:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="checkbox" id="add_album_art" name="add_album_art" value="1" ${config['add_album_art']} />
+                            </dd>
+                        </dl>  
+                        <dl>
+                            <dt>
+                                <label for="embed_album_art">
+                                    Embed album art in each file:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="checkbox" id="embed_album_art" name="embed_album_art" value="1" ${config['embed_album_art']} />
+                            </dd>
+                        </dl>   
+                        <dl>
+                            <dt>
+                                <label for="embed_lyrics">
+                                    Embed lyrics:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="checkbox" id="embed_lyrics" name="embed_lyrics" value="1" ${config['embed_lyrics']} />
+                            </dd>
+                        </dl>  
+                    </div>
+                </fieldset> 
+                <fieldset>
+                    <div class="form_description">
+                        <legend>
+                            Extras
+                        </legend>
+                        <p class="legend_description">
+                        </p>
+                    </div>                     
+                    <div class="form_content"> 
+                        <dl>
+                            <dt>
+                                <label for="destination_dir">
+                                    Path to Destination folder:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="text" id="destination_dir" name="destination_dir" value="${config['dest_dir']}" title="i.e. /Users/name/Music/iTunes or /Volumes/share/music" />
+                            </dd>
+                        </dl>   
+                    </div>
+                </fieldset>
 
-            <tr>
-                <td id="middle">
-                    <h3>NZBs.org: <input type="checkbox" name="nzbsorg" value="1" ${config['use_nzbsorg']} /></h3>
-                </td>
+            </div>
+            <div> 
+                <fieldset>
+                    <div class="form_description">
+                        <legend>
+                            Renaming Options
+                        </legend>
+                        <p class="legend_description">
+                        </p>
+                    </div>                     
+                    <div class="form_content"> 
+                        <dl>
+                            <dt>
+                                <label for="folder_format">
+                                    Folder Format:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="text" id="folder_format" name="folder_format" value="${config['folder_format']}" 
+                                    title="<strong>artist</strong> = artist name<br />
+                                    <strong>album</strong> = album name<br />
+                                    <strong>year</strong> = year released<br />
+                                    <strong>first</strong> = upper case first letter in artist name<br />
+                                    <strong>lowerfirst</strong> = lower case first letter in artist name" />
+                            </dd>
+                        </dl>     
+                        <div id="folder_format_example" class="display_example">
+                        </div>
+                        <dl>
+                            <dt>
+                                <label for="file_format">
+                                    File Format:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="text" id="file_format" name="file_format" value="${config['file_format']}" 
+                                    title="<strong>tracknumber</strong> = track number<br />
+                                    <strong>title</strong> = song title<br />
+                                    <strong>artist</strong> = recording artist<br />
+                                    <strong>album</strong> = album name<br />
+                                    <strong>year</strong> = release date" />
+                            </dd>
+                        </dl>     
+                        <div id="file_format_example" class="display_example">
+                        </div>  
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <div class="form_description">
+                        <legend>
+                            Miscellaneous
+                        </legend>
+                        <p class="legend_description">
+                        </p>
+                    </div>                     
+                    <div class="form_content"> 
+                        <dl>
+                            <dt>
+                                <label for="include_extras">
+                                    Automatically Include Extras When Adding an Artist:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="checkbox" id="include_extras"name="include_extras" value="1" ${config['include_extras']} title="(EPs, Compilations, Live Albums, Remix Albums and Singles)" />
+                            </dd>
+                        </dl>  
+                        <dl>
+                            <dt>
+                                <label for="interface">
+                                    Interface:
+                                </label>
+                            </dt>
+                            <dd>
+                                <select name="interface" id="interface" title="Change the way Headphones looks - core functionality remains the same">
+                                    %for interface in config['interface_list']:
+                                        <%
+                                                if interface == headphones.INTERFACE:
+                                                        selected = 'selected="selected"'
+                                                else:
+                                                        selected = ''
+                                        %>
+                                        <option value="${interface}" ${selected}>
+                                            ${interface}
+                                        </option>
+                                    %endfor
+                                </select>
+                            </dd>
+                        </dl>       
+                        <dl>
+                            <dt>
+                                <label for="log_dir">
+                                    Log Directory:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="text" id="log_dir" name="log_dir" value="${config['log_dir']}" />
+                            </dd>
+                        </dl>  
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <div class="form_description">
+                        <legend>
+                            Re-Encoding Options
+                        </legend>
+                        <p class="legend_description">
+                        </p>
+                    </div>                     
+                    <div class="form_content"> 
+                        <dl>
+                            <dt>
+                                <label for="encode">
+                                    Re-encode downloads during postprocessing:
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="checkbox" id="encode" name="encode" value="1" ${config['encode']} title="Note: this option requires the lame or ffmpeg encoder" />
+                            </dd>
+                        </dl>  
+                        <div id="encode_details" class="extra_detail">
+                            <dl>
+                                <dt>
+                                    <label for="encoderlossless">
+                                        Only re-encode lossless files (.flac):
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="checkbox" id="encoderlossless" name="encoderlossless" value="1" ${config['encoderlossless']}/>
+                                </dd>
+                            </dl>                         
+                            <dl>
+                                <dt>
+                                    <label for="encoder">
+                                        Encoder:
+                                    </label>
+                                </dt>
+                                    <dd>
+                                        <%
+                                            if config['encoder'] == 'lame':
+                                                lameselect = 'selected="selected"'
+                                                ffmpegselect = ''
+                                            else:
+                                                lameselect = ''
+                                                ffmpegselect = 'selected="selected"'
+                                        %>
+                                        <select name="encoder" id="encoder">
+                                            <option value="lame" ${lameselect}>
+                                                lame
+                                            </option>
+                                            <option value="ffmpeg" ${ffmpegselect}>
+                                                ffmpeg
+                                            </option>
+                                        </select>
+                                    </dd>
+                                </dl> 
+                                <dl>
+                                    <dt>
+                                        <label for="encoderoutputformat">
+                                            Format:
+                                        </label>
+                                    </dt>
+                                    <dd>
+                                        <select name="encoderoutputformat" id="encoderoutputformat">
+                                        %for x in ['mp3', 'ogg', 'm4a']:
+                                                <%
+                                                    if config['encoderoutputformat'] == x:
+                                                        outputselect = 'selected="selected"'
+                                                    else:
+                                                        outputselect = ''
+                                                %>
+                                                <option id="encoderoutputformat_${x}" value="${x}" ${outputselect}>
+                                                    ${x}
+                                                </option>
+                                        %endfor
+                                        </select>
+                                    </dd>
+                                </dl> 
+                                <dl>
+                                    <dt>
+                                        <label for="use_advanced_encoding">
+                                            Use advanced encoding options:
+                                        </label>
+                                    </dt>
+                                    <dd>
+                                        <input type="checkbox" id="use_advanced_encoding" name="use_advanced_encoding" value="1" ${config['use_advanced_encoding']} />
+                                    </dd>
+                                </dl> 
+                                <div id="standard_audio_details" class="extra_detail">
+                                    <dl>
+                                        <dt>
+                                            <label for="encodervbrcbr">
+                                                VBR/CBR:
+                                            </label>
+                                        </dt>
+                                        <dd>
+                                            <select name="encodervbrcbr" id="encodervbrcbr">
+                                            %for x in ['cbr', 'vbr']:
+                                                <%
+                                                    if config['encodervbrcbr'] == x:
+                                                        outputselect = 'selected="selected"'
+                                                    else:
+                                                        outputselect = ''
+                                                %>
+                                                <option id="encodervbrcbr_${x}" value="${x}" ${outputselect}>
+                                                    ${x}
+                                                </option>
+                                            %endfor
+                                            </select>
+                                        </dd>
+                                    </dl>                                 
+                                    
+                                    <dl id="encoderquality_container">
+                                        <dt>
+                                            <label for="encoderquality">
+                                                Quality:
+                                            </label>
+                                        </dt>
+                                        <dd>
+                                            <select name="encoderquality" id="encoderquality">
+                                            %for x in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
+                                                <%
+                                                    if config['encoderquality'] == x:
+                                                        outputselect = 'selected="selected"'
+                                                    else:
+                                                        outputselect = ''
+                                                %>
+                                                <option value="${x}" ${outputselect}>
+                                                    ${x}
+                                                </option>
+                                            %endfor
+                                            </select>
+                                        </dd>
+                                    </dl> 
+                                
+                                    <dl id="bitrate_container">
+                                        <dt>
+                                            <label for="bitrate">
+                                                Bitrate:
+                                            </label>
+                                        </dt>
+                                        <dd>
+                                            <select name="bitrate" id="bitrate">
+                                            %for x in [64, 128, 192, 256, 320]:
+                                                <%
+                                                    if config["bitrate"] == x:
+                                                        outputselect = "selected"
+                                                    else:
+                                                        outputselect = ''
+                                                %>      
+                                                <option value="${x}" ${outputselect}>
+                                                    ${x} kbps
+                                                </option>
+                                            %endfor
+                                            </select>
+                                        </dd>
+                                    </dl>     
+                                    <dl id="samplingfrequency_container">
+                                        <dt>
+                                            <label for="samplingfrequency">
+                                                Sampling:
+                                            </label>
+                                        </dt>
+                                        <dd>
+                                            <%
+                                                    if config["samplingfrequency"] == 44100:
+                                                            freq44100 = 'selected="selected"'
+                                                            freq48000 = ''
+                                                    else:
+                                                            freq44100 = ''
+                                                            freq48000 = 'selected="selected"'
+                                            %>
+                                            <select id="samplingfrequency" name="samplingfrequency">
+                                                    <option value="44100" ${freq44100}>
+                                                        44.1 kHz
+                                                    </option>
+                                                    <option value="48000" ${freq48000}>
+                                                        48.0 kHz
+                                                    </option>
+                                            </select>
+                                        </dd>
+                                    </dl>  
+                                </div>
+                                <div id="advanced_encode_options_details" class="extra_detail">
+                                    <dl>
+                                        <dt>
+                                            <label for="advancedencoder">
+                                                Advance Encode Options:
+                                            </label>
+                                        </dt>
+                                        <dd>
+                                            <input type="text" id="advancedencoder" name="advancedencoder" value="${config['advancedencoder']}"  />
+                                        </dd>
+                                    </dl>
+                                </div>
+                                <dl>
+                                    <dt>
+                                        <label for="encoderfolder">
+                                            Path to Encoder:
+                                        </label>
+                                    </dt>
+                                    <dd>
+                                        <input type="text" id="encoderfolder" name="encoderfolder" value="${config['encoderfolder']}"  />
+                                    </dd>
+                                </dl>  
+                            </div>
+                        </div>
+                </fieldset>   
 
+<<<<<<< HEAD
                 <td>
 
                     <h3>NZBs.org UID: </h3>
@@ -383,19 +1291,55 @@
 						<option value=${x} ${outputselect}>${x}</option>
 					%endfor
 					</select>
+=======
+            </div>  
+        </div>
+        <p class="center">
+            <input type="submit" id="submit" value="Save Changes">
+        </p>
+    </form> 
+        
+    
+    <div class="overlay " id="add_newznab">
+  
+        <img src="images/headphoneslogo.png" style="float: left; margin:-5px 13px 0 -3px;" />
+        <h2>
+            Add Newznab Site
+        </h2>
+        <p>
+            Add the details of the Newznab site below.
+        </p>
+>>>>>>> martynhaigh/configUpdate
 
-					Quality: <select name="encoderquality">
-					%for x in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
-						<%
-							if config['encoderquality'] == x:
-								outputselect = 'selected'
-							else:
-								outputselect = ''
-						%>
-						<option value=${x} ${outputselect}>${x}</option>
-					%endfor
-					</select></h4>
+        <!-- input form. you can press enter too -->
+        <form id="add_newznab_form">
+            <p>
+                <label for="add_newznab_name">
+                    Name:
+                </label>
+                <input id="add_newznab_name" type="text" required="required" pattern="[a-zA-Z ]{5,}" maxlength="30" value="testdata" />
+            </p>
+            <p>
+                <label for="add_newznab_url">
+                    URL:
+                </label>
+                <input id="add_newznab_url" type="url" required="required" value="https://testdata" />
+            </p>
+            <p>    
+                <label for="add_newznab_apikey">
+                    API Key:
+                </label>
+                <input id="add_newznab_apikey" type="text" required="required" pattern="[a-zA-Z ]{5,}" maxlength="30" value="sdfsdf"/>
+            </p>
+            <p class="action">
+                <button type="submit">
+                    OK 
+                </button>
+            </p>
+        </form>
+        <br />
 
+<<<<<<< HEAD
 					<br>
 					<h4>Bitrate: <select name="bitrate">
 					%for x in [64, 128, 192, 256, 320]:
@@ -497,3 +1441,22 @@
 	});
 	</script>
 </%def>
+=======
+    </div>
+    <div id="floating_next">Go to<br /><span /></div>
+    
+    <div id="floating_prev">Go to<br /><span /></div>
+</%def>
+
+<%def name="javascriptIncludes()">
+    <!-- replace for release -->
+    <!--script src="http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js">
+</script-->
+    <script>!window.jQuery.tools && document.write(unescape('%3Cscript src="js/libs/jquery.tools.min.js"%3E%3C/script%3E'))</script>
+    
+    <script src="js/libs/jquery.dataTables.min.js"></script>
+
+    <script src="js/config.js"></script>
+</%def>
+
+>>>>>>> martynhaigh/configUpdate

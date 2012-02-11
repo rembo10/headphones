@@ -1,0 +1,354 @@
+.navigation {
+    /*filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff', endColorstr='#300');
+     b ackground:-*moz-linear-gradient(left, #fff, #300);
+     background:-webkit-gradient(linear, left center, right center, from(#fff), to(#300));*/
+    height: 100%;
+    position: absolute;
+    z-index:1;
+    opacity:0.2;
+    width:150px;
+}
+.navigation.next, .next .click_container  {
+    right: 0;
+    top: 0;
+}
+.navigation.previous, .previous .click_container {
+    left: 0;
+    top: 0;
+}
+
+.navigation .click_container {
+    display: block;
+    height: 100%;
+    position: absolute;
+    width: 100px;
+}
+.navigation p {
+    position:absolute;
+    color:#000;
+    font-size:15px;
+    cursor:pointer;
+}
+
+.navigation.next p {
+    right:10px;
+}
+.navigation.previous p {
+    left:10px;
+}
+
+.navigation .top {
+    top:10px;  
+}
+
+.navigation .bottom {
+    bottom:10px;
+}
+
+#floating_next, #floating_prev{
+    position:absolute;
+    display:none;
+    text-align:center;
+}
+
+
+    .panes  {
+        background:#fff; 
+        padding:20px; 
+        border-radius:20px; 
+        margin:0 auto 20px; 
+        width:65%;
+        position:relative;
+    }
+    
+    .panes > div {
+        background-color:#fff;
+        border-radius:20px;
+        clear:both;
+        margin: auto;
+        padding: 0;
+        position: relative;
+        width: 100%;
+        display:none; 
+    }
+
+    
+    input, textarea, select {font:12px/12px Arial, Helvetica, sans-serif; padding:0;}
+
+    fieldset.action {
+        background:#9da2a6; 
+        border-color:#e5e5e5 #797c80 #797c80 #e5e5e5; 
+        margin-top:-20px;
+        width:100%;
+        display:none;
+    }
+
+
+    label {font-size:11px; font-weight:bold; color:#666;}
+    label.opt {font-weight:normal;}
+
+    #footer {font-size:11px;}
+    
+    
+    #pagemenu_container {
+        background-color: #fff;
+        float: left;
+        list-style-type: none;
+        min-width: 1000px;
+        overflow: hidden;
+        width: 100%;
+        z-index: 998;
+        border-bottom:1px solid #300;
+    }
+    
+    ul#page_menu {
+        margin: 5px 0 5px 79px;
+    }
+
+    ul#page_menu li {
+        display: inline;
+        height: 100%;
+        width: 100%;
+        padding:5px 10px 15px 10px;
+    }
+
+    div#main {
+        padding: 160px 0 0;
+    }
+    
+
+    
+    ul#subhead_menu li a.current {
+        text-decoration:underline;
+        border-width:0;
+    }
+
+    fieldset {
+        width:80%;
+        margin:auto;
+        position:relative;
+        z-index:2;
+    }
+    fieldset .form_description {
+        float:left;
+        width:25%;
+    }
+    fieldset .form_content { 
+        width:300px;
+        float:left;
+        padding-left:20px;
+        margin-left:20px;
+        border-left:1px solid #300;
+    }
+
+    dt {  
+        margin: 5px 10px 5px 3px;
+    }
+    dd {  
+        margin:0 10px 10px 0;
+    }
+
+    .flow dt {
+     clear: left;  
+     float:left;
+    }
+    .flow dd {
+        padding-top:2px;
+    }
+
+    fieldset input[type="text"], fieldset input[type="password"] {
+        width:100%;
+    }
+    input#http_port, input#preferred_bitrate_input {
+        width:40%;
+    }
+    .help {
+        float:right;
+        height:20px;
+        width:20px;
+        background-color:red;
+    }
+
+    .tooltip {
+        background-color:#000;
+        border:1px solid #fff;
+        padding:10px 15px;
+        width:220px;
+        display:none;
+        color:#fff;
+        text-align:left;
+        font-size:12px;
+        
+        /* outline radius for mozilla/firefox only */
+        -moz-box-shadow:0 0 10px #000;
+        -webkit-box-shadow:0 0 10px #000;
+    }
+    .tooltip a:link, .tooltip a:visited {
+        color:#fff;
+        text-decoration:underline;
+    }
+    
+    .tooltip a:hover {
+        text-decoration:none;
+    }
+    
+    fieldset legend {
+        font-size:1em;
+        color:#300;
+        display:block;
+        font-weight:bold;
+        text-align:right;
+        width:100%; 
+    }
+    .legend_description {
+        font-size:1em;
+        color:#300;
+        display:block; 
+        text-align:right;
+    }
+
+    
+    .form_content dl:nth-of-type(1) {
+        margin-top: -4px;
+        padding-top: 0;
+    }
+
+    .panes fieldset+fieldset, .panes fieldset+div fieldset, .panes div+fieldset {
+        margin-top:10px;
+    }
+    .extra_detail {
+        margin:0;
+        padding:0;
+        margin-left:5px;
+        padding-left:5px;
+        border-left:1px solid #300;
+        clear:both;
+    }
+     .extra_detail .extra_detail{ 
+        margin-left:5px;
+        padding-left:5px;
+     }
+    .extra_detail + dl {
+        margin-top:20px;
+    }
+    .display_example {
+        background-color:#EBF4FB;
+        padding:4px;
+        border:1px solid #a7d6fb;
+        font-size:0.7em;
+    }
+    
+    
+    /*
+     * styles for the modal popup box
+     * */
+    
+   
+    /* the overlayed element */
+    .overlay {
+        
+        /* initially overlay is hidden */
+        display:none;
+        
+        /* growing background image */
+        background-image:url(../images/white.png);
+             
+        
+        /* some padding to layout nested elements nicely  */
+        padding:20px 10px;
+        
+        /* a little styling */  
+        font-size:11px;
+    }
+    
+    /* default close button positioned on upper right corner */
+    .overlay .close {
+        background-image:url(../images/close.png);
+        position:absolute; right:5px; top:5px;
+        cursor:pointer;
+        height:35px;
+        width:35px;
+    }
+    .overlay label {
+            float:left;
+            clear:left;
+            display:block;
+            width:60px;
+            text-align:right;
+            padding-right:10px;
+            padding-top:3px;
+            margin-top:10px;
+            color:#fff;
+    }
+    .overlay h2 {
+        margin-top:10px;
+    }
+    #add_newznab_form {
+        clear:both; 
+        margin-top:10px;
+    }
+    .overlay input[type="text"], .overlay input[type="url"] {
+        float:left;
+        clear:right;
+        display:block;
+        width:250px;
+        margin-top:10px;
+    }
+    .overlay .action {
+        width:100%;
+        clear:both;
+        padding-top:20px;
+        
+    }
+    .overlay button {
+        float:right;
+        display:block;
+        margin-right:20px;
+        
+        
+        font-size:1.2em;
+        
+    }
+    
+    #add_newznab {
+        background-image:url(../images/apple.png);
+        color:#fff;
+        padding:40px 20px 20px 50px;
+        width:350px;
+        }
+        
+        /* CSS3 border radius for various elements. yea - CSS isn't perfect */
+        .rounded, #sheet input, .error {
+            border-radius: 5px;
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            -o-border-radius: 5px;
+            -khtml-border-radius: 5px;
+        }
+        
+        /* validation error message */
+        .error {
+            background-color:#E8FF6D;
+            padding:4px;
+            -webkit-box-shadow: #000 0 0 12px;
+            -moz-box-shadow: #000 0 0 12px;
+        }
+        /* pure CSS arrow */
+        .error em {
+            display:block;
+            width:0;
+            height:0;
+            border:10px solid;
+            border-color:#FFFE36 transparent transparent;
+            
+            /* positioning */
+            position:absolute;
+            bottom:-17px;
+            left:60px;
+        }
+    
+        
+        /* input field that caused validation error */
+        .invalid {
+            background-color:rgba(221, 233, 255, 0.898) !important;
+        }
