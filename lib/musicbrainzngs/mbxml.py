@@ -1,3 +1,8 @@
+# This file is part of the musicbrainzngs library
+# Copyright (C) Alastair Porter, Adrian Sampson, and others
+# This file is distributed under a BSD-2-Clause type license.
+# See the COPYING file for more information.
+
 import xml.etree.ElementTree as ET
 import string
 import StringIO
@@ -25,6 +30,7 @@ except:
 		return "%s:%s" % (prefix, tag), xmlns
 
 NS_MAP = {"http://musicbrainz.org/ns/mmd-2.0#": "ws2"}
+_log = logging.getLogger("python-musicbrainz-ngs")
 
 def make_artist_credit(artists):
 	names = []
@@ -52,7 +58,7 @@ def parse_elements(valid_els, element):
 		if t in valid_els:
 			result[t] = sub.text
 		else:
-			logging.debug("in <%s>, uncaught <%s>", fixtag(element.tag, NS_MAP)[0], t)
+			_log.debug("in <%s>, uncaught <%s>", fixtag(element.tag, NS_MAP)[0], t)
 	return result
 
 def parse_attributes(attributes, element):
@@ -67,7 +73,7 @@ def parse_attributes(attributes, element):
 		if attr in element.attrib:
 			result[attr] = element.attrib[attr]
 		else:
-			logging.debug("in <%s>, uncaught attribute %s", fixtag(element.tag, NS_MAP)[0], attr)
+			_log.debug("in <%s>, uncaught attribute %s", fixtag(element.tag, NS_MAP)[0], attr)
 	return result
 
 def parse_inner(inner_els, element):
@@ -97,7 +103,7 @@ def parse_inner(inner_els, element):
 			else:
 				result[t] = inner_result
 		else:
-			logging.debug("in <%s>, not delegating <%s>", fixtag(element.tag, NS_MAP)[0], t)
+			_log.debug("in <%s>, not delegating <%s>", fixtag(element.tag, NS_MAP)[0], t)
 	return result
 
 def parse_message(message):
@@ -155,10 +161,8 @@ def parse_collection_release_list(rl):
 
 def parse_artist_lifespan(lifespan):
 	parts = parse_elements(["begin", "end"], lifespan)
-	beginval = parts.get("begin", "")
-	endval = parts.get("end", "")
-		
-	return (beginval, endval)
+
+	return parts
 
 def parse_artist_list(al):
 	return [parse_artist(a) for a in al]
@@ -417,7 +421,7 @@ def parse_track_list(tl):
 
 def parse_track(track):
 	result = {}
-	elements = ["position"]
+	elements = ["position", "title"]
 	inner_els = {"recording": parse_recording}
 
 	result.update(parse_elements(elements, track))
