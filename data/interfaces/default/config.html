@@ -1135,7 +1135,7 @@
             
 		<tr>
                 <td>
-                    <br><br><br><br><h2>Torrent:</h2><br>
+                    <h2>Torrent:</h2><br>
                 </td>
             </tr>
 
@@ -1376,17 +1376,33 @@
                     <h3>Path to Encoder:</h3><input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43">
                 	</div>
                 </td>
-		<td>
-                      <h2>Prowl Notification:</h2>
-		      <br>
-                      <h3><input type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} />Enabled Prowl Notification</h3><br>
+		        <td>
+                      <h2>Prowl Notification:</h2><br>
+                      <h3><input type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} />Enable Prowl Notifications</h3><br>
                       <div id="prowloptions">
-		      	<h3>API key:</h3><input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50"><br><br>
+		      	        <h3>API key:</h3><input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50"><br><br>
                       	<h3><input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} />Notify on snatch?</h3><br>
                       	<h3>Priority (-2,-1,0,1 or 2):</h3><input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2">
                       </div>
-		</td>
+		        </td>
             </tr>
+            <tr>
+				<td>
+					<h3>Muscbrainz Mirror: <select name="mirror"><h3>
+					%for mirror in config['mirror_list']:
+						<%
+							if mirror == headphones.MIRROR:
+								selected = 'selected="selected"'
+							else:
+								selected = ''
+							if mirror == "localhost":
+								mirrortext = "  (use localhost:7143)"
+							else:
+								mirrortext = ''
+						%>
+						<option value="${mirror}" ${selected}>${mirror} ${mirrortext}</option>
+					%endfor
+					</select>
         </table>
     </div>
 

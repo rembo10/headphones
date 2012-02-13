@@ -11,7 +11,7 @@ from lib.configobj import ConfigObj
 
 import cherrypy
 
-from headphones import updater, searcher, importer, versioncheck, logger, postprocessor, version, sab, librarysync
+from headphones import versioncheck, logger, version
 from headphones.common import *
 
 FULL_PATH = None
@@ -137,6 +137,8 @@ PROWL_ENABLED = True
 PROWL_PRIORITY = 1
 PROWL_KEYS = None
 PROWL_ONSNATCH = True
+MIRRORLIST = ["musicbrainz.org","tbueter.com","localhost"]
+MIRROR = None
 
 AUTOWANT_ALBUM = False
 AUTOWANT_SINGLE = False
@@ -206,8 +208,8 @@ def initialize():
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, ENCODE, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
-                ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, \
-                AUTOWANT_ALBUM, AUTOWANT_SINGLE, AUTOWANT_COMPILATION, AUTOWANT_REMIX, AUTOWANT_EP, AUTOWANT_LIVE, AUTOWANT_SOUNDTRACK
+                AUTOWANT_ALBUM, AUTOWANT_SINGLE, AUTOWANT_COMPILATION, AUTOWANT_REMIX, AUTOWANT_EP, AUTOWANT_LIVE, AUTOWANT_SOUNDTRACK, \
+                ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, MIRROR
                 
         if __INITIALIZED__:
             return False
@@ -321,6 +323,8 @@ def initialize():
         AUTOWANT_EP = bool(check_setting_int(CFG, 'General', 'autowant_ep', 0))
         AUTOWANT_LIVE = bool(check_setting_int(CFG, 'General', 'autowant_live', 0))
         AUTOWANT_SOUNDTRACK = bool(check_setting_int(CFG, 'General', 'autowant_soundtrack', 0))
+        
+        MIRROR = check_setting_str(CFG, 'General', 'mirror', 'tbueter.com')
         
         USE_ADVANCED_ENCODING = bool(check_setting_int(CFG, 'General', 'use_advanced_encoding', 1))
 		
@@ -534,6 +538,8 @@ def config_write():
     new_config['General']['autowant_live'] = AUTOWANT_LIVE
     new_config['General']['autowant_soundtrack'] = AUTOWANT_SOUNDTRACK
     
+    new_config['General']['mirror'] = MIRROR
+    
     new_config.write()
 
     
@@ -544,6 +550,7 @@ def start():
     if __INITIALIZED__:
     
         # Start our scheduled background tasks
+        from headphones import updater, searcher, librarysync, postprocessor
 
         SCHED.add_interval_job(updater.dbUpdate, hours=48)
         SCHED.add_interval_job(searcher.searchforalbum, minutes=SEARCH_INTERVAL)
