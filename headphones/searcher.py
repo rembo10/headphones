@@ -62,40 +62,46 @@ def url_fix(s, charset='utf-8'):
     return urlparse.urlunsplit((scheme, netloc, path, qs, anchor))    
     
     
-def searchforalbum(albumid=None, new=False):
+def searchforalbum(albumid=None, new=False, lossless=False):
     
     if not albumid:
 
         myDB = db.DBConnection()
     
-        results = myDB.select('SELECT AlbumID from albums WHERE Status="Wanted"')
+        results = myDB.select('SELECT AlbumID, Status from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
         new = True
          
         for result in results:
             foundNZB = "none"
             if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN) and (headphones.SAB_HOST or headphones.BLACKHOLE):
-                foundNZB = searchNZB(result['AlbumID'], new)
+                if result['Status'] == "Wanted Lossless":
+                    foundNZB = searchNZB(result['AlbumID'], new, losslessOnly=True)
+                else:
+                    foundNZB = searchNZB(result['AlbumID'], new)
 
             if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA) and foundNZB == "none":
-                searchTorrent(result['AlbumID'], new)
+                if result['Status'] == "Wanted Lossless":
+                    searchTorrent(result['AlbumID'], new, losslessOnly=True)
+                else:
+                    searchTorrent(result['AlbumID'], new)
             
     else:        
     
         foundNZB = "none"
         if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN) and (headphones.SAB_HOST or headphones.BLACKHOLE):
-            foundNZB = searchNZB(albumid, new)
+            foundNZB = searchNZB(albumid, new, lossless)
 
         if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA) and foundNZB == "none":
-            searchTorrent(albumid, new)
+            searchTorrent(albumid, new, lossless)
 
-def searchNZB(albumid=None, new=False):
+def searchNZB(albumid=None, new=False, losslessOnly=False):
 
     myDB = db.DBConnection()
     
     if albumid:
-        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted" AND AlbumID=?', [albumid])
+        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE AlbumID=?', [albumid])
     else:
-        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted"')
+        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
         new = True
         
     for albums in results:
@@ -133,7 +139,7 @@ def searchNZB(albumid=None, new=False):
         
         if headphones.NZBMATRIX:
             provider = "nzbmatrix"
-            if headphones.PREFERRED_QUALITY == 3:
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "23"
                 maxsize = 10000000000    
             elif headphones.PREFERRED_QUALITY:
@@ -183,7 +189,7 @@ def searchNZB(albumid=None, new=False):
             
         if headphones.NEWZNAB:
             provider = "newznab"
-            if headphones.PREFERRED_QUALITY == 3:
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "3040"
                 maxsize = 10000000000
             elif headphones.PREFERRED_QUALITY:
@@ -235,7 +241,7 @@ def searchNZB(albumid=None, new=False):
                     
         if headphones.NZBSORG:
             provider = "nzbsorg"
-            if headphones.PREFERRED_QUALITY == 3:
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "31"
                 maxsize = 10000000000
             elif headphones.PREFERRED_QUALITY:
@@ -301,7 +307,7 @@ def searchNZB(albumid=None, new=False):
         if headphones.NEWZBIN:
             provider = "newzbin"    
             providerurl = "https://www.newzbin.com/"
-            if headphones.PREFERRED_QUALITY == 3:
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "7"        #music
                 format = "2"             #flac
                 maxsize = 10000000000
@@ -560,14 +566,14 @@ def preprocess(resultlist):
 
 
 
-def searchTorrent(albumid=None, new=False):
+def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
     myDB = db.DBConnection()
     
     if albumid:
-        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted" AND AlbumID=?', [albumid])
+        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE AlbumID=?', [albumid])
     else:
-        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted"')
+        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
         new = True
         
     for albums in results:
@@ -607,7 +613,7 @@ def searchTorrent(albumid=None, new=False):
         if headphones.KAT:
             provider = "Kick Ass Torrent"
             providerurl = url_fix("http://www.kat.ph/search/" + term)
-            if headphones.PREFERRED_QUALITY == 3:
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "7"        #music
                 format = "2"             #flac
                 maxsize = 10000000000
@@ -668,7 +674,7 @@ def searchTorrent(albumid=None, new=False):
 								resultlist.append((title, size, url, provider))
 								logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
 							else:
-								logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes)' % (title, size))    
+								logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeders), rightformat))    
 						
 						except Exception, e:
 							logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
@@ -677,7 +683,7 @@ def searchTorrent(albumid=None, new=False):
         if headphones.ISOHUNT:
             provider = "ISOhunt"    
             providerurl = url_fix("http://isohunt.com/js/rss/" + term)
-            if headphones.PREFERRED_QUALITY == 3:
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "7"        #music
                 format = "2"             #flac
                 maxsize = 10000000000
@@ -741,7 +747,7 @@ def searchTorrent(albumid=None, new=False):
 								resultlist.append((title, size, url, provider))
 								logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
 							else:
-								logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes)' % (title, size))    
+								logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeders), rightformat))    
 						
 						except Exception, e:
 							logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
@@ -749,7 +755,7 @@ def searchTorrent(albumid=None, new=False):
         if headphones.MININOVA:
             provider = "Mininova"    
             providerurl = url_fix("http://www.mininova.org/rss/" + term + "/5")
-            if headphones.PREFERRED_QUALITY == 3:
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "7"        #music
                 format = "2"             #flac
                 maxsize = 10000000000
@@ -808,7 +814,7 @@ def searchTorrent(albumid=None, new=False):
 								resultlist.append((title, size, url, provider))
 								logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
 							else:
-								logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes)' % (title, size))    
+								logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeders), rightformat))    
 						
 						except Exception, e:
 							logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
