@@ -1,6 +1,6 @@
 import headphones
 
-from headphones import logger, db, mb, importer
+from headphones import logger, db, importer
 
 def dbUpdate():
 
