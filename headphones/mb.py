@@ -13,8 +13,31 @@ import headphones
 from headphones import logger, db
 from headphones.helpers import multikeysort, replace_all
 
-q = ws.Query()
 mb_lock = threading.Lock()
+
+
+# Quick fix to add mirror switching on the fly. Need to probably return the mbhost & mbport that's
+# being used, so we can send those values to the log
+def startmb():
+
+	if headphones.MIRROR == "localhost":
+		mbhost = "localhost"
+		mbport = 7143
+		sleepytime = 0
+	elif headphones.MIRROR == "tbueter.com":
+		mbhost = "tbueter.com"
+		mbport = 3000
+		sleepytime = 0
+	else:
+		mbhost = "musicbrainz.org"
+		mbport = 80
+		sleepytime = 1
+	
+	service = ws.WebService(host=mbhost, port=mbport)
+	q = ws.Query(service)
+	
+	return (q, sleepytime)
+	
 
 def findArtist(name, limit=1):
 
@@ -27,6 +50,8 @@ def findArtist(name, limit=1):
 		chars = set('!?*')
 		if any((c in chars) for c in name):
 			name = '"'+name+'"'
+			
+		q, sleepytime = startmb()
 		
 		while attempt < 5:
 		
@@ -34,11 +59,11 @@ def findArtist(name, limit=1):
 				artistResults = q.getArtists(ws.ArtistFilter(query=name, limit=limit))
 				break
 			except WebServiceError, e:
-				logger.warn('Attempt to query MusicBrainz for %s failed: %s' % (name, e))
+				logger.warn('Attempt to query MusicBrainz for %s failed: %s [%s:%i]' % (name, e, mbhost, mbport))
 				attempt += 1
 				time.sleep(5)
 		
-		time.sleep(1)
+		time.sleep(sleepytime)
 		
 		if not artistResults:
 			return False		
@@ -85,6 +110,8 @@ def findRelease(name, limit=1):
 		chars = set('!?')
 		if any((c in chars) for c in name):
 			name = '"'+name+'"'
+			
+		q, sleepytime = startmb()
 		
 		while attempt < 5:
 		
@@ -96,7 +123,7 @@ def findRelease(name, limit=1):
 				attempt += 1
 				time.sleep(5)
 		
-		time.sleep(1)
+		time.sleep(sleepytime)
 		
 		if not releaseResults:
 			return False		
@@ -126,6 +153,8 @@ def getArtist(artistid, extrasonly=False):
 		artist = None
 		attempt = 0
 		
+		q, sleepytime = startmb()
+		
 		while attempt < 5:
 		
 			try:
@@ -139,7 +168,7 @@ def getArtist(artistid, extrasonly=False):
 		if not artist:
 			return False
 		
-		time.sleep(1)
+		time.sleep(sleepytime)
 				
 		artist_dict['artist_name'] = artist.name
 		artist_dict['artist_sortname'] = artist.sortName
@@ -215,6 +244,8 @@ def getReleaseGroup(rgid):
 		releaseGroup = None
 		attempt = 0
 		
+		q, sleepytime = startmb()
+		
 		while attempt < 5:
 		
 			try:
@@ -228,7 +259,7 @@ def getReleaseGroup(rgid):
 		if not releaseGroup:
 			return False
 			
-		time.sleep(1)
+		time.sleep(sleepytime)
 		# I think for now we have to make separate queries for each release, in order
 		# to get more detailed release info (ASIN, track count, etc.)
 		for release in releaseGroup.releases:
@@ -257,7 +288,7 @@ def getReleaseGroup(rgid):
 					logger.debug('%s is not an official live album. Skipping' % releaseResult.name)
 					continue
 				
-			time.sleep(1)
+			time.sleep(sleepytime)
 			
 			formats = {
 				'2xVinyl':			'2',
@@ -345,6 +376,8 @@ def getRelease(releaseid):
 		inc = ws.ReleaseIncludes(tracks=True, releaseEvents=True, releaseGroup=True, artist=True)
 		results = None
 		attempt = 0
+		
+		q, sleepytime = startmb()
 			
 		while attempt < 5:
 		
@@ -359,7 +392,7 @@ def getRelease(releaseid):
 		if not results:
 			return False
 		
-		time.sleep(1)
+		time.sleep(sleepytime)
 		
 		release['title'] = results.title
 		release['id'] = u.extractUuid(results.id)
@@ -414,6 +447,8 @@ def findArtistbyAlbum(name):
 	f = ws.ReleaseGroupFilter(query=term, limit=1)
 	results = None
 	attempt = 0
+	
+	q, sleepytime = startmb()
 			
 	while attempt < 5:
 			
@@ -425,7 +460,7 @@ def findArtistbyAlbum(name):
 			attempt += 1
 			time.sleep(5)	
 	
-	time.sleep(1)
+	time.sleep(sleepytime)
 	
 	if not results:
 		return False
@@ -447,6 +482,8 @@ def findAlbumID(artist=None, album=None):
 	f = ws.ReleaseGroupFilter(title=album, artistName=artist, limit=1)
 	results = None
 	attempt = 0
+	
+	q, sleepytime = startmb()
 			
 	while attempt < 5:
 			
@@ -458,7 +495,7 @@ def findAlbumID(artist=None, album=None):
 			attempt += 1
 			time.sleep(5)	
 	
-	time.sleep(1)
+	time.sleep(sleepytime)
 	
 	if not results:
 		return False

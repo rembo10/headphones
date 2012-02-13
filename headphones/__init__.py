@@ -11,7 +11,7 @@ from lib.configobj import ConfigObj
 
 import cherrypy
 
-from headphones import updater, searcher, importer, versioncheck, logger, postprocessor, version, sab, librarysync
+from headphones import versioncheck, logger, version
 from headphones.common import *
 
 FULL_PATH = None
@@ -134,6 +134,8 @@ PROWL_ENABLED = True
 PROWL_PRIORITY = 1
 PROWL_KEYS = None
 PROWL_ONSNATCH = True
+MIRRORLIST = ["musicbrainz.org","tbueter.com","localhost"]
+MIRROR = None
 
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
@@ -195,7 +197,7 @@ def initialize():
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, ENCODE, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
-                ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH
+                ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, MIRROR
                 
         if __INITIALIZED__:
             return False
@@ -207,7 +209,7 @@ def initialize():
         CheckSection('Newznab')
         CheckSection('NZBsorg')
         CheckSection('Newzbin')
-	CheckSection('Prowl')
+        CheckSection('Prowl')
         
         # Set global variables based on config file or use defaults
         try:
@@ -296,10 +298,12 @@ def initialize():
         ENCODERVBRCBR = check_setting_str(CFG, 'General', 'encodervbrcbr', 'cbr')
         ENCODERLOSSLESS = bool(check_setting_int(CFG, 'General', 'encoderlossless', 1))
 
-	PROWL_ENABLED = bool(check_setting_int(CFG, 'Prowl', 'prowl_enabled', 0))
-	PROWL_KEYS = check_setting_str(CFG, 'Prowl', 'prowl_keys', '')
-	PROWL_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_onsnatch', 0)) 
-	PROWL_PRIORITY = check_setting_int(CFG, 'Prowl', 'prowl_priority', 0)
+        PROWL_ENABLED = bool(check_setting_int(CFG, 'Prowl', 'prowl_enabled', 0))
+        PROWL_KEYS = check_setting_str(CFG, 'Prowl', 'prowl_keys', '')
+        PROWL_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_onsnatch', 0)) 
+        PROWL_PRIORITY = check_setting_int(CFG, 'Prowl', 'prowl_priority', 0)
+        
+        MIRROR = check_setting_str(CFG, 'General', 'mirror', 'tbueter.com')
         
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
@@ -502,6 +506,8 @@ def config_write():
     new_config['General']['encodervbrcbr'] = ENCODERVBRCBR
     new_config['General']['encoderlossless'] = ENCODERLOSSLESS
     
+    new_config['General']['mirror'] = MIRROR
+    
     new_config.write()
 
     
@@ -512,6 +518,7 @@ def start():
     if __INITIALIZED__:
     
         # Start our scheduled background tasks
+        from headphones import updater, searcher, librarysync, postprocessor
 
         SCHED.add_interval_job(updater.dbUpdate, hours=48)
         SCHED.add_interval_job(searcher.searchforalbum, minutes=SEARCH_INTERVAL)
