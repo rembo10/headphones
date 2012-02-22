@@ -134,7 +134,7 @@ PROWL_ENABLED = True
 PROWL_PRIORITY = 1
 PROWL_KEYS = None
 PROWL_ONSNATCH = True
-MIRRORLIST = ["musicbrainz.org","tbueter.com","localhost"]
+MIRRORLIST = ["musicbrainz.org","headphones","tbueter.com","localhost"]
 MIRROR = None
 
 def CheckSection(sec):
@@ -303,7 +303,7 @@ def initialize():
         PROWL_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_onsnatch', 0)) 
         PROWL_PRIORITY = check_setting_int(CFG, 'Prowl', 'prowl_priority', 0)
         
-        MIRROR = check_setting_str(CFG, 'General', 'mirror', 'tbueter.com')
+        MIRROR = check_setting_str(CFG, 'General', 'mirror', 'headphones')
         
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
