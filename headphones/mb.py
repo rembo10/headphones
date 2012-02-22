@@ -24,6 +24,10 @@ def startmb():
 		mbhost = "localhost"
 		mbport = 7143
 		sleepytime = 0
+	elif headphones.MIRROR == "headphones":
+		mbhost = "178.63.142.150"
+		mbport = 5000
+		sleepytime = 0
 	elif headphones.MIRROR == "tbueter.com":
 		mbhost = "tbueter.com"
 		mbport = 3000
