@@ -137,7 +137,7 @@ PROWL_ENABLED = True
 PROWL_PRIORITY = 1
 PROWL_KEYS = None
 PROWL_ONSNATCH = True
-MIRRORLIST = ["musicbrainz.org","tbueter.com","localhost"]
+MIRRORLIST = ["musicbrainz.org","headphones","tbueter.com","localhost"]
 MIRROR = None
 
 AUTOWANT_ALBUM = False
@@ -315,7 +315,7 @@ def initialize():
         PROWL_KEYS = check_setting_str(CFG, 'Prowl', 'prowl_keys', '')
         PROWL_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_onsnatch', 0)) 
         PROWL_PRIORITY = check_setting_int(CFG, 'Prowl', 'prowl_priority', 0)
-        
+
         AUTOWANT_ALBUM = bool(check_setting_int(CFG, 'General', 'autowant_album', 0))
         AUTOWANT_SINGLE = bool(check_setting_int(CFG, 'General', 'autowant_single', 0))
         AUTOWANT_COMPILATION = bool(check_setting_int(CFG, 'General', 'autowant_compilation', 0))
@@ -324,7 +324,7 @@ def initialize():
         AUTOWANT_LIVE = bool(check_setting_int(CFG, 'General', 'autowant_live', 0))
         AUTOWANT_SOUNDTRACK = bool(check_setting_int(CFG, 'General', 'autowant_soundtrack', 0))
         
-        MIRROR = check_setting_str(CFG, 'General', 'mirror', 'tbueter.com')
+        MIRROR = check_setting_str(CFG, 'General', 'mirror', 'headphones')
         
         USE_ADVANCED_ENCODING = bool(check_setting_int(CFG, 'General', 'use_advanced_encoding', 1))
 		

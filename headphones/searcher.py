@@ -308,7 +308,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
         if headphones.NEWZBIN:
             provider = "newzbin"    
-            providerurl = "https://www.newzbin.com/"
+            providerurl = "https://www.newzbin2.es/"
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "7"        #music
                 format = "2"             #flac
@@ -514,7 +514,7 @@ def getresultNZB(result):
     
     if result[3] == 'newzbin':
         params = urllib.urlencode({"username": headphones.NEWZBIN_UID, "password": headphones.NEWZBIN_PASSWORD, "reportid": result[2]})
-        url = "https://www.newzbin.com" + "/api/dnzb/"
+        url = "https://www.newzbin2.es" + "/api/dnzb/"
         urllib._urlopener = NewzbinDownloader()
         try:
             nzb = urllib.urlopen(url, data=params).read()
