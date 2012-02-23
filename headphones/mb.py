@@ -63,7 +63,7 @@ def findArtist(name, limit=1):
 				artistResults = q.getArtists(ws.ArtistFilter(query=name, limit=limit))
 				break
 			except WebServiceError, e:
-				logger.warn('Attempt to query MusicBrainz for %s failed: %s [%s:%i]' % (name, e, mbhost, mbport))
+				logger.warn('Attempt to query MusicBrainz for %s failed: %s' % (name, e))
 				attempt += 1
 				time.sleep(5)
 		
