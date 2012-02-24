@@ -18,9 +18,13 @@ mb_lock = threading.Lock()
 
 # Quick fix to add mirror switching on the fly. Need to probably return the mbhost & mbport that's
 # being used, so we can send those values to the log
-def startmb():
-
-	if headphones.MIRROR == "localhost":
+def startmb(forcemb=False):
+	
+	if forcemb or headphones.MIRROR == "musicbrainz.org":
+		mbhost = "musicbrainz.org"
+		mbport = 80
+		sleepytime = 1
+	elif headphones.MIRROR == "localhost":
 		mbhost = "localhost"
 		mbport = 7143
 		sleepytime = 0
@@ -28,14 +32,10 @@ def startmb():
 		mbhost = "178.63.142.150"
 		mbport = 5000
 		sleepytime = 0
-	elif headphones.MIRROR == "tbueter.com":
+	else:
 		mbhost = "tbueter.com"
 		mbport = 3000
 		sleepytime = 0
-	else:
-		mbhost = "musicbrainz.org"
-		mbport = 80
-		sleepytime = 1
 	
 	service = ws.WebService(host=mbhost, port=mbport)
 	q = ws.Query(service)
@@ -55,7 +55,7 @@ def findArtist(name, limit=1):
 		if any((c in chars) for c in name):
 			name = '"'+name+'"'
 			
-		q, sleepytime = startmb()
+		q, sleepytime = startmb(forcemb=True)
 		
 		while attempt < 5:
 		
@@ -65,7 +65,7 @@ def findArtist(name, limit=1):
 			except WebServiceError, e:
 				logger.warn('Attempt to query MusicBrainz for %s failed: %s' % (name, e))
 				attempt += 1
-				time.sleep(5)
+				time.sleep(10)
 		
 		time.sleep(sleepytime)
 		
@@ -115,7 +115,7 @@ def findRelease(name, limit=1):
 		if any((c in chars) for c in name):
 			name = '"'+name+'"'
 			
-		q, sleepytime = startmb()
+		q, sleepytime = startmb(forcemb=True)
 		
 		while attempt < 5:
 		
@@ -125,7 +125,7 @@ def findRelease(name, limit=1):
 			except WebServiceError, e:
 				logger.warn('Attempt to query MusicBrainz for %s failed: %s' % (name, e))
 				attempt += 1
-				time.sleep(5)
+				time.sleep(10)
 		
 		time.sleep(sleepytime)
 		
@@ -432,7 +432,8 @@ def getRelease(releaseid):
 		release['tracks'] = tracks
 		
 		return release
-		
+
+# Used when there is a disambiguation
 def findArtistbyAlbum(name):
 
 	myDB = db.DBConnection()
@@ -452,7 +453,7 @@ def findArtistbyAlbum(name):
 	results = None
 	attempt = 0
 	
-	q, sleepytime = startmb()
+	q, sleepytime = startmb(forcemb=True)
 			
 	while attempt < 5:
 			
@@ -462,7 +463,7 @@ def findArtistbyAlbum(name):
 		except WebServiceError, e:
 			logger.warn('Attempt to query MusicBrainz for %s failed: %s. Sleeping 5 seconds.' % (name, e))
 			attempt += 1
-			time.sleep(5)	
+			time.sleep(10)	
 	
 	time.sleep(sleepytime)
 	
@@ -487,7 +488,7 @@ def findAlbumID(artist=None, album=None):
 	results = None
 	attempt = 0
 	
-	q, sleepytime = startmb()
+	q, sleepytime = startmb(forcemb=True)
 			
 	while attempt < 5:
 			
@@ -497,7 +498,7 @@ def findAlbumID(artist=None, album=None):
 		except Exception, e:
 			logger.warn('Attempt to query MusicBrainz for %s - %s failed: %s. Sleeping 5 seconds.' % (artist, album, e))
 			attempt += 1
-			time.sleep(5)	
+			time.sleep(10)	
 	
 	time.sleep(sleepytime)
 	
