@@ -126,44 +126,68 @@ body { background-color: #313131; width: 100%; height: 100%; color: #c2c2c2; ove
 
 
 
-table.display thead tr th { background: url(../images/table-header.png); border: 1px solid #000; color: #000; text-shadow: 1px 1px rgb(100,100,100); }
+table.display thead tr th { background: url(../images/table-header.png); border: 1px solid #000; color: #000; }
 
-h1 { font-size: 20px; color: #fff; }
-h2 { font-size: 18px; color: #fff; }
-h3 { font-size: 12px; color: #fff; font-wieght: normal; }
-h4 { font-size: 14px; color: #fff; }
+h1 { font-size: 14px; padding: 10px 0px 10px 10px; color: #FFF; text-decoration: none; background-color: #212121;}
+h2 { font-size: 13px; color: #FFF; text-decoration: none;}
+h3 { font-size: 12px; color: #FFF; text-decoration: none;}
+h4 { font-size: 12px; color: #FFF; text-decoration: none;}
 
 p.indented { padding-top: 20px; margin-left: 20px; font-size: 14px; }
 p.center { text-align: center; font-size: 18px; }
 .smalltext2 { font-size: 12px; margin-left: 45px; }
 
-header { width: 100%; height: 60px; background: #313131; position: fixed; top: 0px; left: 0px; z-index: 998; background: url(../images/header.png); }
+header 
+{ 
+width: 100%; 
+height: 65px; 
+background: #313131; 
+border-bottom: 1px solid #000;
+position: fixed; 
+top: 0px; 
+left: 0px; 
+z-index: 998; 
+background: url(../images/header.png); 
+}
 
-div#updatebar { text-align: center; width: 300px; min-height: 200px; position: fixed; top: 300px; left: 100%; margin: auto; background-color: rgba(0,0,0,0.8); }
+div#updatebar { box-shadow: 5px 5px 3px #000; text-align: center; width: 300px; min-height: 60px; position: fixed; bottom: 20px; right: 10px; z-index: 9999; padding: 20px; margin: auto; background-color: rgba(0,0,0,0.8); }
 div#logo { padding-left: 10px; }
 
-ul#nav { position: fixed; top: 60px; left: 0px; list-style-type: none; height: 100%; width: 200px; padding: 0; margin: 0; background-color: #343434; padding-top: 30px; }
+ul#nav { position: fixed; top: 60px; left: 0px; list-style-type: none; height: 100%; width: 200px; padding: 0; margin: 0; background-color: #343434; border-right: 1px solid #000; padding-top: 30px; z-index: 300;}
 ul#nav li { display: block; width: 100%; padding: 0; margin: 0;}
 ul#nav li:hover { display: block; width: 100%; background: #ac0000 url(../images/nav-link-hover.png); }
-ul#nav li a { padding: 5px; font-size: 12px; color: #FFF; text-decoration: none; width: 100%; display: block; }
-ul#nav li a:hover { color: #fff; width: 100%; }
-ul#nav li .selected { background: #ac0000 url(../images/nav-link-hover.png) }
+ul#nav li a { padding: 5px 0px 5px 10px; font-size: 12px; color: #FFF; text-decoration: none; width: 100%; display: block; }
+ul#nav li a:hover { color: #fff; }
+.selected { background: #ac0000 url(../images/nav-link-hover.png); }
 
-div#subhead_container { height: 30px; width:100%; position: fixed; top: 60px; left: 200px; background-color:#ac0000; list-style-type: none; z-index: 998; overflow: hidden; }
-ul#subhead_menu { margin-top: 5px; }
+div#subhead_container { border-bottom: 1px solid #000; height: 40px; width:100%; position: fixed; top: 65px; left: 200px; background: #ac0000 url(../images/subhead.png); list-style-type: none; z-index: 200; overflow: hidden; }
+ul#subhead_menu { 
+margin-top: 5px; 
+}
 ul#subhead_menu li { width: 100%; height: 100%; display: inline; }
-ul#subhead_menu li a { padding: 5px 15px 10px 15px; vertical-align: middle; color: white; font-size: 16px; text-decoration: none; }
+ul#subhead_menu li a { padding: 0px 15px 0px 15px; line-height: 40px; vertical-align: middle; color: white; font-size: 16px; text-decoration: none; }
 ul#subhead_menu li a:hover { width: 100%; height: 100%; background-color: #grey; }
 
 /*
  *	Searchbar Styles 
  * */
 
-div#searchbar { margin: 20px 30px auto auto; position: fixed; top: 0px; right: 0px; z-index: 1000; background-color: #fff; border-radius: 20px; border: 1px solid #909090 }
+div#searchbar 
+{ 
+	margin: 20px 30px auto auto; 
+	position: fixed; 
+	top: 0px; 
+	right: 0px; 
+	z-index: 1000; 
+	background-color: #FFF; 
+	border-radius: 20px; 
+	border: 2px solid #000;
+	box-shadow: 0px px 2px #000;
+}
 div#searchbar input[type=text] { background-color: #fff; border-radius: 20px 0px 0px 20px; padding: 2px 10px 2px 10px; border: 0; border-right: 1px solid #909090 }
 div#searchbar input[type=submit] { background-color: #fff; border-radius: 0px 20px 20px 0px; padding: 2px 10px 2px 10px; border: 0; border-left: 1px solid #909090 }
 div#searchbar input[type=submit]:hover { background-color: #ac0000; color: #FFF; text-shadow: 1px 1px 3px #000; }
-div#searchbar select { background-color: #fff; border-radius: 20px; padding: 2px 10px 2px 10px; border: 0; }
+div#searchbar select { background-color: #fff; padding: 2px 10px 2px 10px; border: 0; }
 
 div#main { position: absolute; top: 90px; left: 200px; width: 100%; min-width: 200px; max-width: 1000px; min-height: 300px;}
 
@@ -189,10 +213,10 @@ table#artist_table td#status { vertical-align: middle; text-align: left; min-wid
 table#artist_table td#album { vertical-align: middle; text-align: left; min-width: 300px; }
 table#artist_table td#have { vertical-align: middle; }
 
-#artist_table_filter { background: #FFF; color: #fff; width: 200px; padding-left: 10px; line-height: 25px;
-position: fixed; top: 60px; left: 200px; background: #000; height: 30px; width: 100%;}
-.filter input[type="text"] { background: #FFF; color: #000; border-radius: 20px; padding-left: 10px; border: 0px; }
-.filter { }
+#artist_table_filter { background: #FFF; color: #fff; width: 200px; padding-left: 10px; line-height: 40px;
+position: fixed; top: 60px; z-index: 2; left: 200px; background: #000 url(../images/subhead.png); height: 40px; width: 100%;}
+#artist_table_filter input[type="text"] { background: #FFF; color: #000; border-radius: 20px; padding-left: 10px; border: 0px;  }
+.filter { color: #000; text-shadow: 1px 1px rgb(100,100,100); font-size: 12px; font-weight: bold; }
 div#paddingheader { padding-top: 48px; font-size: 24px; font-weight: bold; text-align: left; }
 div#nopaddingheader { font-size: 24px; font-weight: bold; text-align: left; }
 table#album_table { width: 100%; }
