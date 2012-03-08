@@ -29,9 +29,9 @@
 }
 
 .dataTables_length {
-	width: 40%;
+	width: 50%;
 	float: left;
-	margin: 15px;
+	margin-bottom: 10px;
 	color: #fff;
 }
 
@@ -39,7 +39,7 @@
 	width: 50%;
 	float: right;
 	text-align: right;
-	margin: 15px;
+	margin-bottom: 10px;
 	color: #fff;
 }
 
@@ -48,6 +48,7 @@
 	float: left;
 	margin-top: 15px;
 	font-weight: bold;
+	clear: both;
 }
 
 .dataTables_paginate {
@@ -111,7 +112,7 @@ table.display thead th {
 	background-color: #414141;
 	color: White;
 	font-weight: bold;
-	font-size: 16px;
+	font-size: 12px;
 	cursor: pointer;
 	* cursor: hand;
 }
@@ -128,7 +129,7 @@ table.display tr.heading2 td {
 
 table.display td {
 	padding: 3px 10px;
-	font-size: 16px;
+	font-size: 12px;
 }
 
 table.display td.center {
@@ -185,7 +186,7 @@ table.display tr.even.gradeC {
 }
 
 /*
- * Skipped 
+ * GradeSkipped 
  * */
 table.display tr.odd.gradeX {
 	background-color: #4F0043;
@@ -279,7 +280,6 @@ td.details {
 
 .paging_full_numbers span.paginate_button,
  	.paging_full_numbers span.paginate_active {
-	border: 1px solid #aaa;
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 	padding: 2px 5px;
@@ -289,23 +289,28 @@ td.details {
 }
 
 .paging_full_numbers span.paginate_button {
-	background-color: #ddd;
+	background-color: #e50000;
+	color: #fff;
 }
 
 .paging_full_numbers span.paginate_button:hover {
-	background-color: #ccc;
+	background-color: #ff0000;
+	color: #fff;
 }
 
 .paging_full_numbers span.paginate_active {
-	background-color: #99B3FF;
+	background-color: #800000;
+	color: #fff;
 }
 
 table.display tr.even.row_selected td {
-	background-color: #B0BED9;
+	background-color: #660000;
+	color: #fff;
 }
 
 table.display tr.odd.row_selected td {
-	background-color: #9FAFD1;
+	background-color: #4d0000;
+	color: #fff;
 }
 
 div.box {

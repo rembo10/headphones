@@ -80,6 +80,14 @@ h1, h2, h3, h4, h5, h6 { font-weight: bold; }
     \\ ========================================== //
 */
 
+/*
+ *	Univarsal 
+ * */
+
+ *:focus{
+	outline: none;
+ }
+ 
 a:link {
 	color: #fff;
 	text-shadow: 1px 1px 2px #000;
@@ -108,7 +116,7 @@ a.blue {
 
 body { background-color: #000; min-width: 935px; color: #c2c2c2; }
 
-header { min-height: 70px; width: 100%; min-width: 935px; padding-left: 0px; padding-right: 10px; background-image: url(../images/menu-background.png); background-color: #CDC9C9; position: fixed; top: 0px; left: 0px; z-index: 998; }
+header { min-height: 70px; width: 100%; min-width: 935px; padding-left: 0px; padding-right: 10px; background: url(../images/menu-background.png) #000; position: fixed; top: 0px; left: 0px; z-index: 998; }
 
 table.display thead tr th { background: url(../images/table-header.png); }
 
@@ -135,7 +143,17 @@ ul#subhead_menu li { width: 100%; height: 100%; display: inline; }
 ul#subhead_menu li a { padding: 5px 15px 10px 15px; vertical-align: middle; color: white; font-size: 16px; text-decoration: none; }
 ul#subhead_menu li a:hover { width: 100%; height: 100%; background-color: #grey; }
 
-div#searchbar { margin: 24px 30px auto auto; float: right; }
+/*
+ *	Searchbar Styles 
+ * */
+
+div#searchbar { margin: 24px 30px auto auto; float: right; background-color: #fff; border-radius: 20px; border: 1px solid #909090 }
+div#searchbar input[type=text] { background-color: #fff; border-radius: 20px 0px 0px 20px; padding: 2px 10px 2px 10px; border: 0; border-right: 1px solid #909090 }
+div#searchbar input[type=submit] { background-color: #fff; border-radius: 0px 20px 20px 0px; padding: 2px 10px 2px 10px; border: 0; border-left: 1px solid #909090 }
+div#searchbar input[type=submit]:hover { background-color: #ac0000; color: #FFF; text-shadow: 1px 1px 3px #000; }
+div#searchbar select { background-color: #fff; border-radius: 20px; padding: 2px 10px 2px 10px; border: 0; }
+
+
 
 div#main { margin: 0; padding: 80px 0 0 0; }
 
