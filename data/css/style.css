@@ -84,9 +84,17 @@ h1, h2, h3, h4, h5, h6 { font-weight: bold; }
  *	Univarsal 
  * */
 
+ .clear{
+	clear:both;
+ }
+ 
  *:focus{
 	outline: none;
  }
+ 
+ /*
+  *	Links Styles 
+  * */
  
 a:link {
 	color: #fff;
@@ -114,9 +122,9 @@ a.blue {
 
 #container { width: 960px; margin: auto; }
 
-body { background-color: #000; min-width: 935px; color: #c2c2c2; }
+body { background-color: #000; width: 100%; height: 100%; color: #c2c2c2; }
 
-header { min-height: 70px; width: 100%; min-width: 935px; padding-left: 0px; padding-right: 10px; background: url(../images/menu-background.png) #000; position: fixed; top: 0px; left: 0px; z-index: 998; }
+
 
 table.display thead tr th { background: url(../images/table-header.png); }
 
@@ -129,15 +137,18 @@ p.indented { padding-top: 20px; margin-left: 20px; font-size: 14px; }
 p.center { text-align: center; font-size: 18px; }
 .smalltext2 { font-size: 12px; margin-left: 45px; }
 
-div#updatebar { text-align: center; min-width: 970px; width: 100%; background-color: light-blue; float: left; }
-div#logo { float: left; padding-left: 10px; }
+header { width: 100%; height: 60px; background: #313131; position: fixed; top: 0px; left: 0px; z-index: 998; background: url(../images/header.png); }
 
-ul#nav { margin: 25px 0 0 0; float: left; list-style-type: none; }
-ul#nav li { margin: 40px 0px auto 10px;  display: inline; }
-ul#nav li a { padding: 5px; font-size: 16px; font-weight: bold; color: #ac0000; text-decoration: none; }
-ul#nav li a:hover { background-color: #ac0000; border-radius: 5px; color: #fff; }
+div#updatebar { text-align: center; width: 300px; min-height: 200px; position: absolute; top: 300px; left: 100%; margin: auto; background-color: rgba(0,0,0,0.8); }
+div#logo { padding-left: 10px; }
 
-div#subhead_container { height: 30px; width:100%; min-width: 1000px; background-color:#ac0000; float: left; list-style-type: none; z-index: 998; overflow: hidden; }
+ul#nav { position: absolute; top: 60px; left: 0px; list-style-type: none; height: 100%; width: 200px; padding: 0; margin: 0; background-color: #313131; padding-top: 30px; }
+ul#nav li { display: block; width: 100%; padding: 0; margin: 0;}
+ul#nav li:hover { display: block; width: 100%; background: #ac0000 url(../images/nav-hover.png); }
+ul#nav li a { padding: 5px; font-size: 12px; color: #FFF; text-decoration: none; width: 100%;  }
+ul#nav li a:hover { color: #fff; width: 100%;}
+
+div#subhead_container { height: 30px; width:100%; position: absolute; top: 60px; left: 160px; background-color:#ac0000; list-style-type: none; z-index: 998; overflow: hidden; }
 ul#subhead_menu { margin-top: 5px; }
 ul#subhead_menu li { width: 100%; height: 100%; display: inline; }
 ul#subhead_menu li a { padding: 5px 15px 10px 15px; vertical-align: middle; color: white; font-size: 16px; text-decoration: none; }
@@ -147,7 +158,7 @@ ul#subhead_menu li a:hover { width: 100%; height: 100%; background-color: #grey;
  *	Searchbar Styles 
  * */
 
-div#searchbar { margin: 24px 30px auto auto; float: right; background-color: #fff; border-radius: 20px; border: 1px solid #909090 }
+div#searchbar { margin: 24px 30px auto auto; position: absolute; top: 0px; right: 0px; z-index: 1000; background-color: #fff; border-radius: 20px; border: 1px solid #909090 }
 div#searchbar input[type=text] { background-color: #fff; border-radius: 20px 0px 0px 20px; padding: 2px 10px 2px 10px; border: 0; border-right: 1px solid #909090 }
 div#searchbar input[type=submit] { background-color: #fff; border-radius: 0px 20px 20px 0px; padding: 2px 10px 2px 10px; border: 0; border-left: 1px solid #909090 }
 div#searchbar input[type=submit]:hover { background-color: #ac0000; color: #FFF; text-shadow: 1px 1px 3px #000; }
@@ -155,7 +166,7 @@ div#searchbar select { background-color: #fff; border-radius: 20px; padding: 2px
 
 
 
-div#main { margin: 0; padding: 80px 0 0 0; }
+div#main { margin-top: 100px; padding: 0 0 0 0; }
 
 .table_wrapper { border-radius: 5px; -webkit-border-radius: 5px; -moz-border-radius: 5px; width: 100%; margin: 10px auto 0 auto; padding: 25px; background-color: #313131; position: relative; min-height: 200px; clear: both; _height: 302px; zoom: 1; }
 .manage_wrapper { width: 88%; margin: 20px auto 0 auto; padding: 25px; min-height: 150px; clear: both; _height: 302px; zoom: 1; }
@@ -220,7 +231,7 @@ table#track_table td#name { vertical-align: middle; text-align: center; font-siz
 table#track_table td#duration { vertical-align: middle; text-align: center; }
 table#track_table td#location { vertical-align: middle; text-align: center; font-size: 11px; }
 table#track_table td#bitrate { vertical-align: middle; text-align: center; font-size: 12px; }
-
+div#history_table_wrapper { padding: 20px; }
 table#history_table { background-color: white; width: 100%; font-size: 13px; }
 
 table#history_table td#dateadded { vertical-align: middle; text-align: center; min-width: 150px; font-size: 14px; }

@@ -4,7 +4,6 @@
 	-moz-border-radius: 5px;
 	width: 100%;
 	margin: 0px auto 0 auto;
-	padding: 0px;
 	background-color: #313131;
 	min-height: 155px;
 	clear: both;
@@ -243,10 +242,11 @@ table.display tr.even.gradeZ {
 }
 
 .dataTables_empty {
+	color: #575757;
 	font-size: 24px;
 	text-align: center;
 	vertical-align: middle;
-	background-color: white; 
+	background-color: #343434; 
 	height: 50px;
 	width: 90%;
 }
