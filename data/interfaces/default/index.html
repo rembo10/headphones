@@ -70,16 +70,14 @@
 	{
 		$('#artist_table').dataTable(
 			{
+			
 				"aoColumns": [
 					{ "sType": "title-string"},
 					null,
 					{ "sType": "title-string"},
 					{ "sType": "title-numeric"}
 				],
-				"bStateSave": true,
-				"iDisplayLength": 50,
-				"sPaginationType": "full_numbers",
-				
+				"bPaginate": false
 			});
 	});
 	</script>
