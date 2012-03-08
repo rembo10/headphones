@@ -1,0 +1,82 @@
+<%inherit file="base.html" />
+
+<%def name="body()">
+	<div id="paddingheader">
+		<h1>Manage Artists<h1>
+	</div>
+	<form action="markArtists" method="get">
+	<p class="indented">
+		<select name="action">
+  			<option value="pause">Pause</option>
+  			<option value="resume">Resume</option>
+  			<option value="refresh">Refresh</option>
+  			<option value="delete">Delete</option>
+		</select>
+		selected artists
+		<input type="submit" value="Go">
+	</p>
+	<table class="display" id="artist_table">
+		<thead>
+			<tr>
+				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
+				<th id="name">Artist Name</th>
+				<th id="status">Status</th>
+				<th id="album">Latest Album</th>
+			</tr>
+		</thead>
+		<tbody>
+		%for artist in artists:
+			<%
+				if artist['Status'] == 'Paused':
+					grade = 'X'
+				elif artist['Status'] == 'Loading':
+					grade = 'C'
+				else:
+					grade = 'Z'
+					
+				if artist['ReleaseDate'] and artist['LatestAlbum']:
+					releasedate = artist['ReleaseDate']
+					albumdisplay = '<i>%s</i> (%s)' % (artist['LatestAlbum'], artist['ReleaseDate'])	
+				elif artist['LatestAlbum']:
+					releasedate = ''
+					albumdisplay = '<i>%s</i>' % artist['LatestAlbum']
+				else:
+					releasedate = ''
+					albumdisplay = '<i>None</i>'
+			%>
+			<tr class="grade${grade}">
+				<td id="select"><input type="checkbox" name="${artist['ArtistID']}" class="checkbox" /></td>
+				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
+				<td id="status">${artist['Status']}</td>	
+				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
+			</tr>
+		%endfor
+		</tbody>
+	</table>
+	</form>
+</%def>
+
+<%def name="headIncludes()">
+	<link rel="stylesheet" href="css/data_table.css">
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script>
+	$(document).ready(function()
+	{
+		$('#artist_table').dataTable(
+			{
+				"aoColumns": [
+					null,
+					{ "sType": "title-string"},
+					null,
+					{ "sType": "title-string"}
+				],
+				"bStateSave": true,
+				"bPaginate": false
+				
+			});
+	});
+	</script>
+</%def>

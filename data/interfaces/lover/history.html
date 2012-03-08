@@ -1,0 +1,85 @@
+<%inherit file="base.html"/>
+<%!
+	from headphones import helpers
+%>
+
+<%def name="headerIncludes()">
+	<div id="subhead_container">
+		<ul id="subhead_menu">
+			<li><a href="clearhistory?type=all">Clear All History</a></li>
+			<li><a href="clearhistory?type=Processed">Clear Processed</a></li>
+			<li><a href="clearhistory?type=Unprocessed">Clear Unprocessed</a></li>
+			<li><a href="clearhistory?type=Snatched">Clear Snatched</a></li>
+		</ul>
+	</div>	
+</%def>
+
+<%def name="body()">
+	<div id="paddingheader">
+		History
+	</div>
+	<table class="display" id="history_table">
+		<thead>
+			<tr>
+				<th id="dateadded">Date Added</th>
+				<th id="filename">File Name</th>
+				<th id="size">Size</th>
+				<th id="status">Status</th>
+				<th id="action"></th>
+			</tr>
+		</thead>
+		<tbody>
+		%for item in history:
+			<%
+				if item['Status'] == 'Processed':
+					grade = 'A'
+				elif item['Status'] == 'Snatched':
+					grade = 'C'
+				elif item['Status'] == 'Unprocessed':
+					grade = 'X'
+				else:
+					grade = 'U'
+					
+				fileid = 'unknown'
+				if item['URL'].find('nzb') != -1:
+					fileid = 'nzb'
+				if item['URL'].find('torrent') != -1:
+					fileid = 'torrent'
+			%>
+			<tr class="grade${grade}">
+				<td id="dateadded">${item['DateAdded']}</td>
+				<td id="filename">${item['Title']} [<a href="${item['URL']}">${fileid}</a>]<a href="albumPage?AlbumID=${item['AlbumID']}">[album page]</a></td>
+				<td id="size">${helpers.bytes_to_mb(item['Size'])}</td>
+				<td id="status">${item['Status']}</td>
+				<td id="action">[<a href="queueAlbum?AlbumID=${item['AlbumID']}&redirect=history">retry</a>][<a href="queueAlbum?AlbumID=${item['AlbumID']}&new=True&redirect=history">new</a>]</td>
+			</tr>
+		%endfor
+		</tbody>
+	</table>
+</%def>
+
+<%def name="headIncludes()">
+	<link rel="stylesheet" href="css/data_table.css">
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script>
+	$(document).ready(function()
+	{
+		$('#history_table').dataTable(
+			{
+				"oLanguage": {
+					"sLengthMenu":"Show _MENU_ items per page",
+					"sEmptyTable": "No History to Display",
+					"sInfo":"Showing _START_ to _END_ of _TOTAL_ items",
+					"sInfoEmpty":"Showing 0 to 0 of 0 items",
+					"sInfoFiltered":"(filtered from _MAX_ total items)"},
+				"iDisplayLength": 25,
+				"sPaginationType": "full_numbers",
+				"aaSorting": []
+
+			});
+	});
+	</script>
+</%def>
