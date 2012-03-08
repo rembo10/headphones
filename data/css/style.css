@@ -122,11 +122,11 @@ a.blue {
 
 #container { width: 960px; margin: auto; }
 
-body { background-color: #000; width: 100%; height: 100%; color: #c2c2c2; }
+body { background-color: #313131; width: 100%; height: 100%; color: #c2c2c2; overflow: hidden;}
 
 
 
-table.display thead tr th { background: url(../images/table-header.png); }
+table.display thead tr th { background: url(../images/table-header.png); border: 1px solid #000; color: #000; text-shadow: 1px 1px rgb(100,100,100); }
 
 h1 { font-size: 20px; color: #fff; }
 h2 { font-size: 18px; color: #fff; }
@@ -139,16 +139,17 @@ p.center { text-align: center; font-size: 18px; }
 
 header { width: 100%; height: 60px; background: #313131; position: fixed; top: 0px; left: 0px; z-index: 998; background: url(../images/header.png); }
 
-div#updatebar { text-align: center; width: 300px; min-height: 200px; position: absolute; top: 300px; left: 100%; margin: auto; background-color: rgba(0,0,0,0.8); }
+div#updatebar { text-align: center; width: 300px; min-height: 200px; position: fixed; top: 300px; left: 100%; margin: auto; background-color: rgba(0,0,0,0.8); }
 div#logo { padding-left: 10px; }
 
-ul#nav { position: absolute; top: 60px; left: 0px; list-style-type: none; height: 100%; width: 200px; padding: 0; margin: 0; background-color: #313131; padding-top: 30px; }
+ul#nav { position: fixed; top: 60px; left: 0px; list-style-type: none; height: 100%; width: 200px; padding: 0; margin: 0; background-color: #343434; padding-top: 30px; }
 ul#nav li { display: block; width: 100%; padding: 0; margin: 0;}
-ul#nav li:hover { display: block; width: 100%; background: #ac0000 url(../images/nav-hover.png); }
-ul#nav li a { padding: 5px; font-size: 12px; color: #FFF; text-decoration: none; width: 100%;  }
-ul#nav li a:hover { color: #fff; width: 100%;}
+ul#nav li:hover { display: block; width: 100%; background: #ac0000 url(../images/nav-link-hover.png); }
+ul#nav li a { padding: 5px; font-size: 12px; color: #FFF; text-decoration: none; width: 100%; display: block; }
+ul#nav li a:hover { color: #fff; width: 100%; }
+ul#nav li .selected { background: #ac0000 url(../images/nav-link-hover.png) }
 
-div#subhead_container { height: 30px; width:100%; position: absolute; top: 60px; left: 160px; background-color:#ac0000; list-style-type: none; z-index: 998; overflow: hidden; }
+div#subhead_container { height: 30px; width:100%; position: fixed; top: 60px; left: 200px; background-color:#ac0000; list-style-type: none; z-index: 998; overflow: hidden; }
 ul#subhead_menu { margin-top: 5px; }
 ul#subhead_menu li { width: 100%; height: 100%; display: inline; }
 ul#subhead_menu li a { padding: 5px 15px 10px 15px; vertical-align: middle; color: white; font-size: 16px; text-decoration: none; }
@@ -158,48 +159,51 @@ ul#subhead_menu li a:hover { width: 100%; height: 100%; background-color: #grey;
  *	Searchbar Styles 
  * */
 
-div#searchbar { margin: 24px 30px auto auto; position: absolute; top: 0px; right: 0px; z-index: 1000; background-color: #fff; border-radius: 20px; border: 1px solid #909090 }
+div#searchbar { margin: 20px 30px auto auto; position: fixed; top: 0px; right: 0px; z-index: 1000; background-color: #fff; border-radius: 20px; border: 1px solid #909090 }
 div#searchbar input[type=text] { background-color: #fff; border-radius: 20px 0px 0px 20px; padding: 2px 10px 2px 10px; border: 0; border-right: 1px solid #909090 }
 div#searchbar input[type=submit] { background-color: #fff; border-radius: 0px 20px 20px 0px; padding: 2px 10px 2px 10px; border: 0; border-left: 1px solid #909090 }
 div#searchbar input[type=submit]:hover { background-color: #ac0000; color: #FFF; text-shadow: 1px 1px 3px #000; }
 div#searchbar select { background-color: #fff; border-radius: 20px; padding: 2px 10px 2px 10px; border: 0; }
 
+div#main { position: absolute; top: 90px; left: 200px; width: 100%; min-width: 200px; max-width: 1000px; min-height: 300px;}
 
-
-div#main { margin-top: 100px; padding: 0 0 0 0; }
-
-.table_wrapper { border-radius: 5px; -webkit-border-radius: 5px; -moz-border-radius: 5px; width: 100%; margin: 10px auto 0 auto; padding: 25px; background-color: #313131; position: relative; min-height: 200px; clear: both; _height: 302px; zoom: 1; }
+.table_wrapper { border-radius: 5px; -webkit-border-radius: 5px; -moz-border-radius: 5px; width: 100%; padding: 25px; background-color: #313131; position: relative; min-height: 200px; clear: both; _height: 302px; zoom: 1; }
 .manage_wrapper { width: 88%; margin: 20px auto 0 auto; padding: 25px; min-height: 150px; clear: both; _height: 302px; zoom: 1; }
-.table_wrapper_left { padding: 25px; background-color: #313131; float: left; width: 40%; min-height: 100px; margin-top: 25px; margin-left: 30px; margin-right: auto; -moz-border-radius: 5px; border-radius: 5px; }
-.table_wrapper_right{ padding: 25px; background-color: #313131; width: 40%; min-height: 100px; margin-top: 25px; margin-left: auto; margin-right: 30px; -moz-border-radius: 5px; border-radius: 5px; }
+.table_wrapper_left { background-color: #313131; float: left; width: 40%; min-height: 100px; margin-top: 25px; margin-left: 30px; margin-right: auto; -moz-border-radius: 5px; border-radius: 5px; }
+.table_wrapper_right{ background-color: #313131; width: 40%; min-height: 100px; margin-top: 25px; margin-left: auto; margin-right: 30px; -moz-border-radius: 5px; border-radius: 5px; }
 
 .configtable { font-size: 14px; line-height:18px; }
 .configtable td { width: 350px; padding: 10px; }
 .configtable td#middle { vertical-align: middle; }
+
 #artist_table_wrapper { padding: 20px; }
-table#artist_table { background-color: white; width: 100%; padding: 20px; }
+table#artist_table { width: 100%; padding: 20px; }
 
 table#artist_table th#select { text-align: left; }
 table#artist_table th#name { text-align: left; min-width: 200px; }
 table#artist_table th#status { text-align: left; min-width: 50px; }
 table#artist_table th#album { text-align: left; min-width: 300px; }
-table#artist_table th#have { text-align: center; }
+table#artist_table th#have { text-align: left; min-width: 60px; ; }
 table#artist_table td#name { vertical-align: middle; text-align: left; min-width:200px; }
 table#artist_table td#status { vertical-align: middle; text-align: left; min-width: 50px; }
 table#artist_table td#album { vertical-align: middle; text-align: left; min-width: 300px; }
 table#artist_table td#have { vertical-align: middle; }
 
-div#paddingheader { padding-top: 48px; font-size: 24px; font-weight: bold; text-align: center; }
-div#nopaddingheader { font-size: 24px; font-weight: bold; text-align: center; }
-table#album_table { background-color: white; }
+#artist_table_filter { background: #FFF; color: #fff; width: 200px; padding-left: 10px; line-height: 25px;
+position: fixed; top: 60px; left: 200px; background: #000; height: 30px; width: 100%;}
+.filter input[type="text"] { background: #FFF; color: #000; border-radius: 20px; padding-left: 10px; border: 0px; }
+.filter { }
+div#paddingheader { padding-top: 48px; font-size: 24px; font-weight: bold; text-align: left; }
+div#nopaddingheader { font-size: 24px; font-weight: bold; text-align: left; }
+table#album_table { width: 100%; }
 
 table#album_table th#select { vertical-align: middle; text-align: left; min-width: 10px; }
 table#album_table th#albumart { text-align: left; min-width: 50px; }
-table#album_table th#albumname { text-align: center; min-width: 150px; }
-table#album_table th#reldate { width: 175px; text-align: center; min-width: 70px; }
-table#album_table th#status { width: 175px; text-align: center; min-width: 80px; }
-table#album_table th#type { width: 175px; text-align: center; min-width: 100px; }
-table#album_table th#bitrate { text-align: center; min-width: 60px; }
+table#album_table th#albumname { text-align: left; min-width: 150px; }
+table#album_table th#reldate { width: 175px; text-align: left; min-width: 70px; }
+table#album_table th#status { width: 175px; text-align: left; min-width: 80px; }
+table#album_table th#type { width: 175px; text-align: left; min-width: 100px; }
+table#album_table th#bitrate { text-align: left; min-width: 60px; }
 table#album_table td#select { vertical-align: middle; text-align: left; }
 table#album_table td#albumart { vertical-align: middle; text-align: left; }
 /* Album art image sizes */
@@ -210,81 +214,81 @@ table#album_table td#albumart { vertical-align: middle; text-align: left; }
 
 #album-describtion { float: left; width: 400px; min-height: 200px; margin-left: 20px; }
 
-table#album_table td#albumname { vertical-align: middle; text-align: center; }
-table#album_table td#reldate { vertical-align: middle; text-align: center; }
-table#album_table td#status { vertical-align: middle; text-align: center; font-size: 13px; }
-table#album_table td#type { vertical-align: middle; text-align: center; }
+table#album_table td#albumname { vertical-align: middle; text-align: left; }
+table#album_table td#reldate { vertical-align: middle; text-align: left; }
+table#album_table td#status { vertical-align: middle; text-align: left; font-size: 13px; }
+table#album_table td#type { vertical-align: middle; text-align: left; }
 table#album_table td#have { vertical-align: middle; }
-table#album_table td#bitrate { vertical-align: middle; text-align: center; font-size: 13px; }
+table#album_table td#bitrate { vertical-align: middle; text-align: left; font-size: 13px; }
 
 div#albumheader { margin: 20px 0px 40px 0px; min-height: 200px; }
 div#track_wrapper { font-size: 16px; width: 100%; clear:both;  }
 div#track_table { margin-top: 20px; }
-table#track_table th#number { text-align: right; min-width: 10px; }
-table#track_table th#name { text-align: center; min-width: 280px; }
-table#track_table th#duration { text-align: center; min-width: 80px; }
-table#track_table th#location { text-align: center; min-width: 250px; }
-table#track_table th#bitrate { text-align: center; min-width: 75px; }
+table#track_table th#number { text-align: right; min-width: 8px; }
+table#track_table th#name { text-align:left ; min-width: 160px; }
+table#track_table th#duration { text-align: left; min-width: 70px; }
+table#track_table th#location { text-align: left; min-width: 180px; }
+table#track_table th#bitrate { text-align: left; min-width: 75px; }
 
-table#track_table td#number { vertical-align: middle; text-align: right; }
-table#track_table td#name { vertical-align: middle; text-align: center; font-size: 15px; }
-table#track_table td#duration { vertical-align: middle; text-align: center; }
-table#track_table td#location { vertical-align: middle; text-align: center; font-size: 11px; }
-table#track_table td#bitrate { vertical-align: middle; text-align: center; font-size: 12px; }
+table#track_table td#number { vertical-align: middle; text-align: left; font-size: 12px; overflow: hidden; }
+table#track_table td#name { vertical-align: middle; text-align: left; font-size: 12px; overflow: hidden; }
+table#track_table td#duration { vertical-align: middle; text-align: left; font-size: 12px; overflow: hidden; }
+table#track_table td#location { vertical-align: middle; text-align: left; font-size: 12px; overflow: hidden; }
+table#track_table td#bitrate { vertical-align: middle; text-align: left; font-size: 12px; overflow: hidden; }
 div#history_table_wrapper { padding: 20px; }
-table#history_table { background-color: white; width: 100%; font-size: 13px; }
+table#history_table { width: 100%; font-size: 12px; }
 
-table#history_table td#dateadded { vertical-align: middle; text-align: center; min-width: 150px; font-size: 14px; }
-table#history_table td#filename { vertical-align: middle; text-align: center; min-width: 100px; font-size: 15px; }
-table#history_table td#size { vertical-align: middle; text-align: center; min-width: 75px; font-size: 14px; }
-table#history_table td#status { vertical-align: middle; text-align: center; font-size: 14px; }
-table#history_table td#action { vertical-align: middle; text-align: center; font-size: 14px; }
+table#history_table td#dateadded { vertical-align: middle; text-align: left; min-width: 150px; font-size: 14px; }
+table#history_table td#filename { vertical-align: middle; text-align: left; min-width: 100px; font-size: 15px; }
+table#history_table td#size { vertical-align: middle; text-align: left; min-width: 75px; font-size: 14px; }
+table#history_table td#status { vertical-align: middle; text-align: left; font-size: 14px; }
+table#history_table td#action { vertical-align: middle; text-align: left; font-size: 14px; }
 
 #log_table_wrapper { padding: 20px; }
-table#log_table { background-color: white; }
+table#log_table { width: 100%; }
 
 table#log_table th#timestamp { text-align: left; min-width: 150px; }
 table#log_table th#level { text-align: left; min-width: 60px; }
 table#log_table th#message { text-align: left; min-width: 500px; }
 
-table#upcoming_table th#albumart { text-align: center; min-width: 50px; }
-table#upcoming_table th#albumname { text-align: center; min-width: 200px; }
-table#upcoming_table th#artistname { text-align: center; min-width: 150px; }
-table#upcoming_table th#reldate { text-align: center; min-width: 100px; }
-table#upcoming_table th#type { text-align: center; min-width: 75px; }
+table#upcoming_table th#albumart { text-align: left; min-width: 50px; }
+table#upcoming_table th#albumname { text-align: left; min-width: 200px; }
+table#upcoming_table th#artistname { text-align: left; min-width: 150px; }
+table#upcoming_table th#reldate { text-align: left; min-width: 100px; }
+table#upcoming_table th#type { text-align: left; min-width: 75px; }
 
-table#upcoming_table td#select { vertical-align: middle; text-align: center; }
-table#upcoming_table td#albumart { vertical-align: middle; text-align: center; min-width: 50px; }
-table#upcoming_table td#albumname { vertical-align: middle; text-align: center; min-width: 200px; }
-table#upcoming_table td#artistname { vertical-align: middle; text-align: center; min-width: 150px; }
-table#upcoming_table td#reldate { vertical-align: middle; text-align: center; min-width: 100px; }
-table#upcoming_table td#type { vertical-align: middle; text-align: center; min-width: 75px; }
-table#upcoming_table td#status { vertical-align: middle; text-align: center; }
+table#upcoming_table td#select { vertical-align: middle; text-align: left; }
+table#upcoming_table td#albumart { vertical-align: middle; text-align: left; min-width: 50px; }
+table#upcoming_table td#albumname { vertical-align: middle; text-align: left; min-width: 200px; }
+table#upcoming_table td#artistname { vertical-align: middle; text-align: left; min-width: 150px; }
+table#upcoming_table td#reldate { vertical-align: middle; text-align: left; min-width: 100px; }
+table#upcoming_table td#type { vertical-align: middle; text-align: left; min-width: 75px; }
+table#upcoming_table td#status { vertical-align: middle; text-align: left; }
 
 table#wanted_table { width: 100%; }
-table#wanted_table th#albumart { text-align: center; min-width: 50px; }
-table#wanted_table th#albumname { text-align: center; min-width: 200px; }
-table#wanted_table th#artistname { text-align: center; min-width: 150px; }
-table#wanted_table th#reldate { text-align: center; min-width: 100px; }
-table#wanted_table th#type { text-align: center; min-width: 75px; }
+table#wanted_table th#albumart { text-align: left; min-width: 50px; }
+table#wanted_table th#albumname { text-align: left; min-width: 200px; }
+table#wanted_table th#artistname { text-align: left; min-width: 150px; }
+table#wanted_table th#reldate { text-align: left; min-width: 100px; }
+table#wanted_table th#type { text-align: left; min-width: 75px; }
 
-table#wanted_table td#select { vertical-align: middle; text-align: center; }
-table#wanted_table td#albumart { vertical-align: middle; text-align: center; min-width: 50px; }
-table#wanted_table td#albumname { vertical-align: middle; text-align: center; min-width: 200px; }
-table#wanted_table td#artistname { vertical-align: middle; text-align: center; min-width: 150px; }
-table#wanted_table td#reldate { vertical-align: middle; text-align: center; min-width: 100px; }
-table#wanted_table td#type { vertical-align: middle; text-align: center; min-width: 75px; }
-table#wanted_table td#status { vertical-align: middle; text-align: center; }
+table#wanted_table td#select { vertical-align: middle; text-align: left; }
+table#wanted_table td#albumart { vertical-align: middle; text-align: left; min-width: 50px; }
+table#wanted_table td#albumname { vertical-align: middle; text-align: left; min-width: 200px; }
+table#wanted_table td#artistname { vertical-align: middle; text-align: left; min-width: 150px; }
+table#wanted_table td#reldate { vertical-align: middle; text-align: left; min-width: 100px; }
+table#wanted_table td#type { vertical-align: middle; text-align: left; min-width: 75px; }
+table#wanted_table td#status { vertical-align: middle; text-align: left; }
 
 table#searchresults_table th#albumname { text-align: left; min-width: 225px; }
-table#searchresults_table th#artistname { text-align: center; min-width: 325px; }
-table#searchresults_table th#score { text-align: center; min-width: 75px; }
+table#searchresults_table th#artistname { text-align: left; min-width: 325px; }
+table#searchresults_table th#score { text-align: left; min-width: 75px; }
 
 table#searchresults_table td#albumname { vertical-align: middle; text-align: left; min-width: 200px; }
 table#searchresults_table td#artistname { vertical-align: middle; text-align: left; min-width: 300px; }
-table#searchresults_table td#score { vertical-align: middle; text-align: center; min-width: 75px; }
+table#searchresults_table td#score { vertical-align: middle; text-align: left; min-width: 75px; }
 
-div.progress-container { border: 1px solid #313131; width: 100px; height: 14px; margin: 2px 5px 2px 0; padding: 1px; float: left; background: #414141; color: white; }
+div.progress-container { border: 1px solid #313131; width: 100px; height: 12px; margin: 2px 5px 2px 0; padding: 1px; background: #414141; color: white; }
 div.progress-container > div { background-color: #575757; height: 14px; background-image: url(../images/progress.png); }
 .havetracks { font-size: 13px; margin-left: 36px; padding-bottom: 3px; vertical-align: middle; }
 

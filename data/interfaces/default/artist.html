@@ -95,7 +95,7 @@
 				<td id="type">${album['Type']}</td>
 				<td id="status"><img src="../images/${album['Status']}.png" title="${album['Status']}" />
 				%if album['Status'] == 'Skipped':
-					<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}"><img src="../images/add.png" title="Download this album" style="margin-left: 5px;"/></a>
+					<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}"><img src="../images/get.png" title="Download this album" style="margin-left: 5px;"/></a>
 				%elif album['Status'] == 'Wanted':
 					<a href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}"><img src="../images/cancel.png" title="Cancel" style="margin-left: 5px;"/></a>
 				%else:

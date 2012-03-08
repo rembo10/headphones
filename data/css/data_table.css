@@ -35,11 +35,9 @@
 }
 
 .dataTables_filter {
-	width: 50%;
-	float: right;
-	text-align: right;
-	margin-bottom: 10px;
-	color: #fff;
+	/*
+	 * Look in style.css "#artist_table_filter"
+	 * */
 }
 
 .dataTables_info {

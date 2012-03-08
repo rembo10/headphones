@@ -41,6 +41,16 @@
 			<div id="logo">
 				<a href="home"><img src="images/headphoneslogo.png" alt="headphones"></a>
 			</div>
+			<div id="searchbar">
+                <form action="search" method="get">
+                    <input type="text" value="" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" />
+                    <select name="type">
+  						<option value="artist">Artist</option>
+  						<option value="album">Album</option>
+					</select>
+                    <input type="submit" value="Add"/>
+                </form>
+            </div>
 			<div class="clear" />
 		</header>
 		<ul id="nav">
@@ -51,43 +61,16 @@
 				<li><a href="history">history</a></li>
 				<li><a href="logs">logs</a></li>
 				<li><a href="config">settings</a></li>
-			</ul>
+		</ul>
 		<div id="subhead">
 				${next.headerIncludes()}
-				<div id="searchbar">
-                <form action="search" method="get">
-                    <input type="text" value="" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" />
-                    <select name="type">
-  						<option value="artist">Artist</option>
-  						<option value="album">Album</option>
-					</select>
-                    <input type="submit" value="Add"/>
-                </form>
-            </div>
-			</div>
-
+		</div>
 		<div id="main" class="main">
 			${next.body()}
 			<div class="clear" />
 		</div>
 
 		<footer>
-			<div id="version">
-				Version: ${headphones.CURRENT_VERSION}
-				%if version.HEADPHONES_VERSION != 'master':
-				(${version.HEADPHONES_VERSION})
-				%endif
-			</div>
-			<div id="donate">
-				<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
-					<input type="hidden" name="cmd" value="_s-xclick">
-					<input type="hidden" name="hosted_button_id" value="93FFC6WDV97QS">
-					<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-					<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
-				</form>
-				<br>
-				powered by musicbrainz (<a href="http://metabrainz.org/donate/index.html">donate</a>)
-			</div>
 		</footer>
 	</div>
 
@@ -97,6 +80,7 @@
 	
 	<script src="js/plugins.js"></script>
 	<script src="js/script.js"></script>
+	<script src="js/ActiveLinks.js"></script>
 
 	<!--[if lt IE 7 ]>
 	<script src="js/libs/dd_belatedpng.js"></script>
