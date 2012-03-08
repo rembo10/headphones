@@ -1,0 +1,52 @@
+<%inherit file="base.html" />
+<%!
+	import headphones
+%>
+<%def name="body()">
+	<div id="paddingheader">
+		<h1>Manage New Artists<h1>
+		<h3><a href="musicScan?path=${headphones.MUSIC_DIR}&redirect=manageNew">Scan Music Library</a></h3>
+	</div>
+	<form action="addArtists" method="get">
+	<p class="indented">
+		Add selected artists
+		<input type="submit" value="Go">
+	</p>
+	<table class="display" id="artist_table">
+		<thead>
+			<tr>
+				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
+				<th id="name">Artist Name</th>
+			</tr>
+		</thead>
+		<tbody>
+		%for artist in headphones.NEW_ARTISTS:
+			<tr class="gradeZ">
+				<td id="select"><input type="checkbox" name="${artist}" class="checkbox" /></td>
+				<td id="name">${artist}</a></td>
+			</tr>
+		%endfor
+		</tbody>
+	</table>
+	</form>
+</%def>
+
+<%def name="headIncludes()">
+	<link rel="stylesheet" href="css/data_table.css">
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script>
+	$(document).ready(function()
+	{
+		$('#artist_table').dataTable(
+			{
+				"aaSorting": [[1, 'asc']],
+				"bStateSave": false,
+				"bPaginate": false
+				
+			});
+	});
+	</script>
+</%def>
