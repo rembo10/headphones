@@ -133,7 +133,10 @@ background-image: -o-linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102) 
 background-image: -moz-linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102) 100%);
 background-image: -webkit-linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102) 100%);
 background-image: -ms-linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102) 100%);
-border: 1px solid #000; color: #000;
+border: 1px solid #000;
+color: #000;
+text-shadow: 1px 1px rgb(100,100,100);
+line-height: 100%;
  }
 
 h1 { font-size: 14px; padding: 10px 0px 10px 10px; color: #FFF; text-decoration: none; background-color: #212121;}
@@ -167,15 +170,48 @@ div#logo { padding-left: 10px; }
 
 ul#nav { position: fixed; top: 60px; left: 0px; list-style-type: none; height: 100%; width: 200px; padding: 0; margin: 0; background-color: #343434; border-right: 1px solid #000; padding-top: 30px; z-index: 300;}
 ul#nav li { display: block; width: 100%; padding: 0; margin: 0;}
-ul#nav li:hover { display: block; width: 100%; background: #ac0000 url(../images/nav-link-hover.png); }
-ul#nav li a { padding: 5px 0px 5px 10px; font-size: 12px; color: #FFF; text-decoration: none; width: 100%; display: block; }
+ul#nav li:hover { 
+display: block; 
+width: 100%; 
+background: #292929;
+}
+ul#nav li a { line-height: 25px; padding-left: 10px; font-size: 12px; color: #FFF; text-decoration: none; width: 100%; display: block; }
 ul#nav li a:hover { color: #fff; }
-.selected { background: #ac0000 url(../images/nav-link-hover.png); }
+.selected { 
+background-image: linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+background-image: -o-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+}
+.selected:hover { 
+background-image: linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+background-image: -o-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+}
 
-div#subhead_container { border-bottom: 1px solid #000; height: 40px; width:100%; position: fixed; top: 65px; left: 200px; background: #ac0000 url(../images/subhead.png); list-style-type: none; z-index: 200; overflow: hidden; }
+div#subhead_container 
+{
+border-bottom: 1px solid #000; 
+height: 40px; 
+width:100%; 
+position: fixed; 
+top: 65px; 
+left: 200px; 
+background-image: linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+background-image: -o-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+list-style-type: none; z-index: 200; overflow: hidden; 
+}
+
 ul#subhead_menu { 
 margin-top: 5px; 
 }
+
 ul#subhead_menu li { width: 100%; height: 100%; display: inline; }
 ul#subhead_menu li a { padding: 0px 15px 0px 15px; line-height: 40px; vertical-align: middle; color: white; font-size: 16px; text-decoration: none; }
 ul#subhead_menu li a:hover { width: 100%; height: 100%; background-color: #grey; }
@@ -203,6 +239,18 @@ div#searchbar select { background-color: #fff; padding: 2px 10px 2px 10px; borde
 
 div#main { position: absolute; top: 90px; left: 200px; width: 100%; min-width: 200px; min-height: 300px; margin: 20px; }
 
+.dataTables_filter 
+{
+color: #fff; 
+width: 200px; 
+padding-left: 10px; line-height: 40px;
+position: fixed; 
+top: 60px; 
+z-index: 2; 
+left: 200px; 
+background: #000 url(../images/subhead.png); 
+height: 40px; width: 100%;
+}
 .table_wrapper { border-radius: 5px; -webkit-border-radius: 5px; -moz-border-radius: 5px; width: 100%; background-color: #313131; position: relative; min-height: 50px; clear: both; _height: 302px; zoom: 1; }
 .manage_wrapper { width: 88%; margin: 20px auto 0 auto; padding: 25px; min-height: 150px; clear: both; _height: 302px; zoom: 1; }
 .table_wrapper_left { background-color: #313131; float: left; width: 40%; min-height: 100px; margin-top: 25px; margin-right: auto; -moz-border-radius: 5px; border-radius: 5px; }
@@ -226,11 +274,14 @@ table#artist_table td#status { vertical-align: middle; text-align: left; }
 table#artist_table td#album { vertical-align: middle; text-align: left; }
 table#artist_table td#have { vertical-align: middle; }
 
-#artist_table_filter { background: #FFF; color: #fff; width: 200px; padding-left: 10px; line-height: 40px;
-position: fixed; top: 60px; z-index: 2; left: 200px; background: #000 url(../images/subhead.png); height: 40px; width: 100%;}
+#artist_table div { color: #000; text-shadow: 1px 1px rgb(100,100,100); font-size: 12px; font-weight: bold; }
 #artist_table_filter input[type="text"] { background: #FFF; color: #000; border-radius: 20px; padding-left: 10px; border: 0px;  }
-.filter { color: #000; text-shadow: 1px 1px rgb(100,100,100); font-size: 12px; font-weight: bold; }
-div#paddingheader { padding-top: 48px; font-size: 24px; font-weight: bold; text-align: left; }
+div#paddingheader { 
+padding-top: 48px; 
+font-size: 24px; 
+font-weight: bold; 
+text-align: left; 
+}
 div#nopaddingheader { font-size: 24px; font-weight: bold; text-align: left; }
 table#album_table { width: 100%; }
 
@@ -243,6 +294,7 @@ table#album_table th#type { width: 175px; text-align: left; min-width: 100px; }
 table#album_table th#bitrate { text-align: left; min-width: 60px; }
 table#album_table td#select { vertical-align: middle; text-align: left; }
 table#album_table td#albumart { vertical-align: middle; text-align: left; }
+
 /* Album art image sizes */
 .album-art-small { float: left; background: url(../images/cover-small.png) no-repeat top left; padding-top:4px; padding-left: 14px; padding-right: 8px; padding-bottom: 4px;}
 .album-art-small img { width: 100px; height: 100px; }
@@ -328,9 +380,9 @@ table#searchresults_table td#albumname { vertical-align: middle; text-align: lef
 table#searchresults_table td#artistname { vertical-align: middle; text-align: left; min-width: 300px; }
 table#searchresults_table td#score { vertical-align: middle; text-align: left; min-width: 75px; }
 
-div.progress-container { border: 1px solid #313131; width: 100px; height: 12px; margin: 2px 5px 2px 0; padding: 1px; background: #414141; color: white; }
-div.progress-container > div { background-color: #575757; height: 14px; background-image: url(../images/progress.png); }
-.havetracks { font-size: 13px; margin-left: 36px; padding-bottom: 3px; vertical-align: middle; }
+div.progress-container { border: 1px solid #313131; width: 100px; height: 13px; margin: 2px 5px 2px 0; padding: 1px; background: #414141; color: white; }
+div.progress-container > div { background-color: #575757; height: 90%; background-image: url(../images/progress.png); }
+.havetracks { font-size: 12px; margin-left: 36px; padding-bottom: 3px; vertical-align: middle; }
 
 footer { margin: 20px auto 20px auto; }
 div#version { text-align: center; font-weight: bold; }
