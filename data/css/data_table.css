@@ -278,8 +278,7 @@ td.details {
 
 .paging_full_numbers span.paginate_button,
  	.paging_full_numbers span.paginate_active {
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
+	border: 1px solid #000;
 	padding: 2px 5px;
 	margin: 0 3px;
 	cursor: pointer;
