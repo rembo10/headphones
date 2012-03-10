@@ -24,7 +24,9 @@
 
 <%def name="body()">
 	<div id="paddingheader">
-		<h1>${artist['ArtistName']}<h1>
+		<h1>
+			${artist['ArtistName']}
+		</h1>
 		%if artist['Status'] == 'Loading':
 		<h3><i>(Album information for this artist is currently being loaded)</i></h3>
 		%endif		
@@ -87,7 +89,9 @@
 				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></td>
 				<td id="albumart">
 				<div class="album-art-small">
-				<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" title="${album['AlbumTitle']}">
+					<a href="albumPage?AlbumID=${album['AlbumID']}">
+						<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" title="${album['AlbumTitle']}">
+					</a>
 				</div>
 				</td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
