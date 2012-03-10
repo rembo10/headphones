@@ -212,13 +212,26 @@ background: #292929;
 
 ul#nav li.selected 
 { 
-background-image: url(../images/nav-link-selected.png);
+background-image: linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102) 100%);
+background-image: -o-linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102) 100%);
 border-bottom: 1px solid #000;
 border-top: 1px solid #000;
 font-weight: bold;
 }
 
-ul#nav li a { line-height: 25px; padding-left: 10px; font-size: 12px; color: #FFF; text-decoration: none; width: 100%; display: block; }
+ul#nav li a 
+{ 
+line-height: 25px; 
+padding-left: 30px; 
+font-size: 12px; 
+color: #FFF; 
+text-decoration: none; 
+width: 170px; 
+display: block;
+}
 ul#nav li a:hover { color: #fff; }
 
 /*Subhead menu*/
@@ -249,7 +262,11 @@ display: inline-block;
 ul#subhead_menu li:hover 
 { 
 padding: 0px 5px 0px 5px;
-background: url(../images/nav-link-selected.png);
+background-image: linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102) 100%);
+background-image: -o-linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102) 100%);
 border-left: 1px solid #000;
 border-right: 1px solid #000;
 }
@@ -277,19 +294,39 @@ div#searchbar
 	top: 0px; 
 	right: 0px; 
 	z-index: 1000; 
-	background-color: #FFF; 
 	border-radius: 20px; 
-	border: 2px solid #000;
-	box-shadow: 0px px 2px #000;
+	color: #fff;
+	background-color: rgb(120,0,10); 
+	border-top: 1px solid rgb(90,0,20);
+	border-left: 1px solid rgb(90,0,20);
+	box-shadow: 1px 1px 2px rgb(240,0,20);
 }
-div#searchbar input[type=text] { background-color: #fff; border-radius: 20px 0px 0px 20px; padding: 2px 10px 2px 10px; border: 0; border-right: 1px solid #909090 }
-div#searchbar input[type=submit] { background-color: #fff; border-radius: 0px 20px 20px 0px; padding: 2px 10px 2px 10px; border: 0; border-left: 1px solid #909090 }
-div#searchbar input[type=submit]:hover { background-color: #ac0000; color: #FFF; text-shadow: 1px 1px 3px #000; }
+div#searchbar input[type=text] { 
+background-color: rgb(120,0,10); 
+border-radius: 20px 0px 0px 20px; 
+color: #fff;
+padding: 2px 10px 2px 10px; 
+border: 0; 
+border-right: 1px solid #909090 
+}
+div#searchbar input[type=submit] 
+{ 
+background-color: rgb(120,0,10); 
+border-radius: 0px 20px 20px 0px; 
+padding: 2px 10px 2px 10px; 
+border: 0; 
+border-left: 1px solid #909090;
+color: #fff;
+}
+div#searchbar input[type=submit]:hover { 
+background-color: #ac0000; 
+text-shadow: 1px 1px 3px #000; }
 div#searchbar select 
 { 
-	background-color: #fff; 
-	padding: 2px 10px 2px 10px; 
-	border: 0; 
+	color: #fff;
+	background-color: rgb(120,0,10);
+	border: 0px;
+	border-color: rgb(70,0,10);
 }
 
 div#main { position: absolute; top: 90px; left: 200px; width: 100%; min-width: 200px; min-height: 300px; margin: 20px; }
@@ -297,26 +334,67 @@ div#main { position: absolute; top: 90px; left: 200px; width: 100%; min-width: 2
 /*Filter position*/
 .dataTables_filter 
 {
-color: #fff; 
 width: 200px; 
-padding-left: 10px; line-height: 40px;
+padding-left: 10px; 
 position: fixed; 
 top: 65px; 
 z-index: 2; 
 left: 200px; 
-height: 40px; width: 100%;
+height: 40px; 
+width: 100%;
+font-size: 12px;
+font-weight: bold;
+color: rgb(20,0,5);
+text-shadow: 1px 1px rgb(123,0,10);
+line-height: 40px;
+}
+
+/*Filter text input styles*/
+#artist_table_filter type[type="text"],
+#log_table_filter type[type="text"],
+.dataTables_filter [type="text"] { 
+	color: #FFF; 
+	border-radius: 20px; 
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	padding-left: 10px; 
+	background-color: rgb(30,0,10); 
+	border: 1px solid #000;
+	box-shadow: 1px 1px 2px rgb(123,0,10);
+}
+
+.dataTables_info
+{
+	font-weight: normal;
 }
 
 .table_wrapper { border-radius: 5px; -webkit-border-radius: 5px; -moz-border-radius: 5px; width: 100%; background-color: #313131; position: relative; min-height: 50px; clear: both; _height: 302px; zoom: 1; }
+/*All inputs in the main content */
+.table_wrapper input[type="text"],
+.table_wrapper input[type="password"],
+.table_wrapper input[type="select"] 
+.table_wrapper input[type="radio"]
+{
+	color: rgb(120,120,120);
+	padding: 3px 10px 3px 10px;
+	border-radius: 20px;
+	background-color: rgb(30,30,30); 
+	border:0;
+	border-top: 1px solid rgb(20,20,20);
+	border-left: 1px solid rgb(20,20,20);
+	box-shadow: 1px 1px 1px rgb(70,70,70);
+}
 .manage_wrapper { width: 88%; margin: 20px auto 0 auto; padding: 25px; min-height: 150px; clear: both; _height: 302px; zoom: 1; }
-.table_wrapper_left { background-color: #313131; float: left; width: 40%; min-height: 100px; margin-top: 25px; margin-right: auto; -moz-border-radius: 5px; border-radius: 5px; }
-.table_wrapper_right{ background-color: #313131; width: 40%; min-height: 100px; margin-top: 25px; margin-left: auto; -moz-border-radius: 5px; border-radius: 5px; }
+.table_wrapper_left { float: left; width: 40%; min-height: 100px; margin-top: 25px; }
+.table_wrapper_right{ width: 40%; min-height: 100px; margin-top: 25px; }
 
 .configtable { font-size: 14px; line-height:18px; }
 .configtable td { width: 350px; padding: 10px; }
 .configtable td#middle { vertical-align: middle; }
 
 #artist_table_wrapper { }
+
+/* Artist Table Style*/
 table#artist_table { width: 100%; padding: 20px; }
 
 table#artist_table th#select { text-align: left; }
@@ -331,7 +409,7 @@ table#artist_table td#album { vertical-align: middle; text-align: left; }
 table#artist_table td#have { vertical-align: middle; }
 
 #artist_table div { color: #000; text-shadow: 1px 1px rgb(100,100,100); font-size: 12px; font-weight: bold; }
-#artist_table_filter input[type="text"] { background: #FFF; color: #000; border-radius: 20px; padding-left: 10px; border: 0px;  }
+
 div#paddingheader { 
 padding-top: 48px; 
 font-size: 24px; 
@@ -340,7 +418,7 @@ text-align: left;
 }
 div#nopaddingheader { font-size: 24px; font-weight: bold; text-align: left; }
 table#album_table { width: 100%; }
-
+/* Album Tableheader*/
 table#album_table th#select { vertical-align: middle; text-align: left; min-width: 10px; }
 table#album_table th#albumart { text-align: left; min-width: 50px; }
 table#album_table th#albumname { text-align: left; min-width: 150px; }
@@ -348,6 +426,7 @@ table#album_table th#reldate { width: 175px; text-align: left; min-width: 70px; 
 table#album_table th#status { width: 175px; text-align: left; min-width: 80px; }
 table#album_table th#type { width: 175px; text-align: left; min-width: 100px; }
 table#album_table th#bitrate { text-align: left; min-width: 60px; }
+/* Album tabledata */
 table#album_table td#select { vertical-align: middle; text-align: left; }
 table#album_table td#albumart { vertical-align: middle; text-align: left; }
 
@@ -358,7 +437,6 @@ table#album_table td#albumart { vertical-align: middle; text-align: left; }
 .album-art-big img { width: 200px; height: 200px; } 	
 
 #album-describtion { float: left; width: 400px; min-height: 200px; margin-left: 20px; }
-
 table#album_table td#albumname { vertical-align: middle; text-align: left; }
 table#album_table td#reldate { vertical-align: middle; text-align: left; }
 table#album_table td#status { vertical-align: middle; text-align: left; font-size: 13px; }
@@ -367,6 +445,8 @@ table#album_table td#have { vertical-align: middle; }
 table#album_table td#bitrate { vertical-align: middle; text-align: left; font-size: 13px; }
 
 div#albumheader { margin: 20px 0px 40px 0px; min-height: 200px; }
+
+/* Track table*/
 div#track_wrapper { font-size: 16px; width: 100%; clear:both;  }
 div#track_table { margin-top: 20px; }
 table#track_table th#number { text-align: right; min-width: 8px; }
@@ -383,8 +463,7 @@ table#track_table td#bitrate { vertical-align: middle; text-align: left; font-si
 div#history_table_wrapper { margin-top: 20px; }
 table#history_table { width: 100%; font-size: 12px; }
 
-#history_table_filter div { position: fixed;  top: 75px; right: 10px; z-index: 400; }
-#history_table_filter input[type="text"]{ border-radius: 20px; border: 1px solid #000; box-shadow: 0px 0px 3px #000; padding-left: 10px; padding-right: 10px; }
+/* History table*/
 
 table#history_table td#dateadded { vertical-align: middle; text-align: left; min-width: 150px; font-size: 14px; }
 table#history_table td#filename { vertical-align: middle; text-align: left; min-width: 100px; font-size: 15px; }
