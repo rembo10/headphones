@@ -18,7 +18,7 @@
 			<tr class="gradeZ">
 				<td id="albumart">
 					<div class="album-art-small">
-					<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
+					<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg"></td>
 					</div>
 				<td id="artistname">${album['ArtistName']}</td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
@@ -32,6 +32,7 @@
 	</div>
 	
 	<form action="markAlbums" method="get">
+		<div class="dataTables_mark">
 	<p class="indented">Mark selected albums as 
 		<select name="action">
   			<option value="Skipped">Skipped</option>
@@ -39,6 +40,7 @@
 		</select>
 		<input type="submit" value="Go">
 	</p>
+	</div>
 	<div class="table_wrapper">
 		<h1>Wanted Albums</h1>
 		<table class="display" id="wanted_table">
