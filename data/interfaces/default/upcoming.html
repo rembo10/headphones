@@ -18,9 +18,17 @@
 			<tr class="gradeZ">
 				<td id="albumart">
 					<div class="album-art-small">
-					<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg"></td>
+						<a href="albumPage?AlbumID=${album['AlbumID']}">
+							<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg">
+						</a>
 					</div>
-				<td id="artistname">${album['ArtistName']}</td>
+				</td>
+					
+				<td id="artistname">
+					<a href="artistPage?ArtistID=${artist['ArtistID']}">
+						${album['ArtistName']}
+					</a>
+				</td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
@@ -58,8 +66,17 @@
 		%for album in wanted:
 			<tr class="gradeZ">
 				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></th>
-				<td id="albumart"><img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
-				<td id="artistname">${album['ArtistName']}</td>
+				<td id="albumart">
+					<div class="album-art-small">
+					<a href="albumPage?AlbumID=${album['AlbumID']}">
+						<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg">
+					</a>
+					</div>
+				</td>
+				<td id="artistname">
+					<a href="">
+						${album['ArtistName']}
+					</a></td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
