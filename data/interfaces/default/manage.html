@@ -17,24 +17,27 @@
 <%def name="body()">
 	<div class="table_wrapper">
 		<h1>Scan Music Library</h1><br />
-		Where do you keep your music?<br /><br />
-		You can put in any directory, and it will scan for audio files in that folder
-		(including all subdirectories)<br /><br />		For example: '/Users/name/Music'
-		<br /> <br />
-		It may take a while depending on how many files you have. You can navigate away from the page<br />
-		as soon as you click 'Submit'
+		<p>
+			Where do you keep your music?<br /><br />
+			You can put in any directory, and it will scan for audio files in that folder
+			(including all subdirectories)<br />
+			For example: '/Users/name/Music'
+		</p>
 		<br /><br />
-		<form action="musicScan" method="GET" align="center">
+		<form action="musicScan" method="GET">
 		%if headphones.MUSIC_DIR:
 			<input type="text" value="${headphones.MUSIC_DIR}" name="path" size="70" />
 		%else:
 			<input type="text" value="Enter a Music Directory to scan" onfocus="if
 			(this.value==this.defaultValue) this.value='';" name="path" size="70" />
 		%endif
-		<br>
-		<h3><input type="checkbox" name="autoadd" value="1" ${checked(headphones.ADD_ARTISTS)}>Automatically add new artists</h3>
-		<br><br>
-		<input type="submit" /></form>
+		<br />
+		<br />
+		<input type="checkbox" name="autoadd" value="1" ${checked(headphones.ADD_ARTISTS)}> Automatically add new artists
+		<br />
+		<br />
+		<input type="submit" />
+		* This process runs in the background.</form>
 	</div>
 
 	<div class="table_wrapper_left">
