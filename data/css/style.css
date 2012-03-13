@@ -37,7 +37,6 @@ body { font:13px/1.231 sans-serif; *font-size:small; }
 select, input, textarea, button { font:99% sans-serif; }
 pre, code, kbd, samp { font-family: monospace, sans-serif; }
 
-html { overflow-y: scroll; }
 a:hover, a:active { outline: none; }
 ul, ol { margin-left: 2em; }
 ol { list-style-type: decimal; }
@@ -167,7 +166,7 @@ a.blue {
 
 #container { width: 960px; margin: auto; }
 
-body { background-color: #313131; color: #c2c2c2;}
+body { background-color: #313131; color: #c2c2c2; overflow: hidden; overflow-y: hidden; overflow-x: hidden; }
 
 
 
@@ -199,7 +198,54 @@ left: 0px;
 z-index: 998;
 }
 
-div#updatebar { box-shadow: 5px 5px 3px #000; text-align: center; width: 300px; min-height: 60px; position: fixed; bottom: 20px; right: 10px; z-index: 9999; padding: 20px; margin: auto; background-color: rgba(0,0,0,0.8); }
+div.btnClose 
+{
+    overflow: hidden;
+    -moz-border-radius: 20px; -webkit-border-radius: 20px; border-radius: 20px;
+    background-color: rgb(60,0,5);
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    position: relative;
+    top: -29px;
+    right: -29px;
+    float: right;
+    border: 1px solid #000;
+    box-shadow: 0px 0px 3px #000;
+    font-weight: bold;
+    font-size: 12px;
+    line-height: 18px;
+}
+
+div#updatebar  
+{
+    background-image: linear-gradient(bottom, rgb(97,0,0) 0%, rgb(122,0,0) 100%);
+background-image: -o-linear-gradient(bottom, rgb(97,0,0) 0%, rgb(122,0,0) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(97,0,0) 0%, rgb(122,0,0) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(97,0,0) 0%, rgb(122,0,0) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(97,0,0) 0%, rgb(122,0,0) 100%);
+    box-shadow: 0px 0px 6px #000; text-align: center; 
+    width: 300px; 
+    min-height: 60px; 
+    position: fixed; 
+    bottom: 25px; 
+    right: 25px; 
+    z-index: 9999; 
+    padding: 20px; 
+}
+    
+a.update-link 
+{
+    margin: 30px;
+    border-radius: 3px;
+    padding: 10px 5px 10px 5px; 
+    font-size: 22px; 
+    background-image: linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,199,7) 100%);
+background-image: -o-linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,199,7) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,199,7) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,199,7) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,199,7) 100%);
+               }    
 div#logo { padding-left: 10px; }
 
 ul#nav { position: fixed; top: 60px; left: 0px; list-style-type: none; height: 100%; width: 200px; padding: 0; margin: 0; background-color: #343434; border-right: 1px solid #000; padding-top: 30px; z-index: 300;}
@@ -259,8 +305,8 @@ height: 40px;
 padding: 0px 9px 0px 9px;
 line-height: 40px;
 display: inline-block; 
-border-left: 1px solid #000;
-border-right: 1px solid #000;
+border-left: 1px solid rgb(50,50,50);
+border-right: 1px solid rgb(25,25,25);
 margin: 0;
 }
 
@@ -322,9 +368,11 @@ border: 0;
 border-left: 1px solid #909090;
 color: #fff;
 }
+
 div#searchbar input[type=submit]:hover { 
 background-color: #ac0000; 
 text-shadow: 1px 1px 3px #000; }
+
 div#searchbar select 
 { 
 	color: #fff;
@@ -333,7 +381,17 @@ div#searchbar select
 	border-color: rgb(70,0,10);
 }
 
-div#main { position: absolute; top: 90px; left: 200px; width: 100%; min-width: 200px; min-height: 300px; margin: 20px; }
+div#main  
+{
+    position: absolute; 
+    top: 105px; 
+    left: 200px;
+    padding: 5px;
+    min-width: 200px; 
+    min-height: 300px;
+    height: 100%;
+    width: 100%;
+}
 
 /*Filter position*/
 .dataTables_filter 
@@ -405,7 +463,7 @@ table#artist_table th#select { text-align: left; }
 table#artist_table th#name { text-align: left; min-width: 32%; }
 table#artist_table th#status { text-align: left; min-width: 8%; }
 table#artist_table th#album { text-align: left; min-width: 49%; }
-table#artist_table th#have { text-align: center; width: 60px; }
+table#artist_table th#have { text-align: center; width: 11%; }
 
 table#artist_table td#name { vertical-align: middle; text-align: left; }
 table#artist_table td#status { vertical-align: middle; text-align: left; }
@@ -414,6 +472,9 @@ table#artist_table td#have { vertical-align: middle; }
 
 #artist_table div { color: #000; text-shadow: 1px 1px rgb(100,100,100); font-size: 12px; font-weight: bold; }
 
+/*
+    Paddingheader
+*/
 div#paddingheader { 
 padding-top: 48px; 
 font-size: 24px; 
@@ -421,6 +482,8 @@ font-weight: bold;
 text-align: left; 
 }
 div#nopaddingheader { font-size: 24px; font-weight: bold; text-align: left; }
+
+
 table#album_table { width: 100%; }
 /* Album Tableheader*/
 table#album_table th#select { vertical-align: middle; text-align: left; min-width: 10px; }
@@ -450,7 +513,9 @@ table#album_table td#bitrate { vertical-align: middle; text-align: left; font-si
 
 div#albumheader { margin: 20px 0px 40px 0px; min-height: 200px; }
 
-/* Track table*/
+/*
+    Track
+*/
 div#track_wrapper { font-size: 16px; width: 100%; clear:both;  }
 div#track_table { margin-top: 20px; }
 table#track_table th#number { text-align: right; min-width: 8px; }
@@ -475,19 +540,26 @@ table#history_table td#size { vertical-align: middle; text-align: left; min-widt
 table#history_table td#status { vertical-align: middle; text-align: left; font-size: 14px; }
 table#history_table td#action { vertical-align: middle; text-align: left; font-size: 14px; }
 
+/*
+    Log
+*/
 #log_table_wrapper { padding-top: 20px; }
 table#log_table { width: 100%; }
 
 table#log_table th#timestamp { text-align: left; min-width: 150px; }
 table#log_table th#level { text-align: left; min-width: 60px; }
 table#log_table th#message { text-align: left; min-width: 500px; }
-
+/*
+    Upcoming
+*/
+/*Upcoming Tablehead*/
 table#upcoming_table th#albumart { text-align: left; min-width: 20%; }
 table#upcoming_table th#albumname { text-align: left; min-width: 200px; }
 table#upcoming_table th#artistname { text-align: left; min-width: 150px; }
 table#upcoming_table th#reldate { text-align: left; min-width: 100px; }
 table#upcoming_table th#type { text-align: left; min-width: 75px; }
 
+/*Upcoming Tabledata*/
 table#upcoming_table td#select { vertical-align: middle; text-align: left; }
 table#upcoming_table td#albumart { vertical-align: middle; text-align: left; min-width: 50px; }
 table#upcoming_table td#albumname { vertical-align: middle; text-align: left; min-width: 200px; }
@@ -496,6 +568,7 @@ table#upcoming_table td#reldate { vertical-align: middle; text-align: left; min-
 table#upcoming_table td#type { vertical-align: middle; text-align: left; min-width: 75px; }
 table#upcoming_table td#status { vertical-align: middle; text-align: left; }
 
+/*Wanted Tablehead*/
 table#wanted_table { width: 100%; }
 table#wanted_table th#albumart { text-align: left; min-width: 50px; }
 table#wanted_table th#albumname { text-align: left; min-width: 200px; }
@@ -503,6 +576,7 @@ table#wanted_table th#artistname { text-align: left; min-width: 150px; }
 table#wanted_table th#reldate { text-align: left; min-width: 100px; }
 table#wanted_table th#type { text-align: left; min-width: 75px; }
 
+/*Wanted Tabledata*/
 table#wanted_table td#select { vertical-align: middle; text-align: left; }
 table#wanted_table td#albumart { vertical-align: middle; text-align: left; min-width: 50px; }
 table#wanted_table td#albumname { vertical-align: middle; text-align: left; min-width: 200px; }
@@ -511,6 +585,7 @@ table#wanted_table td#reldate { vertical-align: middle; text-align: left; min-wi
 table#wanted_table td#type { vertical-align: middle; text-align: left; min-width: 75px; }
 table#wanted_table td#status { vertical-align: middle; text-align: left; }
 
+/*Search Results Tablehead*/
 table#searchresults_table th#albumname { text-align: left; min-width: 225px; }
 table#searchresults_table th#artistname { text-align: left; min-width: 325px; }
 table#searchresults_table th#score { text-align: left; min-width: 75px; }
@@ -519,9 +594,22 @@ table#searchresults_table td#albumname { vertical-align: middle; text-align: lef
 table#searchresults_table td#artistname { vertical-align: middle; text-align: left; min-width: 300px; }
 table#searchresults_table td#score { vertical-align: middle; text-align: left; min-width: 75px; }
 
-div.progress-container { border: 1px solid #313131; width: 100px; height: 15px; margin: 2px 5px 2px 0; padding: 1px; background: #414141; color: white; }
-div.progress-container > div { height: 100%; margin: 1px; }
-.havetracks { font-size: 12px; position: relative; width: 100px; text-align: center; }
+/*progress container*/
+div.progress-container { border: 1px solid #000; width: 100%; height: 15px; margin: 2px 5px 2px 5px; background: #414141; }
+/*Progress bar*/
+div.progress-container > div  
+{
+height: 100%; 
+background-image: linear-gradient(bottom, rgb(44,97,0) 0%, rgb(69,122,0) 100%);
+background-image: -o-linear-gradient(bottom, rgb(44,97,0) 0%, rgb(69,122,0) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(44,97,0) 0%, rgb(69,122,0) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(44,97,0) 0%, rgb(69,122,0) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(44,97,0) 0%, rgb(69,122,0) 100%);
+}
+/*text format for match/procent*/
+.searchscrore,
+.havetracks { font-size: 12px; position: relative; width: 100%; text-align: center; color: #fff; text-shadow: 1px 1px 3px #000; }
+
 
 footer { margin: 20px auto 20px auto; }
 div#version { text-align: center; font-weight: bold; }
@@ -568,7 +656,6 @@ div#shutdown{ text-align: center; vertical-align: middle; }
 }
 
 @media screen and (max-device-width: 480px) {
-
   html { -webkit-text-size-adjust:none; -ms-text-size-adjust:none; }
 }
 

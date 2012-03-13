@@ -3,7 +3,7 @@
 <%def name="body()">
 
 	<div id="paddingheader">
-		<h1>Search Results<h1>
+		<h1>Search Results</h1>
 	</div>
 	<table class="display" id="searchresults_table">
 		<thead>
@@ -30,7 +30,17 @@
 					<td id="albumname"><a href="${result['albumurl']}">${result['title']}</a></td>
 				%endif
 					<td id="artistname"><a href="${result['url']}">${result['uniquename']}</a></td>
-					<td id="score">${result['score']}</td>
+					<td id="score">
+						<div class="searchscore" title="The match result is: ${result['score']}%">
+										${result['score']}%
+									
+							<div class="progress-container">
+								<div style="width: ${result['score']}%">
+									
+								</div>
+							</div>
+							</div>
+					</td>
 				%if type == 'album':	
 					<td id="add"><a href="addReleaseById?rid=${result['albumid']}">Add this album</a></td>
 				%else:

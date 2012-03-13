@@ -286,12 +286,22 @@ td.details {
 }
 
 .paging_full_numbers span.paginate_button {
-	background-color: #e50000;
+	background-image: linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
+background-image: -o-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
+border-bottom: 1px solid #000; 
 	color: #fff;
 }
 
 .paging_full_numbers span.paginate_button:hover {
-	background-color: #ff0000;
+	background-image: linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
+background-image: -o-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
+border-bottom: 1px solid #000; 
 	color: #fff;
 }
 
