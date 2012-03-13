@@ -34,7 +34,7 @@ def startmb(forcemb=False):
 		sleepytime = 0
 	else:
 		mbhost = "tbueter.com"
-		mbport = 3000
+		mbport = 5000
 		sleepytime = 0
 	
 	service = ws.WebService(host=mbhost, port=mbport)
