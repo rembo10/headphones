@@ -21,6 +21,33 @@
 	<link rel="shortcut icon" href="images/favicon.ico">
 	<link rel="apple-touch-icon" href="images/headphoneslogo.png">
 	<link rel="stylesheet" href="css/style.css?v=2">
+	
+	<script src="js/jquery-1.7.1.js"></script>
+	<script>!window.jQuery && document.write(unescape('%3Cscript src="js/libs/jquery-1.6.2.min.js"%3E%3C/script%3E'))</script>
+	${next.javascriptIncludes()}
+	
+	<script src="js/plugins.js"></script>
+	<script src="js/script.js"></script>
+	
+	<!-- Script by Brinken -->
+		<script type="text/javascript" src="js/FancyScript.js"></script>
+	
+		<!-- jScrollPane -->
+			<!-- styles needed by jScrollPane -->
+			<link type="text/css" href="css/jquery.jscrollpane.css" rel="stylesheet" media="all" />
+			<!-- jScrollPane script -->
+			<script type="text/javascript" src="js/jquery.jscrollpane.js" ></script>
+			<!-- Mousewheel support -->
+			<script type="text/javascript" src="js/jquery.mousewheel.min.js" ></script>
+			<!-- Add to Scrollbars #main -->
+			<script>
+			$(function()
+			{
+				$('.main').jScrollPane();
+			});
+			</script>
+			
+		
 	${next.headIncludes()}
 	
 	<script src="js/libs/modernizr-1.7.min.js"></script>
@@ -29,11 +56,21 @@
 	<div id="container">
 		% if not headphones.CURRENT_VERSION:
             <div id="updatebar">
-                You're running an unknown version of Headphones. <a class="blue" href="update">Click here to update</a>
+				<div class="btnClose" title="Close" >X</div>
+                You're running an unknown version of Headphones. 
+				<br />
+				<br />
+				<br />
+				<a class="update-link" href="update">Validate</a>
             </div>
             % elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
             <div id="updatebar">
-                A <a class="blue" href="http://github.com/rembo10/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}"> newer version</a> is available. You're ${headphones.COMMITS_BEHIND} commits behind. <a class="blue" href="update">Click here to update</a>
+				<div class="btnClose" title="Close" >X</div>
+                A <a class="update-link" href="http://github.com/rembo10/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}"> newer version</a> is available. You're ${headphones.COMMITS_BEHIND} commits behind. 
+				<br />
+				<br />
+				<br />
+				<a class="update-link" href="update">Update</a>
             </div>
 			% endif
 		<header>
@@ -54,7 +91,7 @@
 			<div class="clear" />
 		</header>
 		<ul id="nav">
-				<li><a href="home">Library</a></li>
+				<li><a class="elseSelect" href="home">Home</a></li>
 				<li><a href="upcoming">Upcoming</a></li>
 				<li><a href="extras">Suggestions</a></li>
 				<li><a href="manage">Manage</a></li>
@@ -67,21 +104,13 @@
 		</div>
 		<div id="main" class="main">
 			${next.body()}
-			<div class="clear" />
 		</div>
 
 		<footer>
 		</footer>
 	</div>
-
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
-	<script>!window.jQuery && document.write(unescape('%3Cscript src="js/libs/jquery-1.6.2.min.js"%3E%3C/script%3E'))</script>
-	${next.javascriptIncludes()}
 	
-	<script src="js/plugins.js"></script>
-	<script src="js/script.js"></script>
-	<script src="js/ActiveLinks.js"></script>
-
+</script>
 	<!--[if lt IE 7 ]>
 	<script src="js/libs/dd_belatedpng.js"></script>
 	<script> DD_belatedPNG.fix('img, .png_bg');</script>

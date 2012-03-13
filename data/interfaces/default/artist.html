@@ -106,7 +106,15 @@
 					<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Retry the same download again"><img src="../images/retry.png" style="margin-left: 5px;" /></a><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True" title="Try a new download, skipping all previously tried nzbs"><img src="../images/new.png" alt="New" style="margin-left: 5px;" /></a>
 				%endif
 				</td>
-				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
+				<td id="have"><span title="${percent}"><span>
+					<div class="progress-container" title="You have ${havetracks} of a total ${totaltracks}">
+						<div style="width:${percent}%">
+							<div class="havetracks">
+								${havetracks}/${totaltracks}
+							</div>
+						</div>
+					</div>
+				</td>
 				<td id="bitrate">${bitrate}</td>
 			</tr>
 		%endfor

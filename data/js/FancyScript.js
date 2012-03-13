@@ -4,21 +4,33 @@ $(document).ready(function () {
         var hreflink = $(this).attr("href");
         if (hreflink == location.href.split("/").pop()) {
             $(this).parent().addClass("selected");
-        }
+		}
     });
 });
 //Resize #main to fit window size
-$(document).ready(function () {
+$(document).ready(function() {
+	//On load set #main height & width
 	windowWidth = $(window).width();
 	windowHeight = $(window).height();
 	menuWidth = $("#nav").width();
-	$("#main").width(windowWidth - menuWidth - 40);
+	headerHeight = $("header").height();
+	$("#main").height(windowHeight - headerHeight - 40);
+	$("#main").width(windowWidth - menuWidth - 10);
 });
 
 //On window resize
-$(window).resize(function () {
+$(window).resize(function() {
 	windowWidth = $(window).width();
 	windowHeight = $(window).height();
 	menuWidth = $("#nav").width();
-	$("#main").width(windowWidth - menuWidth - 40);
+	headerHeight = $("header").height();
+	$("#main").height(windowHeight - headerHeight - 40);
+	$("#main").width(windowWidth - menuWidth - 10);
+});
+
+//Update close
+$(document).ready(function () {
+	$(".btnClose").click(function() {
+		$("#updatebar").fadeOut("slow");
+	});
 });
