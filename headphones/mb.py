@@ -19,19 +19,25 @@ mb_lock = threading.Lock()
 # Quick fix to add mirror switching on the fly. Need to probably return the mbhost & mbport that's
 # being used, so we can send those values to the log
 def startmb(forcemb=False):
+
+	# just in case someone switches to the headphones server mid-query
+	hpuser=None
+	hppass=None
 	
 	if forcemb or headphones.MIRROR == "musicbrainz.org":
 		mbhost = "musicbrainz.org"
 		mbport = 80
 		sleepytime = 1
-	elif headphones.MIRROR == "localhost":
-		mbhost = "localhost"
-		mbport = 7143
-		sleepytime = 0
+	elif headphones.MIRROR == "custom":
+		mbhost = headphones.CUSTOMHOST
+		mbport = headphones.CUSTOMPORT
+		sleepytime = headphones.CUSTOMSLEEP
 	elif headphones.MIRROR == "headphones":
 		mbhost = "178.63.142.150"
 		mbport = 5000
 		sleepytime = 0
+		hpuser = headphones.HPUSER
+		hppass = headphones.HPPASS
 	else:
 		mbhost = "tbueter.com"
 		mbport = 5000
@@ -40,8 +46,11 @@ def startmb(forcemb=False):
 	service = ws.WebService(host=mbhost, port=mbport)
 	q = ws.Query(service)
 	
-	return (q, sleepytime)
+	logger.debug('Using the following server values:\nMBHost: %s ; MBPort: %i  ;  Sleep Interval: %i ' % (mbhost, mbport, sleepytime))
+	if headphones.MIRROR == "headphones":
+		logger.debug('Headphones Username: %s  ; Headphones Password: %s ' % (hpuser, len(hppass) * '*'))
 	
+	return (q, sleepytime)
 
 def findArtist(name, limit=1):
 
