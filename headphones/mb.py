@@ -47,8 +47,11 @@ def startmb(forcemb=False):
 	q = ws.Query(service)
 	
 	logger.debug('Using the following server values:\nMBHost: %s ; MBPort: %i  ;  Sleep Interval: %i ' % (mbhost, mbport, sleepytime))
-	if headphones.MIRROR == "headphones":
-		logger.debug('Headphones Username: %s  ; Headphones Password: %s ' % (hpuser, len(hppass) * '*'))
+	if headphones.MIRROR == "headphones" and not forcemb:
+		try:
+			logger.debug('Headphones Username: %s  ; Headphones Password: %s%s%s' % (hpuser, hppass[0],(len(hppass)-2) * '*', hppass[-1]))
+		except Exception, e:
+			logger.debug('Error logging hpuser or hppass: %s. Check your settings' % e)
 	
 	return (q, sleepytime)
 
