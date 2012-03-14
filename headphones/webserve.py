@@ -384,7 +384,12 @@ class WebInterface(object):
 					"prowl_keys": headphones.PROWL_KEYS,
 					"prowl_priority": headphones.PROWL_PRIORITY,
 					"mirror_list": headphones.MIRRORLIST,
-					"mirror": headphones.MIRROR
+					"mirror": headphones.MIRROR,
+					"customhost": headphones.CUSTOMHOST,
+					"customport": headphones.CUSTOMPORT,
+					"customsleep": headphones.CUSTOMSLEEP,
+					"hpuser": headphones.HPUSER,
+					"hppass": headphones.HPPASS
 				}
 		return serve_template(templatename="config.html", title="Settings", config=config)	
 	config.exposed = True
@@ -397,7 +402,7 @@ class WebInterface(object):
 		torrentblackhole_dir=None, download_torrent_dir=None, numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, 
 		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, interface=None, log_dir=None,
 		encode=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
-		prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, mirror=None):
+		prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None):
 
 		headphones.HTTP_HOST = http_host
 		headphones.HTTP_PORT = http_port
@@ -462,6 +467,11 @@ class WebInterface(object):
 		headphones.PROWL_KEYS = prowl_keys
 		headphones.PROWL_PRIORITY = prowl_priority
 		headphones.MIRROR = mirror
+		headphones.CUSTOMHOST = customhost
+		headphones.CUSTOMPORT = customport
+		headphones.CUSTOMSLEEP = customsleep
+		headphones.HPUSER = hpuser
+		headphones.HPPASS
 		
 		headphones.config_write()
 
