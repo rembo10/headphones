@@ -432,21 +432,29 @@
             </tr>
             <tr>
 				<td>
-					<h3>Muscbrainz Mirror: <select name="mirror"><h3>
+					<h3>Muscbrainz Mirror: <select name="mirror" id="mirror"><h3>
 					%for mirror in config['mirror_list']:
 						<%
 							if mirror == headphones.MIRROR:
 								selected = 'selected="selected"'
 							else:
 								selected = ''
-							if mirror == "localhost":
-								mirrortext = "  (use localhost:7143)"
-							else:
-								mirrortext = ''
 						%>
-						<option value="${mirror}" ${selected}>${mirror} ${mirrortext}</option>
+						<option value="${mirror}" ${selected}>${mirror}</option>
 					%endfor
 					</select>
+					
+					<div id="customoptions">
+					<h3>Host:<br><input type="text" name="customhost" value="${config['customhost']}" size="20"></h3>
+					<h3>Port:<br><input type="text" name="customport" value="${config['customport']}" size="8"></h3>
+					<h3>Sleep Interval:<br><input type="text" name="customsleep" value="${config['customsleep']}" size="4"></h3>
+					</div>
+					
+					<div id="hpserveroptions">
+					<h3>Username:<br><input type="text" name="hpuser" value="${config['hpuser']}" size="20"></h3>
+					<h3>Password:<br><input type="password" name="hppass" value="${config['hppass']}" size="15"></h3>
+					<i class="smalltext2"><a href="http://headphones.codeshy.com">what is this?</a></p>
+					</div>
         </table>
     </div>
 
@@ -457,6 +465,27 @@
 
 <%def name="javascriptIncludes()">
 	<script>
+	
+	hideServerDivs = function () {
+		$("#customoptions").hide("fast");
+		$("#hpserveroptions").hide("fast");
+	};
+	
+	handleNewSelection = function () {
+	
+		hideServerDivs();
+		
+		switch ($(this).val()) {
+			case 'custom':
+				$("#customoptions").show("fast");
+			break;
+			case 'headphones':
+				$("#hpserveroptions").show("fast");
+			break;
+		}
+	};
+	
+
 	$(document).ready(function()
 	{
 		if ($("#encode").is(":checked"))
@@ -497,7 +526,12 @@
 			{
 				$("#prowloptions").hide("fast");
 			}
-		});
+		});		
+		
+		$("#mirror").change(handleNewSelection);
+		handleNewSelection.apply($("#mirror"));
+
 	});
+	
 	</script>
 </%def>
