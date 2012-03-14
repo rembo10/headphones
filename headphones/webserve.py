@@ -471,7 +471,7 @@ class WebInterface(object):
 		headphones.CUSTOMPORT = customport
 		headphones.CUSTOMSLEEP = customsleep
 		headphones.HPUSER = hpuser
-		headphones.HPPASS
+		headphones.HPPASS = hppass
 		
 		headphones.config_write()
 
