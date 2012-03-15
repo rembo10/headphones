@@ -1,0 +1,17 @@
+select, .select
+{
+    background-color: #FFF;
+    color: #222; /*default styling of input*/
+    line-height: 40px;
+    height: 40px;
+    width: 46.72466734902764%;
+}
+select
+{
+    width: 46.72466734902764%;
+}
+.arrow
+{
+    background-color: #E4AACC;
+    border-left: 1px solid #000;
+}
