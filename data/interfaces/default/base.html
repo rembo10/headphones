@@ -59,15 +59,17 @@
 				<br />
 				<br />
 				<br />
-				<a class="update-link" href="update">Validate</a>
+				<a class="update-link" href="update">Update</a>
             </div>
             % elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
             <div id="updatebar">
 				<div class="btnClose" title="Close" >X</div>
-                A <a class="update-link" href="http://github.com/rembo10/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}"> newer version</a> is available. You're ${headphones.COMMITS_BEHIND} commits behind. 
+                A newer version is available. <br /> 
+				You're ${headphones.COMMITS_BEHIND} commits behind. 
 				<br />
 				<br />
 				<br />
+				<a class="update-link" href="http://github.com/rembo10/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}">Version</a>
 				<a class="update-link" href="update">Update</a>
             </div>
 			% endif

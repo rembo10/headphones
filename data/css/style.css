@@ -232,16 +232,20 @@ background-image: -ms-linear-gradient(bottom, rgb(97,0,0) 0%, rgb(122,0,0) 100%)
     
 a.update-link 
 {
-    margin: 30px;
+    border: 1px solid #000;
     border-radius: 3px;
-    padding: 10px 5px 10px 5px; 
-    font-size: 22px; 
-    background-image: linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,199,7) 100%);
-background-image: -o-linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,199,7) 100%);
-background-image: -moz-linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,199,7) 100%);
-background-image: -webkit-linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,199,7) 100%);
-background-image: -ms-linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,199,7) 100%);
-               }    
+    padding: 5px 10px 5px 10px; 
+    font-size: 16px; 
+    font-weight: bold;
+    background-image: linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,153,7) 100%);
+    background-image: -o-linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,153,7) 100%);
+    background-image: -moz-linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,153,7) 100%);
+    background-image: -webkit-linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,153,7) 100%);
+    background-image: -ms-linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,153,7) 100%);
+    text-shadow: 1px 1px 0px rgb(0,173,7);
+    color: #000;
+}  
+  
 div#logo { padding-left: 10px; }
 
 ul#nav { position: fixed; top: 60px; left: 0px; list-style-type: none; height: 100%; width: 200px; padding: 0; margin: 0; background-color: #343434; border-right: 1px solid #000; padding-top: 30px; z-index: 300;}
@@ -524,24 +528,92 @@ text-shadow: 1px 1px 0px rgb(87,160,0);
 }
 
 .table_wrapper { border-radius: 5px; -webkit-border-radius: 5px; -moz-border-radius: 5px; width: 100%; background-color: #313131; position: relative; min-height: 50px; clear: both; _height: 302px; zoom: 1; }
-/*All inputs in the main content */
-.table_wrapper input[type="text"],
-.table_wrapper input[type="password"],
-.table_wrapper input[type="select"] 
-.table_wrapper input[type="radio"]
+/*All inputs in the main content 
+
+/*Tooltip*/
+.tooltip
+{
+    margin-right: 3px;
+    float: left;
+    position: relative;
+    color: #000;
+    border-radius: 20px;
+    border: 1px solid #000;
+    box-shadow: 1px 1px 0px rgb(90,90,90);
+    width: 20px;
+    font-weight: bold;
+	font-size: 12px;
+    height: 20px;
+    text-align: center;
+    line-height: 20px;
+    cursor: help;
+    background-image: linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+    background-image: -o-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+    background-image: -moz-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+    background-image: -webkit-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+    background-image: -ms-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+    text-shadow: 1px 1px 0px rgb(180,180,180);
+}
+.tooltip:after {
+	content: "!";
+}
+/*Tooltip info*/
+.tooltip span 
+{
+    display: none;    
+}
+.tooltip:hover span 
+{
+    border: 1px solid #000;
+    border-radius: 3px;
+    box-shadow: 0px 0px 3px #000;
+    color: #000;
+	display: block;
+	font-style: italic;
+	font-weight: normal;
+	position: absolute;
+    z-index: 999;
+    top: 10px;
+    left: 30px;
+    text-align: left;
+    padding: 3px 6px 3px 6px;
+    width: 15em;
+    background-image: linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+    background-image: -o-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+    background-image: -moz-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+    background-image: -webkit-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+    background-image: -ms-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+}
+
+form input[type="radio"],
+form input[type='submit'] 
+{
+    border: 1px solid #000;
+    border-radius: 3px;
+    color: #000;
+    font-weight: bold;
+    padding: 3px 6px 3px 6px;
+	background-image: linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+background-image: -o-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+text-shadow: 1px 1px 0px rgb(180,180,180);
+}
+input[type="password"],
+input[type="text"]
 {
 	color: rgb(120,120,120);
 	padding: 3px 10px 3px 10px;
 	border-radius: 20px;
 	background-color: rgb(30,30,30); 
-	border:0;
+	border: 0;
 	border-top: 1px solid rgb(20,20,20);
 	border-left: 1px solid rgb(20,20,20);
 	box-shadow: 1px 1px 1px rgb(70,70,70);
 }
 .manage_wrapper { width: 88%; margin: 20px auto 0 auto; padding: 25px; min-height: 150px; clear: both; _height: 302px; zoom: 1; }
-.table_wrapper_left { float: left; width: 40%; min-height: 100px; margin-top: 25px; }
-.table_wrapper_right{ float: right; width: 40%; min-height: 100px; margin-top: 25px; }
+.table_wrapper_half { float: left; width: 50%; min-height: 100px; margin-top: 25px; }
 
 .configtable { font-size: 14px; line-height:18px; }
 .configtable td { width: 350px; padding: 10px; }

@@ -31,7 +31,16 @@ $(window).resize(function() {
 
 //Update close
 $(document).ready(function () {
+	$("#updatebar").hide();
+	$("#updatebar").fadeIn("Fast");
+	
 	$(".btnClose").click(function() {
 		$("#updatebar").fadeOut("slow");
 	});
+});
+
+//Main fadeIn
+$(document).ready(function () {
+	$("#main").hide();
+	$("#main").fadeIn("slow");
 });
