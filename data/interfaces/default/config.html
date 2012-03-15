@@ -20,24 +20,28 @@
             <tr>
                 <td>
                   <h3>HTTP Host:</h3>
-                    <input type="text" name="http_host" value="${config['http_host']}" size="30" maxlength="40"><br>
-                    <i class="smalltext">i.e. localhost or 0.0.0.0</i>
+                    <input type="text" name="http_host" value="${config['http_host']}" size="30" maxlength="40" />
+						<div class="tooltip">
+							<span>
+								i.e. localhost or 0.0.0.0
+							</span>
+						</div>
                 </td>
                 <td>
                     <h3>HTTP Username:</h3>
-                    <input type="text" name="http_username" value="${config['http_user']}" size="30" maxlength="40">
+                    <input type="text" name="http_username" value="${config['http_user']}" size="30" maxlength="40" />
                 </td>
             </tr>
 
             <tr>
                 <td>
                       <h3>HTTP Port:</h3>
-                      <input type="text" name="http_port" value="${config['http_port']}" size="10" maxlength="40">
+                      <input type="text" name="http_port" value="${config['http_port']}" size="10" maxlength="40" />
                 </td>
 
                 <td>
                       <h3>HTTP Password:</h3>
-                      <input type="password" name="http_password" value="${config['http_pass']}" size="30" maxlength="40">
+                      <input type="password" name="http_password" value="${config['http_pass']}" size="30" maxlength="40" />
                 </td>
             </tr>
 
@@ -58,36 +62,41 @@
             </tr>
             <tr>
                 <td>
-                    <h3>SABnzbd Host:</h3><input type="text" name="sab_host" value="${config['sab_host']}" size="30" maxlength="40"><br>
-
-                    <i class="smalltext">usually http://localhost:8080</i>
+                    <h3>SABnzbd Host:</h3><input type="text" name="sab_host" value="${config['sab_host']}" size="30" maxlength="40" />
+					<div class="tooltip">
+						<span>
+							Usually http://localhost:8080
+						</span>
+					</div>
                 </td>
 
                 <td>
-                    <h3>SABnzbd Username:</h3><input type="text" name="sab_username" value="${config['sab_user']}" size="20" maxlength="40">
-                </td>
-            </tr>
-
-            <tr>
-                <td>
-                    <h3>SABnzbd API:</h3><input type="text" name="sab_apikey" value="${config['sab_api']}" size="36" maxlength="40">
-                </td>
-
-                <td>
-                    <h3>SABnzbd Password:</h3><input type="password" name="sab_password" value="${config['sab_pass']}" size="20" maxlength="40">
+                    <h3>SABnzbd Username:</h3><input type="text" name="sab_username" value="${config['sab_user']}" size="20" maxlength="40" />
                 </td>
             </tr>
 
             <tr>
                 <td>
-                    <h3>SABnzbd Category:</h3><input type="text" name="sab_category" value="${config['sab_cat']}" size="20" maxlength="40">
+                    <h3>SABnzbd API:</h3><input type="text" name="sab_apikey" value="${config['sab_api']}" size="36" maxlength="40" />
                 </td>
 
                 <td>
-                    <h3>Music Download Directory:</h3><input type="text" name="download_dir" value="${config['download_dir']}" size="50"><br>
+                    <h3>SABnzbd Password:</h3><input type="password" name="sab_password" value="${config['sab_pass']}" size="20" maxlength="40" />
+                </td>
+            </tr>
 
-                    <i class="smalltext">Full path to the directory where SAB downloads your music<br>
-                    i.e. /Users/name/Downloads/music</i>
+            <tr>
+                <td>
+                    <h3>SABnzbd Category:</h3><input type="text" name="sab_category" value="${config['sab_cat']}" size="20" maxlength="40" />
+                </td>
+
+                <td>
+                    <h3>Music Download Directory:</h3><input type="text" name="download_dir" value="${config['download_dir']}" size="40" />
+					<div class="tooltip">
+						<span>
+							Full path to the directory where SAB downloads your music | i.e. /Users/name/Downloads/music
+						</span>
+					</div>
                 </td>
             </tr>
             
@@ -97,9 +106,9 @@
                 </td>
 
                 <td>
-                    <h3>Black Hole Directory:</h3><input type="text" name="blackhole_dir" value="${config['blackhole_dir']}" size="50"><br>
+                    <h3>Black Hole Directory:</h3><input type="text" name="blackhole_dir" value="${config['blackhole_dir']}" size="40" />
 
-                    <i class="smalltext">Folder your Download program watches for NZBs</i>
+                    <div class="tooltip"><span>Folder your Download program watches for NZBs</span></div>
                 </td>
             </tr>
 
@@ -113,30 +122,32 @@
             
 		<tr>
                 <td>
-                    <br><br><br><br><h2>Torrent:</h2>
+                    <br /><br /><br /><br /><h2>Torrent:</h2>
                 </td>
             </tr>
 
 		<tr>
                 <td>
-                    <h3>Black Hole Directory:</h3><input type="text" name="torrentblackhole_dir" value="${config['torrentblackhole_dir']}" size="50"><br>
-
-                    <i class="smalltext">Folder your Download program watches for Torrents</i>
+                    <h3>Black Hole Directory:</h3><input type="text" name="torrentblackhole_dir" value="${config['torrentblackhole_dir']}" size="40">
+					<div class="tooltip">
+						<span>Folder your Download program watches for Torrents</span>
+						</div>
                 </td>
 
                 <td>
-                    <h3>Minimum seeders:</h3><input type="text" name="numberofseeders" value="${config['numberofseeders']}" size="5"><br>
+                    <h3>Minimum seeders:</h3><input type="text" name="numberofseeders" value="${config['numberofseeders']}" size="5" />
 
-                    <i class="smalltext">Number of minimum seeders a torrent must have to be accepted</i>
+                    <div class="tooltip">
+						<span>Number of minimum seeders a torrent must have to be accepted</span></div>
                 </td>
             </tr>
 
 		<tr>
                 <td>
-                    <h3>Music Download Directory:</h3><input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="50"><br>
+                    <h3>Music Download Directory:</h3><input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="40" />
 
-                    <i class="smalltext">Full path to the directory where your torrent client downloads your music<br>
-                    i.e. /Users/name/Downloads/music</i>
+                    <div class="tooltip"><span>Full path to the directory where your torrent client downloads your music
+                    i.e. /Users/name/Downloads/music</span></div>
                 </td>
 
                 <td></td>
@@ -174,8 +185,8 @@
 
                 <td>
                     <h3>Newznab Host: </h3>
-                      <input type="text" name="newznab_host" value="${config['newznab_host']}" size="30" maxlength="40"><br>
-                      <i class="smalltext">i.e. http://nzb.su</i>
+                      <input type="text" name="newznab_host" value="${config['newznab_host']}" size="30" maxlength="40">
+                      <div class="tooltip"><span>i.e. http://nzb.su</span></div>
                 </td>
 
                 <td>
@@ -224,17 +235,17 @@
             
 		<tr>
                 <td>
-                    <h2>Torrent:</h2><br>
+                    <h2>Torrent:</h2><br />
                 </td>
             </tr>
 
 		<tr>
 		    <td id="middle">
-                    <h3>Isohunt: <input type="checkbox" name="use_isohunt" value="1" ${config['use_isohunt']} /></h3><br>
+                    <h3>Isohunt: <input type="checkbox" name="use_isohunt" value="1" ${config['use_isohunt']} /></h3><br />
                 </td>
 
 		    <td id="middle">
-                    <h3>Mininova: <input type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /></h3><br>
+                    <h3>Mininova: <input type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /></h3><br />
                 </td>
             </tr>
 
@@ -251,7 +262,7 @@
         <table class="configtable" summary="Quality & Post Processing">
             <tr>
                 <td>
-                	<h2>Album Quality:</h2><br>
+                	<h2>Album Quality:</h2><br />
                    	  <h4><input type="radio" name="preferred_quality" value="0" ${config['pref_qual_0']} /> Highest Quality excluding Lossless</h4>
                       <h4><input type="radio" name="preferred_quality" value="1" ${config['pref_qual_1']} /> Highest Quality including Lossless</h4>
                       <h4><input type="radio" name="preferred_quality" value="3" ${config['pref_qual_3']} /> Lossless Only</h4>
@@ -273,11 +284,14 @@
 
             <tr>
                 <td>
-                    <br>
+                    <br />
 
-                    <h3>Path to Destination folder:</h3><input type="text" name="destination_dir" value="${config['dest_dir']}" size="50">
-                      <br>
-                      <i class="smalltext">i.e. /Users/name/Music/iTunes or /Volumes/share/music</i>
+                    <h3>Path to Destination folder:</h3><input type="text" name="destination_dir" value="${config['dest_dir']}" size="40" />
+                      <div class="tooltip">
+						<span>
+							i.e. /Users/name/Music/iTunes or /Volumes/share/music
+						</span>
+					</div>
                 </td>
             </tr>
 		</table>
@@ -289,21 +303,20 @@
             <tr>
                 <td>
                 	<h2>Renaming Options:</h2>
-					<br>
-                    <h3>Folder Format:</h3><input type="text" name="folder_format" value="${config['folder_format']}" size="43"><br>
-                      <i class="smalltext">Use: artist, album, year, releasetype and first (first letter in artist name)<br />
-                      				E.g.: first/artist/album [year] = G/Girl Talk/All Day [2010]</i>
-                    <br><br>
-                    <h3>File Format:</h3><input type="text" name="file_format" value="${config['file_format']}" size="43">
-                      <br>
-                      <i class="smalltext">Use: tracknumber, title, artist, album and year</i>
+					<br />
+                    <h3>Folder Format:</h3><input type="text" name="folder_format" value="${config['folder_format']}" size="43" />
+                      <div class="tooltip"><span>Use: artist, album, year, releasetype and first (first letter in artist name)
+                      				E.g.: first/artist/album [year] = G/Girl Talk/All Day [2010]</span></div>
+                    <br /><br />
+                    <h3>File Format:</h3><input type="text" name="file_format" value="${config['file_format']}" size="43" />
+                      <div class="tooltip"><span>Use: tracknumber, title, artist, album and year</span></div>
                 </td>
                 <td>
                       <h2>Miscellaneous:</h2>
-						<br>
+						<br />
                       	<h3><input type="checkbox" name="include_extras" value="1" ${config['include_extras']} />Automatically Include Extras When Adding an Artist</h3>
-                      <i class="smalltext">(EPs, Compilations, Live Albums, Remix Albums and Singles)</i>
-					<br><br>
+                      <div class="tooltip"><span>(EPs, Compilations, Live Albums, Remix Albums and Singles)</span></div>
+					<br /><br />
 					<h3>Interface: <select name="interface"><h3>
 					%for interface in config['interface_list']:
 						<%
@@ -315,20 +328,20 @@
 						<option value="${interface}" ${selected}>${interface}</option>
 					%endfor
 					</select>
-					<br><br>
-                    <h3>Log Directory:</h3><input type="text" name="log_dir" value="${config['log_dir']}" size="50">
+					<br /><br />
+                    <h3>Log Directory:</h3><input type="text" name="log_dir" value="${config['log_dir']}" size="40">
                 </td>
             </tr>
             <tr>
                 <td>
                       <h2>Re-Encoding Options:</h2>
-                      <i class="smalltext">Note: this option requires the lame or ffmpeg encoder</i>
-						<br><br>
+					  <div class="tooltip"><span>Note: this option requires the lame or ffmpeg encoder</span></div>
+						<br />
                       	<h3><input type="checkbox" name="encode" id="encode" value="1" ${config['encode']}/> Re-encode downloads during postprocessing</h3>
-                    	<br>
+                    	<br />
                     <div id="encoderoptions">
                       	<h4><input type="checkbox" name="encoderlossless" value="1" ${config['encoderlossless']}/> Only re-encode lossless files (.flac)</h4>                      
-					<br>
+					<br />
 					<%
 						if config['encoder'] == 'lame':
 							lameselect = 'selected="selected"'
@@ -353,10 +366,10 @@
 						<option value=${x} ${outputselect}>${x}</option>
 					%endfor
 					</select></h4>
-					<br>
+					<br />
 					
 					<h3>Audio Properties:</h3>
-					<br>
+					<br />
 					<h4>VBR/CBR: <select name="encodervbrcbr">
 					%for x in ['cbr', 'vbr']:
 						<%
@@ -381,7 +394,7 @@
 					%endfor
 					</select></h4>
 
-					<br>
+					<br />
 					<h4>Bitrate: <select name="bitrate">
 					%for x in [64, 128, 192, 256, 320]:
 						<%
@@ -406,23 +419,23 @@
 						<option value=44100 ${freq44100}>44.1 kHz</option>
 						<option value=48000 ${freq48000}>48.0 kHz</option>
 					</select></h4>
-					<br>
-					<br>					
+					<br />
+					<br />					
                     <h3>Advanced Encoding Options:</h3>
 					<h4>
 					(ignores audio properties)
 					</h4>
 					<input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43">
-					<br>
+					<br />
                     <h3>Path to Encoder:</h3><input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43">
                 	</div>
                 </td>
 		        <td>
-                      <h2>Prowl Notification:</h2><br>
-                      <h3><input type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} />Enable Prowl Notifications</h3><br>
+                      <h2>Prowl Notification:</h2><br />
+                      <h3><input type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} />Enable Prowl Notifications</h3><br />
                       <div id="prowloptions">
-		      	        <h3>API key:</h3><input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50"><br><br>
-                      	<h3><input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} />Notify on snatch?</h3><br>
+		      	        <h3>API key:</h3><input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="40"><br /><br />
+                      	<h3><input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} />Notify on snatch?</h3><br />
                       	<h3>Priority (-2,-1,0,1 or 2):</h3><input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2">
                       </div>
 		        </td>
@@ -447,7 +460,7 @@
         </table>
     </div>
 
-        <p class="center"><input type="submit" value="Save Changes"><br>
+        <p class="center"><input type="submit" value="Save Changes"><br />
         (Web Interface changes require a restart to take effect)</h3>
       </form>
 </%def>
