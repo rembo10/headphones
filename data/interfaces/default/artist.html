@@ -90,28 +90,27 @@
 				<td id="albumart">
 				<div class="album-art-small">
 					<a href="albumPage?AlbumID=${album['AlbumID']}">
-						<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" title="${album['AlbumTitle']}">
+						<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" title="${artist['ArtistName']} - ${album['AlbumTitle']}">
 					</a>
 				</div>
 				</td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
-				<td id="status"><img src="../images/${album['Status']}.png" title="${album['Status']}" />
+				<td id="status"><span class="btn${album['Status']} btnStatus" title="${album['Status']}">${album['Status']}</span>
 				%if album['Status'] == 'Skipped':
-					<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}"><img src="../images/get.png" title="Download this album" style="margin-left: 5px;"/></a>
+					<a class="btnGet btnStatus" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Get this album">Get</a>
 				%elif album['Status'] == 'Wanted':
-					<a href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}"><img src="../images/cancel.png" title="Cancel" style="margin-left: 5px;"/></a>
+					<a class="btnAbort btnStatus" href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Abort current status, and set to skipped">Abort</a>
 				%else:
-					<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Retry the same download again"><img src="../images/retry.png" style="margin-left: 5px;" /></a><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True" title="Try a new download, skipping all previously tried nzbs"><img src="../images/new.png" alt="New" style="margin-left: 5px;" /></a>
+					<a class="btnRetry btnStatus" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Retry the same nbz">Retry</a>
+					<a class="btnNew btnStatus" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True" title="Try a new download, skipping all previously tried nzbs">New</a>
 				%endif
 				</td>
 				<td id="have"><span title="${percent}"><span>
 					<div class="progress-container" title="You have ${havetracks} of a total ${totaltracks}">
 						<div style="width:${percent}%">
-							<div class="havetracks">
-								${havetracks}/${totaltracks}
-							</div>
+							
 						</div>
 					</div>
 				</td>

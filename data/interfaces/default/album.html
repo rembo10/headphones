@@ -23,7 +23,7 @@
 
 <%def name="body()">
 	<div class="table_wrapper">
-		<h2><a href="artistPage?ArtistID=${album['ArtistID']}"><- Back to ${album['ArtistName']}</a></h2>
+		<h2><a class="btnBack" href="artistPage?ArtistID=${album['ArtistID']}">< Back to ${album['ArtistName']}</a></h2>
 		<div id="albumheader">
 			<div class="album-art-big">
 				<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" alt="albumart" class="albumArt" title="${album['ArtistName']} - ${album['AlbumTitle']}">
@@ -41,11 +41,14 @@
 					albumduration = 'n/a'
 			
 			%>
-			Duration: ${albumduration}
+			<br />
 			%if description:
 			<h3>Description:</h3>
 			${description['Summary']}
 			%endif
+			<br />
+			<br />
+			Playtime: ${albumduration}
 			</div>
 		</div>
 		<div id="track_wrapper">
