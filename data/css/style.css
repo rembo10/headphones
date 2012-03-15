@@ -28,7 +28,6 @@ q:before, q:after { content: ''; content: none; }
 ins { background-color: #ff9; color: #000; text-decoration: none; }
 mark { background-color: #ff9; color: #000; font-style: italic; font-weight: bold; }
 del { text-decoration: line-through; }
-abbr[title], dfn[title] { border-bottom: 1px dotted; cursor: help; }
 table { border-collapse: collapse; border-spacing: 0; }
 hr { display: block; height: 1px; border: 0; border-top: 1px solid #ccc; margin: 1em 0; padding: 0; }
 input, select { vertical-align: middle; }
@@ -133,6 +132,7 @@ background-image: -ms-linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102)
 	clear:both;
  }
  
+ /*Removes outline in Chrome*/
  *:focus{
 	outline: none;
  }
@@ -142,22 +142,18 @@ background-image: -ms-linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102)
   * */
 a:link {
 	color: #fff;
-	text-shadow: 1px 1px 2px #000;
   	text-decoration: none; 
   	}
 a:visited {
   	color: #fff; 
-	text-shadow: 1px 1px 2px #000;
 	text-decoration: none; 
 	}
 a:hover { /*this effect is not shown in NN4.xx*/
   	color: #fff; 
-	text-shadow: 1px 1px 2px #000;
 	text-decoration: underline;
   	}
 a:active {/*colour in NN4.xx is red*/ 
   	color: #fff; 
-	text-shadow: 1px 1px 2px #000;
   	text-decoration: underline; 
 	}
 a.blue {
@@ -166,7 +162,7 @@ a.blue {
 
 #container { width: 960px; margin: auto; }
 
-body { background-color: #313131; color: #c2c2c2; overflow: hidden; overflow-y: hidden; overflow-x: hidden; }
+body { background-color: #313131; color: rgb(190,190,190); text-shadow: 1px 1px 3px #000; overflow: hidden; overflow-y: hidden; overflow-x: hidden; }
 
 
 
@@ -438,37 +434,87 @@ line-height: 40px;
 {
     background: rgb(30,170,140);
     border: 1px solid #000;
-    box-shadow: 0px 0px 1px #000;
     border-radius: 3px;
-    text-shadow: 0;
-    color: #fff;
+    color: #000;
 	font-size: 12px;
 	height: 18px;
 	line-height: 18px;
-	display: block;
-	width: 60%;
-	min-width: 90px;
 	text-align: center;
+	font-weight: bold;
+	float: left;
+	padding: 3px 6px 3px 6px;
 }
-.btnStatus:hover {
+#status.btnStatus:hover {
 	text-decoration: none;
 }
 
-/*Status buttons*/
-.btnDownloaded {
-	background: #a1a100;
+#status a
+{
+    color: #000;
+    display: block;
 }
+
+/*Status buttons*/
+.btnDownloaded 
+{
+	background-image: linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
+background-image: -o-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
+text-shadow: 1px 1px 0px rgb(87,170,0);
+}
+.btnWanted
+{
+    background-image: linear-gradient(bottom, rgb(85,0,128) 0%, rgb(128,0,153) 100%);
+background-image: -o-linear-gradient(bottom, rgb(85,0,128) 0%, rgb(128,0,153) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(85,0,128) 0%, rgb(128,0,153) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(85,0,128) 0%, rgb(128,0,153) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(85,0,128) 0%, rgb(128,0,153) 100%);
+text-shadow: 1px 1px 0px rgb(128,0,160);
+}
+.btnSkipped {
+background-image: linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+background-image: -o-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+text-shadow: 1px 1px 0px rgb(180,180,180);
+}
+
 .btnAbort {
-	background: rgb(170,0,10);
+background-image: linear-gradient(bottom, rgb(128,0,0) 0%, rgb(153,0,0) 100%);
+background-image: -o-linear-gradient(bottom, rgb(128,0,0) 0%, rgb(153,0,0) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(128,0,0) 0%, rgb(153,0,0) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(128,0,0) 0%, rgb(153,0,0) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(128,0,0) 0%, rgb(153,0,0) 100%);
+text-shadow: 1px 1px 0px rgb(190,0,31);
 }
 .btnGet {
-	background: rgb(10,30,160);
+	background-image: linear-gradient(bottom, rgb(128,26,0) 0%, rgb(153,61,0) 100%);
+background-image: -o-linear-gradient(bottom, rgb(128,26,0) 0%, rgb(153,61,0) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(128,26,0) 0%, rgb(153,61,0) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(128,26,0) 0%, rgb(153,61,0) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(128,26,0) 0%, rgb(153,61,0) 100%);
+text-shadow: 1px 1px 0px rgb(173,61,0);
 }
 .btnNew
 {
-    background: rgb(0,10,170);
+    	background-image: linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
+background-image: -o-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
+text-shadow: 1px 1px 0px rgb(87,170,0);
 }
-
+.btnRetry {
+	background-image: linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
+background-image: -o-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
+text-shadow: 1px 1px 0px rgb(87,160,0);
+}
 .btnBack 
 {
     margin-top: 10px;
@@ -669,7 +715,12 @@ background-image: url(../images/progress.png);
 }
 /*text format for match/procent*/
 .searchscrore,
-.havetracks { font-size: 12px; position: relative; width: 100%; text-align: center; color: #fff; text-shadow: 1px 1px 3px #000; }
+.havetracks { font-size: 12px; 
+              position: relative; 
+              width: 100%; 
+              text-align: center; 
+              color: #fff; 
+              text-shadow: 1px 1px 3px #000; }
 
 
 footer { margin: 20px auto 20px auto; }

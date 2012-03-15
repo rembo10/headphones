@@ -53,9 +53,8 @@
 				<td id="status">${artist['Status']}</td>
 				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
 				<td id="have"><span title="${percent}"></span>
-					<div class="progress-container">
+					<div class="progress-container" title="You have: ${havetracks}/${totaltracks}">
 						<div style="width:${percent}%">
-							<div class="havetracks">${havetracks}/${totaltracks}</div>
 						</div>
 					</div>
 				</td>
