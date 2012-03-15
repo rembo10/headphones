@@ -8,17 +8,17 @@ I created this, in order to completely redeign the user-interface of the current
 ###Screenshots
 Since i edit the style and images alot to optimize it's code, these screen will be edited again once i feel satisfied.
 ##Home
-![preview thumb](https://www.dropbox.com/sh/nx6y6yc5miib0vr/tJuqlvJFEw/index.png)
+![preview thumb](http://imageshack.us/photo/my-images/703/indexblr.png/)
 ##Artist 
-![preview thumb](https://www.dropbox.com/sh/36b0adplzb64iq3/g3wKGi-Rf2/artist.PNG)
+![preview thumb](http://imageshack.us/photo/my-images/42/artistx.png/)
 ##Album
-![preview thumb](https://www.dropbox.com/sh/8qzy9zhc38eu046/5-fz1ukl5w/album.PNG)
+![preview thumb](http://imageshack.us/photo/my-images/850/albumw.png/)
 
 ##Manage
-![preview thumb](https://www.dropbox.com/sh/n6una3mojsluxwp/x2S6PX0iwh/manage.PNG)
+![preview thumb](http://imageshack.us/photo/my-images/715/manage.png/)
 ##Settings
-![preview thumb](https://www.dropbox.com/sh/p6wekryf80dcjhz/toQ7TvWaw5/settings.png)
+![preview thumb](http://imageshack.us/photo/my-images/707/settingse.png)
 ##History
-![preview thumb](https://www.dropbox.com/sh/2atnb2ug6hfucrx/sEnlVlWVKR/history.PNG)
+![preview thumb](http://imageshack.us/photo/my-images/827/historyv.png/)
 ##Upcomming
-![preview thumb](https://www.dropbox.com/sh/51c7qg2gl81ztbc/qiCOoM26qm/upcomming.png)
+![preview thumb](http://imageshack.us/photo/my-images/214/upcomming.png)
