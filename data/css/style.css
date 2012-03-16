@@ -179,6 +179,8 @@ h2 { font-size: 13px; color: #FFF; text-decoration: none;}
 h3 { font-size: 12px; color: #FFF; text-decoration: none;}
 h4 { font-size: 10px; color: #FFF; text-decoration: none;}
 
+p { margin-top: 8px; margin-bottom: 8px; }
+
 p.indented { margin-top: 20px; margin-bottom: 20px; font-size: 12px; }
 p.center { text-align: center; font-size: 18px; }
 .smalltext2 { font-size: 12px; margin-left: 45px; }
@@ -529,7 +531,38 @@ text-shadow: 1px 1px 0px rgb(87,160,0);
 }
 
 .table_wrapper { border-radius: 5px; -webkit-border-radius: 5px; -moz-border-radius: 5px; width: 100%; background-color: #313131; position: relative; min-height: 50px; clear: both; _height: 302px; zoom: 1; }
-/*All inputs in the main content 
+/*All inputs in the main content */
+
+.checkbox,
+.radio {
+	width: 19px;
+	height: 25px;
+	padding: 0 5px 0 0;
+	background: url(../images/checkbox.png) no-repeat;
+	display: block;
+	clear: left;
+	float: left;
+}
+
+.radio
+{
+	background: url(../images/radio.png) no-repeat;
+}
+
+.select{
+	position: absolute;
+	width: 158px; /* With the padding included, the width is 190 pixels: the actual width of the image. */
+	height: 21px;
+	padding: 0 24px 0 8px;
+	color: #000;
+	font-weight: bold;
+	text-shadow: 1px 1px 0px rgb(170,170,170);
+	font-size: 12px/21px;
+	line-height: 19px;
+	background: url(../images/select.png) no-repeat;
+	overflow: hidden;
+	background-color: #272727;
+}
 
 /*Tooltip*/
 .tooltip
@@ -586,8 +619,8 @@ text-shadow: 1px 1px 0px rgb(87,160,0);
     background-image: -ms-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
 }
 
-form input[type="radio"],
-form input[type='submit'] 
+.submit,
+input[type="submit"]
 {
     border: 1px solid #000;
     border-radius: 3px;
@@ -595,12 +628,14 @@ form input[type='submit']
     font-weight: bold;
     padding: 3px 6px 3px 6px;
 	background-image: linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-background-image: -o-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-background-image: -moz-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-background-image: -webkit-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-background-image: -ms-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-text-shadow: 1px 1px 0px rgb(180,180,180);
+	background-image: -o-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+	text-shadow: 1px 1px 0px rgb(180,180,180);
 }
+.text-pass,
+.text-field,
 input[type="password"],
 input[type="text"]
 {
