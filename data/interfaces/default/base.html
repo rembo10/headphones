@@ -33,7 +33,6 @@
 		<script type="text/javascript" src="js/FancyScript.js"></script>
 		<!-- Custom Form elements-->
 		<script type="text/javascript" src="js/custom-form-elements.js" ></script>
-		<link type="text/css" href="css/custom-form-elements.css" rel="stylesheet" />
 		<!-- jScrollPane -->
 			<!-- styles needed by jScrollPane -->
 			<link type="text/css" href="css/jquery.jscrollpane.css" rel="stylesheet" media="all" />
@@ -76,10 +75,11 @@
             </div>
 			% endif
 		<header>
-			
+					
 			<div id="logo">
 				<a href="home"><img src="images/headphoneslogo.png" alt="headphones"></a>
 			</div>
+			${next.headerIncludes()}
 			<div id="searchbar">
                 <form action="search" method="get">
                     <input type="text" value="" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" />
@@ -101,12 +101,9 @@
 				<li><a href="logs">Logs</a></li>
 				<li><a href="config">Settings</a></li>
 		</ul>
-		<div id="subhead">
-				${next.headerIncludes()}
-		</div>
-		<div id="main" class="main">
-			${next.body()}
-		</div>
+			<div id="main" class="main">
+				${next.body()}
+			</div>
 
 		<footer>
 		</footer>

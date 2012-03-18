@@ -42,7 +42,7 @@
 	<form action="markAlbums" method="get">
 		<div class="dataTables_mark">
 	<p class="indented">Mark selected albums as 
-		<select name="action">
+		<select class="styled" name="action">
   			<option value="Skipped">Skipped</option>
   			<option value="Downloaded">Downloaded</option>
 		</select>
@@ -54,7 +54,7 @@
 		<table class="display" id="wanted_table">
 		<thead>
 			<tr>
-				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
+				<th id="select"><input class="styled" type="checkbox" onClick="toggle(this)" /></th>
 				<th id="albumart"></th>
 				<th id="artistname">Artist</th>
 				<th id="albumname">Album Name</th>
@@ -65,7 +65,7 @@
 		<tbody>
 		%for album in wanted:
 			<tr class="gradeZ">
-				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></th>
+				<td id="select"><input class="styled" type="checkbox" name="${album['AlbumID']}" class="checkbox" /></th>
 				<td id="albumart">
 					<div class="album-art-small">
 					<a href="albumPage?AlbumID=${album['AlbumID']}">

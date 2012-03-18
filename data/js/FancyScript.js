@@ -13,20 +13,24 @@ $(document).ready(function() {
 	//On load set #main height & width
 	windowWidth = $(window).width();
 	windowHeight = $(window).height();
-	menuWidth = $("#nav").width();
+	menuWidth = $("#nav").outerWidth();
 	headerHeight = $("header").height();
-	$("#main").height(windowHeight - headerHeight - 40);
-	$("#main").width(windowWidth - menuWidth - 10);
+	footerHeight = $("footer").innerHeight();
+	$("#main").height(windowHeight - headerHeight - footerHeight);
+	$("#main").width(windowWidth - menuWidth);
+	$(".fixed").width(windowWidth - menuWidth);
 });
 
 //On window resize
 $(window).resize(function() {
 	windowWidth = $(window).width();
 	windowHeight = $(window).height();
-	menuWidth = $("#nav").width();
+	menuWidth = $("#nav").outerWidth();
 	headerHeight = $("header").height();
-	$("#main").height(windowHeight - headerHeight - 40);
-	$("#main").width(windowWidth - menuWidth - 10);
+	footerHeight = $("footer").innerHeight();
+	$("#main").height(windowHeight - headerHeight - footerHeight);
+	$("#main").width(windowWidth - menuWidth);
+	$(".fixed").width(windowWidth - menuWidth);
 });
 
 //Update close
@@ -37,6 +41,11 @@ $(document).ready(function () {
 	$(".btnClose").click(function() {
 		$("#updatebar").fadeOut("slow");
 	});
+});
+
+//Add styled class to dataTables_lenght
+$(document).ready(function() {
+	$(".dataTables_length label select").addClass("styled");
 });
 
 //Main fadeIn

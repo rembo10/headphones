@@ -28,24 +28,21 @@
 }
 
 .dataTables_length {
-	width: 50%;
-	float: left;
-	margin-bottom: 10px;
-	color: #fff;
+	/*
+	 * Look in styles.css 
+	 * */
 }
 
 .dataTables_filter {
 	/*
-	 * Look in style.css "#artist_table_filter"
+	 * Look in style.css
 	 * */
 }
 
 .dataTables_info {
-	width: 50%;
-	float: left;
-	margin-top: 15px;
-	font-weight: bold;
-	clear: both;
+	/*
+	 * Look in style.css
+	 * */
 }
 
 .dataTables_paginate {
