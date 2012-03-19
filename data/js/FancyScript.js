@@ -53,3 +53,19 @@ $(document).ready(function () {
 	$("#main").hide();
 	$("#main").fadeIn("slow");
 });
+
+//CD Rotate
+$(function() {
+var $rotateElement = $(".album-art-cd");
+rotate(0);
+function rotate(degree) {
+
+      // For webkit browsers: e.g. Chrome
+    $rotateElement.css({ WebkitTransform: 'rotate(' + degree + 'deg)'});
+      // For Mozilla browser: e.g. Firefox
+    $rotateElement.css({ '-moz-transform': 'rotate(' + degree + 'deg)'});
+
+      // Animate rotation with a recursive call
+    setTimeout(function() { rotate(++degree); },30);
+    }
+});

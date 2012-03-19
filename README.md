@@ -1,9 +1,11 @@
 ###About
 I created this, in order to completely redeign the user-interface of the current Headphones by rembo10.
-##Latest
-* Added new screenshots
-* Added universal custom scrollbar - DONE
-* Added edited progress bars, and title - DONE
+##Latest Changes
+* Created "ColorStyles.css" to easy personalize main colors.
+* CD art now rotates.
+* Changed the layout a bit.
+* * Added footer, and moved filter and info to it.
+* * Sub menu has been moved to header. 
 
 ###Screenshots
 Since i edit the style and images alot to optimize it's code, these screen will be edited again once i feel satisfied.
