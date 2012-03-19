@@ -20,9 +20,8 @@ mb_lock = threading.Lock()
 # being used, so we can send those values to the log
 def startmb(forcemb=False):
 
-	# just in case someone switches to the headphones server mid-query
-	hpuser=None
-	hppass=None
+	mbuser = None
+	mbpass = None
 	
 	if forcemb or headphones.MIRROR == "musicbrainz.org":
 		mbhost = "musicbrainz.org"
@@ -34,24 +33,19 @@ def startmb(forcemb=False):
 		sleepytime = headphones.CUSTOMSLEEP
 	elif headphones.MIRROR == "headphones":
 		mbhost = "178.63.142.150"
-		mbport = 5000
+		mbport = 3333
+		mbuser = headphones.HPUSER
+		mbpass = headphones.HPPASS
 		sleepytime = 0
-		hpuser = headphones.HPUSER
-		hppass = headphones.HPPASS
 	else:
 		mbhost = "tbueter.com"
 		mbport = 5000
 		sleepytime = 0
 	
-	service = ws.WebService(host=mbhost, port=mbport)
+	service = ws.WebService(host=mbhost, port=mbport, username=mbuser, password=mbpass, mirror=headphones.MIRROR)
 	q = ws.Query(service)
 	
 	logger.debug('Using the following server values:\nMBHost: %s ; MBPort: %i  ;  Sleep Interval: %i ' % (mbhost, mbport, sleepytime))
-	if headphones.MIRROR == "headphones" and not forcemb:
-		try:
-			logger.debug('Headphones Username: %s  ; Headphones Password: %s%s%s' % (hpuser, hppass[0],(len(hppass)-2) * '*', hppass[-1]))
-		except Exception, e:
-			logger.debug('Error logging hpuser or hppass: %s. Check your settings' % e)
 	
 	return (q, sleepytime)
 
@@ -177,7 +171,7 @@ def getArtist(artistid, extrasonly=False):
 				artist = q.getArtistById(artistid, inc)
 				break
 			except WebServiceError, e:
-				logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s. Sleeping 5 seconds' % artistid)
+				logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s. Sleeping 5 seconds: %s' % (artistid, e))
 				attempt += 1
 				time.sleep(5)
 				
