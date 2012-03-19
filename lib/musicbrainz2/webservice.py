@@ -17,6 +17,7 @@ __revision__ = '$Id: webservice.py 12973 2011-04-29 11:49:31Z luks $'
 import re
 import urllib
 import urllib2
+import base64
 import urlparse
 import logging
 import os.path
@@ -191,7 +192,7 @@ class WebService(IWebService):
 
 	def __init__(self, host='musicbrainz.org', port=80, pathPrefix='/ws',
 			username=None, password=None, realm='musicbrainz.org',
-			opener=None):
+			opener=None, mirror=None):
 		"""Constructor.
 
 		This can be used without parameters. In this case, the
@@ -212,6 +213,7 @@ class WebService(IWebService):
 		self._realm = realm
 		self._pathPrefix = pathPrefix
 		self._log = logging.getLogger(str(self.__class__))
+		self._mirror = mirror
 
 		if opener is None:
 			self._opener = urllib2.build_opener()
@@ -249,6 +251,9 @@ class WebService(IWebService):
 		userAgent = 'python-headphones/' + musicbrainz2.__version__
 		req = urllib2.Request(url)
 		req.add_header('User-Agent', userAgent)
+		if self._mirror == 'headphones':
+			base64string = base64.encodestring('%s:%s' % (self._username, self._password)).replace('\n', '')
+			req.add_header("Authorization", "Basic %s" % base64string)
 		return self._opener.open(req, data)
 
 
