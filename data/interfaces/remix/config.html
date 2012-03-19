@@ -227,7 +227,7 @@
             
 		<tr>
                 <td>
-                    <br><br><br><br><h2>Torrent:</h2><br>
+                    <h2>Torrent:</h2><br>
                 </td>
             </tr>
 
@@ -420,17 +420,41 @@
                     <h3>Path to Encoder:</h3><input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43">
                 	</div>
                 </td>
-		<td>
-                      <h2>Prowl Notification:</h2>
-		      <br>
-                      <h3><input type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} />Enabled Prowl Notification</h3><br>
+		        <td>
+                      <h2>Prowl Notification:</h2><br>
+                      <h3><input type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} />Enable Prowl Notifications</h3><br>
                       <div id="prowloptions">
-		      	<h3>API key:</h3><input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50"><br><br>
+		      	        <h3>API key:</h3><input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50"><br><br>
                       	<h3><input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} />Notify on snatch?</h3><br>
                       	<h3>Priority (-2,-1,0,1 or 2):</h3><input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2">
                       </div>
-		</td>
+		        </td>
             </tr>
+            <tr>
+				<td>
+					<h3>Muscbrainz Mirror: <select name="mirror" id="mirror"><h3>
+					%for mirror in config['mirror_list']:
+						<%
+							if mirror == headphones.MIRROR:
+								selected = 'selected="selected"'
+							else:
+								selected = ''
+						%>
+						<option value="${mirror}" ${selected}>${mirror}</option>
+					%endfor
+					</select>
+					
+					<div id="customoptions">
+					<h3>Host:<br><input type="text" name="customhost" value="${config['customhost']}" size="20"></h3>
+					<h3>Port:<br><input type="text" name="customport" value="${config['customport']}" size="8"></h3>
+					<h3>Sleep Interval:<br><input type="text" name="customsleep" value="${config['customsleep']}" size="4"></h3>
+					</div>
+					
+					<div id="hpserveroptions">
+					<h3>Username:<br><input type="text" name="hpuser" value="${config['hpuser']}" size="20"></h3>
+					<h3>Password:<br><input type="password" name="hppass" value="${config['hppass']}" size="15"></h3>
+					<i class="smalltext2"><a href="http://headphones.codeshy.com/vip">Get an Account</a></p>
+					</div>
         </table>
     </div>
 
@@ -441,6 +465,27 @@
 
 <%def name="javascriptIncludes()">
 	<script>
+	
+	hideServerDivs = function () {
+		$("#customoptions").hide("fast");
+		$("#hpserveroptions").hide("fast");
+	};
+	
+	handleNewSelection = function () {
+	
+		hideServerDivs();
+		
+		switch ($(this).val()) {
+			case 'custom':
+				$("#customoptions").show("fast");
+			break;
+			case 'headphones':
+				$("#hpserveroptions").show("fast");
+			break;
+		}
+	};
+	
+
 	$(document).ready(function()
 	{
 		if ($("#encode").is(":checked"))
@@ -481,7 +526,12 @@
 			{
 				$("#prowloptions").hide("fast");
 			}
-		});
+		});		
+		
+		$("#mirror").change(handleNewSelection);
+		handleNewSelection.apply($("#mirror"));
+
 	});
+	
 	</script>
 </%def>
