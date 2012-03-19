@@ -32,7 +32,7 @@ def startmb(forcemb=False):
 		mbport = headphones.CUSTOMPORT
 		sleepytime = headphones.CUSTOMSLEEP
 	elif headphones.MIRROR == "headphones":
-		mbhost = "codeshy.com"
+		mbhost = "178.63.142.150"
 		mbport = 3333
 		mbuser = headphones.HPUSER
 		mbpass = headphones.HPPASS
