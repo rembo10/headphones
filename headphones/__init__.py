@@ -309,7 +309,7 @@ def initialize():
         PROWL_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_onsnatch', 0)) 
         PROWL_PRIORITY = check_setting_int(CFG, 'Prowl', 'prowl_priority', 0)
         
-        MIRROR = check_setting_str(CFG, 'General', 'mirror', 'headphones')
+        MIRROR = check_setting_str(CFG, 'General', 'mirror', 'musicbrainz.org')
         CUSTOMHOST = check_setting_str(CFG, 'General', 'customhost', 'localhost')
         CUSTOMPORT = check_setting_int(CFG, 'General', 'customport', 5000)
         CUSTOMSLEEP = check_setting_int(CFG, 'General', 'customsleep', 1)
