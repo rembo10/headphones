@@ -23,6 +23,10 @@ def startmb(forcemb=False):
 	mbuser = None
 	mbpass = None
 	
+	# Can use headphones mirror for queries
+	if headphones.MIRROR == "headphones":
+		forcemb=False
+	
 	if forcemb or headphones.MIRROR == "musicbrainz.org":
 		mbhost = "musicbrainz.org"
 		mbport = 80
