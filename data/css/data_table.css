@@ -275,29 +275,32 @@ td.details {
 .paging_full_numbers span.paginate_button,
  	.paging_full_numbers span.paginate_active {
 	border: 1px solid #000;
-	padding: 2px 5px;
+	color: #000;
+	font-weight: bold;
+	padding: 3px 5px;
 	margin: 0 3px;
 	cursor: pointer;
 	*cursor: hand;
+	border-radius: 3px;
+	text-shadow: rgb(255,255,255);
 }
 
 .paging_full_numbers span.paginate_button {
 	background-image: linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
-background-image: -o-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
-background-image: -moz-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
-background-image: -webkit-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
-background-image: -ms-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
-border-bottom: 1px solid #000; 
-	color: #fff;
+	background-image: -o-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
+	border-bottom: 1px solid #000; 
 }
 
 .paging_full_numbers span.paginate_button:hover {
 	background-image: linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
-background-image: -o-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
-background-image: -moz-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
-background-image: -webkit-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
-background-image: -ms-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
-border-bottom: 1px solid #000; 
+	background-image: -o-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
+	border-bottom: 1px solid #000; 
 	color: #fff;
 }
 
