@@ -69,3 +69,8 @@ function rotate(degree) {
     setTimeout(function() { rotate(++degree); },30);
     }
 });
+
+//Acesskey
+$(document).ready(function(){
+	$("dataTables_filter div input").attr("acesskey", "a");
+});

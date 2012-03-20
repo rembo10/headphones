@@ -72,6 +72,7 @@ div#updatebar
 	background-image: -ms-linear-gradient(bottom, rgb(97,0,0) 0%, rgb(122,0,0) 100%);
 }
 /*Tablehead color*/
+h1,
 table.display thead tr th 
 { 
 	background-image: linear-gradient(bottom, rgb(69,69,69) 0%, rgb(102,102,102) 100%);

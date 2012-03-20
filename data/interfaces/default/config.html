@@ -28,15 +28,20 @@
 						    </div>
                     </td>
                     <td>
-                        <h3>HTTP Username:</h3>
+                        <p>HTTP Username:</p>
                         <input type="text" name="http_username" value="${config['http_user']}" size="30" maxlength="40" />
                     </td>
                 </tr>
 
                 <tr>
                     <td>
-                          <h3>HTTP Port:</h3>
-                          <input type="text" name="http_port" value="${config['http_port']}" size="10" maxlength="40" />
+                        <p>HTTP Port:</p>
+                        <input type="text" name="http_port" value="${config['http_port']}" size="10" maxlength="40" />
+                        <div class="tooltip">
+							<span>
+								Default is: 8181
+							</span>
+						</div>
                     </td>
 
                     <td>
@@ -46,11 +51,10 @@
 					    </p>
                     </td>
                 </tr>
-
                 <tr>
                     <td>
                         <p>
-						    Launch Browser on Startup:
+						    Launch Browser on Startup
 						    <input class="styled" type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} />
 					    </p>
                     </td>
@@ -193,35 +197,35 @@
             </h1>
             </a>
             <table class="configtable" summary="Search Providers">
-	            <tr>
-                    <td>
-                        <h2>SABnzbd:</h2>
-                    </td>
-                </tr>
                 <tr>
                     <td>
-                        <h3>
-                            NZBMatrix: 
-                        </h3>
-					    <input class="styled" type="checkbox" name="nzbmatrix" value="1" ${config['use_nzbmatrix']} />
+                        <p>
+                            NZBMatrix:
+                            <input class="styled" type="checkbox" name="nzbmatrix" value="1" ${config['use_nzbmatrix']} />
+                        </p>
+					    
                     </td>
                     <td>
-                        <h3>
-                            NZBMatrix Username: 
-                        </h3>
-                        <input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30" maxlength="40" />
+                        <p>
+                            NZBMatrix Username
+                            <input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30" maxlength="40" />
+                        </p>
+                        
                     </td>
 
                     <td>
-                        <h3>NZBMatrix API:</h3>
+                        <p>NZBMatrix API:
                         <input type="text" name="nzbmatrix_apikey" value="${config['nzbmatrix_api']}" size="36" maxlength="40" />
+                        </p>
                     </td>
                 </tr>
 
                 <tr>
                     <td>
-                        <h3>Newznab:</h3>
-                        <input class="styled" type="checkbox" name="newznab" value="1" ${config['use_newznab']} />					
+                        <p>
+                        <input class="styled" type="checkbox" name="newznab" value="1" ${config['use_newznab']} />
+                        Newznab:
+                        </p>			
                     </td>
 
                     <td>
@@ -265,8 +269,9 @@
 			    <tr>
                     <td>
                         <p>
-				            <input class="styled" type="checkbox" name="newzbin" value="1" ${config['use_newzbin']} />
                             Newzbin
+				            <input class="styled" type="checkbox" name="newzbin" value="1" ${config['use_newzbin']} />
+                            
                         </p>
                     </td>
 
@@ -274,7 +279,6 @@
                         <p>
                             Newzbin UID:
                             <input type="text" name="newzbin_uid" value="${config['newzbin_uid']}" size="30" maxlength="40" />
-                        
                         </p>
                     
                     </td>
@@ -285,16 +289,9 @@
                         </p>
                     </td>
                 </tr>
-            
-            
-		        <tr>
-                    <td>
-                        <h2>Torrent:</h2>
-                    </td>
-                </tr>
-
 		        <tr>
 		            <td>
+                        <h2>Torrent:</h2>
                         <p>
 				            <input class="styled" type="checkbox" name="use_isohunt" value="1" ${config['use_isohunt']} />
                             Isohunt:
@@ -321,7 +318,7 @@
             <table class="configtable" summary="Quality & Post Processing">
                 <tr>
                     <td width="200">
-                	    <h2>Album Quality:</h2><br />
+                	    <h2>Album Quality:</h2>
 					    <p>
 						    <input class="styled" type="radio" name="preferred_quality" value="0" ${config['pref_qual_0']} />
 						    Highest Quality excluding Lossless
@@ -417,12 +414,14 @@
 						    File Format:
 					    </h3>
 						    <input type="text" name="file_format" value="${config['file_format']}" size="43" />
-                        <div class="tooltip">
-						    <span>
-							    Use: tracknumber, title, artist, album and year
-						    <span>
-					    </div>
+							<div class="tooltip">
+								<span>
+									Use: tracknumber, title, artist, album and year
+								<span>
+							</div>
                     </td>
+				</tr>
+				<tr>
                     <td>
                           <h2>Miscellaneous:</h2>
 						    <br />

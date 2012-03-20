@@ -126,7 +126,7 @@ a.blue {
 
 #container { width: 100%; margin: auto; }
 
-body { background-color: #313131; color: rgb(190,190,190); text-shadow: 1px 1px 3px #000; overflow: hidden; overflow-y: hidden; overflow-x: hidden; }
+body { background-color: #313131; color: rgb(190,190,190); overflow: hidden; overflow-y: hidden; overflow-x: hidden; }
 
 
 
@@ -138,9 +138,19 @@ text-shadow: 1px 1px rgb(100,100,100);
 line-height: 100%;
 }
 
-h1 { font-size: 14px; padding: 10px 0px 10px 10px; color: #FFF; text-decoration: none; background-color: #212121; }
+h1,
+h1 a,
+h1 a:hover
+{ 
+	font-size: 14px; 
+	padding: 5px 0px 5px 10px; 
+	color: #000;
+	text-shadow: 1px 1px 0px rgba(255,255,255,0.2);
+	text-decoration: none;
+	border: 1px solid #000;
+}
 h2 { font-size: 13px; color: #FFF; text-decoration: none;}
-h3 { font-size: 12px; color: #FFF; text-decoration: none;}
+h3 { font-size: 12px; color: rgb(160,160,160); text-shadow: 1px 1px 0px rgb(10,10,10); text-decoration: none;}
 h4 { font-size: 10px; color: #FFF; text-decoration: none;}
 
 p { margin-top: 8px; margin-bottom: 8px; }
@@ -894,6 +904,7 @@ footer
 	width: 100%;
 	height: 30px;
 	z-index: 900;
+	box-shadow: 0px 0px 12px #000;
 }
 div#version { text-align: center; font-weight: bold; }
 div#donate { text-align: center; margin: 20px auto 20px auto; }
