@@ -24,7 +24,7 @@
                 <td>
                   <h3>HTTP Host:</h3>
                     <input type="text" name="http_host" value="${config['http_host']}" size="30" maxlength="40"><br>
-                    <i class="smalltext">i.e. localhost or 0.0.0.0</i>
+                    <i class="smalltext">e.g. localhost or 0.0.0.0</i>
                 </td>
                 <td>
                     <h3>HTTP Username:</h3>
@@ -90,7 +90,7 @@
                     <h3>Music Download Directory:</h3><input type="text" name="download_dir" value="${config['download_dir']}" size="50"><br>
 
                     <i class="smalltext">Full path to the directory where SAB downloads your music<br>
-                    i.e. /Users/name/Downloads/music</i>
+                    e.g. /Users/name/Downloads/music</i>
                 </td>
             </tr>
             
@@ -139,7 +139,7 @@
                     <h3>Music Download Directory:</h3><input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="50"><br>
 
                     <i class="smalltext">Full path to the directory where your torrent client downloads your music<br>
-                    i.e. /Users/name/Downloads/music</i>
+                    e.g. /Users/name/Downloads/music</i>
                 </td>
 
                 <td></td>
@@ -178,7 +178,7 @@
                 <td>
                     <h3>Newznab Host: </h3>
                       <input type="text" name="newznab_host" value="${config['newznab_host']}" size="30" maxlength="40"><br>
-                      <i class="smalltext">i.e. http://nzb.su</i>
+                      <i class="smalltext">e.g. http://nzb.su</i>
                 </td>
 
                 <td>
@@ -280,7 +280,7 @@
 
                     <h3>Path to Destination folder:</h3><input type="text" name="destination_dir" value="${config['dest_dir']}" size="50">
                       <br>
-                      <i class="smalltext">i.e. /Users/name/Music/iTunes or /Volumes/share/music</i>
+                      <i class="smalltext">e.g. /Users/name/Music/iTunes or /Volumes/share/music</i>
                 </td>
             </tr>
 		</table>
@@ -421,12 +421,21 @@
                 	</div>
                 </td>
 		        <td>
-                      <h2>Prowl Notification:</h2><br>
+                      <h2>Notifications:</h2><br>
                       <h3><input type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} />Enable Prowl Notifications</h3><br>
                       <div id="prowloptions">
 		      	        <h3>API key:</h3><input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50"><br><br>
                       	<h3><input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} />Notify on snatch?</h3><br>
-                      	<h3>Priority (-2,-1,0,1 or 2):</h3><input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2">
+                      	<h3>Priority (-2,-1,0,1 or 2):</h3><input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2"><br><br>
+                      </div>
+                     <h3><input type="checkbox" name="xbmc_enabled" id="xbmc" value="1" ${config['xbmc_enabled']} />Enable XBMC Updates</h3><br>
+                      <div id="xbmcoptions">
+		      	        <h3>XBMC Host:Port:</h3><input type="text" name="xbmc_host" value="${config['xbmc_host']}" size="30"><br>
+		      	        <i class="smalltext">e.g. http://localhost:8080</i><br>
+		      	        <h3>XBMC Username:</h3><input type="text" name="xbmc_username" value="${config['xbmc_username']}" size="30"><br><br>
+		      	        <h3>XBMC Password:</h3><input type="password" name="xbmc_password" value="${config['xbmc_password']}" size="30"><br><br>
+                      	<h3><input type="checkbox" name="xbmc_update" value="1" ${config['xbmc_update']} />Update XBMC Library</h3><br>
+                      	<h3><input type="checkbox" name="xbmc_notify" value="1" ${config['xbmc_notify']} />Send Notification to XBMC</h3><br>
                       </div>
 		        </td>
             </tr>
@@ -525,6 +534,26 @@
 			else
 			{
 				$("#prowloptions").hide("fast");
+			}
+		});		
+
+		if ($("#xbmc").is(":checked"))
+			{
+				$("#xbmcoptions").show();
+			}
+		else
+			{
+				$("#xbmcoptions").hide();
+			}
+		
+		$("#xbmc").click(function(){
+			if ($("#xbmc").is(":checked"))
+			{
+				$("#xbmcoptions").show("fast");
+			}
+			else
+			{
+				$("#xbmcoptions").hide("fast");
 			}
 		});		
 		
