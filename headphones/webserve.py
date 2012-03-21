@@ -82,7 +82,6 @@ class WebInterface(object):
 		newValueDict = {'IncludeExtras': 1}
 		myDB.upsert("artists", newValueDict, controlValueDict)
 		threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True]).start()
-		time.sleep(10)
 		raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 	getExtras.exposed = True
 	
@@ -152,7 +151,6 @@ class WebInterface(object):
 	
 	def addArtists(self, **args):
 		threading.Thread(target=importer.artistlist_to_mbids, args=[args, True]).start()
-		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 	addArtists.exposed = True
 	
@@ -212,6 +210,7 @@ class WebInterface(object):
 	
 	def markArtists(self, action=None, **args):
 		myDB = db.DBConnection()
+		artistsToAdd = []
 		for ArtistID in args:
 			if action == 'delete':
 				myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
@@ -226,9 +225,10 @@ class WebInterface(object):
 				newValueDict = {'Status': 'Active'}
 				myDB.upsert("artists", newValueDict, controlValueDict)				
 			else:
-				# These may and probably will collide - need to make a better way to queue musicbrainz queries
-				threading.Thread(target=importer.addArtisttoDB, args=[ArtistID]).start()
-				time.sleep(30)
+				artistsToAdd.append(ArtistID)
+		if len(artistsToAdd) > 0:
+			logger.debug("Refreshing artists: %s" % artistsToAdd)
+			threading.Thread(target=importer.addArtistIDListToDB, args=[artistsToAdd]).start()
 		raise cherrypy.HTTPRedirect("home")
 	markArtists.exposed = True
 	
@@ -266,21 +266,18 @@ class WebInterface(object):
 	def forceUpdate(self):
 		from headphones import updater
 		threading.Thread(target=updater.dbUpdate).start()
-		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 	forceUpdate.exposed = True
 	
 	def forceSearch(self):
 		from headphones import searcher
 		threading.Thread(target=searcher.searchforalbum).start()
-		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 	forceSearch.exposed = True
 	
 	def forcePostProcess(self):
 		from headphones import postprocessor
 		threading.Thread(target=postprocessor.forcePostProcess).start()
-		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 	forcePostProcess.exposed = True
 	
@@ -528,7 +525,6 @@ class WebInterface(object):
 
 	def addReleaseById(self, rid):
 		threading.Thread(target=importer.addReleaseById, args=[rid]).start()
-		time.sleep(5)
 		raise cherrypy.HTTPRedirect("home")
 	addReleaseById.exposed = True
 	
