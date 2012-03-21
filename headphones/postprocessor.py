@@ -2,8 +2,7 @@ import os
 import time
 import encode
 import urllib, shutil, re
-from headphones import prowl
-from headphones.prowl import PROWL
+from headphones import notifiers
 import lib.beets as beets
 from lib.beets import autotag
 from lib.beets.mediafile import MediaFile
@@ -207,8 +206,9 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 	if headphones.ENCODE:
 		downloaded_track_list=encode.encode(albumpath)
 	
+	album_art_path = albumart.getAlbumArt(albumid)
+	
 	if headphones.EMBED_ALBUM_ART or headphones.ADD_ALBUM_ART:
-		album_art_path = albumart.getAlbumArt(albumid)
 		artwork = urllib.urlopen(album_art_path).read()
 		if len(artwork) < 100:
 			artwork = False
@@ -256,13 +256,19 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 	updateHave(albumpath)
 	
 	logger.info('Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
-        if headphones.PROWL_ONSNATCH:
-	    pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
-            logger.info(u"Prowl request")
-            prowl = PROWL()
-            prowl.notify(pushmessage,"Download and Postprocessing completed")
-        
-
+	
+	if headphones.PROWL_ONSNATCH:
+		pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
+		logger.info(u"Prowl request")
+		prowl = notifiers.PROWL()
+		prowl.notify(pushmessage,"Download and Postprocessing completed")
+		
+	if headphones.XBMC_ENABLED:
+		xbmc = notifiers.XBMC()
+		if headphones.XBMC_UPDATE:
+			xbmc.update()
+		if headphones.XBMC_NOTIFY:
+			xbmc.notify(release['ArtistName'], release['AlbumTitle'], album_art_path)
 	
 def embedAlbumArt(artwork, downloaded_track_list):
 	logger.info('Embedding album art')
