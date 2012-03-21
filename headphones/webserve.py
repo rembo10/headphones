@@ -321,7 +321,7 @@ class WebInterface(object):
 				 	"http_pass" : headphones.HTTP_PASSWORD,
 					"launch_browser" : checked(headphones.LAUNCH_BROWSER),
 					"download_scan_interval" : headphones.DOWNLOAD_SCAN_INTERVAL,
-					"nzb_search_interval" : headphones.NZB_SEARCH_INTERVAL,
+					"nzb_search_interval" : headphones.SEARCH_INTERVAL,
 					"libraryscan_interval" : headphones.LIBRARYSCAN_INTERVAL,
 					"sab_host" : headphones.SAB_HOST,
 					"sab_user" : headphones.SAB_USERNAME,
@@ -417,7 +417,7 @@ class WebInterface(object):
 		headphones.HTTP_PASSWORD = http_password
 		headphones.LAUNCH_BROWSER = launch_browser
 		headphones.DOWNLOAD_SCAN_INTERVAL = download_scan_interval
-		headphones.NZB_SEARCH_INTERVAL = nzb_search_interval
+		headphones.SEARCH_INTERVAL = nzb_search_interval
 		headphones.LIBRARYSCAN_INTERVAL = libraryscan_interval
 		headphones.SAB_HOST = sab_host
 		headphones.SAB_USERNAME = sab_username
