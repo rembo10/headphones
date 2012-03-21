@@ -9,7 +9,7 @@
 			<li><a href="shutdown">Shut Down</a></li>
 			<li><a href="restart">Restart</a></li>
 		</ul>
-	</div>	
+	</div>
 </%def>
 <%def name="body()">
 	<div id="paddingheader">
@@ -48,6 +48,23 @@
                 <td>
                     <h3>Launch Browser on Startup: <input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} /></h3>
                 </td>
+                <td>
+                    <h3>Download Scan Interval (mins):</h3>
+                    <input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="10" maxlength="40">
+                </td>
+            </tr>
+            <tr>
+
+                <td>
+                    <h3>NZB Search Interval (mins):</h3>
+                    <input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="10" maxlength="40">
+                </td>
+
+                <td>
+                    <h3>Library Scan Interval (mins):</h3>
+                    <input type="text" name="libraryscan_interval" value="${config['libraryscan_interval']}" size="10" maxlength="40">
+                </td>
+
             </tr>
         </table>
 	</div>
@@ -93,7 +110,7 @@
                     e.g. /Users/name/Downloads/music</i>
                 </td>
             </tr>
-            
+
             <tr>
                 <td>
                     <h3>Use Black Hole: <input type="checkbox" name="blackhole" value=1 ${config['use_blackhole']} /></h3>
@@ -196,17 +213,17 @@
 
                     <h3>NZBs.org UID: </h3>
                       <input type="text" name="nzbsorg_uid" value="${config['nzbsorg_uid']}" size="30" maxlength="40">
-                    
+
                 </td>
 
                 <td>
 
                     <h3>NZBs.org Hash: </h3>
                       <input type="text" name="nzbsorg_hash" value="${config['nzbsorg_hash']}" size="36" maxlength="40">
-                    
+
                 </td>
             </tr>
-			
+
 			<tr>
                 <td id="middle">
                     <h3>Newzbin: <input type="checkbox" name="newzbin" value="1" ${config['use_newzbin']} /></h3>
@@ -215,7 +232,7 @@
                 <td>
                     <h3>Newzbin UID: </h3>
                       <input type="text" name="newzbin_uid" value="${config['newzbin_uid']}" size="30" maxlength="40">
-                    
+
                 </td>
 
                 <td>
@@ -287,7 +304,7 @@
 	</div>
 	<div class="table_wrapper">
         <a name="advanced_settings"><h1><u>Advanced Settings</u></h1></a>
-        
+
         <table class="configtable" summary="Advanced Settings">
             <tr>
                 <td>
@@ -330,7 +347,7 @@
                       	<h3><input type="checkbox" name="encode" id="encode" value="1" ${config['encode']}/> Re-encode downloads during postprocessing</h3>
                     	<br>
                     <div id="encoderoptions">
-                      	<h4><input type="checkbox" name="encoderlossless" value="1" ${config['encoderlossless']}/> Only re-encode lossless files (.flac)</h4>                      
+                      	<h4><input type="checkbox" name="encoderlossless" value="1" ${config['encoderlossless']}/> Only re-encode lossless files (.flac)</h4>
 					<br>
 					<%
 						if config['encoder'] == 'lame':
@@ -357,7 +374,7 @@
 					%endfor
 					</select></h4>
 					<br>
-					
+
 					<h3>Audio Properties:</h3>
 					<br>
 					<h4>VBR/CBR: <select name="encodervbrcbr">
@@ -392,11 +409,11 @@
 								bitrateselected = "selected"
 							else:
 								bitrateselected = ''
-						%>	
+						%>
 						<option value=${x} ${bitrateselected}> ${x} kbps</option>
 					%endfor
 					</select>
-					
+
 					<%
 						if config["samplingfrequency"] == 44100:
 							freq44100 = 'selected="selected"'
@@ -410,7 +427,7 @@
 						<option value=48000 ${freq48000}>48.0 kHz</option>
 					</select></h4>
 					<br>
-					<br>					
+					<br>
                     <h3>Advanced Encoding Options:</h3>
 					<h4>
 					(ignores audio properties)
@@ -505,7 +522,7 @@
 			{
 				$("#encoderoptions").hide();
 			}
-		
+
 		$("#encode").click(function(){
 			if ($("#encode").is(":checked"))
 			{
