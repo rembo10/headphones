@@ -24,25 +24,27 @@
 
 <%def name="body()">
 	<div id="paddingheader">
-		<h1>${artist['ArtistName']}<h1>
+		<h1>
+			${artist['ArtistName']}
+		</h1>
 		%if artist['Status'] == 'Loading':
 		<h3><i>(Album information for this artist is currently being loaded)</i></h3>
 		%endif		
 	</div>
 	<form action="markAlbums" method="get"><input type="hidden" name="ArtistID" value=${artist['ArtistID']}>
 	<p class="indented">Mark selected albums as 
-		<select name="action">
+		<select class="styled" name="action">
   			<option value="Wanted">Wanted</option>
   			<option value="WantedNew">Wanted (new only)</option>
   			<option value="Skipped">Skipped</option>
   			<option value="Downloaded">Downloaded</option>
 		</select>
-		<input type="submit" value="Go">
+		<input type="submit" value="GO">
 	</p>
 	<table class="display" id="album_table">
 		<thead>
 			<tr>
-				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
+				<th id="select"><input class="styled" type="checkbox" onClick="toggle(this)" /></th>
 				<th id="albumart"></th>
 				<th id="albumname">Name</th>
 				<th id="reldate">Date</th>
@@ -84,21 +86,34 @@
 				
 			%>
 			<tr class="grade${grade}">
-				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></td>
-				<td id="albumart"><img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
+				<td id="select"><input class="styled" type="checkbox" name="${album['AlbumID']}" class="checkbox" /></td>
+				<td id="albumart">
+				<div class="album-art-small">
+					<a href="albumPage?AlbumID=${album['AlbumID']}">
+						<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" title="${artist['ArtistName']} - ${album['AlbumTitle']}">
+					</a>
+				</div>
+				</td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
-				<td id="status">${album['Status']}
+				<td id="status"><span class="btn${album['Status']} btnStatus" title="${album['Status']}">${album['Status']}</span>
 				%if album['Status'] == 'Skipped':
-					[<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">want</a>]
+					<a class="btnGet btnStatus" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Get this album">Get</a>
 				%elif album['Status'] == 'Wanted':
-					[<a href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">skip</a>]
+					<a class="btnAbort btnStatus" href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Abort current status, and set to skipped">Abort</a>
 				%else:
-					[<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Retry the same download again">retry</a>][<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True" title="Try a new download, skipping all previously tried nzbs">new</a>]
+					<a class="btnRetry btnStatus" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Retry the same nbz">Retry</a>
+					<a class="btnNew btnStatus" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True" title="Try a new download, skipping all previously tried nzbs">New</a>
 				%endif
 				</td>
-				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
+				<td id="have"><span title="${percent}"><span>
+					<div class="progress-container" title="You have ${havetracks} of a total ${totaltracks}">
+						<div style="width:${percent}%">
+							
+						</div>
+					</div>
+				</td>
 				<td id="bitrate">${bitrate}</td>
 			</tr>
 		%endfor
@@ -108,7 +123,7 @@
 </%def>
 
 <%def name="headIncludes()">
-	<link rel="stylesheet" href="css/data_table.css">
+	
 	%if artist['Status'] == 'Loading':
 	<meta http-equiv="refresh" content="5">
 	%endif

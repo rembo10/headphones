@@ -23,11 +23,18 @@
 
 <%def name="body()">
 	<div class="table_wrapper">
-		<h2><a href="artistPage?ArtistID=${album['ArtistID']}"><- Back to ${album['ArtistName']}</a></h2>
-		<div id="albumheader">	
-			<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" height="200" width="200" alt="albumart" class="albumArt">
+		<a id="btnBack" class="btnStatus" href="artistPage?ArtistID=${album['ArtistID']}">
+			Back to ${album['ArtistName']}
+		</a>
+		<div class="clear"></div>
+		<div id="albumheader">
+			<div class="album-art-big">
+				<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" alt="albumart" class="albumArt" title="${album['ArtistName']} - ${album['AlbumTitle']}">
+				<div class="album-art-cd"></div>
+			</div>
+			<div id="album-describtion">
 			<h1>${album['AlbumTitle']}</h1>
-			<h2>${album['ArtistName']}</h2>
+			by <a href="/artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a>
 			<br>
 			<%
 				totalduration = myDB.action("SELECT SUM(TrackDuration) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
@@ -38,12 +45,15 @@
 					albumduration = 'n/a'
 			
 			%>
-			<h3>Tracks: ${totaltracks}</h3>
-			<h3>Duration: ${albumduration}</h3>
+			<br />
 			%if description:
-			<h3>Description: </h3>
+			<h3>Description:</h3>
 			${description['Summary']}
 			%endif
+			<br />
+			<br />
+			Playtime: ${albumduration}
+			</div>
 		</div>
 		<div id="track_wrapper">
 			<table class="display" id="track_table">
@@ -108,7 +118,7 @@
 </%def>
 
 <%def name="headIncludes()">
-	<link rel="stylesheet" href="css/data_table.css">
+	
 </%def>
 
 <%def name="javascriptIncludes()">

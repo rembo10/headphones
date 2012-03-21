@@ -71,6 +71,7 @@ function rotate(degree) {
 });
 
 //Acesskey
-$(document).ready(function(){
-	$("dataTables_filter div input").attr("acesskey", "a");
-});
+function accesskey()
+{
+	document.getElementByClassName('.dataTables_filter div input').accessKey="q";
+}
