@@ -154,11 +154,15 @@ class WebInterface(object):
 		raise cherrypy.HTTPRedirect("home")
 	addArtists.exposed = True
 	
-	def queueAlbum(self, AlbumID, ArtistID=None, new=False, redirect=None):
-		logger.info(u"Marking album: " + AlbumID + "as wanted...")
+	def queueAlbum(self, AlbumID, ArtistID=None, new=False, redirect=None, lossless=False):
+		logger.info(u"Marking album: " + AlbumID + " as wanted...")
 		myDB = db.DBConnection()
 		controlValueDict = {'AlbumID': AlbumID}
-		newValueDict = {'Status': 'Wanted'}
+		if lossless:
+			newValueDict = {'Status': 'Wanted Lossless'}
+			logger.info("...lossless only!")
+		else:	
+			newValueDict = {'Status': 'Wanted'}
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		searcher.searchforalbum(AlbumID, new)
 		if ArtistID:

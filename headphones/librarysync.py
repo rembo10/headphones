@@ -27,7 +27,7 @@ def libraryScan(dir=None):
 	
 	for track in tracks:
 		if not os.path.isfile(track['Location'].encode(headphones.SYS_ENCODING)):
-			myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE TrackID=?', [None, None, track['TrackID']])
+			myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [None, None, None, track['TrackID']])
 
 	logger.info('Scanning music directory: %s' % dir)
 
@@ -72,7 +72,7 @@ def libraryScan(dir=None):
 						track = myDB.action('SELECT TrackID from tracks WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [f_artist, f.album, f.title]).fetchone()
 					
 					if track:
-						myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE TrackID=?', [file, f.bitrate, track['TrackID']])
+						myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [file, f.bitrate, f.format, track['TrackID']])
 						continue		
 				
 				# Try to match on mbid if available and we couldn't find a match based on metadata
@@ -83,14 +83,14 @@ def libraryScan(dir=None):
 					track = myDB.action('SELECT TrackID from tracks WHERE TrackID=?', [f.mb_trackid]).fetchone()
 		
 					if track:
-						myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE TrackID=?', [file, f.bitrate, track['TrackID']])
+						myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [file, f.bitrate, f.format, track['TrackID']])
 						continue				
 				
 				# if we can't find a match in the database on a track level, it might be a new artist or it might be on a non-mb release
 				new_artists.append(f_artist)
 				
 				# The have table will become the new database for unmatched tracks (i.e. tracks with no associated links in the database				
-				myDB.action('INSERT INTO have VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [f_artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid, file, helpers.cleanName(f_artist+' '+f.album+' '+f.title)])
+				myDB.action('INSERT INTO have (ArtistName, AlbumTitle, TrackNumber, TrackTitle, TrackLength, BitRate, Genre, Date, TrackID, Location, CleanName, Format) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [f_artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid, file, helpers.cleanName(f_artist+' '+f.album+' '+f.title), f.format])
 
 	logger.info('Completed scanning of directory: %s' % dir)
 	logger.info('Checking filepaths to see if we can find any matches')
@@ -169,7 +169,7 @@ def libraryScan(dir=None):
 				f = MediaFile(match[0])
 				f.mb_trackid = track['TrackID']
 				f.save()
-				myDB.action('UPDATE tracks SET BitRate=? WHERE TrackID=?', [f.bitrate, track['TrackID']])
+				myDB.action('UPDATE tracks SET BitRate=?, Format=? WHERE TrackID=?', [f.bitrate, f.format, track['TrackID']])
 
 				logger.debug('Wrote mbid to track: %s' % match[0])
 
