@@ -1,9 +1,12 @@
 .dataTables_wrapper {
-	border-radius: 5px;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	width: 100%;
-	background-color: #313131;
+	border-radius: 20px;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	width: 88%;
+	margin: 20px auto 0 auto;
+	padding: 25px;
+	background-color: white;
+	position: relative;
 	min-height: 155px;
 	clear: both;
 	_height: 302px;
@@ -23,25 +26,26 @@
 	text-align: center;
 	color: #999;
 	font-size: 14px;
-	background-color: #343434;
+	background-color: white;
 }
 
 .dataTables_length {
-	/*
-	 * Look in styles.css 
-	 * */
+	width: 40%;
+	float: left;
 }
 
 .dataTables_filter {
-	/*
-	 * Look in style.css
-	 * */
+	width: 50%;
+	float: right;
+	text-align: right;
+	margin-bottom: 15px;
 }
 
 .dataTables_info {
-	/*
-	 * Look in style.css
-	 * */
+	width: 50%;
+	float: left;
+	background-color: white;
+	font-weight: bold;
 }
 
 .dataTables_paginate {
@@ -49,7 +53,7 @@
 	* width: 50px;
 	float: right;
 	text-align: right;
-	margin-top: 15px;
+	background-color: white;
 }
 
 /* Pagination nested */
@@ -82,8 +86,7 @@
  * DataTables display
  */
 table.display {
-	margin: auto; 
-	width: 100%;
+	margin: 20px auto; 
 	clear: both;
 	
 	/* Note Firefox 3.5 and before have a bug with border-collapse
@@ -101,11 +104,10 @@ table.display {
 }
 
 table.display thead th {
-	padding: 3px 15px 6px 15px;
-	background-color: #414141;
-	color: White;
+	padding: 3px 18px 3px 10px;
+	background-color: white;
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 16px;
 	cursor: pointer;
 	* cursor: hand;
 }
@@ -122,7 +124,7 @@ table.display tr.heading2 td {
 
 table.display td {
 	padding: 3px 10px;
-	font-size: 12px;
+	font-size: 16px;
 }
 
 table.display td.center {
@@ -163,47 +165,44 @@ table.display td.center {
  * DataTables row classes
  */
 table.display tr.odd.gradeA {
-	background-color: #546B00;
+	background-color: #ddffdd;
 }
 
 table.display tr.even.gradeA {
-	background-color: #445014;
+	background-color: #ddffdd;
 }
 
 table.display tr.odd.gradeC {
-	background-color: #7A51A5;
+	background-color: #ddddff;
 }
 
 table.display tr.even.gradeC {
-	background-color: #6A33A5;
+	background-color: #ddddff;
 }
 
-/*
- * GradeSkipped 
- * */
 table.display tr.odd.gradeX {
-	background-color: #4F0043;
+	background-color: #ffdddd;
 }
 
 table.display tr.even.gradeX {
-	background-color: #3B0F34;
+	background-color: #ffdddd;
 }
 
 table.display tr.odd.gradeU {
-	background-color: #28064C;
+	background-color: #ddd;
 }
 
 table.display tr.even.gradeU {
-	background-color: #241239;
+	background-color: #eee;
 }
 
 
 table.display tr.odd.gradeZ {
-	background-color: #313131;
+	background-color: #FCFAFA;
 }
 
 table.display tr.even.gradeZ {
-	background-color: #272727;
+	background-color: white;
 }
 
 
@@ -236,11 +235,10 @@ table.display tr.even.gradeZ {
 }
 
 .dataTables_empty {
-	color: #575757;
 	font-size: 24px;
 	text-align: center;
 	vertical-align: middle;
-	background-color: #343434; 
+	background-color: white; 
 	height: 50px;
 	width: 90%;
 }
@@ -274,49 +272,33 @@ td.details {
 
 .paging_full_numbers span.paginate_button,
  	.paging_full_numbers span.paginate_active {
-	border: 1px solid #000;
-	color: #000;
-	font-weight: bold;
-	padding: 3px 5px;
+	border: 1px solid #aaa;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	padding: 2px 5px;
 	margin: 0 3px;
 	cursor: pointer;
 	*cursor: hand;
-	border-radius: 3px;
-	text-shadow: rgb(255,255,255);
 }
 
 .paging_full_numbers span.paginate_button {
-	background-image: linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
-	border-bottom: 1px solid #000; 
+	background-color: #ddd;
 }
 
 .paging_full_numbers span.paginate_button:hover {
-	background-image: linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
-	border-bottom: 1px solid #000; 
-	color: #fff;
+	background-color: #ccc;
 }
 
 .paging_full_numbers span.paginate_active {
-	background-color: #800000;
-	color: #fff;
+	background-color: #99B3FF;
 }
 
 table.display tr.even.row_selected td {
-	background-color: #660000;
-	color: #fff;
+	background-color: #B0BED9;
 }
 
 table.display tr.odd.row_selected td {
-	background-color: #4d0000;
-	color: #fff;
+	background-color: #9FAFD1;
 }
 
 div.box {

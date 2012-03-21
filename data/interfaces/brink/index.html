@@ -52,7 +52,12 @@
 				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
 				<td id="status">${artist['Status']}</td>
 				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
-				<td id="have"><span title="${percent}"></span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
+				<td id="have"><span title="${percent}"></span>
+					<div class="progress-container" title="You have ${havetracks} of ${totaltracks} total.">
+						<span class="havetracks">${havetracks}/${totaltracks}</span>
+						<div style="width:${percent}%"></div>
+					</div>
+				</td>
 			</tr>
 		%endfor
 		</tbody>
@@ -60,7 +65,7 @@
 </%def>
 
 <%def name="headIncludes()">
-	<link rel="stylesheet" href="css/data_table.css">
+	link rel="stylesheet" href="css/interfaces/brink/css/data_table.css">
 </%def>
 
 <%def name="javascriptIncludes()">
@@ -70,17 +75,16 @@
 	{
 		$('#artist_table').dataTable(
 			{
+			
 				"aoColumns": [
 					{ "sType": "title-string"},
 					null,
 					{ "sType": "title-string"},
 					{ "sType": "title-numeric"}
 				],
-				"bStateSave": true,
-				"iDisplayLength": 50,
-				"sPaginationType": "full_numbers",
-				
+				"bPaginate": false
 			});
+			
 	});
 	</script>
 </%def>
