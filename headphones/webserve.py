@@ -323,6 +323,9 @@ class WebInterface(object):
 		 			"http_port" : headphones.HTTP_PORT,
 				 	"http_pass" : headphones.HTTP_PASSWORD,
 					"launch_browser" : checked(headphones.LAUNCH_BROWSER),
+					"download_scan_interval" : headphones.DOWNLOAD_SCAN_INTERVAL,
+					"nzb_search_interval" : headphones.NZB_SEARCH_INTERVAL,
+					"libraryscan_interval" : headphones.LIBRARYSCAN_INTERVAL,
 					"sab_host" : headphones.SAB_HOST,
 					"sab_user" : headphones.SAB_USERNAME,
 					"sab_api" : headphones.SAB_APIKEY,
@@ -401,7 +404,7 @@ class WebInterface(object):
 	config.exposed = True
 	
 	
-	def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0,
+	def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, download_scan_interval=None, nzb_search_interval=None, libraryscan_interval=None,
 		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
 		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
 		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
@@ -416,6 +419,9 @@ class WebInterface(object):
 		headphones.HTTP_USERNAME = http_username
 		headphones.HTTP_PASSWORD = http_password
 		headphones.LAUNCH_BROWSER = launch_browser
+		headphones.DOWNLOAD_SCAN_INTERVAL = download_scan_interval
+		headphones.NZB_SEARCH_INTERVAL = nzb_search_interval
+		headphones.LIBRARYSCAN_INTERVAL = libraryscan_interval
 		headphones.SAB_HOST = sab_host
 		headphones.SAB_USERNAME = sab_username
 		headphones.SAB_PASSWORD = sab_password		
