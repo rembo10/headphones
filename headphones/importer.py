@@ -348,10 +348,10 @@ def updateFormat():
 		logger.info('Finding media format for %s files' % len(tracks))
 		for track in tracks:
 			try:
-                        	f = MediaFile(track['Location'])
-	                except Exception, e:
-        	                logger.info("Exception from MediaFile for: " + downloaded_track + " : " + str(e))
-                	        continue
+				f = MediaFile(track['Location'])
+			except Exception, e:
+				logger.info("Exception from MediaFile for: " + track['Location'] + " : " + str(e))
+				continue
 			controlValueDict = {"TrackID":  track['TrackID']}
 			newValueDict = {"Format": f.format}
 			myDB.upsert("tracks", newValueDict, controlValueDict)
@@ -361,10 +361,10 @@ def updateFormat():
 		logger.info('Finding media format for %s files' % len(havetracks))
 		for track in havetracks:
 			try:
-                        	f = MediaFile(track['Location'])
-	                except Exception, e:
-        	                logger.info("Exception from MediaFile for: " + downloaded_track + " : " + str(e))
-                	        continue
+				f = MediaFile(track['Location'])
+			except Exception, e:
+				logger.info("Exception from MediaFile for: " + track['Location'] + " : " + str(e))
+				continue
 			controlValueDict = {"TrackID":  track['TrackID']}
 			newValueDict = {"Format": f.format}
 			myDB.upsert("have", newValueDict, controlValueDict)
