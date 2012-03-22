@@ -1,38 +1,34 @@
-###About
-I created this, in order to completely redeign the user-interface of the current Headphones by rembo10.
-##Latest Changes
-* Created "ColorStyles.css" to easy personalize main colors.
-* CD art now rotates.
-* Changed the layout a bit.
-* * Added footer, and moved filter and info to it.
-* * Sub menu has been moved to header. 
+#![preview thumb](https://github.com/rembo10/headphones/raw/master/data/images/headphoneslogo.png)Headphones
+
+###Installation and Notes
+
+This is a pretty early release of a third-party add-on for SABnzbd.
+
+To run it, just double-click the Headphones.py file (in Windows - you may need to right click and click 'Open With' -> Python) or launch a terminal, cd into the Headphones directory and run 'python headphones.py'.
+
+For additional startup options, type 'python Headphones.py -h' or 'python Headphones.py --help'
 
 ###Screenshots
-Since i edit the style and images alot to optimize it's code, these screen will be edited again once i feel satisfied.
-##Home
+(note: These screenshots are a little out of date and the interface has gone through a little bit of an overhaul. Updated shots coming soon!)
 
-![preview thumb](http://img703.imageshack.us/img703/1521/indexblr.png)
+First Run
 
-##Artist 
+![preview thumb](http://img806.imageshack.us/img806/4202/headphones2.png)
 
-![preview thumb](http://img42.imageshack.us/img42/9707/artistx.png)
+Artist Search Results
 
-##Album
+![preview thumb](http://img12.imageshack.us/img12/7838/headphones4.png)
 
-![preview thumb](http://img850.imageshack.us/img850/2900/albumw.png)
+Album Selection
 
-##Manage
+![preview thumb](http://img836.imageshack.us/img836/2880/headphones3.png)
 
-![preview thumb](http://img715.imageshack.us/img715/7471/manage.png)
+iTunes/Import
 
-##Settings
+![preview thumb](http://img62.imageshack.us/img62/1218/headphones1.png)
 
-![preview thumb](http://img707.imageshack.us/img707/2589/settingse.png)
+If you run into any issues, visit http://github.com/rembo10/headphones and report an issue. 
 
-##History
+This is free software so feel free to use it/modify it as you wish. 
 
-![preview thumb](http://img827.imageshack.us/img827/265/historyv.png)
-
-##Upcomming
-
-![preview thumb](http://img214.imageshack.us/img214/4788/upcomming.png)
+If you have any ideas for the next release, also make sure to post that here!
