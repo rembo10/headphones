@@ -10,6 +10,9 @@ from headphones import version
 #Identify Our Application
 USER_AGENT = 'Headphones/-'+version.HEADPHONES_VERSION+' ('+platform.system()+' '+platform.release()+')'
 
+BLACKHOLE = "Black Hole"
+SABNZBD = "SABnzbd"
+
 ### Notification Types
 NOTIFY_SNATCH = 1
 NOTIFY_DOWNLOAD = 2

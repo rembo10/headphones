@@ -25,8 +25,9 @@ from lib.beets import autotag
 from lib.beets import library
 import lib.beets.autotag.art
 from lib.beets import plugins
+from lib.beets import util
 from lib.beets.util import pipeline
-from lib.beets.util import syspath, normpath, plurality
+from lib.beets.util import syspath, normpath, displayable_path
 from lib.beets.util.enumeration import enum
 
 action = enum(
@@ -77,6 +78,8 @@ def _reopen_lib(lib):
             lib.directory,
             lib.path_formats,
             lib.art_filename,
+            lib.timeout,
+            lib.replacements,
         )
     else:
         return lib
@@ -107,7 +110,7 @@ def _duplicate_check(lib, task, recent=None):
         recent.add((artist, album))
 
     # Look in the library.
-    cur_paths = set(i.path for i in task.items)
+    cur_paths = set(i.path for i in task.items if i)
     for album_cand in lib.albums(artist=artist):
         if album_cand.album == album:
             # Check whether the album is identical in contents, in which
@@ -137,15 +140,11 @@ def _item_duplicate_check(lib, task, recent=None):
         recent.add((artist, title))
 
     # Check the library.
-    item_iter = lib.items(artist=artist, title=title)
-    try:
-        for other_item in item_iter:
-            # Existing items not considered duplicates.
-            if other_item.path == task.item.path:
-                continue
-            return True
-    finally:
-        item_iter.close()
+    for other_item in lib.items(artist=artist, title=title):
+        # Existing items not considered duplicates.
+        if other_item.path == task.item.path:
+            continue
+        return True
     return False
 
 def _infer_album_fields(task):
@@ -160,7 +159,7 @@ def _infer_album_fields(task):
 
     if task.choice_flag == action.ASIS:
         # Taking metadata "as-is". Guess whether this album is VA.
-        plur_artist, freq = plurality([i.artist for i in task.items])
+        plur_artist, freq = util.plurality([i.artist for i in task.items])
         if freq == len(task.items) or (freq > 1 and
                 float(freq) / len(task.items) >= SINGLE_ARTIST_THRESH):
             # Single-artist album.
@@ -174,30 +173,40 @@ def _infer_album_fields(task):
     elif task.choice_flag == action.APPLY:
         # Applying autotagged metadata. Just get AA from the first
         # item.
-        if not task.items[0].albumartist:
-            changes['albumartist'] = task.items[0].artist
-        if not task.items[0].mb_albumartistid:
-            changes['mb_albumartistid'] = task.items[0].mb_artistid
+        for item in task.items:
+            if item is not None:
+                first_item = item
+                break
+        else:
+            assert False, "all items are None"
+        if not first_item.albumartist:
+            changes['albumartist'] = first_item.artist
+        if not first_item.mb_albumartistid:
+            changes['mb_albumartistid'] = first_item.mb_artistid
 
     else:
         assert False
 
     # Apply new metadata.
     for item in task.items:
-        for k, v in changes.iteritems():
-            setattr(item, k, v)
+        if item is not None:
+            for k, v in changes.iteritems():
+                setattr(item, k, v)
 
 def _open_state():
     """Reads the state file, returning a dictionary."""
     try:
         with open(STATE_FILE) as f:
             return pickle.load(f)
-    except IOError:
+    except (IOError, EOFError):
         return {}
 def _save_state(state):
     """Writes the state dictionary out to disk."""
-    with open(STATE_FILE, 'w') as f:
-        pickle.dump(state, f)
+    try:
+        with open(STATE_FILE, 'w') as f:
+            pickle.dump(state, f)
+    except IOError, exc:
+        log.error(u'state file could not be written: %s' % unicode(exc))
 
 
 # Utilities for reading and writing the beets progress file, which
@@ -265,7 +274,7 @@ class ImportConfig(object):
                'quiet_fallback', 'copy', 'write', 'art', 'delete',
                'choose_match_func', 'should_resume_func', 'threaded',
                'autot', 'singletons', 'timid', 'choose_item_func',
-               'query', 'incremental']
+               'query', 'incremental', 'ignore']
     def __init__(self, **kwargs):
         for slot in self._fields:
             setattr(self, slot, kwargs[slot])
@@ -443,6 +452,7 @@ def read_tasks(config):
 
     # Look for saved incremental directories.
     if config.incremental:
+        incremental_skipped = 0
         history_dirs = history_get()
     
     for toppath in config.paths:
@@ -455,7 +465,7 @@ def read_tasks(config):
         # Produce paths under this directory.
         if progress:
             resume_dir = resume_dirs.get(toppath)
-        for path, items in autotag.albums_in_dir(toppath):
+        for path, items in autotag.albums_in_dir(toppath, config.ignore):
             # Skip according to progress.
             if progress and resume_dir:
                 # We're fast-forwarding to resume a previous tagging.
@@ -467,6 +477,9 @@ def read_tasks(config):
 
             # When incremental, skip paths in the history.
             if config.incremental and path in history_dirs:
+                log.debug(u'Skipping previously-imported path: %s' %
+                          displayable_path(path))
+                incremental_skipped += 1
                 continue
 
             # Yield all the necessary tasks.
@@ -480,6 +493,11 @@ def read_tasks(config):
         # Indicate the directory is finished.
         yield ImportTask.done_sentinel(toppath)
 
+    # Show skipped directories.
+    if config.incremental and incremental_skipped:
+        log.info(u'Incremental import: skipped %i directories.' %
+                 incremental_skipped)
+
 def query_tasks(config):
     """A generator that works as a drop-in-replacement for read_tasks.
     Instead of finding files from the filesystem, a query is used to
@@ -489,14 +507,12 @@ def query_tasks(config):
 
     if config.singletons:
         # Search for items.
-        items = list(lib.items(config.query))
-        for item in items:
+        for item in lib.items(config.query):
             yield ImportTask.item_task(item)
 
     else:
         # Search for albums.
-        albums = lib.albums(config.query)
-        for album in albums:
+        for album in lib.albums(config.query):
             log.debug('yielding album %i: %s - %s' %
                       (album.id, album.albumartist, album.album))
             items = list(album.items())
@@ -591,7 +607,7 @@ def apply_choices(config):
         if task.should_skip():
             continue
 
-        items = task.items if task.is_album else [task.item]
+        items = [i for i in task.items if i] if task.is_album else [task.item]
         # Clear IDs in case the items are being re-tagged.
         for item in items:
             item.id = None
@@ -613,12 +629,11 @@ def apply_choices(config):
         # last item is removed.
         replaced_items = defaultdict(list)
         for item in items:
-            dup_items = list(lib.items(
-                            library.MatchQuery('path', item.path)
-                        ))
+            dup_items = lib.items(library.MatchQuery('path', item.path))
             for dup_item in dup_items:
                 replaced_items[item].append(dup_item)
-                log.debug('replacing item %i: %s' % (dup_item.id, item.path))
+                log.debug('replacing item %i: %s' %
+                          (dup_item.id, displayable_path(item.path)))
         log.debug('%i of %i items replaced' % (len(replaced_items),
                                                len(items)))
 
@@ -628,8 +643,13 @@ def apply_choices(config):
             if config.copy:
                 # If we're replacing an item, then move rather than
                 # copying.
+                old_path = item.path
                 do_copy = not bool(replaced_items[item])
                 lib.move(item, do_copy, task.is_album)
+                if not do_copy:
+                    # If we moved the item, remove the now-nonexistent
+                    # file from old_paths.
+                    task.old_paths.remove(old_path)
             if config.write and task.should_write_tags():
                 item.write()
 
@@ -644,7 +664,7 @@ def apply_choices(config):
             # Add new ones.
             if task.is_album:
                 # Add an album.
-                album = lib.add_album(task.items)
+                album = lib.add_album(items)
                 task.album_id = album.id
             else:
                 # Add tracks.
@@ -690,23 +710,27 @@ def finalize(config):
                 task.save_history()
             continue
 
-        items = task.items if task.is_album else [task.item]
+        items = [i for i in task.items if i] if task.is_album else [task.item]
 
         # Announce that we've added an album.
         if task.is_album:
             album = lib.get_album(task.album_id)
-            plugins.send('album_imported', lib=lib, album=album)
+            plugins.send('album_imported', lib=lib, album=album, config=config)
         else:
             for item in items:
-                plugins.send('item_imported', lib=lib, item=item)
+                plugins.send('item_imported', lib=lib, item=item, config=config)
 
         # Finally, delete old files.
         if config.copy and config.delete:
             new_paths = [os.path.realpath(item.path) for item in items]
             for old_path in task.old_paths:
-                # Only delete files that were actually moved.
+                # Only delete files that were actually copied.
                 if old_path not in new_paths:
                     os.remove(syspath(old_path))
+                    # Clean up directory if it is emptied.
+                    if task.toppath:
+                        util.prune_dirs(os.path.dirname(old_path),
+                                        task.toppath)
 
         # Update progress.
         if config.resume is not False:
@@ -762,7 +786,7 @@ def item_progress(config):
         if task.sentinel:
             continue
 
-        log.info(task.item.path)
+        log.info(displayable_path(task.item.path))
         task.set_null_item_match()
         task.set_choice(action.ASIS)
 

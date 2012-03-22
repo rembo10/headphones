@@ -75,7 +75,6 @@ ADD_ALBUM_ART = False
 EMBED_ALBUM_ART = False
 EMBED_LYRICS = False
 DOWNLOAD_DIR = None
-BLACKHOLE = None
 BLACKHOLE_DIR = None
 USENET_RETENTION = None
 INCLUDE_EXTRAS = False
@@ -108,7 +107,9 @@ NEWZBIN_PASSWORD = None
 
 LASTFM_USERNAME = None
 
-MEDIA_FORMATS = ["mp3", "flac", "aac", "ogg", "ape", "m4a"]
+LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a"]
+LOSSLESS_MEDIA_FORMATS = ["flac"]
+MEDIA_FORMATS = LOSSY_MEDIA_FORMATS + LOSSLESS_MEDIA_FORMATS
 
 TORRENTBLACKHOLE_DIR = None
 NUMBEROFSEEDERS = 10
@@ -118,6 +119,7 @@ MININOVA = None
 DOWNLOAD_TORRENT_DIR = None
 
 INTERFACE = None
+NZB_HANDLER = None
 FOLDER_PERMISSIONS = None
 
 ENCODE = False
@@ -127,6 +129,7 @@ BITRATE = None
 SAMPLINGFREQUENCY = None
 ADVANCEDENCODER = None
 ENCODEROUTPUTFORMAT = None
+USE_ADVANCED_ENCODING = False
 ENCODERQUALITY = None
 ENCODERVBRCBR = None
 ENCODERLOSSLESS = False
@@ -136,6 +139,14 @@ PROWL_KEYS = None
 PROWL_ONSNATCH = True
 MIRRORLIST = ["musicbrainz.org","headphones","tbueter.com","localhost"]
 MIRROR = None
+
+AUTOWANT_ALBUM = False
+AUTOWANT_SINGLE = False
+AUTOWANT_COMPILATION = False
+AUTOWANT_REMIX = False
+AUTOWANT_EP = False
+AUTOWANT_LIVE = False
+AUTOWANT_SOUNDTRACK = False
 
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
@@ -197,6 +208,7 @@ def initialize():
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, ENCODE, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
+                AUTOWANT_ALBUM, AUTOWANT_SINGLE, AUTOWANT_COMPILATION, AUTOWANT_REMIX, AUTOWANT_EP, AUTOWANT_LIVE, AUTOWANT_SOUNDTRACK, \
                 ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, MIRROR
                 
         if __INITIALIZED__:
@@ -244,7 +256,6 @@ def initialize():
         EMBED_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'embed_album_art', 0))
         EMBED_LYRICS = bool(check_setting_int(CFG, 'General', 'embed_lyrics', 0))
         DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'download_dir', '')
-        BLACKHOLE = bool(check_setting_int(CFG, 'General', 'blackhole', 0))
         BLACKHOLE_DIR = check_setting_str(CFG, 'General', 'blackhole_dir', '')
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', '')
         INCLUDE_EXTRAS = bool(check_setting_int(CFG, 'General', 'include_extras', 0))
@@ -285,6 +296,7 @@ def initialize():
         LASTFM_USERNAME = check_setting_str(CFG, 'General', 'lastfm_username', '')
         
         INTERFACE = check_setting_str(CFG, 'General', 'interface', 'default')
+        NZB_HANDLER = check_setting_str(CFG, 'General', 'nzb_handler', 'default')
         FOLDER_PERMISSIONS = check_setting_str(CFG, 'General', 'folder_permissions', '0755')
 		
         ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')        
@@ -294,6 +306,7 @@ def initialize():
         ENCODE = bool(check_setting_int(CFG, 'General', 'encode', 0))
         ADVANCEDENCODER = check_setting_str(CFG, 'General', 'advancedencoder', '')
         ENCODEROUTPUTFORMAT = check_setting_str(CFG, 'General', 'encoderoutputformat', 'mp3')
+		
         ENCODERQUALITY = check_setting_int(CFG, 'General', 'encoderquality', 2)
         ENCODERVBRCBR = check_setting_str(CFG, 'General', 'encodervbrcbr', 'cbr')
         ENCODERLOSSLESS = bool(check_setting_int(CFG, 'General', 'encoderlossless', 1))
@@ -302,9 +315,19 @@ def initialize():
         PROWL_KEYS = check_setting_str(CFG, 'Prowl', 'prowl_keys', '')
         PROWL_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_onsnatch', 0)) 
         PROWL_PRIORITY = check_setting_int(CFG, 'Prowl', 'prowl_priority', 0)
+
+        AUTOWANT_ALBUM = bool(check_setting_int(CFG, 'General', 'autowant_album', 0))
+        AUTOWANT_SINGLE = bool(check_setting_int(CFG, 'General', 'autowant_single', 0))
+        AUTOWANT_COMPILATION = bool(check_setting_int(CFG, 'General', 'autowant_compilation', 0))
+        AUTOWANT_REMIX = bool(check_setting_int(CFG, 'General', 'autowant_remix', 0))
+        AUTOWANT_EP = bool(check_setting_int(CFG, 'General', 'autowant_ep', 0))
+        AUTOWANT_LIVE = bool(check_setting_int(CFG, 'General', 'autowant_live', 0))
+        AUTOWANT_SOUNDTRACK = bool(check_setting_int(CFG, 'General', 'autowant_soundtrack', 0))
         
         MIRROR = check_setting_str(CFG, 'General', 'mirror', 'headphones')
         
+        USE_ADVANCED_ENCODING = bool(check_setting_int(CFG, 'General', 'use_advanced_encoding', 1))
+		
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
         
@@ -442,7 +465,6 @@ def config_write():
     new_config['General']['embed_album_art'] = int(EMBED_ALBUM_ART)
     new_config['General']['embed_lyrics'] = int(EMBED_LYRICS)
     new_config['General']['download_dir'] = DOWNLOAD_DIR
-    new_config['General']['blackhole'] = int(BLACKHOLE)
     new_config['General']['blackhole_dir'] = BLACKHOLE_DIR
     new_config['General']['usenet_retention'] = USENET_RETENTION
     new_config['General']['include_extras'] = int(INCLUDE_EXTRAS)
@@ -493,6 +515,7 @@ def config_write():
     
     new_config['General']['lastfm_username'] = LASTFM_USERNAME
     new_config['General']['interface'] = INTERFACE
+    new_config['General']['nzb_handler'] = NZB_HANDLER
     new_config['General']['folder_permissions'] = FOLDER_PERMISSIONS
 
     new_config['General']['encode'] = int(ENCODE)
@@ -501,10 +524,19 @@ def config_write():
     new_config['General']['samplingfrequency'] = int(SAMPLINGFREQUENCY)
     new_config['General']['encoderfolder'] = ENCODERFOLDER
     new_config['General']['advancedencoder'] = ADVANCEDENCODER
+    new_config['General']['use_advanced_encoding'] = USE_ADVANCED_ENCODING
     new_config['General']['encoderoutputformat'] = ENCODEROUTPUTFORMAT
     new_config['General']['encoderquality'] = ENCODERQUALITY
     new_config['General']['encodervbrcbr'] = ENCODERVBRCBR
     new_config['General']['encoderlossless'] = ENCODERLOSSLESS
+
+    new_config['General']['autowant_album'] = AUTOWANT_ALBUM
+    new_config['General']['autowant_single'] = AUTOWANT_SINGLE
+    new_config['General']['autowant_compilation'] = AUTOWANT_COMPILATION
+    new_config['General']['autowant_remix'] = AUTOWANT_REMIX
+    new_config['General']['autowant_ep'] = AUTOWANT_EP
+    new_config['General']['autowant_live'] = AUTOWANT_LIVE
+    new_config['General']['autowant_soundtrack'] = AUTOWANT_SOUNDTRACK
     
     new_config['General']['mirror'] = MIRROR
     
@@ -536,9 +568,9 @@ def dbcheck():
     c=conn.cursor()
     c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT, IncludeExtras INTEGER, LatestAlbum TEXT, ReleaseDate TEXT, AlbumID TEXT, HaveTracks INTEGER, TotalTracks INTEGER)')
     c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT, Type TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT)')
+    c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT, Format TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT, FolderName TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS have (ArtistName TEXT, AlbumTitle TEXT, TrackNumber TEXT, TrackTitle TEXT, TrackLength TEXT, BitRate TEXT, Genre TEXT, Date TEXT, TrackID TEXT, Location TEXT, CleanName TEXT)')
+    c.execute('CREATE TABLE IF NOT EXISTS have (ArtistName TEXT, AlbumTitle TEXT, TrackNumber TEXT, TrackTitle TEXT, TrackLength TEXT, BitRate TEXT, Genre TEXT, Date TEXT, TrackID TEXT, Location TEXT, CleanName TEXT, Format TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS lastfmcloud (ArtistName TEXT, ArtistID TEXT, Count INTEGER)')
     c.execute('CREATE TABLE IF NOT EXISTS descriptions (ReleaseGroupID TEXT, ReleaseID TEXT, Summary TEXT, Content TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS releases (ReleaseID TEXT, ReleaseGroupID TEXT, UNIQUE(ReleaseID, ReleaseGroupID))')
@@ -614,6 +646,20 @@ def dbcheck():
         c.execute('SELECT CleanName from have')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE have ADD COLUMN CleanName TEXT')  
+    
+    # Add the Format column
+    try:
+        c.execute('SELECT Format from have')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE have ADD COLUMN Format TEXT DEFAULT NULL')  
+    
+    try:
+        c.execute('SELECT Format from tracks')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE tracks ADD COLUMN Format TEXT DEFAULT NULL')  
+
+    # Update the Format of files in library, this won't do anything if all files have a known format
+    threading.Thread(target=importer.updateFormat).start()
     
     conn.commit()
     c.close()

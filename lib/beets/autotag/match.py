@@ -31,6 +31,8 @@ ARTIST_WEIGHT = 3.0
 ALBUM_WEIGHT = 3.0
 # The weight of the entire distance calculated for a given track.
 TRACK_WEIGHT = 1.0
+# The weight of a missing track.
+MISSING_WEIGHT = 0.9
 # These distances are components of the track distance (that is, they
 # compete against each other but not ARTIST_WEIGHT and ALBUM_WEIGHT;
 # the overall TRACK_WEIGHT does that).
@@ -73,7 +75,10 @@ STRONG_REC_THRESH = 0.04
 MEDIUM_REC_THRESH = 0.25
 REC_GAP_THRESH = 0.25
 
-# Artist signals that indicate "various artists".
+# Artist signals that indicate "various artists". These are used at the
+# album level to determine whether a given release is likely a VA
+# release and also on the track level to to remove the penalty for
+# differing artists.
 VA_ARTISTS = (u'', u'various artists', u'va', u'unknown')
 
 # Autotagging exceptions.
@@ -161,18 +166,22 @@ def current_metadata(items):
     likelies = {}
     consensus = {}
     for key in keys:
-        values = [getattr(item, key) for item in items]
+        values = [getattr(item, key) for item in items if item]
         likelies[key], freq = plurality(values)
         consensus[key] = (freq == len(values))
     return likelies['artist'], likelies['album'], consensus['artist']
 
 def order_items(items, trackinfo):
     """Orders the items based on how they match some canonical track
-    information. This always produces a result if the numbers of tracks
-    match.
+    information. Returns a list of Items whose length is equal to the
+    length of ``trackinfo``. This always produces a result if the
+    numbers of items is at most the number of TrackInfo objects
+    (otherwise, returns None). In the case of a partial match, the
+    returned list may contain None in some positions.
     """
-    # Make sure lengths match.
-    if len(items) != len(trackinfo):
+    # Make sure lengths match: If there is less items, it might just be that
+    # there is some tracks missing.
+    if len(items) > len(trackinfo):
         return None
 
     # Construct the cost matrix.
@@ -187,7 +196,7 @@ def order_items(items, trackinfo):
     matching = Munkres().compute(costs)
 
     # Order items based on the matching.
-    ordered_items = [None]*len(items)
+    ordered_items = [None]*len(trackinfo)
     for cur_idx, canon_idx in matching:
         ordered_items[canon_idx] = items[cur_idx]
     return ordered_items
@@ -205,10 +214,8 @@ def track_distance(item, track_info, track_index=None, incl_artist=False):
     dist, dist_max = 0.0, 0.0
 
     # Check track length.
-    if not track_info.length:
-        # If there's no length to check, assume the worst.
-        dist += TRACK_LENGTH_WEIGHT
-    else:
+    # If there's no length to check, apply no penalty.
+    if track_info.length:
         diff = abs(item.length - track_info.length)
         diff = max(diff - TRACK_LENGTH_GRACE, 0.0)
         diff = min(diff, TRACK_LENGTH_MAX)
@@ -223,14 +230,15 @@ def track_distance(item, track_info, track_index=None, incl_artist=False):
     # Attention: MB DB does not have artist info for all compilations,
     # so only check artist distance if there is actually an artist in
     # the MB track data.
-    if incl_artist and track_info.artist:
+    if incl_artist and track_info.artist and \
+            item.artist.lower() not in VA_ARTISTS:
         dist += string_dist(item.artist, track_info.artist) * \
                 TRACK_ARTIST_WEIGHT
         dist_max += TRACK_ARTIST_WEIGHT
 
     # Track index.
     if track_index and item.track:
-        if track_index != item.track:
+        if item.track not in (track_index, track_info.medium_index):
             dist += TRACK_INDEX_WEIGHT
         dist_max += TRACK_INDEX_WEIGHT
     
@@ -269,9 +277,13 @@ def distance(items, album_info):
     
     # Track distances.
     for i, (item, track_info) in enumerate(zip(items, album_info.tracks)):
-        dist += track_distance(item, track_info, i+1, album_info.va) * \
-                TRACK_WEIGHT
-        dist_max += TRACK_WEIGHT
+        if item:
+            dist += track_distance(item, track_info, i+1, album_info.va) * \
+                    TRACK_WEIGHT
+            dist_max += TRACK_WEIGHT
+        else:
+            dist += MISSING_WEIGHT
+            dist_max += MISSING_WEIGHT
 
     # Plugin distances.
     plugin_d, plugin_dm = plugins.album_distance(items, album_info)
@@ -348,8 +360,9 @@ def validate_candidate(items, tuple_dict, info):
         return
 
     # Make sure the album has the correct number of tracks.
-    if len(items) != len(info.tracks):
-        log.debug('Track count mismatch.')
+    if len(items) > len(info.tracks):
+        log.debug('Too many items to match: %i > %i.' %
+                  (len(items), len(info.tracks)))
         return
 
     # Put items in order.

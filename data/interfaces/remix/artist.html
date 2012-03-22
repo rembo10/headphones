@@ -1,6 +1,7 @@
 <%inherit file="base.html"/>
 <%!
 	from headphones import db
+	import headphones
 %>
 
 <%def name="headerIncludes()">
@@ -24,7 +25,7 @@
 
 <%def name="body()">
 	<div id="paddingheader">
-		<h1>${artist['ArtistName']}<h1>
+		<h1><a href="http://musicbrainz.org/artist/${artist['ArtistID']}">${artist['ArtistName']}</a><h1>
 		%if artist['Status'] == 'Loading':
 		<h3><i>(Album information for this artist is currently being loaded)</i></h3>
 		%endif		
@@ -50,6 +51,7 @@
 				<th id="status">Status</th>
 				<th id="have">Have</th>
 				<th id="bitrate">Bitrate</th>
+				<th id="albumformat">Format</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -81,6 +83,16 @@
 					bitrate = str(int(avgbitrate)/1000) + ' kbps'
 				else:
 					bitrate = ''
+
+				albumformatcount = myDB.action("SELECT COUNT(DISTINCT Format) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
+				if albumformatcount == 1:
+					albumformat = myDB.action("SELECT DISTINCT Format FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
+				elif albumformatcount > 1:
+					albumformat = 'Mixed'
+				else:
+					albumformat = ''
+
+				lossy_formats = [str.upper(fmt) for fmt in headphones.LOSSY_MEDIA_FORMATS]
 				
 			%>
 			<tr class="grade${grade}">
@@ -92,14 +104,20 @@
 				<td id="status">${album['Status']}
 				%if album['Status'] == 'Skipped':
 					[<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">want</a>]
-				%elif album['Status'] == 'Wanted':
+				%elif (album['Status'] == 'Wanted' or album['Status'] == 'Wanted Lossless'):
 					[<a href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">skip</a>]
 				%else:
 					[<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Retry the same download again">retry</a>][<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True" title="Try a new download, skipping all previously tried nzbs">new</a>]
 				%endif
+				%if albumformat in lossy_formats and album['Status'] == 'Skipped':
+					[<a id="wantlossless" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&lossless=True">want lossless</a>]
+				%elif albumformat in lossy_formats and (album['Status'] == 'Snatched' or album['Status'] == 'Downloaded'):
+					[<a id="wantlossless" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&lossless=True">retry lossless</a>]
+				%endif
 				</td>
 				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
 				<td id="bitrate">${bitrate}</td>
+				<td id="albumformat">${albumformat}</td>
 			</tr>
 		%endfor
 		</tbody>
@@ -126,6 +144,7 @@
 					null,
 					null,
 					{ "sType": "title-numeric"},
+					null,
 					null
 				],
 				"oLanguage": {

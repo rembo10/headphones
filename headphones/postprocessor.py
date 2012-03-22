@@ -509,7 +509,7 @@ def updateHave(albumpath):
 				else:
 					continue
 				
-				myDB.action('UPDATE tracks SET Location=?, BitRate=? WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [unicode(song, headphones.SYS_ENCODING, errors="replace"), f.bitrate, artist, f.album, f.title])
+				myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [unicode(song, headphones.SYS_ENCODING, errors="replace"), f.bitrate, f.format, artist, f.album, f.title])
 				
 def renameUnprocessedFolder(albumpath):
 	
@@ -553,10 +553,8 @@ def forcePostProcess():
 	
 			if len(folders):
 				logger.info('Found %i folders to process' % len(folders))
-				pass
 			else:
 				logger.info('Found no folders to process in: %s' % download_dir)
-				return
 	
 			# Parse the folder names to get artist album info
 			for folder in folders:

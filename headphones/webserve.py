@@ -13,6 +13,8 @@ import headphones
 from headphones import logger, searcher, db, importer, mb, lastfm, librarysync
 from headphones.helpers import checked, radio
 
+from common import BLACKHOLE, SABNZBD
+
 
 
 def serve_template(templatename, **kwargs):
@@ -156,11 +158,15 @@ class WebInterface(object):
 		raise cherrypy.HTTPRedirect("home")
 	addArtists.exposed = True
 	
-	def queueAlbum(self, AlbumID, ArtistID=None, new=False, redirect=None):
-		logger.info(u"Marking album: " + AlbumID + "as wanted...")
+	def queueAlbum(self, AlbumID, ArtistID=None, new=False, redirect=None, lossless=False):
+		logger.info(u"Marking album: " + AlbumID + " as wanted...")
 		myDB = db.DBConnection()
 		controlValueDict = {'AlbumID': AlbumID}
-		newValueDict = {'Status': 'Wanted'}
+		if lossless:
+			newValueDict = {'Status': 'Wanted Lossless'}
+			logger.info("...lossless only!")
+		else:	
+			newValueDict = {'Status': 'Wanted'}
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		searcher.searchforalbum(AlbumID, new)
 		if ArtistID:
@@ -316,6 +322,9 @@ class WebInterface(object):
 	
 		interface_dir = os.path.join(headphones.PROG_DIR, 'data/interfaces/')
 		interface_list = [ name for name in os.listdir(interface_dir) if os.path.isdir(os.path.join(interface_dir, name)) ]
+		
+		# TODO move this to a constants
+		nzb_handler_list = [SABNZBD, BLACKHOLE]
 
 		config = { 
 					"http_host" : headphones.HTTP_HOST,
@@ -329,7 +338,6 @@ class WebInterface(object):
 					"sab_pass" : headphones.SAB_PASSWORD,
 					"sab_cat" : headphones.SAB_CATEGORY,
 					"download_dir" : headphones.DOWNLOAD_DIR,
-					"use_blackhole" : checked(headphones.BLACKHOLE),
 					"blackhole_dir" : headphones.BLACKHOLE_DIR,
 					"usenet_retention" : headphones.USENET_RETENTION,
 					"use_nzbmatrix" : checked(headphones.NZBMATRIX),
@@ -375,6 +383,7 @@ class WebInterface(object):
 					"encoderfolder":	headphones.ENCODERFOLDER,
 					"advancedencoder":	headphones.ADVANCEDENCODER,
 					"encoderoutputformat": headphones.ENCODEROUTPUTFORMAT,
+					"use_advanced_encoding": headphones.USE_ADVANCED_ENCODING,
 					"samplingfrequency": headphones.SAMPLINGFREQUENCY,
 					"encodervbrcbr": headphones.ENCODERVBRCBR,
 					"encoderquality": headphones.ENCODERQUALITY,
@@ -383,6 +392,13 @@ class WebInterface(object):
 					"prowl_onsnatch": checked(headphones.PROWL_ONSNATCH),
 					"prowl_keys": headphones.PROWL_KEYS,
 					"prowl_priority": headphones.PROWL_PRIORITY,
+					"autowant_album" : checked(headphones.AUTOWANT_ALBUM),
+					"autowant_single" : checked(headphones.AUTOWANT_SINGLE),
+					"autowant_compilation" : checked(headphones.AUTOWANT_COMPILATION),
+					"autowant_remix" : checked(headphones.AUTOWANT_REMIX),
+					"autowant_ep" : checked(headphones.AUTOWANT_EP),
+					"autowant_live" : checked(headphones.AUTOWANT_LIVE),
+					"autowant_soundtrack" : checked(headphones.AUTOWANT_SOUNDTRACK),
 					"mirror_list": headphones.MIRRORLIST,
 					"mirror": headphones.MIRROR
 				}
@@ -391,12 +407,13 @@ class WebInterface(object):
 	
 	
 	def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0,
-		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
+		sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole_dir=None,
 		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
 		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
 		torrentblackhole_dir=None, download_torrent_dir=None, numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, 
 		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, interface=None, log_dir=None,
 		encode=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
+		autowant_album=0, autowant_single=0, autowant_compilation=0, autowant_remix=0, autowant_ep=0, autowant_live=0, autowant_soundtrack=0):
 		prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, mirror=None):
 
 		headphones.HTTP_HOST = http_host
@@ -410,7 +427,6 @@ class WebInterface(object):
 		headphones.SAB_APIKEY = sab_apikey
 		headphones.SAB_CATEGORY = sab_category
 		headphones.DOWNLOAD_DIR = download_dir
-		headphones.BLACKHOLE = blackhole
 		headphones.BLACKHOLE_DIR = blackhole_dir
 		headphones.USENET_RETENTION = usenet_retention
 		headphones.NZBMATRIX = nzbmatrix
@@ -454,6 +470,7 @@ class WebInterface(object):
 		headphones.ENCODERFOLDER = encoderfolder
 		headphones.ADVANCEDENCODER = advancedencoder
 		headphones.ENCODEROUTPUTFORMAT = encoderoutputformat
+		headphones.NZB_HANDLER = nzb_handler
 		headphones.ENCODERVBRCBR = encodervbrcbr
 		headphones.ENCODERQUALITY = int(encoderquality)
 		headphones.ENCODERLOSSLESS = encoderlossless
@@ -461,11 +478,18 @@ class WebInterface(object):
 		headphones.PROWL_ONSNATCH = prowl_onsnatch
 		headphones.PROWL_KEYS = prowl_keys
 		headphones.PROWL_PRIORITY = prowl_priority
+		headphones.AUTOWANT_ALBUM = autowant_album
+		headphones.AUTOWANT_SINGLE = autowant_single
+		headphones.AUTOWANT_COMPILATION = autowant_compilation
+		headphones.AUTOWANT_REMIX = autowant_remix
+		headphones.AUTOWANT_EP = autowant_ep
+		headphones.AUTOWANT_LIVE = autowant_live
+		headphones.AUTOWANT_SOUNDTRACK = autowant_soundtrack
 		headphones.MIRROR = mirror
 		
 		headphones.config_write()
 
-		raise cherrypy.HTTPRedirect("config")
+		raise cherrypy.HTTPRedirect("config" + selected_tab)
 		
 	configUpdate.exposed = True
 

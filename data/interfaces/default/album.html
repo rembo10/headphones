@@ -26,8 +26,8 @@
 		<h2><a href="artistPage?ArtistID=${album['ArtistID']}"><- Back to ${album['ArtistName']}</a></h2>
 		<div id="albumheader">	
 			<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" height="200" width="200" alt="albumart" class="albumArt">
-			<h1>${album['AlbumTitle']}</h1>
-			<h2>${album['ArtistName']}</h2>
+			<h1><a href="http://musicbrainz.org/release-group/${album['AlbumID']}">${album['AlbumTitle']}</a></h1>
+			<h2><a href="http://musicbrainz.org/artist/${album['ArtistID']}">${album['ArtistName']}</a></h2>
 			<br>
 			<%
 				totalduration = myDB.action("SELECT SUM(TrackDuration) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
@@ -54,6 +54,7 @@
 						<th id="duration">Duration</th>
 						<th id="location">Local File</th>
 						<th id="bitrate">Bit Rate</th>
+						<th id="format">Format</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -75,6 +76,11 @@
 							trackduration = helpers.convert_milliseconds(track['TrackDuration'])
 						except:
 							trackduration = 'n/a'
+
+						if not track['Format']:
+							format = 'Unknown'
+						else:
+							format = track['Format']
 					%>
 					<tr class="grade${grade}">
 						<td id="number">${track['TrackNumber']}</td>
@@ -82,6 +88,7 @@
 						<td id="duration">${trackduration}</td>
 						<td id="location">${location}</td>
 						<td id="bitrate">${bitrate}</td>
+						<td id="format">${format}</td>
 					</tr>
 				%endfor
 				<%
@@ -98,6 +105,7 @@
 						<td id="duration">${duration}</td>
 						<td id="location">${track['Location']}</td>
 						<td id="bitrate">${int(track['BitRate'])/1000} kbps</td>
+						<td id="format">${track['Format']}</td>
 					</tr>
 					%endfor
 				%endif
