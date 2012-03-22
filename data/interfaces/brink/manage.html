@@ -1,0 +1,118 @@
+<%inherit file="base.html" />
+<%!
+	import headphones
+	from headphones.helpers import checked
+%>
+<%def name="headerIncludes()">
+	<div id="subhead_container">
+		<ul id="subhead_menu">
+			<li><a href="manageArtists">Manage Artists</a></li>
+			%if not headphones.ADD_ARTISTS:
+			<li><a href="manageNew">Manage New Artists</a></li>
+			%endif
+		</ul>
+	</div>	
+</%def>
+
+<%def name="body()">
+	<div class="table_wrapper">
+		<h1>Scan Music Library</h1>
+		<table class="configtable">
+			<tr>
+				<td>
+					<p>
+						Where do you keep your music?
+					</p>
+					<form action="musicScan" method="GET">
+						%if headphones.MUSIC_DIR:
+							<input type="text" value="${headphones.MUSIC_DIR}" name="path" size="60" />
+							<div class="tooltip">
+							<span>
+								You can put in any directory, and it will scan for audio files in that folder
+								(including all subdirectories)<br />
+								For example: '/Users/name/Music'
+							</span>
+						</div>
+						%else:
+						<p>
+							<input type="text" value="Enter a Music Directory to scan" onfocus="if (this.value==this.defaultValue) this.value='';" name="path" size="60" />
+							<div class="tooltip">
+								<span>
+									You can put in any directory, and it will scan for audio files in that folder
+									(including all subdirectories)<br />
+									For example: '/Users/name/Music'
+								</span>
+							</div>
+						</p>
+						%endif
+						<br />
+						<p>
+							<input class="styled" type="checkbox" name="autoadd" value="1" ${checked(headphones.ADD_ARTISTS)} /> Automatically add new artists
+						</p>
+						<input type="submit" />
+						<div class="tooltip">
+							<span>
+								This process runs in the background.
+							</span>
+						</div>
+					</form>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<div class="table_wrapper_half">
+		<h1>Import Last.FM Artists</h1>
+		<table class="configtable">
+			<tr>
+				<td>
+					<p>
+					Enter the username whose artists you want to import:
+					</p>
+					<form action="importLastFM" method="GET" align="left">
+						<%
+							if headphones.LASTFM_USERNAME:
+								lastfmvalue = headphones.LASTFM_USERNAME
+							else:
+								lastfmvalue = 'Last.fm Username'
+						%>
+						<input type="text" value="${lastfmvalue}" onfocus="if (this.value==this.defaultValue) this.value='';" name="username" size="18" />
+						<br />
+						<br />
+						<input type="submit" />
+					</form>
+				</td>
+			</tr>
+		</table>
+	</div>
+	
+	<div class="table_wrapper_half">
+		<h1>Placeholder :-)</h1>
+		<table class="configtable">
+			<tr>
+				<td>
+					<form action="" method="GET" align="left">
+						<input type="text" onfocus="if (this.value==this.defaultValue) this.value='';" name="" size="18" />
+						<br />
+						<br />
+						<input type="submit" />
+					</form>
+				</td>
+			</tr>
+		</table>
+	</div>
+	
+	<div class="table_wrapper">
+		<h1>Force Search</h1><br />
+		<table class="configtable">
+			<tr>
+				<td>
+					<h3><a href="forceSearch">Force Check for Wanted Albums</a></h3>
+					<h3><a href="forceUpdate">Force Update Active Artists</a></h3>
+					<h3><a href="forcePostProcess">Force Post-Process Albums in Download Folder</a></h3><br /><br />
+					<h3><a href="checkGithub">Check for Headphones Updates</a></h3>
+				</td>
+			</tr>
+		</table>
+	</div>
+</%def>
