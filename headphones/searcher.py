@@ -495,18 +495,23 @@ def verifyresult(title, artistterm, term):
     #        return False
 
     #another attempt to weed out substrings. We don't want "Vol III" when we were looking for "Vol II"
-    tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
-    for token in tokens:
-    	cleantoken = ''.join(c for c in token if c not in string.punctuation)
-    	if not token:
-    		continue
-        if token == 'Various' or token == 'Artists' or token == 'VA':
-            continue
-        if not re.search('(?:\W|^)+' + token + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
-        	if not not re.search('(?:\W|^)+' + cleantoken + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
-            	logger.info("Removed from results: " + title + " (missing tokens: " + token + " and " + cleantoken + ")")
-            	return False
-    return True
+	tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
+	for token in tokens:
+
+		if not token:
+			continue
+		if token == 'Various' or token == 'Artists' or token == 'VA':
+			continue
+		if not re.search('(?:\W|^)+' + token + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
+			cleantoken = ''.join(c for c in token if c not in string.punctuation)
+			if not not re.search('(?:\W|^)+' + cleantoken + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
+				dic = {'!':'i', '$':'s'}
+				dumbtoken = helpers.replace_all(token, dic))
+				if not not re.search('(?:\W|^)+' + dumbtoken + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
+					logger.info("Removed from results: " + title + " (missing tokens: " + token + " and " + cleantoken + ")")
+					return False
+					
+	return True
 
 def getresultNZB(result):
     
