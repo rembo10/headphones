@@ -480,7 +480,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
 def verifyresult(title, artistterm, term):
 	
-    title = re.sub('[\.\-\/\_]', ' ', title)
+	title = re.sub('[\.\-\/\_]', ' ', title)
 	
     #if artistterm != 'Various Artists':
     #    
@@ -495,6 +495,7 @@ def verifyresult(title, artistterm, term):
     #        return False
 
     #another attempt to weed out substrings. We don't want "Vol III" when we were looking for "Vol II"
+    
 	tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
 	for token in tokens:
 
@@ -506,7 +507,7 @@ def verifyresult(title, artistterm, term):
 			cleantoken = ''.join(c for c in token if c not in string.punctuation)
 			if not not re.search('(?:\W|^)+' + cleantoken + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
 				dic = {'!':'i', '$':'s'}
-				dumbtoken = helpers.replace_all(token, dic))
+				dumbtoken = helpers.replace_all(token, dic)
 				if not not re.search('(?:\W|^)+' + dumbtoken + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
 					logger.info("Removed from results: " + title + " (missing tokens: " + token + " and " + cleantoken + ")")
 					return False
