@@ -158,7 +158,7 @@
                         <h3>
                             Usenet Retention:
                         </h3>
-					    <input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="20" maxlength="40" />
+					    <input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5" maxlength="10" />
                     </td>
                     <td></td>
                 </tr>
@@ -608,49 +608,33 @@
                     	  </div>
 		        	</td>
                 </tr>
-                <tr>
-				    <td>
-					    <h3>Muscbrainz Mirror: </h3>
-					    <select class="styled" name="mirror">
-					        %for mirror in config['mirror_list']:
-						        <%
-							        if mirror == headphones.MIRROR:
-								        selected = 'selected="selected"'
-							        else:
-								        selected = ''
-							        if mirror == "localhost":
-								        mirrortext = "  (use localhost:7143)"
-							        else:
-								        mirrortext = ''
-						        %>
-						        <option class="styled" value="${mirror}" ${selected}>
-                                ${mirror} ${mirrortext}
-                                </option>
-					        %endfor
-					    </select>
+            	<tr>
+					<td>
+						<h3>Muscbrainz Mirror: <select name="mirror" id="mirror" class="styled"><h3>
+						%for mirror in config['mirror_list']:
+							<%
+								if mirror == headphones.MIRROR:
+									selected = 'selected="selected"'
+								else:
+									selected = ''
+							%>
+							<option value="${mirror}" ${selected}>${mirror}</option>
+						%endfor
+						</select>
 						
 						<div id="customoptions">
-							<h3>Host:<br>
-								<input type="text" name="customhost" value="${config['customhost']}" size="20">
-							</h3>
-							<h3>
-								Port:<br>
-								<input type="text" name="customport" value="${config['customport']}" size="8">
-							</h3>
-							<h3>
-								Sleep Interval:
-								<br>
-								<input type="text" name="customsleep" value="${config['customsleep']}" size="4">
-							</h3>
+							<h3>Host:<br><input type="text" name="customhost" value="${config['customhost']}" size="20"></h3>
+							<h3>Port:<br><input type="text" name="customport" value="${config['customport']}" size="8"></h3>
+							<h3>Sleep Interval:<br><input type="text" name="customsleep" value="${config['customsleep']}" size="4"></h3>
 						</div>
-						
+					
 						<div id="hpserveroptions">
 							<h3>Username:<br><input type="text" name="hpuser" value="${config['hpuser']}" size="20"></h3>
 							<h3>Password:<br><input type="password" name="hppass" value="${config['hppass']}" size="15"></h3>
 							<i class="smalltext2"><a href="http://headphones.codeshy.com/vip">Get an Account</a></p>
 						</div>
-				    </td>
-                </tr>
+					</td>
+				</tr>
             </table>
         </div>
 
