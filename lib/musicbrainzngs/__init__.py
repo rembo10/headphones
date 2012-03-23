@@ -1,0 +1,1 @@
+from musicbrainz import *

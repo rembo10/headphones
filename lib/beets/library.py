@@ -16,12 +16,14 @@ import sqlite3
 import os
 import re
 import sys
-from string import Template
 import logging
+import shlex
+#from unidecode import unidecode
 from lib.beets.mediafile import MediaFile
 from lib.beets import plugins
 from lib.beets import util
 from lib.beets.util import bytestring_path, syspath, normpath, samefile
+from lib.beets.util.functemplate import Template
 
 MAX_FILENAME_LENGTH = 200
 
@@ -66,6 +68,10 @@ ITEM_FIELDS = [
     ('length',      'real', False, True),
     ('bitrate',     'int',  False, True),
     ('format',      'text', False, True),
+    ('samplerate',  'int',  False, True),
+    ('bitdepth',    'int',  False, True),
+    ('channels',    'int',  False, True),
+    ('mtime',       'int',  False, False),
 ]
 ITEM_KEYS_WRITABLE = [f[0] for f in ITEM_FIELDS if f[3] and f[2]]
 ITEM_KEYS_META     = [f[0] for f in ITEM_FIELDS if f[3]]
@@ -101,6 +107,9 @@ ALBUM_DEFAULT_FIELDS = ('album', 'albumartist', 'genre')
 ITEM_DEFAULT_FIELDS = ARTIST_DEFAULT_FIELDS + ALBUM_DEFAULT_FIELDS + \
     ('title', 'comments')
 
+# Special path format key.
+PF_KEY_DEFAULT = 'default'
+
 # Logger.
 log = logging.getLogger('beets')
 if not log.handlers:
@@ -130,6 +139,7 @@ class Item(object):
             'album_id': None,
         })
         i.read(path)
+        i.mtime = i.current_mtime() # Initial mtime.
         return i
 
     def _fill_record(self, values):
@@ -176,10 +186,12 @@ class Item(object):
                 value = str(value)
 
         if key in ITEM_KEYS:
+            # If the value changed, mark the field as dirty.
             if (not (key in self.record)) or (self.record[key] != value):
-                # don't dirty if value unchanged
                 self.record[key] = value
                 self.dirty[key] = True
+                if key in ITEM_KEYS_WRITABLE:
+                    self.mtime = 0 # Reset mtime on dirty.
         else:
             super(Item, self).__setattr__(key, value)
     
@@ -199,22 +211,33 @@ class Item(object):
         for key in ITEM_KEYS_META:
             setattr(self, key, getattr(f, key))
         self.path = read_path
+
+        # Database's mtime should now reflect the on-disk value.
+        if read_path == self.path:
+            self.mtime = self.current_mtime()
     
     def write(self):
         """Writes the item's metadata to the associated file.
         """
         f = MediaFile(syspath(self.path))
+        plugins.send('write', item=self, mf=f)
         for key in ITEM_KEYS_WRITABLE:
             setattr(f, key, getattr(self, key))
         f.save()
+
+        # The file has a new mtime.
+        self.mtime = self.current_mtime()
 
 
     # Files themselves.
 
     def move(self, dest, copy=False):
         """Moves or copies the item's file, updating the path value if
-        the move succeeds.
+        the move succeeds. If a file exists at ``dest``, then it is
+        slightly modified to be unique.
         """
+        if not util.samefile(self.path, dest):
+            dest = util.unique_path(dest)
         if copy:
             util.copy(self.path, dest)
         else:
@@ -222,6 +245,12 @@ class Item(object):
             
         # Either copying or moving succeeded, so update the stored path.
         self.path = dest
+
+    def current_mtime(self):
+        """Returns the current mtime of the file, rounded to the nearest
+        integer.
+        """
+        return int(os.path.getmtime(syspath(self.path)))
 
 
 # Library queries.
@@ -262,16 +291,6 @@ class Query(object):
         c.close()
         return (result[0], result[1] or 0.0)
 
-    def execute(self, library):
-        """Runs the query in the specified library, returning a
-        ResultIterator.
-        """
-        c = library.conn.cursor()
-        stmt, subs = self.statement()
-        log.debug('Executing query: %s' % stmt)
-        c.execute(stmt, subs)
-        return ResultIterator(c, library)
-
 class FieldQuery(Query):
     """An abstract query that searches in a specific field for a
     pattern.
@@ -303,7 +322,8 @@ class SubstringQuery(FieldQuery):
         return clause, subvals
 
     def match(self, item):
-        return self.pattern.lower() in getattr(item, self.field).lower()
+        value = getattr(item, self.field) or ''
+        return self.pattern.lower() in value.lower()
 
 class BooleanQuery(MatchQuery):
     """Matches a boolean field. Pattern should either be a boolean or a
@@ -333,14 +353,14 @@ class CollectionQuery(Query):
     """An abstract query class that aggregates other queries. Can be
     indexed like a list to access the sub-queries.
     """
-    def __init__(self, subqueries = ()):
+    def __init__(self, subqueries=()):
         self.subqueries = subqueries
     
     # is there a better way to do this?
     def __len__(self): return len(self.subqueries)
     def __getitem__(self, key): return self.subqueries[key]
-    def __iter__(self): iter(self.subqueries)
-    def __contains__(self, item): item in self.subqueries
+    def __iter__(self): return iter(self.subqueries)
+    def __contains__(self, item): return item in self.subqueries
 
     def clause_with_joiner(self, joiner):
         """Returns a clause created by joining together the clauses of
@@ -395,7 +415,7 @@ class CollectionQuery(Query):
                 continue
             key, pattern = res
             if key is None: # No key specified.
-                if os.sep in pattern:
+                if os.sep in pattern and 'path' in all_keys:
                     # This looks like a path.
                     subqueries.append(PathQuery(pattern))
                 else:
@@ -404,7 +424,7 @@ class CollectionQuery(Query):
                                                         default_fields))
             elif key.lower() == 'comp': # a boolean field
                 subqueries.append(BooleanQuery(key.lower(), pattern))
-            elif key.lower() == 'path':
+            elif key.lower() == 'path' and 'path' in all_keys:
                 subqueries.append(PathQuery(pattern))
             elif key.lower() in all_keys: # ignore unrecognized keys
                 subqueries.append(SubstringQuery(key.lower(), pattern))
@@ -413,6 +433,13 @@ class CollectionQuery(Query):
         if not subqueries: # no terms in query
             subqueries = [TrueQuery()]
         return cls(subqueries)
+
+    @classmethod
+    def from_string(cls, query, default_fields=None, all_keys=ITEM_KEYS):
+        """Creates a query based on a single string. The string is split
+        into query parts using shell-style syntax.
+        """
+        return cls.from_strings(shlex.split(query))
 
 class AnySubstringQuery(CollectionQuery):
     """A query that matches a substring in any of a list of metadata
@@ -468,6 +495,14 @@ class TrueQuery(Query):
     def match(self, item):
         return True
 
+class FalseQuery(Query):
+    """A query that never matches."""
+    def clause(self):
+        return '0', ()
+
+    def match(self, item):
+        return False
+
 class PathQuery(Query):
     """A query that matches all items under a given path."""
     def __init__(self, path):
@@ -486,27 +521,22 @@ class PathQuery(Query):
         return '(path = ?) || (path LIKE ?)', (file_blob, dir_pat)
 
 class ResultIterator(object):
-    """An iterator into an item query result set."""
+    """An iterator into an item query result set. The iterator eagerly
+    fetches all of the results from the cursor but lazily constructs
+    Item objects that reflect them.
+    """
+    def __init__(self, cursor):
+        # Fetch all of the rows, closing the cursor (and unlocking the
+        # database).
+        self.rows = cursor.fetchall()
+        self.rowiter = iter(self.rows)
     
-    def __init__(self, cursor, library):
-        self.cursor = cursor
-        self.library = library
-    
-    def __iter__(self): return self
+    def __iter__(self):
+        return self
     
     def next(self):
-        try:
-            row = self.cursor.next()
-        except StopIteration:
-            self.cursor.close()
-            raise
+        row = self.rowiter.next() # May raise StopIteration.
         return Item(row)
-
-    def close(self):
-        self.cursor.close()
-
-    def __del__(self):
-        self.close()
 
 
 # An abstract library.
@@ -696,8 +726,11 @@ class Library(BaseLibrary):
     """A music library using an SQLite database as a metadata store."""
     def __init__(self, path='library.blb',
                        directory='~/Music',
-                       path_formats=None,
+                       path_formats=((PF_KEY_DEFAULT,
+                                      '$artist/$album/$track $title'),),
                        art_filename='cover',
+                       timeout=5.0,
+                       replacements=None,
                        item_fields=ITEM_FIELDS,
                        album_fields=ALBUM_FIELDS):
         if path == ':memory:':
@@ -705,14 +738,12 @@ class Library(BaseLibrary):
         else:
             self.path = bytestring_path(normpath(path))
         self.directory = bytestring_path(normpath(directory))
-        if path_formats is None:
-            path_formats = {'default': '$artist/$album/$track $title'}
-        elif isinstance(path_formats, basestring):
-            path_formats = {'default': path_formats}
         self.path_formats = path_formats
         self.art_filename = bytestring_path(art_filename)
+        self.replacements = replacements
         
-        self.conn = sqlite3.connect(self.path)
+        self.timeout = timeout
+        self.conn = sqlite3.connect(self.path, timeout)
         self.conn.row_factory = sqlite3.Row
             # this way we can access our SELECT results like dictionaries
         
@@ -758,10 +789,10 @@ class Library(BaseLibrary):
         if table == 'albums' and 'artist' in current_fields and \
                     'albumartist' not in current_fields:
             setup_sql += "UPDATE ALBUMS SET albumartist=artist;\n"
-        
+
         self.conn.executescript(setup_sql)
         self.conn.commit()
-    
+
     def destination(self, item, pathmod=None, in_album=False,
                     fragment=False, basedir=None):
         """Returns the path in the library directory designated for item
@@ -773,25 +804,37 @@ class Library(BaseLibrary):
         directory for the destination.
         """
         pathmod = pathmod or os.path
-        
-        # Use a path format based on the album type, if available.
-        if not item.album_id and not in_album:
-            # Singleton track. Never use the "album" formats.
-            if 'singleton' in self.path_formats:
-                path_format = self.path_formats['singleton']
-            else:
-                path_format = self.path_formats['default']
-        elif item.albumtype and item.albumtype in self.path_formats:
-            path_format = self.path_formats[item.albumtype]
-        elif item.comp and 'comp' in self.path_formats:
-            path_format = self.path_formats['comp']
+
+        # Use a path format based on a query, falling back on the
+        # default.
+        for query, path_format in self.path_formats:
+            if query == PF_KEY_DEFAULT:
+                continue
+            query = AndQuery.from_string(query)
+            if in_album:
+                # If we're treating this item as a member of the item,
+                # hack the query so that singleton queries always
+                # observe the item to be non-singleton.
+                for i, subquery in enumerate(query):
+                    if isinstance(subquery, SingletonQuery):
+                        query[i] = FalseQuery() if subquery.sense \
+                                   else TrueQuery()
+            if query.match(item):
+                # The query matches the item! Use the corresponding path
+                # format.
+                break
         else:
-            path_format = self.path_formats['default']
+            # No query matched; fall back to default.
+            for query, path_format in self.path_formats:
+                if query == PF_KEY_DEFAULT:
+                    break
+            else:
+                assert False, "no default path format"
         subpath_tmpl = Template(path_format)
-        
+
         # Get the item's Album if it has one.
         album = self.get_album(item)
-        
+
         # Build the mapping for substitution in the path template,
         # beginning with the values from the database.
         mapping = {}
@@ -804,29 +847,35 @@ class Library(BaseLibrary):
                 # From Item.
                 value = getattr(item, key)
             mapping[key] = util.sanitize_for_path(value, pathmod, key)
-        
+
         # Use the album artist if the track artist is not set and
         # vice-versa.
         if not mapping['artist']:
             mapping['artist'] = mapping['albumartist']
         if not mapping['albumartist']:
             mapping['albumartist'] = mapping['artist']
-        
+
+        # Get values from plugins.
+        for key, value in plugins.template_values(item).iteritems():
+            mapping[key] = util.sanitize_for_path(value, pathmod, key)
+
         # Perform substitution.
-        subpath = subpath_tmpl.substitute(mapping)
-        
+        funcs = DefaultTemplateFunctions(self, item).functions()
+        funcs.update(plugins.template_funcs())
+        subpath = subpath_tmpl.substitute(mapping, funcs)
+
         # Encode for the filesystem, dropping unencodable characters.
         if isinstance(subpath, unicode) and not fragment:
             encoding = sys.getfilesystemencoding() or sys.getdefaultencoding()
             subpath = subpath.encode(encoding, 'replace')
-        
+
         # Truncate components and remove forbidden characters.
-        subpath = util.sanitize_path(subpath)
-        
+        subpath = util.sanitize_path(subpath, pathmod, self.replacements)
+
         # Preserve extension.
         _, extension = pathmod.splitext(item.path)
-        subpath += extension
-        
+        subpath += extension.lower()
+
         if fragment:
             return subpath
         else:
@@ -837,7 +886,6 @@ class Library(BaseLibrary):
     # Item manipulation.
 
     def add(self, item, copy=False):
-        #FIXME make a deep copy of the item?
         item.library = self
         if copy:
             self.move(item, copy=True)
@@ -852,18 +900,18 @@ class Library(BaseLibrary):
                 if key == 'path' and isinstance(value, str):
                     value = buffer(value)
                 subvars.append(value)
-        
+
         # issue query
         c = self.conn.cursor()
         query = 'INSERT INTO items (' + columns + ') VALUES (' + values + ')'
         c.execute(query, subvars)
         new_id = c.lastrowid
         c.close()
-        
+
         item._clear_dirty()
         item.id = new_id
         return new_id
-    
+
     def save(self, event=True):
         """Writes the library to disk (completing an sqlite
         transaction).
@@ -875,7 +923,7 @@ class Library(BaseLibrary):
     def load(self, item, load_id=None):
         if load_id is None:
             load_id = item.id
-        
+
         c = self.conn.execute(
                 'SELECT * FROM items WHERE id=?', (load_id,) )
         item._fill_record(c.fetchone())
@@ -885,7 +933,7 @@ class Library(BaseLibrary):
     def store(self, item, store_id=None, store_all=False):
         if store_id is None:
             store_id = item.id
- 
+
         # build assignments for query
         assignments = ''
         subvars = []
@@ -898,7 +946,7 @@ class Library(BaseLibrary):
                 if key == 'path' and isinstance(value, str):
                     value = buffer(value)
                 subvars.append(value)
-        
+
         if not assignments:
             # nothing to store (i.e., nothing was dirty)
             return
@@ -1011,7 +1059,7 @@ class Library(BaseLibrary):
               " ORDER BY artist, album, disc, track"
         log.debug('Getting items with SQL: %s' % sql)
         c = self.conn.execute(sql, subvals)
-        return ResultIterator(c, self)
+        return ResultIterator(c)
 
 
     # Convenience accessors.
@@ -1020,13 +1068,11 @@ class Library(BaseLibrary):
         """Fetch an Item by its ID. Returns None if no match is found.
         """
         c = self.conn.execute("SELECT * FROM items WHERE id=?", (id,))
-        it = ResultIterator(c, self)
+        it = ResultIterator(c)
         try:
             return it.next()
         except StopIteration:
             return None
-        finally:
-            it.close()
     
     def get_album(self, item_or_id):
         """Given an album ID or an item associated with an album,
@@ -1147,7 +1193,7 @@ class Album(BaseAlbum):
             'SELECT * FROM items WHERE album_id=?',
             (self.id,)
         )
-        return ResultIterator(c, self._library)
+        return ResultIterator(c)
 
     def remove(self, delete=False, with_items=True):
         """Removes this album and all its associated items from the
@@ -1256,5 +1302,141 @@ class Album(BaseAlbum):
         # Normal operation.
         if oldart == artdest:
             util.soft_remove(oldart)
+        artdest = util.unique_path(artdest)
         util.copy(path, artdest)
         self.artpath = artdest
+
+
+# Default path template resources.
+
+def _int_arg(s):
+    """Convert a string argument to an integer for use in a template
+    function.  May raise a ValueError.
+    """
+    return int(s.strip())
+
+class DefaultTemplateFunctions(object):
+    """A container class for the default functions provided to path
+    templates. These functions are contained in an object to provide
+    additional context to the functions -- specifically, the Item being
+    evaluated.
+    """
+    def __init__(self, lib, item):
+        self.lib = lib
+        self.item = item
+
+    _prefix = 'tmpl_'
+
+    def functions(self):
+        """Returns a dictionary containing the functions defined in this
+        object. The keys are function names (as exposed in templates)
+        and the values are Python functions.
+        """
+        out = {}
+        for key in dir(self):
+            if key.startswith(self._prefix):
+                out[key[len(self._prefix):]] = getattr(self, key)
+        return out
+
+    @staticmethod
+    def tmpl_lower(s):
+        """Convert a string to lower case."""
+        return s.lower()
+
+    @staticmethod
+    def tmpl_upper(s):
+        """Covert a string to upper case."""
+        return s.upper()
+
+    @staticmethod
+    def tmpl_title(s):
+        """Convert a string to title case."""
+        return s.title()
+
+    @staticmethod
+    def tmpl_left(s, chars):
+        """Get the leftmost characters of a string."""
+        return s[0:_int_arg(chars)]
+
+    @staticmethod
+    def tmpl_right(s, chars):
+        """Get the rightmost characters of a string."""
+        return s[-_int_arg(chars):]
+
+    @staticmethod
+    def tmpl_if(condition, trueval, falseval=u''):
+        """If ``condition`` is nonempty and nonzero, emit ``trueval``;
+        otherwise, emit ``falseval`` (if provided).
+        """
+        try:
+            condition = _int_arg(condition)
+        except ValueError:
+            condition = condition.strip()
+        if condition:
+            return trueval
+        else:
+            return falseval
+
+    @staticmethod
+    def tmpl_asciify(s):
+        """Translate non-ASCII characters to their ASCII equivalents.
+        """
+        #return unidecode(s)
+        return s
+
+    def tmpl_unique(self, keys, disam):
+        """Generate a string that is guaranteed to be unique among all
+        albums in the library who share the same set of keys. Fields
+        from "disam" are used in the string if they are sufficient to
+        disambiguate the albums. Otherwise, a fallback opaque value is
+        used. Both "keys" and "disam" should be given as
+        whitespace-separated lists of field names.
+        """
+        keys = keys.split()
+        disam = disam.split()
+
+        album = self.lib.get_album(self.item)
+        if not album:
+            # Do nothing for singletons.
+            return u''
+
+        # Find matching albums to disambiguate with.
+        subqueries = []
+        for key in keys:
+            value = getattr(album, key)
+            subqueries.append(MatchQuery(key, value))
+        albums = self.lib.albums(query=AndQuery(subqueries))
+
+        # If there's only one album to matching these details, then do
+        # nothing.
+        if len(albums) == 1:
+            return u''
+
+        # Find the minimum number of fields necessary to disambiguate
+        # the set of albums.
+        disambiguators = []
+        for field in disam:
+            disambiguators.append(field)
+            
+            # Get the value tuple for each album for these
+            # disambiguators.
+            disam_values = set()
+            for a in albums:
+                values = [getattr(a, f) for f in disambiguators]
+                disam_values.add(tuple(values))
+
+            # If the set of unique tuples is equal to the number of
+            # albums in the disambiguation set, we're done -- this is
+            # sufficient disambiguation.
+            if len(disam_values) == len(albums):
+                break
+
+        else:
+            # Even when using all of the disambiguating fields, we
+            # could not separate all the albums. Fall back to the unique
+            # album ID.
+            return u' {}'.format(album.id)
+
+        # Flatten disambiguation values into a string.
+        values = [unicode(getattr(album, f)) for f in disambiguators]
+        return u' [{}]'.format(u' '.join(values))

@@ -19,6 +19,8 @@ import itertools
 import traceback
 from collections import defaultdict
 
+from lib.beets import mediafile
+
 PLUGIN_NAMESPACE = 'beetsplug'
 DEFAULT_PLUGINS = []
 
@@ -36,6 +38,12 @@ class BeetsPlugin(object):
     functionality by defining a subclass of BeetsPlugin and overriding
     the abstract methods defined here.
     """
+    def __init__(self):
+        """Perform one-time plugin setup. There is probably no reason to
+        override this method.
+        """
+        _add_media_fields(self.item_fields())
+
     def commands(self):
         """Should return a list of beets.ui.Subcommand objects for
         commands that should be added to beets' CLI.
@@ -72,6 +80,14 @@ class BeetsPlugin(object):
         """
         pass
 
+    def item_fields(self):
+        """Returns field descriptors to be added to the MediaFile class,
+        in the form of a dictionary whose keys are field names and whose
+        values are descriptor (e.g., MediaField) instances. The Library
+        database schema is not (currently) extended.
+        """
+        return {}
+
     listeners = None
 
     @classmethod
@@ -101,6 +117,36 @@ class BeetsPlugin(object):
             if cls.listeners is None:
                 cls.listeners = defaultdict(list)
             cls.listeners[event].append(func)
+            return func
+        return helper
+
+    template_funcs = None
+    template_fields = None
+
+    @classmethod
+    def template_func(cls, name):
+        """Decorator that registers a path template function. The
+        function will be invoked as ``%name{}`` from path format
+        strings.
+        """
+        def helper(func):
+            if cls.template_funcs is None:
+                cls.template_funcs = {}
+            cls.template_funcs[name] = func
+            return func
+        return helper
+
+    @classmethod
+    def template_field(cls, name):
+        """Decorator that registers a path template field computation.
+        The value will be referenced as ``$name`` from path format
+        strings. The function must accept a single parameter, the Item
+        being formatted.
+        """
+        def helper(func):
+            if cls.template_fields is None:
+                cls.template_fields = {}
+            cls.template_fields[name] = func
             return func
         return helper
 
@@ -194,6 +240,34 @@ def configure(config):
     """Sends the configuration object to each plugin."""
     for plugin in find_plugins():
         plugin.configure(config)
+
+def template_funcs():
+    """Get all the template functions declared by plugins as a
+    dictionary.
+    """
+    funcs = {}
+    for plugin in find_plugins():
+        if plugin.template_funcs:
+            funcs.update(plugin.template_funcs)
+    return funcs
+
+def template_values(item):
+    """Get all the template values computed for a given Item by
+    registered field computations.
+    """
+    values = {}
+    for plugin in find_plugins():
+        if plugin.template_fields:
+            for name, func in plugin.template_fields.iteritems():
+                values[name] = unicode(func(item))
+    return values
+
+def _add_media_fields(fields):
+    """Adds a {name: descriptor} dictionary of fields to the MediaFile
+    class. Called during the plugin initialization.
+    """
+    for key, value in fields.iteritems():
+        setattr(mediafile.MediaFile, key, value)
 
 
 # Event dispatch.
