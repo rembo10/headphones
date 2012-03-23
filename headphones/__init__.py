@@ -666,9 +666,6 @@ def dbcheck():
         c.execute('SELECT Format from tracks')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE tracks ADD COLUMN Format TEXT DEFAULT NULL')  
-
-    # Update the Format of files in library, this won't do anything if all files have a known format
-    threading.Thread(target=importer.updateFormat).start()
     
     conn.commit()
     c.close()
