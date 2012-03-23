@@ -407,11 +407,16 @@ def correctMetadata(albumid, release, downloaded_track_list):
 	logger.debug('Beets recommendation: %s' % rec)
 	autotag.apply_metadata(items, info)
 	
+	if len(items) != len(downloaded_track_list):
+		logger.warn("Mismatch between number of tracks downloaded and the metadata items, but I'll try to write it anyway")
+	
+	i = 1
 	for item in items:
 		try:
 			item.write()
 		except Exception, e:
-			logger.warn('Error writing metadata to track: %s' % e)
+			logger.warn('Error writing metadata to track %i: %s' % (i,e))
+		i += 1
 		
 def embedLyrics(downloaded_track_list):
 	logger.info('Adding lyrics')
