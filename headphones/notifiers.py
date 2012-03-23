@@ -66,37 +66,39 @@ class XBMC:
 
 	def __init__(self):
 	
-		self.host = headphones.XBMC_HOST
+		self.hosts = headphones.XBMC_HOST
 		self.username = headphones.XBMC_USERNAME
 		self.password = headphones.XBMC_PASSWORD
 		
 	def _send(self, command):
 		
-		host = self.host
+		hosts = [x.strip() for x in self.hosts.split(',')]
 		username = self.username
 		password = self.password
 		
 		url_command = urllib.urlencode(command)
 		
-		url = host + '/xbmcCmds/xbmcHttp/?' + url_command
+		for host in hosts:
 		
-		req = urllib2.Request(url)
-		
-		if password:
-			base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
-			req.add_header("Authorization", "Basic %s" % base64string)
+			url = host + '/xbmcCmds/xbmcHttp/?' + url_command
 			
-		logger.info('XBMC url: %s' % url)
-		
-		try:
-			handle = urllib2.urlopen(req)
-		except Exception, e:
-			logger.warn('Error opening XBMC url: ' % e)
-			return
-
-		response = handle.read().decode(headphones.SYS_ENCODING)
-		
-		return response
+			req = urllib2.Request(url)
+			
+			if password:
+				base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+				req.add_header("Authorization", "Basic %s" % base64string)
+				
+			logger.info('XBMC url: %s' % url)
+			
+			try:
+				handle = urllib2.urlopen(req)
+			except Exception, e:
+				logger.warn('Error opening XBMC url: ' % e)
+				return
+	
+			response = handle.read().decode(headphones.SYS_ENCODING)
+			
+			return response
     
 	def update(self):
 					
