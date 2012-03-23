@@ -408,7 +408,10 @@ def correctMetadata(albumid, release, downloaded_track_list):
 	autotag.apply_metadata(items, info)
 	
 	for item in items:
-		item.write()
+		try:
+			item.write()
+		except Exception, e:
+			logger.warn('Error writing metadata to track: %s' % e)
 		
 def embedLyrics(downloaded_track_list):
 	logger.info('Adding lyrics')
