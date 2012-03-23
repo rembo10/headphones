@@ -344,7 +344,7 @@ def moveFiles(albumpath, release, tracks):
 	
 	destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING)
 	
-	if os.path.exists(destination_path):
+	if os.path.exists(destination_path) and 'album' in headphones.FOLDER_FORMAT:
 		i = 1
 		while True:
 			newfolder = folder + '[%i]' % i
