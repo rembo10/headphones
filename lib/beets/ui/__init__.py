@@ -26,23 +26,36 @@ from difflib import SequenceMatcher
 import logging
 import sqlite3
 import errno
+import re
 
 from lib.beets import library
 from lib.beets import plugins
 from lib.beets import util
 
+if sys.platform == 'win32':
+    import colorama
+    colorama.init()
+
 # Constants.
 CONFIG_PATH_VAR = 'BEETSCONFIG'
-DEFAULT_CONFIG_FILE = os.path.expanduser('~/.beetsconfig')
-DEFAULT_LIBRARY = '~/.beetsmusic.blb'
-DEFAULT_DIRECTORY = '~/Music'
-DEFAULT_PATH_FORMATS = {
-    'default': '$albumartist/$album/$track $title',
-    'comp': 'Compilations/$album/$track $title',
-    'singleton': 'Non-Album/$artist/$title',
+DEFAULT_CONFIG_FILENAME_UNIX = '.beetsconfig'
+DEFAULT_CONFIG_FILENAME_WINDOWS = 'beetsconfig.ini'
+DEFAULT_LIBRARY_FILENAME_UNIX = '.beetsmusic.blb'
+DEFAULT_LIBRARY_FILENAME_WINDOWS = 'beetsmusic.blb'
+DEFAULT_DIRECTORY_NAME = 'Music'
+WINDOWS_BASEDIR = os.environ.get('APPDATA') or '~'
+PF_KEY_QUERIES = {
+    'comp': 'comp:true',
+    'singleton': 'singleton:true',
 }
+DEFAULT_PATH_FORMATS = [
+    (library.PF_KEY_DEFAULT,      '$albumartist/$album/$track $title'),
+    (PF_KEY_QUERIES['singleton'], 'Non-Album/$artist/$title'),
+    (PF_KEY_QUERIES['comp'],      'Compilations/$album/$track $title'),
+]
 DEFAULT_ART_FILENAME = 'cover'
-
+DEFAULT_TIMEOUT = 5.0
+NULL_REPLACE = '<strip>'
 
 # UI exception. Commands should throw this in order to display
 # nonrecoverable errors to the user.
@@ -177,7 +190,7 @@ def input_options(options, require=False, prompt=None, fallback_prompt=None,
                 prompt_part_lengths.append(len(tmpl % str(default)))
             else:
                 prompt_parts.append('# selection')
-                prompt_part_lengths.append(prompt_parts[-1])
+                prompt_part_lengths.append(len(prompt_parts[-1]))
         prompt_parts += capitalized
         prompt_part_lengths += [len(s) for s in options]
 
@@ -257,10 +270,10 @@ def input_yn(prompt, require=False, color=False):
     return sel == 'y'
 
 def config_val(config, section, name, default, vtype=None):
-    """Queries the configuration file for a value (given by the
-    section and name). If no value is present, returns default.
-    vtype optionally specifies the return type (although only bool
-    is supported for now).
+    """Queries the configuration file for a value (given by the section
+    and name). If no value is present, returns default.  vtype
+    optionally specifies the return type (although only ``bool`` and
+    ``list`` are supported for now).
     """
     if not config.has_section(section):
         config.add_section(section)
@@ -268,8 +281,12 @@ def config_val(config, section, name, default, vtype=None):
     try:
         if vtype is bool:
             return config.getboolean(section, name)
+        elif vtype is list:
+            # Whitespace-separated strings.
+            strval = config.get(section, name, True)
+            return strval.split()
         else:
-            return config.get(section, name)
+            return config.get(section, name, True)
     except ConfigParser.NoOptionError:
         return default
 
@@ -284,7 +301,7 @@ def human_bytes(size):
 
 def human_seconds(interval):
     """Formats interval, a number of seconds, as a human-readable time
-    interval.
+    interval using English words.
     """
     units = [
         (1, 'second'),
@@ -307,6 +324,13 @@ def human_seconds(interval):
         interval /= float(increment)
 
     return "%3.1f %ss" % (interval, suffix)
+
+def human_seconds_short(interval):
+    """Formats a number of seconds as a short human-readable M:SS
+    string.
+    """
+    interval = int(interval)
+    return u'%i:%02i' % (interval // 60, interval % 60)
 
 # ANSI terminal colorization code heavily inspired by pygments:
 # http://dev.pocoo.org/hg/pygments-main/file/b2deea5b5030/pygments/console.py
@@ -368,6 +392,84 @@ def colordiff(a, b, highlight='red'):
             assert(False)
     
     return u''.join(a_out), u''.join(b_out)
+
+def default_paths(pathmod=None):
+    """Produces the appropriate default config, library, and directory
+    paths for the current system. On Unix, this is always in ~. On
+    Windows, tries ~ first and then $APPDATA for the config and library
+    files (for backwards compatibility).
+    """
+    pathmod = pathmod or os.path
+    windows = pathmod.__name__ == 'ntpath'
+    if windows:
+        windata = os.environ.get('APPDATA') or '~'
+
+    # Shorthand for joining paths.
+    def exp(*vals):
+        return pathmod.expanduser(pathmod.join(*vals))
+
+    config = exp('~', DEFAULT_CONFIG_FILENAME_UNIX)
+    if windows and not pathmod.exists(config):
+        config = exp(windata, DEFAULT_CONFIG_FILENAME_WINDOWS)
+
+    libpath = exp('~', DEFAULT_LIBRARY_FILENAME_UNIX)
+    if windows and not pathmod.exists(libpath):
+        libpath = exp(windata, DEFAULT_LIBRARY_FILENAME_WINDOWS)
+
+    libdir = exp('~', DEFAULT_DIRECTORY_NAME)
+
+    return config, libpath, libdir
+
+def _get_replacements(config):
+    """Given a ConfigParser, get the list of replacement pairs. If no
+    replacements are specified, returns None. Otherwise, returns a list
+    of (compiled regex, replacement string) pairs.
+    """
+    repl_string = config_val(config, 'beets', 'replace', None)
+    if not repl_string:
+        return
+
+    parts = repl_string.strip().split()
+    if not parts:
+        return
+    if len(parts) % 2 != 0:
+        # Must have an even number of parts.
+        raise UserError(u'"replace" config value must consist of'
+                        u' pattern/replacement pairs')
+
+    out = []
+    for index in xrange(0, len(parts), 2):
+        pattern = parts[index]
+        replacement = parts[index+1]
+        if replacement.lower() == NULL_REPLACE:
+            replacement = ''
+        out.append((re.compile(pattern), replacement))
+    return out
+
+def _get_path_formats(config):
+    """Returns a list of path formats (query/template pairs); reflecting
+    the config's specified path formats.
+    """
+    legacy_path_format = config_val(config, 'beets', 'path_format', None)
+    if legacy_path_format:
+        # Old path formats override the default values.
+        path_formats = [(library.PF_KEY_DEFAULT, legacy_path_format)]
+    else:
+        # If no legacy path format, use the defaults instead.
+        path_formats = DEFAULT_PATH_FORMATS
+    if config.has_section('paths'):
+        custom_path_formats = []
+        for key, value in config.items('paths', True):
+            if key in PF_KEY_QUERIES:
+                # Special values that indicate simple queries.
+                key = PF_KEY_QUERIES[key]
+            elif key != library.PF_KEY_DEFAULT:
+                # For non-special keys (literal queries), the _
+                # character denotes a :.
+                key = key.replace('_', ':')
+            custom_path_formats.append((key, value))
+        path_formats = custom_path_formats + path_formats
+    return path_formats
 
 
 # Subcommand parsing infrastructure.
@@ -536,7 +638,10 @@ class SubcommandsOptionParser(optparse.OptionParser):
 def main(args=None, configfh=None):
     """Run the main command-line interface for beets."""
     # Get the default subcommands.
-    from beets.ui.commands import default_commands
+    from lib.beets.ui.commands import default_commands
+
+    # Get default file paths.
+    default_config, default_libpath, default_dir = default_paths()
 
     # Read defaults from config file.
     config = ConfigParser.SafeConfigParser()
@@ -545,7 +650,7 @@ def main(args=None, configfh=None):
     elif CONFIG_PATH_VAR in os.environ:
         configpath = os.path.expanduser(os.environ[CONFIG_PATH_VAR])
     else:
-        configpath = DEFAULT_CONFIG_FILE
+        configpath = default_config
     if configpath:
         configpath = util.syspath(configpath)
         if os.path.exists(util.syspath(configpath)):
@@ -574,8 +679,6 @@ def main(args=None, configfh=None):
                       help='library database file to use')
     parser.add_option('-d', '--directory', dest='directory',
                       help="destination music directory")
-    parser.add_option('-p', '--pathformat', dest='path_format',
-                      help="destination path format string")
     parser.add_option('-v', '--verbose', dest='verbose', action='store_true',
                       help='print debugging information')
     
@@ -584,30 +687,26 @@ def main(args=None, configfh=None):
     
     # Open library file.
     libpath = options.libpath or \
-        config_val(config, 'beets', 'library', DEFAULT_LIBRARY)
+        config_val(config, 'beets', 'library', default_libpath)
     directory = options.directory or \
-        config_val(config, 'beets', 'directory', DEFAULT_DIRECTORY)
-    legacy_path_format = config_val(config, 'beets', 'path_format', None)
-    if options.path_format:
-        # If given, -p overrides all path format settings
-        path_formats = {'default': options.path_format}
-    else:
-        if legacy_path_format:
-            # Old path formats override the default values.
-            path_formats = {'default': legacy_path_format}
-        else:
-            # If no legacy path format, use the defaults instead.
-            path_formats = DEFAULT_PATH_FORMATS
-        if config.has_section('paths'):
-            path_formats.update(config.items('paths'))
+        config_val(config, 'beets', 'directory', default_dir)
+    path_formats = _get_path_formats(config)
     art_filename = \
         config_val(config, 'beets', 'art_filename', DEFAULT_ART_FILENAME)
+    lib_timeout = config_val(config, 'beets', 'timeout', DEFAULT_TIMEOUT)
+    replacements = _get_replacements(config)
+    try:
+        lib_timeout = float(lib_timeout)
+    except ValueError:
+        lib_timeout = DEFAULT_TIMEOUT
     db_path = os.path.expanduser(libpath)
     try:
         lib = library.Library(db_path,
                               directory,
                               path_formats,
-                              art_filename)
+                              art_filename,
+                              lib_timeout,
+                              replacements)
     except sqlite3.OperationalError:
         raise UserError("database file %s could not be opened" % db_path)
     
@@ -617,6 +716,9 @@ def main(args=None, configfh=None):
         log.setLevel(logging.DEBUG)
     else:
         log.setLevel(logging.INFO)
+    log.debug(u'config file: %s' % util.displayable_path(configpath))
+    log.debug(u'library database: %s' % util.displayable_path(lib.path))
+    log.debug(u'library directory: %s' % util.displayable_path(lib.directory))
     
     # Invoke the subcommand.
     try:

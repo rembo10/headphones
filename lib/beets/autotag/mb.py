@@ -15,52 +15,53 @@
 """Searches for albums in the MusicBrainz database.
 """
 import logging
+import lib.musicbrainzngs as musicbrainzngs
 
-from . import musicbrainz3
 import lib.beets.autotag.hooks
 import lib.beets
 
 SEARCH_LIMIT = 5
 VARIOUS_ARTISTS_ID = '89ad4ac3-39f7-470e-963a-56509c546377'
 
-musicbrainz3._useragent = 'beets/%s' % lib.beets.__version__
+musicbrainzngs.set_useragent('beets', lib.beets.__version__,
+                             'http://beets.radbox.org/')
 
 class ServerBusyError(Exception): pass
 class BadResponseError(Exception): pass
 
 log = logging.getLogger('beets')
 
-# We hard-code IDs for artists that can't easily be searched for.
-SPECIAL_CASE_ARTISTS = {
-    '!!!': 'f26c72d3-e52c-467b-b651-679c73d8e1a7',
-}
-
 RELEASE_INCLUDES = ['artists', 'media', 'recordings', 'release-groups',
-                    'labels']
+                    'labels', 'artist-credits']
 TRACK_INCLUDES = ['artists']
 
-def _adapt_criteria(criteria):
-    """Special-case artists in a criteria dictionary before it is passed
-    to the MusicBrainz search server. The dictionary supplied is
-    mutated; nothing is returned.
-    """
-    if 'artist' in criteria:
-        for artist, artist_id in SPECIAL_CASE_ARTISTS.items():
-            if criteria['artist'] == artist:
-                criteria['arid'] = artist_id
-                del criteria['artist']
-                break
+# python-musicbrainz-ngs search functions: tolerate different API versions.
+if hasattr(musicbrainzngs, 'release_search'):
+    # Old API names.
+    _mb_release_search = musicbrainzngs.release_search
+    _mb_recording_search = musicbrainzngs.recording_search
+else:
+    # New API names.
+    _mb_release_search = musicbrainzngs.search_releases
+    _mb_recording_search = musicbrainzngs.search_recordings
 
-def track_info(recording):
+def track_info(recording, medium=None, medium_index=None):
     """Translates a MusicBrainz recording result dictionary into a beets
-    ``TrackInfo`` object.
+    ``TrackInfo`` object. ``medium_index``, if provided, is the track's
+    index (1-based) on its medium.
     """
     info = lib.beets.autotag.hooks.TrackInfo(recording['title'],
-                                         recording['id'])
+                                         recording['id'],
+                                         medium=medium,
+                                         medium_index=medium_index)
 
-    if 'artist-credit' in recording: # XXX: when is this not included?
+    # Get the name of the track artist.
+    if recording.get('artist-credit-phrase'):
+        info.artist = recording['artist-credit-phrase']
+
+    # Get the ID of the first artist.
+    if 'artist-credit' in recording:
         artist = recording['artist-credit'][0]['artist']
-        info.artist = artist['name']
         info.artist_id = artist['id']
 
     if recording.get('length'):
@@ -68,45 +69,74 @@ def track_info(recording):
 
     return info
 
+def _set_date_str(info, date_str):
+    """Given a (possibly partial) YYYY-MM-DD string and an AlbumInfo
+    object, set the object's release date fields appropriately.
+    """
+    if date_str:
+        date_parts = date_str.split('-')
+        for key in ('year', 'month', 'day'):
+            if date_parts:
+                setattr(info, key, int(date_parts.pop(0)))
+
 def album_info(release):
     """Takes a MusicBrainz release result dictionary and returns a beets
     AlbumInfo object containing the interesting data about that release.
     """
+    # Get artist name using join phrases.
+    artist_parts = []
+    for el in release['artist-credit']:
+        if isinstance(el, basestring):
+            artist_parts.append(el)
+        else:
+            artist_parts.append(el['artist']['name'])
+    artist_name = ''.join(artist_parts)
+
     # Basic info.
-    artist = release['artist-credit'][0]['artist']
-    tracks = []
+    track_infos = []
     for medium in release['medium-list']:
-        tracks.extend(i['recording'] for i in medium['track-list'])
+        for track in medium['track-list']:
+            ti = track_info(track['recording'],
+                            int(medium['position']),
+                            int(track['position']))
+            if track.get('title'):
+                # Track title may be distinct from underling recording
+                # title.
+                ti.title = track['title']
+            track_infos.append(ti)
     info = lib.beets.autotag.hooks.AlbumInfo(
         release['title'],
         release['id'],
-        artist['name'],
-        artist['id'],
-        [track_info(track) for track in tracks],
+        artist_name,
+        release['artist-credit'][0]['artist']['id'],
+        track_infos,
+        mediums=len(release['medium-list']),
     )
     info.va = info.artist_id == VARIOUS_ARTISTS_ID
     if 'asin' in release:
         info.asin = release['asin']
 
     # Release type not always populated.
-    reltype = release['release-group']['type']
-    if reltype:
-        info.albumtype = reltype.lower()
+    if 'type' in release['release-group']:
+        reltype = release['release-group']['type']
+        if reltype:
+            info.albumtype = reltype.lower()
 
     # Release date.
-    if 'date' in release: # XXX: when is this not included?
-        date_str = release['date']
-        if date_str:
-            date_parts = date_str.split('-')
-            for key in ('year', 'month', 'day'):
-                if date_parts:
-                    setattr(info, key, int(date_parts.pop(0)))
+    if 'first-release-date' in release['release-group']:
+        # Try earliest release date for the entire group first.
+        _set_date_str(info, release['release-group']['first-release-date'])
+    elif 'date' in release:
+        # Fall back to release-specific date.
+        _set_date_str(info, release['date'])
 
     # Label name.
     if release.get('label-info-list'):
-        label = release['label-info-list'][0]['label']['name']
-        if label != '[no label]':
-            info.label = label
+        label_info = release['label-info-list'][0]
+        if label_info.get('label'):
+            label = label_info['label']['name']
+            if label != '[no label]':
+                info.label = label
 
     return info
 
@@ -118,33 +148,40 @@ def match_album(artist, album, tracks=None, limit=SEARCH_LIMIT):
     optionally, a number of tracks on the album.
     """
     # Build search criteria.
-    criteria = {'release': album}
+    criteria = {'release': album.lower()}
     if artist is not None:
-        criteria['artist'] = artist
+        criteria['artist'] = artist.lower()
     else:
         # Various Artists search.
         criteria['arid'] = VARIOUS_ARTISTS_ID
     if tracks is not None:
         criteria['tracks'] = str(tracks)
 
-    _adapt_criteria(criteria)
-    res = musicbrainz3.release_search(limit=limit, **criteria)
+    # Abort if we have no search terms.
+    if not any(criteria.itervalues()):
+        return
+
+    res = _mb_release_search(limit=limit, **criteria)
     for release in res['release-list']:
         # The search result is missing some data (namely, the tracks),
         # so we just use the ID and fetch the rest of the information.
-        yield album_for_id(release['id'])
+        albuminfo = album_for_id(release['id'])
+        assert albuminfo is not None
+        yield albuminfo
 
 def match_track(artist, title, limit=SEARCH_LIMIT):
     """Searches for a single track and returns an iterable of TrackInfo
     objects.
     """
     criteria = {
-        'artist': artist,
-        'recording': title,
+        'artist': artist.lower(),
+        'recording': title.lower(),
     }
 
-    _adapt_criteria(criteria)
-    res = musicbrainz3.recording_search(limit=limit, **criteria)
+    if not any(criteria.itervalues()):
+        return
+
+    res = _mb_recording_search(limit=limit, **criteria)
     for recording in res['recording-list']:
         yield track_info(recording)
 
@@ -153,8 +190,8 @@ def album_for_id(albumid):
     object or None if the album is not found.
     """
     try:
-        res = musicbrainz3.get_release_by_id(albumid, RELEASE_INCLUDES)
-    except musicbrainz3.ResponseError:
+        res = musicbrainzngs.get_release_by_id(albumid, RELEASE_INCLUDES)
+    except musicbrainzngs.ResponseError:
         log.debug('Album ID match failed.')
         return None
     return album_info(res['release'])
@@ -164,8 +201,8 @@ def track_for_id(trackid):
     or None if no track is found.
     """
     try:
-        res = musicbrainz3.get_recording_by_id(trackid, TRACK_INCLUDES)
-    except musicbrainz3.ResponseError:
+        res = musicbrainzngs.get_recording_by_id(trackid, TRACK_INCLUDES)
+    except musicbrainzngs.ResponseError:
         log.debug('Track ID match failed.')
         return None
     return track_info(res['recording'])

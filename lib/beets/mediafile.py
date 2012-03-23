@@ -94,7 +94,7 @@ def _safe_cast(out_type, val):
             if not isinstance(val, basestring):
                 val = unicode(val)
             # Get a number from the front of the string.
-            val = re.match('[0-9]*', val.strip()).group(0)
+            val = re.match(r'[0-9]*', val.strip()).group(0)
             if not val:
                 return 0
             else:
@@ -114,7 +114,26 @@ def _safe_cast(out_type, val):
         if val is None:
             return u''
         else:
-            return unicode(val)
+            if isinstance(val, str):
+                return val.decode('utf8', 'ignore')
+            elif isinstance(val, unicode):
+                return val
+            else:
+                return unicode(val)
+
+    elif out_type == float:
+        if val is None:
+            return 0.0
+        elif isinstance(val, int) or isinstance(val, float):
+            return float(val)
+        else:
+            if not isinstance(val, basestring):
+                val = unicode(val)
+            val = re.match(r'[\+-]?[0-9\.]*', val.strip()).group(0)
+            if not val:
+                return 0.0
+            else:
+                return float(val)
 
     else:
         return val
@@ -275,7 +294,7 @@ class MediaField(object):
                 frames = obj.mgfile.tags.getall(style.key)
                 entry = None
                 for frame in frames:
-                    if frame.desc == style.id3_desc:
+                    if frame.desc.lower() == style.id3_desc.lower():
                         entry = getattr(frame, style.id3_frame_field)
                         break
                 if entry is None: # no desc match
@@ -298,7 +317,13 @@ class MediaField(object):
         # possibly index the list
         if style.list_elem:
             if entry: # List must have at least one value.
-                return entry[0]
+                # Handle Mutagen bugs when reading values (#356).
+                try:
+                    return entry[0]
+                except:
+                    log.error('Mutagen exception when reading field: %s' %
+                              traceback.format_exc)
+                    return None
             else:
                 return None
         else:
@@ -321,7 +346,7 @@ class MediaField(object):
                 # try modifying in place
                 found = False
                 for frame in frames:
-                    if frame.desc == style.id3_desc:
+                    if frame.desc.lower() == style.id3_desc.lower():
                         setattr(frame, style.id3_frame_field, out)
                         found = True
                         break
@@ -380,19 +405,22 @@ class MediaField(object):
         """
         # Fetch the data using the various StorageStyles.
         styles = self._styles(obj)
-        for style in styles:
-            # Use the first style that returns a reasonable value.
-            out = self._fetchdata(obj, style)
-            if out:
-                break
+        if styles is None:
+            out = None
+        else:
+            for style in styles:
+                # Use the first style that returns a reasonable value.
+                out = self._fetchdata(obj, style)
+                if out:
+                    break
         
-        if style.packing:
-            out = Packed(out, style.packing)[style.pack_pos]
+            if style.packing:
+                out = Packed(out, style.packing)[style.pack_pos]
 
-        # MPEG-4 freeform frames are (should be?) encoded as UTF-8.
-        if obj.type == 'mp4' and style.key.startswith('----:') and \
-                isinstance(out, str):
-            out = out.decode('utf8')
+            # MPEG-4 freeform frames are (should be?) encoded as UTF-8.
+            if obj.type == 'mp4' and style.key.startswith('----:') and \
+                    isinstance(out, str):
+                out = out.decode('utf8')
         
         return _safe_cast(self.out_type, out)
     
@@ -401,6 +429,9 @@ class MediaField(object):
         """
         # Store using every StorageStyle available.
         styles = self._styles(obj)
+        if styles is None:
+            return
+
         for style in styles:
         
             if style.packing:
@@ -430,6 +461,8 @@ class MediaField(object):
                         if self.out_type == bool:
                             # store bools as 1,0 instead of True,False
                             out = unicode(int(out))
+                        elif isinstance(out, str):
+                            out = out.decode('utf8', 'ignore')
                         else:
                             out = unicode(out)
                 elif style.as_type == int:
@@ -611,6 +644,30 @@ class ImageField(object):
                 obj.mgfile['metadata_block_picture'] = [
                     base64.b64encode(pic.write())
                 ]
+
+class FloatValueField(MediaField):
+    """A field that stores a floating-point number as a string."""
+    def __init__(self, places=2, suffix=None, **kwargs):
+        """Make a field that stores ``places`` digits after the decimal
+        point and appends ``suffix`` (if specified) when encoding as a
+        string.
+        """
+        super(FloatValueField, self).__init__(unicode, **kwargs)
+
+        fmt = ['%.', str(places), 'f']
+        if suffix:
+            fmt += [' ', suffix]
+        self.fmt = ''.join(fmt)
+
+    def __get__(self, obj, owner):
+        valstr = super(FloatValueField, self).__get__(obj, owner)
+        return _safe_cast(float, valstr)
+
+    def __set__(self, obj, val):
+        if not val:
+            val = 0.0
+        valstr = self.fmt % val
+        super(FloatValueField, self).__set__(obj, valstr)
 
 
 # The file (a collection of fields).
@@ -865,21 +922,90 @@ class MediaFile(object):
                 etc = StorageStyle('musicbrainz_albumartistid')
             )
 
+    # ReplayGain fields.
+    rg_track_gain = FloatValueField(2, 'dB',
+                mp3 = StorageStyle('TXXX',
+                                   id3_desc=u'REPLAYGAIN_TRACK_GAIN'),
+                mp4 = None,
+                etc = StorageStyle(u'REPLAYGAIN_TRACK_GAIN')
+            )
+    rg_album_gain = FloatValueField(2, 'dB',
+                mp3 = StorageStyle('TXXX',
+                                   id3_desc=u'REPLAYGAIN_ALBUM_GAIN'),
+                mp4 = None,
+                etc = StorageStyle(u'REPLAYGAIN_ALBUM_GAIN')
+            )
+    rg_track_peak = FloatValueField(6, None,
+                mp3 = StorageStyle('TXXX',
+                                   id3_desc=u'REPLAYGAIN_TRACK_PEAK'),
+                mp4 = None,
+                etc = StorageStyle(u'REPLAYGAIN_TRACK_PEAK')
+            )
+    rg_album_peak = FloatValueField(6, None,
+                mp3 = StorageStyle('TXXX',
+                                   id3_desc=u'REPLAYGAIN_ALBUM_PEAK'),
+                mp4 = None,
+                etc = StorageStyle(u'REPLAYGAIN_ALBUM_PEAK')
+            )
+
     @property
     def length(self):
+        """The duration of the audio in seconds (a float)."""
         return self.mgfile.info.length
 
     @property
+    def samplerate(self):
+        """The audio's sample rate (an int)."""
+        if hasattr(self.mgfile.info, 'sample_rate'):
+            return self.mgfile.info.sample_rate
+        return 0
+    
+    @property
+    def bitdepth(self):
+        """The number of bits per sample in the audio encoding (an int).
+        Only available for certain file formats (zero where
+        unavailable).
+        """
+        if hasattr(self.mgfile.info, 'bits_per_sample'):
+            return self.mgfile.info.bits_per_sample        
+        return 0
+
+    @property
+    def channels(self):
+        """The number of channels in the audio (an int)."""
+        if isinstance(self.mgfile.info, lib.mutagen.mp3.MPEGInfo):
+            return {
+                lib.mutagen.mp3.STEREO: 2,
+                lib.mutagen.mp3.JOINTSTEREO: 2,
+                lib.mutagen.mp3.DUALCHANNEL: 2,
+                lib.mutagen.mp3.MONO: 1,
+            }[self.mgfile.info.mode]
+        if hasattr(self.mgfile.info, 'channels'):
+            return self.mgfile.info.channels
+        return 0
+
+    @property
     def bitrate(self):
-        if hasattr(self.mgfile.info, 'bitrate'):
+        """The number of bits per seconds used in the audio coding (an
+        int). If this is provided explicitly by the compressed file
+        format, this is a precise reflection of the encoding. Otherwise,
+        it is estimated from the on-disk file size. In this case, some
+        imprecision is possible because the file header is incorporated
+        in the file size.
+        """
+        if hasattr(self.mgfile.info, 'bitrate') and self.mgfile.info.bitrate:
             # Many formats provide it explicitly.
             return self.mgfile.info.bitrate
         else:
             # Otherwise, we calculate bitrate from the file size. (This
             # is the case for all of the lossless formats.)
+            if not self.length:
+                # Avoid division by zero if length is not available.
+                return 0
             size = os.path.getsize(self.path)
             return int(size * 8 / self.length)
 
     @property
     def format(self):
+        """A string describing the file format/codec."""
         return TYPES[self.type]
