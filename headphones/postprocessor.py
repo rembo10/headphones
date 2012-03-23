@@ -366,8 +366,11 @@ def moveFiles(albumpath, release, tracks):
 	
 	for r,d,f in os.walk(albumpath):
 		for files in f:
-			shutil.move(os.path.join(r, files), destination_path)
-			
+			try:
+				shutil.move(os.path.join(r, files), destination_path)
+			except shutil.Error, e:
+				logger.warn('Error moving file %s: %s' % (files, e))
+				
 	# Chmod the directories using the folder_format (script courtesy of premiso!)
 	folder_list = folder.split('/')
 	
