@@ -109,6 +109,7 @@ def main():
                     'http_root':        headphones.HTTP_ROOT,
                     'http_username':    headphones.HTTP_USERNAME,
                     'http_password':    headphones.HTTP_PASSWORD,
+                    'api':				headphones.API,
             })
     
     logger.info('Starting Headphones on port: %i' % http_port)
