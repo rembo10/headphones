@@ -51,6 +51,9 @@ HTTP_PASSWORD = None
 HTTP_ROOT = None
 LAUNCH_BROWSER = False
 
+API_ENABLED = False
+API_KEY = None
+
 GIT_PATH = None
 INSTALL_TYPE = None
 CURRENT_VERSION = None
@@ -201,7 +204,7 @@ def initialize():
     with INIT_LOCK:
     
         global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, DATA_DIR, CONFIG_FILE, CFG, LOG_DIR, CACHE_DIR, \
-                HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, GIT_PATH, \
+                HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, \
                 CURRENT_VERSION, LATEST_VERSION, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
                 ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, \
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
@@ -240,6 +243,8 @@ def initialize():
         HTTP_PASSWORD = check_setting_str(CFG, 'General', 'http_password', '')
         HTTP_ROOT = check_setting_str(CFG, 'General', 'http_root', '/')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
+        API_ENABLED = bool(check_setting_int(CFG, 'General', 'api_enabled', 0))
+        API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', '')
         
@@ -451,6 +456,8 @@ def config_write():
     new_config['General']['http_password'] = HTTP_PASSWORD
     new_config['General']['http_root'] = HTTP_ROOT
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
+    new_config['General']['api_enabled'] = int(API_ENABLED)
+    new_config['General']['api_key'] = API_KEY
     new_config['General']['log_dir'] = LOG_DIR
     new_config['General']['git_path'] = GIT_PATH
 
