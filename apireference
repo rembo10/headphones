@@ -1,0 +1,11 @@
+
+General structure:
+http://localhost:8181 + HTTP_ROOT + /api?apikey=$apikey&cmd=$command
+
+Optional parameters:
+format : json, xml
+
+
+Commands:
+
+findArtist?name=$artistname&type={album,artist}[&limit=$limit]
