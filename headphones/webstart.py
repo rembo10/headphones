@@ -45,7 +45,7 @@ def initialize(options={}):
     }
 
 	if options['api']:
-		conf['/api'] = {'tools.staticdir.on': True, 'tools.staticdir.dir': "api"}
+		conf['/api'] = {'tools.staticdir.on': True, 'tools.staticdir.filename': "api"}
     
 	if options['http_password'] != "":
 		conf['/'].update({
