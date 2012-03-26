@@ -43,9 +43,6 @@ def initialize(options={}):
         	'tools.staticfile.filename': "images/favicon.ico"
         }
     }
-
-	if options['api']:
-		conf['/api'] = {'tools.staticdir.on': True, 'tools.staticdir.filename': "api"}
     
 	if options['http_password'] != "":
 		conf['/'].update({

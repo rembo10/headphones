@@ -552,3 +552,17 @@ class WebInterface(object):
 		raise cherrypy.HTTPRedirect("extras")
 		
 	updateCloud.exposed = True
+	
+	def api(self, *args, **kwargs):
+		
+		from headphones.api import Api
+				
+		a = Api()
+		
+		a.checkParams(*args, **kwargs)
+		
+		data = a.fetchData()
+		
+		return data
+		
+	api.exposed = True
