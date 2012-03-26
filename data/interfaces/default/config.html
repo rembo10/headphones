@@ -48,23 +48,33 @@
                 <td>
                     <h3>Launch Browser on Startup: <input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} /></h3>
                 </td>
+            </tr>
+            <tr>
                 <td>
-                    <h3>Download Scan Interval (mins):</h3>
-                    <input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="10" maxlength="40">
+                    <h3>Enable API: <input type="checkbox" name="api_enabled" id="api_enabled" value="1" ${config['api_enabled']} /></h3>
+                      <div id="apioptions">
+                      	<br>
+		      	        <h3>API key:<input type="text" name="api_key" id="api_key" value="${config['api_key']}" size="30"><input type="button" value="Generate" id="generate_api"></h3><br><br>
+                      </div>
                 </td>
             </tr>
             <tr>
-
                 <td>
                     <h3>NZB Search Interval (mins):</h3>
-                    <input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="10" maxlength="40">
+                    <input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="5" maxlength="40">
                 </td>
-
+            </tr>
+            <tr>
+                <td>
+                    <h3>Download Folder Scan Interval (mins):</h3>
+                    <input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="5" maxlength="40">
+                </td>
+            </tr>
+            <tr>
                 <td>
                     <h3>Library Scan Interval (mins):</h3>
-                    <input type="text" name="libraryscan_interval" value="${config['libraryscan_interval']}" size="10" maxlength="40">
+                    <input type="text" name="libraryscan_interval" value="${config['libraryscan_interval']}" size="5" maxlength="40">
                 </td>
-
             </tr>
         </table>
 	</div>
@@ -516,6 +526,37 @@
 
 	$(document).ready(function()
 	{
+		if ($("#api_enabled").is(":checked"))
+			{
+				$("#apioptions").show();
+			}
+		else
+			{
+				$("#apioptions").hide();
+			}
+		
+		$("#api_enabled").click(function(){
+			if ($("#api_enabled").is(":checked"))
+			{
+				$("#apioptions").show("fast");
+			}
+			else
+			{
+				$("#apioptions").hide("fast");
+			}
+		});		
+    
+    	$('#api_key').click(function(){ $('#api_key').select() });
+    	$("#generate_api").click(function(){
+    	    $.get('generateAPI', 
+    	        function(data){
+    	            if (data.error != undefined) {
+    	                alert(data.error);
+    	                return;
+    	            }
+    	            $('#api_key').val(data);
+    	    });
+    	});
 		if ($("#encode").is(":checked"))
 			{
 				$("#encoderoptions").show();
