@@ -313,6 +313,16 @@ class WebInterface(object):
 		raise cherrypy.HTTPRedirect("history")
 	clearhistory.exposed = True
 	
+	def generateAPI(self):
+
+		import hashlib, random
+		
+		apikey = hashlib.sha224( str(random.getrandbits(256)) ).hexdigest()[0:32]
+		logger.info("New API generated")
+		return apikey
+	
+	generateAPI.exposed = True
+	
 	def config(self):
 	
 		interface_dir = os.path.join(headphones.PROG_DIR, 'data/interfaces/')
