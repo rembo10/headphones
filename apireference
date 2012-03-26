@@ -2,10 +2,9 @@
 General structure:
 http://localhost:8181 + HTTP_ROOT + /api?apikey=$apikey&cmd=$command
 
-Optional parameters:
-format : json, xml
-
+Data returned in json format
 
 Commands:
-
-findArtist?name=$artistname&type={album,artist}[&limit=$limit]
+&getIndex
+&findArtist?name=$artistname[&limit=$limit]
+&findAlbum?name=$albumname[&limit=$limit]
