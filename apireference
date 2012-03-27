@@ -1,10 +1,15 @@
+The API is still pretty new and needs some serious cleaning up on the backend but should be
+reasonably functional. There are no error codes yet, 
+
 
 General structure:
 http://localhost:8181 + HTTP_ROOT + /api?apikey=$apikey&cmd=$command
 
 Data returned in json format
 
-Commands:
+$commands&parameters[&optionalparameters]:
+
+
 getIndex (fetch data from index page. Returns: ArtistName, ArtistSortName, ArtistID, Status, DateAdded,
 												[LatestAlbum, ReleaseDate, AlbumID], HaveTracks, TotalTracks,
 												IncludeExtras)
@@ -17,7 +22,7 @@ getUpcoming (Returns: Status, AlbumASIN, DateAdded, AlbumTitle, ArtistName, Rele
 
 getWanted (Returns: Status, AlbumASIN, DateAdded, AlbumTitle, ArtistName, ReleaseDate, AlbumID, ArtistID, Type)
 
-getSimilar (Returns similar artists with a higher "Count" being more likely to be similar. Returns: Count, ArtistName, ArtistID)
+getSimilar (Returns similar artists  - with a higher "Count" being more likely to be similar. Returns: Count, ArtistName, ArtistID)
 
 getHistory (Returns: Status, DateAdded, Title, URL (nzb), FolderName, AlbumID, Size (bytes))
 
@@ -38,3 +43,13 @@ refreshArtist&id=$artistid (refresh info for artist in db from musicbrainz)
 
 queueAlbum&id=$albumid[&new=True&lossless=True] (Mark an album as wanted and start the searcher. Optional paramters: 'new' looks for new versions, 'lossless' looks only for lossless versions)
 unqueueAlbum&id=$albumid (Unmark album as wanted / i.e. mark as skipped)
+
+forceSearch (force search for wanted albums - not launched in a separate thread so it may take a bit to complete)
+forceProcess (force post process albums in download directory - also not launched in a separate thread)
+
+getVersion (Returns some version information: git_path, install_type, current_version, installed_version, commits_behind
+checkGithub (updates the version information above and returns getVersion data)
+
+shutdown (shut down headphones)
+restart (restart headphones)
+update (update headphones - you may want to check the install type in get version and not allow this if type==exe)
