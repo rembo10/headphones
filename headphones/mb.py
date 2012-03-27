@@ -33,8 +33,8 @@ def startmb(forcemb=False):
 		sleepytime = 1
 	elif headphones.MIRROR == "custom":
 		mbhost = headphones.CUSTOMHOST
-		mbport = headphones.CUSTOMPORT
-		sleepytime = headphones.CUSTOMSLEEP
+		mbport = int(headphones.CUSTOMPORT)
+		sleepytime = int(headphones.CUSTOMSLEEP)
 	elif headphones.MIRROR == "headphones":
 		mbhost = "178.63.142.150"
 		mbport = 8181
