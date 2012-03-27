@@ -1,13 +1,15 @@
 import headphones
 
-from headphones import db, mb, importer, searcher, logger
+from headphones import db, mb, importer, searcher, postprocessor, versioncheck, logger
 
 import lib.simplejson as simplejson
 from xml.dom.minidom import Document
 import copy
 
 cmd_list = [ 'getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSimilar', 'getHistory', 'getLogs', 
-			'findArtist', 'findAlbum', 'addArtist', 'delArtist', 'pauseArtist', 'resumeArtist', 'refreshArtist']
+			'findArtist', 'findAlbum', 'addArtist', 'delArtist', 'pauseArtist', 'resumeArtist', 'refreshArtist',
+			'queueAlbum', 'unqueueAlbum', 'forceSearch', 'forceProcess', 'getVersion', 'checkGithub', 
+			'shutdown', 'restart', 'update', ]
 
 class Api(object):
 
@@ -263,3 +265,31 @@ class Api(object):
 		controlValueDict = {'AlbumID': self.id}
 		newValueDict = {'Status': 'Skipped'}
 		myDB.upsert("albums", newValueDict, controlValueDict)
+		
+	def _forceSearch(self):
+		searcher.searchforalbum()
+	
+	def _forceProcess(self):
+		postprocessor.forcePostProcess()	
+		
+	def _getVersion(self):
+		self.data = { 
+			'git_path' : headphones.GIT_PATH,
+			'install_type' : headphones.INSTALL_TYPE,
+			'current_version' : headphones.CURRENT_VERSION,
+			'latest_version' : headphonesLATEST_VERSION,
+			'commits_behind' : headphones.COMMITS_BEHIND,
+		}
+	
+	def _checkGithub(self):
+		versioncheck.checkGithub()
+		self._getVersion()
+	
+	def _shutdown(self):
+		headphones.SIGNAL = 'shutdown'
+	
+	def _restart(self):
+		headphones.SIGNAL = 'restart'
+		
+	def _update(self):
+		headphones.SIGNAL = 'update'
