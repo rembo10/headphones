@@ -5,7 +5,7 @@ reasonably functional. There are no error codes yet,
 General structure:
 http://localhost:8181 + HTTP_ROOT + /api?apikey=$apikey&cmd=$command
 
-Data returned in json format
+Data returned in json format. If executing a command like "delArtist" or "addArtist" you'll get back an "OK", else, you'll get the data you requested
 
 $commands&parameters[&optionalparameters]:
 
