@@ -277,7 +277,7 @@ class Api(object):
 			'git_path' : headphones.GIT_PATH,
 			'install_type' : headphones.INSTALL_TYPE,
 			'current_version' : headphones.CURRENT_VERSION,
-			'latest_version' : headphonesLATEST_VERSION,
+			'latest_version' : headphones.LATEST_VERSION,
 			'commits_behind' : headphones.COMMITS_BEHIND,
 		}
 	
