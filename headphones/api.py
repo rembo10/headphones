@@ -6,7 +6,7 @@ import lib.simplejson as simplejson
 from xml.dom.minidom import Document
 import copy
 
-cmd_list = [ 'getIndex', 'findArtist']
+cmd_list = [ 'getIndex', 'getArtist', 'getAlbum', 'findArtist', 'findAlbum']
 
 class Api(object):
 
@@ -51,51 +51,70 @@ class Api(object):
 			return
 		else:
 			self.cmd = kwargs.pop('cmd')
-		
-		#if 'format' not in kwargs:
-		#	self.format = 'json'
-		#else:
-		#	if kwargs['format'] not in ['json', 'xml']:
-		#		self.data = 'Unknown format: %s' % kwargs['format']
-		#		return
-		#	else:
-		#		self.format = kwargs.pop('format')
 			
 		self.kwargs = kwargs
 		self.data = 'OK'
 
 	def fetchData(self):
+		
+		if self.data == 'OK':	
+			methodToCall = getattr(self, "_" + self.cmd)
+			result = methodToCall(**self.kwargs)
+
+			return simplejson.dumps(self.data)
+			
+		else:
+			return self.data
+		
+	def _dic_from_query(self,query):
 	
-		if self.cmd == 'getIndex':
-			self._getIndex()
+		myDB = db.DBConnection()
+		rows = myDB.select(query)
+		
+		rows_as_dic = []
+		
+		for row in rows:
+			row_as_dic = dict(zip(row.keys(), row))
+			rows_as_dic.append(row_as_dic)
 			
-		if self.cmd == 'findArtist':
-			self._findArtist(**self.kwargs)
-			
-		return simplejson.dumps(self.data)
+		return rows_as_dic
 		
 	def _getIndex(self):
-		myDB = db.DBConnection()
-		artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
 		
-		artists_as_dic = []
-		for artist in artists:
-			artist_as_dic = {
-				'ArtistID' : artist['ArtistID'],
-				'ArtistName' : artist['ArtistName'],
-				'ArtistSortName' : artist['ArtistSortName'],
-				'DateAdded' : artist['DateAdded'],
-				'Status' : artist['Status'],
-				'IncludeExtras' : artist['IncludeExtras'],
-				'LatestAlbum' : artist['LatestAlbum'],
-				'ReleaseDate' : artist['ReleaseDate'],
-				'AlbumID' : artist['AlbumID'],
-				'HaveTracks' : artist['HaveTracks'],
-				'TotalTracks' : artist['TotalTracks']}
-			artists_as_dic.append(artist_as_dic)
+		self.data = self._dic_from_query('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
+		return	
+	
+	def _getArtist(self, **kwargs):
+	
+		if 'id' not in kwargs:
+			self.data = 'Missing parameter: id'
+			return
+		else:
+			self.id = kwargs['id']
+	
+		artist = self._dic_from_query('SELECT * from artists WHERE ArtistID="' + self.id + '"')
+		albums = self._dic_from_query('SELECT * from albums WHERE ArtistID="' + self.id + '" order by ReleaseDate DESC')
 		
-		self.data = artists_as_dic
+		self.data = { 'artist': artist, 'albums': albums }
 		
+		return
+	
+	def _getAlbum(self, **kwargs):
+	
+		if 'id' not in kwargs:
+			self.data = 'Missing parameter: id'
+			return
+		else:
+			self.id = kwargs['id']
+			
+		album = self._dic_from_query('SELECT * from albums WHERE AlbumID="' + self.id + '"')
+		tracks = self._dic_from_query('SELECT * from tracks WHERE AlbumID="' + self.id + '"')
+		description = self._dic_from_query('SELECT * from descriptions WHERE ReleaseGroupID="' + self.id + '"')
+		
+		self.data = { 'album' : album, 'tracks' : tracks, 'description' : description }
+		
+		return
+	
 	def _findArtist(self, **kwargs):
 		if 'name' not in kwargs:
 			self.data = 'Missing parameter: name'
