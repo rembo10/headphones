@@ -61,6 +61,7 @@ class Api(object):
 	def fetchData(self):
 		
 		if self.data == 'OK':	
+			logger.info('Recieved API command: ' + self.cmd)
 			methodToCall = getattr(self, "_" + self.cmd)
 			result = methodToCall(**self.kwargs)
 
