@@ -1,12 +1,13 @@
 import headphones
 
-from headphones import db, mb, logger
+from headphones import db, mb, importer, searcher, logger
 
 import lib.simplejson as simplejson
 from xml.dom.minidom import Document
 import copy
 
-cmd_list = [ 'getIndex', 'getArtist', 'getAlbum', 'findArtist', 'findAlbum']
+cmd_list = [ 'getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSimilar', 'getHistory', 'getLogs', 
+			'findArtist', 'findAlbum', 'addArtist', 'delArtist', 'pauseArtist', 'resumeArtist', 'refreshArtist']
 
 class Api(object):
 
@@ -61,7 +62,10 @@ class Api(object):
 			methodToCall = getattr(self, "_" + self.cmd)
 			result = methodToCall(**self.kwargs)
 
-			return simplejson.dumps(self.data)
+			if type(self.data) == type(''):
+				return self.data
+			else:
+				return simplejson.dumps(self.data)
 			
 		else:
 			return self.data
@@ -114,6 +118,25 @@ class Api(object):
 		self.data = { 'album' : album, 'tracks' : tracks, 'description' : description }
 		
 		return
+		
+	def _getHistory(self):
+		self.data = self._dic_from_query('SELECT * from snatched order by DateAdded DESC')
+		return
+	
+	def _getUpcoming(self):
+		self.data = self._dic_from_query("SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC")
+		return
+	
+	def _getWanted(self):
+		self.data = self._dic_from_query("SELECT * from albums WHERE Status='Wanted'")
+		return
+		
+	def _getSimilar(self):
+		self.data = self._dic_from_query('SELECT * from lastfmcloud')
+		return
+		
+	def _getLogs(self):
+		pass
 	
 	def _findArtist(self, **kwargs):
 		if 'name' not in kwargs:
@@ -137,3 +160,106 @@ class Api(object):
 		
 		self.data = mb.findRelease(kwargs['name'], limit)
 		
+	def _addArtist(self, **kwargs):
+		if 'id' not in kwargs:
+			self.data = 'Missing parameter: id'
+			return
+		else:
+			self.id = kwargs['id']
+			
+		try:
+			importer.addArtisttoDB(self.id)
+		except Exception, e:
+			self.data = e
+			
+		return
+		
+	def _delArtist(self, **kwargs):
+		if 'id' not in kwargs:
+			self.data = 'Missing parameter: id'
+			return
+		else:
+			self.id = kwargs['id']
+			
+		myDB = db.DBConnection()
+		myDB.action('DELETE from artists WHERE ArtistID="' + self.id + '"')
+		myDB.action('DELETE from albums WHERE ArtistID="' + self.id + '"')
+		myDB.action('DELETE from tracks WHERE ArtistID="' + self.id + '"')
+		
+	def _pauseArtist(self, **kwargs):
+		if 'id' not in kwargs:
+			self.data = 'Missing parameter: id'
+			return
+		else:
+			self.id = kwargs['id']
+			
+		myDB = db.DBConnection()
+		controlValueDict = {'ArtistID': ArtistID}
+		newValueDict = {'Status': 'Paused'}
+		myDB.upsert("artists", newValueDict, controlValueDict)
+		
+	def _resumeArtist(self, **kwargs):
+		if 'id' not in kwargs:
+			self.data = 'Missing parameter: id'
+			return
+		else:
+			self.id = kwargs['id']
+			
+		myDB = db.DBConnection()
+		controlValueDict = {'ArtistID': ArtistID}
+		newValueDict = {'Status': 'Active'}
+		myDB.upsert("artists", newValueDict, controlValueDict)
+		
+	def _refreshArtist(self, **kwargs):
+		if 'id' not in kwargs:
+			self.data = 'Missing parameter: id'
+			return
+		else:
+			self.id = kwargs['id']
+			
+		try:
+			importer.addArtisttoDB(self.id)
+		except Exception, e:
+			self.data = e
+			
+		return
+		
+	def _queueAlbum(self, **kwargs):
+		
+		if 'id' not in kwargs:
+			self.data = 'Missing parameter: id'
+			return
+		else:
+			self.id = kwargs['id']
+			
+		if 'new' in kwargs:
+			new = kwargs['new']
+		else:
+			new = False
+			
+		if 'lossless' in kwargs:
+			lossless = kwargs['lossless']
+		else:
+			lossless = False
+			
+		myDB = db.DBConnection()
+		controlValueDict = {'AlbumID': self.id}
+		if lossless:
+			newValueDict = {'Status': 'Wanted Lossless'}
+		else:	
+			newValueDict = {'Status': 'Wanted'}
+		myDB.upsert("albums", newValueDict, controlValueDict)
+		searcher.searchforalbum(AlbumID, new)		
+		
+	def _unqueueAlbum(self, **kwargs):
+		
+		if 'id' not in kwargs:
+			self.data = 'Missing parameter: id'
+			return
+		else:
+			self.id = kwargs['id']
+			
+		myDB = db.DBConnection()
+		controlValueDict = {'AlbumID': self.id}
+		newValueDict = {'Status': 'Skipped'}
+		myDB.upsert("albums", newValueDict, controlValueDict)
