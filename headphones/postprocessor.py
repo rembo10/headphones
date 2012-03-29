@@ -323,16 +323,18 @@ def moveFiles(albumpath, release, tracks):
 		firstchar = '0-9'
 	else:
 		firstchar = sortname[0]
-		
-	lowerfirst = firstchar.lower()
 	
 
-	values = {	'artist':	artist,
-				'album':	album,
+	values = {	'Artist':	artist,
+				'Album':	album,
+				'Year':		year,
+				'Type':  releasetype,
+				'First':	firstchar,
+				'artist':	artist.lower(),
+				'album':	album.lower(),
 				'year':		year,
-				'first':	firstchar,
-				'lowerfirst':	lowerfirst,
-                                'releasetype':  releasetype
+				'type':  releasetype.lower(),
+				'first':	firstchar.lower()
 			}
 			
 	
@@ -344,7 +346,10 @@ def moveFiles(albumpath, release, tracks):
 	
 	destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING)
 	
-	if os.path.exists(destination_path) and 'album' in headphones.FOLDER_FORMAT:
+	last_folder = headphones.FOLDER_FORMAT.split('/')[-1]
+	
+	# Only rename the folder if they use the album name, otherwise merge into existing folder
+	if os.path.exists(destination_path) and 'album' in last_folder.lower():
 		i = 1
 		while True:
 			newfolder = folder + '[%i]' % i
@@ -357,15 +362,34 @@ def moveFiles(albumpath, release, tracks):
 
 	logger.info('Moving files from %s to %s' % (unicode(albumpath, headphones.SYS_ENCODING, errors="replace"), unicode(destination_path, headphones.SYS_ENCODING, errors="replace")))
 	
-	try:
-		os.makedirs(destination_path)
-	
-	except Exception, e:
-		logger.error('Could not create folder for %s. Not moving: %s' % (release['AlbumTitle'], e))
-		return albumpath
-	
+	# Basically check if generic/non-album folders already exist, since we're going to merge
+	if not os.path.exists(destination_path):
+		try:
+			os.makedirs(destination_path)
+		except Exception, e:
+			logger.error('Could not create folder for %s. Not moving: %s' % (release['AlbumTitle'], e))
+			return albumpath
+
+	# Move files to the destination folder, renaming them if they already exist
 	for r,d,f in os.walk(albumpath):
 		for files in f:
+			if os.path.isfile(os.path.join(destination_path, files)):
+				logger.info('Destination file exists: %s' % os.path.join(destination_path, files))
+				title = os.path.splitext(files)[0]
+				ext = os.path.splitext(files)[1]
+				i = 1
+				while True:
+					newfile = title + '(' + str(i) + ')' + ext
+					if os.path.isfile(os.path.join(destination_path, newfile)):
+						i += 1
+					else:
+						logger.info('Renaming to %s' % newfile)
+						try:	
+							os.rename(os.path.join(r, files), os.path.join(r, newfile))
+							files = newfile
+						except Exception, e:
+							logger.warn('Error renaming %s: %s' % (files, e))
+						break
 			try:
 				shutil.move(os.path.join(r, files), destination_path)
 			except shutil.Error, e:
@@ -379,6 +403,7 @@ def moveFiles(albumpath, release, tracks):
 		temp_f = os.path.join(temp_f, f)
 		os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING), int(headphones.FOLDER_PERMISSIONS, 8))
 	
+	# If we failed to move all the files out of the directory, this will fail too
 	try:
 		shutil.rmtree(albumpath)
 	except Exception, e:
@@ -475,10 +500,15 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		else:
 			title = f.title
 			
-			values = {	'tracknumber':	tracknumber,
-						'title':		title,
-						'artist':		release['ArtistName'],
-						'album':		release['AlbumTitle'],
+			values = {	'Track':		tracknumber,
+						'Title':		title,
+						'Artist':		release['ArtistName'],
+						'Album':		release['AlbumTitle'],
+						'Year':			year,
+						'track':		tracknumber,
+						'title':		title.lower(),
+						'artist':		release['ArtistName'].lower(),
+						'album':		release['AlbumTitle'].lower(),
 						'year':			year
 						}
 						
