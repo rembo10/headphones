@@ -36,6 +36,7 @@ DATA_DIR = None
 
 CONFIG_FILE = None
 CFG = None
+CONFIG_VERSION = None
 
 DB_FILE = None
 
@@ -203,7 +204,7 @@ def initialize():
 
     with INIT_LOCK:
     
-        global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, DATA_DIR, CONFIG_FILE, CFG, LOG_DIR, CACHE_DIR, \
+        global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, \
                 CURRENT_VERSION, LATEST_VERSION, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
                 ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, \
@@ -230,6 +231,8 @@ def initialize():
         CheckSection('XBMC')
         
         # Set global variables based on config file or use defaults
+        CONFIG_VERSION = check_setting_str(CFG, 'General', 'config_version', '0')
+        
         try:
             HTTP_PORT = check_setting_int(CFG, 'General', 'http_port', 8181)
         except:
@@ -257,8 +260,8 @@ def initialize():
         CORRECT_METADATA = bool(check_setting_int(CFG, 'General', 'correct_metadata', 0))
         MOVE_FILES = bool(check_setting_int(CFG, 'General', 'move_files', 0))
         RENAME_FILES = bool(check_setting_int(CFG, 'General', 'rename_files', 0))
-        FOLDER_FORMAT = check_setting_str(CFG, 'General', 'folder_format', 'artist/album [year]')
-        FILE_FORMAT = check_setting_str(CFG, 'General', 'file_format', 'tracknumber artist - album [year]- title')
+        FOLDER_FORMAT = check_setting_str(CFG, 'General', 'folder_format', 'Artist/Album [Year]')
+        FILE_FORMAT = check_setting_str(CFG, 'General', 'file_format', 'Track Artist - Album [Year]- Title')
         CLEANUP_FILES = bool(check_setting_int(CFG, 'General', 'cleanup_files', 0))
         ADD_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'add_album_art', 0))
         EMBED_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'embed_album_art', 0))
@@ -338,6 +341,16 @@ def initialize():
         HPUSER = check_setting_str(CFG, 'General', 'hpuser', 'username')
         HPPASS = check_setting_str(CFG, 'General', 'hppass', 'password')
         
+        # update folder formats in the config & bump up config version
+        if CONFIG_VERSION == '0':
+            from headphones.helpers import replace_all
+            file_values = {	'tracknumber':	'Track', 'title': 'Title','artist' : 'Artist', 'album' : 'Album', 'year' : 'Year' }
+            folder_values = { 'artist' : 'Artist', 'album':'Album', 'year' : 'Year', 'releasetype' : 'Type', 'first' : 'First', 'lowerfirst' : 'first' }
+            FILE_FORMAT = replace_all(FILE_FORMAT, file_values)
+            FOLDER_FORMAT = replace_all(FOLDER_FORMAT, folder_values)
+            
+            CONFIG_VERSION = '1'
+        
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
         
@@ -350,12 +363,6 @@ def initialize():
         
         # Start the logger, silence console logging if we need to
         logger.headphones_log.initLogger(verbose=VERBOSE)
-        
-        # Update some old config code:
-        if FOLDER_FORMAT == '%artist/%album/%track':
-            FOLDER_FORMAT = 'artist/album [year]'
-        if FILE_FORMAT == '%tracknumber %artist - %album - %title':
-            FILE_FORMAT = 'tracknumber artist - album - title'
         
         # Put the cache dir in the data dir for now
         CACHE_DIR = os.path.join(DATA_DIR, 'cache')
@@ -450,6 +457,7 @@ def config_write():
     new_config.filename = CONFIG_FILE
 
     new_config['General'] = {}
+    new_config['General']['config_version'] = CONFIG_VERSION
     new_config['General']['http_port'] = HTTP_PORT
     new_config['General']['http_host'] = HTTP_HOST
     new_config['General']['http_username'] = HTTP_USERNAME
