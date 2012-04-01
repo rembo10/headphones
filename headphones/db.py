@@ -22,7 +22,7 @@ class DBConnection:
 	def __init__(self, filename="headphones.db"):
 	
 		self.filename = filename
-		self.connection = sqlite3.connect(dbFilename(filename), 20)
+		self.connection = sqlite3.connect(dbFilename(filename), timeout=20)
 		self.connection.row_factory = sqlite3.Row
 		
 	def action(self, query, args=None):
