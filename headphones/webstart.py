@@ -44,7 +44,6 @@ def initialize(options={}):
         }
     }
     
-    
 	if options['http_password'] != "":
 		conf['/'].update({
 			'tools.auth_basic.on': True,

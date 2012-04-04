@@ -19,29 +19,39 @@ mb_lock = threading.Lock()
 # Quick fix to add mirror switching on the fly. Need to probably return the mbhost & mbport that's
 # being used, so we can send those values to the log
 def startmb(forcemb=False):
+
+	mbuser = None
+	mbpass = None
+	
+	# Can use headphones mirror for queries
+	if headphones.MIRROR == "headphones":
+		forcemb=False
 	
 	if forcemb or headphones.MIRROR == "musicbrainz.org":
 		mbhost = "musicbrainz.org"
 		mbport = 80
 		sleepytime = 1
-	elif headphones.MIRROR == "localhost":
-		mbhost = "localhost"
-		mbport = 7143
-		sleepytime = 0
+	elif headphones.MIRROR == "custom":
+		mbhost = headphones.CUSTOMHOST
+		mbport = int(headphones.CUSTOMPORT)
+		sleepytime = int(headphones.CUSTOMSLEEP)
 	elif headphones.MIRROR == "headphones":
 		mbhost = "178.63.142.150"
-		mbport = 5000
+		mbport = 8181
+		mbuser = headphones.HPUSER
+		mbpass = headphones.HPPASS
 		sleepytime = 0
 	else:
 		mbhost = "tbueter.com"
-		mbport = 3000
+		mbport = 5000
 		sleepytime = 0
 	
-	service = ws.WebService(host=mbhost, port=mbport)
+	service = ws.WebService(host=mbhost, port=mbport, username=mbuser, password=mbpass, mirror=headphones.MIRROR)
 	q = ws.Query(service)
 	
-	return (q, sleepytime)
+	logger.debug('Using the following server values:\nMBHost: %s ; MBPort: %i  ;  Sleep Interval: %i ' % (mbhost, mbport, sleepytime))
 	
+	return (q, sleepytime)
 
 def findArtist(name, limit=1):
 
@@ -63,7 +73,7 @@ def findArtist(name, limit=1):
 				artistResults = q.getArtists(ws.ArtistFilter(query=name, limit=limit))
 				break
 			except WebServiceError, e:
-				logger.warn('Attempt to query MusicBrainz for %s failed: %s' % (name, e))
+				logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
 				attempt += 1
 				time.sleep(10)
 		
@@ -123,7 +133,7 @@ def findRelease(name, limit=1):
 				releaseResults = q.getReleases(ws.ReleaseFilter(query=name, limit=limit))
 				break
 			except WebServiceError, e:
-				logger.warn('Attempt to query MusicBrainz for %s failed: %s' % (name, e))
+				logger.warn('Attempt to query MusicBrainz for "%s" failed: %s' % (name, str(e)))
 				attempt += 1
 				time.sleep(10)
 		
@@ -165,7 +175,7 @@ def getArtist(artistid, extrasonly=False):
 				artist = q.getArtistById(artistid, inc)
 				break
 			except WebServiceError, e:
-				logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s. Sleeping 5 seconds' % artistid)
+				logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e))) 
 				attempt += 1
 				time.sleep(5)
 				
@@ -216,7 +226,7 @@ def getArtist(artistid, extrasonly=False):
 						artist = q.getArtistById(artistid, inc)
 						break
 					except WebServiceError, e:
-						logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s. Sleeping 5 seconds' % artistid)
+						logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e)))
 						attempt += 1
 						time.sleep(5)
 						
@@ -256,7 +266,7 @@ def getReleaseGroup(rgid):
 				releaseGroup = q.getReleaseGroupById(rgid, inc)
 				break
 			except WebServiceError, e:
-				logger.warn('Attempt to retrieve information from MusicBrainz for release group "%s" failed. Sleeping 5 seconds' % rgid)
+				logger.warn('Attempt to retrieve information from MusicBrainz for release group "%s" failed (%s)' % (rgid, str(e)))
 				attempt += 1
 				time.sleep(5)
 	
@@ -278,7 +288,7 @@ def getReleaseGroup(rgid):
 					releaseResult = q.getReleaseById(release.id, inc)
 					break
 				except WebServiceError, e:
-					logger.warn('Attempt to retrieve release information for %s from MusicBrainz failed: %s. Sleeping 5 seconds' % (releaseResult.title, e))
+					logger.warn('Attempt to retrieve release information for %s from MusicBrainz failed (%s)' % (releaseResult.title, str(e)))
 					attempt += 1
 					time.sleep(5)		
 			
@@ -389,7 +399,7 @@ def getRelease(releaseid):
 				results = q.getReleaseById(releaseid, inc)
 				break
 			except WebServiceError, e:
-				logger.warn('Attempt to retrieve information from MusicBrainz for release "%s" failed: %s. SLeeping 5 seconds' % (releaseid, e))
+				logger.warn('Attempt to retrieve information from MusicBrainz for release "%s" failed (%s)' % (releaseid, str(e)))
 				attempt += 1
 				time.sleep(5)	
 		
@@ -461,7 +471,7 @@ def findArtistbyAlbum(name):
 			results = q.getReleaseGroups(f)
 			break
 		except WebServiceError, e:
-			logger.warn('Attempt to query MusicBrainz for %s failed: %s. Sleeping 5 seconds.' % (name, e))
+			logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
 			attempt += 1
 			time.sleep(10)	
 	
@@ -495,8 +505,8 @@ def findAlbumID(artist=None, album=None):
 		try:
 			results = q.getReleaseGroups(f)
 			break
-		except Exception, e:
-			logger.warn('Attempt to query MusicBrainz for %s - %s failed: %s. Sleeping 5 seconds.' % (artist, album, e))
+		except WebServiceError, e:
+			logger.warn('Attempt to query MusicBrainz for %s - %s failed (%s)' % (artist, album, str(e)))
 			attempt += 1
 			time.sleep(10)	
 	

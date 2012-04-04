@@ -59,6 +59,11 @@ def artistlist_to_mbids(artistlist, forced=False):
 	except Exception, e:
 		logger.warn('Failed to update arist information from Last.fm: %s' % e)
 		
+def addArtistIDListToDB(artistidlist):
+	# Used to add a list of artist IDs to the database in a single thread
+	logger.debug("Importer: Adding artist ids %s" % artistidlist)
+	for artistid in artistidlist:
+		addArtisttoDB(artistid)
 
 def addArtisttoDB(artistid, extrasonly=False):
 	
@@ -358,10 +363,10 @@ def updateFormat():
 		logger.info('Finding media format for %s files' % len(tracks))
 		for track in tracks:
 			try:
-                        	f = MediaFile(track['Location'])
-	                except Exception, e:
-        	                logger.info("Exception from MediaFile for: " + downloaded_track + " : " + str(e))
-                	        continue
+				f = MediaFile(track['Location'])
+			except Exception, e:
+				logger.info("Exception from MediaFile for: " + track['Location'] + " : " + str(e))
+				continue
 			controlValueDict = {"TrackID":  track['TrackID']}
 			newValueDict = {"Format": f.format}
 			myDB.upsert("tracks", newValueDict, controlValueDict)
@@ -371,10 +376,10 @@ def updateFormat():
 		logger.info('Finding media format for %s files' % len(havetracks))
 		for track in havetracks:
 			try:
-                        	f = MediaFile(track['Location'])
-	                except Exception, e:
-        	                logger.info("Exception from MediaFile for: " + downloaded_track + " : " + str(e))
-                	        continue
+				f = MediaFile(track['Location'])
+			except Exception, e:
+				logger.info("Exception from MediaFile for: " + track['Location'] + " : " + str(e))
+				continue
 			controlValueDict = {"TrackID":  track['TrackID']}
 			newValueDict = {"Format": f.format}
 			myDB.upsert("have", newValueDict, controlValueDict)

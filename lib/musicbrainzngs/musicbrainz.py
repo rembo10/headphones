@@ -16,7 +16,7 @@ import socket
 import xml.etree.ElementTree as etree
 from xml.parsers import expat
 
-_version = "0.2dev"
+_version = "0.3dev"
 _log = logging.getLogger("musicbrainzngs")
 
 
@@ -64,8 +64,11 @@ VALID_INCLUDES = {
 		"release-group-rels", "url-rels", "work-rels"
 	],
 	'discid': [
-		"artists", "labels", "recordings", "release-groups", "puids",
-		"echoprints", "isrcs"
+		"artists", "labels", "recordings", "release-groups", "media",
+		"artist-credits", "discids", "puids", "echoprints", "isrcs",
+		"artist-rels", "label-rels", "recording-rels", "release-rels",
+		"release-group-rels", "url-rels", "work-rels", "recording-level-rels",
+		"work-level-rels"
 	],
 	'echoprint': ["artists", "releases"],
 	'puid': ["artists", "releases", "puids", "echoprints", "isrcs"],
@@ -232,6 +235,10 @@ def set_useragent(app, version, contact=None):
         _useragent = "%s/%s python-musicbrainz-ngs/%s" % (app, version, _version)
     _client = "%s-%s" % (app, version)
     _log.debug("set user-agent to %s" % _useragent)
+
+def set_hostname(new_hostname):
+	global hostname
+	hostname = new_hostname
 
 # Rate limiting.
 
@@ -404,11 +411,14 @@ def _mb_request(path, method='GET', auth_required=False, client_required=False,
 	whether exceptions should be raised if the client and
 	username/password are left unspecified, respectively.
 	"""
-	args = dict(args) or {}
+	if args is None:
+		args = {}
+	else:
+		args = dict(args) or {}
 
 	if _useragent == "":
 		raise UsageError("set a proper user-agent with "
-						 "musicbrainz.set_useragent(\"application name\", \"application version\", \"contact info (preferably URL or email for your application)\")")
+						 "set_useragent(\"application name\", \"application version\", \"contact info (preferably URL or email for your application)\")")
 
 	if client_required:
 		args["client"] = _client
@@ -433,17 +443,19 @@ def _mb_request(path, method='GET', auth_required=False, client_required=False,
 	# Set up HTTP request handler and URL opener.
 	httpHandler = urllib2.HTTPHandler(debuglevel=0)
 	handlers = [httpHandler]
-	opener = urllib2.build_opener(*handlers)
 
 	# Add credentials if required.
 	if auth_required:
+		_log.debug("Auth required for %s" % url)
 		if not user:
 			raise UsageError("authorization required; "
-							 "use musicbrainz.auth(u, p) first")
+							 "use auth(user, pass) first")
 		passwordMgr = _RedirectPasswordMgr()
 		authHandler = _DigestAuthHandler(passwordMgr)
 		authHandler.add_password("musicbrainz.org", (), user, password)
 		handlers.append(authHandler)
+
+	opener = urllib2.build_opener(*handlers)
 
 	# Make request.
 	req = _MusicbrainzHttpRequest(method, url, data)
@@ -456,10 +468,13 @@ def _mb_request(path, method='GET', auth_required=False, client_required=False,
 	# Parse the response.
 	try:
 		return mbxml.parse_message(f)
-	except etree.ParseError, exc:
+	except UnicodeError as exc:
 		raise ResponseError(cause=exc)
-	except UnicodeError, exc:
-		raise ResponseError(cause=exc)
+	except Exception as exc:
+		if isinstance(exc, ETREE_EXCEPTIONS):
+			raise ResponseError(cause=exc)
+		else:
+			raise
 
 def _is_auth_required(entity, includes):
 	""" Some calls require authentication. This returns
@@ -510,6 +525,7 @@ def _do_mb_search(entity, query='', fields={}, limit=None, offset=None):
 		# Escape Lucene's special characters.
 		value = re.sub(r'([+\-&|!(){}\[\]\^"~*?:\\])', r'\\\1', value)
 		value = value.replace('\x00', '').strip()
+		value = value.lower() # Avoid binary operators like OR.
 		if value:
 			query_parts.append(u'%s:(%s)' % (key, value))
 	full_query = u' '.join(query_parts).strip()
@@ -539,7 +555,7 @@ def _do_mb_post(path, body):
 	"""Perform a single POST call for an endpoint with a specified
 	request body.
 	"""
-	return _mb_request(path, 'PUT', True, True, body=body)
+	return _mb_request(path, 'POST', True, True, body=body)
 
 
 # The main interface!
@@ -622,8 +638,8 @@ def search_works(query='', limit=None, offset=None, **fields):
 
 
 # Lists of entities
-def get_releases_by_discid(id, includes=[], release_type=[]):
-	params = _check_filter_and_make_params(includes, release_type=release_type)
+def get_releases_by_discid(id, includes=[], release_status=[], release_type=[]):
+	params = _check_filter_and_make_params(includes, release_status, release_type=release_type)
 	return _do_mb_query("discid", id, includes, params)
 
 def get_recordings_by_echoprint(echoprint, includes=[], release_status=[], release_type=[]):
@@ -720,8 +736,14 @@ def submit_echoprints(echoprints):
 	query = mbxml.make_echoprint_request(echoprints)
 	return _do_mb_post("recording", query)
 
-def submit_isrcs(isrcs):
-	raise NotImplementedError
+def submit_isrcs(recordings_isrcs):
+    """
+    Submit ISRCs.
+    Submits a set of {recording-id: [isrc1, irc1]}
+    Must call auth(user, pass) first
+    """
+    query = mbxml.make_isrc_request(recordings_isrcs=recordings_isrcs)
+    return _do_mb_post("recording", query)
 
 def submit_tags(artist_tags={}, recording_tags={}):
 	""" Submit user tags.

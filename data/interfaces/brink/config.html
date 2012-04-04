@@ -43,7 +43,7 @@
 							</span>
 						</div>
                     </td>
-
+				
                     <td>
 					    <p>
 						    <h3>HTTP Password:</h3>
@@ -52,13 +52,39 @@
                     </td>
                 </tr>
                 <tr>
+                <td>
+                    <h3>Enable API: <input class="styled" type="checkbox" name="api_enabled" id="api_enabled" value="1" ${config['api_enabled']} /></h3>
+                      <div id="apioptions">
+                      	<br>
+		      	        <h3>API key:<input type="text" name="api_key" id="api_key" value="${config['api_key']}" size="30"><input class="submit" type="button" value="Generate" id="generate_api"></h3><br><br>
+                      </div>
+                </td>                
+                </tr>
+                <tr>
                     <td>
                         <p>
 						    Launch Browser on Startup
 						    <input class="styled" type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} />
 					    </p>
                     </td>
+                	<td>
+                	    <h3>Download Scan Interval (mins):</h3>
+                    		<input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="10" maxlength="40">
+                	</td>
                 </tr>
+                <tr>
+
+                	<td>
+                	    <h3>NZB Search Interval (mins):</h3>
+                	    <input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="10" maxlength="40">
+               		</td>
+
+                	<td>
+                	    <h3>Library Scan Interval (mins):</h3>
+                	    <input type="text" name="libraryscan_interval" value="${config['libraryscan_interval']}" size="10" maxlength="40">
+               		</td>
+
+            </tr>
             </table>
 	    </div>
 	    <div class="table_wrapper">
@@ -141,7 +167,7 @@
                         <h3>
                             Usenet Retention:
                         </h3>
-					    <input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="20" maxlength="40" />
+					    <input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5" maxlength="10" />
                     </td>
                     <td></td>
                 </tr>
@@ -405,8 +431,8 @@
 					    <input type="text" name="folder_format" value="${config['folder_format']}" size="43" />
                         <div class="tooltip">
 						    <span>
-							    Use: artist, album, year, releasetype and first (first letter in artist name)
-                      		    E.g.: first/artist/album [year] = G/Girl Talk/All Day [2010]
+							    Use: Artist/artist, Album/album, Year/year, Type/type (release type) and First/first (first letter in artist name)
+                      		    E.g.: Type/First/artist/album [year] = Album/G/girl talk/all day [2010]
 						    </span>
 					    </div>
                         <br /><br />
@@ -416,7 +442,7 @@
 						    <input type="text" name="file_format" value="${config['file_format']}" size="43" />
 							<div class="tooltip">
 								<span>
-									Use: tracknumber, title, artist, album and year
+									Use: Track/track (track #), Title/title, Artist/artist, Album/album and Year/year
 								<span>
 							</div>
                     </td>
@@ -573,75 +599,51 @@
                 	    </div>
                     </td>
 		            <td>
-                        <h2>
-						    Prowl Notification:
-					    </h2>
-                        <p>
-						    <input class="styled" type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} />
-						    Enable Prowl Notifications
-					    </p>
-                        <div id="prowloptions">
-		      	            <h3>
-							    API key:
-						    </h3>
-						    <input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="40" />
-                            <br />
-                            <br />
-                      	    <p>
-							    <input class="styled" type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} />
-							    Notify on snatch?
-						    </p>
-						    <br />
-                      	    <h3>
-							    Priority (-2,-1,0,1 or 2):
-						    </h3>
-						    <input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2" />
-                        </div>
-		            </td>
+                    	  <h2>Notifications:</h2><br>
+                    	  <h3><input type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} />Enable Prowl Notifications</h3><br>
+                    	  <div id="prowloptions">
+		      	    	    <h3>API key:</h3><input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50"><br><br>
+                    	  	<h3><input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} />Notify on snatch?</h3><br>
+                    	  	<h3>Priority (-2,-1,0,1 or 2):</h3><input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2"><br><br>
+                    	  </div>
+                    	 <h3><input type="checkbox" name="xbmc_enabled" id="xbmc" value="1" ${config['xbmc_enabled']} />Enable XBMC Updates</h3><br>
+                    	  <div id="xbmcoptions">
+		      	    	    <h3>XBMC Host:Port:</h3><input type="text" name="xbmc_host" value="${config['xbmc_host']}" size="30"><br>
+		      	    	    <div class="tooltip"><span>e.g. http://localhost:8080. Separate hosts with commas</span></div>
+		      	    	    <h3>XBMC Username:</h3><input type="text" name="xbmc_username" value="${config['xbmc_username']}" size="30"><br><br>
+		      	    	    <h3>XBMC Password:</h3><input type="password" name="xbmc_password" value="${config['xbmc_password']}" size="30"><br><br>
+                    	  	<h3><input type="checkbox" name="xbmc_update" value="1" ${config['xbmc_update']} />Update XBMC Library</h3><br>
+                    	  	<h3><input type="checkbox" name="xbmc_notify" value="1" ${config['xbmc_notify']} />Send Notification to XBMC</h3><br>
+                    	  </div>
+		        	</td>
                 </tr>
-                <tr>
-				    <td>
-					    <h3>Muscbrainz Mirror: </h3>
-					    <select class="styled" name="mirror">
-					        %for mirror in config['mirror_list']:
-						        <%
-							        if mirror == headphones.MIRROR:
-								        selected = 'selected="selected"'
-							        else:
-								        selected = ''
-							        if mirror == "localhost":
-								        mirrortext = "  (use localhost:7143)"
-							        else:
-								        mirrortext = ''
-						        %>
-						        <option class="styled" value="${mirror}" ${selected}>
-                                ${mirror} ${mirrortext}
-                                </option>
-					        %endfor
-					    </select>
+            	<tr>
+					<td>
+						<h3>Muscbrainz Mirror: <select name="mirror" id="mirror" class="styled"><h3>
+						%for mirror in config['mirror_list']:
+							<%
+								if mirror == headphones.MIRROR:
+									selected = 'selected="selected"'
+								else:
+									selected = ''
+							%>
+							<option value="${mirror}" ${selected}>${mirror}</option>
+						%endfor
+						</select>
 						
 						<div id="customoptions">
-							<h3>Host:<br>
-								<input type="text" name="customhost" value="${config['customhost']}" size="20">
-							</h3>
-							<h3>
-								Port:<br>
-								<input type="text" name="customport" value="${config['customport']}" size="8">
-							</h3>
-							<h3>
-								Sleep Interval:
-								<br>
-								<input type="text" name="customsleep" value="${config['customsleep']}" size="4">
-							</h3>
+							<h3>Host:<br><input type="text" name="customhost" value="${config['customhost']}" size="20"></h3>
+							<h3>Port:<br><input type="text" name="customport" value="${config['customport']}" size="8"></h3>
+							<h3>Sleep Interval:<br><input type="text" name="customsleep" value="${config['customsleep']}" size="4"></h3>
 						</div>
-						
+					
 						<div id="hpserveroptions">
 							<h3>Username:<br><input type="text" name="hpuser" value="${config['hpuser']}" size="20"></h3>
 							<h3>Password:<br><input type="password" name="hppass" value="${config['hppass']}" size="15"></h3>
 							<i class="smalltext2"><a href="http://headphones.codeshy.com/vip">Get an Account</a></p>
 						</div>
-				    </td>
-                </tr>
+					</td>
+				</tr>
             </table>
         </div>
 
@@ -655,8 +657,60 @@
 
 <%def name="javascriptIncludes()">
 	<script>
+	
+	hideServerDivs = function () {
+		$("#customoptions").hide("fast");
+		$("#hpserveroptions").hide("fast");
+	};
+	
+	handleNewSelection = function () {
+	
+		hideServerDivs();
+		
+		switch ($(this).val()) {
+			case 'custom':
+				$("#customoptions").show("fast");
+			break;
+			case 'headphones':
+				$("#hpserveroptions").show("fast");
+			break;
+		}
+	};
+	
+
 	$(document).ready(function()
 	{
+		if ($("#api_enabled").is(":checked"))
+			{
+				$("#apioptions").show();
+			}
+		else
+			{
+				$("#apioptions").hide();
+			}
+		
+		$("#api_enabled").click(function(){
+			if ($("#api_enabled").is(":checked"))
+			{
+				$("#apioptions").show("fast");
+			}
+			else
+			{
+				$("#apioptions").hide("fast");
+			}
+		});		
+    
+    	$('#api_key').click(function(){ $('#api_key').select() });
+    	$("#generate_api").click(function(){
+    	    $.get('generateAPI', 
+    	        function(data){
+    	            if (data.error != undefined) {
+    	                alert(data.error);
+    	                return;
+    	            }
+    	            $('#api_key').val(data);
+    	    });
+    	});
 		if ($("#encode").is(":checked"))
 			{
 				$("#encoderoptions").show();
@@ -665,7 +719,7 @@
 			{
 				$("#encoderoptions").hide();
 			}
-		
+
 		$("#encode").click(function(){
 			if ($("#encode").is(":checked"))
 			{
@@ -695,7 +749,32 @@
 			{
 				$("#prowloptions").hide("fast");
 			}
-		});
+		});		
+
+		if ($("#xbmc").is(":checked"))
+			{
+				$("#xbmcoptions").show();
+			}
+		else
+			{
+				$("#xbmcoptions").hide();
+			}
+		
+		$("#xbmc").click(function(){
+			if ($("#xbmc").is(":checked"))
+			{
+				$("#xbmcoptions").show("fast");
+			}
+			else
+			{
+				$("#xbmcoptions").hide("fast");
+			}
+		});		
+		
+		$("#mirror").change(handleNewSelection);
+		handleNewSelection.apply($("#mirror"));
+
 	});
+	
 	</script>
 </%def>

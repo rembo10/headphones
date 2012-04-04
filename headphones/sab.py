@@ -25,8 +25,7 @@ import urllib2, cookielib
 
 from headphones.common import USER_AGENT
 from headphones import logger
-from headphones import prowl
-from headphones.prowl import PROWL
+from headphones import notifiers
 
 def sendNZB(nzb):
 
@@ -119,7 +118,7 @@ def sendNZB(nzb):
         logger.info(u"NZB sent to SAB successfully")
         if headphones.PROWL_ONSNATCH:
             logger.info(u"Prowl request")
-            prowl = PROWL()
+            prowl = notifiers.PROWL()
             prowl.notify(nzb.name,"Download started")
 
         return True

@@ -159,3 +159,6 @@ def apply_metadata(items, album_info):
         
         # Compilation flag.
         item.comp = album_info.va
+        
+        # Headphones seal of approval
+        item.comments = 'tagged by headphones/beets'

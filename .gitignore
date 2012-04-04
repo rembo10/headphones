@@ -7,12 +7,14 @@
 ######################
 *.log
 *.db
+*.db-journal
 *.ini
 logs/*
 
 # OS generated files #
 ######################
 .DS_Store?
+.DS_Store
 ehthumbs.db
 Icon?
 Thumbs.db

@@ -6,6 +6,7 @@ from StringIO import StringIO
 import gzip
 
 import os, re, time
+import string
 
 import headphones, exceptions
 from headphones import logger, db, helpers, classes, sab
@@ -116,7 +117,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
         except TypeError:
             year = ''
         
-        dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':'', '*':''}
+        dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':'', '*':'', '.':'', ':':''}
 
         cleanalbum = helpers.latinToAscii(helpers.replace_all(albums[1], dic))
         cleanartist = helpers.latinToAscii(helpers.replace_all(albums[0], dic))
@@ -481,7 +482,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
 def verifyresult(title, artistterm, term):
 	
-    title = re.sub('[\.\-\/\_]', ' ', title)
+	title = re.sub('[\.\-\/\_]', ' ', title)
 	
     #if artistterm != 'Various Artists':
     #    
@@ -496,17 +497,24 @@ def verifyresult(title, artistterm, term):
     #        return False
 
     #another attempt to weed out substrings. We don't want "Vol III" when we were looking for "Vol II"
-    tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
-    for token in tokens:
-    	if not token:
-    		continue
-        if token == 'Various' or token == 'Artists' or token == 'VA':
-            continue
-        if not re.search('(?:\W|^)+' + token + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
-            if not re.search('(?:\W|^)+' + token.replace("'","") + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):	
-                logger.info("Removed from results: " + title + " (missing tokens: " + token + " and " + token.replace("'","") + ")")
-                return False
-    return True
+    
+	tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
+	for token in tokens:
+
+		if not token:
+			continue
+		if token == 'Various' or token == 'Artists' or token == 'VA':
+			continue
+		if not re.search('(?:\W|^)+' + token + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
+			cleantoken = ''.join(c for c in token if c not in string.punctuation)
+			if not not re.search('(?:\W|^)+' + cleantoken + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
+				dic = {'!':'i', '$':'s'}
+				dumbtoken = helpers.replace_all(token, dic)
+				if not not re.search('(?:\W|^)+' + dumbtoken + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
+					logger.info("Removed from results: " + title + " (missing tokens: " + token + " and " + cleantoken + ")")
+					return False
+					
+	return True
 
 def getresultNZB(result):
     

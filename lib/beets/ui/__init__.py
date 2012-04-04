@@ -28,9 +28,13 @@ import sqlite3
 import errno
 import re
 
-from beets import library
-from beets import plugins
-from beets import util
+from lib.beets import library
+from lib.beets import plugins
+from lib.beets import util
+
+if sys.platform == 'win32':
+    import colorama
+    colorama.init()
 
 # Constants.
 CONFIG_PATH_VAR = 'BEETSCONFIG'
@@ -51,6 +55,7 @@ DEFAULT_PATH_FORMATS = [
 ]
 DEFAULT_ART_FILENAME = 'cover'
 DEFAULT_TIMEOUT = 5.0
+NULL_REPLACE = '<strip>'
 
 # UI exception. Commands should throw this in order to display
 # nonrecoverable errors to the user.
@@ -296,7 +301,7 @@ def human_bytes(size):
 
 def human_seconds(interval):
     """Formats interval, a number of seconds, as a human-readable time
-    interval.
+    interval using English words.
     """
     units = [
         (1, 'second'),
@@ -319,6 +324,13 @@ def human_seconds(interval):
         interval /= float(increment)
 
     return "%3.1f %ss" % (interval, suffix)
+
+def human_seconds_short(interval):
+    """Formats a number of seconds as a short human-readable M:SS
+    string.
+    """
+    interval = int(interval)
+    return u'%i:%02i' % (interval // 60, interval % 60)
 
 # ANSI terminal colorization code heavily inspired by pygments:
 # http://dev.pocoo.org/hg/pygments-main/file/b2deea5b5030/pygments/console.py
@@ -429,6 +441,8 @@ def _get_replacements(config):
     for index in xrange(0, len(parts), 2):
         pattern = parts[index]
         replacement = parts[index+1]
+        if replacement.lower() == NULL_REPLACE:
+            replacement = ''
         out.append((re.compile(pattern), replacement))
     return out
 
@@ -624,7 +638,7 @@ class SubcommandsOptionParser(optparse.OptionParser):
 def main(args=None, configfh=None):
     """Run the main command-line interface for beets."""
     # Get the default subcommands.
-    from beets.ui.commands import default_commands
+    from lib.beets.ui.commands import default_commands
 
     # Get default file paths.
     default_config, default_libpath, default_dir = default_paths()

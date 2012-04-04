@@ -15,7 +15,7 @@
 """Searches for albums in the MusicBrainz database.
 """
 import logging
-import lib.musicbrainzngs
+import lib.musicbrainzngs as musicbrainzngs
 
 import lib.beets.autotag.hooks
 import lib.beets
@@ -23,7 +23,7 @@ import lib.beets
 SEARCH_LIMIT = 5
 VARIOUS_ARTISTS_ID = '89ad4ac3-39f7-470e-963a-56509c546377'
 
-lib.musicbrainzngs.set_useragent('beets', lib.beets.__version__,
+musicbrainzngs.set_useragent('beets', lib.beets.__version__,
                              'http://beets.radbox.org/')
 
 class ServerBusyError(Exception): pass
@@ -36,14 +36,14 @@ RELEASE_INCLUDES = ['artists', 'media', 'recordings', 'release-groups',
 TRACK_INCLUDES = ['artists']
 
 # python-musicbrainz-ngs search functions: tolerate different API versions.
-if hasattr(lib.musicbrainzngs, 'release_search'):
+if hasattr(musicbrainzngs, 'release_search'):
     # Old API names.
-    _mb_release_search = lib.musicbrainzngs.release_search
-    _mb_recording_search = lib.musicbrainzngs.recording_search
+    _mb_release_search = musicbrainzngs.release_search
+    _mb_recording_search = musicbrainzngs.recording_search
 else:
     # New API names.
-    _mb_release_search = lib.musicbrainzngs.search_releases
-    _mb_recording_search = lib.musicbrainzngs.search_recordings
+    _mb_release_search = musicbrainzngs.search_releases
+    _mb_recording_search = musicbrainzngs.search_recordings
 
 def track_info(recording, medium=None, medium_index=None):
     """Translates a MusicBrainz recording result dictionary into a beets
@@ -165,7 +165,9 @@ def match_album(artist, album, tracks=None, limit=SEARCH_LIMIT):
     for release in res['release-list']:
         # The search result is missing some data (namely, the tracks),
         # so we just use the ID and fetch the rest of the information.
-        yield album_for_id(release['id'])
+        albuminfo = album_for_id(release['id'])
+        assert albuminfo is not None
+        yield albuminfo
 
 def match_track(artist, title, limit=SEARCH_LIMIT):
     """Searches for a single track and returns an iterable of TrackInfo
@@ -188,8 +190,8 @@ def album_for_id(albumid):
     object or None if the album is not found.
     """
     try:
-        res = lib.musicbrainzngs.get_release_by_id(albumid, RELEASE_INCLUDES)
-    except lib.musicbrainzngs.ResponseError:
+        res = musicbrainzngs.get_release_by_id(albumid, RELEASE_INCLUDES)
+    except musicbrainzngs.ResponseError:
         log.debug('Album ID match failed.')
         return None
     return album_info(res['release'])
@@ -199,8 +201,8 @@ def track_for_id(trackid):
     or None if no track is found.
     """
     try:
-        res = lib.musicbrainzngs.get_recording_by_id(trackid, TRACK_INCLUDES)
-    except lib.musicbrainzngs.ResponseError:
+        res = musicbrainzngs.get_recording_by_id(trackid, TRACK_INCLUDES)
+    except musicbrainzngs.ResponseError:
         log.debug('Track ID match failed.')
         return None
     return track_info(res['recording'])

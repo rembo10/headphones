@@ -2,8 +2,7 @@ import os
 import time
 import encode
 import urllib, shutil, re
-from headphones import prowl
-from headphones.prowl import PROWL
+from headphones import notifiers
 import lib.beets as beets
 from lib.beets import autotag
 from lib.beets.mediafile import MediaFile
@@ -207,8 +206,9 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 	if headphones.ENCODE:
 		downloaded_track_list=encode.encode(albumpath)
 	
+	album_art_path = albumart.getAlbumArt(albumid)
+	
 	if headphones.EMBED_ALBUM_ART or headphones.ADD_ALBUM_ART:
-		album_art_path = albumart.getAlbumArt(albumid)
 		artwork = urllib.urlopen(album_art_path).read()
 		if len(artwork) < 100:
 			artwork = False
@@ -256,13 +256,19 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 	updateHave(albumpath)
 	
 	logger.info('Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
-        if headphones.PROWL_ONSNATCH:
-	    pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
-            logger.info(u"Prowl request")
-            prowl = PROWL()
-            prowl.notify(pushmessage,"Download and Postprocessing completed")
-        
-
+	
+	if headphones.PROWL_ONSNATCH:
+		pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
+		logger.info(u"Prowl request")
+		prowl = notifiers.PROWL()
+		prowl.notify(pushmessage,"Download and Postprocessing completed")
+		
+	if headphones.XBMC_ENABLED:
+		xbmc = notifiers.XBMC()
+		if headphones.XBMC_UPDATE:
+			xbmc.update()
+		if headphones.XBMC_NOTIFY:
+			xbmc.notify(release['ArtistName'], release['AlbumTitle'], album_art_path)
 	
 def embedAlbumArt(artwork, downloaded_track_list):
 	logger.info('Embedding album art')
@@ -317,16 +323,18 @@ def moveFiles(albumpath, release, tracks):
 		firstchar = '0-9'
 	else:
 		firstchar = sortname[0]
-		
-	lowerfirst = firstchar.lower()
 	
 
-	values = {	'artist':	artist,
-				'album':	album,
+	values = {	'Artist':	artist,
+				'Album':	album,
+				'Year':		year,
+				'Type':  releasetype,
+				'First':	firstchar,
+				'artist':	artist.lower(),
+				'album':	album.lower(),
 				'year':		year,
-				'first':	firstchar,
-				'lowerfirst':	lowerfirst,
-                                'releasetype':  releasetype
+				'type':  releasetype.lower(),
+				'first':	firstchar.lower()
 			}
 			
 	
@@ -338,7 +346,10 @@ def moveFiles(albumpath, release, tracks):
 	
 	destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING)
 	
-	if os.path.exists(destination_path):
+	last_folder = headphones.FOLDER_FORMAT.split('/')[-1]
+	
+	# Only rename the folder if they use the album name, otherwise merge into existing folder
+	if os.path.exists(destination_path) and 'album' in last_folder.lower():
 		i = 1
 		while True:
 			newfolder = folder + '[%i]' % i
@@ -351,17 +362,39 @@ def moveFiles(albumpath, release, tracks):
 
 	logger.info('Moving files from %s to %s' % (unicode(albumpath, headphones.SYS_ENCODING, errors="replace"), unicode(destination_path, headphones.SYS_ENCODING, errors="replace")))
 	
-	try:
-		os.makedirs(destination_path)
-	
-	except Exception, e:
-		logger.error('Could not create folder for %s. Not moving: %s' % (release['AlbumTitle'], e))
-		return albumpath
-	
+	# Basically check if generic/non-album folders already exist, since we're going to merge
+	if not os.path.exists(destination_path):
+		try:
+			os.makedirs(destination_path)
+		except Exception, e:
+			logger.error('Could not create folder for %s. Not moving: %s' % (release['AlbumTitle'], e))
+			return albumpath
+
+	# Move files to the destination folder, renaming them if they already exist
 	for r,d,f in os.walk(albumpath):
 		for files in f:
-			shutil.move(os.path.join(r, files), destination_path)
-			
+			if os.path.isfile(os.path.join(destination_path, files)):
+				logger.info('Destination file exists: %s' % os.path.join(destination_path, files))
+				title = os.path.splitext(files)[0]
+				ext = os.path.splitext(files)[1]
+				i = 1
+				while True:
+					newfile = title + '(' + str(i) + ')' + ext
+					if os.path.isfile(os.path.join(destination_path, newfile)):
+						i += 1
+					else:
+						logger.info('Renaming to %s' % newfile)
+						try:	
+							os.rename(os.path.join(r, files), os.path.join(r, newfile))
+							files = newfile
+						except Exception, e:
+							logger.warn('Error renaming %s: %s' % (files, e))
+						break
+			try:
+				shutil.move(os.path.join(r, files), destination_path)
+			except shutil.Error, e:
+				logger.warn('Error moving file %s: %s' % (files, e))
+				
 	# Chmod the directories using the folder_format (script courtesy of premiso!)
 	folder_list = folder.split('/')
 	
@@ -370,6 +403,7 @@ def moveFiles(albumpath, release, tracks):
 		temp_f = os.path.join(temp_f, f)
 		os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING), int(headphones.FOLDER_PERMISSIONS, 8))
 	
+	# If we failed to move all the files out of the directory, this will fail too
 	try:
 		shutil.rmtree(albumpath)
 	except Exception, e:
@@ -401,8 +435,16 @@ def correctMetadata(albumid, release, downloaded_track_list):
 	logger.debug('Beets recommendation: %s' % rec)
 	autotag.apply_metadata(items, info)
 	
+	if len(items) != len(downloaded_track_list):
+		logger.warn("Mismatch between number of tracks downloaded and the metadata items, but I'll try to write it anyway")
+	
+	i = 1
 	for item in items:
-		item.write()
+		try:
+			item.write()
+		except Exception, e:
+			logger.warn('Error writing metadata to track %i: %s' % (i,e))
+		i += 1
 		
 def embedLyrics(downloaded_track_list):
 	logger.info('Adding lyrics')
@@ -458,10 +500,15 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		else:
 			title = f.title
 			
-			values = {	'tracknumber':	tracknumber,
-						'title':		title,
-						'artist':		release['ArtistName'],
-						'album':		release['AlbumTitle'],
+			values = {	'Track':		tracknumber,
+						'Title':		title,
+						'Artist':		release['ArtistName'],
+						'Album':		release['AlbumTitle'],
+						'Year':			year,
+						'track':		tracknumber,
+						'title':		title.lower(),
+						'artist':		release['ArtistName'].lower(),
+						'album':		release['AlbumTitle'].lower(),
 						'year':			year
 						}
 						

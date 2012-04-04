@@ -36,6 +36,7 @@ DATA_DIR = None
 
 CONFIG_FILE = None
 CFG = None
+CONFIG_VERSION = None
 
 DB_FILE = None
 
@@ -50,6 +51,9 @@ HTTP_USERNAME = None
 HTTP_PASSWORD = None
 HTTP_ROOT = None
 LAUNCH_BROWSER = False
+
+API_ENABLED = False
+API_KEY = None
 
 GIT_PATH = None
 INSTALL_TYPE = None
@@ -75,6 +79,7 @@ ADD_ALBUM_ART = False
 EMBED_ALBUM_ART = False
 EMBED_LYRICS = False
 DOWNLOAD_DIR = None
+BLACKHOLE = None
 BLACKHOLE_DIR = None
 USENET_RETENTION = None
 INCLUDE_EXTRAS = False
@@ -119,7 +124,6 @@ MININOVA = None
 DOWNLOAD_TORRENT_DIR = None
 
 INTERFACE = None
-NZB_HANDLER = None
 FOLDER_PERMISSIONS = None
 
 ENCODE = False
@@ -129,7 +133,6 @@ BITRATE = None
 SAMPLINGFREQUENCY = None
 ADVANCEDENCODER = None
 ENCODEROUTPUTFORMAT = None
-USE_ADVANCED_ENCODING = False
 ENCODERQUALITY = None
 ENCODERVBRCBR = None
 ENCODERLOSSLESS = False
@@ -137,16 +140,19 @@ PROWL_ENABLED = True
 PROWL_PRIORITY = 1
 PROWL_KEYS = None
 PROWL_ONSNATCH = True
-MIRRORLIST = ["musicbrainz.org","headphones","tbueter.com","localhost"]
+XBMC_ENABLED = False
+XBMC_HOST = None
+XBMC_USERNAME = None
+XBMC_PASSWORD = None
+XBMC_UPDATE = False
+XBMC_NOTIFY = False
+MIRRORLIST = ["musicbrainz.org","headphones","tbueter.com","custom"]
 MIRROR = None
-
-AUTOWANT_ALBUM = False
-AUTOWANT_SINGLE = False
-AUTOWANT_COMPILATION = False
-AUTOWANT_REMIX = False
-AUTOWANT_EP = False
-AUTOWANT_LIVE = False
-AUTOWANT_SOUNDTRACK = False
+CUSTOMHOST = None
+CUSTOMPORT = None
+CUSTOMSLEEP = None
+HPUSER = None
+HPPASS = None
 
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
@@ -198,8 +204,8 @@ def initialize():
 
     with INIT_LOCK:
     
-        global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, DATA_DIR, CONFIG_FILE, CFG, LOG_DIR, CACHE_DIR, \
-                HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, GIT_PATH, \
+        global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
+                HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, \
                 CURRENT_VERSION, LATEST_VERSION, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
                 ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, \
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
@@ -208,8 +214,8 @@ def initialize():
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, ENCODE, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
-                AUTOWANT_ALBUM, AUTOWANT_SINGLE, AUTOWANT_COMPILATION, AUTOWANT_REMIX, AUTOWANT_EP, AUTOWANT_LIVE, AUTOWANT_SOUNDTRACK, \
-                ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, MIRROR
+                ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, MIRROR, CUSTOMHOST, CUSTOMPORT, \
+                CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, XBMC_NOTIFY
                 
         if __INITIALIZED__:
             return False
@@ -222,8 +228,11 @@ def initialize():
         CheckSection('NZBsorg')
         CheckSection('Newzbin')
         CheckSection('Prowl')
+        CheckSection('XBMC')
         
         # Set global variables based on config file or use defaults
+        CONFIG_VERSION = check_setting_str(CFG, 'General', 'config_version', '0')
+        
         try:
             HTTP_PORT = check_setting_int(CFG, 'General', 'http_port', 8181)
         except:
@@ -237,6 +246,8 @@ def initialize():
         HTTP_PASSWORD = check_setting_str(CFG, 'General', 'http_password', '')
         HTTP_ROOT = check_setting_str(CFG, 'General', 'http_root', '/')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
+        API_ENABLED = bool(check_setting_int(CFG, 'General', 'api_enabled', 0))
+        API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', '')
         
@@ -249,13 +260,14 @@ def initialize():
         CORRECT_METADATA = bool(check_setting_int(CFG, 'General', 'correct_metadata', 0))
         MOVE_FILES = bool(check_setting_int(CFG, 'General', 'move_files', 0))
         RENAME_FILES = bool(check_setting_int(CFG, 'General', 'rename_files', 0))
-        FOLDER_FORMAT = check_setting_str(CFG, 'General', 'folder_format', 'artist/album [year]')
-        FILE_FORMAT = check_setting_str(CFG, 'General', 'file_format', 'tracknumber artist - album [year]- title')
+        FOLDER_FORMAT = check_setting_str(CFG, 'General', 'folder_format', 'Artist/Album [Year]')
+        FILE_FORMAT = check_setting_str(CFG, 'General', 'file_format', 'Track Artist - Album [Year]- Title')
         CLEANUP_FILES = bool(check_setting_int(CFG, 'General', 'cleanup_files', 0))
         ADD_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'add_album_art', 0))
         EMBED_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'embed_album_art', 0))
         EMBED_LYRICS = bool(check_setting_int(CFG, 'General', 'embed_lyrics', 0))
         DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'download_dir', '')
+        BLACKHOLE = bool(check_setting_int(CFG, 'General', 'blackhole', 0))
         BLACKHOLE_DIR = check_setting_str(CFG, 'General', 'blackhole_dir', '')
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', '')
         INCLUDE_EXTRAS = bool(check_setting_int(CFG, 'General', 'include_extras', 0))
@@ -296,7 +308,6 @@ def initialize():
         LASTFM_USERNAME = check_setting_str(CFG, 'General', 'lastfm_username', '')
         
         INTERFACE = check_setting_str(CFG, 'General', 'interface', 'default')
-        NZB_HANDLER = check_setting_str(CFG, 'General', 'nzb_handler', 'default')
         FOLDER_PERMISSIONS = check_setting_str(CFG, 'General', 'folder_permissions', '0755')
 		
         ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')        
@@ -306,7 +317,6 @@ def initialize():
         ENCODE = bool(check_setting_int(CFG, 'General', 'encode', 0))
         ADVANCEDENCODER = check_setting_str(CFG, 'General', 'advancedencoder', '')
         ENCODEROUTPUTFORMAT = check_setting_str(CFG, 'General', 'encoderoutputformat', 'mp3')
-		
         ENCODERQUALITY = check_setting_int(CFG, 'General', 'encoderquality', 2)
         ENCODERVBRCBR = check_setting_str(CFG, 'General', 'encodervbrcbr', 'cbr')
         ENCODERLOSSLESS = bool(check_setting_int(CFG, 'General', 'encoderlossless', 1))
@@ -315,19 +325,32 @@ def initialize():
         PROWL_KEYS = check_setting_str(CFG, 'Prowl', 'prowl_keys', '')
         PROWL_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_onsnatch', 0)) 
         PROWL_PRIORITY = check_setting_int(CFG, 'Prowl', 'prowl_priority', 0)
-
-        AUTOWANT_ALBUM = bool(check_setting_int(CFG, 'General', 'autowant_album', 0))
-        AUTOWANT_SINGLE = bool(check_setting_int(CFG, 'General', 'autowant_single', 0))
-        AUTOWANT_COMPILATION = bool(check_setting_int(CFG, 'General', 'autowant_compilation', 0))
-        AUTOWANT_REMIX = bool(check_setting_int(CFG, 'General', 'autowant_remix', 0))
-        AUTOWANT_EP = bool(check_setting_int(CFG, 'General', 'autowant_ep', 0))
-        AUTOWANT_LIVE = bool(check_setting_int(CFG, 'General', 'autowant_live', 0))
-        AUTOWANT_SOUNDTRACK = bool(check_setting_int(CFG, 'General', 'autowant_soundtrack', 0))
         
-        MIRROR = check_setting_str(CFG, 'General', 'mirror', 'headphones')
+        XBMC_ENABLED = bool(check_setting_int(CFG, 'XBMC', 'xbmc_enabled', 0))
+        XBMC_HOST = check_setting_str(CFG, 'XBMC', 'xbmc_host', '')
+        XBMC_USERNAME = check_setting_str(CFG, 'XBMC', 'xbmc_username', '')
+        XBMC_PASSWORD = check_setting_str(CFG, 'XBMC', 'xbmc_password', '')
+        XBMC_UPDATE = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update', 0))
+        XBMC_NOTIFY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify', 0))
         
-        USE_ADVANCED_ENCODING = bool(check_setting_int(CFG, 'General', 'use_advanced_encoding', 1))
-		
+        
+        MIRROR = check_setting_str(CFG, 'General', 'mirror', 'musicbrainz.org')
+        CUSTOMHOST = check_setting_str(CFG, 'General', 'customhost', 'localhost')
+        CUSTOMPORT = check_setting_int(CFG, 'General', 'customport', 5000)
+        CUSTOMSLEEP = check_setting_int(CFG, 'General', 'customsleep', 1)
+        HPUSER = check_setting_str(CFG, 'General', 'hpuser', 'username')
+        HPPASS = check_setting_str(CFG, 'General', 'hppass', 'password')
+        
+        # update folder formats in the config & bump up config version
+        if CONFIG_VERSION == '0':
+            from headphones.helpers import replace_all
+            file_values = {	'tracknumber':	'Track', 'title': 'Title','artist' : 'Artist', 'album' : 'Album', 'year' : 'Year' }
+            folder_values = { 'artist' : 'Artist', 'album':'Album', 'year' : 'Year', 'releasetype' : 'Type', 'first' : 'First', 'lowerfirst' : 'first' }
+            FILE_FORMAT = replace_all(FILE_FORMAT, file_values)
+            FOLDER_FORMAT = replace_all(FOLDER_FORMAT, folder_values)
+            
+            CONFIG_VERSION = '1'
+        
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
         
@@ -340,12 +363,6 @@ def initialize():
         
         # Start the logger, silence console logging if we need to
         logger.headphones_log.initLogger(verbose=VERBOSE)
-        
-        # Update some old config code:
-        if FOLDER_FORMAT == '%artist/%album/%track':
-            FOLDER_FORMAT = 'artist/album [year]'
-        if FILE_FORMAT == '%tracknumber %artist - %album - %title':
-            FILE_FORMAT = 'tracknumber artist - album - title'
         
         # Put the cache dir in the data dir for now
         CACHE_DIR = os.path.join(DATA_DIR, 'cache')
@@ -440,12 +457,15 @@ def config_write():
     new_config.filename = CONFIG_FILE
 
     new_config['General'] = {}
+    new_config['General']['config_version'] = CONFIG_VERSION
     new_config['General']['http_port'] = HTTP_PORT
     new_config['General']['http_host'] = HTTP_HOST
     new_config['General']['http_username'] = HTTP_USERNAME
     new_config['General']['http_password'] = HTTP_PASSWORD
     new_config['General']['http_root'] = HTTP_ROOT
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
+    new_config['General']['api_enabled'] = int(API_ENABLED)
+    new_config['General']['api_key'] = API_KEY
     new_config['General']['log_dir'] = LOG_DIR
     new_config['General']['git_path'] = GIT_PATH
 
@@ -465,6 +485,7 @@ def config_write():
     new_config['General']['embed_album_art'] = int(EMBED_ALBUM_ART)
     new_config['General']['embed_lyrics'] = int(EMBED_LYRICS)
     new_config['General']['download_dir'] = DOWNLOAD_DIR
+    new_config['General']['blackhole'] = int(BLACKHOLE)
     new_config['General']['blackhole_dir'] = BLACKHOLE_DIR
     new_config['General']['usenet_retention'] = USENET_RETENTION
     new_config['General']['include_extras'] = int(INCLUDE_EXTRAS)
@@ -513,9 +534,16 @@ def config_write():
     new_config['Prowl']['prowl_onsnatch'] = int(PROWL_ONSNATCH)
     new_config['Prowl']['prowl_priority'] = int(PROWL_PRIORITY)
     
+    new_config['XBMC'] = {}
+    new_config['XBMC']['xbmc_enabled'] = int(XBMC_ENABLED)
+    new_config['XBMC']['xbmc_host'] = XBMC_HOST
+    new_config['XBMC']['xbmc_username'] = XBMC_USERNAME
+    new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
+    new_config['XBMC']['xbmc_update'] = int(XBMC_UPDATE)
+    new_config['XBMC']['xbmc_notify'] = int(XBMC_NOTIFY)
+    
     new_config['General']['lastfm_username'] = LASTFM_USERNAME
     new_config['General']['interface'] = INTERFACE
-    new_config['General']['nzb_handler'] = NZB_HANDLER
     new_config['General']['folder_permissions'] = FOLDER_PERMISSIONS
 
     new_config['General']['encode'] = int(ENCODE)
@@ -524,21 +552,17 @@ def config_write():
     new_config['General']['samplingfrequency'] = int(SAMPLINGFREQUENCY)
     new_config['General']['encoderfolder'] = ENCODERFOLDER
     new_config['General']['advancedencoder'] = ADVANCEDENCODER
-    new_config['General']['use_advanced_encoding'] = USE_ADVANCED_ENCODING
     new_config['General']['encoderoutputformat'] = ENCODEROUTPUTFORMAT
     new_config['General']['encoderquality'] = ENCODERQUALITY
     new_config['General']['encodervbrcbr'] = ENCODERVBRCBR
     new_config['General']['encoderlossless'] = ENCODERLOSSLESS
-
-    new_config['General']['autowant_album'] = AUTOWANT_ALBUM
-    new_config['General']['autowant_single'] = AUTOWANT_SINGLE
-    new_config['General']['autowant_compilation'] = AUTOWANT_COMPILATION
-    new_config['General']['autowant_remix'] = AUTOWANT_REMIX
-    new_config['General']['autowant_ep'] = AUTOWANT_EP
-    new_config['General']['autowant_live'] = AUTOWANT_LIVE
-    new_config['General']['autowant_soundtrack'] = AUTOWANT_SOUNDTRACK
     
     new_config['General']['mirror'] = MIRROR
+    new_config['General']['customhost'] = CUSTOMHOST
+    new_config['General']['customport'] = CUSTOMPORT
+    new_config['General']['customsleep'] = CUSTOMSLEEP
+    new_config['General']['hpuser'] = HPUSER
+    new_config['General']['hppass'] = HPPASS
     
     new_config.write()
 
@@ -657,9 +681,6 @@ def dbcheck():
         c.execute('SELECT Format from tracks')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE tracks ADD COLUMN Format TEXT DEFAULT NULL')  
-
-    # Update the Format of files in library, this won't do anything if all files have a known format
-    threading.Thread(target=importer.updateFormat).start()
     
     conn.commit()
     c.close()
