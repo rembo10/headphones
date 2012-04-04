@@ -197,7 +197,7 @@ class Api(object):
 			self.id = kwargs['id']
 			
 		myDB = db.DBConnection()
-		controlValueDict = {'ArtistID': ArtistID}
+		controlValueDict = {'ArtistID': self.id}
 		newValueDict = {'Status': 'Paused'}
 		myDB.upsert("artists", newValueDict, controlValueDict)
 		
@@ -209,7 +209,7 @@ class Api(object):
 			self.id = kwargs['id']
 			
 		myDB = db.DBConnection()
-		controlValueDict = {'ArtistID': ArtistID}
+		controlValueDict = {'ArtistID': self.id}
 		newValueDict = {'Status': 'Active'}
 		myDB.upsert("artists", newValueDict, controlValueDict)
 		
@@ -252,7 +252,7 @@ class Api(object):
 		else:	
 			newValueDict = {'Status': 'Wanted'}
 		myDB.upsert("albums", newValueDict, controlValueDict)
-		searcher.searchforalbum(AlbumID, new)		
+		searcher.searchforalbum(self.id, new)		
 		
 	def _unqueueAlbum(self, **kwargs):
 		
