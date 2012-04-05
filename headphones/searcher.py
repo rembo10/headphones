@@ -253,7 +253,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 maxsize = 300000000        
 
             params = {    "t": "search",
-                        "apikey": headphones.NZBSORG_APIKEY,
+                        "apikey": headphones.NZBSORG_HASH,
                         "cat": categories,
                         "maxage": headphones.USENET_RETENTION,
                         "q": term
