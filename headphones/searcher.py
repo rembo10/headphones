@@ -243,67 +243,54 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
         if headphones.NZBSORG:
             provider = "nzbsorg"
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
-                categories = "31"
+                categories = "3040"
                 maxsize = 10000000000
             elif headphones.PREFERRED_QUALITY:
-                categories = "5"
+                categories = "3040,3010"
                 maxsize = 2000000000
             else:
-                categories = "5"
+                categories = "3010"
                 maxsize = 300000000        
 
-            params = {    "action": "search",
-                        "dl": 1,
-                        "catid": categories,
-                        "i": headphones.NZBSORG_UID,
-                        "h": headphones.NZBSORG_HASH,
-                        "age": headphones.USENET_RETENTION,
+            params = {    "t": "search",
+                        "apikey": headphones.NZBSORG_APIKEY,
+                        "cat": categories,
+                        "maxage": headphones.USENET_RETENTION,
                         "q": term
                         }
         
-            searchURL = 'https://secure.nzbs.org/rss.php?' + urllib.urlencode(params)
-            logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, provider))
+            searchURL = 'http://beta.nzbs.org/api?' + urllib.urlencode(params)
+                
+            logger.info(u'Parsing results from <a href="%s">nzbs.org</a>' % searchURL)
             
             try:
             	data = urllib2.urlopen(searchURL, timeout=20).read()
             except urllib2.URLError, e:
-            	logger.warn('Error fetching data from NZBs.org: %s' % e)
+            	logger.warn('Error fetching data from nzbs.org: %s' % e)
             	data = False
-            	items = False
             	
             if data:
-				try:    
-					d = minidom.parseString(data)
-					node = d.documentElement
-					items = d.getElementsByTagName("item")
-				except ExpatError:
-					logger.error('Unable to get the NZBs.org feed. Check that your settings are correct - post a bug if they are')
-					items = None
-            
-            if items:
-            
-                for item in items:
-        
-                    sizenode = item.getElementsByTagName("report:size")[0].childNodes
-                    titlenode = item.getElementsByTagName("title")[0].childNodes
-                    linknode = item.getElementsByTagName("link")[0].childNodes
-    
-                    for node in sizenode:
-                        size = int(node.data)
-                    for node in titlenode:
-                        title = node.data
-                    for node in linknode:
-                        url = node.data
-    
-                    if size < maxsize:
-                        resultlist.append((title, size, url, provider))
-                        logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-                    else:
-                        logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
-                
-            else:
-            
-                logger.info('No results found from NZBs.org for %s' % term)
+			
+				d = feedparser.parse(data)
+				
+				if not len(d.entries):
+					logger.info(u"No results found from nzbs.org for %s" % term)
+					pass
+				
+				else:
+					for item in d.entries:
+						try:
+							url = item.link
+							title = item.title
+							size = int(item.links[1]['length'])
+							if size < maxsize:
+								resultlist.append((title, size, url, provider))
+								logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+							else:
+								logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
+						
+						except Exception, e:
+							logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
 
         if headphones.NEWZBIN:
             provider = "newzbin"    
