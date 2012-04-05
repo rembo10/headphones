@@ -38,11 +38,13 @@ footer {
 #nav li.selected,
 #nav li.selected:hover 
 {
-	background-image: linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+	background-image: linear-gradient(bottom, rgb(115,115,115) 0%, rgb(130,130,130) 100%);
+	background-image: -o-linear-gradient(bottom, rgb(115,115,115) 0%, rgb(130,130,130) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(115,115,115) 0%, rgb(130,130,130) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(115,115,115) 0%, rgb(130,130,130) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(115,115,115) 0%, rgb(130,130,130) 100%);
+	border-bottom: 1px solid #000;
+	border-top: 1px solid #000;
 }
 
 /*Tooltip Color*/
@@ -89,4 +91,35 @@ div#searchbar
 	background-color:#FFF;
 	border: 1px solid rgba(0,0,0,0.5);
 	box-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+}
+
+/*
+ * Scrollbar Colors 
+ * */
+ /* Scrollbar background */
+.jspTrack
+{
+	background-image: linear-gradient(left , rgb(28,28,28) 0%, rgb(54,54,54) 100%);
+	background-image: -o-linear-gradient(left , rgb(28,28,28) 0%, rgb(54,54,54) 100%);
+	background-image: -moz-linear-gradient(left , rgb(28,28,28) 0%, rgb(54,54,54) 100%);
+	background-image: -webkit-linear-gradient(left , rgb(28,28,28) 0%, rgb(54,54,54) 100%);
+	background-image: -ms-linear-gradient(left , rgb(28,28,28) 0%, rgb(54,54,54) 100%);
+}
+
+.jspDrag:active,
+.jspDrag:hover
+{
+	
+}
+.jspDrag
+{
+	background: url(../images/scrollgrib.png) 50% 50% no-repeat rgb(160,160,160);
+	/*
+	background-image: linear-gradient(left , rgb(100,100,100) 0%, rgb(140,140,140) 100%);
+	background-image: -o-linear-gradient(left , rgb(100,100,100) 0%, rgb(140,140,140) 100%);
+	background-image: -moz-linear-gradient(left , rgb(100,100,100) 0%, rgb(140,140,140) 100%);
+	background-image: -webkit-linear-gradient(left , rgb(100,100,100) 0%, rgb(140,140,140) 100%);
+	background-image: -ms-linear-gradient(left , rgb(100,100,100) 0%, rgb(140,140,140) 100%);
+	box-shadow: 0px 0px 3px #000; 
+	*/
 }

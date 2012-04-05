@@ -244,7 +244,7 @@ ul#nav li:hover {
 ul#nav li a 
 { 
 line-height: 25px; 
-padding-left: 30px; 
+padding-left: 40px; 
 font-size: 12px; 
 color: #FFF; 
 text-decoration: none; 
@@ -252,6 +252,57 @@ width: 170px;
 display: block;
 }
 ul#nav li a:hover { color: #fff; }
+
+/*
+ * Menu background images
+ */
+.navHome
+{
+	background: url(../images/home.png);
+	background-position: 5% 50%;
+	background-repeat: no-repeat;
+}
+.navUpcoming
+{
+	background: url(../images/upcoming.png);
+	background-position: 5% 50%;
+	background-repeat: no-repeat;
+}
+
+.navSuggestions
+{
+	background: url(../images/suggestions.png);
+	background-position: 5% 50%;
+	background-repeat: no-repeat;
+}
+
+.navManage
+{
+	background: url(../images/manage.png);
+	background-position: 5% 50%;
+	background-repeat: no-repeat;
+}
+
+.navHistory
+{
+	background: url(../images/history.png);
+	background-position: 5% 50%;
+	background-repeat: no-repeat;
+}
+
+.navLogs
+{
+	background: url(../images/logs.png);
+	background-position: 5% 50%;
+	background-repeat: no-repeat;
+}
+
+.navSettings
+{
+	background: url(../images/settings.png);
+	background-position: 5% 50%;
+	background-repeat: no-repeat;
+}
 
 /*Subhead menu*/
 div#subhead_container 
@@ -316,7 +367,7 @@ ul#subhead_menu li a:hover
 div#searchbar 
 { 
 	position: fixed;
-	padding-left: 16px;
+	padding-left: 22px;
 	top: 5px;
 	right: 20px;
 	border-radius: 20px;
@@ -579,6 +630,7 @@ text-shadow: 1px 1px 0px rgb(173,61,0);
 .tooltip
 {
 	/*ColorStyles.css*/
+	margin-top: 3px;
     margin-right: 3px;
     float: left;
     position: relative;
@@ -586,12 +638,12 @@ text-shadow: 1px 1px 0px rgb(173,61,0);
     border-radius: 20px;
     border: 1px solid #000;
     box-shadow: 1px 1px 0px rgb(90,90,90);
-    width: 20px;
+    height: 13px;
+    width: 13px;
     font-weight: bold;
-	font-size: 12px;
-    height: 20px;
+	font-size: 10px;
     text-align: center;
-    line-height: 20px;
+    line-height: 13px;
     cursor: help;
     text-shadow: 1px 1px 0px rgba(255,255,255,0.2);
 }
@@ -611,6 +663,7 @@ text-shadow: 1px 1px 0px rgb(173,61,0);
     color: #000;
 	display: block;
 	font-style: italic;
+	font-size: 12px;
 	font-weight: normal;
 	position: absolute;
     z-index: 999;
@@ -1088,6 +1141,9 @@ table.display tr.even.gradeZ {
 
 .dataTables_scrollBody {
 	*margin-top: -1px;
+}
+.dataTables_mark{
+	margin-left: 20px;
 }
 
 .top, .bottom {
