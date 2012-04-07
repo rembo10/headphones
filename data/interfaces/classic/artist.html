@@ -126,14 +126,14 @@
 </%def>
 
 <%def name="headIncludes()">
-	<link rel="stylesheet" href="css/data_table.css">
+	<link rel="stylesheet" href="interfaces/classic/css/data_table.css">
 	%if artist['Status'] == 'Loading':
 	<meta http-equiv="refresh" content="5">
 	%endif
 </%def>
 
 <%def name="javascriptIncludes()">
-	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script src="interfaces/classic/js/libs/jquery.dataTables.min.js"></script>
 	<script>
 	$(document).ready(function()
 	{
