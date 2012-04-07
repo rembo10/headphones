@@ -72,11 +72,14 @@ div#updatebar,
 h1,
 table.display thead tr th 
 { 
+	background-color: rgb(160,160,160);
+/*
 	background-image: linear-gradient(bottom, rgb(134,134,134) 0%, rgb(168,168,168) 100%);
 	background-image: -o-linear-gradient(bottom, rgb(134,134,134) 0%, rgb(168,168,168) 100%);
 	background-image: -moz-linear-gradient(bottom, rgb(134,134,134) 0%, rgb(168,168,168) 100%);
 	background-image: -webkit-linear-gradient(bottom, rgb(134,134,134) 0%, rgb(168,168,168) 100%);
 	background-image: -ms-linear-gradient(bottom, rgb(134,134,134) 0%, rgb(168,168,168) 100%);
+	*/
 }
 
 /*Top left search field*/

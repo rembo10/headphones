@@ -132,7 +132,7 @@ h4 { font-size: 10px; color: #FFF; text-decoration: none;}
 
 p { margin-top: 8px; margin-bottom: 8px; }
 
-p.indented { margin-top: 20px; margin-bottom: 20px; font-size: 12px; }
+p.indented { margin-top: 20px; margin-bottom: 20px; margin-left: 10px; font-size: 12px; }
 p.center { text-align: center; font-size: 18px; }
 .smalltext2 { font-size: 12px; margin-left: 45px; }
 
@@ -195,9 +195,10 @@ div#updatebar
     
 a.update-link 
 {
+	display: block;
     border: 1px solid #000;
     border-radius: 3px;
-    padding: 5px 10px 5px 10px; 
+    padding: 5px 3px 5px 3px; 
     font-size: 16px; 
     font-weight: bold;
     background-image: linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,153,7) 100%);
@@ -474,6 +475,7 @@ div#main
 	line-height: 30px;
 	font-weight: bold;
 	color: rgb(190,190,190);
+	text-shadow: 1px 1px 0px #000;
 }
 
 .btnStatus
@@ -501,7 +503,7 @@ div#main
 }
 
 /*Status buttons*/
-.btnDownloaded 
+/*
 {
 	background-image: linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
 background-image: -o-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
@@ -510,7 +512,7 @@ background-image: -webkit-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0
 background-image: -ms-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
 text-shadow: 1px 1px 0px rgb(87,170,0);
 }
-.btnWanted
+
 {
     background-image: linear-gradient(bottom, rgb(85,0,128) 0%, rgb(128,0,153) 100%);
 background-image: -o-linear-gradient(bottom, rgb(85,0,128) 0%, rgb(128,0,153) 100%);
@@ -519,6 +521,9 @@ background-image: -webkit-linear-gradient(bottom, rgb(85,0,128) 0%, rgb(128,0,15
 background-image: -ms-linear-gradient(bottom, rgb(85,0,128) 0%, rgb(128,0,153) 100%);
 text-shadow: 1px 1px 0px rgb(128,0,160);
 }
+*/
+.btnDownloaded ,
+.btnWanted,
 .btnSkipped {
 background-image: linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
 background-image: -o-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
@@ -804,11 +809,11 @@ div#albumheader { margin: 20px 0px 40px 0px; min-height: 200px; }
 /*
     Track
 */
-div#track_wrapper { font-size: 16px; width: 100%; clear:both;  }
+div#track_wrapper { font-size: 12px; width: 100%; clear:both;  }
 div#track_table { margin-top: 20px; }
-table#track_table th#number { text-align: right; width: 8px; }
+table#track_table th#number { text-align: center; width: 12px; }
 table#track_table th#name { text-align:left ; min-width: 160px; }
-table#track_table th#duration { text-align: left; width: 20px; }
+table#track_table th#duration { text-align: left; width: 55px; }
 table#track_table th#location { text-align: left; min-width: 180px; }
 table#track_table th#bitrate { text-align: left; min-width: 75px; }
 
@@ -1031,7 +1036,7 @@ table.display thead tr th
 {
 	cursor: pointer;
 	* cursor: hand;
-	padding-left: 15px;
+	padding-left: 8px;
 	border: 1px solid #000;
 	color: #000;
 	text-shadow: 1px 1px rgba(255,255,255,0.2);
@@ -1065,23 +1070,23 @@ table.display td.center
 
 /*Sorting*/
 .sorting_asc {
-	background: url(../images/sort_asc.png) no-repeat center right;
+	background: url(../images/sort_asc.png) no-repeat center right rgb(160,160,160);
 }
 
 .sorting_desc {
-	background: url(../images/sort_desc.png) no-repeat center right;
+	background: url(../images/sort_desc.png) no-repeat center right rgb(160,160,160);
 }
 
 .sorting {
-	background: url(../images/sort_both.png) no-repeat center right;
+	background: url(../images/sort_both.png) no-repeat center right rgb(160,160,160);
 }
 
 .sorting_asc_disabled {
-	background: url(../images/sort_asc_disabled.png) no-repeat center right;
+	background: url(../images/sort_asc_disabled.png) no-repeat center right rgb(160,160,160);
 }
 
 .sorting_desc_disabled {
-	background: url(../images/sort_desc_disabled.png) no-repeat center right;
+	background: url(../images/sort_desc_disabled.png) no-repeat center right rgb(160,160,160);
 }
 
 /*
