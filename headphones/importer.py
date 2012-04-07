@@ -160,6 +160,21 @@ def addArtisttoDB(artistid, extrasonly=False):
 				newValueDict['Status'] = "Wanted"
 			else:
 				newValueDict['Status'] = "Skipped"
+				
+			if rg['type']=="Album" and headphones.AUTOWANT_ALBUM:
+				newValueDict['Status'] = "Wanted"
+			if rg['type']=="Compilation" and headphones.AUTOWANT_COMPILATION:
+				newValueDict['Status'] = "Wanted"
+			if rg['type']=="EP" and headphones.AUTOWANT_EP:
+				newValueDict['Status'] = "Wanted"
+			if rg['type']=="Remix" and headphones.AUTOWANT_REMIX:
+				newValueDict['Status'] = "Wanted"
+			if rg['type']=="Single" and headphones.AUTOWANT_SINGLE:
+				newValueDict['Status'] = "Wanted"
+			if rg['type']=="Live" and headphones.AUTOWANT_LIVE:
+				newValueDict['Status'] = "Wanted"
+			if rg['type']=="Soundtrack" and headphones.AUTOWANT_SOUNDTRACK:
+				newValueDict['Status'] = "Wanted"
 		
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		

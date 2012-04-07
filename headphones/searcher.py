@@ -11,6 +11,8 @@ import string
 import headphones, exceptions
 from headphones import logger, db, helpers, classes, sab
 
+from common import BLACKHOLE
+
 class NewzbinDownloader(urllib.FancyURLopener):
 
     def __init__(self):
@@ -437,14 +439,14 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             if data and bestqual:
             	logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
                 nzb_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year) 
-                if headphones.SAB_HOST and not headphones.BLACKHOLE:
+                if headphones.SAB_HOST and not headphones.NZB_HANDLER == BLACKHOLE:
 
                     nzb = classes.NZBDataSearchResult()
                     nzb.extraInfo.append(data)
                     nzb.name = nzb_folder_name
                     sab.sendNZB(nzb)
 
-                elif headphones.BLACKHOLE:
+                elif headphones.NZB_HANDLER == BLACKHOLE:
                 
                     nzb_name = nzb_folder_name + '.nzb'
                     download_path = os.path.join(headphones.BLACKHOLE_DIR, nzb_name)
@@ -649,6 +651,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 							title = item.title
 							seeders = item.seeds
 							url = item.links[1]['url']
+							url = urllib2.urlopen(url, timeout=30).geturl()
 							size = int(item.links[1]['length'])
 							try:
 								if format == "2":
@@ -661,7 +664,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                                                             torrent = f.read()
                                                                         else:
                                                                             torrent = response.read()
-									if int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1:
+									if int(torrent.find(".flac")) < 1:
 										rightformat = False
 							except Exception, e:
 								rightformat = False
@@ -734,7 +737,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                                                             torrent = f.read()
                                                                         else:
                                                                             torrent = response.read()
-									if int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1:
+									if int(torrent.find(".flac")) < 1:
 										rightformat = False
 							except Exception, e:
 								rightformat = False
@@ -801,7 +804,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                                                             torrent = f.read()
                                                                         else:
                                                                             torrent = response.read()
-									if int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1:
+									if int(torrent.find(".flac")) < 1:
 										rightformat = False
 							except Exception, e:
 								rightformat = False
