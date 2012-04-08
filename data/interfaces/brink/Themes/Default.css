@@ -73,27 +73,20 @@ h1,
 table.display thead tr th 
 { 
 	background-color: rgb(160,160,160);
-/*
-	background-image: linear-gradient(bottom, rgb(134,134,134) 0%, rgb(168,168,168) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(134,134,134) 0%, rgb(168,168,168) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(134,134,134) 0%, rgb(168,168,168) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(134,134,134) 0%, rgb(168,168,168) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(134,134,134) 0%, rgb(168,168,168) 100%);
-	*/
+}
+h1:active,
+table.display thead tr th:active
+{ 
+	background-color: rgb(210,210,210);
+	text-decoration: none;
 }
 
 /*Top left search field*/
-div#searchbar select,
-div#searchbar input[type=text]
-{
-	color: #000;
-}
 div#searchbar
 {
-	background-image: url(../images/search.png);
-	background-color:#FFF;
 	border: 1px solid rgba(0,0,0,0.5);
-	box-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+	box-shadow: 1px 1px 0px rgba(255,255,255,0.8);
+	background: rgba(0,0,0,0.8);
 }
 
 /*

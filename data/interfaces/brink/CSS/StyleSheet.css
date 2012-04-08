@@ -164,20 +164,26 @@ div.btnClose:after
 div.btnClose 
 {
     overflow: hidden;
-    -moz-border-radius: 0px 0px 0px 5px; -webkit-border-radius: 0px 0px 0px 5px; border-radius: 0px 0px 0px 5px;
-    background-color: rgba(0,0,0,0.2);
+    border-radius: 20px;
+    background: rgba(0,0,0,0.5);
     cursor: pointer;
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     position: relative;
-    top: -20px;
-    right: -20px;
+    top: -15px;
+    right: -15px;
     float: right;
     border: 1px solid #000;
-    box-shadow: 0px 0px 3px #000;
+    box-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+	text-shadow: 1px 1px 0px rgba(255,255,255,0.2);
     font-weight: bold;
-    font-size: 12px;
-    line-height: 18px;
+    font-size: 9px;
+    line-height: 15px;
+	text-align: center;
+}
+div.btnClose:hover
+{
+	background: rgb(210,210,210);
 }
 
 div#updatebar  
@@ -368,40 +374,38 @@ ul#subhead_menu li a:hover
 div#searchbar 
 { 
 	position: fixed;
-	padding-left: 22px;
 	top: 5px;
 	right: 20px;
-	border-radius: 20px;
-	background-position: 5px center;
-	background-repeat: no-repeat;
+	border: 0px;
 }
 div#searchbar input[type=text] { 
-	background-color: rgba(0,0,0,0.0); 
 	color: #fff;
 	border: 0px; 
+	background: url(../images/search.png) center left no-repeat rgba(0,0,0,0.0);
+	padding-left: 22px;
 	box-shadow: none;
-}
-div#searchbar select 
-{ 
-	background-color: rgba(0,0,0,0.0);
-	border: 0;
 }
 div#searchbar input[type=submit] 
 { 
-background-color: rgb(70,0,10);
-border-radius: 0px 20px 20px 0px; 
-border-top: 1px solid #000; 
-border-left: 1px solid rgb(45,0,10);
-height: 22px;
-width: 40px;
-line-height: 13px;
-margin-top: -1px;
-color: #000;
-text-align: center;
+	height: 22px;
+	color: #000;
+	font-weight: bold;
+	text-shadow: 1px 1px 0px rgb(170,170,170);
+	font-size: 12px;
+	line-height: 16px;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	box-shadow: 1px 1px 0px rgba(255,255,255,0.2);
+	border: 1px solid #000;
+	background: rgb(160,160,160);
+	margin-left: -5px;
 }
 
-div#searchbar input[type=submit]:hover { 
-color: rgb(170,0,10); }
+div#searchbar input[type=submit]:hover 
+{ 
+	background: rgb(210,210,210); 
+}
 
 
 
@@ -617,19 +621,25 @@ text-shadow: 1px 1px 0px rgb(173,61,0);
 	padding: 0px 15px 0px 10px;
 	color: #000;
 	font-weight: bold;
-	text-shadow: 1px 1px 0px rgb(170,170,170);
-	font-size: 12px/21px;
+	text-shadow: 1px 1px 0px rgba(170,170,170,0.5);
+	font-size: 12px;
 	line-height: 20px;
 	border-radius: 3px;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	box-shadow: 1px 1px 0px rgba(255,255,255,0.2);
 	border: 1px solid #000;
-	background: url(../Images/sort_asc.png);
+	background: url(../Images/arrow-down.png);
 	background-position: 98% 50%;
 	background-repeat: no-repeat;
 	background-color: rgb(160,160,160);
 	overflow: hidden;
+}
+
+.select:hover,
+.select:active
+{
+	background-color: rgb(210,210,210);
 }
 
 /*Tooltip*/
@@ -688,13 +698,15 @@ input[type="submit"]
     color: #000;
     font-weight: bold;
     padding: 3px 6px 3px 6px;
-	background-image: linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+	background: rgb(160,160,160);
 	text-shadow: 1px 1px 0px rgb(180,180,180);
 }
+.submit:hover,
+input[type="submit"]:hover
+{
+	background: rgb(210,210,210);
+}
+
 .text-pass,
 .text-field,
 input[type="password"],

@@ -25,12 +25,13 @@
 	width: 15px;
 	height: 100%;
 	background: rgb(160,160,160);
-	border-bottom: 1px solid rgb(90,90,90);
+	border-bottom: 0px solid rgb(90,90,90);
 	border-right: 1px solid rgb(90,90,90);
-	border-top: 1px solid rgb(190,190,190);
+	border-top: 0px solid rgb(190,190,190);
 	border-left: 1px solid rgb(190,190,190);
 	box-shadow: 0px 0px 5px #000;
-	padding: 2px;
+	padding-left: 2px;
+	padding-right: 2px;
 }
 
 .jspHorizontalBar
@@ -101,12 +102,12 @@
 .jspArrow.jspDisabled
 {
 	cursor: default;
-	background: #80808d;
+	background: rgb(160,160,160);
 }
 
 .jspVerticalBar .jspArrow
 {
-	height: 15px;
+	height: 20px;
 	box-shadow: 1px 1px 3px;
 }
 
@@ -127,6 +128,15 @@
 	background: #eeeef4;
 	float: left;
 	height: 100%;
+}
+
+.jspArrowUp
+{
+	background: url(../images/arrow-up.png) center center no-repeat;
+}
+.jspArrowDown
+{
+	background: url(../images/arrow-down.png) center center no-repeat;
 }
 
 /* Yuk! CSS Hack for IE6 3 pixel bug :( */
