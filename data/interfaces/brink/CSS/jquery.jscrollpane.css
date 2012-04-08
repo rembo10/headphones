@@ -9,6 +9,7 @@
 {
 	overflow: hidden;
 	position: relative;
+	z-index: 9999;
 }
 
 .jspPane
@@ -21,9 +22,15 @@
 	position: absolute;
 	top: 0;
 	right: 0;
-	width: 10px;
+	width: 15px;
 	height: 100%;
-	background: red;
+	background: rgb(160,160,160);
+	border-bottom: 1px solid rgb(90,90,90);
+	border-right: 1px solid rgb(90,90,90);
+	border-top: 1px solid rgb(190,190,190);
+	border-left: 1px solid rgb(190,190,190);
+	box-shadow: 0px 0px 5px #000;
+	padding: 2px;
 }
 
 .jspHorizontalBar
@@ -32,8 +39,8 @@
 	bottom: 0;
 	left: 0;
 	width: 100%;
-	height: 10px;
-	background: red;
+	height: 15px;
+	background: rgb(160,160,160);
 }
 
 .jspVerticalBar *,
@@ -51,27 +58,28 @@
 .jspHorizontalBar .jspCap
 {
 	float: left;
+	background: rgb(160,160,160);
 }
 
 .jspTrack
 {
-	background: rgb(10,10,10);
 	position: relative;
+	border-radius: 20px;
 }
 
 .jspDrag
 {
-	background: rgb(90,0,10);
 	position: relative;
 	top: 0;
 	left: 0;
 	cursor: pointer;
 	border-radius: 20px;
+	box-shadow: 0px 0px 3px #000;
 }
 .jspDrag:active,
 .jspDrag:hover
 {
-	background: rgb(160,0,10);
+	
 }
 
 .jspHorizontalBar .jspTrack,
@@ -83,10 +91,11 @@
 
 .jspArrow
 {
-	background: #50506d;
-	text-indent: -20000px;
+	background: rgb(160,160,160);
+	text-indent: 0px;
 	display: block;
 	cursor: pointer;
+	box-shadow: 0px 0px 3px #000;
 }
 
 .jspArrow.jspDisabled
@@ -97,7 +106,8 @@
 
 .jspVerticalBar .jspArrow
 {
-	height: 10px;
+	height: 15px;
+	box-shadow: 1px 1px 3px;
 }
 
 .jspHorizontalBar .jspArrow
