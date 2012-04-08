@@ -1,1 +1,11 @@
 <%inherit file="base.html"/>
+
+<table>
+%for artist in artists:
+<tr>
+	<td>${artist['ArtistName']}</td>
+	<td>${artist['Status']}</td>
+	<td>${artist['ArtistID']}</td>
+</tr>
+%endfor
+</table>

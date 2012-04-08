@@ -9,3 +9,17 @@ window.log = function f(){ log.history = log.history || []; log.history.push(arg
 
 // place any jQuery/helper plugins in here, instead of separate, slower script files.
 
+$(function() {
+	var open = false;
+	$('#footerSlideButton').click(function() {
+		if(open === false) {
+			$('#footerSlideContent').animate({ height: '300px' });
+			$(this).css('backgroundPosition', 'bottom left');
+			open = true;
+		} else {
+			$('#footerSlideContent').animate({ height: '0px' });
+			$(this).css('backgroundPosition', 'top left');
+			open = false;
+		}
+	});
+});
