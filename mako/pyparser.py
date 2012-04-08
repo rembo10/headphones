@@ -1,5 +1,5 @@
 # mako/pyparser.py
-# Copyright (C) 2006-2011 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -333,9 +333,11 @@ else:
                 self.listener.codeargs.append(p)
                 self.listener.args.append(ExpressionGenerator(n).value())
                 self.listener.declared_identifiers = \
-                    self.listener.declared_identifiers.union(p.declared_identifiers)
+                    self.listener.declared_identifiers.union(
+                                                      p.declared_identifiers)
                 self.listener.undeclared_identifiers = \
-                    self.listener.undeclared_identifiers.union(p.undeclared_identifiers)
+                    self.listener.undeclared_identifiers.union(
+                                                      p.undeclared_identifiers)
 
         def visit(self, expr):
             visitor.walk(expr, self)  # , walker=walker())

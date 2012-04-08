@@ -1,5 +1,5 @@
 # mako/lookup.py
-# Copyright (C) 2006-2011 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -151,14 +151,21 @@ class TemplateLookup(TemplateCollection):
                         bytestring_passthrough=False,
                         output_encoding=None, 
                         encoding_errors='strict', 
+
+                        cache_args=None,
+                        cache_impl='beaker',
+                        cache_enabled=True,
                         cache_type=None, 
-                        cache_dir=None, cache_url=None,
-                        cache_enabled=True, 
+                        cache_dir=None, 
+                        cache_url=None, 
+
                         modulename_callable=None, 
+                        module_writer=None,
                         default_filters=None, 
                         buffer_filters=(), 
                         strict_undefined=False,
                         imports=None, 
+                        enable_loop=True,
                         input_encoding=None, 
                         preprocessor=None):
  
@@ -170,23 +177,34 @@ class TemplateLookup(TemplateCollection):
         self.filesystem_checks = filesystem_checks
         self.collection_size = collection_size
 
+        if cache_args is None:
+            cache_args = {}
+        # transfer deprecated cache_* args
+        if cache_dir:
+            cache_args.setdefault('dir', cache_dir)
+        if cache_url:
+            cache_args.setdefault('url', cache_url)
+        if cache_type:
+            cache_args.setdefault('type', cache_type)
+
         self.template_args = {
             'format_exceptions':format_exceptions, 
             'error_handler':error_handler, 
             'disable_unicode':disable_unicode, 
             'bytestring_passthrough':bytestring_passthrough,
             'output_encoding':output_encoding, 
+            'cache_impl':cache_impl,
             'encoding_errors':encoding_errors, 
             'input_encoding':input_encoding, 
             'module_directory':module_directory, 
-            'cache_type':cache_type, 
-            'cache_dir':cache_dir or module_directory, 
-            'cache_url':cache_url, 
+            'module_writer':module_writer,
+            'cache_args':cache_args,
             'cache_enabled':cache_enabled, 
             'default_filters':default_filters, 
             'buffer_filters':buffer_filters, 
             'strict_undefined':strict_undefined,
             'imports':imports, 
+            'enable_loop':enable_loop,
             'preprocessor':preprocessor}
 
         if collection_size == -1:
@@ -204,7 +222,7 @@ class TemplateLookup(TemplateCollection):
         Note the "relativeto" argument is not supported here at the moment.
  
         """
- 
+
         try:
             if self.filesystem_checks:
                 return self._check(uri, self._collection[uri])
@@ -229,7 +247,8 @@ class TemplateLookup(TemplateCollection):
 
         if uri[0] != '/':
             if relativeto is not None:
-                v = self._uri_cache[key] = posixpath.join(posixpath.dirname(relativeto), uri)
+                v = self._uri_cache[key] = posixpath.join(
+                                            posixpath.dirname(relativeto), uri)
             else:
                 v = self._uri_cache[key] = '/' + uri
         else:
