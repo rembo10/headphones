@@ -156,7 +156,7 @@ def addArtisttoDB(artistid, extrasonly=False):
 							"Type":				rg['type']
 							}
 							
-			if release_dict['releasedate'] > helpers.today():
+			if release_dict['releasedate'] > helpers.today() and headphones.AUTOMARK_WANTED:
 				newValueDict['Status'] = "Wanted"
 			else:
 				newValueDict['Status'] = "Skipped"

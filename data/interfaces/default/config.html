@@ -325,21 +325,22 @@
                       <h2>Miscellaneous:</h2>
 						<br>
                       	<h3><input type="checkbox" name="include_extras" value="1" ${config['include_extras']} />Automatically Include Extras When Adding an Artist</h3>
-                      <i class="smalltext">(EPs, Compilations, Live Albums, Remix Albums and Singles)</i>
-					<br><br>
-					<h3>Interface: <select name="interface"><h3>
-					%for interface in config['interface_list']:
-						<%
-							if interface == headphones.INTERFACE:
-								selected = 'selected="selected"'
-							else:
-								selected = ''
-						%>
-						<option value="${interface}" ${selected}>${interface}</option>
-					%endfor
-					</select>
-					<br><br>
-                    <h3>Log Directory:</h3><input type="text" name="log_dir" value="${config['log_dir']}" size="50">
+                      	<i class="smalltext">(EPs, Compilations, Live Albums, Remix Albums and Singles)</i>
+						<h3><input type="checkbox" name="automark_wanted" value="1" ${config['automark_wanted']} />Automatically Mark Upcoming Albums as Wanted</h3>					
+						<br>
+						<h3>Interface: <select name="interface"><h3>
+						%for interface in config['interface_list']:
+							<%
+								if interface == headphones.INTERFACE:
+									selected = 'selected="selected"'
+								else:
+									selected = ''
+							%>
+							<option value="${interface}" ${selected}>${interface}</option>
+						%endfor
+						</select>
+						<br><br>
+                    	<h3>Log Directory:</h3><input type="text" name="log_dir" value="${config['log_dir']}" size="50">
                 </td>
             </tr>
             <tr>
