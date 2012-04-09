@@ -6,7 +6,7 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<ul id="subhead_menu">
-			<li><a href="shutdown">Shut Down</a></li>
+			<li><a href="shutdown" onClick="javascript;return confirm='Do you wish to Shutdown Headphones?'">Shut Down</a></li>
 			<li><a href="restart">Restart</a></li>
 		</ul>
 	</div>	
@@ -14,9 +14,10 @@
 <%def name="body()">
     <form action="configUpdate" method="post">
 	    <div class="table_wrapper">
-            <a name="web_interface"><h1>Web Interface</h1></a>
-
-            <table class="configtable" summary="Web Interface">
+			<div class="configContent">
+				<span class="configHeadline">Web Interface</span>
+				<div class="configPlaceHolder">
+					<table class="configtable" summary="Web Interface">
                 <tr>
                     <td>
                       <h3>HTTP Host:</h3>
@@ -28,14 +29,14 @@
 						    </div>
                     </td>
                     <td>
-                        <p>HTTP Username:</p>
+                        <h3>HTTP Username:</h3>
                         <input type="text" name="http_username" value="${config['http_user']}" size="30" maxlength="40" />
                     </td>
                 </tr>
 
                 <tr>
                     <td>
-                        <p>HTTP Port:</p>
+                        <h3>HTTP Port:</h3>
                         <input type="text" name="http_port" value="${config['http_port']}" size="10" maxlength="40" />
                         <div class="tooltip">
 							<span>
@@ -62,10 +63,10 @@
                 </tr>
                 <tr>
                     <td>
-                        <p>
+                        <h3>
 						    Launch Browser on Startup
 						    <input class="styled" type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} />
-					    </p>
+					    </h3>
                     </td>
                 	<td>
                 	    <h3>Download Scan Interval (mins):</h3>
@@ -86,10 +87,15 @@
 
             </tr>
             </table>
+				</div>
+			</div>
+            
 	    </div>
 	    <div class="table_wrapper">
-            <a name="download"><h1>Download Settings</h1></a>
-            <table class="configtable" summary="Download Settings">
+			<div class="configContent">
+				<span class="configHeadline">Download Settings</span>
+				<div class="configPlaceHolder">
+				<table class="configtable" summary="Download Settings">
 	            <tr>
                     <td colspan="2">
                         <h2>SABnzbd:</h2>
@@ -215,14 +221,15 @@
                     <td></td>
                 </tr>
             </table>
+				</div>
+			</div>
+            
 	    </div>
         <div class="table_wrapper">
-            <a name="providers">
-            <h1>
-                Search Providers
-            </h1>
-            </a>
-            <table class="configtable" summary="Search Providers">
+			<div class="configContent">
+				<span class="configHeadline">Search Providers</span>
+				<div class="configPlaceHolder">
+					<table class="configtable" summary="Search Providers">
                 <tr>
                     <td>
                         <p>
@@ -326,15 +333,15 @@
                     </td>
                 </tr>
             </table>
+				</div>
+			</div>
+            
 	    </div>
 	    <div class="table_wrapper">
-            <a name="post_processing">
-			    <h1>
-				    Quality &amp; Post Processing
-			    </h1>
-		    </a>
-
-            <table class="configtable" summary="Quality & Post Processing">
+			<div class="configContent">
+				<span class="configHeadline">Quality &amp; Post Processing</span>
+				<div class="configPlaceHolder">
+				<table class="configtable" summary="Quality & Post Processing">
                 <tr>
                     <td width="200">
                 	    <h2>Album Quality:</h2>
@@ -409,11 +416,15 @@
                     </td>
                 </tr>
 		    </table>
+				</div>
+			</div>
+            
 	    </div>
 	    <div class="table_wrapper">
-            <a name="advanced_settings"><h1>Advanced Settings</h1></a>
-        
-            <table class="configtable" summary="Advanced Settings">
+			<div class="configContent">
+				<span class="configHeadline">Advanced Settings</span>
+				<div class="configPlaceHolder">
+					<table class="configtable" summary="Advanced Settings">
                 <tr>
                     <td>
                 	    <h2>Renaming Options:</h2>
@@ -672,6 +683,9 @@
 					</td>
 				</tr>
             </table>
+				</div>
+			</div>
+            
         </div>
 
         <p class="center">

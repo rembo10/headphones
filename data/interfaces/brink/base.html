@@ -24,7 +24,7 @@
 	<link rel="stylesheet" href="interfaces/brink/Themes/Default.css">
 	<link rel="stylesheet" href="interfaces/brink/css/data_table.css">
 	
-	<script src="js/jquery-1.7.1.js"></script>
+	<script src="interfaces/brink/js/jquery-1.7.1.js"></script>
 	<script>!window.jQuery && document.write(unescape('%3Cscript src="js/libs/jquery-1.6.2.min.js"%3E%3C/script%3E'))</script>
 	${next.javascriptIncludes()}
 	
@@ -45,7 +45,15 @@
 			<!-- Add to Scrollbars #main -->
 			<script>
 			$(function(){
-				$('.main').jScrollPane();
+				$('.main').jScrollPane({
+					showArrows: true
+				});
+			});
+			
+			$(".main").resize(function(){
+				$('.main').jScrollPane({
+					showArrows: true
+				});
 			});
 			</script>
 		
@@ -84,8 +92,8 @@
 			${next.headerIncludes()}
 			<div id="searchbar">
                 <form action="search" method="get">
-                    <input type="text" value="" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" accesskey="s" />
-                    <select name="type">
+                    <input type="text" value="" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" accesskey="s" placeholder="Search..." />
+                    <select class="styled" name="type">
   						<option value="artist">Artist</option>
   						<option value="album">Album</option>
 					</select>
@@ -95,13 +103,13 @@
 			<div class="clear" />
 		</header>
 		<ul id="nav">
-				<li><a class="elseSelect" href="home" accesskey="1">Home</a></li>
-				<li><a href="upcoming" accesskey="2">Upcoming</a></li>
-				<li><a href="extras" accesskey="3">Suggestions</a></li>
-				<li><a href="manage" accesskey="4">Manage</a></li>
-				<li><a href="history" accesskey="5">History</a></li>
-				<li><a href="logs" accesskey="6">Logs</a></li>
-				<li><a href="config" accesskey="7">Settings</a></li>
+				<li><a class="navHome" href="home" accesskey="1">Home</a></li>
+				<li><a class="navUpcoming" href="upcoming" accesskey="2">Upcoming</a></li>
+				<li><a class="navSuggestions" href="extras" accesskey="3">Suggestions</a></li>
+				<li><a class="navManage" href="manage" accesskey="4">Manage</a></li>
+				<li><a class="navHistory" href="history" accesskey="5">History</a></li>
+				<li><a class="navLogs" href="logs" accesskey="6">Logs</a></li>
+				<li><a class="navSettings" href="config" accesskey="7">Settings</a></li>
 		</ul>
 			<div id="main" class="main">
 				${next.body()}

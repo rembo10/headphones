@@ -132,7 +132,7 @@ h4 { font-size: 10px; color: #FFF; text-decoration: none;}
 
 p { margin-top: 8px; margin-bottom: 8px; }
 
-p.indented { margin-top: 20px; margin-bottom: 20px; font-size: 12px; }
+p.indented { margin-top: 20px; margin-bottom: 20px; margin-left: 10px; font-size: 12px; }
 p.center { text-align: center; font-size: 18px; }
 .smalltext2 { font-size: 12px; margin-left: 45px; }
 
@@ -164,20 +164,26 @@ div.btnClose:after
 div.btnClose 
 {
     overflow: hidden;
-    -moz-border-radius: 0px 0px 0px 5px; -webkit-border-radius: 0px 0px 0px 5px; border-radius: 0px 0px 0px 5px;
-    background-color: rgba(0,0,0,0.2);
+    border-radius: 20px;
+    background: rgba(0,0,0,0.5);
     cursor: pointer;
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     position: relative;
-    top: -20px;
-    right: -20px;
+    top: -15px;
+    right: -15px;
     float: right;
     border: 1px solid #000;
-    box-shadow: 0px 0px 3px #000;
+    box-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+	text-shadow: 1px 1px 0px rgba(255,255,255,0.2);
     font-weight: bold;
-    font-size: 12px;
-    line-height: 18px;
+    font-size: 9px;
+    line-height: 15px;
+	text-align: center;
+}
+div.btnClose:hover
+{
+	background: rgb(210,210,210);
 }
 
 div#updatebar  
@@ -195,9 +201,10 @@ div#updatebar
     
 a.update-link 
 {
+	display: block;
     border: 1px solid #000;
     border-radius: 3px;
-    padding: 5px 10px 5px 10px; 
+    padding: 5px 3px 5px 3px; 
     font-size: 16px; 
     font-weight: bold;
     background-image: linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,153,7) 100%);
@@ -244,7 +251,7 @@ ul#nav li:hover {
 ul#nav li a 
 { 
 line-height: 25px; 
-padding-left: 30px; 
+padding-left: 40px; 
 font-size: 12px; 
 color: #FFF; 
 text-decoration: none; 
@@ -252,6 +259,57 @@ width: 170px;
 display: block;
 }
 ul#nav li a:hover { color: #fff; }
+
+/*
+ * Menu background images
+ */
+.navHome
+{
+	background: url(../images/home.png);
+	background-position: 5% 50%;
+	background-repeat: no-repeat;
+}
+.navUpcoming
+{
+	background: url(../images/upcoming.png);
+	background-position: 5% 50%;
+	background-repeat: no-repeat;
+}
+
+.navSuggestions
+{
+	background: url(../images/suggestions.png);
+	background-position: 5% 50%;
+	background-repeat: no-repeat;
+}
+
+.navManage
+{
+	background: url(../images/manage.png);
+	background-position: 5% 50%;
+	background-repeat: no-repeat;
+}
+
+.navHistory
+{
+	background: url(../images/history.png);
+	background-position: 5% 50%;
+	background-repeat: no-repeat;
+}
+
+.navLogs
+{
+	background: url(../images/logs.png);
+	background-position: 5% 50%;
+	background-repeat: no-repeat;
+}
+
+.navSettings
+{
+	background: url(../images/settings.png);
+	background-position: 5% 50%;
+	background-repeat: no-repeat;
+}
 
 /*Subhead menu*/
 div#subhead_container 
@@ -316,40 +374,38 @@ ul#subhead_menu li a:hover
 div#searchbar 
 { 
 	position: fixed;
-	padding-left: 16px;
 	top: 5px;
 	right: 20px;
-	border-radius: 20px;
-	background-position: 5px center;
-	background-repeat: no-repeat;
+	border: 0px;
 }
 div#searchbar input[type=text] { 
-	background-color: rgba(0,0,0,0.0); 
 	color: #fff;
 	border: 0px; 
+	background: url(../images/search.png) center left no-repeat rgba(0,0,0,0.0);
+	padding-left: 22px;
 	box-shadow: none;
-}
-div#searchbar select 
-{ 
-	background-color: rgba(0,0,0,0.0);
-	border: 0;
 }
 div#searchbar input[type=submit] 
 { 
-background-color: rgb(70,0,10);
-border-radius: 0px 20px 20px 0px; 
-border-top: 1px solid #000; 
-border-left: 1px solid rgb(45,0,10);
-height: 22px;
-width: 40px;
-line-height: 13px;
-margin-top: -1px;
-color: #000;
-text-align: center;
+	height: 22px;
+	color: #000;
+	font-weight: bold;
+	text-shadow: 1px 1px 0px rgb(170,170,170);
+	font-size: 12px;
+	line-height: 16px;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	box-shadow: 1px 1px 0px rgba(255,255,255,0.2);
+	border: 1px solid #000;
+	background: rgb(160,160,160);
+	margin-left: -5px;
 }
 
-div#searchbar input[type=submit]:hover { 
-color: rgb(170,0,10); }
+div#searchbar input[type=submit]:hover 
+{ 
+	background: rgb(210,210,210); 
+}
 
 
 
@@ -362,6 +418,7 @@ div#main
     min-height: 300px;
     height: 100%;
     width: 100%;
+	z-index: 1;
 }
 
 /*Filter position*/
@@ -423,6 +480,7 @@ div#main
 	line-height: 30px;
 	font-weight: bold;
 	color: rgb(190,190,190);
+	text-shadow: 1px 1px 0px #000;
 }
 
 .btnStatus
@@ -450,7 +508,7 @@ div#main
 }
 
 /*Status buttons*/
-.btnDownloaded 
+/*
 {
 	background-image: linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
 background-image: -o-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
@@ -459,7 +517,7 @@ background-image: -webkit-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0
 background-image: -ms-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
 text-shadow: 1px 1px 0px rgb(87,170,0);
 }
-.btnWanted
+
 {
     background-image: linear-gradient(bottom, rgb(85,0,128) 0%, rgb(128,0,153) 100%);
 background-image: -o-linear-gradient(bottom, rgb(85,0,128) 0%, rgb(128,0,153) 100%);
@@ -468,6 +526,9 @@ background-image: -webkit-linear-gradient(bottom, rgb(85,0,128) 0%, rgb(128,0,15
 background-image: -ms-linear-gradient(bottom, rgb(85,0,128) 0%, rgb(128,0,153) 100%);
 text-shadow: 1px 1px 0px rgb(128,0,160);
 }
+*/
+.btnDownloaded ,
+.btnWanted,
 .btnSkipped {
 background-image: linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
 background-image: -o-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
@@ -560,25 +621,32 @@ text-shadow: 1px 1px 0px rgb(173,61,0);
 	padding: 0px 15px 0px 10px;
 	color: #000;
 	font-weight: bold;
-	text-shadow: 1px 1px 0px rgb(170,170,170);
-	font-size: 12px/21px;
+	text-shadow: 1px 1px 0px rgba(170,170,170,0.5);
+	font-size: 12px;
 	line-height: 20px;
 	border-radius: 3px;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	box-shadow: 1px 1px 0px rgba(255,255,255,0.2);
 	border: 1px solid #000;
-	background: url(../Images/sort_asc.png);
+	background: url(../Images/arrow-down.png);
 	background-position: 98% 50%;
 	background-repeat: no-repeat;
 	background-color: rgb(160,160,160);
 	overflow: hidden;
 }
 
+.select:hover,
+.select:active
+{
+	background-color: rgb(210,210,210);
+}
+
 /*Tooltip*/
 .tooltip
 {
 	/*ColorStyles.css*/
+	margin-top: 3px;
     margin-right: 3px;
     float: left;
     position: relative;
@@ -586,12 +654,12 @@ text-shadow: 1px 1px 0px rgb(173,61,0);
     border-radius: 20px;
     border: 1px solid #000;
     box-shadow: 1px 1px 0px rgb(90,90,90);
-    width: 20px;
+    height: 13px;
+    width: 13px;
     font-weight: bold;
-	font-size: 12px;
-    height: 20px;
+	font-size: 10px;
     text-align: center;
-    line-height: 20px;
+    line-height: 13px;
     cursor: help;
     text-shadow: 1px 1px 0px rgba(255,255,255,0.2);
 }
@@ -611,6 +679,7 @@ text-shadow: 1px 1px 0px rgb(173,61,0);
     color: #000;
 	display: block;
 	font-style: italic;
+	font-size: 12px;
 	font-weight: normal;
 	position: absolute;
     z-index: 999;
@@ -629,13 +698,15 @@ input[type="submit"]
     color: #000;
     font-weight: bold;
     padding: 3px 6px 3px 6px;
-	background-image: linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+	background: rgb(160,160,160);
 	text-shadow: 1px 1px 0px rgb(180,180,180);
 }
+.submit:hover,
+input[type="submit"]:hover
+{
+	background: rgb(210,210,210);
+}
+
 .text-pass,
 .text-field,
 input[type="password"],
@@ -652,6 +723,27 @@ input[type="text"]
 }
 .manage_wrapper { width: 88%; margin: 20px auto 0 auto; padding: 25px; min-height: 150px; clear: both; _height: 302px; zoom: 1; }
 .table_wrapper_half { float: left; width: 50%; min-height: 100px; padding-bottom: 15px; }
+
+.configHeadline
+{
+	display: block;
+	background: url(../images/arrow-down.png) 7px 50% no-repeat rgb(160,160,160);
+	font-size: 16px;
+	color: rgb(0,0,0);
+	text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+	line-height: 25px;
+	padding-left: 30px;
+	cursor: pointer;
+}
+.configHeadline:active
+{
+	background: rgb(210,210,210);
+}
+.configClosed
+{
+	background: url(../images/arrow-up.png) 7px 50% no-repeat rgb(160,160,160);
+}
+
 
 .configtable { font-size: 14px; line-height:18px; }
 .configtable td { width: 350px; padding: 10px; }
@@ -751,11 +843,11 @@ div#albumheader { margin: 20px 0px 40px 0px; min-height: 200px; }
 /*
     Track
 */
-div#track_wrapper { font-size: 16px; width: 100%; clear:both;  }
+div#track_wrapper { font-size: 12px; width: 100%; clear:both;  }
 div#track_table { margin-top: 20px; }
-table#track_table th#number { text-align: right; width: 8px; }
+table#track_table th#number { text-align: center; width: 12px; }
 table#track_table th#name { text-align:left ; min-width: 160px; }
-table#track_table th#duration { text-align: left; width: 20px; }
+table#track_table th#duration { text-align: left; width: 55px; }
 table#track_table th#location { text-align: left; min-width: 180px; }
 table#track_table th#bitrate { text-align: left; min-width: 75px; }
 
@@ -840,11 +932,10 @@ div.progress-container
     width: 100%; 
     height: 15px; 
     margin: 2px 5px 2px 0px; 
-    background-color: rgba(0,0,0,0.2);
+    background-color: rgba(0,0,0,0.5);
     color: rgb(30,30,30); 
-    text-shadow: 1px 1px rgb(50,50,50);
     text-align: center;
-    border-radius: 20px;
+    border-radius: 3px;
     overflow: hidden;
 }
 /*Progress bar*/
@@ -863,8 +954,8 @@ div.progress-container div
     font-size: 12px;
     position: relative;
     text-align: center; 
-    color: rgb(0,0,0);
-    text-shadow: 1px 1px 0px rgb(50,50,50);
+    color: rgba(0,0,0,0.8);
+    text-shadow: 1px 1px 0px rgba(255,255,255,0.2);
 }
 
 
@@ -978,7 +1069,7 @@ table.display thead tr th
 {
 	cursor: pointer;
 	* cursor: hand;
-	padding-left: 15px;
+	padding-left: 8px;
 	border: 1px solid #000;
 	color: #000;
 	text-shadow: 1px 1px rgba(255,255,255,0.2);
@@ -1012,23 +1103,23 @@ table.display td.center
 
 /*Sorting*/
 .sorting_asc {
-	background: url(../images/sort_asc.png) no-repeat center right;
+	background: url(../images/sort_asc.png) no-repeat center right rgb(160,160,160);
 }
 
 .sorting_desc {
-	background: url(../images/sort_desc.png) no-repeat center right;
+	background: url(../images/sort_desc.png) no-repeat center right rgb(160,160,160);
 }
 
 .sorting {
-	background: url(../images/sort_both.png) no-repeat center right;
+	background: url(../images/sort_both.png) no-repeat center right rgb(160,160,160);
 }
 
 .sorting_asc_disabled {
-	background: url(../images/sort_asc_disabled.png) no-repeat center right;
+	background: url(../images/sort_asc_disabled.png) no-repeat center right rgb(160,160,160);
 }
 
 .sorting_desc_disabled {
-	background: url(../images/sort_desc_disabled.png) no-repeat center right;
+	background: url(../images/sort_desc_disabled.png) no-repeat center right rgb(160,160,160);
 }
 
 /*
@@ -1088,6 +1179,9 @@ table.display tr.even.gradeZ {
 
 .dataTables_scrollBody {
 	*margin-top: -1px;
+}
+.dataTables_mark{
+	margin-left: 20px;
 }
 
 .top, .bottom {

@@ -15,7 +15,7 @@ $(document).ready(function() {
 	windowHeight = $(window).height();
 	menuWidth = $("#nav").outerWidth();
 	headerHeight = $("header").height();
-	footerHeight = $("footer").innerHeight();
+	footerHeight = $("footer").height();
 	$("#main").height(windowHeight - headerHeight - footerHeight);
 	$("#main").width(windowWidth - menuWidth);
 	$(".fixed").width(windowWidth - menuWidth);
@@ -27,7 +27,7 @@ $(window).resize(function() {
 	windowHeight = $(window).height();
 	menuWidth = $("#nav").outerWidth();
 	headerHeight = $("header").height();
-	footerHeight = $("footer").innerHeight();
+	footerHeight = $("footer").height();
 	$("#main").height(windowHeight - headerHeight - footerHeight);
 	$("#main").width(windowWidth - menuWidth);
 	$(".fixed").width(windowWidth - menuWidth);
@@ -75,3 +75,10 @@ function accesskey()
 {
 	document.getElementByClassName('.dataTables_filter div input').accessKey="q";
 }
+
+//Config open/close
+$(function() {
+    $('.configHeadline').click(function() {
+        $(this).next('div').slideToggle("medium");
+    });
+});
