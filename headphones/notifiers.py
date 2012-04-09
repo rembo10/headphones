@@ -129,3 +129,45 @@ class XBMC:
 		
 		if not request:
 			logger.warn('Error sending notification request to XBMC')
+			
+class NMA:
+
+	def __init__(self):
+	
+		self.apikey = headphones.NMA_APIKEY
+		self.priority = headphones.NMA_PRIORITY
+		
+	def _send(self, data):
+		
+		url_data = urllib.urlencode(data)
+		url = 'https://www.notifymyandroid.com/publicapi/notify'
+		
+		req = urllib2.Request(url, url_data)
+
+		try:
+			handle = urllib2.urlopen(req)
+		except Exception, e:
+			logger.warn('Error opening NotifyMyAndroid url: ' % e)
+			return
+
+		response = handle.read().decode(headphones.SYS_ENCODING)
+		
+		return response		
+		
+	def notify(self, artist, album):
+	
+		apikey = self.apikey
+		priority = self.priority
+		
+		event = artist + ' - ' + album + ' complete!'
+		
+		description = "Headphones has downloaded and postprocessed: " + artist + ' [' + album + ']'
+	
+		data = { 'apikey': apikey, 'application':'Headphones', 'event': event, 'description': description, 'priority': priority}
+
+		logger.info('Sending notification request to NotifyMyAndroid')
+		request = self._send(data)
+		
+		if not request:
+			logger.warn('Error sending notification request to NotifyMyAndroid')		
+		
