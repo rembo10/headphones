@@ -325,21 +325,23 @@
                       <h2>Miscellaneous:</h2>
 						<br>
                       	<h3><input type="checkbox" name="include_extras" value="1" ${config['include_extras']} />Automatically Include Extras When Adding an Artist</h3>
-                      <i class="smalltext">(EPs, Compilations, Live Albums, Remix Albums and Singles)</i>
-					<br><br>
-					<h3>Interface: <select name="interface"><h3>
-					%for interface in config['interface_list']:
-						<%
-							if interface == headphones.INTERFACE:
-								selected = 'selected="selected"'
-							else:
-								selected = ''
-						%>
-						<option value="${interface}" ${selected}>${interface}</option>
-					%endfor
-					</select>
-					<br><br>
-                    <h3>Log Directory:</h3><input type="text" name="log_dir" value="${config['log_dir']}" size="50">
+                      	<i class="smalltext">(EPs, Compilations, Live Albums, Remix Albums and Singles)</i>
+						<h3><input type="checkbox" name="autowant_upcoming" value="1" ${config['autowant_upcoming']} />Automatically Mark Upcoming Albums as Wanted</h3>	
+						<h3><input type="checkbox" name="autowant_all" value="1" ${config['autowant_all']} />Automatically Mark All Albums as Wanted</h3>
+						<br>
+						<h3>Interface: <select name="interface"><h3>
+						%for interface in config['interface_list']:
+							<%
+								if interface == headphones.INTERFACE:
+									selected = 'selected="selected"'
+								else:
+									selected = ''
+							%>
+							<option value="${interface}" ${selected}>${interface}</option>
+						%endfor
+						</select>
+						<br><br>
+                    	<h3>Log Directory:</h3><input type="text" name="log_dir" value="${config['log_dir']}" size="50">
                 </td>
             </tr>
             <tr>
@@ -456,6 +458,34 @@
 		      	        <h3>XBMC Password:</h3><input type="password" name="xbmc_password" value="${config['xbmc_password']}" size="30"><br><br>
                       	<h3><input type="checkbox" name="xbmc_update" value="1" ${config['xbmc_update']} />Update XBMC Library</h3><br>
                       	<h3><input type="checkbox" name="xbmc_notify" value="1" ${config['xbmc_notify']} />Send Notification to XBMC</h3><br>
+                      </div>
+                     <h3><input type="checkbox" name="nma_enabled" id="nma" value="1" ${config['nma_enabled']} />Enable NotifyMyAndroid</h3><br>
+                      <div id="nmaoptions">
+		      	        <h3>NotifyMyAndroid API Key:</h3><input type="text" name="nma_apikey" value="${config['nma_apikey']}" size="30"><br>
+		      	        <i class="smalltext">Separate multiple api keys with commas</i><br>
+		      	        <h3>Priority:<select name="nma_priority"></h3>
+							%for x in [-2,-1,0,1,2]:
+								<%
+									if config['nma_priority'] == x:
+										nma_priority_selected = 'selected'
+									else:
+										nma_priority_selected = ''
+									
+									if x == -2:
+										nma_priority_value = 'Very Low'
+									elif x == -1:
+										nma_priority_value = 'Moderate'
+									elif x == 0:
+										nma_priority_value = 'Normal'
+									elif x == 1:
+										nma_priority_value = 'High'
+									else:
+										nma_priority_value = 'Emergency'
+								%>
+								<option value=${x} ${nma_priority_selected}>${nma_priority_value}</option>
+							%endfor
+						</select>
+					<br><br>
                       </div>
 		        </td>
             </tr>
@@ -609,6 +639,26 @@
 				$("#xbmcoptions").hide("fast");
 			}
 		});		
+		
+		if ($("#nma").is(":checked"))
+			{
+				$("#nmaoptions").show();
+			}
+		else
+			{
+				$("#nmaoptions").hide();
+			}
+		
+		$("#nma").click(function(){
+			if ($("#nma").is(":checked"))
+			{
+				$("#nmaoptions").show("fast");
+			}
+			else
+			{
+				$("#nmaoptions").hide("fast");
+			}
+		});	
 		
 		$("#mirror").change(handleNewSelection);
 		handleNewSelection.apply($("#mirror"));
