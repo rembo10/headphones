@@ -105,11 +105,11 @@ div#searchbar
 .jspDrag:active,
 .jspDrag:hover
 {
-	background: url(../images/scrollgrib.png) 50% 50% no-repeat rgb(180,180,180);
+	background: url(../images/scrollgrib.png) 50% 50% no-repeat rgb(160,160,160);
 }
 .jspDrag
 {
-	background: url(../images/scrollgrib.png) 50% 50% no-repeat rgb(160,160,160);
+	background: url(../images/scrollgrib.png) 50% 50% no-repeat rgb(130,130,130);
 	/*
 	background-image: linear-gradient(left , rgb(100,100,100) 0%, rgb(140,140,140) 100%);
 	background-image: -o-linear-gradient(left , rgb(100,100,100) 0%, rgb(140,140,140) 100%);

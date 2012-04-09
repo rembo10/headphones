@@ -75,3 +75,10 @@ function accesskey()
 {
 	document.getElementByClassName('.dataTables_filter div input').accessKey="q";
 }
+
+//Config open/close
+$(function() {
+    $('.configHeadline').click(function() {
+        $(this).next('div').slideToggle("medium");
+    });
+});
