@@ -383,6 +383,7 @@ class WebInterface(object):
 					"folder_format" : headphones.FOLDER_FORMAT,
 					"file_format" : headphones.FILE_FORMAT,
 					"include_extras" : checked(headphones.INCLUDE_EXTRAS),
+					"automark_wanted" : checked(headphones.AUTOMARK_WANTED),
 					"log_dir" : headphones.LOG_DIR,
 					"interface_list" : interface_list,
 					"encode":		checked(headphones.ENCODE),
@@ -481,6 +482,7 @@ class WebInterface(object):
 		headphones.FOLDER_FORMAT = folder_format
 		headphones.FILE_FORMAT = file_format
 		headphones.INCLUDE_EXTRAS = include_extras
+		headphones.AUTOMARK_WANTED = automark_wanted
 		headphones.INTERFACE = interface
 		headphones.LOG_DIR = log_dir
 		headphones.ENCODE = encode
