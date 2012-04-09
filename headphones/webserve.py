@@ -405,6 +405,9 @@ class WebInterface(object):
 					"xbmc_password": headphones.XBMC_PASSWORD,
 					"xbmc_update": checked(headphones.XBMC_UPDATE),
 					"xbmc_notify": checked(headphones.XBMC_NOTIFY),
+					"nma_enabled": checked(headphones.NMA_ENABLED),
+					"nma_apikey": headphones.NMA_APIKEY,
+					"nma_priority": int(headphones.NMA_PRIORITY),
 					"mirror_list": headphones.MIRRORLIST,
 					"mirror": headphones.MIRROR,
 					"customhost": headphones.CUSTOMHOST,
@@ -425,7 +428,7 @@ class WebInterface(object):
 		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, interface=None, log_dir=None,
 		encode=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
 		prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0, 
-		mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None):
+		nma_enabled=False, nma_apikey=None, nma_priority=0, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None):
 
 		headphones.HTTP_HOST = http_host
 		headphones.HTTP_PORT = http_port
@@ -500,6 +503,9 @@ class WebInterface(object):
 		headphones.XBMC_PASSWORD = xbmc_password
 		headphones.XBMC_UPDATE = xbmc_update
 		headphones.XBMC_NOTIFY = xbmc_notify
+		headphones.NMA_ENABLED = nma_enabled
+		headphones.NMA_APIKEY = nma_apikey
+		headphones.NMA_PRIORITY = nma_priority
 		headphones.MIRROR = mirror
 		headphones.CUSTOMHOST = customhost
 		headphones.CUSTOMPORT = customport
