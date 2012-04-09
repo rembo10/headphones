@@ -383,7 +383,8 @@ class WebInterface(object):
 					"folder_format" : headphones.FOLDER_FORMAT,
 					"file_format" : headphones.FILE_FORMAT,
 					"include_extras" : checked(headphones.INCLUDE_EXTRAS),
-					"automark_wanted" : checked(headphones.AUTOMARK_WANTED),
+					"autowant_upcoming" : checked(headphones.AUTOWANT_UPCOMING),
+					"autowant_all" : checked(headphones.AUTOWANT_ALL),
 					"log_dir" : headphones.LOG_DIR,
 					"interface_list" : interface_list,
 					"encode":		checked(headphones.ENCODE),
@@ -426,7 +427,7 @@ class WebInterface(object):
 		usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
 		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
 		torrentblackhole_dir=None, download_torrent_dir=None, numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, 
-		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, interface=None, log_dir=None,
+		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, autowant_upcoming=False, autowant_all=False, interface=None, log_dir=None,
 		encode=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
 		prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0, 
 		nma_enabled=False, nma_apikey=None, nma_priority=0, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None):
@@ -482,7 +483,8 @@ class WebInterface(object):
 		headphones.FOLDER_FORMAT = folder_format
 		headphones.FILE_FORMAT = file_format
 		headphones.INCLUDE_EXTRAS = include_extras
-		headphones.AUTOMARK_WANTED = automark_wanted
+		headphones.AUTOWANT_UPCOMING = autowant_upcoming
+		headphones.AUTOWANT_ALL = autowant_all
 		headphones.INTERFACE = interface
 		headphones.LOG_DIR = log_dir
 		headphones.ENCODE = encode
