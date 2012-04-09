@@ -146,6 +146,9 @@ XBMC_USERNAME = None
 XBMC_PASSWORD = None
 XBMC_UPDATE = False
 XBMC_NOTIFY = False
+NMA_ENABLED = False
+NMA_APIKEY = None
+NMA_PRIORITY = None
 MIRRORLIST = ["musicbrainz.org","headphones","tbueter.com","custom"]
 MIRROR = None
 CUSTOMHOST = None
@@ -215,7 +218,7 @@ def initialize():
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, ENCODE, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
                 ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, MIRROR, CUSTOMHOST, CUSTOMPORT, \
-                CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, XBMC_NOTIFY
+                CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY
                 
         if __INITIALIZED__:
             return False
@@ -229,6 +232,7 @@ def initialize():
         CheckSection('Newzbin')
         CheckSection('Prowl')
         CheckSection('XBMC')
+        CheckSection('NMA')
         
         # Set global variables based on config file or use defaults
         CONFIG_VERSION = check_setting_str(CFG, 'General', 'config_version', '0')
@@ -333,6 +337,9 @@ def initialize():
         XBMC_UPDATE = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update', 0))
         XBMC_NOTIFY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify', 0))
         
+        NMA_ENABLED = bool(check_setting_int(CFG, 'NMA', 'nma_enabled', 0))
+        NMA_APIKEY = check_setting_str(CFG, 'NMA', 'nma_apikey', '')
+        NMA_PRIORITY = check_setting_int(CFG, 'NMA', 'nma_priority', 0)
         
         MIRROR = check_setting_str(CFG, 'General', 'mirror', 'musicbrainz.org')
         CUSTOMHOST = check_setting_str(CFG, 'General', 'customhost', 'localhost')
@@ -541,6 +548,11 @@ def config_write():
     new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
     new_config['XBMC']['xbmc_update'] = int(XBMC_UPDATE)
     new_config['XBMC']['xbmc_notify'] = int(XBMC_NOTIFY)
+    
+    new_config['NMA'] = {}
+    new_config['NMA']['nma_enabled'] = int(NMA_ENABLED)
+    new_config['NMA']['nma_apikey'] = NMA_APIKEY
+    new_config['NMA']['nma_priority'] = NMA_PRIORITY
     
     new_config['General']['lastfm_username'] = LASTFM_USERNAME
     new_config['General']['interface'] = INTERFACE
