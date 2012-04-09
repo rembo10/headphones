@@ -1,5 +1,5 @@
 # mako/lexer.py
-# Copyright (C) 2006-2011 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -62,7 +62,8 @@ class Lexer(object):
         return self.match_reg(reg)
  
     def match_reg(self, reg):
-        """match the given regular expression object to the current text position.
+        """match the given regular expression object to the current text
+        position.
  
         if a match occurs, update the current text and line position.
  
@@ -86,36 +87,40 @@ class Lexer(object):
             self.lineno += len(lines)
             #print "MATCHED:", match.group(0), "LINE START:", 
             # self.matched_lineno, "LINE END:", self.lineno
-        #print "MATCH:", regexp, "\n", self.text[mp : mp + 15], (match and "TRUE" or "FALSE")
+        #print "MATCH:", regexp, "\n", self.text[mp : mp + 15], \
+        #          (match and "TRUE" or "FALSE")
         return match
  
     def parse_until_text(self, *text):
         startpos = self.match_position
+        text_re = r'|'.join(text)
+        brace_level = 0
         while True:
             match = self.match(r'#.*\n')
             if match:
                 continue
-            match = self.match(r'(\"\"\"|\'\'\'|\"|\')')
+            match = self.match(r'(\"\"\"|\'\'\'|\"|\')((?<!\\)\\\1|.)*?\1',
+                               re.S)
             if match:
-                m = self.match(r'.*?%s' % match.group(1), re.S)
-                if not m:
-                    raise exceptions.SyntaxException(
-                                "Unmatched '%s'" % 
-                                match.group(1), 
-                                **self.exception_kwargs)
-            else:
-                match = self.match(r'(%s)' % r'|'.join(text))
-                if match:
-                    return \
-                        self.text[startpos:self.match_position-len(match.group(1))],\
-                        match.group(1)
-                else:
-                    match = self.match(r".*?(?=\"|\'|#|%s)" % r'|'.join(text), re.S)
-                    if not match:
-                        raise exceptions.SyntaxException(
-                                    "Expected: %s" % 
-                                    ','.join(text), 
-                                    **self.exception_kwargs)
+                continue
+            match = self.match(r'(%s)' % text_re)
+            if match:
+                if match.group(1) == '}' and brace_level > 0:
+                    brace_level -= 1
+                    continue
+                return \
+                    self.text[startpos:\
+                              self.match_position-len(match.group(1))],\
+                    match.group(1)
+            match = self.match(r"(.*?)(?=\"|\'|#|%s)" % text_re, re.S)
+            if match:
+                brace_level += match.group(1).count('{')
+                brace_level -= match.group(1).count('}')
+                continue
+            raise exceptions.SyntaxException(
+                        "Expected: %s" % 
+                        ','.join(text), 
+                        **self.exception_kwargs)
  
     def append_node(self, nodecls, *args, **kwargs):
         kwargs.setdefault('source', self.text)
@@ -127,6 +132,10 @@ class Lexer(object):
             self.tag[-1].nodes.append(node)
         else:
             self.template.nodes.append(node)
+        # build a set of child nodes for the control line
+        # (used for loop variable detection)
+        if self.control_line:
+            self.control_line[-1].nodes.append(node)
         if isinstance(node, parsetree.Tag):
             if len(self.tag):
                 node.parent = self.tag[-1]
@@ -139,9 +148,9 @@ class Lexer(object):
             elif len(self.control_line) and \
                     not self.control_line[-1].is_ternary(node.keyword):
                 raise exceptions.SyntaxException(
-                                "Keyword '%s' not a legal ternary for keyword '%s'" %
-                                (node.keyword, self.control_line[-1].keyword),
-                                **self.exception_kwargs)
+                          "Keyword '%s' not a legal ternary for keyword '%s'" %
+                          (node.keyword, self.control_line[-1].keyword),
+                          **self.exception_kwargs)
 
     _coding_re = re.compile(r'#.*coding[:=]\s*([-\w.]+).*\r?\n')
 
@@ -178,10 +187,10 @@ class Lexer(object):
                 text = text.decode(parsed_encoding)
             except UnicodeDecodeError, e:
                 raise exceptions.CompileException(
-                                "Unicode decode operation of encoding '%s' failed" %
-                                parsed_encoding, 
-                                text.decode('utf-8', 'ignore'), 
-                                0, 0, filename)
+                           "Unicode decode operation of encoding '%s' failed" %
+                           parsed_encoding, 
+                           text.decode('utf-8', 'ignore'), 
+                           0, 0, filename)
 
         return parsed_encoding, text
 
@@ -230,11 +239,12 @@ class Lexer(object):
                                                 self.tag[-1].keyword, 
                                                 **self.exception_kwargs)
         if len(self.control_line):
-            raise exceptions.SyntaxException("Unterminated control keyword: '%s'" %
-                                            self.control_line[-1].keyword, 
-                                            self.text, 
-                                            self.control_line[-1].lineno,
-                                            self.control_line[-1].pos, self.filename)
+            raise exceptions.SyntaxException(
+                                      "Unterminated control keyword: '%s'" %
+                                      self.control_line[-1].keyword, 
+                                      self.text, 
+                                      self.control_line[-1].lineno,
+                                      self.control_line[-1].pos, self.filename)
         return self.template
 
     def match_tag_start(self):
@@ -243,7 +253,8 @@ class Lexer(object):
  
             ([\w\.\:]+)   # keyword
  
-            ((?:\s+\w+|\s*=\s*|".*?"|'.*?')*)  # attrname, = sign, string expression
+            ((?:\s+\w+|\s*=\s*|".*?"|'.*?')*)  # attrname, = \
+                                               #        sign, string expression
  
             \s*     # more whitespace
  
@@ -254,11 +265,12 @@ class Lexer(object):
             re.I | re.S | re.X)
  
         if match:
-            keyword, attr, isend = match.group(1), match.group(2), match.group(3)
+            keyword, attr, isend = match.groups()
             self.keyword = keyword
             attributes = {}
             if attr:
-                for att in re.findall(r"\s*(\w+)\s*=\s*(?:'([^']*)'|\"([^\"]*)\")", attr):
+                for att in re.findall(
+                           r"\s*(\w+)\s*=\s*(?:'([^']*)'|\"([^\"]*)\")", attr):
                     key, val1, val2 = att
                     text = val1 or val2
                     text = text.replace('\r\n', '\n')
@@ -285,14 +297,14 @@ class Lexer(object):
         if match:
             if not len(self.tag):
                 raise exceptions.SyntaxException(
-                                        "Closing tag without opening tag: </%%%s>" %
-                                        match.group(1), 
-                                        **self.exception_kwargs)
+                                   "Closing tag without opening tag: </%%%s>" %
+                                    match.group(1), 
+                                    **self.exception_kwargs)
             elif self.tag[-1].keyword != match.group(1):
                 raise exceptions.SyntaxException(
-                                        "Closing tag </%%%s> does not match tag: <%%%s>" %
-                                        (match.group(1), self.tag[-1].keyword),
-                                        **self.exception_kwargs)
+                             "Closing tag </%%%s> does not match tag: <%%%s>" %
+                             (match.group(1), self.tag[-1].keyword),
+                             **self.exception_kwargs)
             self.tag.pop()
             return True
         else:
@@ -372,7 +384,9 @@ class Lexer(object):
             return False
 
     def match_control_line(self):
-        match = self.match(r"(?<=^)[\t ]*(%(?!%)|##)[\t ]*((?:(?:\\r?\n)|[^\r\n])*)(?:\r?\n|\Z)", re.M)
+        match = self.match(
+                      r"(?<=^)[\t ]*(%(?!%)|##)[\t ]*((?:(?:\\r?\n)|[^\r\n])*)"
+                      r"(?:\r?\n|\Z)", re.M)
         if match:
             operator = match.group(1)
             text = match.group(2)

@@ -1,5 +1,5 @@
 # mako/filters.py
-# Copyright (C) 2006-2011 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -165,7 +165,8 @@ def htmlentityreplace_errors(ex):
 codecs.register_error('htmlentityreplace', htmlentityreplace_errors)
 
 
-# TODO: options to make this dynamic per-compilation will be added in a later release
+# TODO: options to make this dynamic per-compilation will be added in a later
+# release
 DEFAULT_ESCAPES = {
     'x':'filters.xml_escape',
     'h':'filters.html_escape',

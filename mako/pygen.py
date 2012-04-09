@@ -1,5 +1,5 @@
 # mako/pygen.py
-# Copyright (C) 2006-2011 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -65,8 +65,6 @@ class PythonPrinter(object):
             self._flush_adjusted_lines()
             self.in_indent_lines = True
 
-        decreased_indent = False
- 
         if (line is None or 
             re.match(r"^\s*#",line) or
             re.match(r"^\s*$", line)
@@ -78,8 +76,7 @@ class PythonPrinter(object):
         is_comment = line and len(line) and line[0] == '#'
  
         # see if this line should decrease the indentation level
-        if (not decreased_indent and 
-            not is_comment and 
+        if (not is_comment and 
             (not hastext or self._is_unindentor(line))
             ):
  
@@ -108,7 +105,7 @@ class PythonPrinter(object):
             # keep track of what the keyword was that indented us,
             # if it is a python compound statement keyword
             # where we might have to look for an "unindent" keyword
-            match = re.match(r"^\s*(if|try|elif|while|for)", line)
+            match = re.match(r"^\s*(if|try|elif|while|for|with)", line)
             if match:
                 # its a "compound" keyword, so we will check for "unindentors"
                 indentor = match.group(1)
@@ -119,7 +116,8 @@ class PythonPrinter(object):
                 # its not a "compound" keyword.  but lets also
                 # test for valid Python keywords that might be indenting us,
                 # else assume its a non-indenting line
-                m2 = re.match(r"^\s*(def|class|else|elif|except|finally)", line)
+                m2 = re.match(r"^\s*(def|class|else|elif|except|finally)",
+                              line)
                 if m2:
                     self.indent += 1
                     self.indent_detail.append(indentor)

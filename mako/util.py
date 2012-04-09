@@ -1,9 +1,10 @@
 # mako/util.py
-# Copyright (C) 2006-2011 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
 
+import imp
 import sys
 
 
@@ -64,7 +65,35 @@ if py24:
 else:
     def exception_name(exc):
         return exc.__class__.__name__
- 
+
+class PluginLoader(object):
+    def __init__(self, group):
+        self.group = group
+        self.impls = {}
+
+    def load(self, name):
+        if name in self.impls:
+             return self.impls[name]()
+        else:
+            import pkg_resources
+            for impl in pkg_resources.iter_entry_points(
+                                self.group, 
+                                name):
+                self.impls[name] = impl.load
+                return impl.load()
+            else:
+                raise exceptions.RuntimeException(
+                        "Can't load plugin %s %s" % 
+                        (self.group, name))
+
+    def register(self, name, modulepath, objname):
+        def load():
+            mod = __import__(modulepath)
+            for token in modulepath.split(".")[1:]:
+                mod = getattr(mod, token)
+            return getattr(mod, objname)
+        self.impls[name] = load
+
 def verify_directory(dir):
     """create and/or verify a filesystem directory."""
  
@@ -100,6 +129,33 @@ class memoized_property(object):
         obj.__dict__[self.__name__] = result = self.fget(obj)
         return result
 
+class memoized_instancemethod(object):
+    """Decorate a method memoize its return value.
+
+    Best applied to no-arg methods: memoization is not sensitive to
+    argument values, and will always return the same value even when
+    called with different arguments.
+
+    """
+    def __init__(self, fget, doc=None):
+        self.fget = fget
+        self.__doc__ = doc or fget.__doc__
+        self.__name__ = fget.__name__
+
+    def __get__(self, obj, cls):
+        if obj is None:
+            return self
+        def oneshot(*args, **kw):
+            result = self.fget(obj, *args, **kw)
+            memo = lambda *a, **kw: result
+            memo.__name__ = self.__name__
+            memo.__doc__ = self.__doc__
+            obj.__dict__[self.__name__] = memo
+            return result
+        oneshot.__name__ = self.__name__
+        oneshot.__doc__ = self.__doc__
+        return oneshot
+
 class SetLikeDict(dict):
     """a dictionary that has some setlike methods on it"""
     def union(self, other):
@@ -131,16 +187,17 @@ class FastEncodingBuffer(object):
  
     def getvalue(self):
         if self.encoding:
-            return self.delim.join(self.data).encode(self.encoding, self.errors)
+            return self.delim.join(self.data).encode(self.encoding,
+                                                     self.errors)
         else:
             return self.delim.join(self.data)
 
 class LRUCache(dict):
-    """A dictionary-like object that stores a limited number of items, discarding
-    lesser used items periodically.
+    """A dictionary-like object that stores a limited number of items,
+    discarding lesser used items periodically.
  
     this is a rewrite of LRUCache from Myghty to use a periodic timestamp-based
-    paradigm so that synchronization is not really needed.  the size management 
+    paradigm so that synchronization is not really needed.  the size management
     is inexact.
     """
  
@@ -188,8 +245,8 @@ class LRUCache(dict):
                 try:
                     del self[item.key]
                 except KeyError:
-                    # if we couldnt find a key, most likely some other thread broke in 
-                    # on us. loop around and try again
+                    # if we couldn't find a key, most likely some other thread
+                    # broke in on us. loop around and try again
                     break
 
 # Regexp to match python magic encoding line
@@ -198,7 +255,8 @@ _PYTHON_MAGIC_COMMENT_re = re.compile(
     re.VERBOSE)
 
 def parse_encoding(fp):
-    """Deduce the encoding of a Python source file (binary mode) from magic comment.
+    """Deduce the encoding of a Python source file (binary mode) from magic
+    comment.
 
     It does this in the same way as the `Python interpreter`__
 
@@ -227,7 +285,8 @@ def parse_encoding(fp):
                 pass
             else:
                 line2 = fp.readline()
-                m = _PYTHON_MAGIC_COMMENT_re.match(line2.decode('ascii', 'ignore'))
+                m = _PYTHON_MAGIC_COMMENT_re.match(
+                                               line2.decode('ascii', 'ignore'))
 
         if has_bom:
             if m:
@@ -350,3 +409,18 @@ except ImportError:
     import inspect
     def inspect_func_args(fn):
         return inspect.getargspec(fn)
+
+def read_file(path, mode='rb'):
+    fp = open(path, mode)
+    try:
+        data = fp.read()
+        return data
+    finally:
+        fp.close()
+
+def load_module(module_id, path):
+    fp = open(path, 'rb')
+    try:
+        return imp.load_source(module_id, path, fp)
+    finally:
+        fp.close()

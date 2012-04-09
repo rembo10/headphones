@@ -1,0 +1,50 @@
+body { 
+	background-color: #000; 
+	color: #dddeee; 
+}
+header {
+	background-color: #111;
+	height: 64px;
+}
+#logo {
+	margin-left: 5px;
+}
+footer {
+	position: fixed;
+	bottom:0;
+	width: 100%;
+}
+#footerSlideButton {
+	background-color: #111;
+	position: absolute;
+	top: -24px;
+	width:100%;
+	height:24px;
+	border: none;
+	cursor: pointer;
+	text-align: center;
+}
+#footerSlideButtonTextLeft {
+	float: left;
+	width: 33%
+}
+#footerSlideButtonTextCenter {
+	float: left;
+	width: 30%;
+}
+#footerSlideButtonTextRight {
+	float: left;
+	width: 33%;
+}
+#footerSlideContent {
+	width: 100%;
+	height: 0px;
+	background: #ccc;
+	color: #111;
+	font-size: 0.8em;
+	border: none;
+	font-family: DejaVuSansBook, Sans-Serif;
+}
+#footerSlideText {
+	padding: 15px 10px 25px 25px;
+}s
