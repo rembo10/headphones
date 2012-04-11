@@ -95,7 +95,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: bold; }
   *	Links Styles 
   * */
 a:link {
-	color: rgb(240,240,240);
+	color: rgb(200,200,200);
   	text-decoration: none; 
   	}
 a:visited {
@@ -104,11 +104,11 @@ a:visited {
 	}
 a:hover { /*this effect is not shown in NN4.xx*/
   	color: rgb(255,255,255); 
-	text-decoration: underline;
+	text-decoration: none;
   	}
 a:active {/*colour in NN4.xx is red*/ 
   	color: #fff; 
-  	text-decoration: underline; 
+  	text-decoration: none; 
 	}
 
 #container { width: 100%; margin: auto; }
@@ -136,14 +136,14 @@ p.indented { margin-top: 20px; margin-bottom: 20px; margin-left: 10px; font-size
 p.center { text-align: center; font-size: 18px; }
 .smalltext2 { font-size: 12px; margin-left: 45px; }
 
-/*Main Header*/
+/*#header*/
 header 
 { 
 /*ColorStyles.css*/
 position: fixed;
 left: 0px;
 top: 0px;
-z-index: 999;
+z-index: 3;
 width: 100%; 
 height: 35px; 
 border-bottom: 1px solid #000;
@@ -152,11 +152,53 @@ box-shadow: 0px 0px 2px #000;
 
 div#logo 
 { 
+	position: absolute;
+	top: 0px;
+	left: 0px;
 	padding-left: 5px;
 	height: 30px; 
-	width: 30px;
+	font-size: 16px;
+	font-weight: bold;
+	font-style: italic;
+	color: rgb(0,0,0);
+	line-height: 35px;
 }
-/*Update box*/
+div#logo a
+{
+	color: rgb(0,0,0);
+}
+div#logo a:hover 
+{
+	text-decoration: none;
+}
+
+div#logo img
+{
+	height: 35px;
+	float: left;
+	margin-right: 10px;
+}
+/*
+ * Dialogs
+ * */
+/*Page Dialog*/
+span.globalDialog
+{
+}
+span.pageDialog
+{
+	margin: 0 auto 0 auto;
+	width: 98%;
+	padding: 5px 10px 5px 10px;
+	margin-top: 10px;
+	font-size: 12px;
+	display: block;
+	color: rgba(0,0,0,0.7);
+	background: rgba(255,255,255,0.2);
+	border: 1px solid rgba(255,255,255,0.5);
+	border-radius: 3px;
+}
+/*Update Dialog*/
 div.btnClose:after
 {
 	content: "X";
@@ -171,7 +213,7 @@ div.btnClose
     height: 15px;
     position: relative;
     top: -15px;
-    right: -15px;
+    right: 0px;
     float: right;
     border: 1px solid #000;
     box-shadow: 1px 1px 0px rgba(255,255,255,0.5);
@@ -183,29 +225,34 @@ div.btnClose
 }
 div.btnClose:hover
 {
-	background: rgb(210,210,210);
+	background: rgb(190,190,190);
+	color: rgb(0,0,0);
 }
 
 div#updatebar  
 {
-	border-top: 1px solid #000;
-	text-align: center; 
-    width: 160px; 
+	border: 1px solid #000;
+	border-radius: 6px;
+	text-align: left; 
+    width: 260px; 
     min-height: 60px; 
     position: fixed; 
-    bottom: 31px; 
-    left: 0px; 
-    z-index: 9999; 
-    padding: 20px; 
+    bottom: 20px; 
+    right: 20px; 
+    z-index: 1000; 
+    padding: 5px;
+	padding-top: 20px;
+	box-shadow: 0px 0px 3px #000;
 }
     
 a.update-link 
 {
 	display: block;
     border: 1px solid #000;
+	float: right;
     border-radius: 3px;
     padding: 5px 3px 5px 3px; 
-    font-size: 16px; 
+    font-size: 12px; 
     font-weight: bold;
     background-image: linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,153,7) 100%);
     background-image: -o-linear-gradient(bottom, rgb(8,97,0) 0%, rgb(0,153,7) 100%);
@@ -222,7 +269,7 @@ ul#nav
 	position: fixed;
 	top: 35px;
 	left: 0px;
-	z-index: 998;
+	z-index: 2;
 	list-style-type: none; 
 	height: 100%; 
 	width: 200px; 
@@ -231,7 +278,6 @@ ul#nav
 	background-color: rgba(255,255,255,0.1);
 	border-right: 1px solid #000; 
 	padding-top: 30px; 
-	z-index: 300;
 	box-shadow: 0px 0px 3px #000;
 }
 
@@ -319,7 +365,7 @@ position: fixed;
 top: 0px;
 left: 200px;
 height: 35px;
-z-index: 1000;
+z-index: 5;
 }
 
 ul#subhead_menu 
@@ -412,13 +458,10 @@ div#searchbar input[type=submit]:hover
 div#main  
 {
 	position: fixed;
-	top: 35px;
-	left: 200px;
+	top: 36px;
+	left: 202px;
     min-width: 200px; 
     min-height: 300px;
-    height: 100%;
-    width: 100%;
-	z-index: 1;
 }
 
 /*Filter position*/
@@ -426,16 +469,13 @@ div#main
 {
 	position: fixed;
 	bottom: 0px;
-	left: 200px;
-	z-index: 901;
-	padding-left: 10px; 
-	height: 30px; 
-	line-height: 30px;
-	width: 250px;
+	left: 210px;
+	height: 25px;
+	z-index: 10;
 	font-size: 12px;
 	font-weight: bold;
-	color: rgb(20,0,5);
-	text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
+	color: rgb(0,0,0);
+	text-shadow: 1px 1px 0px rgba(255,255,255,0.3);
 }
 
 /*Filter text input styles*/
@@ -456,28 +496,28 @@ div#main
 .dataTables_length 
 {
 	position: fixed;
-	bottom: 0px;
+	bottom: 18px;
 	left: 400px;
-	z-index: 901;
+	z-index: 5;
 	padding-left: 10px; 
 	height: 30px; 
 	line-height: 30px;
 	width: 350px;
 	font-size: 12px;
 	font-weight: bold;
-	color: rgb(20,0,5);
-	text-shadow: 1px 1px rgb(123,0,10);
+	color: rgb(0,0,0);
+	text-shadow: 1px 1px 0px rgba(255,255,255,0.3);
 }
 
 .dataTables_info
 {
 	width: 200px;
 	position: fixed;
-	bottom: 0px;
-	right: 0px;
-	z-index: 990;
-	text-align: left;
-	line-height: 30px;
+	bottom: 5px;
+	right: 15px;
+	z-index: 3;
+	text-align: right;
+	line-height: 25px;
 	font-weight: bold;
 	color: rgb(190,190,190);
 	text-shadow: 1px 1px 0px #000;
@@ -547,13 +587,27 @@ background-image: -ms-linear-gradient(bottom, rgb(128,0,0) 0%, rgb(153,0,0) 100%
 text-shadow: 1px 1px 0px rgb(190,0,31);
 }
 .btnGet {
-	background-image: linear-gradient(bottom, rgb(128,26,0) 0%, rgb(153,61,0) 100%);
-background-image: -o-linear-gradient(bottom, rgb(128,26,0) 0%, rgb(153,61,0) 100%);
-background-image: -moz-linear-gradient(bottom, rgb(128,26,0) 0%, rgb(153,61,0) 100%);
-background-image: -webkit-linear-gradient(bottom, rgb(128,26,0) 0%, rgb(153,61,0) 100%);
-background-image: -ms-linear-gradient(bottom, rgb(128,26,0) 0%, rgb(153,61,0) 100%);
-text-shadow: 1px 1px 0px rgb(173,61,0);
+	background: url(../images/download.png) 5% 50% no-repeat rgb(128,26,0);
+	padding-left: 18px;
+	text-shadow: 1px 1px 0px rgba(255,255,255,0.3);
 }
+.btnGet:hover
+{
+	background: url(../images/download.png) 5% 50% no-repeat rgb(148,26,0);
+}
+.btnAdd
+{
+	background: url(../images/add.png) 50% 50% no-repeat;
+	height: 18px;
+	width: 18px;
+	display: block;
+	float: left;
+}
+.btnAdd:hover
+{
+	background: url(../images/add-hover.png) 50% 50% no-repeat;
+}
+
 .btnNew
 {
     background-image: linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
@@ -793,14 +847,15 @@ table#album_table td#albumart { vertical-align: middle; text-align: left; }
 /* Album art image sizes */
 .album-art-small 
 {
+	width: 60px;
+	height: 60px;
 	margin: 3px;
 	float: left;
 	overflow: hidden; 
-	background-color: #000;
-	width: 60px;
-	height: 60px;
-	box-shadow: 1px 1px 1px #000; 
-	border-radius: 3px; 
+	background: rgb(30,30,30);
+	border: 1px solid rgb(10,10,10);
+	box-shadow: 1px 1px 0px rgba(255,255,255,0.2); 
+	border-radius: 2px; 
 }
 .album-art-small img { width: 60px; height: 60px; z-index: 200; }
 .album-art-big 
@@ -926,24 +981,30 @@ div.progress-container span
     float: left;
     margin: auto;
 }
+div.progress-container span:hover
+{
+	color: #fff;
+}
 div.progress-container  
 {
-    border: 1px solid rgb(20,20,20); 
     width: 100%; 
     height: 15px; 
     margin: 2px 5px 2px 0px; 
-    background-color: rgba(0,0,0,0.5);
-    color: rgb(30,30,30); 
-    text-align: center;
-    border-radius: 3px;
     overflow: hidden;
+    text-align: center;
+    color: rgb(30,30,30); 
+    background: rgb(30,30,30);
+	border: 1px solid rgb(10,10,10);
+	box-shadow: 1px 1px 0px rgba(255,255,255,0.2); 
+	border-radius: 2px; 
 }
 /*Progress bar*/
 div.progress-container div  
 {
     height: 100%;
-    background-color: rgba(255,255,255,0.1);
+    background-color: rgba(255,255,255,0.5);
 }
+
 /*text format for match/procent*/
 .searchmatch,
 .havetracks
@@ -959,7 +1020,7 @@ div.progress-container div
 }
 
 
-footer 
+#footer /*#footer*/
 {
 	/*ColorStyles.css*/
 	position: fixed; 
@@ -967,9 +1028,86 @@ footer
 	left: 0px;
 	width: 100%;
 	height: 30px;
-	z-index: 900;
-	box-shadow: 0px 0px 12px #000;
+	box-shadow: 0px 0px 5px #000;
+	z-index: 3;
 }
+
+/*Footer manage/settings*/
+div#footManage
+{
+	height: 30px;
+	padding-top: 2px;
+	margin-left: 5px;
+}
+div#footManage ul
+{
+	list-style-type: none;
+	padding: 0px;
+	margin: 0px;
+	position: relative;
+}
+div#footManage ul ul
+{
+	display: none;
+	width: 160px;
+	background: rgb(160,160,160);
+}
+div#footManage ul li
+{
+	display: block;
+	height: 24px;
+	border: 1px solid rgb(0,0,0);
+	border-radius: 3px;
+	float: left;
+	padding-left: 10px;
+	padding-right: 20px;
+	line-height: 25px;
+	background: rgb(160,160,160) url(../images/arrow-down.png) center right no-repeat;
+	margin-right: 5px;
+	color: #000;
+	text-shadow: 1px 1px 0px rgba(255,255,255,0.3);
+	font-weight: bold;
+}
+
+div#footManage ul li:hover ul
+{
+	display: block;
+	position: absolute;
+	left: 0px;
+	bottom: 0px;
+	border: 1px solid #000;
+	border-radius: 3px;
+	overflow: hidden;
+	box-shadow: 0px 0px 3px #000;
+	background: rgb(30,30,30);
+	padding: 2px;
+	
+}
+div#footManage ul ul li
+{
+	float: none;
+	background: none;
+	border: none;
+	padding: 0;
+	margin: 0;
+}
+div#footManage ul ul li a
+{
+	display: block;
+	color: #fff;
+	padding-left: 15px;
+	padding-right: 5px;
+	border-radius: 3px;
+	text-shadow: 1px 1px 0px rgba(255,255,255,0.0);
+	
+}
+div#footManage ul ul li a:hover
+{
+	background: rgb(255,255,255);
+	display: block;
+	color: #000;
+}
+
 div#version { text-align: center; font-weight: bold; }
 div#donate { text-align: center; margin: 20px auto 20px auto; }
 
@@ -981,7 +1119,7 @@ div#shutdown
 	width: 100%; 
 	height: 100%; 
 	background-color: rgba(0,0,0,0.9);
-	z-index: 9999;
+	z-index: 999;
 }
 div#shutdown div
 {

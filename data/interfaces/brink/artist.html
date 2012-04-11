@@ -28,7 +28,7 @@
 			${artist['ArtistName']}
 		</h1>
 		%if artist['Status'] == 'Loading':
-		<h3><i>(Album information for this artist is currently being loaded)</i></h3>
+		<span class="pageDialog">Album information for this artist is currently being loaded</span>
 		%endif		
 	</div>
 	<form action="markAlbums" method="get"><input type="hidden" name="ArtistID" value=${artist['ArtistID']}>
@@ -137,8 +137,8 @@
 		$('#album_table').dataTable(
 			{
 				"aoColumns": [
-					null,
-					null,
+					{ "bSortable": false},
+					{ "bSortable": false},
 					null,
 					null,
 					null,

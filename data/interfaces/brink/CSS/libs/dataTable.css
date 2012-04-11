@@ -8,6 +8,7 @@
 	clear: both;
 	_height: 302px;
 	zoom: 1; /* Feeling sorry for IE */
+	z-index: 1;
 }
 
 .dataTables_processing {

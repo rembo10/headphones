@@ -41,9 +41,9 @@
 							</div>
 					</td>
 				%if type == 'album':	
-					<td id="add"><a href="addReleaseById?rid=${result['albumid']}">Add this album</a></td>
+					<td id="add"><a class="btnAdd" href="addReleaseById?rid=${result['albumid']}" title="Add this Album"></a></td>
 				%else:
-					<td id="add"><a href="addArtist?artistid=${result['id']}">Add this artist</a></td>
+					<td id="add"><a class="btnAdd" href="addArtist?artistid=${result['id']}" title="Add this Artist"></a></td>
 				%endif
 				</tr>
 				%endfor

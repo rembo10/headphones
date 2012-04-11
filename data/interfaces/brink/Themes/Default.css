@@ -26,7 +26,7 @@ header
 	border-bottom: 1px solid #000; 
 }
 
-footer {
+#footer {
 	background-image: linear-gradient(bottom, rgb(82,82,82) 0%, rgb(117,117,117) 100%);
 	background-image: -o-linear-gradient(bottom, rgb(82,82,82) 0%, rgb(117,117,117) 100%);
 	background-image: -moz-linear-gradient(bottom, rgb(82,82,82) 0%, rgb(117,117,117) 100%);
@@ -57,7 +57,10 @@ footer {
     background-image: -ms-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
 }
 /*Tooltip popup Color*/
-div#updatebar,
+div#updatebar
+{
+	background: rgba(0,0,0,0.8);
+}
 .tooltip span
 {
 	background-image: linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
@@ -110,12 +113,4 @@ div#searchbar
 .jspDrag
 {
 	background: url(../images/scrollgrib.png) 50% 50% no-repeat rgb(130,130,130);
-	/*
-	background-image: linear-gradient(left , rgb(100,100,100) 0%, rgb(140,140,140) 100%);
-	background-image: -o-linear-gradient(left , rgb(100,100,100) 0%, rgb(140,140,140) 100%);
-	background-image: -moz-linear-gradient(left , rgb(100,100,100) 0%, rgb(140,140,140) 100%);
-	background-image: -webkit-linear-gradient(left , rgb(100,100,100) 0%, rgb(140,140,140) 100%);
-	background-image: -ms-linear-gradient(left , rgb(100,100,100) 0%, rgb(140,140,140) 100%);
-	box-shadow: 0px 0px 3px #000; 
-	*/
 }

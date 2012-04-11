@@ -65,26 +65,20 @@
 </%def>
 
 <%def name="headIncludes()">
-	link rel="stylesheet" href="interfaces/brink/CSS/data_table.css">
+	
 </%def>
 
 <%def name="javascriptIncludes()">
-	<script src="interfaces/brink/JS/libs/jquery.dataTables.min.js"></script>
-	<script>
-	$(document).ready(function()
-	{
+	<script src="interfaces/brink/js/libs/jquery.dataTables.min.js"></script>
+	<script type="text/javascript">
+	$(document).ready(function(){
 		$('#artist_table').dataTable(
-			{
-			
-				"aoColumns": [
-					{ "sType": "title-string"},
-					null,
-					{ "sType": "title-string"},
-					{ "sType": "title-numeric"}
-				],
-				"bPaginate": false
-			});
-			
+		{
+			"aaSorting": [
+			],
+			"bPaginate": false,
+			"bFilter": true
+		});
 	});
 	</script>
 </%def>

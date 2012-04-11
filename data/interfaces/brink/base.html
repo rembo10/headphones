@@ -18,44 +18,62 @@
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		
-	<link rel="shortcut icon" href="interfaces/brink/Images/favicon.ico">
-	<link rel="apple-touch-icon" href="interfaces/brink/Images/headphoneslogo.png">
-	<link rel="stylesheet" href="interfaces/brink/CSS/StyleSheet.css">
-	<link rel="stylesheet" href="interfaces/brink/Themes/Default.css">
-	<link rel="stylesheet" href="interfaces/brink/css/data_table.css">
+	<link rel="shortcut icon" href="../images/favicon.ico">
+	<link rel="apple-touch-icon" href="../images/headphoneslogo.png">
 	
-	<script src="interfaces/brink/js/jquery-1.7.1.js"></script>
+	<link rel="stylesheet" href="interfaces/brink/CSS/style.css">
+	<link rel="stylesheet" href="interfaces/brink/CSS/dataTable.css">
+	
+	<script src="interfaces/brink/js/libs/jquery-1.7.1.js"></script>
 	<script>!window.jQuery && document.write(unescape('%3Cscript src="js/libs/jquery-1.6.2.min.js"%3E%3C/script%3E'))</script>
 	${next.javascriptIncludes()}
 	
 	<script src="js/plugins.js"></script>
-	<script src="js/script.js"></script>
+	<script src="interfaces/brink/js/script.js"></script>
 	
-	<!-- Script by Brinken -->
-		<script type="text/javascript" src="interfaces/brink/JS/FancyScript.js"></script>
+	<!-- Theme style -->
+	<link rel="stylesheet" href="interfaces/brink/Themes/Default.css">
+	<!--
+		<script type="text/javascript">
+		selectedTheme();
+		</script>
+	-->
+	
 		<!-- Custom Form elements-->
-		<script type="text/javascript" src="interfaces/brink/JS/custom-form-elements.js" ></script>
-		<!-- jScrollPane -->
-			<!-- styles needed by jScrollPane -->
-			<link type="text/css" href="interfaces/brink/CSS/jquery.jscrollpane.css" rel="stylesheet" media="all" />
-			<!-- jScrollPane script -->
-			<script type="text/javascript" src="interfaces/brink/JS/jquery.jscrollpane.js" ></script>
-			<!-- Mousewheel support -->
-			<script type="text/javascript" src="interfaces/brink/JS/jquery.mousewheel.js" ></script>
-			<!-- Add to Scrollbars #main -->
-			<script>
-			$(function(){
-				$('.main').jScrollPane({
-					showArrows: true
-				});
+		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.custom-form-elements.js" ></script>
+		
+	<!-- jScrollPane -->
+		<!-- styles needed by jScrollPane -->
+		<link type="text/css" href="interfaces/brink/css/libs/jquery.jscrollpane.css" rel="stylesheet" media="all" />
+		<!-- jScrollPane script -->
+		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.jscrollpane.js" ></script>
+		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.jscrollpane.min.js" ></script>
+		<!-- Mousewheel support -->
+		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.mousewheel.js" ></script>
+		
+		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.dataTables.js" ></script>
+		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.dataTables.min.js" ></script>
+		
+		<script type="text/javascript">
+		function mainScroll()
+		{
+			$('#main').jScrollPane({
+				showArrows: true
 			});
-			
-			$(".main").resize(function(){
-				$('.main').jScrollPane({
-					showArrows: true
-				});
-			});
-			</script>
+		}
+
+		$(window).resize(function(){
+			mainResize();
+			mainScroll();
+		});
+		$(document).ready(function(){
+			mainResize();
+			mainScroll();
+		});
+		$('#main').resize(function(){
+			mainScroll();
+		});
+		</script>
 		
 	${next.headIncludes()}
 	
@@ -66,7 +84,7 @@
 		% if not headphones.CURRENT_VERSION:
             <div id="updatebar">
 				<div class="btnClose" title="Close" ></div>
-                You're running an unknown version of Headphones. 
+                You're running an unknown version of Headphones.
 				<br />
 				<br />
 				<br />
@@ -87,7 +105,7 @@
 		<header>
 					
 			<div id="logo">
-				<a href="home"><img src="interfaces/brink/Images/headphoneslogo-black.png" alt="headphones"></a>
+				<a href="home"><img src="../images/headphoneslogo.png" alt="headphones">Headphones</a>
 			</div>
 			${next.headerIncludes()}
 			<div id="searchbar">
@@ -115,8 +133,20 @@
 				${next.body()}
 			</div>
 
-		<footer>
-		</footer>
+		<div id="footer">
+			<div id="footManage">
+				<ul>
+					<li>Tools
+					<ul>
+						<li><a href="forceSearch" title="Refresh/Update">Wanted Albums</a></li>
+						<li><a href="forceUpdate" title="Refresh/Update">Active Artists</a></li>
+						<li><a href="forcePostProcess" title="Refresh/Update">Post-Process</a></li>
+						<li><a href="checkGithub" title="Refresh/Update">Headphones Updates</a></li>
+					</ul>
+					</li>
+				</ul>
+			</div>
+		</div>
 	</div>
 	
 </script>
