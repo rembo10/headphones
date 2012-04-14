@@ -329,16 +329,16 @@ def moveFiles(albumpath, release, tracks):
 		firstchar = sortname[0]
 	
 
-	values = {	'%Artist%':	artist,
-				'%Album%':	album,
-				'%Year%':		year,
-				'%Type%':  releasetype,
-				'%First%':	firstchar,
-				'%artist%':	artist.lower(),
-				'%album%':	album.lower(),
-				'%year%':		year,
-				'%type%':  releasetype.lower(),
-				'%first%':	firstchar.lower()
+	values = {	'$Artist':	artist,
+				'$Album':	album,
+				'$Year':		year,
+				'$Type':  releasetype,
+				'$First':	firstchar,
+				'$artist':	artist.lower(),
+				'$album':	album.lower(),
+				'$year':		year,
+				'$type':  releasetype.lower(),
+				'$first':	firstchar.lower()
 			}
 			
 	
@@ -504,16 +504,16 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		else:
 			title = f.title
 			
-			values = {	'%Track%':		tracknumber,
-						'%Title%':		title,
-						'%Artist%':		release['ArtistName'],
-						'%Album%':		release['AlbumTitle'],
-						'%Year%':			year,
-						'%track%':		tracknumber,
-						'%title%':		title.lower(),
-						'%artist%':		release['ArtistName'].lower(),
-						'%album%':		release['AlbumTitle'].lower(),
-						'%year%':			year
+			values = {	'$Track':		tracknumber,
+						'$Title':		title,
+						'$Artist':		release['ArtistName'],
+						'$Album':		release['AlbumTitle'],
+						'$Year':			year,
+						'$track':		tracknumber,
+						'$title':		title.lower(),
+						'$artist':		release['ArtistName'].lower(),
+						'$album':		release['AlbumTitle'].lower(),
+						'$year':			year
 						}
 						
 			ext = os.path.splitext(downloaded_track)[1]
