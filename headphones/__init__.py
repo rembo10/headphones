@@ -363,8 +363,10 @@ def initialize():
             CONFIG_VERSION = '1'
             
         if CONFIG_VERSION == '1':
-        	from headphones.helpers import replace_all
-        	file_values = {	'Track':		'%Track%',
+
+			from headphones.helpers import replace_all
+
+			file_values = {	'Track':		'%Track%',
 							'Title':		'%Title%',
 							'Artist':		'%Artist%',
 							'Album':		'%Album%',
@@ -385,12 +387,11 @@ def initialize():
 								'year':		'%year%',
 								'type':  	'%type%',
 								'first':	'%first%'
-			}
+							}	
+			FILE_FORMAT = replace_all(FILE_FORMAT, file_values)
+			FOLDER_FORMAT = replace_all(FOLDER_FORMAT, folder_values)
 			
-            FILE_FORMAT = replace_all(FILE_FORMAT, file_values)
-            FOLDER_FORMAT = replace_all(FOLDER_FORMAT, folder_values)
-            
-            CONFIG_VERSION = '2'
+			CONFIG_VERSION = '2'
         
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
