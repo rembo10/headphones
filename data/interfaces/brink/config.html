@@ -424,8 +424,8 @@
 					    <input type="text" name="folder_format" value="${config['folder_format']}" size="43" />
                         <div class="tooltip">
 						    <span>
-							    Use: %Artist%/%artist%, %Album%/%album%, %Year%/%year%, %Type%/%type% (release type) and %First%/%first% (first letter in artist name)
-                      		    E.g.: %Type%/%First%/%artist%/%album% [%year%] = Album/G/girl talk/all day [2010]
+							    Use: $Artist/$artist, $Album/$album, $Year/$year, $Type/$type (release type) and $First/$first (first letter in artist name)
+                      		    E.g.: $Type/$First/$artist/$album [$year] = Album/G/girl talk/all day [2010]
 						    </span>
 					    </div>
                         <br /><br />
@@ -435,7 +435,7 @@
 						    <input type="text" name="file_format" value="${config['file_format']}" size="43" />
 							<div class="tooltip">
 								<span>
-									Use: %Track%/%track% (track #), %Title%/%title%, %Artist%/%artist%, %Album%/%album% and %Year%/%year%
+									Use: $Track/$track (track #), $Title/$title, $Artist/$artist, $Album/$album and $Year/$year
 								<span>
 							</div>
                     </td>

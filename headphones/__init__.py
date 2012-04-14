@@ -366,27 +366,27 @@ def initialize():
 
 			from headphones.helpers import replace_all
 
-			file_values = {	'Track':		'%Track%',
-							'Title':		'%Title%',
-							'Artist':		'%Artist%',
-							'Album':		'%Album%',
-							'Year':			'%Year%',
-							'track':		'%track%',
-							'title':		'%title%',
-							'artist':		'%artist%',
-							'album':		'%album%',
-							'year':			'%year%'
+			file_values = {	'Track':		'$Track',
+							'Title':		'$Title',
+							'Artist':		'$Artist',
+							'Album':		'$Album',
+							'Year':			'$Year',
+							'track':		'$track',
+							'title':		'$title',
+							'artist':		'$artist',
+							'album':		'$album',
+							'year':			'$year'
 							}
-			folder_values = { 	'Artist':	'%Artist%',
-								'Album':	'%Album%',
-								'Year':		'%Year%',
-								'Type':  	'%Type%',
-								'First':	'%First%',
-								'artist':	'%artist%',
-								'album':	'%album%',
-								'year':		'%year%',
-								'type':  	'%type%',
-								'first':	'%first%'
+			folder_values = { 	'Artist':	'$Artist',
+								'Album':	'$Album',
+								'Year':		'$Year',
+								'Type':  	'$Type',
+								'First':	'$First',
+								'artist':	'$artist',
+								'album':	'$album',
+								'year':		'$year',
+								'type':  	'$type',
+								'first':	'$first'
 							}	
 			FILE_FORMAT = replace_all(FILE_FORMAT, file_values)
 			FOLDER_FORMAT = replace_all(FOLDER_FORMAT, folder_values)
