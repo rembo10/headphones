@@ -508,12 +508,12 @@ def renameFiles(albumpath, downloaded_track_list, release):
 						'$Title':		title,
 						'$Artist':		release['ArtistName'],
 						'$Album':		release['AlbumTitle'],
-						'$Year':			year,
+						'$Year':		year,
 						'$track':		tracknumber,
 						'$title':		title.lower(),
 						'$artist':		release['ArtistName'].lower(),
 						'$album':		release['AlbumTitle'].lower(),
-						'$year':			year
+						'$year':		year
 						}
 						
 			ext = os.path.splitext(downloaded_track)[1]
