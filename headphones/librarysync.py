@@ -118,15 +118,19 @@ def libraryScan(dir=None):
 			firstchar = '0-9'
 		else:
 			firstchar = sortname[0]
-			
-		lowerfirst = firstchar.lower()
+
 		
-		albumvalues = {	'artist':	artist,
-						'album':	album,
-						'year':		year,
-						'first':	firstchar,
-						'lowerfirst':	lowerfirst
-					}
+		albumvalues = {	'$Artist':	artist,
+						'$Album':	album,
+						'$Year':	year,
+						'$Type':	releasetype,
+						'$First':	firstchar,
+						'$artist':	artist.lower(),
+						'$album':	album.lower(),
+						'$year':	year,
+						'$type':  	releasetype.lower(),
+						'$first':	firstchar.lower()
+						}
 				
 		
 		folder = helpers.replace_all(headphones.FOLDER_FORMAT, albumvalues)
@@ -140,12 +144,17 @@ def libraryScan(dir=None):
 		else:
 			tracknumber = '%02d' % track['TrackNumber']
 			
-		trackvalues = {	'tracknumber':	tracknumber,
-						'title':		track['TrackTitle'],
-						'artist':		release['ArtistName'],
-						'album':		release['AlbumTitle'],
-						'year':			year
-						}
+			trackvalues = {	'$Track':		tracknumber,
+							'$Title':		title,
+							'$Artist':		release['ArtistName'],
+							'$Album':		release['AlbumTitle'],
+							'$Year':		year,
+							'$track':		tracknumber,
+							'$title':		title.lower(),
+							'$artist':		release['ArtistName'].lower(),
+							'$album':		release['AlbumTitle'].lower(),
+							'$year':		year
+							}
 		
 		new_file_name = helpers.replace_all(headphones.FILE_FORMAT, trackvalues).replace('/','_') + '.*'
 		
