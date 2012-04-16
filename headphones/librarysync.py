@@ -108,6 +108,7 @@ def libraryScan(dir=None):
 			
 		artist = release['ArtistName'].replace('/', '_')
 		album = release['AlbumTitle'].replace('/', '_')
+		releasetype = release['Type'].replace('/', '_')
 	
 		if release['ArtistName'].startswith('The '):
 			sortname = release['ArtistName'][4:]
@@ -144,17 +145,19 @@ def libraryScan(dir=None):
 		else:
 			tracknumber = '%02d' % track['TrackNumber']
 			
-			trackvalues = {	'$Track':		tracknumber,
-							'$Title':		title,
-							'$Artist':		release['ArtistName'],
-							'$Album':		release['AlbumTitle'],
-							'$Year':		year,
-							'$track':		tracknumber,
-							'$title':		title.lower(),
-							'$artist':		release['ArtistName'].lower(),
-							'$album':		release['AlbumTitle'].lower(),
-							'$year':		year
-							}
+		title = track['TrackTitle']
+		
+		trackvalues = {	'$Track':		tracknumber,
+						'$Title':		title,
+						'$Artist':		release['ArtistName'],
+						'$Album':		release['AlbumTitle'],
+						'$Year':		year,
+						'$track':		tracknumber,
+						'$title':		title.lower(),
+						'$artist':		release['ArtistName'].lower(),
+						'$album':		release['AlbumTitle'].lower(),
+						'$year':		year
+						}
 		
 		new_file_name = helpers.replace_all(headphones.FILE_FORMAT, trackvalues).replace('/','_') + '.*'
 		
