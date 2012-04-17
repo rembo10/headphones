@@ -24,7 +24,7 @@ def startmb(forcemb=False):
 	mbpass = None
 	
 	# Can use headphones mirror for queries
-	if headphones.MIRROR == "headphones":
+	if headphones.MIRROR == "headphones" or "custom":
 		forcemb=False
 	
 	if forcemb or headphones.MIRROR == "musicbrainz.org":
