@@ -343,10 +343,13 @@ def moveFiles(albumpath, release, tracks):
 			
 	
 	folder = helpers.replace_all(headphones.FOLDER_FORMAT, values)
-	folder = folder.replace('./', '_/').replace(':','_').replace('?','_')
+	folder = folder.replace('./', '_/').replace(':','_').replace('?','_').replace('/.','/_')
 	
 	if folder.endswith('.'):
 		folder = folder.replace(folder[len(folder)-1], '_')
+		
+	if folder.startswith('.'):
+		folder = folder.replace(0, '_')
 	
 	destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING)
 	
@@ -523,6 +526,9 @@ def renameFiles(albumpath, downloaded_track_list, release):
 		
 		new_file_name = new_file_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING)
 
+		if new_file_name.startswith('.'):
+			new_file_name = new_file_name.replace(0, '_')
+		
 		new_file = os.path.join(albumpath, new_file_name)
 
 		logger.debug('Renaming %s ---> %s' % (downloaded_track, new_file_name))
