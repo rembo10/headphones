@@ -672,7 +672,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 								logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeders), rightformat))    
 						
 						except Exception, e:
-							logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
+							logger.error(u"An unknown error occured in the KAT parser: %s" % e)
 
                    
         if headphones.ISOHUNT:
@@ -738,14 +738,14 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 										rightformat = False
 							except Exception, e:
 								rightformat = False
-							if rightformat == True and size < maxsize and minimumseeders < seeders:
+							if rightformat == True and size < maxsize and minimumseeders < seeds:
 								resultlist.append((title, size, url, provider))
 								logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
 							else:
-								logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeders), rightformat))    
+								logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
 						
 						except Exception, e:
-							logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
+							logger.error(u"An unknown error occured in the ISOhunt parser: %s" % e)
 
         if headphones.MININOVA:
             provider = "Mininova"    
@@ -805,14 +805,14 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 										rightformat = False
 							except Exception, e:
 								rightformat = False
-							if rightformat == True and size < maxsize and minimumseeders < seeders:
+							if rightformat == True and size < maxsize and minimumseeders < seeds:
 								resultlist.append((title, size, url, provider))
 								logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
 							else:
-								logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeders), rightformat))    
+								logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
 						
 						except Exception, e:
-							logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
+							logger.error(u"An unknown error occured in the MiniNova Parser: %s" % e)
 
 
 
