@@ -396,9 +396,9 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
                     for result in resultlist:
                         delta = abs(targetsize - result[1])
-                        newlist.append((result[0], result[1], result[2], delta))
+                        newlist.append((result[0], result[1], result[2], result[3], delta))
         
-                    nzblist = sorted(newlist, key=lambda title: title[3])
+                    nzblist = sorted(newlist, key=lambda title: title[4])
                 
                 except Exception, e:
                     
@@ -840,9 +840,9 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
                     for result in resultlist:
                         delta = abs(targetsize - result[1])
-                        newlist.append((result[0], result[1], result[2], delta))
+                        newlist.append((result[0], result[1], result[2], result[3], delta))
         
-                    torrentlist = sorted(newlist, key=lambda title: title[3])
+                    torrentlist = sorted(newlist, key=lambda title: title[4])
                 
                 except Exception, e:
                     
