@@ -19,11 +19,17 @@ def checkFolder():
 		
 		if album['FolderName']:
 		
-			album_path = os.path.join(headphones.DOWNLOAD_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
+			nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
+			torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
 
-			if os.path.exists(album_path):
-				logger.debug('Found %s. Verifying....' % album['FolderName'])
-				verify(album['AlbumID'], album_path)
+			if os.path.exists(nzb_album_path):
+				logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
+				verify(album['AlbumID'], nzb_album_path)
+				
+			elif os.path.exists(nzb_album_path):
+				logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
+				verify(album['AlbumID'], torrent_album_path)
+				
 
 def verify(albumid, albumpath):
 
