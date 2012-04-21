@@ -26,7 +26,7 @@ def checkFolder():
 				logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
 				verify(album['AlbumID'], nzb_album_path)
 				
-			elif os.path.exists(nzb_album_path):
+			elif os.path.exists(torrent_album_path):
 				logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
 				verify(album['AlbumID'], torrent_album_path)
 				
