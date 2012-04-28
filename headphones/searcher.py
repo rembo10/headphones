@@ -149,6 +149,13 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             else:
                 categories = "22"
                 maxsize = 300000000
+                
+            # For some reason NZBMatrix is erroring out/timing out when the term starts with a "The" right now
+            # so we'll strip it out for the time being. This may get fixed on their end, it may not, but
+            # hopefully this will fix it for now. If you notice anything else it gets stuck on, please post it
+            # on Github so it can be added
+            if term.lower().startswith("the "):
+            	term = term[4:]
             
             
             params = {    "page": "download",
