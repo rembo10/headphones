@@ -1,50 +1,108 @@
-function getArtistInfo(name,imgElem,size) {
+function getArtistInfo(name,imgElem,size,artistID) {
 	var apikey = "690e1ed3bc00bc91804cd8f7fe5ed6d4";
-	var url = "http://ws.audioscrobbler.com/2.0/?method=artist.getInfo&artist="+ name +"&api_key="+ apikey+"&format=json&callback=?";
-	// Get Data
-	$.getJSON(url, function(data) {
-		var artist = data.artist.name;
-		var artistBio = data.artist.bio.summary;
-		var artistBio = artistBio;		
-		var imageUrl = data.artist.image[size]['#text'];
-		if (data.artist === undefined || imageUrl == "")  {
-			imageUrl = "interfaces/lossless/images/no-cover-artist.png";
-		} else {
-			imageUrl = data.artist.image[size]['#text'];						
-		// If Last.fm don't provide a cover then use standard
-		}		
-		var imageLarge = data.artist.image[4]['#text'];	
-		var image = imgElem;
-		var bio = $('#artistBio');	
-        $(image).attr("src",imageUrl).removeAttr("width").removeAttr("height");
-        if ( bio.length > 0 ) $(bio).append(artistBio);
-        $(image).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + artist + '"></a>');
+	
+	// Get Data by Artist ID 	
+	$.ajax({
+		url: "http://ws.audioscrobbler.com/2.0/?method=artist.getInfo&mbid="+ artistID +"&api_key="+ apikey+"&format=json",
+		dataType: "jsonp",
+		cache: true,
+		success: function(data){
+			if ( data.artist !== undefined ) {
+				var imageUrl = data.artist.image[size]['#text'];
+			}
+			if (data.error) {
+				getArtistName();
+			} else {
+				if ( data.artist === undefined || imageUrl == "" || imageUrl == undefined ) {
+					var imageLarge = "#";
+					var imageUrl = "interfaces/lossless/images/no-cover-artist.png";
+				} else {
+					var artist = data.artist.mbid;
+					var artistBio = data.artist.bio.summary;
+					var imageLarge = data.artist.image[4]['#text'];
+					var imageUrl = data.artist.image[size]['#text'];
+				}		
+				var artistBio = artistBio;				
+				var image = imgElem;
+				var bio = $('#artistBio');	
+				$(image).attr("src",imageUrl).removeAttr("width").removeAttr("height").hide().fadeIn();
+				if ( bio.length > 0 ) $(bio).append(artistBio);
+				$(image).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + name + '"></a>');
+			}
+		}				
 	});
+	// If not found get by Name
+	function getArtistName() {
+		$.ajax({
+			url: "http://ws.audioscrobbler.com/2.0/?method=artist.getInfo&artist="+ name +"&api_key="+ apikey+"&format=json",
+			dataType: "jsonp",
+			success: function(data){
+				if ( data.artist !== undefined ) {
+					var imageUrl = data.artist.image[size]['#text'];
+				}
+				if ( data.artist === undefined || imageUrl == "" ) {
+					var imageLarge = "#";
+					var imageUrl = "interfaces/lossless/images/no-cover-artist.png";
+				} else {
+					var artist = data.artist.name;
+					var artistBio = data.artist.bio.summary;
+					var imageLarge = data.artist.image[4]['#text'];
+					var imageUrl = data.artist.image[size]['#text'];
+				}		
+				var artistBio = artistBio;				
+				var image = imgElem;
+				var bio = $('#artistBio');	
+				$(image).attr("src",imageUrl).removeAttr("width").removeAttr("height").hide().fadeIn();
+				if ( bio.length > 0 ) $(bio).append(artistBio);
+				$(image).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + artist + '"></a>');
+			}				
+		});
+	}
 }
 
-function getAlbumInfo(name, album, elem) {
+function getAlbumInfo(name, album, elem,size) {
 	var apikey = "690e1ed3bc00bc91804cd8f7fe5ed6d4";	
-	var url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" + apikey + "&artist="+ name +"&album="+ album +"&format=json&callback=?";
 	var dimensions = getOriginalWidthOfImg(this);
 	var cover = $(elem);
+	
 	if ( dimensions <= 1) {
 		// Get Data
-		$.getJSON(url, function(data) {
-			if (data.album === undefined)  {
-				imageUrl = "interfaces/lossless/images/no-cover-art.png";
-			} else {
-				imageUrl = data.album.image[3]['#text'];						
-			// If Last.fm don't provide a cover then use standard
+		$.ajax({
+			url: "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" + apikey + "&artist="+ name +"&album="+ album +"&format=json&callback=?",
+			dataType: "jsonp",
+			success: function(data){
+				if ( data.artist !== undefined ) {
+					var imageUrl = data.artist.image[size]['#text'];
+				}
+				if (data.album === undefined || imageUrl == "")  {
+					if ( elem.width() == 50 ) {
+						var imageUrl = "interfaces/lossless/images/no-cover-artist.png";
+					} else {
+						var imageUrl = "interfaces/lossless/images/no-cover-art.png";
+					}
+				} else {
+					var imageUrl = data.album.image[size]['#text'];		
+					var imageLarge = data.album.image[3]['#text'];			
+				}
+				$(cover).error(function(){
+					if ( elem.width() == 50 ) {
+						var imageUrl = "interfaces/lossless/images/no-cover-artist.png";
+					} else {
+						var imageUrl = "interfaces/lossless/images/no-cover-art.png";
+					}
+					$(elem).css("background", "url("+ imageUrl+") center top no-repeat");
+				});
+				if ( imageUrl == "") {
+					if ( elem.width() == 50 ) {
+						var imageUrl = "interfaces/lossless/images/no-cover-artist.png";
+					} else {
+						var imageUrl = "interfaces/lossless/images/no-cover-art.png";
+					}
+					$(elem).css("background", "url("+ imageUrl+") center top no-repeat");
+				} 
+				$(elem).css("background", "url("+ imageUrl+") center top no-repeat");
+				$(elem).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + name + '"></a>');
 			}
-			$(cover).error(function(){
-				imageUrl = "interfaces/lossless/images/no-cover-art.png";
-				$('#albumImg img').css("background", "url("+ imageUrl+") center top no-repeat");
-			});
-			if ( imageUrl == "") {
-				imageUrl = "interfaces/lossless/images/no-cover-art.png";
-				$('#albumImg img').css("background", "url("+ imageUrl+") center top no-repeat");
-			} 
-			$('#albumImg img').css("background", "url("+ imageUrl+") center top no-repeat");
 		});
 	}
 }

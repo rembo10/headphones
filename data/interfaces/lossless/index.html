@@ -1,4 +1,4 @@
-lossless<%inherit file="base.html"/>
+<%inherit file="base.html"/>
 <%!
 	from headphones import helpers
 %>
@@ -54,7 +54,7 @@ lossless<%inherit file="base.html"/>
 			%>
 			<tr class="grade${grade}">
 				<td id="albumart"><div id="artistImg"><img class="albumArt" src="http://ec1.images-amazon.com/images/P/${artist['AlbumID']}.01.MZZZZZZZ.jpg" height="50" width="50"></div></td>
-				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
+				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}" title="${artist['ArtistID']}">${artist['ArtistName']}</a></td>
 				<td id="status">${artist['Status']}</td>
 				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
 				<td id="have"><span title="${percent}"></span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
@@ -73,12 +73,16 @@ lossless<%inherit file="base.html"/>
 	<script>
 	$(document).ready(function() {
 		$("table#artist_table tr td#name").each(function(){	
+			var id = $(this).children('a').attr('title');
 			var artist = $(this).children('a').text();
 			var image = $(this).parent().find("td#albumart img");
-			getArtistInfo(artist,image,1);
+			getArtistInfo(artist,image,1,id);
 		});
 		
 		$('#artist_table').dataTable({
+			"aoColumnDefs": [
+			      { 'bSortable': false, 'aTargets': [ 0 ] }
+			],
 			"aoColumns": [
 				null,
 				{ "sType": "title-string"},
@@ -92,6 +96,7 @@ lossless<%inherit file="base.html"/>
 			"iDisplayLength": 50,
 			"sPaginationType": "full_numbers"				
 		});
+		resetFilters("artist or album");
 	});
 	$(window).load(function(){
 		initFancybox();

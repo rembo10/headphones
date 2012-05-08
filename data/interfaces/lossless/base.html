@@ -76,13 +76,22 @@
 		</div>
 
 		<footer>
+			<div id="actions">
+				<small>
+				<a href="shutdown"><span class="ui-button-icon-primary ui-icon ui-icon-power"></span>Shutdown</a> |
+				<a href="restart"><span class="ui-button-icon-primary ui-icon ui-icon-power"></span>Restart</a> |
+				<a href="#" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update succesful" data-error="Error checking update"><span class="ui-icon ui-icon-refresh"></span>Check for new version</a>
+				</small>
+			</div>
+			<div id="donate">
+				<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=elmarkou%40gmail%2ecom&lc=NL&item_name=I%20Like%20to%20donate%20because%20of%20this%20awesome%20Headphones%20Template&no_note=0&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest" target="_blank"><img src="interfaces/lossless/images/icon_like.png" /><small> I like this template</small></a>
+			</div>
 			<div id="version">
 				Version: <em>${headphones.CURRENT_VERSION}</em>
 				%if version.HEADPHONES_VERSION != 'master':
 				(${version.HEADPHONES_VERSION})
 				%endif
-				<a href="#" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update succesful" data-error="Error checking update">Check for new version</a>
-			</div>
+			</div>			
 		</footer>
 		<a href="#main" id="toTop"><span>Back to top</span></a>
 	</div>

@@ -104,8 +104,15 @@ table {
     border-spacing: 0;
     th {
     	.gradient(#FAFAFA, #EAEAEA);
+    	border-left: 1px solid #E0E0E0;
+    	.shadow(1px 0 0 #FAFAFA);
     	text-shadow:1px 1px 0 #FFFFFF ;
     	input[type="checkbox"]{ vertical-align: middle;}
+    	&:first-child { border-left:0;.shadow(none)}
+    	&.sorting_desc,&.sorting_asc  {
+    		.gradient(#FAFBFD, #DCE6EF);
+    		color: @link-color;
+    	}
     }
     td {
     	vertical-align: top;
@@ -332,8 +339,10 @@ header {
 }
 footer {
     display: table;
-    margin: 20px auto;
+    margin: 60px auto 20px auto;
     width: 960px;
+    padding-top: 10px;
+    border-top: 1px solid #EEE;
 }
 #main {
     line-height: 24px;
@@ -819,7 +828,7 @@ div#artistheader {
     }
     th#artistname {
         min-width: 325px;
-        text-align: center;
+        text-align: left;
     }
     #artistImg {
     	background: url("../images/loader_black.gif") no-repeat scroll center center #FFFFFF;
@@ -841,6 +850,7 @@ div#artistheader {
         text-align: left;
         vertical-align: middle;
     }
+    td#add {vertical-align: middle;}
     td#score {
     	.bar {
     		width: 100px;
@@ -887,13 +897,25 @@ div#artistheader {
     font-size: 10px;
     position: relative;
     z-index: 999;
-    margin: 20px auto;
+    margin: 0px auto;
     text-align: center;
-    width: 390px;
+    width: 400px;
 }
 #donate {
-    margin: 20px auto;
-    text-align: center;
+    float: left;
+    text-align: left;
+}
+#actions {
+	float: right;
+	text-align: right;
+	margin-right: 10px;
+	margin-top: -5px;
+	color: @border-color;
+	.ui-icon {
+		position: relative;
+		top: 4px;
+		background-image: url("../images/ui-icons_70b2e1_256x240.png");
+	}
 }
 #toTop {
     background: url("../images/toTop.gif") no-repeat scroll 10px center #f7f7f7;
@@ -916,7 +938,6 @@ div#artistheader {
 }
 .cloudtag {
     font-size: 16px;
-    padding-top: 30px;
     #cloud {
         line-height: 1.5em;
         margin: 0;
@@ -965,7 +986,10 @@ div#artistheader {
                 font-weight: 900;
             }
         }
-        li { display: inline; }
+        li { 
+        	display: inline-block;
+        	margin: 5px 10px;
+         }
     }
 }
 
