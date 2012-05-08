@@ -178,10 +178,29 @@ table th {
   background-image: -webkit-linear-gradient(#fafafa, #eaeaea) !important;
   filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
   -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  border-left: 1px solid #E0E0E0;
+  -moz-box-shadow: 1px 0 0 #fafafa;
+  -webkit-box-shadow: 1px 0 0 #fafafa;
+  box-shadow: 1px 0 0 #fafafa;
   text-shadow: 1px 1px 0 #FFFFFF ;
 }
 table th input[type="checkbox"] {
   vertical-align: middle;
+}
+table th:first-child {
+  border-left: 0;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+table th.sorting_desc,
+table th.sorting_asc {
+  background-image: -moz-linear-gradient(#fafbfd, #dce6ef) !important;
+  background-image: linear-gradient(#fafbfd, #dce6ef) !important;
+  background-image: -webkit-linear-gradient(#fafbfd, #dce6ef) !important;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  color: #4183c4;
 }
 table td {
   vertical-align: top;
@@ -468,8 +487,10 @@ header #logo {
 }
 footer {
   display: table;
-  margin: 20px auto;
+  margin: 60px auto 20px auto;
   width: 960px;
+  padding-top: 10px;
+  border-top: 1px solid #EEE;
 }
 #main {
   line-height: 24px;
@@ -1017,7 +1038,7 @@ div#artistheader h2 a {
 }
 #searchresults_table th#artistname {
   min-width: 325px;
-  text-align: center;
+  text-align: left;
 }
 #searchresults_table #artistImg {
   background: url("../images/loader_black.gif") no-repeat scroll center center #ffffff;
@@ -1037,6 +1058,9 @@ div#artistheader h2 a {
 #searchresults_table td#artistname {
   min-width: 300px;
   text-align: left;
+  vertical-align: middle;
+}
+#searchresults_table td#add {
   vertical-align: middle;
 }
 #searchresults_table td#score .bar {
@@ -1088,13 +1112,25 @@ div#artistheader h2 a {
   font-size: 10px;
   position: relative;
   z-index: 999;
-  margin: 20px auto;
+  margin: 0px auto;
   text-align: center;
-  width: 390px;
+  width: 400px;
 }
 #donate {
-  margin: 20px auto;
-  text-align: center;
+  float: left;
+  text-align: left;
+}
+#actions {
+  float: right;
+  text-align: right;
+  margin-right: 10px;
+  margin-top: -5px;
+  color: #cccccc;
+}
+#actions .ui-icon {
+  position: relative;
+  top: 4px;
+  background-image: url("../images/ui-icons_70b2e1_256x240.png");
 }
 #toTop {
   background: url("../images/toTop.gif") no-repeat scroll 10px center #f7f7f7;
@@ -1115,7 +1151,6 @@ div#artistheader h2 a {
 }
 .cloudtag {
   font-size: 16px;
-  padding-top: 30px;
 }
 .cloudtag #cloud {
   line-height: 1.5em;
@@ -1167,7 +1202,8 @@ div#artistheader h2 a {
   font-weight: 900;
 }
 .cloudtag #cloud li {
-  display: inline;
+  display: inline-block;
+  margin: 5px 10px;
 }
 .floatright {
   float: right;

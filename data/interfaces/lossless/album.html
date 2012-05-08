@@ -26,7 +26,7 @@
 	<div class="table_wrapper">
 		<div id="albumheader" class="clearfix">	
 			<div id="albumImg">
-				<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" height="200" width="200" alt="albumart" class="albumArt">
+				<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" height="200" width="200" alt="albumart" class="albumArt" rel="dialog">
 			</div>
 			
 			<h1><a href="http://musicbrainz.org/release-group/${album['AlbumID']}">${album['AlbumTitle']}</a></h1>
@@ -129,16 +129,18 @@
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
 	$(document).ready(function()	{
-		getAlbumInfo("${album['ArtistName']}","${album['AlbumTitle']}","#albumheader .albumArt");
+		getAlbumInfo("${album['ArtistName']}","${album['AlbumTitle']}","#albumheader .albumArt",1);
 		initActions();
 		
-		$('#track_table').dataTable(
-			{
-				"aaSorting": [],
-				"bFilter": false,
-				"bInfo": false,
-				"bPaginate": false
-			});
+		$('#track_table').dataTable({
+			"aaSorting": [],
+			"bFilter": false,
+			"bInfo": false,
+			"bPaginate": false
 		});
+	});
+	$(window).load(function(){
+		initFancybox();
+	});
 	</script>
 </%def>

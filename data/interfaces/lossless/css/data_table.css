@@ -108,8 +108,6 @@ table.display thead th {
 	background-color: white;
 	font-weight: bold;
 	font-size: 16px;
-	cursor: pointer;
-	* cursor: hand;
 }
 
 table.display tfoot th {
@@ -139,14 +137,20 @@ table.display td.center {
 
 .sorting_asc {
 	background: url('../images/sort_asc.png') no-repeat center right;
+	cursor: pointer;
+	* cursor: hand;
 }
 
 .sorting_desc {
 	background: url('../images/sort_desc.png') no-repeat center right;
+	cursor: pointer;
+	* cursor: hand;
 }
 
 .sorting {
 	background: url('../images/sort_both.png') no-repeat center right;
+	cursor: pointer;
+	* cursor: hand;
 }
 
 .sorting_asc_disabled {
