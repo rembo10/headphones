@@ -1,0 +1,101 @@
+lossless<%inherit file="base.html"/>
+<%!
+	from headphones import helpers
+%>
+
+<%def name="body()">
+	<table class="display" id="artist_table">
+		<thead>
+			<tr>
+				<th id="albumart"></th>
+				<th id="name">Artist Name</th>
+				<th id="status">Status</th>
+				<th id="album">Latest Album</th>
+				<th id="have">Have</th>
+			</tr>
+		</thead>
+		<tbody>
+		%for artist in artists:
+			<%
+				totaltracks = artist['TotalTracks']
+				havetracks = artist['HaveTracks']
+				if not havetracks:
+					havetracks = 0
+				try:
+					percent = (havetracks*100.0)/totaltracks
+					if percent > 100:
+						percent = 100
+				except (ZeroDivisionError, TypeError):
+					percent = 0
+					totaltracks = '?'
+				
+				if artist['ReleaseDate'] and artist['LatestAlbum']:
+					releasedate = artist['ReleaseDate']
+					albumdisplay = '<i>%s</i> (%s)' % (artist['LatestAlbum'], artist['ReleaseDate'])
+					if releasedate > helpers.today():
+						grade = 'A'
+					else:
+						grade = 'Z'
+				elif artist['LatestAlbum']:
+					releasedate = ''
+					grade = 'Z'
+					albumdisplay = '<i>%s</i>' % artist['LatestAlbum']
+				else:
+					releasedate = ''
+					grade = 'Z'
+					albumdisplay = '<i>None</i>'
+				
+				if artist['Status'] == 'Paused':
+					grade = 'X'
+
+				if artist['Status'] == 'Loading':
+					grade = 'L'
+				
+			%>
+			<tr class="grade${grade}">
+				<td id="albumart"><div id="artistImg"><img class="albumArt" src="http://ec1.images-amazon.com/images/P/${artist['AlbumID']}.01.MZZZZZZZ.jpg" height="50" width="50"></div></td>
+				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
+				<td id="status">${artist['Status']}</td>
+				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
+				<td id="have"><span title="${percent}"></span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
+			</tr>
+		%endfor
+		</tbody>
+	</table>
+</%def>
+
+<%def name="headIncludes()">
+	<link rel="stylesheet" href="interfaces/lossless/css/data_table.css">
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script>
+	$(document).ready(function() {
+		$("table#artist_table tr td#name").each(function(){	
+			var artist = $(this).children('a').text();
+			var image = $(this).parent().find("td#albumart img");
+			getArtistInfo(artist,image,1);
+		});
+		
+		$('#artist_table').dataTable({
+			"aoColumns": [
+				null,
+				{ "sType": "title-string"},
+				null,
+				{ "sType": "title-string"},
+				{ "sType": "title-numeric"}
+			],
+			"oLanguage": {
+				"sSearch": ""},
+			"bStateSave": true,
+			"iDisplayLength": 50,
+			"sPaginationType": "full_numbers"				
+		});
+	});
+	$(window).load(function(){
+		initFancybox();
+	});
+	</script>
+	
+</%def>

@@ -1,0 +1,15 @@
+<%inherit file="base.html" />
+<%def name="body()">
+	<div class="title">
+		<h1 class="clearfix"><img src="interfaces/lossless/images/icon_extra.gif" alt="extra"/>Artists You Might Like</h1>
+	</div>
+	<div class="table_wrapper">
+		<div class="cloudtag">
+			<ul id="cloud">
+			%for artist in cloudlist:
+				<li><a href="addArtist?artistid=${artist['ArtistID']}" class="tag${artist['Count']}">${artist['ArtistName']}</a></li>
+			%endfor
+			</ul>
+		</div>
+	</div>
+</%def>

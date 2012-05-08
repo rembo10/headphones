@@ -1,0 +1,81 @@
+lossless<%inherit file="base.html" />
+
+<%def name="body()">
+	<div class="table_wrapper">
+	<div id="paddingheader">
+		<h1 class="clearfix"><img src="interfaces/lossless/images/icon_search.png" alt="Search results"/>Search Result</h1>
+	</div>
+	<table class="display" id="searchresults_table">
+		<thead>
+			<tr>
+			%if type == 'album':
+				<th id="albumname">Album Name</th>
+			%endif
+				<th id="albumart"></th>
+				<th id="artistname">Artist Name</th>
+				<th id="score">Score</th>
+				<th id="add"></th>
+			</tr>
+		</thead>
+		<tbody>
+			%if searchresults:
+				%for result in searchresults:
+				<%
+					if result['score'] == 100:
+						grade = 'A'
+					else:
+						grade = 'Z'
+				%>
+				<tr class="grade${grade}">
+				%if type == 'album':
+					<td id="albumname"><a href="${result['albumurl']}">${result['title']}</a></td>
+				%endif
+					<td id="albumart"><div id="artistImg"><img class="albumArt" src="http://ec1.images-amazon.com/images/P/${result['uniquename']}.01.MZZZZZZZ.jpg" height="50" width="50"></div></td>
+					<td id="artistname"><a href="${result['url']}">${result['uniquename']}</a></td>
+					<td id="score"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></td>
+				%if type == 'album':	
+					<td id="add"><a href="#" onclick="doAjaxCall('addReleaseById?rid=${result['albumid']}',$(this));" data-success="Album '${result['title']}' added"><span class="ui-icon ui-icon-plus"></span> Add this album</a></td>
+				%else:
+					<td id="add"><a href="#" onclick="doAjaxCall('addArtist?artistid=${result['id']}',$(this));" data-success="'${result['uniquename']}' added"><span class="ui-icon ui-icon-plus"></span> Add this artist</a></td>
+				%endif
+				</tr>
+				%endfor
+			%endif
+		</tbody>
+	</table>
+	</div>
+</%def>
+
+<%def name="headIncludes()">
+	<link rel="stylesheet" href="interfaces/lossless/css/data_table.css">
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script>
+	$(document).ready(function(){
+		$("table#searchresults_table tr td#artistname").each(function(){	
+			var artist = $(this).children('a').text();
+			var image = $(this).parent().find("td#albumart img");
+			getArtistInfo(artist,image,1);
+		});
+		$('#searchresults_table').dataTable(
+			{
+				"oLanguage": {
+					"sLengthMenu":"Show _MENU_ results per page",
+					"sEmptyTable": "No results",
+					"sInfo":"Showing _START_ to _END_ of _TOTAL_ results",
+					"sInfoEmpty":"Showing 0 to 0 of 0 results",
+					"sInfoFiltered":"(filtered from _MAX_ total results)",
+					"sSearch" : ""},
+				"iDisplayLength": 25,
+				"sPaginationType": "full_numbers",
+				"aaSorting": []
+
+			});
+	});
+	$(window).load(function(){
+		initFancybox();
+	});
+	</script>
+</%def>

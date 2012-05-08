@@ -1,0 +1,67 @@
+lossless<%inherit file="base.html" />
+<%!
+	import headphones
+%>
+
+<%def name="headerIncludes()">
+	<div id="subhead_container">
+		<div id="subhead_menu">
+			<a id="menu_link_scan" onclick="doAjaxCall('musicScan?path=${headphones.MUSIC_DIR}&redirect=manageNew',$(this))" data-success="Music library is getting scanned">Scan Music Library</a>
+		</div>		
+	</div>	
+	<a href="manage" class="back">&laquo; Back to manage overview</a>
+</%def>
+
+
+<%def name="body()">
+	<div class="table_wrapper">
+	<div id="manageheader" class="title">
+		<h1 class="clearfix"><img src="interfaces/lossless/images/icon_manage.png" alt="manage"/>Manage New Artists</h1>
+	</div>
+	<form action="addArtists" method="get">
+	<div id="markalbum">
+		Add selected artists
+		<input type="submit" value="Go">
+	</div>
+	<table class="display" id="artist_table">
+		<thead>
+			<tr>
+				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
+				<th id="name">Artist Name</th>
+			</tr>
+		</thead>
+		<tbody>
+		%for artist in headphones.NEW_ARTISTS:
+			<tr class="gradeZ">
+				<td id="select"><input type="checkbox" name="${artist}" class="checkbox" /></td>
+				<td id="name">${artist}</a></td>
+			</tr>
+		%endfor
+		</tbody>
+	</table>
+	</form>
+	</div>
+</%def>
+
+<%def name="headIncludes()">
+	<link rel="stylesheet" href="interfaces/lossless/css/data_table.css">
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script>
+	$(document).ready(function()
+	{
+		$('#artist_table').dataTable(
+			{
+				"aaSorting": [[1, 'asc']],
+				"bStateSave": false,
+				"bPaginate": false,
+				"oLanguage": {
+					"sSearch" : ""},
+				
+			});
+initActions();
+	});
+	</script>
+</%def>
