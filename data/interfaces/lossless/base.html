@@ -29,16 +29,18 @@
 <body>
 	<div id="container">
 		<div id="ajaxMsg"></div>
-		<header>			
-			% if not headphones.CURRENT_VERSION:
+		% if not headphones.CURRENT_VERSION:
             <div id="updatebar">
-                You're running an unknown version of Headphones. <a class="blue" href="update">Click here to update</a>
+                You're running an unknown version of Headphones. <a href="update">Update</a> or 
+                <a href="#" onclick="$('#updatebar').slideUp('slow');">Close</a>
             </div>
             % elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
             <div id="updatebar">
-                A <a class="blue" href="http://github.com/rembo10/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}"> newer version</a> is available. You're ${headphones.COMMITS_BEHIND} commits behind. <a class="blue" href="update">Click here to update</a>
+                A <a href="http://github.com/rembo10/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}"> newer version</a> is available. You're ${headphones.COMMITS_BEHIND} commits behind. <a href="update">Update</a> or <a href="#" onclick="$('#updatebar').slideUp('slow');">Close</a>
             </div>
 			% endif
+	
+		<header>			
 			<div class="wrapper">
 			<div id="logo">
 				<a href="home"><img src="images/headphoneslogo.png" alt="headphones"></a>
@@ -82,7 +84,7 @@
 				<a href="#" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update succesful" data-error="Error checking update">Check for new version</a>
 			</div>
 		</footer>
-		<a href="#" id="toTop"><span>Back to top</span></a>
+		<a href="#main" id="toTop"><span>Back to top</span></a>
 	</div>
 
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>

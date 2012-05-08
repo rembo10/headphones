@@ -345,7 +345,7 @@ footer {
 // Messages
 .message {
     .rounded(10px);
-    background-color: @msg-bg;
+    .gradient(#FCF5C2,@msg-bg);
     display: inline-block;
     padding: 5px 10px;
     margin-top: 10px;
@@ -401,17 +401,9 @@ footer {
 }
 
 #updatebar {
-    .roundedBottom(10px);
-    background-color: @msg-bg;
-    border: 1px solid @border-color;
-    font-size: 11px;
-    left: 35%;
-    margin: 0 auto;
-    padding: 1px 10px;
-    position: absolute;
-    text-align: center;
-    text-transform: lowercase;
-    top: 0;
+    #ajaxMsg; 
+    display: block;
+    .gradient(#FCF5C2,@msg-bg);
 }
 
 // Subheader
