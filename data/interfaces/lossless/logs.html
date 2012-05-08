@@ -1,0 +1,63 @@
+lossless<%inherit file="base.html"/>
+<%!
+	from headphones import helpers
+%>
+
+<%def name="body()">
+	<div class="title">
+		<h1 class="clearfix"><img src="interfaces/lossless/images/icon_logs.png" alt="Logs"/>Logs</h1>
+	</div>
+	<table class="display" id="log_table">
+		<thead>
+			<tr>
+				<th id="timestamp">Timestamp</th>
+				<th id="level">Level</th>
+				<th id="message">Message</th>
+			</tr>
+		</thead>
+		<tbody>
+		%for line in lineList:
+			<%
+				timestamp, message, level, threadname = line
+				
+				if level == 'WARNING' or level == 'ERROR':
+					grade = 'X'
+				else:
+					grade = 'Z'
+			%>
+				<tr class="grade${grade}">
+					<td id="timestamp">${timestamp}</td>
+					<td id="level">${level}</td>
+					<td id="message">${message}</td>
+				</tr>
+		%endfor
+		</tbody>
+	</table>
+</%def>
+
+<%def name="headIncludes()">
+	<link rel="stylesheet" href="interfaces/lossless/css/data_table.css">
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script>
+	$(document).ready(function()
+	{
+		$('#log_table').dataTable(
+			{
+				"oLanguage": {
+					"sLengthMenu":"Show _MENU_ lines per page",
+					"sEmptyTable": "No log information available",
+					"sInfo":"Showing _START_ to _END_ of _TOTAL_ lines",
+					"sInfoEmpty":"Showing 0 to 0 of 0 lines",
+					"sInfoFiltered":"(filtered from _MAX_ total lines)"},
+				"bStateSave": true,
+				"iDisplayLength": 100,
+				"sPaginationType": "full_numbers",
+				"aaSorting": []
+
+			});
+	});
+	</script>
+</%def>
