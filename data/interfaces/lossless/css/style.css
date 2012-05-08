@@ -481,7 +481,11 @@ footer {
   -moz-border-radius: 10px;
   -webkit-border-radius: 10px;
   border-radius: 10px;
-  background-color: #fff6a9;
+  background-image: -moz-linear-gradient(#fcf5c2, #fff6a9) !important;
+  background-image: linear-gradient(#fcf5c2, #fff6a9) !important;
+  background-image: -webkit-linear-gradient(#fcf5c2, #fff6a9) !important;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
   display: inline-block;
   padding: 5px 10px;
   margin-top: 10px;
@@ -555,22 +559,72 @@ footer {
   margin-right: 3px;
 }
 #updatebar {
-  -moz-border-radius-bottomleft: 10px;
-  -moz-border-radius-bottomright: 10px;
-  -webkit-border-bottom-right-radius: 10px;
-  -webkit-border-bottom-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  background-color: #fff6a9;
   border: 1px solid #cccccc;
-  font-size: 11px;
-  left: 35%;
-  margin: 0 auto;
-  padding: 1px 10px;
-  position: absolute;
+  background-image: -moz-linear-gradient(#ffffff, #eeeeee) !important;
+  background-image: linear-gradient(#ffffff, #eeeeee) !important;
+  background-image: -webkit-linear-gradient(#ffffff, #eeeeee) !important;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  display: none;
+  font-size: 14px;
+  right: 10px;
+  -moz-box-shadow: 0px 0px 2px #aaaaaa;
+  -webkit-box-shadow: 0px 0px 2px #aaaaaa;
+  box-shadow: 0px 0px 2px #aaaaaa;
+  padding: 7px 10px;
+  position: fixed;
   text-align: center;
-  text-transform: lowercase;
-  top: 0;
+  bottom: 10px;
+  min-height: 22px;
+  width: 250px;
+  z-index: 9999;
+  filter: alpha(opacity=85);
+  -moz-opacity: 0.8 !important;
+  -khtml-opacity: 0.8 !important;
+  opacity: 0.8 !important;
+  display: block;
+  background-image: -moz-linear-gradient(#fcf5c2, #fff6a9) !important;
+  background-image: linear-gradient(#fcf5c2, #fff6a9) !important;
+  background-image: -webkit-linear-gradient(#fcf5c2, #fff6a9) !important;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+}
+#updatebar .msg {
+  font-family: "Trebuchet MS", Helvetica, Arial, sans-serif;
+  line-height: normal;
+  padding-left: 20px;
+}
+#updatebar .loader {
+  position: relative;
+  top: 2px;
+}
+#updatebar.success {
+  background-image: -moz-linear-gradient(#d3ffd7, #c2edc6) !important;
+  background-image: linear-gradient(#d3ffd7, #c2edc6) !important;
+  background-image: -webkit-linear-gradient(#d3ffd7, #c2edc6) !important;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  padding: 15px 10px;
+  text-align: left;
+}
+#updatebar.error {
+  background-image: -moz-linear-gradient(#ffd3d3, #edc4c4) !important;
+  background-image: linear-gradient(#ffd3d3, #edc4c4) !important;
+  background-image: -webkit-linear-gradient(#ffd3d3, #edc4c4) !important;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  padding: 15px 10px;
+  text-align: left;
+}
+#updatebar .ui-icon {
+  display: inline-block;
+  margin-left: -20px;
+  top: 2px;
+  position: relative;
+  margin-right: 3px;
 }
 #subhead .back {
   float: left;
