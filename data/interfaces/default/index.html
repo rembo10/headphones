@@ -71,15 +71,21 @@
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-	$(document).ready(function() {
+	function getArtistArt() {
 		$("table#artist_table tr td#name").each(function(){	
 			var id = $(this).children('a').attr('title');
 			var artist = $(this).children('a').text();
 			var image = $(this).parent().find("td#albumart img");
-			getArtistInfo(artist,image,1,id);
+			if ( !image.hasClass('done') ) {
+				image.addClass('done');
+				getArtistInfo(artist,image,1,id);
+			}
 		});
-		
+	}
+	function initThisPage() {
+		getArtistArt();
 		$('#artist_table').dataTable({
+			"bDestroy": true,
 			"aoColumnDefs": [
 			      { 'bSortable': false, 'aTargets': [ 0 ] }
 			],
@@ -97,9 +103,14 @@
 			"sPaginationType": "full_numbers"				
 		});
 		resetFilters("artist or album");
+	}
+	
+	$(document).ready(function() {
+		initThisPage();
 	});
 	$(window).load(function(){
 		initFancybox();
+		refreshLoadArtist();
 	});
 	</script>
 	

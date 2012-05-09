@@ -222,6 +222,29 @@ function refreshTable() {
 		initThisPage();
 	});
 }
+function refreshLoadArtist() {
+	if ( $(".gradeL").length > 0 ) {
+		var url =  $(location).attr('href');
+		var loadingRow = $("table.display tr.gradeL")
+		loadingRow.each(function(){
+			var row = $(this).index() + 1;
+			var rowLoad = $("table.display tbody tr:nth-child("+row+")");
+			$(rowLoad).load(url + " table.display tbody tr:nth-child("+ row +") td", function() {
+				if ( $(rowLoad).children("#status").text() == 'Active'  ) {
+					// Active
+					$(rowLoad).removeClass('gradeL').addClass('gradeZ');
+					initThisPage();
+				} else {
+					// Still loading
+					setTimeout(function(){
+						refreshLoadArtist();
+					},3000);
+				}
+			});	
+		});
+	}
+}
+
 function refreshTab() {
 	var url =  $(location).attr('href');
 	var tabId = $('.ui-tabs-panel:visible').attr("id");
