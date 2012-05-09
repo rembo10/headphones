@@ -1,17 +1,28 @@
-<%inherit file="base.html" />
+lossless<%inherit file="base.html" />
 <%!
 	import headphones
 %>
+
+<%def name="headerIncludes()">
+	<div id="subhead_container">
+		<div id="subhead_menu">
+			<a id="menu_link_scan" onclick="doAjaxCall('musicScan?path=${headphones.MUSIC_DIR}&redirect=manageNew',$(this))" data-success="Music library is getting scanned">Scan Music Library</a>
+		</div>		
+	</div>	
+	<a href="manage" class="back">&laquo; Back to manage overview</a>
+</%def>
+
+
 <%def name="body()">
-	<div id="paddingheader">
-		<h1>Manage New Artists<h1>
-		<h3><a href="musicScan?path=${headphones.MUSIC_DIR}&redirect=manageNew">Scan Music Library</a></h3>
+	<div class="table_wrapper">
+	<div id="manageheader" class="title">
+		<h1 class="clearfix"><img src="interfaces/default/images/icon_manage.png" alt="manage"/>Manage New Artists</h1>
 	</div>
 	<form action="addArtists" method="get">
-	<p class="indented">
+	<div id="markalbum">
 		Add selected artists
 		<input type="submit" value="Go">
-	</p>
+	</div>
 	<table class="display" id="artist_table">
 		<thead>
 			<tr>
@@ -29,10 +40,11 @@
 		</tbody>
 	</table>
 	</form>
+	</div>
 </%def>
 
 <%def name="headIncludes()">
-	<link rel="stylesheet" href="css/data_table.css">
+	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
 </%def>
 
 <%def name="javascriptIncludes()">
@@ -44,9 +56,12 @@
 			{
 				"aaSorting": [[1, 'asc']],
 				"bStateSave": false,
-				"bPaginate": false
+				"bPaginate": false,
+				"oLanguage": {
+					"sSearch" : ""},
 				
 			});
+initActions();
 	});
 	</script>
 </%def>
