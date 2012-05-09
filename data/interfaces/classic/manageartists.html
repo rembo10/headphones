@@ -1,37 +1,24 @@
-lossless<%inherit file="base.html" />
-
-
-
-<%def name="headerIncludes()">
-	<div id="subhead_container">
-			&nbsp;
-	</div>	
-	<a href="manage" class="back">&laquo; Back to manage overview</a>
-</%def>
-
+<%inherit file="base.html" />
 
 <%def name="body()">
-	<div class="table_wrapper">
-	<div id="manageheader" class="title">
-		<h1 class="clearfix"><img src="interfaces/lossless/images/icon_manage.png" alt="manage"/>Manage Artists</h1>
+	<div id="paddingheader">
+		<h1>Manage Artists<h1>
 	</div>
-	<form action="markArtists" method="get" id="markArtists">
-	<div id="markalbum">
-		<select name="action" onChange="doAjaxCall('markArtists',$(this),'table',true);" data-error="You didn't select any artist">
-  			<option disabled="disabled" selected="selected">Choose...</option>
+	<form action="markArtists" method="get">
+	<p class="indented">
+		<select name="action">
   			<option value="pause">Pause</option>
   			<option value="resume">Resume</option>
   			<option value="refresh">Refresh</option>
   			<option value="delete">Delete</option>
 		</select>
 		selected artists
-		<input type="hidden" value="Go">
-	</div>
+		<input type="submit" value="Go">
+	</p>
 	<table class="display" id="artist_table">
 		<thead>
 			<tr>
 				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
-				<th id="albumart"></th>
 				<th id="name">Artist Name</th>
 				<th id="status">Status</th>
 				<th id="album">Latest Album</th>
@@ -59,7 +46,6 @@ lossless<%inherit file="base.html" />
 			%>
 			<tr class="grade${grade}">
 				<td id="select"><input type="checkbox" name="${artist['ArtistID']}" class="checkbox" /></td>
-				<td id="albumart"><div id="artistImg"><img class="albumArt" src="http://ec1.images-amazon.com/images/P/${artist['AlbumID']}.01.MZZZZZZZ.jpg" height="50" width="50"></div></td>
 				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
 				<td id="status">${artist['Status']}</td>	
 				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
@@ -68,44 +54,29 @@ lossless<%inherit file="base.html" />
 		</tbody>
 	</table>
 	</form>
-	</div>
 </%def>
 
 <%def name="headIncludes()">
-	<link rel="stylesheet" href="interfaces/lossless/css/data_table.css">
+	<link rel="stylesheet" href="css/data_table.css">
 </%def>
 
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-
-	function initThisPage() {
-		$("table#artist_table tr td#name").each(function(){	
-			var artist = $(this).children('a').text();
-			var image = $(this).parent().find("td#albumart img");
-			getArtistInfo(artist,image,1);
-		});
-		$('#artist_table').dataTable({	
-			"bDestroy":true,		
-			"aoColumns": [
-				null,
-				null,
-				{ "sType": "title-string"},
-				null,
-				{ "sType": "title-string"}
-			],
-			"oLanguage": {
-				"sSearch" : ""},
-			"bStateSave": true,
-			"bPaginate": false
-		});
-		resetFilters("artists");
-	}
-	$(document).ready(function() {
-		initThisPage();
-	});
-	$(window).load(function(){
-		initFancybox();
+	$(document).ready(function()
+	{
+		$('#artist_table').dataTable(
+			{
+				"aoColumns": [
+					null,
+					{ "sType": "title-string"},
+					null,
+					{ "sType": "title-string"}
+				],
+				"bStateSave": true,
+				"bPaginate": false
+				
+			});
 	});
 	</script>
 </%def>

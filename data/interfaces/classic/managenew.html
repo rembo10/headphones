@@ -1,28 +1,17 @@
-lossless<%inherit file="base.html" />
+<%inherit file="base.html" />
 <%!
 	import headphones
 %>
-
-<%def name="headerIncludes()">
-	<div id="subhead_container">
-		<div id="subhead_menu">
-			<a id="menu_link_scan" onclick="doAjaxCall('musicScan?path=${headphones.MUSIC_DIR}&redirect=manageNew',$(this))" data-success="Music library is getting scanned">Scan Music Library</a>
-		</div>		
-	</div>	
-	<a href="manage" class="back">&laquo; Back to manage overview</a>
-</%def>
-
-
 <%def name="body()">
-	<div class="table_wrapper">
-	<div id="manageheader" class="title">
-		<h1 class="clearfix"><img src="interfaces/lossless/images/icon_manage.png" alt="manage"/>Manage New Artists</h1>
+	<div id="paddingheader">
+		<h1>Manage New Artists<h1>
+		<h3><a href="musicScan?path=${headphones.MUSIC_DIR}&redirect=manageNew">Scan Music Library</a></h3>
 	</div>
 	<form action="addArtists" method="get">
-	<div id="markalbum">
+	<p class="indented">
 		Add selected artists
 		<input type="submit" value="Go">
-	</div>
+	</p>
 	<table class="display" id="artist_table">
 		<thead>
 			<tr>
@@ -40,11 +29,10 @@ lossless<%inherit file="base.html" />
 		</tbody>
 	</table>
 	</form>
-	</div>
 </%def>
 
 <%def name="headIncludes()">
-	<link rel="stylesheet" href="interfaces/lossless/css/data_table.css">
+	<link rel="stylesheet" href="css/data_table.css">
 </%def>
 
 <%def name="javascriptIncludes()">
@@ -56,12 +44,9 @@ lossless<%inherit file="base.html" />
 			{
 				"aaSorting": [[1, 'asc']],
 				"bStateSave": false,
-				"bPaginate": false,
-				"oLanguage": {
-					"sSearch" : ""},
+				"bPaginate": false
 				
 			});
-initActions();
 	});
 	</script>
 </%def>

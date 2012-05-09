@@ -15,7 +15,7 @@ function getArtistInfo(name,imgElem,size,artistID) {
 			} else {
 				if ( data.artist === undefined || imageUrl == "" || imageUrl == undefined ) {
 					var imageLarge = "#";
-					var imageUrl = "interfaces/lossless/images/no-cover-artist.png";
+					var imageUrl = "interfaces/default/images/no-cover-artist.png";
 				} else {
 					var artist = data.artist.mbid;
 					var artistBio = data.artist.bio.summary;
@@ -42,7 +42,7 @@ function getArtistInfo(name,imgElem,size,artistID) {
 				}
 				if ( data.artist === undefined || imageUrl == "" ) {
 					var imageLarge = "#";
-					var imageUrl = "interfaces/lossless/images/no-cover-artist.png";
+					var imageUrl = "interfaces/default/images/no-cover-artist.png";
 				} else {
 					var artist = data.artist.name;
 					var artistBio = data.artist.bio.summary;
@@ -76,9 +76,9 @@ function getAlbumInfo(name, album, elem,size) {
 				}
 				if (data.album === undefined || imageUrl == "")  {
 					if ( elem.width() == 50 ) {
-						var imageUrl = "interfaces/lossless/images/no-cover-artist.png";
+						var imageUrl = "interfaces/default/images/no-cover-artist.png";
 					} else {
-						var imageUrl = "interfaces/lossless/images/no-cover-art.png";
+						var imageUrl = "interfaces/default/images/no-cover-art.png";
 					}
 				} else {
 					var imageUrl = data.album.image[size]['#text'];		
@@ -86,17 +86,17 @@ function getAlbumInfo(name, album, elem,size) {
 				}
 				$(cover).error(function(){
 					if ( elem.width() == 50 ) {
-						var imageUrl = "interfaces/lossless/images/no-cover-artist.png";
+						var imageUrl = "interfaces/default/images/no-cover-artist.png";
 					} else {
-						var imageUrl = "interfaces/lossless/images/no-cover-art.png";
+						var imageUrl = "interfaces/default/images/no-cover-art.png";
 					}
 					$(elem).css("background", "url("+ imageUrl+") center top no-repeat");
 				});
 				if ( imageUrl == "") {
 					if ( elem.width() == 50 ) {
-						var imageUrl = "interfaces/lossless/images/no-cover-artist.png";
+						var imageUrl = "interfaces/default/images/no-cover-artist.png";
 					} else {
-						var imageUrl = "interfaces/lossless/images/no-cover-art.png";
+						var imageUrl = "interfaces/default/images/no-cover-art.png";
 					}
 					$(elem).css("background", "url("+ imageUrl+") center top no-repeat");
 				} 
@@ -129,18 +129,18 @@ function replaceEmptyAlbum(elem,name) {
 			var imageUrl;
 			$.getJSON(url, function(data, response) {
 				if (data.album === undefined)  {
-					imageUrl = "interfaces/lossless/images/no-cover-art.png";
+					imageUrl = "interfaces/default/images/no-cover-art.png";
 				} else {
 					imageUrl = data.album.image[3]['#text'];	
 					imageLarge = data.album.image[4]['#text'];					
 				// If Last.fm don't provide a cover then use standard
 				}
 				$(cover).error(function(){
-					imageUrl = "interfaces/lossless/images/no-cover-art.png";
+					imageUrl = "interfaces/default/images/no-cover-art.png";
 					$(this).hide().attr("src", imageUrl).show();
 				})
 				if ( imageUrl == "") {
-					imageUrl = "interfaces/lossless/images/no-cover-art.png";
+					imageUrl = "interfaces/default/images/no-cover-art.png";
 					$(this).hide().attr("src", imageUrl).show();
 				}
 				$(cover).hide().attr("src", imageUrl).show();
@@ -240,7 +240,7 @@ function doAjaxCall(url,elem,reload,form) {
 		var dataString = $(formID).serialize();
 	}
 	// Loader Image
-	var loader = $("<img src='interfaces/lossless/images/loader_black.gif' alt='loading' class='loader'/>");
+	var loader = $("<img src='interfaces/default/images/loader_black.gif' alt='loading' class='loader'/>");
 	// Data Success Message
 	var dataSucces = $(elem).data('success');
 	if (typeof dataSucces === "undefined") {
@@ -335,8 +335,8 @@ function preventDefault(){
 
 function initFancybox() {
 	if ( $("a[rel=dialog]").length > 0 ) {
-		$.getScript('interfaces/lossless/js/fancybox/jquery.fancybox-1.3.4.js', function() {
-			$("head").append("<link rel='stylesheet' href='interfaces/lossless/js/fancybox/jquery.fancybox-1.3.4.css'>");
+		$.getScript('interfaces/default/js/fancybox/jquery.fancybox-1.3.4.js', function() {
+			$("head").append("<link rel='stylesheet' href='interfaces/default/js/fancybox/jquery.fancybox-1.3.4.css'>");
 	 		$("a[rel=dialog]").fancybox();
 	 	});
 	 }
