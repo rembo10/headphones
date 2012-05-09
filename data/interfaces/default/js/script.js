@@ -255,6 +255,13 @@ function refreshTab() {
 
 function showMsg(msg,loader,timeout,ms) {
 	var feedback = $("#ajaxMsg");
+	update = $("#updatebar");
+	if ( update.is(":visible") ) {
+		var height = update.height() + 35;
+		feedback.css("bottom",height + "px");
+	} else {
+		feedback.removeAttr("style");
+	}
 	feedback.fadeIn();
 	var message = $("<div class='msg'>" + msg + "</div>");
 	if (loader) {
@@ -275,6 +282,14 @@ function showMsg(msg,loader,timeout,ms) {
 function doAjaxCall(url,elem,reload,form) {
 	// Set Message
 	feedback = $("#ajaxMsg");
+	update = $("#updatebar");
+	if ( update.is(":visible") ) {
+		var height = update.height() + 35;
+		feedback.css("bottom",height + "px");
+	} else {
+		feedback.removeAttr("style");
+	}
+	
 	feedback.fadeIn();
 	// Get Form data
 	var formID = "#"+url;
@@ -301,7 +316,7 @@ function doAjaxCall(url,elem,reload,form) {
 	
 	// Check if checkbox is selected
 	if ( form ) {
-		if ( $('td#select input[type=checkbox]').length > 0 && !$('td#select input[type=checkbox]').is(':checked') || $('#importLastFM #username').length > 0 && $("#importLastFM #username" ).val().length === 0 ) {
+		if ( $('td#select input[type=checkbox]').length > 0 && !$('td#select input[type=checkbox]').is(':checked') || $('#importLastFM #username:visible').length > 0 && $("#importLastFM #username" ).val().length === 0 ) {
 			feedback.addClass('error')
 			$(feedback).prepend(errorMsg);
 			setTimeout(function(){
