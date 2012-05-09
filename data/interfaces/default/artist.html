@@ -7,7 +7,7 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">		
-			<a id="menu_link_refresh" onclick="doAjaxCall('refreshArtist?ArtistID=${artist['ArtistID']}', $(this))" href="#" data-success="'${artist['ArtistName']}' will be refreshed">Refresh Artist</a>
+			<a id="menu_link_refresh" onclick="doAjaxCall('refreshArtist?ArtistID=${artist['ArtistID']}', $(this)),'table'" href="#" data-success="'${artist['ArtistName']}' will be refreshed">Refresh Artist</a>
 			<a id="menu_link_delete" href="deleteArtist?ArtistID=${artist['ArtistID']}">Delete Artist</a>
 			%if artist['Status'] == 'Paused':
 				<a id="menu_link_resume" href="#" onclick="doAjaxCall('resumeArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} resumed">Resume Artist</a>
@@ -29,7 +29,12 @@
 		<div id="artistImg">
 			<img class="albumArt" src="http://ec1.images-amazon.com/images/P/None.01.MZZZZZZZ.jpg" width="200" height="200" alt="${artist['ArtistName']}"/>
 		</div>
-		<h1><a href="http://musicbrainz.org/artist/${artist['ArtistID']}">${artist['ArtistName']}</a></h1>
+		<h1>	
+			%if artist['Status'] == 'Loading':	
+				<img src="interfaces/default/images/loader_black.gif" alt="loading" style="float:left; margin-right: 5px;"/> 
+			%endif
+			<a href="http://musicbrainz.org/artist/${artist['ArtistID']}">${artist['ArtistName']}</a>
+		</h1>
 		<div id="artistBio"></div>
 		%if artist['Status'] == 'Loading':
 		<h3><i>(Album information for this artist is currently being loaded)</i></h3>
@@ -134,7 +139,6 @@
 
 <%def name="headIncludes()">
 	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
-	<script type="javascript" href="interfaces/default/css/data_table.css">
 	%if artist['Status'] == 'Loading':
 	<meta http-equiv="refresh" content="5">
 	%endif
@@ -145,6 +149,10 @@
 	
 	<script>
 	function initThisPage() {
+		%if artist['Status'] == 'Loading':
+			showMsg("Getting artist information",true);
+		%endif
+		
 		$('#album_table').dataTable({
 			"bDestroy": true,
 			"aoColumns": [
@@ -173,6 +181,10 @@
 
 		});			
 		resetFilters("albums");
+		replaceEmptyAlbum("table#album_table td#albumart img","${artist['ArtistName']}");
+		setTimeout(function(){
+			initFancybox();
+		},1000);
 	}
 	
 	$(document).ready(function() {		

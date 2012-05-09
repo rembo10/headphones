@@ -253,6 +253,25 @@ function refreshTab() {
 	});
 }
 
+function showMsg(msg,loader,timeout,ms) {
+	var feedback = $("#ajaxMsg");
+	feedback.fadeIn();
+	var message = $("<div class='msg'>" + msg + "</div>");
+	if (loader) {
+		var message = $("<div class='msg'><img src='interfaces/default/images/loader_black.gif' alt='loading' class='loader' style='position: relative;top:10px;margin-top:-15px; margin-left:-10px;'/>" + msg + "</div>");
+		feedback.css("padding","14px 10px")
+	}
+	$(feedback).prepend(message);
+	if (timeout) {
+		setTimeout(function(){
+			message.fadeOut(function(){
+				$(this).remove();
+				feedback.fadeOut();					
+			});
+		},ms);
+	} 
+}
+
 function doAjaxCall(url,elem,reload,form) {
 	// Set Message
 	feedback = $("#ajaxMsg");
@@ -328,7 +347,7 @@ function doAjaxCall(url,elem,reload,form) {
 	  				feedback.removeClass('success');
 	  			});
 	  			if ( reload == true ) 	refreshSubmenu(url);
-	  			if ( reload == "table") refreshTable();
+	  			if ( reload == "table") console.log('refresh'); refreshTable();
 	  			if ( reload == "tabs") 	refreshTab();
 	  			if ( form ) {
 	  				// Change the option to 'choose...'
