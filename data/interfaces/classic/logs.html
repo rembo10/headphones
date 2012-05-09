@@ -1,12 +1,9 @@
-lossless<%inherit file="base.html"/>
+<%inherit file="base.html"/>
 <%!
 	from headphones import helpers
 %>
 
 <%def name="body()">
-	<div class="title">
-		<h1 class="clearfix"><img src="interfaces/lossless/images/icon_logs.png" alt="Logs"/>Logs</h1>
-	</div>
 	<table class="display" id="log_table">
 		<thead>
 			<tr>
@@ -36,7 +33,7 @@ lossless<%inherit file="base.html"/>
 </%def>
 
 <%def name="headIncludes()">
-	<link rel="stylesheet" href="interfaces/lossless/css/data_table.css">
+	<link rel="stylesheet" href="css/data_table.css">
 </%def>
 
 <%def name="javascriptIncludes()">
