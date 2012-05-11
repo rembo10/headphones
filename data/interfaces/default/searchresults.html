@@ -55,7 +55,7 @@
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	
 	<script>
-	$(document).ready(function(){
+	function initThisPage() {
 		$("table#searchresults_table tr td#artistname").each(function(){	
 			var artist = $(this).children('a').attr('title');
 			var image = $(this).parent().find("td#albumart img");
@@ -71,6 +71,7 @@
 		});
 		$('#searchresults_table').dataTable(
 			{
+				"bDestroy": true,
 				"aoColumnDefs": [
 			          { 'bSortable': false, 'aTargets': [ 0,3 ] }
 				],	
@@ -86,6 +87,9 @@
 				"aaSorting": []
 			});
 			resetFilters("album");
+	}
+	$(document).ready(function(){
+			initThisPage();		
 	});
 	$(window).load(function(){
 		initFancybox();

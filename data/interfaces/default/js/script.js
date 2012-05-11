@@ -362,7 +362,9 @@ function doAjaxCall(url,elem,reload,form) {
 	  				feedback.removeClass('success');
 	  			});
 	  			if ( reload == true ) 	refreshSubmenu(url);
-	  			if ( reload == "table") console.log('refresh'); refreshTable();
+	  			if ( reload == "table") {
+	  				console.log('refresh'); refreshTable();
+	  			}
 	  			if ( reload == "tabs") 	refreshTab();
 	  			if ( form ) {
 	  				// Change the option to 'choose...'
