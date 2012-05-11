@@ -35,10 +35,7 @@
 			%endif
 			<a href="http://musicbrainz.org/artist/${artist['ArtistID']}">${artist['ArtistName']}</a>
 		</h1>
-		<div id="artistBio"></div>
-		%if artist['Status'] == 'Loading':
-		<h3><i>(Album information for this artist is currently being loaded)</i></h3>
-		%endif		
+		<div id="artistBio"></div>	
 	</div>
 	<form action="markAlbums" method="get" id="markAlbums">
 	<input type="hidden" name="ArtistID" value=${artist['ArtistID']}>
