@@ -487,7 +487,7 @@ header #logo {
 }
 footer {
   display: table;
-  margin: 60px auto 20px auto;
+  margin: 60px auto 50px auto;
   width: 960px;
   padding-top: 10px;
   border-top: 1px solid #EEE;
