@@ -22,6 +22,9 @@ class Api(object):
 		self.kwargs = None
 
 		self.data = None
+
+		self.callback = None
+
 		
 	def checkParams(self,*args,**kwargs):
 		
@@ -64,12 +67,16 @@ class Api(object):
 			logger.info('Recieved API command: ' + self.cmd)
 			methodToCall = getattr(self, "_" + self.cmd)
 			result = methodToCall(**self.kwargs)
-
-			if type(self.data) == type(''):
-				return self.data
+			if 'callback' not in self.kwargs:
+				if type(self.data) == type(''):
+					return self.data
+				else:
+					return simplejson.dumps(self.data)
 			else:
-				return simplejson.dumps(self.data)
-			
+				self.callback = self.kwargs['callback']
+				self.data = simplejson.dumps(self.data)
+				self.data = self.callback + '(' + self.data + ');'
+				return self.data
 		else:
 			return self.data
 		
@@ -86,7 +93,7 @@ class Api(object):
 			
 		return rows_as_dic
 		
-	def _getIndex(self):
+	def _getIndex(self, **kwargs):
 		
 		self.data = self._dic_from_query('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
 		return	
@@ -103,7 +110,6 @@ class Api(object):
 		albums = self._dic_from_query('SELECT * from albums WHERE ArtistID="' + self.id + '" order by ReleaseDate DESC')
 		
 		self.data = { 'artist': artist, 'albums': albums }
-		
 		return
 	
 	def _getAlbum(self, **kwargs):
@@ -119,26 +125,25 @@ class Api(object):
 		description = self._dic_from_query('SELECT * from descriptions WHERE ReleaseGroupID="' + self.id + '"')
 		
 		self.data = { 'album' : album, 'tracks' : tracks, 'description' : description }
-		
 		return
 		
-	def _getHistory(self):
+	def _getHistory(self, **kwargs):
 		self.data = self._dic_from_query('SELECT * from snatched order by DateAdded DESC')
 		return
 	
-	def _getUpcoming(self):
+	def _getUpcoming(self, **kwargs):
 		self.data = self._dic_from_query("SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC")
 		return
 	
-	def _getWanted(self):
+	def _getWanted(self, **kwargs):
 		self.data = self._dic_from_query("SELECT * from albums WHERE Status='Wanted'")
 		return
 		
-	def _getSimilar(self):
+	def _getSimilar(self, **kwargs):
 		self.data = self._dic_from_query('SELECT * from lastfmcloud')
 		return
 		
-	def _getLogs(self):
+	def _getLogs(self, **kwargs):
 		pass
 	
 	def _findArtist(self, **kwargs):
@@ -267,13 +272,13 @@ class Api(object):
 		newValueDict = {'Status': 'Skipped'}
 		myDB.upsert("albums", newValueDict, controlValueDict)
 		
-	def _forceSearch(self):
+	def _forceSearch(self, **kwargs):
 		searcher.searchforalbum()
 	
-	def _forceProcess(self):
+	def _forceProcess(self, **kwargs):
 		postprocessor.forcePostProcess()	
 		
-	def _getVersion(self):
+	def _getVersion(self, **kwargs):
 		self.data = { 
 			'git_path' : headphones.GIT_PATH,
 			'install_type' : headphones.INSTALL_TYPE,
@@ -282,15 +287,15 @@ class Api(object):
 			'commits_behind' : headphones.COMMITS_BEHIND,
 		}
 	
-	def _checkGithub(self):
+	def _checkGithub(self, **kwargs):
 		versioncheck.checkGithub()
 		self._getVersion()
 	
-	def _shutdown(self):
+	def _shutdown(self, **kwargs):
 		headphones.SIGNAL = 'shutdown'
 	
-	def _restart(self):
+	def _restart(self, **kwargs):
 		headphones.SIGNAL = 'restart'
 		
-	def _update(self):
+	def _update(self, **kwargs):
 		headphones.SIGNAL = 'update'
