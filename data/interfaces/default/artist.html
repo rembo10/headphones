@@ -6,40 +6,52 @@
 
 <%def name="headerIncludes()">
 	<div id="subhead_container">
-		<ul id="subhead_menu">
-			<li><a href="refreshArtist?ArtistID=${artist['ArtistID']}">Refresh Artist</a></li>
-			<li><a href="deleteArtist?ArtistID=${artist['ArtistID']}">Delete Artist</a></li>
+		<div id="subhead_menu">		
+			<a id="menu_link_refresh" onclick="doAjaxCall('refreshArtist?ArtistID=${artist['ArtistID']}', $(this)),'table'" href="#" data-success="'${artist['ArtistName']}' will be refreshed">Refresh Artist</a>
+			<a id="menu_link_delete" href="deleteArtist?ArtistID=${artist['ArtistID']}">Delete Artist</a>
 			%if artist['Status'] == 'Paused':
-				<li><a href="resumeArtist?ArtistID=${artist['ArtistID']}">Resume Artist</a></li>
+				<a id="menu_link_resume" href="#" onclick="doAjaxCall('resumeArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} resumed">Resume Artist</a>
 			%else:
-				<li><a href="pauseArtist?ArtistID=${artist['ArtistID']}">Pause Artist</a></li>
+				<a id="menu_link_pauze" href="#" onclick="doAjaxCall('pauseArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} paused">Pause Artist</a>
 			%endif
 			%if artist['IncludeExtras']:
-				<li><a href="removeExtras?ArtistID=${artist['ArtistID']}">Remove Extras</a></li>
+				<a id="menu_link_removeextra" href="#" onclick="doAjaxCall('removeExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Extra's removed">Remove Extras</a>
 			%else:	
-				<li><a href="getExtras?ArtistID=${artist['ArtistID']}">Get Extras</a></li>
+				<a id="menu_link_getextra" href="#" onclick="doAjaxCall('getExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Getting Extra's">Get Extras</a>
 			%endif
-		</ul>
+		</div>
 	</div>	
+	<a href="/" class="back">&laquo; Back to overview</a>
 </%def>
 
 <%def name="body()">
-	<div id="paddingheader">
-		<h1><a href="http://musicbrainz.org/artist/${artist['ArtistID']}">${artist['ArtistName']}</a><h1>
-		%if artist['Status'] == 'Loading':
-		<h3><i>(Album information for this artist is currently being loaded)</i></h3>
-		%endif		
+	<div id="artistheader" class="clearfix">
+		<div id="artistImg">
+			<img class="albumArt" src="http://ec1.images-amazon.com/images/P/None.01.MZZZZZZZ.jpg" width="200" height="200" alt="${artist['ArtistName']}"/>
+		</div>
+		<h1>	
+			%if artist['Status'] == 'Loading':	
+				<img src="interfaces/default/images/loader_black.gif" alt="loading" style="float:left; margin-right: 5px;"/> 
+			%endif
+			<a href="http://musicbrainz.org/artist/${artist['ArtistID']}">${artist['ArtistName']}</a>
+			%if artist['Status'] == 'Loading':
+				<h3><i>(Album information for this artist is currently being loaded)</i></h3>
+			%endif	
+		</h1>
+		<div id="artistBio"></div>	
 	</div>
-	<form action="markAlbums" method="get"><input type="hidden" name="ArtistID" value=${artist['ArtistID']}>
-	<p class="indented">Mark selected albums as 
-		<select name="action">
+	<form action="markAlbums" method="get" id="markAlbums">
+	<input type="hidden" name="ArtistID" value=${artist['ArtistID']}>
+	<div id="markalbum">Mark selected albums as 
+		<select name="action" onChange="doAjaxCall('markAlbums',$(this),'table',true);" data-error="You didn't select any albums">
+  			<option disabled="disabled" selected="selected">Choose...</option>
   			<option value="Wanted">Wanted</option>
   			<option value="WantedNew">Wanted (new only)</option>
   			<option value="Skipped">Skipped</option>
   			<option value="Downloaded">Downloaded</option>
 		</select>
-		<input type="submit" value="Go">
-	</p>
+		<input type="hidden" value="Go">
+	</div>
 	<table class="display" id="album_table">
 		<thead>
 			<tr>
@@ -103,22 +115,22 @@
 				<td id="type">${album['Type']}</td>
 				<td id="status">${album['Status']}
 				%if album['Status'] == 'Skipped':
-					[<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">want</a>]
+					[<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' added to Wanted list">want</a>]
 				%elif (album['Status'] == 'Wanted' or album['Status'] == 'Wanted Lossless'):
-					[<a href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">skip</a>]
+					[<a href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' skipped">skip</a>]
 				%else:
-					[<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Retry the same download again">retry</a>][<a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True" title="Try a new download, skipping all previously tried nzbs">new</a>]
+					[<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),'table')" data-success="Retrying to download '${album['AlbumTitle']}'" title="Retry the same download again" data-success="Retrying '${album['AlbumTitle']}'">retry</a>][<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),'table')" title="Try a new download, skipping all previously tried nzbs"  data-success="Downloading new version for '${album['AlbumTitle']}'" data-success="Retrying to download New '${album['AlbumTitle']}'">new</a>]
 				%endif
 				%if albumformat in lossy_formats and album['Status'] == 'Skipped':
-					[<a id="wantlossless" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&lossless=True">want lossless</a>]
+					[<a id="wantlossless" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&lossless=True', $(this),'table')" data-success="'${album['AlbumTitle']}' lossless added to Wanted list">want lossless</a>]
 				%elif albumformat in lossy_formats and (album['Status'] == 'Snatched' or album['Status'] == 'Downloaded'):
-					[<a id="wantlossless" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&lossless=True">retry lossless</a>]
+					[<a id="wantlossless" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&lossless=True', $(this),'table')" data-success="Retrying lossless '${album['AlbumTitle']}'">retry lossless</a>]
 				%endif
 				</td>
 				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
 				<td id="bitrate">${bitrate}</td>
 				<td id="albumformat">${albumformat}</td>
-			</tr>
+			</tr>			
 		%endfor
 		</tbody>
 	</table>
@@ -126,7 +138,7 @@
 </%def>
 
 <%def name="headIncludes()">
-	<link rel="stylesheet" href="css/data_table.css">
+	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
 	%if artist['Status'] == 'Loading':
 	<meta http-equiv="refresh" content="5">
 	%endif
@@ -134,32 +146,57 @@
 
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
+	
 	<script>
-	$(document).ready(function()
-	{
-		$('#album_table').dataTable(
-			{
-				"aoColumns": [
-					null,
-					null,
-					null,
-					null,
-					null,
-					null,
-					{ "sType": "title-numeric"},
-					null,
-					null
-				],
-				"oLanguage": {
-					"sLengthMenu":"Show _MENU_ albums per page",
-					"sEmptyTable": "No album information available",
-					"sInfo":"Showing _TOTAL_ albums",
-					"sInfoEmpty":"Showing 0 to 0 of 0 albums",
-					"sInfoFiltered":"(filtered from _MAX_ total albums)"},
-				"bPaginate": false,
-				"aaSorting": [[4, 'asc'],[3,'desc']]
+	function initThisPage() {
+		%if artist['Status'] == 'Loading':
+			showMsg("Getting artist information",true);
+		%endif
+		
+		$('#album_table').dataTable({
+			"bDestroy": true,
+			"aoColumns": [
+				null,
+				null,
+				null,
+				null,
+				null,
+				null,
+				{ "sType": "title-numeric"},
+				null,
+				null
+			],
+			"aoColumnDefs": [
+			          { 'bSortable': false, 'aTargets': [ 0,1 ] }
+			],				
+			"oLanguage": {
+				"sLengthMenu":"Show _MENU_ albums per page",
+				"sEmptyTable": "No album information available",
+				"sInfo":"Showing _TOTAL_ albums",
+				"sInfoEmpty":"Showing 0 to 0 of 0 albums",
+				"sInfoFiltered":"(filtered from _MAX_ total albums)",
+				"sSearch": ""},
+			"bPaginate": false,
+			"aaSorting": [[4, 'asc'],[3,'desc']]
 
-			});
+		});			
+		resetFilters("albums");
+		replaceEmptyAlbum("table#album_table td#albumart img","${artist['ArtistName']}");
+		setTimeout(function(){
+			initFancybox();
+		},1000);
+	}
+	
+	$(document).ready(function() {		
+		getArtistInfo("${artist['ArtistName']}","#artistImg img",3,"${artist['ArtistID']}");
+		initActions();
+		initThisPage();
+	});
+	$(window).load(function(){
+		replaceEmptyAlbum("table#album_table td#albumart img","${artist['ArtistName']}");
+		setTimeout(function(){
+			initFancybox();
+		},1000)
 	});
 	</script>
 </%def>

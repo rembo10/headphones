@@ -6,29 +6,31 @@
 
 <%def name="headerIncludes()">
 	<div id="subhead_container">
-		<ul id="subhead_menu">
-			<li><a href="deleteAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">Delete Album</a></li>
+		<div id="subhead_menu">
+			<a id="menu_link_delete" href="deleteAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">Delete Album</a>
 			%if album['Status'] == 'Skipped':
-			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False">Mark Album as Wanted</a></li>
+			<a id="menu_link_wanted" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true)" data-success="'${album['AlbumTitle']}' added to your wanted list">Mark Album as Wanted</a>
 			%elif album['Status'] == 'Wanted':
-			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True">Force Check</a></li>
-			<li><a href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">Mark Album as Skipped</a></li>
+			<a id="menu_link_check" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this));" data-success="Forced checking successful">Force Check</a>
+			<a id="menu_link_skipped" href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),true);" data-success="'${album['AlbumTitle']}' marked as Skipped">Mark Album as Skipped</a>
 			%else:
-			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False">Retry Download</a></li>
-			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True">Try New Version</a></li>
+			<a id="menu_link_retry" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true);" data-success="Retrying to download '${album['AlbumTitle']}'">Retry Download</a>
+			<a id="menu_link_new" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),true);" data-success="Retrying new version of '${album['AlbumTitle']}'">Try New Version</a>
 			%endif			
-		</ul>
+		</div>
 	</div>	
+	<a href="artistPage?ArtistID=${album['ArtistID']}" class="back">&laquo; Back to ${album['ArtistName']}</a>
 </%def>
 
 <%def name="body()">
 	<div class="table_wrapper">
-		<h2><a href="artistPage?ArtistID=${album['ArtistID']}"><- Back to ${album['ArtistName']}</a></h2>
-		<div id="albumheader">	
-			<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" height="200" width="200" alt="albumart" class="albumArt">
+		<div id="albumheader" class="clearfix">	
+			<div id="albumImg">
+				<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" height="200" width="200" alt="albumart" class="albumArt" rel="dialog">
+			</div>
+			
 			<h1><a href="http://musicbrainz.org/release-group/${album['AlbumID']}">${album['AlbumTitle']}</a></h1>
 			<h2><a href="http://musicbrainz.org/artist/${album['ArtistID']}">${album['ArtistName']}</a></h2>
-			<br>
 			<%
 				totalduration = myDB.action("SELECT SUM(TrackDuration) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
 				totaltracks = len(myDB.select("SELECT TrackTitle from tracks WHERE AlbumID=?", [album['AlbumID']]))
@@ -38,12 +40,16 @@
 					albumduration = 'n/a'
 			
 			%>
-			<h3>Tracks: ${totaltracks}</h3>
-			<h3>Duration: ${albumduration}</h3>
-			%if description:
-			<h3>Description: </h3>
-			${description['Summary']}
-			%endif
+			<div class="albuminfo">
+				%if description:
+				<p>${description['Summary']}</p>
+				%endif
+				<ul>
+					<li>Tracks: <span>${totaltracks}</span></li> 
+					<li>Duration: <span>${albumduration}</span></li>
+				</ul>
+			</div>
+			
 		</div>
 		<div id="track_wrapper">
 			<table class="display" id="track_table">
@@ -116,21 +122,25 @@
 </%def>
 
 <%def name="headIncludes()">
-	<link rel="stylesheet" href="css/data_table.css">
+	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
 </%def>
 
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-	$(document).ready(function()
-	{
-		$('#track_table').dataTable(
-			{
-				"aaSorting": [],
-				"bFilter": false,
-				"bInfo": false,
-				"bPaginate": false
-			});
+	$(document).ready(function()	{
+		getAlbumInfo("${album['ArtistName']}","${album['AlbumTitle']}","#albumheader .albumArt",1);
+		initActions();
+		
+		$('#track_table').dataTable({
+			"aaSorting": [],
+			"bFilter": false,
+			"bInfo": false,
+			"bPaginate": false
+		});
+	});
+	$(window).load(function(){
+		initFancybox();
 	});
 	</script>
 </%def>
