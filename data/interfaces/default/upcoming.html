@@ -1,4 +1,14 @@
-lossless<%inherit file="base.html" />
+<%inherit file="base.html" />
+
+<%def name="headerIncludes()">
+	<div id="subhead_container">
+		<div id="subhead_menu">
+			<a href="#" id="menu_link_scan" onclick="doAjaxCall('forceSearch',$(this))" data-success="Checking for wanted albums succesful" data-error="Error checking wanted albums">Force Check</a>
+		</div>
+	</div>	
+</%def>
+
+
 <%def name="body()">
 	
 	<div class="title">
@@ -88,6 +98,7 @@ lossless<%inherit file="base.html" />
 			"bPaginate": false
 		});
 		resetFilters("artists");
+		initActions();
 	}
 	$(document).ready(function() {
 		initThisPage();		
