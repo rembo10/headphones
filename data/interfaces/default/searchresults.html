@@ -34,9 +34,9 @@
 					<td id="artistname"><a href="${result['url']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
 					<td id="score"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></td>
 				%if type == 'album':	
-					<td id="add"><a href="#" onclick="doAjaxCall('addReleaseById?rid=${result['albumid']}',$(this));" data-success="Album '${result['title']}' added"><span class="ui-icon ui-icon-plus"></span> Add this album</a></td>
+					<td id="add"><a href="addReleaseById?rid=${result['albumid']}"><span class="ui-icon ui-icon-plus"></span> Add this album</a></td>
 				%else:
-					<td id="add"><a href="#" onclick="doAjaxCall('addArtist?artistid=${result['id']}',$(this));" data-success="'${result['uniquename']}' added"><span class="ui-icon ui-icon-plus"></span> Add this artist</a></td>
+					<td id="add"><a href="addArtist?artistid=${result['id']}"><span class="ui-icon ui-icon-plus"></span> Add this artist</a></td>
 				%endif
 				</tr>
 				%endfor
@@ -55,7 +55,7 @@
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	
 	<script>
-	$(document).ready(function(){
+	function initThisPage() {
 		$("table#searchresults_table tr td#artistname").each(function(){	
 			var artist = $(this).children('a').attr('title');
 			var image = $(this).parent().find("td#albumart img");
@@ -71,6 +71,7 @@
 		});
 		$('#searchresults_table').dataTable(
 			{
+				"bDestroy": true,
 				"aoColumnDefs": [
 			          { 'bSortable': false, 'aTargets': [ 0,3 ] }
 				],	
@@ -86,6 +87,9 @@
 				"aaSorting": []
 			});
 			resetFilters("album");
+	}
+	$(document).ready(function(){
+			initThisPage();		
 	});
 	$(window).load(function(){
 		initFancybox();
