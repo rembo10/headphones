@@ -128,7 +128,7 @@ DOWNLOAD_TORRENT_DIR = None
 INTERFACE = None
 FOLDER_PERMISSIONS = None
 
-ENCODE = False
+MUSIC_ENCODER = False
 ENCODERFOLDER = None
 ENCODER = None
 BITRATE = None
@@ -218,7 +218,7 @@ def initialize():
                 LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
-                ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, ENCODE, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
+                ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
                 ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, MIRROR, CUSTOMHOST, CUSTOMPORT, \
                 CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY
                 
@@ -322,7 +322,7 @@ def initialize():
         ENCODER = check_setting_str(CFG, 'General', 'encoder', 'ffmpeg')
         BITRATE = check_setting_int(CFG, 'General', 'bitrate', 192)
         SAMPLINGFREQUENCY= check_setting_int(CFG, 'General', 'samplingfrequency', 44100)
-        ENCODE = bool(check_setting_int(CFG, 'General', 'encode', 0))
+        MUSIC_ENCODER = bool(check_setting_int(CFG, 'General', 'music_encoder', 0))
         ADVANCEDENCODER = check_setting_str(CFG, 'General', 'advancedencoder', '')
         ENCODEROUTPUTFORMAT = check_setting_str(CFG, 'General', 'encoderoutputformat', 'mp3')
         ENCODERQUALITY = check_setting_int(CFG, 'General', 'encoderquality', 2)
@@ -595,7 +595,7 @@ def config_write():
     new_config['General']['interface'] = INTERFACE
     new_config['General']['folder_permissions'] = FOLDER_PERMISSIONS
 
-    new_config['General']['encode'] = int(ENCODE)
+    new_config['General']['music_encoder'] = int(MUSIC_ENCODER)
     new_config['General']['encoder'] = ENCODER
     new_config['General']['bitrate'] = int(BITRATE)
     new_config['General']['samplingfrequency'] = int(SAMPLINGFREQUENCY)
