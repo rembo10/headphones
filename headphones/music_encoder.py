@@ -18,7 +18,7 @@ def encode(albumPath):
 	musicFinalFiles=[]
 	musicTempFiles=[]
 	encoder =""
-	startAlbumTime=time.clock()
+	startAlbumTime=time.time()
 	ifencoded=0
 	
 	if not os.path.exists(tempDirEncode):		
@@ -89,7 +89,7 @@ def encode(albumPath):
 def command(encoder,musicSource,musicDest,albumPath):
 	return_code=1
 	cmd=''
-	startMusicTime=time.clock()
+	startMusicTime=time.time()
 	if headphones.ENCODER == 'lame':
 		if headphones.ADVANCEDENCODER =='':
 			cmd=encoder + ' -h'		
@@ -128,7 +128,7 @@ def command(encoder,musicSource,musicDest,albumPath):
 		logger.info('Music "%s" encoded in %s' % (musicSource,getTimeEncode(startMusicTime)))
 		
 def getTimeEncode(start):
-	seconds =int(time.clock()-start)
+	seconds =int(time.time()-start)
 	hours = seconds / 3600
 	seconds -= 3600*hours
 	minutes = seconds / 60
