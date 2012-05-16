@@ -115,7 +115,7 @@ def command(encoder,musicSource,musicDest,albumPath):
 				cmd=cmd+ ' -ar ' + str(headphones.SAMPLINGFREQUENCY) + ' -ab ' + str(headphones.BITRATE) + 'k'
 			elif headphones.ENCODERVBRCBR=='vbr':
 				cmd=cmd+' -aq ' + str(headphones.ENCODERQUALITY)
-			cmd=cmd+ ' -y -ac 2 -map_meta_data 0:0,s0 -vn'
+			cmd=cmd+ ' -y -ac 2 -vn'
 		else:
 			cmd=cmd+' '+ headphones.ADVANCEDENCODER
 		cmd=cmd+ ' "' + musicDest + '"'
