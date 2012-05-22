@@ -43,18 +43,11 @@
 	{
 		$('#log_table').dataTable(
 			{
-				"oLanguage": {
-					"sLengthMenu":"Show _MENU_ lines per page",
-					"sEmptyTable": "No log information available",
-					"sInfo":"Showing _START_ to _END_ of _TOTAL_ lines",
-					"sInfoEmpty":"Showing 0 to 0 of 0 lines",
-					"sInfoFiltered":"(filtered from _MAX_ total lines)"},
-				"bStateSave": true,
-				"iDisplayLength": 100,
-				"sPaginationType": "full_numbers",
-				"aaSorting": []
-
-			});
+			"aaSorting": [
+			],
+			"bPaginate": false,
+			"bFilter": true
+		});
 	});
 	</script>
 </%def>
