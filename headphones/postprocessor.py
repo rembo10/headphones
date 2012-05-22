@@ -1,6 +1,6 @@
 import os
 import time
-import encode
+import music_encoder
 import urllib, shutil, re
 from headphones import notifiers
 import lib.beets as beets
@@ -209,8 +209,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
 
 	logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
 	#start enconding
-	if headphones.ENCODE:
-		downloaded_track_list=encode.encode(albumpath)
+	if headphones.MUSIC_ENCODER:
+		downloaded_track_list=music_encoder.encode(albumpath)
 	
 	album_art_path = albumart.getAlbumArt(albumid)
 	

@@ -387,7 +387,7 @@ class WebInterface(object):
 					"autowant_all" : checked(headphones.AUTOWANT_ALL),
 					"log_dir" : headphones.LOG_DIR,
 					"interface_list" : interface_list,
-					"encode":		checked(headphones.ENCODE),
+					"music_encoder":		checked(headphones.MUSIC_ENCODER),
 					"encoder":		headphones.ENCODER,
 					"bitrate":		int(headphones.BITRATE),
 					"encoderfolder":	headphones.ENCODERFOLDER,
@@ -428,7 +428,7 @@ class WebInterface(object):
 		nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
 		torrentblackhole_dir=None, download_torrent_dir=None, numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, 
 		rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, autowant_upcoming=False, autowant_all=False, interface=None, log_dir=None,
-		encode=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
+		music_encoder=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
 		prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0, 
 		nma_enabled=False, nma_apikey=None, nma_priority=0, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None):
 
@@ -487,7 +487,7 @@ class WebInterface(object):
 		headphones.AUTOWANT_ALL = autowant_all
 		headphones.INTERFACE = interface
 		headphones.LOG_DIR = log_dir
-		headphones.ENCODE = encode
+		headphones.MUSIC_ENCODER = music_encoder
 		headphones.ENCODER = encoder
 		headphones.BITRATE = int(bitrate)
 		headphones.SAMPLINGFREQUENCY = int(samplingfrequency)
