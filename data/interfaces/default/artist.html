@@ -15,9 +15,9 @@
 				<a id="menu_link_pauze" href="#" onclick="doAjaxCall('pauseArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} paused">Pause Artist</a>
 			%endif
 			%if artist['IncludeExtras']:
-				<a id="menu_link_removeextra" href="#" onclick="doAjaxCall('removeExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Extra's removed">Remove Extras</a>
+				<a id="menu_link_removeextra" href="#" onclick="doAjaxCall('removeExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Extras removed for ${artist['ArtistName']}">Remove Extras</a>
 			%else:	
-				<a id="menu_link_getextra" href="#" onclick="doAjaxCall('getExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Getting Extra's">Get Extras</a>
+				<a id="menu_link_getextra" href="#" onclick="doAjaxCall('getExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Getting Extras for ${artist['ArtistName']}">Get Extras</a>
 			%endif
 		</div>
 	</div>	
@@ -119,12 +119,12 @@
 				%elif (album['Status'] == 'Wanted' or album['Status'] == 'Wanted Lossless'):
 					[<a href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' skipped">skip</a>]
 				%else:
-					[<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),'table')" data-success="Retrying to download '${album['AlbumTitle']}'" title="Retry the same download again" data-success="Retrying '${album['AlbumTitle']}'">retry</a>][<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),'table')" title="Try a new download, skipping all previously tried nzbs"  data-success="Downloading new version for '${album['AlbumTitle']}'" data-success="Retrying to download New '${album['AlbumTitle']}'">new</a>]
+					[<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),'table')" data-success="Retrying the same version of '${album['AlbumTitle']}'" title="Retry the same download again">retry</a>][<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),'table')" title="Try a new download, skipping all previously tried nzbs"  data-success="Downloading new version for '${album['AlbumTitle']}'" data-success="Looking for a new version of '${album['AlbumTitle']}'">new</a>]
 				%endif
 				%if albumformat in lossy_formats and album['Status'] == 'Skipped':
-					[<a id="wantlossless" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&lossless=True', $(this),'table')" data-success="'${album['AlbumTitle']}' lossless added to Wanted list">want lossless</a>]
+					[<a id="wantlossless" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&lossless=True', $(this),'table')" data-success="Lossless version of '${album['AlbumTitle']}' added to queue">want lossless</a>]
 				%elif albumformat in lossy_formats and (album['Status'] == 'Snatched' or album['Status'] == 'Downloaded'):
-					[<a id="wantlossless" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&lossless=True', $(this),'table')" data-success="Retrying lossless '${album['AlbumTitle']}'">retry lossless</a>]
+					[<a id="wantlossless" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&lossless=True', $(this),'table')" data-success="Retrying the same lossless version of '${album['AlbumTitle']}'">retry lossless</a>]
 				%endif
 				</td>
 				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
