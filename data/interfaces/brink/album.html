@@ -122,13 +122,14 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script src="interfaces/brink/JS/libs/jquery.dataTables.min.js"></script>
 	<script>
 	$(document).ready(function()
 	{
 		$('#track_table').dataTable(
 			{
-				"aaSorting": [],
+				"aaSorting": [
+				],
 				"bFilter": false,
 				"bInfo": false,
 				"bPaginate": false
