@@ -60,21 +60,22 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script src="interfaces/brink/JS/libs/jquery.dataTables.min.js"></script>
 	<script>
 	$(document).ready(function()
 	{
 		$('#history_table').dataTable(
 			{
-				"oLanguage": {
-					"sLengthMenu":"Show _MENU_ items per page",
-					"sEmptyTable": "No History to Display",
-					"sInfo":"Showing _START_ to _END_ of _TOTAL_ items",
-					"sInfoEmpty":"Showing 0 to 0 of 0 items",
-					"sInfoFiltered":"(filtered from _MAX_ total items)"},
-				"iDisplayLength": 25,
-				"sPaginationType": "full_numbers",
-				"aaSorting": []
+				"aoColumns": [
+					null,
+					null,
+					null,
+					null,
+					null
+				],
+				"bFilter": false,
+				"bInfo": false,
+				"bPaginate": false
 
 			});
 	});

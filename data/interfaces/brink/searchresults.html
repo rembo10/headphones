@@ -41,9 +41,9 @@
 							</div>
 					</td>
 				%if type == 'album':	
-					<td id="add"><a href="addReleaseById?rid=${result['albumid']}">Add this album</a></td>
+					<td id="add"><a class="btnAdd" href="addReleaseById?rid=${result['albumid']}" title="Add this Album"></a></td>
 				%else:
-					<td id="add"><a href="addArtist?artistid=${result['id']}">Add this artist</a></td>
+					<td id="add"><a class="btnAdd" href="addArtist?artistid=${result['id']}" title="Add this Artist"></a></td>
 				%endif
 				</tr>
 				%endfor
@@ -57,23 +57,26 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script src="interfaces/brink/JS/libs/jquery.dataTables.min.js"></script>
 	<script>
-	$(document).ready(function()
-	{
-		$('#searchresults_table').dataTable(
+		$(document).ready(function()
+		{
+			$('#searchresults_table').dataTable(
 			{
-				"oLanguage": {
-					"sLengthMenu":"Show _MENU_ results per page",
-					"sEmptyTable": "No results",
-					"sInfo":"Showing _START_ to _END_ of _TOTAL_ results",
-					"sInfoEmpty":"Showing 0 to 0 of 0 results",
-					"sInfoFiltered":"(filtered from _MAX_ total results)"},
-				"iDisplayLength": 25,
-				"sPaginationType": "full_numbers",
-				"aaSorting": []
-
+				"aoColumns": [
+						null,
+						null,
+						{ "bSortable": false}
+					],
+					"oLanguage": {
+						"sLengthMenu":"Show _MENU_ albums per page",
+						"sEmptyTable": "No search results found",
+						"sInfo":"Showing _TOTAL_ albums",
+						"sInfoEmpty":"No albums found",
+						"sInfoFiltered":"(Filtered from _MAX_ total albums)"},
+					"bPaginate": false,
+					"aaSorting": [[4, 'asc'],[3,'desc']]
 			});
-	});
+		});
 	</script>
 </%def>

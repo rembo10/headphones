@@ -18,99 +18,147 @@
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		
-	<link rel="shortcut icon" href="interfaces/brink/Images/favicon.ico">
-	<link rel="apple-touch-icon" href="interfaces/brink/Images/headphoneslogo.png">
-	<link rel="stylesheet" href="interfaces/brink/CSS/StyleSheet.css">
-	<link rel="stylesheet" href="interfaces/brink/Themes/Default.css">
-	<link rel="stylesheet" href="interfaces/brink/css/data_table.css">
+	<link rel="shortcut icon" href="../images/favicon.ico">
+	<link rel="apple-touch-icon" href="../images/headphoneslogo.png">
 	
-	<script src="js/jquery-1.7.1.js"></script>
+	<link rel="stylesheet" href="interfaces/brink/CSS/style.css">
+	<link rel="stylesheet" href="interfaces/brink/CSS/dataTable.css">
+	
+	<script src="interfaces/brink/js/libs/jquery-1.7.1.js"></script>
 	<script>!window.jQuery && document.write(unescape('%3Cscript src="js/libs/jquery-1.6.2.min.js"%3E%3C/script%3E'))</script>
 	${next.javascriptIncludes()}
 	
 	<script src="js/plugins.js"></script>
-	<script src="js/script.js"></script>
+	<script src="interfaces/brink/js/script.js"></script>
 	
-	<!-- Script by Brinken -->
-		<script type="text/javascript" src="interfaces/brink/JS/FancyScript.js"></script>
+	<!-- Theme style -->
+	<link rel="stylesheet" href="interfaces/brink/Themes/Default.css">
+	<!--
+		<script type="text/javascript">
+		selectedTheme();
+		</script>
+	-->
+	
 		<!-- Custom Form elements-->
-		<script type="text/javascript" src="interfaces/brink/JS/custom-form-elements.js" ></script>
-		<!-- jScrollPane -->
-			<!-- styles needed by jScrollPane -->
-			<link type="text/css" href="interfaces/brink/CSS/jquery.jscrollpane.css" rel="stylesheet" media="all" />
-			<!-- jScrollPane script -->
-			<script type="text/javascript" src="interfaces/brink/JS/jquery.jscrollpane.js" ></script>
-			<!-- Mousewheel support -->
-			<script type="text/javascript" src="interfaces/brink/JS/jquery.mousewheel.js" ></script>
-			<!-- Add to Scrollbars #main -->
-			<script>
-			$(function(){
-				$('.main').jScrollPane();
-			});
-			</script>
+		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.custom-form-elements.js" ></script>
+		
+	<!-- jScrollPane -->
+		<!-- styles needed by jScrollPane -->
+		<link type="text/css" href="interfaces/brink/css/libs/jquery.jscrollpane.css" rel="stylesheet" media="all" />
+		<!-- jScrollPane script -->
+		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.jscrollpane.js" ></script>
+		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.jscrollpane.min.js" ></script>
+		<!-- Mousewheel support -->
+		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.mousewheel.js" ></script>
+		
+		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.dataTables.js" ></script>
+		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.dataTables.min.js" ></script>
+		
+		<script type="text/javascript">
+
+		$(window).resize(function(){
+			mainResize();
+			mainScroll();
+		});
+		$(document).ready(function(){
+			mainResize();
+			mainScroll();
+		});
+		$('#main').resize(function(){
+			mainScroll();
+		});
+		</script>
 		
 	${next.headIncludes()}
 	
 	<script src="js/libs/modernizr-1.7.min.js"></script>
 </head>
 <body>
-	<div id="container">
+	<div id="message">
 		% if not headphones.CURRENT_VERSION:
-            <div id="updatebar">
+            <div class="dialog error">
 				<div class="btnClose" title="Close" ></div>
-                You're running an unknown version of Headphones. 
-				<br />
-				<br />
-				<br />
-				<a class="update-link" href="update">Update</a>
+				<table>
+					<tr>
+						<td><div class="image" title="Update"></div></td>
+						<td>
+							You're running an unknown version of Headphones. It's recommended that you 
+							<a href="update">update</a> now!
+						</td>
+					</tr>
+				</table>
             </div>
-            % elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
-            <div id="updatebar">
+		% elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
+			<div class="dialog update">
 				<div class="btnClose" title="Close" ></div>
-                A newer version is available. <br /> 
+				A newer version is available. <br /> 
 				You're ${headphones.COMMITS_BEHIND} commits behind. 
 				<br />
 				<br />
 				<br />
-				<a class="update-link" href="http://github.com/rembo10/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}">Version</a>
-				<a class="update-link" href="update">Update</a>
-            </div>
-			% endif
-		<header>
-					
-			<div id="logo">
-				<a href="home"><img src="interfaces/brink/Images/headphoneslogo-black.png" alt="headphones"></a>
+				<a href="http://github.com/rembo10/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}">Version</a>
+				<a href="update">Update</a>
 			</div>
-			${next.headerIncludes()}
-			<div id="searchbar">
-                <form action="search" method="get">
-                    <input type="text" value="" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" accesskey="s" />
-                    <select name="type">
-  						<option value="artist">Artist</option>
-  						<option value="album">Album</option>
-					</select>
-                    <input class="submit" type="submit" value="GO"/>
-                </form>
-            </div>
-			<div class="clear" />
-		</header>
-		<ul id="nav">
-				<li><a class="elseSelect" href="home" accesskey="1">Home</a></li>
-				<li><a href="upcoming" accesskey="2">Upcoming</a></li>
-				<li><a href="extras" accesskey="3">Suggestions</a></li>
-				<li><a href="manage" accesskey="4">Manage</a></li>
-				<li><a href="history" accesskey="5">History</a></li>
-				<li><a href="logs" accesskey="6">Logs</a></li>
-				<li><a href="config" accesskey="7">Settings</a></li>
-		</ul>
-			<div id="main" class="main">
-				${next.body()}
-			</div>
-
-		<footer>
-		</footer>
+		% endif
+		<script>
+			// Types (error, update)are equal to class, which can be found in style.css
+			// eks. 'messageDialog("type", "message");'
+		</script>
 	</div>
-	
+	<table id="table_body">
+		<tr>
+			<td id="header" colspan="2">
+				<div id="logo">
+					<a href="home"><img src="../images/headphoneslogo.png" alt="headphones"/>Headphones</a>
+				</div>
+				${next.headerIncludes()}
+				<div id="searchbar">
+					<form action="search" method="get">
+						<input type="text" value="" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" accesskey="s" placeholder="Search..." />
+						<select class="styled" name="type">
+							<option value="artist">Artist</option>
+							<option value="album">Album</option>
+						</select>
+						<input class="submit" type="submit" value="GO"/>
+					</form>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td id="nav-container">
+				<ul id="nav">
+					<li><a class="navHome" href="home" accesskey="1">Home</a></li>
+					<li><a class="navUpcoming" href="upcoming" accesskey="2">Upcoming</a></li>
+					<li><a class="navSuggestions" href="extras" accesskey="3">Suggestions</a></li>
+					<li><a class="navManage" href="manage" accesskey="4">Manage</a></li>
+					<li><a class="navHistory" href="history" accesskey="5">History</a></li>
+					<li><a class="navLogs" href="logs" accesskey="6">Logs</a></li>
+					<li><a class="navSettings" href="config" accesskey="7">Settings</a></li>
+				</ul>
+			</td>
+			<td id="content-container">
+				<div id="main" class="main">
+				${next.body()}
+				</div>
+			</td>
+		</tr>
+		<tr id="footer" >
+			<td colspan="2">
+				<div id="footManage">
+					<ul>
+						<li>Tools
+						<ul>
+							<li><a href="forceSearch" title="Refresh/Update">Wanted Albums</a></li>
+							<li><a href="forceUpdate" title="Refresh/Update">Active Artists</a></li>
+							<li><a href="forcePostProcess" title="Refresh/Update">Post-Process</a></li>
+							<li><a href="checkGithub" title="Refresh/Update">Headphones Updates</a></li>
+						</ul>
+						</li>
+					</ul>
+				</div>
+			</td>
+		</tr>
+	</table>
 </script>
 	<!--[if lt IE 7 ]>
 	<script src="js/libs/dd_belatedpng.js"></script>

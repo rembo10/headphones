@@ -13,29 +13,25 @@
 </%def>
 <%def name="body()">
     <form action="configUpdate" method="post">
-	    <div class="table_wrapper">
-            <a name="web_interface"><h1>Web Interface</h1></a>
-
+					<div class="table_wrapper">
+						<a name="Interface"><h1>Web Interface</h1></a>
             <table class="configtable" summary="Web Interface">
                 <tr>
                     <td>
                       <h3>HTTP Host:</h3>
-                        <input type="text" name="http_host" value="${config['http_host']}" size="30" maxlength="40" />
-						    <div class="tooltip">
-							    <span>
-								    i.e. localhost or 0.0.0.0
-							    </span>
-						    </div>
+					</td>
+					<td>
+                        <input type="text" name="http_host" value="${config['http_host']}" size="25" maxlength="40" />
+						<div class="tooltip">
+							<span>
+								Localhost or 0.0.0.0
+							</span>
+						</div>
                     </td>
                     <td>
-                        <p>HTTP Username:</p>
-                        <input type="text" name="http_username" value="${config['http_user']}" size="30" maxlength="40" />
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <p>HTTP Port:</p>
+                        <h3>HTTP Port:</h3>
+					</td>
+					<td>
                         <input type="text" name="http_port" value="${config['http_port']}" size="10" maxlength="40" />
                         <div class="tooltip">
 							<span>
@@ -43,52 +39,91 @@
 							</span>
 						</div>
                     </td>
-				
+                </tr>
+
+                <tr>
+                    
+					<td>
+                        <h3>HTTP Username:</h3>
+					</td>
                     <td>
-					    <p>
-						    <h3>HTTP Password:</h3>
-						    <input type="password" name="http_password" value="${config['http_pass']}" size="30" maxlength="40" />
-					    </p>
+                        <input type="text" name="http_username" value="${config['http_user']}" size="30" maxlength="40" />
+                    </td>
+                    <td>
+						<h3>HTTP Password:</h3>
+					</td>
+                    <td>
+						<input type="password" name="http_password" value="${config['http_pass']}" size="30" maxlength="40" />
                     </td>
                 </tr>
                 <tr>
-                <td>
-                    <h3>Enable API: <input class="styled" type="checkbox" name="api_enabled" id="api_enabled" value="1" ${config['api_enabled']} /></h3>
-                      <div id="apioptions">
-                      	<br>
-		      	        <h3>API key:<input type="text" name="api_key" id="api_key" value="${config['api_key']}" size="30"><input class="submit" type="button" value="Generate" id="generate_api"></h3><br><br>
-                      </div>
-                </td>                
+					<td>
+						<h3>Enable API 
+							<input class="styled" type="checkbox" name="api_enabled" id="api_enabled" value="1" ${config['api_enabled']} />
+						</h3>
+						<div id="apioptions">
+							<br>
+							<h3>API key:<input type="text" name="api_key" id="api_key" value="${config['api_key']}" size="30"><input class="submit" type="button" value="Generate" id="generate_api"></h3><br><br>
+						</div>
+					</td>                
                 </tr>
+				<tr>
+					<td>
+						<h3>
+						    Layout: 
+                        </h3>
+					</td>
+                    <td>
+                        <select class="styled" name="interface">
+					    %for interface in config['interface_list']:
+						    <%
+							    if interface == headphones.INTERFACE:
+								    selected = 'selected="selected"'
+							    else:
+								    selected = ''
+						    %>
+						    <option value="${interface}" ${selected}>
+                                ${interface}
+                            </option>
+					    %endfor
+					    </select>
+						<!--
+							Make config for change of ColorStyle.css.
+						-->
+					</td>
+				</tr>
                 <tr>
                     <td>
-                        <p>
-						    Launch Browser on Startup
-						    <input class="styled" type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} />
-					    </p>
+                        <h3>Launch Browser on Startup:</h3>
+					</td>
+					<td>
+						<input class="styled" type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} />
                     </td>
                 	<td>
-                	    <h3>Download Scan Interval (mins):</h3>
-                    		<input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="10" maxlength="40">
+                	    <h3>Download Scan Interval:</h3>
+					</td>
+					<td>
+                    	<input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="10" maxlength="40"> mins
                 	</td>
                 </tr>
                 <tr>
-
                 	<td>
-                	    <h3>NZB Search Interval (mins):</h3>
-                	    <input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="10" maxlength="40">
+                	    <h3>NZB Search Interval:</h3>
+					</td>
+					<td>
+                	    <input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="10" maxlength="40"> mins
                		</td>
-
                 	<td>
-                	    <h3>Library Scan Interval (mins):</h3>
-                	    <input type="text" name="libraryscan_interval" value="${config['libraryscan_interval']}" size="10" maxlength="40">
+                	    <h3>Library Scan Interval:</h3>
+					</td>
+					<td>
+                	    <input type="text" name="libraryscan_interval" value="${config['libraryscan_interval']}" size="10" maxlength="40"> mins
                		</td>
-
-            </tr>
+				</tr>
             </table>
 	    </div>
 	    <div class="table_wrapper">
-            <a name="download"><h1>Download Settings</h1></a>
+            <a name="Download"><h1>Download Settings</h1></a>
             <table class="configtable" summary="Download Settings">
 	            <tr>
                     <td colspan="2">
@@ -142,10 +177,10 @@
                 </tr>
                 <tr>
                     <td>
-					    <p>
-						    Use Black Hole: 
+					    <h3>
+						    Use Black Hole 
 						    <input class="styled" type="checkbox" name="blackhole" value="1" ${config['use_blackhole']} />
-					    </p>
+					    </h3>
                     </td>
 
                     <td>
@@ -217,7 +252,7 @@
             </table>
 	    </div>
         <div class="table_wrapper">
-            <a name="providers">
+            <a name="Providers">
             <h1>
                 Search Providers
             </h1>
@@ -328,7 +363,7 @@
             </table>
 	    </div>
 	    <div class="table_wrapper">
-            <a name="post_processing">
+            <a name="PostProcessing">
 			    <h1>
 				    Quality &amp; Post Processing
 			    </h1>
@@ -336,7 +371,7 @@
 
             <table class="configtable" summary="Quality & Post Processing">
                 <tr>
-                    <td width="200">
+                    <td>
                 	    <h2>Album Quality:</h2>
 					    <p>
 						    <input class="styled" type="radio" name="preferred_quality" value="0" ${config['pref_qual_0']} />
@@ -411,7 +446,7 @@
 		    </table>
 	    </div>
 	    <div class="table_wrapper">
-            <a name="advanced_settings"><h1>Advanced Settings</h1></a>
+            <a name="Advanced"><h1>Advanced Settings</h1></a>
         
             <table class="configtable" summary="Advanced Settings">
                 <tr>
@@ -456,27 +491,6 @@
 								<input class="styled" type="checkbox" name="autowant_all" value="1" ${config['autowant_all']} />Automatically Mark All Albums as Wanted	
 					    	</p>	
 					    <br />
-					    <h3>
-						    Interface: 
-                        <h3>
-
-                        <select class="styled" name="interface">
-					    %for interface in config['interface_list']:
-						    <%
-							    if interface == headphones.INTERFACE:
-								    selected = 'selected="selected"'
-							    else:
-								    selected = ''
-						    %>
-						    <option value="${interface}" ${selected}>
-                                ${interface}
-                            </option>
-					    %endfor
-					    </select>
-						<!--
-							Make config for change of ColorStyle.css.
-						-->
-					    <br /><br />
                         <h3>Log Directory:</h3>
 					    <input type="text" name="log_dir" value="${config['log_dir']}" size="40" />
                     </td>
@@ -673,9 +687,10 @@
 				</tr>
             </table>
         </div>
+	    
 
         <p class="center">
-			<input class="submit" type="submit" value="Save Changes" />
+			<input class="submit save" type="submit" value="Save Changes" />
 			<br />
             (Web Interface changes require a restart to take effect)
         </p>
@@ -684,6 +699,10 @@
 
 <%def name="javascriptIncludes()">
 	<script>
+	
+	$("save").click(function(){
+		messageDialog("update", "Your settings has been saved!")
+	});
 	
 	hideServerDivs = function () {
 		$("#customoptions").hide("fast");
@@ -822,5 +841,9 @@
 
 	});
 	
+	//Slide toggle
+	$(document).ready(function(){
+		$(".configtable").addClass("closed");
+	});
 	</script>
 </%def>
