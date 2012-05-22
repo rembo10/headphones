@@ -9,13 +9,13 @@
 		<div id="subhead_menu">
 			<a id="menu_link_delete" href="deleteAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">Delete Album</a>
 			%if album['Status'] == 'Skipped':
-			<a id="menu_link_wanted" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true)" data-success="'${album['AlbumTitle']}' added to your wanted list">Mark Album as Wanted</a>
+			<a id="menu_link_wanted" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true)" data-success="'${album['AlbumTitle']}' added to queue">Mark Album as Wanted</a>
 			%elif album['Status'] == 'Wanted':
 			<a id="menu_link_check" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this));" data-success="Forced checking successful">Force Check</a>
 			<a id="menu_link_skipped" href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),true);" data-success="'${album['AlbumTitle']}' marked as Skipped">Mark Album as Skipped</a>
 			%else:
-			<a id="menu_link_retry" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true);" data-success="Retrying to download '${album['AlbumTitle']}'">Retry Download</a>
-			<a id="menu_link_new" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),true);" data-success="Retrying new version of '${album['AlbumTitle']}'">Try New Version</a>
+			<a id="menu_link_retry" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true);" data-success="Retrying the same version of '${album['AlbumTitle']}'">Retry Download</a>
+			<a id="menu_link_new" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),true);" data-success="Looking for a new version of '${album['AlbumTitle']}'">Try New Version</a>
 			%endif			
 		</div>
 	</div>	
