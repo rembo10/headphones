@@ -35,12 +35,6 @@ a:hover { /*this effect is not shown in NN4.xx*/
 a:active {/*colour in NN4.xx is red*/ 
   	color: rgb(200,200,200);
   	text-decoration: none; 
-	}
-
-.dataTable a {
-	height: 100%;
-	width: 100%;
-	display: block;
 }
 #container { width: 100%; margin: auto; }
 
@@ -109,13 +103,8 @@ div#logo img
 	float: left;
 	margin-right: 10px;
 }
-/*
- * Dialogs
- * */
+
 /*Page Dialog*/
-span.globalDialog
-{
-}
 span.pageDialog
 {
 	margin: 0 auto 0 auto;
@@ -124,15 +113,15 @@ span.pageDialog
 	font-size: 12px;
 	text-align: center;
 	display: block;
-	color: rgba(0,0,0,0.8);
+	color: rgba(0,0,0,0.9);
 	text-shadow: rbga(255,255,255,0.5);
-	box-shadow: 0px 0px 15px rgb(22,111,153);
+	box-shadow: 0px 0px 3px rgb(222,213,118);
 	border-radius: 3px;
-	background-image: linear-gradient(bottom, rgb(17,110,143) 0%, rgb(22,111,153) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(17,110,143) 0%, rgb(22,111,153) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(17,110,143) 0%, rgb(22,111,153) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(17,110,143) 0%, rgb(22,111,153) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(17,110,143) 0%, rgb(22,111,153) 100%);
+	background-image: linear-gradient(bottom, rgb(222,213,118) 0%, rgb(255,245,140) 100%);
+	background-image: -o-linear-gradient(bottom, rgb(222,213,118) 0%, rgb(255,245,140) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(222,213,118) 0%, rgb(255,245,140) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(222,213,118) 0%, rgb(255,245,140) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(222,213,118) 0%, rgb(255,245,140) 100%);
 }
 /*Update Dialog*/
 div.btnClose:after
@@ -802,17 +791,6 @@ table#artist_table td#have { vertical-align: middle; }
 
 #artist_table div { color: #000; text-shadow: 1px 1px rgb(100,100,100); font-size: 12px; font-weight: bold; }
 
-/*
-    Paddingheader
-*/
-div#paddingheader { 
-padding-top: 48px; 
-font-size: 24px; 
-font-weight: bold; 
-text-align: left; 
-}
-div#nopaddingheader { font-size: 24px; font-weight: bold; text-align: left; }
-
 
 table#album_table { width: 100%; }
 /* Album Tableheader*/
@@ -882,10 +860,11 @@ div#albumheader { margin: 20px 0px 40px 0px; min-height: 200px; }
     Track
 */
 div#track_wrapper { font-size: 12px; width: 100%; clear:both;  }
-div#track_table { margin-top: 20px; }
-table#track_table th#number { text-align: center; width: 12px; }
+table#track_table { margin-top: 20px; width: 100%; }
+table#track_table td { padding: 3px 10px 3px 10px; }
+table#track_table th#number { text-align: left; width: 30px; padding-left: 4px; }
 table#track_table th#name { text-align:left ; min-width: 160px; }
-table#track_table th#duration { text-align: left; width: 55px; }
+table#track_table th#duration { text-align: left; width: 90px; }
 table#track_table th#location { text-align: left; min-width: 180px; }
 table#track_table th#bitrate { text-align: left; min-width: 75px; }
 
@@ -908,6 +887,7 @@ table#history_table td#action { vertical-align: middle; text-align: left; font-s
     Log
 */
 table#log_table { width: 100%; }
+table#log_table td { padding: 3px 5px 3px 10px; }
 
 table#log_table th#timestamp { text-align: left; min-width: 150px; }
 table#log_table th#level { text-align: left; min-width: 60px; }
