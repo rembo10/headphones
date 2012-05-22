@@ -349,7 +349,7 @@
                       <h2>Re-Encoding Options:</h2>
                       <i class="smalltext">Note: this option requires the lame or ffmpeg encoder</i>
 						<br><br>
-                      	<h3><input type="checkbox" name="encode" id="encode" value="1" ${config['encode']}/> Re-encode downloads during postprocessing</h3>
+                      	<h3><input type="checkbox" name="music_encoder" id="music_encoder" value="1" ${config['music_encoder']}/> Re-encode downloads during postprocessing</h3>
                     	<br>
                     <div id="encoderoptions">
                       	<h4><input type="checkbox" name="encoderlossless" value="1" ${config['encoderlossless']}/> Only re-encode lossless files (.flac)</h4>
@@ -580,7 +580,7 @@
     	            $('#api_key').val(data);
     	    });
     	});
-		if ($("#encode").is(":checked"))
+		if ($("#music_encoder").is(":checked"))
 			{
 				$("#encoderoptions").show();
 			}
@@ -589,8 +589,8 @@
 				$("#encoderoptions").hide();
 			}
 
-		$("#encode").click(function(){
-			if ($("#encode").is(":checked"))
+		$("#music_encoder").click(function(){
+			if ($("#music_encoder").is(":checked"))
 			{
 				$("#encoderoptions").show("fast");
 			}

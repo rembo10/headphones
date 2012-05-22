@@ -504,7 +504,7 @@
 					    </div>
                         <h2>Re-Encoding Options:</h2>
                         <p>
-						    <input class="styled" type="checkbox" name="encode" id="encode" value="1" ${config['encode']} /> 
+						    <input class="styled" type="checkbox" name="music_encoder" id="music_encoder" value="1" ${config['music_encoder']} /> 
 						    Re-encode downloads during postprocessing
 					    </p>
                         <div id="encoderoptions">
@@ -757,7 +757,7 @@
     	            $('#api_key').val(data);
     	    });
     	});
-		if ($("#encode").is(":checked"))
+		if ($("#music_encoder").is(":checked"))
 			{
 				$("#encoderoptions").show();
 			}
@@ -766,8 +766,8 @@
 				$("#encoderoptions").hide();
 			}
 
-		$("#encode").click(function(){
-			if ($("#encode").is(":checked"))
+		$("#music_encoder").click(function(){
+			if ($("#music_encoder").is(":checked"))
 			{
 				$("#encoderoptions").show("fast");
 			}
