@@ -7,14 +7,13 @@
  * Just copy the lines, and replace it in here.
  */
 /* Main Header */
-header
+#header
 {
 	background-image: linear-gradient(bottom, rgb(207,207,207) 0%, rgb(245,245,245) 100%);
 	background-image: -o-linear-gradient(bottom, rgb(207,207,207) 0%, rgb(245,245,245) 100%);
 	background-image: -moz-linear-gradient(bottom, rgb(207,207,207) 0%, rgb(245,245,245) 100%);
 	background-image: -webkit-linear-gradient(bottom, rgb(207,207,207) 0%, rgb(245,245,245) 100%);
 	background-image: -ms-linear-gradient(bottom, rgb(207,207,207) 0%, rgb(245,245,245) 100%);
-	border-bottom: 1px solid #000; 
 }
 
 #subhead_container{
@@ -23,26 +22,26 @@ header
 	background-image: -moz-linear-gradient(bottom, rgba(0,0,0,0.1) 0%, rgba(255,255,255,0.1) 100%);
 	background-image: -webkit-linear-gradient(bottom, rgba(0,0,0,0.1) 0%, rgba(255,255,255,0.1) 100%);
 	background-image: -ms-linear-gradient(bottom, rgba(0,0,0,0.1) 0%, rgba(255,255,255,0.1) 100%);
-	border-bottom: 1px solid #000; 
 }
 
-footer {
+#footer {
 	background-image: linear-gradient(bottom, rgb(82,82,82) 0%, rgb(117,117,117) 100%);
 	background-image: -o-linear-gradient(bottom, rgb(82,82,82) 0%, rgb(117,117,117) 100%);
 	background-image: -moz-linear-gradient(bottom, rgb(82,82,82) 0%, rgb(117,117,117) 100%);
 	background-image: -webkit-linear-gradient(bottom, rgb(82,82,82) 0%, rgb(117,117,117) 100%);
 	background-image: -ms-linear-gradient(bottom, rgb(82,82,82) 0%, rgb(117,117,117) 100%);
-	border-top: 1px solid #000; 
 }
 /*Main menu current page*/
 #nav li.selected,
 #nav li.selected:hover 
 {
-	background-image: linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(23,23,23) 0%, rgb(48,48,48) 100%);
+	background-image: linear-gradient(bottom, rgb(115,115,115) 0%, rgb(130,130,130) 100%);
+	background-image: -o-linear-gradient(bottom, rgb(115,115,115) 0%, rgb(130,130,130) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(115,115,115) 0%, rgb(130,130,130) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(115,115,115) 0%, rgb(130,130,130) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(115,115,115) 0%, rgb(130,130,130) 100%);
+	border-bottom: 1px solid #000;
+	border-top: 1px solid #000;
 }
 
 /*Tooltip Color*/
@@ -55,7 +54,10 @@ footer {
     background-image: -ms-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
 }
 /*Tooltip popup Color*/
-div#updatebar,
+div#updatebar
+{
+	background: rgba(0,0,0,0.8);
+}
 .tooltip span
 {
 	background-image: linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
@@ -70,23 +72,48 @@ div#updatebar,
 h1,
 table.display thead tr th 
 { 
-	background-image: linear-gradient(bottom, rgb(134,134,134) 0%, rgb(168,168,168) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(134,134,134) 0%, rgb(168,168,168) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(134,134,134) 0%, rgb(168,168,168) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(134,134,134) 0%, rgb(168,168,168) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(134,134,134) 0%, rgb(168,168,168) 100%);
+	background-color: rgb(160,160,160);
+}
+h1:active,
+table.display thead tr th:active
+{ 
+	background-color: rgb(210,210,210);
+	text-decoration: none;
 }
 
 /*Top left search field*/
-div#searchbar select,
-div#searchbar input[type=text]
-{
-	color: #000;
-}
 div#searchbar
 {
-	background-image: url(../images/search.png);
-	background-color:#FFF;
 	border: 1px solid rgba(0,0,0,0.5);
-	box-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+	box-shadow: 1px 1px 0px rgba(255,255,255,0.8);
+	background: rgba(0,0,0,0.8);
+}
+
+/*
+ * Scrollbar Colors 
+ * */
+ /* Scrollbar background */
+.jspTrack
+{
+	background-image: linear-gradient(left , rgb(10,10,10) 0%, rgb(30,30,30) 100%);
+	background-image: -o-linear-gradient(left , rgb(10,10,10) 0%, rgb(30,30,30) 100%);
+	background-image: -moz-linear-gradient(left , rgb(10,10,10) 0%, rgb(30,30,30) 100%);
+	background-image: -webkit-linear-gradient(left , rgb(10,10,10) 0%, rgb(30,30,30) 100%);
+	background-image: -ms-linear-gradient(left , rgb(10,10,10) 0%, rgb(30,30,30) 100%);
+}
+
+.jspDrag:active,
+.jspDrag:hover
+{
+	background: url(../images/scrollGrib.png) 50% 50% no-repeat rgb(160,160,160);
+}
+.jspDrag
+{
+	background: url(../images/scrollGrib.png) 50% 50% no-repeat rgb(130,130,130);
+}
+.jspArrowUp{
+	background: url(../images/arrowUp.png) 50% 50% no-repeat rgb(130,130,130);
+}
+.jspArrowDown{
+	background: url(../images/arrowDown.png) 50% 50% no-repeat rgb(130,130,130);
 }

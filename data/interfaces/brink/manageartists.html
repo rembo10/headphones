@@ -6,7 +6,7 @@
 	</div>
 	<form action="markArtists" method="get">
 	<p class="indented">
-		<select name="action">
+		<select class="styled" name="action">
   			<option value="pause">Pause</option>
   			<option value="resume">Resume</option>
   			<option value="refresh">Refresh</option>
@@ -61,17 +61,17 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script src="interfaces/brink/JS/libs/jquery.dataTables.min.js"></script>
 	<script>
 	$(document).ready(function()
 	{
 		$('#artist_table').dataTable(
 			{
 				"aoColumns": [
+					{ "bSortable": false},
 					null,
-					{ "sType": "title-string"},
 					null,
-					{ "sType": "title-string"}
+					null,
 				],
 				"bStateSave": true,
 				"bPaginate": false

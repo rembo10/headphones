@@ -28,7 +28,7 @@
 			${artist['ArtistName']}
 		</h1>
 		%if artist['Status'] == 'Loading':
-		<h3><i>(Album information for this artist is currently being loaded)</i></h3>
+		<span class="pageDialog">Album information for this artist is currently being loaded</span>
 		%endif		
 	</div>
 	<form action="markAlbums" method="get"><input type="hidden" name="ArtistID" value=${artist['ArtistID']}>
@@ -44,7 +44,7 @@
 	<table class="display" id="album_table">
 		<thead>
 			<tr>
-				<th id="select"><input class="styled" type="checkbox" onClick="toggle(this)" /></th>
+				<th id="select"><input id="mainCheckbox" class="styled" name="head" type="checkbox" onClick="toggle(this);headToggle();" /></th>
 				<th id="albumart"></th>
 				<th id="albumname">Name</th>
 				<th id="reldate">Date</th>
@@ -130,15 +130,15 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script src="interfaces/brink/JS/libs/jquery.dataTables.min.js"></script>
 	<script>
 	$(document).ready(function()
 	{
 		$('#album_table').dataTable(
 			{
 				"aoColumns": [
-					null,
-					null,
+					{ "bSortable": false},
+					{ "bSortable": false},
 					null,
 					null,
 					null,
@@ -147,14 +147,13 @@
 					null
 				],
 				"oLanguage": {
-					"sLengthMenu":"Show _MENU_ albums per page",
-					"sEmptyTable": "No album information available",
-					"sInfo":"Showing _TOTAL_ albums",
-					"sInfoEmpty":"Showing 0 to 0 of 0 albums",
-					"sInfoFiltered":"(filtered from _MAX_ total albums)"},
+					"sLengthMenu":"Show _MENU_ artist per page",
+					"sEmptyTable": "No artist information available",
+					"sInfo":"Showing _TOTAL_ artist",
+					"sInfoEmpty":"No artist found",
+					"sInfoFiltered":"(Filtered from _MAX_ total artist)"},
 				"bPaginate": false,
 				"aaSorting": [[4, 'asc'],[3,'desc']]
-
 			});
 	});
 	</script>
