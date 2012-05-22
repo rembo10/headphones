@@ -409,13 +409,18 @@ def moveFiles(albumpath, release, tracks):
 				logger.warn('Error moving file %s: %s' % (files, e))
 				
 	# Chmod the directories using the folder_format (script courtesy of premiso!)
-	folder_list = folder.split('/')
-	
+	folder_list = folder.split('/')	
 	temp_f = headphones.DESTINATION_DIR
+
 	for f in folder_list:
+
 		temp_f = os.path.join(temp_f, f)
-		os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING), int(headphones.FOLDER_PERMISSIONS, 8))
-	
+
+		try:
+			os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING), int(headphones.FOLDER_PERMISSIONS, 8))
+		except Exception, e:
+			logger.error("Error trying to change permissions on folder: %s" % temp_f)
+			
 	# If we failed to move all the files out of the directory, this will fail too
 	try:
 		shutil.rmtree(albumpath)
