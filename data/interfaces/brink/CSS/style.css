@@ -779,7 +779,7 @@ input[type="text"]
 .configtable { font-size: 14px; vertical-align: middle; border-spacing: 10px; border-collapse: separate; }
 .configtable td  
 {
-    padding: 5px; 
+    padding: 55px; 
 }
 .configtable td#middle { vertical-align: middle; }
 .configtable.open{
