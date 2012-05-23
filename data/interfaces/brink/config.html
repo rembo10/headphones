@@ -19,61 +19,43 @@
                 <tr>
                     <td>
                       <h3>HTTP Host:</h3>
-					</td>
-					<td>
                         <input type="text" name="http_host" value="${config['http_host']}" size="25" maxlength="40" />
 						<div class="tooltip">
 							<span>
 								Localhost or 0.0.0.0
 							</span>
 						</div>
-                    </td>
-                    <td>
+						
+
                         <h3>HTTP Port:</h3>
-					</td>
-					<td>
                         <input type="text" name="http_port" value="${config['http_port']}" size="10" maxlength="40" />
                         <div class="tooltip">
 							<span>
 								Default is: 8181
 							</span>
 						</div>
-                    </td>
-                </tr>
+						
 
-                <tr>
-                    
-					<td>
                         <h3>HTTP Username:</h3>
-					</td>
-                    <td>
                         <input type="text" name="http_username" value="${config['http_user']}" size="30" maxlength="40" />
-                    </td>
-                    <td>
+						
+
 						<h3>HTTP Password:</h3>
-					</td>
-                    <td>
 						<input type="password" name="http_password" value="${config['http_pass']}" size="30" maxlength="40" />
                     </td>
-                </tr>
-                <tr>
+
 					<td>
-						<h3>Enable API 
-							<input class="styled" type="checkbox" name="api_enabled" id="api_enabled" value="1" ${config['api_enabled']} />
-						</h3>
+						<h3>API:</h3>
+						<p>Enable <input class="styled" type="checkbox" name="api_enabled" id="api_enabled" value="1" ${config['api_enabled']} />
+						</p>
 						<div id="apioptions">
-							<br>
 							<h3>API key:<input type="text" name="api_key" id="api_key" value="${config['api_key']}" size="30"><input class="submit" type="button" value="Generate" id="generate_api"></h3><br><br>
 						</div>
-					</td>                
-                </tr>
-				<tr>
-					<td>
+
+						
 						<h3>
 						    Layout: 
                         </h3>
-					</td>
-                    <td>
                         <select class="styled" name="interface">
 					    %for interface in config['interface_list']:
 						    <%
@@ -87,37 +69,24 @@
                             </option>
 					    %endfor
 					    </select>
-						<!--
-							Make config for change of ColorStyle.css.
-						-->
-					</td>
-				</tr>
-                <tr>
-                    <td>
-                        <h3>Launch Browser on Startup:</h3>
-					</td>
-					<td>
+
+						
+                        <h3>Launch on Startup:</h3>
 						<input class="styled" type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} />
-                    </td>
-                	<td>
+						<p>This will launch the browser when running Headphones</p>
+						
+						<br />
                 	    <h3>Download Scan Interval:</h3>
+                    	<input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="2" maxlength="40"> mins
 					</td>
 					<td>
-                    	<input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="10" maxlength="40"> mins
-                	</td>
-                </tr>
-                <tr>
-                	<td>
                 	    <h3>NZB Search Interval:</h3>
-					</td>
-					<td>
-                	    <input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="10" maxlength="40"> mins
-               		</td>
-                	<td>
+
+                	    <input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="2" maxlength="40"> mins
+
                 	    <h3>Library Scan Interval:</h3>
-					</td>
-					<td>
-                	    <input type="text" name="libraryscan_interval" value="${config['libraryscan_interval']}" size="10" maxlength="40"> mins
+
+                	    <input type="text" name="libraryscan_interval" value="${config['libraryscan_interval']}" size="2" maxlength="40"> mins
                		</td>
 				</tr>
             </table>
@@ -128,51 +97,36 @@
 	            <tr>
                     <td colspan="2">
                         <h2>SABnzbd:</h2>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <h3>
-                            SABnzbd Host:
-                        </h3>
-                        <input type="text" name="sab_host" value="${config['sab_host']}" size="30" maxlength="40" />
-					    <div class="tooltip">
-						    <span>
-							    Usually http://localhost:8080
-						    </span>
-					    </div>
-                    </td>
-                    <td>
-                        <h3>
-                            SABnzbd Username:
-                        </h3>
-                        <input type="text" name="sab_username" value="${config['sab_user']}" size="20" maxlength="40" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <h3>
-                            SABnzbd API:
-                        </h3>
-                        <input type="text" name="sab_apikey" value="${config['sab_api']}" size="36" maxlength="40" />
-                    </td>
-                    <td>
-                        <h3>SABnzbd Password:</h3>
-                        <input type="password" name="sab_password" value="${config['sab_pass']}" size="20" maxlength="40" />
-                    </td>
-                </tr>
+						
+                        <h3>SABnzbd Host:</h3>
+							<input type="text" name="sab_host" value="${config['sab_host']}" size="30" maxlength="40" />
+							<div class="tooltip">
+								<span>
+									Usually http://localhost:8080
+								</span>
+							</div>
 
-                <tr>
-                    <td>
-                        <h3>SABnzbd Category:</h3><input type="text" name="sab_category" value="${config['sab_cat']}" size="20" maxlength="40" />
-                    </td>
-                    <td>
-                        <h3>Music Download Directory:</h3><input type="text" name="download_dir" value="${config['download_dir']}" size="40" />
-					    <div class="tooltip">
-						    <span>
-							    Full path to the directory where SAB downloads your music | i.e. /Users/name/Downloads/music
-						    </span>
-					    </div>
+                        
+
+                        <h3>SABnzbd API:</h3>
+							<input type="text" name="sab_apikey" value="${config['sab_api']}" size="36" maxlength="40" />
+						
+						<h3>SABnzbd Username:</h3>
+							<input type="text" name="sab_username" value="${config['sab_user']}" size="20" maxlength="40" />
+						
+                        <h3>SABnzbd Password:</h3>
+							<input type="password" name="sab_password" value="${config['sab_pass']}" size="20" maxlength="40" />
+
+                        <h3>SABnzbd Category:</h3>
+							<input type="text" name="sab_category" value="${config['sab_cat']}" size="20" maxlength="40" />
+
+                        <h3>Music Download Directory:</h3>
+							<input type="text" name="download_dir" value="${config['download_dir']}" size="40" />
+								<div class="tooltip">
+									<span>
+										Full path to the directory where SAB downloads your music | i.e. /Users/name/Downloads/music
+									</span>
+								</div>
                     </td>
                 </tr>
                 <tr>
@@ -690,7 +644,7 @@
 	    
 
         <p class="center">
-			<input class="submit save" type="submit" value="Save Changes" />
+			<input id="save" class="submit save" type="submit" value="Save Changes" />
 			<br />
             (Web Interface changes require a restart to take effect)
         </p>
@@ -700,7 +654,7 @@
 <%def name="javascriptIncludes()">
 	<script>
 	
-	$("save").click(function(){
+	$("#save").click(function(){
 		messageDialog("update", "Your settings has been saved!")
 	});
 	
@@ -723,7 +677,10 @@
 		}
 	};
 	
-
+	$(".checkbox").click(function(){
+		alert($(this));
+	});
+	
 	$(document).ready(function()
 	{
 		if ($("#api_enabled").is(":checked"))
@@ -735,18 +692,11 @@
 				$("#apioptions").hide();
 			}
 		
-		$("#api_enabled").click(function(){
-			if ($("#api_enabled").is(":checked"))
-			{
-				$("#apioptions").show("fast");
-			}
-			else
-			{
-				$("#apioptions").hide("fast");
-			}
+		$("#api_enabled").is(":checked", function(){
+			$("#apioptions").show();
 		});		
     
-    	$('#api_key').click(function(){ $('#api_key').select() });
+    	$("#api_key").click(function(){ $("#api_key").select() });
     	$("#generate_api").click(function(){
     	    $.get('generateAPI', 
     	        function(data){
@@ -839,11 +789,6 @@
 		$("#mirror").change(handleNewSelection);
 		handleNewSelection.apply($("#mirror"));
 
-	});
-	
-	//Slide toggle
-	$(document).ready(function(){
-		$(".configtable").addClass("closed");
 	});
 	</script>
 </%def>
