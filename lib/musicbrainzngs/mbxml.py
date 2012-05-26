@@ -4,9 +4,11 @@
 # See the COPYING file for more information.
 
 import xml.etree.ElementTree as ET
-import string
-import StringIO
 import logging
+
+from lib.musicbrainzngs import compat
+from lib.musicbrainzngs import util
+
 try:
 	from ET import fixtag
 except:
@@ -16,7 +18,7 @@ except:
 		# tag and namespace declaration, if any
 		if isinstance(tag, ET.QName):
 			tag = tag.text
-		namespace_uri, tag = string.split(tag[1:], "}", 1)
+		namespace_uri, tag = tag[1:].split("}", 1)
 		prefix = namespaces.get(namespace_uri)
 		if prefix is None:
 			prefix = "ns%d" % len(namespaces)
@@ -28,6 +30,7 @@ except:
 		else:
 			xmlns = None
 		return "%s:%s" % (prefix, tag), xmlns
+
 
 NS_MAP = {"http://musicbrainz.org/ns/mmd-2.0#": "ws2",
           "http://musicbrainz.org/ns/ext#-2.0": "ext"}
@@ -113,9 +116,7 @@ def parse_inner(inner_els, element):
 	return result
 
 def parse_message(message):
-	s = message.read()
-	f = StringIO.StringIO(s)
-	tree = ET.ElementTree(file=f)
+	tree = util.bytes_to_elementtree(message)
 	root = tree.getroot()
 	result = {}
 	valid_elements = {"artist": parse_artist,
@@ -176,7 +177,8 @@ def parse_artist_list(al):
 def parse_artist(artist):
 	result = {}
 	attribs = ["id", "type", "ext:score"]
-	elements = ["name", "sort-name", "country", "user-rating", "disambiguation"]
+	elements = ["name", "sort-name", "country", "user-rating",
+				"disambiguation", "gender", "ipi"]
 	inner_els = {"life-span": parse_artist_lifespan,
 	             "recording-list": parse_recording_list,
 	             "release-list": parse_release_list,
@@ -199,7 +201,8 @@ def parse_label_list(ll):
 def parse_label(label):
 	result = {}
 	attribs = ["id", "type", "ext:score"]
-	elements = ["name", "sort-name", "country", "label-code", "user-rating"]
+	elements = ["name", "sort-name", "country", "label-code", "user-rating",
+				"ipi", "disambiguation"]
 	inner_els = {"life-span": parse_artist_lifespan,
 	             "release-list": parse_release_list,
 	             "tag-list": parse_tag_list,
