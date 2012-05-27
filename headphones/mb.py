@@ -120,10 +120,10 @@ def findArtist(name, limit=1):
 def findRelease(name, limit=1):
 
     with mb_lock:
-    
-        releaselist = []
+        limit=25
+        releaselistngs = []
         attempt = 0
-        releaseResults = None
+        releaseResultsngs = None
         
         chars = set('!?')
         if any((c in chars) for c in name):
@@ -134,31 +134,28 @@ def findRelease(name, limit=1):
         while attempt < 5:
         
             try:
-                releaseResults = q.getReleases(ws.ReleaseFilter(query=name, limit=limit))
+                releaseResultsngs = musicbrainzngs.search_releases(query=name,limit=limit)['release-list']
                 break
-            except WebServiceError, e:
+            except WebServiceError, e: #need to update exceptions
                 logger.warn('Attempt to query MusicBrainz for "%s" failed: %s' % (name, str(e)))
                 attempt += 1
                 time.sleep(10)
         
         time.sleep(sleepytime)
         
-        if not releaseResults:
-            return False        
-        
-        for result in releaseResults:
-            
-            releaselist.append({
-                        'uniquename':        result.release.artist.name,
-                        'title':             result.release.title,
-                        'id':                u.extractUuid(result.release.artist.id),
-                        'albumid':            u.extractUuid(result.release.id),
-                        'url':                 result.release.artist.id,
-                        'albumurl':            result.release.id,
-                        'score':            result.score
-                        })
-            
-        return releaselist
+        if not releaseResultsngs:
+            return False
+        for result in releaseResultsngs:
+                        releaselistngs.append({
+                        'uniquename':        unicode(result['artist-credit'][0]['artist']['name']),
+                        'title':             unicode(result['title']),
+                        'id':                unicode(result['artist-credit'][0]['artist']['id']),
+                        'albumid':            unicode(result['id']),
+                        'url':                 unicode("http://musicbrainz.org/artist/" + result['artist-credit'][0]['artist']['id']),#probably needs to be changed
+                        'albumurl':            unicode("http://musicbrainz.org/release/" + result['id']),#probably needs to be changed
+                        'score':            int(result['ext:score'])
+                        })            
+        return releaselistngs
 
 def getArtist(artistid, extrasonly=False):
 
