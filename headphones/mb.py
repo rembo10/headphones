@@ -170,7 +170,13 @@ def getArtist(artistid, extrasonly=False):
         while attempt < 5:
         
             try:
-                artist = musicbrainzngs.get_artist_by_id(artistid,includes=["releases","release-groups"],release_status="official",release_type="album")['artist']
+                limit = 100
+                artist = musicbrainzngs.get_artist_by_id(artistid)['artist']
+                newRgs = None                
+                artist['release-group-list'] = []
+                while newRgs == None or len(newRgs) >= limit:
+                    newRgs = musicbrainzngs.browse_release_groups(artistid,release_type="album",offset=len(artist['release-group-list']),limit=limit)['release-group-list'] 
+                    artist['release-group-list'] += newRgs
                 break
             except WebServiceError, e:
                 logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e))) 
