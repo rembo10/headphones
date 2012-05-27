@@ -159,12 +159,9 @@ def findRelease(name, limit=1):
 
 def getArtist(artistid, extrasonly=False):
 
-    with mb_lock:
-    
+    with mb_lock:    
         artist_dict = {}
     
-        #Get all official release groups
-        inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM), releaseGroups=True)
         artist = None
         attempt = 0
         
@@ -173,37 +170,52 @@ def getArtist(artistid, extrasonly=False):
         while attempt < 5:
         
             try:
-                artist = q.getArtistById(artistid, inc)
+                artist = musicbrainzngs.get_artist_by_id(artistid,includes=["releases","release-groups"],release_status="official",release_type="album")['artist']
                 break
             except WebServiceError, e:
                 logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e))) 
                 attempt += 1
                 time.sleep(5)
-                
+            except Exception,e:
+                pass
+        
+        
         if not artist:
             return False
         
         time.sleep(sleepytime)
+        
+        if 'disambiguation' in artist:
+            uniquename = unicode(artist['sort-name'] + " (" + artist['disambiguation'] + ")")
+        else:
+            uniquename = unicode(artist['sort-name'])
+        artist_dict['artist_name'] = unicode(artist['name'])
+        artist_dict['artist_sortname'] = unicode(artist['sort-name'])
+        artist_dict['artist_uniquename'] = uniquename
+        artist_dict['artist_type'] = unicode(artist['type'])
+
+        artist_dict['artist_begindate'] = None
+        artist_dict['artist_enddate'] = None
+        if 'life-span' in artist:
+            if 'begin' in artist['life-span']:
+                artist_dict['artist_begindate'] = unicode(artist['life-span']['begin'])
+            if 'end' in artist['life-span']:
+                artist_dict['artist_enddate'] = unicode(artist['life-span']['end'])      
+
                 
-        artist_dict['artist_name'] = artist.name
-        artist_dict['artist_sortname'] = artist.sortName
-        artist_dict['artist_uniquename'] = artist.getUniqueName()
-        artist_dict['artist_type'] = u.extractFragment(artist.type)
-        artist_dict['artist_begindate'] = artist.beginDate
-        artist_dict['artist_enddate'] = artist.endDate
         
         releasegroups = []
         
         if not extrasonly:
-        
-            for rg in artist.getReleaseGroups():
-                
+            for rg in artist['release-group-list']:
+                if rg['type'] != 'Album': #only add releases without a secondary type
+                    continue
                 releasegroups.append({
-                            'title':        rg.title,
-                            'id':            u.extractUuid(rg.id),
-                            'url':            rg.id,
-                            'type':            u.getReleaseTypeName(rg.type)
-                    })
+                            'title':        unicode(rg['title']),
+                            'id':            unicode(rg['id']),
+                            'url':            u"http://musicbrainz.org/release-group/" + rg['id'],
+                            'type':            unicode(rg['type'])
+                    })               
                 
         # See if we need to grab extras
         myDB = db.DBConnection()
@@ -214,35 +226,28 @@ def getArtist(artistid, extrasonly=False):
             includeExtras = False
         
         if includeExtras or headphones.INCLUDE_EXTRAS:
-            includes = [m.Release.TYPE_COMPILATION, m.Release.TYPE_REMIX, m.Release.TYPE_SINGLE, m.Release.TYPE_LIVE, m.Release.TYPE_EP, m.Release.TYPE_SOUNDTRACK]
+            includes = ["single", "ep", "compilation", "soundtrack", "live", "remix"]
             for include in includes:
-                inc = ws.ArtistIncludes(releases=(m.Release.TYPE_OFFICIAL, include), releaseGroups=True)
-        
                 artist = None
                 attempt = 0
-            
-                while attempt < 5:
-        
+                while attempt < 5:#this may be redundant with musicbrainzngs, it seems to retry and wait by itself, i will leave it in for rembo to review
                     try:
-                        artist = q.getArtistById(artistid, inc)
+                        artist = musicbrainzngs.get_artist_by_id(artistid,includes=["releases","release-groups"],release_status=['official'],release_type=include)['artist']
                         break
-                    except WebServiceError, e:
+                    except WebServiceError, e:#update exceptions
                         logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e)))
                         attempt += 1
                         time.sleep(5)
-                        
                 if not artist:
                     continue
-                    
-                for rg in artist.getReleaseGroups():
-            
+                for rg in artist['release-group-list']:
                     releasegroups.append({
-                            'title':        rg.title,
-                            'id':            u.extractUuid(rg.id),
-                            'url':            rg.id,
-                            'type':            u.getReleaseTypeName(rg.type)
-                        })
-                
+                            'title':        unicode(rg['title']),
+                            'id':            unicode(rg['id']),
+                            'url':            u"http://musicbrainz.org/release-group/" + rg['id'],
+                            'type':            unicode(rg['type'])
+                        })            
+            
         artist_dict['releasegroups'] = releasegroups
         
         return artist_dict
