@@ -10,6 +10,7 @@ import logging
 import socket
 import xml.etree.ElementTree as etree
 from xml.parsers import expat
+import base64
 
 from lib.musicbrainzngs import mbxml
 from lib.musicbrainzngs import util
@@ -228,6 +229,14 @@ def auth(u, p):
     global user, password
     user = u
     password = p
+    
+def hpauth(u, p):
+    """Set the username and password to be used in subsequent queries to
+    the MusicBrainz XML API that require authentication.
+    """
+    global hpuser, hppassword
+    hpuser = u
+    hppassword = p
 
 def set_useragent(app, version, contact=None):
     """Set the User-Agent to be used for requests to the MusicBrainz webservice.
@@ -357,7 +366,7 @@ class _MusicbrainzHttpRequest(compat.Request):
 
 # Core (internal) functions for calling the MB API.
 
-def _safe_open(opener, req, body=None, max_retries=8, retry_delay_delta=2.0):
+def _safe_open(opener, req, body=None, max_retries=3, retry_delay_delta=2.0):
     """Open an HTTP request with a given URL opener and (optionally) a
     request body. Transient errors lead to retries.  Permanent errors
     and repeated errors are translated into a small set of handleable
@@ -477,6 +486,12 @@ def _mb_request(path, method='GET', auth_required=False, client_required=False,
     # Make request.
     req = _MusicbrainzHttpRequest(method, url, data)
     req.add_header('User-Agent', _useragent)
+    
+	# Add headphones credentials
+    if hostname == '178.63.142.150:8181':
+        base64string = base64.encodestring('%s:%s' % (hpuser, hppassword)).replace('\n', '')
+        req.add_header("Authorization", "Basic %s" % base64string)
+    
     _log.debug("requesting with UA %s" % _useragent)
     if body:
         req.add_header('Content-Type', 'application/xml; charset=UTF-8')
