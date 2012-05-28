@@ -397,8 +397,6 @@ def getRelease(releaseid):
     with mb_lock:
     
         release = {}
-    
-        inc = ws.ReleaseIncludes(tracks=True, releaseEvents=True, releaseGroup=True, artist=True)
         results = None
         attempt = 0
         
@@ -406,10 +404,10 @@ def getRelease(releaseid):
             
         while attempt < 5:
         
-            try:
-                results = q.getReleaseById(releaseid, inc)
+            try:       
+                results = musicbrainzngs.get_release_by_id(releaseid,["artists","release-groups","media","recordings"]).get('release')        
                 break
-            except WebServiceError, e:
+            except WebServiceError, e: #update this
                 logger.warn('Attempt to retrieve information from MusicBrainz for release "%s" failed (%s)' % (releaseid, str(e)))
                 attempt += 1
                 time.sleep(5)    
@@ -418,38 +416,36 @@ def getRelease(releaseid):
             return False
         
         time.sleep(sleepytime)
-        
-        release['title'] = results.title
-        release['id'] = u.extractUuid(results.id)
-        release['asin'] = results.asin
-        release['date'] = results.getEarliestReleaseDate()
 
+        release['title'] = unicode(results['title'])
+        release['id'] = unicode(results['id']) 
+        release['asin'] = unicode(results['asin']) if 'asin' in results else None 
+        release['date'] = unicode(results['date'])
 
-        rg = results.getReleaseGroup()
-        if rg:
-            release['rgid'] = u.extractUuid(rg.id)
-            release['rg_title'] = rg.title
-            release['rg_type'] = u.extractFragment(rg.type)
+        if 'release-group' in results:
+            release['rgid'] = unicode(results['release-group']['id'])
+            release['rg_title'] = unicode(results['release-group']['title'])
+            release['rg_type'] = unicode(results['release-group']['type'])
         else:
             logger.warn("Release " + releaseid + "had no ReleaseGroup associated")
-        #so we can start with a releaseID from anywhere and get the artist info
-        #it looks like MB api v1 only returns 1 artist object - 2.0 returns more...
-        release['artist_name'] = results.artist.name
-        release['artist_id'] = u.extractUuid(results.artist.id)
-        
+
+        release['artist_name'] = unicode(results['artist-credit'][0]['artist']['name'])
+        release['artist_id'] = unicode(results['artist-credit'][0]['artist']['id'])
+                
+
+        totalTracks = 0
         tracks = []
-        
-        i = 1
-        for track in results.tracks:
-            tracks.append({
-                    'number':        i,
-                    'title':        track.title,
-                    'id':            u.extractUuid(track.id),
-                    'url':            track.id,
-                    'duration':        track.duration
-                    })
-            i += 1
-            
+        for medium in results['medium-list']:                
+            for track in medium['track-list']:
+                tracks.append({
+                        'number':        totalTracks + 1,
+                        'title':        unicode(track['recording']['title']),
+                        'id':            unicode(track['recording']['id']),
+                        'url':            u"http://musicbrainz.org/track/" + track['recording']['id'],
+                        'duration':        int(track['length']) if 'length' in track else 0
+                        })
+                totalTracks += 1       
+
         release['tracks'] = tracks
         
         return release
