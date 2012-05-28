@@ -49,9 +49,16 @@ def startmb(forcemb=False):
         sleepytime = 0
     
     musicbrainzngs.set_useragent("headphones","0.0","https://github.com/doskir/headphones")
-    logger.info("set user agent")
     musicbrainzngs.set_hostname(mbhost + ":" + str(mbport))
-    logger.info("set host and port")
+    if sleepytime == 0:
+        musicbrainzngs.set_rate_limit(False)
+    else:
+        musicbrainzngs.set_rate_limit(True)
+
+    #CHECK THIS
+    if mbuser and mbpass:#i have no idea if this will work or not
+        musicbrainzngs.auth(mbuser,mbpass)
+    #CHECK THIS
 
     #q = musicbrainzngs
     service = ws.WebService(host=mbhost, port=mbport, username=mbuser, password=mbpass, mirror=headphones.MIRROR)
@@ -63,8 +70,7 @@ def startmb(forcemb=False):
 
 def findArtist(name, limit=1):
 
-    with mb_lock:
-        limit = 25
+    with mb_lock:       
         artistlist = []
         attempt = 0
         artistResults = None
@@ -119,8 +125,7 @@ def findArtist(name, limit=1):
         
 def findRelease(name, limit=1):
 
-    with mb_lock:
-        limit=25
+    with mb_lock:        
         releaselistngs = []
         attempt = 0
         releaseResultsngs = None
@@ -346,7 +351,6 @@ def getReleaseGroup(rgid):
                         'duration':        int(track['recording']['length'] if 'length' in track['recording'] else track['length'] if 'length' in track else 0)
                         })
                     totalTracks += 1
-
                 
             release_dict = {
                 'hasasin':        bool(releaseResult.get('asin')),
@@ -509,8 +513,7 @@ def findAlbumID(artist=None, album=None):
     
     q, sleepytime = startmb(forcemb=True)
             
-    while attempt < 5:
-            
+    while attempt < 5:            
         try:
             term = '"'+album+'" AND artist:"'+artist+'"'
             results_ngs = musicbrainzngs.search_release_groups(term,1).get('release-group-list')
