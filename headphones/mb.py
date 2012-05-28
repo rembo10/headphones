@@ -343,7 +343,7 @@ def getReleaseGroup(rgid):
                         'title':        unicode(track['recording']['title']),
                         'id':            unicode(track['recording']['id']),
                         'url':            u"http://musicbrainz.org/track/" + track['recording']['id'],
-                        'duration':        int(track['recording']['length'])
+                        'duration':        int(track['recording']['length'] if 'length' in track['recording'] else track['length'] if 'length' in track else 0)
                         })
                     totalTracks += 1
 
