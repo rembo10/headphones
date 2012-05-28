@@ -504,8 +504,7 @@ def findArtistbyAlbum(name):
     
 def findAlbumID(artist=None, album=None):
 
-    f = ws.ReleaseGroupFilter(title=album, artistName=artist, limit=1)
-    results = None
+    results_ngs = None
     attempt = 0
     
     q, sleepytime = startmb(forcemb=True)
@@ -513,17 +512,20 @@ def findAlbumID(artist=None, album=None):
     while attempt < 5:
             
         try:
-            results = q.getReleaseGroups(f)
+            term = '"'+album+'" AND artist:"'+artist+'"'
+            results_ngs = musicbrainzngs.search_release_groups(term,1).get('release-group-list')
             break
-        except WebServiceError, e:
+        except WebServiceError, e:#update exceptions
             logger.warn('Attempt to query MusicBrainz for %s - %s failed (%s)' % (artist, album, str(e)))
             attempt += 1
-            time.sleep(10)    
+            time.sleep(10)
     
     time.sleep(sleepytime)
     
-    if not results:
+    if not results_ngs:
         return False
-        
-    rgid = u.extractUuid(results[0].releaseGroup.id)
-    return rgid
+
+    if len(results_ngs) < 1:
+        return False    
+    rgid_ngs = unicode(results_ngs[0]['id'])
+    return rgid_ngs
