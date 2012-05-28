@@ -8,6 +8,7 @@ from headphones import logger, db
 from headphones.helpers import multikeysort, replace_all
 
 import lib.musicbrainzngs as musicbrainzngs
+from lib.musicbrainzngs import WebServiceError
 
 mb_lock = threading.Lock()
 
@@ -42,17 +43,19 @@ def startmb(forcemb=False):
         mbport = 5000
         sleepytime = 0
     
-    musicbrainzngs.set_useragent("headphones","0.0","https://github.com/doskir/headphones")
+    musicbrainzngs.set_useragent("headphones","0.0","https://github.com/rembo10/headphones")
     musicbrainzngs.set_hostname(mbhost + ":" + str(mbport))
     if sleepytime == 0:
         musicbrainzngs.set_rate_limit(False)
     else:
         musicbrainzngs.set_rate_limit(True)
 
-    #CHECK THIS
-    if mbuser and mbpass:#i have no idea if this will work or not
-        musicbrainzngs.auth(mbuser,mbpass)
-    #CHECK THIS
+    # Add headphones credentials
+    if headphones.MIRROR == "headphones":
+    	if not mbuser and mbpass:
+    		logger.warn("No username or password set for VIP server")
+        else:
+        	musicbrainzngs.hpauth(mbuser,mbpass)
 
     #q = musicbrainzngs
     q = musicbrainzngs
