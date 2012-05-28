@@ -266,7 +266,6 @@ def getReleaseGroup(rgid):
     
         releaselist = []
         
-        inc = ws.ReleaseGroupIncludes(releases=True, artist=True)
         releaseGroup = None
         attempt = 0
         
@@ -275,47 +274,42 @@ def getReleaseGroup(rgid):
         while attempt < 5:
         
             try:
-                releaseGroup = q.getReleaseGroupById(rgid, inc)
+                releaseGroup = musicbrainzngs.get_release_group_by_id(rgid,["artists","releases","media","discids",])['release-group']
                 break
             except WebServiceError, e:
                 logger.warn('Attempt to retrieve information from MusicBrainz for release group "%s" failed (%s)' % (rgid, str(e)))
                 attempt += 1
                 time.sleep(5)
-    
+        
         if not releaseGroup:
             return False
+        
             
         time.sleep(sleepytime)
+        
         # I think for now we have to make separate queries for each release, in order
         # to get more detailed release info (ASIN, track count, etc.)
-        for release in releaseGroup.releases:
-    
-            inc = ws.ReleaseIncludes(tracks=True, releaseEvents=True)    
+        for release in releaseGroup['release-list']:
             releaseResult = None
             attempt = 0
-            
             while attempt < 5:
-            
                 try:
-                    releaseResult = q.getReleaseById(release.id, inc)
+                    releaseResult = musicbrainzngs.get_release_by_id(release['id'],["recordings","media"])['release']
                     break
-                except WebServiceError, e:
+                except WebServiceError, e: #UPDATE THIS
                     logger.warn('Attempt to retrieve release information for %s from MusicBrainz failed (%s)' % (releaseResult.title, str(e)))
                     attempt += 1
-                    time.sleep(5)        
-            
+                    time.sleep(5) 
+
             if not releaseResult:
                 continue
             
-            # Release filter for non-official live albums
-            types = releaseResult.getTypes()
-            if any('Live' in type for type in types):
-                if not any('Official' in type for type in types):
+            if releaseGroup['type'] == 'live' and releaseResult['status'] != 'Official':
                     logger.debug('%s is not an official live album. Skipping' % releaseResult.name)
                     continue
-                
+
             time.sleep(sleepytime)
-            
+
             formats = {
                 '2xVinyl':            '2',
                 'Vinyl':            '2',
@@ -325,68 +319,73 @@ def getReleaseGroup(rgid):
                 'Digital Media':    '0'
                 }
                 
-            country = {
+            countries = {
                 'US':    '0',
-                'GB':    '1',
+
+               'GB':    '1',
                 'JP':    '2',
                 }
-
-            
             try:
-                format = int(replace_all(u.extractFragment(releaseResult.releaseEvents[0].format), formats))
+                format = int(formats[releaseResult['medium-list'][0]['format']])
             except:
-                format = 3
+                format = 3 #this is the same number 'Cassette' uses above, change it ?
                 
             try:
-                country = int(replace_all(releaseResult.releaseEvents[0].country, country))
+                country = int(countries[releaseResult['country']])                
             except:
                 country = 3
-            
+            totalTracks = 0
+            tracks = []
+            for medium in releaseResult['medium-list']:                
+                for track in medium['track-list']:
+                    tracks.append({
+                        'number':        totalTracks + 1,
+                        'title':        unicode(track['recording']['title']),
+                        'id':            unicode(track['recording']['id']),
+                        'url':            u"http://musicbrainz.org/track/" + track['recording']['id'],
+                        'duration':        int(track['recording']['length'])
+                        })
+                    totalTracks += 1
+
+                
             release_dict = {
-                'hasasin':        bool(releaseResult.asin),
-                'asin':            releaseResult.asin,
-                'trackscount':    len(releaseResult.getTracks()),
-                'releaseid':    u.extractUuid(releaseResult.id),
-                'releasedate':    releaseResult.getEarliestReleaseDate(),
+                'hasasin':        bool(releaseResult.get('asin')),
+                'asin':            unicode(releaseResult.get('asin')) if 'asin' in releaseResult else None,
+                'trackscount':    totalTracks,
+                'releaseid':      unicode(releaseResult.get('id')),
+                'releasedate':    unicode(releaseResult.get('date')),
                 'format':        format,
                 'country':        country
                 }
-            
-            tracks = []
-            
-            i = 1
-            for track in releaseResult.tracks:
-                
-                tracks.append({
-                        'number':        i,
-                        'title':        track.title,
-                        'id':            u.extractUuid(track.id),
-                        'url':            track.id,
-                        'duration':        track.duration
-                        })
-                i += 1
-            
-            release_dict['tracks'] = tracks        
-            
+            release_dict['tracks'] = tracks
             releaselist.append(release_dict)
+        #necessary to make dates that miss the month and/or day show up after full dates
+        def getSortableReleaseDate(releaseDate):
+            if releaseDate.count('-') == 2:
+                return releaseDate
+            elif releaseDate.count('-') == 1:
+                return releaseDate + '32'
+            else:
+                return releaseDate + '13-32'
+        
+        releaselist.sort(key=lambda x:getSortableReleaseDate(x['releasedate']))
+
         
         average_tracks = sum(x['trackscount'] for x in releaselist) / float(len(releaselist))
-        
         for item in releaselist:
             item['trackscount_delta'] = abs(average_tracks - item['trackscount'])
-            
         a = multikeysort(releaselist, ['-hasasin', 'country', 'format', 'trackscount_delta'])
-        
+
         release_dict = {'releaseid' :a[0]['releaseid'],
-                        'releasedate'    : releaselist[0]['releasedate'],
+                        'releasedate'    : unicode(releaselist[0]['releasedate']),
                         'trackcount'    : a[0]['trackscount'],
                         'tracks'        : a[0]['tracks'],
                         'asin'            : a[0]['asin'],
                         'releaselist'    : releaselist,
-                        'artist_name'    : releaseGroup.artist.name,
-                        'artist_id'        : u.extractUuid(releaseGroup.artist.id),
-                        'title'            : releaseGroup.title,
-                        'type'            : u.extractFragment(releaseGroup.type)
+                        'artist_name'    : unicode(releaseGroup['artist-credit'][0]['artist']['name']),
+                        'artist_id'        : unicode(releaseGroup['artist-credit'][0]['artist']['id']),
+                        'title'            : unicode(releaseGroup['title']),
+                        'type'            : unicode(releaseGroup['type'])
                         }
         
         return release_dict
