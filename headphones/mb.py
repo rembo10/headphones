@@ -463,39 +463,42 @@ def findArtistbyAlbum(name):
     # Probably not neccessary but just want to double check
     if not artist['AlbumTitle']:
         return False
-    
+
     term = '"'+artist['AlbumTitle']+'" AND artist:"'+name+'"'
-    
-    f = ws.ReleaseGroupFilter(query=term, limit=1)
+
     results = None
     attempt = 0
     
     q, sleepytime = startmb(forcemb=True)
             
     while attempt < 5:
-            
         try:
-            results = q.getReleaseGroups(f)
+            results = musicbrainzngs.search_release_groups(term).get('release-group-list')
             break
-        except WebServiceError, e:
+        except WebServiceError, e: #update exceptions
             logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
             attempt += 1
             time.sleep(10)    
     
     time.sleep(sleepytime)
     
-    if not results:
+    if not  results:
         return False
 
     artist_dict = {}
+    for releaseGroup in results:
+        newArtist = releaseGroup['artist-credit'][0]['artist']         
+        if 'disambiguation' in newArtist:
+            uniquename = unicode(newArtist['sort-name'] + " (" + newArtist['disambiguation'] + ")")
+        else:
+            uniquename = unicode(newArtist['sort-name'])
+        artist_dict['name'] = unicode(newArtist['sort-name'])
+        artist_dict['uniquename'] = uniquename
+        artist_dict['id'] = unicode(newArtist['id'])
+        artist_dict['url'] = u'http://musicbrainz.org/artist/' + newArtist['id']
+        artist_dict['score'] = int(releaseGroup['ext:score'])
+
     
-    for result in results:
-        releaseGroup = result.releaseGroup
-        artist_dict['name'] = releaseGroup.artist.name
-        artist_dict['uniquename'] = releaseGroup.artist.getUniqueName()
-        artist_dict['id'] = u.extractUuid(releaseGroup.artist.id)
-        artist_dict['url'] = releaseGroup.artist.id
-        artist_dict['score'] = result.score
     
     return artist_dict
     
