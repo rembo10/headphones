@@ -3,12 +3,6 @@ from __future__ import with_statement
 import time
 import threading
 
-import lib.musicbrainz2.webservice as ws
-import lib.musicbrainz2.model as m
-import lib.musicbrainz2.utils as u
-
-from lib.musicbrainz2.webservice import WebServiceError
-
 import headphones
 from headphones import logger, db
 from headphones.helpers import multikeysort, replace_all
@@ -61,8 +55,7 @@ def startmb(forcemb=False):
     #CHECK THIS
 
     #q = musicbrainzngs
-    service = ws.WebService(host=mbhost, port=mbport, username=mbuser, password=mbpass, mirror=headphones.MIRROR)
-    q = ws.Query(service)
+    q = musicbrainzngs
     
     logger.debug('Using the following server values:\nMBHost: %s ; MBPort: %i  ;  Sleep Interval: %i ' % (mbhost, mbport, sleepytime))
     
@@ -82,7 +75,7 @@ def findArtist(name, limit=1):
         q, sleepytime = startmb(forcemb=True)
         
         while attempt < 5:        
-            try:
+            try:                
                 artistResults = musicbrainzngs.search_artists(query=name,limit=limit)['artist-list']
                 break
             except WebServiceError, e:#need to update the exceptions
