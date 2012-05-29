@@ -281,6 +281,13 @@ def getReleaseGroup(rgid):
             if not releaseResult:
                 continue
             
+            #skip releases that do not have any release date associated with them
+            #if we don't do this the albums will get the release date "None" and will
+            #automatically be set to wanted if "Automatically Mark Upcoming Albums as Wanted" is set
+            #because None is not a valid date and will never be in the past so it is always upcoming
+            if 'date' not in releaseResult:
+                continue       
+
             if releaseGroup['type'] == 'live' and releaseResult['status'] != 'Official':
                     logger.debug('%s is not an official live album. Skipping' % releaseResult.name)
                     continue
