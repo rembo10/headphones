@@ -68,7 +68,6 @@ def findArtist(name, limit=1):
 
     with mb_lock:       
         artistlist = []
-        attempt = 0
         artistResults = None
         
         chars = set('!?*')
@@ -76,15 +75,12 @@ def findArtist(name, limit=1):
             name = '"'+name+'"'
             
         q, sleepytime = startmb(forcemb=True)
-        
-        while attempt < 5:        
-            try:                
-                artistResults = musicbrainzngs.search_artists(query=name,limit=limit)['artist-list']
-                break
-            except WebServiceError, e:#need to update the exceptions
-                logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
-                attempt += 1
-                time.sleep(10)
+
+        try:
+            artistResults = musicbrainzngs.search_artists(query=name,limit=limit)['artist-list']
+        except WebServiceError, e:
+            logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
+            time.sleep(5)
         
         time.sleep(sleepytime)
         
@@ -123,7 +119,6 @@ def findRelease(name, limit=1):
 
     with mb_lock:        
         releaselistngs = []
-        attempt = 0
         releaseResultsngs = None
         
         chars = set('!?')
@@ -132,15 +127,11 @@ def findRelease(name, limit=1):
             
         q, sleepytime = startmb(forcemb=True)
         
-        while attempt < 5:
-        
-            try:
-                releaseResultsngs = musicbrainzngs.search_releases(query=name,limit=limit)['release-list']
-                break
-            except WebServiceError, e: #need to update exceptions
-                logger.warn('Attempt to query MusicBrainz for "%s" failed: %s' % (name, str(e)))
-                attempt += 1
-                time.sleep(10)
+        try:
+            releaseResultsngs = musicbrainzngs.search_releases(query=name,limit=limit)['release-list']
+        except WebServiceError, e: #need to update exceptions
+            logger.warn('Attempt to query MusicBrainz for "%s" failed: %s' % (name, str(e)))
+            time.sleep(5)
         
         time.sleep(sleepytime)
         
@@ -164,28 +155,22 @@ def getArtist(artistid, extrasonly=False):
         artist_dict = {}
     
         artist = None
-        attempt = 0
         
         q, sleepytime = startmb()
         
-        while attempt < 5:
-        
-            try:
-                limit = 100
-                artist = musicbrainzngs.get_artist_by_id(artistid)['artist']
-                newRgs = None                
-                artist['release-group-list'] = []
-                while newRgs == None or len(newRgs) >= limit:
-                    newRgs = musicbrainzngs.browse_release_groups(artistid,release_type="album",offset=len(artist['release-group-list']),limit=limit)['release-group-list'] 
-                    artist['release-group-list'] += newRgs
-                break
-            except WebServiceError, e:
-                logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e))) 
-                attempt += 1
-                time.sleep(5)
-            except Exception,e:
-                pass
-        
+        try:
+            limit = 100
+            artist = musicbrainzngs.get_artist_by_id(artistid)['artist']
+            newRgs = None
+            artist['release-group-list'] = []
+            while newRgs == None or len(newRgs) >= limit:
+                newRgs = musicbrainzngs.browse_release_groups(artistid,release_type="album",offset=len(artist['release-group-list']),limit=limit)['release-group-list'] 
+                artist['release-group-list'] += newRgs
+        except WebServiceError, e:
+            logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e))) 
+            time.sleep(5)
+        except Exception,e:
+            pass
         
         if not artist:
             return False
@@ -235,16 +220,15 @@ def getArtist(artistid, extrasonly=False):
         if includeExtras or headphones.INCLUDE_EXTRAS:
             includes = ["single", "ep", "compilation", "soundtrack", "live", "remix"]
             for include in includes:
+                
                 artist = None
-                attempt = 0
-                while attempt < 5:#this may be redundant with musicbrainzngs, it seems to retry and wait by itself, i will leave it in for rembo to review
-                    try:
-                        artist = musicbrainzngs.get_artist_by_id(artistid,includes=["releases","release-groups"],release_status=['official'],release_type=include)['artist']
-                        break
-                    except WebServiceError, e:#update exceptions
-                        logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e)))
-                        attempt += 1
-                        time.sleep(5)
+                
+                try:
+                    artist = musicbrainzngs.get_artist_by_id(artistid,includes=["releases","release-groups"],release_status=['official'],release_type=include)['artist']
+                except WebServiceError, e:#update exceptions
+                    logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e)))
+                    time.sleep(5)
+                        
                 if not artist:
                     continue
                 for rg in artist['release-group-list']:
@@ -268,19 +252,14 @@ def getReleaseGroup(rgid):
         releaselist = []
         
         releaseGroup = None
-        attempt = 0
         
         q, sleepytime = startmb()
         
-        while attempt < 5:
-        
-            try:
-                releaseGroup = musicbrainzngs.get_release_group_by_id(rgid,["artists","releases","media","discids",])['release-group']
-                break
-            except WebServiceError, e:
-                logger.warn('Attempt to retrieve information from MusicBrainz for release group "%s" failed (%s)' % (rgid, str(e)))
-                attempt += 1
-                time.sleep(5)
+        try:
+            releaseGroup = musicbrainzngs.get_release_group_by_id(rgid,["artists","releases","media","discids",])['release-group']
+        except WebServiceError, e:
+            logger.warn('Attempt to retrieve information from MusicBrainz for release group "%s" failed (%s)' % (rgid, str(e)))
+            time.sleep(5)
         
         if not releaseGroup:
             return False
@@ -292,15 +271,12 @@ def getReleaseGroup(rgid):
         # to get more detailed release info (ASIN, track count, etc.)
         for release in releaseGroup['release-list']:
             releaseResult = None
-            attempt = 0
-            while attempt < 5:
-                try:
-                    releaseResult = musicbrainzngs.get_release_by_id(release['id'],["recordings","media"])['release']
-                    break
-                except WebServiceError, e: #UPDATE THIS
-                    logger.warn('Attempt to retrieve release information for %s from MusicBrainz failed (%s)' % (releaseResult.title, str(e)))
-                    attempt += 1
-                    time.sleep(5) 
+            
+            try:
+                releaseResult = musicbrainzngs.get_release_by_id(release['id'],["recordings","media"])['release']
+            except WebServiceError, e:
+                logger.warn('Attempt to retrieve release information for %s from MusicBrainz failed (%s)' % (releaseResult.title, str(e)))
+                time.sleep(5) 
 
             if not releaseResult:
                 continue
@@ -329,7 +305,7 @@ def getReleaseGroup(rgid):
             try:
                 format = int(formats[releaseResult['medium-list'][0]['format']])
             except:
-                format = 3 #this is the same number 'Cassette' uses above, change it ?
+                format = 3
                 
             try:
                 country = int(countries[releaseResult['country']])                
@@ -398,19 +374,14 @@ def getRelease(releaseid):
     
         release = {}
         results = None
-        attempt = 0
         
         q, sleepytime = startmb()
-            
-        while attempt < 5:
         
-            try:       
-                results = musicbrainzngs.get_release_by_id(releaseid,["artists","release-groups","media","recordings"]).get('release')        
-                break
-            except WebServiceError, e: #update this
-                logger.warn('Attempt to retrieve information from MusicBrainz for release "%s" failed (%s)' % (releaseid, str(e)))
-                attempt += 1
-                time.sleep(5)    
+        try:
+            results = musicbrainzngs.get_release_by_id(releaseid,["artists","release-groups","media","recordings"]).get('release')
+        except WebServiceError, e:
+            logger.warn('Attempt to retrieve information from MusicBrainz for release "%s" failed (%s)' % (releaseid, str(e)))
+            time.sleep(5)    
         
         if not results:
             return False
@@ -467,22 +438,18 @@ def findArtistbyAlbum(name):
     term = '"'+artist['AlbumTitle']+'" AND artist:"'+name+'"'
 
     results = None
-    attempt = 0
     
     q, sleepytime = startmb(forcemb=True)
-            
-    while attempt < 5:
-        try:
-            results = musicbrainzngs.search_release_groups(term).get('release-group-list')
-            break
-        except WebServiceError, e: #update exceptions
-            logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
-            attempt += 1
-            time.sleep(10)    
+    
+    try:
+        results = musicbrainzngs.search_release_groups(term).get('release-group-list')
+    except WebServiceError, e:
+        logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
+        time.sleep(5)    
     
     time.sleep(sleepytime)
     
-    if not  results:
+    if not results:
         return False
 
     artist_dict = {}
@@ -505,19 +472,15 @@ def findArtistbyAlbum(name):
 def findAlbumID(artist=None, album=None):
 
     results_ngs = None
-    attempt = 0
     
     q, sleepytime = startmb(forcemb=True)
-            
-    while attempt < 5:            
-        try:
-            term = '"'+album+'" AND artist:"'+artist+'"'
-            results_ngs = musicbrainzngs.search_release_groups(term,1).get('release-group-list')
-            break
-        except WebServiceError, e:#update exceptions
-            logger.warn('Attempt to query MusicBrainz for %s - %s failed (%s)' % (artist, album, str(e)))
-            attempt += 1
-            time.sleep(10)
+    
+    try:
+        term = '"'+album+'" AND artist:"'+artist+'"'
+        results_ngs = musicbrainzngs.search_release_groups(term,1).get('release-group-list')
+    except WebServiceError, e:
+        logger.warn('Attempt to query MusicBrainz for %s - %s failed (%s)' % (artist, album, str(e)))
+        time.sleep(5)
     
     time.sleep(sleepytime)
     
