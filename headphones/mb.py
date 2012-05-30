@@ -57,7 +57,7 @@ def startmb(forcemb=False):
         else:
         	musicbrainzngs.hpauth(mbuser,mbpass)
 
-    #q = musicbrainzngs
+    # Don't really need to return q anymore since ngs, but maybe we can return an 'initialized=True' instead?
     q = musicbrainzngs
     
     logger.debug('Using the following server values:\nMBHost: %s ; MBPort: %i  ;  Sleep Interval: %i ' % (mbhost, mbport, sleepytime))
@@ -177,22 +177,27 @@ def getArtist(artistid, extrasonly=False):
         
         time.sleep(sleepytime)
         
-        if 'disambiguation' in artist:
-            uniquename = unicode(artist['sort-name'] + " (" + artist['disambiguation'] + ")")
-        else:
-            uniquename = unicode(artist['sort-name'])
+        #if 'disambiguation' in artist:
+        #    uniquename = unicode(artist['sort-name'] + " (" + artist['disambiguation'] + ")")
+        #else:
+        #    uniquename = unicode(artist['sort-name'])
+        
         artist_dict['artist_name'] = unicode(artist['name'])
-        artist_dict['artist_sortname'] = unicode(artist['sort-name'])
-        artist_dict['artist_uniquename'] = uniquename
-        artist_dict['artist_type'] = unicode(artist['type'])
+        
+        # Not using the following values anywhere yet so we don't need to grab them.
+        # Was causing an exception to be raised if they didn't exist.
+        # 
+        #artist_dict['artist_sortname'] = unicode(artist['sort-name'])
+        #artist_dict['artist_uniquename'] = uniquename
+        #artist_dict['artist_type'] = unicode(artist['type'])
 
-        artist_dict['artist_begindate'] = None
-        artist_dict['artist_enddate'] = None
-        if 'life-span' in artist:
-            if 'begin' in artist['life-span']:
-                artist_dict['artist_begindate'] = unicode(artist['life-span']['begin'])
-            if 'end' in artist['life-span']:
-                artist_dict['artist_enddate'] = unicode(artist['life-span']['end'])      
+        #artist_dict['artist_begindate'] = None
+        #artist_dict['artist_enddate'] = None
+        #if 'life-span' in artist:
+        #    if 'begin' in artist['life-span']:
+        #        artist_dict['artist_begindate'] = unicode(artist['life-span']['begin'])
+        #    if 'end' in artist['life-span']:
+        #        artist_dict['artist_enddate'] = unicode(artist['life-span']['end'])      
 
                 
         
@@ -225,7 +230,7 @@ def getArtist(artistid, extrasonly=False):
                 
                 try:
                     artist = musicbrainzngs.get_artist_by_id(artistid,includes=["releases","release-groups"],release_status=['official'],release_type=include)['artist']
-                except WebServiceError, e:#update exceptions
+                except WebServiceError, e:
                     logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e)))
                     time.sleep(5)
                         
