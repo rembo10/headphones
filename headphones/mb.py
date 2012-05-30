@@ -279,14 +279,7 @@ def getReleaseGroup(rgid):
                 time.sleep(5) 
 
             if not releaseResult:
-                continue
-            
-            #skip releases that do not have any release date associated with them
-            #if we don't do this the albums will get the release date "None" and will
-            #automatically be set to wanted if "Automatically Mark Upcoming Albums as Wanted" is set
-            #because None is not a valid date and will never be in the past so it is always upcoming
-            if 'date' not in releaseResult:
-                continue       
+                continue               
 
             if releaseGroup['type'] == 'live' and releaseResult['status'] != 'Official':
                     logger.debug('%s is not an official live album. Skipping' % releaseResult.name)
@@ -336,7 +329,7 @@ def getReleaseGroup(rgid):
                 'asin':            unicode(releaseResult.get('asin')) if 'asin' in releaseResult else None,
                 'trackscount':    totalTracks,
                 'releaseid':      unicode(releaseResult.get('id')),
-                'releasedate':    unicode(releaseResult.get('date')),
+                'releasedate':    unicode(releaseResult.get('date')) if 'date' in releaseResult else None,
                 'format':        format,
                 'country':        country
                 }
@@ -344,6 +337,9 @@ def getReleaseGroup(rgid):
             releaselist.append(release_dict)
         #necessary to make dates that miss the month and/or day show up after full dates
         def getSortableReleaseDate(releaseDate):
+            if releaseDate == None:
+                return 'None';#change this value to change the sorting behaviour of none, returning 'None' will put it at the top 
+                              #which was normal behaviour for pre-ngs versions
             if releaseDate.count('-') == 2:
                 return releaseDate
             elif releaseDate.count('-') == 1:
@@ -360,7 +356,7 @@ def getReleaseGroup(rgid):
         a = multikeysort(releaselist, ['-hasasin', 'country', 'format', 'trackscount_delta'])
 
         release_dict = {'releaseid' :a[0]['releaseid'],
-                        'releasedate'    : unicode(releaselist[0]['releasedate']),
+                        'releasedate'    : releaselist[0]['releasedate'],
                         'trackcount'    : a[0]['trackscount'],
                         'tracks'        : a[0]['tracks'],
                         'asin'            : a[0]['asin'],
