@@ -63,6 +63,7 @@ COMMITS_BEHIND = None
 
 CHECK_GITHUB = False
 CHECK_GITHUB_ON_STARTUP = False
+CHECK_GITHUB_INTERVAL = None
 
 MUSIC_DIR = None
 DESTINATION_DIR = None
@@ -214,7 +215,7 @@ def initialize():
     
         global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, \
-                CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
+                CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
                 ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, \
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, DOWNLOAD_TORRENT_DIR, \
@@ -262,6 +263,7 @@ def initialize():
         
         CHECK_GITHUB = bool(check_setting_int(CFG, 'General', 'check_github', 1))
         CHECK_GITHUB_ON_STARTUP = bool(check_setting_int(CFG, 'General', 'check_github_on_startup', 1))
+        CHECK_GITHUB_INTERVAL = check_setting_int(CFG, 'General', 'check_github_interval', 360)
         
         MUSIC_DIR = check_setting_str(CFG, 'General', 'music_dir', '')
         DESTINATION_DIR = check_setting_str(CFG, 'General', 'destination_dir', '')
@@ -522,6 +524,7 @@ def config_write():
     
     new_config['General']['check_github'] = int(CHECK_GITHUB)
     new_config['General']['check_github_on_startup'] = int(CHECK_GITHUB_ON_STARTUP)
+    new_config['General']['check_github_interval'] = CHECK_GITHUB_INTERVAL
 
     new_config['General']['music_dir'] = MUSIC_DIR
     new_config['General']['destination_dir'] = DESTINATION_DIR
@@ -642,7 +645,7 @@ def start():
         SCHED.add_interval_job(librarysync.libraryScan, minutes=LIBRARYSCAN_INTERVAL)
         
         if CHECK_GITHUB:
-            SCHED.add_interval_job(versioncheck.checkGithub, minutes=300)
+            SCHED.add_interval_job(versioncheck.checkGithub, minutes=CHECK_GITHUB_INTERVAL)
         
         SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
 
