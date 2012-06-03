@@ -92,16 +92,17 @@ def findArtist(name, limit=1):
             else:
                 uniquename = unicode(result['sort-name'])
             if result['name'] != uniquename and limit == 1:
-                logger.debug('Found an artist with a disambiguation: %s - doing an album based search' % name)
+                logger.info('Found an artist with a disambiguation: %s - doing an album based search' % name)
                 artistdict = findArtistbyAlbum(name)                
                 if not artistdict:
-                    logger.debug('Cannot determine the best match from an artist/album search. Using top match instead')
+                    logger.info('Cannot determine the best match from an artist/album search. Using top match instead')
                     artistlist.append({
-                        'name':             unicode(result['sort-name']),
-                        'uniquename':        uniquename,
+                    # Just need the artist id if the limit is 1
+                    #    'name':             unicode(result['sort-name']),
+                    #    'uniquename':        uniquename,
                         'id':                unicode(result['id']),
-                        'url':                 unicode("http://musicbrainz.org/artist/" + result['id']),#probably needs to be changed
-                        'score':            int(result['ext:score'])
+                    #    'url':                 unicode("http://musicbrainz.org/artist/" + result['id']),#probably needs to be changed
+                    #    'score':            int(result['ext:score'])
                         })                    
                 else:
                     artistlist.append(artistdict)
@@ -467,15 +468,16 @@ def findArtistbyAlbum(name):
     artist_dict = {}
     for releaseGroup in results:
         newArtist = releaseGroup['artist-credit'][0]['artist']         
-        if 'disambiguation' in newArtist:
-            uniquename = unicode(newArtist['sort-name'] + " (" + newArtist['disambiguation'] + ")")
-        else:
-            uniquename = unicode(newArtist['sort-name'])
-        artist_dict['name'] = unicode(newArtist['sort-name'])
-        artist_dict['uniquename'] = uniquename
+        # Only need the artist ID if we're doing an artist+album lookup
+        #if 'disambiguation' in newArtist:
+        #    uniquename = unicode(newArtist['sort-name'] + " (" + newArtist['disambiguation'] + ")")
+        #else:
+        #    uniquename = unicode(newArtist['sort-name'])
+        #artist_dict['name'] = unicode(newArtist['sort-name'])
+        #artist_dict['uniquename'] = uniquename
         artist_dict['id'] = unicode(newArtist['id'])
-        artist_dict['url'] = u'http://musicbrainz.org/artist/' + newArtist['id']
-        artist_dict['score'] = int(releaseGroup['ext:score'])
+        #artist_dict['url'] = u'http://musicbrainz.org/artist/' + newArtist['id']
+        #artist_dict['score'] = int(releaseGroup['ext:score'])
 
     
     
