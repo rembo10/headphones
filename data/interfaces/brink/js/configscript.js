@@ -66,9 +66,9 @@ Event = function(){
 	alert("hello");
 }
 
-$( "#api_enabled" ).change(Event);
+$( "#api_enabled" ).change(Event(););
 
-$(document).ready(function()
+$( 'input[type="checkbox"]' ).change(function()
 {
 	if ($("#api_enabled").is(":checked"))
 		{
