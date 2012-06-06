@@ -20,29 +20,27 @@
 		
 	<link rel="shortcut icon" href="../images/favicon.ico">
 	<link rel="apple-touch-icon" href="../images/headphoneslogo.png">
-	
+	<!--Main theme-->
 	<link rel="stylesheet" href="interfaces/brink/CSS/style.css">
-	<link rel="stylesheet" href="interfaces/brink/CSS/dataTable.css">
 	
-	<script src="interfaces/brink/js/libs/jquery-1.7.1.js"></script>
-	<script>!window.jQuery && document.write(unescape('%3Cscript src="js/libs/jquery-1.6.2.min.js"%3E%3C/script%3E'))</script>
-	${next.javascriptIncludes()}
-	
-	<script type="text/javascript" src="interfaces/brink/js/libs/jquery.custom-form-elements.js" ></script>
-	
-	<script src="interfaces/brink/js/script.js"></script>
-	
-	<!-- Theme style -->
+	<!--Theme-->
 	<link rel="stylesheet" href="interfaces/brink/Themes/Default.css">
+	
+	<!--Jquery libs-->
+	<script type="text/javascript" src="interfaces/brink/js/libs/jquery-1.7.2.min.js" ></script>
+	<script type="text/javascript" src="interfaces/brink/js/libs/jquery-ui-1.8.20.custom.min.js" ></script>
+	<link rel="stylesheet" href="interfaces/brink/CSS/jquery-ui.css">
+	<script src="interfaces/brink/js/script.js"></script>
+	<!-- Theme style -->
 		<!-- styles needed by jScrollPane -->
 		<link type="text/css" href="interfaces/brink/css/libs/jquery.jscrollpane.css" rel="stylesheet" media="all" />
+		<!--Custom form elements-->
+		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.elements.js" ></script>
 		<!-- jScrollPane script -->
-		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.jscrollpane.js" ></script>
 		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.jscrollpane.min.js" ></script>
 		<!-- Mousewheel support -->
 		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.mousewheel.js" ></script>
-		
-		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.dataTables.js" ></script>
+		<!--Datatables-->
 		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.dataTables.min.js" ></script>
 		
 		<script type="text/javascript">
@@ -51,10 +49,12 @@
 			mainResize();
 			mainScroll();
 		});
+		
 		$(document).ready(function(){
 			mainResize();
 			mainScroll();
 		});
+		
 		$('#main').resize(function(){
 			mainScroll();
 		});

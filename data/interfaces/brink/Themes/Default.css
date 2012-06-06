@@ -60,11 +60,11 @@ div#updatebar
 }
 .tooltip span
 {
-	background-image: linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-    background-image: -o-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-    background-image: -moz-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-    background-image: -webkit-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-    background-image: -ms-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
+	background-image: linear-gradient(bottom, rgb(219,219,140) 0%, rgb(240,240,178) 100%);
+	background-image: -o-linear-gradient(bottom, rgb(219,219,140) 0%, rgb(240,240,178) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(219,219,140) 0%, rgb(240,240,178) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(219,219,140) 0%, rgb(240,240,178) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(219,219,140) 0%, rgb(240,240,178) 100%);
 	/*Font Color*/
 	color: #000;
 }
