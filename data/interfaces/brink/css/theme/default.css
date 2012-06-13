@@ -23,14 +23,6 @@
 	background-image: -webkit-linear-gradient(bottom, rgba(0,0,0,0.1) 0%, rgba(255,255,255,0.1) 100%);
 	background-image: -ms-linear-gradient(bottom, rgba(0,0,0,0.1) 0%, rgba(255,255,255,0.1) 100%);
 }
-
-#footer {
-	background-image: linear-gradient(bottom, rgb(82,82,82) 0%, rgb(117,117,117) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(82,82,82) 0%, rgb(117,117,117) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(82,82,82) 0%, rgb(117,117,117) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(82,82,82) 0%, rgb(117,117,117) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(82,82,82) 0%, rgb(117,117,117) 100%);
-}
 /*Main menu current page*/
 
 /*Tooltip Color*/

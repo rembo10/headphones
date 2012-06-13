@@ -6,7 +6,9 @@ body {
 	overflow: hidden;
 	color: rgb(160,160,160);
 	font-size: 100%;
+	background: url(../images/micro_carbon.png);
 }
+
 /*
  *	Univarsal 
  * */
@@ -164,9 +166,7 @@ div.custom_container   /*Makes use of noty*/
 /*Main Menu*/
 #nav-container{
 	vertical-align: top;
-	border-right: 1px solid #000;
 	width: 200px;
-	background-color: rgba(255,255,255,0.3);
 }
 ul#nav 
 { 
@@ -175,6 +175,7 @@ ul#nav
 	padding: 0; 
 	margin: 0;
 	background-color: rgb(200,200,200);
+	transition: all 300ms linear;
 }
 
 ul#nav li  
@@ -185,7 +186,6 @@ ul#nav li
     margin: 0;
 	border-bottom: 1px solid rgb(90,90,90);
 	border-top: 1px solid rgba(255,255,255,0.8);
-	
 }
 ul#nav li:hover { 
     display: block; 
@@ -211,6 +211,9 @@ ul#nav li:hover {
 
 ul#nav li a 
 { 
+	display: block;
+	width: 100%;
+	height: 100%;
 	line-height: 35px; 
 	padding-left: 40px; 
 	font-size: 1em; 
@@ -343,7 +346,10 @@ div#searchbar
 
 div#main {
 	overflow: hidden;
-	height: 100%;
+	background: rgb(32,32,32);
+	border: 2px solid rgb(0,0,0);
+	border-radius: .4em;
+	box-shadow: 3px 3px 10px #000;
 }
 
 /*buttons*/
@@ -527,6 +533,8 @@ input, textarea, select, option {
    font-size: .9em;
    color: rgba(255,255,255,0.6);
    height: 1.8em;
+   text-shadow: 1px 1px 0px rgba(0,0,0,0.2);
+   font-weight: bold;
 }
 
 input, textarea{
@@ -864,7 +872,7 @@ div.progress-container div
 #footer /*#footer*/
 {
 	/*ColorStyles.css*/
-	height: 30px;
+	height: 50px;
 	border-collapse: collapse;
 }
 

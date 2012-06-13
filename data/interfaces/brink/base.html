@@ -48,7 +48,7 @@
 	<script type="text/javascript" src="interfaces/brink/js/libs/jquery.jscrollpane.min.js" ></script>
 	<script type="text/javascript" src="interfaces/brink/js/libs/jquery.mousewheel.js" ></script>
 	<!--Datatables-->
-	<script type="text/javascript" src="interfaces/brink/js/libs/jquery.dataTables.min.js" ></script>
+	<script type="text/javascript" src="../js/libs/jquery.dataTables.min.js"></script>
 	<link rel="stylesheet" href="interfaces/brink/CSS/dataTable.css">
 		
 	<script type="text/javascript">
@@ -131,9 +131,9 @@
 			</td>
 		</tr>
 		<tr>
-			<td id="nav-container">
+			<td id="nav-container" rowspan="2">
 				<ul id="nav">
-					<li><a href="home" accesskey="1">Home</a></li>
+					<li><a href="home" accesskey="1"></a></li>
 					<li><a href="upcoming" accesskey="2">Upcoming</a></li>
 					<li><a href="extras" accesskey="3">Suggestions</a></li>
 					<li><a href="manage" accesskey="4">Manage</a></li>
@@ -141,15 +141,6 @@
 					<li><a href="logs" accesskey="6">Logs</a></li>
 					<li><a href="config" accesskey="7">Settings</a></li>
 				</ul>
-			</td>
-			<td id="content-container">
-				<div id="main" class="main">
-				${next.body()}
-				</div>
-			</td>
-		</tr>
-		<tr id="footer" >
-			<td colspan="2">
 				<div id="options">
 					<ul>
 						<li>Options
@@ -162,6 +153,15 @@
 						</li>
 					</ul>
 				</div>
+			</td>
+			<td id="content-container">
+				<div id="main" class="main">
+				${next.body()}
+				</div>
+			</td>
+		</tr>
+		<tr id="footer" >
+			<td colspan="2">
 			</td>
 		</tr>
 	</table>
