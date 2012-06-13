@@ -1,10 +1,48 @@
-
-$(function(){
-	$( ".tabs" ).tabs();
+// Ajax Config Form
+$(document).ready(function() { 
+    $('#configForm').ajaxForm({ 
+        success: function() {
+			var noty_id = noty({
+				"text":"Settings has been saved successfully!",
+				"type":"success"
+			});
+        } 
+    }); 
 });
 
-$(".save").click(function(){
-	messageDialog("update", "Your settings has been saved!")
+//Slider for interval
+$(function(){
+	$( '.sliderInterval' ).each(function(){
+		var sliderName = $(this).attr("for");
+		var a = $('input[name="' + sliderName + '"]').val();
+		var b = 60;
+		var c = a % b;
+		if ( a >= b ){
+			$('#' + sliderName ).text( (a-c)/b + " hour/s " + c + " minutes" );
+		} else {
+			$('#' + sliderName ).text( a + " minutes" );
+		}
+		// Slider Function
+		$( this ).slider({
+			range: "max",
+			min: 30,
+			max: 1440,
+			step: 10,
+			value: a,
+			slide: function( event, ui ) {
+				a = ui.value;
+				c = a % b;
+				if(a >= b){
+					$('input[name="' + sliderName + '"]').val( ui.value );
+					$('#' + sliderName ).text( (a-c)/b + " hour/s " + c + " minutes" );
+				} else {
+					$('input[name="' + sliderName + '"]').val( ui.value );
+					$('#' + sliderName ).text( a + " minutes" );
+				}
+				
+			}
+		});
+	});
 });
 
 // Sliders
@@ -61,12 +99,6 @@ handleNewSelection = function () {
 		break;
 	}
 };
-
-Event = function(){
-	alert("hello");
-}
-
-$( "#api_enabled" ).change(Event(););
 
 $( 'input[type="checkbox"]' ).change(function()
 {

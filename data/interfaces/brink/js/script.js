@@ -61,13 +61,6 @@ function messageDialog(type, text){
 	+ '</div>');
 }
 
-function tooltip(text){
-	document.write(
-	  '<div class="tooltip">' 
-		+ '<span>' + text + '</span>' //Close
-	+ '</div>');
-}
-
 //Add styled class to dataTables_lenght
 $(document).ready(function() {
 	$(".dataTables_length label select").addClass("styled");
@@ -95,25 +88,3 @@ function rotate(degree) {
     }
 });
 
-//Config open/close
-$(document).ready(function(){
-    $('.panel').hide("slide", { direction: "top" }, 1000);
-});
-
-$('.panel').live('click',function(){
-    $('.open-panel').hide("slide", { direction: "top" }, 1000);
-    $(this).addClass('.open-panel').toggle("slide", { direction: "top" }, 1000);
-});
-
-$('.mainCheckbox').click(function(){
-	if ($('input[name=head}').is(':checked')){
-	$('input').not(':checked')
-		.attr('checked', true)
-		.css('background-postion:', '0px -50px;');
-	}
-	else if($('input[name=head}').not(':checked')){
-		$('input').is(':checked')
-			.attr('checked', flase)
-			.css('background-postion:', '0px 0px;');
-	}
-});
