@@ -570,14 +570,22 @@ input[type="submit"]{
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#000000',GradientType=0 ); /* IE6-9 */}
 select{
 	padding-right: 20px;
-	background: url(../images/arrow-down.png) #444, rgb(69,72,77); /* Old browsers */
-	background: url(../images/arrow-down.png) #444 right center no-repeat, -moz-linear-gradient(top, rgba(69,72,77,1) 0%, rgba(0,0,0,1) 100%); /* FF3.6+ */
-	background: url(../images/arrow-down.png) #444 right center no-repeat, -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(69,72,77,1)), color-stop(100%,rgba(0,0,0,1))); /* Chrome,Safari4+ */
-	background: url(../images/arrow-down.png) #444 right center no-repeat, -webkit-linear-gradient(top, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* Chrome10+,Safari5.1+ */
-	background: url(../images/arrow-down.png) #444 right center no-repeat,  -o-linear-gradient(top, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* Opera 11.10+ */
-	background: url(../images/arrow-down.png) #444 right center no-repeat, -ms-linear-gradient(top, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* IE10+ */
-	background: url(../images/arrow-down.png) #444 right center no-repeat, 	 linear-gradient(top, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* W3C */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#000000',GradientType=0 ); /* IE6-9 */}
+	background: url(../images/arrow-down.png), rgb(69,72,77); /* Old browsers */
+	background: url(../images/arrow-down.png), -moz-linear-gradient(top, rgba(69,72,77,1) 0%, rgba(0,0,0,1) 100%); /* FF3.6+ */
+	background: url(../images/arrow-down.png), -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(69,72,77,1)), color-stop(100%,rgba(0,0,0,1)));/* Chrome,Safari4+ */
+	background: url(../images/arrow-down.png), -webkit-linear-gradient(top, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* Chrome10+,Safari5.1+ */	
+	background: url(../images/arrow-down.png), -o-linear-gradient(top, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* Opera 11.10+ */
+	background: url(../images/arrow-down.png), -ms-linear-gradient(top, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* IE10+ */
+	background: url(../images/arrow-down.png), 	 linear-gradient(top, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
+	
+	
+	background-repeat: no-repeat;
+	background-position: center right;
+	 
+	 
+	 
+	 
 }
 select option{
 	background: rgb(31,31,31);
