@@ -55,6 +55,8 @@
 .jspTrack
 {
 	position: relative;
+	background-color: rgba(0,145,255,0.1);
+	border-left: 1px solid rgba(0,145,255,0.3);
 }
 
 .jspDrag
@@ -63,11 +65,12 @@
 	top: 0;
 	left: 0;
 	cursor: pointer;
+	background-color: rgba(0,145,255,0.2);
 }
 .jspDrag:active,
 .jspDrag:hover
 {
-	
+	background-color: rgba(0,175,255,0.5);
 }
 
 .jspHorizontalBar .jspTrack,

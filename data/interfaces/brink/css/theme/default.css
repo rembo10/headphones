@@ -71,18 +71,17 @@ div#searchbar
  /* Scrollbar background */
 .jspTrack
 {
-	background: rgba(160,160,160,0.3);
+	background-color: rgba(0,145,255,0.3);
 	border-left: 1px solid rgba(160,160,160,0.3);
 }
 
 .jspDrag:active,
 .jspDrag:hover
 {
-	background: rgba(0,175,255,0.6);
 }
 .jspDrag
 {
-	background: rgb(0,175,255);
+	background-color: rgba(0,175,255,0.2);
 }
 .jspArrowUp{
 	background: url(../images/arrowUp.png) 50% 50% no-repeat rgb(130,130,130);

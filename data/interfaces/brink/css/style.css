@@ -9,6 +9,19 @@ body {
 	background: url(../images/micro_carbon.png);
 }
 
+@font-face{ 
+	font-family: 'WebSymbolsRegular';
+	src: url('../fonts/websymbols-regular-webfont.eot');
+	src: url('../fonts/websymbols-regular-webfont.eot?#iefix') format('embedded-opentype'),
+	     url('../fonts/websymbols-regular-webfont.woff') format('woff'),
+	     url('../fonts/websymbols-regular-webfont.ttf') format('truetype'),
+	     url('../fonts/websymbols-regular-webfont.svg#WebSymbolsRegular') format('svg');
+}
+
+.web-symbol{
+	font-family: 'WebSymbolsRegular';
+}
+
 /*
  *	Univarsal 
  * */
@@ -187,6 +200,18 @@ ul#nav li
 	border-bottom: 1px solid rgb(90,90,90);
 	border-top: 1px solid rgba(255,255,255,0.8);
 }
+ul#nav li a span{
+	font-family: 'WebSymbolsRegular';
+	font-size: 1em;
+	display: inline;
+}
+
+ul#nav li a h3 {
+	font-size: 1em;
+	margin: 0;
+	padding: 0;
+}
+
 ul#nav li:hover { 
     display: block; 
     background: rgba(0,0,0,0.2);
@@ -215,68 +240,15 @@ ul#nav li a
 	width: 100%;
 	height: 100%;
 	line-height: 35px; 
-	padding-left: 40px; 
 	font-size: 1em; 
-	color: rgb(120,120,120); 
+	color: rgb(120,120,120);
 	text-decoration: none; 
-	text-transform: uppercase;
 	font-weight: bold;
 	display: block;
 }
 ul#nav li.selected a,
 ul#nav li.selected a:hover{color: #fff;}
 ul#nav li a:hover { color: rgba(0,0,0,0.7); }
-
-/*
- * Menu background images
- */
-ul#nav li a[href="home"]
-{
-	background: url(../images/home.png);
-	background-position: 5% 50%;
-	background-repeat: no-repeat;
-}
-ul#nav li a[href="upcoming"]
-{
-	background: url(../images/upcoming.png);
-	background-position: 5% 50%;
-	background-repeat: no-repeat;
-}
-
-ul#nav li a[href="extras"]
-{
-	background: url(../images/suggestions.png);
-	background-position: 5% 50%;
-	background-repeat: no-repeat;
-}
-
-ul#nav li a[href="manage"]
-{
-	background: url(../images/manage.png);
-	background-position: 5% 50%;
-	background-repeat: no-repeat;
-}
-
-ul#nav li a[href="history"]
-{
-	background: url(../images/history.png);
-	background-position: 5% 50%;
-	background-repeat: no-repeat;
-}
-
-ul#nav li a[href="logs"]
-{
-	background: url(../images/logs.png);
-	background-position: 5% 50%;
-	background-repeat: no-repeat;
-}
-
-ul#nav li a[href="config"]
-{
-	background: url(../images/settings.png);
-	background-position: 5% 50%;
-	background-repeat: no-repeat;
-}
 
 /*Subhead menu*/
 div#subhead_container 
@@ -885,26 +857,47 @@ div.progress-container div
 }
 
 /*Footer manage/settings*/
-div#options
+div#bottombar{
+	position: absolute;
+	bottom: 50px;
+	left: 0px;
+	text-align: center;
+}
+#options
 {
-	height: 30px;
 	padding-top: 2px;
 	margin-left: 5px;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
 }
-div#options ul
+#options li{
+	display:block;
+	float: left;
+	padding-left: 5px;
+	padding-right: 5px;
+	line-height: 25px;
+	font-size: 0.8em;
+	color: rgba(255,255,255,0.5);
+	background: rgba(0,145,255,0.5);
+	border-radius: .3em;
+}
+#options ul
 {
 	list-style-type: none;
 	padding: 0px;
 	margin: 0px;
 	position: relative;
-}
-div#options ul ul
-{
+	top: 0px;
+	left: 0px;
 	display: none;
 	width: 160px;
-	background: rgb(160,160,160);
+	transition: width 2s, height 2s, transform 2s;
+	-moz-transition: width 2s, height 2s, -moz-transform 2s;
+	-webkit-transition: width 2s, height 2s, -webkit-transform 2s;
+	-o-transition: width 2s, height 2s,-o-transform 2s;
 }
-div#options ul li
+#options ul li
 {
 	display: block;
 	height: 24px;
@@ -922,21 +915,12 @@ div#options ul li
 	font-size: 12px;
 }
 
-div#options ul li:hover ul
+#options li:hover ul
 {
 	display: block;
-	position: absolute;
-	left: 0px;
-	bottom: 0px;
-	border: 1px solid #000;
-	border-radius: 3px;
-	overflow: hidden;
-	box-shadow: 0px 0px 3px #000;
-	background: rgb(30,30,30);
-	padding: 2px;
-	
+	width: 200px;
 }
-div#options ul ul li
+#options ul li
 {
 	float: none;
 	background: none;
@@ -944,7 +928,7 @@ div#options ul ul li
 	padding: 0;
 	margin: 0;
 }
-div#options ul ul li a
+#options ul li a
 {
 	display: block;
 	color: #fff;
@@ -954,15 +938,15 @@ div#options ul ul li a
 	text-shadow: 1px 1px 0px rgba(255,255,255,0.0);
 	
 }
-div#options ul ul li a:hover
+#options ul li a:hover
 {
 	background: rgb(255,255,255);
 	display: block;
 	color: #000;
 }
 
-div#version { text-align: center; font-weight: bold; }
-div#donate { text-align: center; margin: 20px auto 20px auto; }
+span#version { text-align: center; font-weight: bold; }
+span#donate { text-align: center; margin: 20px auto 20px auto; }
 
 /*	Shutdown
  * */
