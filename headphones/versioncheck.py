@@ -93,7 +93,7 @@ def checkGithub():
 
 	# Get the latest commit available from github
 	url = 'https://api.github.com/repos/%s/headphones/commits/%s' % (user, branch)
-	
+	logger.info ('Retrieving latest version information from github')
 	try:
 		result = urllib2.urlopen(url).read()
 		git = simplejson.JSONDecoder().decode(result)
@@ -103,7 +103,7 @@ def checkGithub():
 	
 	# See how many commits behind we are	
 	if headphones.CURRENT_VERSION:
-		
+		logger.info('Comparing currently installed version with latest github version')
 		url = 'https://api.github.com/repos/%s/headphones/compare/%s...%s' % (user, headphones.CURRENT_VERSION, headphones.LATEST_VERSION)
 		
 		try:
@@ -123,7 +123,7 @@ def checkGithub():
 	else:
 		logger.info('You are running an unknown version of Headphones. Run the updater to identify your version')
 	
-	return LATEST_VERSION
+	return headphones.LATEST_VERSION
 		
 def update():
 
