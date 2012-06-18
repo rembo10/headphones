@@ -6,7 +6,7 @@ from headphones import logger, version
 import lib.simplejson as simplejson
 
 user = "rembo10"
-branch = "gh_api"
+branch = "master"
 
 def runGit(args):
 
@@ -100,6 +100,8 @@ def checkGithub():
 		headphones.LATEST_VERSION = git['sha']
 	except:
 		logger.warn('Could not get the latest commit from github')
+		headphones.COMMITS_BEHIND = 0
+		return headphones.CURRENT_VERSION
 	
 	# See how many commits behind we are	
 	if headphones.CURRENT_VERSION:
@@ -112,6 +114,8 @@ def checkGithub():
 			headphones.COMMITS_BEHIND = git['total_commits']
 		except:
 			logger.warn('Could not get commits behind from github')
+			headphones.COMMITS_BEHIND = 0
+			return headphones.CURRENT_VERSION
 			
 		if headphones.COMMITS_BEHIND >= 1:
 			logger.info('New version is available. You are %s commits behind' % headphones.COMMITS_BEHIND)
