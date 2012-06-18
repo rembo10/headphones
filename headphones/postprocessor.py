@@ -404,7 +404,7 @@ def moveFiles(albumpath, release, tracks):
 							logger.warn('Error renaming %s: %s' % (files, e))
 						break
 			try:
-				shutil.move(os.path.join(r, files), destination_path)
+				shutil.move(os.path.join(r, files), os.path.join(destination_path, files))
 			except shutil.Error, e:
 				logger.warn('Error moving file %s: %s' % (files, e))
 				
