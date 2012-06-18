@@ -222,6 +222,8 @@ def addArtisttoDB(artistid, extrasonly=False):
 		newValueDict = {"Status":			"Active",
 						"TotalTracks":		totaltracks,
 						"HaveTracks":		havetracks}
+						
+	newValueDict['LastUpdated'] = helpers.now()
 	
 	myDB.upsert("artists", newValueDict, controlValueDict)
 	logger.info(u"Updating complete for: " + artist['artist_name'])
