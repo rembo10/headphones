@@ -141,14 +141,11 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
         if headphones.NZBMATRIX:
             provider = "nzbmatrix"
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
-                categories = "23"
-                maxsize = 10000000000    
+                categories = "23" 
             elif headphones.PREFERRED_QUALITY:
                 categories = "23,22"
-                maxsize = 2000000000
             else:
                 categories = "22"
-                maxsize = 300000000
                 
             # For some reason NZBMatrix is erroring out/timing out when the term starts with a "The" right now
             # so we'll strip it out for the time being. This may get fixed on their end, it may not, but
@@ -186,12 +183,10 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 						url = item.link
 						title = item.title
 						size = int(item.links[1]['length'])
-						if size < maxsize:
-							resultlist.append((title, size, url, provider))
-							logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-						else:
-							logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
-					
+						
+						resultlist.append((title, size, url, provider))
+						logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+  					
 					except AttributeError, e:
 						logger.info(u"No results found from NZBMatrix for %s" % term)
             
@@ -199,13 +194,10 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             provider = "newznab"
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "3040"
-                maxsize = 10000000000
             elif headphones.PREFERRED_QUALITY:
                 categories = "3040,3010"
-                maxsize = 2000000000
             else:
-                categories = "3010"
-                maxsize = 300000000        
+                categories = "3010"    
 
             params = {    "t": "search",
                         "apikey": headphones.NEWZNAB_APIKEY,
@@ -238,11 +230,9 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 							url = item.link
 							title = item.title
 							size = int(item.links[1]['length'])
-							if size < maxsize:
-								resultlist.append((title, size, url, provider))
-								logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-							else:
-								logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
+							
+							resultlist.append((title, size, url, provider))
+							logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size))) 
 						
 						except Exception, e:
 							logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
@@ -251,13 +241,10 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             provider = "nzbsorg"
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "3040"
-                maxsize = 10000000000
             elif headphones.PREFERRED_QUALITY:
                 categories = "3040,3010"
-                maxsize = 2000000000
             else:
-                categories = "3010"
-                maxsize = 300000000        
+                categories = "3010"      
 
             params = {    "t": "search",
                         "apikey": headphones.NZBSORG_HASH,
@@ -290,12 +277,10 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 							url = item.link
 							title = item.title
 							size = int(item.links[1]['length'])
-							if size < maxsize:
-								resultlist.append((title, size, url, provider))
-								logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-							else:
-								logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
-						
+							
+							resultlist.append((title, size, url, provider))
+							logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+							
 						except Exception, e:
 							logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
 
@@ -305,15 +290,12 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "7"        #music
                 format = "2"             #flac
-                maxsize = 10000000000
             elif headphones.PREFERRED_QUALITY:
                 categories = "7"        #music
                 format = "10"            #mp3+flac
-                maxsize = 2000000000
             else:
                 categories = "7"        #music
-                format = "8"            #mp3
-                maxsize = 300000000        
+                format = "8"            #mp3      
 
             params = {   
                         "fpn": "p",
@@ -370,11 +352,11 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                             logger.info("Didn't find a valid Newzbin reportid in linknode")
                         else:
                             url = id_match.group(1) #we have to make a post request later, need the id                            
-                    if size < maxsize and url:
+                    if url:
                         resultlist.append((title, size, url, provider))
                         logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                     else:
-                        logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes)' % (title, size))    
+                        logger.info('No url link found in nzb. Skipping.')    
                 
             else:
                 logger.info('No results found from NEWZBIN for %s' % term)
