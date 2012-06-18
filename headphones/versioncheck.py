@@ -1,13 +1,12 @@
-import platform, subprocess, re, os
-
-import urllib2
-import tarfile
+import platform, subprocess, re, os, urllib2, tarfile
 
 import headphones
 from headphones import logger, version
 
-from lib.pygithub import github
+import lib.simplejson as simplejson
 
+user = "rembo10"
+branch = "gh_api"
 
 def runGit(args):
 
@@ -92,33 +91,40 @@ def getVersion():
 	
 def checkGithub():
 
-	commits_behind = 0
-	cur_commit = headphones.CURRENT_VERSION
-	latest_commit = None
-
-	gh = github.GitHub()
+	# Get the latest commit available from github
+	url = 'https://api.github.com/repos/%s/headphones/commits/%s' % (user, branch)
+	logger.info ('Retrieving latest version information from github')
+	try:
+		result = urllib2.urlopen(url).read()
+		git = simplejson.JSONDecoder().decode(result)
+		headphones.LATEST_VERSION = git['sha']
+	except:
+		logger.warn('Could not get the latest commit from github')
 	
-	for curCommit in gh.commits.forBranch('rembo10', 'headphones', version.HEADPHONES_VERSION):
-		if not latest_commit:
-			latest_commit = curCommit.id
-			if not cur_commit:
-				break
+	# See how many commits behind we are	
+	if headphones.CURRENT_VERSION:
+		logger.info('Comparing currently installed version with latest github version')
+		url = 'https://api.github.com/repos/%s/headphones/compare/%s...%s' % (user, headphones.CURRENT_VERSION, headphones.LATEST_VERSION)
 		
-		if curCommit.id == cur_commit:
-			break
+		try:
+			result = urllib2.urlopen(url).read()
+			git = simplejson.JSONDecoder().decode(result)
+			headphones.COMMITS_BEHIND = git['total_commits']
+		except:
+			logger.warn('Could not get commits behind from github')
 			
-		commits_behind += 1
-		
-	headphones.LATEST_VERSION = latest_commit
-	headphones.COMMITS_BEHIND = commits_behind
-		
-	if headphones.LATEST_VERSION == headphones.CURRENT_VERSION:
-		logger.info('Headphones is already up-to-date.')
-		
-	return latest_commit
-		
-
+		if headphones.COMMITS_BEHIND >= 1:
+			logger.info('New version is available. You are %s commits behind' % headphones.COMMITS_BEHIND)
+		elif headphones.COMMITS_BEHIND == 0:
+			logger.info('Headphones is up to date')
+		elif headphones.COMMITS_BEHIND == -1:
+			logger.info('You are running an unknown version of Headphones. Run the updater to identify your version')
+			
+	else:
+		logger.info('You are running an unknown version of Headphones. Run the updater to identify your version')
 	
+	return headphones.LATEST_VERSION
+		
 def update():
 
 	
@@ -146,7 +152,7 @@ def update():
 				
 	else:
 	
-		tar_download_url = 'http://github.com/rembo10/headphones/tarball/'+version.HEADPHONES_VERSION
+		tar_download_url = 'https://github.com/%s/headphones/tarball/%s' % (user, branch)
 		update_dir = os.path.join(headphones.PROG_DIR, 'update')
 		version_path = os.path.join(headphones.PROG_DIR, 'version.txt')
 		
@@ -200,5 +206,5 @@ def update():
 			ver_file.write(headphones.LATEST_VERSION)
 			ver_file.close()
 		except IOError, e:
-			logger.error(u"Unable to write for curCommit in gh.commits.forBranch file, update not complete: "+ex(e))
+			logger.error(u"Unable to write current version to version.txt, update not complete: "+ex(e))
 			return
