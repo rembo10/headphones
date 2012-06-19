@@ -52,10 +52,10 @@ def startmb(forcemb=False):
 
     # Add headphones credentials
     if headphones.MIRROR == "headphones":
-    	if not mbuser and mbpass:
-    		logger.warn("No username or password set for VIP server")
+        if not mbuser and mbpass:
+            logger.warn("No username or password set for VIP server")
         else:
-        	musicbrainzngs.hpauth(mbuser,mbpass)
+            musicbrainzngs.hpauth(mbuser,mbpass)
 
     # Don't really need to return q anymore since ngs, but maybe we can return an 'initialized=True' instead?
     q = musicbrainzngs

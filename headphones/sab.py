@@ -66,7 +66,7 @@ def sendNZB(nzb):
         multiPartParams = {"nzbfile": (nzb.name+".nzb", nzb.extraInfo[0])}
 
     if not headphones.SAB_HOST.startswith('http'):
-    	headphones.SAB_HOST = 'http://' + headphones.SAB_HOST
+        headphones.SAB_HOST = 'http://' + headphones.SAB_HOST
 
     if headphones.SAB_HOST.endswith('/'):
         headphones.SAB_HOST = headphones.SAB_HOST[0:len(headphones.SAB_HOST)-1]

@@ -325,7 +325,7 @@ def initialize():
         
         INTERFACE = check_setting_str(CFG, 'General', 'interface', 'default')
         FOLDER_PERMISSIONS = check_setting_str(CFG, 'General', 'folder_permissions', '0755')
-		
+        
         ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')        
         ENCODER = check_setting_str(CFG, 'General', 'encoder', 'ffmpeg')
         BITRATE = check_setting_int(CFG, 'General', 'bitrate', 192)
@@ -363,7 +363,7 @@ def initialize():
         # update folder formats in the config & bump up config version
         if CONFIG_VERSION == '0':
             from headphones.helpers import replace_all
-            file_values = {	'tracknumber':	'Track', 'title': 'Title','artist' : 'Artist', 'album' : 'Album', 'year' : 'Year' }
+            file_values = { 'tracknumber':  'Track', 'title': 'Title','artist' : 'Artist', 'album' : 'Album', 'year' : 'Year' }
             folder_values = { 'artist' : 'Artist', 'album':'Album', 'year' : 'Year', 'releasetype' : 'Type', 'first' : 'First', 'lowerfirst' : 'first' }
             FILE_FORMAT = replace_all(FILE_FORMAT, file_values)
             FOLDER_FORMAT = replace_all(FOLDER_FORMAT, folder_values)
@@ -372,34 +372,34 @@ def initialize():
             
         if CONFIG_VERSION == '1':
 
-			from headphones.helpers import replace_all
+            from headphones.helpers import replace_all
 
-			file_values = {	'Track':		'$Track',
-							'Title':		'$Title',
-							'Artist':		'$Artist',
-							'Album':		'$Album',
-							'Year':			'$Year',
-							'track':		'$track',
-							'title':		'$title',
-							'artist':		'$artist',
-							'album':		'$album',
-							'year':			'$year'
-							}
-			folder_values = { 	'Artist':	'$Artist',
-								'Album':	'$Album',
-								'Year':		'$Year',
-								'Type':  	'$Type',
-								'First':	'$First',
-								'artist':	'$artist',
-								'album':	'$album',
-								'year':		'$year',
-								'type':  	'$type',
-								'first':	'$first'
-							}	
-			FILE_FORMAT = replace_all(FILE_FORMAT, file_values)
-			FOLDER_FORMAT = replace_all(FOLDER_FORMAT, folder_values)
-			
-			CONFIG_VERSION = '2'
+            file_values = { 'Track':        '$Track',
+                            'Title':        '$Title',
+                            'Artist':       '$Artist',
+                            'Album':        '$Album',
+                            'Year':         '$Year',
+                            'track':        '$track',
+                            'title':        '$title',
+                            'artist':       '$artist',
+                            'album':        '$album',
+                            'year':         '$year'
+                            }
+            folder_values = {   'Artist':   '$Artist',
+                                'Album':    '$Album',
+                                'Year':     '$Year',
+                                'Type':     '$Type',
+                                'First':    '$First',
+                                'artist':   '$artist',
+                                'album':    '$album',
+                                'year':     '$year',
+                                'type':     '$type',
+                                'first':    '$first'
+                            }   
+            FILE_FORMAT = replace_all(FILE_FORMAT, file_values)
+            FOLDER_FORMAT = replace_all(FOLDER_FORMAT, folder_values)
+            
+            CONFIG_VERSION = '2'
         
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
@@ -435,12 +435,12 @@ def initialize():
         
         # Check for new versions
         if CHECK_GITHUB_ON_STARTUP:
-        	try:
-        	    LATEST_VERSION = versioncheck.checkGithub()
-        	except:
-        	    LATEST_VERSION = CURRENT_VERSION
+            try:
+                LATEST_VERSION = versioncheck.checkGithub()
+            except:
+                LATEST_VERSION = CURRENT_VERSION
         else:
-        	LATEST_VERSION = CURRENT_VERSION
+            LATEST_VERSION = CURRENT_VERSION
 
         __INITIALIZED__ = True
         return True
@@ -766,9 +766,9 @@ def shutdown(restart=False, update=False):
     config_write()
     
     if not restart and not update:
-    	logger.info('Headphones is shutting down...')
+        logger.info('Headphones is shutting down...')
     if update:
-    	logger.info('Headphones is updating...')
+        logger.info('Headphones is updating...')
         try:
             versioncheck.update()
         except Exception, e:
@@ -779,7 +779,7 @@ def shutdown(restart=False, update=False):
         os.remove(PIDFILE)
         
     if restart:
-    	logger.info('Headphones is restarting...')
+        logger.info('Headphones is restarting...')
         popen_list = [sys.executable, FULL_PATH]
         popen_list += ARGS
         if '--nolaunch' not in popen_list:
