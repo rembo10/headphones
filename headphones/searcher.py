@@ -896,30 +896,26 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 def preprocesstorrent(resultlist):
     selresult = ""
     for result in resultlist:
-        try:
-            if selresult == "":
-                selresult = result
-                request = urllib2.Request(result[2])
-                request.add_header('Accept-encoding', 'gzip')
-                response = urllib2.urlopen(request)
-                if response.info().get('Content-Encoding') == 'gzip':
-                    buf = StringIO( response.read())
-                    f = gzip.GzipFile(fileobj=buf)
-                    torrent = f.read()
-                else:
-                    torrent = response.read()
-            elif int(selresult[1]) < int(result[1]):
-                selresult = result
-                request = urllib2.Request(result[2])
-                request.add_header('Accept-encoding', 'gzip')
-                response = urllib2.urlopen(request)
-                if response.info().get('Content-Encoding') == 'gzip':
-                    buf = StringIO( response.read())
-                    f = gzip.GzipFile(fileobj=buf)
-                    torrent = f.read()
-                else:
-                    torrent = response.read()
-        except ExpatError:
-            logger.error('Unable to torrent file. Skipping.')
-            continue
+        if selresult == "":
+            selresult = result
+        elif int(selresult[1]) < int(result[1]): # if size is lower than new result replace previous selected result (bigger size = better quality?)
+            selresult = result
+            
+    try:
+        request = urllib2.Request(selresult[2])
+        request.add_header('Accept-encoding', 'gzip')
+        
+        if selresult[3] == 'Kick Ass Torrent':
+            request.add_header('Referer', 'http://kat.ph/')
+            
+        response = urllib2.urlopen(request)
+        if response.info().get('Content-Encoding') == 'gzip':
+            buf = StringIO(response.read())
+            f = gzip.GzipFile(fileobj=buf)
+            torrent = f.read()
+        else:
+            torrent = response.read()
+    except ExpatError:
+        logger.error('Unable to torrent %s' % selresult[2])
+        
     return torrent, selresult
