@@ -1,13 +1,9 @@
 body {
-	background-color: #313131;
 	margin: 0px;
 	padding: 0px;
 	font-family: Verdana, Tahoma, Arial, sans-serif;
 	overflow: hidden;
-	color: rgb(160,160,160);
-	font-size: 100%;
-	background: url(../images/micro_carbon.png);
-}
+	font-size: 100%;}
 
 @font-face{ 
 	font-family: 'WebSymbolsRegular';
@@ -20,8 +16,8 @@ body {
 
 .web-symbol{
 	font-family: 'WebSymbolsRegular';
+	font-size: 2em;
 }
-
 /*
  *	Univarsal 
  * */
@@ -54,6 +50,20 @@ a:active {/*colour in NN4.xx is red*/
   	color: rgb(200,200,200);
   	text-decoration: none; 
 }
+
+.symbol-link a {
+	color: #fff;
+	float: right;
+}
+.symbol-link a span{
+	font-family: 'WebSymbolsRegular';
+	display: inline;
+}
+.symbol-link a p {
+	display: inline;
+	color: #fff;
+}
+
 #container { width: 100%; margin: auto; }
 
 h1
@@ -89,8 +99,9 @@ p.center { text-align: center; font-size: 12px; }
 /*#header*/
 #header 
 { 
-	/*ColorStyles.css*/
-	height: 35px; 
+	box-sizing: border-box;
+	height: 45px; 
+	border-bottom: 1px solid #000;
 	box-shadow: 1px 1px 2px #000;
 }
 
@@ -108,7 +119,7 @@ div#logo
 }
 div#logo a
 {
-	color: rgb(0,0,0);
+	color: rgb(255,255,255);
 }
 div#logo a:hover 
 {
@@ -187,8 +198,6 @@ ul#nav
 	width: 200px; 
 	padding: 0; 
 	margin: 0;
-	background-color: rgb(200,200,200);
-	transition: all 300ms linear;
 }
 
 ul#nav li  
@@ -197,58 +206,52 @@ ul#nav li
     width: 100%; 
     padding: 0; 
     margin: 0;
-	border-bottom: 1px solid rgb(90,90,90);
-	border-top: 1px solid rgba(255,255,255,0.8);
+	border-bottom: 1px solid rgba(0,0,0,0.2);
+	border-top: 1px solid rgba(255,255,255,0.2);
 }
-ul#nav li a span{
+#nav li a{
+	color: #7597A8;
+	padding-left: 10px;
+	line-height: 2em;
+	display: block;
+}
+#nav li a .icon{
 	font-family: 'WebSymbolsRegular';
-	font-size: 1em;
+	display: inline-block;
+	width: 30px;
+	text-align: center;
+}
+#nav li a .text{
 	display: inline;
 }
 
-ul#nav li a h3 {
-	font-size: 1em;
-	margin: 0;
-	padding: 0;
-}
-
 ul#nav li:hover { 
-    display: block; 
-    background: rgba(0,0,0,0.2);
-	background-image: linear-gradient(bottom, rgb(195,195,195) 0%, rgb(210,210,210) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(195,195,195) 0%, rgb(210,210,210) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(195,195,195) 0%, rgb(210,210,210) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(195,195,195) 0%, rgb(210,210,210) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(195,195,195) 0%, rgb(210,210,210) 100%);
+	background: -moz-linear-gradient(top, rgba(80,80,80,0.5) 0%, rgba(40,40,40,0.5) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(80,80,80,0.5)), color-stop(100%,rgba(40,40,40,0.5))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, rgba(80,80,80,0.5) 0%,rgba(40,40,40,0.5) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, rgba(80,80,80,0.5) 0%,rgba(40,40,40,0.5) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, rgba(80,80,80,0.5) 0%,rgba(40,40,40,0.5) 100%); /* IE10+ */
+	background: linear-gradient(top, rgba(80,80,80,0.5) 0%,rgba(40,40,40,0.5) 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#80505050', endColorstr='#80282828',GradientType=0 ); /* IE6-9 */
 }
 
 #nav li.selected,
 #nav li:hover.selected
 {
-	background-image: linear-gradient(bottom, rgb(0,145,255) 0%, rgb(97,189,255) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(0,145,255) 0%, rgb(97,189,255) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(0,145,255) 0%, rgb(97,189,255) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(0,145,255) 0%, rgb(97,189,255) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(0,145,255) 0%, rgb(97,189,255) 100%);
-	border-bottom: 1px solid rgba(0,0,0,0.5);
-	border-top: 1px solid rgb(200,237,255);
+	background: rgb(62,80,89); /* Old browsers */
+	background: -moz-linear-gradient(top, rgba(62,80,89,1) 1%, rgba(53,70,76,1) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(1%,rgba(62,80,89,1)), color-stop(100%,rgba(53,70,76,1))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, rgba(62,80,89,1) 1%,rgba(53,70,76,1) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, rgba(62,80,89,1) 1%,rgba(53,70,76,1) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, rgba(62,80,89,1) 1%,rgba(53,70,76,1) 100%); /* IE10+ */
+	background: linear-gradient(top, rgba(62,80,89,1) 1%,rgba(53,70,76,1) 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3e5059', endColorstr='#35464c',GradientType=0 ); /* IE6-9 */
 }
 
-ul#nav li a 
-{ 
-	display: block;
-	width: 100%;
-	height: 100%;
-	line-height: 35px; 
-	font-size: 1em; 
-	color: rgb(120,120,120);
-	text-decoration: none; 
-	font-weight: bold;
-	display: block;
-}
+ul#nav li.selected span,
 ul#nav li.selected a,
-ul#nav li.selected a:hover{color: #fff;}
-ul#nav li a:hover { color: rgba(0,0,0,0.7); }
+ul#nav li.selected a:hover{color: #ffffff;}
+ul#nav li a:hover { color: #ffffff; }
 
 /*Subhead menu*/
 div#subhead_container 
@@ -308,8 +311,33 @@ ul#subhead_menu li a:hover
 /* Searchbar Styles */
 div#searchbar 
 { 
-	border: 0px;
+	margin-top: 2.5px;
+	height: 30px;
 	float: right;
+}
+div#searchbar input[type="text"]{
+	margin: 0px;
+	padding: 0px;
+	float: left;
+	height: 28px;
+	border-radius: 0.3em 0em 0em 0.3em;
+	padding-left: 10px;
+}
+div#searchbar select{
+	float: left;
+	margin-right: -3px;
+	margin-left: -1px;
+	height: 30px;
+	border-radius: 0em;
+}
+div#searchbar input[type='submit']{
+	height: 30px;
+	font-size: 1em;
+	border-radius: 0em 0.3em 0.3em 0em;
+}
+div#searchbar input[type='submit']:hover{
+	color: rgb(0,145,255);
+	
 }
 
 #content-container{
@@ -318,38 +346,16 @@ div#searchbar
 
 div#main {
 	overflow: hidden;
-	background: rgb(32,32,32);
-	border: 2px solid rgb(0,0,0);
-	border-radius: .4em;
-	box-shadow: 3px 3px 10px #000;
 }
 
 /*buttons*/
-.btnStatus
-{
-    background: rgb(30,170,140);
-    border-top: 1px solid rgba(255,255,255,0.3);
-    border-left: 1px solid rgba(255,255,255,0.3);
-    border-right: 1px solid rgba(0,0,0,0.3);
-    border-bottom: 1px solid rgba(0,0,0,0.3);
-    border-radius: 3px;
-    color: #000;
-	font-size: 0.9em;
-	height: 18px;
-	line-height: 18px;
-	text-align: center;
-	font-weight: bold;
-	float: left;
-	padding: 3px 6px 3px 6px;
-}
-#status.btnStatus:hover {
-	text-decoration: none;
-}
 
 #status a
 {
-    color: #000;
-    display: block;
+	color: rgb(0,145,255);
+}
+#status a:hover{
+	color: rgb(255,255,255);
 }
 
 .btnDownloaded ,
@@ -429,7 +435,6 @@ text-shadow: 1px 1px 0px rgb(190,0,31);
 	-webkit-border-radius: 5px; 
 	-moz-border-radius: 5px; 
 	width: 100%; 
-	background-color: #313131; 
 	min-height: 50px; 
 	clear: both; 
 	_height: 302px; 
@@ -442,7 +447,7 @@ div.tooltip
 	/*ColorStyles.css*/
 	position: relative;
     color: #000;
-    border-radius: 0px .2em .2em 0px;
+    border-radius: .2em;
     border-left: 1px solid #808080;
     height: 1.8em;
     width: 1em;
@@ -454,7 +459,6 @@ div.tooltip
     text-shadow: 1px 1px 0px rgba(255,255,255,0.2);
 	font-family: Courier;
 	display: inline-block;
-	margin-left: -24px;
 	padding: 0px;
 }
 div.tooltip:after {
@@ -501,12 +505,12 @@ input, textarea, select, option {
    -webkit-box-shadow: 1px 1px 0px rgba(255,255,255,0.1);
    padding-left: 10px;
    padding-right: 10px;
-   line-height: 1.3em;
    font-size: .9em;
    color: rgba(255,255,255,0.6);
    height: 1.8em;
    text-shadow: 1px 1px 0px rgba(0,0,0,0.2);
    font-weight: bold;
+   height: 28px;
 }
 
 input, textarea{
@@ -530,8 +534,6 @@ input[type="submit"]{
 	-webkit-box-shadow: 1px 1px 0px rgba(255,255,255,0.1);
 	-webkit-border-radius: 0.2em;
 	height: 28px;
-	padding-left: 5px;
-	padding-right: 5px;
 	background: rgb(69,72,77); /* Old browsers */
 	background-image: -moz-linear-gradient(top, rgba(69,72,77,1) 0%, rgba(0,0,0,1) 100%); /* FF3.6+ */
 	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(69,72,77,1)), color-stop(100%,rgba(0,0,0,1))); /* Chrome,Safari4+ */
@@ -550,21 +552,15 @@ select{
 	background: url(../images/arrow-down.png), -ms-linear-gradient(top, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* IE10+ */
 	background: url(../images/arrow-down.png), 	 linear-gradient(top, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* W3C */
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
-	
-	
 	background-repeat: no-repeat;
 	background-position: center right;
-	 
-	 
-	 
-	 
 }
 select option{
 	background: rgb(31,31,31);
 	line-height: 1.8em;
 }
 select option:hover{
-	background-: rgb(255,255,255);
+	background: rgb(255,255,255);
 	color: #000;
 }
 
@@ -597,29 +593,30 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0091ff', end
 
 input[type="checkbox"]:checked{
    background: rgb(0,145,255) no-repeat center center;
-   -webkit-background-size: 28px 28px; /* shrink high resolution background */
 }
 input[type="checkbox"]:checked:after{
-	content: "x";
-	color: rgb(30,30,30);
-	font-family: Verdana;
+	content: '.';
+	color: rgb(255,255,255);
+	font-family: 'WebSymbolsRegular';
 	font-weight: bold;
-	font-size: .9em;
-	text-shadow: 1px 1px 0px rgb(255,255,255,0.3);
-	margin-left: 4px;
-	line-height: 0.1em;
+	font-size: 1em;
+	text-shadow: 1px 1px 0px rgba(0,0,0,0.3);
+	margin-left: 1px;
+	margin-bottom: 2px;
 }
 
 input:hover,
 textarea:hover,
 select:hover{
 	box-shadow: 0px 0px 3px rgb(0,145,255);
+	color: rgb(0,145,255);
 }
 
 input:focus, 
 textarea:focus,
 select:focus { 
 	box-shadow: 0px 0px 6px rgb(0,145,255);
+	color: rgb(0,145,255);
 }
 
 /*End Inputs & Select*/
@@ -627,20 +624,25 @@ select:focus {
 .manage_wrapper { width: 88%; margin: 20px auto 0 auto; padding: 25px; min-height: 150px; clear: both; _height: 302px; zoom: 1; }
 
 /*Config*/
-#config fieldset { border-color: rgba(0,0,0,0.2); background-color: rgba(0,0,0,0.1);}
-#config fieldset legend { 
-	border-bottom: 2px solid rgba(0,140,255,0.9);
-	width: 100%;
-	text-transform: uppercase;
-	font-weight: bold;
-	color: rgb(120,120,120);
+.config-wrapper{
+	margin: auto;
+	width: 640px;
 }
-#config fieldset dl dt {  }
-#config fieldset dl dd { margin-top: 10px; margin-bottom: 10px; }
+.configtable {
+	width: 100%;
+}
+.configtable td{
+	vertical-align: top;
+	border-spacing: 10px;
+}
+
+p.label-comment{
+	color: rgb(120,120,120);
+	font-size: .8em;
+}
 
 /* Artist Table Style*/
 table#artist_table { width: 100%;}
-
 table#artist_table th#select { text-align: left; }
 table#artist_table th#name { text-align: left; min-width: 150px; }
 table#artist_table th#status { text-align: left; min-width: 40px; }
@@ -653,7 +655,6 @@ table#artist_table td#album { vertical-align: middle; text-align: left; }
 table#artist_table td#have { vertical-align: middle; }
 
 #artist_table div { color: #000; text-shadow: 1px 1px rgb(100,100,100); font-size: 12px; font-weight: bold; }
-
 
 table#album_table { width: 100%; }
 /* Album Tableheader*/
@@ -677,7 +678,6 @@ table#album_table td#albumart { vertical-align: middle; text-align: left; }
 	margin: 3px;
 	float: left;
 	overflow: hidden; 
-	background: rgb(30,30,30);
 	border: 1px solid rgb(10,10,10);
 	box-shadow: 1px 1px 0px rgba(255,255,255,0.2); 
 	border-radius: 2px; 
@@ -821,8 +821,6 @@ div.progress-container
     margin: 2px 5px 2px 0px; 
     overflow: hidden;
     text-align: center;
-    color: rgb(30,30,30); 
-    background: rgb(30,30,30);
 	border: 1px solid rgb(10,10,10);
 	box-shadow: 1px 1px 0px rgba(255,255,255,0.2); 
 	border-radius: 2px; 
@@ -854,6 +852,7 @@ div.progress-container div
 	/*ColorStyles.css*/
 	height: 50px;
 	border-collapse: collapse;
+	box-sizing: border-box;
 }
 
 /*Footer manage/settings*/

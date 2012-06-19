@@ -9,7 +9,7 @@
 <!--[if IE 9 ]>    <html lang="en" class="no-js ie9"> <![endif]-->
 <!--[if (gt IE 9)|!(IE)]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
 <head>
-	<meta charset="UTF-8">
+	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	
 	<title>Headphones - ${title}</title>
@@ -115,64 +115,64 @@
 		<tr>
 			<td id="header" colspan="2">
 				<div id="logo">
-					<a href="home"><img src="../images/headphoneslogo.png" alt="headphones"/>Headphones</a>
+					<a href="home"><img src="../images/headphoneslogo.png" alt="headphones"/></a>
 				</div>
 				${next.headerIncludes()}
 				<div id="searchbar">
-					<form action="search" method="get" class="jqtransform">
-						<input type="text" value="" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" accesskey="s" placeholder="Search..." />
-						<select class="styled" name="type">
+					<form action="search" method="get">
+						<input type="text" value="" name="name" accesskey="s" placeholder="Search..." />
+						<select name="type">
 							<option value="artist">Artist</option>
 							<option value="album">Album</option>
 						</select>
-						<input class="submit" type="submit" value="GO"/>
+						<input class="web-symbol" type="submit" value="L"/>
 					</form>
 				</div>
 			</td>
 		</tr>
 		<tr>
-			<td id="nav-container" rowspan="2">
+			<td id="nav-container">
 				<ul id="nav">
 					<li><a href="home" accesskey="1">
-							<span>1</span>
-							<h3>Home</h3>
+							<span class="icon">U</span>
+							<span class="text">Home</span>
 						</a>
 					</li>
 					<li><a href="upcoming" accesskey="2">
-							<span>O</span>
-							<h3>Upcoming</h3>
+							<span class="icon">O</span>
+							<span class="text">Upcoming</span>
 						</a>
 					</li>
 					<li><a href="extras" accesskey="3">
-							<span>R</span>
-							<h3>Suggestions</h3>
+							<span class="icon">R</span>
+							<span class="text">Suggestions</span>
 						</a>
 					</li>
 					<li><a href="manage" accesskey="4">
-							<span>_</span>
-							<h3>Manage</h3>
+							<span class="icon">_</span>
+							<span class="text">Manage</span>
 						</a>
 					</li>
 					<li><a href="history" accesskey="5">
-							<span>Z</span>
-							<h3>History</h3>
+							<span class="icon">Z</span>
+							<span class="text">History</span>
 						</a>
 					</li>
 					<li><a href="logs" accesskey="6">
-							<span>a</span>
-							<h3>Logs</h3>
+							<span class="icon">a</span>
+							<span class="text">Logs</span>
 						</a>
 					</li>
 					<li><a href="config" accesskey="7">
-							<span>S</span>
-							<h3>Settings</h3>
+							<span class="icon">S</span>
+							<span class="text">Settings</span>
 						</a>
 					</li>
 				</ul>
 				<div id="bottombar">
 					<ul id="options">
 						<li><span class="web-symbol">:</span>
-							<h1>Options</h1>
+							<p>Options</p>
 							<ul>
 								<li><a href="forceSearch" title="Refresh/Update">Wanted Albums</a></li>
 								<li><a href="forceUpdate" title="Refresh/Update">Active Artists</a></li>
@@ -191,6 +191,16 @@
 		</tr>
 		<tr id="footer" >
 			<td colspan="2">
+				<div class="symbol-link">
+					<a href="shutdown">
+						<span>X</span>
+						<p>Shut Down</p>
+					</a>
+					<a href="restart">
+						<span>J</span>
+						<p>Restart</p>
+					</a>
+				</div>
 			</td>
 		</tr>
 	</table>

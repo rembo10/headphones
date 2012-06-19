@@ -9,11 +9,22 @@ $(document).ready(function() {
     });
 });
 
+// Loader
+var loaderSymbols = ['0', '1', '2', '3', '4', '5', '6', '7'], 
+loaderRate = 100, 
+loaderIndex = 0, 
+loader = function() { 
+	$('.loader').text( loaderSymbols[loaderIndex] );
+	loaderIndex = loaderIndex  < loaderSymbols.length - 1 ? loaderIndex + 1 : 0; 
+	setTimeout(loader, loaderRate); 
+}; 
+loader(); 
+
 //Resize #main to fit window size
 function mainResize()
 {
 	var totalHeight = $(window).height() -
-					($("#header").outerHeight() + 2 +
+					($("#header").outerHeight() +
 					$("#footer").outerHeight());
 	$("#main").height(totalHeight);
 }

@@ -1,6 +1,6 @@
 // Ajax Config Form
 $(document).ready(function() { 
-    $('#configForm').ajaxForm({ 
+    $('#config').ajaxForm({ 
         success: function() {
 			var noty_id = noty({
 				"text":"Settings has been saved successfully!",
@@ -9,6 +9,30 @@ $(document).ready(function() {
         } 
     }); 
 });
+// Enabled/disabled label
+$(document).ready(function(){
+	$( '.switch' ).each(function(){
+		//set Label name to current active state
+		var labelName = 'label[for="' + $(this).attr("name") + '"]';
+		if ( $( this ).is(':checked') ){
+			$( labelName ).text( 'Enabled' );
+		}
+		else {
+			$( labelName ).text( 'Disabled' );
+		}
+		//Change label
+		$( this ).change(function(){
+			if ( $( this ).is( ':checked' ) ){
+				
+				$( labelName ).text( 'Enabled' );
+			}
+			else{
+				$( labelName ).text( 'Disabled' );
+			}
+		});
+	});
+});
+
 
 //Slider for interval
 $(function(){
@@ -39,7 +63,6 @@ $(function(){
 					$('input[name="' + sliderName + '"]').val( ui.value );
 					$('#' + sliderName ).text( a + " minutes" );
 				}
-				
 			}
 		});
 	});

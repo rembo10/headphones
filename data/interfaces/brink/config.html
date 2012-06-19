@@ -18,43 +18,67 @@
 
 <%def name="body()">
     <form id="config" action="configUpdate" method="post">
-		<div>
-			<fieldset>
-				<legend>Web Interface</legend>
+			<div class="config-wrapper">
+				<h2>Web Interface</h2>
+				<table class="configtable">
 					<!--HTTP-->
-					<dl>
-						<dt>
-							HTTP
-						</dt>
-						<dd>
+					<tr>
+						<td>
+							<h2>HTTP</h2>
+							<p class="label-comment">Basic settings for Headphones.</p>
+						</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>
 							<label for="http_host">Host:</label>
+							<p class="label-comment">Localhost or 0.0.0.0</p>
+						</td>
+						<td>
 							<input type="text" name="http_host" value="${config['http_host']}" size="25" maxlength="40" />
-							<div class="tooltip"><span>Localhost or 0.0.0.0</span></div>
-						</dd>
-						<dd>
+						</td>
+					</tr>
+					<tr>
+						<td>
 							<label for="http_port">Port:</label>
+							<p class="label-comment">Default is: 8181</p>
+						</td>
+						<td>
 							<input type="text" name="http_port" value="${config['http_port']}" size="10" maxlength="40" />
-							<div class="tooltip"><span>Default is: 8181</span></div>
-						</dd>
-						<dd>
+						</td>
+					</tr>
+					<tr>
+						<td>
 							<label for="http_username">Username:</label>
+							<p class="label-comment">Pick a username off your choosing, or leave blank for none.</p>
+						</td>
+						<td>
 							<input type="text" name="http_username" value="${config['http_user']}" size="30" maxlength="40" />
-						</dd>
-						<dd>
+						</td>
+					</tr>
+					<tr>
+						<td>
 							<label for="http_password">Password:</label>
+						</td>
+						<td>
 							<input type="password" name="http_password" value="${config['http_pass']}" size="30" maxlength="40" />
-						</dd>
-						<dd>
-							<label for="launch_browser">Launch browser:</label>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="launch_browser">Launch browser:</label><br />
+							<p class="label-comment">This will launch the browser when running Headphones</p>
+						</td>
+						<td>
 							<input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} />
-							<div class="tooltip"><span>This will launch the browser when running Headphones</span></div>
-						</dd>
-					</dl><!--end Startup-->
+							
+						</td>
+					</tr><!--end Startup-->
 						
 					<!--Layout/Theme-->
-					<dl>
-						<dt><label for="interface">Interface:</label></dt>
-						<dd>
+					<tr>
+						<td><label for="interface">Interface:</label></td>
+						<td>
 							<select  name="interface">
 							%for interface in config['interface_list']:
 								<%
@@ -68,332 +92,396 @@
 								</option>
 							%endfor
 							</select>
-						</dd>
-					</dl><!--end layout-->
+						</td>
+					</tr><!--end layout-->
 					<!--API-->
-					<dl>
-						<dd>
+					<tr>
+						<td>
 							<label for="api_key">API key:</label>
+						</td>
+						<td>
 							<input type="text" name="api_key" value="${config['api_key']}" size="40"><input class="submit" type="button" value="Generate" id="generate_api">
-						</dd>
-					</dl><!--end API-->		
+						</td>
+					</tr><!--end API-->		
 					<!--Interval-->
-					<dl>
-						<dt>Scan Intervals</dt>
-						<dd>
+					<tr>
+						<td><h3>Scan Intervals</h3></td>
+					</tr>
+					<tr>
+						<td>
 							<label for="download_scan_interval">Download folder scan every: </label>
-							<label id="download_scan_interval"></label>
-							<br />
-							<input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="2" maxlength="40" /> mins
+							<p class="label-comment"><label id="download_scan_interval"></label></p>
+						</td>
+						<td>
 							<div class="sliderInterval" for="download_scan_interval"></div>
-						</dd>
-						<dd>
+							<input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="2" maxlength="40" /> mins
+						</td>
+					</tr>
+					<tr>
+						<td>
 							<label for="nzb_search_interval">NZB Search</label>
-							<label id="nzb_search_interval"></label>
-							<input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="2" maxlength="40" /> mins
+							<p class="label-comment"><label id="nzb_search_interval"></label></p>
+						</td>
+						<td>
 							<div class="sliderInterval" for="nzb_search_interval"></div>
-						</dd>
-						<dd>
+							<input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="2" maxlength="40" /> mins
+						</td>
+						<td>
+						</td>
+					</tr>
+					<tr>
+						<!-- Doesn't work
+						<td>
 							<label for="library_scan_interval">Library</label>
+						</td>
+						<td>
 							<label id="library_scan_interval"></label>
 							<input type="text" name="library_scan_interval" value="${config['libraryscan_interval']}" size="2" maxlength="40" /> mins
 							<div class="sliderInterval" for="library_scan_interval"></div>
-						</dd>
-					</dl><!--end Interval-->
-				</legend><!--end HTTP-->
-			</div><!--end Web Interface-->
-			<fieldset>
-				<legend>Download Settings</legend>
+						</td>
+						-->
+					</tr><!--end Interval-->
+			</table><!--end Web Interface-->
+			<input type="submit" value="Save" />
+		</div>
+			<div class="config-wrapper">
+				<h2>Download Settings</h2>
+				<table class="configtable">
 				<!--Sabnzdb-->
-				<fieldset>
-					<legend>SABnzbd</legend>
-					<dl>
-						<dt><label for="sab_host">Host:</label></dt>
-						<dd><input type="text" name="sab_host" value="${config['sab_host']}" size="30" maxlength="40" />
-							<div class="tooltip"><span>Usually http://localhost:8080</span></div>
-						</dd>
-					</dl>
-					<dl>
-						<dt><label for="sab_apikey">API key:</label></dt>
-						<dd><input type="text" name="sab_apikey" value="${config['sab_api']}" size="36" maxlength="40" /></dd>
-					</dl>
-					<dl>
-						<dt><label for="sab_username">Username:</label></dt>
-						<dd><input type="text" name="sab_username" value="${config['sab_user']}" size="20" maxlength="40" /></dd>
-					</dl>
-					<dl>
-						<dt><label for="sab_password">Password:</label></dt>
-						<dd><input type="password" name="sab_password" value="${config['sab_pass']}" size="20" maxlength="40" /></dd>
-					</dl>
-					<dl>
-						<dt><label for="sab_category">Category:</label></dd>
-						<dd><input type="text" name="sab_category" value="${config['sab_cat']}" size="20" maxlength="40" /></dd>
-					</dl>
-					<dl>
-						<dt><label for="download_dir">Download Directory:</label></dt>
-						<dd><input type="text" name="download_dir" value="${config['download_dir']}" size="40" />
-							<div class="tooltip"><span>Full path to the directory where SAB downloads your music | i.e. /Users/name/Downloads/music</span></div>
-						</dd>
-					</dl>
-				</fieldset>
+					<tr>
+						<td>
+							<h3>SABnzbd</h3>
+						</td>
+					</tr>
+					<tr>
+						<td width="200"><label for="sab_host">Host:</label>
+							<p class="label-comment">Usually http://localhost:8080</p>
+						</td>
+						<td><input type="text" name="sab_host" value="${config['sab_host']}" size="30" maxlength="40" /></td>
+					</tr>
+					<tr>
+						<td><label for="sab_apikey">API key:</label></td>
+						<td><input type="text" name="sab_apikey" value="${config['sab_api']}" size="36" maxlength="40" /></td>
+					</tr>
+					<tr>
+						<td><label for="sab_username">Username:</label></td>
+						<td><input type="text" name="sab_username" value="${config['sab_user']}" size="20" maxlength="40" /></td>
+					</tr>
+					<tr>
+						<td><label for="sab_password">Password:</label></td>
+						<td><input type="password" name="sab_password" value="${config['sab_pass']}" size="20" maxlength="40" /></td>
+					</tr>
+					<tr>
+						<td><label for="sab_category">Category:</label></td>
+						<td><input type="text" name="sab_category" value="${config['sab_cat']}" size="20" maxlength="40" /></td>
+					</tr>
+					<tr>
+						<td>
+							<label for="download_dir">Download Directory:</label>
+							<p class="label-comment">Full path to the directory where SAB downloads your music <br /> i.e. /Users/name/Downloads/music</p>
+						</td>
+						<td><input type="text" name="download_dir" value="${config['download_dir']}" size="40" /></td>
+					</tr>
+				</table>
 				<!--end Sabnzdb-->
 				<!--Torrents-->
-				<fieldset id="Torrents" class="configtable">	
-					<legend>Torrents</legend>
-					<dl>
-						<dt><label for="blackhole_dir">Black Hole Directory:</label>
-						</dt>
-						<dd><input type="text" name="blackhole_dir" value="${config['blackhole_dir']}" size="40" />
-							<div class="tooltip"><span>Folder your Download program watches for NZBs</span></div>
-						</dd>
-					</dl>
-					<dl>
-						<dt><label for="usenet_retention">Usenet Retention:</label></dt>
-						<dd><input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5" maxlength="10" /></dd>
-					</dl>
-					<dl>
-						<dt><label for="torrentblackhole_dir">Black Hole Directory:</label></dt>
-						<dd><input type="text" name="torrentblackhole_dir" value="${config['torrentblackhole_dir']}" size="40">
-								<div class="tooltip"><span>Folder your Download program watches for Torrents</span></div>
-							</dd>
-					</dl>
+				<table class="configtable">	
+					<tr><td>Torrents</td></tr>
+					<tr>
+						<td>
+							<label for="blackhole_dir">Black Hole Directory:</label>
+							<p class="label-comment">Folder your Download program watches for NZBs</p>
+						</td>
+						<td>
+							<input type="text" name="blackhole_dir" value="${config['blackhole_dir']}" size="40" />
+						</td>
+					</tr>
+					<tr>
+						<td><label for="usenet_retention">Usenet Retention:</label></td>
+						<td><input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5" maxlength="10" /></td>
+					</tr>
+					<tr>
+						<td>
+							<label for="torrentblackhole_dir">Black Hole Directory:</label>
+							<p class="label-comment">Folder your Download program watches for Torrents</p>
+						</td>
+						<td>
+							<input type="text" name="torrentblackhole_dir" value="${config['torrentblackhole_dir']}" size="40">
+								
+						</td>
+					</tr>
 						
-					<dl>
-						<dt><label for="numberofseeders">Minimum seeders:</label>
-						</dt>
-						<dd><input type="text" name="numberofseeders" value="${config['numberofseeders']}" size="5" />
-							<div class="tooltip"><span>Number of minimum seeders a torrent must have to be accepted</span></div>
-						</dd>
-					</dl>
+					<tr>
+						<td><label for="numberofseeders">Minimum seeders:</label>
+							<p class="label-comment">Number of minimum seeders a torrent must have to be accepted</p>
+						</td>
+						<td><input type="text" name="numberofseeders" value="${config['numberofseeders']}" size="5" />
+						</td>
+					</tr>
 					
-					<dl>
-						<dt><label for="download_torent_dir">Music Download Directory:</label>
-						</dt>
-						<dd><input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="40" />
-							<div class="tooltip"><span>Full path to the directory where your torrent client downloads your music <br />i.e. /Users/name/Downloads/music</span></div>
-						</dd>
-					</dl>
-					<dl>
-						<dt><label for="use_isohunt">Isohunt:</label></dt>
-						<dd><input type="checkbox" name="use_isohunt" value="1" ${config['use_isohunt']} /></dd>
-					</dl>
-					<dl>
-						<dt><label for="use_mininova">Mininova</label></dt>
-						<dd><input type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /></dd>
-					</dl>
-					<dl>
-						<dt><label for="use_kat">Kick Ass Torrents:</label></dt>
-						<dd><input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /></dd>
-					</dl>
-				</fieldset><!--end Torrents-->
-			</fieldset><!--end DownloadSettings-->
+					<tr>
+						<td>
+							<label for="download_torent_dir">Music Download Directory:</label>
+							<p class="label-comment">Full path to the directory where your torrent client downloads your music <br />i.e. /Users/name/Downloads/music</p>
+						</td>
+						<td><input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="40" /></td>
+					</tr>
+					<tr>
+						<td><label for="use_isohunt">Isohunt:</label></td>
+						<td><input type="checkbox" name="use_isohunt" value="1" ${config['use_isohunt']} /></td>
+					</tr>
+					<tr>
+						<td><label for="use_mininova">Mininova</label></td>
+						<td><input type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /></td>
+					</tr>
+					<tr>
+						<td><label for="use_kat">Kick Ass Torrents:</label></td>
+						<td><input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /></td>
+					</tr>
+				</table><!--end Torrents-->
+			</div><!--end DownloadSettings-->
 			<!--Search Providers-->
-			<fieldset id="SearchProviders" class="table_wrapper accordion">
-				<legend>Search Providers</legend>
+			<div class="config-wrapper">
+				<h2>Search Providers</h2>
 				<!--NZB Matrix-->
-				<fieldset id="nzbmatrix" class="configtable">
-					<legend>
-						NZBMatrix
-						<input type="checkbox" name="nzbmatrix" value="1" ${config['use_nzbmatrix']} />
-					</legend>
-					<dl>
-						<dt><label for="nzbmatrix_username">Username:</label></dt>
-							<dd><input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30" maxlength="40" /></dd>
-					</dl>
-					<dl>
-						<dt><label for="nzbmatrix_apikey">API:</label></dt>
-							<dd><input type="text" name="nzbmatrix_apikey" value="${config['nzbmatrix_api']}" size="36" maxlength="40" /></dd>
-					</dl>
-					<dl>
-						<dt><label for="nzbmatrix_website">Website:</label></dt>
-						<dd<a name="nzbmatrix_website" href="http://www.nzbmatrix.com" target="_blank">NZBMatrix.com</a></dd>
-					</dl>
-				</fieldset><!--end NZB Matrix-->
+				<table id="nzbmatrix" class="configtable">
+					<tr>
+						<td >
+							<h3>NZBMatrix</h3>
+							<p class="label-comment">Some info about</p>
+						</td>
+						<td>
+							
+						</td>
+					</tr>
+					<tr>
+						<td><label for="nzbmatrix">Enabled/Disabled</label></td>
+						<td>
+							<input class="switch" type="checkbox" name="nzbmatrix" value="1" ${config['use_nzbmatrix']} />
+						</td>
+					</tr>
+					<tr>
+						<td><label for="nzbmatrix_username">Username:</label></td>
+							<td><input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30" maxlength="40" /></td>
+					</tr>
+					<tr>
+						<td><label for="nzbmatrix_apikey">API:</label></td>
+						<td><input type="text" name="nzbmatrix_apikey" value="${config['nzbmatrix_api']}" size="36" maxlength="40" /></td>
+					</tr>
+					<tr>
+						<td><label for="nzbmatrix_website">Website:</label></td>
+						<td><a name="nzbmatrix_website" href="http://www.nzbmatrix.com" target="_blank">NZBMatrix.com</a></td>
+					</tr>
+				</table><!--end NZB Matrix-->
 
 				<!--Newznab-->
-				<fieldset id="newznab" class="configtable">
-					<legend>
-						Newznab<input type="checkbox" name="newznab" value="1" ${config['use_newznab']} />
-					</legend>
-					<dl>
-						<dt><label for="newznab_host">Host:</label></dt>
-						<dd><input type="text" name="newznab_host" value="${config['newznab_host']}" size="30" maxlength="40" /></dd>
-					</dl>
-					<dl>
-						<dt><label for="newznab_apikey">API:</label></dt>
-						<dd><input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36" maxlength="40" /></dd>
-					</dl>
-				</fieldset><!--end Newznab-->
+				<table id="newznab" class="configtable">
+					<tr>
+						<td colspan="2">
+							<h3>Newznab</h3>
+						</td>
+					</tr>
+					<tr>
+						<td width="200"><label for="newznab"></label></td>
+						<td>
+							<input class="switch" type="checkbox" name="newznab" value="1" ${config['use_newznab']} />
+						</td>
+					</tr>
+					<tr>
+						<td><label for="newznab_host">Host:</label></td>
+						<td><input type="text" name="newznab_host" value="${config['newznab_host']}" size="30" maxlength="40" /></td>
+					</tr>
+					<tr>
+						<td><label for="newznab_apikey">API:</label></td>
+						<td><input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36" maxlength="40" /></td>
+					</tr>
+				</table><!--end Newznab-->
 
 				<!--NZBs.org-->
-				<fieldset id="nzbs" class="configtable">
-					<legend>
-						Nzbs
-						<input type="checkbox" name="nzbsorg" value="1" ${config['use_nzbsorg']} />
-					</legend>
-					<dl>
-						<dt><label for="nzbsorg_hash">API Key:</label></dt>
-						<dd><input type="text" name="nzbsorg_hash" value="${config['nzbsorg_hash']}" size="30" maxlength="40"></dd>
-					</dl>
-				</fieldset><!--end NZBs.org-->
+				<table id="nzbs" class="configtable">
+					<tr>
+						<td>
+							<h3>Nzbs</h3>
+						</td>
+					</tr>
+					<tr>
+						<td width="200"><label for="nzbsorg"></label></td>
+						<td><input class="switch" type="checkbox" name="nzbsorg" value="1" ${config['use_nzbsorg']} /></td>
+					</tr>
+					<tr>
+						<td><label for="nzbsorg_hash">API Key:</label></td>
+						<td><input type="text" name="nzbsorg_hash" value="${config['nzbsorg_hash']}" size="30" maxlength="40"></td>
+					</tr>
+				</table><!--end NZBs.org-->
 
 				<!--Newzbin-->
-				<fieldset id="newsbin" class="configtable">
-					<legend>
+				<table id="newsbin" class="configtable">
+					<tr><td>
 						Newsbin
 						<input type="checkbox" name="newzbin" value="1" ${config['use_newzbin']} />
-					</legend>
-					<dl>
-						<dt><label for="newzbin_uid">UID:</label></dt>
-						<dd><input type="text" name="newzbin_uid" value="${config['newzbin_uid']}" size="30" maxlength="40" /></dd>
-					</dl>
-					<dl>
-						<dt><label for="newzbin_password">Password:</label></dt>
-						<dd><input type="text" name="newzbin_password" value="${config['newzbin_pass']}" size="36" maxlength="40" /></dd>
-					</dl>
-				</fieldset><!--end Newzbin-->
-			</fieldset><!--end Search Providers-->
+					</td></tr>
+					<tr>
+						<td width="200"><label for="newzbin_uid">UID:</label></td>
+						<td><input type="text" name="newzbin_uid" value="${config['newzbin_uid']}" size="30" maxlength="40" /></td>
+					</tr>
+					<tr>
+						<td><label for="newzbin_password">Password:</label></td>
+						<td><input type="text" name="newzbin_password" value="${config['newzbin_pass']}" size="36" maxlength="40" /></td>
+					</tr>
+				</table><!--end Newzbin-->
+			</div><!--end Search Providers-->
 			<!--Quality-->
-			<fieldset id="Quality" class="tabs">
-				<legend>Quality & Post Processing</legend>
-				<fieldset id="AlbumQuality" class="configtable">
-					<legend>Album Quality</legend>
-					<dl>
-						<dt>
+			<div id="Quality" class="config-wrapper">
+				<h2>Quality & Post Processing</h2>
+				<table id="AlbumQuality">
+					<tr><td>Album Quality</td></tr>
+					<tr>
+						<td>
 							<label for="prefered_quality">Prefered Quality:</label>
-						</dt>
-							<dd>
-								<input type="radio" name="preferred_quality" id="QualityExcluding" value="0" ${config['pref_qual_0']} />
-								<label for="QualityExcluding">Highest Quality excluding Lossless</label>
-								
-								<input type="radio" name="preferred_quality" id="QualityIncluding" value="1" ${config['pref_qual_1']} />
-								<label for="QualityIncluding">Highest Quality including Lossless</label>
-								
-								<input type="radio" name="preferred_quality" id="QualityLossless" value="2" ${config['pref_qual_2']} />
-								<label for="QualityLossless">Lossless Only</label>
-								
-								<input type="radio" name="preferred_quality" id="QualityPreferred" value="3" ${config['pref_qual_3']} />
-								<label for="QualityPreferred">Preferred Bitrate:
-									<input type="text" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3" maxlength="5" />kbps
-								</label>
-							</dd>
-					</dl>
-					<dl>
-						<dt><label for="detect_bitrate">Auto-Detect Preferred Bitrate </label></dt>
-							<dd><input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} /></dd>
-					</dl>
-				</fieldset>
+						</td>
+						<td>
+							<input type="radio" name="preferred_quality" id="QualityExcluding" value="0" ${config['pref_qual_0']} />
+							<label for="QualityExcluding">Highest Quality excluding Lossless</label>
+							<br /><br />
+							<input type="radio" name="preferred_quality" id="QualityIncluding" value="1" ${config['pref_qual_1']} />
+							<label for="QualityIncluding">Highest Quality including Lossless</label>
+							<br /><br />
+							<input type="radio" name="preferred_quality" id="QualityLossless" value="2" ${config['pref_qual_2']} />
+							<label for="QualityLossless">Lossless Only</label>
+							<br /><br />
+							<input type="radio" name="preferred_quality" id="QualityPreferred" value="3" ${config['pref_qual_3']} />
+							<label for="QualityPreferred">Preferred Bitrate:
+								<input type="text" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3" maxlength="5" />kbps
+							</label>
+						</td>
+					</tr>
+					<tr>
+						<td><label for="detect_bitrate">Auto-Detect Preferred Bitrate </label></td>
+						<td><input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} /></td>
+					</tr>
+				</table>
 				<!--PostProcessing-->
-				<fieldset>
-					<legend>Post Processing</legend>
-					<dl>
-						<dt></dt>
-						<dd>
-							<label for="move_files">Move Downloads</label>
+				<table class="configtable">
+					<tr>
+						<td>
+							Post Processing
+						</td>
+						<td>
 							<input type="checkbox" name="move_files" value="1" ${config['move_files']} />
-						</dd>
-						<dd>	
-							<label for="rename_files">Rename files</label>
+							<label for="move_files">Move Downloads</label>
+							<br />
+							<br />
 							<input type="checkbox" name="rename_files" value="1" ${config['rename_files']} />
-						</dd>
-						<dd>
-							<label for="correct_metadata">Correct metadata:</label>
+							<label for="rename_files">Rename files</label>
+							<br />
+							<br />
 							<input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} />
-						</dd>
-						<dd>
-							<label for="cleanup_files">Delete leftover files (.m3u, .nfo, .sfv, .nzb, etc.):</label>
+							<label for="correct_metadata">Correct metadata:</label>
+							<br />
+							<br />
 							<input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} />
-						</dd>
-						<dd>
-							<label for="add_album_art">Add album art as 'folder.jpg' to album folder:</label>
+							<label for="cleanup_files">Delete leftover files (.m3u, .nfo, .sfv, .nzb, etc.):</label>
+							<br />
+							<br />
 							<input type="checkbox" name="add_album_art" value="1" ${config['add_album_art']} />
-						</dd>
-						<dd>
-							<label for="embed_album_art">Embed album art in each file:</label>
+							<label for="add_album_art">Add album art as 'folder.jpg' to album folder:</label>
+							<br />
+							<br />
 							<input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']} />
-						</dd>
-						<dd>
-							<label for="embed_lyrics">Embed lyrics:</label>
+							<label for="embed_album_art">Embed album art in each file:</label>
+							<br />
+							<br />
 							<input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']} />
-						</dd>
-					</dl>
-					<dl>
-						<dd>
+							<label for="embed_lyrics">Embed lyrics:</label>
+						</td>
+					</tr>
+					<tr>
+						<td>
 							<label for="destination_dir">Path to music folder:</label>
+							<p class="label-comment">i.e. /Users/name/Music/iTunes or /Volumes/share/music</p>
+						</td>
+						<td>
 							<input type="text" name="destination_dir" value="${config['dest_dir']}" size="40" />
-							<div class="tooltip"><span>i.e. /Users/name/Music/iTunes or /Volumes/share/music</span></div>
-						</dd>
-					</dl>
-				</fieldset><!--end PostProcessing-->
-			</fieldset><!--end Quality-->
+						</td>
+					</tr>
+				</table><!--end PostProcessing-->
+			</div><!--end Quality-->
 			<!--AdvancedSettings-->
-			<fieldset id="AdvancedSettings">
-				<legend>Advanced Settings</legend>
+			<div id="AdvancedSettings" class="config-wrapper">
+				<h2>Advanced Settings</h2>
 				<!--Renaming-->
-				<fieldset id="Renaming">
-					<legend>Renaming</legend>
-					<dl>
-						<dt>
+				<table class="configtable">
+					<tr><td>Renaming</td></tr>
+					<tr>
+						<td>
 							<label for="folder_format">Folder Format:</label>
-						</dt>
-						<dd><input type="text" name="folder_format" value="${config['folder_format']}" size="43" />
-							<div class="tooltip"><span>
+							<p class="label-comment">
 								Use: $Artist/$artist, $Album/$album, $Year/$year, $Type/$type (release type) and $First/$first (first letter in artist name)
 								E.g.: $Type/$First/$artist/$album [$year] = Album/G/girl talk/all day [2010]
-							</div></span>
-						</dd>
-					</dl>
-					<dl>
-						<dt><label for="file_format">File Format:</label></dt>
-						<dd><input type="text" name="file_format" value="${config['file_format']}" size="43" />
+							</p>
+						</td>
+						<td><input type="text" name="folder_format" value="${config['folder_format']}" size="43" />
+							
+						</td>
+					</tr>
+					<tr>
+						<td><label for="file_format">File Format:</label></td>
+						<td><input type="text" name="file_format" value="${config['file_format']}" size="43" />
 							<div class="tooltip"><span>Use: $Track/$track (track #), $Title/$title, $Artist/$artist, $Album/$album and $Year/$year</span></div>
-						</dd>
-					</dl>
-				</fieldset>
+						</td>
+					</tr>
+				</table>
 				<!--end Renaming-->
 				<!--Miscellaneous-->
-				<fieldset id="Miscellaneous" class="configtable">
-					<dl>
-						<dt>
+				<h3>Miscellaneous</h3>
+				<table id="Miscellaneous">
+					<tr>
+						<td>
 							<label for="include_extras">Automatically Include Extras When Adding an Artist</label>
-						</dt>
-						<dd><input type="checkbox" name="include_extras" value="1" ${config['include_extras']} />
+						</td>
+						<td><input type="checkbox" name="include_extras" value="1" ${config['include_extras']} />
 							<div class="tooltip"><span>(EPs, Compilations, Live Albums, Remix Albums and Singles)</span></div>
-						</dd>
-					</dl>
-					<dl>
-						<dt><label for="autowant_upcoming">Automatically Mark Upcoming Albums as Wanted</label></dt>
-						<dd><input type="checkbox" name="autowant_upcoming" value="1" ${config['autowant_upcoming']} /></dd>
-					</dl>
-					<dl>
-						<dt><label for="autowant_all">Automatically Mark All Albums as Wanted	</label></dt>
-						<dd><input type="checkbox" name="autowant_all" value="1" ${config['autowant_all']} /></dd>
-					</dl>
+						</td>
+					</tr>
+					<tr>
+						<td><label for="autowant_upcoming">Automatically Mark Upcoming Albums as Wanted</label></td>
+						<td><input type="checkbox" name="autowant_upcoming" value="1" ${config['autowant_upcoming']} /></td>
+					</tr>
+					<tr>
+						<td><label for="autowant_all">Automatically Mark All Albums as Wanted	</label></td>
+						<td><input type="checkbox" name="autowant_all" value="1" ${config['autowant_all']} /></td>
+					</tr>
 					<!--Logs-->
-					<dl>
-						<dd colspan="2">
+					<tr>
+						<td colspan="2">
 							<label for="log_dir">Log Directory:</label>
 							<input type="text" name="log_dir" value="${config['log_dir']}" size="40" />
-						</dd>
-					</dl><!--end Logs-->
-				</fieldset>
+						</td>
+					</tr><!--end Logs-->
+				</table>
 				<!--end Miscellaneous-->
+			</div>
 				
 				<!--Re-Encoding Options-->
-				<fieldset id="Re-EncodingOptions">
-					<legend>
-						<input type="checkbox" name="music_encoder" id="music_encoder" value="1" ${config['music_encoder']} />
-						Re-Encoding Options
-					</legend>
-					<dl>
-						<dt>Re-encode downloads during postprocessing</dt>
-						<dd>This option requires the lame or ffmpeg encoder</dd>
-					</dl>
+				<div id="Re-EncodingOptions" class="config-wrapper">
+					<h3>Re-Encoding Options</h3>
+					<table class="configtable">
+						<tr>
+							<td>
+								<input type="checkbox" name="music_encoder" id="music_encoder" value="1" ${config['music_encoder']} />
+								Re-Encoding Options
+							</td>
+						</tr>
+						<tr>
+							<td>Re-encode downloads during postprocessing</td>
+							<td>This option requires the lame or ffmpeg encoder</td>
+						</tr>
+					</table>
 					<!--Encoder Options-->
-					<fieldset id="encoderoptions" class="configtable">
-						<dl>
-							<dt><label for="encoderlossless">Only re-encode lossless files (.flac)</label></dt>
-							<dd>
+					<table id="encoderoptions">
+						<tr>
+							<td><label for="encoderlossless">Only re-encode lossless files (.flac)</label></td>
+							<td>
 								<input type="checkbox" name="encoderlossless" value="1" ${config['encoderlossless']} />
 								<%
 									if config['encoder'] == 'lame':
@@ -403,20 +491,20 @@
 										lameselect = ''
 										ffmpegselect = 'selected="selected"'
 								%>
-							</dd>
-						 </dl>
-						<dl>
-							<dt><label for="encoder">Encoder:</label></dt>
-							<dd>
+							</td>
+						 </tr>
+						<tr>
+							<td><label for="encoder">Encoder:</label></td>
+							<td>
 								<select name="encoder">
 									<option value="lame" ${lameselect}>lame</option>
 									<option value="ffmpeg" ${ffmpegselect}>ffmpeg</option>
 								</select>
-							</dd>
-						</dl>
-						<dl>
-							<dt><label for="encoderoutputformat">Format:</label></dt>
-							<dd>
+							</td>
+						</tr>
+						<tr>
+							<td><label for="encoderoutputformat">Format:</label></td>
+							<td>
 								<select name="encoderoutputformat">
 									%for x in ['mp3', 'ogg', 'm4a']:
 									<%
@@ -428,15 +516,20 @@
 									<option value="${x}" ${outputselect}>${x}</option>
 									%endfor
 								</select>
-							</dd>
-						</dl>
-					</fieldset><!--end Encoder Options-->
-					<!--Audio Properties-->
-					<fieldset id="audiooptions" class="configtable">
-						<!--VBR/CBR-->
-						<dl>
-							<dt><label for="encodervbrcbr">VBR/CBR:</label></dt>
-							<dd><select name="encodervbrcbr">
+							</td>
+						</tr>
+					</table><!--end Encoder Options-->
+					<input type="submit" value="Save Changes" />
+				</div><!--end Re-Encoding Options-->
+				
+				<!--Audio Properties-->
+				<div id="audiooptions" class="config-wrapper">
+					<h2>Audio Properties</h2>
+					<!--VBR/CBR-->
+					<table class="configtable">
+						<tr>
+							<td><label for="encodervbrcbr">VBR/CBR:</label></td>
+							<td><select name="encodervbrcbr">
 							%for x in ['cbr', 'vbr']:
 								<%
 									if config['encodervbrcbr'] == x:
@@ -446,12 +539,12 @@
 								%>
 								<option value=${x} ${outputselect}>${x}</option>
 							%endfor
-							</select></dd>
-						</dl><!--end VBR/CBR-->
-						
-						<dl><!--Quality-->
-							<dt><label for="encoderquality">Quality:</label></dt>
-							<dd><select name="encoderquality">
+							</select></td>
+						</tr><!--end VBR/CBR-->
+					
+						<tr><!--Quality-->
+							<td><label for="encoderquality">Quality:</label></td>
+							<td><select name="encoderquality">
 								%for x in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
 								<%
 									if config['encoderquality'] == x:
@@ -461,13 +554,13 @@
 								%>
 								<option value=${x} ${outputselect}>${x}</option>
 								%endfor
-							</select></dd>
-						</dl><!--end quality-->
-						
+							</select></td>
+						</tr><!--end quality-->
+					
 						<!--Bitrate-->
-						<dl>
-							<dt><label for="bitrate">Bitrate:</label></dt>
-							<dd><select name="bitrate">
+						<tr>
+							<td><label for="bitrate">Bitrate:</label></td>
+							<td><select name="bitrate">
 								%for x in [64, 128, 192, 256, 320]:
 									<%
 										if config["bitrate"] == x:
@@ -486,150 +579,150 @@
 								else:
 									freq44100 = ''
 									freq48000 = 'selected="selected"'
-							%></dt>
-						</dl><!--end Bitrate-->
-					
+							%></td>
+						</tr><!--end Bitrate-->
+				
 						<!--Samplings-->
-						<dl>
-							<dt><label>Sampling: </label></dt>
-							<dd><select name="samplingfrequency">
+						<tr>
+							<td><label>Sampling: </label></td>
+							<td><select name="samplingfrequency">
 								<option value=44100 ${freq44100}>44.1 kHz</option>
 								<option value=48000 ${freq48000}>48.0 kHz</option>
-							</select></dd>
-						</dl><!--end Samplings-->
+							</select></td>
+						</tr><!--end Samplings-->
+							
 						<!--Advanced Encoding-->			
-						<dl>
-							<dt>
+						<tr>
+							<td>
 								<label>Advanced Encoding Options:</label>
 								<h4>Ignores audio properties</h4>
-							</dt>
-								<dd><input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43" /></dd>
-						</dl>
-						<dl>
-							<dt><label>Path to Encoder:</label></dt>
-							<dd><input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43" /></dd>
-						</dl><!--end Advanced Encoding-->
-					</fieldset><!--Audio Properties-->
-				</fieldset>
-				<!--Re-Encoding Options-->
+							</td>
+								<td><input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43" /></td>
+						</tr>
+						<tr>
+							<td><label>Path to Encoder:</label></td>
+							<td><input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43" /></td>
+						</tr><!--end Advanced Encoding-->
+					</table><!--Audio Properties-->
+					<input type="submit" value="Save Changes" />
+				</div><!--Re-Encoding Options-->
 					
-				<!--Notifications-->
-				<fieldset id="Notifications">
-					<legend>Notifications</legend>
-					<ul>
-						<li><a href="#prowloptions">Prowl</a></li>
-						<li><a href="#xbmcoptions">XBMC</a></li>
-						<li><a href="#nmaoptions">Android</a></li>
-					</ul>
-					<!--Prowl-->
-					<fieldset id="prowloptions">
-						<legend>Prowloptions</legend>
-						<dl>
-							<dt>
-								<label for="prowl_enabled">Prowl Options</label
-								<input type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} />
-							</dt>
-							<dd>
-								<label for="prowl_keys">API key:</label></dt>
-								<input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50" />
-							</dd>
-							<dd>
-								<label for="prowl_onsnatch">Notify on snatch</label>
-								<input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} />
-							</dd>
-							<dd>
-								<label for="prowl_priority">Priority (-2,-1,0,1 or 2):</label>
-								<input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2">
-							</dd>
-						</dl>
-					</fieldset><!--end Prowl-->
-					<!--XBMC-->
-					<fieldset id="xbmcoptions">
-						<legend>
-							XBMC 
-							<input type="checkbox" name="xbmc_enabled" id="xbmc" value="1" ${config['xbmc_enabled']} />
-						</legend>
-						<dl>
-							<dt><label for="xbmc_host">XBMC Host:</label></dt>
-							<dd><input type="text" name="xbmc_host" value="${config['xbmc_host']}" size="30">
-								<div class="tooltip"><span>e.g. http://localhost:8080. Separate hosts with commas</span></div>	
-							</dd>
-						</dl>
+			<!--Notifications-->
+			<div id="Notifications">
+				<h2>Notifications</h2>
+				<!--Prowl-->
+				<table id="prowloptions">
+					<tr><td>Prowloptions</td></tr>
+					<tr>
+						<td>
+							<label for="prowl_enabled">Prowl Options</label
+							<input type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} />
+						</td>
+						<td>
+							<label for="prowl_keys">API key:</label></td>
+							<input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50" />
+						</td>
+						<td>
+							<label for="prowl_onsnatch">Notify on snatch</label>
+							<input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} />
+						</td>
+						<td>
+							<label for="prowl_priority">Priority (-2,-1,0,1 or 2):</label>
+							<input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2">
+						</td>
+					</tr>
+				</table><!--end Prowl-->
+				<!--XBMC-->
+				<table id="xbmcoptions">
+					<tr><td>
+						XBMC 
+						<input type="checkbox" name="xbmc_enabled" id="xbmc" value="1" ${config['xbmc_enabled']} />
+					</td></tr>
+					<tr>
+						<td><label for="xbmc_host">XBMC Host:</label></td>
+						<td><input type="text" name="xbmc_host" value="${config['xbmc_host']}" size="30">
+							<div class="tooltip"><span>e.g. http://localhost:8080. Separate hosts with commas</span></div>	
+						</td>
+					</tr>
+					
+					<tr>
+						<td><label>XBMC Username:</label></td>
+						<td><input type="text" name="xbmc_username" value="${config['xbmc_username']}" size="30"></td>
+					</tr>
 						
-						<dl>
-							<dt><label>XBMC Username:</label></dt>
-							<dd><input type="text" name="xbmc_username" value="${config['xbmc_username']}" size="30"></dd>
-						</dl>
-							
-						<dl>
-							<dt><label>XBMC Password:</label></dt>
-							<dd><input type="password" name="xbmc_password" value="${config['xbmc_password']}" size="30"></dd>
-						</dl>
-						<dl>
-							<dt><label>Update XBMC Library:</label></dt>
-							<dd><input type="checkbox" name="xbmc_update" value="1" ${config['xbmc_update']} /></dd>
-						</dl>
-						<dl>
-							<dt><label>Send Notification to XBMC:</label></dt>
-							<dd><input type="checkbox" name="xbmc_notify" value="1" ${config['xbmc_notify']} /></dd>
-						</dl>
-					</fieldset><!--end XBMC-->
-						
-					<!--NMA Options-->
-					<fieldset id="nmaoptions">
-						<legend>
-							Notify My Android
-							<input type="checkbox" name="nma_enabled" id="nma" value="1" ${config['nma_enabled']} />
-						</legend>
-						<dl>
-							<dt><p>Separate multiple api keys with ",".</p></dt>
-						</dl>
-						<dl>
-							<dt><label>NotifyMyAndroid API Key:</label></dt>
-							<dd><input type="text" name="nma_apikey" value="${config['nma_apikey']}" size="30"></dd>
-						</dl>
-						<dl>
-							<dt><a href="https://play.google.com/store/apps/details?id=com.usk.app.notifymyandroid">Get NotifyMyAndroid</a></dt>
-						</dl>
-						
-						<!--Priority-->
-						<dl>
-							<dt><label for="nma_priority">Priority:</label></dt>
-							<dd>
-								<select name="nma_priority">
-									%for x in [-2,-1,0,1,2]:
-										<%
-											if config['nma_priority'] == x:
-												nma_priority_selected = 'selected'
-											else:
-												nma_priority_selected = ''
-											
-											if x == -2:
-												nma_priority_value = 'Very Low'
-											elif x == -1:
-												nma_priority_value = 'Moderate'
-											elif x == 0:
-												nma_priority_value = 'Normal'
-											elif x == 1:
-												nma_priority_value = 'High'
-											else:
-												nma_priority_value = 'Emergency'
-										%>
-										<option value=${x} ${nma_priority_selected}>${nma_priority_value}</option>
-									%endfor
-								</select>
-							</dd>
-						</dl><!--end Priority-->
-					</fieldset><!--end NMA Options-->
-				</fieldset><!--end Notifications-->
+					<tr>
+						<td><label>XBMC Password:</label></td>
+						<td><input type="password" name="xbmc_password" value="${config['xbmc_password']}" size="30"></td>
+					</tr>
+					<tr>
+						<td><label>Update XBMC Library:</label></td>
+						<td><input type="checkbox" name="xbmc_update" value="1" ${config['xbmc_update']} /></td>
+					</tr>
+					<tr>
+						<td><label>Send Notification to XBMC:</label></td>
+						<td><input type="checkbox" name="xbmc_notify" value="1" ${config['xbmc_notify']} /></td>
+					</tr>
+				</table><!--end XBMC-->
+					
+				<!--NMA Options-->
+				<table id="nmaoptions">
+					<tr>
+						<td>
+						Notify My Android
+						<input type="checkbox" name="nma_enabled" id="nma" value="1" ${config['nma_enabled']} />
+						</td>
+					</tr>
+					<tr>
+						<td><p>Separate multiple api keys with ",".</p></td>
+					</tr>
+					<tr>
+						<td><label>NotifyMyAndroid API Key:</label></td>
+						<td><input type="text" name="nma_apikey" value="${config['nma_apikey']}" size="30"></td>
+					</tr>
+					<tr>
+						<td><a href="https://play.google.com/store/apps/details?id=com.usk.app.notifymyandroid">Get NotifyMyAndroid</a></td>
+					</tr>
+					
+					<!--Priority-->
+					<tr>
+						<td><label for="nma_priority">Priority:</label></td>
+						<td>
+							<select name="nma_priority">
+								%for x in [-2,-1,0,1,2]:
+									<%
+										if config['nma_priority'] == x:
+											nma_priority_selected = 'selected'
+										else:
+											nma_priority_selected = ''
+										
+										if x == -2:
+											nma_priority_value = 'Very Low'
+										elif x == -1:
+											nma_priority_value = 'Moderate'
+										elif x == 0:
+											nma_priority_value = 'Normal'
+										elif x == 1:
+											nma_priority_value = 'High'
+										else:
+											nma_priority_value = 'Emergency'
+									%>
+									<option value=${x} ${nma_priority_selected}>${nma_priority_value}</option>
+								%endfor
+							</select>
+						</td>
+					</tr><!--end Priority-->
+				</table><!--end NMA Options-->
+				<input type="submit" value="Save Changes" />
+			</div><!--end Notifications-->
 				
-				<!--Mirror-->
-				<fieldset id="Mirror">
-					<legend>Mirror</legend>
-					<!--Musicbrainz-->
-					<dl>
-						<dt><label for="mirror">Musicbrainz Mirror:</label></dt>
-						<dd>
+			<!--Mirror-->
+			<div id="Mirror">
+				<h2>Mirror</h2>
+				<!--Musicbrainz-->
+				<table class="configtable">
+					<tr>
+						<td><label for="mirror">Musicbrainz Mirror:</label></td>
+						<td>
 							<select name="mirror" id="mirror">
 								%for mirror in config['mirror_list']:
 									<%
@@ -641,48 +734,47 @@
 									<option value="${mirror}" ${selected}>${mirror}</option>
 								%endfor
 							</select>
-						</dd>
-					</dl><!--end Musicbrainz-->
-					<dl>
-						<dd>
-							<!--Custom options-->
-							<fieldset id="customoptions" class="configtable">
-								<legend>Custom Options</legend>
-								<dl>
-									<dt><label for="customhost">Host:</label></dt>
-									<dd><input type="text" name="customhost" value="${config['customhost']}" size="20"></dd>
-								</dl>
-								<dl>
-									<dt><label for="customport">Port:</label></dt>
-									<dd><input type="text" name="customport" value="${config['customport']}" size="8"></dd>
-								</dl>
-								<dl>
-									<dt><label for="customsleep">Sleep Interval:</label></dt>
-									<dd><input type="text" name="customsleep" value="${config['customsleep']}" size="4"></dd>
-								</dl>
-							</fieldset><!--end Custom options-->
-											
-							<!--Hp server options-->
-							<fieldset>
-								<legend>Headphones Server</legend>
-								<dl>
-									<dt><label for="hpuser">Username:</label></dt>
-									<dd><input type="text" name="hpuser" value="${config['hpuser']}" size="20"></dd>
-								</dl>
-								<dl>
-									<dt><label for="hppass"Password:</label></dt>
-									<dd><input type="password" name="hppass" value="${config['hppass']}" size="15"></dd>
-								</dl>
-								<dl>
-									<dt colspan="2"><i class="smalltext2"><a href="http://headphones.codeshy.com/vip">Get an Account</a></p></dt>
-								</dl>
-							</fieldset><!--end hp server options-->
-						</dd>
-					</dl>
-				</fieldset><!--End mirror-->
-		</fieldset><!--end AdvancedSettings-->
-		<input type="submit" value="Save Changes" />
-		<span class="info">Web Interface changes require a restart to take effect</span>
+						</td>
+					</tr>
+				</table><!--end Musicbrainz-->
+						
+				<!--Custom options-->
+				<table id="customoptions" class="configtable">
+					<tr><td>Custom Options</td></tr>
+					<tr>
+						<td><label for="customhost">Host:</label></td>
+						<td><input type="text" name="customhost" value="${config['customhost']}" size="20"></td>
+					</tr>
+					<tr>
+						<td><label for="customport">Port:</label></td>
+						<td><input type="text" name="customport" value="${config['customport']}" size="8"></td>
+					</tr>
+					<tr>
+						<td><label for="customsleep">Sleep Interval:</label></td>
+						<td><input type="text" name="customsleep" value="${config['customsleep']}" size="4"></td>
+					</tr>
+				</table><!--end Custom options-->
+										
+				<!--Hp server options-->
+				<table id="hpserver" class="configtable">
+					<tr><td>Headphones Server</td></tr>
+					<tr>
+						<td><label for="hpuser">Username:</label></td>
+						<td><input type="text" name="hpuser" value="${config['hpuser']}" size="20"></td>
+					</tr>
+					<tr>
+						<td><label for="hppass"Password:</label></td>
+						<td><input type="password" name="hppass" value="${config['hppass']}" size="15"></td>
+					</tr>
+					<tr>
+						<dt colspan="2"><i class="smalltext2"><a href="http://headphones.codeshy.com/vip">Get an Account</a></p></td>
+					</tr>
+				</table><!--end hp server options-->
+			</div><!--End mirror-->
+			<input type="submit" value="Save Changes" />
+			<span class="info">Web Interface changes require a restart to take effect</span>
+		</div><!--end AdvancedSettings-->
+		
     </form>
 </%def>
 
