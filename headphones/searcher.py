@@ -650,7 +650,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                                                             torrent = f.read()
                                                                         else:
                                                                             torrent = response.read()
-									if int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1:
+									if int(torrent.find(".flac")) < 1:
 										rightformat = False
 							except Exception, e:
 								rightformat = False
@@ -723,7 +723,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                                                             torrent = f.read()
                                                                         else:
                                                                             torrent = response.read()
-									if int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1:
+									if int(torrent.find(".flac")) < 1:
 										rightformat = False
 							except Exception, e:
 								rightformat = False
@@ -790,7 +790,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                                                             torrent = f.read()
                                                                         else:
                                                                             torrent = response.read()
-									if int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1:
+									if int(torrent.find(".flac")) < 1:
 										rightformat = False
 							except Exception, e:
 								rightformat = False
