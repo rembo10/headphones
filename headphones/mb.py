@@ -239,7 +239,7 @@ def getArtist(artistid, extrasonly=False):
             includeExtras = False
         
         if includeExtras or headphones.INCLUDE_EXTRAS:
-            includes = ["single", "ep", "compilation", "soundtrack", "live", "remix"]
+            includes = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]
             for include in includes:
                 
                 artist = None
