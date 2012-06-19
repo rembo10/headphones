@@ -643,6 +643,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 								if format == "2":
                                                                         request = urllib2.Request(url)
                                                                         request.add_header('Accept-encoding', 'gzip')
+                                                                        request.add_header('Referer', 'http://kat.ph/')
                                                                         response = urllib2.urlopen(request)
                                                                         if response.info().get('Content-Encoding') == 'gzip':
                                                                             buf = StringIO( response.read())
