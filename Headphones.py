@@ -120,19 +120,19 @@ def main():
     headphones.start()
     
     while True:
-    	if not headphones.SIGNAL:
-    		time.sleep(1)
-    	else:
-    		logger.info('Received signal: ' + headphones.SIGNAL)
-    		if headphones.SIGNAL == 'shutdown':
-    			headphones.shutdown()
-    		elif headphones.SIGNAL == 'restart':
-    			headphones.shutdown(restart=True)
-    		else:
-    			headphones.shutdown(restart=True, update=True)
-    		
-    		headphones.SIGNAL = None
-    		
+        if not headphones.SIGNAL:
+            time.sleep(1)
+        else:
+            logger.info('Received signal: ' + headphones.SIGNAL)
+            if headphones.SIGNAL == 'shutdown':
+                headphones.shutdown()
+            elif headphones.SIGNAL == 'restart':
+                headphones.shutdown(restart=True)
+            else:
+                headphones.shutdown(restart=True, update=True)
+            
+            headphones.SIGNAL = None
+            
     return
 
 if __name__ == "__main__":
