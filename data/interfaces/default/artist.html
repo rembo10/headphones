@@ -7,7 +7,7 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">		
-			<a id="menu_link_refresh" onclick="doAjaxCall('refreshArtist?ArtistID=${artist['ArtistID']}', $(this)),'table'" href="#" data-success="'${artist['ArtistName']}' will be refreshed">Refresh Artist</a>
+			<a id="menu_link_refresh" onclick="doAjaxCall('refreshArtist?ArtistID=${artist['ArtistID']}', $(this)),'table'" href="#" data-success="'${artist['ArtistName']}' is being refreshed">Refresh Artist</a>
 			<a id="menu_link_delete" href="deleteArtist?ArtistID=${artist['ArtistID']}">Delete Artist</a>
 			%if artist['Status'] == 'Paused':
 				<a id="menu_link_resume" href="#" onclick="doAjaxCall('resumeArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} resumed">Resume Artist</a>
@@ -21,7 +21,7 @@
 			%endif
 		</div>
 	</div>	
-	<a href="/" class="back">&laquo; Back to overview</a>
+	<a href="home" class="back">&laquo; Back to overview</a>
 </%def>
 
 <%def name="body()">

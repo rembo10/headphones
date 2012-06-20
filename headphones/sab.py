@@ -31,13 +31,13 @@ def sendNZB(nzb):
 
     params = {}
 
-    if headphones.SAB_USERNAME != None:
+    if headphones.SAB_USERNAME:
         params['ma_username'] = headphones.SAB_USERNAME
-    if headphones.SAB_PASSWORD != None:
+    if headphones.SAB_PASSWORD:
         params['ma_password'] = headphones.SAB_PASSWORD
-    if headphones.SAB_APIKEY != None:
+    if headphones.SAB_APIKEY:
         params['apikey'] = headphones.SAB_APIKEY
-    if headphones.SAB_CATEGORY != None:
+    if headphones.SAB_CATEGORY:
         params['cat'] = headphones.SAB_CATEGORY
 
 

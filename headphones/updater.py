@@ -6,7 +6,7 @@ def dbUpdate():
 
 	myDB = db.DBConnection()
 
-	activeartists = myDB.select('SELECT ArtistID, ArtistName from artists WHERE Status="Active" or Status="Loading" order by ArtistSortName collate nocase')
+	activeartists = myDB.select('SELECT ArtistID, ArtistName from artists WHERE Status="Active" or Status="Loading" order by LastUpdated ASC')
 
 	logger.info('Starting update for %i active artists' % len(activeartists))
 	
