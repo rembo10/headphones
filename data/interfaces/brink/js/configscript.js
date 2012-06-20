@@ -1,5 +1,6 @@
-// Ajax Config Form
+
 $(document).ready(function() { 
+	// Ajax Config Form
     $('#config').ajaxForm({ 
         success: function() {
 			var noty_id = noty({
@@ -9,6 +10,10 @@ $(document).ready(function() {
         } 
     }); 
 });
+
+
+
+
 // Enabled/disabled label
 $(document).ready(function(){
 	$( '.switch' ).each(function(){

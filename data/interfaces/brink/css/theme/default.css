@@ -96,11 +96,6 @@ table.display thead tr th
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#35444c', endColorstr='#2c393f',GradientType=0 ); /* IE6-9 */
 }
 
-/*Top left search field*/
-div#searchbar
-{
-}
-
 /*
  * Scrollbar Colors 
  * */

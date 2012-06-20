@@ -35,6 +35,9 @@
 	<!--Ajax Form-->
 	<script src="interfaces/brink/js/libs/jquery.form.js"></script>
 	
+	<!--jsTree-->
+	<script src="interfaces/brink/js/libs/jstree/jquery.jstree.js"></script>
+	
 	<!--Noty-->
 	<script type="text/javascript" src="interfaces/brink/js/libs/jquery.noty.js" ></script>
 	<link rel="stylesheet" href="interfaces/brink/css/libs/jquery.noty.css">
@@ -78,10 +81,6 @@
 				"type":"success",
 				buttons: [
 				  {type: 'button green', text: 'Update', click: function($noty) {
-
-						// this = button element
-						// $noty = $noty element
-
 						$(this).click(function(){
 							document.location.href='update';
 						});
@@ -91,7 +90,7 @@
 				  },
 				  {type: 'button pink', text: 'Cancel', click: function($noty) {
 					  $noty.close();
-					  noty({force: true, text: 'You can update anytime from the tools menu', type: 'error'});
+					  noty({force: true, text: 'You can update anytime from the tools menu', type: 'information'});
 					}
 				  }
 				  ],
@@ -118,6 +117,10 @@
 					<a href="home"><img src="../images/headphoneslogo.png" alt="headphones"/></a>
 				</div>
 				${next.headerIncludes()}
+			</td>
+		</tr>
+		<tr>
+			<td id="nav-container">
 				<div id="searchbar">
 					<form action="search" method="get">
 						<input type="text" value="" name="name" accesskey="s" placeholder="Search..." />
@@ -128,60 +131,50 @@
 						<input class="web-symbol" type="submit" value="L"/>
 					</form>
 				</div>
-			</td>
-		</tr>
-		<tr>
-			<td id="nav-container">
 				<ul id="nav">
 					<li><a href="home" accesskey="1">
-							<span class="icon">U</span>
-							<span class="text">Home</span>
+							<span>U</span>Home
 						</a>
 					</li>
 					<li><a href="upcoming" accesskey="2">
-							<span class="icon">O</span>
-							<span class="text">Upcoming</span>
+							<span>O</span>Upcoming
 						</a>
 					</li>
 					<li><a href="extras" accesskey="3">
-							<span class="icon">R</span>
-							<span class="text">Suggestions</span>
+							<span>R</span>Suggestions
 						</a>
 					</li>
 					<li><a href="manage" accesskey="4">
-							<span class="icon">_</span>
-							<span class="text">Manage</span>
+							<span>_</span>Manage
 						</a>
 					</li>
 					<li><a href="history" accesskey="5">
-							<span class="icon">Z</span>
-							<span class="text">History</span>
+							<span>Z</span>History
 						</a>
 					</li>
 					<li><a href="logs" accesskey="6">
-							<span class="icon">a</span>
-							<span class="text">Logs</span>
+							<span>a</span>Logs
 						</a>
 					</li>
 					<li><a href="config" accesskey="7">
-							<span class="icon">S</span>
-							<span class="text">Settings</span>
+							<span>S</span>Settings
 						</a>
 					</li>
 				</ul>
-				<div id="bottombar">
 					<ul id="options">
-						<li><span class="web-symbol">:</span>
-							<p>Options</p>
+						<li><span class="web-symbol">:</span>Quick Action
 							<ul>
-								<li><a href="forceSearch" title="Refresh/Update">Wanted Albums</a></li>
-								<li><a href="forceUpdate" title="Refresh/Update">Active Artists</a></li>
-								<li><a href="forcePostProcess" title="Refresh/Update">Post-Process</a></li>
-								<li><a href="checkGithub" title="Refresh/Update">Headphones Updates</a></li>
-							</ul>
-						</li>
-					</ul>
-				</div>
+								<li><h1>Force</h1>
+									<li><a href="forceSearch"><span>I</span>Wanted Albums</a></li>
+									<li><a href="forceUpdate"><span>U</span>Active Artists</a></li>
+									<li><a href="forcePostProcess"><span>J</span>Post-Process</a></li>
+									<li><a href="checkGithub"><span>V</span>Update</a></li>
+								</li>
+								<li><h1>Power</h1>
+									<li><a href="shutdown" onclick="javascript:return confirm('Shutdown HP?')"><span>X</span>Shut Down</a></li>
+									<li><a href="restart" onclick="javascript:return confirm('Restart HP?')"><span>J</span>Restart</a></li>
+								</li>
+							</ul></li></ul>
 			</td>
 			<td id="content-container">
 				<div id="main" class="main">
@@ -192,14 +185,7 @@
 		<tr id="footer" >
 			<td colspan="2">
 				<div class="symbol-link">
-					<a href="shutdown">
-						<span>X</span>
-						<p>Shut Down</p>
-					</a>
-					<a href="restart">
-						<span>J</span>
-						<p>Restart</p>
-					</a>
+					
 				</div>
 			</td>
 		</tr>

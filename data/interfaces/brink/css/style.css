@@ -16,7 +16,6 @@ body {
 
 .web-symbol{
 	font-family: 'WebSymbolsRegular';
-	font-size: 2em;
 }
 /*
  *	Univarsal 
@@ -34,6 +33,9 @@ body {
  /*
   *	Links Styles 
   * */
+a span{
+	font-family: 'WebSymbolsRegular';
+}
 a:link {
 	color: rgb(200,200,200);
   	text-decoration: none; 
@@ -68,21 +70,17 @@ a:active {/*colour in NN4.xx is red*/
 
 h1
  { 
-	font-size: 16px; 
-	padding: 5px 0px 5px 10px; 
-	color: rgb(0,140,255);
+	font-size: 1.2em; 
 	text-decoration: none;
-	border-bottom: 2px solid rgb(0,140,255);
 	margin: 0;
+	line-height: 2em;
 }
-h2 { font-size: 1.4em; color: rgb(255,255,255); text-shadow: -1px -1px 0px rgb(10,10,10); margin-bottom: 0px; text-decoration: none; padding: 0px;}
-h3 { font-size: 1.1em; font-weight: normal; color: rgb(120,120,120); text-shadow: 1px 1px 0px rgba(0,0,0,0.2); }
-h4 { padding: 10px; font-size: 0.8em; color: rgba(0,0,0,0.6); text-shadow: 1px 1px 0px rgba(255,255,255,0.1); text-decoration: none; max-width: 20em;}
-h4:hover {
-	display:block;
-	background: rgb(219,219,140);
-	box-shadow: 1px 1px 1px rgb(219,219,140);
-}
+h1 span,
+h2 span,
+h3 span{ font-family: 'WebSymbolsRegular'; padding-right: 10px; }
+h2 { font-size: 1em; color: rgb(255,255,255); text-shadow: -1px -1px 0px rgb(10,10,10); margin-bottom: 0px; text-decoration: none; padding: 0px;}
+h3 { font-size: .8em; font-weight: normal; color: rgb(140,140,140); }
+h4 { padding: .6px; font-size: 0.8em; color: rgba(0,0,0,0.6); text-shadow: 1px 1px 0px rgba(255,255,255,0.1); text-decoration: none;}
 
 p { color: rgb(160,160,160); text-shadow: 1px 1px 1px #000;  margin-top: 8px; margin-bottom: 8px; }
 
@@ -187,10 +185,11 @@ div.custom_container   /*Makes use of noty*/
     z-index: 999999;
 }
 
-/*Main Menu*/
+/*Menu*/
 #nav-container{
 	vertical-align: top;
 	width: 200px;
+	border-right: 1px solid rgba(255,255,255,0.1);
 }
 ul#nav 
 { 
@@ -215,14 +214,13 @@ ul#nav li
 	line-height: 2em;
 	display: block;
 }
-#nav li a .icon{
+#nav li a span{
 	font-family: 'WebSymbolsRegular';
 	display: inline-block;
 	width: 30px;
 	text-align: center;
 }
-#nav li a .text{
-	display: inline;
+#nav li a{
 }
 
 ul#nav li:hover { 
@@ -253,7 +251,9 @@ ul#nav li.selected a,
 ul#nav li.selected a:hover{color: #ffffff;}
 ul#nav li a:hover { color: #ffffff; }
 
-/*Subhead menu*/
+/* *
+ * Sub navigation
+ */
 div#subhead_container 
 {
 	height: 35px;
@@ -289,56 +289,41 @@ border-right: 1px solid rgb(45,45,45);
 border-left: 1px solid rgb(15,15,15);
 }
 
-ul#subhead_menu li a 
-{ 
-    padding-left: 10px;
-    padding-right: 10px;
-    display: block;
-    line-height: 35px; 
-    color: rgb(0,0,0);
-	text-shadow: 1px 1px 0px rgba(255,255,255,0.3);
-    font-size: 0.7em; 
-    font-weight: bold;
-    text-decoration: none;
-}
+ul#subhead_menu li a { padding-left: 10px; padding-right: 10px; display: block;
+					line-height: 35px; color: rgb(0,0,0); text-shadow: 1px 1px 0px rgba(255,255,255,0.3);
+					font-size: 0.7em; font-weight: bold; text-decoration: none; }
+ul#subhead_menu li a:hover { color: rgb(255,255,255); font-weight: bold; }
+/*
+ * end Sub navigation
+ * */
 
-ul#subhead_menu li a:hover 
-{
-	color: rgb(255,255,255);
-	font-weight: bold;
-}
-
-/* Searchbar Styles */
+/* *
+ * searchbar
+ */
 div#searchbar 
 { 
-	margin-top: 2.5px;
-	height: 30px;
-	float: right;
+	float: left;
 }
 div#searchbar input[type="text"]{
 	margin: 0px;
 	padding: 0px;
 	float: left;
-	height: 28px;
-	border-radius: 0.3em 0em 0em 0.3em;
-	padding-left: 10px;
+	width: 106px;
 }
 div#searchbar select{
 	float: left;
 	margin-right: -3px;
 	margin-left: -1px;
-	height: 30px;
-	border-radius: 0em;
 }
 div#searchbar input[type='submit']{
-	height: 30px;
 	font-size: 1em;
-	border-radius: 0em 0.3em 0.3em 0em;
 }
 div#searchbar input[type='submit']:hover{
 	color: rgb(0,145,255);
-	
 }
+/*
+ * end searchbar
+ * */
 
 #content-container{
 	overflow: hidden;
@@ -348,88 +333,6 @@ div#main {
 	overflow: hidden;
 }
 
-/*buttons*/
-
-#status a
-{
-	color: rgb(0,145,255);
-}
-#status a:hover{
-	color: rgb(255,255,255);
-}
-
-.btnDownloaded ,
-.btnWanted,
-.btnSkipped {
-background-image: linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-background-image: -o-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-background-image: -moz-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-background-image: -webkit-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-background-image: -ms-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-text-shadow: 1px 1px 0px rgb(180,180,180);
-}
-
-.btnAbort {
-background-image: linear-gradient(bottom, rgb(128,0,0) 0%, rgb(153,0,0) 100%);
-background-image: -o-linear-gradient(bottom, rgb(128,0,0) 0%, rgb(153,0,0) 100%);
-background-image: -moz-linear-gradient(bottom, rgb(128,0,0) 0%, rgb(153,0,0) 100%);
-background-image: -webkit-linear-gradient(bottom, rgb(128,0,0) 0%, rgb(153,0,0) 100%);
-background-image: -ms-linear-gradient(bottom, rgb(128,0,0) 0%, rgb(153,0,0) 100%);
-text-shadow: 1px 1px 0px rgb(190,0,31);
-}
-.btnGet {
-	background: url(../images/download.png) 5% 50% no-repeat rgb(128,26,0);
-	padding-left: 22px;
-	text-shadow: 1px 1px 0px rgba(255,255,255,0.3);
-}
-.btnGet:hover
-{
-	background: url(../images/download.png) 5% 50% no-repeat rgb(148,26,0);
-}
-.btnAdd
-{
-	background: url(../images/add.png) 50% 50% no-repeat;
-	height: 18px;
-	width: 18px;
-	display: block;
-	float: left;
-}
-.btnAdd:hover
-{
-	background: url(../images/add-hover.png) 50% 50% no-repeat;
-}
-
-.btnNew
-{
-    background-image: linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
-	text-shadow: 1px 1px 0px rgb(87,170,0);
-}
-.btnRetry {
-	background-image: linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(51,128,0) 0%, rgb(87,153,0) 100%);
-	text-shadow: 1px 1px 0px rgb(87,160,0);
-}
-#btnBack 
-{
-	position: static;
-    background-image: linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%); 
-	background-image: -ms-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-	text-shadow: 1px 1px 0px rgb(180,180,180);
-	color: #000;
-	margin-left: 20px;
-	margin-top: 20px;
-}
-/*end buttons*/
 .table_wrapper { 
 	border-radius: 5px; 
 	-webkit-border-radius: 5px; 
@@ -441,76 +344,22 @@ text-shadow: 1px 1px 0px rgb(190,0,31);
 	zoom: 1; 
 }
 
-/*Tooltip*/
-div.tooltip
-{
-	/*ColorStyles.css*/
-	position: relative;
-    color: #000;
-    border-radius: .2em;
-    border-left: 1px solid #808080;
-    height: 1.8em;
-    width: 1em;
-    font-weight: bold;
-	font-size: .9em;
-    text-align: center;
-    line-height: 2.0em;
-    cursor: help;
-    text-shadow: 1px 1px 0px rgba(255,255,255,0.2);
-	font-family: Courier;
-	display: inline-block;
-	padding: 0px;
-}
-div.tooltip:after {
-	content: "?";
-}
-/*Tooltip info*/
-div.tooltip span 
-{
-	line-height: 1em;
-	font-style: italic;
-	font-size: 1em;
-	font-weight: normal;
-    color: #000;
-	border: 1px solid #000;
-    border-radius: 3px;
-    box-shadow: 0px 0px 3px #000;
-    display: none;
-	position: absolute;
-    z-index: 999;
-    top: 0px;
-    left: 20px;
-    text-align: left;
-    padding: 5px;
-    width: 25em;
-}
-div.tooltip:hover span 
-{
-	display: block;
-	
-}
-span.info{
-	display: inline-block;
-	background: rgb(219,219,140);
-	box-shadow: 0px 0px 3px #000;
-	padding: 2px;
-	font-size: 0.8em;
-	border-radius: 3px;
-}
-/*end Tooltip*/
 /*Inputs & Select*/
 input, textarea, select, option {
    -webkit-appearance: none;
    -webkit-border-radius: 0.2em;
    -webkit-box-shadow: 1px 1px 0px rgba(255,255,255,0.1);
-   padding-left: 10px;
-   padding-right: 10px;
-   font-size: .9em;
+   padding-left: 5px;
+   padding-right: 5px;
+   font-size: .8em;
    color: rgba(255,255,255,0.6);
-   height: 1.8em;
+   line-height: 25px;
    text-shadow: 1px 1px 0px rgba(0,0,0,0.2);
    font-weight: bold;
-   height: 28px;
+   margin: 0;
+}
+input[type="text"]{
+	height: 27px;
 }
 
 input, textarea{
@@ -533,7 +382,6 @@ input[type="submit"]{
 	border: 1px solid rgb(0,0,0);
 	-webkit-box-shadow: 1px 1px 0px rgba(255,255,255,0.1);
 	-webkit-border-radius: 0.2em;
-	height: 28px;
 	background: rgb(69,72,77); /* Old browsers */
 	background-image: -moz-linear-gradient(top, rgba(69,72,77,1) 0%, rgba(0,0,0,1) 100%); /* FF3.6+ */
 	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(69,72,77,1)), color-stop(100%,rgba(0,0,0,1))); /* Chrome,Safari4+ */
@@ -543,7 +391,7 @@ input[type="submit"]{
 	background-image: linear-gradient(top, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* W3C */
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#000000',GradientType=0 ); /* IE6-9 */}
 select{
-	padding-right: 20px;
+	padding-right: 11px;
 	background: url(../images/arrow-down.png), rgb(69,72,77); /* Old browsers */
 	background: url(../images/arrow-down.png), -moz-linear-gradient(top, rgba(69,72,77,1) 0%, rgba(0,0,0,1) 100%); /* FF3.6+ */
 	background: url(../images/arrow-down.png), -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(69,72,77,1)), color-stop(100%,rgba(0,0,0,1)));/* Chrome,Safari4+ */
@@ -557,7 +405,6 @@ select{
 }
 select option{
 	background: rgb(31,31,31);
-	line-height: 1.8em;
 }
 select option:hover{
 	background: rgb(255,255,255);
@@ -607,39 +454,23 @@ input[type="checkbox"]:checked:after{
 
 input:hover,
 textarea:hover,
-select:hover{
-	box-shadow: 0px 0px 3px rgb(0,145,255);
-	color: rgb(0,145,255);
-}
+select:hover{ box-shadow: 0px 0px 3px rgb(0,145,255); color: rgb(0,145,255); }
 
 input:focus, 
 textarea:focus,
-select:focus { 
-	box-shadow: 0px 0px 6px rgb(0,145,255);
-	color: rgb(0,145,255);
+select:focus { box-shadow: 0px 0px 6px rgb(0,145,255); color: rgb(0,145,255);
 }
 
 /*End Inputs & Select*/
 
 .manage_wrapper { width: 88%; margin: 20px auto 0 auto; padding: 25px; min-height: 150px; clear: both; _height: 302px; zoom: 1; }
 
-/*Config*/
-.config-wrapper{
-	margin: auto;
-	width: 640px;
-}
-.configtable {
-	width: 100%;
-}
-.configtable td{
-	vertical-align: top;
-	border-spacing: 10px;
-}
-
-p.label-comment{
-	color: rgb(120,120,120);
-	font-size: .8em;
-}
+/*config*/
+div#config_wrapper { margin: auto; width: 640px; }
+div#config_wrapper div table { width: 100%; border-collapse:separate; border-spacing: 10px; }
+div#config_wrapper div table tr td:first-child{ width: 240px; }
+div#config_wrapper div table tr td{ vertical-align: middle; }
+/*end config*/
 
 /* Artist Table Style*/
 table#artist_table { width: 100%;}
@@ -653,8 +484,6 @@ table#artist_table td#name { vertical-align: middle; text-align: left; }
 table#artist_table td#status { vertical-align: middle; text-align: left; color: rgba(0,0,0,0.4)}
 table#artist_table td#album { vertical-align: middle; text-align: left; }
 table#artist_table td#have { vertical-align: middle; }
-
-#artist_table div { color: #000; text-shadow: 1px 1px rgb(100,100,100); font-size: 12px; font-weight: bold; }
 
 table#album_table { width: 100%; }
 /* Album Tableheader*/
@@ -809,10 +638,11 @@ div.progress-container span
 {
     float: left;
     margin: auto;
+	color: #fffff;
 }
 div.progress-container span:hover
 {
-	color: #67b3ea;
+	
 }
 div.progress-container  
 {
@@ -824,12 +654,20 @@ div.progress-container
 	border: 1px solid rgb(10,10,10);
 	box-shadow: 1px 1px 0px rgba(255,255,255,0.2); 
 	border-radius: 2px; 
+	background: rgba(0,0,0,0.1);
 }
 /*Progress bar*/
 div.progress-container div  
 {
     height: 100%;
-    background-color: rgba(255,255,255,0.5);
+	background: rgb(57,69,81); /* Old browsers */
+background: -moz-linear-gradient(top, rgba(57,69,81,1) 0%, rgba(54,64,76,1) 49%, rgba(36,43,51,1) 50%, rgba(36,43,51,1) 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(57,69,81,1)), color-stop(49%,rgba(54,64,76,1)), color-stop(50%,rgba(36,43,51,1)), color-stop(100%,rgba(36,43,51,1))); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top, rgba(57,69,81,1) 0%,rgba(54,64,76,1) 49%,rgba(36,43,51,1) 50%,rgba(36,43,51,1) 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top, rgba(57,69,81,1) 0%,rgba(54,64,76,1) 49%,rgba(36,43,51,1) 50%,rgba(36,43,51,1) 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top, rgba(57,69,81,1) 0%,rgba(54,64,76,1) 49%,rgba(36,43,51,1) 50%,rgba(36,43,51,1) 100%); /* IE10+ */
+background: linear-gradient(top, rgba(57,69,81,1) 0%,rgba(54,64,76,1) 49%,rgba(36,43,51,1) 50%,rgba(36,43,51,1) 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#394551', endColorstr='#242b33',GradientType=0 ); /* IE6-9 */
 }
 
 /*text format for match/procent*/
@@ -842,8 +680,6 @@ div.progress-container div
     font-size: 12px;
     position: relative;
     text-align: center; 
-    color: rgba(0,0,0,0.8);
-    text-shadow: 1px 1px 0px rgba(255,255,255,0.2);
 }
 
 
@@ -856,92 +692,39 @@ div.progress-container div
 }
 
 /*Footer manage/settings*/
-div#bottombar{
-	position: absolute;
-	bottom: 50px;
-	left: 0px;
-	text-align: center;
-}
 #options
 {
-	padding-top: 2px;
-	margin-left: 5px;
-	list-style-type: none;
-	margin: 0;
-	padding: 0;
-}
-#options li{
-	display:block;
 	float: left;
-	padding-left: 5px;
+	padding: 5px;
+	list-style-type: none;
+	position: relative;
+	background-color: #192126;
+	
+}
+#options li { }  
+#options li a{
+	padding-left: 20px;
 	padding-right: 5px;
 	line-height: 25px;
-	font-size: 0.8em;
-	color: rgba(255,255,255,0.5);
-	background: rgba(0,145,255,0.5);
-	border-radius: .3em;
+	display: block;
+	color: rgb(120,120,120);
 }
+#options li a:hover { background: rgb(255,255,255); }
+#options li span{ width: 30px; text-align: center; display:inline-block; }
 #options ul
 {
 	list-style-type: none;
 	padding: 0px;
 	margin: 0px;
-	position: relative;
-	top: 0px;
-	left: 0px;
+	position: absolute;
 	display: none;
-	width: 160px;
-	transition: width 2s, height 2s, transform 2s;
-	-moz-transition: width 2s, height 2s, -moz-transform 2s;
-	-webkit-transition: width 2s, height 2s, -webkit-transform 2s;
-	-o-transition: width 2s, height 2s,-o-transform 2s;
-}
-#options ul li
-{
-	display: block;
-	height: 24px;
-	border: 1px solid rgb(0,0,0);
-	border-radius: 3px;
-	float: left;
-	padding-left: 10px;
-	padding-right: 20px;
-	line-height: 25px;
-	background: rgb(160,160,160) url(../images/arrow-down.png) center right no-repeat;
-	margin-right: 5px;
-	color: #000;
-	text-shadow: 1px 1px 0px rgba(255,255,255,0.3);
-	font-weight: bold;
-	font-size: 12px;
+	background-color: rgba(0,0,0,0.5);
+	width: 200px;
 }
 
 #options li:hover ul
 {
 	display: block;
-	width: 200px;
-}
-#options ul li
-{
-	float: none;
-	background: none;
-	border: none;
-	padding: 0;
-	margin: 0;
-}
-#options ul li a
-{
-	display: block;
-	color: #fff;
-	padding-left: 15px;
-	padding-right: 5px;
-	border-radius: 3px;
-	text-shadow: 1px 1px 0px rgba(255,255,255,0.0);
-	
-}
-#options ul li a:hover
-{
-	background: rgb(255,255,255);
-	display: block;
-	color: #000;
 }
 
 span#version { text-align: center; font-weight: bold; }
