@@ -591,3 +591,24 @@ class WebInterface(object):
         return data
         
     api.exposed = True
+    
+    def getInfo(self, id, id_type):
+        
+        from headphones import cache
+        return cache.getInfo(id, id_type)
+        
+    getInfo.exposed = True
+    
+    def getArtwork(self, id, id_type):
+        
+        from headphones import cache
+        return cache.getArtwork(id, id_type)
+        
+    getArtwork.exposed = True
+    
+    def getArtworkURL(self,id, id_type):
+        
+        from headphones import cache
+        return cache.getArtworkURL(id, id_type)
+        
+    getArtworkURL.exposed = True
