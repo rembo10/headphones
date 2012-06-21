@@ -37,7 +37,7 @@ class Cache(object):
     
     Call cache.getInfo(id) to grab the artist/album info; will return the text description
     
-    The basic format for art in the cache is <musicbrainzid>.<date>.<url including extension>
+    The basic format for art in the cache is <musicbrainzid>.<date>.<ext>
     and for info it is <musicbrainzid>.<date>.txt
     """
     
@@ -136,8 +136,8 @@ class Cache(object):
             try:
                 result = urllib2.urlopen(url).read()
                 data = simplejson.JSONDecoder().decode(result)
-                info = artist['artist']['bio']['content']
-                image_url = artist['artist']['image'][-1]['#text']
+                info = data['artist']['bio']['content']
+                image_url = data['artist']['image'][-1]['#text']
             except:
                 logger.warn('Could not open url: ' + url)
                 return        
@@ -210,7 +210,9 @@ class Cache(object):
                     except:
                         logger.error('Error deleting file from the cache: ' + artwork_file)
                         
-                artwork_path = os.path.join(self.path_to_art_cache, self.id + '.' + helpers.today() + '.' + image_url.replace('/','%%%').replace(':','_%_'))
+                ext = os.path.splitext(image_url)[1]
+                        
+                artwork_path = os.path.join(self.path_to_art_cache, self.id + '.' + helpers.today() + ext)
                 try:
                     f = open(artwork_path, 'wb')
                     f.write(artwork)
