@@ -19,7 +19,7 @@ import glob, urllib2
 import lib.simplejson as simplejson
 
 import headphones
-from headphones import helpers, logger
+from headphones import db, helpers, logger
 
 lastfm_apikey = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
 
@@ -116,38 +116,55 @@ class Cache(object):
         
         if self._exists('info') and self._is_current(self.info_files[0]):
             f = open(self.info_files[0], 'r').read()
-            return f
+            return f.decode('utf-8')
         else:
             self._update_cache()
             if self._exists('info'):
                 f = open(self.info_files[0],'r').read()
-                return f
+                return f.decode('utf-8')
 
     def _update_cache(self):
         '''
         Since we call the same url for both info and artwork, we'll update both at the same time
         '''
         
-        url = "http://ws.audioscrobbler.com/2.0/?method=" + self.id_type + ".getInfo&mbid=" + self.id + "&api_key=" + lastfm_apikey + "&format=json"
+        # Since lastfm uses release ids rather than release group ids for albums, we have to do a artist + album search for albums
+        if self.id_type == 'artist':
+            url = "http://ws.audioscrobbler.com/2.0/?method=artist.getInfo&mbid=" + self.id + "&api_key=" + lastfm_apikey + "&format=json"
+            logger.debug('Retrieving artist information from: ' + url)
+            
+            try:
+                result = urllib2.urlopen(url).read()
+                data = simplejson.JSONDecoder().decode(result)
+                info = artist['artist']['bio']['content']
+                image_url = artist['artist']['image'][-1]['#text']
+            except:
+                logger.warn('Could not open url: ' + url)
+                return        
+        
+        else:
+            myDB = db.DBConnection()
+            dbartist = myDB.action('SELECT ArtistName, AlbumTitle FROM albums WHERE AlbumID=?', [self.id]).fetchone()
+            url = "http://ws.audioscrobbler.com/2.0/?method=album.getInfo&api_key=" + lastfm_apikey + "&artist="+ dbartist['ArtistName'] +"&album="+ dbartist['AlbumTitle'] +"&format=json"
+        
+            logger.debug('Retrieving artist information from: ' + url)
+            try:
+                result = urllib2.urlopen(url).read()
+                data = simplejson.JSONDecoder().decode(result)
+                info = data['album']['wiki']['content']
+                image_url = data['album']['image'][-1]['#text']
+            except:
+                logger.warn('Could not open url: ' + url)
+                return
 
-        logger.debug('Retrieving artist information from: ' + url)
-        try:
-            result = urllib2.urlopen(url).read()
-            artist = simplejson.JSONDecoder().decode(result)
-            artist_bio = artist['artist']['bio']['content']
-            artist_image_url = artist['artist']['image'][4]['#text']
-        except:
-            logger.warn('Could not open url: ' + url)
-            return
-
-        if artist_bio:
+        if info:
             
             # Make sure the info dir exists:
             if not os.path.isdir(self.path_to_info_cache):
                 try:
                     os.makedirs(self.path_to_info_cache)
                 except Exception, e:
-                    logger.error('Unable to create info cache dir. Error: ' + e)
+                    logger.error('Unable to create info cache dir. Error: ' + str(e))
                     
             # Delete any old files and replace it with a new one
             for info_file in self.info_files:
@@ -156,20 +173,27 @@ class Cache(object):
                 except:
                     logger.error('Error deleting file from the cache: ' + info_file)
                     
-            bio_path = os.path.join(self.path_to_info_cache, self.id + '.' + helpers.today() + '.txt')
+            info_file_path = os.path.join(self.path_to_info_cache, self.id + '.' + helpers.today() + '.txt')
             try:    
-                f = open(bio_path, 'w')
-                f.write(artist_bio)
+                f = open(info_file_path, 'w')
+                f.write(info.encode('utf-8'))
                 f.close()
             except Exception, e:
-                logger.error('Unable to write to the cache dir: ' + e)
+                logger.error('Unable to write to the cache dir: ' + str(e))
                 
-        if artist_image_url:
+        if image_url:
+
+            myDB = db.DBConnection()
+            
+            if self.id_type == 'artist':
+                myDB.action('UPDATE artists SET ArtworkURL=? WHERE ArtistID=?', [image_url, self.id])
+            else:
+                myDB.action('UPDATE albums SET ArtworkURL=? WHERE AlbumID=?', [image_url, self.id])
             
             try:
-                artwork = urllib2.urlopen(artist_image_url).read()
+                artwork = urllib2.urlopen(image_url).read()
             except Exception, e:
-                logger.error('Unable to open url "' + artist_image_url + '". Error: ' + str(e))
+                logger.error('Unable to open url "' + image_url + '". Error: ' + str(e))
                 
             if artwork:
                 
@@ -186,7 +210,7 @@ class Cache(object):
                     except:
                         logger.error('Error deleting file from the cache: ' + artwork_file)
                         
-                artwork_path = os.path.join(self.path_to_art_cache, self.id + '.' + helpers.today() + '.' + artist_image_url.replace('/','%%%').replace(':','_%_'))
+                artwork_path = os.path.join(self.path_to_art_cache, self.id + '.' + helpers.today() + '.' + image_url.replace('/','%%%').replace(':','_%_'))
                 try:
                     f = open(artwork_path, 'wb')
                     f.write(artwork)
@@ -205,12 +229,3 @@ def getInfo(id, id_type):
     c = Cache()
     info_path = c.get_info_from_cache(id, id_type)
     return info_path
-                    
-def getArtworkURL(id, id_type):
-
-    c = Cache()
-    artwork_path = c.get_artwork_from_cache(id, id_type)
-    filename = os.path.basename(artwork_path)
-    encoded_url = '.'.join(filename.split('.')[2:])
-    normal_url = encoded_url.replace('%%%','/').replace('_%_',':')
-    return normal_url
