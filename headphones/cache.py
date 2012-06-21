@@ -211,6 +211,6 @@ def getArtworkURL(id, id_type):
     c = Cache()
     artwork_path = c.get_artwork_from_cache(id, id_type)
     filename = os.path.basename(artwork_path)
-    encoded_url = filename.split('.')[2:]
+    encoded_url = '.'.join(filename.split('.')[2:])
     normal_url = encoded_url.replace('%%%','/').replace('_%_',':')
     return normal_url
