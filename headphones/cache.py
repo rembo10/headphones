@@ -50,6 +50,11 @@ class Cache(object):
     artwork_files = []
     info_files = []
     
+    artwork_errors = False
+    info_errors = False
+    info = None
+    artwork_url = None
+    
     def __init__(self):
         
         pass
@@ -106,6 +111,9 @@ class Cache(object):
             return self.artwork_files[0]
         else:
             self._update_cache()
+            
+            if self.artwork_errors:
+                return self.artwork_url
             if self._exists('artwork'):
                 return self.artwork_files[0]
                 
@@ -119,6 +127,10 @@ class Cache(object):
             return f.decode('utf-8')
         else:
             self._update_cache()
+            
+            if self.info_errors:
+                return self.info
+            
             if self._exists('info'):
                 f = open(self.info_files[0],'r').read()
                 return f.decode('utf-8')
@@ -165,6 +177,8 @@ class Cache(object):
                     os.makedirs(self.path_to_info_cache)
                 except Exception, e:
                     logger.error('Unable to create info cache dir. Error: ' + str(e))
+                    self.info_errors = True
+                    self.info = info
                     
             # Delete any old files and replace it with a new one
             for info_file in self.info_files:
@@ -180,6 +194,8 @@ class Cache(object):
                 f.close()
             except Exception, e:
                 logger.error('Unable to write to the cache dir: ' + str(e))
+                self.info_errors = True
+                self.info = info
                 
         if image_url:
 
@@ -203,6 +219,9 @@ class Cache(object):
                         os.makedirs(self.path_to_art_cache)
                     except Exception, e:
                         logger.error('Unable to create artwork cache dir. Error: ' + str(e))
+                        self.artwork_errors = True
+                        self.artwork_url = image_url
+                        
                 #Delete the old stuff
                 for artwork_file in self.artwork_files:
                     try:
@@ -219,15 +238,21 @@ class Cache(object):
                     f.close()
                 except Exception, e:
                     logger.error('Unable to write to the cache dir: ' + str(e))
+                    self.artwork_errors = True
+                    self.artwork_url = image_url
                     
 def getArtwork(id, id_type):
     
     c = Cache()
     artwork_path = c.get_artwork_from_cache(id, id_type)
-    return artwork_path
+    
+    if artwork_path.startswith('http://'):
+        return artwork_path
+    else:
+        return "file:///" + artwork_path
     
 def getInfo(id, id_type):
     
     c = Cache()
-    info_path = c.get_info_from_cache(id, id_type)
-    return info_path
+    info = c.get_info_from_cache(id, id_type)
+    return info
