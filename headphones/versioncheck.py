@@ -62,7 +62,7 @@ def runGit(args):
             
 def getVersion():
 
-    if version.HEADPHONES_VERSION.startswith('build '):
+    if version.HEADPHONES_VERSION.startswith('win32build'):
         
         headphones.INSTALL_TYPE = 'win'
         
