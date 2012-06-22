@@ -14,7 +14,7 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import glob, urllib2
+import glob, urllib, urllib2
 
 import lib.simplejson as simplejson
 
@@ -154,7 +154,14 @@ class Cache(object):
         
         # Since lastfm uses release ids rather than release group ids for albums, we have to do a artist + album search for albums
         if self.id_type == 'artist':
-            url = "http://ws.audioscrobbler.com/2.0/?method=artist.getInfo&mbid=" + self.id + "&api_key=" + lastfm_apikey + "&format=json"
+            
+            params = {  "method": "artist.getInfo",
+                        "api_key": lastfm_apikey,
+                        "mbid": self.id,
+                        "format": "json"
+                        }
+            
+            url = "http://ws.audioscrobbler.com/2.0/?" + urllib.urlencode(params)
             logger.debug('Retrieving artist information from: ' + url)
             
             try:
@@ -167,16 +174,32 @@ class Cache(object):
             
                 try:
                     data = simplejson.JSONDecoder().decode(result)
-                    info = data['artist']['bio']['content']
-                    image_url = data['artist']['image'][-1]['#text']
                 except:
                     logger.warn('Could not parse data from url: ' + url)
                     return
+                try:
+                    info = data['artist']['bio']['content']
+                except KeyError:
+                    logger.debug('No artist bio found on url: ' + url)
+                    info = None
+                try:
+                    image_url = data['artist']['image'][-1]['#text']
+                except KeyError:
+                    logger.debug('No artist image found on url: ' + url)
+                    image_url = None
         
         else:
             myDB = db.DBConnection()
             dbartist = myDB.action('SELECT ArtistName, AlbumTitle FROM albums WHERE AlbumID=?', [self.id]).fetchone()
-            url = "http://ws.audioscrobbler.com/2.0/?method=album.getInfo&api_key=" + lastfm_apikey + "&artist="+ dbartist['ArtistName'] +"&album="+ dbartist['AlbumTitle'] +"&format=json"
+            
+            params = {  "method": "album.getInfo",
+                        "api_key": lastfm_apikey,
+                        "artist": dbartist['ArtistName'],
+                        "album": dbartist['AlbumTitle'],
+                        "format": "json"
+                        }
+                        
+            url = "http://ws.audioscrobbler.com/2.0/?" + urllib.urlencode(params)
         
             logger.debug('Retrieving artist information from: ' + url)
             try:
@@ -188,12 +211,19 @@ class Cache(object):
             if result:
                 try:    
                     data = simplejson.JSONDecoder().decode(result)
-                    info = data['album']['wiki']['content']
-                    image_url = data['album']['image'][-1]['#text']
                 except:
                     logger.warn('Could not parse data from url: ' + url)
                     return
-
+                try:    
+                    info = data['album']['wiki']['content']
+                except KeyError:
+                    logger.debug('No album infomation found from: ' + url)
+                    info = None
+                try:
+                    image_url = data['album']['image'][-1]['#text']
+                except KeyError:
+                    logger.debug('No album image link found on url: ' + url)
+                    image_url = None
         if info:
             
             # Make sure the info dir exists:
