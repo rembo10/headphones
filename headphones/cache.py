@@ -339,6 +339,9 @@ def getArtwork(ArtistID=None, AlbumID=None):
     c = Cache()
     artwork_path = c.get_artwork_from_cache(ArtistID, AlbumID)
     
+    if not artwork_path:
+        return None
+    
     if artwork_path.startswith('http://'):
         return artwork_path
     else:
@@ -348,4 +351,8 @@ def getInfo(ArtistID=None, AlbumID=None):
     
     c = Cache()
     info = c.get_info_from_cache(ArtistID, AlbumID)
+    
+    if not info:
+        return None
+        
     return info
