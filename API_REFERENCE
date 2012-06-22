@@ -12,9 +12,9 @@ $commands&parameters[&optionalparameters]:
 
 getIndex (fetch data from index page. Returns: ArtistName, ArtistSortName, ArtistID, Status, DateAdded,
 												[LatestAlbum, ReleaseDate, AlbumID], HaveTracks, TotalTracks,
-												IncludeExtras)
+												IncludeExtras, LastUpdated, ArtworkURL: a remote url to the artwork. To get the cached image path, see getArtistArt command)
 
-getArtist&id=$artistid (fetch artist data. returns the artist object (see above) and album info: Status, AlbumASIN, DateAdded, AlbumTitle, ArtistName, ReleaseDate, AlbumID, ArtistID, Type)
+getArtist&id=$artistid (fetch artist data. returns the artist object (see above) and album info: Status, AlbumASIN, DateAdded, AlbumTitle, ArtistName, ReleaseDate, AlbumID, ArtistID, Type, ArtworkURL: hosted image path. For cached image, see getAlbumArt command)
 
 getAlbum&id=$albumid (fetch data from album page. Returns the album object, a description object and a tracks object. Tracks contain: AlbumASIN, AlbumTitle, TrackID, Format, TrackDuration (ms), ArtistName, TrackTitle, AlbumID, ArtistID, Location, TrackNumber, CleanName (stripped of punctuation /styling), BitRate)
 
@@ -53,3 +53,9 @@ checkGithub (updates the version information above and returns getVersion data)
 shutdown (shut down headphones)
 restart (restart headphones)
 update (update headphones - you may want to check the install type in get version and not allow this if type==exe)
+
+getArtistArt&id=$artistid  (Returns either a relative path to the cached image, or a remote url if the image can't be saved to the cache dir)
+getAlbumArt&id=$albumid (see above)
+
+getArtistInfo&id=$artistid (Returns the artist bio preformatted in html)
+getAlbumInfo&id=$albumid (See above, returns album description in html)
