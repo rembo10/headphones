@@ -277,8 +277,10 @@ class Cache(object):
                 except KeyError:
                     logger.debug('No album thumbnail image link found on url: ' + url)
                     thumb_url = None
-        if info:
-            
+        
+        # Save the info no matter what the query type if it's outdated/missing
+        if info and not (self.info_files and self._is_current(self.info_files[0])):
+
             # Make sure the info dir exists:
             if not os.path.isdir(self.path_to_info_cache):
                 try:
@@ -332,11 +334,9 @@ class Cache(object):
             else:
                 f = open(new_info_file_path, 'w')
                 f.close()
-                
-        if image_url:
-            # If we're just grabbing an info or thumbnail file, no need to open the actual image_url unless it's outdated
-            if self.query_type != 'artwork' and self.artwork_files and self._is_current(self.artwork_files[0]):
-                return
+        
+        # Should we grab the artwork here if we're just grabbing thumbs or info??
+        if image_url and self.query_type == 'artwork':
 
             myDB = db.DBConnection()
             
@@ -381,11 +381,8 @@ class Cache(object):
                     self.artwork_errors = True
                     self.artwork_url = image_url
                     
-        if thumb_url:
-            
-            # If we're grabbing an artwork or info file, no need to open the actual image_url unless it's outdated
-            if self.query_type != 'thumb' and self.thumb_files and self._is_current(self.thumb_files[0]):
-                return
+        # Grab the thumbnail as well if we're getting the full artwork (as long as it's missing/outdated
+        if thumb_url and self.query_type in ['thumb','artwork'] and not (self.thumb_files and self._is_current(self.thumb_files[0])):
             
             try:
                 artwork = urllib2.urlopen(thumb_url).read()
