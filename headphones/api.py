@@ -24,7 +24,7 @@ import copy
 cmd_list = [ 'getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSimilar', 'getHistory', 'getLogs', 
             'findArtist', 'findAlbum', 'addArtist', 'delArtist', 'pauseArtist', 'resumeArtist', 'refreshArtist',
             'queueAlbum', 'unqueueAlbum', 'forceSearch', 'forceProcess', 'getVersion', 'checkGithub', 
-            'shutdown', 'restart', 'update', 'getArtwork', 'getInfo']
+            'shutdown', 'restart', 'update', 'getArtistArt', 'getAlbumArt', 'getArtistInfo', 'getAlbumInfo']
 
 class Api(object):
 
