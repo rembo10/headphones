@@ -60,25 +60,24 @@ class Cache(object):
         pass
         
     def _exists(self, type):
-        
+
+        self.artwork_files = glob.glob(os.path.join(self.path_to_art_cache, self.id + '*'))
+        self.info_files = glob.glob(os.path.join(self.path_to_info_cache, self.id + '*'))
+
         if type == 'artwork':
-            
-            self.artwork_files = glob.glob(os.path.join(self.path_to_art_cache, self.id + '*'))
-            
+
             if self.artwork_files:
                 return True
             else:
                 return False
-                
+
         else:
-            
-            self.info_files = glob.glob(os.path.join(self.path_to_info_cache, self.id + '*'))
             
             if self.info_files:
                 return True
             else:
                 return False
-                
+
     def _get_age(self, date):
         # There's probably a better way to do this
         split_date = date.split('-')
