@@ -24,7 +24,7 @@ import copy
 cmd_list = [ 'getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSimilar', 'getHistory', 'getLogs', 
             'findArtist', 'findAlbum', 'addArtist', 'delArtist', 'pauseArtist', 'resumeArtist', 'refreshArtist',
             'queueAlbum', 'unqueueAlbum', 'forceSearch', 'forceProcess', 'getVersion', 'checkGithub', 
-            'shutdown', 'restart', 'update', 'getArtistArt', 'getAlbumArt', 'getArtistInfo', 'getAlbumInfo']
+            'shutdown', 'restart', 'update', 'getArtistArt', 'getAlbumArt', 'getArtistInfo', 'getAlbumInfo', 'getArtistThumb', 'getAlbumThumb']
 
 class Api(object):
 
@@ -354,3 +354,23 @@ class Api(object):
             self.id = kwargs['id']
             
         self.data = cache.getInfo(AlbumID=self.id)
+        
+    def _getArtistThumb(self, **kwargs):
+        
+        if 'id' not in kwargs:
+            self.data = 'Missing parameter: id'
+            return
+        else:
+            self.id = kwargs['id']
+            
+        self.data = cache.getThumb(ArtistID=self.id)
+
+    def _getAlbumThumb(self, **kwargs):
+        
+        if 'id' not in kwargs:
+            self.data = 'Missing parameter: id'
+            return
+        else:
+            self.id = kwargs['id']
+            
+        self.data = cache.getThumb(AlbumID=self.id)

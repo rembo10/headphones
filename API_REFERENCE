@@ -59,3 +59,6 @@ getAlbumArt&id=$albumid (see above)
 
 getArtistInfo&id=$artistid (Returns the artist bio preformatted in html)
 getAlbumInfo&id=$albumid (See above, returns album description in html)
+
+getArtistThumb&id=$artistid (Returns either a relative path to the cached thumbnail artist image, or an http:// address if the cache dir can't be written to)
+getAlbumThumb&id=$albumid (see above)
