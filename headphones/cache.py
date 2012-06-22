@@ -45,7 +45,8 @@ class Cache(object):
     path_to_info_cache = os.path.join(headphones.CACHE_DIR, 'info')
     
     id = None
-    id_type = None # 'artist' or 'album'
+    id_type = None # 'artist' or 'album' - set automatically depending on whether ArtistID or AlbumID is passed
+    query_type = None # 'artwork' or 'info' - set automatically
     
     artwork_files = []
     info_files = []
@@ -102,6 +103,9 @@ class Cache(object):
         '''
         Pass a musicbrainz id to this function (either ArtistID or AlbumID)
         '''
+        
+        self.query_type = 'artwork'
+        
         if ArtistID:
             self.id = ArtistID
             self.id_type = 'artist'
@@ -122,6 +126,8 @@ class Cache(object):
                 return None
                 
     def get_info_from_cache(self, ArtistID=None, AlbumID=None):
+        
+        self.query_type = 'info'
         
         if ArtistID:    
             self.id = ArtistID
@@ -250,8 +256,40 @@ class Cache(object):
                 logger.error('Unable to write to the cache dir: ' + str(e))
                 self.info_errors = True
                 self.info = info
+        
+        # If there is no info, we should either write an empty file, or make an older file current
+        # just so it doesn't check it every time        
+        else:
+            
+            new_info_file_path = os.path.join(self.path_to_info_cache, self.id + '.' + helpers.today() + '.txt')
+            
+            if len(self.info_files) == 1:
+                try:
+                    os.rename(self.info_files[0], new_info_file_path)
+                except Exception, e:
+                    logger.warn('Error renaming cached info file: ' + str(e))
+            
+            elif len(self.info_files) > 1:
+                for info_file in self.info_files[1:]:
+                    try:
+                        os.remove(info_file)
+                    except Exception, e:
+                        logger.warn('Error removing cached info file "' + info_file + '". Error: ' + str(e))
+                        
+                try:
+                    os.rename(self.info_files[0], new_info_file_path)
+                except Exception, e:
+                    logger.warn('Error renaming cached info file: ' + str(e))
+                        
+            else:
+                f = open(new_info_file_path, 'w')
+                f.close()
                 
         if image_url:
+            
+            # If we're just grabbing an info file, no need to open the actual image_url unless it's outdated
+            if self.query_type == 'info' and self.artwork_files and self._is_current(self.artwork_files[0]):
+                return
 
             myDB = db.DBConnection()
             
@@ -264,6 +302,7 @@ class Cache(object):
                 artwork = urllib2.urlopen(image_url).read()
             except Exception, e:
                 logger.error('Unable to open url "' + image_url + '". Error: ' + str(e))
+                artwork = None
                 
             if artwork:
                 
@@ -294,7 +333,7 @@ class Cache(object):
                     logger.error('Unable to write to the cache dir: ' + str(e))
                     self.artwork_errors = True
                     self.artwork_url = image_url
-                    
+
 def getArtwork(ArtistID=None, AlbumID=None):
     
     c = Cache()
