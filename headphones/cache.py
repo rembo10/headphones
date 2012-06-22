@@ -194,8 +194,8 @@ class Cache(object):
             
             params = {  "method": "album.getInfo",
                         "api_key": lastfm_apikey,
-                        "artist": dbartist['ArtistName'],
-                        "album": dbartist['AlbumTitle'],
+                        "artist": dbartist['ArtistName'].encode('utf-8'),
+                        "album": dbartist['AlbumTitle'].encode('utf-8'),
                         "format": "json"
                         }
                         
