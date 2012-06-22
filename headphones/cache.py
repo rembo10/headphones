@@ -52,9 +52,13 @@ class Cache(object):
     info_files = []
     
     artwork_errors = False
+    artwork_url = None
+    
+    thumb_errors = False
+    thumb_url = None
+    
     info_errors = False
     info = None
-    artwork_url = None
     
     def __init__(self):
         
@@ -63,11 +67,19 @@ class Cache(object):
     def _exists(self, type):
 
         self.artwork_files = glob.glob(os.path.join(self.path_to_art_cache, self.id + '*'))
+        self.thumb_files = glob.glob(os.path.join(self.path_to_art_cache, 'T_' + self.id + '*'))
         self.info_files = glob.glob(os.path.join(self.path_to_info_cache, self.id + '*'))
 
         if type == 'artwork':
 
             if self.artwork_files:
+                return True
+            else:
+                return False
+                
+        elif type == 'thumb':
+            
+            if self.thumb_files:
                 return True
             else:
                 return False
@@ -122,6 +134,32 @@ class Cache(object):
                 return self.artwork_url
             elif self._exists('artwork'):
                 return self.artwork_files[0]
+            else:
+                return None
+                
+    def get_thumb_from_cache(self, ArtistID=None, AlbumID=None):
+        '''
+        Pass a musicbrainz id to this function (either ArtistID or AlbumID)
+        '''
+        
+        self.query_type = 'thumb'
+        
+        if ArtistID:
+            self.id = ArtistID
+            self.id_type = 'artist'
+        else:
+            self.id = AlbumID
+            self.id_type = 'album'
+        
+        if self._exists('thumb') and self._is_current(self.thumb_files[0]):
+            return self.thumb_files[0]
+        else:
+            self._update_cache()
+            # If we failed to get artwork, either return the url or the older file
+            if self.thumb_errors and self.thumb_url:
+                return self.thumb_url
+            elif self._exists('thumb'):
+                return self.thumb_files[0]
             else:
                 return None
                 
@@ -192,6 +230,11 @@ class Cache(object):
                 except KeyError:
                     logger.debug('No artist image found on url: ' + url)
                     image_url = None
+                try:
+                    thumb_url = data['artist']['image'][-3]['#text']  # 
+                except KeyError:
+                    logger.debug('No artist thumbnail image found on url: ' + url)
+                    thumb_url = None
         
         else:
             myDB = db.DBConnection()
@@ -229,6 +272,11 @@ class Cache(object):
                 except KeyError:
                     logger.debug('No album image link found on url: ' + url)
                     image_url = None
+                try:
+                    thumb_url = data['album']['image'][-3]['#text']
+                except KeyError:
+                    logger.debug('No album thumbnail image link found on url: ' + url)
+                    thumb_url = None
         if info:
             
             # Make sure the info dir exists:
@@ -286,9 +334,8 @@ class Cache(object):
                 f.close()
                 
         if image_url:
-            
-            # If we're just grabbing an info file, no need to open the actual image_url unless it's outdated
-            if self.query_type == 'info' and self.artwork_files and self._is_current(self.artwork_files[0]):
+            # If we're just grabbing an info or thumbnail file, no need to open the actual image_url unless it's outdated
+            if self.query_type != 'artwork' and self.artwork_files and self._is_current(self.artwork_files[0]):
                 return
 
             myDB = db.DBConnection()
@@ -333,11 +380,66 @@ class Cache(object):
                     logger.error('Unable to write to the cache dir: ' + str(e))
                     self.artwork_errors = True
                     self.artwork_url = image_url
+                    
+        if thumb_url:
+            
+            # If we're grabbing an artwork or info file, no need to open the actual image_url unless it's outdated
+            if self.query_type != 'thumb' and self.thumb_files and self._is_current(self.thumb_files[0]):
+                return
+            
+            try:
+                artwork = urllib2.urlopen(thumb_url).read()
+            except Exception, e:
+                logger.error('Unable to open url "' + thumb_url + '". Error: ' + str(e))
+                artwork = None
+                
+            if artwork:
+                
+                # Make sure the artwork dir exists:
+                if not os.path.isdir(self.path_to_art_cache):
+                    try:
+                        os.makedirs(self.path_to_art_cache)
+                    except Exception, e:
+                        logger.error('Unable to create artwork cache dir. Error: ' + str(e))
+                        self.thumb_errors = True
+                        self.thumb_url = thumb_url
+                        
+                #Delete the old stuff
+                for thumb_file in self.thumb_files:
+                    try:
+                        os.remove(thumb_file)
+                    except:
+                        logger.error('Error deleting file from the cache: ' + thumb_file)
+                        
+                ext = os.path.splitext(image_url)[1]
+                        
+                thumb_path = os.path.join(self.path_to_art_cache, 'T_' + self.id + '.' + helpers.today() + ext)
+                try:
+                    f = open(thumb_path, 'wb')
+                    f.write(artwork)
+                    f.close()
+                except Exception, e:
+                    logger.error('Unable to write to the cache dir: ' + str(e))
+                    self.thumb_errors = True
+                    self.thumb_url = image_url
 
 def getArtwork(ArtistID=None, AlbumID=None):
     
     c = Cache()
     artwork_path = c.get_artwork_from_cache(ArtistID, AlbumID)
+    
+    if not artwork_path:
+        return None
+    
+    if artwork_path.startswith('http://'):
+        return artwork_path
+    else:
+        return "cache" + artwork_path[len(headphones.CACHE_DIR):]
+        
+def getThumb(ArtistID=None, AlbumID=None):
+    
+    c = Cache()
+    artwork_path = c.get_thumb_from_cache(ArtistID, AlbumID)
     
     if not artwork_path:
         return None

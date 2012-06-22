@@ -605,3 +605,10 @@ class WebInterface(object):
         return cache.getArtwork(ArtistID, AlbumID)
         
     getArtwork.exposed = True
+    
+    def getThumb(self, ArtistID=None, AlbumID=None):
+        
+        from headphones import cache
+        return cache.getThumb(ArtistID, AlbumID)
+        
+    getThumb.exposed = True
