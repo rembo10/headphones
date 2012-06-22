@@ -345,7 +345,7 @@ def getArtwork(ArtistID=None, AlbumID=None):
     if artwork_path.startswith('http://'):
         return artwork_path
     else:
-        return "file:///" + artwork_path
+        return "file://" + urllib.quote(artwork_path)
     
 def getInfo(ArtistID=None, AlbumID=None):
     
