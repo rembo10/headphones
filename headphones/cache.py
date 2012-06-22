@@ -183,7 +183,7 @@ class Cache(object):
                     logger.warn('Could not parse data from url: ' + url)
                     return
                 try:
-                    info = data['artist']['bio']['content']
+                    info = data['artist']['bio']['summary']
                 except KeyError:
                     logger.debug('No artist bio found on url: ' + url)
                     info = None
@@ -220,7 +220,7 @@ class Cache(object):
                     logger.warn('Could not parse data from url: ' + url)
                     return
                 try:    
-                    info = data['album']['wiki']['content']
+                    info = data['album']['wiki']['summary']
                 except KeyError:
                     logger.debug('No album infomation found from: ' + url)
                     info = None
@@ -306,7 +306,7 @@ class Cache(object):
                 
             if artwork:
                 
-                # Make sure the info dir exists:
+                # Make sure the artwork dir exists:
                 if not os.path.isdir(self.path_to_art_cache):
                     try:
                         os.makedirs(self.path_to_art_cache)
