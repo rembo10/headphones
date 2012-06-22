@@ -99,28 +99,37 @@ class Cache(object):
         else:
             return False
         
-    def get_artwork_from_cache(self, id, id_type):
+    def get_artwork_from_cache(self, ArtistID=None, AlbumID=None):
         '''
-        Pass a musicbrainz id to this function, and a type (either artist or album)
+        Pass a musicbrainz id to this function (either ArtistID or AlbumID)
         '''
-        
-        self.id = id
-        self.id_type = id_type
+        if ArtistID:
+            self.id = ArtistID
+            self.id_type = 'artist'
+        else:
+            self.id = AlbumID
+            self.id_type = 'album'
         
         if self._exists('artwork') and self._is_current(self.artwork_files[0]):
             return self.artwork_files[0]
         else:
             self._update_cache()
-            
-            if self.artwork_errors:
+            # If we failed to get artwork, either return the url or the older file
+            if self.artwork_errors and self.artwork_url:
                 return self.artwork_url
-            if self._exists('artwork'):
+            elif self._exists('artwork'):
                 return self.artwork_files[0]
+            else:
+                return None
                 
-    def get_info_from_cache(self, id, id_type):
+    def get_info_from_cache(self, ArtistID=None, AlbumID=None):
         
-        self.id = id
-        self.id_type = id_type
+        if ArtistID:    
+            self.id = ArtistID
+            self.id_type = 'artist'
+        else:
+            self.id = AlbumID
+            self.id_type = 'album'
         
         if self._exists('info') and self._is_current(self.info_files[0]):
             f = open(self.info_files[0], 'r').read()
@@ -128,12 +137,15 @@ class Cache(object):
         else:
             self._update_cache()
             
-            if self.info_errors:
+            if self.info_errors and self.info:
                 return self.info
             
-            if self._exists('info'):
+            elif self._exists('info'):
                 f = open(self.info_files[0],'r').read()
                 return f.decode('utf-8')
+                
+            else:
+                return None
 
     def _update_cache(self):
         '''
@@ -147,12 +159,19 @@ class Cache(object):
             
             try:
                 result = urllib2.urlopen(url).read()
-                data = simplejson.JSONDecoder().decode(result)
-                info = data['artist']['bio']['content']
-                image_url = data['artist']['image'][-1]['#text']
             except:
                 logger.warn('Could not open url: ' + url)
-                return        
+                return
+            
+            if result:    
+            
+                try:
+                    data = simplejson.JSONDecoder().decode(result)
+                    info = data['artist']['bio']['content']
+                    image_url = data['artist']['image'][-1]['#text']
+                except:
+                    logger.warn('Could not parse data from url: ' + url)
+                    return
         
         else:
             myDB = db.DBConnection()
@@ -162,12 +181,18 @@ class Cache(object):
             logger.debug('Retrieving artist information from: ' + url)
             try:
                 result = urllib2.urlopen(url).read()
-                data = simplejson.JSONDecoder().decode(result)
-                info = data['album']['wiki']['content']
-                image_url = data['album']['image'][-1]['#text']
             except:
                 logger.warn('Could not open url: ' + url)
                 return
+                
+            if result:
+                try:    
+                    data = simplejson.JSONDecoder().decode(result)
+                    info = data['album']['wiki']['content']
+                    image_url = data['album']['image'][-1]['#text']
+                except:
+                    logger.warn('Could not parse data from url: ' + url)
+                    return
 
         if info:
             
@@ -241,18 +266,18 @@ class Cache(object):
                     self.artwork_errors = True
                     self.artwork_url = image_url
                     
-def getArtwork(id, id_type):
+def getArtwork(ArtistID=None, AlbumID=None):
     
     c = Cache()
-    artwork_path = c.get_artwork_from_cache(id, id_type)
+    artwork_path = c.get_artwork_from_cache(ArtistID, AlbumID)
     
     if artwork_path.startswith('http://'):
         return artwork_path
     else:
         return "file:///" + artwork_path
     
-def getInfo(id, id_type):
+def getInfo(ArtistID=None, AlbumID=None):
     
     c = Cache()
-    info = c.get_info_from_cache(id, id_type)
+    info = c.get_info_from_cache(ArtistID, AlbumID)
     return info
