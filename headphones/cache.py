@@ -110,6 +110,22 @@ class Cache(object):
             return True
         else:
             return False
+            
+    def _get_thumb_url(self, data):
+        
+        thumb_url = None
+        
+        try:
+            images = data[self.id_type]['image']
+        except KeyError:
+            return None
+        
+        for image in images:
+            if image['size'] == 'medium':
+                thumb_url = image['#text']
+                break
+                
+        return thumb_url
         
     def get_artwork_from_cache(self, ArtistID=None, AlbumID=None):
         '''
@@ -223,18 +239,22 @@ class Cache(object):
                 try:
                     info = data['artist']['bio']['summary']
                 except KeyError:
-                    logger.debug('No artist bio found on url: ' + url)
+                    logger.debug('No artist bio summary found on url: ' + url)
                     info = None
+                try:
+                    info_full = data['artist']['bio']['content']
+                except KeyError:
+                    logger.debug('No artist bio found on url: ' + url)
+                    info_full = None
                 try:
                     image_url = data['artist']['image'][-1]['#text']
                 except KeyError:
                     logger.debug('No artist image found on url: ' + url)
                     image_url = None
-                try:
-                    thumb_url = data['artist']['image'][-3]['#text']  # 
-                except KeyError:
+                
+                thumb_url = self._get_thumb_url(data)
+                if not thumb_url:
                     logger.debug('No artist thumbnail image found on url: ' + url)
-                    thumb_url = None
         
         else:
             myDB = db.DBConnection()
@@ -265,20 +285,35 @@ class Cache(object):
                 try:    
                     info = data['album']['wiki']['summary']
                 except KeyError:
-                    logger.debug('No album infomation found from: ' + url)
+                    logger.debug('No album summary found from: ' + url)
                     info = None
+                try:    
+                    info_full = data['album']['wiki']['content']
+                except KeyError:
+                    logger.debug('No album infomation found from: ' + url)
+                    info_full = None
                 try:
                     image_url = data['album']['image'][-1]['#text']
                 except KeyError:
                     logger.debug('No album image link found on url: ' + url)
                     image_url = None
-                try:
-                    thumb_url = data['album']['image'][-3]['#text']
-                except KeyError:
-                    logger.debug('No album thumbnail image link found on url: ' + url)
-                    thumb_url = None
+                
+                thumb_url = self._get_thumb_url(data)
+                if not thumb_url:
+                    logger.debug('No album thumbnail image found on url: ' + url)
+                    
+        #Save the content & summary to the database no matter what if we've opened up the url
+        if info or info_full:
+            
+            myDB = db.DBConnection()
+            
+            if self.id_type == 'artist':
+                myDB.action('UPDATE descriptions SET Summary=?, Content=? WHERE ArtistID=?', [info, info_full, self.id])
+            else:
+                myDB.action('UPDATE descriptions SET Summary=?, Content=? WHERE ReleaseGroupID=?', [info, info_full, self.id])
         
-        # Save the info no matter what the query type if it's outdated/missing
+        # Save the info no matter what the query type if it's outdated/missing (maybe it's redundant to save
+        # the info files since we're already saving them to the database??? Especially since the DB has summary & content
         if info and not (self.info_files and self._is_current(self.info_files[0])):
 
             # Make sure the info dir exists:
@@ -310,6 +345,15 @@ class Cache(object):
         # If there is no info, we should either write an empty file, or make an older file current
         # just so it doesn't check it every time        
         elif not info and not (self.info_files and self._is_current(self.info_files[0])):
+            
+            # Make sure the info dir exists:
+            if not os.path.isdir(self.path_to_info_cache):
+                try:
+                    os.makedirs(self.path_to_info_cache)
+                except Exception, e:
+                    logger.error('Unable to create info cache dir. Error: ' + str(e))
+                    self.info_errors = True
+                    self.info = info
             
             new_info_file_path = os.path.join(self.path_to_info_cache, self.id + '.' + helpers.today() + '.txt')
             
