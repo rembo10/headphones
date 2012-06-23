@@ -28,6 +28,8 @@ import headphones
 from headphones import logger, searcher, db, importer, mb, lastfm, librarysync
 from headphones.helpers import checked, radio
 
+import lib.simplejson as simplejson
+
 
 
 def serve_template(templatename, **kwargs):
@@ -595,7 +597,9 @@ class WebInterface(object):
     def getInfo(self, ArtistID=None, AlbumID=None):
         
         from headphones import cache
-        return cache.getInfo(ArtistID, AlbumID)
+        info_dict = cache.getInfo(ArtistID, AlbumID)
+        
+        return simplejson.dumps(info_dict)
         
     getInfo.exposed = True
     

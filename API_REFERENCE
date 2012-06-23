@@ -59,8 +59,8 @@ update (update headphones - you may want to check the install type in get versio
 getArtistArt&id=$artistid  (Returns either a relative path to the cached image, or a remote url if the image can't be saved to the cache dir)
 getAlbumArt&id=$albumid (see above)
 
-getArtistInfo&id=$artistid (Returns the artist bio preformatted in html)
-getAlbumInfo&id=$albumid (See above, returns album description in html)
+getArtistInfo&id=$artistid (Returns Summary and Content, both formatted in html)
+getAlbumInfo&id=$albumid (See above, returns Summary and Content)
 
 getArtistThumb&id=$artistid (Returns either a relative path to the cached thumbnail artist image, or an http:// address if the cache dir can't be written to)
 getAlbumThumb&id=$albumid (see above)

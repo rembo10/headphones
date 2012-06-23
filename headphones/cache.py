@@ -42,14 +42,13 @@ class Cache(object):
     """
     
     path_to_art_cache = os.path.join(headphones.CACHE_DIR, 'artwork')
-    path_to_info_cache = os.path.join(headphones.CACHE_DIR, 'info')
     
     id = None
     id_type = None # 'artist' or 'album' - set automatically depending on whether ArtistID or AlbumID is passed
-    query_type = None # 'artwork' or 'info' - set automatically
+    query_type = None # 'artwork','thumb' or 'info' - set automatically
     
     artwork_files = []
-    info_files = []
+    thumb_files = []
     
     artwork_errors = False
     artwork_url = None
@@ -57,8 +56,8 @@ class Cache(object):
     thumb_errors = False
     thumb_url = None
     
-    info_errors = False
-    info = None
+    info_summary = None
+    info_content = None
     
     def __init__(self):
         
@@ -68,7 +67,6 @@ class Cache(object):
 
         self.artwork_files = glob.glob(os.path.join(self.path_to_art_cache, self.id + '*'))
         self.thumb_files = glob.glob(os.path.join(self.path_to_art_cache, 'T_' + self.id + '*'))
-        self.info_files = glob.glob(os.path.join(self.path_to_info_cache, self.id + '*'))
 
         if type == 'artwork':
 
@@ -84,13 +82,6 @@ class Cache(object):
             else:
                 return False
 
-        else:
-            
-            if self.info_files:
-                return True
-            else:
-                return False
-
     def _get_age(self, date):
         # There's probably a better way to do this
         split_date = date.split('-')
@@ -99,10 +90,11 @@ class Cache(object):
         return days_old
         
     
-    def _is_current(self, file):
+    def _is_current(self, filename=None, date=None):
         
-        base_filename = os.path.basename(file)
-        date = base_filename.split('.')[1]
+        if filename:
+            base_filename = os.path.basename(filename)
+            date = base_filename.split('.')[1]
         
         # Calculate how old the cached file is based on todays date & file date stamp
         # helpers.today() returns todays date in yyyy-mm-dd format
@@ -141,7 +133,7 @@ class Cache(object):
             self.id = AlbumID
             self.id_type = 'album'
         
-        if self._exists('artwork') and self._is_current(self.artwork_files[0]):
+        if self._exists('artwork') and self._is_current(filename=self.artwork_files[0]):
             return self.artwork_files[0]
         else:
             self._update_cache()
@@ -167,7 +159,7 @@ class Cache(object):
             self.id = AlbumID
             self.id_type = 'album'
         
-        if self._exists('thumb') and self._is_current(self.thumb_files[0]):
+        if self._exists('thumb') and self._is_current(filename=self.thumb_files[0]):
             return self.thumb_files[0]
         else:
             self._update_cache()
@@ -182,34 +174,32 @@ class Cache(object):
     def get_info_from_cache(self, ArtistID=None, AlbumID=None):
         
         self.query_type = 'info'
+        myDB = db.DBConnection()
         
         if ArtistID:    
             self.id = ArtistID
             self.id_type = 'artist'
+            db_info = myDB.action('SELECT Summary, Content, LastUpdated FROM descriptions WHERE ArtistID=?', [self.id]).fetchone()
         else:
             self.id = AlbumID
             self.id_type = 'album'
-        
-        if self._exists('info') and self._is_current(self.info_files[0]):
-            f = open(self.info_files[0], 'r').read()
-            return f.decode('utf-8')
-        else:
-            self._update_cache()
-            
-            if self.info_errors and self.info:
-                return self.info
-            
-            elif self._exists('info'):
-                f = open(self.info_files[0],'r').read()
-                return f.decode('utf-8')
-                
-            else:
-                return None
+            db_info = myDB.action('SELECT Summary, Content, LastUpdated FROM descriptions WHERE ReleaseGroupID=?', [self.id]).fetchone()
 
+        if not db_info or not db_info['LastUpdated'] or not self._is_current(date=db_info['LastUpdated']):
+            
+            self._update_cache()
+            info_dict = { 'Summary' : self.info_summary, 'Content' : self.info_content }
+            return info_dict
+
+        else:
+            info_dict = { 'Summary' : db_info['Summary'], 'Content' : db_info['Content'] }
+            return info_dict
+        
     def _update_cache(self):
         '''
         Since we call the same url for both info and artwork, we'll update both at the same time
         '''
+        myDB = db.DBConnection()
         
         # Since lastfm uses release ids rather than release group ids for albums, we have to do a artist + album search for albums
         if self.id_type == 'artist':
@@ -229,7 +219,7 @@ class Cache(object):
                 logger.warn('Could not open url: ' + url)
                 return
             
-            if result:    
+            if result:
             
                 try:
                     data = simplejson.JSONDecoder().decode(result)
@@ -237,15 +227,15 @@ class Cache(object):
                     logger.warn('Could not parse data from url: ' + url)
                     return
                 try:
-                    info = data['artist']['bio']['summary']
+                    self.info_summary = data['artist']['bio']['summary']
                 except KeyError:
                     logger.debug('No artist bio summary found on url: ' + url)
-                    info = None
+                    self.info_summary = None
                 try:
-                    info_full = data['artist']['bio']['content']
+                    self.info_content = data['artist']['bio']['content']
                 except KeyError:
                     logger.debug('No artist bio found on url: ' + url)
-                    info_full = None
+                    self.info_content = None
                 try:
                     image_url = data['artist']['image'][-1]['#text']
                 except KeyError:
@@ -257,7 +247,7 @@ class Cache(object):
                     logger.debug('No artist thumbnail image found on url: ' + url)
         
         else:
-            myDB = db.DBConnection()
+
             dbartist = myDB.action('SELECT ArtistName, AlbumTitle FROM albums WHERE AlbumID=?', [self.id]).fetchone()
             
             params = {  "method": "album.getInfo",
@@ -283,15 +273,15 @@ class Cache(object):
                     logger.warn('Could not parse data from url: ' + url)
                     return
                 try:    
-                    info = data['album']['wiki']['summary']
+                    self.info_summary = data['album']['wiki']['summary']
                 except KeyError:
                     logger.debug('No album summary found from: ' + url)
-                    info = None
+                    self.info_summary = None
                 try:    
-                    info_full = data['album']['wiki']['content']
+                    self.info_content = data['album']['wiki']['content']
                 except KeyError:
                     logger.debug('No album infomation found from: ' + url)
-                    info_full = None
+                    self.info_content = None
                 try:
                     image_url = data['album']['image'][-1]['#text']
                 except KeyError:
@@ -303,91 +293,33 @@ class Cache(object):
                     logger.debug('No album thumbnail image found on url: ' + url)
                     
         #Save the content & summary to the database no matter what if we've opened up the url
-        if info or info_full:
-            
-            myDB = db.DBConnection()
-            
-            if self.id_type == 'artist':
-                myDB.action('UPDATE descriptions SET Summary=?, Content=? WHERE ArtistID=?', [info, info_full, self.id])
-            else:
-                myDB.action('UPDATE descriptions SET Summary=?, Content=? WHERE ReleaseGroupID=?', [info, info_full, self.id])
-        
-        # Save the info no matter what the query type if it's outdated/missing (maybe it's redundant to save
-        # the info files since we're already saving them to the database??? Especially since the DB has summary & content
-        if info and not (self.info_files and self._is_current(self.info_files[0])):
+        if self.id_type == 'artist':
+            controlValueDict = {"ArtistID":     self.id}
+        else:
+            controlValueDict = {"ReleaseGroupID":     self.id}
 
-            # Make sure the info dir exists:
-            if not os.path.isdir(self.path_to_info_cache):
-                try:
-                    os.makedirs(self.path_to_info_cache)
-                except Exception, e:
-                    logger.error('Unable to create info cache dir. Error: ' + str(e))
-                    self.info_errors = True
-                    self.info = info
-                    
-            # Delete any old files and replace it with a new one
-            for info_file in self.info_files:
-                try:
-                    os.remove(info_file)
-                except:
-                    logger.error('Error deleting file from the cache: ' + info_file)
-                    
-            info_file_path = os.path.join(self.path_to_info_cache, self.id + '.' + helpers.today() + '.txt')
-            try:    
-                f = open(info_file_path, 'w')
-                f.write(info.encode('utf-8'))
-                f.close()
-            except Exception, e:
-                logger.error('Unable to write to the cache dir: ' + str(e))
-                self.info_errors = True
-                self.info = info
-        
-        # If there is no info, we should either write an empty file, or make an older file current
-        # just so it doesn't check it every time        
-        elif not info and not (self.info_files and self._is_current(self.info_files[0])):
-            
-            # Make sure the info dir exists:
-            if not os.path.isdir(self.path_to_info_cache):
-                try:
-                    os.makedirs(self.path_to_info_cache)
-                except Exception, e:
-                    logger.error('Unable to create info cache dir. Error: ' + str(e))
-                    self.info_errors = True
-                    self.info = info
-            
-            new_info_file_path = os.path.join(self.path_to_info_cache, self.id + '.' + helpers.today() + '.txt')
-            
-            if len(self.info_files) == 1:
-                try:
-                    os.rename(self.info_files[0], new_info_file_path)
-                except Exception, e:
-                    logger.warn('Error renaming cached info file: ' + str(e))
-            
-            elif len(self.info_files) > 1:
-                for info_file in self.info_files[1:]:
-                    try:
-                        os.remove(info_file)
-                    except Exception, e:
-                        logger.warn('Error removing cached info file "' + info_file + '". Error: ' + str(e))
+        newValueDict = {"Summary":       self.info_summary,
+                        "Content":       self.info_content,
+                        "LastUpdated":   helpers.today()}
                         
-                try:
-                    os.rename(self.info_files[0], new_info_file_path)
-                except Exception, e:
-                    logger.warn('Error renaming cached info file: ' + str(e))
-                        
-            else:
-                f = open(new_info_file_path, 'w')
-                f.close()
-        
-        # Should we grab the artwork here if we're just grabbing thumbs or info?? Probably not since the files can be quite big
-        if image_url and self.query_type == 'artwork':
-
-            myDB = db.DBConnection()
+        myDB.upsert("descriptions", newValueDict, controlValueDict)
             
+        # Save the image URL to the database
+        if image_url:
             if self.id_type == 'artist':
                 myDB.action('UPDATE artists SET ArtworkURL=? WHERE ArtistID=?', [image_url, self.id])
             else:
                 myDB.action('UPDATE albums SET ArtworkURL=? WHERE AlbumID=?', [image_url, self.id])
+        
+        # Save the thumb URL to the database
+        if thumb_url:
+            if self.id_type == 'artist':
+                myDB.action('UPDATE artists SET ThumbURL=? WHERE ArtistID=?', [thumb_url, self.id])
+            else:
+                myDB.action('UPDATE albums SET ThumbURL=? WHERE AlbumID=?', [thumb_url, self.id])
+        
+        # Should we grab the artwork here if we're just grabbing thumbs or info?? Probably not since the files can be quite big
+        if image_url and self.query_type == 'artwork':
             
             try:
                 artwork = urllib2.urlopen(image_url).read()
@@ -427,13 +359,6 @@ class Cache(object):
                     
         # Grab the thumbnail as well if we're getting the full artwork (as long as it's missing/outdated
         if thumb_url and self.query_type in ['thumb','artwork'] and not (self.thumb_files and self._is_current(self.thumb_files[0])):
-            
-            myDB = db.DBConnection()
-            
-            if self.id_type == 'artist':
-                myDB.action('UPDATE artists SET ThumbURL=? WHERE ArtistID=?', [thumb_url, self.id])
-            else:
-                myDB.action('UPDATE albums SET ThumbURL=? WHERE AlbumID=?', [thumb_url, self.id])
             
             try:
                 artwork = urllib2.urlopen(thumb_url).read()
@@ -500,9 +425,7 @@ def getThumb(ArtistID=None, AlbumID=None):
 def getInfo(ArtistID=None, AlbumID=None):
     
     c = Cache()
-    info = c.get_info_from_cache(ArtistID, AlbumID)
     
-    if not info:
-        return None
+    info_dict = c.get_info_from_cache(ArtistID, AlbumID)
         
-    return info
+    return info_dict
