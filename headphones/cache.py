@@ -384,6 +384,13 @@ class Cache(object):
         # Grab the thumbnail as well if we're getting the full artwork (as long as it's missing/outdated
         if thumb_url and self.query_type in ['thumb','artwork'] and not (self.thumb_files and self._is_current(self.thumb_files[0])):
             
+            myDB = db.DBConnection()
+            
+            if self.id_type == 'artist':
+                myDB.action('UPDATE artists SET ThumbURL=? WHERE ArtistID=?', [thumb_url, self.id])
+            else:
+                myDB.action('UPDATE albums SET ThumbURL=? WHERE AlbumID=?', [thumb_url, self.id])
+            
             try:
                 artwork = urllib2.urlopen(thumb_url).read()
             except Exception, e:
