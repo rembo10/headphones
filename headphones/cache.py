@@ -309,7 +309,7 @@ class Cache(object):
         
         # If there is no info, we should either write an empty file, or make an older file current
         # just so it doesn't check it every time        
-        else:
+        elif not info and not (self.info_files and self._is_current(self.info_files[0])):
             
             new_info_file_path = os.path.join(self.path_to_info_cache, self.id + '.' + helpers.today() + '.txt')
             
@@ -335,7 +335,7 @@ class Cache(object):
                 f = open(new_info_file_path, 'w')
                 f.close()
         
-        # Should we grab the artwork here if we're just grabbing thumbs or info??
+        # Should we grab the artwork here if we're just grabbing thumbs or info?? Probably not since the files can be quite big
         if image_url and self.query_type == 'artwork':
 
             myDB = db.DBConnection()
