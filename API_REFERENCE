@@ -12,7 +12,7 @@ $commands&parameters[&optionalparameters]:
 
 getIndex (fetch data from index page. Returns: ArtistName, ArtistSortName, ArtistID, Status, DateAdded,
 												[LatestAlbum, ReleaseDate, AlbumID], HaveTracks, TotalTracks,
-												IncludeExtras, LastUpdated, ArtworkURL: a remote url to the artwork. To get the cached image path, see getArtistArt command)
+												IncludeExtras, LastUpdated, [ArtworkURL, ThumbURL]: a remote url to the artwork/thumbnail. To get the cached image path, see getArtistArt command)
 
 getArtist&id=$artistid (fetch artist data. returns the artist object (see above) and album info: Status, AlbumASIN, DateAdded, AlbumTitle, ArtistName, ReleaseDate, AlbumID, ArtistID, Type, ArtworkURL: hosted image path. For cached image, see getAlbumArt command)
 
