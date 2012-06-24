@@ -214,7 +214,7 @@ class Cache(object):
             logger.debug('Retrieving artist information from: ' + url)
             
             try:
-                result = urllib2.urlopen(url).read()
+                result = urllib2.urlopen(url, timeout=20).read()
             except:
                 logger.warn('Could not open url: ' + url)
                 return
@@ -261,7 +261,7 @@ class Cache(object):
         
             logger.debug('Retrieving artist information from: ' + url)
             try:
-                result = urllib2.urlopen(url).read()
+                result = urllib2.urlopen(url, timeout=20).read()
             except:
                 logger.warn('Could not open url: ' + url)
                 return
@@ -322,7 +322,7 @@ class Cache(object):
         if image_url and self.query_type == 'artwork':
             
             try:
-                artwork = urllib2.urlopen(image_url).read()
+                artwork = urllib2.urlopen(image_url, timeout=20).read()
             except Exception, e:
                 logger.error('Unable to open url "' + image_url + '". Error: ' + str(e))
                 artwork = None
@@ -361,7 +361,7 @@ class Cache(object):
         if thumb_url and self.query_type in ['thumb','artwork'] and not (self.thumb_files and self._is_current(self.thumb_files[0])):
             
             try:
-                artwork = urllib2.urlopen(thumb_url).read()
+                artwork = urllib2.urlopen(thumb_url, timeout=20).read()
             except Exception, e:
                 logger.error('Unable to open url "' + thumb_url + '". Error: ' + str(e))
                 artwork = None
