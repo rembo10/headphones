@@ -40,7 +40,7 @@
 		%for album in wanted:
 			<tr class="gradeZ">
 				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></th>
-				<td id="albumart"><img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
+				<td id="albumart"><img title="${album['AlbumID']}" height="50" width="50"></td>
 				<td id="artistname">${album['ArtistName']}</td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
@@ -70,7 +70,7 @@
 		<tbody>
 		%for album in upcoming:
 			<tr class="gradeZ">
-				<td id="albumart"><img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
+				<td id="albumart"><img title="${album['AlbumID']}" height="50" width="50"></td>
 				<td id="artistname">${album['ArtistName']}</td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
@@ -90,7 +90,19 @@
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
+	
+	function getAlbumArt() {
+		$("td#albumart img").each(function(){	
+			var id = $(this).attr('title');
+			var image = $(this);
+			if ( !image.hasClass('done') ) {
+				image.addClass('done');
+				getThumb(image,id,'album');
+			}
+		});
+	}
 	function initThisPage() {
+		getAlbumArt();
 		$('#wanted_table').dataTable({
 			"bDestroy":true,
 			"bFilter": false,
@@ -102,9 +114,6 @@
 	}
 	$(document).ready(function() {
 		initThisPage();		
-	});
-	$(window).load(function(){
-		replaceEmptyAlbum("table#wanted_table td#albumart img","interfaces/default/images/no-cover-art.png");
 	});
 	</script>
 </%def>
