@@ -27,7 +27,7 @@
 <%def name="body()">
 	<div id="artistheader" class="clearfix">
 		<div id="artistImg">
-			<img class="albumArt" src="http://ec1.images-amazon.com/images/P/None.01.MZZZZZZZ.jpg" width="200" height="200" alt="${artist['ArtistName']}"/>
+			<img id="artistImg" class="albumArt" alt="${artist['ArtistName']}"/>
 		</div>
 		<h1>	
 			%if artist['Status'] == 'Loading':	
@@ -109,7 +109,7 @@
 			%>
 			<tr class="grade${grade}">
 				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></td>
-				<td id="albumart"><img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
+				<td id="albumart"><img title="${album['AlbumID']}" height="64" width="64"></td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
@@ -148,11 +148,41 @@
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	
 	<script>
+	
+	function getArtistArt() {
+		var id = "${artist['ArtistID']}";
+		var image = $("div#artistImg img#artistImg");
+		if ( !image.hasClass('done') ) {
+			image.addClass('done');
+			getArtwork(image,id,'artist');
+		}
+	}
+	
+	function getAlbumArt() {
+		$("table#album_table tr td#albumart").each(function(){	
+			var id = $(this).children('img').attr('title');
+			var image = $(this).children('img');
+			if ( !image.hasClass('done') ) {
+				image.addClass('done');
+				getThumb(image,id,'album');
+			}
+		});
+	}
+	
+	function getArtistBio() {
+		var id = "${artist['ArtistID']}";
+		var elem = $("div#artistBio")
+		getInfo(elem,id,'artist');
+	}
+
+	
 	function initThisPage() {
 		%if artist['Status'] == 'Loading':
 			showMsg("Getting artist information",true);
 		%endif
-		
+		getArtistArt();
+		getArtistBio();
+		getAlbumArt();
 		$('#album_table').dataTable({
 			"bDestroy": true,
 			"aoColumns": [
@@ -181,19 +211,16 @@
 
 		});			
 		resetFilters("albums");
-		replaceEmptyAlbum("table#album_table td#albumart img","${artist['ArtistName']}");
 		setTimeout(function(){
 			initFancybox();
 		},1000);
 	}
 	
 	$(document).ready(function() {		
-		getArtistInfo("${artist['ArtistName']}","#artistImg img",3,"${artist['ArtistID']}");
 		initActions();
 		initThisPage();
 	});
 	$(window).load(function(){
-		replaceEmptyAlbum("table#album_table td#albumart img","${artist['ArtistName']}");
 		setTimeout(function(){
 			initFancybox();
 		},1000)

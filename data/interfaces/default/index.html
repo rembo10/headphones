@@ -74,11 +74,10 @@
 	function getArtistArt() {
 		$("table#artist_table tr td#name").each(function(){	
 			var id = $(this).children('a').attr('title');
-			var artist = $(this).children('a').text();
 			var image = $(this).parent().find("td#albumart img");
 			if ( !image.hasClass('done') ) {
 				image.addClass('done');
-				getArtistInfo(artist,image,1,id);
+				getThumb(image,id,'artist');
 			}
 		});
 	}
