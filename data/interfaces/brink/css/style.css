@@ -115,7 +115,8 @@ div#searchbar
 }
 div#searchbar input[type="text"]{
 	margin: 0px;
-	padding: 0px;
+	padding: 0;
+	padding-left: 5px;
 	float: left;
 	width: 150px;
 }

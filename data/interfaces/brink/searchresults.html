@@ -3,15 +3,17 @@
 <%def name="body()">
 
 	<div id="paddingheader">
-		<h1>Search Results</h1>
+		<h1><span>L</span>Search Results</h1>
 	</div>
 	<table class="display" id="searchresults_table">
 		<thead>
 			<tr>
+				<th id="albumart"></th>
 			%if type == 'album':
 				<th id="albumname">Album Name</th>
+			%else:
+				<th id="">Latest Album</th>
 			%endif
-				<th id="albumart"></th>
 				<th id="artistname">Artist Name</th>
 				<th id="score">Score</th>
 				<th id="add"></th>
@@ -27,14 +29,33 @@
 						grade = 'Z'
 				%>
 				<tr class="grade${grade}">
+					<td id="albumart">
+						<div class="album-art-small">
+							<a href="${result['albumurl']}">
+								<div>
+									%if album['Status'] == 'Skipped':
+										<a class="web-symbol" href="addReleaseById?rid=${result['albumid']}" title="Add this Album"><span>N</span></a>
+									%elif album['Status'] == 'Wanted':
+										<a class="web-symbol" href="#" title="Mark downloaded"><span>/</span></a>
+										<a class="web-symbol" href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Unmark"><span>&#215;</span></a>
+									%else:
+										<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Retry the same nbz"><span>*</span></a>
+										<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True" title="Try a new download, skipping all previously tried nzbs">J</a>
+									%endif
+									</div>
+								
+								<img src="http://ec1.images-amazon.com/images/P/.01.MZZZZZZZ.jpg">
+							</a>
+						</div>
+					</td>
 				%if type == 'album':
 					<td id="albumname"><a href="${result['albumurl']}">${result['title']}</a></td>
+				%else:
+					<td id="albumname">Latest Album</td>
 				%endif
 					<td id="artistname"><a href="${result['url']}">${result['uniquename']}</a></td>
 					<td id="score">
 						<div class="searchscore" title="The match result is: ${result['score']}%">
-										
-									
 							<div class="progress-container" title="Match result is ${result['score']}%">
 								<span class="searchmatch">${result['score']}%</span>
 								<div style="width: ${result['score']}%"></div>
@@ -42,7 +63,7 @@
 							</div>
 					</td>
 				%if type == 'album':	
-					<td id="add"><a class="btnAdd" href="addReleaseById?rid=${result['albumid']}" title="Add this Album"></a></td>
+					<td id="add"></td>
 				%else:
 					<td id="add"><a class="btnAdd" href="addArtist?artistid=${result['id']}" title="Add this Artist"></a></td>
 				%endif

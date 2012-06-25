@@ -93,7 +93,7 @@
 								%if album['Status'] == 'Skipped':
 									<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Mark Wanted"><span>O</span></a>
 								%elif album['Status'] == 'Wanted':
-									<a class="web-symbol" href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Abort"><span>&#215;</span></a>
+									<a class="web-symbol" href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Unmark Wanted"><span>&#215;</span></a>
 								%else:
 									<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Retry"><span>*</span></a>
 									<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True" title="Try new">J</a>
