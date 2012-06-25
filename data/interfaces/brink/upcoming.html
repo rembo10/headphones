@@ -69,6 +69,19 @@
 				<td id="albumart">
 					<div class="album-art-small">
 					<a href="albumPage?AlbumID=${album['AlbumID']}">
+						<div class="status ${album['Status']}">${album['Status']}<br />
+							<div>
+							%if album['Status'] == 'Skipped':
+								<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Get this album"><span>+</span></a>
+							%elif album['Status'] == 'Wanted':
+								<a class="web-symbol" href="#" title="Mark downloaded"><span>/</span></a>
+								<a class="web-symbol" href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Abort current status, and set to skipped"><span>&#215;</span></a>
+							%else:
+								<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Retry the same nbz"><span>*</span></a>
+								<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True" title="Try a new download, skipping all previously tried nzbs">J</a>
+							%endif
+							</div>
+						</div>
 						<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg">
 					</a>
 					</div>

@@ -4,14 +4,14 @@
 %>
 
 <%def name="headIncludes()">
-	<script type="text/javascript" src="interfaces/brink/js/configscript.js"></script>
+	<script type="text/javascript" src="../interfaces/brink/js/configscript.js"></script>
 </%def>
 
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<ul id="subhead_menu">
-			<li><a href="shutdown">Shut Down</a></li>
-			<li><a href="restart">Restart</a></li>
+			<li><a href="#WebInterface">Web Interfaces</a></li>
+			<li><a href="#SearchProviders">Search Providers</a></li>
 		</ul>
 	</div>	
 </%def>
@@ -19,7 +19,7 @@
 <%def name="body()">
     <form id="config" action="configUpdate" method="post">
 		<div id="config_wrapper"><!--config_wrapper-->
-			<div><!--Web Interface-->
+			<div id="WebInterface"><!--Web Interface-->
 				<h1><span>C</span>Web Interface</h1>
 				<h3><span>W</span>Web Interface changes require a restart to take effect</h3>
 				<div>
@@ -105,7 +105,7 @@
 							<tr>
 								<td><h2>API:</h2>
 									<h3><label for="api_enabled">Enabled/Disabled</label></h3></td>
-								<td><input type="checkbox" name="api_enabled" id="api_enabled" value="1" ${config['api_enabled']} /></td>
+								<td><input class="switch" type="checkbox" name="api_enabled" id="api_enabled" value="1" ${config['api_enabled']} /></td>
 							</tr>
 							<tr>
 								<td>
@@ -131,7 +131,7 @@
 									</td>
 									<td>
 										<div class="sliderInterval" for="nzb_search_interval"></div>
-										<input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="2" maxlength="10" /> mins
+										<h3><input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="2" maxlength="10" /> min.</h3>
 									</td>
 									<td>
 									</td>
@@ -146,7 +146,7 @@
 								</td>
 								<td>
 									<div class="sliderInterval" for="download_scan_interval"></div>
-									<input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="2" maxlength="10" /> mins
+									<h3><input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="2" maxlength="10" />min.</h3>
 								</td>
 							</tr>
 							<!--end Download Scan-->
@@ -154,17 +154,16 @@
 							<!--Library Scan-->
 							<tr>
 								<td><label for="library_scan_interval">Library scan:</label>
-									<h3><label id="library_scan_interval"></label></h3>
+									<h3><label id="libraryscan_interval"></label></h3>
 								</td>
 								<td>
-									<input type="text" name="library_scan_interval" value="${config['libraryscan_interval']}" size="2" maxlength="10" /> mins
-									<div class="sliderInterval" for="library_scan_interval"></div>
+									<h3><input type="text" name="libraryscan_interval" value="${config['libraryscan_interval']}" size="2" maxlength="10" />min.</h3>
+									<div class="sliderInterval" for="libraryscan_interval"></div>
 								</td>
 							</tr>
 							<!--end Interval-->
 					</table><!--end HTTP-->
 				</div>
-				<input type="submit" value="Save" />
 			</div>
 			<!--end Web Interface-->
 			
@@ -558,7 +557,6 @@
 								</td>
 							</tr>
 						</table>
-						<input type="submit" value="Save Changes" />
 					</div><!--end Encoder Options-->
 				
 					<div><!--Audio Properties-->
@@ -633,7 +631,7 @@
 							<tr>
 								<td>
 									<label>Advanced Encoding Options:</label>
-									<h4>Ignores audio properties</h4>
+									<h3>Ignores audio properties</h3>
 								</td>
 									<td><input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43" /></td>
 							</tr>
@@ -643,7 +641,6 @@
 							</tr><!--end Advanced Encoding-->
 						</table>
 					</div><!--Audio Properties-->
-					<input type="submit" value="Save Changes" />
 				</div><!--Re-Encoding Options-->
 					
 				<!--Notifications-->
@@ -679,9 +676,10 @@
 							<td><input class="switch" type="checkbox" name="xbmc_enabled" id="xbmc" value="1" ${config['xbmc_enabled']} /></td>
 						</tr>
 						<tr>
-							<td><label for="xbmc_host">XBMC Host:</label></td>
-							<td><input type="text" name="xbmc_host" value="${config['xbmc_host']}" size="30">
+							<td><label for="xbmc_host">XBMC Host:</label>
 								<h3>e.g. http://localhost:8080. Separate hosts with commas</h3>
+							</td>
+							<td><input type="text" name="xbmc_host" value="${config['xbmc_host']}" size="30">
 							</td>
 						</tr>
 						<tr>
@@ -705,11 +703,11 @@
 					<!--NMA Options-->
 					<table id="nmaoptions">
 						<tr>
-							<td colspan="2">
+							<td>
 								<h2>Notify My Android</h2>
 								<h3><label for="nma_enabled">Enabled/Disabled</label></h3>
 							</td>
-							<td><input type="checkbox" name="nma_enabled" id="nma" value="1" ${config['nma_enabled']} /></td>
+							<td><input class="switch" type="checkbox" name="nma_enabled" id="nma" value="1" ${config['nma_enabled']} /></td>
 						</tr>
 						<tr>
 							<td><label for="nma_apikey">NotifyMyAndroid API Key:</label>
@@ -750,14 +748,13 @@
 							</td>
 						</tr><!--end Priority-->
 					</table><!--end NMA Options-->
-					<input type="submit" value="Save Changes" />
 				</div><!--end Notifications-->
 				
 				<!--Mirror-->
 				<div id="Mirror">
 					<h2><span>K</span>Mirror</h2>
 					<!--Musicbrainz-->
-					<table class="configtable">
+					<table>
 						<tr>
 							<td><label for="mirror">Musicbrainz Mirror:</label></td>
 							<td>
@@ -777,7 +774,7 @@
 					</table><!--end Musicbrainz-->
 							
 					<!--Custom options-->
-					<table id="customoptions" class="configtable">
+					<table id="customoptions">
 						<tr><td colspan="2"><h2>Custom Options</h2></td></tr>
 						<tr>
 							<td><label for="customhost">Host:</label></td>
@@ -795,10 +792,10 @@
 					<!--end Custom options-->
 											
 					<!--Hp server options-->
-					<table id="hpserver" class="configtable">
+					<table id="hpserver">
 						<tr>
 							<td><h2>Headphones Server</h2>
-							<h3><a href="http://headphones.codeshy.com/vip">Get an Account</a></h3>
+							<h3><a href="http://headphones.codeshy.com/vip" target="_blank"><span>D</span>Get an Account</a></h3>
 							</td>
 							<td></td>
 						</tr>
@@ -810,19 +807,17 @@
 							<td><label for="hppass"Password:</label></td>
 							<td><input type="password" name="hppass" value="${config['hppass']}" size="15"></td>
 						</tr>
-						<tr>
-							<td colspan="2"><a href="http://headphones.codeshy.com/vip">Get an Account</a></td>
-						</tr>
-					</table><!--end hp server options-->
+					</table>
+					<!--end hp server options-->
+					
+					
 				</div><!--End mirror-->
-				<input type="submit" value="Save Changes" />
+				
 			</div><!--end AdvancedSettings-->
+			<input type="submit" value="Save Changes" />
 		</div><!--end config wrapper-->
     </form>
 </%def>
 
 <%def name="javascriptIncludes()">
-	<script>
-	
-	</script>
 </%def>

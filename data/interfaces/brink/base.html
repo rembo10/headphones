@@ -18,8 +18,8 @@
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		
-	<link rel="shortcut icon" href="../images/favicon.ico">
-	<link rel="apple-touch-icon" href="../images/headphoneslogo.png">
+	<link rel="shortcut icon" href=".images/favicon.ico">
+	<link rel="apple-touch-icon" href="images/headphoneslogo.png">
 	<!--Main Stylesheet-->
 	<link rel="stylesheet" href="interfaces/brink/CSS/style.css">
 	<!-- Theme style -->
@@ -114,30 +114,31 @@
 		<tr>
 			<td id="header" colspan="2">
 				<div id="logo">
-					<a href="home"><img src="../images/headphoneslogo.png" alt="headphones"/></a>
+					<img src="/images/headphoneslogo.png" alt="headphones" />
+				</div>
+				
+				<div id="searchbar">
+					<form action="search" method="get">
+						<select name="type">
+							<option value="artist">Artist</option>
+							<option value="album">Album</option>
+						</select>
+						<input type="text" value="" name="name" accesskey="s" placeholder="Search..." />
+						<input class="web-symbol" type="submit" value="L"/>
+					</form>
 				</div>
 				${next.headerIncludes()}
 			</td>
 		</tr>
 		<tr>
 			<td id="nav-container">
-				<div id="searchbar">
-					<form action="search" method="get">
-						<input type="text" value="" name="name" accesskey="s" placeholder="Search..." />
-						<select name="type">
-							<option value="artist">Artist</option>
-							<option value="album">Album</option>
-						</select>
-						<input class="web-symbol" type="submit" value="L"/>
-					</form>
-				</div>
 				<ul id="nav">
 					<li><a href="home" accesskey="1">
 							<span>U</span>Home
 						</a>
 					</li>
 					<li><a href="upcoming" accesskey="2">
-							<span>O</span>Upcoming
+							<span>N</span>Upcoming
 						</a>
 					</li>
 					<li><a href="extras" accesskey="3">
@@ -161,20 +162,6 @@
 						</a>
 					</li>
 				</ul>
-					<ul id="options">
-						<li><span class="web-symbol">:</span>Quick Action
-							<ul>
-								<li><h1>Force</h1>
-									<li><a href="forceSearch"><span>I</span>Wanted Albums</a></li>
-									<li><a href="forceUpdate"><span>U</span>Active Artists</a></li>
-									<li><a href="forcePostProcess"><span>J</span>Post-Process</a></li>
-									<li><a href="checkGithub"><span>V</span>Update</a></li>
-								</li>
-								<li><h1>Power</h1>
-									<li><a href="shutdown" onclick="javascript:return confirm('Shutdown HP?')"><span>X</span>Shut Down</a></li>
-									<li><a href="restart" onclick="javascript:return confirm('Restart HP?')"><span>J</span>Restart</a></li>
-								</li>
-							</ul></li></ul>
 			</td>
 			<td id="content-container">
 				<div id="main" class="main">
@@ -184,8 +171,15 @@
 		</tr>
 		<tr id="footer" >
 			<td colspan="2">
-				<div class="symbol-link">
-					
+				<div class="btn left">
+					<a href="forceSearch"><span>I</span>Wanted Albums</a>
+					<a href="forceUpdate"><span>U</span>Active Artists</a>
+					<a href="forcePostProcess"><span>J</span>Post-Process</a>
+					<a href="checkGithub"><span>V</span>Update</a>
+				</div>
+				<div class="btn right">
+					<a href="restart" onclick="javascript:return confirm('Restart HP?')"><span>J</span>Restart</a>
+					<a href="shutdown" onclick="javascript:return confirm('Shutdown HP?')"><span>X</span>Shut Down</a>
 				</div>
 			</td>
 		</tr>

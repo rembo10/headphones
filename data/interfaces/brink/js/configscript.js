@@ -1,7 +1,7 @@
 
 $(document).ready(function() { 
 	// Ajax Config Form
-    $('#config').ajaxForm({ 
+    $('.ajax').ajaxForm({ 
         success: function() {
 			var noty_id = noty({
 				"text":"Settings has been saved successfully!",
@@ -10,9 +10,6 @@ $(document).ready(function() {
         } 
     }); 
 });
-
-
-
 
 // Enabled/disabled label
 $(document).ready(function(){

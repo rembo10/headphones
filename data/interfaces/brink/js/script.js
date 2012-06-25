@@ -31,9 +31,7 @@ function mainResize()
 
 function mainScroll()
 {
-	$('#main').jScrollPane({
-		showArrows: true
-	});
+	$('#main').jScrollPane({ showArrows: true, animateScroll: true });
 }
 
 // Mark Config navi item

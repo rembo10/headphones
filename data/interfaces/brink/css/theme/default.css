@@ -61,17 +61,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#37414c', end
 
 #subhead_container{
 }
-/*Main menu current page*/
-
-/*Tooltip Color*/
-.tooltip
-{
-	background-image: linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-    background-image: -o-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-    background-image: -moz-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-    background-image: -webkit-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-    background-image: -ms-linear-gradient(bottom, rgb(117,117,117) 0%, rgb(156,156,156) 100%);
-}
 /*Tooltip popup Color*/
 .tooltip span
 {
@@ -99,24 +88,3 @@ table.display thead tr th
 /*
  * Scrollbar Colors 
  * */
- /* Scrollbar background */
-.jspTrack
-{
-	background-color: rgba(0,145,255,0.3);
-	border-left: 1px solid rgba(160,160,160,0.3);
-}
-
-.jspDrag:active,
-.jspDrag:hover
-{
-}
-.jspDrag
-{
-	background-color: rgba(0,175,255,0.2);
-}
-.jspArrowUp{
-	background: url(../images/arrowUp.png) 50% 50% no-repeat rgb(130,130,130);
-}
-.jspArrowDown{
-	background: url(../images/arrowDown.png) 50% 50% no-repeat rgb(130,130,130);
-}
