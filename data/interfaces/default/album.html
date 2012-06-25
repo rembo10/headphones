@@ -26,7 +26,7 @@
 	<div class="table_wrapper">
 		<div id="albumheader" class="clearfix">	
 			<div id="albumImg">
-				<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" height="200" width="200" alt="albumart" class="albumArt" rel="dialog">
+				<img id="albumImg" height="200" width="200" alt="albumart" class="albumArt" rel="dialog">
 			</div>
 			
 			<h1><a href="http://musicbrainz.org/release-group/${album['AlbumID']}">${album['AlbumTitle']}</a></h1>
@@ -41,9 +41,7 @@
 			
 			%>
 			<div class="albuminfo">
-				%if description:
-				<p>${description['Summary']}</p>
-				%endif
+				<div id="albumInfo"></div>
 				<ul>
 					<li>Tracks: <span>${totaltracks}</span></li> 
 					<li>Duration: <span>${albumduration}</span></li>
@@ -128,8 +126,25 @@
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
+	
+	function getAlbumArt() {
+		var id = "${album['AlbumID']}";
+		var image = $("div#albumImg img#albumImg");
+		if ( !image.hasClass('done') ) {
+			image.addClass('done');
+			getArtwork(image,id,'album');
+		}
+	}
+	
+	function getAlbumInfo() {
+		var id = "${album['AlbumID']}";
+		var elem = $("#albumInfo");
+		getInfo(elem,id,'album');
+	}
+	
 	$(document).ready(function()	{
-		getAlbumInfo("${album['ArtistName']}","${album['AlbumTitle']}","#albumheader .albumArt",3);
+		getAlbumInfo();
+		getAlbumArt();
 		initActions();
 		
 		$('#track_table').dataTable({

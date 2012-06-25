@@ -56,6 +56,10 @@ def initialize(options={}):
         '/favicon.ico':{
             'tools.staticfile.on': True,
             'tools.staticfile.filename': "images/favicon.ico"
+        },
+        '/cache':{
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': headphones.CACHE_DIR
         }
     }
     
