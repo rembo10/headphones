@@ -26,7 +26,7 @@ import string
 import headphones, exceptions
 from headphones import logger, db, helpers, classes, sab
 
-import bencode
+import lib.bencode as bencode
 
 class NewzbinDownloader(urllib.FancyURLopener):
 
