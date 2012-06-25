@@ -115,9 +115,9 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
     myDB = db.DBConnection()
     
     if albumid:
-        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE AlbumID=?', [albumid])
+        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate, Type from albums WHERE AlbumID=?', [albumid])
     else:
-        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
+        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate, Type from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
         new = True
         
     for albums in results:
@@ -161,6 +161,11 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 categories = "23,22"
             else:
                 categories = "22"
+                
+            # Search Audiobooks
+            if albums['Type'] == "Other":
+                categories = "49"
+                logger.info("Album type is audiobook/spokenword. Using audiobook category")
                 
             # For some reason NZBMatrix is erroring out/timing out when the term starts with a "The" right now
             # so we'll strip it out for the time being. This may get fixed on their end, it may not, but
@@ -212,7 +217,11 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             elif headphones.PREFERRED_QUALITY:
                 categories = "3040,3010"
             else:
-                categories = "3010"    
+                categories = "3010"
+                
+            if albums['Type'] == 'Other':
+                categories = "3030"
+                logger.info("Album type is audiobook/spokenword. Using audiobook category")
 
             params = {    "t": "search",
                         "apikey": headphones.NEWZNAB_APIKEY,
@@ -259,7 +268,11 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             elif headphones.PREFERRED_QUALITY:
                 categories = "3040,3010"
             else:
-                categories = "3010"      
+                categories = "3010"
+                
+            if albums['Type'] == 'Other':
+                categories = "3030"
+                logger.info("Album type is audiobook/spokenword. Using audiobook category")
 
             params = {    "t": "search",
                         "apikey": headphones.NZBSORG_HASH,
@@ -312,6 +325,11 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 categories = "7"        #music
                 format = "8"            #mp3      
 
+            if albums['Type'] == 'Other':
+                categories = "13"
+                format = "16"
+                logger.info("Album type is audiobook/spokenword. Using audiobook category")
+            
             params = {   
                         "fpn": "p",
                         'u_nfo_posts_only': 0,
