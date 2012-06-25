@@ -26,6 +26,8 @@ import string
 import headphones, exceptions
 from headphones import logger, db, helpers, classes, sab
 
+import bencode
+
 class NewzbinDownloader(urllib.FancyURLopener):
 
     def __init__(self):
@@ -912,15 +914,17 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
                 elif headphones.TORRENTBLACKHOLE_DIR != "":
                 
+                    # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
+                    
                     torrent_name = torrent_folder_name + '.torrent'
                     download_path = os.path.join(headphones.TORRENTBLACKHOLE_DIR, torrent_name)
                     try:
-                        f = open(download_path, 'wb')
-                        f.write(data)
-                        f.close()
-                        logger.info('File saved to: %s' % torrent_name)
+                        torrent_file = open(download_path, 'rb').read()
+                        torrent_info = bencode.bdecode(torrent_file)
+                        torrent_folder_name = torrent_info['info'].get('name','')
+                        logger.info('Torrent folder name: %s' % torrent_folder_name)
                     except Exception, e:
-                        logger.error('Couldn\'t write Torrent file: %s' % e)
+                        logger.error('Couldn\'t get name from Torrent file: %s' % e)
                         break
                         
                 myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
