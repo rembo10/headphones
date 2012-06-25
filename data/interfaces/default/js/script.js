@@ -15,7 +15,7 @@ function getThumb(imgElem,id,type) {
 			else {
 				var imageUrl = data;
 				}
-			$(imgElem).attr("src",imageUrl).removeAttr("width").removeAttr("height").hide().fadeIn();
+			$(imgElem).attr("src",imageUrl).hide().fadeIn();
 			$(imgElem).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + name + '"></a>');
 			}
 	});
@@ -51,13 +51,33 @@ function getInfo(elem,id,type) {
 	} else {
 		var infoURL = "getInfo?AlbumID=" + id;
 	}
-	// Get Data from the cache by Artist ID 	
+	// Get Data from the cache by ID 	
 	$.ajax({
 		url: infoURL,
-		data_type: "jsonp",
+		dataType: "json",
 		success: function(data){
-			var summary = data['Summary'];
+			var summary = data.Summary;
 			$(elem).append(summary);
+		}
+	});
+}
+
+function getImageLinks(elem,id,type) {
+	
+	if ( type == 'artist' ) {
+		var infoURL = "getImageLinks?ArtistID=" + id;
+	} else {
+		var infoURL = "getImageLinks?AlbumID=" + id;
+	}
+	// Get Data from the cache by ID 	
+	$.ajax({
+		url: infoURL,
+		dataType: "json",
+		success: function(data){
+			var thumbnail = data.thumbnail;
+			var artwork = data.artwork;
+			
+			$(elem).attr("src", thumbnail);
 		}
 	});
 }
