@@ -32,7 +32,7 @@ function getArtwork(imgElem,id,type) {
 	// Get Data from the cache by Artist ID 	
 	$.ajax({
 		url: artworkURL,
-		cache: true;
+		cache: true,
 		success: function(data){
 			if ( data == "" ) {
 				var imageUrl = "interfaces/default/images/no-cover-artist.png";
@@ -90,43 +90,6 @@ function getOriginalWidthOfImg(img_element) {
     var t = new Image();
     t.src = (img_element.getAttribute ? img_element.getAttribute("src") : false) || img_element.src;
     return t.width;
-}
-
-function replaceEmptyAlbum(elem,name) {
-	var album = $(elem);
-	var artist = name;
-	var albumname;
-	var apikey = "690e1ed3bc00bc91804cd8f7fe5ed6d4";
-	// Loop through every album art and get the albums with no cover
-	$(album).each(function(e){
-		var dimensions = getOriginalWidthOfImg(this);
-		var cover = $(this);
-		var url;
-		albumname = cover.closest("tr").find("#albumname a").text();
-		if ( dimensions <= 1) {
-			url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" + apikey + "&artist="+ artist +"&album="+ albumname +"&format=json&callback=?";
-			var imageUrl;
-			$.getJSON(url, function(data, response) {
-				if (data.album === undefined)  {
-					imageUrl = "interfaces/default/images/no-cover-art.png";
-				} else {
-					imageUrl = data.album.image[3]['#text'];	
-					imageLarge = data.album.image[4]['#text'];					
-				// If Last.fm don't provide a cover then use standard
-				}
-				$(cover).error(function(){
-					imageUrl = "interfaces/default/images/no-cover-art.png";
-					$(this).hide().attr("src", imageUrl).show();
-				})
-				if ( imageUrl == "") {
-					imageUrl = "interfaces/default/images/no-cover-art.png";
-					$(this).hide().attr("src", imageUrl).show();
-				}
-				$(cover).hide().attr("src", imageUrl).show();
-				$(cover).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + artist + " - " + albumname + '"></a>');
-			});
-		} 	
-	});		
 }
 
 function initHeader() {		
