@@ -1,3 +1,18 @@
+#  This file is part of Headphones.
+#
+#  Headphones is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Headphones is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
+
 from __future__ import with_statement
 
 import time
@@ -52,10 +67,10 @@ def startmb(forcemb=False):
 
     # Add headphones credentials
     if headphones.MIRROR == "headphones":
-    	if not mbuser and mbpass:
-    		logger.warn("No username or password set for VIP server")
+        if not mbuser and mbpass:
+            logger.warn("No username or password set for VIP server")
         else:
-        	musicbrainzngs.hpauth(mbuser,mbpass)
+            musicbrainzngs.hpauth(mbuser,mbpass)
 
     # Don't really need to return q anymore since ngs, but maybe we can return an 'initialized=True' instead?
     q = musicbrainzngs
@@ -224,7 +239,7 @@ def getArtist(artistid, extrasonly=False):
             includeExtras = False
         
         if includeExtras or headphones.INCLUDE_EXTRAS:
-            includes = ["single", "ep", "compilation", "soundtrack", "live", "remix"]
+            includes = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]
             for include in includes:
                 
                 artist = None

@@ -129,6 +129,54 @@ table.display td.center {
 	text-align: center;
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Little hack to handle the two tables on the upcoming page
+ */
+table.display_no_select {
+	margin: 20px auto; 
+	clear: both;
+	border:1px solid #EEE;
+	width: 100%;
+	
+	/* Note Firefox 3.5 and before have a bug with border-collapse
+	 * ( https://bugzilla.mozilla.org/show%5Fbug.cgi?id=155955 ) 
+	 * border-spacing: 0; is one possible option. Conditional-css.com is
+	 * useful for this kind of thing
+	 *
+	 * Further note IE 6/7 has problems when calculating widths with border width.
+	 * It subtracts one px relative to the other browsers from the first column, and
+	 * adds one to the end...
+	 *
+	 * If you want that effect I'd suggest setting a border-top/left on th/td's and 
+	 * then filling in the gaps with other borders.
+	 */
+}
+
+table.display_no_select thead th {
+	padding: 3px 18px 3px 10px;
+	background-color: white;
+	font-weight: bold;
+	font-size: 16px;
+}
+
+table.display_no_select tfoot th {
+	padding: 3px 18px 3px 10px;
+	border-top: 1px solid black;
+	font-weight: bold;
+}
+
+table.display_no_select tr.heading2 td {
+	border-bottom: 1px solid #aaa;
+}
+
+table.display_no_select td {
+	padding: 8px 10px;
+	font-size: 16px;
+}
+table
+table.display_no_select td.center {
+	text-align: center;
+}
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

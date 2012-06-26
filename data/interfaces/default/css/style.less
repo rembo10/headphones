@@ -84,6 +84,8 @@ img {
         float: left;
         min-height: 100%;
         min-width: 100%;
+        max-width: 250px;
+        max-height: 300px;
         position: relative;
     }
 }
@@ -1082,6 +1084,15 @@ div#albumheader .albuminfo li span, div#artistheader h3 span {
     font-size: 14px;
     text-align: center;
     vertical-align: middle;
+}
+#upcoming_table, #wanted_table {
+	td#albumart {
+	    img {
+	        background: #FFF;
+	        border: 1px solid #ccc;
+	        padding: 3px;
+	    }
+	}
 }
 #upcoming_table th#albumart, #wanted_table th#albumart {
     min-width: 50px;
