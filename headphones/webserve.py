@@ -616,3 +616,13 @@ class WebInterface(object):
         return cache.getThumb(ArtistID, AlbumID)
         
     getThumb.exposed = True
+    
+    # If you just want to get the last.fm image links for an album, make sure to pass a releaseid and not a releasegroupid
+    def getImageLinks(self, ArtistID=None, AlbumID=None):
+        
+        from headphones import cache
+        image_dict = cache.getImageLinks(ArtistID, AlbumID)
+        
+        return simplejson.dumps(image_dict)
+        
+    getImageLinks.exposed = True

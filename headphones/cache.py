@@ -194,6 +194,88 @@ class Cache(object):
         else:
             info_dict = { 'Summary' : db_info['Summary'], 'Content' : db_info['Content'] }
             return info_dict
+            
+    def get_image_links(self, ArtistID=None, AlbumID=None):
+        '''
+        Here we're just going to open up the last.fm url, grab the image links and return them
+        Won't save any image urls, or save the artwork in the cache. Useful for search results, etc.
+        '''
+        if ArtistID:
+            
+            self.id_type = 'artist'
+            
+            params = {  "method": "artist.getInfo",
+                        "api_key": lastfm_apikey,
+                        "mbid": ArtistID,
+                        "format": "json"
+                        }
+            
+            url = "http://ws.audioscrobbler.com/2.0/?" + urllib.urlencode(params)
+            logger.debug('Retrieving artist information from: ' + url)
+            
+            try:
+                result = urllib2.urlopen(url, timeout=20).read()
+            except:
+                logger.warn('Could not open url: ' + url)
+                return
+            
+            if result:
+            
+                try:
+                    data = simplejson.JSONDecoder().decode(result)
+                except:
+                    logger.warn('Could not parse data from url: ' + url)
+                    return
+
+                try:
+                    image_url = data['artist']['image'][-1]['#text']
+                except KeyError:
+                    logger.debug('No artist image found on url: ' + url)
+                    image_url = None
+                
+                thumb_url = self._get_thumb_url(data)
+                if not thumb_url:
+                    logger.debug('No artist thumbnail image found on url: ' + url)
+                    
+        else:
+            
+            self.id_type = 'album'
+            
+            params = {  "method": "album.getInfo",
+                        "api_key": lastfm_apikey,
+                        "mbid": AlbumID,
+                        "format": "json"
+                        }
+            
+            url = "http://ws.audioscrobbler.com/2.0/?" + urllib.urlencode(params)
+            logger.debug('Retrieving album information from: ' + url)
+            
+            try:
+                result = urllib2.urlopen(url, timeout=20).read()
+            except:
+                logger.warn('Could not open url: ' + url)
+                return
+            
+            if result:
+            
+                try:
+                    data = simplejson.JSONDecoder().decode(result)
+                except:
+                    logger.warn('Could not parse data from url: ' + url)
+                    return
+                    
+                try:
+                    image_url = data['artist']['image'][-1]['#text']
+                except KeyError:
+                    logger.debug('No artist image found on url: ' + url)
+                    image_url = None
+                
+                thumb_url = self._get_thumb_url(data)
+                if not thumb_url:
+                    logger.debug('No artist thumbnail image found on url: ' + url)
+                    
+        image_dict = {'artwork' : image_url, 'thumbnail' : thumb_url }
+        return image_dict
         
     def _update_cache(self):
         '''
@@ -429,3 +511,10 @@ def getInfo(ArtistID=None, AlbumID=None):
     info_dict = c.get_info_from_cache(ArtistID, AlbumID)
         
     return info_dict
+    
+def getImageLinks(ArtistID=None, AlbumID=None):
+    
+    c = Cache()
+    image_links = c.get_image_links(ArtistID, AlbumID)
+    
+    return image_links
