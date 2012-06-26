@@ -218,7 +218,7 @@ def addArtisttoDB(artistid, extrasonly=False):
                 
             myDB.upsert("tracks", newValueDict, controlValueDict)
             
-        logger.info(u"Updating album cache for " + rg['title'])
+        logger.debug(u"Updating album cache for " + rg['title'])
         cache.getThumb(AlbumID=rg['id'])
             
     latestalbum = myDB.action('SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [artistid]).fetchone()
@@ -243,7 +243,7 @@ def addArtisttoDB(artistid, extrasonly=False):
     
     myDB.upsert("artists", newValueDict, controlValueDict)
     
-    logger.info(u"Updating cache for: " + artist['artist_name'])
+    logger.debug(u"Updating cache for: " + artist['artist_name'])
     cache.getThumb(ArtistID=artistid)
     
     logger.info(u"Updating complete for: " + artist['artist_name'])
