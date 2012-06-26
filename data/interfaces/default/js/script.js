@@ -344,7 +344,7 @@ function initFancybox() {
 	if ( $("a[rel=dialog]").length > 0 ) {
 		$.getScript('interfaces/default/js/fancybox/jquery.fancybox-1.3.4.js', function() {
 			$("head").append("<link rel='stylesheet' href='interfaces/default/js/fancybox/jquery.fancybox-1.3.4.css'>");
-	 		$("a[rel=dialog]").fancybox({});
+	 		$("a[rel=dialog]").fancybox();
 	 	});
 	 }
 }
