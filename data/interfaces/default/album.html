@@ -129,10 +129,11 @@
 	
 	function getAlbumArt() {
 		var id = "${album['AlbumID']}";
+		var name = "${album['AlbumTitle']}";
 		var image = $("div#albumImg img#albumImg");
 		if ( !image.hasClass('done') ) {
 			image.addClass('done');
-			getArtwork(image,id,'album');
+			getArtwork(image,id,name,'album');
 		}
 	}
 	
@@ -146,6 +147,9 @@
 		getAlbumInfo();
 		getAlbumArt();
 		initActions();
+		setTimeout(function(){
+			initFancybox();
+			},1000);
 		
 		$('#track_table').dataTable({
 			"aaSorting": [],
@@ -154,8 +158,6 @@
 			"bPaginate": false
 		});
 	});
-	$(window).load(function(){
-		initFancybox();
-	});
+
 	</script>
 </%def>

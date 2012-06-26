@@ -17,12 +17,12 @@ function getThumb(imgElem,id,type) {
 				var imageUrl = data;
 				}
 			$(imgElem).attr("src",imageUrl).hide().fadeIn();
-			$(imgElem).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + name + '"></a>');
+			// $(imgElem).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + name + '"></a>');
 			}
 	});
 }
 
-function getArtwork(imgElem,id,type) {
+function getArtwork(imgElem,id,name,type) {
 	
 	if ( type == 'artist' ) {
 		var artworkURL = "getArtwork?ArtistID=" + id;
@@ -40,8 +40,8 @@ function getArtwork(imgElem,id,type) {
 			else {
 				var imageUrl = data;
 				}
-			$(imgElem).attr("src",imageUrl).removeAttr("width").removeAttr("height").hide().fadeIn();
-			$(imgElem).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + name + '"></a>');
+			$(imgElem).attr("src",imageUrl).hide().fadeIn();
+			$(imgElem).wrap('<a href="'+ imageUrl +'" rel="dialog" title="' + name + '"></a>');
 			}
 	});
 }

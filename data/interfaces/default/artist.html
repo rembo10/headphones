@@ -27,7 +27,7 @@
 <%def name="body()">
 	<div id="artistheader" class="clearfix">
 		<div id="artistImg">
-			<img id="artistImg" class="albumArt" alt="${artist['ArtistName']}"/>
+			<img id="artistImage" class="albumArt" alt="${artist['ArtistName']}" height="200" />
 		</div>
 		<h1>	
 			%if artist['Status'] == 'Loading':	
@@ -109,7 +109,7 @@
 			%>
 			<tr class="grade${grade}">
 				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></td>
-				<td id="albumart"><img title="${album['AlbumID']}" height="64" width="64"></td>
+				<td id="albumart"><img class="albumArt" title="${album['AlbumID']}" height="64" width="64"></td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
@@ -151,10 +151,11 @@
 	
 	function getArtistArt() {
 		var id = "${artist['ArtistID']}";
-		var image = $("div#artistImg img#artistImg");
+		var name = "${artist['ArtistName']}";
+		var image = $("div#artistImg img#artistImage");
 		if ( !image.hasClass('done') ) {
 			image.addClass('done');
-			getArtwork(image,id,'artist');
+			getArtwork(image,id,name,'artist');
 		}
 	}
 	
@@ -220,10 +221,6 @@
 		initActions();
 		initThisPage();
 	});
-	$(window).load(function(){
-		setTimeout(function(){
-			initFancybox();
-		},1000)
-	});
+
 	</script>
 </%def>
