@@ -26,7 +26,7 @@
 	<div class="table_wrapper">
 		<div id="albumheader" class="clearfix">	
 			<div id="albumImg">
-				<img id="albumImg" height="200" width="200" alt="albumart" class="albumArt" rel="dialog">
+				<img height="200" alt="" class="albumArt">
 			</div>
 			
 			<h1><a href="http://musicbrainz.org/release-group/${album['AlbumID']}">${album['AlbumTitle']}</a></h1>
@@ -130,7 +130,7 @@
 	function getAlbumArt() {
 		var id = "${album['AlbumID']}";
 		var name = "${album['AlbumTitle']}";
-		var image = $("div#albumImg img#albumImg");
+		var image = $("div#albumImg img");
 		if ( !image.hasClass('done') ) {
 			image.addClass('done');
 			getArtwork(image,id,name,'album');

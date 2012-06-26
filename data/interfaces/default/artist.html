@@ -27,7 +27,7 @@
 <%def name="body()">
 	<div id="artistheader" class="clearfix">
 		<div id="artistImg">
-			<img id="artistImage" class="albumArt" alt="${artist['ArtistName']}" height="200" />
+			<img id="artistImage" class="albumArt" alt="" />
 		</div>
 		<h1>	
 			%if artist['Status'] == 'Loading':	
@@ -214,7 +214,7 @@
 		resetFilters("albums");
 		setTimeout(function(){
 			initFancybox();
-		},1000);
+		},1500)
 	}
 	
 	$(document).ready(function() {		

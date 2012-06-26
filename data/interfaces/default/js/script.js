@@ -2,8 +2,10 @@ function getThumb(imgElem,id,type) {
 	
 	if ( type == 'artist' ) {
 		var thumbURL = "getThumb?ArtistID=" + id;
+		// var imgURL = "getArtwork?ArtistID=" + id;
 	} else {
 		var thumbURL = "getThumb?AlbumID=" + id;
+		// var imgURL = "getArtwork?AlbumID=" + id;
 	}
 	// Get Data from the cache by Artist ID 	
 	$.ajax({
@@ -15,9 +17,9 @@ function getThumb(imgElem,id,type) {
 			}
 			else {
 				var imageUrl = data;
-				}
+			}
 			$(imgElem).attr("src",imageUrl).hide().fadeIn();
-			// $(imgElem).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + name + '"></a>');
+			// $(imgElem).wrap('<a href="'+ imgURL +'" rel="dialog" title="' + name + '"></a>');
 			}
 	});
 }
@@ -34,12 +36,12 @@ function getArtwork(imgElem,id,name,type) {
 		url: artworkURL,
 		cache: true,
 		success: function(data){
-			if ( data == "" ) {
+			if ( data == "" || data == undefined ) {
 				var imageUrl = "interfaces/default/images/no-cover-artist.png";
 			}
 			else {
 				var imageUrl = data;
-				}
+			}
 			$(imgElem).attr("src",imageUrl).hide().fadeIn();
 			$(imgElem).wrap('<a href="'+ imageUrl +'" rel="dialog" title="' + name + '"></a>');
 			}
@@ -78,18 +80,21 @@ function getImageLinks(elem,id,type) {
 		cache: true,
 		dataType: "json",
 		success: function(data){
-			var thumbnail = data.thumbnail;
-			var artwork = data.artwork;
-			
+			if ( data.thumbnail == "" || data.thumbnail == undefined ) {
+				var thumbnail = "interfaces/default/images/no-cover-artist.png";
+			}
+			else {
+				var thumbnail = data.thumbnail;
+			}
+			if ( data.artwork == "" || data.artwork == undefined ) {
+				var artwork = "interfaces/default/images/no-cover-artist.png";
+			}
+			else {
+				var artwork = data.artwork;
+			}
 			$(elem).attr("src", thumbnail);
 		}
 	});
-}
-
-function getOriginalWidthOfImg(img_element) {
-    var t = new Image();
-    t.src = (img_element.getAttribute ? img_element.getAttribute("src") : false) || img_element.src;
-    return t.width;
 }
 
 function initHeader() {		
@@ -339,7 +344,7 @@ function initFancybox() {
 	if ( $("a[rel=dialog]").length > 0 ) {
 		$.getScript('interfaces/default/js/fancybox/jquery.fancybox-1.3.4.js', function() {
 			$("head").append("<link rel='stylesheet' href='interfaces/default/js/fancybox/jquery.fancybox-1.3.4.css'>");
-	 		$("a[rel=dialog]").fancybox();
+	 		$("a[rel=dialog]").fancybox({});
 	 	});
 	 }
 }
