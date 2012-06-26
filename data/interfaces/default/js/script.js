@@ -153,7 +153,8 @@ function initActions() {
     $("#subhead_menu #menu_link_scan").button({ icons: { primary: "ui-icon-search"} });
 }
 
-function refreshSubmenu(url) {
+function refreshSubmenu() {
+	var url = $(location).attr('href');
 	$("#subhead_container").load(url + " #subhead_menu",function(){
 		initActions();
 	});
@@ -303,7 +304,7 @@ function doAjaxCall(url,elem,reload,form) {
 	  			feedback.fadeOut(function(){
 	  				feedback.removeClass('success');
 	  			});
-	  			if ( reload == true ) 	refreshSubmenu(url);
+	  			if ( reload == true ) 	refreshSubmenu();
 	  			if ( reload == "table") {
 	  				console.log('refresh'); refreshTable();
 	  			}
