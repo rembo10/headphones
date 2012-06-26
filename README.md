@@ -2,33 +2,44 @@
 
 ###Installation and Notes
 
-This is a pretty early release of a third-party add-on for SABnzbd.
+This is a relatively early release of a third-party add-on for SABnzbd. It's been around for about a year, and while
+quite functional, there are still a lot of kinks to work out!
 
 To run it, just double-click the Headphones.py file (in Windows - you may need to right click and click 'Open With' -> Python) or launch a terminal, cd into the Headphones directory and run 'python headphones.py'.
 
 For additional startup options, type 'python Headphones.py -h' or 'python Headphones.py --help'
 
 ###Screenshots
-(note: These screenshots are a little out of date and the interface has gone through a little bit of an overhaul. Updated shots coming soon!)
 
-First Run
+Homepage (Artist Overview)
 
-![preview thumb](http://img806.imageshack.us/img806/4202/headphones2.png)
+![preview thumb](http://i.imgur.com/7VHuO.png)
 
-Artist Search Results
+One of the many settings pages....
 
-![preview thumb](http://img12.imageshack.us/img12/7838/headphones4.png)
+![preview thumb](http://i.imgur.com/l0AYz.png)
 
-Album Selection
+It might even know you better than you know yourself:
 
-![preview thumb](http://img836.imageshack.us/img836/2880/headphones3.png)
+![preview thumb](http://i.imgur.com/LALaa.png)
 
-iTunes/Import
+Import Your Artists:
 
-![preview thumb](http://img62.imageshack.us/img62/1218/headphones1.png)
+![preview thumb](http://i.imgur.com/rvkD4.png)
 
-If you run into any issues, visit http://github.com/rembo10/headphones and report an issue. 
+Artist Search Results (also search by album!):
 
-This is free software so feel free to use it/modify it as you wish. 
+![preview thumb](http://i.imgur.com/1mTzO.png)
 
-If you have any ideas for the next release, also make sure to post that here!
+Artist Page with Bio & Album Overview:
+
+![preview thumb](http://i.imgur.com/5j7Jh.png)
+![preview thumb](http://i.imgur.com/mSKEJ.png)
+
+Album Page with track overview:
+
+![preview thumb](http://i.imgur.com/CUy4e.png)
+
+If you run into any issues, visit http://headphones.codeshy.com/forum and report an issue. 
+
+This is free software under the GPL v3 open source license - so feel free to do with it what you wish.
