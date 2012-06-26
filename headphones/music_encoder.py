@@ -52,7 +52,7 @@ def encode(albumPath):
                         musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT).encode(headphones.SYS_ENCODING)
                         musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
                     else:
-                        logger.warn('Music "%s" is already encoded' % (music))
+                        logger.debug('Music "%s" is already encoded' % (music))
                 else:
                     musicFiles.append(os.path.join(r, music))
                     musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT).encode(headphones.SYS_ENCODING)
@@ -70,7 +70,7 @@ def encode(albumPath):
                 logger.warn('Lame cant encode "%s" format for "%s", use ffmpeg' % (os.path.splitext(music)[1],music))
             else:
                 if (music.lower().endswith('.mp3') and (infoMusic.bitrate/1000<=headphones.BITRATE)): 
-                    logger.warn('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))
+                    logger.info('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))
                 else:
                     command(encoder,music,musicTempFiles[i],albumPath)
                     ifencoded=1
@@ -83,7 +83,7 @@ def encode(albumPath):
                     ifencoded=1
             elif (headphones.ENCODEROUTPUTFORMAT=='mp3' or headphones.ENCODEROUTPUTFORMAT=='m4a'):
                 if (music.lower().endswith('.'+headphones.ENCODEROUTPUTFORMAT) and (infoMusic.bitrate/1000<=headphones.BITRATE)):
-                    logger.warn('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))      
+                    logger.info('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))      
                 else:
                     command(encoder,music,musicTempFiles[i],albumPath)
                     ifencoded=1
