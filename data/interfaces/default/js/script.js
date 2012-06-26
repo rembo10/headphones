@@ -8,6 +8,7 @@ function getThumb(imgElem,id,type) {
 	// Get Data from the cache by Artist ID 	
 	$.ajax({
 		url: thumbURL,
+		cache: true,
 		success: function(data){
 			if ( data == "" ) {
 				var imageUrl = "interfaces/default/images/no-cover-artist.png";
@@ -31,6 +32,7 @@ function getArtwork(imgElem,id,type) {
 	// Get Data from the cache by Artist ID 	
 	$.ajax({
 		url: artworkURL,
+		cache: true;
 		success: function(data){
 			if ( data == "" ) {
 				var imageUrl = "interfaces/default/images/no-cover-artist.png";
@@ -54,6 +56,7 @@ function getInfo(elem,id,type) {
 	// Get Data from the cache by ID 	
 	$.ajax({
 		url: infoURL,
+		cache: true,
 		dataType: "json",
 		success: function(data){
 			var summary = data.Summary;
@@ -72,6 +75,7 @@ function getImageLinks(elem,id,type) {
 	// Get Data from the cache by ID 	
 	$.ajax({
 		url: infoURL,
+		cache: true,
 		dataType: "json",
 		success: function(data){
 			var thumbnail = data.thumbnail;
