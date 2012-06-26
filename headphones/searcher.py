@@ -1,3 +1,18 @@
+#  This file is part of Headphones.
+#
+#  Headphones is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Headphones is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
+
 import urllib, urllib2, urlparse
 import lib.feedparser as feedparser
 from xml.dom import minidom
@@ -10,6 +25,8 @@ import string
 
 import headphones, exceptions
 from headphones import logger, db, helpers, classes, sab
+
+import lib.bencode as bencode
 
 class NewzbinDownloader(urllib.FancyURLopener):
 
@@ -100,9 +117,9 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
     myDB = db.DBConnection()
     
     if albumid:
-        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE AlbumID=?', [albumid])
+        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate, Type from albums WHERE AlbumID=?', [albumid])
     else:
-        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
+        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate, Type from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
         new = True
         
     for albums in results:
@@ -126,9 +143,9 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
         if albums[0] in albums[1] or len(albums[0]) < 4 or len(albums[1]) < 4:
             term = cleanartist + ' ' + cleanalbum + ' ' + year
         elif albums[0] == 'Various Artists':
-        	term = cleanalbum + ' ' + year
+            term = cleanalbum + ' ' + year
         else:
-        	term = cleanartist + ' ' + cleanalbum
+            term = cleanartist + ' ' + cleanalbum
             
         # Replace bad characters in the term and unicode it
         term = re.sub('[\.\-\/]', ' ', term).encode('utf-8')
@@ -147,12 +164,17 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             else:
                 categories = "22"
                 
+            # Search Audiobooks
+            if albums['Type'] == "Other":
+                categories = "49"
+                logger.info("Album type is audiobook/spokenword. Using audiobook category")
+                
             # For some reason NZBMatrix is erroring out/timing out when the term starts with a "The" right now
             # so we'll strip it out for the time being. This may get fixed on their end, it may not, but
             # hopefully this will fix it for now. If you notice anything else it gets stuck on, please post it
             # on Github so it can be added
             if term.lower().startswith("the "):
-            	term = term[4:]
+                term = term[4:]
             
             
             params = {    "page": "download",
@@ -169,26 +191,26 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
             logger.info(u'Parsing results from <a href="%s">NZBMatrix</a>' % searchURL)
             try:
-            	data = urllib2.urlopen(searchURL, timeout=20).read()
+                data = urllib2.urlopen(searchURL, timeout=20).read()
             except urllib2.URLError, e:
-            	logger.warn('Error fetching data from NZBMatrix: %s' % e)
-            	data = False   
-            	
+                logger.warn('Error fetching data from NZBMatrix: %s' % e)
+                data = False   
+                
             if data:
             
-				d = feedparser.parse(data)
-				
-				for item in d.entries:
-					try:
-						url = item.link
-						title = item.title
-						size = int(item.links[1]['length'])
-						
-						resultlist.append((title, size, url, provider))
-						logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-  					
-					except AttributeError, e:
-						logger.info(u"No results found from NZBMatrix for %s" % term)
+                d = feedparser.parse(data)
+                
+                for item in d.entries:
+                    try:
+                        url = item.link
+                        title = item.title
+                        size = int(item.links[1]['length'])
+                        
+                        resultlist.append((title, size, url, provider))
+                        logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                    
+                    except AttributeError, e:
+                        logger.info(u"No results found from NZBMatrix for %s" % term)
             
         if headphones.NEWZNAB:
             provider = "newznab"
@@ -197,7 +219,11 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             elif headphones.PREFERRED_QUALITY:
                 categories = "3040,3010"
             else:
-                categories = "3010"    
+                categories = "3010"
+                
+            if albums['Type'] == 'Other':
+                categories = "3030"
+                logger.info("Album type is audiobook/spokenword. Using audiobook category")
 
             params = {    "t": "search",
                         "apikey": headphones.NEWZNAB_APIKEY,
@@ -211,31 +237,31 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, headphones.NEWZNAB_HOST))
             
             try:
-            	data = urllib2.urlopen(searchURL, timeout=20).read()
+                data = urllib2.urlopen(searchURL, timeout=20).read()
             except urllib2.URLError, e:
-            	logger.warn('Error fetching data from %s: %s' % (headphones.NEWZNAB_HOST, e))
-            	data = False
-            	
+                logger.warn('Error fetching data from %s: %s' % (headphones.NEWZNAB_HOST, e))
+                data = False
+                
             if data:
-			
-				d = feedparser.parse(data)
-				
-				if not len(d.entries):
-					logger.info(u"No results found from %s for %s" % (headphones.NEWZNAB_HOST, term))
-					pass
-				
-				else:
-					for item in d.entries:
-						try:
-							url = item.link
-							title = item.title
-							size = int(item.links[1]['length'])
-							
-							resultlist.append((title, size, url, provider))
-							logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size))) 
-						
-						except Exception, e:
-							logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
+            
+                d = feedparser.parse(data)
+                
+                if not len(d.entries):
+                    logger.info(u"No results found from %s for %s" % (headphones.NEWZNAB_HOST, term))
+                    pass
+                
+                else:
+                    for item in d.entries:
+                        try:
+                            url = item.link
+                            title = item.title
+                            size = int(item.links[1]['length'])
+                            
+                            resultlist.append((title, size, url, provider))
+                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size))) 
+                        
+                        except Exception, e:
+                            logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
                     
         if headphones.NZBSORG:
             provider = "nzbsorg"
@@ -244,7 +270,11 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             elif headphones.PREFERRED_QUALITY:
                 categories = "3040,3010"
             else:
-                categories = "3010"      
+                categories = "3010"
+                
+            if albums['Type'] == 'Other':
+                categories = "3030"
+                logger.info("Album type is audiobook/spokenword. Using audiobook category")
 
             params = {    "t": "search",
                         "apikey": headphones.NZBSORG_HASH,
@@ -258,31 +288,31 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             logger.info(u'Parsing results from <a href="%s">nzbs.org</a>' % searchURL)
             
             try:
-            	data = urllib2.urlopen(searchURL, timeout=20).read()
+                data = urllib2.urlopen(searchURL, timeout=20).read()
             except urllib2.URLError, e:
-            	logger.warn('Error fetching data from nzbs.org: %s' % e)
-            	data = False
-            	
+                logger.warn('Error fetching data from nzbs.org: %s' % e)
+                data = False
+                
             if data:
-			
-				d = feedparser.parse(data)
-				
-				if not len(d.entries):
-					logger.info(u"No results found from nzbs.org for %s" % term)
-					pass
-				
-				else:
-					for item in d.entries:
-						try:
-							url = item.link
-							title = item.title
-							size = int(item.links[1]['length'])
-							
-							resultlist.append((title, size, url, provider))
-							logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-							
-						except Exception, e:
-							logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
+            
+                d = feedparser.parse(data)
+                
+                if not len(d.entries):
+                    logger.info(u"No results found from nzbs.org for %s" % term)
+                    pass
+                
+                else:
+                    for item in d.entries:
+                        try:
+                            url = item.link
+                            title = item.title
+                            size = int(item.links[1]['length'])
+                            
+                            resultlist.append((title, size, url, provider))
+                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                            
+                        except Exception, e:
+                            logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
 
         if headphones.NEWZBIN:
             provider = "newzbin"    
@@ -297,12 +327,17 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 categories = "7"        #music
                 format = "8"            #mp3      
 
+            if albums['Type'] == 'Other':
+                categories = "13"
+                format = "16"
+                logger.info("Album type is audiobook/spokenword. Using audiobook category")
+            
             params = {   
                         "fpn": "p",
                         'u_nfo_posts_only': 0,
-						'u_url_posts_only': 0,
-						'u_comment_posts_only': 0,
-						'u_show_passworded': 0,
+                        'u_url_posts_only': 0,
+                        'u_comment_posts_only': 0,
+                        'u_show_passworded': 0,
                         "searchaction": "Search",
                         #"dl": 1,
                         "category": categories,
@@ -403,28 +438,28 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             
             if new:
     
-				while True:
-                	
-					if len(nzblist):
-                	
-						alreadydownloaded = myDB.select('SELECT * from snatched WHERE URL=?', [nzblist[0][2]])
-						
-						if len(alreadydownloaded):
-							logger.info('%s has already been downloaded. Skipping.' % nzblist[0][0])
-							nzblist.pop(0)
-						
-						else:
-							break
-					else:
-						logger.info('No more results found for %s' % term)
-						return "none"
+                while True:
+                    
+                    if len(nzblist):
+                    
+                        alreadydownloaded = myDB.select('SELECT * from snatched WHERE URL=?', [nzblist[0][2]])
+                        
+                        if len(alreadydownloaded):
+                            logger.info('%s has already been downloaded. Skipping.' % nzblist[0][0])
+                            nzblist.pop(0)
+                        
+                        else:
+                            break
+                    else:
+                        logger.info('No more results found for %s' % term)
+                        return "none"
 
             logger.info(u"Pre-processing result")
             
             (data, bestqual) = preprocess(nzblist)
             
             if data and bestqual:
-            	logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
+                logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
                 nzb_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year) 
                 if headphones.SAB_HOST and not headphones.BLACKHOLE:
 
@@ -455,9 +490,9 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
 
 def verifyresult(title, artistterm, term):
-	
-	title = re.sub('[\.\-\/\_]', ' ', title)
-	
+    
+    title = re.sub('[\.\-\/\_]', ' ', title)
+    
     #if artistterm != 'Various Artists':
     #    
     #    if not re.search('^' + re.escape(artistterm), title, re.IGNORECASE):
@@ -472,23 +507,23 @@ def verifyresult(title, artistterm, term):
 
     #another attempt to weed out substrings. We don't want "Vol III" when we were looking for "Vol II"
     
-	tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
-	for token in tokens:
+    tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
+    for token in tokens:
 
-		if not token:
-			continue
-		if token == 'Various' or token == 'Artists' or token == 'VA':
-			continue
-		if not re.search('(?:\W|^)+' + token + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
-			cleantoken = ''.join(c for c in token if c not in string.punctuation)
-			if not not re.search('(?:\W|^)+' + cleantoken + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
-				dic = {'!':'i', '$':'s'}
-				dumbtoken = helpers.replace_all(token, dic)
-				if not not re.search('(?:\W|^)+' + dumbtoken + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
-					logger.info("Removed from results: " + title + " (missing tokens: " + token + " and " + cleantoken + ")")
-					return False
-					
-	return True
+        if not token:
+            continue
+        if token == 'Various' or token == 'Artists' or token == 'VA':
+            continue
+        if not re.search('(?:\W|^)+' + token + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
+            cleantoken = ''.join(c for c in token if c not in string.punctuation)
+            if not not re.search('(?:\W|^)+' + cleantoken + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
+                dic = {'!':'i', '$':'s'}
+                dumbtoken = helpers.replace_all(token, dic)
+                if not not re.search('(?:\W|^)+' + dumbtoken + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
+                    logger.info("Removed from results: " + title + " (missing tokens: " + token + " and " + cleantoken + ")")
+                    return False
+                    
+    return True
 
 def getresultNZB(result):
     
@@ -521,7 +556,7 @@ def preprocess(resultlist):
         usenet_retention = 2000
     else:
         usenet_retention = int(headphones.USENET_RETENTION)
-	
+    
     for result in resultlist:
         nzb = getresultNZB(result)
         if nzb:
@@ -581,9 +616,9 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         if albums[0] in albums[1] or len(albums[0]) < 4 or len(albums[1]) < 4:
             term = cleanartist + ' ' + cleanalbum + ' ' + year
         elif albums[0] == 'Various Artists':
-        	term = cleanalbum + ' ' + year
+            term = cleanalbum + ' ' + year
         else:
-        	term = cleanartist + ' ' + cleanalbum
+            term = cleanartist + ' ' + cleanalbum
             
         # Replace bad characters in the term and unicode it
         term = re.sub('[\.\-\/]', ' ', term).encode('utf-8')
@@ -619,51 +654,51 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             searchURL = providerurl + "/?%s" % urllib.urlencode(params)
             
             try:
-            	data = urllib2.urlopen(searchURL, timeout=20).read()
+                data = urllib2.urlopen(searchURL, timeout=20).read()
             except urllib2.URLError, e:
-            	logger.warn('Error fetching data from %s: %s' % (provider, e))
-            	data = False
+                logger.warn('Error fetching data from %s: %s' % (provider, e))
+                data = False
             
             if data:
-			
-				d = feedparser.parse(data)
-				if not len(d.entries):
-					logger.info(u"No results found from %s for %s" % (provider, term))
-					pass
-				
-				else:
-					for item in d.entries:
-						try:
-							rightformat = True
-							title = item.title
-							seeders = item.seeds
-							url = item.links[1]['url']
-							size = int(item.links[1]['length'])
-							try:
-								if format == "2":
-                                                                        request = urllib2.Request(url)
-                                                                        request.add_header('Accept-encoding', 'gzip')
-                                                                        response = urllib2.urlopen(request)
-                                                                        if response.info().get('Content-Encoding') == 'gzip':
-                                                                            buf = StringIO( response.read())
-                                                                            f = gzip.GzipFile(fileobj=buf)
-                                                                            torrent = f.read()
-                                                                        else:
-                                                                            torrent = response.read()
-									if int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1:
-										rightformat = False
-							except Exception, e:
-								rightformat = False
-							if rightformat == True and size < maxsize and minimumseeders < int(seeders):
-								resultlist.append((title, size, url, provider))
-								logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-							else:
-								logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeders), rightformat))    
-						
-						except Exception, e:
-							logger.error(u"An unknown error occured in the KAT parser: %s" % e)
 
-                   
+                d = feedparser.parse(data)
+                if not len(d.entries):
+                    logger.info(u"No results found from %s for %s" % (provider, term))
+                    pass
+                
+                else:
+                    for item in d.entries:
+                        try:
+                            rightformat = True
+                            title = item.title
+                            seeders = item.seeds
+                            url = item.links[1]['url']
+                            size = int(item.links[1]['length'])
+                            try:
+                                if format == "2":
+                                    request = urllib2.Request(url)
+                                    request.add_header('Accept-encoding', 'gzip')
+                                    request.add_header('Referer', 'http://kat.ph/')
+                                    response = urllib2.urlopen(request)
+                                    if response.info().get('Content-Encoding') == 'gzip':
+                                        buf = StringIO( response.read())
+                                        f = gzip.GzipFile(fileobj=buf)
+                                        torrent = f.read()
+                                    else:
+                                        torrent = response.read()
+                                    if int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1:
+                                        rightformat = False
+                            except Exception, e:
+                                rightformat = False
+                            if rightformat == True and size < maxsize and minimumseeders < int(seeders):
+                                resultlist.append((title, size, url, provider))
+                                logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                            else:
+                                logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeders), rightformat))    
+                        
+                        except Exception, e:
+                            logger.error(u"An unknown error occured in the KAT parser: %s" % e)
+
         if headphones.ISOHUNT:
             provider = "ISOhunt"    
             providerurl = url_fix("http://isohunt.com/js/rss/" + term)
@@ -687,54 +722,54 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             searchURL = providerurl + "?%s" % urllib.urlencode(params)
             
             try:
-            	data = urllib2.urlopen(searchURL, timeout=20).read()
+                data = urllib2.urlopen(searchURL, timeout=20).read()
             except urllib2.URLError, e:
-            	logger.warn('Error fetching data from %s: %s' % (provider, e))
-            	data = False
+                logger.warn('Error fetching data from %s: %s' % (provider, e))
+                data = False
             
             if data:
-			
-				d = feedparser.parse(data)
-				if not len(d.entries):
-					logger.info(u"No results found from %s for %s" % (provider, term))
-					pass
-				
-				else:
-					for item in d.entries:
-						try:
-							rightformat = True
-							title = re.sub(r"(?<=  \[)(.+)(?=\])","",item.title)
-							title = title.replace("[]","")
-							sxstart = item.description.find("Seeds: ") + 7
-							seeds = ""
-							while item.description[sxstart:sxstart + 1] != " ":
-								seeds = seeds + item.description[sxstart:sxstart + 1]
-								sxstart = sxstart + 1
-							url = item.links[1]['url']
-							size = int(item.links[1]['length'])
-							try:
-								if format == "2":
-                                                                        request = urllib2.Request(url)
-                                                                        request.add_header('Accept-encoding', 'gzip')
-                                                                        response = urllib2.urlopen(request)
-                                                                        if response.info().get('Content-Encoding') == 'gzip':
-                                                                            buf = StringIO( response.read())
-                                                                            f = gzip.GzipFile(fileobj=buf)
-                                                                            torrent = f.read()
-                                                                        else:
-                                                                            torrent = response.read()
-									if int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1:
-										rightformat = False
-							except Exception, e:
-								rightformat = False
-							if rightformat == True and size < maxsize and minimumseeders < seeds:
-								resultlist.append((title, size, url, provider))
-								logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-							else:
-								logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
-						
-						except Exception, e:
-							logger.error(u"An unknown error occured in the ISOhunt parser: %s" % e)
+            
+                d = feedparser.parse(data)
+                if not len(d.entries):
+                    logger.info(u"No results found from %s for %s" % (provider, term))
+                    pass
+                
+                else:
+                    for item in d.entries:
+                        try:
+                            rightformat = True
+                            title = re.sub(r"(?<=  \[)(.+)(?=\])","",item.title)
+                            title = title.replace("[]","")
+                            sxstart = item.description.find("Seeds: ") + 7
+                            seeds = ""
+                            while item.description[sxstart:sxstart + 1] != " ":
+                                seeds = seeds + item.description[sxstart:sxstart + 1]
+                                sxstart = sxstart + 1
+                            url = item.links[1]['url']
+                            size = int(item.links[1]['length'])
+                            try:
+                                if format == "2":
+                                    request = urllib2.Request(url)
+                                    request.add_header('Accept-encoding', 'gzip')
+                                    response = urllib2.urlopen(request)
+                                    if response.info().get('Content-Encoding') == 'gzip':
+                                        buf = StringIO( response.read())
+                                        f = gzip.GzipFile(fileobj=buf)
+                                        torrent = f.read()
+                                    else:
+                                        torrent = response.read()
+                                    if int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1:
+                                        rightformat = False
+                            except Exception, e:
+                                rightformat = False
+                            if rightformat == True and size < maxsize and minimumseeders < seeds:
+                                resultlist.append((title, size, url, provider))
+                                logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                            else:
+                                logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
+                        
+                        except Exception, e:
+                            logger.error(u"An unknown error occured in the ISOhunt parser: %s" % e)
 
         if headphones.MININOVA:
             provider = "Mininova"    
@@ -755,53 +790,53 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             searchURL = providerurl     
        
             try:
-            	data = urllib2.urlopen(searchURL, timeout=20).read()
+                data = urllib2.urlopen(searchURL, timeout=20).read()
             except urllib2.URLError, e:
-            	logger.warn('Error fetching data from %s: %s' % (provider, e))
-            	data = False
+                logger.warn('Error fetching data from %s: %s' % (provider, e))
+                data = False
             
             if data:
-			
-				d = feedparser.parse(data)
-				if not len(d.entries):
-					logger.info(u"No results found from %s for %s" % (provider, term))
-					pass
-				
-				else:
-					for item in d.entries:
-						try:
-							rightformat = True
-							title = item.title
-							sxstart = item.description.find("Ratio: ") + 7
-							seeds = ""
-							while item.description[sxstart:sxstart + 1] != " ":
-								seeds = seeds + item.description[sxstart:sxstart + 1]
-								sxstart = sxstart + 1
-							url = item.links[1]['url']
-							size = int(item.links[1]['length'])
-							try:
-								if format == "2":
-                                                                        request = urllib2.Request(url)
-                                                                        request.add_header('Accept-encoding', 'gzip')
-                                                                        response = urllib2.urlopen(request)
-                                                                        if response.info().get('Content-Encoding') == 'gzip':
-                                                                            buf = StringIO( response.read())
-                                                                            f = gzip.GzipFile(fileobj=buf)
-                                                                            torrent = f.read()
-                                                                        else:
-                                                                            torrent = response.read()
-									if int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1:
-										rightformat = False
-							except Exception, e:
-								rightformat = False
-							if rightformat == True and size < maxsize and minimumseeders < seeds:
-								resultlist.append((title, size, url, provider))
-								logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-							else:
-								logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
-						
-						except Exception, e:
-							logger.error(u"An unknown error occured in the MiniNova Parser: %s" % e)
+            
+                d = feedparser.parse(data)
+                if not len(d.entries):
+                    logger.info(u"No results found from %s for %s" % (provider, term))
+                    pass
+                
+                else:
+                    for item in d.entries:
+                        try:
+                            rightformat = True
+                            title = item.title
+                            sxstart = item.description.find("Ratio: ") + 7
+                            seeds = ""
+                            while item.description[sxstart:sxstart + 1] != " ":
+                                seeds = seeds + item.description[sxstart:sxstart + 1]
+                                sxstart = sxstart + 1
+                            url = item.links[1]['url']
+                            size = int(item.links[1]['length'])
+                            try:
+                                if format == "2":
+                                    request = urllib2.Request(url)
+                                    request.add_header('Accept-encoding', 'gzip')
+                                    response = urllib2.urlopen(request)
+                                    if response.info().get('Content-Encoding') == 'gzip':
+                                        buf = StringIO( response.read())
+                                        f = gzip.GzipFile(fileobj=buf)
+                                        torrent = f.read()
+                                    else:
+                                        torrent = response.read()
+                                    if int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1:
+                                        rightformat = False
+                            except Exception, e:
+                                rightformat = False
+                            if rightformat == True and size < maxsize and minimumseeders < seeds:
+                                resultlist.append((title, size, url, provider))
+                                logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                            else:
+                                logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
+                        
+                        except Exception, e:
+                            logger.error(u"An unknown error occured in the MiniNova Parser: %s" % e)
 
 
 
@@ -847,28 +882,28 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             
             if new:
     
-				while True:
-                	
-					if len(torrentlist):
-                	
-						alreadydownloaded = myDB.select('SELECT * from snatched WHERE URL=?', [torrentlist[0][2]])
-						
-						if len(alreadydownloaded):
-							logger.info('%s has already been downloaded. Skipping.' % torrentlist[0][0])
-							torrentlist.pop(0)
-						
-						else:
-							break
-					else:
-						logger.info('No more results found for %s' % term)
-						return
+                while True:
+                    
+                    if len(torrentlist):
+                    
+                        alreadydownloaded = myDB.select('SELECT * from snatched WHERE URL=?', [torrentlist[0][2]])
+                        
+                        if len(alreadydownloaded):
+                            logger.info('%s has already been downloaded. Skipping.' % torrentlist[0][0])
+                            torrentlist.pop(0)
+                        
+                        else:
+                            break
+                    else:
+                        logger.info('No more results found for %s' % term)
+                        return
 
             logger.info(u"Pre-processing result")
             
             (data, bestqual) = preprocesstorrent(torrentlist)
             
             if data and bestqual:
-            	logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
+                logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
                 torrent_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year) 
                 if headphones.TORRENTBLACKHOLE_DIR == "sendtracker":
 
@@ -879,15 +914,17 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
                 elif headphones.TORRENTBLACKHOLE_DIR != "":
                 
+                    # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
+                    
                     torrent_name = torrent_folder_name + '.torrent'
                     download_path = os.path.join(headphones.TORRENTBLACKHOLE_DIR, torrent_name)
                     try:
-                        f = open(download_path, 'wb')
-                        f.write(data)
-                        f.close()
-                        logger.info('File saved to: %s' % torrent_name)
+                        torrent_file = open(download_path, 'rb').read()
+                        torrent_info = bencode.bdecode(torrent_file)
+                        torrent_folder_name = torrent_info['info'].get('name','')
+                        logger.info('Torrent folder name: %s' % torrent_folder_name)
                     except Exception, e:
-                        logger.error('Couldn\'t write Torrent file: %s' % e)
+                        logger.error('Couldn\'t get name from Torrent file: %s' % e)
                         break
                         
                 myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
@@ -896,30 +933,26 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 def preprocesstorrent(resultlist):
     selresult = ""
     for result in resultlist:
-        try:
-            if selresult == "":
-                selresult = result
-                request = urllib2.Request(result[2])
-                request.add_header('Accept-encoding', 'gzip')
-                response = urllib2.urlopen(request)
-                if response.info().get('Content-Encoding') == 'gzip':
-                    buf = StringIO( response.read())
-                    f = gzip.GzipFile(fileobj=buf)
-                    torrent = f.read()
-                else:
-                    torrent = response.read()
-            elif int(selresult[1]) < int(result[1]):
-                selresult = result
-                request = urllib2.Request(result[2])
-                request.add_header('Accept-encoding', 'gzip')
-                response = urllib2.urlopen(request)
-                if response.info().get('Content-Encoding') == 'gzip':
-                    buf = StringIO( response.read())
-                    f = gzip.GzipFile(fileobj=buf)
-                    torrent = f.read()
-                else:
-                    torrent = response.read()
-        except ExpatError:
-            logger.error('Unable to torrent file. Skipping.')
-            continue
+        if selresult == "":
+            selresult = result
+        elif int(selresult[1]) < int(result[1]): # if size is lower than new result replace previous selected result (bigger size = better quality?)
+            selresult = result
+            
+    try:
+        request = urllib2.Request(selresult[2])
+        request.add_header('Accept-encoding', 'gzip')
+        
+        if selresult[3] == 'Kick Ass Torrent':
+            request.add_header('Referer', 'http://kat.ph/')
+            
+        response = urllib2.urlopen(request)
+        if response.info().get('Content-Encoding') == 'gzip':
+            buf = StringIO(response.read())
+            f = gzip.GzipFile(fileobj=buf)
+            torrent = f.read()
+        else:
+            torrent = response.read()
+    except ExpatError:
+        logger.error('Unable to torrent %s' % selresult[2])
+        
     return torrent, selresult

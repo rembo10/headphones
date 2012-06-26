@@ -26,8 +26,12 @@
 					else:
 						grade = 'Z'
 				%>
-				<tr class="grade${grade}">			
-					<td id="albumart"><div id="artistImg"><img class="albumArt" src="http://ec1.images-amazon.com/images/P/${result['uniquename']}.01.MZZZZZZZ.jpg" height="50" width="50"></div></td>
+				<tr class="grade${grade}">
+				%if type == 'album':
+					<td id="albumart"><div id="artistImg"><img title="${result['albumid']}" class="albumArt" height="50" width="50"></div></td>
+				%else:
+					<td id="albumart"><div id="artistImg"><img title="${result['id']}" class="albumArt" height="50" width="50"></div></td>
+				%endif
 				%if type == 'album':
 					<td id="albumname"><a href="${result['albumurl']}">${result['title']}</a></td>
 				%endif
@@ -55,20 +59,18 @@
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	
 	<script>
-	function initThisPage() {
-		$("table#searchresults_table tr td#artistname").each(function(){	
-			var artist = $(this).children('a').attr('title');
-			var image = $(this).parent().find("td#albumart img");
-			var album = $(this).prev().text();
-			var getId = $(this).children('a').attr('href');
-			var id = getId.substr(30);
-			%if type == 'artist':			
-				getArtistInfo(artist,image,1,id);
-			%endif
-			%if type == 'album':
-				getAlbumInfo(artist,album,image,1);				
-			%endif
+	function getArt() {
+		$("table#searchresults_table tr td#albumart img").each(function(){	
+			var id = $(this).attr('title');
+			var image = $(this);
+			if ( !image.hasClass('done') ) {
+				image.addClass('done');
+				getImageLinks(image,id,"${type}");
+			}
 		});
+	}
+	function initThisPage() {
+		getArt();
 		$('#searchresults_table').dataTable(
 			{
 				"bDestroy": true,

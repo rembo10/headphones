@@ -1,153 +1,100 @@
-function getArtistInfo(name,imgElem,size,artistID) {
-	var apikey = "690e1ed3bc00bc91804cd8f7fe5ed6d4";
+function getThumb(imgElem,id,type) {
 	
-	// Get Data by Artist ID 	
+	if ( type == 'artist' ) {
+		var thumbURL = "getThumb?ArtistID=" + id;
+		// var imgURL = "getArtwork?ArtistID=" + id;
+	} else {
+		var thumbURL = "getThumb?AlbumID=" + id;
+		// var imgURL = "getArtwork?AlbumID=" + id;
+	}
+	// Get Data from the cache by Artist ID 	
 	$.ajax({
-		url: "http://ws.audioscrobbler.com/2.0/?method=artist.getInfo&mbid="+ artistID +"&api_key="+ apikey+"&format=json",
-		dataType: "jsonp",
+		url: thumbURL,
 		cache: true,
 		success: function(data){
-			if ( data.artist !== undefined ) {
-				var imageUrl = data.artist.image[size]['#text'];
+			if ( data == "" ) {
+				var imageUrl = "interfaces/default/images/no-cover-artist.png";
 			}
-			if (data.error) {
-				getArtistName();
-			} else {
-				if ( data.artist === undefined || imageUrl == "" || imageUrl == undefined ) {
-					var imageLarge = "#";
-					var imageUrl = "interfaces/default/images/no-cover-artist.png";
-				} else {
-					var artist = data.artist.mbid;
-					var artistBio = data.artist.bio.summary;
-					var imageLarge = data.artist.image[4]['#text'];
-					var imageUrl = data.artist.image[size]['#text'];
-				}		
-				var artistBio = artistBio;				
-				var image = imgElem;
-				var bio = $('#artistBio');	
-				$(image).attr("src",imageUrl).removeAttr("width").removeAttr("height").hide().fadeIn();
-				if ( bio.length > 0 ) $(bio).append(artistBio);
-				$(image).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + name + '"></a>');
+			else {
+				var imageUrl = data;
 			}
-		}				
+			$(imgElem).attr("src",imageUrl).hide().fadeIn();
+			// $(imgElem).wrap('<a href="'+ imgURL +'" rel="dialog" title="' + name + '"></a>');
+			}
 	});
-	// If not found get by Name
-	function getArtistName() {
-		$.ajax({
-			url: "http://ws.audioscrobbler.com/2.0/?method=artist.getInfo&artist="+ name +"&api_key="+ apikey+"&format=json",
-			dataType: "jsonp",
-			success: function(data){
-				if ( data.artist !== undefined ) {
-					var imageUrl = data.artist.image[size]['#text'];
-				}
-				if ( data.artist === undefined || imageUrl == "" ) {
-					var imageLarge = "#";
-					var imageUrl = "interfaces/default/images/no-cover-artist.png";
-				} else {
-					var artist = data.artist.name;
-					var artistBio = data.artist.bio.summary;
-					var imageLarge = data.artist.image[4]['#text'];
-					var imageUrl = data.artist.image[size]['#text'];
-				}		
-				var artistBio = artistBio;				
-				var image = imgElem;
-				var bio = $('#artistBio');	
-				$(image).attr("src",imageUrl).removeAttr("width").removeAttr("height").hide().fadeIn();
-				if ( bio.length > 0 ) $(bio).append(artistBio);
-				$(image).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + artist + '"></a>');
-			}				
-		});
-	}
 }
 
-function getAlbumInfo(name, album, elem,size) {
-	var apikey = "690e1ed3bc00bc91804cd8f7fe5ed6d4";	
-	var dimensions = getOriginalWidthOfImg(this);
-	var cover = $(elem);
+function getArtwork(imgElem,id,name,type) {
 	
-	if ( dimensions <= 1) {
-		// Get Data
-		$.ajax({
-			url: "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" + apikey + "&artist="+ name +"&album="+ album +"&format=json&callback=?",
-			dataType: "jsonp",
-			success: function(data){
-				if ( data.artist !== undefined ) {
-					var imageUrl = data.artist.image[size]['#text'];
-				}
-				if (data.album === undefined || imageUrl == "")  {
-					if ( elem.width() == 50 ) {
-						var imageUrl = "interfaces/default/images/no-cover-artist.png";
-					} else {
-						var imageUrl = "interfaces/default/images/no-cover-art.png";
-					}
-				} else {
-					var imageUrl = data.album.image[size]['#text'];		
-					var imageLarge = data.album.image[3]['#text'];			
-				}
-				$(cover).error(function(){
-					if ( elem.width() == 50 ) {
-						var imageUrl = "interfaces/default/images/no-cover-artist.png";
-					} else {
-						var imageUrl = "interfaces/default/images/no-cover-art.png";
-					}
-					$(elem).css("background", "url("+ imageUrl+") center top no-repeat");
-				});
-				if ( imageUrl == "") {
-					if ( elem.width() == 50 ) {
-						var imageUrl = "interfaces/default/images/no-cover-artist.png";
-					} else {
-						var imageUrl = "interfaces/default/images/no-cover-art.png";
-					}
-					$(elem).css("background", "url("+ imageUrl+") center top no-repeat");
-				} 
-				$(elem).css("background", "url("+ imageUrl+") center top no-repeat");
-				$(elem).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + name + '"></a>');
-			}
-		});
+	if ( type == 'artist' ) {
+		var artworkURL = "getArtwork?ArtistID=" + id;
+	} else {
+		var artworkURL = "getArtwork?AlbumID=" + id;
 	}
+	// Get Data from the cache by Artist ID 	
+	$.ajax({
+		url: artworkURL,
+		cache: true,
+		success: function(data){
+			if ( data == "" || data == undefined ) {
+				var imageUrl = "interfaces/default/images/no-cover-artist.png";
+			}
+			else {
+				var imageUrl = data;
+			}
+			$(imgElem).attr("src",imageUrl).hide().fadeIn();
+			$(imgElem).wrap('<a href="'+ imageUrl +'" rel="dialog" title="' + name + '"></a>');
+			}
+	});
 }
 
-function getOriginalWidthOfImg(img_element) {
-    var t = new Image();
-    t.src = (img_element.getAttribute ? img_element.getAttribute("src") : false) || img_element.src;
-    return t.width;
+function getInfo(elem,id,type) {
+	
+	if ( type == 'artist' ) {
+		var infoURL = "getInfo?ArtistID=" + id;
+	} else {
+		var infoURL = "getInfo?AlbumID=" + id;
+	}
+	// Get Data from the cache by ID 	
+	$.ajax({
+		url: infoURL,
+		cache: true,
+		dataType: "json",
+		success: function(data){
+			var summary = data.Summary;
+			$(elem).append(summary);
+		}
+	});
 }
 
-function replaceEmptyAlbum(elem,name) {
-	var album = $(elem);
-	var artist = name;
-	var albumname;
-	var apikey = "690e1ed3bc00bc91804cd8f7fe5ed6d4";
-	// Loop through every album art and get the albums with no cover
-	$(album).each(function(e){
-		var dimensions = getOriginalWidthOfImg(this);
-		var cover = $(this);
-		var url;
-		albumname = cover.closest("tr").find("#albumname a").text();
-		if ( dimensions <= 1) {
-			url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" + apikey + "&artist="+ artist +"&album="+ albumname +"&format=json&callback=?";
-			var imageUrl;
-			$.getJSON(url, function(data, response) {
-				if (data.album === undefined)  {
-					imageUrl = "interfaces/default/images/no-cover-art.png";
-				} else {
-					imageUrl = data.album.image[3]['#text'];	
-					imageLarge = data.album.image[4]['#text'];					
-				// If Last.fm don't provide a cover then use standard
-				}
-				$(cover).error(function(){
-					imageUrl = "interfaces/default/images/no-cover-art.png";
-					$(this).hide().attr("src", imageUrl).show();
-				})
-				if ( imageUrl == "") {
-					imageUrl = "interfaces/default/images/no-cover-art.png";
-					$(this).hide().attr("src", imageUrl).show();
-				}
-				$(cover).hide().attr("src", imageUrl).show();
-				$(cover).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + artist + " - " + albumname + '"></a>');
-			});
-		} 	
-	});		
+function getImageLinks(elem,id,type) {
+	
+	if ( type == 'artist' ) {
+		var infoURL = "getImageLinks?ArtistID=" + id;
+	} else {
+		var infoURL = "getImageLinks?AlbumID=" + id;
+	}
+	// Get Data from the cache by ID 	
+	$.ajax({
+		url: infoURL,
+		cache: true,
+		dataType: "json",
+		success: function(data){
+			if ( data.thumbnail == "" || data.thumbnail == undefined ) {
+				var thumbnail = "interfaces/default/images/no-cover-artist.png";
+			}
+			else {
+				var thumbnail = data.thumbnail;
+			}
+			if ( data.artwork == "" || data.artwork == undefined ) {
+				var artwork = "interfaces/default/images/no-cover-artist.png";
+			}
+			else {
+				var artwork = data.artwork;
+			}
+			$(elem).attr("src", thumbnail);
+		}
+	});
 }
 
 function initHeader() {		
@@ -211,7 +158,8 @@ function initActions() {
     $("#subhead_menu #menu_link_scan").button({ icons: { primary: "ui-icon-search"} });
 }
 
-function refreshSubmenu(url) {
+function refreshSubmenu() {
+	var url = $(location).attr('href');
 	$("#subhead_container").load(url + " #subhead_menu",function(){
 		initActions();
 	});
@@ -361,7 +309,7 @@ function doAjaxCall(url,elem,reload,form) {
 	  			feedback.fadeOut(function(){
 	  				feedback.removeClass('success');
 	  			});
-	  			if ( reload == true ) 	refreshSubmenu(url);
+	  			if ( reload == true ) 	refreshSubmenu();
 	  			if ( reload == "table") {
 	  				console.log('refresh'); refreshTable();
 	  			}

@@ -1,19 +1,21 @@
-# This file is part of Sick Beard.
+#  This file is part of Headphones.
 #
-# Sick Beard is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+#  Headphones is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-# Sick Beard is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#  Headphones is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License
-# along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+#  You should have received a copy of the GNU General Public License
+#  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-
+#####################################
+## Stolen from Sick-Beard's sab.py ##
+#####################################
 
 import urllib, httplib
 import datetime
@@ -66,7 +68,7 @@ def sendNZB(nzb):
         multiPartParams = {"nzbfile": (nzb.name+".nzb", nzb.extraInfo[0])}
 
     if not headphones.SAB_HOST.startswith('http'):
-    	headphones.SAB_HOST = 'http://' + headphones.SAB_HOST
+        headphones.SAB_HOST = 'http://' + headphones.SAB_HOST
 
     if headphones.SAB_HOST.endswith('/'):
         headphones.SAB_HOST = headphones.SAB_HOST[0:len(headphones.SAB_HOST)-1]
