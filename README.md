@@ -13,32 +13,31 @@ For additional startup options, type 'python Headphones.py -h' or 'python Headph
 
 Homepage (Artist Overview)
 
-![preview thumb](http://i.imgur.com/7VHuO.png)
+![preview thumb](http://i.imgur.com/LZO9a.png)
 
 One of the many settings pages....
 
-![preview thumb](http://i.imgur.com/l0AYz.png)
+![preview thumb](http://i.imgur.com/xcWNy.png)
 
 It might even know you better than you know yourself:
 
-![preview thumb](http://i.imgur.com/LALaa.png)
+![preview thumb](http://i.imgur.com/R7J0f.png)
 
-Import Your Artists:
+Import Your Favorite Artists:
 
-![preview thumb](http://i.imgur.com/rvkD4.png)
+![preview thumb](http://i.imgur.com/6tZoC.png)
 
 Artist Search Results (also search by album!):
 
-![preview thumb](http://i.imgur.com/1mTzO.png)
+![preview thumb](http://i.imgur.com/rIV0P.png)
 
 Artist Page with Bio & Album Overview:
 
-![preview thumb](http://i.imgur.com/5j7Jh.png)
-![preview thumb](http://i.imgur.com/mSKEJ.png)
+![preview thumb](http://i.imgur.com/SSil1.png)
 
 Album Page with track overview:
 
-![preview thumb](http://i.imgur.com/CUy4e.png)
+![preview thumb](http://i.imgur.com/kcjES.png)
 
 If you run into any issues, visit http://headphones.codeshy.com/forum and report an issue. 
 
