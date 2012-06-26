@@ -1,3 +1,18 @@
+#  This file is part of Headphones.
+#
+#  Headphones is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Headphones is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
+
 from __future__ import with_statement
 
 import os, sys, subprocess
@@ -325,7 +340,7 @@ def initialize():
         
         INTERFACE = check_setting_str(CFG, 'General', 'interface', 'default')
         FOLDER_PERMISSIONS = check_setting_str(CFG, 'General', 'folder_permissions', '0755')
-		
+        
         ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')        
         ENCODER = check_setting_str(CFG, 'General', 'encoder', 'ffmpeg')
         BITRATE = check_setting_int(CFG, 'General', 'bitrate', 192)
@@ -363,7 +378,7 @@ def initialize():
         # update folder formats in the config & bump up config version
         if CONFIG_VERSION == '0':
             from headphones.helpers import replace_all
-            file_values = {	'tracknumber':	'Track', 'title': 'Title','artist' : 'Artist', 'album' : 'Album', 'year' : 'Year' }
+            file_values = { 'tracknumber':  'Track', 'title': 'Title','artist' : 'Artist', 'album' : 'Album', 'year' : 'Year' }
             folder_values = { 'artist' : 'Artist', 'album':'Album', 'year' : 'Year', 'releasetype' : 'Type', 'first' : 'First', 'lowerfirst' : 'first' }
             FILE_FORMAT = replace_all(FILE_FORMAT, file_values)
             FOLDER_FORMAT = replace_all(FOLDER_FORMAT, folder_values)
@@ -372,34 +387,34 @@ def initialize():
             
         if CONFIG_VERSION == '1':
 
-			from headphones.helpers import replace_all
+            from headphones.helpers import replace_all
 
-			file_values = {	'Track':		'$Track',
-							'Title':		'$Title',
-							'Artist':		'$Artist',
-							'Album':		'$Album',
-							'Year':			'$Year',
-							'track':		'$track',
-							'title':		'$title',
-							'artist':		'$artist',
-							'album':		'$album',
-							'year':			'$year'
-							}
-			folder_values = { 	'Artist':	'$Artist',
-								'Album':	'$Album',
-								'Year':		'$Year',
-								'Type':  	'$Type',
-								'First':	'$First',
-								'artist':	'$artist',
-								'album':	'$album',
-								'year':		'$year',
-								'type':  	'$type',
-								'first':	'$first'
-							}	
-			FILE_FORMAT = replace_all(FILE_FORMAT, file_values)
-			FOLDER_FORMAT = replace_all(FOLDER_FORMAT, folder_values)
-			
-			CONFIG_VERSION = '2'
+            file_values = { 'Track':        '$Track',
+                            'Title':        '$Title',
+                            'Artist':       '$Artist',
+                            'Album':        '$Album',
+                            'Year':         '$Year',
+                            'track':        '$track',
+                            'title':        '$title',
+                            'artist':       '$artist',
+                            'album':        '$album',
+                            'year':         '$year'
+                            }
+            folder_values = {   'Artist':   '$Artist',
+                                'Album':    '$Album',
+                                'Year':     '$Year',
+                                'Type':     '$Type',
+                                'First':    '$First',
+                                'artist':   '$artist',
+                                'album':    '$album',
+                                'year':     '$year',
+                                'type':     '$type',
+                                'first':    '$first'
+                            }   
+            FILE_FORMAT = replace_all(FILE_FORMAT, file_values)
+            FOLDER_FORMAT = replace_all(FOLDER_FORMAT, folder_values)
+            
+            CONFIG_VERSION = '2'
         
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
@@ -435,12 +450,12 @@ def initialize():
         
         # Check for new versions
         if CHECK_GITHUB_ON_STARTUP:
-        	try:
-        	    LATEST_VERSION = versioncheck.checkGithub()
-        	except:
-        	    LATEST_VERSION = CURRENT_VERSION
+            try:
+                LATEST_VERSION = versioncheck.checkGithub()
+            except:
+                LATEST_VERSION = CURRENT_VERSION
         else:
-        	LATEST_VERSION = CURRENT_VERSION
+            LATEST_VERSION = CURRENT_VERSION
 
         __INITIALIZED__ = True
         return True
@@ -657,13 +672,13 @@ def dbcheck():
 
     conn=sqlite3.connect(DB_FILE)
     c=conn.cursor()
-    c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT, IncludeExtras INTEGER, LatestAlbum TEXT, ReleaseDate TEXT, AlbumID TEXT, HaveTracks INTEGER, TotalTracks INTEGER, LastUpdated TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT, Type TEXT)')
+    c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT, IncludeExtras INTEGER, LatestAlbum TEXT, ReleaseDate TEXT, AlbumID TEXT, HaveTracks INTEGER, TotalTracks INTEGER, LastUpdated TEXT, ArtworkURL TEXT, ThumbURL TEXT)')
+    c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT, Type TEXT, ArtworkURL TEXT, ThumbURL TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT, Format TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT, FolderName TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS have (ArtistName TEXT, AlbumTitle TEXT, TrackNumber TEXT, TrackTitle TEXT, TrackLength TEXT, BitRate TEXT, Genre TEXT, Date TEXT, TrackID TEXT, Location TEXT, CleanName TEXT, Format TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS lastfmcloud (ArtistName TEXT, ArtistID TEXT, Count INTEGER)')
-    c.execute('CREATE TABLE IF NOT EXISTS descriptions (ReleaseGroupID TEXT, ReleaseID TEXT, Summary TEXT, Content TEXT)')
+    c.execute('CREATE TABLE IF NOT EXISTS descriptions (ArtistID TEXT, ReleaseGroupID TEXT, ReleaseID TEXT, Summary TEXT, Content TEXT, LastUpdated TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS releases (ReleaseID TEXT, ReleaseGroupID TEXT, UNIQUE(ReleaseID, ReleaseGroupID))')
     c.execute('CREATE INDEX IF NOT EXISTS tracks_albumid ON tracks(AlbumID ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS album_artistid_reldate ON albums(ArtistID ASC, ReleaseDate DESC)')
@@ -752,7 +767,37 @@ def dbcheck():
     try:
         c.execute('SELECT LastUpdated from artists')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE artists ADD COLUMN LastUpdated TEXT DEFAULT NULL')  
+        c.execute('ALTER TABLE artists ADD COLUMN LastUpdated TEXT DEFAULT NULL')
+        
+    try:
+        c.execute('SELECT ArtworkURL from artists')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE artists ADD COLUMN ArtworkURL TEXT DEFAULT NULL') 
+        
+    try:
+        c.execute('SELECT ArtworkURL from albums')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE albums ADD COLUMN ArtworkURL TEXT DEFAULT NULL') 
+        
+    try:
+        c.execute('SELECT ThumbURL from artists')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE artists ADD COLUMN ThumbURL TEXT DEFAULT NULL') 
+        
+    try:
+        c.execute('SELECT ThumbURL from albums')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE albums ADD COLUMN ThumbURL TEXT DEFAULT NULL') 
+        
+    try:
+        c.execute('SELECT ArtistID from descriptions')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE descriptions ADD COLUMN ArtistID TEXT DEFAULT NULL') 
+        
+    try:
+        c.execute('SELECT LastUpdated from descriptions')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE descriptions ADD COLUMN LastUpdated TEXT DEFAULT NULL') 
     
     conn.commit()
     c.close()
@@ -766,9 +811,9 @@ def shutdown(restart=False, update=False):
     config_write()
     
     if not restart and not update:
-    	logger.info('Headphones is shutting down...')
+        logger.info('Headphones is shutting down...')
     if update:
-    	logger.info('Headphones is updating...')
+        logger.info('Headphones is updating...')
         try:
             versioncheck.update()
         except Exception, e:
@@ -779,7 +824,7 @@ def shutdown(restart=False, update=False):
         os.remove(PIDFILE)
         
     if restart:
-    	logger.info('Headphones is restarting...')
+        logger.info('Headphones is restarting...')
         popen_list = [sys.executable, FULL_PATH]
         popen_list += ARGS
         if '--nolaunch' not in popen_list:
