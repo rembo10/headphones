@@ -53,8 +53,8 @@
 				
 			%>
 			<tr class="grade${grade}">
-				<td id="albumart"><div id="artistImg"><img class="albumArt" alt="" height="50" width="50"/></div></td>
-				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}" title="${artist['ArtistID']}">${artist['ArtistName']}</a></td>
+				<td id="albumart"><div id="artistImg"><img class="albumArt" height="50" width="50" alt="" id="${artist['ArtistID']}"/></div></td>
+				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
 				<td id="status">${artist['Status']}</td>
 				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
 				<td id="have"><span title="${percent}"></span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
@@ -72,9 +72,9 @@
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
 	function getArtistArt() {
-		$("table#artist_table tr td#name").each(function(){	
-			var id = $(this).children('a').attr('title');
-			var image = $(this).parent().find("td#albumart img");
+		$("table#artist_table tr td#albumart #artistImg").each(function(){	
+			var id = $(this).children('img').attr('id');
+			var image = $(this).children('img');
 			if ( !image.hasClass('done') ) {
 				image.addClass('done');
 				getThumb(image,id,'artist');

@@ -27,7 +27,7 @@
 <%def name="body()">
 	<div id="artistheader" class="clearfix">
 		<div id="artistImg">
-			<img id="artistImage" class="albumArt" height="200" width="200" alt="" />
+			<img id="artistImage" height="200" width="200" class="albumArt" alt="" />
 		</div>
 		<h1>	
 			%if artist['Status'] == 'Loading':	
@@ -109,7 +109,7 @@
 			%>
 			<tr class="grade${grade}">
 				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></td>
-				<td id="albumart"><img class="albumArt" title="${album['AlbumID']}" height="64" width="64"></td>
+				<td id="albumart"><img class="albumArt" id="${album['AlbumID']}" height="64" width="64"></td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
@@ -161,7 +161,7 @@
 	
 	function getAlbumArt() {
 		$("table#album_table tr td#albumart").each(function(){	
-			var id = $(this).children('img').attr('title');
+			var id = $(this).children('img').attr('id');
 			var image = $(this).children('img');
 			if ( !image.hasClass('done') ) {
 				image.addClass('done');
