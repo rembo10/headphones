@@ -17,7 +17,7 @@
 	</div>
 	<form action="markArtists" method="get" id="markArtists">
 	<div id="markalbum">
-		<select name="action" onChange="doAjaxCall('markArtists',$(this),'table',true);" data-error="You didn't select any artist">
+		<select name="action" onChange="doAjaxCall('markArtists',$(this),'table',true);" data-error="You didn't select any artists">
   			<option disabled="disabled" selected="selected">Choose...</option>
   			<option value="pause">Pause</option>
   			<option value="resume">Resume</option>
@@ -59,8 +59,8 @@
 			%>
 			<tr class="grade${grade}">
 				<td id="select"><input type="checkbox" name="${artist['ArtistID']}" class="checkbox" /></td>
-				<td id="albumart"><div id="artistImg"><img class="albumArt" src="http://ec1.images-amazon.com/images/P/${artist['AlbumID']}.01.MZZZZZZZ.jpg" height="50" width="50"></div></td>
-				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
+				<td id="albumart"><div id="artistImg"><img class="albumArt" height="50" width="50"></div></td>
+				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}" title="${artist['ArtistID']}">${artist['ArtistName']}</a></td>
 				<td id="status">${artist['Status']}</td>	
 				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
 			</tr>
@@ -78,13 +78,19 @@
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
+	function getArtistArt() {
+		$("table#artist_table tr td#name").each(function(){	
+			var id = $(this).children('a').attr('title');
+			var image = $(this).parent().find("td#albumart img");
+			if ( !image.hasClass('done') ) {
+				image.addClass('done');
+				getThumb(image,id,'artist');
+			}
+		});
+	}
 
 	function initThisPage() {
-		$("table#artist_table tr td#name").each(function(){	
-			var artist = $(this).children('a').text();
-			var image = $(this).parent().find("td#albumart img");
-			getArtistInfo(artist,image,1);
-		});
+		getArtistArt();
 		$('#artist_table').dataTable({	
 			"bDestroy":true,		
 			"aoColumns": [

@@ -9,13 +9,13 @@
 		<div id="subhead_menu">
 			<a id="menu_link_delete" href="deleteAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">Delete Album</a>
 			%if album['Status'] == 'Skipped':
-			<a id="menu_link_wanted" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true)" data-success="'${album['AlbumTitle']}' added to your wanted list">Mark Album as Wanted</a>
+			<a id="menu_link_wanted" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true)" data-success="'${album['AlbumTitle']}' added to queue">Mark Album as Wanted</a>
 			%elif album['Status'] == 'Wanted':
 			<a id="menu_link_check" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this));" data-success="Forced checking successful">Force Check</a>
 			<a id="menu_link_skipped" href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),true);" data-success="'${album['AlbumTitle']}' marked as Skipped">Mark Album as Skipped</a>
 			%else:
-			<a id="menu_link_retry" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true);" data-success="Retrying to download '${album['AlbumTitle']}'">Retry Download</a>
-			<a id="menu_link_new" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),true);" data-success="Retrying new version of '${album['AlbumTitle']}'">Try New Version</a>
+			<a id="menu_link_retry" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true);" data-success="Retrying the same version of '${album['AlbumTitle']}'">Retry Download</a>
+			<a id="menu_link_new" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),true);" data-success="Looking for a new version of '${album['AlbumTitle']}'">Try New Version</a>
 			%endif			
 		</div>
 	</div>	
@@ -26,7 +26,7 @@
 	<div class="table_wrapper">
 		<div id="albumheader" class="clearfix">	
 			<div id="albumImg">
-				<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" height="200" width="200" alt="albumart" class="albumArt" rel="dialog">
+				<img height="200" width="200" alt="" class="albumArt">
 			</div>
 			
 			<h1><a href="http://musicbrainz.org/release-group/${album['AlbumID']}">${album['AlbumTitle']}</a></h1>
@@ -41,9 +41,7 @@
 			
 			%>
 			<div class="albuminfo">
-				%if description:
-				<p>${description['Summary']}</p>
-				%endif
+				<div id="albumInfo"></div>
 				<ul>
 					<li>Tracks: <span>${totaltracks}</span></li> 
 					<li>Duration: <span>${albumduration}</span></li>
@@ -128,9 +126,30 @@
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
+	
+	function getAlbumArt() {
+		var id = "${album['AlbumID']}";
+		var name = "${album['AlbumTitle']}";
+		var image = $("div#albumImg img");
+		if ( !image.hasClass('done') ) {
+			image.addClass('done');
+			getArtwork(image,id,name,'album');
+		}
+	}
+	
+	function getAlbumInfo() {
+		var id = "${album['AlbumID']}";
+		var elem = $("#albumInfo");
+		getInfo(elem,id,'album');
+	}
+	
 	$(document).ready(function()	{
-		getAlbumInfo("${album['ArtistName']}","${album['AlbumTitle']}","#albumheader .albumArt",3);
+		getAlbumInfo();
+		getAlbumArt();
 		initActions();
+		setTimeout(function(){
+			initFancybox();
+			},1000);
 		
 		$('#track_table').dataTable({
 			"aaSorting": [],
@@ -139,8 +158,6 @@
 			"bPaginate": false
 		});
 	});
-	$(window).load(function(){
-		initFancybox();
-	});
+
 	</script>
 </%def>

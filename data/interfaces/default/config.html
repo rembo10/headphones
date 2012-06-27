@@ -195,7 +195,7 @@
                 	</fieldset>
                 	
                 	<fieldset>
-                		<legend>Newsnab</legend>
+                		<legend>Newznab</legend>
                 		<div class="row checkbox">                    	
                 			<input  id="usenewznab" type="checkbox" name="newznab" onclick="initConfigCheckbox($(this));" value="1" ${config['use_newznab']} /><label>Use Newznab</label>
                 		</div>
@@ -327,7 +327,7 @@
     	           		 <legend>Re-Encoding Options</legend>
     	           		 <small class="heading"><span style="float: left; margin-right: .3em; margin-top: 4px;" class="ui-icon ui-icon-info"></span>Note: this option requires the lame or ffmpeg encoder</small>
     	           		 <div class="checkbox row clearfix">
-    	                  		<input type="checkbox" name="encode" id="encode" value="1" ${config['encode']}/><label>Re-encode downloads during postprocessing</label>
+    	                  		<input type="checkbox" name="music_encoder" id="music_encoder" value="1" ${config['music_encoder']}/><label>Re-encode downloads during postprocessing</label>
     	                	</div>
     	                	<div id="encoderoptions" class="row clearfix checkbox">
     	                  		<input type="checkbox" name="encoderlossless" value="1" ${config['encoderlossless']}/><label>Only re-encode lossless files (.flac)</label>
@@ -609,7 +609,7 @@
 			</tr>
         </table>
     </div>	
-        <input type="button" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Saved changed">
+        <input type="button" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
         <div class="message">
         	<p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>Web Interface changes require a restart to take effect</p>
 		</div>
@@ -674,7 +674,7 @@
     	            $('#api_key').val(data);
     	    });
     	});
-		if ($("#encode").is(":checked"))
+		if ($("#music_encoder").is(":checked"))
 			{
 				$("#encoderoptions").show();
 			}
@@ -683,8 +683,8 @@
 				$("#encoderoptions").hide();
 			}
 
-		$("#encode").click(function(){
-			if ($("#encode").is(":checked"))
+		$("#music_encoder").click(function(){
+			if ($("#music_encoder").is(":checked"))
 			{
 				$("#encoderoptions").slideDown();
 			}

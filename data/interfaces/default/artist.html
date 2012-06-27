@@ -7,7 +7,7 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">		
-			<a id="menu_link_refresh" onclick="doAjaxCall('refreshArtist?ArtistID=${artist['ArtistID']}', $(this)),'table'" href="#" data-success="'${artist['ArtistName']}' will be refreshed">Refresh Artist</a>
+			<a id="menu_link_refresh" onclick="doAjaxCall('refreshArtist?ArtistID=${artist['ArtistID']}', $(this)),'table'" href="#" data-success="'${artist['ArtistName']}' is being refreshed">Refresh Artist</a>
 			<a id="menu_link_delete" href="deleteArtist?ArtistID=${artist['ArtistID']}">Delete Artist</a>
 			%if artist['Status'] == 'Paused':
 				<a id="menu_link_resume" href="#" onclick="doAjaxCall('resumeArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} resumed">Resume Artist</a>
@@ -15,25 +15,28 @@
 				<a id="menu_link_pauze" href="#" onclick="doAjaxCall('pauseArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} paused">Pause Artist</a>
 			%endif
 			%if artist['IncludeExtras']:
-				<a id="menu_link_removeextra" href="#" onclick="doAjaxCall('removeExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Extra's removed">Remove Extras</a>
+				<a id="menu_link_removeextra" href="#" onclick="doAjaxCall('removeExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Extras removed for ${artist['ArtistName']}">Remove Extras</a>
 			%else:	
-				<a id="menu_link_getextra" href="#" onclick="doAjaxCall('getExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Getting Extra's">Get Extras</a>
+				<a id="menu_link_getextra" href="#" onclick="doAjaxCall('getExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Getting Extras for ${artist['ArtistName']}">Get Extras</a>
 			%endif
 		</div>
 	</div>	
-	<a href="/" class="back">&laquo; Back to overview</a>
+	<a href="home" class="back">&laquo; Back to overview</a>
 </%def>
 
 <%def name="body()">
 	<div id="artistheader" class="clearfix">
 		<div id="artistImg">
-			<img class="albumArt" src="http://ec1.images-amazon.com/images/P/None.01.MZZZZZZZ.jpg" width="200" height="200" alt="${artist['ArtistName']}"/>
+			<img id="artistImage" class="albumArt" height="200" width="200" alt="" />
 		</div>
 		<h1>	
 			%if artist['Status'] == 'Loading':	
 				<img src="interfaces/default/images/loader_black.gif" alt="loading" style="float:left; margin-right: 5px;"/> 
 			%endif
 			<a href="http://musicbrainz.org/artist/${artist['ArtistID']}">${artist['ArtistName']}</a>
+			%if artist['Status'] == 'Loading':
+				<h3><i>(Album information for this artist is currently being loaded)</i></h3>
+			%endif	
 		</h1>
 		<div id="artistBio"></div>	
 	</div>
@@ -106,7 +109,7 @@
 			%>
 			<tr class="grade${grade}">
 				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></td>
-				<td id="albumart"><img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
+				<td id="albumart"><img class="albumArt" title="${album['AlbumID']}" height="64" width="64"></td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
@@ -116,12 +119,12 @@
 				%elif (album['Status'] == 'Wanted' or album['Status'] == 'Wanted Lossless'):
 					[<a href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' skipped">skip</a>]
 				%else:
-					[<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),'table')" data-success="Retrying to download '${album['AlbumTitle']}'" title="Retry the same download again" data-success="Retrying '${album['AlbumTitle']}'">retry</a>][<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),'table')" title="Try a new download, skipping all previously tried nzbs"  data-success="Downloading new version for '${album['AlbumTitle']}'" data-success="Retrying to download New '${album['AlbumTitle']}'">new</a>]
+					[<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),'table')" data-success="Retrying the same version of '${album['AlbumTitle']}'" title="Retry the same download again">retry</a>][<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),'table')" title="Try a new download, skipping all previously tried nzbs"  data-success="Downloading new version for '${album['AlbumTitle']}'" data-success="Looking for a new version of '${album['AlbumTitle']}'">new</a>]
 				%endif
 				%if albumformat in lossy_formats and album['Status'] == 'Skipped':
-					[<a id="wantlossless" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&lossless=True', $(this),'table')" data-success="'${album['AlbumTitle']}' lossless added to Wanted list">want lossless</a>]
+					[<a id="wantlossless" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&lossless=True', $(this),'table')" data-success="Lossless version of '${album['AlbumTitle']}' added to queue">want lossless</a>]
 				%elif albumformat in lossy_formats and (album['Status'] == 'Snatched' or album['Status'] == 'Downloaded'):
-					[<a id="wantlossless" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&lossless=True', $(this),'table')" data-success="Retrying lossless '${album['AlbumTitle']}'">retry lossless</a>]
+					[<a id="wantlossless" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&lossless=True', $(this),'table')" data-success="Retrying the same lossless version of '${album['AlbumTitle']}'">retry lossless</a>]
 				%endif
 				</td>
 				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
@@ -145,11 +148,42 @@
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	
 	<script>
+	
+	function getArtistArt() {
+		var id = "${artist['ArtistID']}";
+		var name = "${artist['ArtistName']}";
+		var image = $("div#artistImg img#artistImage");
+		if ( !image.hasClass('done') ) {
+			image.addClass('done');
+			getArtwork(image,id,name,'artist');
+		}
+	}
+	
+	function getAlbumArt() {
+		$("table#album_table tr td#albumart").each(function(){	
+			var id = $(this).children('img').attr('title');
+			var image = $(this).children('img');
+			if ( !image.hasClass('done') ) {
+				image.addClass('done');
+				getThumb(image,id,'album');
+			}
+		});
+	}
+	
+	function getArtistBio() {
+		var id = "${artist['ArtistID']}";
+		var elem = $("#artistBio");
+		getInfo(elem,id,'artist');
+	}
+
+	
 	function initThisPage() {
 		%if artist['Status'] == 'Loading':
 			showMsg("Getting artist information",true);
 		%endif
-		
+		getArtistArt();
+		getArtistBio();
+		getAlbumArt();
 		$('#album_table').dataTable({
 			"bDestroy": true,
 			"aoColumns": [
@@ -178,22 +212,15 @@
 
 		});			
 		resetFilters("albums");
-		replaceEmptyAlbum("table#album_table td#albumart img","${artist['ArtistName']}");
 		setTimeout(function(){
 			initFancybox();
-		},1000);
+		},1500)
 	}
 	
 	$(document).ready(function() {		
-		getArtistInfo("${artist['ArtistName']}","#artistImg img",3,"${artist['ArtistID']}");
 		initActions();
 		initThisPage();
 	});
-	$(window).load(function(){
-		replaceEmptyAlbum("table#album_table td#albumart img","${artist['ArtistName']}");
-		setTimeout(function(){
-			initFancybox();
-		},1000)
-	});
+
 	</script>
 </%def>
