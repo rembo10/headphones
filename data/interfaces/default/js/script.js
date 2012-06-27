@@ -2,10 +2,8 @@ function getThumb(imgElem,id,type) {
 	
 	if ( type == 'artist' ) {
 		var thumbURL = "getThumb?ArtistID=" + id;
-		// var imgURL = "getArtwork?ArtistID=" + id;
 	} else {
 		var thumbURL = "getThumb?AlbumID=" + id;
-		// var imgURL = "getArtwork?AlbumID=" + id;
 	}
 	// Get Data from the cache by Artist ID 	
 	$.ajax({
@@ -19,16 +17,17 @@ function getThumb(imgElem,id,type) {
 				var imageUrl = data;
 			}
 			$(imgElem).attr("src",imageUrl).hide().fadeIn();
-			// $(imgElem).wrap('<a href="'+ imgURL +'" rel="dialog" title="' + name + '"></a>');
 			// Get original width / Height
-			var imgWidth = imgElem[0].naturalWidth;
-			var imgHeight = imgElem[0].naturalHeight;
-			// Make the ratio correct
-			if ( imgWidth > imgHeight) {
-				$(imgElem).removeAttr("width");
-			} else {
-				$(imgElem).removeAttr("height");		
-			}
+			$(imgElem).load(function(){
+				var imgWidth = imgElem[0].naturalWidth;
+				var imgHeight = imgElem[0].naturalHeight;
+				// Make the ratio correct
+				if ( imgWidth > imgHeight) {						
+					$(imgElem).removeAttr("width");
+				} else {
+					$(imgElem).removeAttr("height");		
+				}	
+			})			
 		}
 	});
 }
@@ -54,14 +53,17 @@ function getArtwork(imgElem,id,name,type) {
 			$(imgElem).attr("src",imageUrl).hide().fadeIn();			
 			$(imgElem).wrap('<a href="'+ imageUrl +'" rel="dialog" onclick="return false;" title="' + name + '"></a>');
 			// Get original width / Height
-			var imgWidth = imgElem[0].naturalWidth;
-			var imgHeight = imgElem[0].naturalHeight;
-			// Make the ratio correct
-			if ( imgWidth > imgHeight) {						
-				$(imgElem).removeAttr("width");
-			} else {
-				$(imgElem).removeAttr("height");		
-			}		
+			$(imgElem).load(function(){
+				var imgWidth = imgElem[0].naturalWidth;
+				var imgHeight = imgElem[0].naturalHeight;
+				// Make the ratio correct
+				if ( imgWidth > imgHeight) {						
+					$(imgElem).removeAttr("width");
+				} else {
+					$(imgElem).removeAttr("height");		
+				}	
+				initFancybox();	
+			});			
 		}
 	});
 }

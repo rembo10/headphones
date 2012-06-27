@@ -158,6 +158,8 @@ img.albumArt {
   float: left;
   min-height: 100%;
   min-width: 100%;
+  max-width: 300px;
+  max-height: 300px;
   position: relative;
 }
 .title {
