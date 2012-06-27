@@ -489,7 +489,8 @@ def getArtwork(ArtistID=None, AlbumID=None):
     if artwork_path.startswith('http://'):
         return artwork_path
     else:
-        return "cache" + artwork_path[len(headphones.CACHE_DIR):]
+        artwork_file = os.path.basename(artwork_path)
+        return "cache/artwork/" + artwork_file
         
 def getThumb(ArtistID=None, AlbumID=None):
     
@@ -502,7 +503,8 @@ def getThumb(ArtistID=None, AlbumID=None):
     if artwork_path.startswith('http://'):
         return artwork_path
     else:
-        return "cache" + artwork_path[len(headphones.CACHE_DIR):]
+        thumbnail_file = os.path.basename(artwork_path)
+        return "cache/artwork/" + thumbnail_file
     
 def getInfo(ArtistID=None, AlbumID=None):
     
