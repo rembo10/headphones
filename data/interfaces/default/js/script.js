@@ -46,7 +46,7 @@ function getArtwork(imgElem,id,name,type) {
 		cache: true,
 		success: function(data){
 			if ( data == "" || data == undefined ) {
-				var imageUrl = "interfaces/default/images/no-cover-artist.png";
+				var imageUrl = "interfaces/default/images/no-cover-art.png";
 			}
 			else {
 				var imageUrl = data;
