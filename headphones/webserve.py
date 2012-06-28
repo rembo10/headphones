@@ -223,7 +223,13 @@ class WebInterface(object):
         myDB = db.DBConnection()
         artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
         return serve_template(templatename="manageartists.html", title="Manage Artists", artists=artists)
-    manageArtists.exposed = True    
+    manageArtists.exposed = True
+    
+    def manageAlbums(self):
+        myDB = db.DBConnection()
+        albums = myDB.select('SELECT * from albums')
+        return serve_template(templatename="managealbums.html", title="Manage Albums", albums=albums)
+    manageArtists.exposed = True
     
     def manageNew(self):
         return serve_template(templatename="managenew.html", title="Manage New Artists")
