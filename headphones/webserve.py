@@ -148,7 +148,7 @@ class WebInterface(object):
     
     def markAlbums(self, ArtistID=None, action=None, **args):
         myDB = db.DBConnection()
-        if action == 'WantedNew':
+        if action == 'WantedNew' or 'WantedLossless':
             newaction = 'Wanted'
         else:
             newaction = action
@@ -160,6 +160,8 @@ class WebInterface(object):
                 searcher.searchforalbum(mbid, new=False)
             if action == 'WantedNew':
                 searcher.searchforalbum(mbid, new=True)
+            if action == 'WantedLossless':
+                searcher.searchforalbum(mbid, lossless=True)
         if ArtistID:
             raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
         else:
@@ -229,7 +231,7 @@ class WebInterface(object):
         myDB = db.DBConnection()
         albums = myDB.select('SELECT * from albums')
         return serve_template(templatename="managealbums.html", title="Manage Albums", albums=albums)
-    manageArtists.exposed = True
+    manageAlbums.exposed = True
     
     def manageNew(self):
         return serve_template(templatename="managenew.html", title="Manage New Artists")
