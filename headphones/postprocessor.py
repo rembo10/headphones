@@ -418,9 +418,12 @@ def moveFiles(albumpath, release, tracks):
                         except Exception, e:
                             logger.warn('Error renaming %s: %s' % (files, e))
                         break
+            else:
+                logger.info('Destination file doesnt exist: %s' % files)
+
             try:
                 shutil.move(os.path.join(r, files), os.path.join(destination_path, files))
-            except shutil.Error, e:
+            except Exception, e:
                 logger.warn('Error moving file %s: %s' % (files, e))
                 
     # Chmod the directories using the folder_format (script courtesy of premiso!)
