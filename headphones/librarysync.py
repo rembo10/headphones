@@ -51,13 +51,19 @@ def libraryScan(dir=None):
 
     myDB.action('DELETE from have')
     
+    if os.name == 'nt':
+        dir = dir.decode("UTF-8")
+    
     for r,d,f in os.walk(dir):
         for files in f:
             # MEDIA_FORMATS = music file extensions, e.g. mp3, flac, etc
             if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
 
                 song = os.path.join(r, files)
-                file = unicode(os.path.join(r, files), headphones.SYS_ENCODING, errors='replace')
+                if os.name != 'nt':
+                    file = unicode(os.path.join(r, files), headphones.SYS_ENCODING, errors='replace')
+                else:
+                    file = os.path.join(r,files)
 
                 # Try to read the metadata
                 try:
