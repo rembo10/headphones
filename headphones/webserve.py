@@ -138,6 +138,7 @@ class WebInterface(object):
         myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
         myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
         myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+        myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
         raise cherrypy.HTTPRedirect("home")
     deleteArtist.exposed = True
     
@@ -245,6 +246,7 @@ class WebInterface(object):
                 myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
                 myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
                 myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+                myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
             elif action == 'pause':
                 controlValueDict = {'ArtistID': ArtistID}
                 newValueDict = {'Status': 'Paused'}
