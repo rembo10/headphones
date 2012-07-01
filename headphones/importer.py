@@ -99,7 +99,7 @@ def addArtisttoDB(artistid, extrasonly=False):
     myDB = db.DBConnection()
     
     # Delete from blacklist if it's on there
-    myDB.action('DELETE from blacklist WHERE ArtistID=?', [ArtistID])
+    myDB.action('DELETE from blacklist WHERE ArtistID=?', [artistid])
 
     # We need the current minimal info in the database instantly
     # so we don't throw a 500 error when we redirect to the artistPage
