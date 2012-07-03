@@ -61,7 +61,7 @@ def artistlist_to_mbids(artistlist, forced=False):
         myDB = db.DBConnection()
         bl_artist = myDB.action('SELECT * FROM blacklist WHERE ArtistID=?', [artistid]).fetchone()
         if bl_artist or artistid == various_artists_mbid:
-            logger.info("Artist ID for '%s' is either blacklisted or Various Artists. Not Adding: %s (to add artist, you must do it manually)" % (name, artistid))
+            logger.info("Artist ID for '%s' is either blacklisted or Various Artists. To add artist, you must do it manually (Artist ID: %s)" % (artist, artistid))
             continue
         
         # Add to database if it doesn't exist
