@@ -26,13 +26,10 @@ def libraryScan(dir=None):
     if not dir:
         dir = headphones.MUSIC_DIR
         
-    try:
-        dir = str(dir)
-    except UnicodeEncodeError:
-        dir = unicode(dir).encode('unicode_escape')
+    dir = dir.encode(headphones.SYS_ENCODING)
         
     if not os.path.isdir(dir):
-        logger.warn('Cannot find directory: %s. Not scanning' % dir)
+        logger.warn('Cannot find directory: %s. Not scanning' % dir.decode(headphones.SYS_ENCODING))
         return
 
     myDB = db.DBConnection()
@@ -57,14 +54,13 @@ def libraryScan(dir=None):
             if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
 
                 song = os.path.join(r, files)
-                file = unicode(os.path.join(r, files), headphones.SYS_ENCODING, errors='replace')
 
                 # Try to read the metadata
                 try:
                     f = MediaFile(song)
 
                 except:
-                    logger.error('Cannot read file: ' + file)
+                    logger.error('Cannot read file: ' + song.decode(headphones.SYS_ENCODING))
                     continue
                     
                 # Grab the bitrates for the auto detect bit rate option
@@ -87,7 +83,7 @@ def libraryScan(dir=None):
                         track = myDB.action('SELECT TrackID from tracks WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [f_artist, f.album, f.title]).fetchone()
                     
                     if track:
-                        myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [file, f.bitrate, f.format, track['TrackID']])
+                        myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [song.decode(headphones.SYS_ENCODING), f.bitrate, f.format, track['TrackID']])
                         continue        
                 
                 # Try to match on mbid if available and we couldn't find a match based on metadata
@@ -98,14 +94,14 @@ def libraryScan(dir=None):
                     track = myDB.action('SELECT TrackID from tracks WHERE TrackID=?', [f.mb_trackid]).fetchone()
         
                     if track:
-                        myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [file, f.bitrate, f.format, track['TrackID']])
+                        myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [song.decode(headphones.SYS_ENCODING), f.bitrate, f.format, track['TrackID']])
                         continue                
                 
                 # if we can't find a match in the database on a track level, it might be a new artist or it might be on a non-mb release
                 new_artists.append(f_artist)
                 
                 # The have table will become the new database for unmatched tracks (i.e. tracks with no associated links in the database                
-                myDB.action('INSERT INTO have (ArtistName, AlbumTitle, TrackNumber, TrackTitle, TrackLength, BitRate, Genre, Date, TrackID, Location, CleanName, Format) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [f_artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid, file, helpers.cleanName(f_artist+' '+f.album+' '+f.title), f.format])
+                myDB.action('INSERT INTO have (ArtistName, AlbumTitle, TrackNumber, TrackTitle, TrackLength, BitRate, Genre, Date, TrackID, Location, CleanName, Format) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [f_artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid, song.decode(headphones.SYS_ENCODING), helpers.cleanName(f_artist+' '+f.album+' '+f.title), f.format])
 
     logger.info('Completed scanning directory: %s' % dir)
     
