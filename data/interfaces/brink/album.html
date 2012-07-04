@@ -47,12 +47,12 @@
 			%>
 			<br />
 			%if description:
-			<h3>Description:</h3>
-			${description['Summary']}
+			<p>${description['Summary']}</p>
 			%endif
-			<br />
-			<br />
-			Playtime: ${albumduration}
+			<ul>
+				<li>Tracks: <span>${totaltracks}</span></li> 
+				<li>Duration: <span>${albumduration}</span></li>
+			</ul>
 			</div>
 		</div>
 		<div id="track_wrapper">
@@ -64,6 +64,7 @@
 						<th id="duration">Duration</th>
 						<th id="location">Local File</th>
 						<th id="bitrate">Bit Rate</th>
+						<th id="format">Format</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -92,6 +93,7 @@
 						<td id="duration">${trackduration}</td>
 						<td id="location">${location}</td>
 						<td id="bitrate">${bitrate}</td>
+						<td id="format">${format}</td>
 					</tr>
 				%endfor
 				<%
@@ -108,6 +110,7 @@
 						<td id="duration">${duration}</td>
 						<td id="location">${track['Location']}</td>
 						<td id="bitrate">${int(track['BitRate'])/1000} kbps</td>
+						<td id="format">${track['Format']}</td>
 					</tr>
 					%endfor
 				%endif
@@ -124,8 +127,9 @@
 <%def name="javascriptIncludes()">
 	<script src="interfaces/brink/JS/libs/jquery.dataTables.min.js"></script>
 	<script>
-	$(document).ready(function()
-	{
+	$(document).ready(function() {
+		getAlbumInfo("${album['ArtistName']}","${album['AlbumTitle']}","#albumheader .albumArt",3);
+		initActions();
 		$('#track_table').dataTable(
 			{
 				"aaSorting": [
@@ -134,6 +138,21 @@
 				"bInfo": false,
 				"bPaginate": false
 			});
+	});
+	//CD Rotate
+	$(function() {
+		var $rotateElement = $(".album-art-cd");
+		rotate(0);
+		function rotate(degree) {
+
+		  // For webkit browsers: e.g. Chrome
+		$rotateElement.css({ WebkitTransform: 'rotate(' + degree + 'deg)'});
+		  // For Mozilla browser: e.g. Firefox
+		$rotateElement.css({ '-moz-transform': 'rotate(' + degree + 'deg)'});
+
+		  // Animate rotation with a recursive call
+		setTimeout(function() { rotate(++degree); },30);
+		}
 	});
 	</script>
 </%def>

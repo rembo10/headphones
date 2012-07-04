@@ -43,8 +43,13 @@ $(function(){
 		var a = $('input[name="' + sliderName + '"]').val();
 		var b = 60;
 		var c = a % b;
-		if ( a >= b ){
-			$('#' + sliderName ).text( (a-c)/b + " hour/s " + c + " minutes" );
+		if (a == 60){
+			$('#' + sliderName ).text( (a-c)/b + " hour" );
+		}
+		else if (c <= 0){
+			$('#' + sliderName ).text( (a-c)/b + " hours" );
+		} else if ( a >= b ){
+			$('#' + sliderName ).text( (a-c)/b + " hours " + c + " minutes" );
 		} else {
 			$('#' + sliderName ).text( a + " minutes" );
 		}
@@ -57,10 +62,17 @@ $(function(){
 			value: a,
 			slide: function( event, ui ) {
 				a = ui.value;
-				c = a % b;
-				if(a >= b){
+				c = a % b;			
+				if (a == 60){
 					$('input[name="' + sliderName + '"]').val( ui.value );
-					$('#' + sliderName ).text( (a-c)/b + " hour/s " + c + " minutes" );
+					$('#' + sliderName ).text( (a-c)/b + " hour" );
+				}
+				else if (c <= 0){
+					$('input[name="' + sliderName + '"]').val( ui.value );
+					$('#' + sliderName ).text( (a-c)/b + " hours" );
+				} else if ( a >= b ){
+					$('input[name="' + sliderName + '"]').val( ui.value );
+					$('#' + sliderName ).text( (a-c)/b + " hours " + c + " minutes" );
 				} else {
 					$('input[name="' + sliderName + '"]').val( ui.value );
 					$('#' + sliderName ).text( a + " minutes" );

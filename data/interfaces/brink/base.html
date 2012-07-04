@@ -21,22 +21,19 @@
 	<link rel="shortcut icon" href=".images/favicon.ico">
 	<link rel="apple-touch-icon" href="images/headphoneslogo.png">
 	<!--Main Stylesheet-->
-	<link rel="stylesheet" href="interfaces/brink/CSS/style.css">
+	<link rel="stylesheet" href="interfaces/brink/css/style.css">
 	<!-- Theme style -->
 	<link rel="stylesheet" href="interfaces/brink/css/theme/default.css">
 
 	<!--Jquery APIs-->
-	<script src="../js/libs/jquery.min.js"></script>
-	<script src="../js/libs/jquery-ui.min.js"></script>
+	<script src="js/libs/jquery-1.7.2.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 	
-	<!--Jquery UI CSS-->
-	<link rel="stylesheet" href="interfaces/brink/CSS/jquery-ui-1.8.21.custom.css">
+	<script src="interfaces/brink/js/jquery-ui-1.8.21.custom.min.js"></script>
+	<link rel="stylesheet" href="interfaces/brink/css/jquery-ui-1.8.21.custom.css">
 		
 	<!--Ajax Form-->
 	<script src="interfaces/brink/js/libs/jquery.form.js"></script>
-	
-	<!--jsTree-->
-	<script src="interfaces/brink/js/libs/jstree/jquery.jstree.js"></script>
 	
 	<!--Noty-->
 	<script type="text/javascript" src="interfaces/brink/js/libs/jquery.noty.js" ></script>
@@ -46,30 +43,17 @@
 	<!--Global Script-->
 	<script src="interfaces/brink/js/script.js"></script>
 	
+	<!--Datatables-->
+	<script type="text/javascript" src="/js/libs/jquery.dataTables.min.js"></script>
+	<link rel="stylesheet" href="interfaces/brink/CSS/jquery.dataTables_themeroller.css">
+		
+	${next.headIncludes()}
+	${next.javascriptIncludes()}
+	
 	<!--jScrollPane-->
 	<link type="text/css" href="interfaces/brink/css/jquery.jscrollpane.css" rel="stylesheet" media="all" />
 	<script type="text/javascript" src="interfaces/brink/js/libs/jquery.jscrollpane.min.js" ></script>
 	<script type="text/javascript" src="interfaces/brink/js/libs/jquery.mousewheel.js" ></script>
-	<!--Datatables-->
-	<script type="text/javascript" src="../js/libs/jquery.dataTables.min.js"></script>
-	<link rel="stylesheet" href="interfaces/brink/CSS/dataTable.css">
-		
-	<script type="text/javascript">
-		
-		$(window).resize(function(){
-			mainResize();
-			mainScroll();
-		});
-		$(document).ready(function(){
-			mainResize();
-			mainScroll();
-		});
-		$('#main').resize(function(){
-			mainScroll();
-		});
-	</script>
-		
-	${next.headIncludes()}
 	
 	<script src="js/libs/modernizr-1.7.min.js"></script>
 </head>
@@ -107,8 +91,12 @@
 								+ "<a href='update'>Update</a>",
 				"type":"success"
 			});
+			$(document).ready(function(){
+				$("#commitsBehind").text("Update (${headphones.COMMITS_BEHIND})")
+			});
 		</script>
 	% endif
+	
 	<div class="custom_container"></div>
 	<table id="table_body">
 		<tr>
@@ -162,6 +150,7 @@
 						</a>
 					</li>
 				</ul>
+				<div></div>
 			</td>
 			<td id="content-container">
 				<div id="main" class="main">
@@ -175,7 +164,7 @@
 					<a href="forceSearch"><span>I</span>Wanted Albums</a>
 					<a href="forceUpdate"><span>U</span>Active Artists</a>
 					<a href="forcePostProcess"><span>J</span>Post-Process</a>
-					<a href="checkGithub"><span>V</span>Update</a>
+					<a href="checkGithub"><span>V</span>Update<label id="commits"></label></a>
 				</div>
 				<div class="btn right">
 					<a href="restart" onclick="javascript:return confirm('Restart HP?')"><span>J</span>Restart</a>
@@ -185,13 +174,8 @@
 		</tr>
 	</table>
 </script>
-	<!--[if lt IE 7 ]>
-	<script src="js/libs/dd_belatedpng.js"></script>
-	<script> DD_belatedPNG.fix('img, .png_bg');</script>
-	<![endif]-->
 </body>
 </html>
-
-<%def name="javascriptIncludes()"></%def>
 <%def name="headIncludes()"></%def>
 <%def name="headerIncludes()"></%def>
+<%def name="javascriptIncludes()"></%def>

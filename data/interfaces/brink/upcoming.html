@@ -1,16 +1,15 @@
 <%inherit file="base.html" />
 <%def name="body()">
 	<div class="table_wrapper">
-		<h1><span>N</span>Upcoming Albums</h1>
+		<h1><span>O</span>Upcoming Albums</h1>
 		<table class="display" id="upcoming_table">
 		<thead>
 			<tr>
 				<th id="albumart"></th>
-				<th id="artistname">Artist</th>
+				<th id="name">Artist</th>
 				<th id="albumname">Album Name</th>
 				<th id="reldate">Release Date</th>
 				<th id="type">Type</th>
-				<th id="status">Status</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -19,7 +18,7 @@
 				<td id="albumart">
 					<div class="album-art-small">
 						<a href="albumPage?AlbumID=${album['AlbumID']}">
-							<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg">
+							<img />
 						</a>
 					</div>
 				</td>
@@ -32,7 +31,6 @@
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
-				<td id="status">${album['Status']}</td>
 			</tr>
 		%endfor
 		</tbody>
@@ -50,7 +48,7 @@
 	</p>
 	</div>
 	<div class="table_wrapper">
-		<h1><span>O</span>Wanted Albums</h1>
+		<h1><span>N</span>Wanted Albums</h1>
 		<table class="display" id="wanted_table">
 		<thead>
 			<tr>
@@ -68,22 +66,20 @@
 				<td id="select"><input class="styled" type="checkbox" name="${album['AlbumID']}" class="checkbox" /></th>
 				<td id="albumart">
 					<div class="album-art-small">
-					<a href="albumPage?AlbumID=${album['AlbumID']}">
-						<div class="status ${album['Status']}">${album['Status']}<br />
+						<div class="status ${album['Status']}">
 							<div>
-							%if album['Status'] == 'Skipped':
-								<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Get this album"><span>N</span></a>
-							%elif album['Status'] == 'Wanted':
-								<a class="web-symbol" href="#" title="Mark downloaded"><span>/</span></a>
-								<a class="web-symbol" href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Unmark"><span>&#215;</span></a>
-							%else:
-								<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Retry the same nbz"><span>*</span></a>
-								<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True" title="Try a new download, skipping all previously tried nzbs">J</a>
-							%endif
+								%if album['Status'] == 'Skipped':
+									<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Get this album"><span>N</span></a>
+								%elif album['Status'] == 'Wanted':
+									<a class="web-symbol" href="#" title="Mark downloaded"><span>/</span></a>
+									<a class="web-symbol" href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Unmark"><span>&#215;</span></a>
+								%else:
+									<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Retry the same nbz"><span>*</span></a>
+									<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True" title="Try a new download, skipping all previously tried nzbs">J</a>
+								%endif
 							</div>
 						</div>
-						<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg">
-					</a>
+						<img />
 					</div>
 				</td>
 				<td id="artistname">
@@ -108,8 +104,31 @@
 <%def name="javascriptIncludes()">
 	<script src="interfaces/brink/JS/libs/jquery.dataTables.min.js"></script>
 	<script>
+	function getArtistArt() {
+		$("table#upcoming_table tr td#artistname").each(function(){	
+			var id = $(this).parent().find("td#select input").attr('name');
+			var artist = $(this).children('a').text();
+			var image = $(this).parent().find("td#albumart img");
+			if ( !image.hasClass('done') ) {
+				image.addClass('done');
+				getArtistInfo(artist,image,1,id);
+			}
+		});
+		$("table#wanted_table tr td#artistname").each(function(){	
+			var id = $(this).parent().find("td#select input").attr('name');
+			var artist = $(this).children('a').text();
+			var image = $(this).parent().find("td#albumart img");
+			if ( !image.hasClass('done') ) {
+				image.addClass('done');
+				getArtistInfo(artist,image,1,id);
+			}
+		});
+	}
+	
+	
 	$(document).ready(function()
 	{
+		getArtistArt();
 		$('#wanted_table').dataTable(
 			{
 				"aoColumns": [

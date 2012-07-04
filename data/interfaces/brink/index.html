@@ -9,7 +9,6 @@
 			<tr>
 				<th id="albumart"></th>
 				<th id="name">Artist Name</th>
-				<th id="status">Status</th>
 				<th id="album">Latest Album</th>
 				<th id="have">Have</th>
 			</tr>
@@ -52,28 +51,20 @@
 			<tr class="grade${grade}">
 				<td id="albumart">
 					<div class="album-art-small">
-						<a href="albumPage?AlbumID=${artist['AlbumID']}">
-							<!--
+						<div class="status ${artist['Status']}">
 							<div>
-								%if album['Status'] == 'Skipped':
-									<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Mark Wanted"><span>O</span></a>
-								%elif album['Status'] == 'Wanted':
-									<a class="web-symbol" href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Unmark Wanted"><span>&#215;</span></a>
+								%if artist['Status'] == 'Active':
+								<span class="web-symbol">/</span>
 								%else:
-									<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Retry"><span>*</span></a>
-									<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True" title="Try new">J</a>
-								%endif
+								<span class="web-symbol loader"></span>
+								%endif	
 							</div>
-							-->
-						<!--rembo
-							<img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" title="${artist['ArtistName']} - ${albumdisplay}">
-						-->
-						</a>
+						</div>
+						<img />
 					</div>
 				</td>
 				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
 				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
-				<td id="status">${artist['Status']}</td>
 				<td id="have"><span title="${percent}"></span>
 					<div class="progress-container" title="You have ${havetracks} of ${totaltracks} total.">
 						<span class="havetracks">${havetracks}/${totaltracks}</span>
@@ -91,9 +82,10 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-	<script src="interfaces/brink/js/libs/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="js/libs/jquery.dataTables.min.js"></script>
 	<script type="text/javascript">
 	$(document).ready(function(){
+		getArtistArt();
 		$('#artist_table').dataTable(
 		{
 			"aaSorting": [
@@ -102,5 +94,18 @@
 			"bFilter": true
 		});
 	});
+	
+	function getArtistArt() {
+		$("table#artist_table tr td#name").each(function(){	
+			var id = $(this).children('a').attr('title');
+			var artist = $(this).children('a').text();
+			var image = $(this).parent().find("td#albumart img");
+			if ( !image.hasClass('done') ) {
+				image.addClass('done');
+				getArtistInfo(artist,image,1,id);
+			}
+		});
+	}
+	
 	</script>
 </%def>

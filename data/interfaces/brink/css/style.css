@@ -68,6 +68,7 @@ a:active {/*colour in NN4.xx is red*/
 }
 
 #container { width: 100%; margin: auto; }
+h1,h2,h3,h4,h5,h6{padding-left: 10px,}
 
 h1
  { 
@@ -84,6 +85,16 @@ h3 { font-size: .8em; font-weight: normal; color: rgb(140,140,140); }
 h4 { padding: .6px; font-size: 0.8em; color: rgba(0,0,0,0.6); text-shadow: 1px 1px 0px rgba(255,255,255,0.1); text-decoration: none;}
 
 p { color: rgb(160,160,160); text-shadow: 1px 1px 1px #000;  margin-top: 8px; margin-bottom: 8px; }
+
+#paddingheader { width: 100%; border-bottom: 2px solid rgb(0,145,255); background: #000;  }
+#switchViews { float: left; list-style-type: none; margin: 0; padding: 0; border: 1px solid rgba(255,255,255,0.1); }
+#switchViews li{ border-right: 1px solid rgba(255,255,255,0.1); padding: 5px; margin: 0; line-height: 25px; cursor: pointer; display: inline-block;}
+#switchViews:last-child{
+	border-right: 0;
+}
+#switchViews li:hover{
+	background: rgba(0,145,255,0.1);
+}
 
 /*#table_body*/
 #table_body{
@@ -275,14 +286,16 @@ div#main {
 
 /*Inputs & Select*/
 input, textarea, select, option {
-   -webkit-appearance: none;
-   padding-left: 5px;
-   padding-right: 5px;
-   font-size: .8em;
-   color: rgba(255,255,255,0.6);
-   line-height: 25px;
-   font-weight: bold;
-   margin: 0;
+	appearance:none;
+	-moz-appearance:none; /* Firefox */
+	-webkit-appearance:none; /* Safari and Chrome */
+	padding-left: 5px;
+	padding-right: 5px;
+	font-size: .8em;
+	color: rgba(255,255,255,0.6);
+	line-height: 25px;
+	font-weight: bold;
+	margin: 0;
 }
 input[type="text"]{
 	height: 27px;
@@ -370,9 +383,8 @@ div#config_wrapper div table tr td{ vertical-align: middle; }
 /* Artist Table Style*/
 table#artist_table { width: 100%;}
 table#artist_table th#select { text-align: left; }
-table#artist_table th#albumart { text-align: center; width: 90px; }
+table#artist_table th#albumart { text-align: center; width: 100px; }
 table#artist_table th#name { text-align: left; min-width: 150px; }
-table#artist_table th#status { text-align: left; min-width: 40px; }
 table#artist_table th#album { text-align: left; min-width: 100px; }
 table#artist_table th#have { text-align: center; min-width: 50px; }
 
@@ -381,7 +393,6 @@ table#artist_table tr { border-top: 1px solid rgba(255,255,255,0.2);border-botto
 table#artist_table td#select { vertical-align: middle; text-align: center; }
 table#artist_table td#albumart { vertical-align: middle; text-align: left; }
 table#artist_table td#name { vertical-align: middle; text-align: left; }
-table#artist_table td#status { vertical-align: middle; text-align: left; color: rgba(0,0,0,0.4)}
 table#artist_table td#album { vertical-align: middle; text-align: left; }
 table#artist_table td#have { vertical-align: middle; }
 
@@ -399,51 +410,103 @@ table#album_table tr { border-top: 1px solid rgba(255,255,255,0.2); border-botto
 table#album_table td#select { vertical-align: middle; text-align: left; }
 table#album_table td#albumart { vertical-align: middle; text-align: left; }
 
+.album-container { 
+	position: relative;
+	display: none; 
+	float: left; 
+	width: 126px;
+	margin: 10px 10px 10px 10px; 
+}
+.album-container .album-image-container{
+	height: 126px;
+	height: 126px;
+	position: relative;
+}
+.album-container  .album-image-container .album-image { 
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: 1;
+	border: 0; 
+}
+
+.album-container  input {
+	box-shadow: 0 0 6px #000;
+	-moz-box-shadow: 0 0 6px #000;
+	-webkit-box-shadow: 0 0 6px #000;
+	position: absolute;
+	top: 0px;
+	z-index: 2;
+	width: 100%;
+	height: 100%;
+	text-align: center; 
+}
+.album-container  input:checked {
+	background: rgba(0,0,0,0.1);
+	box-shadow: 0 0 10px rgb(0,145,255);
+	-moz-box-shadow: 0 0 10px rgb(0,145,255);
+	-webkit-box-shadow: 0 0 10px rgb(0,145,255);
+}
+.album-container .album-actions {
+	width: 100%;
+	height: 30px;
+	font-size: 1.3em;
+	line-height: 26px; 
+	text-align: center; 
+	background-color: rgba(0,0,0,0.8); 
+	border-radius: 0em 0em 0.5em 0.5em;
+	-moz-border-radius: 0em 0em 0.5em 0.5em;
+	-webkit-border-radius: 0em 0em 0.5em 0.5em;
+	-o-border-radius: 0em 0em 0.5em 0.5em;
+}
+.album-container .album-info{
+	text-align: left;
+	font-size: 0.7em;
+	position: relative;
+	top: 5px;
+	left: 0px;
+	width: 100%;
+	height: 40px;
+	text-shadow: 1px 1px 2px #000;
+	overflow: hidden;
+	border-bottom: 1px solid rgba(0,145,255,0.1);
+}
 /* Album art image sizes */
 .album-art-small 
 {
 	width: 60px;
 	height: 60px;
-	margin: 3px;
 	float: left;
-	overflow: hidden; 
-	border: 1px solid rgb(10,10,10);
-	box-shadow: 1px 1px 0px rgba(255,255,255,0.2); 
-	border-radius: 2px; 
+	overflow: visible; 
+	border: 0;
 	background-color: rgba(0,0,0,0.1);
 	position: relative;
+	background: url('images/no-cover.png');
 }
-.album-art-small img { width: 60px; height: 60px; z-index: 200; }
-.display tr:hover .status { height: 100%; }
+.album-art-small img { width: 100%; height: 100%; z-index: 200; border: 0; }
+
 .status {
 	position: absolute;
-	bottom: 0px;
-	left: 0px;
-	width: 100%;
-	height: 2em;
-	font-size: .8em;
-	background-color: rgba(0,0,0,0.5);
+	top: 0px;
+	right: -2em;
+	width: 2em;
+	text-align: center;
+	height: 100%;
+	font-size: 1.2em;
+	background-color: rgba(0,0,0,0.8);
 	text-align: center;
 	z-index: 99;
-	box-shadow: 0px 0px 3px #000;
-	-moz-box-shadow: 0px 0px 3px #000;
-	-o-box-shadow: 0px 0px 3px #000;
-	-webkit-box-shadow: 0px 0px 3px #000;
-	line-height: 2em;
+	line-height: 1.5em;
 	color: #fff;
+	transition: height 0.2s;
+	-moz-transition: height 0.2s; /* Firefox 4 */
+	-webkit-transition: height 0.2s; /* Safari and Chrome */
+	-o-transition: height 0.2s; /* Opera */
+	vertical-align: middle;
 }
-.status div { 
-	font-size: 2em;
-}
-.status.Skipped {
-	background-color: rgba(0,0,0,0.5);
-}
-.status.Wanted {
-	background-color: rgba(0,145,255,.5);
-}
-.status.Downloaded{
-	background-color: rgb(0,255,0);
-}
+div.status:hover { }
 .album-art-big 
 { 
 	background: url(../images/box-big.png) no-repeat top left; 
@@ -728,240 +791,3 @@ div#shutdown div div
 #cloud a { padding: 0px; }
 #cloud { margin: 0; }
 #cloud li { display: inline; }
-
-/********************************
- *	Data_tables.css moved here  *
- ********************************/
-
-table.display {
-	border-collapse: collapse;
-}
-
-table.display thead tr th 
-{
-	cursor: pointer;
-	* cursor: hand;
-	padding-left: 8px;
-	border: 1px solid #000;
-	color: #000;
-	text-shadow: 1px 1px rgba(255,255,255,0.2);
-	height: 20px;
-	overflow: hidden;
-	font-size: 12px;
-}
-
-table.display tbody tr:hover td{
-	background-color: rgb(10,60,90);
-}
-
-table.display td 
-{
-	padding: 0px 0px 0px 15px;
-	font-size: 12px;
-}
-
-table.display tfoot th 
-{
-	padding: 3px 18px 3px 15px;
-	border-top: 1px solid black;
-	font-weight: bold;
-}
-
-table.display tr.heading2 td 
-{
-	border-bottom: 1px solid #aaa;
-}
-
-table.display td.center 
-{
-	text-align: center;
-}
-
-/*Sorting*/
-.sorting_asc {
-	background: url(../images/sort_asc.png) no-repeat center right rgb(160,160,160);
-}
-
-.sorting_desc {
-	background: url(../images/sort_desc.png) no-repeat center right rgb(160,160,160);
-}
-
-.sorting {
-	background: url(../images/sort_both.png) no-repeat center right rgb(160,160,160);
-}
-
-.sorting_asc_disabled {
-	background: url(../images/sort_asc_disabled.png) no-repeat center right rgb(160,160,160);
-}
-
-.sorting_desc_disabled {
-	background: url(../images/sort_desc_disabled.png) no-repeat center right rgb(160,160,160);
-}
-
-/*
- * Grades 
- * */
-
-table.display tr.odd.gradeA {
-	background-color: #546B00;
-}
-
-table.display tr.even.gradeA {
-	background-color: #445014;
-}
-
-
-
-/*Wanted*/
-table.display tr.odd.gradeC {
-	background-color: #7A51A5;
-}
-
-table.display tr.even.gradeC {
-	background-color: #6A33A5;
-}
-
-/*
- * GradeSkipped 
- * */
-table.display tr.odd.gradeX {
-	background-color: #4F0043;
-}
-
-table.display tr.even.gradeX {
-	background-color: #3B0F34;
-}
-
-table.display tr.odd.gradeU {
-	background-color: #28064C;
-}
-
-table.display tr.even.gradeU {
-	background-color: #241239;
-}
-
-/*Skipped*/
-table.display tr.odd.gradeZ {
-	background-color: #373737;
-}
-
-table.display tr.even.gradeZ {
-	background-color: #313131;
-}
-
-.dataTables_scroll {
-	clear: both;
-}
-
-.dataTables_scrollBody {
-	*margin-top: -1px;
-}
-.dataTables_mark{
-	margin-left: 20px;
-}
-
-.top, .bottom {
-	padding: 15px;
-	background-color: #F5F5F5;
-	border: 1px solid #CCCCCC;
-}
-
-.top .dataTables_info {
-	float: none;
-}
-
-.clear {
-	clear: both;
-}
-
-.dataTables_empty {
-	color: #575757;
-	font-size: 24px;
-	text-align: center;
-	vertical-align: middle;
-	background-color: #343434; 
-	height: 50px;
-	width: 90%;
-}
-
-tfoot input {
-	margin: 0.5em 0;
-	width: 100%;
-	color: #444;
-}
-
-tfoot input.search_init {
-	color: #999;
-}
-
-td.group {
-	background-color: #d1cfd0;
-	border-bottom: 2px solid #A19B9E;
-	border-top: 2px solid #A19B9E;
-}
-
-td.details {
-	background-color: #d1cfd0;
-	border: 2px solid #A19B9E;
-}
-
-.paging_full_numbers {
-	width: 400px;
-	height: 22px;
-	line-height: 22px;
-}
-
-.paging_full_numbers span.paginate_button,
- 	.paging_full_numbers span.paginate_active {
-	border: 1px solid #000;
-	color: #000;
-	font-weight: bold;
-	padding: 3px 5px;
-	margin: 0 3px;
-	cursor: pointer;
-	*cursor: hand;
-	border-radius: 3px;
-	text-shadow: rgb(255,255,255);
-}
-
-.paging_full_numbers span.paginate_button {
-	background-image: linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(82,0,0) 0%, rgb(117,0,10) 100%);
-	border-bottom: 1px solid #000; 
-}
-
-.paging_full_numbers span.paginate_button:hover {
-	background-image: linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(117,0,10) 0%, rgb(82,0,0) 100%);
-	border-bottom: 1px solid #000; 
-	color: #fff;
-}
-
-.paging_full_numbers span.paginate_active {
-	background-color: #800000;
-	color: #fff;
-}
-
-table.display tr.even.row_selected td {
-	background-color: #660000;
-	color: #fff;
-}
-
-table.display tr.odd.row_selected td {
-	background-color: #4d0000;
-	color: #fff;
-}
-
-div.box {
-	height: 100px;
-	padding: 10px;
-	overflow: auto;
-	border: 1px solid #8080FF;
-	background-color: #E5E5FF;
-}

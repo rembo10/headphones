@@ -8,12 +8,6 @@
 </%def>
 
 <%def name="headerIncludes()">
-	<div id="subhead_container">
-		<ul id="subhead_menu">
-			<li><a href="#WebInterface">Web Interfaces</a></li>
-			<li><a href="#SearchProviders">Search Providers</a></li>
-		</ul>
-	</div>	
 </%def>
 
 <%def name="body()">
@@ -109,7 +103,6 @@
 							</tr>
 							<tr>
 								<td>
-									<label for="api_key">API key:</label>
 									<h3>Visit <a href="https://github.com/rembo10/headphones/tree/" target="_blank"><span>D</span>repo</a> for more information.</h3>
 								</td>
 								<td>
@@ -131,7 +124,9 @@
 									</td>
 									<td>
 										<div class="sliderInterval" for="nzb_search_interval"></div>
-										<h3><input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="2" maxlength="10" /> min.</h3>
+									</td>
+									<td>
+										<input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="2" maxlength="10" />
 									</td>
 									<td>
 									</td>
@@ -146,7 +141,9 @@
 								</td>
 								<td>
 									<div class="sliderInterval" for="download_scan_interval"></div>
-									<h3><input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="2" maxlength="10" />min.</h3>
+								</td>
+								<td>
+									<input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="2" maxlength="10" />
 								</td>
 							</tr>
 							<!--end Download Scan-->
@@ -157,8 +154,10 @@
 									<h3><label id="libraryscan_interval"></label></h3>
 								</td>
 								<td>
-									<h3><input type="text" name="libraryscan_interval" value="${config['libraryscan_interval']}" size="2" maxlength="10" />min.</h3>
 									<div class="sliderInterval" for="libraryscan_interval"></div>
+								</td>
+								<td>
+									<input type="text" name="libraryscan_interval" value="${config['libraryscan_interval']}" size="2" maxlength="10" />
 								</td>
 							</tr>
 							<!--end Interval-->
@@ -317,14 +316,16 @@
 				<!--end Newznab-->
 
 				<!--NZBs.org-->
-				<table id="nzbs">
+				<table>
 					<tr>
 						<td>
 							<h2><a href="http://nzbs.org/" target="_blank"><span>D</span>Nzbs</a></h2>
-							<h3><label for="nzbsorg"></label></h3>
+							<h3></h3>
 						</td>
-						<td><input class="switch" type="checkbox" name="nzbsorg" value="1" ${config['use_nzbsorg']} /></td>
+						<td><input class="switch" type="checkbox" name="nzbsorg" value="1" ${config['use_nzbsorg']} /><h3><label for="nzbsorg"></label></h3></td>
 					</tr>
+				</table>
+				<table id="nzbsorg">
 					<tr>
 						<td><label for="nzbsorg_hash">API Key:</label></td>
 						<td><input type="text" name="nzbsorg_hash" value="${config['nzbsorg_hash']}" size="30" maxlength="40"></td>
@@ -333,16 +334,18 @@
 				<!--end NZBs.org-->
 				
 				<!--Newzbin-->
-				<table id="newsbin" class="configtable">
+				<table>
 					<tr>
 						<td>
-							<h2><a href="http://www.newsbin.com/" target="_blank"><span>D</span>Newsbin</a></h2>
+							<h2><a href="http://www.newsbin.com/" target="_blank"><span>D</span>Newzbin</a></h2>
 							<h3><label for="newzbin">Enabled/Disabled</label></h3>
 						</td>
 						<td>
 							<input class="switch" type="checkbox" name="newzbin" value="1" ${config['use_newzbin']} />
 						</td>
 					</tr>
+				</table>
+				<table id="newsbin" class="configtable">
 					<tr>
 						<td><label for="newzbin_uid">UID:</label></td>
 						<td><input type="text" name="newzbin_uid" value="${config['newzbin_uid']}" size="30" maxlength="40" /></td>
@@ -648,13 +651,16 @@
 					<h1><span>W</span>Notifications</h1>
 					<h3></h3>
 					<!--Prowl-->
-					<table id="prowloptions">
+					<table>
 						<tr>
 							<td><h2>Prowl Options</h2>
 								<h3><label for="prowl_enabled">Enabled/Disabled</label></h3>
 							</td>
 							<td><input class="switch" type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} /></td>
 						</tr>
+					</table>
+					<table id="prowloptions">
+						
 						<tr>
 							<td><label for="prowl_keys">API key:</label></td>
 							<td><input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50" /></td>
@@ -668,13 +674,15 @@
 						</tr>
 					</table><!--end Prowl-->
 					<!--XBMC-->
-					<table id="xbmcoptions">
+					<table>
 						<tr>
 							<td><h2>XBMC</h2>
 								<h3><label for="xbmc_enabled">Enabled/Disabled</label></h3>
 							</td>
 							<td><input class="switch" type="checkbox" name="xbmc_enabled" id="xbmc" value="1" ${config['xbmc_enabled']} /></td>
 						</tr>
+					</table>
+					<table id="xbmcoptions">
 						<tr>
 							<td><label for="xbmc_host">XBMC Host:</label>
 								<h3>e.g. http://localhost:8080. Separate hosts with commas</h3>
@@ -701,7 +709,7 @@
 					</table><!--end XBMC-->
 					
 					<!--NMA Options-->
-					<table id="nmaoptions">
+					<table>
 						<tr>
 							<td>
 								<h2>Notify My Android</h2>
@@ -709,6 +717,8 @@
 							</td>
 							<td><input class="switch" type="checkbox" name="nma_enabled" id="nma" value="1" ${config['nma_enabled']} /></td>
 						</tr>
+					</table>
+					<table id="nmaoptions">
 						<tr>
 							<td><label for="nma_apikey">NotifyMyAndroid API Key:</label>
 								<h3>Separate multiple api keys with ",".</h3>
@@ -795,7 +805,7 @@
 					<table id="hpserver">
 						<tr>
 							<td><h2>Headphones Server</h2>
-							<h3><a href="http://headphones.codeshy.com/vip" target="_blank"><span>D</span>Get an Account</a></h3>
+								<h3><a href="http://headphones.codeshy.com/vip" target="_blank"><span>D</span>Get an Account</a></h3>
 							</td>
 							<td></td>
 						</tr>
@@ -804,7 +814,7 @@
 							<td><input type="text" name="hpuser" value="${config['hpuser']}" size="20"></td>
 						</tr>
 						<tr>
-							<td><label for="hppass"Password:</label></td>
+							<td><label for="hppass">Password:</label></td>
 							<td><input type="password" name="hppass" value="${config['hppass']}" size="15"></td>
 						</tr>
 					</table>
@@ -820,4 +830,117 @@
 </%def>
 
 <%def name="javascriptIncludes()">
+	<script>
+		$(document).ready(function(){
+		
+			//nzbs.org
+			function nzbsorg(){
+				if( $('input[name="nzbsorg"]').is(":checked") ){
+					$("table#nzbsorg").show();
+					enit();
+				}
+				else {
+					$("table#nzbsorg").hide();
+					enit();
+				}
+			}
+			nzbsorg();
+			$('input[name="nzbsorg"]').change(function(){
+				nzbsorg();
+			});
+			//end nzbs.org
+			
+			//Newzbin
+			function newzbin(){
+				if( $('input[name="newzbin"]').is(":checked") ){
+					$("table#newsbin").show();
+					enit();
+				}
+				else {
+					$("table#newsbin").hide();
+					enit();
+				}
+			}
+			newzbin();
+			$('input[name="newzbin"]').change(function(){
+				newzbin();
+			});
+			//end Newzbin
+			
+			//Prowl
+			function prowl(){
+				if( $('input[name="prowl_enabled"]').is(":checked") ){
+					$("table#prowloptions").show();
+					enit();
+				}
+				else {
+					$("table#prowloptions").hide();
+					enit();
+				}
+			}
+			prowl();
+			$('input[name="prowl_enabled"]').change(function(){
+				prowl();
+			});
+			//end Prowl
+			
+			
+			//XBMC
+			function xbmc(){
+				if(	$('input[name="xbmc_enabled"]').is(":checked") ) {
+					$("table#xbmcoptions").show();
+					enit();
+				} else {
+					$("table#xbmcoptions").hide();
+					enit();
+				}
+			}
+			xbmc();
+			$('input[name="xbmc_enabled"]').change(function(){
+				xbmc();
+			});
+			//end XBMC
+			
+			//NMA
+			function nma(){
+				if( $("#nma").is(":checked") ){
+					$("#nmaoptions").show();
+					enit();
+				} else {
+					$("#nmaoptions").hide();
+					enit();
+				}
+			}
+			$("#nma").change(function(){
+				nma();
+			});
+			//end NMA
+		
+			//Mirrors
+			
+			function mirror(){
+				var value = $("#mirror").val();
+				if( value == "musicbrainz.org" ){
+					$("table#customoptions").hide();
+					$("table#hpserver").hide();
+					enit();
+				} else if ( value == "headphones" ){
+					$("table#customoptions").hide();
+					$("table#hpserver").show();
+					enit();
+				} else if ( value == "custom" ){
+					$("table#customoptions").show();
+					$("table#hpserver").hide();
+					enit();
+				}
+			}
+			mirror();
+			$("#mirror").change(function(){
+				mirror();
+			});
+			//end Mirrors
+			
+			enit();
+		});
+	</script>
 </%def>
