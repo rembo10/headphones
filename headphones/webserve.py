@@ -149,11 +149,12 @@ class WebInterface(object):
     
     def markAlbums(self, ArtistID=None, action=None, **args):
         myDB = db.DBConnection()
-        if action == 'WantedNew' or 'WantedLossless':
+        if action == 'WantedNew' or action == 'WantedLossless':
             newaction = 'Wanted'
         else:
             newaction = action
         for mbid in args:
+            logger.info("Marking %s as %s" % (mbid, newaction))
             controlValueDict = {'AlbumID': mbid}
             newValueDict = {'Status': newaction}
             myDB.upsert("albums", newValueDict, controlValueDict)
