@@ -916,11 +916,19 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 
                     # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
                     
+
                     torrent_name = torrent_folder_name + '.torrent'
                     download_path = os.path.join(headphones.TORRENTBLACKHOLE_DIR, torrent_name)
                     try:
-                        torrent_file = open(download_path, 'rb').read()
-                        torrent_info = bencode.bdecode(torrent_file)
+			#Write the torrent file to a path derived from the TORRENTBLACKHOLE_DIR and file name.
+			torrent_file = open(download_path, 'wb')
+			torrent_file.write(data)
+			torrent_file.close()
+			#Open the fresh torrent file again so we can extract the proper torrent name
+			#Used later in post-processing.
+			torrent_file = open(download_path, 'rb')
+                        torrent_info = bencode.bdecode(torrent_file.read())
+			torrent_file.close()
                         torrent_folder_name = torrent_info['info'].get('name','')
                         logger.info('Torrent folder name: %s' % torrent_folder_name)
                     except Exception, e:

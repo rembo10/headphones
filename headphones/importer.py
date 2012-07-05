@@ -56,14 +56,20 @@ def artistlist_to_mbids(artistlist, forced=False):
         except IndexError:
             logger.info('MusicBrainz query turned up no matches for: %s' % artist)
             continue
+            
+        # Check if it's blacklisted/various artists
+        myDB = db.DBConnection()
+        bl_artist = myDB.action('SELECT * FROM blacklist WHERE ArtistID=?', [artistid]).fetchone()
+        if bl_artist or artistid == various_artists_mbid:
+            logger.info("Artist ID for '%s' is either blacklisted or Various Artists. To add artist, you must do it manually (Artist ID: %s)" % (artist, artistid))
+            continue
         
         # Add to database if it doesn't exist
-        if artistid != various_artists_mbid and not is_exists(artistid):
+        if not is_exists(artistid):
             addArtisttoDB(artistid)
         
         # Just update the tracks if it does
         else:
-            myDB = db.DBConnection()
             havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist]))
             myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, artistid])
             
@@ -82,7 +88,7 @@ def addArtistIDListToDB(artistidlist):
 
 def addArtisttoDB(artistid, extrasonly=False):
     
-    # Putting this here to get around the circular import
+    # Putting this here to get around the circular import. We're using this to update thumbnails for artist/albums
     from headphones import cache
     
     # Can't add various artists - throws an error from MB
@@ -91,6 +97,9 @@ def addArtisttoDB(artistid, extrasonly=False):
         return
         
     myDB = db.DBConnection()
+    
+    # Delete from blacklist if it's on there
+    myDB.action('DELETE from blacklist WHERE ArtistID=?', [artistid])
 
     # We need the current minimal info in the database instantly
     # so we don't throw a 500 error when we redirect to the artistPage
