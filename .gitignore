@@ -1,4 +1,4 @@
-# Compiled source #
+﻿# Compiled source #
 ###################
 *.pyc
 *.py~
@@ -19,3 +19,4 @@ cache/*
 ehthumbs.db
 Icon?
 Thumbs.db
+

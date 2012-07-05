@@ -9,7 +9,7 @@
 <!--[if IE 9 ]>    <html lang="en" class="no-js ie9"> <![endif]-->
 <!--[if (gt IE 9)|!(IE)]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
 <head>
-	<meta charset="UTF-8">
+	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	
 	<title>Headphones - ${title}</title>
@@ -18,114 +18,139 @@
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		
-	<link rel="shortcut icon" href="../images/favicon.ico">
-	<link rel="apple-touch-icon" href="../images/headphoneslogo.png">
+	<link rel="shortcut icon" href=".images/favicon.ico">
+	<link rel="apple-touch-icon" href="images/headphoneslogo.png">
+	<!--Main Stylesheet-->
+	<link rel="stylesheet" href="interfaces/brink/css/style.css">
+	<!-- Theme style -->
+	<link rel="stylesheet" href="interfaces/brink/css/theme/default.css">
+
+	<!--Jquery APIs-->
+	<script src="js/libs/jquery-1.7.2.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 	
-	<link rel="stylesheet" href="interfaces/brink/CSS/style.css">
-	<link rel="stylesheet" href="interfaces/brink/CSS/dataTable.css">
+	<script src="interfaces/brink/js/jquery-ui-1.8.21.custom.min.js"></script>
+	<link rel="stylesheet" href="interfaces/brink/css/jquery-ui-1.8.21.custom.css">
+		
+	<!--Ajax Form-->
+	<script src="interfaces/brink/js/libs/jquery.form.js"></script>
 	
-	<script src="interfaces/brink/js/libs/jquery-1.7.1.js"></script>
-	<script>!window.jQuery && document.write(unescape('%3Cscript src="js/libs/jquery-1.6.2.min.js"%3E%3C/script%3E'))</script>
-	${next.javascriptIncludes()}
+	<!--Noty-->
+	<script type="text/javascript" src="interfaces/brink/js/libs/jquery.noty.js" ></script>
+	<link rel="stylesheet" href="interfaces/brink/css/libs/jquery.noty.css">
+	<link rel="stylesheet" href="interfaces/brink/css/libs/noty_theme_default.css">
 	
-	<script type="text/javascript" src="interfaces/brink/js/libs/jquery.custom-form-elements.js" ></script>
-	
+	<!--Global Script-->
 	<script src="interfaces/brink/js/script.js"></script>
 	
-	<!-- Theme style -->
-	<link rel="stylesheet" href="interfaces/brink/Themes/Default.css">
-		<!-- styles needed by jScrollPane -->
-		<link type="text/css" href="interfaces/brink/css/libs/jquery.jscrollpane.css" rel="stylesheet" media="all" />
-		<!-- jScrollPane script -->
-		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.jscrollpane.js" ></script>
-		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.jscrollpane.min.js" ></script>
-		<!-- Mousewheel support -->
-		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.mousewheel.js" ></script>
-		
-		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.dataTables.js" ></script>
-		<script type="text/javascript" src="interfaces/brink/js/libs/jquery.dataTables.min.js" ></script>
-		
-		<script type="text/javascript">
-
-		$(window).resize(function(){
-			mainResize();
-			mainScroll();
-		});
-		$(document).ready(function(){
-			mainResize();
-			mainScroll();
-		});
-		$('#main').resize(function(){
-			mainScroll();
-		});
-		</script>
+	<!--Datatables-->
+	<script type="text/javascript" src="/js/libs/jquery.dataTables.min.js"></script>
+	<link rel="stylesheet" href="interfaces/brink/CSS/jquery.dataTables_themeroller.css">
 		
 	${next.headIncludes()}
+	${next.javascriptIncludes()}
+	
+	<!--jScrollPane-->
+	<link type="text/css" href="interfaces/brink/css/jquery.jscrollpane.css" rel="stylesheet" media="all" />
+	<script type="text/javascript" src="interfaces/brink/js/libs/jquery.jscrollpane.min.js" ></script>
+	<script type="text/javascript" src="interfaces/brink/js/libs/jquery.mousewheel.js" ></script>
 	
 	<script src="js/libs/modernizr-1.7.min.js"></script>
 </head>
 <body>
-	<div id="message">
-		% if not headphones.CURRENT_VERSION:
-            <div class="dialog error">
-				<div class="btnClose" title="Close" ></div>
-				<table>
-					<tr>
-						<td><div class="image" title="error"></div></td>
-						<td>
-							You're running an unknown version of Headphones. It's recommended that you 
-							<a href="update">update</a> now!
-						</td>
-					</tr>
-				</table>
-            </div>
-		% elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
-			<div class="dialog update">
-				<div class="btnClose" title="Close" ></div>
-				A newer version is available. <br /> 
-				You're ${headphones.COMMITS_BEHIND} commits behind. 
-				<br />
-				<br />
-				<br />
-				<a href="http://github.com/rembo10/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}">Version</a>
-				<a href="update">Update</a>
-			</div>
-		% endif
-		<script>
-			// Types (error, update)are equal to class, which can be found in style.css
-			// eks. 'messageDialog("type", "message");'
+	% if not headphones.CURRENT_VERSION:
+		<script type="text/javascript">
+			noty({
+				"text":"You're running an unknown version of Headphones.<br />It's recommended that you update now!",
+				"type":"success",
+				buttons: [
+				  {type: 'button green', text: 'Update', click: function($noty) {
+						$(this).click(function(){
+							document.location.href='update';
+						});
+						$noty.close
+					  noty({force: true, text: 'Headphones is now updating, please be patient', type: 'success'});
+					}
+				  },
+				  {type: 'button pink', text: 'Cancel', click: function($noty) {
+					  $noty.close();
+					  noty({force: true, text: 'You can update anytime from the tools menu', type: 'information'});
+					}
+				  }
+				  ],
+				closable: false,
+				timeout: false
+			});
 		</script>
-	</div>
+	% elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
+		<script>
+			noty({
+				"text":"A newer version is available."
+								+ "<br />You're ${headphones.COMMITS_BEHIND} commits behind"
+								+ "<a href='http://github.com/rembo10/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}'>Version</a>"
+								+ "<a href='update'>Update</a>",
+				"type":"success"
+			});
+			$(document).ready(function(){
+				$("#commitsBehind").text("Update (${headphones.COMMITS_BEHIND})")
+			});
+		</script>
+	% endif
+	
+	<div class="custom_container"></div>
 	<table id="table_body">
 		<tr>
 			<td id="header" colspan="2">
 				<div id="logo">
-					<a href="home"><img src="../images/headphoneslogo.png" alt="headphones"/>Headphones</a>
+					<img src="/images/headphoneslogo.png" alt="headphones" />
 				</div>
-				${next.headerIncludes()}
+				
 				<div id="searchbar">
 					<form action="search" method="get">
-						<input type="text" value="" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" accesskey="s" placeholder="Search..." />
-						<select class="styled" name="type">
+						<select name="type">
 							<option value="artist">Artist</option>
 							<option value="album">Album</option>
 						</select>
-						<input class="submit" type="submit" value="GO"/>
+						<input type="text" value="" name="name" accesskey="s" placeholder="Search..." />
+						<input class="web-symbol" type="submit" value="L"/>
 					</form>
 				</div>
+				${next.headerIncludes()}
 			</td>
 		</tr>
 		<tr>
 			<td id="nav-container">
 				<ul id="nav">
-					<li><a class="navHome" href="home" accesskey="1">Home</a></li>
-					<li><a class="navUpcoming" href="upcoming" accesskey="2">Upcoming</a></li>
-					<li><a class="navSuggestions" href="extras" accesskey="3">Suggestions</a></li>
-					<li><a class="navManage" href="manage" accesskey="4">Manage</a></li>
-					<li><a class="navHistory" href="history" accesskey="5">History</a></li>
-					<li><a class="navLogs" href="logs" accesskey="6">Logs</a></li>
-					<li><a class="navSettings" href="config" accesskey="7">Settings</a></li>
+					<li><a href="home" accesskey="1">
+							<span>U</span>Home
+						</a>
+					</li>
+					<li><a href="upcoming" accesskey="2">
+							<span>N</span>Upcoming
+						</a>
+					</li>
+					<li><a href="extras" accesskey="3">
+							<span>R</span>Suggestions
+						</a>
+					</li>
+					<li><a href="manage" accesskey="4">
+							<span>_</span>Manage
+						</a>
+					</li>
+					<li><a href="history" accesskey="5">
+							<span>Z</span>History
+						</a>
+					</li>
+					<li><a href="logs" accesskey="6">
+							<span>a</span>Logs
+						</a>
+					</li>
+					<li><a href="config" accesskey="7">
+							<span>S</span>Settings
+						</a>
+					</li>
 				</ul>
+				<div></div>
 			</td>
 			<td id="content-container">
 				<div id="main" class="main">
@@ -135,29 +160,22 @@
 		</tr>
 		<tr id="footer" >
 			<td colspan="2">
-				<div id="footManage">
-					<ul>
-						<li>Tools
-						<ul>
-							<li><a href="forceSearch" title="Refresh/Update">Wanted Albums</a></li>
-							<li><a href="forceUpdate" title="Refresh/Update">Active Artists</a></li>
-							<li><a href="forcePostProcess" title="Refresh/Update">Post-Process</a></li>
-							<li><a href="checkGithub" title="Refresh/Update">Headphones Updates</a></li>
-						</ul>
-						</li>
-					</ul>
+				<div class="btn left">
+					<a href="forceSearch"><span>I</span>Wanted Albums</a>
+					<a href="forceUpdate"><span>U</span>Active Artists</a>
+					<a href="forcePostProcess"><span>J</span>Post-Process</a>
+					<a href="checkGithub"><span>V</span>Update<label id="commits"></label></a>
+				</div>
+				<div class="btn right">
+					<a href="restart" onclick="javascript:return confirm('Restart HP?')"><span>J</span>Restart</a>
+					<a href="shutdown" onclick="javascript:return confirm('Shutdown HP?')"><span>X</span>Shut Down</a>
 				</div>
 			</td>
 		</tr>
 	</table>
 </script>
-	<!--[if lt IE 7 ]>
-	<script src="js/libs/dd_belatedpng.js"></script>
-	<script> DD_belatedPNG.fix('img, .png_bg');</script>
-	<![endif]-->
 </body>
 </html>
-
-<%def name="javascriptIncludes()"></%def>
 <%def name="headIncludes()"></%def>
 <%def name="headerIncludes()"></%def>
+<%def name="javascriptIncludes()"></%def>
