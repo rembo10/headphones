@@ -298,7 +298,7 @@ def initialize():
         DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'download_dir', '')
         BLACKHOLE = bool(check_setting_int(CFG, 'General', 'blackhole', 0))
         BLACKHOLE_DIR = check_setting_str(CFG, 'General', 'blackhole_dir', '')
-        USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', '')
+        USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', '1500')
         INCLUDE_EXTRAS = bool(check_setting_int(CFG, 'General', 'include_extras', 0))
         AUTOWANT_UPCOMING = bool(check_setting_int(CFG, 'General', 'autowant_upcoming', 1))
         AUTOWANT_ALL = bool(check_setting_int(CFG, 'General', 'autowant_all', 0))
