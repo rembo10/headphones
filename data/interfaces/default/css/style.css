@@ -866,7 +866,8 @@ div#artistheader h2 a {
   text-align: left;
 }
 #artist_table th#status,
-#artist_table th#albumart {
+#artist_table th#albumart,
+#artist_table th#lastupdated {
   min-width: 50px;
   text-align: left;
 }
@@ -878,7 +879,8 @@ div#artistheader h2 a {
   text-align: left;
   vertical-align: middle;
 }
-#artist_table td#status {
+#artist_table td#status,
+#artist_table td#lastupdated {
   min-width: 50px;
   text-align: left;
   vertical-align: middle;
@@ -1295,6 +1297,7 @@ div#artistheader h2 a {
   clear: both;
 }
 #album_table th#albumname,
+#album_table th#artistname,
 #upcoming_table th#artistname,
 #wanted_table th#artistname {
   min-width: 150px;
@@ -1317,6 +1320,7 @@ div#artistheader h2 a {
   vertical-align: middle;
 }
 #album_table td#albumname,
+#album_table td#artistname,
 #album_table td#reldate,
 #album_table td#type,
 #track_table td#duration,
