@@ -7,8 +7,8 @@
 	<table class="display" id="artist_table">
 		<thead>
 			<tr>
+				<th id="albumart"></th>
 				<th id="name">Artist Name</th>
-				<th id="status">Status</th>
 				<th id="album">Latest Album</th>
 				<th id="have">Have</th>
 			</tr>
@@ -49,8 +49,21 @@
 				
 			%>
 			<tr class="grade${grade}">
+				<td id="albumart">
+					<div class="album-art-small">
+						<div class="status ${artist['Status']}">
+							<div>
+								%if artist['Status'] == 'Active':
+								<span class="web-symbol">/</span>
+								%else:
+								<span class="web-symbol loader"></span>
+								%endif	
+							</div>
+						</div>
+						<img />
+					</div>
+				</td>
 				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
-				<td id="status">${artist['Status']}</td>
 				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
 				<td id="have"><span title="${percent}"></span>
 					<div class="progress-container" title="You have ${havetracks} of ${totaltracks} total.">
@@ -69,9 +82,10 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-	<script src="interfaces/brink/js/libs/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="js/libs/jquery.dataTables.min.js"></script>
 	<script type="text/javascript">
 	$(document).ready(function(){
+		getArtistArt();
 		$('#artist_table').dataTable(
 		{
 			"aaSorting": [
@@ -80,5 +94,18 @@
 			"bFilter": true
 		});
 	});
+	
+	function getArtistArt() {
+		$("table#artist_table tr td#name").each(function(){	
+			var id = $(this).children('a').attr('title');
+			var artist = $(this).children('a').text();
+			var image = $(this).parent().find("td#albumart img");
+			if ( !image.hasClass('done') ) {
+				image.addClass('done');
+				getArtistInfo(artist,image,1,id);
+			}
+		});
+	}
+	
 	</script>
 </%def>

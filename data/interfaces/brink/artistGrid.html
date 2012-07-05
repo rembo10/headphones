@@ -27,10 +27,7 @@
 		<h1>${artist['ArtistName']}</h1>
 		%if artist['Status'] == 'Loading':
 		<h3><span>W</span>Album information for this artist is currently being loaded</h3>
-		%endif
-		<ul id="switchViews">
-			<li class="active"><span class="web-symbol">&sup1;</span></li>
-		</ul>
+		%endif		
 	</div>
 	<form class="ajax" action="markAlbums" method="get">
 		<input type="hidden" name="ArtistID" value=${artist['ArtistID']}>
@@ -43,15 +40,12 @@
 		</select>
 		<input type="submit" value="GO">
 	</p>
-	<div id="gridView">
 	%for album in albums:
 		<%
 		%>
 		<div class="album-container">
-			<div class="album-image-container">
-				<input class="album-select" type="checkbox" name="${album['AlbumID']}" />
-				<img class="album-image" />
-			</div>
+			<input type="checkbox" name="${album['AlbumID']}" />
+			<img class="image" />
 			<div class="album-actions">
 				%if album['Status'] == 'Skipped':
 					<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Mark Wanted"><span>O</span></a>
@@ -62,14 +56,12 @@
 					<a class="web-symbol" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True" title="Try new"><span>J</span></a>
 				%endif
 			</div>
-			<div class="album-info">
+			<div>
 				<b>${artist['ArtistName']}</b> <br />
-				<span>${album['AlbumTitle']}</span>
+				${album['AlbumTitle']}
 			</div>
 		</div>
 	%endfor
-	</div>
-	<div id="listView">
 	<table class="display" id="album_table">
 		<thead>
 			<tr>
@@ -146,7 +138,6 @@
 		%endfor
 		</tbody>
 	</table>
-	</div><!--end listView-->
 	</form>
 </%def>
 
@@ -159,30 +150,21 @@
 
 <%def name="javascriptIncludes()">
 	<script>
-	function getAlbumInfoGrid() {
+		
+	function getArtistArt() {
 		$(".album-container").each(function() {
-			$(this).fadeIn("slow", function(){
-				var element = $(this).find("img.album-image");
-				var artistname = $(this).find(".album-info b").text();
-				var albumname = $(this).find(".album-info span").text();
-				getAlbumInfo(artistname,albumname,element,2);
-			});
+			var id = $(this).children("input").attr("name");
+			var artist = $("#paddingheader h1").text();
+			var image = $(this).children("img");
+			if ( !image.hasClass("done") ) {
+				getArtistInfo(artist,image,2,id);
+				image.addClass("done");
+				$(this).fadeIn();
+			}
 		});
 	}
 	$(document).ready(function(){
-		//ListView
-		getAlbumInfoGrid();
-		//GridView
-		$("#gridView").show();
-		$("#listView").hide();
-		enit();
-		$("#switchViews li").click(function(){
-			$("#gridView").toggle();
-			$("#listView").toggle();
-			var text = $(this).children("span").text() == '&sup1;' ? '&sup2;' : '&sup1;';
-			enit();
-		});
-		
+		getArtistArt();
 		$('#album_table').dataTable({
 			"aoColumns": [
 				{ "bSortable": false},
@@ -203,5 +185,6 @@
 			"aaSorting": [[4, 'asc'],[3,'desc']]
 		});
 	});
+	
 	</script>
 </%def>
