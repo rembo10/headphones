@@ -21,9 +21,18 @@
 	position: absolute;
 	top: 0;
 	right: 0;
-	width: 10px;
+	width: 14px;
 	height: 100%;
-	background: red;
+	border-left: 1px solid rgba(255,255,255,0.1);
+	padding: 1px;
+	background: rgb(55,65,76); /* Old browsers */
+	background: -moz-linear-gradient(left, rgba(55,65,76,1) 0%, rgba(45,53,63,1) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(55,65,76,1)), color-stop(100%,rgba(45,53,63,1))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(left, rgba(55,65,76,1) 0%,rgba(45,53,63,1) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(left, rgba(55,65,76,1) 0%,rgba(45,53,63,1) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(left, rgba(55,65,76,1) 0%,rgba(45,53,63,1) 100%); /* IE10+ */
+	background: linear-gradient(left, rgba(55,65,76,1) 0%,rgba(45,53,63,1) 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#37414c', endColorstr='#2d353f',GradientType=1 ); /* IE6-9 */
 }
 
 .jspHorizontalBar
@@ -33,7 +42,6 @@
 	left: 0;
 	width: 100%;
 	height: 10px;
-	background: red;
 }
 
 .jspVerticalBar *,
@@ -41,6 +49,7 @@
 {
 	margin: 0;
 	padding: 0;
+	
 }
 
 .jspCap
@@ -55,23 +64,38 @@
 
 .jspTrack
 {
-	background: rgb(10,10,10);
 	position: relative;
+	border-radius: 1em;
+	background: rgb(13,15,17); /* Old browsers */
+background: -moz-linear-gradient(left, rgba(13,15,17,1) 0%, rgba(23,28,33,1) 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(13,15,17,1)), color-stop(100%,rgba(23,28,33,1))); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(left, rgba(13,15,17,1) 0%,rgba(23,28,33,1) 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(left, rgba(13,15,17,1) 0%,rgba(23,28,33,1) 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(left, rgba(13,15,17,1) 0%,rgba(23,28,33,1) 100%); /* IE10+ */
+background: linear-gradient(left, rgba(13,15,17,1) 0%,rgba(23,28,33,1) 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0d0f11', endColorstr='#171c21',GradientType=1 ); /* IE6-9 */
 }
 
 .jspDrag
 {
-	background: rgb(90,0,10);
 	position: relative;
 	top: 0;
 	left: 0;
 	cursor: pointer;
-	border-radius: 20px;
+	border-left: 1px solid rgba(255,255,255,0.1);
+	border-radius: 1em;
+	background: rgb(112,135,158); /* Old browsers */
+background: -moz-linear-gradient(left, rgba(112,135,158,1) 0%, rgba(76,90,107,1) 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(112,135,158,1)), color-stop(100%,rgba(76,90,107,1))); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(left, rgba(112,135,158,1) 0%,rgba(76,90,107,1) 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(left, rgba(112,135,158,1) 0%,rgba(76,90,107,1) 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(left, rgba(112,135,158,1) 0%,rgba(76,90,107,1) 100%); /* IE10+ */
+background: linear-gradient(left, rgba(112,135,158,1) 0%,rgba(76,90,107,1) 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#70879e', endColorstr='#4c5a6b',GradientType=1 ); /* IE6-9 */
 }
 .jspDrag:active,
 .jspDrag:hover
 {
-	background: rgb(160,0,10);
 }
 
 .jspHorizontalBar .jspTrack,
@@ -83,36 +107,35 @@
 
 .jspArrow
 {
-	background: #50506d;
-	text-indent: -20000px;
 	display: block;
 	cursor: pointer;
+	font-family: 'WebSymbolsRegular';
+	font-size: 0.1em;
 }
 
 .jspArrow.jspDisabled
 {
 	cursor: default;
-	background: #80808d;
 }
 
-.jspVerticalBar .jspArrow .jspArrowUp {
-	background: url(../images/arrow-up.png) no-repeat 50% 50%;
+.jspVerticalBar .jspArrow .jspArrowUp:after {
+	content: ':';
 }
-.jspVerticalBar .jspArrow .jspArrowDown {
-	background: url(../images/arrow-down.png) no-repeat 50% 50%;
+.jspVerticalBar .jspArrow .jspArrowDown:after {
+	content: ';';
 }
 .jspVerticalBar .jspArrow
 {
-	height: 10px;
+	height: 16px;
+	width: 100%;
 }
 
 
 .jspHorizontalBar .jspArrow
 {
-	width: 10px;
+	width: 16px;
 	float: left;
 	height: 100%;
-	background-image: url(../images/arrow-up.png);
 }
 
 .jspVerticalBar .jspArrow:focus
