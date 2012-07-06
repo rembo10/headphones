@@ -1,7 +1,7 @@
 <%inherit file="base.html"/>
 
 <%def name="headIncludes()">
-	<meta http-equiv="refresh" content="${timer};url=index">
+	<meta http-equiv="refresh" content="${timer};url=home">
 </%def>
 
 <%def name="body()">
@@ -9,13 +9,10 @@
 		<div id="shutdown">
 			<div>
 				<div>
-				<span>
-					<h1>Headphones is ${message}</h1>
-				</span>
+					<h1><span><script>loader();</script></span>${message}</h1>
 				<br />
-				<span>
-					Estimate ${timer} seconds
-				</span>
+				<br />
+					<h3>Estimate ${timer} seconds</h3>
 				</div>
 			</div>
 		</div>
