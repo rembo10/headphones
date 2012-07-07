@@ -164,24 +164,21 @@ def addArtisttoDB(artistid, extrasonly=False):
             continue
     
         logger.info(u"Now adding/updating album: " + rg['title'])
+
         controlValueDict = {"AlbumID":  rg['id']}
+
+        newValueDict = {"ArtistID":         artistid,
+                        "ArtistName":       artist['artist_name'],
+                        "AlbumTitle":       rg['title'],
+                        "AlbumASIN":        release_dict['asin'],
+                        "ReleaseDate":      release_dict['releasedate'],
+                        "Type":             rg['type']
+                        }
         
-        if len(rg_exists):
-        
-            newValueDict = {"AlbumASIN":        release_dict['asin'],
-                            "ReleaseDate":      release_dict['releasedate'],
-                            }
-        
-        else:
-        
-            newValueDict = {"ArtistID":         artistid,
-                            "ArtistName":       artist['artist_name'],
-                            "AlbumTitle":       rg['title'],
-                            "AlbumASIN":        release_dict['asin'],
-                            "ReleaseDate":      release_dict['releasedate'],
-                            "DateAdded":        helpers.today(),
-                            "Type":             rg['type']
-                            }
+        # Only change the status & add DateAdded if the album is not already in the database
+        if not len(rg_exists):
+
+            newValueDict['DateAdded']= helpers.today()
                             
             if headphones.AUTOWANT_ALL:
                 newValueDict['Status'] = "Wanted"
@@ -191,18 +188,14 @@ def addArtisttoDB(artistid, extrasonly=False):
                 newValueDict['Status'] = "Skipped"
         
         myDB.upsert("albums", newValueDict, controlValueDict)
-            
-        # I changed the albumid from releaseid -> rgid, so might need to delete albums that have a releaseid
-        for release in release_dict['releaselist']:
-            myDB.action('DELETE from albums WHERE AlbumID=?', [release['releaseid']])
-            myDB.action('DELETE from tracks WHERE AlbumID=?', [release['releaseid']])
-        
+
         for track in release_dict['tracks']:
         
             cleanname = helpers.cleanName(artist['artist_name'] + ' ' + rg['title'] + ' ' + track['title'])
         
             controlValueDict = {"TrackID":  track['id'],
                                 "AlbumID":  rg['id']}
+
             newValueDict = {"ArtistID":     artistid,
                         "ArtistName":       artist['artist_name'],
                         "AlbumTitle":       rg['title'],
