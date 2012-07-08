@@ -97,7 +97,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
                 else:
                     foundNZB = searchNZB(result['AlbumID'], new)
 
-            if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA) and foundNZB == "none":
+            if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES) and foundNZB == "none":
                 if result['Status'] == "Wanted Lossless":
                     searchTorrent(result['AlbumID'], new, losslessOnly=True)
                 else:
@@ -109,7 +109,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
         if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN) and (headphones.SAB_HOST or headphones.BLACKHOLE):
             foundNZB = searchNZB(albumid, new, lossless)
 
-        if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA) and foundNZB == "none":
+        if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES) and foundNZB == "none":
             searchTorrent(albumid, new, lossless)
 
 def searchNZB(albumid=None, new=False, losslessOnly=False):
@@ -623,7 +623,8 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         # Replace bad characters in the term and unicode it
         term = re.sub('[\.\-\/]', ' ', term).encode('utf-8')
         artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8')
-        
+        albumterm  = re.sub('[\.\-\/]', ' ', cleanalbum).encode('utf-8')
+
         logger.info("Searching torrents for %s since it was marked as wanted" % term)
         
         resultlist = []
@@ -698,6 +699,74 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         
                         except Exception, e:
                             logger.error(u"An unknown error occured in the KAT parser: %s" % e)
+
+        if headphones.WAFFLES:
+# https://www.waffles.fm/browse.php?uid=xxx&passkey=xxx&rss=1&q=artist%3A%22The%20Beatles%22%20album%3A%22Rubber%20Soul%22%20format%3A%22MP3%22%20bitrate%3A%28V0%20OR%20APX%29%20is%3A%28vbr%29&c0=1&s=added&d=desc
+            provider = "Waffles.fm"
+            providerurl = url_fix("https://www.waffles.fm/browse.php")
+
+            bitrate = None
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+                format = "FLAC"
+                bitrate = "(Lossless)"
+                maxsize = 10000000000
+            elif headphones.PREFERRED_QUALITY:
+                format = "(FLAC OR MP3)"
+                maxsize = 10000000000
+            else:
+                format = "MP3"
+                maxsize = 300000000
+
+            query_items = ['artist:"%s"' % artistterm,
+                           'album:"%s"'   % albumterm,
+                           'format:"%s"' % format,
+                           'size:[0 TO %d]' % maxsize,
+                           '-seeders:0'] # cut out dead torrents
+            if bitrate:
+                query_items.append('bitrate:"%s"' % bitrate)
+
+            params = {
+                "uid": headphones.WAFFLES_UID,
+                "passkey": headphones.WAFFLES_PASSKEY,
+                "rss": "1",
+                "c0": "1",
+                "s": "seeders", # sort by
+                "d": "desc" # direction
+            }
+
+            searchURL = "%s?%s&q=%s" % (providerurl, urllib.urlencode(params), urllib.quote(" ".join(query_items)))
+
+            try:
+                data = urllib2.urlopen(searchURL, timeout=20).read()
+            except urllib2.URLError, e:
+                logger.warn('Error fetching data from %s: %s' % (provider, e))
+                data = False
+
+            if data:
+
+                d = feedparser.parse(data)
+                if not len(d.entries):
+                    logger.info(u"No results found from %s for %s" % (provider, term))
+                    pass
+
+                else:
+                    for item in d.entries:
+                        try:
+                            title_match = re.search(r"(.+)\[(.+)\]$", item.title)
+                            title = title_match.group(1).strip()
+                            details = title_match.group(2).split("-")
+
+                            desc_match = re.search(r"Size: (\d+)<", item.description)
+                            size = desc_match.group(1)
+
+                            url = item.link
+
+                            resultlist.append((title, size, url, provider))
+                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                        except Exception, e:
+                            logger.error(u"An error occurred while trying to parse the response from Waffles.fm: %s" % e)
+
+
 
         if headphones.ISOHUNT:
             provider = "ISOhunt"    
