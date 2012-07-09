@@ -252,6 +252,19 @@
                     	</div>
                     	<div class="row checkbox">
                     	<input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Kick Ass Torrents</label></div>
+                        <div class="row checkbox">
+                            <input id="usewaffles" type="checkbox" name="waffles" onclick="initConfigCheckbox($(this));" value="1" ${config['use_waffles']} /><label>Waffles.fm</label>
+                        </div>
+                        <div class="config">
+                            <div class="row">
+                                <label>Waffles UID Number: </label>
+                                <input type="text" name="waffles_uid" value="${config['waffles_uid']}" size="36" maxlength="40">
+                            </div>
+                            <div class="row">
+                                <label>Waffles Passkey: </label>
+                                <input type="text" name="waffles_passkey" value="${config['waffles_passkey']}" size="36" maxlength="40">
+                            </div>
+                        </div>
                     </fieldset>
                     
                 </td>
@@ -764,6 +777,7 @@
 		initConfigCheckbox("#usenewznab");
 		initConfigCheckbox("#usenewzbin");
 		initConfigCheckbox("#usenzbsorg");
+		initConfigCheckbox("#usewaffles");
 		initConfigCheckbox("#useblackhole");
 		initConfigCheckbox("#useapi");
 	}
