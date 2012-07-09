@@ -711,7 +711,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 bitrate = "(Lossless)"
                 maxsize = 10000000000
             elif headphones.PREFERRED_QUALITY:
-                format = "(FLAC OR MP3)"
+                format = "FLAC OR MP3"
                 maxsize = 10000000000
             else:
                 format = "MP3"
@@ -719,7 +719,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
             query_items = ['artist:"%s"' % artistterm,
                            'album:"%s"'   % albumterm,
-                           'format:"%s"' % format,
+                           'format:(%s)' % format,
                            'size:[0 TO %d]' % maxsize,
                            '-seeders:0'] # cut out dead torrents
             if bitrate:
@@ -984,7 +984,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 elif headphones.TORRENTBLACKHOLE_DIR != "":
                 
                     # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
-                    
+
 
                     torrent_name = torrent_folder_name + '.torrent'
                     download_path = os.path.join(headphones.TORRENTBLACKHOLE_DIR, torrent_name)
@@ -998,7 +998,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 			torrent_file = open(download_path, 'rb')
                         torrent_info = bencode.bdecode(torrent_file.read())
 			torrent_file.close()
-                        torrent_folder_name = torrent_info['info'].get('name','')
+                        torrent_folder_name = torrent_info['info'].get('name','').decode('utf-8')
                         logger.info('Torrent folder name: %s' % torrent_folder_name)
                     except Exception, e:
                         logger.error('Couldn\'t get name from Torrent file: %s' % e)
