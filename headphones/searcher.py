@@ -701,7 +701,6 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                             logger.error(u"An unknown error occured in the KAT parser: %s" % e)
 
         if headphones.WAFFLES:
-# https://www.waffles.fm/browse.php?uid=xxx&passkey=xxx&rss=1&q=artist%3A%22The%20Beatles%22%20album%3A%22Rubber%20Soul%22%20format%3A%22MP3%22%20bitrate%3A%28V0%20OR%20APX%29%20is%3A%28vbr%29&c0=1&s=added&d=desc
             provider = "Waffles.fm"
             providerurl = url_fix("https://www.waffles.fm/browse.php")
 
