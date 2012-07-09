@@ -261,7 +261,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size))) 
                         
                         except Exception, e:
-                            logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
+                            logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
                     
         if headphones.NZBSORG:
             provider = "nzbsorg"
@@ -312,7 +312,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                             
                         except Exception, e:
-                            logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
+                            logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
 
         if headphones.NEWZBIN:
             provider = "newzbin"    
@@ -698,7 +698,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeders), rightformat))    
                         
                         except Exception, e:
-                            logger.error(u"An unknown error occured in the KAT parser: %s" % e)
+                            logger.error(u"An unknown error occurred in the KAT parser: %s" % e)
 
         if headphones.WAFFLES:
             provider = "Waffles.fm"
@@ -837,7 +837,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
                         
                         except Exception, e:
-                            logger.error(u"An unknown error occured in the ISOhunt parser: %s" % e)
+                            logger.error(u"An unknown error occurred in the ISOhunt parser: %s" % e)
 
         if headphones.MININOVA:
             provider = "Mininova"    
@@ -904,7 +904,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
                         
                         except Exception, e:
-                            logger.error(u"An unknown error occured in the MiniNova Parser: %s" % e)
+                            logger.error(u"An unknown error occurred in the MiniNova Parser: %s" % e)
 
 
 
