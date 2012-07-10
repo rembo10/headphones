@@ -294,6 +294,10 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
     if headphones.NMA_ENABLED:
         nma = notifiers.NMA()
         nma.notify(release['ArtistName'], release['AlbumTitle'])
+
+    if headphones.SYNOINDEX_ENABLED:
+        syno = notifiers.Synoindex()
+        syno.notify(albumpath)
     
 def embedAlbumArt(artwork, downloaded_track_list):
     logger.info('Embedding album art')
