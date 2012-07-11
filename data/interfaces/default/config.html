@@ -1,4 +1,4 @@
-<%inherit file="base.html"/>
+m<%inherit file="base.html"/>
 <%!
 	import headphones
 %>
@@ -38,21 +38,21 @@
             			<legend>Basic</legend>
 	            		<div class="row">
 	            		 	<label>HTTP Host</label>
-	            		   <input type="text" name="http_host" value="${config['http_host']}" size="30" maxlength="40">
+	            		   <input type="text" name="http_host" value="${config['http_host']}" size="30">
 	            		   <small>e.g. localhost or 0.0.0.0</small>
 	            		</div> 
 	            		<div class="row">
 	            		      <label>HTTP Port</label>
-	            		      <input type="text" name="http_port" value="${config['http_port']}" size="10" maxlength="40">
+	            		      <input type="text" name="http_port" value="${config['http_port']}" size="10">
 	            		 </div>
 	            		 <div class="row">
 	            		     <label>HTTP Username</label>
-	            		     <input type="text" name="http_username" value="${config['http_user']}" size="30" maxlength="40">
+	            		     <input type="text" name="http_username" value="${config['http_user']}" size="30">
 	            		 </div>
 	            		 
 	            		 <div class="row">
 	            		   <label>HTTP Password</label>
-	            		   <input type="password" name="http_password" value="${config['http_pass']}" size="30" maxlength="40">
+	            		   <input type="password" name="http_password" value="${config['http_pass']}" size="30">
 	            		 </div>
 	            		 <div class="row checkbox">	                   
 	            		     <input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} /> <label>Launch Browser on Startup</label> 
@@ -77,17 +77,17 @@
                     	<legend>Interval</legend>
 	                   	<div class="row">
 	                    	<label>NZB Search Interval</label>
-	                    	<input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="4" maxlength="10">mins
+	                    	<input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="4">mins
 	                    </div>
 	            
 	                	<div class="row">
 	                    	<label>Download Scan Interval</label>
-	                    	<input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="4" maxlength="10">mins
+	                    	<input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="4">mins
 	                    </div>
 	                
 	                    <div class="row">
 	                   	 	<label>Library Scan Interval</label>
-	                    	<input type="text" name="libraryscan_interval" value="${config['libraryscan_interval']}" size="4" maxlength="10">mins
+	                    	<input type="text" name="libraryscan_interval" value="${config['libraryscan_interval']}" size="4">mins
 	                    </div>
 	                </fieldset>
                 </td>
@@ -103,24 +103,24 @@
                 		<legend>SABnzbd</legend>
 	                	<div class="row">
 		                    <label>SABnzbd Host:</label>
-		                    <input type="text" name="sab_host" value="${config['sab_host']}" size="30" maxlength="40">
+		                    <input type="text" name="sab_host" value="${config['sab_host']}" size="30">
 		                    <small>usually http://localhost:8080</small>
 	                    </div>
 	                   	<div class="row">
 		                    <label>SABnzbd Username</label>
-		                    <input type="text" name="sab_username" value="${config['sab_user']}" size="20" maxlength="40">
+		                    <input type="text" name="sab_username" value="${config['sab_user']}" size="20">
 	                    </div>	               
 	                	<div class="row">
 		                    <label>SABnzbd API:</label>
-		                    <input type="text" name="sab_apikey" value="${config['sab_api']}" size="36" maxlength="40">
+		                    <input type="text" name="sab_apikey" value="${config['sab_api']}" size="36">
 	                    </div>
 	                   	<div class="row">
 		                    <label>SABnzbd Password:</label>
-		                    <input type="password" name="sab_password" value="${config['sab_pass']}" size="20" maxlength="40">
+		                    <input type="password" name="sab_password" value="${config['sab_pass']}" size="20">
 	                    </div>
 	                    <div class="row">
 	                        <label>SABnzbd Category:</label>
-	                        <input type="text" name="sab_category" value="${config['sab_cat']}" size="20" maxlength="40">
+	                        <input type="text" name="sab_category" value="${config['sab_cat']}" size="20">
 	                    </div>
                     </fieldset>
                     <fieldset>
@@ -165,7 +165,7 @@
 	                   	    </div>
                    	    </div>
                    	    <div class="checkbox row">                    	
-                   	    	<input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5" maxlength="10"><label>Usenet Retention</label>
+                   	    	<input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5"><label>Usenet Retention</label>
                    	    </div>
                    	 </fieldset>
                 </td>
@@ -185,11 +185,11 @@
                 		<div class="config">
 	                		<div class="row">
 	                			<label>NZBMatrix Username: </label>
-	                			<input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30" maxlength="40">
+	                			<input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30">
 	                		</div>
 	                		<div class="row">
 	                		 	<label>NZBMatrix API</label>
-	                		   <input type="text" name="nzbmatrix_apikey" value="${config['nzbmatrix_api']}" size="36" maxlength="40">
+	                		   <input type="text" name="nzbmatrix_apikey" value="${config['nzbmatrix_api']}" size="36">
 	                		 </div>
                 		</div>
                 	</fieldset>
@@ -202,12 +202,12 @@
                 		<div class="config">
 	                		<div class="row">
 	                		<label>Newznab Host</label>
-	                		  <input type="text" name="newznab_host" value="${config['newznab_host']}" size="30" maxlength="40">
+	                		  <input type="text" name="newznab_host" value="${config['newznab_host']}" size="30">
 	                		  <small>e.g. http://nzb.su</small>
 	                		 </div>
 	                		 <div class="row">
 	                		 <label>Newznab API: </label>
-	                		  <input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36" maxlength="40">
+	                		  <input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36">
 	                		  </div>
                 		  </div>
                 	</fieldset>                	
@@ -222,7 +222,7 @@
                 		<div class="config">
                 			<div class="row">
                 			<label>NZBs.org API Key</label>
-                			  <input type="text" name="nzbsorg_hash" value="${config['nzbsorg_hash']}" size="30" maxlength="40">
+                			  <input type="text" name="nzbsorg_hash" value="${config['nzbsorg_hash']}" size="30">
                 			</div>
                 		</div>
                 	</fieldset>
@@ -234,11 +234,11 @@
                 		<div class="config">
                 			<div class="row">
                 			<label>Newzbin UID: </label>
-                			 <input type="text" name="newzbin_uid" value="${config['newzbin_uid']}" size="30" maxlength="40">
+                			 <input type="text" name="newzbin_uid" value="${config['newzbin_uid']}" size="30">
                 			</div>
                 			<div class="row">
                 			<label>Newzbin Password: </label>
-                			  <input type="text" name="newzbin_password" value="${config['newzbin_pass']}" size="36" maxlength="40">
+                			  <input type="text" name="newzbin_password" value="${config['newzbin_pass']}" size="36">
                 			</div>
                 		</div>
                 	</fieldset>
@@ -258,11 +258,11 @@
                         <div class="config">
                             <div class="row">
                                 <label>Waffles UID Number: </label>
-                                <input type="text" name="waffles_uid" value="${config['waffles_uid']}" size="36" maxlength="40">
+                                <input type="text" name="waffles_uid" value="${config['waffles_uid']}" size="36">
                             </div>
                             <div class="row">
                                 <label>Waffles Passkey: </label>
-                                <input type="text" name="waffles_passkey" value="${config['waffles_passkey']}" size="36" maxlength="40">
+                                <input type="text" name="waffles_passkey" value="${config['waffles_passkey']}" size="36">
                             </div>
                         </div>
                     </fieldset>
@@ -283,7 +283,7 @@
                 		    <input type="radio" name="preferred_quality" value="1" ${config['pref_qual_1']} /><label>Highest Quality including Lossless</label>
                 		    <input type="radio" name="preferred_quality" value="3" ${config['pref_qual_3']} /><label>Lossless Only</label>
                 		    <input type="radio" name="preferred_quality" value="2" ${config['pref_qual_2']} /><label>Preferred Bitrate:
-                			<input type="text" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3" maxlength="5" />kbps</label>
+                			<input type="text" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3">kbps</label>
                 		</div>
                 		<div class="row checkbox left">    					
                 		 	<input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />
