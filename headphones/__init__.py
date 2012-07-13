@@ -377,6 +377,8 @@ def initialize():
         NMA_APIKEY = check_setting_str(CFG, 'NMA', 'nma_apikey', '')
         NMA_PRIORITY = check_setting_int(CFG, 'NMA', 'nma_priority', 0)
         
+        SYNOINDEX_ENABLED = bool(check_setting_int(CFG, 'Synoindex', 'synoindex_enabled', 0))
+        
         MIRROR = check_setting_str(CFG, 'General', 'mirror', 'musicbrainz.org')
         CUSTOMHOST = check_setting_str(CFG, 'General', 'customhost', 'localhost')
         CUSTOMPORT = check_setting_int(CFG, 'General', 'customport', 5000)

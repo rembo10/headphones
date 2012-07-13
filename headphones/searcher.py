@@ -164,10 +164,13 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             else:
                 categories = "22"
                 
-            # Search Audiobooks
+            # Search Audiobooks/Singles/etc
             if albums['Type'] == "Other":
                 categories = "49"
                 logger.info("Album type is audiobook/spokenword. Using audiobook category")
+            if albums['Type'] == "Single":
+                categories = "47"
+                logger.info("Album type is 'Single'. Using singles category")
                 
             # For some reason NZBMatrix is erroring out/timing out when the term starts with a "The" right now
             # so we'll strip it out for the time being. This may get fixed on their end, it may not, but
