@@ -173,6 +173,7 @@ XBMC_NOTIFY = False
 NMA_ENABLED = False
 NMA_APIKEY = None
 NMA_PRIORITY = None
+SYNOINDEX_ENABLED = False
 MIRRORLIST = ["musicbrainz.org","headphones","custom"]
 MIRROR = None
 CUSTOMHOST = None
@@ -242,7 +243,7 @@ def initialize():
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
                 ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, MIRROR, CUSTOMHOST, CUSTOMPORT, \
-                CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY
+                CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, SYNOINDEX_ENABLED
                 
         if __INITIALIZED__:
             return False
@@ -258,6 +259,7 @@ def initialize():
         CheckSection('Prowl')
         CheckSection('XBMC')
         CheckSection('NMA')
+        CheckSection('Synoindex')
         
         # Set global variables based on config file or use defaults
         CONFIG_VERSION = check_setting_str(CFG, 'General', 'config_version', '0')
@@ -633,6 +635,9 @@ def config_write():
     new_config['NMA']['nma_enabled'] = int(NMA_ENABLED)
     new_config['NMA']['nma_apikey'] = NMA_APIKEY
     new_config['NMA']['nma_priority'] = NMA_PRIORITY
+
+    new_config['Synoindex'] = {}
+    new_config['Synoindex']['synoindex_enabled'] = int(SYNOINDEX_ENABLED)
     
     new_config['General']['lastfm_username'] = LASTFM_USERNAME
     new_config['General']['interface'] = INTERFACE
