@@ -126,7 +126,7 @@ def libraryScan(dir=None):
             importer.artistlist_to_mbids(artist_list)
         else:
             logger.info('To add these artists, go to Manage->Manage New Artists')
-            myDB.action('DELETE * from newartists')
+            myDB.action('DELETE from newartists')
             for artist in artist_list:
                 myDB.action('INSERT into newartists VALUES (?)', [artist])
     
