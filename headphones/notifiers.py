@@ -21,6 +21,8 @@ import urllib2
 import headphones
 from httplib import HTTPSConnection
 from urllib import urlencode
+import os.path
+import subprocess
 
 class PROWL:
 
@@ -186,3 +188,37 @@ class NMA:
         if not request:
             logger.warn('Error sending notification request to NotifyMyAndroid')        
         
+
+class Synoindex:
+    def __init__(self, util_loc='/usr/syno/bin/synoindex'):
+        self.util_loc = util_loc
+
+    def util_exists(self):
+        return os.path.exists(self.util_loc)
+
+    def notify(self, path):
+        if not self.util_exists():
+            logger.warn("Error sending notification: synoindex utility not found at %s" % self.util_loc)
+            return
+
+        if os.path.isfile(path):
+            cmd_arg = '-a'
+        elif os.path.isdir(path):
+            cmd_arg = '-A'
+        else:
+            logger.warn("Error sending notification: Path passed to synoindex was not a file or folder.")
+            return
+
+        cmd = [self.util_loc, cmd_arg, '\"%s\"' % os.path.abspath(path)]
+        logger.debug("Calling synoindex command: %s" % str(cmd))
+        try:
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=headphones.PROG_DIR)
+            out, error = p.communicate()
+            logger.debug("Synoindex result: %s" % str(out))
+        except OSError, e:
+            logger.warn("Error sending notification: %s" % str(e))
+
+    def notify_multiple(self, path_list):
+        if isinstance(path_list, list):
+            for path in path_list:
+                self.notify(path)

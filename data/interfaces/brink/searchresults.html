@@ -3,13 +3,16 @@
 <%def name="body()">
 
 	<div id="paddingheader">
-		<h1>Search Results</h1>
+		<h1><span>L</span>Search Results</h1>
 	</div>
 	<table class="display" id="searchresults_table">
 		<thead>
 			<tr>
 			%if type == 'album':
+				<th id="albumart"></th>
 				<th id="albumname">Album Name</th>
+			%elif type == 'artist':
+				<th id="artistart"></th>
 			%endif
 				<th id="artistname">Artist Name</th>
 				<th id="score">Score</th>
@@ -25,15 +28,24 @@
 					else:
 						grade = 'Z'
 				%>
+				
 				<tr class="grade${grade}">
-				%if type == 'album':
-					<td id="albumname"><a href="${result['albumurl']}">${result['title']}</a></td>
-				%endif
-					<td id="artistname"><a href="${result['url']}">${result['uniquename']}</a></td>
+					%if type == 'album':
+						<td id="albumart">
+							<div class="album-art-small">
+								<div class="status">
+									<div>
+										<a class="web-symbol" href="addReleaseById?rid=${result['albumid']}" title="Add to collection"><span>+</span></a>
+									</div>
+								</div>
+								<img />
+							</div>
+						</td>
+						<td id="albumname"><a href="${result['albumurl']}">${result['title']}</a></td>
+					%endif
+					<td id="artistname"><a href="${result['url']}" for="${result['id']}">${result['uniquename']}</a></td>
 					<td id="score">
 						<div class="searchscore" title="The match result is: ${result['score']}%">
-										
-									
 							<div class="progress-container" title="Match result is ${result['score']}%">
 								<span class="searchmatch">${result['score']}%</span>
 								<div style="width: ${result['score']}%"></div>
@@ -41,8 +53,8 @@
 							</div>
 					</td>
 				%if type == 'album':	
-					<td id="add"><a class="btnAdd" href="addReleaseById?rid=${result['albumid']}" title="Add this Album"></a></td>
-				%else:
+					<td id="add"></td>
+				%elif type == 'artist':
 					<td id="add"><a class="btnAdd" href="addArtist?artistid=${result['id']}" title="Add this Artist"></a></td>
 				%endif
 				</tr>
@@ -57,26 +69,21 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-	<script src="interfaces/brink/JS/libs/jquery.dataTables.min.js"></script>
-	<script>
-		$(document).ready(function()
-		{
-			$('#searchresults_table').dataTable(
-			{
-				"aoColumns": [
-						null,
-						null,
-						{ "bSortable": false}
-					],
-					"oLanguage": {
-						"sLengthMenu":"Show _MENU_ albums per page",
-						"sEmptyTable": "No search results found",
-						"sInfo":"Showing _TOTAL_ albums",
-						"sInfoEmpty":"No albums found",
-						"sInfoFiltered":"(Filtered from _MAX_ total albums)"},
-					"bPaginate": false,
-					"aaSorting": [[4, 'asc'],[3,'desc']]
+		<script src="js/libs/jquery.dataTables.min.js"></script>
+		<script type="text/javascript">
+		function getArtistArt() {
+			$("table#searchresults_table tr td#artistname").each(function(){	
+				var id = $(this).attr('for');
+				var artist = $(this).children('a').text();
+				var image = $(this).parent().find("td#albumart img");
+				if ( !image.hasClass('done') ) {
+					image.addClass('done');
+					getArtistInfo(artist,image,1,id);
+				}
 			});
+		}
+		$(document).ready(function(){
+			getArtistArt();
 		});
-	</script>
+		</script>
 </%def>
