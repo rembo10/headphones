@@ -40,9 +40,6 @@ def is_exists(artistid):
 def artistlist_to_mbids(artistlist, forced=False):
 
     for artist in artistlist:
-        
-        if forced:
-            artist = unicode(artist, 'utf-8')
             
         results = mb.findArtist(artist, limit=1)
         
@@ -57,12 +54,15 @@ def artistlist_to_mbids(artistlist, forced=False):
             logger.info('MusicBrainz query turned up no matches for: %s' % artist)
             continue
             
-        # Check if it's blacklisted/various artists
+        # Check if it's blacklisted/various artists (only check if it's not forced, e.g. through library scan auto-add.)
+        # Forced example = Adding an artist from Manage New Artists
         myDB = db.DBConnection()
-        bl_artist = myDB.action('SELECT * FROM blacklist WHERE ArtistID=?', [artistid]).fetchone()
-        if bl_artist or artistid == various_artists_mbid:
-            logger.info("Artist ID for '%s' is either blacklisted or Various Artists. To add artist, you must do it manually (Artist ID: %s)" % (artist, artistid))
-            continue
+        
+        if not forced:
+            bl_artist = myDB.action('SELECT * FROM blacklist WHERE ArtistID=?', [artistid]).fetchone()
+            if bl_artist or artistid == various_artists_mbid:
+                logger.info("Artist ID for '%s' is either blacklisted or Various Artists. To add artist, you must do it manually (Artist ID: %s)" % (artist, artistid))
+                continue
         
         # Add to database if it doesn't exist
         if not is_exists(artistid):
@@ -72,6 +72,10 @@ def artistlist_to_mbids(artistlist, forced=False):
         else:
             havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist]))
             myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, artistid])
+            
+        # Delete it from the New Artists if the request came from there
+        if forced:
+            myDB.action('DELETE from newartists WHERE ArtistName=?', [artist])
             
     # Update the similar artist tag cloud:
     logger.info('Updating artist information from Last.fm')
