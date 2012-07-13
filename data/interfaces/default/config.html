@@ -578,7 +578,14 @@ m<%inherit file="base.html"/>
                      		</div>
                      	</div>
                      </fieldset>
-                 
+
+                    <fieldset>
+                        <h3>Synology NAS</h3>
+                        <div class="checkbox row">
+                            <input type="checkbox" name="synoindex_enabled" id="synoindex" value="1" ${config['synoindex_enabled']} /><label>Enable Synoindex</label>
+                        </div>
+                    </fieldset>
+
                  	<fieldset>
                  		<legend>Musicbrainz</legend>
                  		<div class="row">
