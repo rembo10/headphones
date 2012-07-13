@@ -1,5 +1,154 @@
+function getArtistInfo(name,imgElem,size,artistID) {
+	var apikey = "690e1ed3bc00bc91804cd8f7fe5ed6d4";
+	
+	// Get Data by Artist ID 	
+	$.ajax({
+		url: "http://ws.audioscrobbler.com/2.0/?method=artist.getInfo&mbid="+ artistID +"&api_key="+ apikey+"&format=json",
+		dataType: "jsonp",
+		cache: true,
+		success: function(data){
+			if ( data.artist !== undefined ) {
+				var imageUrl = data.artist.image[size]['#text'];
+			}
+			if (data.error) {
+				getArtistName();
+			} else {
+				if ( data.artist === undefined || imageUrl == "" || imageUrl == undefined ) {
+					var imageLarge = "#";
+					var imageUrl = "interfaces/brink/images/no-cover-artist.png";
+				} else {
+					var artist = data.artist.mbid;
+					var artistBio = data.artist.bio.summary;
+					var imageLarge = data.artist.image[4]['#text'];
+					var imageUrl = data.artist.image[size]['#text'];
+				}		
+				var artistBio = artistBio;				
+				var image = imgElem;
+				var bio = $('#artistBio');	
+				$(image).attr("src",imageUrl).removeAttr("width").removeAttr("height").hide().fadeIn();
+				if ( bio.length > 0 ) $(bio).append(artistBio);
+				$(image).wrap('<a href="albumPage?AlbumID='+ artistID +'"></a>');
+			}
+		}				
+	});
+	// If not found get by Name
+	function getArtistName() {
+		$.ajax({
+			url: "http://ws.audioscrobbler.com/2.0/?method=artist.getInfo&artist="+ name +"&api_key="+ apikey+"&format=json",
+			dataType: "jsonp",
+			success: function(data){
+				if ( data.artist !== undefined ) {
+					var imageUrl = data.artist.image[size]['#text'];
+				}
+				if ( data.artist === undefined || imageUrl == "" ) {
+					var imageLarge = "#";
+					var imageUrl = "interfaces/brink/images/no-cover-artist.png";
+				} else {
+					var artist = data.artist.name;
+					var artistBio = data.artist.bio.summary;
+					var imageLarge = data.artist.image[4]['#text'];
+					var imageUrl = data.artist.image[size]['#text'];
+				}		
+				var artistBio = artistBio;				
+				var image = imgElem;
+				var bio = $('#artistBio');	
+				$(image).attr("src",imageUrl).removeAttr("width").removeAttr("height").hide().fadeIn();
+				if ( bio.length > 0 ) $(bio).append(artistBio);
+				$(image).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + artist + '"></a>');
+			}				
+		});
+	}
+}
+
+function getAlbumInfo(name, album, elem,size) {
+	var apikey = "690e1ed3bc00bc91804cd8f7fe5ed6d4";	
+	var dimensions = getOriginalWidthOfImg(this);
+	var cover = $(elem);
+	
+	if ( dimensions <= 1) {
+		// Get Data
+		$.ajax({
+			url: "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" + apikey + "&artist="+ name +"&album="+ album +"&format=json&callback=?",
+			dataType: "jsonp",
+			success: function(data){
+				if ( data.artist !== undefined ) {
+					var imageUrl = data.artist.image[size]['#text'];
+				}
+				if (data.album === undefined || imageUrl == "")  {
+					if ( elem.width() == 50 ) {
+						var imageUrl = "interfaces/brink/images/no-cover-artist.png";
+					} else {
+						var imageUrl = "interfaces/brink/images/no-cover-art.png";
+					}
+				} else {
+					var imageUrl = data.album.image[size]['#text'];		
+					var imageLarge = data.album.image[3]['#text'];			
+				}
+				$(cover).error(function(){
+					if ( elem.width() == 50 ) {
+						var imageUrl = "interfaces/brink/images/no-cover-artist.png";
+					} else {
+						var imageUrl = "interfaces/brink/images/no-cover-art.png";
+					}
+					$(elem).css("background", "url("+ imageUrl+") center top no-repeat");
+				});
+				if ( imageUrl == "") {
+					if ( elem.width() == 50 ) {
+						var imageUrl = "interfaces/brink/images/no-cover-artist.png";
+					} else {
+						var imageUrl = "interfaces/brink/images/no-cover-art.png";
+					}
+					$(elem).css("background", "url("+ imageUrl+")");
+				} 
+				$(elem).css("background", "url("+ imageUrl+") center top no-repeat");
+				$(elem).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + name + '"></a>');
+			}
+		});
+	}
+}
+
+function getOriginalWidthOfImg(img_element) {
+    var t = new Image();
+    t.src = (img_element.getAttribute ? img_element.getAttribute("src") : false) || img_element.src;
+    return t.width;
+}
+
+function replaceEmptyAlbum(elem,name,album) {
+	var album = $(elem);
+	var artist = name;
+	var albumname = album;
+	var apikey = "690e1ed3bc00bc91804cd8f7fe5ed6d4";
+	var dimensions = getOriginalWidthOfImg(this);
+	var cover = $(this);
+	var url;
+	if ( dimensions <= 1) {
+		url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" + apikey + "&artist="+ artist +"&album="+ albumname +"&format=json&callback=?";
+		var imageUrl;
+		$.getJSON(url, function(data, response) {
+			if (data.album === undefined)  {
+				imageUrl = "interfaces/brink/images/no-cover-art.png";
+			} else {
+				imageUrl = data.album.image[3]['#text'];	
+				imageLarge = data.album.image[4]['#text'];					
+			// If Last.fm don't provide a cover then use standard
+			}
+			$(cover).error(function(){
+				imageUrl = "interfaces/brink/images/no-cover-art.png";
+				$(this).hide().attr("src", imageUrl).show();
+			})
+			if ( imageUrl == "") {
+				imageUrl = "interfaces/brink/images/no-cover-art.png";
+				$(this).hide().attr("src", imageUrl).show();
+			}
+			$(cover).hide().attr("src", imageUrl).show();
+			$(cover).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + artist + " - " + albumname + '"></a>');
+		});
+	} 	
+}
+
 //Mark current active link
 $(document).ready(function() {
+	enit();
     $("#nav li a").each(function () {
         var hreflink = $(this).attr("href");
 		var locationHref = location.href.split("/").pop();
@@ -9,104 +158,25 @@ $(document).ready(function() {
     });
 });
 
-//Resize #main to fit window size
-function mainResize()
+// Loader
+var loaderSymbols = ['0', '1', '2', '3', '4', '5', '6', '7'], 
+loaderRate = 100, 
+loaderIndex = 0, 
+loader = function() { 
+	$('.loader').text( loaderSymbols[loaderIndex] );
+	loaderIndex = loaderIndex  < loaderSymbols.length - 1 ? loaderIndex + 1 : 0; 
+	setTimeout(loader, loaderRate); 
+}; 
+loader(); 
+
+function enit()
 {
+	var mainWindow = $("#main");
 	var totalHeight = $(window).height() -
-					($("#header").outerHeight() + 2 +
-					$("#footer").outerHeight());
-	$("#main").height(totalHeight);
+					($("#header").outerHeight() +
+					$("#footer").outerHeight()) - 3;
+	$(mainWindow).height(totalHeight);
+	
+	$(mainWindow).jScrollPane({ showArrows: true, animateScroll: true });
 }
 
-function mainScroll()
-{
-	$('#main').jScrollPane({
-		showArrows: true
-	});
-}
-
-// Mark Config navi item
-$(document).ready(function(){
-	$("#nav-config li").click(function(){
-		$("#nav-config li.selected").removeClass("selected");
-		$(this).addClass("selected");
-	});
-});
-
-//Smooth scroll bookmarks
-$(document).ready(function () {
-    $("#nav-config li a").bind("click", function (event) {
-        event.preventDefault();
-        var target = $(this).attr("href");
-        $("#main").stop().animate({
-            scrollLeft: $(target).offset().left,
-            scrollTop: $(target).offset().top - 100
-        }, 1200);
-    });
-});
-
-//Message dialog close & output
-$(document).ready(function(){
-	$("#message div .btnClose").click(function(){
-		$(this).parent().fadeOut(1000);
-	});
-});
-
-function messageDialog(type, text){
-	document.write(
-	  '<div class="dialog ' + type + '">' 
-		+ '<div class="btnClose" title="Close" ></div>' //Close
-		+ '<div class="image" title="' + type + '"></div>' //Image
-		+ '<span>' + text + '</span>' //Message
-	+ '</div>');
-}
-
-//Add styled class to dataTables_lenght
-$(document).ready(function() {
-	$(".dataTables_length label select").addClass("styled");
-});
-
-//Main fadeIn
-$(document).ready(function () {
-	$("#main").hide();
-	$("#main").fadeIn("slow");
-});
-
-//CD Rotate
-$(function() {
-var $rotateElement = $(".album-art-cd");
-rotate(0);
-function rotate(degree) {
-
-      // For webkit browsers: e.g. Chrome
-    $rotateElement.css({ WebkitTransform: 'rotate(' + degree + 'deg)'});
-      // For Mozilla browser: e.g. Firefox
-    $rotateElement.css({ '-moz-transform': 'rotate(' + degree + 'deg)'});
-
-      // Animate rotation with a recursive call
-    setTimeout(function() { rotate(++degree); },30);
-    }
-});
-
-//Config open/close
-$(document).ready(function(){
-    $('.panel').hide("slide", { direction: "top" }, 1000);
-});
-
-$('.panel').live('click',function(){
-    $('.open-panel').hide("slide", { direction: "top" }, 1000);
-    $(this).addClass('.open-panel').toggle("slide", { direction: "top" }, 1000);
-});
-
-$('.mainCheckbox').click(function(){
-	if ($('input[name=head}').is(':checked')){
-	$('input').not(':checked')
-		.attr('checked', true)
-		.css('background-postion:', '0px -50px;');
-	}
-	else if($('input[name=head}').not(':checked')){
-		$('input').is(':checked')
-			.attr('checked', flase)
-			.css('background-postion:', '0px 0px;');
-	}
-});

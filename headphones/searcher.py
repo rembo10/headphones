@@ -97,7 +97,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
                 else:
                     foundNZB = searchNZB(result['AlbumID'], new)
 
-            if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA) and foundNZB == "none":
+            if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES) and foundNZB == "none":
                 if result['Status'] == "Wanted Lossless":
                     searchTorrent(result['AlbumID'], new, losslessOnly=True)
                 else:
@@ -109,7 +109,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
         if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN) and (headphones.SAB_HOST or headphones.BLACKHOLE):
             foundNZB = searchNZB(albumid, new, lossless)
 
-        if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA) and foundNZB == "none":
+        if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES) and foundNZB == "none":
             searchTorrent(albumid, new, lossless)
 
 def searchNZB(albumid=None, new=False, losslessOnly=False):
@@ -261,7 +261,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size))) 
                         
                         except Exception, e:
-                            logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
+                            logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
                     
         if headphones.NZBSORG:
             provider = "nzbsorg"
@@ -312,7 +312,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                             
                         except Exception, e:
-                            logger.error(u"An unknown error occured trying to parse the feed: %s" % e)
+                            logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
 
         if headphones.NEWZBIN:
             provider = "newzbin"    
@@ -623,7 +623,8 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         # Replace bad characters in the term and unicode it
         term = re.sub('[\.\-\/]', ' ', term).encode('utf-8')
         artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8')
-        
+        albumterm  = re.sub('[\.\-\/]', ' ', cleanalbum).encode('utf-8')
+
         logger.info("Searching torrents for %s since it was marked as wanted" % term)
         
         resultlist = []
@@ -697,7 +698,74 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeders), rightformat))    
                         
                         except Exception, e:
-                            logger.error(u"An unknown error occured in the KAT parser: %s" % e)
+                            logger.error(u"An unknown error occurred in the KAT parser: %s" % e)
+
+        if headphones.WAFFLES:
+            provider = "Waffles.fm"
+            providerurl = url_fix("https://www.waffles.fm/browse.php")
+
+            bitrate = None
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+                format = "FLAC"
+                bitrate = "(Lossless)"
+                maxsize = 10000000000
+            elif headphones.PREFERRED_QUALITY:
+                format = "FLAC OR MP3"
+                maxsize = 10000000000
+            else:
+                format = "MP3"
+                maxsize = 300000000
+
+            query_items = ['artist:"%s"' % artistterm,
+                           'album:"%s"'   % albumterm,
+                           'format:(%s)' % format,
+                           'size:[0 TO %d]' % maxsize,
+                           '-seeders:0'] # cut out dead torrents
+            if bitrate:
+                query_items.append('bitrate:"%s"' % bitrate)
+
+            params = {
+                "uid": headphones.WAFFLES_UID,
+                "passkey": headphones.WAFFLES_PASSKEY,
+                "rss": "1",
+                "c0": "1",
+                "s": "seeders", # sort by
+                "d": "desc" # direction
+            }
+
+            searchURL = "%s?%s&q=%s" % (providerurl, urllib.urlencode(params), urllib.quote(" ".join(query_items)))
+
+            try:
+                data = urllib2.urlopen(searchURL, timeout=20).read()
+            except urllib2.URLError, e:
+                logger.warn('Error fetching data from %s: %s' % (provider, e))
+                data = False
+
+            if data:
+
+                d = feedparser.parse(data)
+                if not len(d.entries):
+                    logger.info(u"No results found from %s for %s" % (provider, term))
+                    pass
+
+                else:
+                    for item in d.entries:
+                        try:
+                            title_match = re.search(r"(.+)\[(.+)\]$", item.title)
+                            title = title_match.group(1).strip()
+                            details = title_match.group(2).split("-")
+
+                            desc_match = re.search(r"Size: (\d+)<", item.description)
+                            size = desc_match.group(1)
+
+                            url = item.link
+
+                            resultlist.append((title, size, url, provider))
+                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                        except Exception, e:
+                            logger.error(u"An error occurred while trying to parse the response from Waffles.fm: %s" % e)
+
+
 
         if headphones.ISOHUNT:
             provider = "ISOhunt"    
@@ -769,7 +837,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
                         
                         except Exception, e:
-                            logger.error(u"An unknown error occured in the ISOhunt parser: %s" % e)
+                            logger.error(u"An unknown error occurred in the ISOhunt parser: %s" % e)
 
         if headphones.MININOVA:
             provider = "Mininova"    
@@ -836,7 +904,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
                         
                         except Exception, e:
-                            logger.error(u"An unknown error occured in the MiniNova Parser: %s" % e)
+                            logger.error(u"An unknown error occurred in the MiniNova Parser: %s" % e)
 
 
 
@@ -915,7 +983,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 elif headphones.TORRENTBLACKHOLE_DIR != "":
                 
                     # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
-                    
+
 
                     torrent_name = torrent_folder_name + '.torrent'
                     download_path = os.path.join(headphones.TORRENTBLACKHOLE_DIR, torrent_name)
@@ -929,7 +997,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 			torrent_file = open(download_path, 'rb')
                         torrent_info = bencode.bdecode(torrent_file.read())
 			torrent_file.close()
-                        torrent_folder_name = torrent_info['info'].get('name','')
+                        torrent_folder_name = torrent_info['info'].get('name','').decode('utf-8')
                         logger.info('Torrent folder name: %s' % torrent_folder_name)
                     except Exception, e:
                         logger.error('Couldn\'t get name from Torrent file: %s' % e)

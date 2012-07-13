@@ -236,7 +236,9 @@ class WebInterface(object):
     manageAlbums.exposed = True
     
     def manageNew(self):
-        return serve_template(templatename="managenew.html", title="Manage New Artists")
+        myDB = db.DBConnection()
+        newartists = myDB.select('SELECT * from newartists')
+        return serve_template(templatename="managenew.html", title="Manage New Artists", newartists=newartists)
     manageNew.exposed = True    
     
     def markArtists(self, action=None, **args):
@@ -394,6 +396,9 @@ class WebInterface(object):
                     "use_isohunt" : checked(headphones.ISOHUNT),
                     "use_kat" : checked(headphones.KAT),
                     "use_mininova" : checked(headphones.MININOVA),
+                    "use_waffles" : checked(headphones.WAFFLES),
+                    "waffles_uid" : headphones.WAFFLES_UID,
+                    "waffles_passkey": headphones.WAFFLES_PASSKEY,
                     "pref_qual_0" : radio(headphones.PREFERRED_QUALITY, 0),
                     "pref_qual_1" : radio(headphones.PREFERRED_QUALITY, 1),
                     "pref_qual_3" : radio(headphones.PREFERRED_QUALITY, 3),
@@ -438,6 +443,7 @@ class WebInterface(object):
                     "nma_enabled": checked(headphones.NMA_ENABLED),
                     "nma_apikey": headphones.NMA_APIKEY,
                     "nma_priority": int(headphones.NMA_PRIORITY),
+                    "synoindex_enabled": checked(headphones.SYNOINDEX_ENABLED),
                     "mirror_list": headphones.MIRRORLIST,
                     "mirror": headphones.MIRROR,
                     "customhost": headphones.CUSTOMHOST,
@@ -454,11 +460,11 @@ class WebInterface(object):
         sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
         usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
         nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
-        torrentblackhole_dir=None, download_torrent_dir=None, numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, 
+        torrentblackhole_dir=None, download_torrent_dir=None, numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None,
         rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, autowant_upcoming=False, autowant_all=False, interface=None, log_dir=None,
         music_encoder=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
         prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0, 
-        nma_enabled=False, nma_apikey=None, nma_priority=0, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None):
+        nma_enabled=False, nma_apikey=None, nma_priority=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -497,6 +503,9 @@ class WebInterface(object):
         headphones.ISOHUNT = use_isohunt
         headphones.KAT = use_kat
         headphones.MININOVA = use_mininova
+        headphones.WAFFLES = waffles
+        headphones.WAFFLES_UID = waffles_uid
+        headphones.WAFFLES_PASSKEY = waffles_passkey
         headphones.PREFERRED_QUALITY = int(preferred_quality)
         headphones.PREFERRED_BITRATE = preferred_bitrate
         headphones.DETECT_BITRATE = detect_bitrate
@@ -538,6 +547,7 @@ class WebInterface(object):
         headphones.NMA_ENABLED = nma_enabled
         headphones.NMA_APIKEY = nma_apikey
         headphones.NMA_PRIORITY = nma_priority
+        headphones.SYNOINDEX_ENABLED = synoindex_enabled
         headphones.MIRROR = mirror
         headphones.CUSTOMHOST = customhost
         headphones.CUSTOMPORT = customport

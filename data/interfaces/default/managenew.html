@@ -31,10 +31,10 @@
 			</tr>
 		</thead>
 		<tbody>
-		%for artist in headphones.NEW_ARTISTS:
+		%for artist in newartists:
 			<tr class="gradeZ">
-				<td id="select"><input type="checkbox" name="${artist}" class="checkbox" /></td>
-				<td id="name">${artist}</a></td>
+				<td id="select"><input type="checkbox" name="${artist['ArtistName']}" class="checkbox" /></td>
+				<td id="name">${artist['ArtistName']}</a></td>
 			</tr>
 		%endfor
 		</tbody>
