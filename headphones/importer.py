@@ -245,6 +245,8 @@ def addArtisttoDB(artistid, extrasonly=False):
     
     myDB.upsert("artists", newValueDict, controlValueDict)
     
+    myDB.action('DELETE from newartists WHERE ArtistName=?', [artist['artist_name']])
+    
     logger.debug(u"Updating cache for: " + artist['artist_name'])
     cache.getThumb(ArtistID=artistid)
     

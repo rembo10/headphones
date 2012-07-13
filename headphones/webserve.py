@@ -236,7 +236,9 @@ class WebInterface(object):
     manageAlbums.exposed = True
     
     def manageNew(self):
-        return serve_template(templatename="managenew.html", title="Manage New Artists")
+        myDB = db.DBConnection()
+        newartists = myDB.select('SELECT * from newartists')
+        return serve_template(templatename="managenew.html", title="Manage New Artists", newartists=newartists)
     manageNew.exposed = True    
     
     def markArtists(self, action=None, **args):

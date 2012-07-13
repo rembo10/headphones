@@ -126,7 +126,9 @@ def libraryScan(dir=None):
             importer.artistlist_to_mbids(artist_list)
         else:
             logger.info('To add these artists, go to Manage->Manage New Artists')
-            headphones.NEW_ARTISTS = artist_list
+            myDB.action('DELETE * from newartists')
+            for artist in artist_list:
+                myDB.action('INSERT into newartists VALUES (?)', [artist])
     
     if headphones.DETECT_BITRATE:
         headphones.PREFERRED_BITRATE = sum(bitrates)/len(bitrates)/1000
