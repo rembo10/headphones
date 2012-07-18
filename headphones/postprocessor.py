@@ -13,8 +13,11 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import with_statement
+
 import os
 import time
+import threading
 import music_encoder
 import urllib, shutil, re
 from headphones import notifiers
@@ -235,8 +238,11 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
     if headphones.EMBED_ALBUM_ART or headphones.ADD_ALBUM_ART:
         artwork = urllib.urlopen(album_art_path).read()
         if len(artwork) < 100:
-            artwork = False
-            logger.info("No suitable album art found. Not adding album art")
+            logger.info("No suitable album art found from Amazon. Checking Last.FM....")
+            artwork = albumart.getCachedArt(albumid)
+            if len(artwork) < 100:
+                artwork = False
+                logger.info("No suitable album art found from Last.FM. Not adding album art")
     
     if headphones.EMBED_ALBUM_ART and artwork:
         embedAlbumArt(artwork, downloaded_track_list)
