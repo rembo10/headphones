@@ -26,7 +26,7 @@ from lib.beets import autotag
 from lib.beets.mediafile import MediaFile
 
 import headphones
-from headphones import db, albumart, lyrics, logger, helpers, cache
+from headphones import db, albumart, lyrics, logger, helpers
 
 postprocessor_lock = threading.Lock()
 
@@ -239,7 +239,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
         artwork = urllib.urlopen(album_art_path).read()
         if len(artwork) < 100:
             logger.info("No suitable album art found from Amazon. Checking Last.FM....")
-            artwork = urllib.urlopen(cache.getArtwork(AlbumID=albumid)).read()
+            artwork = albumart.getCachedArt(albumid)
             if len(artwork) < 100:
                 artwork = False
                 logger.info("No suitable album art found from Last.FM. Not adding album art")
