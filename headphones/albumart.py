@@ -23,3 +23,21 @@ def getAlbumArt(albumid):
     url = 'http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg' % asin
     
     return url
+    
+def getCachedArt(albumid):
+    
+    from headphones import cache
+    
+    c = cache.Cache()
+    
+    artwork_path = c.get_artwork_from_cache(AlbumID=albumid)
+    
+    if not artwork_path:
+        return None
+    
+    if artwork_path.startswith('http://'):
+        artwork = urllib.urlopen(artwork_path).read()
+        return artwork
+    else:
+        artwork = open(artwork_path, "r").read()
+        return artwork
