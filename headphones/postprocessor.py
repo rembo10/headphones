@@ -25,26 +25,29 @@ from lib.beets.mediafile import MediaFile
 import headphones
 from headphones import db, albumart, lyrics, logger, helpers
 
+postprocessor_lock = threading.Lock()
+
 def checkFolder():
+    
+    with postprocessor_lock:
 
-    myDB = db.DBConnection()
-    snatched = myDB.select('SELECT * from snatched WHERE Status="Snatched"')
+        myDB = db.DBConnection()
+        snatched = myDB.select('SELECT * from snatched WHERE Status="Snatched"')
 
-    for album in snatched:
+        for album in snatched:
         
-        if album['FolderName']:
-        
-            nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
-            torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
+            if album['FolderName']:
 
-            if os.path.exists(nzb_album_path):
-                logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
-                verify(album['AlbumID'], nzb_album_path)
-                
-            elif os.path.exists(torrent_album_path):
-                logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
-                verify(album['AlbumID'], torrent_album_path)
-                
+                nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
+                torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
+
+                if os.path.exists(nzb_album_path):
+                    logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
+                    verify(album['AlbumID'], nzb_album_path)
+
+                elif os.path.exists(torrent_album_path):
+                    logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
+                    verify(album['AlbumID'], torrent_album_path)
 
 def verify(albumid, albumpath):
 
