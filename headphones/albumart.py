@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import db, cache
+from headphones import db
 
 def getAlbumArt(albumid):
 
@@ -26,7 +26,10 @@ def getAlbumArt(albumid):
     
 def getCachedArt(albumid):
     
-    c = Cache()
+    from headphones import cache
+    
+    c = cache.Cache()
+    
     artwork_path = c.get_artwork_from_cache(AlbumID=albumid)
     
     if not artwork_path:
