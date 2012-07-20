@@ -143,7 +143,7 @@ class WebInterface(object):
     deleteArtist.exposed = True
     
     def refreshArtist(self, ArtistID):
-        importer.addArtisttoDB(ArtistID)    
+        threading.Thread(target=importer.addArtisttoDB, args=[ArtistID]).start()  
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     refreshArtist.exposed=True  
     
