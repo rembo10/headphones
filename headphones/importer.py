@@ -196,7 +196,6 @@ def addArtisttoDB(artistid, extrasonly=False):
         # This is used to see how many tracks you have from an album - to mark it as downloaded. Default is 80%, can be set in config as ALBUM_COMPLETION_PCT
         total_track_count = len(release_dict['tracks'])
         
-        
         for track in release_dict['tracks']:
         
             cleanname = helpers.cleanName(artist['artist_name'] + ' ' + rg['title'] + ' ' + track['title'])
@@ -221,7 +220,6 @@ def addArtisttoDB(artistid, extrasonly=False):
             if not match:
                 match = myDB.action('SELECT Location, BitRate, Format from have WHERE TrackID=?', [track['id']]).fetchone()         
             if match:
-                have_track_count += 1
                 newValueDict['Location'] = match['Location']
                 newValueDict['BitRate'] = match['BitRate']
                 newValueDict['Format'] = match['Format']
@@ -234,11 +232,9 @@ def addArtisttoDB(artistid, extrasonly=False):
         
         if rg_exists:
             if rg_exists['Status'] == 'Skipped' and ((have_track_count/float(total_track_count)) >= (headphones.ALBUM_COMPLETION_PCT/100.0)):
-                logger.info('album exists, marking as downloaded 1')
                 myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', rg['id']])
         else:
             if ((have_track_count/float(total_track_count)) >= (headphones.ALBUM_COMPLETION_PCT/100.0)):
-                logger.info('album exists, marking as downloaded 2')
                 myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', rg['id']])
 
         logger.debug(u"Updating album cache for " + rg['title'])
