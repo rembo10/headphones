@@ -136,6 +136,8 @@ LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a"]
 LOSSLESS_MEDIA_FORMATS = ["flac"]
 MEDIA_FORMATS = LOSSY_MEDIA_FORMATS + LOSSLESS_MEDIA_FORMATS
 
+ALBUM_COMPLETION_PCT = None    # This is used in importer.py to determine how complete an album needs to be - to be considered "downloaded". Percentage from 0-100
+
 TORRENTBLACKHOLE_DIR = None
 NUMBEROFSEEDERS = 10
 ISOHUNT = None
@@ -242,7 +244,8 @@ def initialize():
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
                 ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, MIRROR, CUSTOMHOST, CUSTOMPORT, \
-                CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, SYNOINDEX_ENABLED
+                CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, SYNOINDEX_ENABLED, \
+                ALBUM_COMPLETION_PCT
                 
         if __INITIALIZED__:
             return False
@@ -259,6 +262,7 @@ def initialize():
         CheckSection('XBMC')
         CheckSection('NMA')
         CheckSection('Synoindex')
+        CheckSection('Advanced')
         
         # Set global variables based on config file or use defaults
         CONFIG_VERSION = check_setting_str(CFG, 'General', 'config_version', '0')
@@ -383,8 +387,10 @@ def initialize():
         CUSTOMHOST = check_setting_str(CFG, 'General', 'customhost', 'localhost')
         CUSTOMPORT = check_setting_int(CFG, 'General', 'customport', 5000)
         CUSTOMSLEEP = check_setting_int(CFG, 'General', 'customsleep', 1)
-        HPUSER = check_setting_str(CFG, 'General', 'hpuser', 'username')
-        HPPASS = check_setting_str(CFG, 'General', 'hppass', 'password')
+        HPUSER = check_setting_str(CFG, 'General', 'hpuser', '')
+        HPPASS = check_setting_str(CFG, 'General', 'hppass', '')
+        
+        ALBUM_COMPLETION_PCT = check_setting_int(CFG, 'Advanced', 'album_completion_pct', 80)
         
         # update folder formats in the config & bump up config version
         if CONFIG_VERSION == '0':
@@ -661,6 +667,9 @@ def config_write():
     new_config['General']['customsleep'] = CUSTOMSLEEP
     new_config['General']['hpuser'] = HPUSER
     new_config['General']['hppass'] = HPPASS
+    
+    new_config['Advanced'] = {}
+    new_config['Advanced']['album_completion_pct'] = ALBUM_COMPLETION_PCT
     
     new_config.write()
 
