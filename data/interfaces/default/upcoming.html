@@ -41,7 +41,7 @@
 			<tr class="gradeZ">
 				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></th>
 				<td id="albumart"><img title="${album['AlbumID']}" height="64" width="64"></td>
-				<td id="artistname">${album['ArtistName']}</td>
+				<td id="artistname"><a href="artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a></td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
@@ -71,7 +71,7 @@
 		%for album in upcoming:
 			<tr class="gradeZ">
 				<td id="albumart"><img title="${album['AlbumID']}" height="64" width="64"></td>
-				<td id="artistname">${album['ArtistName']}</td>
+				<td id="artistname"><a href="artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a></td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
