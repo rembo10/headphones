@@ -214,6 +214,28 @@ m<%inherit file="base.html"/>
 					    <input id="newznab_enabled" type="checkbox" name="newznab_enabled" onclick="initConfigCheckbox($(this));" value="1" ${config['newznab_enabled']} /><label>Enabled</label>
 					</div>
 				    </div>
+				    <%
+					newznab_number = 2
+				    %>
+				    %for newznab in config['extra_newznabs']:
+					<div class="config" id="newznab${newznab_number}">
+					    <div class="row">
+						<label>Newznab Host</label>
+						<input type="text" name="newznab_host${newznab_number}" value="${newznab[0]}" size="30">
+						<small>e.g. http://nzb.su</small>
+					    </div>
+					    <div class="row">
+						<label>Newznab API</label>
+						<input type="text" name="newznab_apikey${newznab_number}" value="${newznab[1]}" size="36">
+					    </div>
+					    <div class="row checkbox">
+						<input id="newznab_enabled" type="checkbox" name="newznab_enabled${newznab_number}" value="1" ${newznab[2]} /><label>Enabled</label>
+					    </div>
+					</div>
+					<%
+					    newznab_number += 1
+					%>
+				    %endfor
 				    <input type="button" value="Add Newznab" class="add_newznab" id="add_newznab" />
 				</div>
                 	</fieldset>
@@ -799,7 +821,7 @@ m<%inherit file="base.html"/>
 	    $("#add_newznab").click(function() {
 		var intIdPrev = $("#newznab_providers > div").size()
 		var intId = intIdPrev + 1;
-		var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled\" value=\"1\" /><label>Enabled</label></div>");
+		var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled" + intId + "\" value=\"1\" /><label>Enabled</label></div>");
 		var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"remove\" value=\"Remove\" /></div>");
 		removeButton.click(function() {
 		    $(this).parent().remove();
