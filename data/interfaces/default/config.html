@@ -817,6 +817,20 @@ m<%inherit file="base.html"/>
 		$(".remove").click(function() {
 		    $(this).parent().parent().remove();
 		});
+		    
+		$("#add_newznab").click(function() {
+		    var intIdPrev = $("#newznab_providers > div").size();
+		    var intId = intIdPrev + 1;
+		    var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
+		    var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"remove\" value=\"Remove\" /></div>");
+		    removeButton.click(function() {
+			$(this).parent().remove();
+		    });
+		    formfields.append(removeButton);
+		    formfields.append("</div>");
+		    $("#newznab" + intIdPrev).after(formfields);
+		});
+		
 		$(function() {
 			$( "#tabs" ).tabs();
 		});
@@ -831,18 +845,6 @@ m<%inherit file="base.html"/>
 	}
 	$(document).ready(function() {
 	    initThisPage();
-	    $("#add_newznab").click(function() {
-		var intIdPrev = $("#newznab_providers > div").size();
-		var intId = intIdPrev + 1;
-		var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
-		var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"remove\" value=\"Remove\" /></div>");
-		removeButton.click(function() {
-		    $(this).parent().remove();
-		});
-		formfields.append(removeButton);
-		formfields.append("</div>");
-		$("#newznab" + intIdPrev).after(formfields);
-	    });
 	});
 	
 	</script>
