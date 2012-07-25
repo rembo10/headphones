@@ -121,6 +121,7 @@ NZBMATRIX_APIKEY = None
 NEWZNAB = False
 NEWZNAB_HOST = None
 NEWZNAB_APIKEY = None
+NEWZNAB_ENABLED = False
 
 NZBSORG = False
 NZBSORG_UID = None
@@ -240,7 +241,7 @@ def initialize():
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
-                NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
+                NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
                 ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, MIRROR, CUSTOMHOST, CUSTOMPORT, \
@@ -340,6 +341,7 @@ def initialize():
         NEWZNAB = bool(check_setting_int(CFG, 'Newznab', 'newznab', 0))
         NEWZNAB_HOST = check_setting_str(CFG, 'Newznab', 'newznab_host', '')
         NEWZNAB_APIKEY = check_setting_str(CFG, 'Newznab', 'newznab_apikey', '')
+        NEWZNAB_ENABLED = bool(check_setting_int(CFG, 'Newznab', 'newznab_enabled', 1))
         
         NZBSORG = bool(check_setting_int(CFG, 'NZBsorg', 'nzbsorg', 0))
         NZBSORG_UID = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_uid', '')
@@ -613,6 +615,7 @@ def config_write():
     new_config['Newznab']['newznab'] = int(NEWZNAB)
     new_config['Newznab']['newznab_host'] = NEWZNAB_HOST
     new_config['Newznab']['newznab_apikey'] = NEWZNAB_APIKEY
+    new_config['Newznab']['newznab_enabled'] = int(NEWZNAB_ENABLED)
 
     new_config['NZBsorg'] = {}
     new_config['NZBsorg']['nzbsorg'] = int(NZBSORG)

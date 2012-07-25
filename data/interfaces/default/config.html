@@ -184,7 +184,7 @@ m<%inherit file="base.html"/>
                 		</div>
                 		<div class="config">
 	                		<div class="row">
-	                			<label>NZBMatrix Username: </label>
+	                			<label>NZBMatrix Username</label>
 	                			<input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30">
 	                		</div>
 	                		<div class="row">
@@ -200,17 +200,20 @@ m<%inherit file="base.html"/>
                 			<input  id="usenewznab" type="checkbox" name="newznab" onclick="initConfigCheckbox($(this));" value="1" ${config['use_newznab']} /><label>Use Newznab</label>
                 		</div>
                 		<div class="config">
-	                		<div class="row">
-	                		<label>Newznab Host</label>
-	                		  <input type="text" name="newznab_host" value="${config['newznab_host']}" size="30">
-	                		  <small>e.g. http://nzb.su</small>
-	                		 </div>
-	                		 <div class="row">
-	                		 <label>Newznab API: </label>
-	                		  <input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36">
-	                		  </div>
-                		  </div>
-                	</fieldset>                	
+				    <div class="row">
+					<label>Newznab Host</label>
+					<input type="text" name="newznab_host" value="${config['newznab_host']}" size="30">
+					<small>e.g. http://nzb.su</small>
+				    </div>
+				    <div class="row">
+					<label>Newznab API</label>
+					<input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36">
+				    </div>
+				    <div class="row checkbox">
+					<input id="newznab_enabled" type="checkbox" name="newznab_enabled" onclick="initConfigCheckbox($(this));" value="1" ${config['newznab_enabled']} /><label>Enabled</label>
+				    </div>
+				</div>
+                	</fieldset>
                 </td>
         
                 <td>
@@ -233,11 +236,11 @@ m<%inherit file="base.html"/>
                 		</div>
                 		<div class="config">
                 			<div class="row">
-                			<label>Newzbin UID: </label>
+                			<label>Newzbin UID</label>
                 			 <input type="text" name="newzbin_uid" value="${config['newzbin_uid']}" size="30">
                 			</div>
                 			<div class="row">
-                			<label>Newzbin Password: </label>
+                			<label>Newzbin Password</label>
                 			  <input type="password" name="newzbin_password" value="${config['newzbin_pass']}" size="36">
                 			</div>
                 		</div>
