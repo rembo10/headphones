@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
+import urllib2
 from headphones import db
 
 def getAlbumArt(albumid):
@@ -36,7 +37,7 @@ def getCachedArt(albumid):
         return None
     
     if artwork_path.startswith('http://'):
-        artwork = urllib.urlopen(artwork_path).read()
+        artwork = urllib2.urlopen(artwork_path, timeout=20).read()
         return artwork
     else:
         artwork = open(artwork_path, "r").read()
