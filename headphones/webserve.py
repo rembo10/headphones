@@ -384,6 +384,8 @@ class WebInterface(object):
                     "use_newznab" : checked(headphones.NEWZNAB),
                     "newznab_host" : headphones.NEWZNAB_HOST,
                     "newznab_api" : headphones.NEWZNAB_APIKEY,
+                    "newznab_enabled" : checked(headphones.NEWZNAB_ENABLED),
+                    "extra_newznabs" : headphones.EXTRA_NEWZNABS,
                     "use_nzbsorg" : checked(headphones.NZBSORG),
                     "nzbsorg_uid" : headphones.NZBSORG_UID,
                     "nzbsorg_hash" : headphones.NZBSORG_HASH,
@@ -458,13 +460,13 @@ class WebInterface(object):
     
     def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None, download_scan_interval=None, nzb_search_interval=None, libraryscan_interval=None,
         sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
-        usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
+        usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0,
         nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
         torrentblackhole_dir=None, download_torrent_dir=None, numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None,
         rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, autowant_upcoming=False, autowant_all=False, interface=None, log_dir=None,
         music_encoder=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
         prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0, 
-        nma_enabled=False, nma_apikey=None, nma_priority=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None):
+        nma_enabled=False, nma_apikey=None, nma_priority=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -491,6 +493,7 @@ class WebInterface(object):
         headphones.NEWZNAB = newznab
         headphones.NEWZNAB_HOST = newznab_host
         headphones.NEWZNAB_APIKEY = newznab_apikey
+        headphones.NEWZNAB_ENABLED = newznab_enabled
         headphones.NZBSORG = nzbsorg
         headphones.NZBSORG_UID = nzbsorg_uid
         headphones.NZBSORG_HASH = nzbsorg_hash
@@ -554,6 +557,22 @@ class WebInterface(object):
         headphones.CUSTOMSLEEP = customsleep
         headphones.HPUSER = hpuser
         headphones.HPPASS = hppass
+
+        # Handle the variable config options. Note - keys with False values aren't getting passed
+        
+        headphones.EXTRA_NEWZNABS = []
+        
+        for kwarg in kwargs:
+            if kwarg.startswith('newznab_host'):
+                newznab_number = kwarg[12:]
+                newznab_host = kwargs['newznab_host' + newznab_number]
+                newznab_api = kwargs['newznab_api' + newznab_number]
+                try:
+                    newznab_enabled = int(kwargs['newznab_enabled' + newznab_number])
+                except KeyError:
+                    newznab_enabled = 0
+                
+                headphones.EXTRA_NEWZNABS.append([newznab_host, newznab_api, newznab_enabled])
         
         headphones.config_write()
 
