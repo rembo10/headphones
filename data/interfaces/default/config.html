@@ -265,6 +265,19 @@ m<%inherit file="base.html"/>
                                 <input type="text" name="waffles_passkey" value="${config['waffles_passkey']}" size="36">
                             </div>
                         </div>
+                        <div class="row checkbox">
+                            <input id="usewhatcd" type="checkbox" name="whatcd" onclick="initConfigCheckbox($(this));" value="1" ${config['use_whatcd']} /><label>What.cd</label>
+                        </div>
+                        <div class="config">
+                            <div class="row">
+                                <label>What.cd UID Number: </label>
+                                <input type="text" name="whatcd_uid" value="${config['whatcd_uid']}" size="36">
+                            </div>
+                            <div class="row">
+                                <label>What.cd Passkey: </label>
+                                <input type="text" name="whatcd_passkey" value="${config['whatcd_passkey']}" size="36">
+                            </div>
+                        </div>
                     </fieldset>
                     
                 </td>
@@ -785,6 +798,7 @@ m<%inherit file="base.html"/>
 		initConfigCheckbox("#usenewzbin");
 		initConfigCheckbox("#usenzbsorg");
 		initConfigCheckbox("#usewaffles");
+		initConfigCheckbox("#usewhatcd");
 		initConfigCheckbox("#useblackhole");
 		initConfigCheckbox("#useapi");
 	}
