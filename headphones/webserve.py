@@ -385,6 +385,7 @@ class WebInterface(object):
                     "newznab_host" : headphones.NEWZNAB_HOST,
                     "newznab_api" : headphones.NEWZNAB_APIKEY,
                     "newznab_enabled" : checked(headphones.NEWZNAB_ENABLED),
+                    "extra_newznabs" : headphones.EXTRA_NEWZNABS,
                     "use_nzbsorg" : checked(headphones.NZBSORG),
                     "nzbsorg_uid" : headphones.NZBSORG_UID,
                     "nzbsorg_hash" : headphones.NZBSORG_HASH,
@@ -465,7 +466,7 @@ class WebInterface(object):
         rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, autowant_upcoming=False, autowant_all=False, interface=None, log_dir=None,
         music_encoder=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
         prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0, 
-        nma_enabled=False, nma_apikey=None, nma_priority=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None):
+        nma_enabled=False, nma_apikey=None, nma_priority=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -556,6 +557,22 @@ class WebInterface(object):
         headphones.CUSTOMSLEEP = customsleep
         headphones.HPUSER = hpuser
         headphones.HPPASS = hppass
+
+        # Handle the variable config options. Note - keys with False values aren't getting passed
+        
+        headphones.EXTRA_NEWZNABS = []
+        
+        for kwarg in kwargs:
+            if kwarg.startswith('newznab_host'):
+                newznab_number = kwarg[12:]
+                newznab_host = kwargs['newznab_host' + newznab_number]
+                newznab_api = kwargs['newznab_api' + newznab_number]
+                try:
+                    newznab_enabled = int(kwargs['newznab_enabled' + newznab_number])
+                except KeyError:
+                    newznab_enabled = 0
+                
+                headphones.EXTRA_NEWZNABS.append([newznab_host, newznab_api, newznab_enabled])
         
         headphones.config_write()
 

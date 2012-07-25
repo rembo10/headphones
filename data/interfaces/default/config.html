@@ -1,6 +1,7 @@
 m<%inherit file="base.html"/>
 <%!
 	import headphones
+	from operator import itemgetter
 %>
 
 <%def name="headerIncludes()">
@@ -217,19 +218,27 @@ m<%inherit file="base.html"/>
 				    <%
 					newznab_number = 2
 				    %>
-				    %for newznab in config['extra_newznabs']:
+				    %for newznab in sorted(config['extra_newznabs'], key=itemgetter(0)):
+					<%
+					    if newznab[2]:
+						newznab_enabled = "checked"
+					    else:
+						newznab_enabled = ""
+					%>
 					<div class="config" id="newznab${newznab_number}">
 					    <div class="row">
 						<label>Newznab Host</label>
 						<input type="text" name="newznab_host${newznab_number}" value="${newznab[0]}" size="30">
-						<small>e.g. http://nzb.su</small>
 					    </div>
 					    <div class="row">
 						<label>Newznab API</label>
-						<input type="text" name="newznab_apikey${newznab_number}" value="${newznab[1]}" size="36">
+						<input type="text" name="newznab_api${newznab_number}" value="${newznab[1]}" size="36">
 					    </div>
 					    <div class="row checkbox">
-						<input id="newznab_enabled" type="checkbox" name="newznab_enabled${newznab_number}" value="1" ${newznab[2]} /><label>Enabled</label>
+						<input id="newznab_enabled" type="checkbox" name="newznab_enabled${newznab_number}" value="1" ${newznab_enabled} /><label>Enabled</label>
+					    </div>
+					    <div class="row">
+						<input type="button" class="remove" id="newznab${newznab_number}" value="Remove ${newznab[0]}">
 					    </div>
 					</div>
 					<%
@@ -804,6 +813,10 @@ m<%inherit file="base.html"/>
 		
 		$("#mirror").change(handleNewSelection);
 			handleNewSelection.apply($("#mirror"));
+		
+		$(".remove").click(function() {
+		    $(this).parent().parent().remove();
+		});
 		$(function() {
 			$( "#tabs" ).tabs();
 		});
@@ -819,16 +832,16 @@ m<%inherit file="base.html"/>
 	$(document).ready(function() {
 	    initThisPage();
 	    $("#add_newznab").click(function() {
-		var intIdPrev = $("#newznab_providers > div").size()
+		var intIdPrev = $("#newznab_providers > div").size();
 		var intId = intIdPrev + 1;
-		var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled" + intId + "\" value=\"1\" /><label>Enabled</label></div>");
+		var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
 		var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"remove\" value=\"Remove\" /></div>");
 		removeButton.click(function() {
 		    $(this).parent().remove();
 		});
 		formfields.append(removeButton);
 		formfields.append("</div>");
-		$("#newznab" + intIdPrev).append(formfields);
+		$("#newznab" + intIdPrev).after(formfields);
 	    });
 	});
 	
