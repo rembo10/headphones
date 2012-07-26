@@ -20,6 +20,7 @@ import os, sys, subprocess
 import threading
 import webbrowser
 import sqlite3
+import itertools
 
 from lib.apscheduler.scheduler import Scheduler
 from lib.configobj import ConfigObj
@@ -229,7 +230,6 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
     else:
         logger.debug(item_name + " -> ******")
     return my_val
-    
 
 def initialize():
 
@@ -343,7 +343,10 @@ def initialize():
         NEWZNAB_HOST = check_setting_str(CFG, 'Newznab', 'newznab_host', '')
         NEWZNAB_APIKEY = check_setting_str(CFG, 'Newznab', 'newznab_apikey', '')
         NEWZNAB_ENABLED = bool(check_setting_int(CFG, 'Newznab', 'newznab_enabled', 1))
-        EXTRA_NEWZNABS = check_setting_str(CFG, 'Newznab', 'extra_newznabs', [], log=False)
+        
+        # Need to pack the extra newznabs back into a list of tuples
+        flattened_newznabs = check_setting_str(CFG, 'Newznab', 'extra_newznabs', [], log=False)
+        EXTRA_NEWZNABS = list(itertools.izip(*[itertools.islice(flattened_newznabs, i, None, 3) for i in range(3)]))
         
         NZBSORG = bool(check_setting_int(CFG, 'NZBsorg', 'nzbsorg', 0))
         NZBSORG_UID = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_uid', '')
@@ -618,7 +621,13 @@ def config_write():
     new_config['Newznab']['newznab_host'] = NEWZNAB_HOST
     new_config['Newznab']['newznab_apikey'] = NEWZNAB_APIKEY
     new_config['Newznab']['newznab_enabled'] = int(NEWZNAB_ENABLED)
-    new_config['Newznab']['extra_newznabs'] = EXTRA_NEWZNABS
+    # Need to unpack the extra newznabs for saving in config.ini
+    flattened_newznabs = []
+    for newznab in EXTRA_NEWZNABS:
+        for item in newznab:
+            flattened_newznabs.append(item)
+    
+    new_config['Newznab']['extra_newznabs'] = flattened_newznabs
 
     new_config['NZBsorg'] = {}
     new_config['NZBsorg']['nzbsorg'] = int(NZBSORG)

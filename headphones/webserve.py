@@ -572,7 +572,7 @@ class WebInterface(object):
                 except KeyError:
                     newznab_enabled = 0
                 
-                headphones.EXTRA_NEWZNABS.append([newznab_host, newznab_api, newznab_enabled])
+                headphones.EXTRA_NEWZNABS.append((newznab_host, newznab_api, newznab_enabled))
         
         headphones.config_write()
 
