@@ -1,7 +1,6 @@
 m<%inherit file="base.html"/>
 <%!
 	import headphones
-	from operator import itemgetter
 %>
 
 <%def name="headerIncludes()">
@@ -218,9 +217,9 @@ m<%inherit file="base.html"/>
 				    <%
 					newznab_number = 2
 				    %>
-				    %for newznab in sorted(config['extra_newznabs'], key=itemgetter(0)):
+				    %for newznab in config['extra_newznabs']:
 					<%
-					    if newznab[2]:
+					    if newznab[2] == '1' or newznab[2] == 1:
 						newznab_enabled = "checked"
 					    else:
 						newznab_enabled = ""
@@ -814,21 +813,25 @@ m<%inherit file="base.html"/>
 		$("#mirror").change(handleNewSelection);
 			handleNewSelection.apply($("#mirror"));
 		
+		var deletedNewznabs = 0;
+		
 		$(".remove").click(function() {
 		    $(this).parent().parent().remove();
+		    deletedNewznabs = deletedNewznabs + 1;
 		});
 		    
 		$("#add_newznab").click(function() {
-		    var intIdPrev = $("#newznab_providers > div").size();
-		    var intId = intIdPrev + 1;
+		    var intId = $("#newznab_providers > div").size() + deletedNewznabs + 1;
 		    var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
 		    var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"remove\" value=\"Remove\" /></div>");
 		    removeButton.click(function() {
 			$(this).parent().remove();
+			deletedNewznabs = deletedNewznabs + 1;
+			
 		    });
 		    formfields.append(removeButton);
 		    formfields.append("</div>");
-		    $("#newznab" + intIdPrev).after(formfields);
+		    $("#add_newznab").before(formfields);
 		});
 		
 		$(function() {

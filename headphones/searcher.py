@@ -217,14 +217,11 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             
         if headphones.NEWZNAB:
             
-            newznab_hosts = [[headphones.NEWZNAB_HOST, headphones.NEWZNAB_APIKEY, headphones.NEWZNAB_ENABLED]]
-
-            # This is just to make sure we don't have any empty string for EXTRA_NEWZNABS
-            if not headphones.EXTRA_NEWZNABS:
-                headphones.EXTRA_NEWZNABS = []
+            newznab_hosts = [(headphones.NEWZNAB_HOST, headphones.NEWZNAB_APIKEY, headphones.NEWZNAB_ENABLED)]
             
             for newznab_host in headphones.EXTRA_NEWZNABS:
-                newznab_hosts.append(newznab_host)
+                if newznab_host[2] == '1' or newznab_host[2] == 1:
+                    newznab_hosts.append(newznab_host)
             
             provider = "newznab"
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
@@ -239,9 +236,6 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 logger.info("Album type is audiobook/spokenword. Using audiobook category")
                 
             for newznab_host in newznab_hosts:
-                
-                if newznab_host[2] == 0 or newznab_host[2] == '0':
-                    continue
 
                 params = {    "t": "search",
                             "apikey": newznab_host[1],
