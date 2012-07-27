@@ -216,6 +216,13 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                         logger.info(u"No results found from NZBMatrix for %s" % term)
             
         if headphones.NEWZNAB:
+            
+            newznab_hosts = [(headphones.NEWZNAB_HOST, headphones.NEWZNAB_APIKEY, headphones.NEWZNAB_ENABLED)]
+            
+            for newznab_host in headphones.EXTRA_NEWZNABS:
+                if newznab_host[2] == '1' or newznab_host[2] == 1:
+                    newznab_hosts.append(newznab_host)
+            
             provider = "newznab"
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "3040"
@@ -227,44 +234,46 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             if albums['Type'] == 'Other':
                 categories = "3030"
                 logger.info("Album type is audiobook/spokenword. Using audiobook category")
+                
+            for newznab_host in newznab_hosts:
 
-            params = {    "t": "search",
-                        "apikey": headphones.NEWZNAB_APIKEY,
-                        "cat": categories,
-                        "maxage": headphones.USENET_RETENTION,
-                        "q": term
-                        }
-        
-            searchURL = headphones.NEWZNAB_HOST + '/api?' + urllib.urlencode(params)
-                
-            logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, headphones.NEWZNAB_HOST))
+                params = {    "t": "search",
+                            "apikey": newznab_host[1],
+                            "cat": categories,
+                            "maxage": headphones.USENET_RETENTION,
+                            "q": term
+                            }
             
-            try:
-                data = urllib2.urlopen(searchURL, timeout=20).read()
-            except urllib2.URLError, e:
-                logger.warn('Error fetching data from %s: %s' % (headphones.NEWZNAB_HOST, e))
-                data = False
+                searchURL = newznab_host[0] + '/api?' + urllib.urlencode(params)
+                    
+                logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, newznab_host[0]))
                 
-            if data:
-            
-                d = feedparser.parse(data)
+                try:
+                    data = urllib2.urlopen(searchURL, timeout=20).read()
+                except urllib2.URLError, e:
+                    logger.warn('Error fetching data from %s: %s' % (newznab_host[0], e))
+                    data = False
+                    
+                if data:
                 
-                if not len(d.entries):
-                    logger.info(u"No results found from %s for %s" % (headphones.NEWZNAB_HOST, term))
-                    pass
-                
-                else:
-                    for item in d.entries:
-                        try:
-                            url = item.link
-                            title = item.title
-                            size = int(item.links[1]['length'])
+                    d = feedparser.parse(data)
+                    
+                    if not len(d.entries):
+                        logger.info(u"No results found from %s for %s" % (newznab_host[0], term))
+                        pass
+                    
+                    else:
+                        for item in d.entries:
+                            try:
+                                url = item.link
+                                title = item.title
+                                size = int(item.links[1]['length'])
+                                
+                                resultlist.append((title, size, url, provider))
+                                logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size))) 
                             
-                            resultlist.append((title, size, url, provider))
-                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size))) 
-                        
-                        except Exception, e:
-                            logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
+                            except Exception, e:
+                                logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
                     
         if headphones.NZBSORG:
             provider = "nzbsorg"
