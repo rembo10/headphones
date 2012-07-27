@@ -109,14 +109,14 @@ m<%inherit file="base.html"/>
 	                   	<div class="row">
 		                    <label>SABnzbd Username</label>
 		                    <input type="text" name="sab_username" value="${config['sab_user']}" size="20">
-	                    </div>	               
+	                    </div>
+				<div class="row">
+		                    <label>SABnzbd Password:</label>
+		                    <input type="password" name="sab_password" value="${config['sab_pass']}" size="20">
+	                    </div>               
 	                	<div class="row">
 		                    <label>SABnzbd API:</label>
 		                    <input type="text" name="sab_apikey" value="${config['sab_api']}" size="36">
-	                    </div>
-	                   	<div class="row">
-		                    <label>SABnzbd Password:</label>
-		                    <input type="password" name="sab_password" value="${config['sab_pass']}" size="20">
 	                    </div>
 	                    <div class="row">
 	                        <label>SABnzbd Category:</label>
@@ -184,7 +184,7 @@ m<%inherit file="base.html"/>
                 		</div>
                 		<div class="config">
 	                		<div class="row">
-	                			<label>NZBMatrix Username: </label>
+	                			<label>NZBMatrix Username</label>
 	                			<input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30">
 	                		</div>
 	                		<div class="row">
@@ -199,18 +199,54 @@ m<%inherit file="base.html"/>
                 		<div class="row checkbox">                    	
                 			<input  id="usenewznab" type="checkbox" name="newznab" onclick="initConfigCheckbox($(this));" value="1" ${config['use_newznab']} /><label>Use Newznab</label>
                 		</div>
-                		<div class="config">
-	                		<div class="row">
-	                		<label>Newznab Host</label>
-	                		  <input type="text" name="newznab_host" value="${config['newznab_host']}" size="30">
-	                		  <small>e.g. http://nzb.su</small>
-	                		 </div>
-	                		 <div class="row">
-	                		 <label>Newznab API: </label>
-	                		  <input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36">
-	                		  </div>
-                		  </div>
-                	</fieldset>                	
+				<div id="newznab_providers">
+				    <div class="config" id="newznab1">
+					<div class="row">
+					    <label>Newznab Host</label>
+					    <input type="text" name="newznab_host" value="${config['newznab_host']}" size="30">
+					    <small>e.g. http://nzb.su</small>
+					</div>
+					<div class="row">
+					    <label>Newznab API</label>
+					    <input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36">
+					</div>
+					<div class="row checkbox">
+					    <input id="newznab_enabled" type="checkbox" name="newznab_enabled" onclick="initConfigCheckbox($(this));" value="1" ${config['newznab_enabled']} /><label>Enabled</label>
+					</div>
+				    </div>
+				    <%
+					newznab_number = 2
+				    %>
+				    %for newznab in config['extra_newznabs']:
+					<%
+					    if newznab[2] == '1' or newznab[2] == 1:
+						newznab_enabled = "checked"
+					    else:
+						newznab_enabled = ""
+					%>
+					<div class="config" id="newznab${newznab_number}">
+					    <div class="row">
+						<label>Newznab Host</label>
+						<input type="text" name="newznab_host${newznab_number}" value="${newznab[0]}" size="30">
+					    </div>
+					    <div class="row">
+						<label>Newznab API</label>
+						<input type="text" name="newznab_api${newznab_number}" value="${newznab[1]}" size="36">
+					    </div>
+					    <div class="row checkbox">
+						<input id="newznab_enabled" type="checkbox" name="newznab_enabled${newznab_number}" value="1" ${newznab_enabled} /><label>Enabled</label>
+					    </div>
+					    <div class="row">
+						<input type="button" class="remove" id="newznab${newznab_number}" value="Remove ${newznab[0]}">
+					    </div>
+					</div>
+					<%
+					    newznab_number += 1
+					%>
+				    %endfor
+				    <input type="button" value="Add Newznab" class="add_newznab" id="add_newznab" />
+				</div>
+                	</fieldset>
                 </td>
         
                 <td>
@@ -233,12 +269,12 @@ m<%inherit file="base.html"/>
                 		</div>
                 		<div class="config">
                 			<div class="row">
-                			<label>Newzbin UID: </label>
+                			<label>Newzbin UID</label>
                 			 <input type="text" name="newzbin_uid" value="${config['newzbin_uid']}" size="30">
                 			</div>
                 			<div class="row">
-                			<label>Newzbin Password: </label>
-                			  <input type="text" name="newzbin_password" value="${config['newzbin_pass']}" size="36">
+                			<label>Newzbin Password</label>
+                			  <input type="password" name="newzbin_password" value="${config['newzbin_pass']}" size="36">
                 			</div>
                 		</div>
                 	</fieldset>
@@ -776,6 +812,28 @@ m<%inherit file="base.html"/>
 		
 		$("#mirror").change(handleNewSelection);
 			handleNewSelection.apply($("#mirror"));
+		
+		var deletedNewznabs = 0;
+		
+		$(".remove").click(function() {
+		    $(this).parent().parent().remove();
+		    deletedNewznabs = deletedNewznabs + 1;
+		});
+		    
+		$("#add_newznab").click(function() {
+		    var intId = $("#newznab_providers > div").size() + deletedNewznabs + 1;
+		    var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
+		    var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"remove\" value=\"Remove\" /></div>");
+		    removeButton.click(function() {
+			$(this).parent().remove();
+			deletedNewznabs = deletedNewznabs + 1;
+			
+		    });
+		    formfields.append(removeButton);
+		    formfields.append("</div>");
+		    $("#add_newznab").before(formfields);
+		});
+		
 		$(function() {
 			$( "#tabs" ).tabs();
 		});
@@ -789,7 +847,7 @@ m<%inherit file="base.html"/>
 		initConfigCheckbox("#useapi");
 	}
 	$(document).ready(function() {
-		initThisPage();
+	    initThisPage();
 	});
 	
 	</script>

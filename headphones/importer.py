@@ -156,7 +156,7 @@ def addArtisttoDB(artistid, extrasonly=False):
         rgid = rg['id']
         
         # check if the album already exists
-        rg_exists = myDB.select("SELECT * from albums WHERE AlbumID=?", [rg['id']])
+        rg_exists = myDB.action("SELECT * from albums WHERE AlbumID=?", [rg['id']]).fetchone()
                     
         try:    
             release_dict = mb.getReleaseGroup(rgid)
@@ -180,7 +180,7 @@ def addArtisttoDB(artistid, extrasonly=False):
                         }
         
         # Only change the status & add DateAdded if the album is not already in the database
-        if not len(rg_exists):
+        if not rg_exists:
 
             newValueDict['DateAdded']= helpers.today()
                             
@@ -193,6 +193,9 @@ def addArtisttoDB(artistid, extrasonly=False):
         
         myDB.upsert("albums", newValueDict, controlValueDict)
 
+        # This is used to see how many tracks you have from an album - to mark it as downloaded. Default is 80%, can be set in config as ALBUM_COMPLETION_PCT
+        total_track_count = len(release_dict['tracks'])
+        
         for track in release_dict['tracks']:
         
             cleanname = helpers.cleanName(artist['artist_name'] + ' ' + rg['title'] + ' ' + track['title'])
@@ -221,12 +224,22 @@ def addArtisttoDB(artistid, extrasonly=False):
                 newValueDict['BitRate'] = match['BitRate']
                 newValueDict['Format'] = match['Format']
                 myDB.action('DELETE from have WHERE Location=?', [match['Location']])
-                
+
             myDB.upsert("tracks", newValueDict, controlValueDict)
-            
+
+        # Mark albums as downloaded if they have at least 80% (by default, configurable) of the album
+        have_track_count = len(myDB.select('SELECT * from tracks WHERE AlbumID=? AND Location IS NOT NULL', [rg['id']]))
+        
+        if rg_exists:
+            if rg_exists['Status'] == 'Skipped' and ((have_track_count/float(total_track_count)) >= (headphones.ALBUM_COMPLETION_PCT/100.0)):
+                myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', rg['id']])
+        else:
+            if ((have_track_count/float(total_track_count)) >= (headphones.ALBUM_COMPLETION_PCT/100.0)):
+                myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', rg['id']])
+
         logger.debug(u"Updating album cache for " + rg['title'])
         cache.getThumb(AlbumID=rg['id'])
-            
+
     latestalbum = myDB.action('SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [artistid]).fetchone()
     totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid]))
     havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['artist_name']]))

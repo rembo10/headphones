@@ -20,6 +20,7 @@ import os, sys, subprocess
 import threading
 import webbrowser
 import sqlite3
+import itertools
 
 from lib.apscheduler.scheduler import Scheduler
 from lib.configobj import ConfigObj
@@ -121,6 +122,8 @@ NZBMATRIX_APIKEY = None
 NEWZNAB = False
 NEWZNAB_HOST = None
 NEWZNAB_APIKEY = None
+NEWZNAB_ENABLED = False
+EXTRA_NEWZNABS = []
 
 NZBSORG = False
 NZBSORG_UID = None
@@ -135,6 +138,8 @@ LASTFM_USERNAME = None
 LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a"]
 LOSSLESS_MEDIA_FORMATS = ["flac"]
 MEDIA_FORMATS = LOSSY_MEDIA_FORMATS + LOSSLESS_MEDIA_FORMATS
+
+ALBUM_COMPLETION_PCT = None    # This is used in importer.py to determine how complete an album needs to be - to be considered "downloaded". Percentage from 0-100
 
 TORRENTBLACKHOLE_DIR = None
 NUMBEROFSEEDERS = 10
@@ -225,7 +230,6 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
     else:
         logger.debug(item_name + " -> ******")
     return my_val
-    
 
 def initialize():
 
@@ -238,11 +242,12 @@ def initialize():
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
-                NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
+                NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS,\
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
                 ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, MIRROR, CUSTOMHOST, CUSTOMPORT, \
-                CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, SYNOINDEX_ENABLED
+                CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, SYNOINDEX_ENABLED, \
+                ALBUM_COMPLETION_PCT
                 
         if __INITIALIZED__:
             return False
@@ -259,6 +264,7 @@ def initialize():
         CheckSection('XBMC')
         CheckSection('NMA')
         CheckSection('Synoindex')
+        CheckSection('Advanced')
         
         # Set global variables based on config file or use defaults
         CONFIG_VERSION = check_setting_str(CFG, 'General', 'config_version', '0')
@@ -336,6 +342,11 @@ def initialize():
         NEWZNAB = bool(check_setting_int(CFG, 'Newznab', 'newznab', 0))
         NEWZNAB_HOST = check_setting_str(CFG, 'Newznab', 'newznab_host', '')
         NEWZNAB_APIKEY = check_setting_str(CFG, 'Newznab', 'newznab_apikey', '')
+        NEWZNAB_ENABLED = bool(check_setting_int(CFG, 'Newznab', 'newznab_enabled', 1))
+        
+        # Need to pack the extra newznabs back into a list of tuples
+        flattened_newznabs = check_setting_str(CFG, 'Newznab', 'extra_newznabs', [], log=False)
+        EXTRA_NEWZNABS = list(itertools.izip(*[itertools.islice(flattened_newznabs, i, None, 3) for i in range(3)]))
         
         NZBSORG = bool(check_setting_int(CFG, 'NZBsorg', 'nzbsorg', 0))
         NZBSORG_UID = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_uid', '')
@@ -383,8 +394,10 @@ def initialize():
         CUSTOMHOST = check_setting_str(CFG, 'General', 'customhost', 'localhost')
         CUSTOMPORT = check_setting_int(CFG, 'General', 'customport', 5000)
         CUSTOMSLEEP = check_setting_int(CFG, 'General', 'customsleep', 1)
-        HPUSER = check_setting_str(CFG, 'General', 'hpuser', 'username')
-        HPPASS = check_setting_str(CFG, 'General', 'hppass', 'password')
+        HPUSER = check_setting_str(CFG, 'General', 'hpuser', '')
+        HPPASS = check_setting_str(CFG, 'General', 'hppass', '')
+        
+        ALBUM_COMPLETION_PCT = check_setting_int(CFG, 'Advanced', 'album_completion_pct', 80)
         
         # update folder formats in the config & bump up config version
         if CONFIG_VERSION == '0':
@@ -607,6 +620,14 @@ def config_write():
     new_config['Newznab']['newznab'] = int(NEWZNAB)
     new_config['Newznab']['newznab_host'] = NEWZNAB_HOST
     new_config['Newznab']['newznab_apikey'] = NEWZNAB_APIKEY
+    new_config['Newznab']['newznab_enabled'] = int(NEWZNAB_ENABLED)
+    # Need to unpack the extra newznabs for saving in config.ini
+    flattened_newznabs = []
+    for newznab in EXTRA_NEWZNABS:
+        for item in newznab:
+            flattened_newznabs.append(item)
+    
+    new_config['Newznab']['extra_newznabs'] = flattened_newznabs
 
     new_config['NZBsorg'] = {}
     new_config['NZBsorg']['nzbsorg'] = int(NZBSORG)
@@ -661,6 +682,9 @@ def config_write():
     new_config['General']['customsleep'] = CUSTOMSLEEP
     new_config['General']['hpuser'] = HPUSER
     new_config['General']['hppass'] = HPPASS
+    
+    new_config['Advanced'] = {}
+    new_config['Advanced']['album_completion_pct'] = ALBUM_COMPLETION_PCT
     
     new_config.write()
 
