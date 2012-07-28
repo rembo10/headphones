@@ -1,5 +1,5 @@
 # ext/babelplugin.py
-# Copyright (C) 2006-2011 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -67,6 +67,9 @@ def extract_nodes(nodes, keywords, comment_tags, options):
 
         if isinstance(node, parsetree.DefTag):
             code = node.function_decl.code
+            child_nodes = node.nodes
+        elif isinstance(node, parsetree.BlockTag):
+            code = node.body_decl.code
             child_nodes = node.nodes
         elif isinstance(node, parsetree.CallTag):
             code = node.code.code
