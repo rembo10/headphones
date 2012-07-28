@@ -8,7 +8,7 @@
 # distribute, sublicense, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
@@ -16,7 +16,7 @@
 # MODIFIED TO WORK WITH HEADPHONES!!
 #
 
-__version__ = '1.0b14'
+__version__ = '1.0b15'
 __author__ = 'Adrian Sampson <adrian@radbox.org>'
 
 from lib.beets.library import Library
