@@ -28,6 +28,20 @@ try:
     set
 except NameError:
     from sets import Set as set
+
+try:
+    basestring
+except NameError:
+    basestring = str
+
+try:
+    # Python 3
+    import builtins
+except ImportError:
+    # Python 2
+    import __builtin__ as builtins
+
+import operator as _operator
 import sys
 
 def as_dict(config):
@@ -195,10 +209,11 @@ class Parser(ConfigParser):
             if section not in result:
                 result[section] = {}
             for option in self.options(section):
-                value = self.get(section, option, raw, vars)
+                value = self.get(section, option, raw=raw, vars=vars)
                 try:
                     value = unrepr(value)
-                except Exception, x:
+                except Exception:
+                    x = sys.exc_info()[1]
                     msg = ("Config error in section: %r, option: %r, "
                            "value: %r. Config values must be valid Python." %
                            (section, option, value))
@@ -216,7 +231,8 @@ class Parser(ConfigParser):
 
 # public domain "unrepr" implementation, found on the web and then improved.
 
-class _Builder:
+
+class _Builder2:
     
     def build(self, o):
         m = getattr(self, 'build_' + o.__class__.__name__, None)
@@ -224,6 +240,18 @@ class _Builder:
             raise TypeError("unrepr does not recognize %s" %
                             repr(o.__class__.__name__))
         return m(o)
+    
+    def astnode(self, s):
+        """Return a Python2 ast Node compiled from a string."""
+        try:
+            import compiler
+        except ImportError:
+            # Fallback to eval when compiler package is not available,
+            # e.g. IronPython 1.0.
+            return eval(s)
+        
+        p = compiler.parse("__tempvalue__ = " + s)
+        return p.getChildren()[1].getChildren()[0].getChildren()[1]
     
     def build_Subscript(self, o):
         expr, flags, subs = o.getChildren()
@@ -272,8 +300,7 @@ class _Builder:
         
         # See if the Name is in builtins.
         try:
-            import __builtin__
-            return getattr(__builtin__, name)
+            return getattr(builtins, name)
         except AttributeError:
             pass
         
@@ -282,6 +309,10 @@ class _Builder:
     def build_Add(self, o):
         left, right = map(self.build, o.getChildren())
         return left + right
+
+    def build_Mul(self, o):
+        left, right = map(self.build, o.getChildren())
+        return left * right
     
     def build_Getattr(self, o):
         parent = self.build(o.expr)
@@ -297,25 +328,128 @@ class _Builder:
         return self.build(o.getChildren()[0])
 
 
-def _astnode(s):
-    """Return a Python ast Node compiled from a string."""
-    try:
-        import compiler
-    except ImportError:
-        # Fallback to eval when compiler package is not available,
-        # e.g. IronPython 1.0.
-        return eval(s)
+class _Builder3:
     
-    p = compiler.parse("__tempvalue__ = " + s)
-    return p.getChildren()[1].getChildren()[0].getChildren()[1]
+    def build(self, o):
+        m = getattr(self, 'build_' + o.__class__.__name__, None)
+        if m is None:
+            raise TypeError("unrepr does not recognize %s" %
+                            repr(o.__class__.__name__))
+        return m(o)
     
+    def astnode(self, s):
+        """Return a Python3 ast Node compiled from a string."""
+        try:
+            import ast
+        except ImportError:
+            # Fallback to eval when ast package is not available,
+            # e.g. IronPython 1.0.
+            return eval(s)
+
+        p = ast.parse("__tempvalue__ = " + s)
+        return p.body[0].value
+
+    def build_Subscript(self, o):
+        return self.build(o.value)[self.build(o.slice)]
+    
+    def build_Index(self, o):
+        return self.build(o.value)
+    
+    def build_Call(self, o):
+        callee = self.build(o.func)
+        
+        if o.args is None:
+            args = ()
+        else: 
+            args = tuple([self.build(a) for a in o.args]) 
+        
+        if o.starargs is None:
+            starargs = ()
+        else:
+            starargs = self.build(o.starargs)
+        
+        if o.kwargs is None:
+            kwargs = {}
+        else:
+            kwargs = self.build(o.kwargs)
+        
+        return callee(*(args + starargs), **kwargs)
+    
+    def build_List(self, o):
+        return list(map(self.build, o.elts))
+    
+    def build_Str(self, o):
+        return o.s
+    
+    def build_Num(self, o):
+        return o.n
+    
+    def build_Dict(self, o):
+        return dict([(self.build(k), self.build(v))
+                     for k, v in zip(o.keys, o.values)])
+    
+    def build_Tuple(self, o):
+        return tuple(self.build_List(o))
+    
+    def build_Name(self, o):
+        name = o.id
+        if name == 'None':
+            return None
+        if name == 'True':
+            return True
+        if name == 'False':
+            return False
+        
+        # See if the Name is a package or module. If it is, import it.
+        try:
+            return modules(name)
+        except ImportError:
+            pass
+        
+        # See if the Name is in builtins.
+        try:
+            import builtins
+            return getattr(builtins, name)
+        except AttributeError:
+            pass
+        
+        raise TypeError("unrepr could not resolve the name %s" % repr(name))
+        
+    def build_UnaryOp(self, o):
+        op, operand = map(self.build, [o.op, o.operand])
+        return op(operand)
+    
+    def build_BinOp(self, o):
+        left, op, right = map(self.build, [o.left, o.op, o.right]) 
+        return op(left, right)
+
+    def build_Add(self, o):
+        return _operator.add
+
+    def build_Mult(self, o):
+        return _operator.mul
+        
+    def build_USub(self, o):
+        return _operator.neg
+
+    def build_Attribute(self, o):
+        parent = self.build(o.value)
+        return getattr(parent, o.attr)
+
+    def build_NoneType(self, o):
+        return None
+
 
 def unrepr(s):
     """Return a Python object compiled from a string."""
     if not s:
         return s
-    obj = _astnode(s)
-    return _Builder().build(obj)
+    if sys.version_info < (3, 0):
+        b = _Builder2()
+    else:
+        b = _Builder3()
+    obj = b.astnode(s)
+    return b.build(obj)
 
 
 def modules(modulePath):

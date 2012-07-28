@@ -12,8 +12,13 @@ to a hierarchical arrangement of objects, starting at request.app.root.
 import string
 import sys
 import types
+try:
+    classtype = (type, types.ClassType)
+except AttributeError:
+    classtype = type
 
 import cherrypy
+from cherrypy._cpcompat import set
 
 
 class PageHandler(object):
@@ -197,8 +202,18 @@ class LateParamPageHandler(PageHandler):
                       'cherrypy.request.params copied in)')
 
 
-punctuation_to_underscores = string.maketrans(
-    string.punctuation, '_' * len(string.punctuation))
+if sys.version_info < (3, 0):
+    punctuation_to_underscores = string.maketrans(
+        string.punctuation, '_' * len(string.punctuation))
+    def validate_translator(t):
+        if not isinstance(t, str) or len(t) != 256:
+            raise ValueError("The translate argument must be a str of len 256.")
+else:
+    punctuation_to_underscores = str.maketrans(
+        string.punctuation, '_' * len(string.punctuation))
+    def validate_translator(t):
+        if not isinstance(t, dict):
+            raise ValueError("The translate argument must be a dict.")
 
 class Dispatcher(object):
     """CherryPy Dispatcher which walks a tree of objects to find a handler.
@@ -222,8 +237,7 @@ class Dispatcher(object):
     
     def __init__(self, dispatch_method_name=None,
                  translate=punctuation_to_underscores):
-        if not isinstance(translate, str) or len(translate) != 256:
-            raise ValueError("The translate argument must be a str of len 256.")
+        validate_translator(translate)
         self.translate = translate
         if dispatch_method_name:
             self.dispatch_method_name = dispatch_method_name
@@ -524,7 +538,7 @@ class RoutesDispatcher(object):
             controller = result.get('controller')
             controller = self.controllers.get(controller, controller)
             if controller:
-                if isinstance(controller, (type, types.ClassType)):
+                if isinstance(controller, classtype):
                     controller = controller()
                 # Get config from the controller.
                 if hasattr(controller, "_cp_config"):
@@ -550,9 +564,9 @@ class RoutesDispatcher(object):
 
 
 def XMLRPCDispatcher(next_dispatcher=Dispatcher()):
-    from cherrypy.lib import xmlrpc
+    from cherrypy.lib import xmlrpcutil
     def xmlrpc_dispatch(path_info):
-        path_info = xmlrpc.patched_path(path_info)
+        path_info = xmlrpcutil.patched_path(path_info)
         return next_dispatcher(path_info)
     return xmlrpc_dispatch
 

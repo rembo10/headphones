@@ -93,7 +93,7 @@ import types
 from warnings import warn
 
 import cherrypy
-from cherrypy._cpcompat import copyitems, pickle, random20
+from cherrypy._cpcompat import copyitems, pickle, random20, unicodestr
 from cherrypy.lib import httputil
 
 
@@ -171,7 +171,15 @@ class Session(object):
                 self.id = None
                 self.missing = True
                 self._regenerate()
-    
+
+    def now(self):
+        """Generate the session specific concept of 'now'.
+
+        Other session providers can override this to use alternative,
+        possibly timezone aware, versions of 'now'.
+        """
+        return datetime.datetime.now()
+
     def regenerate(self):
         """Replace the current session (with a new id)."""
         self.regenerated = True
@@ -210,7 +218,7 @@ class Session(object):
             #   accessed: no need to save it
             if self.loaded:
                 t = datetime.timedelta(seconds = self.timeout * 60)
-                expiration_time = datetime.datetime.now() + t
+                expiration_time = self.now() + t
                 if self.debug:
                     cherrypy.log('Saving with expiry %s' % expiration_time,
                                  'TOOLS.SESSIONS')
@@ -225,7 +233,7 @@ class Session(object):
         """Copy stored session data into this session instance."""
         data = self._load()
         # data is either None or a tuple (session_data, expiration_time)
-        if data is None or data[1] < datetime.datetime.now():
+        if data is None or data[1] < self.now():
             if self.debug:
                 cherrypy.log('Expired session, flushing data', 'TOOLS.SESSIONS')
             self._data = {}
@@ -277,10 +285,11 @@ class Session(object):
         if not self.loaded: self.load()
         return key in self._data
     
-    def has_key(self, key):
-        """D.has_key(k) -> True if D has a key k, else False."""
-        if not self.loaded: self.load()
-        return key in self._data
+    if hasattr({}, 'has_key'):
+        def has_key(self, key):
+            """D.has_key(k) -> True if D has a key k, else False."""
+            if not self.loaded: self.load()
+            return key in self._data
     
     def get(self, key, default=None):
         """D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None."""
@@ -326,7 +335,7 @@ class RamSession(Session):
     
     def clean_up(self):
         """Clean up expired sessions."""
-        now = datetime.datetime.now()
+        now = self.now()
         for id, (data, expiration_time) in copyitems(self.cache):
             if expiration_time <= now:
                 try:
@@ -337,6 +346,11 @@ class RamSession(Session):
                     del self.locks[id]
                 except KeyError:
                     pass
+        
+        # added to remove obsolete lock objects
+        for id in list(self.locks):
+            if id not in self.cache:
+                self.locks.pop(id, None)
     
     def _exists(self):
         return self.id in self.cache
@@ -467,7 +481,7 @@ class FileSession(Session):
     
     def clean_up(self):
         """Clean up expired sessions."""
-        now = datetime.datetime.now()
+        now = self.now()
         # Iterate over all session files in self.storage_path
         for fname in os.listdir(self.storage_path):
             if (fname.startswith(self.SESSION_PREFIX)
@@ -575,7 +589,7 @@ class PostgresqlSession(Session):
     def clean_up(self):
         """Clean up expired sessions."""
         self.cursor.execute('delete from session where expiration_time < %s',
-                            (datetime.datetime.now(),))
+                            (self.now(),))
 
 
 class MemcachedSession(Session):
@@ -601,6 +615,19 @@ class MemcachedSession(Session):
         import memcache
         cls.cache = memcache.Client(cls.servers)
     setup = classmethod(setup)
+    
+    def _get_id(self):
+        return self._id
+    def _set_id(self, value):
+        # This encode() call is where we differ from the superclass.
+        # Memcache keys MUST be byte strings, not unicode.
+        if isinstance(value, unicodestr):
+            value = value.encode('utf-8')
+
+        self._id = value
+        for o in self.id_observers:
+            o(value)
+    id = property(_get_id, _set_id, doc="The current session ID.")
     
     def _exists(self):
         self.mc_lock.acquire()
@@ -683,12 +710,12 @@ close.priority = 90
 
 def init(storage_type='ram', path=None, path_header=None, name='session_id',
          timeout=60, domain=None, secure=False, clean_freq=5,
-         persistent=True, debug=False, **kwargs):
+         persistent=True, httponly=False, debug=False, **kwargs):
     """Initialize session object (using cookies).
     
     storage_type
-        One of 'ram', 'file', 'postgresql'. This will be used
-        to look up the corresponding class in cherrypy.lib.sessions
+        One of 'ram', 'file', 'postgresql', 'memcached'. This will be
+        used to look up the corresponding class in cherrypy.lib.sessions
         globals. For example, 'file' will use the FileSession class.
     
     path
@@ -721,6 +748,10 @@ def init(storage_type='ram', path=None, path_header=None, name='session_id',
         to expire the cookie. If False, the cookie will not have an expiry,
         and the cookie will be a "session cookie" which expires when the
         browser is closed.
+    
+    httponly
+        If False (the default) the cookie 'httponly' value will not be set.
+        If True, the cookie 'httponly' value will be set (to 1).
     
     Any additional kwargs will be bound to the new Session instance,
     and may be specific to the storage type. See the subclass of Session
@@ -772,11 +803,12 @@ def init(storage_type='ram', path=None, path_header=None, name='session_id',
         # and http://support.mozilla.com/en-US/kb/Cookies
         cookie_timeout = None
     set_response_cookie(path=path, path_header=path_header, name=name,
-                        timeout=cookie_timeout, domain=domain, secure=secure)
+                        timeout=cookie_timeout, domain=domain, secure=secure,
+                        httponly=httponly)
 
 
 def set_response_cookie(path=None, path_header=None, name='session_id',
-                        timeout=60, domain=None, secure=False):
+                        timeout=60, domain=None, secure=False, httponly=False):
     """Set a response cookie for the client.
     
     path
@@ -801,6 +833,10 @@ def set_response_cookie(path=None, path_header=None, name='session_id',
         if False (the default) the cookie 'secure' value will not
         be set. If True, the cookie 'secure' value will be set (to 1).
 
+    httponly
+        If False (the default) the cookie 'httponly' value will not be set.
+        If True, the cookie 'httponly' value will be set (to 1).
+
     """
     # Set response cookie
     cookie = cherrypy.serving.response.cookie
@@ -820,7 +856,10 @@ def set_response_cookie(path=None, path_header=None, name='session_id',
         cookie[name]['domain'] = domain
     if secure:
         cookie[name]['secure'] = 1
-
+    if httponly:
+        if not cookie[name].isReservedKey('httponly'):
+            raise ValueError("The httponly cookie token is not supported.")
+        cookie[name]['httponly'] = 1
 
 def expire():
     """Expire the current session cookie."""
