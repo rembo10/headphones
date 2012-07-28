@@ -8,7 +8,7 @@
 # distribute, sublicense, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
@@ -43,6 +43,7 @@ class BeetsPlugin(object):
         override this method.
         """
         _add_media_fields(self.item_fields())
+        self.import_stages = []
 
     def commands(self):
         """Should return a list of beets.ui.Subcommand objects for
@@ -162,7 +163,7 @@ def load_plugins(names=()):
         try:
             try:
                 __import__(modname, None, None)
-            except ImportError, exc:
+            except ImportError as exc:
                 # Again, this is hacky:
                 if exc.args[0].endswith(' ' + name):
                     log.warn('** plugin %s not found' % name)
@@ -269,22 +270,27 @@ def _add_media_fields(fields):
     for key, value in fields.iteritems():
         setattr(mediafile.MediaFile, key, value)
 
+def import_stages():
+    """Get a list of import stage functions defined by plugins."""
+    stages = []
+    for plugin in find_plugins():
+        if hasattr(plugin, 'import_stages'):
+            stages += plugin.import_stages
+    return stages
+
 
 # Event dispatch.
 
-# All the handlers for the event system.
-# Each key of the dictionary should contain a list of functions to be
-# called for any event. Functions will be called in the order they were
-# added.
-_event_handlers = defaultdict(list)
-
-def load_listeners():
-    """Loads and registers event handlers from all loaded plugins.
+def event_handlers():
+    """Find all event handlers from plugins as a dictionary mapping
+    event names to sequences of callables.
     """
+    all_handlers = defaultdict(list)
     for plugin in find_plugins():
         if plugin.listeners:
             for event, handlers in plugin.listeners.items():
-                _event_handlers[event] += handlers
+                all_handlers[event] += handlers
+    return all_handlers
 
 def send(event, **arguments):
     """Sends an event to all assigned event listeners. Event is the
@@ -294,7 +300,7 @@ def send(event, **arguments):
     Returns the number of handlers called.
     """
     log.debug('Sending event: %s' % event)
-    handlers = _event_handlers[event]
+    handlers = event_handlers()[event]
     for handler in handlers:
         handler(**arguments)
     return len(handlers)
