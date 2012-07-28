@@ -1,8 +1,10 @@
 """CherryPy Application and Tree objects."""
 
 import os
+import sys
+
 import cherrypy
-from cherrypy._cpcompat import ntou
+from cherrypy._cpcompat import ntou, py3k
 from cherrypy import _cpconfig, _cplogging, _cprequest, _cpwsgi, tools
 from cherrypy.lib import httputil
 
@@ -123,8 +125,8 @@ class Application(object):
         
         resp = self.response_class()
         cherrypy.serving.load(req, resp)
-        cherrypy.engine.timeout_monitor.acquire()
         cherrypy.engine.publish('acquire_thread')
+        cherrypy.engine.publish('before_request')
         
         return req, resp
     
@@ -132,7 +134,7 @@ class Application(object):
         """Release the current serving (request and response)."""
         req = cherrypy.serving.request
         
-        cherrypy.engine.timeout_monitor.release()
+        cherrypy.engine.publish('after_request')
         
         try:
             req.close()
@@ -266,14 +268,23 @@ class Tree(object):
         
         # Correct the SCRIPT_NAME and PATH_INFO environ entries.
         environ = environ.copy()
-        if environ.get(u'wsgi.version') == (u'u', 0):
-            # Python 2/WSGI u.0: all strings MUST be of type unicode
-            enc = environ[u'wsgi.url_encoding']
-            environ[u'SCRIPT_NAME'] = sn.decode(enc)
-            environ[u'PATH_INFO'] = path[len(sn.rstrip("/")):].decode(enc)
+        if not py3k:
+            if environ.get(ntou('wsgi.version')) == (ntou('u'), 0):
+                # Python 2/WSGI u.0: all strings MUST be of type unicode
+                enc = environ[ntou('wsgi.url_encoding')]
+                environ[ntou('SCRIPT_NAME')] = sn.decode(enc)
+                environ[ntou('PATH_INFO')] = path[len(sn.rstrip("/")):].decode(enc)
+            else:
+                # Python 2/WSGI 1.x: all strings MUST be of type str
+                environ['SCRIPT_NAME'] = sn
+                environ['PATH_INFO'] = path[len(sn.rstrip("/")):]
         else:
-            # Python 2/WSGI 1.x: all strings MUST be of type str
-            environ['SCRIPT_NAME'] = sn
-            environ['PATH_INFO'] = path[len(sn.rstrip("/")):]
+            if environ.get(ntou('wsgi.version')) == (ntou('u'), 0):
+                # Python 3/WSGI u.0: all strings MUST be full unicode
+                environ['SCRIPT_NAME'] = sn
+                environ['PATH_INFO'] = path[len(sn.rstrip("/")):]
+            else:
+                # Python 3/WSGI 1.x: all strings MUST be ISO-8859-1 str
+                environ['SCRIPT_NAME'] = sn.encode('utf-8').decode('ISO-8859-1')
+                environ['PATH_INFO'] = path[len(sn.rstrip("/")):].encode('utf-8').decode('ISO-8859-1')
         return app(environ, start_response)
-
