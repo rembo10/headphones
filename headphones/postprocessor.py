@@ -470,7 +470,7 @@ def correctMetadata(albumid, release, downloaded_track_list):
             logger.error("Beets couldn't create an Item from: " + downloaded_track + " - not a media file?" + str(e))
     
     try:
-        cur_artist, cur_album, out_tuples, rec = autotag.tag_album(items, search_artist=helpers.latinToAscii(release['ArtistName']), search_album=helpers.latinToAscii(release['AlbumTitle']))
+        cur_artist, cur_album, candidates, rec = autotag.tag_album(items, search_artist=helpers.latinToAscii(release['ArtistName']), search_album=helpers.latinToAscii(release['AlbumTitle']))
     except Exception, e:
         logger.error('Error getting recommendation: %s. Not writing metadata' % e)
         return
@@ -478,9 +478,9 @@ def correctMetadata(albumid, release, downloaded_track_list):
         logger.warn('No accurate album match found for %s, %s -  not writing metadata' % (release['ArtistName'], release['AlbumTitle']))
         return
     
-    distance, items, info = out_tuples[0]
+    dist, info, mapping, extra_items, extra_tracks = candidates[0]
     logger.debug('Beets recommendation: %s' % rec)
-    autotag.apply_metadata(items, info)
+    autotag.apply_metadata(info, mapping)
     
     if len(items) != len(downloaded_track_list):
         logger.warn("Mismatch between number of tracks downloaded and the metadata items, but I'll try to write it anyway")
