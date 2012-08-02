@@ -25,7 +25,7 @@ import threading
 
 import headphones
 
-from headphones import logger, searcher, db, importer, mb, lastfm, librarysync
+from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, webfilters
 from headphones.helpers import checked, radio
 
 import lib.simplejson as simplejson
@@ -46,7 +46,9 @@ def serve_template(templatename, **kwargs):
         return exceptions.html_error_template().render()
     
 class WebInterface(object):
-    
+
+    _cp_filters = [webfilters.HTTPSFilter()]
+
     def index(self):
         raise cherrypy.HTTPRedirect("home")
     index.exposed=True
