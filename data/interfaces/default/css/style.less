@@ -113,7 +113,7 @@ table {
     	&:first-child { border-left:0;.shadow(none)}
     	&.sorting_desc,&.sorting_asc  {
     		.gradient(#FAFBFD, #DCE6EF);
-    		color: @link-color;
+    		color: @link-color !important;
     	}
     }
     td {
@@ -279,7 +279,7 @@ ul#nav {
         float: left;
         font-size: 18px;
         font-weight: bold;
-        margin: 8px 0 0 0;
+        margin: 8px 0 0 2px;
         text-align: center;
         a {
             color: @text-color;
@@ -288,10 +288,11 @@ ul#nav {
             text-shadow: 1px 1px 0px #FFF;
             text-transform: capitalize;
             border: 1px solid transparent;
+            font-weight: normal;
             font-family: @alt-font-face;
             &:hover {
             	 .gradient(#F1F1F1, #E0E0E0);
-            	 border: 1px solid #DDDDDD;
+            	 border: 1px solid #dCE6EF;
             	 .rounded(3px);
             	 .shadow(0 1px 0 #FAFAFA);
             	 .shadow(0 1px 0 #FAFAFA inset);
@@ -299,6 +300,18 @@ ul#nav {
             	-moz-transition:color .2s ease-in;  
             	-o-transition:color .2s ease-in;  
             	transition:color .2s ease-in;  
+            }
+            &.active { 
+	            .gradient(#FAFBFD, #DCE6EF);
+            	 border: 1px solid #DDDDDD;
+            	 color: @swatch-blue;
+            	 .rounded(3px);
+            	 .shadow(0 1px 0 #FAFAFA);
+            	 .shadow(0 1px 0 #FAFAFA inset);
+            	-webkit-transition:color .2s ease-in;  
+            	-moz-transition:color .2s ease-in;  
+            	-o-transition:color .2s ease-in;  
+            	transition:color .2s ease-in; 
             }
             &.config {
                 height: 28px;

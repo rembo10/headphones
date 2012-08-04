@@ -27,7 +27,7 @@
 <%def name="body()">
 	<div id="artistheader" class="clearfix">
 		<div id="artistImg">
-			<img id="artistImage" height="200" width="200" class="albumArt" alt="" />
+			<img id="artistImage" class="albumArt" alt="" />
 		</div>
 		<h1>	
 			%if artist['Status'] == 'Loading':	
@@ -211,12 +211,16 @@
 			"aaSorting": [[4, 'asc'],[3,'desc']]
 
 		});			
-		resetFilters("albums");		
+		resetFilters("albums");
+		setTimeout(function(){
+			initFancybox();
+		},1500)
 	}
 	
 	$(document).ready(function() {		
 		initActions();
 		initThisPage();
 	});
+
 	</script>
 </%def>

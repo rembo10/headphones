@@ -158,7 +158,7 @@ img.albumArt {
   float: left;
   min-height: 100%;
   min-width: 100%;
-  max-width: 300px;
+  max-width: 250px;
   max-height: 300px;
   position: relative;
 }
@@ -206,7 +206,7 @@ table th.sorting_asc {
   background-image: -o-linear-gradient(#fafbfd, #dce6ef) !important;
   filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
   -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  color: #4183c4;
+  color: #4183c4 !important;
 }
 table td {
   vertical-align: top;
@@ -421,7 +421,7 @@ ul#nav li {
   float: left;
   font-size: 18px;
   font-weight: bold;
-  margin: 8px 0 0 0;
+  margin: 8px 0 0 2px;
   text-align: center;
 }
 ul#nav li a {
@@ -431,6 +431,7 @@ ul#nav li a {
   text-shadow: 1px 1px 0px #FFF;
   text-transform: capitalize;
   border: 1px solid transparent;
+  font-weight: normal;
   font-family: "Trebuchet MS", Helvetica, Arial, sans-serif;
 }
 ul#nav li a:hover {
@@ -440,7 +441,32 @@ ul#nav li a:hover {
   background-image: -o-linear-gradient(#f1f1f1, #e0e0e0) !important;
   filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
   -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  border: 1px solid #dCE6EF;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  -moz-box-shadow: 0 1px 0 #fafafa;
+  -webkit-box-shadow: 0 1px 0 #fafafa;
+  -o-box-shadow: 0 1px 0 #fafafa;
+  box-shadow: 0 1px 0 #fafafa;
+  -moz-box-shadow: 0 1px 0 #fafafa inset;
+  -webkit-box-shadow: 0 1px 0 #fafafa inset;
+  -o-box-shadow: 0 1px 0 #fafafa inset;
+  box-shadow: 0 1px 0 #fafafa inset;
+  -webkit-transition: color 0.2s ease-in;
+  -moz-transition: color 0.2s ease-in;
+  -o-transition: color 0.2s ease-in;
+  transition: color 0.2s ease-in;
+}
+ul#nav li a.active {
+  background-image: -moz-linear-gradient(#fafbfd, #dce6ef) !important;
+  background-image: linear-gradient(#fafbfd, #dce6ef) !important;
+  background-image: -webkit-linear-gradient(#fafbfd, #dce6ef) !important;
+  background-image: -o-linear-gradient(#fafbfd, #dce6ef) !important;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
   border: 1px solid #DDDDDD;
+  color: #4183c4;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;

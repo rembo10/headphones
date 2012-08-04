@@ -53,7 +53,7 @@
 				
 			%>
 			<tr class="grade${grade}">
-				<td id="albumart"><div id="artistImg"><img class="albumArt" height="50" width="50" alt="" id="${artist['ArtistID']}"/></div></td>
+				<td id="albumart"><div id="artistImg"><img class="albumArt" alt="" id="${artist['ArtistID']}"/></div></td>
 				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
 				<td id="status">${artist['Status']}</td>
 				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>

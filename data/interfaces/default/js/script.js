@@ -2,8 +2,10 @@ function getThumb(imgElem,id,type) {
 	
 	if ( type == 'artist' ) {
 		var thumbURL = "getThumb?ArtistID=" + id;
+		// var imgURL = "getArtwork?ArtistID=" + id;
 	} else {
 		var thumbURL = "getThumb?AlbumID=" + id;
+		// var imgURL = "getArtwork?AlbumID=" + id;
 	}
 	// Get Data from the cache by Artist ID 	
 	$.ajax({
@@ -17,18 +19,8 @@ function getThumb(imgElem,id,type) {
 				var imageUrl = data;
 			}
 			$(imgElem).attr("src",imageUrl).hide().fadeIn();
-			// Get original width / Height
-			$(imgElem).load(function(){
-				var imgWidth = imgElem[0].naturalWidth;
-				var imgHeight = imgElem[0].naturalHeight;
-				// Make the ratio correct
-				if ( imgWidth > imgHeight) {						
-					$(imgElem).removeAttr("width");
-				} else {
-					$(imgElem).removeAttr("height");		
-				}	
-			})			
-		}
+			// $(imgElem).wrap('<a href="'+ imgURL +'" rel="dialog" title="' + name + '"></a>');
+			}
 	});
 }
 
@@ -45,26 +37,14 @@ function getArtwork(imgElem,id,name,type) {
 		cache: true,
 		success: function(data){
 			if ( data == "" || data == undefined ) {
-				var imageUrl = "interfaces/default/images/no-cover-art.png";
+				var imageUrl = "interfaces/default/images/no-cover-artist.png";
 			}
 			else {
 				var imageUrl = data;
 			}
-			$(imgElem).attr("src",imageUrl).hide().fadeIn();			
-			$(imgElem).wrap('<a href="'+ imageUrl +'" rel="dialog" onclick="return false;" title="' + name + '"></a>');
-			// Get original width / Height
-			$(imgElem).load(function(){
-				var imgWidth = imgElem[0].naturalWidth;
-				var imgHeight = imgElem[0].naturalHeight;
-				// Make the ratio correct
-				if ( imgWidth > imgHeight) {						
-					$(imgElem).removeAttr("width");
-				} else {
-					$(imgElem).removeAttr("height");		
-				}	
-				initFancybox();	
-			});			
-		}
+			$(imgElem).attr("src",imageUrl).hide().fadeIn();
+			$(imgElem).wrap('<a href="'+ imageUrl +'" rel="dialog" title="' + name + '"></a>');
+			}
 	});
 }
 
@@ -142,7 +122,15 @@ function initHeader() {
 			inside = false;
 		}
 	});
-	
+	var pathname = window.location.pathname;
+	pathname.replace('/', '');
+	$("#nav li a").attr('href',function(i, val ){
+		val = "/" + val;
+		if ( val == pathname) {
+		   $(this).addClass('active');
+		}
+	});
+	$("#nav li a.config.active img").attr("src","interfaces/default/images/icon_gear_hover.png");
 }
 
 function initConfigCheckbox(elem) {
@@ -331,8 +319,7 @@ function doAjaxCall(url,elem,reload,form) {
 	  			});
 	  			if ( reload == true ) 	refreshSubmenu();
 	  			if ( reload == "table") {
-	  				//console.log('refresh'); 
-	  				refreshTable();
+	  				console.log('refresh'); refreshTable();
 	  			}
 	  			if ( reload == "tabs") 	refreshTab();
 	  			if ( form ) {
