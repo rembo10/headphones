@@ -29,5 +29,6 @@ def dbUpdate():
     
         artistid = artist[0]
         importer.addArtisttoDB(artistid)
+        importer.updateArtistTotalTracks(artistid)
         
     logger.info('Update complete')

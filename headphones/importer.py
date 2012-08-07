@@ -412,3 +412,10 @@ def updateFormat():
             newValueDict = {"Format": f.format}
             myDB.upsert("have", newValueDict, controlValueDict)
         logger.info('Finished finding media format for %s files' % len(havetracks))
+        
+def updateArtistTotalTracks(artistid):
+    if headphones.EXCLUDESKIPPEDINTOTAL:
+      myDB = db.DBConnection()
+      totaltracksNotIgnored = len(myDB.select('SELECT tracks.ArtistID from tracks INNER JOIN albums ON tracks.AlbumID = albums.AlbumID WHERE albums.Status <> ? AND albums.ArtistId=?', ['Skipped', artistid]))
+      myDB.action('UPDATE artists SET TotalTracks=? WHERE ArtistID=?', [totaltracksNotIgnored, artistid])
+      logger.info(u"Updating Total Tracks Complete for: " + artistid)
