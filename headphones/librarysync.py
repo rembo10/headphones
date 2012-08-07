@@ -39,7 +39,9 @@ def libraryScan(dir=None):
     
     for track in tracks:
         if not os.path.isfile(track['Location'].encode(headphones.SYS_ENCODING)):
-            myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [None, None, None, track['TrackID']])
+            myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [None, None, None, track['TrackID']], commit=False)
+
+    myDB.commit()
 
     logger.info('Scanning music directory: %s' % dir)
 
@@ -50,6 +52,8 @@ def libraryScan(dir=None):
     
     for r,d,f in os.walk(dir):
         for files in f:
+            # Taking out the auto-commit for every database transaction, instead we'll commit every 100 songs.
+            i = 0
             # MEDIA_FORMATS = music file extensions, e.g. mp3, flac, etc
             if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
 
@@ -80,13 +84,13 @@ def libraryScan(dir=None):
                 
                 if f_artist and f.album and f.title:
 
-                    track = myDB.action('SELECT TrackID from tracks WHERE CleanName LIKE ?', [helpers.cleanName(f_artist +' '+f.album+' '+f.title)]).fetchone()
+                    track = myDB.action('SELECT TrackID from tracks WHERE CleanName LIKE ?', [helpers.cleanName(f_artist +' '+f.album+' '+f.title)], commit=False).fetchone()
                         
                     if not track:
-                        track = myDB.action('SELECT TrackID from tracks WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [f_artist, f.album, f.title]).fetchone()
+                        track = myDB.action('SELECT TrackID from tracks WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [f_artist, f.album, f.title], commit=False).fetchone()
                     
                     if track:
-                        myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [unicode_song_path, f.bitrate, f.format, track['TrackID']])
+                        myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [unicode_song_path, f.bitrate, f.format, track['TrackID']], commit=False)
                         continue        
                 
                 # Try to match on mbid if available and we couldn't find a match based on metadata
@@ -94,18 +98,26 @@ def libraryScan(dir=None):
 
                     # Wondering if theres a better way to do this -> do one thing if the row exists,
                     # do something else if it doesn't
-                    track = myDB.action('SELECT TrackID from tracks WHERE TrackID=?', [f.mb_trackid]).fetchone()
+                    track = myDB.action('SELECT TrackID from tracks WHERE TrackID=?', [f.mb_trackid], commit=False).fetchone()
         
                     if track:
-                        myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [unicode_song_path, f.bitrate, f.format, track['TrackID']])
+                        myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [unicode_song_path, f.bitrate, f.format, track['TrackID']], commit=False)
                         continue                
                 
                 # if we can't find a match in the database on a track level, it might be a new artist or it might be on a non-mb release
                 new_artists.append(f_artist)
                 
                 # The have table will become the new database for unmatched tracks (i.e. tracks with no associated links in the database                
-                myDB.action('INSERT INTO have (ArtistName, AlbumTitle, TrackNumber, TrackTitle, TrackLength, BitRate, Genre, Date, TrackID, Location, CleanName, Format) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [f_artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid, unicode_song_path, helpers.cleanName(f_artist+' '+f.album+' '+f.title), f.format])
+                myDB.action('INSERT INTO have (ArtistName, AlbumTitle, TrackNumber, TrackTitle, TrackLength, BitRate, Genre, Date, TrackID, Location, CleanName, Format) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [f_artist, f.album, f.track, f.title, f.length, f.bitrate, f.genre, f.date, f.mb_trackid, unicode_song_path, helpers.cleanName(f_artist+' '+f.album+' '+f.title), f.format], commit=False)
 
+                ## Increment the song counter and commit every 100th song
+                i += 1
+                if i%100 == 0:
+                    myDB.commit()
+                    
+    # Do one last commit of the changes
+    myDB.commit()                
+                
     logger.info('Completed scanning directory: %s' % dir)
     
     # Clean up the new artist list
