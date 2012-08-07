@@ -420,6 +420,7 @@ class WebInterface(object):
                     "include_extras" : checked(headphones.INCLUDE_EXTRAS),
                     "autowant_upcoming" : checked(headphones.AUTOWANT_UPCOMING),
                     "autowant_all" : checked(headphones.AUTOWANT_ALL),
+                    "excludeskippedintotal" : checked(headphones.EXCLUDESKIPPEDINTOTAL),
                     "log_dir" : headphones.LOG_DIR,
                     "interface_list" : interface_list,
                     "music_encoder":        checked(headphones.MUSIC_ENCODER),
@@ -463,7 +464,7 @@ class WebInterface(object):
         usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0,
         nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
         torrentblackhole_dir=None, download_torrent_dir=None, numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None,
-        rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, autowant_upcoming=False, autowant_all=False, interface=None, log_dir=None,
+        rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, autowant_upcoming=False, autowant_all=False, excludeskippedintotal=False, interface=None, log_dir=None,
         music_encoder=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
         prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0, 
         nma_enabled=False, nma_apikey=None, nma_priority=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None, **kwargs):
@@ -525,6 +526,7 @@ class WebInterface(object):
         headphones.INCLUDE_EXTRAS = include_extras
         headphones.AUTOWANT_UPCOMING = autowant_upcoming
         headphones.AUTOWANT_ALL = autowant_all
+        headphones.EXCLUDESKIPPEDINTOTAL = excludeskippedintotal
         headphones.INTERFACE = interface
         headphones.LOG_DIR = log_dir
         headphones.MUSIC_ENCODER = music_encoder
