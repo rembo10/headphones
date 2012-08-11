@@ -49,13 +49,13 @@ def encode(albumPath):
                 if (headphones.ENCODERLOSSLESS):
                     if (music.lower().endswith('.flac')):
                         musicFiles.append(os.path.join(r, music))
-                        musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT).encode(headphones.SYS_ENCODING)
+                        musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT)
                         musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
                     else:
                         logger.debug('Music "%s" is already encoded' % (music))
                 else:
                     musicFiles.append(os.path.join(r, music))
-                    musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT).encode(headphones.SYS_ENCODING)
+                    musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT)
                     musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
                             
     if headphones.ENCODER=='lame':
