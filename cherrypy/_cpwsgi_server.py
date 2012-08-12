@@ -37,8 +37,11 @@ class CPWSGIServer(wsgiserver.CherryPyWSGIServer):
                    )
         self.protocol = self.server_adapter.protocol_version
         self.nodelay = self.server_adapter.nodelay
-        
-        ssl_module = self.server_adapter.ssl_module or 'pyopenssl'
+
+        if sys.version_info >= (3, 0):
+            ssl_module = self.server_adapter.ssl_module or 'builtin'
+        else:
+            ssl_module = self.server_adapter.ssl_module or 'pyopenssl'
         if self.server_adapter.ssl_context:
             adapter_class = wsgiserver.get_ssl_adapter_class(ssl_module)
             self.ssl_adapter = adapter_class(
@@ -52,3 +55,9 @@ class CPWSGIServer(wsgiserver.CherryPyWSGIServer):
                 self.server_adapter.ssl_certificate,
                 self.server_adapter.ssl_private_key,
                 self.server_adapter.ssl_certificate_chain)
+        
+        self.stats['Enabled'] = getattr(self.server_adapter, 'statistics', False)
+
+    def error_log(self, msg="", level=20, traceback=False):
+        cherrypy.engine.log(msg, level, traceback)
+

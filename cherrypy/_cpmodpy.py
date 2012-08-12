@@ -224,7 +224,7 @@ def handler(req):
                         qs = ir.query_string
                         rfile = BytesIO()
                 
-                send_response(req, response.status, response.header_list,
+                send_response(req, response.output_status, response.header_list,
                               response.body, response.stream)
             finally:
                 app.release_serving()
@@ -266,11 +266,22 @@ def send_response(req, status, headers, body, stream=False):
 
 import os
 import re
+try:
+    import subprocess
+    def popen(fullcmd):
+        p = subprocess.Popen(fullcmd, shell=True,
+                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                             close_fds=True)
+        return p.stdout
+except ImportError:
+    def popen(fullcmd):
+        pipein, pipeout = os.popen4(fullcmd)
+        return pipeout
 
 
 def read_process(cmd, args=""):
     fullcmd = "%s %s" % (cmd, args)
-    pipein, pipeout = os.popen4(fullcmd)
+    pipeout = popen(fullcmd)
     try:
         firstline = pipeout.readline()
         if (re.search(ntob("(not recognized|No such file|not found)"), firstline,

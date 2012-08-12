@@ -6,7 +6,7 @@ import warnings
 
 import cherrypy
 from cherrypy._cpcompat import basestring, copykeys, ntob, unicodestr
-from cherrypy._cpcompat import SimpleCookie, CookieError
+from cherrypy._cpcompat import SimpleCookie, CookieError, py3k
 from cherrypy import _cpreqbody, _cpconfig
 from cherrypy._cperror import format_exc, bare_error
 from cherrypy.lib import httputil, file_generator
@@ -49,7 +49,12 @@ class Hook(object):
         
         self.kwargs = kwargs
     
+    def __lt__(self, other):
+        # Python 3
+        return self.priority < other.priority
+
     def __cmp__(self, other):
+        # Python 2
         return cmp(self.priority, other.priority)
     
     def __call__(self):
@@ -104,7 +109,7 @@ class HookMap(dict):
                     exc = sys.exc_info()[1]
                     cherrypy.log(traceback=True, severity=40)
         if exc:
-            raise
+            raise exc
     
     def __copy__(self):
         newmap = self.__class__()
@@ -488,14 +493,20 @@ class Request(object):
             self.stage = 'close'
     
     def run(self, method, path, query_string, req_protocol, headers, rfile):
-        """Process the Request. (Core)
+        r"""Process the Request. (Core)
         
         method, path, query_string, and req_protocol should be pulled directly
         from the Request-Line (e.g. "GET /path?key=val HTTP/1.0").
         
         path
             This should be %XX-unquoted, but query_string should not be.
-            They both MUST be byte strings, not unicode strings.
+            
+            When using Python 2, they both MUST be byte strings,
+            not unicode strings.
+            
+            When using Python 3, they both MUST be unicode strings,
+            not byte strings, and preferably not bytes \x00-\xFF
+            disguised as unicode.
         
         headers
             A list of (name, value) tuples.
@@ -676,10 +687,11 @@ class Request(object):
                 self.query_string_encoding)
         
         # Python 2 only: keyword arguments must be byte strings (type 'str').
-        for key, value in p.items():
-            if isinstance(key, unicode):
-                del p[key]
-                p[key.encode(self.query_string_encoding)] = value
+        if not py3k:
+            for key, value in p.items():
+                if isinstance(key, unicode):
+                    del p[key]
+                    p[key.encode(self.query_string_encoding)] = value
         self.params.update(p)
     
     def process_headers(self):
@@ -770,6 +782,10 @@ class Request(object):
 class ResponseBody(object):
     """The body of the HTTP response (the response entity)."""
     
+    if py3k:
+        unicode_err = ("Page handlers MUST return bytes. Use tools.encode "
+                       "if you wish to return unicode.")
+    
     def __get__(self, obj, objclass=None):
         if obj is None:
             # When calling on the class instead of an instance...
@@ -779,6 +795,9 @@ class ResponseBody(object):
     
     def __set__(self, obj, value):
         # Convert the given value to an iterable object.
+        if py3k and isinstance(value, str):
+            raise ValueError(self.unicode_err)
+        
         if isinstance(value, basestring):
             # strings get wrapped in a list because iterating over a single
             # item list is much faster than iterating over every character
@@ -788,6 +807,11 @@ class ResponseBody(object):
             else:
                 # [''] doesn't evaluate to False, so replace it with [].
                 value = []
+        elif py3k and isinstance(value, list):
+            # every item in a list must be bytes... 
+            for i, item in enumerate(value):
+                if isinstance(item, str):
+                    raise ValueError(self.unicode_err)
         # Don't use isinstance here; io.IOBase which has an ABC takes
         # 1000 times as long as, say, isinstance(value, str)
         elif hasattr(value, 'read'):
@@ -862,7 +886,12 @@ class Response(object):
         if isinstance(self.body, basestring):
             return self.body
         
-        newbody = ''.join([chunk for chunk in self.body])
+        newbody = []
+        for chunk in self.body:
+            if py3k and not isinstance(chunk, bytes):
+                raise TypeError("Chunk %s is not of type 'bytes'." % repr(chunk))
+            newbody.append(chunk)
+        newbody = ntob('').join(newbody)
         
         self.body = newbody
         return newbody
@@ -876,6 +905,7 @@ class Response(object):
         
         headers = self.headers
         
+        self.status = "%s %s" % (code, reason)
         self.output_status = ntob(str(code), 'ascii') + ntob(" ") + headers.encode(reason)
         
         if self.stream:

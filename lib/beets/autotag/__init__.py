@@ -1,5 +1,5 @@
 # This file is part of beets.
-# Copyright 2011, Adrian Sampson.
+# Copyright 2012, Adrian Sampson.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -8,7 +8,7 @@
 # distribute, sublicense, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
@@ -22,7 +22,7 @@ from lib.beets import library, mediafile
 from lib.beets.util import sorted_walk, ancestry
 
 # Parts of external interface.
-from .hooks import AlbumInfo, TrackInfo
+from .hooks import AlbumInfo, TrackInfo, AlbumMatch, TrackMatch
 from .match import AutotagError
 from .match import tag_item, tag_album
 from .match import RECOMMEND_STRONG, RECOMMEND_MEDIUM, RECOMMEND_NONE
@@ -93,7 +93,7 @@ def albums_in_dir(path, ignore=()):
                 collapse_root = root
                 collapse_items = []
                 continue
-        
+
         # If it's nonempty, yield it.
         if items:
             yield root, items
@@ -106,6 +106,8 @@ def apply_item_metadata(item, track_info):
     """Set an item's metadata from its matched TrackInfo object.
     """
     item.artist = track_info.artist
+    item.artist_sort = track_info.artist_sort
+    item.artist_credit = track_info.artist_credit
     item.title = track_info.title
     item.mb_trackid = track_info.track_id
     if track_info.artist_id:
@@ -113,11 +115,12 @@ def apply_item_metadata(item, track_info):
     # At the moment, the other metadata is left intact (including album
     # and track number). Perhaps these should be emptied?
 
-def apply_metadata(items, album_info):
-    """Set the items' metadata to match an AlbumInfo object. The list
-    of items must be ordered.
+def apply_metadata(album_info, mapping, per_disc_numbering=False):
+    """Set the items' metadata to match an AlbumInfo object using a
+    mapping from Items to TrackInfo objects. If `per_disc_numbering`,
+    then the track numbers are per-disc instead of per-release.
     """
-    for index, (item, track_info) in enumerate(zip(items, album_info.tracks)):
+    for item, track_info in mapping.iteritems():
         # Album, artist, track count.
         if not item:
             continue
@@ -127,8 +130,15 @@ def apply_metadata(items, album_info):
             item.artist = album_info.artist
         item.albumartist = album_info.artist
         item.album = album_info.album
-        item.tracktotal = len(items)
-        
+        item.tracktotal = len(album_info.tracks)
+
+        # Artist sort and credit names.
+        item.artist_sort = track_info.artist_sort or album_info.artist_sort
+        item.artist_credit = track_info.artist_credit or \
+                             album_info.artist_credit
+        item.albumartist_sort = album_info.artist_sort
+        item.albumartist_credit = album_info.artist_credit
+
         # Release date.
         if album_info.year:
             item.year = album_info.year
@@ -136,15 +146,19 @@ def apply_metadata(items, album_info):
             item.month = album_info.month
         if album_info.day:
             item.day = album_info.day
-        
-        # Title and track index.
+
+        # Title.
         item.title = track_info.title
-        item.track = index + 1
+
+        if per_disc_numbering:
+            item.track = track_info.medium_index
+        else:
+            item.track = track_info.index
 
         # Disc and disc count.
         item.disc = track_info.medium
         item.disctotal = album_info.mediums
-        
+
         # MusicBrainz IDs.
         item.mb_trackid = track_info.track_id
         item.mb_albumid = album_info.album_id
@@ -153,12 +167,25 @@ def apply_metadata(items, album_info):
         else:
             item.mb_artistid = album_info.artist_id
         item.mb_albumartistid = album_info.artist_id
+        item.mb_releasegroupid = album_info.releasegroup_id
+
+        # Compilation flag.
+        item.comp = album_info.va
+
+        # Miscellaneous metadata.
         item.albumtype = album_info.albumtype
         if album_info.label:
             item.label = album_info.label
         
-        # Compilation flag.
-        item.comp = album_info.va
+        item.asin = album_info.asin
+        item.catalognum = album_info.catalognum
+        item.script = album_info.script
+        item.language = album_info.language
+        item.country = album_info.country
+        item.albumstatus = album_info.albumstatus
+        item.media = album_info.media
+        item.albumdisambig = album_info.albumdisambig
+        item.disctitle = track_info.disctitle
         
         # Headphones seal of approval
         item.comments = 'tagged by headphones/beets'
