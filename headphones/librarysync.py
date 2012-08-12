@@ -56,7 +56,7 @@ def libraryScan(dir=None):
                 song = os.path.join(r, files)
 
                 # We need the unicode path to use for logging, inserting into database
-                unicode_song_path = song.decode(headphones.SYS_ENCODING, errors='replace')
+                unicode_song_path = song.decode(headphones.SYS_ENCODING, 'replace')
 
                 # Try to read the metadata
                 try:
