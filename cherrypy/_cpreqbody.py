@@ -101,10 +101,28 @@ If we were defining a custom processor, we can do so without making a ``Tool``. 
 Note that you can only replace the ``processors`` dict wholesale this way, not update the existing one.
 """
 
+try:
+    from io import DEFAULT_BUFFER_SIZE
+except ImportError:
+    DEFAULT_BUFFER_SIZE = 8192
 import re
 import sys
 import tempfile
-from urllib import unquote_plus
+try:
+    from urllib import unquote_plus
+except ImportError:
+    def unquote_plus(bs):
+        """Bytes version of urllib.parse.unquote_plus."""
+        bs = bs.replace(ntob('+'), ntob(' '))
+        atoms = bs.split(ntob('%'))
+        for i in range(1, len(atoms)):
+            item = atoms[i]
+            try:
+                pct = int(item[:2], 16)
+                atoms[i] = bytes([pct]) + item[2:]
+            except ValueError:
+                pass
+        return ntob('').join(atoms)
 
 import cherrypy
 from cherrypy._cpcompat import basestring, ntob, ntou
@@ -399,7 +417,6 @@ class Entity(object):
         # Copy the class 'attempt_charsets', prepending any Content-Type charset
         dec = self.content_type.params.get("charset", None)
         if dec:
-            #dec = dec.decode('ISO-8859-1')
             self.attempt_charsets = [dec] + [c for c in self.attempt_charsets
                                              if c != dec]
         else:
@@ -446,11 +463,14 @@ class Entity(object):
     def __iter__(self):
         return self
     
-    def next(self):
+    def __next__(self):
         line = self.readline()
         if not line:
             raise StopIteration
         return line
+
+    def next(self):
+        return self.__next__()
     
     def read_into_file(self, fp_out=None):
         """Read the request body into fp_out (or make_file() if None). Return fp_out."""
@@ -671,13 +691,16 @@ class Part(Entity):
 
 Entity.part_class = Part
 
-
-class Infinity(object):
-    def __cmp__(self, other):
-        return 1
-    def __sub__(self, other):
-        return self
-inf = Infinity()
+try:
+    inf = float('inf')
+except ValueError:
+    # Python 2.4 and lower
+    class Infinity(object):
+        def __cmp__(self, other):
+            return 1
+        def __sub__(self, other):
+            return self
+    inf = Infinity()
 
 
 comma_separated_headers = ['Accept', 'Accept-Charset', 'Accept-Encoding',
@@ -689,7 +712,7 @@ comma_separated_headers = ['Accept', 'Accept-Charset', 'Accept-Encoding',
 
 class SizedReader:
     
-    def __init__(self, fp, length, maxbytes, bufsize=8192, has_trailers=False):
+    def __init__(self, fp, length, maxbytes, bufsize=DEFAULT_BUFFER_SIZE, has_trailers=False):
         # Wrap our fp in a buffer so peek() works
         self.fp = fp
         self.length = length
@@ -930,8 +953,9 @@ class RequestBody(Entity):
         request_params = self.request_params
         for key, value in self.params.items():
             # Python 2 only: keyword arguments must be byte strings (type 'str').
-            if isinstance(key, unicode):
-                key = key.encode('ISO-8859-1')
+            if sys.version_info < (3, 0):
+                if isinstance(key, unicode):
+                    key = key.encode('ISO-8859-1')
             
             if key in request_params:
                 if not isinstance(request_params[key], list):

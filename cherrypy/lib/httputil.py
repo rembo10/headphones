@@ -9,7 +9,7 @@ to a public caning.
 
 from binascii import b2a_base64
 from cherrypy._cpcompat import BaseHTTPRequestHandler, HTTPDate, ntob, ntou, reversed, sorted
-from cherrypy._cpcompat import basestring, iteritems, unicodestr, unquote_qs
+from cherrypy._cpcompat import basestring, bytestr, iteritems, nativestr, unicodestr, unquote_qs
 response_codes = BaseHTTPRequestHandler.responses.copy()
 
 # From http://www.cherrypy.org/ticket/361
@@ -37,6 +37,18 @@ def urljoin(*atoms):
         url = url.replace("//", "/")
     # Special-case the final url of "", and return "/" instead.
     return url or "/"
+
+def urljoin_bytes(*atoms):
+    """Return the given path *atoms, joined into a single URL.
+    
+    This will correctly join a SCRIPT_NAME and PATH_INFO into the
+    original URL, even if either atom is blank.
+    """
+    url = ntob("/").join([x for x in atoms if x])
+    while ntob("//") in url:
+        url = url.replace(ntob("//"), ntob("/"))
+    # Special-case the final url of "", and return "/" instead.
+    return url or ntob("/")
 
 def protocol_from_http(protocol_str):
     """Return a protocol tuple from the given 'HTTP/x.y' string."""
@@ -105,9 +117,15 @@ class HeaderElement(object):
     def __cmp__(self, other):
         return cmp(self.value, other.value)
     
+    def __lt__(self, other):
+        return self.value < other.value
+    
     def __str__(self):
         p = [";%s=%s" % (k, v) for k, v in iteritems(self.params)]
         return "%s%s" % (self.value, "".join(p))
+    
+    def __bytes__(self):
+        return ntob(self.__str__())
 
     def __unicode__(self):
         return ntou(self.__str__())
@@ -181,6 +199,12 @@ class AcceptElement(HeaderElement):
         if diff == 0:
             diff = cmp(str(self), str(other))
         return diff
+    
+    def __lt__(self, other):
+        if self.qvalue == other.qvalue:
+            return str(self) < str(other)
+        else:
+            return self.qvalue < other.qvalue
 
 
 def header_elements(fieldname, fieldvalue):
@@ -199,8 +223,12 @@ def header_elements(fieldname, fieldvalue):
     return list(reversed(sorted(result)))
 
 def decode_TEXT(value):
-    r"""Decode :rfc:`2047` TEXT (e.g. "=?utf-8?q?f=C3=BCr?=" -> u"f\xfcr")."""
-    from email.Header import decode_header
+    r"""Decode :rfc:`2047` TEXT (e.g. "=?utf-8?q?f=C3=BCr?=" -> "f\xfcr")."""
+    try:
+        # Python 3
+        from email.header import decode_header
+    except ImportError:
+        from email.Header import decode_header
     atoms = decode_header(value)
     decodedvalue = ""
     for atom, charset in atoms:
@@ -252,6 +280,10 @@ def valid_status(status):
     
     return code, reason, message
 
+
+# NOTE: the parse_qs functions that follow are modified version of those
+# in the python3.0 source - we need to pass through an encoding to the unquote
+# method, but the default parse_qs function doesn't allow us to.  These do.
 
 def _parse_qs(qs, keep_blank_values=0, strict_parsing=0, encoding='utf-8'):
     """Parse a query given as a string argument.
@@ -338,8 +370,9 @@ class CaseInsensitiveDict(dict):
     def get(self, key, default=None):
         return dict.get(self, str(key).title(), default)
     
-    def has_key(self, key):
-        return dict.has_key(self, str(key).title())
+    if hasattr({}, 'has_key'):
+        def has_key(self, key):
+            return dict.has_key(self, str(key).title())
     
     def update(self, E):
         for k in E.keys():
@@ -369,8 +402,12 @@ class CaseInsensitiveDict(dict):
 # A CRLF is allowed in the definition of TEXT only as part of a header
 # field continuation. It is expected that the folding LWS will be
 # replaced with a single SP before interpretation of the TEXT value."
-header_translate_table = ''.join([chr(i) for i in xrange(256)])
-header_translate_deletechars = ''.join([chr(i) for i in xrange(32)]) + chr(127)
+if nativestr == bytestr:
+    header_translate_table = ''.join([chr(i) for i in xrange(256)])
+    header_translate_deletechars = ''.join([chr(i) for i in xrange(32)]) + chr(127)
+else:
+    header_translate_table = None
+    header_translate_deletechars = bytes(range(32)) + bytes([127])
 
 
 class HeaderMap(CaseInsensitiveDict):

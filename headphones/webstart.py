@@ -35,7 +35,8 @@ def initialize(options={}):
 
     conf = {
         '/': {
-            'tools.staticdir.root': os.path.join(headphones.PROG_DIR, 'data')        
+            'tools.staticdir.root': os.path.join(headphones.PROG_DIR, 'data'),
+            'tools.proxy.on': True,  # pay attention to X-Forwarded-Proto header
         },
         '/interfaces':{
             'tools.staticdir.on': True,

@@ -1,7 +1,7 @@
 """CherryPy Library"""
 
 # Deprecated in CherryPy 3.2 -- remove in CherryPy 3.3
-from cherrypy.lib.reprconf import _Builder, unrepr, modules, attributes
+from cherrypy.lib.reprconf import unrepr, modules, attributes
 
 class file_generator(object):
     """Yield the given input (a file object) in chunks (default 64k). (Core)"""

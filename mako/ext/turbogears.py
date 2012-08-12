@@ -1,5 +1,5 @@
 # ext/turbogears.py
-# Copyright (C) 2006-2011 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -39,7 +39,8 @@ class TGPlugin(object):
             return Template(template_string, **self.tmpl_options)
         # Translate TG dot notation to normal / template path
         if '/' not in templatename:
-            templatename = '/' + templatename.replace('.', '/') + '.' + self.extension
+            templatename = '/' + templatename.replace('.', '/') + '.' +\
+                    self.extension
 
         # Lookup template
         return self.lookup.get_template(templatename)

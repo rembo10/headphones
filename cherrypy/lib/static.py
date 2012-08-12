@@ -1,3 +1,7 @@
+try:
+    from io import UnsupportedOperation
+except ImportError:
+    UnsupportedOperation = object()
 import logging
 import mimetypes
 mimetypes.init()
@@ -115,6 +119,8 @@ def serve_fileobj(fileobj, content_type=None, disposition=None, name=None,
         if debug:
             cherrypy.log('os has no fstat attribute', 'TOOLS.STATIC')
         content_length = None
+    except UnsupportedOperation:
+        content_length = None
     else:
         # Set the Last-Modified response header, so that
         # modified-since validation code can work.
@@ -174,7 +180,12 @@ def _serve_fileobj(fileobj, content_type, content_length, debug=False):
             else:
                 # Return a multipart/byteranges response.
                 response.status = "206 Partial Content"
-                from mimetools import choose_boundary
+                try:
+                    # Python 3
+                    from email.generator import _make_boundary as choose_boundary
+                except ImportError:
+                    # Python 2
+                    from mimetools import choose_boundary
                 boundary = choose_boundary()
                 ct = "multipart/byteranges; boundary=%s" % boundary
                 response.headers['Content-Type'] = ct

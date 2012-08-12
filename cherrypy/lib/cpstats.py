@@ -320,20 +320,21 @@ class StatsTool(cherrypy.Tool):
     def record_stop(self, uriset=None, slow_queries=1.0, slow_queries_count=100,
                     debug=False, **kwargs):
         """Record the end of a request."""
+        resp = cherrypy.serving.response
         w = appstats['Requests'][threading._get_ident()]
         
         r = cherrypy.request.rfile.bytes_read
         w['Bytes Read'] = r
         appstats['Total Bytes Read'] += r
         
-        if cherrypy.response.stream:
+        if resp.stream:
             w['Bytes Written'] = 'chunked'
         else:
-            cl = int(cherrypy.response.headers.get('Content-Length', 0))
+            cl = int(resp.headers.get('Content-Length', 0))
             w['Bytes Written'] = cl
             appstats['Total Bytes Written'] += cl
         
-        w['Response Status'] = cherrypy.response.status
+        w['Response Status'] = getattr(resp, 'output_status', None) or resp.status
         
         w['End Time'] = time.time()
         p = w['End Time'] - w['Start Time']

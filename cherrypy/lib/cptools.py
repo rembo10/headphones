@@ -116,7 +116,7 @@ def validate_since():
 #                                Tool code                                #
 
 def allow(methods=None, debug=False):
-    """Raise 405 if request.method not in methods (default GET/HEAD).
+    """Raise 405 if request.method not in methods (default ['GET', 'HEAD']).
     
     The given methods are case-insensitive, and may be in any order.
     If only one method is allowed, you may supply a single string;
@@ -150,6 +150,10 @@ def proxy(base=None, local='X-Forwarded-Host', remote='X-Forwarded-For',
     """Change the base URL (scheme://host[:port][/path]).
     
     For running a CP server behind Apache, lighttpd, or other HTTP server.
+    
+    For Apache and lighttpd, you should leave the 'local' argument at the
+    default value of 'X-Forwarded-Host'. For Squid, you probably want to set
+    tools.proxy.local = 'Origin'.
     
     If you want the new request.base to include path info (not just the host),
     you must explicitly set base to the full base path, and ALSO set 'local'
@@ -581,9 +585,11 @@ class MonitoredHeaderMap(_httputil.HeaderMap):
         self.accessed_headers.add(key)
         return _httputil.HeaderMap.get(self, key, default=default)
     
-    def has_key(self, key):
-        self.accessed_headers.add(key)
-        return _httputil.HeaderMap.has_key(self, key)
+    if hasattr({}, 'has_key'):
+        # Python 2
+        def has_key(self, key):
+            self.accessed_headers.add(key)
+            return _httputil.HeaderMap.has_key(self, key)
 
 
 def autovary(ignore=None, debug=False):

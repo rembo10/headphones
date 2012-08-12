@@ -107,7 +107,7 @@ and not simply return an error message as a result.
 from cgi import escape as _escape
 from sys import exc_info as _exc_info
 from traceback import format_exception as _format_exception
-from cherrypy._cpcompat import basestring, iteritems, urljoin as _urljoin
+from cherrypy._cpcompat import basestring, bytestr, iteritems, ntob, tonative, urljoin as _urljoin
 from cherrypy.lib import httputil as _httputil
 
 
@@ -183,7 +183,7 @@ class HTTPRedirect(CherryPyException):
     """The list of URL's to emit."""
 
     encoding = 'utf-8'
-    """The encoding when passed urls are unicode objects"""
+    """The encoding when passed urls are not native strings"""
     
     def __init__(self, urls, status=None, encoding=None):
         import cherrypy
@@ -194,8 +194,7 @@ class HTTPRedirect(CherryPyException):
         
         abs_urls = []
         for url in urls:
-            if isinstance(url, unicode):
-                url = url.encode(encoding or self.encoding)
+            url = tonative(url, encoding or self.encoding)
                 
             # Note that urljoin will "do the right thing" whether url is:
             #  1. a complete URL with host (e.g. "http://www.example.com/test")
@@ -248,7 +247,7 @@ class HTTPRedirect(CherryPyException):
                    307: "This resource has moved temporarily to <a href='%s'>%s</a>.",
                    }[status]
             msgs = [msg % (u, u) for u in self.urls]
-            response.body = "<br />\n".join(msgs)
+            response.body = ntob("<br />\n".join(msgs), 'utf-8')
             # Previous code may have set C-L, so we have to reset it
             # (allow finalize to set it).
             response.headers.pop('Content-Length', None)
@@ -341,8 +340,8 @@ class HTTPError(CherryPyException):
         self.status = status
         try:
             self.code, self.reason, defaultmsg = _httputil.valid_status(status)
-        except ValueError, x:
-            raise self.__class__(500, x.args[0])
+        except ValueError:
+            raise self.__class__(500, _exc_info()[1].args[0])
         
         if self.code < 400 or self.code > 599:
             raise ValueError("status must be between 400 and 599.")
@@ -373,8 +372,8 @@ class HTTPError(CherryPyException):
         response.headers['Content-Type'] = "text/html;charset=utf-8"
         response.headers.pop('Content-Length', None)
         
-        content = self.get_error_page(self.status, traceback=tb,
-                                      message=self._message)
+        content = ntob(self.get_error_page(self.status, traceback=tb,
+                                           message=self._message), 'utf-8')
         response.body = content
         
         _be_ie_unfriendly(self.code)
@@ -442,8 +441,8 @@ def get_error_page(status, **kwargs):
     
     try:
         code, reason, message = _httputil.valid_status(status)
-    except ValueError, x:
-        raise cherrypy.HTTPError(500, x.args[0])
+    except ValueError:
+        raise cherrypy.HTTPError(500, _exc_info()[1].args[0])
     
     # We can't use setdefault here, because some
     # callers send None for kwarg values.
@@ -470,7 +469,8 @@ def get_error_page(status, **kwargs):
             if hasattr(error_page, '__call__'):
                 return error_page(**kwargs)
             else:
-                return open(error_page, 'rb').read() % kwargs
+                data = open(error_page, 'rb').read()
+                return tonative(data) % kwargs
         except:
             e = _format_exception(*_exc_info())[-1]
             m = kwargs['message']
@@ -508,19 +508,22 @@ def _be_ie_unfriendly(status):
         if l and l < s:
             # IN ADDITION: the response must be written to IE
             # in one chunk or it will still get replaced! Bah.
-            content = content + (" " * (s - l))
+            content = content + (ntob(" ") * (s - l))
         response.body = content
         response.headers['Content-Length'] = str(len(content))
 
 
 def format_exc(exc=None):
     """Return exc (or sys.exc_info if None), formatted."""
-    if exc is None:
-        exc = _exc_info()
-    if exc == (None, None, None):
-        return ""
-    import traceback
-    return "".join(traceback.format_exception(*exc))
+    try:
+        if exc is None:
+            exc = _exc_info()
+        if exc == (None, None, None):
+            return ""
+        import traceback
+        return "".join(traceback.format_exception(*exc))
+    finally:
+        del exc
 
 def bare_error(extrabody=None):
     """Produce status, headers, body for a critical error.
@@ -539,15 +542,15 @@ def bare_error(extrabody=None):
     # it cannot be allowed to fail. Therefore, don't add to it!
     # In particular, don't call any other CP functions.
     
-    body = "Unrecoverable error in the server."
+    body = ntob("Unrecoverable error in the server.")
     if extrabody is not None:
-        if not isinstance(extrabody, str): 
+        if not isinstance(extrabody, bytestr):
             extrabody = extrabody.encode('utf-8')
-        body += "\n" + extrabody
+        body += ntob("\n") + extrabody
     
-    return ("500 Internal Server Error",
-            [('Content-Type', 'text/plain'),
-             ('Content-Length', str(len(body)))],
+    return (ntob("500 Internal Server Error"),
+            [(ntob('Content-Type'), ntob('text/plain')),
+             (ntob('Content-Length'), ntob(str(len(body)),'ISO-8859-1'))],
             [body])
 
 

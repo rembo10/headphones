@@ -1,23 +1,19 @@
 # ext/pygmentplugin.py
-# Copyright (C) 2006-2011 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
 
-import re
-try:
-    set
-except NameError:
-    from sets import Set as set
-
 from pygments.lexers.web import \
      HtmlLexer, XmlLexer, JavascriptLexer, CssLexer
-from pygments.lexers.agile import PythonLexer
-from pygments.lexer import Lexer, DelegatingLexer, RegexLexer, bygroups, \
-     include, using, this
-from pygments.token import Error, Punctuation, \
-     Text, Comment, Operator, Keyword, Name, String, Number, Other, Literal
-from pygments.util import html_doctype_matches, looks_like_xml
+from pygments.lexers.agile import PythonLexer, Python3Lexer
+from pygments.lexer import DelegatingLexer, RegexLexer, bygroups, \
+     include, using
+from pygments.token import \
+     Text, Comment, Operator, Keyword, Name, String, Other
+from pygments.formatters.html import HtmlFormatter
+from pygments import highlight
+from mako import util
 
 class MakoLexer(RegexLexer):
     name = 'Mako'
@@ -30,13 +26,16 @@ class MakoLexer(RegexLexer):
              bygroups(Text, Comment.Preproc, Keyword, Other)),
             (r'(\s*)(\%(?!%))([^\n]*)(\n|\Z)',
              bygroups(Text, Comment.Preproc, using(PythonLexer), Other)),
-             (r'(\s*)(##[^\n]*)(\n|\Z)',
+            (r'(\s*)(##[^\n]*)(\n|\Z)',
               bygroups(Text, Comment.Preproc, Other)),
-              (r'''(?s)<%doc>.*?</%doc>''', Comment.Preproc),
-            (r'(<%)([\w\.\:]+)', bygroups(Comment.Preproc, Name.Builtin), 'tag'),
-            (r'(</%)([\w\.\:]+)(>)', bygroups(Comment.Preproc, Name.Builtin, Comment.Preproc)),
+            (r'''(?s)<%doc>.*?</%doc>''', Comment.Preproc),
+            (r'(<%)([\w\.\:]+)',
+              bygroups(Comment.Preproc, Name.Builtin), 'tag'),
+            (r'(</%)([\w\.\:]+)(>)',
+              bygroups(Comment.Preproc, Name.Builtin, Comment.Preproc)),
             (r'<%(?=([\w\.\:]+))', Comment.Preproc, 'ondeftags'),
-            (r'(<%(?:!?))(.*?)(%>)(?s)', bygroups(Comment.Preproc, using(PythonLexer), Comment.Preproc)),
+            (r'(<%(?:!?))(.*?)(%>)(?s)',
+              bygroups(Comment.Preproc, using(PythonLexer), Comment.Preproc)),
             (r'(\$\{)(.*?)(\})',
              bygroups(Comment.Preproc, using(PythonLexer), Comment.Preproc)),
             (r'''(?sx)
@@ -105,3 +104,19 @@ class MakoCssLexer(DelegatingLexer):
     def __init__(self, **options):
         super(MakoCssLexer, self).__init__(CssLexer, MakoLexer,
                                              **options)
+
+
+pygments_html_formatter = HtmlFormatter(cssclass='syntax-highlighted',
+                                        linenos=True)
+def syntax_highlight(filename='', language=None):
+    mako_lexer = MakoLexer()
+    if util.py3k:
+        python_lexer = Python3Lexer()
+    else:
+        python_lexer = PythonLexer()
+    if filename.startswith('memory:') or language == 'mako':
+        return lambda string: highlight(string, mako_lexer,
+                                        pygments_html_formatter)
+    return lambda string: highlight(string, python_lexer,
+                                    pygments_html_formatter)
+

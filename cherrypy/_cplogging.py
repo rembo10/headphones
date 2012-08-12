@@ -109,6 +109,20 @@ import sys
 
 import cherrypy
 from cherrypy import _cperror
+from cherrypy._cpcompat import ntob, py3k
+
+
+class NullHandler(logging.Handler):
+    """A no-op logging handler to silence the logging.lastResort handler."""
+
+    def handle(self, record):
+        pass
+
+    def emit(self, record):
+        pass
+
+    def createLock(self):
+        self.lock = None
 
 
 class LogManager(object):
@@ -127,8 +141,12 @@ class LogManager(object):
     access_log = None
     """The actual :class:`logging.Logger` instance for access messages."""
     
-    access_log_format = \
-        '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
+    if py3k:
+        access_log_format = \
+            '{h} {l} {u} {t} "{r}" {s} {b} "{f}" "{a}"'
+    else:
+        access_log_format = \
+            '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
     
     logger_root = None
     """The "top-level" logger name.
@@ -152,8 +170,13 @@ class LogManager(object):
             self.access_log = logging.getLogger("%s.access.%s" % (logger_root, appid))
         self.error_log.setLevel(logging.INFO)
         self.access_log.setLevel(logging.INFO)
+
+        # Silence the no-handlers "warning" (stderr write!) in stdlib logging
+        self.error_log.addHandler(NullHandler())
+        self.access_log.addHandler(NullHandler())
+
         cherrypy.engine.subscribe('graceful', self.reopen_files)
-    
+
     def reopen_files(self):
         """Close and reopen all file handlers."""
         for log in (self.error_log, self.access_log):
@@ -206,7 +229,9 @@ class LogManager(object):
         if response.output_status is None:
             status = "-"
         else:
-            status = response.output_status.split(" ", 1)[0]
+            status = response.output_status.split(ntob(" "), 1)[0]
+            if py3k:
+                status = status.decode('ISO-8859-1')
         
         atoms = {'h': remote.name or remote.ip,
                  'l': '-',
@@ -218,21 +243,43 @@ class LogManager(object):
                  'f': dict.get(inheaders, 'Referer', ''),
                  'a': dict.get(inheaders, 'User-Agent', ''),
                  }
-        for k, v in atoms.items():
-            if isinstance(v, unicode):
-                v = v.encode('utf8')
-            elif not isinstance(v, str):
-                v = str(v)
-            # Fortunately, repr(str) escapes unprintable chars, \n, \t, etc
-            # and backslash for us. All we have to do is strip the quotes.
-            v = repr(v)[1:-1]
-            # Escape double-quote.
-            atoms[k] = v.replace('"', '\\"')
-        
-        try:
-            self.access_log.log(logging.INFO, self.access_log_format % atoms)
-        except:
-            self(traceback=True)
+        if py3k:
+            for k, v in atoms.items():
+                if not isinstance(v, str):
+                    v = str(v)
+                v = v.replace('"', '\\"').encode('utf8')
+                # Fortunately, repr(str) escapes unprintable chars, \n, \t, etc
+                # and backslash for us. All we have to do is strip the quotes.
+                v = repr(v)[2:-1]
+                
+                # in python 3.0 the repr of bytes (as returned by encode) 
+                # uses double \'s.  But then the logger escapes them yet, again
+                # resulting in quadruple slashes.  Remove the extra one here.
+                v = v.replace('\\\\', '\\')
+                
+                # Escape double-quote.
+                atoms[k] = v
+            
+            try:
+                self.access_log.log(logging.INFO, self.access_log_format.format(**atoms))
+            except:
+                self(traceback=True)
+        else:
+            for k, v in atoms.items():
+                if isinstance(v, unicode):
+                    v = v.encode('utf8')
+                elif not isinstance(v, str):
+                    v = str(v)
+                # Fortunately, repr(str) escapes unprintable chars, \n, \t, etc
+                # and backslash for us. All we have to do is strip the quotes.
+                v = repr(v)[1:-1]
+                # Escape double-quote.
+                atoms[k] = v.replace('"', '\\"')
+            
+            try:
+                self.access_log.log(logging.INFO, self.access_log_format % atoms)
+            except:
+                self(traceback=True)
     
     def time(self):
         """Return now() in Apache Common Log Format (no timezone)."""

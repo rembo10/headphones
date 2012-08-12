@@ -82,6 +82,6 @@ def json_out(content_type='application/json', debug=False, handler=json_handler)
     request.handler = handler
     if content_type is not None:
         if debug:
-            cherrypy.log('Setting Content-Type to %s' % ct, 'TOOLS.JSON_OUT')
+            cherrypy.log('Setting Content-Type to %s' % content_type, 'TOOLS.JSON_OUT')
         cherrypy.serving.response.headers['Content-Type'] = content_type
 
