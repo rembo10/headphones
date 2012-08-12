@@ -42,30 +42,7 @@ class DBConnection:
         self.connection = sqlite3.connect(dbFilename(filename), timeout=20)
         self.connection.row_factory = sqlite3.Row
         
-    def commit(self):
-        
-        with db_lock:
-            
-            attempt = 0
-            
-            while attempt < 5:
-                try:
-                    self.connection.commit()
-                    break
-                
-                except sqlite3.OperationalError, e:
-                    if "unable to open database file" in e.message or "database is locked" in e.message:
-                        logger.warn('Database Error: %s' % e)
-                        attempt += 1
-                        time.sleep(1)
-                    else:
-                        logger.error('Database error: %s' % e)
-                        raise
-                except sqlite3.DatabaseError, e:
-                    logger.error('Fatal Error executing %s :: %s' % (query, e))
-                    raise
-    
-    def action(self, query, args=None, commit=True):
+    def action(self, query, args=None):
     
         with db_lock:
 
@@ -83,10 +60,7 @@ class DBConnection:
                     else:
                         #logger.debug(self.filename+": "+query+" with args "+str(args))
                         sqlResult = self.connection.execute(query, args)
-                    
-                    if commit:
-                        self.connection.commit()
-                        
+                    self.connection.commit()
                     break
                 except sqlite3.OperationalError, e:
                     if "unable to open database file" in e.message or "database is locked" in e.message:
