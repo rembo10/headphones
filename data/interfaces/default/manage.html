@@ -6,10 +6,21 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">
-			<a id="menu_link_edit" href="manageAlbums">Manage Albums</a>
-			<a id="menu_link_edit" href="manageArtists">Manage Artists</a>
+			<a class="menu_link_edit" id="manage_albums" href="#">Manage Albums</a>
+				<div id="dialog" title="Choose Album Filter" style="display:none" class="configtable">
+					<div class="links">
+						<a href="manageAlbums?Status=Downloaded"><span class="ui-icon ui-icon-check"></span>Manage Downloaded Albums</a><br>
+						<a href="manageAlbums?Status=Skipped"><span class="ui-icon ui-icon-flag"></span>Manage Skipped Albums</a><br>
+						<a href="manageAlbums?Status=Snatched"><span class="ui-icon ui-icon-arrowthickstop-1-s"></span>Manage Snatched Albums</a><br>
+						<a href="manageAlbums?Status=Upcoming"><span class="ui-icon ui-icon-calendar"></span>Manage Upcoming Albums</a><br>
+						<a href="manageAlbums?Status=Wanted"><span class="ui-icon ui-icon-heart"></span>Manage Wanted Albums</a><br>
+						<br><br>
+						<a href="manageAlbums">Manage All Albums</a>
+					</div>
+				</div>
+			<a class="menu_link_edit" href="manageArtists">Manage Artists</a>
 			%if not headphones.ADD_ARTISTS:
-			<a id="menu_link_edit" href="manageNew">Manage New Artists</a>
+			<a class="menu_link_edit" href="manageNew">Manage New Artists</a>
 			%endif
 		</div>
 	</div>	
@@ -95,6 +106,10 @@
 <%def name="javascriptIncludes()">
 	<script>
 		function initThisPage() {
+			$('#manage_albums').click(function() {
+				$('#dialog').dialog();
+				return false;
+			});
 			jQuery( "#tabs" ).tabs();
 			initActions();
 		};
