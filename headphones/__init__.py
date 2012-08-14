@@ -853,7 +853,6 @@ def dbcheck():
         c.execute('SELECT ReleaseID from albums')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE albums ADD COLUMN ReleaseID TEXT DEFAULT NULL')
-        c.execute('UPDATE TABLE albums SET ReleaseID = AlbumID')
         
     try:
         c.execute('SELECT ReleaseFormat from albums')
