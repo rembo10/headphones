@@ -211,6 +211,14 @@ class WebInterface(object):
         else:
             raise cherrypy.HTTPRedirect("home")
     deleteAlbum.exposed = True
+    
+    def switchAlbum(self, AlbumID, ReleaseID):
+        '''
+        Take the values from allalbums/alltracks (based on the ReleaseID) and swap it into the album & track tables
+        '''
+        from headphones import albumswitcher
+        albumswitcher.switch(AlbumID, ReleaseID)
+    switchAlbum.exposed = True
 
     def upcoming(self):
         myDB = db.DBConnection()
