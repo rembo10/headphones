@@ -22,10 +22,10 @@ def switch(AlbumID, ReleaseID):
     the albums & tracks table.
     '''
     myDB = db.DBConnection()
-    oldalbumdata = myDB.select('SELECT * from albums WHERE AlbumID=?', [AlbumID])
-    newalbumdata = myDB.select('SELECT * from allalbums WHERE ReleaseID=?', [ReleaseID])
-    newtrackdata = myDB.select('SELECT * from alltracks WHERE ReleaseID=?', [ReleaseID])
-    myDB.action('DELETE * from tracks WHERE AlbumID=?', [AlbumID])
+    oldalbumdata = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
+    newalbumdata = myDB.action('SELECT * from allalbums WHERE ReleaseID=?', [ReleaseID]).fetchone()
+    newtrackdata = myDB.action('SELECT * from alltracks WHERE ReleaseID=?', [ReleaseID]).fetchall()
+    myDB.action('DELETE from tracks WHERE AlbumID=?', [AlbumID])
 
     controlValueDict = {"AlbumID":  AlbumID}
 
@@ -45,7 +45,7 @@ def switch(AlbumID, ReleaseID):
     for track in newtrackdata:
         
         controlValueDict = {"TrackID":  track['TrackID'],
-                            "AlbumID":  AlbumID
+                            "AlbumID":  AlbumID}
 
         newValueDict = {"ArtistID":     track['ArtistID'],
                     "ArtistName":       track['ArtistName'],
@@ -64,14 +64,15 @@ def switch(AlbumID, ReleaseID):
         myDB.upsert("tracks", newValueDict, controlValueDict)
     
     # Mark albums as downloaded if they have at least 80% (by default, configurable) of the album
+    total_track_count = len(newtrackdata)
     have_track_count = len(myDB.select('SELECT * from tracks WHERE AlbumID=? AND Location IS NOT NULL', [AlbumID]))
         
     if oldalbumdata['Status'] == 'Skipped' and ((have_track_count/float(total_track_count)) >= (headphones.ALBUM_COMPLETION_PCT/100.0)):
-        myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', rg['id']])
+        myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', AlbumID])
     
     # Update have track counts on index
-    totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid]))
-    havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['artist_name']]))
+    totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [newalbumdata['ArtistID']]))
+    havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [newalbumdata['ArtistID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [newalbumdata['ArtistID']]))
 
     controlValueDict = {"ArtistID":     newalbumdata['ArtistID']}
     
