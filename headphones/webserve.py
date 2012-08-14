@@ -229,9 +229,12 @@ class WebInterface(object):
         return serve_template(templatename="manageartists.html", title="Manage Artists", artists=artists)
     manageArtists.exposed = True
     
-    def manageAlbums(self):
+    def manageAlbums(self, Status=None):
         myDB = db.DBConnection()
-        albums = myDB.select('SELECT * from albums')
+        if Status:
+            albums = myDB.select('SELECT * from albums WHERE Status=?', [Status])
+        else:
+            albums = myDB.select('SELECT * from albums')
         return serve_template(templatename="managealbums.html", title="Manage Albums", albums=albums)
     manageAlbums.exposed = True
     
