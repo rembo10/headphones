@@ -231,7 +231,9 @@ class WebInterface(object):
     
     def manageAlbums(self, Status=None):
         myDB = db.DBConnection()
-        if Status:
+        if Status == "Upcoming":
+            albums = myDB.select("SELECT * from albums WHERE ReleaseDate > date('now')")
+        elif Status:
             albums = myDB.select('SELECT * from albums WHERE Status=?', [Status])
         else:
             albums = myDB.select('SELECT * from albums')
