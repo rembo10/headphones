@@ -868,6 +868,11 @@ def dbcheck():
         c.execute('SELECT ReleaseID from tracks')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE tracks ADD COLUMN ReleaseID TEXT DEFAULT NULL')
+        
+    try:
+        c.execute('SELECT Matched from have')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE have ADD COLUMN Matched TEXT DEFAULT NULL')
     
     conn.commit()
     c.close()

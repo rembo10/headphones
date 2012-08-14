@@ -315,8 +315,15 @@ def getRelease(releaseid, include_artist_info=True):
         release['id'] = unicode(results['id']) 
         release['asin'] = unicode(results['asin']) if 'asin' in results else None 
         release['date'] = unicode(results['date'])
-        release['format'] = unicode(results['medium-list'][0]['format'])
-        release['country'] = unicode(results['country'])
+        try:
+            release['format'] = unicode(results['medium-list'][0]['format'])
+        except:
+            release['format'] = u'Unknown'
+        
+        try:
+            release['country'] = unicode(results['country'])
+        except:
+            release['country'] = u'Unknown'
         
 
         if include_artist_info:

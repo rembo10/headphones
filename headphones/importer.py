@@ -153,6 +153,8 @@ def addArtisttoDB(artistid, extrasonly=False):
 
     for rg in artist['releasegroups']:
         
+        logger.info("Now adding/updating: " + rg['title'])
+        
         rgid = rg['id']
         
         # check if the album already exists
@@ -177,7 +179,7 @@ def addArtisttoDB(artistid, extrasonly=False):
             try:
                 releasedict = mb.getRelease(releaseid, include_artist_info=False)
             except Exception, e:
-                logger.info('Unable to get release information for %s' % release['id'])
+                logger.info('Unable to get release information for %s: %s' % (release['id'], e))
                 continue
            
             if not releasedict:
@@ -287,7 +289,7 @@ def addArtisttoDB(artistid, extrasonly=False):
             myDB.upsert("alltracks", newValueDict, controlValueDict)
         
         # Delete matched tracks from the have table
-        myDB.action('DELETE * from have WHERE Matched="True"')
+        myDB.action('DELETE from have WHERE Matched="True"')
         
         # If there's no release in the main albums tables, add the default (hybrid)
         # If there is a release, check the ReleaseID against the AlbumID to see if they differ (user updated)
@@ -298,7 +300,7 @@ def addArtisttoDB(artistid, extrasonly=False):
         else:
             releaseid = rg_exists['ReleaseID']
         
-        album = myDB.select('SELECT * from allallbums WHERE ReleaseID=?', releaseid)
+        album = myDB.action('SELECT * from allalbums WHERE ReleaseID=?', [releaseid]).fetchone()
 
         controlValueDict = {"AlbumID":  rg['id']}
 
@@ -319,15 +321,15 @@ def addArtisttoDB(artistid, extrasonly=False):
                             
             if headphones.AUTOWANT_ALL:
                 newValueDict['Status'] = "Wanted"
-            elif release_dict['releasedate'] > helpers.today() and headphones.AUTOWANT_UPCOMING:
+            elif album['ReleaseDate'] > helpers.today() and headphones.AUTOWANT_UPCOMING:
                 newValueDict['Status'] = "Wanted"
             else:
                 newValueDict['Status'] = "Skipped"
         
         myDB.upsert("albums", newValueDict, controlValueDict)
 
-        myDB.action('DELETE * from tracks WHERE AlbumID=?', rg['id'])
-        tracks = myDB.select('SELECT * from alltracks WHERE ReleaseID=?', [releaseid])
+        myDB.action('DELETE from tracks WHERE AlbumID=?', [rg['id']])
+        tracks = myDB.action('SELECT * from alltracks WHERE ReleaseID=?', [releaseid]).fetchall()
 
         # This is used to see how many tracks you have from an album - to mark it as downloaded. Default is 80%, can be set in config as ALBUM_COMPLETION_PCT
         total_track_count = len(tracks)
@@ -363,7 +365,7 @@ def addArtisttoDB(artistid, extrasonly=False):
             if ((have_track_count/float(total_track_count)) >= (headphones.ALBUM_COMPLETION_PCT/100.0)):
                 myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', rg['id']])
 
-        logger.debug(u"Updating album cache for " + rg['title'])
+        logger.info(u"Seeing if we need album art for " + rg['title'])
         cache.getThumb(AlbumID=rg['id'])
 
     latestalbum = myDB.action('SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [artistid]).fetchone()
@@ -388,7 +390,7 @@ def addArtisttoDB(artistid, extrasonly=False):
     
     myDB.upsert("artists", newValueDict, controlValueDict)
     
-    logger.debug(u"Updating cache for: " + artist['artist_name'])
+    logger.info(u"Seeing if we need album art for: " + artist['artist_name'])
     cache.getThumb(ArtistID=artistid)
     
     logger.info(u"Updating complete for: " + artist['artist_name'])
@@ -603,7 +605,7 @@ def getHybridRelease(fullreleaselist):
     for item in sortable_release_list:
         item['trackscount_delta'] = abs(average_tracks - item['trackscount'])
     
-    a = multikeysort(sortable_release_list, ['-hasasin', 'country', 'format', 'trackscount_delta'])
+    a = helpers.multikeysort(sortable_release_list, ['-hasasin', 'country', 'format', 'trackscount_delta'])
 
     release_dict = {'ReleaseDate'    : sortable_release_list[0]['releasedate'],
                     'Tracks'         : a[0]['tracks'],

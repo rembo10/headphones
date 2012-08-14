@@ -218,6 +218,7 @@ class WebInterface(object):
         '''
         from headphones import albumswitcher
         albumswitcher.switch(AlbumID, ReleaseID)
+        raise cherrypy.HTTPRedirect("albumPage?AlbumID=%s" % AlbumID)
     switchAlbum.exposed = True
 
     def upcoming(self):
