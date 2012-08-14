@@ -293,6 +293,8 @@ def addArtisttoDB(artistid, extrasonly=False):
         # If there is a release, check the ReleaseID against the AlbumID to see if they differ (user updated)
         if not rg_exists:
             releaseid = rg['id']
+        elif rg_exists and not rg_exists['ReleaseID']:
+            releaseid = rg['id']
         else:
             releaseid = rg_exists['ReleaseID']
         
@@ -300,9 +302,9 @@ def addArtisttoDB(artistid, extrasonly=False):
 
         controlValueDict = {"AlbumID":  rg['id']}
 
-        newValueDict = {"ArtistID":         artistid,
-                        "ArtistName":       artist['artist_name'],
-                        "AlbumTitle":       rg['title'],
+        newValueDict = {"ArtistID":         album['ArtistID'],
+                        "ArtistName":       album['ArtistName'],
+                        "AlbumTitle":       album['AlbumTitle'],
                         "ReleaseID":        album['ReleaseID'],
                         "AlbumASIN":        album['AlbumASIN'],
                         "ReleaseDate":      album['ReleaseDate'],
@@ -572,8 +574,8 @@ def getHybridRelease(fullreleaselist):
         
         release_dict = {
             'hasasin':        bool(release['AlbumASIN']),
-            'asin':           release['AlbumASIN']
-            'trackscount':    len(release['Tracks'],
+            'asin':           release['AlbumASIN'],
+            'trackscount':    len(release['Tracks']),
             'releaseid':      release['ReleaseID'],
             'releasedate':    release['ReleaseDate'],
             'format':         format,
@@ -597,7 +599,7 @@ def getHybridRelease(fullreleaselist):
 
     sortable_release_list.sort(key=lambda x:getSortableReleaseDate(x['releasedate']))
 
-    average_tracks = sum(x['trackscount'] for x in releaselist) / float(len(releaselist))
+    average_tracks = sum(x['trackscount'] for x in sortable_release_list) / float(len(sortable_release_list))
     for item in sortable_release_list:
         item['trackscount_delta'] = abs(average_tracks - item['trackscount'])
     
