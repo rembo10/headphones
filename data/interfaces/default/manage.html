@@ -6,10 +6,21 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">
-			<a id="menu_link_edit" href="manageAlbums">Manage Albums</a>
-			<a id="menu_link_edit" href="manageArtists">Manage Artists</a>
+			<a class="menu_link_edit" id="manage_albums" href="#">Manage Albums</a>
+				<div id="dialog" title="Choose Album Filter" style="display:none">
+					<ul>
+						<li><a href="manageAlbums?Status=Wanted">Manage Wanted Albums</a></li>
+						<li><a href="manageAlbums?Status=Snatched">Manage Snatched Albums</a></li>
+						<li><a href="manageAlbums?Status=Downloaded">Manage Downloaded Albums</a></li>
+						<li><a href="manageAlbums?Status=Skipped">Manage Skipped Albums</a></li>
+						<li><a href="manageAlbums?Status=Upcoming">Manage Upcoming Albums</a></li>
+						<br>
+						<li><a href="manageAlbums">Manage All Albums</a></li>
+					</ul>
+				</div>
+			<a class="menu_link_edit" href="manageArtists">Manage Artists</a>
 			%if not headphones.ADD_ARTISTS:
-			<a id="menu_link_edit" href="manageNew">Manage New Artists</a>
+			<a class="menu_link_edit" href="manageNew">Manage New Artists</a>
 			%endif
 		</div>
 	</div>	
@@ -95,6 +106,10 @@
 <%def name="javascriptIncludes()">
 	<script>
 		function initThisPage() {
+			$('#manage_albums').click(function() {
+				$('#dialog').dialog();
+				return false;
+			});
 			jQuery( "#tabs" ).tabs();
 			initActions();
 		};
