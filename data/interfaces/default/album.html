@@ -168,7 +168,7 @@
 		getInfo(elem,id,'album');
 	}
 	
-	$(document).ready(function()	{
+	function initThisPage() {
 		$('#album_chooser').click(function() {
 			$('#dialog').dialog();
 			return false;
@@ -187,8 +187,13 @@
 			"aaSorting": [],
 			"bFilter": false,
 			"bInfo": false,
-			"bPaginate": false
-		});
+			"bPaginate": false,
+			"bDestroy": true
+		});		
+	};
+	
+	$(document).ready(function()	{
+		initThisPage();
 	});
 
 	</script>
