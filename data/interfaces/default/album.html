@@ -1,5 +1,5 @@
 <%inherit file="base.html" />
-<%! 
+<%!
 	from headphones import db, helpers
 	myDB = db.DBConnection()
 %>
@@ -16,7 +16,31 @@
 			%else:
 			<a id="menu_link_retry" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true);" data-success="Retrying the same version of '${album['AlbumTitle']}'">Retry Download</a>
 			<a id="menu_link_new" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),true);" data-success="Looking for a new version of '${album['AlbumTitle']}'">Try New Version</a>
-			%endif			
+			%endif		
+			<a class="menu_link_edit" id="album_chooser" href="#">Choose Alternate Version</a>
+				<div id="dialog" title="Choose an Alternate Release" style="display:none" class="configtable">
+					<div class="links">
+						<%
+							alternate_albums = myDB.select("SELECT * from allalbums WHERE AlbumID=?", [album['AlbumID']])
+						%>
+						%if not alternate_albums:
+							<p>No alternate versions found. Try refreshing the artist</p>
+						%else:
+							%for alternate_album in alternate_albums:
+								<%
+									track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=?", [alternate_album['ReleaseID']]))
+									have_track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=? AND Location IS NOT NULL", [alternate_album['ReleaseID']]))
+									if alternate_album['AlbumID'] == alternate_album['ReleaseID']:
+										alternate_album_name = "Headphones Default Release [" + have_track_count + "/" track_count + " tracks]"
+									else:
+										alternate_album_name = alternate_album['AlbumTitle'] + " (" + alternate_album['ReleaseCountry'] + ", " + alternate_album['ReleaseFormat'] + ") [" + have_track_count + "/" track_count + " tracks]"
+									
+								%>
+								<a href="#" onclick="doAjaxCall('switchAlbum?AlbumID=${album['AlbumID']}&ReleaseID=${alternate_album['ReleaseID']}', $(this), 'table');" data-success="Switched release to: ${alternate_album_name}">${alternate_album_name}</a><br>
+							%endfor
+						%endif
+					</div>
+				</div>	
 		</div>
 	</div>	
 	<a href="artistPage?ArtistID=${album['ArtistID']}" class="back">&laquo; Back to ${album['ArtistName']}</a>
@@ -82,7 +106,7 @@
 							trackduration = 'n/a'
 
 						if not track['Format']:
-							format = 'Unknown'
+							format = ''
 						else:
 							format = track['Format']
 					%>
@@ -144,6 +168,10 @@
 	}
 	
 	$(document).ready(function()	{
+		$('#album_chooser').click(function() {
+			$('#dialog').dialog();
+			return false;
+		});
 		getAlbumInfo();
 		getAlbumArt();
 		initActions();
