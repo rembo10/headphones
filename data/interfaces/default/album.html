@@ -24,7 +24,8 @@
 							alternate_albums = myDB.select("SELECT * from allalbums WHERE AlbumID=?", [album['AlbumID']])
 						%>
 						%if not alternate_albums:
-							<p>No alternate versions found. Try refreshing the artist</p>
+							<p>No alternate versions found. Try refreshing the artist (if the artist is being refreshed, please wait until it's finished)</p>
+							<h2><a id="refresh_artist" onclick="doAjaxCall('refreshArtist?ArtistID=${album['ArtistID']}', $(this)), true" href="#" data-success="'${album['ArtistName']}' is being refreshed">Refresh Artist</a></h2>
 						%else:
 							%for alternate_album in alternate_albums:
 								<%
@@ -171,6 +172,9 @@
 		$('#album_chooser').click(function() {
 			$('#dialog').dialog();
 			return false;
+		});
+		$('#refresh_artist').click(function() {
+			$('#dialog').dialog("close");
 		});
 		getAlbumInfo();
 		getAlbumArt();
