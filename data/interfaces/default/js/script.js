@@ -257,7 +257,7 @@ function doAjaxCall(url,elem,reload,form) {
 	var dataError = $(elem).data('error');
 	if (typeof dataError === "undefined") {
 		// Standard Message when variable is not set
-		var dataError = "There was a error";
+		var dataError = "There was an error";
 	} 	
 	// Get Success & Error message from inline data, else use standard message
 	var succesMsg = $("<div class='msg'><span class='ui-icon ui-icon-check'></span>" + dataSucces + "</div>");
