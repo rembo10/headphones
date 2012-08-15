@@ -33,7 +33,7 @@
 									else:
 										alternate_album_name = alternate_album['AlbumTitle'] + " (" + alternate_album['ReleaseCountry'] + ", " + alternate_album['ReleaseFormat'] + ")"
 								%>
-								<a href="switchAlbum?AlbumID=${album['AlbumID']}&ReleaseID=${alternate_album['ReleaseID']}">${alternate_album_name}</a><br>
+								<a href="#" onclick="doAjaxCall('switchAlbum?AlbumID=${album['AlbumID']}&ReleaseID=${alternate_album['ReleaseID']}', $(this), 'table');" data-success="Switched release to: ${alternate_album_name}">${alternate_album_name}</a><br>
 							%endfor
 						%endif
 					</div>

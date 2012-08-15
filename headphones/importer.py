@@ -173,6 +173,9 @@ def addArtisttoDB(artistid, extrasonly=False):
         fullreleaselist = []
             
         for release in releaselist:
+        # What we're doing here now is first updating the allalbums & alltracks table to the most
+        # current info, then moving the appropriate release into the album table and its associated
+        # tracks into the tracks table
             
             releaseid = release['id']
             
@@ -296,6 +299,20 @@ def addArtisttoDB(artistid, extrasonly=False):
         if not rg_exists:
             releaseid = rg['id']
         elif rg_exists and not rg_exists['ReleaseID']:
+            # Need to do some importing here - to transition the old format of using the release group
+            # only to using releasegroup & releaseid. These are the albums that are missing a ReleaseID
+            # so we'll need to move over the locations, bitrates & formats from the tracks table to the new
+            # alltracks table. Thankfully we can just use TrackIDs since they span releases/releasegroups
+            logger.info("Copying current track information to alternate releases")
+            tracks = myDB.action('SELECT * from tracks WHERE AlbumID=?', [rg['id']]).fetchall()
+            for track in tracks:
+                if track['Location']:
+                    controlValueDict = {"TrackID":  track['TrackID']}
+                    newValueDict = {"Location":     track['Location'],
+                                    "BitRate":      track['BitRate'],
+                                    "Format":       track['Format'],
+                                    }
+                    myDB.upsert("alltracks", newValueDict, controlValueDict)
             releaseid = rg['id']
         else:
             releaseid = rg_exists['ReleaseID']
