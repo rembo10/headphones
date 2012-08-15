@@ -31,9 +31,9 @@
 									track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=?", [alternate_album['ReleaseID']]))
 									have_track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=? AND Location IS NOT NULL", [alternate_album['ReleaseID']]))
 									if alternate_album['AlbumID'] == alternate_album['ReleaseID']:
-										alternate_album_name = "Headphones Default Release [" + have_track_count + "/" track_count + " tracks]"
+										alternate_album_name = "Headphones Default Release [" + have_track_count + "/" + track_count + " tracks]"
 									else:
-										alternate_album_name = alternate_album['AlbumTitle'] + " (" + alternate_album['ReleaseCountry'] + ", " + alternate_album['ReleaseFormat'] + ") [" + have_track_count + "/" track_count + " tracks]"
+										alternate_album_name = alternate_album['AlbumTitle'] + " (" + alternate_album['ReleaseCountry'] + ", " + alternate_album['ReleaseFormat'] + ") [" + have_track_count + "/" + track_count + " tracks]"
 									
 								%>
 								<a href="#" onclick="doAjaxCall('switchAlbum?AlbumID=${album['AlbumID']}&ReleaseID=${alternate_album['ReleaseID']}', $(this), 'table');" data-success="Switched release to: ${alternate_album_name}">${alternate_album_name}</a><br>
