@@ -342,9 +342,14 @@ m<%inherit file="base.html"/>
                 		 	<input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}><label>Embed lyrics</label>
                 		</div>
                 		<div class="row">
-	                		<label>Path to Destination folder</label>
+	                		<label>Path to Destination Folder</label>
 	                		<input type="text" name="destination_dir" value="${config['dest_dir']}" size="50">
 	                		<small>e.g. /Users/name/Music/iTunes or /Volumes/share/music</small>
+                		</div>
+                		<div class="row">
+	                		<label>Path to Lossless Destination folder (optional)</label>
+	                		<input type="text" name="lossless_destination_dir" value="${config['lossless_dest_dir']}" size="50">
+	                		<small>Set this if you have a separate directory for lossless music</small>
                 		</div>
                 	</fieldset>
                </td>
@@ -379,8 +384,14 @@ m<%inherit file="base.html"/>
     	                  		<input type="checkbox" name="music_encoder" id="music_encoder" value="1" ${config['music_encoder']}/><label>Re-encode downloads during postprocessing</label>
     	                	</div>
     	                	<div id="encoderoptions" class="row clearfix checkbox">
+				    <div class="row">
     	                  		<input type="checkbox" name="encoderlossless" value="1" ${config['encoderlossless']}/><label>Only re-encode lossless files (.flac)</label>
-    						</div>
+				    </div>
+				    <br>
+				    <div class="row">	
+					<input type="checkbox" name="delete_lossless_files" value="1" ${config['delete_lossless_files']}/><label>Delete original lossless files after encoding</label>
+				    </div>
+				</div>
     						<%
     							if config['encoder'] == 'lame':
     								lameselect = 'selected="selected"'
