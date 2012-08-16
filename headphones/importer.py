@@ -338,6 +338,11 @@ def addArtisttoDB(artistid, extrasonly=False):
                             
             if headphones.AUTOWANT_ALL:
                 newValueDict['Status'] = "Wanted"
+                
+                #start a search for the album
+                import searcher
+                searcher.searchforalbum(albumid=rg['id'])
+                
             elif album['ReleaseDate'] > helpers.today() and headphones.AUTOWANT_UPCOMING:
                 newValueDict['Status'] = "Wanted"
             else:
@@ -522,7 +527,7 @@ def addReleaseById(rid):
                 
         #start a search for the album
         import searcher
-        searcher.searchNZB(rgid, False)
+        searcher.searchforalbum(rgid, False)
     elif not rg_exists and not release_dict:
         logger.error("ReleaseGroup does not exist in the database and did not get a valid response from MB. Skipping release.")
         return
