@@ -42,7 +42,7 @@ def getSimilar():
             time.sleep(1)
             continue
             
-        if len(data) < 200:
+        if not data or len(data) < 200:
             continue
             
         try:    
