@@ -26,7 +26,7 @@ from lib.beets import autotag
 from lib.beets.mediafile import MediaFile
 
 import headphones
-from headphones import db, albumart, lyrics, logger, helpers
+from headphones import db, albumart, librarysync, lyrics, logger, helpers
 
 postprocessor_lock = threading.Lock()
 
@@ -269,21 +269,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
         logger.error('No DESTINATION_DIR has been set. Set "Destination Directory" to the parent directory you want to move the files to')
         pass
         
-    myDB = db.DBConnection()
-    # There's gotta be a better way to update the have tracks - sqlite
-    
-    trackcount = myDB.select('SELECT HaveTracks from artists WHERE ArtistID=?', [release['ArtistID']])
-    
-    if not trackcount[0][0]:
-        cur_track_count = 0
-    else:
-        cur_track_count = trackcount[0][0]
-        
-    new_track_count = cur_track_count + len(downloaded_track_list)
-    myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [new_track_count, release['ArtistID']])
-    myDB.action('UPDATE albums SET status = "Downloaded" WHERE AlbumID=?', [albumid])
-    myDB.action('UPDATE snatched SET status = "Processed" WHERE AlbumID=?', [albumid])
-    updateHave(albumpath)
+    # Update the have tracks
+    librarysync.libraryScan(dir=albumpath, append=True, ArtistID=release['ArtistID'], ArtistName=release['ArtistName'])
     
     logger.info('Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
     
@@ -577,36 +564,6 @@ def renameFiles(albumpath, downloaded_track_list, release):
         except Exception, e:
             logger.error('Error renaming file: %s. Error: %s' % (downloaded_track, e))
             continue
-        
-def updateHave(albumpath):
-
-    results = []
-    
-    for r,d,f in os.walk(albumpath):
-        for files in f:
-            if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
-                results.append(os.path.join(r, files))
-    
-    if results:
-    
-        myDB = db.DBConnection()
-    
-        for song in results:
-            try:
-                f = MediaFile(song)
-                #logger.debug('Reading: %s' % song.decode('UTF-8'))
-            except:
-                logger.warn('Could not read file: %s' % song)
-                continue
-            else:   
-                if f.albumartist:
-                    artist = f.albumartist
-                elif f.artist:
-                    artist = f.artist
-                else:
-                    continue
-                
-                myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [unicode(song, headphones.SYS_ENCODING, errors="replace"), f.bitrate, f.format, artist, f.album, f.title])
                 
 def renameUnprocessedFolder(albumpath):
     
