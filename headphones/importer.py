@@ -236,7 +236,7 @@ def addArtisttoDB(artistid, extrasonly=False):
                     newValueDict['Location'] = match['Location']
                     newValueDict['BitRate'] = match['BitRate']
                     newValueDict['Format'] = match['Format']
-                    myDB.action('UPDATE tracks SET Matched="True" WHERE Location=?', match['Location'])
+                    myDB.action('UPDATE have SET Matched="True" WHERE Location=?', [match['Location']])
                                 
                 myDB.upsert("alltracks", newValueDict, controlValueDict)
 
@@ -287,7 +287,7 @@ def addArtisttoDB(artistid, extrasonly=False):
                 newValueDict['Location'] = match['Location']
                 newValueDict['BitRate'] = match['BitRate']
                 newValueDict['Format'] = match['Format']
-                myDB.action('UPDATE tracks SET Matched="True" WHERE Location=?', match['Location'])
+                myDB.action('UPDATE have SET Matched="True" WHERE Location=?', [match['Location']])
                             
             myDB.upsert("alltracks", newValueDict, controlValueDict)
         

@@ -176,8 +176,6 @@
 		$('#refresh_artist').click(function() {
 			$('#dialog').dialog("close");
 		});
-		getAlbumInfo();
-		getAlbumArt();
 		initActions();
 		setTimeout(function(){
 			initFancybox();
@@ -193,6 +191,8 @@
 	};
 	
 	$(document).ready(function()	{
+		getAlbumInfo();
+		getAlbumArt();
 		initThisPage();
 	});
 
