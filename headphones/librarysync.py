@@ -21,12 +21,16 @@ from lib.beets.mediafile import MediaFile
 import headphones
 from headphones import db, logger, helpers, importer
 
-def libraryScan(dir=None):
+# You can scan a single directory and append it to the current library by specifying append=True, ArtistID & ArtistName
+def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None):
 
     if not dir:
         dir = headphones.MUSIC_DIR
-        
-    dir = dir.encode(headphones.SYS_ENCODING)
+    
+    # If we're appending a dir, it's coming from the post processor which is
+    # already bytestring
+    if not append:
+        dir = dir.encode(headphones.SYS_ENCODING)
         
     if not os.path.isdir(dir):
         logger.warn('Cannot find directory: %s. Not scanning' % dir.decode(headphones.SYS_ENCODING))
@@ -34,12 +38,15 @@ def libraryScan(dir=None):
 
     myDB = db.DBConnection()
     
-    # Clean up bad filepaths
-    tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
+    if not append:
+        # Clean up bad filepaths
+        tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
     
-    for track in tracks:
-        if not os.path.isfile(track['Location'].encode(headphones.SYS_ENCODING)):
-            myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [None, None, None, track['TrackID']])
+        for track in tracks:
+            if not os.path.isfile(track['Location'].encode(headphones.SYS_ENCODING)):
+                myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [None, None, None, track['TrackID']])
+
+        myDB.action('DELETE from have')
 
     logger.info('Scanning music directory: %s' % dir)
 
@@ -47,8 +54,6 @@ def libraryScan(dir=None):
     bitrates = []
     
     song_list = []
-
-    myDB.action('DELETE from have')
     
     for r,d,f in os.walk(dir):
         for files in f:
@@ -290,32 +295,42 @@ def libraryScan(dir=None):
 
     logger.info('Completed matching tracks from directory: %s' % dir)
     
-    # Clean up the new artist list
-    unique_artists = {}.fromkeys(new_artists).keys()
-    current_artists = myDB.select('SELECT ArtistName, ArtistID from artists')
     
-    artist_list = [f for f in unique_artists if f.lower() not in [x[0].lower() for x in current_artists]]
-    
-    # Update track counts
-    logger.info('Updating current artist track counts')
-
-    for artist in current_artists:
-        # Have tracks are selected from tracks table and not all tracks because of duplicates
-        # We update the track count upon an album switch to compliment this
-        havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID like ? AND Location IS NOT NULL', [artist['ArtistID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['ArtistName']]))
-        myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, artist['ArtistID']])
+    if not append:
+        # Clean up the new artist list
+        unique_artists = {}.fromkeys(new_artists).keys()
+        current_artists = myDB.select('SELECT ArtistName, ArtistID from artists')
         
-    logger.info('Found %i new artists' % len(artist_list))
-
-    if len(artist_list):
-        if headphones.ADD_ARTISTS:
-            logger.info('Importing %i new artists' % len(artist_list))
-            importer.artistlist_to_mbids(artist_list)
-        else:
-            logger.info('To add these artists, go to Manage->Manage New Artists')
-            myDB.action('DELETE from newartists')
-            for artist in artist_list:
-                myDB.action('INSERT into newartists VALUES (?)', [artist])
+        artist_list = [f for f in unique_artists if f.lower() not in [x[0].lower() for x in current_artists]]
+        
+        # Update track counts
+        logger.info('Updating current artist track counts')
     
-    if headphones.DETECT_BITRATE:
-        headphones.PREFERRED_BITRATE = sum(bitrates)/len(bitrates)/1000
+        for artist in current_artists:
+            # Have tracks are selected from tracks table and not all tracks because of duplicates
+            # We update the track count upon an album switch to compliment this
+            havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artist['ArtistID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['ArtistName']]))
+            myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, artist['ArtistID']])
+            
+        logger.info('Found %i new artists' % len(artist_list))
+    
+        if len(artist_list):
+            if headphones.ADD_ARTISTS:
+                logger.info('Importing %i new artists' % len(artist_list))
+                importer.artistlist_to_mbids(artist_list)
+            else:
+                logger.info('To add these artists, go to Manage->Manage New Artists')
+                myDB.action('DELETE from newartists')
+                for artist in artist_list:
+                    myDB.action('INSERT into newartists VALUES (?)', [artist])
+        
+        if headphones.DETECT_BITRATE:
+            headphones.PREFERRED_BITRATE = sum(bitrates)/len(bitrates)/1000
+            
+    else:
+        # If we're appending a new album to the database, update the artists total track counts
+        logger.info('Updating artist track counts')
+        
+        havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [ArtistID])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [ArtistName]))
+        myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, ArtistID])
+    
