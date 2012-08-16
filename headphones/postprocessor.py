@@ -269,6 +269,10 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
         logger.error('No DESTINATION_DIR has been set. Set "Destination Directory" to the parent directory you want to move the files to')
         pass
         
+    myDB = db.DBConnection()
+    myDB.action('UPDATE albums SET status = "Downloaded" WHERE AlbumID=?', [albumid])
+    myDB.action('UPDATE snatched SET status = "Processed" WHERE AlbumID=?', [albumid])
+        
     # Update the have tracks
     librarysync.libraryScan(dir=albumpath, append=True, ArtistID=release['ArtistID'], ArtistName=release['ArtistName'])
     
