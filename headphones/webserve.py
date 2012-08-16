@@ -429,6 +429,7 @@ class WebInterface(object):
                     "embed_album_art" : checked(headphones.EMBED_ALBUM_ART),
                     "embed_lyrics" : checked(headphones.EMBED_LYRICS),
                     "dest_dir" : headphones.DESTINATION_DIR,
+                    "lossless_dest_dir" : headphones.LOSSLESS_DESTINATION_DIR,
                     "folder_format" : headphones.FOLDER_FORMAT,
                     "file_format" : headphones.FILE_FORMAT,
                     "include_extras" : checked(headphones.INCLUDE_EXTRAS),
@@ -446,6 +447,7 @@ class WebInterface(object):
                     "encodervbrcbr": headphones.ENCODERVBRCBR,
                     "encoderquality": headphones.ENCODERQUALITY,
                     "encoderlossless": checked(headphones.ENCODERLOSSLESS),
+                    "delete_lossless_files": checked(headphones.DELETE_LOSSLESS_FILES),
                     "prowl_enabled": checked(headphones.PROWL_ENABLED),
                     "prowl_onsnatch": checked(headphones.PROWL_ONSNATCH),
                     "prowl_keys": headphones.PROWL_KEYS,
@@ -477,8 +479,8 @@ class WebInterface(object):
         usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0,
         nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
         torrentblackhole_dir=None, download_torrent_dir=None, numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None,
-        rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, autowant_upcoming=False, autowant_all=False, interface=None, log_dir=None,
-        music_encoder=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
+        rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, include_extras=0, autowant_upcoming=False, autowant_all=False, interface=None, log_dir=None,
+        music_encoder=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0, delete_lossless_files=0,
         prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0, 
         nma_enabled=False, nma_apikey=None, nma_priority=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None, **kwargs):
 
@@ -534,6 +536,7 @@ class WebInterface(object):
         headphones.EMBED_ALBUM_ART = embed_album_art
         headphones.EMBED_LYRICS = embed_lyrics
         headphones.DESTINATION_DIR = destination_dir
+        headphones.LOSSLESS_DESTINATION_DIR = lossless_destination_dir
         headphones.FOLDER_FORMAT = folder_format
         headphones.FILE_FORMAT = file_format
         headphones.INCLUDE_EXTRAS = include_extras
@@ -550,7 +553,8 @@ class WebInterface(object):
         headphones.ENCODEROUTPUTFORMAT = encoderoutputformat
         headphones.ENCODERVBRCBR = encodervbrcbr
         headphones.ENCODERQUALITY = int(encoderquality)
-        headphones.ENCODERLOSSLESS = encoderlossless
+        headphones.ENCODERLOSSLESS = int(encoderlossless)
+        headphones.DELETE_LOSSLESS_FILES = int(delete_lossless_files)
         headphones.PROWL_ENABLED = prowl_enabled
         headphones.PROWL_ONSNATCH = prowl_onsnatch
         headphones.PROWL_KEYS = prowl_keys
