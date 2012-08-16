@@ -84,6 +84,7 @@ CHECK_GITHUB_INTERVAL = None
 
 MUSIC_DIR = None
 DESTINATION_DIR = None
+LOSSLESS_DESTINATION_DIR = None
 FOLDER_FORMAT = None
 FILE_FORMAT = None
 PATH_TO_XML = None
@@ -165,6 +166,7 @@ ENCODEROUTPUTFORMAT = None
 ENCODERQUALITY = None
 ENCODERVBRCBR = None
 ENCODERLOSSLESS = False
+DELETE_LOSSLESS_FILES = False
 PROWL_ENABLED = True
 PROWL_PRIORITY = 1
 PROWL_KEYS = None
@@ -238,7 +240,8 @@ def initialize():
     
         global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, \
-                CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
+                CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
+                LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
                 ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, \
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, DOWNLOAD_TORRENT_DIR, \
@@ -246,7 +249,7 @@ def initialize():
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS,\
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
-                ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, MIRROR, CUSTOMHOST, CUSTOMPORT, \
+                ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, MIRROR, CUSTOMHOST, CUSTOMPORT, \
                 CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, SYNOINDEX_ENABLED, \
                 ALBUM_COMPLETION_PCT
                 
@@ -295,6 +298,7 @@ def initialize():
         
         MUSIC_DIR = check_setting_str(CFG, 'General', 'music_dir', '')
         DESTINATION_DIR = check_setting_str(CFG, 'General', 'destination_dir', '')
+        LOSSLESS_DESTINATION_DIR = check_setting_str(CFG, 'General', 'lossless_destination_dir', '')
         PREFERRED_QUALITY = check_setting_int(CFG, 'General', 'preferred_quality', 0)
         PREFERRED_BITRATE = check_setting_int(CFG, 'General', 'preferred_bitrate', '')
         DETECT_BITRATE = bool(check_setting_int(CFG, 'General', 'detect_bitrate', 0))
@@ -373,6 +377,7 @@ def initialize():
         ENCODERQUALITY = check_setting_int(CFG, 'General', 'encoderquality', 2)
         ENCODERVBRCBR = check_setting_str(CFG, 'General', 'encodervbrcbr', 'cbr')
         ENCODERLOSSLESS = bool(check_setting_int(CFG, 'General', 'encoderlossless', 1))
+        DELETE_LOSSLESS_FILES = bool(check_setting_int(CFG, 'General', 'delete_lossless_files', 1))
 
         PROWL_ENABLED = bool(check_setting_int(CFG, 'Prowl', 'prowl_enabled', 0))
         PROWL_KEYS = check_setting_str(CFG, 'Prowl', 'prowl_keys', '')
@@ -570,6 +575,7 @@ def config_write():
 
     new_config['General']['music_dir'] = MUSIC_DIR
     new_config['General']['destination_dir'] = DESTINATION_DIR
+    new_config['General']['lossless_destination_dir'] = LOSSLESS_DESTINATION_DIR
     new_config['General']['preferred_quality'] = PREFERRED_QUALITY
     new_config['General']['preferred_bitrate'] = PREFERRED_BITRATE
     new_config['General']['detect_bitrate'] = int(DETECT_BITRATE)
@@ -677,7 +683,8 @@ def config_write():
     new_config['General']['encoderoutputformat'] = ENCODEROUTPUTFORMAT
     new_config['General']['encoderquality'] = ENCODERQUALITY
     new_config['General']['encodervbrcbr'] = ENCODERVBRCBR
-    new_config['General']['encoderlossless'] = ENCODERLOSSLESS
+    new_config['General']['encoderlossless'] = int(ENCODERLOSSLESS)
+    new_config['General']['delete_lossless_files'] = int(DELETE_LOSSLESS_FILES)
     
     new_config['General']['mirror'] = MIRROR
     new_config['General']['customhost'] = CUSTOMHOST
