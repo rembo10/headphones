@@ -240,7 +240,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
         if len(artwork) < 100:
             logger.info("No suitable album art found from Amazon. Checking Last.FM....")
             artwork = albumart.getCachedArt(albumid)
-            if len(artwork) < 100:
+            if not artwork or len(artwork) < 100:
                 artwork = False
                 logger.info("No suitable album art found from Last.FM. Not adding album art")
     
