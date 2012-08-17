@@ -414,14 +414,17 @@ def moveFiles(albumpath, release, tracks):
     if make_lossless_folder:
         # Only rename the folder if they use the album name, otherwise merge into existing folder
         if os.path.exists(lossless_destination_path) and 'album' in last_folder.lower():
+            
+            temp_folder = folder
+            
             i = 1
             while True:
-                newfolder = folder + '[%i]' % i
+                newfolder = temp_folder + '[%i]' % i
                 lossless_destination_path = os.path.normpath(os.path.join(headphones.LOSSLESS_DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING)
                 if os.path.exists(lossless_destination_path):
                     i += 1
                 else:
-                    folder = newfolder
+                    temp_folder = newfolder
                     break
                     
         if not os.path.exists(lossless_destination_path):
@@ -434,14 +437,17 @@ def moveFiles(albumpath, release, tracks):
                 
     if make_lossy_folder:
         if os.path.exists(lossy_destination_path) and 'album' in last_folder.lower():
+            
+            temp_folder = folder
+            
             i = 1
             while True:
-                newfolder = folder + '[%i]' % i
+                newfolder = temp_folder + '[%i]' % i
                 lossy_destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING)
                 if os.path.exists(lossy_destination_path):
                     i += 1
                 else:
-                    folder = newfolder
+                    temp_folder = newfolder
                     break
                     
         if not os.path.exists(lossy_destination_path):
