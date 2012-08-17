@@ -13,10 +13,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
+import os, time
 from operator import itemgetter
 import datetime
-import re
+import re, shutil
 
 import headphones
 
@@ -218,3 +218,35 @@ def extract_song_data(s):
     else:
         logger.info("Couldn't parse " + s + " into a valid Newbin format")
         return (name, album, year)
+        
+def smartMove(src, dest, delete=True):
+    
+    source_dir = os.path.dirname(src)
+    filename = os.path.basename(src)
+    
+    if os.path.isfile(os.path.join(dest, filename)):
+        logger.info('Destination file exists: %s' % os.path.join(dest, filename).decode(headphones.SYS_ENCODING))
+        title = os.path.splitext(filename)[0]
+        ext = os.path.splitext(filename)[1]
+        i = 1
+        while True:
+            newfile = title + '(' + str(i) + ')' + ext
+            if os.path.isfile(os.path.join(dest, newfile)):
+                i += 1
+            else:
+                logger.info('Renaming to %s' % newfile)
+                try:    
+                    os.rename(src, os.path.join(source_dir, newfile))
+                    filename = newfile
+                except Exception, e:
+                    logger.warn('Error renaming %s: %s' % (src.decode(headphones.SYS_ENCODING), e))
+                break
+
+    try:
+        if delete:
+            shutil.move(os.path.join(source_dir, filename), os.path.join(dest, filename))
+        else:
+            shutil.copy(os.path.join(source_dir, filename), os.path.join(dest, filename))
+            return True
+    except Exception, e:
+        logger.warn('Error moving file %s: %s' % (filename.decode(headphones.SYS_ENCODING), e))
