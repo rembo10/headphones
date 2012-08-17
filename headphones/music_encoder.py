@@ -138,7 +138,8 @@ def command(encoder,musicSource,musicDest,albumPath):
     time.sleep(10)
     return_code = call(cmd, shell=True)
     if (return_code==0) and (os.path.exists(musicDest)):
-        os.remove(musicSource)
+        if headphones.DELETE_LOSSLESS_FILES:
+            os.remove(musicSource)
         shutil.move(musicDest,albumPath)
         logger.info('Music "%s" encoded in %s' % (musicSource,getTimeEncode(startMusicTime)))
         
