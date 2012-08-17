@@ -459,10 +459,10 @@ def moveFiles(albumpath, release, tracks):
         
         for file_to_move in files_to_move:
             
-            if any(file_to_move.lower.endswith(x) for x in headphones.LOSSY_MEDIA_FORMATS):
+            if any(file_to_move.lower().endswith('.' + x.lower()) for x in headphones.LOSSY_MEDIA_FORMATS):
                 helpers.smartMove(file_to_move, lossy_destination_path)
                 
-            elif any(files.lower.endswith(x) for x in headphones.LOSSLESS_MEDIA_FORMATS):
+            elif any(file_to_move.lower().endswith('.' + x.lower()) for x in headphones.LOSSLESS_MEDIA_FORMATS):
                 helpers.smartMove(file_to_move, lossless_destination_path)
             
             # If it's a non-music file, move it to both dirs    
