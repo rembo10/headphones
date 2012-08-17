@@ -229,7 +229,7 @@ class Cache(object):
 
                 try:
                     image_url = data['artist']['image'][-1]['#text']
-                except KeyError:
+                except Exception:
                     logger.debug('No artist image found on url: ' + url)
                     image_url = None
                 
@@ -266,11 +266,12 @@ class Cache(object):
                     
                 try:
                     image_url = data['artist']['image'][-1]['#text']
-                except KeyError:
+                except Exception:
                     logger.debug('No artist image found on url: ' + url)
                     image_url = None
                 
                 thumb_url = self._get_thumb_url(data)
+                
                 if not thumb_url:
                     logger.debug('No artist thumbnail image found on url: ' + url)
                     
@@ -310,17 +311,17 @@ class Cache(object):
                     return
                 try:
                     self.info_summary = data['artist']['bio']['summary']
-                except KeyError:
+                except Exception:
                     logger.debug('No artist bio summary found on url: ' + url)
                     self.info_summary = None
                 try:
                     self.info_content = data['artist']['bio']['content']
-                except KeyError:
+                except Exception:
                     logger.debug('No artist bio found on url: ' + url)
                     self.info_content = None
                 try:
                     image_url = data['artist']['image'][-1]['#text']
-                except KeyError:
+                except Exception:
                     logger.debug('No artist image found on url: ' + url)
                     image_url = None
                 
@@ -356,21 +357,22 @@ class Cache(object):
                     return
                 try:    
                     self.info_summary = data['album']['wiki']['summary']
-                except KeyError:
+                except Exception:
                     logger.debug('No album summary found from: ' + url)
                     self.info_summary = None
                 try:    
                     self.info_content = data['album']['wiki']['content']
-                except KeyError:
+                except Exception:
                     logger.debug('No album infomation found from: ' + url)
                     self.info_content = None
                 try:
                     image_url = data['album']['image'][-1]['#text']
-                except KeyError:
+                except Exception:
                     logger.debug('No album image link found on url: ' + url)
                     image_url = None
                 
                 thumb_url = self._get_thumb_url(data)
+
                 if not thumb_url:
                     logger.debug('No album thumbnail image found on url: ' + url)
                     
@@ -402,7 +404,6 @@ class Cache(object):
         
         # Should we grab the artwork here if we're just grabbing thumbs or info?? Probably not since the files can be quite big
         if image_url and self.query_type == 'artwork':
-            
             try:
                 artwork = urllib2.urlopen(image_url, timeout=20).read()
             except Exception, e:
