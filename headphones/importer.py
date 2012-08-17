@@ -40,6 +40,9 @@ def is_exists(artistid):
 def artistlist_to_mbids(artistlist, forced=False):
 
     for artist in artistlist:
+        
+        if not artist:
+            continue
             
         results = mb.findArtist(artist, limit=1)
         
