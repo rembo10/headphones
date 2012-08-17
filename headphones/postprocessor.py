@@ -387,9 +387,9 @@ def moveFiles(albumpath, release, tracks):
     for r,d,f in os.walk(albumpath):
         for files in f:
             files_to_move.append(os.path.join(r, files))
-            if any(files.lower.endswith(x) for x in headphones.LOSSY_MEDIA_FORMATS):
+            if any(files.lower().endswith('.' + x.lower()) for x in headphones.LOSSY_MEDIA_FORMATS):
                 lossy_media = True
-            if any(files.lower.endswith(x) for x in headphones.LOSSLESS_MEDIA_FORMATS):
+            if any(files.lower().endswith('.' + x.lower()) for x in headphones.LOSSLESS_MEDIA_FORMATS):
                 lossless_media = True
 
     # Do some sanity checking to see what directories we need to create:
@@ -466,6 +466,7 @@ def moveFiles(albumpath, release, tracks):
                 helpers.smartMove(file_to_move, lossless_destination_path)
             
             # If it's a non-music file, move it to both dirs    
+            # TODO: Move specific-to-lossless files to the lossless dir only
             else:
                 
                 moved_to_lossy_folder = helpers.smartMove(file_to_move, lossy_destination_path, delete=False)
@@ -582,6 +583,8 @@ def correctMetadata(albumid, release, downloaded_track_list):
 def embedLyrics(downloaded_track_list):
     logger.info('Adding lyrics')
     
+    # TODO: If adding lyrics for flac & lossy, only fetch the lyrics once
+    # and apply it to both files
     for downloaded_track in downloaded_track_list:
         
         try:
