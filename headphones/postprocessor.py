@@ -418,7 +418,7 @@ def moveFiles(albumpath, release, tracks):
             while True:
                 newfolder = folder + '[%i]' % i
                 lossless_destination_path = os.path.normpath(os.path.join(headphones.LOSSLESS_DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING)
-                if os.path.exists(destination_path):
+                if os.path.exists(lossless_destination_path):
                     i += 1
                 else:
                     folder = newfolder
