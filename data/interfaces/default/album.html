@@ -17,14 +17,14 @@
 			<a id="menu_link_retry" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true);" data-success="Retrying the same version of '${album['AlbumTitle']}'">Retry Download</a>
 			<a id="menu_link_new" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),true);" data-success="Looking for a new version of '${album['AlbumTitle']}'">Try New Version</a>
 			%endif		
-			<a class="menu_link_edit" id="album_chooser" href="#">Choose Alternate Version</a>
+			<a class="menu_link_edit" id="album_chooser" href="#">Choose Alternate Release</a>
 				<div id="dialog" title="Choose an Alternate Release" style="display:none" class="configtable">
 					<div class="links">
 						<%
 							alternate_albums = myDB.select("SELECT * from allalbums WHERE AlbumID=?", [album['AlbumID']])
 						%>
 						%if not alternate_albums:
-							<p>No alternate versions found. Try refreshing the artist (if the artist is being refreshed, please wait until it's finished)</p>
+							<p>No alternate releases found. Try refreshing the artist (if the artist is being refreshed, please wait until it's finished)</p>
 							<h2><a id="refresh_artist" onclick="doAjaxCall('refreshArtist?ArtistID=${album['ArtistID']}', $(this)), true" href="#" data-success="'${album['ArtistName']}' is being refreshed">Refresh Artist</a></h2>
 						%else:
 							%for alternate_album in alternate_albums:
