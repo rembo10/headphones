@@ -623,7 +623,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
         try:
             f = MediaFile(downloaded_track)
         except:
-            logger.info("MediaFile couldn't parse: " + downloaded_track)
+            logger.info("MediaFile couldn't parse: " + downloaded_track.decode(headphones.SYS_ENCODING))
             continue
             
         if not f.track:
@@ -665,12 +665,16 @@ def renameFiles(albumpath, downloaded_track_list, release):
             new_file_name = new_file_name.replace(0, '_')
         
         new_file = os.path.join(albumpath, new_file_name)
+        
+        if downloaded_track == new_file_name:
+            logger.info("Renaming for: " + downloaded_track.decode(headphones.SYS_ENCODING) + " is not neccessary")
+            continue
 
-        logger.debug('Renaming %s ---> %s' % (downloaded_track, new_file_name))
+        logger.info('Renaming %s ---> %s' % (downloaded_track.decode(headphones.SYS_ENCODING), new_file_name.decode(headphones.SYS_ENCODING)))
         try:
             os.rename(downloaded_track, new_file)
         except Exception, e:
-            logger.error('Error renaming file: %s. Error: %s' % (downloaded_track, e))
+            logger.error('Error renaming file: %s. Error: %s' % (downloaded_track.decode(headphones.SYS_ENCODING), e))
             continue
                 
 def renameUnprocessedFolder(albumpath):
