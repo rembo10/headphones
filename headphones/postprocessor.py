@@ -667,10 +667,10 @@ def renameFiles(albumpath, downloaded_track_list, release):
         new_file = os.path.join(albumpath, new_file_name)
         
         if downloaded_track == new_file_name:
-            logger.info("Renaming for: " + downloaded_track.decode(headphones.SYS_ENCODING) + " is not neccessary")
+            logger.debug("Renaming for: " + downloaded_track.decode(headphones.SYS_ENCODING) + " is not neccessary")
             continue
 
-        logger.info('Renaming %s ---> %s' % (downloaded_track.decode(headphones.SYS_ENCODING), new_file_name.decode(headphones.SYS_ENCODING)))
+        logger.debug('Renaming %s ---> %s' % (downloaded_track.decode(headphones.SYS_ENCODING), new_file_name.decode(headphones.SYS_ENCODING)))
         try:
             os.rename(downloaded_track, new_file)
         except Exception, e:
