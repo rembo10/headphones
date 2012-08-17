@@ -286,10 +286,16 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None):
                 continue          
         
         # if we can't find a match in the database on a track level, it might be a new artist or it might be on a non-mb release
-        new_artists.append(song['ArtistName'])
+        if song['ArtistName']:
+            new_artists.append(song['ArtistName'])
+        else:
+            continue
         
         # The have table will become the new database for unmatched tracks (i.e. tracks with no associated links in the database                
-        CleanName = helpers.cleanName(song['ArtistName'] +' '+ song['AlbumTitle'] +' '+song['TrackTitle'])
+        if song['ArtistName'] and song['AlbumTitle'] and song['TrackTitle']:
+            CleanName = helpers.cleanName(song['ArtistName'] +' '+ song['AlbumTitle'] +' '+song['TrackTitle'])
+        else:
+            continue
         
         myDB.action('INSERT INTO have (ArtistName, AlbumTitle, TrackNumber, TrackTitle, TrackLength, BitRate, Genre, Date, TrackID, Location, CleanName, Format) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [song['ArtistName'], song['AlbumTitle'], song['TrackNumber'], song['TrackTitle'], song['TrackLength'], song['BitRate'], song['Genre'], song['Date'], song['TrackID'], song['Location'], CleanName, song['Format']])
 
