@@ -182,7 +182,6 @@
 			showMsg("Getting artist information",true);
 		%endif
 		getArtistArt();
-		getArtistBio();
 		getAlbumArt();
 		$('#album_table').dataTable({
 			"bDestroy": true,
@@ -220,6 +219,7 @@
 	$(document).ready(function() {		
 		initActions();
 		initThisPage();
+		getArtistBio();
 	});
 
 	</script>

@@ -496,6 +496,8 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
                 myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", nzb_folder_name])
                 return "found"
+            else:
+                return "none"
         else:      
             return "none"
 
@@ -673,7 +675,9 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 data = False
             
             if data:
-
+            
+                logger.info(u'Parsing results from <a href="%s">KAT</a>' % searchURL)
+                
                 d = feedparser.parse(data)
                 if not len(d.entries):
                     logger.info(u"No results found from %s for %s" % (provider, term))
@@ -707,7 +711,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 resultlist.append((title, size, url, provider))
                                 logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                             else:
-                                logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeders), rightformat))    
+                                logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeders), rightformat))    
                         
                         except Exception, e:
                             logger.error(u"An unknown error occurred in the KAT parser: %s" % e)
@@ -754,7 +758,9 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 data = False
 
             if data:
-
+                
+                logger.info(u'Parsing results from <a href="%s">Waffles.fm</a>' % searchURL)
+                
                 d = feedparser.parse(data)
                 if not len(d.entries):
                     logger.info(u"No results found from %s for %s" % (provider, term))
@@ -780,7 +786,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
 
         if headphones.ISOHUNT:
-            provider = "ISOhunt"    
+            provider = "isoHunt"    
             providerurl = url_fix("http://isohunt.com/js/rss/" + term)
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "7"        #music
@@ -809,6 +815,8 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             
             if data:
             
+                logger.info(u'Parsing results from <a href="%s">isoHunt</a>' % searchURL)
+                
                 d = feedparser.parse(data)
                 if not len(d.entries):
                     logger.info(u"No results found from %s for %s" % (provider, term))
@@ -846,10 +854,10 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 resultlist.append((title, size, url, provider))
                                 logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                             else:
-                                logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
+                                logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
                         
                         except Exception, e:
-                            logger.error(u"An unknown error occurred in the ISOhunt parser: %s" % e)
+                            logger.error(u"An unknown error occurred in the isoHunt parser: %s" % e)
 
         if headphones.MININOVA:
             provider = "Mininova"    
@@ -877,6 +885,8 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             
             if data:
             
+                logger.info(u'Parsing results from <a href="%s">Mininova</a>' % searchURL)
+                
                 d = feedparser.parse(data)
                 if not len(d.entries):
                     logger.info(u"No results found from %s for %s" % (provider, term))
@@ -913,10 +923,10 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 resultlist.append((title, size, url, provider))
                                 logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                             else:
-                                logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
+                                logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
                         
                         except Exception, e:
-                            logger.error(u"An unknown error occurred in the MiniNova Parser: %s" % e)
+                            logger.error(u"An unknown error occurred in the Mininova Parser: %s" % e)
 
 
 
@@ -983,7 +993,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             (data, bestqual) = preprocesstorrent(torrentlist)
             
             if data and bestqual:
-                logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
+                logger.info(u'Found best result from %s: <a href="%s">%s</a> - %s' % (bestqual[3], bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
                 torrent_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year) 
                 if headphones.TORRENTBLACKHOLE_DIR == "sendtracker":
 

@@ -14,7 +14,7 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import urllib
+import urllib, urllib2
 from xml.dom import minidom
 import htmlentitydefs
 
@@ -30,7 +30,7 @@ def getLyrics(artist, song):
     searchURL = 'http://lyrics.wikia.com/api.php?' + urllib.urlencode(params)
     
     try:
-        data = urllib.urlopen(searchURL).read()
+        data = urllib2.urlopen(searchURL, timeout=20).read()
     except Exception, e:
         logger.warn('Error opening: %s. Error: %s' % (searchURL, e))
         return

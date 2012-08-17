@@ -144,6 +144,7 @@ function initConfigCheckbox(elem) {
 function initActions() {
 	$("#subhead_menu #menu_link_refresh").button({ icons: { primary: "ui-icon-refresh" }  });
 	$("#subhead_menu #menu_link_edit").button({ icons: { primary: "ui-icon-pencil" }  });
+	$("#subhead_menu .menu_link_edit").button({ icons: { primary: "ui-icon-pencil" }  });
     $("#subhead_menu #menu_link_delete" ).button({ icons: { primary: "ui-icon-trash" } });
     $("#subhead_menu #menu_link_pauze").button({ icons: { primary: "ui-icon-pause"} });
     $("#subhead_menu #menu_link_resume").button({ icons: { primary: "ui-icon-play"} });
@@ -256,7 +257,7 @@ function doAjaxCall(url,elem,reload,form) {
 	var dataError = $(elem).data('error');
 	if (typeof dataError === "undefined") {
 		// Standard Message when variable is not set
-		var dataError = "There was a error";
+		var dataError = "There was an error";
 	} 	
 	// Get Success & Error message from inline data, else use standard message
 	var succesMsg = $("<div class='msg'><span class='ui-icon ui-icon-check'></span>" + dataSucces + "</div>");

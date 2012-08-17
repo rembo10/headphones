@@ -37,8 +37,12 @@ def getCachedArt(albumid):
         return None
     
     if artwork_path.startswith('http://'):
-        artwork = urllib2.urlopen(artwork_path, timeout=20).read()
-        return artwork
+        try:
+            artwork = urllib2.urlopen(artwork_path, timeout=20).read()
+            return artwork
+        except:
+            logger.warn("Unable to open url: " + artwork_path)
+            return None
     else:
         artwork = open(artwork_path, "r").read()
         return artwork
