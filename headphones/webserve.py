@@ -610,12 +610,13 @@ class WebInterface(object):
                 
                 headphones.EXTRA_NEWZNABS.append((newznab_host, newznab_api, newznab_enabled))
                 
-        # Convert the extras to list then string
+        # Convert the extras to list then string. Coming in as 0 or 1
         temp_extras_list = []
-        extras_list = [ single, ep, compilation, soundtrack, live, remix, spokenword, audiobook]
+        extras_list = [single, ep, compilation, soundtrack, live, remix, spokenword, audiobook]
         
         i = 1
         for extra in extras_list:
+            print repr(extra)
             if extra:
                 temp_extras_list.append(i)
             i+=1

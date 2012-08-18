@@ -1,6 +1,7 @@
 m<%inherit file="base.html"/>
 <%!
 	import headphones
+	import string
 %>
 
 <%def name="headerIncludes()">
@@ -505,9 +506,30 @@ m<%inherit file="base.html"/>
 		        	<fieldset>
 		        		<legend>Miscellaneous</legend>
 		        		<div class="checkbox left row">
-		        		  	<input type="checkbox" name="include_extras" value="1" ${config['include_extras']} /><label>Automatically Include Extras When Adding an Artist <small>(EPs, Compilations, Live Albums, Remix Albums and Singles)</small></label>
-		        		  	
-		        		</div>
+		        		  	<input type="checkbox" name="include_extras" id="include_extras" value="1" ${config['include_extras']} /><label>Automatically Include Extras When Adding an Artist <br>
+						<%
+						    which_extras_selected = ""
+						    for extra in config['extras']:
+						        if config['extras'][extra] == "checked":
+							    which_extras_selected += string.capwords(extra) + ', '
+						    # Chop off the last comma & space
+						    if which_extras_selected:
+							which_extras_selected = which_extras_selected[:-2]
+						    else:
+							which_extras_selected = "None"
+						%>
+						<small>Currently Selected: ${which_extras_selected} <a href="#" id="modify_extras">(Change)</a></small></label>
+		        		  	<div id="dialog" title="Choose Which Extras to Include" style="display:none" class="configtable">
+						    %for extra in config['extras']:
+						        <input type="checkbox" id="${extra}_temp" name="${extra}_temp" value="1" ${config['extras'][extra]} />${string.capwords(extra)}<br>
+						    %endfor
+						</div>
+		        		  	<div style="display:none">
+						    %for extra in config['extras']:
+						        <input type="checkbox" id="${extra}" name="${extra}" value="1" ${config['extras'][extra]} />${string.capwords(extra)}<br>
+						    %endfor
+						</div>
+					</div>
 		        		<div class="row left checkbox">
 		        			<input type="checkbox" name="autowant_upcoming" value="1" ${config['autowant_upcoming']} /><label>Automatically Mark Upcoming Albums as Wanted</label>	
 		        			<div class="row leftcheckbox">
@@ -707,6 +729,13 @@ m<%inherit file="base.html"/>
 		}
 	};
 	
+	function openExtrasDialog() {
+	    $("#dialog").dialog({ close: function(){ 
+	        var elem = '<input type="button" data-success="Changes saved successfully">';
+		doAjaxCall('configUpdate', elem,'tabs',true); 
+	    }}).dialog("open");
+	};
+	
 	function initThisPage() 
 	
 	{
@@ -830,6 +859,25 @@ m<%inherit file="base.html"/>
 		    $(this).parent().parent().remove();
 		    deletedNewznabs = deletedNewznabs + 1;
 		});
+		
+		$("#modify_extras").click(openExtrasDialog);
+		
+		$("#include_extras").click(function(){
+		    if ($("#include_extras").is(":checked")){
+			openExtrasDialog();
+		    }
+		});
+		
+		%for extra in config['extras']:
+		$("#${extra}_temp").click(function(){
+		    if ($(this).is(":checked")){
+			$("#${extra}").attr("checked", true);
+		    }
+		    else {
+			$("${extra}").attr("checked", false);
+		    }
+		});
+		%endfor	
 		    
 		$("#add_newznab").click(function() {
 		    var intId = $("#newznab_providers > div").size() + deletedNewznabs + 1;
