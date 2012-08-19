@@ -426,15 +426,38 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                     albumlength = sum([pair[0] for pair in tracks])
 
                     targetsize = albumlength/1000 * int(headphones.PREFERRED_BITRATE) * 128
-                    logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
-    
-                    newlist = []
-
-                    for result in resultlist:
-                        delta = abs(targetsize - result[1])
-                        newlist.append((result[0], result[1], result[2], result[3], delta))
-        
-                    nzblist = sorted(newlist, key=lambda title: title[4])
+                    
+                    if not targetsize:
+                        logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
+                        nzblist = sorted(resultlist, key=lambda title: title[1], reverse=True)
+                    
+                    else:
+                        logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
+                        newlist = []
+                        
+                        if headphones.PREFERRED_BITRATE_HIGH_BUFFER:
+                            high_size_limit = targetsize * int(headphones.PREFERRED_BITRATE_HIGH_BUFFER)/100
+                        else:
+                            high_size_limit = None
+                        if headphones.PREFERRED_BITRATE_LOW_BUFFER:
+                            low_size_limit = targetsize * int(headphones.PREFERRED_BITRATE_LOW_BUFFER)/100
+                        else:
+                            low_size_limit = None
+                            
+                        for result in resultlist:
+                            
+                            if high_size_limit and (result[1] > high_size_limit):
+                                logger.info(result[0] + "is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit))
+                                continue
+                                
+                            if low_size_limit and (result[1] < low_size_limit):
+                                logger.info(result[0] + "is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit))
+                                continue
+                                                                
+                            delta = abs(targetsize - result[1])
+                            newlist.append((result[0], result[1], result[2], result[3], delta))
+            
+                        nzblist = sorted(newlist, key=lambda title: title[4])
                 
                 except Exception, e:
                     

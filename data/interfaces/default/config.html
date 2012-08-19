@@ -1,6 +1,7 @@
 m<%inherit file="base.html"/>
 <%!
 	import headphones
+	import string
 %>
 
 <%def name="headerIncludes()">
@@ -315,16 +316,18 @@ m<%inherit file="base.html"/>
                 	<fieldset>
                 		<legend>Quality</legend>
                 		<div class="row radio clearfix">
-                		   	<input type="radio" name="preferred_quality" value="0" ${config['pref_qual_0']} /><label>Highest Quality excluding Lossless</label>
+				    <input type="radio" name="preferred_quality" value="0" ${config['pref_qual_0']} /><label>Highest Quality excluding Lossless</label>
                 		    <input type="radio" name="preferred_quality" value="1" ${config['pref_qual_1']} /><label>Highest Quality including Lossless</label>
                 		    <input type="radio" name="preferred_quality" value="3" ${config['pref_qual_3']} /><label>Lossless Only</label>
-                		    <input type="radio" name="preferred_quality" value="2" ${config['pref_qual_2']} /><label>Preferred Bitrate:
-                			<input type="text" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3">kbps</label>
-                		</div>
-                		<div class="row checkbox left">    					
-                		 	<input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />
-                		 	<label>Auto-Detect Preferred Bitrate</label>
-                		</div>
+                		    <input type="radio" id="preferred_bitrate" name="preferred_quality" value="2" ${config['pref_qual_2']} />Preferred Bitrate: <input type="text" class="override-float" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3">kbps<br>
+                			<div id="preferred_bitrate_options">
+					    Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['pref_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['pref_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br><br>
+					    <div class="row checkbox left">    					
+                		 	        <input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />
+                		 	        <label>Auto-Detect Preferred Bitrate</label>
+					    </div>					    
+					</div>
+				</div>
                 		
                 	</fieldset>
                	</td>
@@ -505,9 +508,30 @@ m<%inherit file="base.html"/>
 		        	<fieldset>
 		        		<legend>Miscellaneous</legend>
 		        		<div class="checkbox left row">
-		        		  	<input type="checkbox" name="include_extras" value="1" ${config['include_extras']} /><label>Automatically Include Extras When Adding an Artist <small>(EPs, Compilations, Live Albums, Remix Albums and Singles)</small></label>
-		        		  	
-		        		</div>
+		        		  	<input type="checkbox" name="include_extras" id="include_extras" value="1" ${config['include_extras']} /><label>Automatically Include Extras When Adding an Artist <br>
+						<%
+						    which_extras_selected = ""
+						    for extra in config['extras']:
+						        if config['extras'][extra] == "checked":
+							    which_extras_selected += string.capwords(extra) + ', '
+						    # Chop off the last comma & space
+						    if which_extras_selected:
+							which_extras_selected = which_extras_selected[:-2]
+						    else:
+							which_extras_selected = "None"
+						%>
+						<small>Currently Selected: ${which_extras_selected} <a href="#" id="modify_extras">(Change)</a></small></label>
+		        		  	<div id="dialog" title="Choose Which Extras to Include" style="display:none" class="configtable">
+						    %for extra in config['extras']:
+						        <input type="checkbox" id="${extra}_temp" name="${extra}_temp" value="1" ${config['extras'][extra]} />${string.capwords(extra)}<br>
+						    %endfor
+						</div>
+		        		  	<div style="display:none">
+						    %for extra in config['extras']:
+						        <input type="checkbox" id="${extra}" name="${extra}" value="1" ${config['extras'][extra]} />${string.capwords(extra)}<br>
+						    %endfor
+						</div>
+					</div>
 		        		<div class="row left checkbox">
 		        			<input type="checkbox" name="autowant_upcoming" value="1" ${config['autowant_upcoming']} /><label>Automatically Mark Upcoming Albums as Wanted</label>	
 		        			<div class="row leftcheckbox">
@@ -707,6 +731,13 @@ m<%inherit file="base.html"/>
 		}
 	};
 	
+	function openExtrasDialog() {
+	    $("#dialog").dialog({ close: function(){ 
+	        var elem = '<input type="button" data-success="Changes saved successfully">';
+		doAjaxCall('configUpdate', elem,'tabs',true); 
+	    }}).dialog("open");
+	};
+	
 	function initThisPage() 
 	
 	{
@@ -819,6 +850,25 @@ m<%inherit file="base.html"/>
 			{
 				$("#nmaoptions").slideUp();
 			}
+		});
+		if ($("#preferred_bitrate").is(":checked"))
+			{
+				$("#preferred_bitrate_options").show();
+			}
+		else
+			{
+				$("#preferred_bitrate_options").hide();
+			}
+		
+		$('input[type=radio]').change(function(){
+			if ($("#preferred_bitrate").is(":checked"))
+			{
+				$("#preferred_bitrate_options").slideDown("fast");
+			}
+			else
+			{
+				$("#preferred_bitrate_options").slideUp("fast");
+			}
 		});	
 		
 		$("#mirror").change(handleNewSelection);
@@ -830,6 +880,25 @@ m<%inherit file="base.html"/>
 		    $(this).parent().parent().remove();
 		    deletedNewznabs = deletedNewznabs + 1;
 		});
+		
+		$("#modify_extras").click(openExtrasDialog);
+		
+		$("#include_extras").click(function(){
+		    if ($("#include_extras").is(":checked")){
+			openExtrasDialog();
+		    }
+		});
+		
+		%for extra in config['extras']:
+		$("#${extra}_temp").click(function(){
+		    if ($(this).is(":checked")){
+			$("#${extra}").attr("checked", true);
+		    }
+		    else {
+			$("#${extra}").attr("checked", false);
+		    }
+		});
+		%endfor	
 		    
 		$("#add_newznab").click(function() {
 		    var intId = $("#newznab_providers > div").size() + deletedNewznabs + 1;
