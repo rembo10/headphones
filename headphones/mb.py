@@ -234,7 +234,7 @@ def getArtist(artistid, extrasonly=False):
         myDB = db.DBConnection()
 
         try:
-            db_artist = myDB.select('SELECT IncludeExtras, Extras from artists WHERE ArtistID=?', [artistid]).fetchone()
+            db_artist = myDB.action('SELECT IncludeExtras, Extras from artists WHERE ArtistID=?', [artistid]).fetchone()
             includeExtras = db_artist['IncludeExtras']
         except IndexError:
             includeExtras = False
