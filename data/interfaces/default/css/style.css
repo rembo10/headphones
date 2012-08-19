@@ -674,6 +674,13 @@ footer {
   position: relative;
   margin-right: 3px;
 }
+#dialog {
+  padding: 40px;
+}
+#dialog input#submit {
+  margin-left: 50px;
+  margin-right: auto;
+}
 #subhead .back {
   float: left;
   margin-top: -25px;
