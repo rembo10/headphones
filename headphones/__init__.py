@@ -901,8 +901,8 @@ def dbcheck():
         logger.info("Copying over current artist IncludeExtras information")
         artists = c.execute('SELECT ArtistID, IncludeExtras from artists').fetchall()
         for artist in artists:
-            if artist['IncludeExtras']:
-                c.execute('INSERT into artists (Extras) VALUES ("1,2,3,4,5,6,7,8") WHERE ArtistID=' + artist['ArtistID'])
+            if artist[1]:
+                c.execute('UPDATE artists SET Extras=? WHERE ArtistID=?', ("1,2,3,4,5,6,7,8", artist[0]))
     
     conn.commit()
     c.close()
