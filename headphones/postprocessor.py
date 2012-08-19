@@ -65,17 +65,22 @@ def verify(albumid, albumpath):
         #TODO: odd things can happen when there are diacritic characters in the folder name, need to translate them?
         import mb
         
-        release_dict = None
+        release_list = None
         
         try:    
-            release_dict = mb.getReleaseGroup(albumid)
+            release_list = mb.getReleaseGroup(albumid)
         except Exception, e:
             logger.info('Unable to get release information for manual album with rgid: %s. Error: %s' % (albumid, e))
             return
             
-        if not release_dict:
+        if not release_list:
             logger.info('Unable to get release information for manual album with rgid: %s' % albumid)
             return
+
+        # Since we're just using this to create the bare minimum information to insert an artist/album combo, use the first release
+        releaseid = release_list[0]['id']
+
+        release_dict = mb.getRelease(releaseid)
 
         logger.info(u"Now adding/updating artist: " + release_dict['artist_name'])
         
@@ -90,10 +95,12 @@ def verify(albumid, albumpath):
                         "ArtistSortName":   sortname,
                         "DateAdded":        helpers.today(),
                         "Status":           "Paused"}
-        logger.info("ArtistID:ArtistName: " + release_dict['artist_id'] + " : " + release_dict['artist_name'])
+                        
+        logger.info("ArtistID: " + release_dict['artist_id'] + " , ArtistName: " + release_dict['artist_name'])
 
         if headphones.INCLUDE_EXTRAS:
             newValueDict['IncludeExtras'] = 1
+            newValueDict['Extras'] = headphones.EXTRAS
         
         myDB.upsert("artists", newValueDict, controlValueDict)
 
@@ -104,24 +111,21 @@ def verify(albumid, albumpath):
                         "ArtistName":       release_dict['artist_name'],
                         "AlbumTitle":       release_dict['title'],
                         "AlbumASIN":        release_dict['asin'],
-                        "ReleaseDate":      release_dict['releasedate'],
+                        "ReleaseDate":      release_dict['date'],
                         "DateAdded":        helpers.today(),
-                        "Type":             release_dict['type'],
+                        "Type":             release_dict['rg_type'],
                         "Status":           "Snatched"
                         }
 
         myDB.upsert("albums", newValueDict, controlValueDict)
-        
-        # I changed the albumid from releaseid -> rgid, so might need to delete albums that have a releaseid
-        for rel in release_dict['releaselist']:
-            myDB.action('DELETE from albums WHERE AlbumID=?', [rel['releaseid']])
-            myDB.action('DELETE from tracks WHERE AlbumID=?', [rel['releaseid']])
-        
+    
+        # Delete existing tracks associated with this AlbumID since we're going to replace them and don't want any extras
         myDB.action('DELETE from tracks WHERE AlbumID=?', [albumid])
         for track in release_dict['tracks']:
         
             controlValueDict = {"TrackID":  track['id'],
                                 "AlbumID":  albumid}
+                                
             newValueDict = {"ArtistID":     release_dict['artist_id'],
                         "ArtistName":       release_dict['artist_name'],
                         "AlbumTitle":       release_dict['title'],
