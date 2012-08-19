@@ -316,16 +316,18 @@ m<%inherit file="base.html"/>
                 	<fieldset>
                 		<legend>Quality</legend>
                 		<div class="row radio clearfix">
-                		   	<input type="radio" name="preferred_quality" value="0" ${config['pref_qual_0']} /><label>Highest Quality excluding Lossless</label>
+				    <input type="radio" name="preferred_quality" value="0" ${config['pref_qual_0']} /><label>Highest Quality excluding Lossless</label>
                 		    <input type="radio" name="preferred_quality" value="1" ${config['pref_qual_1']} /><label>Highest Quality including Lossless</label>
                 		    <input type="radio" name="preferred_quality" value="3" ${config['pref_qual_3']} /><label>Lossless Only</label>
-                		    <input type="radio" name="preferred_quality" value="2" ${config['pref_qual_2']} /><label>Preferred Bitrate:
-                			<input type="text" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3">kbps</label>
-                		</div>
-                		<div class="row checkbox left">    					
-                		 	<input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />
-                		 	<label>Auto-Detect Preferred Bitrate</label>
-                		</div>
+                		    <input type="radio" id="preferred_bitrate" name="preferred_quality" value="2" ${config['pref_qual_2']} />Preferred Bitrate: <input type="text" class="override-float" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3">kbps<br>
+                			<div id="preferred_bitrate_options">
+					    Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['pref_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['pref_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br><br>
+					    <div class="row checkbox left">    					
+                		 	        <input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />
+                		 	        <label>Auto-Detect Preferred Bitrate</label>
+					    </div>					    
+					</div>
+				</div>
                 		
                 	</fieldset>
                	</td>
@@ -847,6 +849,25 @@ m<%inherit file="base.html"/>
 			else
 			{
 				$("#nmaoptions").slideUp();
+			}
+		});
+		if ($("#preferred_bitrate").is(":checked"))
+			{
+				$("#preferred_bitrate_options").show();
+			}
+		else
+			{
+				$("#preferred_bitrate_options").hide();
+			}
+		
+		$('input[type=radio]').change(function(){
+			if ($("#preferred_bitrate").is(":checked"))
+			{
+				$("#preferred_bitrate_options").slideDown("fast");
+			}
+			else
+			{
+				$("#preferred_bitrate_options").slideUp("fast");
 			}
 		});	
 		
