@@ -61,9 +61,27 @@ class WebInterface(object):
         myDB = db.DBConnection()
         artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
         albums = myDB.select('SELECT * from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
+        
+        # Serve the extras up as a dict to make things easier for new templates
+        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]
+        extras_dict = {}
+        
+        if not artist['Extras']:
+            artist_extras = ""
+        else:
+            artist_extras = artist['Extras']
+            
+        i = 1
+        for extra in extras_list:
+            if str(i) in artist_extras:
+                extras_dict[extra] = "checked"
+            else:
+                extras_dict[extra] = ""
+            i+=1
+
         if artist is None:
             raise cherrypy.HTTPRedirect("home")
-        return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums)
+        return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums, extras=extras_dict)
     artistPage.exposed = True
     
     
@@ -93,10 +111,27 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % artistid)
     addArtist.exposed = True
     
-    def getExtras(self, ArtistID):
+    def getExtras(self, ArtistID, newstyle=False, **kwargs):
+        # if calling this function without the newstyle, they're using the old format
+        # which doesn't separate extras, so we'll grab all of them
+        #
+        # If they are, we need to convert kwargs to string format
+        if not newstyle:
+            extras = "1,2,3,4,5,6,7,8"
+        else:
+            temp_extras_list = []
+            # TODO: Put these extras as a global variable
+            i = 1
+            for extra in ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]:
+                if extra in kwargs:
+                    temp_extras_list.append(i)
+                i += 1
+            extras = ','.join(str(n) for n in temp_extras_list)
+            
         myDB = db.DBConnection()
         controlValueDict = {'ArtistID': ArtistID}
-        newValueDict = {'IncludeExtras': 1}
+        newValueDict = {'IncludeExtras': 1,
+                        'Extras':        extras}
         myDB.upsert("artists", newValueDict, controlValueDict)
         threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True]).start()
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
