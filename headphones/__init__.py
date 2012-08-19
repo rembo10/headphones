@@ -90,6 +90,8 @@ FILE_FORMAT = None
 PATH_TO_XML = None
 PREFERRED_QUALITY = None
 PREFERRED_BITRATE = None
+PREFERRED_BITRATE_HIGH_BUFFER = None
+PREFERRED_BITRATE_LOW_BUFFER = None
 DETECT_BITRATE = False
 ADD_ARTISTS = False
 CORRECT_METADATA = False
@@ -252,7 +254,8 @@ def initialize():
                 ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, \
                 ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
-                XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT
+                XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
+                PREFERRED_BITRATE_LOW_BUFFER
                 
         if __INITIALIZED__:
             return False
@@ -302,6 +305,8 @@ def initialize():
         LOSSLESS_DESTINATION_DIR = check_setting_str(CFG, 'General', 'lossless_destination_dir', '')
         PREFERRED_QUALITY = check_setting_int(CFG, 'General', 'preferred_quality', 0)
         PREFERRED_BITRATE = check_setting_int(CFG, 'General', 'preferred_bitrate', '')
+        PREFERRED_BITRATE_HIGH_BUFFER = check_setting_int(CFG, 'General', 'preferred_bitrate_high_buffer', '')
+        PREFERRED_BITRATE_LOW_BUFFER = check_setting_int(CFG, 'General', 'preferred_bitrate_low_buffer', '')
         DETECT_BITRATE = bool(check_setting_int(CFG, 'General', 'detect_bitrate', 0))
         ADD_ARTISTS = bool(check_setting_int(CFG, 'General', 'auto_add_artists', 1))
         CORRECT_METADATA = bool(check_setting_int(CFG, 'General', 'correct_metadata', 0))
@@ -580,6 +585,8 @@ def config_write():
     new_config['General']['lossless_destination_dir'] = LOSSLESS_DESTINATION_DIR
     new_config['General']['preferred_quality'] = PREFERRED_QUALITY
     new_config['General']['preferred_bitrate'] = PREFERRED_BITRATE
+    new_config['General']['preferred_bitrate_high_buffer'] = PREFERRED_BITRATE_HIGH_BUFFER
+    new_config['General']['preferred_bitrate_low_buffer'] = PREFERRED_BITRATE_LOW_BUFFER
     new_config['General']['detect_bitrate'] = int(DETECT_BITRATE)
     new_config['General']['auto_add_artists'] = int(ADD_ARTISTS)
     new_config['General']['correct_metadata'] = int(CORRECT_METADATA)

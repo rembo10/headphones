@@ -455,6 +455,8 @@ class WebInterface(object):
                     "pref_qual_3" : radio(headphones.PREFERRED_QUALITY, 3),
                     "pref_qual_2" : radio(headphones.PREFERRED_QUALITY, 2),
                     "pref_bitrate" : headphones.PREFERRED_BITRATE,
+                    "pref_bitrate_high" : headphones.PREFERRED_BITRATE_HIGH_BUFFER,
+                    "pref_bitrate_low" : headphones.PREFERRED_BITRATE_LOW_BUFFER,
                     "detect_bitrate" : checked(headphones.DETECT_BITRATE),
                     "move_files" : checked(headphones.MOVE_FILES),
                     "rename_files" : checked(headphones.RENAME_FILES),
@@ -535,7 +537,8 @@ class WebInterface(object):
         interface=None, log_dir=None, music_encoder=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, 
         encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0, delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, 
         prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0, nma_enabled=False, 
-        nma_apikey=None, nma_priority=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None, **kwargs):
+        nma_apikey=None, nma_priority=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None, 
+        preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -580,6 +583,8 @@ class WebInterface(object):
         headphones.WAFFLES_PASSKEY = waffles_passkey
         headphones.PREFERRED_QUALITY = int(preferred_quality)
         headphones.PREFERRED_BITRATE = preferred_bitrate
+        headphones.PREFERRED_BITRATE_HIGH_BUFFER = preferred_bitrate_high_buffer
+        headphones.PREFERRED_BITRATE_LOW_BUFFER = preferred_bitrate_low_buffer
         headphones.DETECT_BITRATE = detect_bitrate
         headphones.MOVE_FILES = move_files
         headphones.CORRECT_METADATA = correct_metadata
