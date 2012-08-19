@@ -902,7 +902,7 @@ def dbcheck():
         artists = c.execute('SELECT ArtistID, IncludeExtras from artists').fetchall()
         for artist in artists:
             if artist['IncludeExtras']:
-                c.execute('INSERT into artists Extras="1,2,3,4,5,6,7,8" WHERE ArtistID=' + artist['ArtistID'])
+                c.execute('INSERT into artists (Extras) VALUES ("1,2,3,4,5,6,7,8") WHERE ArtistID=' + artist['ArtistID'])
     
     conn.commit()
     c.close()
