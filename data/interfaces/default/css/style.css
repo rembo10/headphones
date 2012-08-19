@@ -376,6 +376,10 @@ form .radio label {
   padding-top: 1px;
   width: auto;
 }
+.override-float {
+  float: none !important;
+  margin-bottom: 0px !important;
+}
 form .radio input {
   float: left;
   margin-bottom: 10px;
