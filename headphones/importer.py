@@ -470,6 +470,7 @@ def addReleaseById(rid):
         
         if headphones.INCLUDE_EXTRAS:
             newValueDict['IncludeExtras'] = 1
+            newValueDict['Extras'] = headphones.EXTRAS
         
         myDB.upsert("artists", newValueDict, controlValueDict)
         
