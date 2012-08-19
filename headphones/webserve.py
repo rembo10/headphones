@@ -616,7 +616,6 @@ class WebInterface(object):
         
         i = 1
         for extra in extras_list:
-            print repr(extra)
             if extra:
                 temp_extras_list.append(i)
             i+=1
