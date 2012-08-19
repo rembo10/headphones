@@ -2,6 +2,7 @@
 <%!
 	from headphones import db
 	import headphones
+	import string
 %>
 
 <%def name="headerIncludes()">
@@ -16,9 +17,21 @@
 			%endif
 			%if artist['IncludeExtras']:
 				<a id="menu_link_removeextra" href="#" onclick="doAjaxCall('removeExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Extras removed for ${artist['ArtistName']}">Remove Extras</a>
+				<a class="menu_link_edit" id="menu_link_modifyextra" href="#">Modify Extras</a>
 			%else:	
-				<a id="menu_link_getextra" href="#" onclick="doAjaxCall('getExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Getting Extras for ${artist['ArtistName']}">Get Extras</a>
+				<a id="menu_link_getextra" href="#">Get Extras</a>
 			%endif
+					<div id="dialog" title="Choose Which Extras to Fetch" style="display:none" class="configtable">
+						<form action="getExtras" method="get" class="form">
+							<input type="hidden" name="ArtistID" value="${artist['ArtistID']}">
+							<input type="hidden" name="newstyle" value="true">
+							%for extra in extras:
+								<input type="checkbox" id="${extra}" name="${extra}" value="1" ${extras[extra]} />${string.capwords(extra)}<br>
+							%endfor
+							<br>
+							<input id="submit" type="submit" value="Fetch Extras">
+						</form>
+					</div>
 		</div>
 	</div>	
 	<a href="home" class="back">&laquo; Back to overview</a>
@@ -178,6 +191,14 @@
 
 	
 	function initThisPage() {
+		$('#menu_link_getextra').click(function() {
+			$('#dialog').dialog();
+			return false;
+		});
+		$('#menu_link_modifyextra').click(function() {
+			$('#dialog').dialog();
+		});
+		
 		%if artist['Status'] == 'Loading':
 			showMsg("Getting artist information",true);
 		%endif
