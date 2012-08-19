@@ -230,6 +230,7 @@ def getArtist(artistid, extrasonly=False):
                     })               
                 
         # See if we need to grab extras. Artist specific extras take precedence over global option
+        # Global options are set when adding a new artist
         myDB = db.DBConnection()
 
         try:

@@ -887,12 +887,15 @@ def dbcheck():
     try:
         c.execute('SELECT Extras from artists')
     except sqlite3.OperationalError:
-        # Need to update some stuff when people are upgrading and have the 'INCLUDE_EXTRAS' options selected
+        c.execute('ALTER TABLE artists ADD COLUMN Extras TEXT DEFAULT NULL')
+        # Need to update some stuff when people are upgrading and have 'include extras' set globally/for an artist
         if INCLUDE_EXTRAS:
             EXTRAS = "1,2,3,4,5,6,7,8"
-            c.execute('ALTER TABLE artists ADD COLUMN Extras TEXT DEFAULT "1,2,3,4,5,6,7,8"')
-        else:
-            c.execute('ALTER TABLE artists ADD COLUMN Extras TEXT DEFAULT NULL')
+        logger.info("Copying over current artist IncludeExtras information")
+        artists = c.execute('SELECT ArtistID, IncludeExtras from artists').fetchall()
+        for artist in artists:
+            if artist['IncludeExtras']:
+                c.execute('INSERT into artists Extras="1,2,3,4,5,6,7,8" WHERE ArtistID=' + artist['ArtistID'])
     
     conn.commit()
     c.close()
