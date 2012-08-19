@@ -116,9 +116,13 @@ def addArtisttoDB(artistid, extrasonly=False):
     # Don't replace a known artist name with an "Artist ID" placeholder
 
     dbartist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [artistid]).fetchone()
-    if dbartist is None:
+    
+    # Only modify the Include Extras stuff if it's a new artist. We need it early so we know what to fetch
+    if not dbartist:
         newValueDict = {"ArtistName":   "Artist ID: %s" % (artistid),
-                "Status":   "Loading"}
+                        "Status":       "Loading",
+                        "IncludeExtras": headphones.INCLUDE_EXTRAS,
+                        "Extras":        headphones.EXTRAS }
     else:
         newValueDict = {"Status":   "Loading"}
 
@@ -148,9 +152,6 @@ def addArtisttoDB(artistid, extrasonly=False):
                     "ArtistSortName":   sortname,
                     "DateAdded":        helpers.today(),
                     "Status":           "Loading"}
-    
-    if headphones.INCLUDE_EXTRAS:
-        newValueDict['IncludeExtras'] = 1
     
     myDB.upsert("artists", newValueDict, controlValueDict)
 

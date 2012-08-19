@@ -229,16 +229,28 @@ def getArtist(artistid, extrasonly=False):
                             'type':       unicode(rg['type'])
                     })               
                 
-        # See if we need to grab extras
+        # See if we need to grab extras. Artist specific extras take precedence over global option
         myDB = db.DBConnection()
 
         try:
-            includeExtras = myDB.select('SELECT IncludeExtras from artists WHERE ArtistID=?', [artistid])[0][0]
+            db_artist = myDB.select('SELECT IncludeExtras, Extras from artists WHERE ArtistID=?', [artistid]).fetchone()
+            includeExtras = db_artist['IncludeExtras']
         except IndexError:
             includeExtras = False
         
-        if includeExtras or headphones.INCLUDE_EXTRAS:
-            includes = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]
+        if includeExtras:
+            
+            # Need to convert extras string from something like '2,5.6' to ['ep','live','remix']
+            extras = db_artist['Extras']
+            extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]
+            includes = []
+            
+            i = 1
+            for extra in extras_list:
+                if str(i) in extras:
+                    includes.append(extra)
+                i += 1
+
             for include in includes:
                 
                 artist = None
