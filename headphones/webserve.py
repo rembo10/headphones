@@ -61,9 +61,27 @@ class WebInterface(object):
         myDB = db.DBConnection()
         artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
         albums = myDB.select('SELECT * from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
+        
+        # Serve the extras up as a dict to make things easier for new templates
+        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]
+        extras_dict = {}
+        
+        if not artist['Extras']:
+            artist_extras = ""
+        else:
+            artist_extras = artist['Extras']
+            
+        i = 1
+        for extra in extras_list:
+            if str(i) in artist_extras:
+                extras_dict[extra] = "checked"
+            else:
+                extras_dict[extra] = ""
+            i+=1
+
         if artist is None:
             raise cherrypy.HTTPRedirect("home")
-        return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums)
+        return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums, extras=extras_dict)
     artistPage.exposed = True
     
     
@@ -93,10 +111,27 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % artistid)
     addArtist.exposed = True
     
-    def getExtras(self, ArtistID):
+    def getExtras(self, ArtistID, newstyle=False, **kwargs):
+        # if calling this function without the newstyle, they're using the old format
+        # which doesn't separate extras, so we'll grab all of them
+        #
+        # If they are, we need to convert kwargs to string format
+        if not newstyle:
+            extras = "1,2,3,4,5,6,7,8"
+        else:
+            temp_extras_list = []
+            # TODO: Put these extras as a global variable
+            i = 1
+            for extra in ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]:
+                if extra in kwargs:
+                    temp_extras_list.append(i)
+                i += 1
+            extras = ','.join(str(n) for n in temp_extras_list)
+            
         myDB = db.DBConnection()
         controlValueDict = {'ArtistID': ArtistID}
-        newValueDict = {'IncludeExtras': 1}
+        newValueDict = {'IncludeExtras': 1,
+                        'Extras':        extras}
         myDB.upsert("artists", newValueDict, controlValueDict)
         threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True]).start()
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
@@ -420,6 +455,8 @@ class WebInterface(object):
                     "pref_qual_3" : radio(headphones.PREFERRED_QUALITY, 3),
                     "pref_qual_2" : radio(headphones.PREFERRED_QUALITY, 2),
                     "pref_bitrate" : headphones.PREFERRED_BITRATE,
+                    "pref_bitrate_high" : headphones.PREFERRED_BITRATE_HIGH_BUFFER,
+                    "pref_bitrate_low" : headphones.PREFERRED_BITRATE_LOW_BUFFER,
                     "detect_bitrate" : checked(headphones.DETECT_BITRATE),
                     "move_files" : checked(headphones.MOVE_FILES),
                     "rename_files" : checked(headphones.RENAME_FILES),
@@ -470,19 +507,38 @@ class WebInterface(object):
                     "hpuser": headphones.HPUSER,
                     "hppass": headphones.HPPASS
                 }
+            
+        # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8
+        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]
+        extras_dict = {}
+        
+        i = 1
+        for extra in extras_list:
+            if str(i) in headphones.EXTRAS:
+                extras_dict[extra] = "checked"
+            else:
+                extras_dict[extra] = ""
+            i+=1
+                
+        config["extras"] = extras_dict
+        
         return serve_template(templatename="config.html", title="Settings", config=config)  
     config.exposed = True
     
     
-    def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None, download_scan_interval=None, nzb_search_interval=None, libraryscan_interval=None,
-        sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
-        usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0,
-        nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
-        torrentblackhole_dir=None, download_torrent_dir=None, numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None,
-        rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, include_extras=0, autowant_upcoming=False, autowant_all=False, interface=None, log_dir=None,
-        music_encoder=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0, delete_lossless_files=0,
-        prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0, 
-        nma_enabled=False, nma_apikey=None, nma_priority=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None, **kwargs):
+    def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None, 
+        download_scan_interval=None, nzb_search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, 
+        sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None, usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, 
+        newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, 
+        newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None, 
+        numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, rename_files=0, correct_metadata=0, 
+        cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, 
+        include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0, remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, 
+        interface=None, log_dir=None, music_encoder=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, 
+        encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0, delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, 
+        prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0, nma_enabled=False, 
+        nma_apikey=None, nma_priority=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None, 
+        preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -527,6 +583,8 @@ class WebInterface(object):
         headphones.WAFFLES_PASSKEY = waffles_passkey
         headphones.PREFERRED_QUALITY = int(preferred_quality)
         headphones.PREFERRED_BITRATE = preferred_bitrate
+        headphones.PREFERRED_BITRATE_HIGH_BUFFER = preferred_bitrate_high_buffer
+        headphones.PREFERRED_BITRATE_LOW_BUFFER = preferred_bitrate_low_buffer
         headphones.DETECT_BITRATE = detect_bitrate
         headphones.MOVE_FILES = move_files
         headphones.CORRECT_METADATA = correct_metadata
@@ -591,7 +649,20 @@ class WebInterface(object):
                     newznab_enabled = 0
                 
                 headphones.EXTRA_NEWZNABS.append((newznab_host, newznab_api, newznab_enabled))
+                
+        # Convert the extras to list then string. Coming in as 0 or 1
+        temp_extras_list = []
+        extras_list = [single, ep, compilation, soundtrack, live, remix, spokenword, audiobook]
         
+        i = 1
+        for extra in extras_list:
+            if extra:
+                temp_extras_list.append(i)
+            i+=1
+        
+        headphones.EXTRAS = ','.join(str(n) for n in temp_extras_list)    
+        
+        # Write the config
         headphones.config_write()
 
         raise cherrypy.HTTPRedirect("config")
