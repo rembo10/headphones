@@ -62,6 +62,21 @@ class WebInterface(object):
         artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
         albums = myDB.select('SELECT * from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
         
+        # Don't redirect to the artist page until it has the bare minimum info inserted 
+        # Redirect to the home page if we still can't get it after 5 seconds       
+        retry = 0
+            
+        while retry < 5:
+            if not artist:
+                time.sleep(1)
+                artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
+                retry += 1
+            else:
+                break
+                
+        if not artist:
+            raise cherrypy.HTTPRedirect("home")
+            
         # Serve the extras up as a dict to make things easier for new templates
         extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]
         extras_dict = {}
@@ -79,8 +94,6 @@ class WebInterface(object):
                 extras_dict[extra] = ""
             i+=1
 
-        if artist is None:
-            raise cherrypy.HTTPRedirect("home")
         return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums, extras=extras_dict)
     artistPage.exposed = True
     
