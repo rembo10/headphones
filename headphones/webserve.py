@@ -69,6 +69,7 @@ class WebInterface(object):
         while retry < 5:
             if not artist:
                 time.sleep(1)
+                artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
                 retry += 1
             else:
                 break
