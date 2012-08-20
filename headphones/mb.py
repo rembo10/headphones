@@ -326,8 +326,8 @@ def getRelease(releaseid, include_artist_info=True):
 
         release['title'] = unicode(results['title'])
         release['id'] = unicode(results['id']) 
-        release['asin'] = unicode(results['asin']) if 'asin' in results else u'None'
-        release['date'] = unicode(results['date']) if 'date' in results else u'None'
+        release['asin'] = unicode(results['asin']) if 'asin' in results else None
+        release['date'] = unicode(results['date']) if 'date' in results else None
         try:
             release['format'] = unicode(results['medium-list'][0]['format'])
         except:
