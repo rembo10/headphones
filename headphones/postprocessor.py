@@ -283,7 +283,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
     
     logger.info('Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
     
-    if headphones.PROWL_ONSNATCH:
+    if headphones.PROWL_ENABLED:
         pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
         logger.info(u"Prowl request")
         prowl = notifiers.PROWL()
