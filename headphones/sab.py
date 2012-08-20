@@ -118,10 +118,14 @@ def sendNZB(nzb):
 
     if sabText == "ok":
         logger.info(u"NZB sent to SAB successfully")
-        if headphones.PROWL_ONSNATCH:
-            logger.info(u"Prowl request")
+        if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
+            logger.info(u"Sending Prowl notification")
             prowl = notifiers.PROWL()
             prowl.notify(nzb.name,"Download started")
+        if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
+            logger.debug(u"Sending NMA notification")
+            nma = notifiers.NMA()
+            nma.notify(snatched_nzb=nzb.name)
 
         return True
     elif sabText == "Missing authentication":
