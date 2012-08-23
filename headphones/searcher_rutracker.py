@@ -64,8 +64,10 @@ class Rutracker():
          
         # Build search url
         
-        searchterm = artist
-        searchterm = searchterm + ' '
+        searchterm = ''
+        if artist != 'Various Artists':
+            searchterm = artist
+            searchterm = searchterm + ' '
         searchterm = searchterm + album
         searchterm = searchterm + ' '
         searchterm = searchterm + year
