@@ -28,6 +28,9 @@ from headphones import logger, db, helpers, classes, sab
 
 import lib.bencode as bencode
 
+import headphones.searcher_rutracker as rutrackersearch
+rutracker = rutrackersearch.Rutracker()
+
 class NewzbinDownloader(urllib.FancyURLopener):
 
     def __init__(self):
@@ -97,7 +100,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
                 else:
                     foundNZB = searchNZB(result['AlbumID'], new)
 
-            if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES) and foundNZB == "none":
+            if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER) and foundNZB == "none":
                 if result['Status'] == "Wanted Lossless":
                     searchTorrent(result['AlbumID'], new, losslessOnly=True)
                 else:
@@ -109,7 +112,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
         if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN) and (headphones.SAB_HOST or headphones.BLACKHOLE):
             foundNZB = searchNZB(albumid, new, lossless)
 
-        if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES) and foundNZB == "none":
+        if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER) and foundNZB == "none":
             searchTorrent(albumid, new, lossless)
 
 def searchNZB(albumid=None, new=False, losslessOnly=False):
@@ -632,6 +635,13 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
         new = True
         
+    # rutracker login
+    
+    if headphones.RUTRACKER and results:
+        rulogin = rutracker.login(headphones.RUTRACKER_USER, headphones.RUTRACKER_PASSWORD)
+        if not rulogin:
+            logger.info(u'Could not login to rutracker, search results will exclude this provider')
+    
     for albums in results:
         
         albumid = albums[2]
@@ -806,7 +816,46 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         except Exception, e:
                             logger.error(u"An error occurred while trying to parse the response from Waffles.fm: %s" % e)
 
-
+        
+        # rutracker.org
+        
+        if headphones.RUTRACKER and rulogin:
+        
+            provider = "rutracker.org"
+            bitrate = False
+            
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+                format = 'lossless'
+                maxsize = 10000000000
+            elif headphones.PREFERRED_QUALITY == 1:
+                format = 'lossless+mp3'
+                maxsize = 10000000000
+            else:
+                format = 'mp3'
+                maxsize = 300000000
+                if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
+                    bitrate = True
+                
+            # build search url based on above
+            
+            searchURL = rutracker.searchurl(artistterm, albumterm, year, format)
+            logger.info(u'Parsing results from <a href="%s">rutracker.org</a>' % searchURL)
+            
+            # parse results and get best match
+            rulist = rutracker.search(searchURL, maxsize, minimumseeders, albumid, bitrate)
+            
+            # add best match to overall results list
+            
+            if rulist:
+                for ru in rulist:
+                    title = ru[0]
+                    size = ru[1]
+                    url = ru[2]
+                    resultlist.append((title, size, url, provider))
+                    logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+            else:
+                logger.info(u"No valid results found from %s" % (provider))
+                
 
         if headphones.ISOHUNT:
             provider = "isoHunt"    
@@ -1029,19 +1078,24 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 
                     # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
 
-
                     torrent_name = torrent_folder_name + '.torrent'
                     download_path = os.path.join(headphones.TORRENTBLACKHOLE_DIR, torrent_name)
                     try:
-			#Write the torrent file to a path derived from the TORRENTBLACKHOLE_DIR and file name.
-			torrent_file = open(download_path, 'wb')
-			torrent_file.write(data)
-			torrent_file.close()
-			#Open the fresh torrent file again so we can extract the proper torrent name
-			#Used later in post-processing.
-			torrent_file = open(download_path, 'rb')
+                        if bestqual[3] == 'rutracker.org':
+			                download_path = rutracker.get_torrent(bestqual[2], headphones.TORRENTBLACKHOLE_DIR)
+			                if not download_path:
+			                    break
+                        else:  
+			                #Write the torrent file to a path derived from the TORRENTBLACKHOLE_DIR and file name.
+			                torrent_file = open(download_path, 'wb')
+			                torrent_file.write(data)
+			                torrent_file.close()
+			                
+			            #Open the fresh torrent file again so we can extract the proper torrent name
+			            #Used later in post-processing.
+                        torrent_file = open(download_path, 'rb')
                         torrent_info = bencode.bdecode(torrent_file.read())
-			torrent_file.close()
+                        torrent_file.close()
                         torrent_folder_name = torrent_info['info'].get('name','').decode('utf-8')
                         logger.info('Torrent folder name: %s' % torrent_folder_name)
                     except Exception, e:
@@ -1058,7 +1112,12 @@ def preprocesstorrent(resultlist):
             selresult = result
         elif int(selresult[1]) < int(result[1]): # if size is lower than new result replace previous selected result (bigger size = better quality?)
             selresult = result
-            
+             
+    # get outta here if rutracker
+        
+    if selresult[3] == 'rutracker.org':
+        return True, selresult
+                   
     try:
         request = urllib2.Request(selresult[2])
         request.add_header('Accept-encoding', 'gzip')
