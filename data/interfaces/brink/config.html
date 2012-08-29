@@ -305,12 +305,54 @@
 						<td><input class="switch" type="checkbox" name="newznab" value="1" ${config['use_newznab']} /></td>
 					</tr>
 					<tr>
-						<td><label for="newznab_host">Host:</label></td>
-						<td><input type="text" name="newznab_host" value="${config['newznab_host']}" size="30" maxlength="40" /></td>
-					</tr>
-					<tr>
-						<td><label for="newznab_apikey">API:</label></td>
-						<td><input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36" maxlength="40" /></td>
+						
+						<div id="newznab_providers">
+							<div class="config" id="newznab1">
+								<div class="row">
+									<label>Newznab Host</label>
+									<input type="text" name="newznab_host" value="${config['newznab_host']}" size="30">
+									<small>e.g. http://nzb.su</small>
+								</div>
+								<div class="row">
+									<label>Newznab API</label>
+									<input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36">
+								</div>
+								<div class="row checkbox">
+									<input id="newznab_enabled" type="checkbox" name="newznab_enabled" onclick="initConfigCheckbox($(this));" value="1" ${config['newznab_enabled']} /><label>Enabled</label>
+								</div>
+							</div>
+							<%
+							newznab_number = 1
+							%>
+							%for newznab in config['extra_newznabs']:
+							<%
+								if newznab[2] == '1' or newznab[2] == 1:
+								newznab_enabled = "checked"
+								else:
+								newznab_enabled = ""
+							%>
+							<div class="config" id="newznab${newznab_number}">
+								<div class="row">
+								<label>Newznab Host</label>
+								<input type="text" name="newznab_host${newznab_number}" value="${newznab[0]}" size="30">
+								</div>
+								<div class="row">
+								<label>Newznab API</label>
+								<input type="text" name="newznab_api${newznab_number}" value="${newznab[1]}" size="36">
+								</div>
+								<div class="row checkbox">
+								<input id="newznab_enabled" type="checkbox" name="newznab_enabled${newznab_number}" value="1" ${newznab_enabled} /><label>Enabled</label>
+								</div>
+								<div class="row">
+								<input type="button" class="remove" id="newznab${newznab_number}" value="Remove ${newznab[0]}">
+								</div>
+							</div>
+							<%
+								newznab_number += 1
+							%>
+							%endfor
+							<input type="button" value="Add Newznab" class="add_newznab" id="add_newznab" />
+						</div>
 					</tr>
 				</table>
 				<!--end Newznab-->
@@ -759,7 +801,10 @@
 						</tr><!--end Priority-->
 					</table><!--end NMA Options-->
 				</div><!--end Notifications-->
-				
+				<div id="NAS">
+					<h2>Synology NAS</h2>
+					<input type="checkbox" name="synoindex_enabled" id="synoindex" value="1" ${config['synoindex_enabled']} /><label>Enable Synoindex</label>
+				</div>
 				<!--Mirror-->
 				<div id="Mirror">
 					<h2><span>K</span>Mirror</h2>
@@ -832,7 +877,37 @@
 <%def name="javascriptIncludes()">
 	<script>
 		$(document).ready(function(){
-		
+			//Newznab
+			function newznab(){
+				if( $('input[name="newznab"]').is(":checked") ){
+					$("table#newznab-group").show();
+					enit();
+				}
+				else {
+					$("table#newznab-group").hide();
+					enit();
+				}
+			}
+			var deletedNewznabs = 0;
+			$(".remove").click(function() {
+				$(this).parent().parent().remove();
+				deletedNewznabs = deletedNewznabs + 1;
+			});
+			
+			$("#add_newznab").click(function() {
+				var intId = $("#newznab_providers > div").size() + deletedNewznabs + 1;
+				var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
+				var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"remove\" value=\"Remove\" /></div>");
+				removeButton.click(function() {
+				$(this).parent().remove();
+					deletedNewznabs = deletedNewznabs + 1;
+				
+				});
+				formfields.append(removeButton);
+				formfields.append("</div>");
+				$("#add_newznab").before(formfields);
+			});
+			
 			//nzbs.org
 			function nzbsorg(){
 				if( $('input[name="nzbsorg"]').is(":checked") ){
