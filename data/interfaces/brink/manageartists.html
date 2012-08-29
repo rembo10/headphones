@@ -1,7 +1,7 @@
 <%inherit file="base.html" />
 
 <%def name="body()">
-	<div id="paddingheader">
+	<div id="nav-sub-container">
 		<h1>Manage Artists<h1>
 	</div>
 	<form action="markArtists" method="get">
@@ -19,8 +19,8 @@
 		<thead>
 			<tr>
 				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
-				<th id="name">Artist Name</th>
 				<th id="status">Status</th>
+				<th id="name">Artist Name</th>
 				<th id="album">Latest Album</th>
 			</tr>
 		</thead>
@@ -46,8 +46,18 @@
 			%>
 			<tr class="grade${grade}">
 				<td id="select"><input type="checkbox" name="${artist['ArtistID']}" class="checkbox" /></td>
+				<td id="status">
+
+				%if artist['Status'] == 'Paused':
+					<span class="wsr Clock"></span>
+				%elif artist['Status'] == 'Loading':
+					<span class="wsr Loading loader"></span>
+				%else: 
+					<span class="wsr Approved"></span>
+				%endif
+				
+				</td>	
 				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
-				<td id="status">${artist['Status']}</td>	
 				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
 			</tr>
 		%endfor
@@ -61,21 +71,21 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-	<script src="interfaces/brink/js/libs/jquery.dataTables.min.js"></script>
+	<script src="interfaces/brink/JS/libs/jquery.dataTables.min.js"></script>
 	<script>
 	$(document).ready(function()
 	{
 		$('#artist_table').dataTable(
 			{
+				"bDestroy": true,
 				"aoColumns": [
-					{ "bSortable": false},
+					null,
 					null,
 					null,
 					null,
 				],
 				"bStateSave": true,
 				"bPaginate": false
-				
 			});
 	});
 	</script>
