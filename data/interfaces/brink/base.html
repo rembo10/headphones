@@ -22,6 +22,7 @@
 	<link rel="apple-touch-icon" href="images/headphoneslogo.png">
 	<!--Main Stylesheet-->
 	<link rel="stylesheet" href="interfaces/brink/css/style.css">
+	<link rel="stylesheet" href="interfaces/brink/css/websymbol.css">
 	<!-- Theme style -->
 	<link rel="stylesheet" href="interfaces/brink/css/theme/default.css">
 
@@ -45,7 +46,7 @@
 	
 	<!--Datatables-->
 	<script type="text/javascript" src="/js/libs/jquery.dataTables.min.js"></script>
-	<link rel="stylesheet" href="interfaces/brink/css/jquery.dataTables_themeroller.css">
+	<link rel="stylesheet" href="interfaces/brink/CSS/jquery.dataTables_themeroller.css">
 		
 	${next.headIncludes()}
 	${next.javascriptIncludes()}
@@ -58,53 +59,52 @@
 	<script src="js/libs/modernizr-1.7.min.js"></script>
 </head>
 <body>
+	<script type="text/javascript">
+		$(document).ready(function(){
 	% if not headphones.CURRENT_VERSION:
-		<script type="text/javascript">
-			noty({
-				"text":"You're running an unknown version of Headphones.<br />It's recommended that you update now!",
-				"type":"success",
-				buttons: [
-				  {type: 'button green', text: 'Update', click: function($noty) {
-						$(this).click(function(){
-							document.location.href='update';
-						});
-						$noty.close
-					  noty({force: true, text: 'Headphones is now updating, please be patient', type: 'success'});
-					}
-				  },
-				  {type: 'button pink', text: 'Cancel', click: function($noty) {
-					  $noty.close();
-					  noty({force: true, text: 'You can update anytime from the tools menu', type: 'information'});
-					}
-				  }
-				  ],
-				closable: false,
-				timeout: false
-			});
-		</script>
+			$("#commits-behind").fadeIn('slow').text("New version available");
 	% elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
-		<script>
-			noty({
-				"text":"A newer version is available."
-								+ "<br />You're ${headphones.COMMITS_BEHIND} commits behind"
-								+ "<a href='http://github.com/rembo10/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}'>Version</a>"
-								+ "<a href='update'>Update</a>",
-				"type":"success"
-			});
-			$(document).ready(function(){
-				$("#commitsBehind").text("Update (${headphones.COMMITS_BEHIND})")
-			});
-		</script>
+			$("#commits-behind").fadeIn('slow').text("(${headphones.COMMITS_BEHIND})");	
+	% else: 
+			$("#commits-behind").hide()
 	% endif
+		});
+	</script>
 	
 	<div class="custom_container"></div>
 	<table id="table_body">
 		<tr>
 			<td id="header" colspan="2">
-				<div id="logo">
-					<img src="/images/headphoneslogo.png" alt="headphones" />
-				</div>
-				
+				<ul id="nav">
+					<li><a href="home" accesskey="1">
+							<span class="wsr User"></span> Artist
+						</a>
+					</li>
+					<li><a href="upcoming" accesskey="2">
+							<span class="wsr">N</span> Upcoming
+						</a>
+					</li>
+					<li><a href="extras" accesskey="3">
+							<span class="wsr">R</span> Suggestions
+						</a>
+					</li>
+					<li><a href="manage" accesskey="4">
+							<span class="wsr">_</span> Manage
+						</a>
+					</li>
+					<li><a href="history" accesskey="5">
+							<span class="wsr">Z</span> History
+						</a>
+					</li>
+					<li><a href="logs" accesskey="6">
+							<span class="wsr">a</span> Logs
+						</a>
+					</li>
+					<li><a href="config" accesskey="7">
+							<span class="wsr">S</span> Settings
+						</a>
+					</li>
+				</ul>
 				<div id="searchbar">
 					<form action="search" method="get">
 						<select name="type">
@@ -112,46 +112,13 @@
 							<option value="album">Album</option>
 						</select>
 						<input type="text" value="" name="name" accesskey="s" placeholder="Search..." />
-						<input class="web-symbol" type="submit" value="L"/>
+						<input class="wsr" type="submit" value="L" />
 					</form>
 				</div>
 				${next.headerIncludes()}
 			</td>
 		</tr>
 		<tr>
-			<td id="nav-container">
-				<ul id="nav">
-					<li><a href="home" accesskey="1">
-							<span>U</span>Home
-						</a>
-					</li>
-					<li><a href="upcoming" accesskey="2">
-							<span>N</span>Upcoming
-						</a>
-					</li>
-					<li><a href="extras" accesskey="3">
-							<span>R</span>Suggestions
-						</a>
-					</li>
-					<li><a href="manage" accesskey="4">
-							<span>_</span>Manage
-						</a>
-					</li>
-					<li><a href="history" accesskey="5">
-							<span>Z</span>History
-						</a>
-					</li>
-					<li><a href="logs" accesskey="6">
-							<span>a</span>Logs
-						</a>
-					</li>
-					<li><a href="config" accesskey="7">
-							<span>S</span>Settings
-						</a>
-					</li>
-				</ul>
-				<div></div>
-			</td>
 			<td id="content-container">
 				<div id="main" class="main">
 				${next.body()}
@@ -161,14 +128,16 @@
 		<tr id="footer" >
 			<td colspan="2">
 				<div class="btn left">
-					<a href="forceSearch"><span>I</span>Wanted Albums</a>
-					<a href="forceUpdate"><span>U</span>Active Artists</a>
-					<a href="forcePostProcess"><span>J</span>Post-Process</a>
-					<a href="checkGithub"><span>V</span>Update<label id="commits"></label></a>
+					<a href="forceSearch"><span class="wsr">I</span> Wanted Albums</a>
+					<a href="forceUpdate"><span class="wsr">U</span> Active Artists</a>
+					<a href="forcePostProcess"><span class="wsr">J</span> Post-Process</a>
+					<a href="checkGithub" onclick="javascript:return confirm('Do you wish to Update Headphones now?')"><span class="wsr">V</span> Update
+						<span id="commits-behind"></span>
+					</a>
 				</div>
 				<div class="btn right">
-					<a href="restart" onclick="javascript:return confirm('Restart HP?')"><span>J</span>Restart</a>
-					<a href="shutdown" onclick="javascript:return confirm('Shutdown HP?')"><span>X</span>Shut Down</a>
+					<a href="restart" onclick="javascript:return confirm('Do you wish to Restart Headphones?')"><span class="wsr">J</span> Restart</a>
+					<a href="shutdown" onclick="javascript:return confirm('Do you wish to Shutdown Headphones?')"><span class="wsr">X</span> Shut Down</a>
 				</div>
 			</td>
 		</tr>

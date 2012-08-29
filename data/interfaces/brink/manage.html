@@ -5,44 +5,41 @@
 %>
 <%def name="headerIncludes()">
 	<div id="subhead_container">
-		<ul id="subhead_menu">
-			<li><a href="manageArtists">Manage Artists</a></li>
-			%if not headphones.ADD_ARTISTS:
-			<li><a href="manageNew">Manage New Artists</a></li>
-			%endif
-		</ul>
+		
 	</div>	
 </%def>
 
 <%def name="body()">
 	<div class="table_wrapper">
+		<div id="nav-sub-container">
+			<ul id="nav-sub">
+				<li>Manage: </li>
+				<li><a href="manageAlbums">Albums</a></li>
+				<li><a href="manageArtists">Artists</a></li>
+				%if not headphones.ADD_ARTISTS:
+				<li><a href="manageNew">New Artists</a></li>
+				%endif
+			</ul>
+		</div>
 		<h1>Scan Music Library</h1>
 		<table class="configtable">
 			<tr>
 				<td>
 					<p>
-						Where do you keep your music?
+						Local Music Directory:
 					</p>
 					<form action="musicScan" method="GET">
 						%if headphones.MUSIC_DIR:
 							<input type="text" value="${headphones.MUSIC_DIR}" name="path" size="60" />
-							<div class="tooltip">
-							<span>
 								You can put in any directory, and it will scan for audio files in that folder
 								(including all subdirectories)<br />
 								For example: '/Users/name/Music'
-							</span>
-						</div>
 						%else:
 						<p>
-							<input type="text" value="Enter a Music Directory to scan" onfocus="if (this.value==this.defaultValue) this.value='';" name="path" size="60" />
-							<div class="tooltip">
-								<span>
+							<input type="text" placeholder="Music Directory" onfocus="if (this.value==this.defaultValue) this.value='';" name="path" size="60" />
 									You can put in any directory, and it will scan for audio files in that folder
 									(including all subdirectories)<br />
 									For example: '/Users/name/Music'
-								</span>
-							</div>
 						</p>
 						%endif
 						<br />
@@ -50,11 +47,7 @@
 							<input class="styled" type="checkbox" name="autoadd" value="1" ${checked(headphones.ADD_ARTISTS)} /> Automatically add new artists
 						</p>
 						<input type="submit" />
-						<div class="tooltip">
-							<span>
 								This process runs in the background.
-							</span>
-						</div>
 					</form>
 				</td>
 			</tr>

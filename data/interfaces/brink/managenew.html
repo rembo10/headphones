@@ -3,7 +3,7 @@
 	import headphones
 %>
 <%def name="body()">
-	<div id="paddingheader">
+	<div id="nav-sub-container">
 		<h1>Manage New Artists<h1>
 		<h3><a href="musicScan?path=${headphones.MUSIC_DIR}&redirect=manageNew">Scan Music Library</a></h3>
 	</div>
@@ -20,10 +20,10 @@
 			</tr>
 		</thead>
 		<tbody>
-		%for artist in newartists:
+		%for artist in headphones.NEW_ARTISTS:
 			<tr class="gradeZ">
-				<td id="select"><input type="checkbox" name="${artist['ArtistName']}" class="checkbox" /></td>
-				<td id="name">${artist['ArtistName']}</a></td>
+				<td id="select"><input type="checkbox" name="${artist}" class="checkbox" /></td>
+				<td id="name">${artist}</a></td>
 			</tr>
 		%endfor
 		</tbody>
@@ -36,7 +36,7 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-	<script src="interfaces/brink/js/libs/jquery.dataTables.min.js"></script>
+	<script src="interfaces/brink/JS/libs/jquery.dataTables.min.js"></script>
 	<script>
 	$(document).ready(function()
 	{
