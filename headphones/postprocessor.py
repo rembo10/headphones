@@ -266,12 +266,13 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
     if headphones.RENAME_FILES:
         renameFiles(albumpath, downloaded_track_list, release)
     
-    if headphones.MOVE_FILES and headphones.DESTINATION_DIR:
-        albumpaths = moveFiles(albumpath, release, tracks)
-    
     if headphones.MOVE_FILES and not headphones.DESTINATION_DIR:
         logger.error('No DESTINATION_DIR has been set. Set "Destination Directory" to the parent directory you want to move the files to')
-        pass
+        albumpaths = [albumpath]
+    elif headphones.MOVE_FILES and headphones.DESTINATION_DIR:
+        albumpaths = moveFiles(albumpath, release, tracks)
+    else:
+		albumpaths = [albumpath]
         
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Downloaded" WHERE AlbumID=?', [albumid])
