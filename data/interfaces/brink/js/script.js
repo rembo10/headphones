@@ -174,7 +174,7 @@ function enit()
 	var mainWindow = $("#main");
 	var totalHeight = $(window).height() - ($("#header").outerHeight() + $("#footer").outerHeight()) - 3;
 	$(mainWindow).height(totalHeight);
-	$(mainWindow).jScrollPane({ showArrows: true, animateScroll: true, hijackInternalLinks: true });
+	$(mainWindow).jScrollPane({ showArrows: true, animateScroll: true, hijackInternalLinks: true, autoReinitialise: true });
 }
 $(document).ready(function(){
 	$("ul#nav-view li").toggle(function() {
@@ -188,7 +188,6 @@ $(document).ready(function(){
 		$(this).children("span").addClass("Icon");
 		$("#gridView").show();
 		$("#listView").hide();
-		enit();
 	});
 });
 
