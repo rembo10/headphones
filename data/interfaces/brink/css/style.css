@@ -1,0 +1,804 @@
+body {
+	margin: 0px;
+	padding: 0px;
+	font-family: "Century Gothic", Verdana, Tahoma, Arial, sans-serif;
+	overflow: hidden;
+	font-size: 100%;
+}
+
+/*
+ *	Univarsal 
+ * */
+
+ .clear{
+	clear:both;
+ }
+ 
+ /*Removes outline in Chrome*/
+ *:focus{
+	outline: none;
+ }
+ 
+ /*
+  *	Links Styles 
+  * */
+
+a:link {
+	color: rgb(200,200,200);
+  	text-decoration: none; 
+  	}
+a:visited {
+  	color: rgb(200,200,200);
+	text-decoration: none; 
+	}
+a:hover { /*this effect is not shown in NN4.xx*/
+  	color: rgb(255,255,255); 
+	text-decoration: none;
+  	}
+a:active {/*colour in NN4.xx is red*/ 
+  	color: rgb(200,200,200);
+  	text-decoration: none; 
+}
+
+#container { width: 100%; margin: auto; }
+
+/*Text format*/
+h1,h2,h3,h4,h5,h6{padding-left: 10px,}
+
+h1
+ { 
+	font-size: 1.2em; 
+	text-decoration: none;
+	margin: 0;
+	line-height: 2em;
+	color: rgb(0,145,255);
+}
+h2 { font-size: 1em; color: rgb(255,255,255); text-shadow: -1px -1px 0px rgb(10,10,10); margin-bottom: 0px; text-decoration: none; padding: 0px;}
+h3 { font-size: .8em; font-weight: normal; color: rgb(140,140,140); }
+h4 { padding: .6px; font-size: 0.8em; color: rgba(0,0,0,0.6); text-shadow: 1px 1px 0px rgba(255,255,255,0.1); text-decoration: none;}
+
+p { color: rgb(160,160,160); text-shadow: 1px 1px 1px #000;  margin-top: 8px; margin-bottom: 8px; }
+small { color: rgb(160,160,160); }
+/*#table_body*/
+#table_body{
+	width: 100%;
+	border-collapse: collapse;
+	overflow: hidden;
+}
+/*header*/
+#header 
+{ 
+	box-sizing: border-box;
+	height: 45px; 
+	border-bottom: 1px solid #000;
+	box-shadow: 1px 1px 2px #000;
+	vertical-align: middle;
+}
+
+div#logo{ float: left; margin-left: .5em; width: 12em;}
+div#logo img{ width: 2.5em; }
+
+/* *
+ * Search holder
+ */
+div#searchbar 
+{ 
+	margin-top: .5em;
+	margin-right: .5em;
+	float: right;
+}
+div#searchbar input[type="text"]{
+	margin: 0px;
+	padding: 0;
+	padding-left: 5px;
+	float: left;
+	width: 150px;
+}
+div#searchbar select{
+	float: left;
+}
+/*
+ * end searchbar
+ * */
+
+/*Noty*/
+div.custom_container   /*Makes use of noty*/
+{
+    width: 320px;
+    position: fixed; 
+    top: 25px; 
+    right: 25px; 
+    z-index: 999999;
+}
+
+/*Commits*/
+span#commits-behind {
+	position: relative;
+}
+span#commits-behind {
+	position: absolute;
+	background-color: red;
+	margin-top: -12px;
+	padding: 2px;
+	border: 1px solid white;
+	text-align: center;
+	border-radius: 4px;
+}
+
+/*Menu*/
+ul#nav 
+{ 
+	list-style-type: none; 
+	padding: 0; 
+	margin: 0;
+	float: left;
+	height: 100%;
+	width: 60%;
+}
+
+
+ul#nav li  
+{
+    float: left;
+    padding: 0; 
+    margin: 0;
+	line-height: 3em;
+	font-size: 1em;
+	text-align: center;
+	height: 100%;
+}
+ul#nav li a:hover{
+	background-color: rgba(8,160,255,0.1);
+	color: rgba(0,145,255,0.8);
+	text-shadow: 1px 1px rgba(0,0,0,0.9);
+}
+ul#nav li a{
+	padding-left: 10px;
+	padding-right: 10px;
+	display: block;
+	color: rgba(0,0,0,0.9);
+	text-shadow: 1px 1px rgba(0,145,255,0.2);
+}
+/* *
+ * Sub navigation
+ */
+ 
+#nav-sub-container { 
+	width: 100%; 
+	border-bottom: 1px solid rgb(0,145,255); 
+	background: #000;
+	height: 2.3em;
+}
+#nav-sub-container li {
+	font-size: .8em;
+	text-align: center;
+	line-height: 2.8em;
+}
+#nav-sub-container.nav-sub-fixed {
+	position: fixed;
+	top: 53px;
+	width: 22em;
+	border-right: 1px solid rgb(0,145,255);
+	border-radius: 0 0 10em 0;
+}
+
+ul#nav-sub { float: left; }
+ul#nav-view { float:right; }
+
+/*DropDown*/
+ul#nav-sub li ul { display: none; list-style: none; padding: 0; margin: 0; box-shadow: 0px 5px 5px #000;}
+ul#nav-sub li:hover ul { display: block; }
+ul#nav-sub li ul li { background-color: rgba(0,0,0,.5); float: none; text-align: left;}
+ul#nav-sub li ul li a{ display: block; 
+border-top:1px solid rgba(255,255,255,.1);
+border-bottom:1px solid rgba(0,0,0,.1);
+ }
+ul#nav-sub li ul li a:hover{ color: rgb(0,145,255); }
+
+
+ul#nav-sub,
+ul#nav-view {
+	list-style: none;
+	padding: 0px;
+	margin: 0px;
+	height: 100%;
+}
+
+ul#nav-view li,
+ul#nav-sub > li { 
+	float: left; 
+	border-right: 1px solid rgba(255,255,255,0.2);
+}
+
+ul#nav-view li,
+ul#nav-sub li a { 
+	display: block; 
+	padding: 0 10px 0 10px;
+	text-decoration: none; 
+	color: rgba(255,255,255,.3);
+}
+ul#nav-view > li:hover,
+ul#nav-sub > li:hover > a { 
+	color: rgb(0,145,255);
+	border-bottom: 2px solid rgb(0,145,255);
+	cursor: pointer;
+}
+ 
+ul#content-container{
+	overflow: hidden;
+}
+
+div#main {
+	overflow: hidden;
+}
+
+.table_wrapper { 
+	border-radius: 5px; 
+	-webkit-border-radius: 5px; 
+	-moz-border-radius: 5px; 
+	width: 100%; 
+	min-height: 50px; 
+	clear: both; 
+	_height: 302px; 
+	zoom: 1; 
+}
+
+/*Inputs & Select*/
+input, textarea, select, option {
+	appearance:none;
+	-moz-appearance:none; /* Firefox */
+	-webkit-appearance:none; /* Safari and Chrome */
+	padding-left: 5px;
+	padding-right: 5px;
+	font-size: .8em;
+	color: rgba(255,255,255,0.6);
+	line-height: 25px;
+	font-weight: bold;
+	margin: 0;
+}
+input[type="text"]{
+	height: 27px;
+}
+
+input, textarea{
+	border: 1px solid rgba(0,0,0,0.6);
+	background: rgba(0,0,0,.1);
+	border: 1px solid rgba(0,0,0,.3);
+}
+input[type=checkbox]:hover,
+input[type=radio]:hover,
+input[type='text']:focus,
+input[type='password']:focus,
+textarea:focus {
+	background-color: rgba(0,145,255,.1);
+	color: #fff;
+}
+
+select, 
+input[type="button"], 
+input[type="submit"]{
+	background-color: rgba(0,0,0,.1);
+	border: 1px solid rgba(0,0,0,.3);
+}
+select:hover,
+input[type="button"]:hover, 
+input[type="submit"]:hover{
+	background-color: rgba(0,145,255,.1);
+	color: #fff;
+}
+select option{
+	background: rgb(31,31,31);
+}
+select option:hover{
+	background: rgb(255,255,255);
+	color: #000;
+}
+
+input[type=checkbox],
+input[type=radio] {
+   display: inline-block;
+   font-size: 15px;
+   line-height: 1em;
+   margin: 0 0.25em 0 0;
+   padding: 0;
+   width: 1.25em;
+   height: 1.25em;
+   vertical-align: text-top;
+}
+
+input[type=radio] {
+    -webkit-border-radius: 2em; /* Make radios round */
+}
+
+input[type="radio"]:checked {
+	background: rgba(0,145,255,.8);
+}
+
+input[type="checkbox"]:checked{
+   background: rgb(0,145,255) no-repeat center center;
+}
+input[type="checkbox"]:checked:after{
+	content: '.';
+	color: rgb(255,255,255);
+	font-family: 'WebSymbolsRegular';
+	font-weight: bold;
+	font-size: 1em;
+	text-shadow: 1px 1px 0px rgba(0,0,0,0.3);
+	margin-left: 1px;
+	margin-bottom: 2px;
+}
+
+/*End Inputs & Select*/
+
+.manage_wrapper { width: 88%; margin: 20px auto 0 auto; padding: 25px; min-height: 150px; clear: both; _height: 302px; zoom: 1; }
+
+/*config*/
+div#config_wrapper { margin: auto; width: 640px;}
+div#config_wrapper div table { width: 100%; border-collapse:separate; border-spacing: 10px; }
+div#config_wrapper div table tr td:first-child{ width: 240px; }
+div#config_wrapper div table tr td{ vertical-align: middle; }
+/*end config*/
+
+/* Artist Table Style*/
+table#artist_table { width: 100%;}
+table#artist_table th#select { text-align: left; }
+table#artist_table th#albumart { text-align: center; width: 100px; }
+table#artist_table th#name { text-align: left; min-width: 150px; }
+table#artist_table th#album { text-align: left; min-width: 100px; }
+table#artist_table th#have { text-align: center; min-width: 50px; }
+
+table#artist_table td#select { vertical-align: middle; text-align: center; }
+table#artist_table td#albumart { vertical-align: middle; text-align: left; }
+table#artist_table td#name { vertical-align: middle; text-align: left; }
+table#artist_table td#album { vertical-align: middle; text-align: left; }
+table#artist_table td#have { vertical-align: middle; }
+
+table#album_table { width: 100%; }
+/* Album Tableheader*/
+table#album_table th#select { vertical-align: middle; text-align: left; width: 25px; }
+table#album_table th#albumart {vertical-align: middle; text-align: left; width: 70px; }
+table#album_table th#albumname {vertical-align: middle; text-align: left; min-width: 150px; }
+table#album_table th#reldate {vertical-align: middle; width: 175px; text-align: left; min-width: 70px; }
+table#album_table th#status {vertical-align: middle; width: 175px; text-align: left; min-width: 80px; }
+table#album_table th#type {vertical-align: middle; width: 175px; text-align: left; min-width: 60px; max-width: 100px; }
+table#album_table th#bitrate {vertical-align: middle; text-align: left; min-width: 60px; }
+/* Album tabledata */
+table#album_table td#select { vertical-align: middle; text-align: left; }
+table#album_table td#albumart { vertical-align: middle; text-align: left; }
+/*Artist Bio*/
+.artist-bio-container{
+	width: 100%;
+	height: 240px;
+	background-color: rgba(0,0,0,0.5);
+	position: relative;
+}
+.artist-bio-container .artist-art{
+	width: 240px; 
+	max-height: 240px;
+	float: left;
+	margin: 10px;
+	box-shadow: 0 0 6px #000;
+	-moz-box-shadow: 0 0 6px #000;
+	-webkit-box-shadow: 0 0 6px #000;
+	-o-box-shadow: 0 0 6px #000;
+	overflow: hidden;
+}
+.artist-bio-container .artist-art img{ 
+	width: 100%;
+}
+.artist-bio-container .artist-bio{
+	float: left;
+	font-size: .8em;
+	display: block;
+	width: 35%;
+}
+
+/*Grid View Artist*/
+.image-container { 
+	position: relative;
+	display: none; 
+	float: left; 
+	width: 126px;
+	margin: 10px 10px 10px 10px; 
+}
+.image-tag {
+	z-index: 2;
+	position: absolute;
+	top: 0px;
+	left: 10px;
+	width: .6em;
+	height: 1.2em;
+	border-radius: 0 0 2px 2px;
+	box-shadow: 1px 2px 2px #000;
+	display: none;
+}
+.image-tag.Wanted {
+	background-color: rgb(0,175,255);
+	display: block;
+}
+.image-tag.Downloaded {
+	background-color: #5DD345;
+	display: block;
+}
+.image-container .image-box{
+	height: 126px;
+	width: 126px;
+	position: relative;
+	box-shadow: 0 0 6px #000;
+	-moz-box-shadow: 0 0 6px #000;
+	-webkit-box-shadow: 0 0 6px #000;
+	overflow: hidden;
+}
+.image-container  .image-box img { 
+	width: 100%;
+	min-height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: 1;
+	border: 0;
+}
+
+.image-container  input {
+	position: absolute;
+	top: 0px;
+	z-index: 2;
+	width: 100%;
+	height: 100%;
+	text-align: right; 
+}
+.image-container  input:checked {
+	content: "";
+	background: rgba(0,0,0,0.1);
+	box-shadow: 0 0 10px rgb(0,145,255);
+	-moz-box-shadow: 0 0 10px rgb(0,145,255);
+	-webkit-box-shadow: 0 0 10px rgb(0,145,255);
+}
+.image-container .image-actions {
+	display: none;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	z-index: 4;
+	width: 100%;
+	height: 20%;
+	font-size: 1em;
+	line-height: 1.5em; 
+	text-align: center; 
+	background-color: rgba(0,0,0,0.5); 
+}
+.image-container:hover .image-actions{
+	display: block;
+}
+.image-container .image-info{
+	text-align: left;
+	font-size: 0.7em;
+	position: relative;
+	top: 5px;
+	left: 0px;
+	width: 100%;
+	height: 40px;
+	text-shadow: 1px 1px 2px #000;
+	overflow: hidden;
+	border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+/* Album art image sizes */
+.album-art-small
+{
+	position: relative;
+	width: 61px;
+	height: 61px;
+	float: left;
+	overflow: visible; 
+	background-color: rgb(255,255,255);
+	position: relative;
+	text-align: center;
+	box-shadow: 0 0 3px #000;
+	-moz-box-shadow: 0 0 3px #000;
+	-webkit-box-shadow: 0 0 3px #000;
+	-o-box-shadow: 0 0 3px #000;
+}
+.album-art-small img { width: 100%; height: 100%; }
+.album-art-small .album-actions {
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	width: 100%;
+	background-color: rgba(0,0,0,0.5);
+}
+.artist-status div{
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0,0,0,0.5);
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 2;
+	line-height: 3.8em;
+	text-align: center;
+}
+.album-art-small img { width: 100%; height: 100%; z-index: 200; border: 0; }
+div.status:hover { }
+.album-art-big 
+{ 
+	background: url(../images/box-big.png) no-repeat top left; 
+	float: left; 
+	height: 200px; 
+	margin-left: 20px;
+	margin-top. 20px;
+	padding-top:5px; 
+	padding-left: 27px; 
+	padding-bottom: 5px; 
+	padding-right: 110px; 
+	position: relative; 
+	width: 200px; 
+	z-index: 200;
+}
+.album-art-cd 
+{ 
+	background: url(../images/cd-big.png); 
+	width: 191px;
+	height: 191px;
+	position: absolute;
+	top: 9px;
+	right: 20px;
+	z-index: 1;
+}
+.album-art-big img { width: 200px; height: 200px; position: absolute; z-index: 2; } 	
+
+#album-describtion { float: left; width: 400px; min-height: 200px; margin-left: 20px; }
+table#album_table td#albumname { vertical-align: middle; text-align: left; }
+table#album_table td#reldate { vertical-align: middle; text-align: left; }
+table#album_table td#status { vertical-align: middle; text-align: left; }
+table#album_table td#type { vertical-align: middle; text-align: left; }
+table#album_table td#have { vertical-align: middle; }
+table#album_table td#bitrate { vertical-align: middle; text-align: left; }
+
+div#albumheader { margin: 20px 0px 40px 0px; min-height: 200px; }
+
+/*
+    Track
+*/
+div#track_wrapper { font-size: 12px; width: 100%; clear:both;  }
+table#track_table { margin-top: 20px; width: 100%; }
+table#track_table td { padding: 3px 10px 3px 10px; }
+table#track_table th#number { text-align: left; width: 30px; padding-left: 4px; }
+table#track_table th#name { text-align:left ; min-width: 160px; }
+table#track_table th#duration { text-align: left; width: 90px; }
+table#track_table th#location { text-align: left; min-width: 180px; }
+table#track_table th#bitrate { text-align: left; min-width: 75px; }
+
+table#track_table td#number { vertical-align: middle; text-align: left; font-size: 12px; overflow: hidden; }
+table#track_table td#name { vertical-align: middle; text-align: left; font-size: 12px; overflow: hidden; }
+table#track_table td#duration { vertical-align: middle; text-align: left; font-size: 12px; overflow: hidden; }
+table#track_table td#location { vertical-align: middle; text-align: left; font-size: 12px; overflow: hidden; }
+table#track_table td#bitrate { vertical-align: middle; text-align: left; font-size: 12px; overflow: hidden; }
+
+
+
+/* History table*/
+table#history_table { width: 100%; font-size: 12px; }
+table#history_table td#dateadded { vertical-align: middle; text-align: left; min-width: 150px; font-size: 14px; }
+table#history_table td#filename { vertical-align: middle; text-align: left; min-width: 100px; font-size: 15px; }
+table#history_table td#size { vertical-align: middle; text-align: left; min-width: 75px; font-size: 14px; }
+table#history_table td#status { vertical-align: middle; text-align: left; font-size: 14px; }
+table#history_table td#action { vertical-align: middle; text-align: left; font-size: 14px; }
+
+/*
+    Log
+*/
+table#log_table { width: 100%; }
+table#log_table th#timestamp { text-align: left; min-width: 150px; }
+table#log_table th#level { text-align: left; min-width: 60px; }
+table#log_table th#message { text-align: left; min-width: 500px; }
+/*
+    Upcoming
+*/
+/*Upcoming Tablehead*/
+table#upcoming_table {width: 100%;}
+table#upcoming_table th#albumart { text-align: left; min-width: 20%; }
+table#upcoming_table th#albumname { text-align: left; min-width: 200px; }
+table#upcoming_table th#artistname { text-align: left; min-width: 150px; }
+table#upcoming_table th#reldate { text-align: left; min-width: 100px; }
+table#upcoming_table th#type { text-align: left; min-width: 75px; }
+
+/*Upcoming Tabledata*/
+table#upcoming_table td#select { vertical-align: middle; text-align: left; }
+table#upcoming_table td#albumart { vertical-align: middle; text-align: left; min-width: 50px; }
+table#upcoming_table td#albumname { vertical-align: middle; text-align: left; min-width: 200px; }
+table#upcoming_table td#artistname { vertical-align: middle; text-align: left; min-width: 150px; }
+table#upcoming_table td#reldate { vertical-align: middle; text-align: left; min-width: 100px; }
+table#upcoming_table td#type { vertical-align: middle; text-align: left; min-width: 75px; }
+table#upcoming_table td#status { vertical-align: middle; text-align: left; }
+
+/*Wanted Tablehead*/
+table#wanted_table { width: 100%; }
+table#wanted_table th#albumart { text-align: left; min-width: 50px; }
+table#wanted_table th#albumname { text-align: left; min-width: 200px; }
+table#wanted_table th#artistname { text-align: left; min-width: 150px; }
+table#wanted_table th#reldate { text-align: left; min-width: 100px; }
+table#wanted_table th#type { text-align: left; min-width: 75px; }
+
+/*Wanted Tabledata*/
+table#wanted_table td#select { vertical-align: middle; text-align: left; }
+table#wanted_table td#albumart { vertical-align: middle; text-align: left; min-width: 50px; }
+table#wanted_table td#albumname { vertical-align: middle; text-align: left; min-width: 200px; }
+table#wanted_table td#artistname { vertical-align: middle; text-align: left; min-width: 150px; }
+table#wanted_table td#reldate { vertical-align: middle; text-align: left; min-width: 100px; }
+table#wanted_table td#type { vertical-align: middle; text-align: left; min-width: 75px; }
+table#wanted_table td#status { vertical-align: middle; text-align: left; }
+
+/*Search Results Tablehead*/
+table#searchresults_table { width: 100%; }
+table#searchresults_table th#albumname { text-align: left; min-width: 225px; }
+table#searchresults_table th#artistname { text-align: left; min-width: 325px; }
+table#searchresults_table th#score { text-align: left; min-width: 75px; }
+
+table#searchresults_table td#albumname { vertical-align: middle; text-align: left; min-width: 200px; }
+table#searchresults_table td#artistname { vertical-align: middle; text-align: left; min-width: 300px; }
+table#searchresults_table td#score { vertical-align: middle; text-align: left; min-width: 75px; }
+
+/*progress container*/
+
+div.progress-container span 
+{
+    float: left;
+    margin: auto;
+	color: #fffff;
+}
+div.progress-container span:hover
+{
+	
+}
+div.progress-container  
+{
+    width: 100%; 
+    height: 15px; 
+    margin: 2px 5px 2px 0px; 
+    overflow: hidden;
+    text-align: center;
+	border: 1px solid rgb(10,10,10);
+	box-shadow: 1px 1px 0px rgba(255,255,255,0.2); 
+	border-radius: 2px; 
+	background: rgba(0,0,0,0.1);
+}
+/*Progress bar*/
+div.progress-container div  
+{
+    height: 100%;
+	background: rgb(57,69,81); /* Old browsers */
+background: -moz-linear-gradient(top, rgba(57,69,81,1) 0%, rgba(54,64,76,1) 49%, rgba(36,43,51,1) 50%, rgba(36,43,51,1) 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(57,69,81,1)), color-stop(49%,rgba(54,64,76,1)), color-stop(50%,rgba(36,43,51,1)), color-stop(100%,rgba(36,43,51,1))); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top, rgba(57,69,81,1) 0%,rgba(54,64,76,1) 49%,rgba(36,43,51,1) 50%,rgba(36,43,51,1) 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top, rgba(57,69,81,1) 0%,rgba(54,64,76,1) 49%,rgba(36,43,51,1) 50%,rgba(36,43,51,1) 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top, rgba(57,69,81,1) 0%,rgba(54,64,76,1) 49%,rgba(36,43,51,1) 50%,rgba(36,43,51,1) 100%); /* IE10+ */
+background: linear-gradient(top, rgba(57,69,81,1) 0%,rgba(54,64,76,1) 49%,rgba(36,43,51,1) 50%,rgba(36,43,51,1) 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#394551', endColorstr='#242b33',GradientType=0 ); /* IE6-9 */
+}
+
+/*text format for match/procent*/
+.searchmatch,
+.havetracks
+{ 
+    display: block;
+    float: left;
+    width: 100%;
+    font-size: 12px;
+    position: relative;
+    text-align: center; 
+}
+
+
+#footer /*#footer*/
+{
+	/*ColorStyles.css*/
+	height: 50px;
+	border-collapse: collapse;
+	box-sizing: border-box;
+}
+
+#footer .btn a {
+	font-size: .8em;
+	background: rgba(0,0,0,.1);
+	border: 1px solid rgba(0,0,0,.3);
+	padding: 5px 10px 5px 10px;
+	margin: 0px 5px 0px 5px;
+}
+#footer .btn a:hover {
+	background: rgba(255,255,255,.1);
+}
+#footer .btn.left{
+	float: left;
+}
+#footer .btn.right{
+	float: right;
+}
+
+/*Footer manage/settings*/
+#options
+{
+	float: left;
+	padding: 5px;
+	list-style-type: none;
+	position: relative;
+	background-color: #192126;
+	
+}
+#options li { }  
+#options li a{
+	padding-left: 20px;
+	padding-right: 5px;
+	line-height: 25px;
+	display: block;
+	color: rgb(120,120,120);
+}
+#options li a:hover { background: rgb(255,255,255); }
+#options li span{ width: 30px; text-align: center; display:inline-block; }
+#options ul
+{
+	list-style-type: none;
+	padding: 0px;
+	margin: 0px;
+	position: absolute;
+	display: none;
+	background-color: rgba(0,0,0,0.5);
+	width: 200px;
+}
+
+#options li:hover ul
+{
+	display: block;
+}
+
+span#version { text-align: center; font-weight: bold; }
+span#donate { text-align: center; margin: 20px auto 20px auto; }
+
+/*	Shutdown
+ * */
+
+div#shutdown
+{ 
+	position: fixed; 
+	top: 0px; 
+	left: 0px; 
+	width: 100%; 
+	height: 100%; 
+	background-color: rgba(0,0,0,0.9);
+	z-index: 999;
+}
+div#shutdown div
+{
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	width: 0px;
+	height: 0px;
+}
+div#shutdown div div
+{
+	text-align: center;
+	position: relative;
+	float: left;
+	left: -150px;
+	top: -100px;
+	width: 300px;
+	height: 200px;
+}
+
+
+.cloudtag { padding-top: 30px; font-size:16px; }
+#cloud a.tag1 { font-size: 0.7em; font-weight: 100; }
+#cloud a.tag2 { font-size: 0.8em; font-weight: 200; }
+#cloud a.tag3 { font-size: 0.9em; font-weight: 300; }
+#cloud a.tag4 { font-size: 1.0em; font-weight: 400; }
+#cloud a.tag5 { font-size: 1.2em; font-weight: 500; }
+#cloud a.tag6 { font-size: 1.4em; font-weight: 600; }
+#cloud a.tag7 { font-size: 1.6em; font-weight: 700; }
+#cloud a.tag8 { font-size: 1.8em; font-weight: 800; }
+#cloud a.tag9 { font-size: 2.2em; font-weight: 900; }
+#cloud a.tag10 { font-size: 2.5em; font-weight: 900; }
+
+#cloud { padding: 2px; line-height: 1.5em; text-align: center; }
+#cloud a { padding: 0px; }
+#cloud { margin: 0; }
+#cloud li { display: inline; }

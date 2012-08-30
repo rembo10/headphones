@@ -1,12 +1,38 @@
 <%inherit file="base.html"/>
 <%!
 	from headphones import db
+	import headphones
+	import string
 %>
 
 <%def name="body()">
+	<script>
+		$(document).ready(function(){
+			$('#menu_link_getextra').click(function() {
+				$('#dialog').dialog();
+				return false;
+			});
+			$('#menu_link_modifyextra').click(function() {
+				$('#dialog').dialog();
+			});
+		});
+	</script>
+
+	<div id="dialog" title="Choose Which Extras to Fetch" style="display:none" class="configtable">
+		<form action="getExtras" method="get" class="ajax">
+			<input type="hidden" name="ArtistID" value="${artist['ArtistID']}">
+			<input type="hidden" name="newstyle" value="true">
+			%for extra in extras:
+				<input type="checkbox" id="${extra}" name="${extra}" value="1" ${extras[extra]} />${string.capwords(extra)}<br>
+			%endfor
+			<br>
+			<input id="submit" type="submit" value="Fetch Extras">
+		</form>
+	</div>
+	
 	<div id="nav-sub-container">
 		<ul id="nav-sub">
-			<li><a href="refreshArtist?ArtistID=${artist['ArtistID']}"><span class="wsr Synchronize"></span> Refresh</a></li>
+			<li><a class="refreshArtist" href="refreshArtist?ArtistID=${artist['ArtistID']}"><span class="wsr Synchronize"></span> Refresh</a></li>
 			<li><a href="deleteArtist?ArtistID=${artist['ArtistID']}"><span class="wsr Close"></span> Delete Artist</a></li>
 			%if artist['Status'] == 'Paused':
 				<li><a href="resumeArtist?ArtistID=${artist['ArtistID']}" ><span class="wsr Clock"></span> Resume</a></li>
@@ -14,15 +40,18 @@
 				<li><a href="pauseArtist?ArtistID=${artist['ArtistID']}"><span class="wsr Clock"></span> Pause</a></li>
 			%endif
 			%if artist['IncludeExtras']:
-				<li><a href="removeExtras?ArtistID=${artist['ArtistID']}"><span class="wsr Tag"></span> Remove Extras</a></li>
+				<li><a href="removeExtras?ArtistID=${artist['ArtistID']}">Remove Extras</a></li>
+				<li><a class="menu_link_edit" href="#">Modify Extras</a></li>
 			%else:	
-				<li><a href="getExtras?ArtistID=${artist['ArtistID']}"><span class="wsr Tag"></span> Get Extras</a></li>
+				<li><a id="menu_link_getextra" href="#">Get Extras</a></li>
 			%endif
 		</ul>
 		<ul id="nav-view">
 			<li><span class="wsr Icon"></span> Viewport</li>
 		</ul>
 	</div>
+	
+	
 	<form class="ajax" action="markAlbums" method="get">
 	<div class="artist-bio-container">
 		<div class="artist-art">
@@ -192,6 +221,21 @@
 			"bPaginate": false,
 			"aaSorting": [[4, 'asc'],[3,'desc']]
 		});
+		$( "#nav-sub li a" ).click(function(){
+		});
+		%if artist['Status'] == 'Loading':
+			var noty_id = noty({
+				text:'<span class="wsr Loading loader"></span> Artist is refreshing!',
+				layout: 'bottomRight',
+				type:'information'
+			});
+		%elif artist['Status'] == 'Paused':
+			var noty_id = noty({
+				text:'<span class="wsr Alert"></span> Artist is paused!',
+				layout: 'bottomRight',
+				type:'information'
+			});
+		%endif
 	});
 	function getArtistArt() {
 		$(".artist-bio-container").each(function(){
