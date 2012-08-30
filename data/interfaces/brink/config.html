@@ -11,10 +11,10 @@
 </%def>
 
 <%def name="body()">
-    <form id="config" action="configUpdate" method="post">
+    <form id="config" class="ajax" action="configUpdate" method="post">
 		<div id="nav-sub-container" class="nav-sub-fixed">
 			<ul id="nav-sub">
-				<li><a href="#"><span class="wsr">C</span> Settings Jump Menu</a>
+				<li><a href="#"><span class="wsr Code"></span> Settings Jump Menu</a>
 					<ul>
 						<li><a href="#WebInterface"><span class="wsr"></span> Web Interface</a></li>
 						<li><a href="#DownloadSettings"><span class="wsr"></span> Download Settings</a></li>
@@ -23,26 +23,26 @@
 						<li><a href="#Notifications"><span class="wsr"></span> Notifications</a></li>
 					</ul>
 				</li>
-				<li><a href="#SaveSettings"><span class="wsr">C</span> Save Changes</a></li>
+				<li><a href="#" class="submitForm" ><span class="wsr Approved"></span> Save Changes</a></li>
 			</ul>
 		</div>
 		<div id="config_wrapper"><!--config_wrapper-->
 			<div id="WebInterface"><!--Web Interface-->
-				<h1><span>C</span>Web Interface</h1>
-				<h3><span>W</span>Web Interface changes require a restart to take effect</h3>
+				<h1><span class="wsr">C</span>Web Interface</h1>
+				<small><span class="wsr">W</span>Web Interface changes require a restart to take effect</small>
 				<div>
 					<table><!--HTTP-->
 						<tr>
 							<td>
 								<h2>HTTP</h2>
-								<h3>Basic settings for Headphones.</h3>
+								<br /><small>Basic settings for Headphones.</small>
 							</td>
 							<td></td>
 						</tr>
 						<tr>
 							<td>
 								<label for="http_host">Host:</label>
-								<h3>Localhost or 0.0.0.0</h3>
+								<br /><small>Localhost or 0.0.0.0</small>
 							</td>
 							<td>
 								<input type="text" name="http_host" value="${config['http_host']}" size="25" maxlength="40" />
@@ -51,7 +51,7 @@
 						<tr>
 							<td>
 								<label for="http_port">Port:</label>
-								<h3>Default is: 8181</h3>
+								<br /><small>Default is: 8181</small>
 							</td>
 							<td>
 								<input type="text" name="http_port" value="${config['http_port']}" size="10" maxlength="40" />
@@ -60,7 +60,7 @@
 						<tr>
 							<td>
 								<label for="http_username">Username:</label>
-								<h3>Enter a desired username at login, or leave blank for none.</p>
+								<br /><small>Enter a desired username at login, or leave blank for none.</p>
 							</td>
 							<td>
 								<input type="text" name="http_username" value="${config['http_user']}" size="30" maxlength="40" />
@@ -69,7 +69,7 @@
 						<tr>
 							<td>
 								<label for="http_password">Password:</label>
-								<h3>Enter a desired password at login, or leave blank for none.</h3>
+								<br /><small>Enter a desired password at login, or leave blank for none.</small>
 							</td>
 							<td>
 								<input type="password" name="http_password" value="${config['http_pass']}" size="30" maxlength="40" />
@@ -78,7 +78,7 @@
 						<tr>
 							<td>
 								<label for="launch_browser">Launch browser:</label><br />
-								<h3>Enabling this feature will open Headphones at startup.</h3>
+								<br /><small>Enabling this feature will open Headphones at startup.</small>
 							</td>
 							<td>
 								<input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} />
@@ -89,7 +89,7 @@
 						<!--Layout/Theme-->
 							<tr>
 								<td><label for="interface">Interface:</label>
-									<h3>Choose from a verity of different themes</h3>
+									<br /><small>Choose from a verity of different themes</small>
 								</td>
 								<td>
 									<select  name="interface">
@@ -111,12 +111,12 @@
 						<!--API-->
 							<tr>
 								<td><h2>API:</h2>
-									<h3><label for="api_switch">Enabled/Disabled</label></h3></td>
+									<small><label for="api_switch">Enabled/Disabled</label></small></td>
 								<td><input class="switch" type="checkbox" name="api_switch" id="api_enabled" value="1" ${config['api_enabled']} /></td>
 							</tr>
 							<tr id="api_switch">
 								<td>
-									<h3>Visit <a href="https://github.com/rembo10/headphones/tree/" target="_blank"><span>D</span>repo</a> for more information.</h3>
+									<small>Visit <a href="https://github.com/rembo10/headphones/tree/" target="_blank"><span>D</span>repo</a> for more information.</small>
 								</td>
 								<td>
 									<input type="text" name="api_key" value="${config['api_key']}" size="30"><input class="submit" type="button" value="Generate" id="generate_api">
@@ -126,14 +126,14 @@
 						
 						<!--Interval-->
 							<tr>
-								<td><h2><span>P</span>Scan Intervals</h2></td>
+								<td><h2><span class="wsr">P</span>Scan Intervals</h2></td>
 							</tr>
 							
 							<!--NZB Scan-->
 								<tr>
 									<td>
-										<label for="nzb_search_interval">NZB Search:</label>
-										<h3><label id="nzb_search_interval"></label></h3>
+										<label for="nzb_search_interval">NZB Search:</label><br />
+										<small><label id="nzb_search_interval"></label></small>
 									</td>
 									<td>
 										<div class="sliderInterval" for="nzb_search_interval"></div>
@@ -149,8 +149,8 @@
 							<!--Download Scan-->
 							<tr>
 								<td>
-									<label for="download_scan_interval">Download folder scan every: </label>
-									<h3><label id="download_scan_interval"></label></h3>
+									<label for="download_scan_interval">Download folder scan every: </label><br />
+									<small><label id="download_scan_interval"></label></small>
 								</td>
 								<td>
 									<div class="sliderInterval" for="download_scan_interval"></div>
@@ -163,8 +163,8 @@
 							
 							<!--Library Scan-->
 							<tr>
-								<td><label for="library_scan_interval">Library scan:</label>
-									<h3><label id="libraryscan_interval"></label></h3>
+								<td><label for="library_scan_interval">Library scan:</label><br />
+									<small><label id="libraryscan_interval"></label></small>
 								</td>
 								<td>
 									<div class="sliderInterval" for="libraryscan_interval"></div>
@@ -181,8 +181,8 @@
 			
 			<!--Download Settings-->
 			<div id="DownloadSettings">
-				<h1><span>u</span>Download Settings</h1>
-				<h3>Setup SABnzbd or BitTorrent</h3>
+				<h1><span class="wsr">u</span>Download Settings</h1>
+				<small>Setup SABnzbd or BitTorrent</small>
 				
 				<!--Sabnzdb-->
 				<div>
@@ -190,25 +190,25 @@
 						<tr>
 							<td>
 								<h2>SABnzbd</h2>
-								<h3></h3>
+								<small></small>
 							</td>
 							<td></td>
 						</tr>
 						<tr>
 							<td><label for="sab_host">Host:</label>
-								<h3>Usually http://localhost:8080</h3>
+								<br /><small>Usually http://localhost:8080</small>
 							</td>
 							<td><input type="text" name="sab_host" value="${config['sab_host']}" size="30" maxlength="40" /></td>
 						</tr>
 						<tr>
 							<td><label for="sab_username">Username:</label>
-								<h3>Type the user name for SABnzbd</h3>
+								<br /><small>Type the user name for SABnzbd</small>
 							</td>
 							<td><input type="text" name="sab_username" value="${config['sab_user']}" size="20" maxlength="40" /></td>
 						</tr>
 						<tr>
 							<td><label for="sab_password">Password:</label>
-								<h3>Enter the password for SABnzbd</h3>
+								<br /><small>Enter the password for SABnzbd</small>
 							</td>
 							<td><input type="password" name="sab_password" value="${config['sab_pass']}" size="20" maxlength="40" /></td>
 						</tr>
@@ -218,14 +218,14 @@
 						</tr>
 						<tr>
 							<td><label for="sab_category">Category:</label>
-								<h3>Write the category label name from SABnzbd</h3>
+								<small>Write the category label name from SABnzbd</small>
 							</td>
 							<td><input type="text" name="sab_category" value="${config['sab_cat']}" size="20" maxlength="40" /></td>
 						</tr>
 						<tr>
 							<td>
 								<label for="download_dir">Download Directory:</label>
-								<h3>Full path to the directory where SAB downloads your music.</h3>
+								<br /><small>Full path to the directory where SAB downloads your music.</small>
 							</td>
 							<td><input type="text" name="download_dir" value="${config['download_dir']}" size="40" /></td>
 						</tr>
@@ -237,13 +237,13 @@
 				<div>
 					<table>	
 						<tr>
-							<td><h2><span>~</span>Torrents</h2></td>
+							<td><h2><span class="wsr">~</span>Torrents</h2></td>
 							<td></td>
 						</tr>
 						<tr>
 							<td>
 								<label for="blackhole_dir">Black Hole Directory:</label>
-								<h3>Folder your Download program watches for NZBs</h3>
+								<br /><small>Folder your Download program watches for NZBs</small>
 							</td>
 							<td>
 								<input type="text" name="blackhole_dir" value="${config['blackhole_dir']}" size="40" />
@@ -251,14 +251,14 @@
 						</tr>
 						<tr>
 							<td><label for="usenet_retention">Usenet Retention:</label>
-								<h3>Binary retention time</h3>
+								<br /><small>Binary retention time</small>
 							</td>
 							<td><input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5" maxlength="10" /></td>
 						</tr>
 						<tr>
 							<td>
 								<label for="torrentblackhole_dir">Black Hole Directory:</label>
-								<h3>Folder your Download program watches for Torrents</h3>
+								<br /><small>Folder your Download program watches for Torrents</small>
 							</td>
 							<td>
 								<input type="text" name="torrentblackhole_dir" value="${config['torrentblackhole_dir']}" size="40">	
@@ -266,14 +266,14 @@
 						</tr>
 						<tr>
 							<td><label for="numberofseeders">Minimum seeders:</label>
-								<h3>Number of minimum seeders a torrent must have to be accepted</h3>
+								<br /><small>Number of minimum seeders a torrent must have to be accepted</small>
 							</td>
 							<td><input type="text" name="numberofseeders" value="${config['numberofseeders']}" size="5" /></td>
 						</tr>
 						<tr>
 							<td>
 								<label for="download_torent_dir">Music Download Directory:</label>
-								<h3>Full path to the directory where your torrent client downloads your music <br />i.e. /Users/name/Downloads/music</h3>
+								<br /><small>Full path to the directory where your torrent client downloads your music <br />i.e. /Users/name/Downloads/music</small>
 							</td>
 							<td><input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="40" /></td>
 						</tr>
@@ -285,15 +285,15 @@
 			<!--end Download Settings-->
 			
 			<div><!--Search Providers-->
-				<h2><span>L</span> Search Providers</h2>
-				<h3>"We provide you with a automated search service to locate binary files/secgments that can be found on the public access network called Usenet."</h3>
+				<h2><span class="wsr">L</span> Search Providers</h2>
+				<small>"We provide you with a automated search service to locate binary files/secgments that can be found on the public access network called Usenet."</small>
 				
 				<!--NZB Matrix-->
 				<table id="nzbmatrix">
 					<tr>
 						<td>
-							<h2><a href="http://www.nzbmatrix.com" target="_blank"><span>D</span>NZBMatrix</a></h2>
-							<h3><label for="nzbmatrix_switch">Enabled/Disabled</label></h3>
+							<h2><a href="http://www.nzbmatrix.com" target="_blank"><span class="wsr">D</span>NZBMatrix</a></h2>
+							<br /><small><label for="nzbmatrix_switch">Enabled/Disabled</label></small>
 						</td>
 						<td><input class="switch" type="checkbox" name="nzbmatrix_switch" value="1" ${config['use_nzbmatrix']} /></td>
 					</tr>
@@ -314,8 +314,8 @@
 				<table id="newznab" class="configtable">
 					<tr>
 						<td>
-							<h2><a href="http://www.newznab.com/" target="_blank"><span>D</span>Newznab</a></h2>
-							<h3><label for="newznab">Enabled/Disabled</label></h3>
+							<h2><a href="http://www.newznab.com/" target="_blank"><span class="wsr">D</span>Newznab</a></h2>
+							<br /><small><label for="newznab">Enabled/Disabled</label></small>
 						</td>
 						<td><input class="switch" type="checkbox" name="newznab" value="1" ${config['use_newznab']} /></td>
 					</tr>
@@ -325,14 +325,15 @@
 								<div class="row">
 									<label>Newznab Host</label>
 									<input type="text" name="newznab_host" value="${config['newznab_host']}" size="30">
-									<small>e.g. http://nzb.su</small>
+									<br /><small>e.g. http://nzb.su</small>
 								</div>
 								<div class="row">
 									<label>Newznab API</label>
 									<input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36">
 								</div>
 								<div class="row checkbox">
-									<input id="newznab_enabled" type="checkbox" name="newznab_enabled" onclick="initConfigCheckbox($(this));" value="1" ${config['newznab_enabled']} /><label>Enabled</label>
+									<input id="newznab_enabled" type="checkbox" name="newznab_enabled" onclick="initConfigCheckbox($(this));" value="1" ${config['newznab_enabled']} />
+									<label>Enabled</label>
 								</div>
 							</div>
 							<%
@@ -369,10 +370,10 @@
 				<table>
 					<tr>
 						<td>
-							<h2><a href="http://nzbs.org/" target="_blank"><span>D</span>Nzbs</a></h2>
-							<h3></h3>
+							<h2><a href="http://nzbs.org/" target="_blank"><span class="wsr">D</span>Nzbs</a></h2>
+							<small></small>
 						</td>
-						<td><input class="switch" type="checkbox" name="nzbsorg" value="1" ${config['use_nzbsorg']} /><h3><label for="nzbsorg"></label></h3></td>
+						<td><input class="switch" type="checkbox" name="nzbsorg" value="1" ${config['use_nzbsorg']} /><small><label for="nzbsorg"></label></small></td>
 					</tr>
 				</table>
 				<table id="nzbsorg">
@@ -387,8 +388,8 @@
 				<table>
 					<tr>
 						<td>
-							<h2><a href="http://www.newsbin.com/" target="_blank"><span>D</span>Newzbin</a></h2>
-							<h3><label for="newzbin">Enabled/Disabled</label></h3>
+							<h2><a href="http://www.newsbin.com/" target="_blank"><span class="wsr">D</span>Newzbin</a></h2>
+							<small><label for="newzbin">Enabled/Disabled</label></small>
 						</td>
 						<td>
 							<input class="switch" type="checkbox" name="newzbin" value="1" ${config['use_newzbin']} />
@@ -412,7 +413,7 @@
 					<tr>
 						<td>
 							<h2>BitTorrent:</h2>
-							<h3>A peer-to-peer file sharing (P2P) communications protocol</h3>
+							<small>A peer-to-peer file sharing (P2P) communications protocol</small>
 						</td>
 						<td>
 							<input type="checkbox" name="use_isohunt" value="1" ${config['use_isohunt']} />
@@ -433,12 +434,12 @@
 			
 			<!--Quality-->
 			<div id="Quality">
-				<h1><span>I</span> Quality & Post Processing</h1>
-				<h3></h3>
+				<h1><span class="wsr">I</span> Quality & Post Processing</h1>
+				<small></small>
 				<table id="AlbumQuality">
 					<tr>
 						<td><h2>Album Quality:</h2>
-							<h3></h3>
+							<small></small>
 						</td>
 						<td></td>
 					</tr>
@@ -469,7 +470,7 @@
 				<table class="configtable">
 					<tr>
 						<td><h2>Post Processing:</h2>
-							<h3></h3>
+							<small></small>
 						</td>
 						<td>
 							<input type="checkbox" name="move_files" value="1" ${config['move_files']} />
@@ -496,7 +497,7 @@
 					</tr>
 					<tr>
 						<td><label for="destination_dir">Music Folder:</label>
-							<h3>i.e. /Users/name/Music/iTunes or /Volumes/share/music</h3>
+							<small>i.e. /Users/name/Music/iTunes or /Volumes/share/music</small>
 						</td>
 							<td><input type="text" name="destination_dir" value="${config['dest_dir']}" size="40" /></td>
 					</tr>
@@ -504,22 +505,22 @@
 			</div><!--end Quality-->
 			
 			<div id="AdvancedSettings"><!--AdvancedSettings-->
-				<h1><span>S</span>Advanced Settings</h1>
+				<h1><span class="wsr">S</span>Advanced Settings</h1>
 				<div><!--Renaming-->
 					<table class="configtable">
 						<tr>
-							<td><h2><span>T</span>Renaming</h2></td>
+							<td><h2><span class="wsr">T</span>Renaming</h2></td>
 						</tr>
 						<tr>
 							<td><label for="folder_format">Folder Format:</label>
-									<h3>Use: $Artist/$artist, $Album/$album, $Year/$year, $Type/$type (release type) and $First/$first (first letter in artist name) <br />
-										E.g.: $Type/$First/$artist/$album [$year] = Album/G/girl talk/all day [2010]</h3>
+									<small>Use: $Artist/$artist, $Album/$album, $Year/$year, $Type/$type (release type) and $First/$first (first letter in artist name) <br />
+										E.g.: $Type/$First/$artist/$album [$year] = Album/G/girl talk/all day [2010]</small>
 							</td>
 								<td><input type="text" name="folder_format" value="${config['folder_format']}" size="43" /></td>
 						</tr>
 						<tr>
 							<td><label for="file_format">File Format:</label>
-									<h3>Use: $Track/$track (track #), $Title/$title, $Artist/$artist, $Album/$album and $Year/$year</h3>
+									<small>Use: $Track/$track (track #), $Title/$title, $Artist/$artist, $Album/$album and $Year/$year</small>
 							</td>
 							<td><input type="text" name="file_format" value="${config['file_format']}" size="43" /></td>
 						</tr>
@@ -528,15 +529,15 @@
 				<div><!--Miscellaneous-->
 					<table id="Miscellaneous" class="configtable">
 						<tr>
-							<td><h2><span>F</span>Miscellaneous</h2>
-								<h3>Customize what HP</h3>
+							<td><h2><span class="wsr">F</span>Miscellaneous</h2>
+								<small>Customize what HP</small>
 							</td>
 							<td></td>
 						</tr>
 						<tr>
 							<td>
 								<h2>Automatically:</h2>
-								<h3>EPs, Compilations, Live Albums, Remix Albums and Singles</h3>
+								<small>EPs, Compilations, Live Albums, Remix Albums and Singles</small>
 							</td>
 							<td>
 								<input type="checkbox" name="include_extras" value="1" ${config['include_extras']} />
@@ -564,7 +565,7 @@
 				<!--Re-Encoding Options-->
 				<div id="Re-EncodingOptions">
 					<h2>Re-Encoding Options</h2>
-						<h3>Re-encode downloads during postprocessing.<br />This option requires the lame or ffmpeg encoder.</h3>
+						<small>Re-encode downloads during postprocessing.<br />This option requires the lame or ffmpeg encoder.</small>
 					<div><!--Encoder Options-->
 						<table id="encoderoptions">
 							<tr>
@@ -684,7 +685,7 @@
 							<tr>
 								<td>
 									<label>Advanced Encoding Options:</label>
-									<h3>Ignores audio properties</h3>
+									<small>Ignores audio properties</small>
 								</td>
 									<td><input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43" /></td>
 							</tr>
@@ -698,13 +699,13 @@
 					
 				<!--Notifications-->
 				<div id="Notifications">
-					<h1><span>W</span>Notifications</h1>
-					<h3></h3>
+					<h1><span class="wsr">W</span> Notifications</h1>
+					<small></small>
 					<!--Prowl-->
 					<table>
 						<tr>
 							<td><h2>Prowl Options</h2>
-								<h3><label for="prowl_enabled">Enabled/Disabled</label></h3>
+								<small><label for="prowl_enabled">Enabled/Disabled</label></small>
 							</td>
 							<td><input class="switch" type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} /></td>
 						</tr>
@@ -727,7 +728,7 @@
 					<table>
 						<tr>
 							<td><h2>XBMC</h2>
-								<h3><label for="xbmc_enabled">Enabled/Disabled</label></h3>
+								<small><label for="xbmc_enabled">Enabled/Disabled</label></small>
 							</td>
 							<td><input class="switch" type="checkbox" name="xbmc_enabled" id="xbmc" value="1" ${config['xbmc_enabled']} /></td>
 						</tr>
@@ -735,7 +736,7 @@
 					<table id="xbmcoptions">
 						<tr>
 							<td><label for="xbmc_host">XBMC Host:</label>
-								<h3>e.g. http://localhost:8080. Separate hosts with commas</h3>
+								<small>e.g. http://localhost:8080. Separate hosts with commas</small>
 							</td>
 							<td><input type="text" name="xbmc_host" value="${config['xbmc_host']}" size="30">
 							</td>
@@ -763,7 +764,7 @@
 						<tr>
 							<td>
 								<h2>Notify My Android</h2>
-								<h3><label for="nma_enabled">Enabled/Disabled</label></h3>
+								<small><label for="nma_enabled">Enabled/Disabled</label></small>
 							</td>
 							<td><input class="switch" type="checkbox" name="nma_enabled" id="nma" value="1" ${config['nma_enabled']} /></td>
 						</tr>
@@ -771,7 +772,7 @@
 					<table id="nmaoptions">
 						<tr>
 							<td><label for="nma_apikey">NotifyMyAndroid API Key:</label>
-								<h3>Separate multiple api keys with ",".</h3>
+								<small>Separate multiple api keys with ",".</small>
 							</td>
 							<td><input type="text" name="nma_apikey" value="${config['nma_apikey']}" size="30"></td>
 						</tr>
@@ -815,7 +816,7 @@
 				</div>
 				<!--Mirror-->
 				<div id="Mirror">
-					<h2><span>K</span>Mirror</h2>
+					<h2><span class="wsr">K</span>Mirror</h2>
 					<!--Musicbrainz-->
 					<table>
 						<tr>
@@ -858,7 +859,7 @@
 					<table id="hpserver">
 						<tr>
 							<td><h2>Headphones Server</h2>
-								<h3><a href="http://headphones.codeshy.com/vip" target="_blank"><span>D</span>Get an Account</a></h3>
+								<small><a href="http://headphones.codeshy.com/vip" target="_blank"><span class="wsr">D</span>Get an Account</a></small>
 							</td>
 							<td></td>
 						</tr>
@@ -877,7 +878,6 @@
 				</div><!--End mirror-->
 				
 			</div><!--end AdvancedSettings-->
-			<input type="submit" value="Save Changes" />
 		</div><!--end config wrapper-->
     </form>
 </%def>
@@ -885,6 +885,9 @@
 <%def name="javascriptIncludes()">
 	<script>
 		$(document).ready(function(){
+			$(".submitForm").click(function(){
+				$("#config").submit();
+			});
 			//Newznab
 			function newznab(){
 				if( $('input[name="newznab"]').is(":checked") ){

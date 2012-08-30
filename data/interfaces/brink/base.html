@@ -27,19 +27,18 @@
 	<link rel="stylesheet" href="interfaces/brink/css/theme/default.css">
 
 	<!--Jquery APIs-->
-	<script src="js/libs/jquery-1.7.2.min.js"></script>
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-	
-	<script src="interfaces/brink/js/jquery-ui-1.8.21.custom.min.js"></script>
-	<link rel="stylesheet" href="interfaces/brink/css/jquery-ui-1.8.21.custom.css">
+	<script src="interfaces/brink/js/libs/jquery-1.8.0.min.js"></script>
+	<script src="interfaces/brink/js/libs/jquery-ui-1.8.23.custom.min.js"></script>
+	<link rel="stylesheet" href="interfaces/brink/css/libs/jquery-ui-1.8.23.custom.css">
 		
 	<!--Ajax Form-->
 	<script src="interfaces/brink/js/libs/jquery.form.js"></script>
 	
 	<!--Noty-->
-	<script type="text/javascript" src="interfaces/brink/js/libs/jquery.noty.js" ></script>
-	<link rel="stylesheet" href="interfaces/brink/css/libs/jquery.noty.css">
-	<link rel="stylesheet" href="interfaces/brink/css/libs/noty_theme_default.css">
+	<script type="text/javascript" src="interfaces/brink/js/noty/jquery.noty.js"></script>
+	<script type="text/javascript" src="interfaces/brink/js/noty/layouts/bottomRight.js"></script>
+	<!-- You can add more layouts if you want -->
+	<script type="text/javascript" src="interfaces/brink/js/noty/themes/brink.js"></script>
 	
 	<!--Global Script-->
 	<script src="interfaces/brink/js/script.js"></script>
@@ -62,7 +61,7 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 	% if not headphones.CURRENT_VERSION:
-			$("#commits-behind").fadeIn('slow').text("New version available");
+			$("#commits-behind").fadeIn('slow').text("${headphones.COMMITS_BEHIND}");
 	% elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
 			$("#commits-behind").fadeIn('slow').text("(${headphones.COMMITS_BEHIND})");	
 	% else: 
@@ -70,8 +69,6 @@
 	% endif
 		});
 	</script>
-	
-	<div class="custom_container"></div>
 	<table id="table_body">
 		<tr>
 			<td id="header" colspan="2">
