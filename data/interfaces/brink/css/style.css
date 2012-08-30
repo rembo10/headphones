@@ -159,6 +159,7 @@ ul#nav li a{
 	color: rgba(0,0,0,0.9);
 	text-shadow: 1px 1px rgba(0,145,255,0.2);
 }
+
 /* *
  * Sub navigation
  */
@@ -219,6 +220,11 @@ ul#nav-sub li a {
 }
 ul#nav-view > li:hover,
 ul#nav-sub > li:hover > a { 
+	color: rgb(0,145,255);
+	border-bottom: 2px solid rgb(0,145,255);
+	cursor: pointer;
+}
+ul#nav-sub > li > a.active {
 	color: rgb(0,145,255);
 	border-bottom: 2px solid rgb(0,145,255);
 	cursor: pointer;

@@ -6,10 +6,17 @@
 
 
 <%def name="body()">
-	<div class="table_wrapper">
-	<div id="manageheader" class="title">
-		<h1 class="clearfix"><img src="interfaces/default/images/icon_manage.png" alt="manage"/>Manage Albums</h1>
+	<div id="nav-sub-container">
+		<ul id="nav-sub">
+			<li><a href="manage">Manage</a></li>
+			<li><a class="active" href="manageAlbums">Albums</a></li>
+			<li><a href="manageArtists">Artists</a></li>
+			%if not headphones.ADD_ARTISTS:
+			<li><a href="manageNew">New Artists</a></li>
+			%endif
+		</ul>
 	</div>
+	<div class="table_wrapper">
 	<form action="markAlbums" method="get" id="markAlbums">
 	<div id="markalbum">Mark selected albums as 
 		<select name="action" onChange="doAjaxCall('markAlbums',$(this),'table',true);" data-error="You didn't select any albums">
