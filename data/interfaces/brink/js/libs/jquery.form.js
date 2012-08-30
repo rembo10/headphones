@@ -1,6 +1,6 @@
 /*!
  * jQuery Form Plugin
- * version: 3.09 (16-APR-2012)
+ * version: 3.14 (30-JUL-2012)
  * @requires jQuery v1.3.2 or later
  *
  * Examples and documentation at: http://malsup.com/jquery/form/
@@ -165,7 +165,7 @@ $.fn.ajaxSubmit = function(options) {
     }
 
     options.success = function(data, status, xhr) { // jQuery 1.4+ passes xhr as 3rd arg
-        var context = options.context || options;    // jQuery 1.4+ supports scope context 
+        var context = options.context || this ;    // jQuery 1.4+ supports scope context 
         for (var i=0, max=callbacks.length; i < max; i++) {
             callbacks[i].apply(context, [data, status, xhr || $form, $form]);
         }
@@ -253,11 +253,11 @@ $.fn.ajaxSubmit = function(options) {
         }
 
         s.data = null;
-          var beforeSend = s.beforeSend;
-          s.beforeSend = function(xhr, o) {
-              o.data = formdata;
-            if(beforeSend)
-                beforeSend.call(o, xhr, options);
+            var beforeSend = s.beforeSend;
+            s.beforeSend = function(xhr, o) {
+                o.data = formdata;
+                if(beforeSend)
+                    beforeSend.call(this, xhr, o);
         };
         $.ajax(s);
     }
@@ -316,6 +316,12 @@ $.fn.ajaxSubmit = function(options) {
                 var e = (status === 'timeout' ? 'timeout' : 'aborted');
                 log('aborting upload... ' + e);
                 this.aborted = 1;
+                // #214
+                if (io.contentWindow.document.execCommand) {
+                    try { // #214
+                        io.contentWindow.document.execCommand('Stop');
+                    } catch(ignore) {}
+                }
                 $io.attr('src', s.iframeSrc); // abort op in progress
                 xhr.error = e;
                 if (s.error)
@@ -426,9 +432,16 @@ $.fn.ajaxSubmit = function(options) {
                 if (s.extraData) {
                     for (var n in s.extraData) {
                         if (s.extraData.hasOwnProperty(n)) {
-                            extraInputs.push(
-                                $('<input type="hidden" name="'+n+'">').attr('value',s.extraData[n])
-                                    .appendTo(form)[0]);
+                           // if using the $.param format that allows for multiple values with the same name
+                           if($.isPlainObject(s.extraData[n]) && s.extraData[n].hasOwnProperty('name') && s.extraData[n].hasOwnProperty('value')) {
+                               extraInputs.push(
+                               $('<input type="hidden" name="'+s.extraData[n].name+'">').attr('value',s.extraData[n].value)
+                                   .appendTo(form)[0]);
+                           } else {
+                               extraInputs.push(
+                               $('<input type="hidden" name="'+n+'">').attr('value',s.extraData[n])
+                                   .appendTo(form)[0]);
+                           }
                         }
                     }
                 }
@@ -997,7 +1010,7 @@ $.fn.clearFields = $.fn.clearInputs = function(includeHidden) {
             this.selectedIndex = -1;
         }
         else if (includeHidden) {
-            // includeHidden can be the valud true, or it can be a selector string
+            // includeHidden can be the value true, or it can be a selector string
             // indicating a special test; for example:
             //  $('#myForm').clearForm('.special:hidden')
             // the above would clean hidden inputs that have the class of 'special'
