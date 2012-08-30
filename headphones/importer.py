@@ -41,7 +41,7 @@ def artistlist_to_mbids(artistlist, forced=False):
 
     for artist in artistlist:
         
-        if not artist:
+        if not artist and not (artist == ' '):
             continue
             
         results = mb.findArtist(artist, limit=1)
