@@ -12,6 +12,20 @@
 
 <%def name="body()">
     <form id="config" action="configUpdate" method="post">
+		<div id="nav-sub-container" class="nav-sub-fixed">
+			<ul id="nav-sub">
+				<li><a href="#"><span class="wsr">C</span> Settings Jump Menu</a>
+					<ul>
+						<li><a href="#WebInterface"><span class="wsr"></span> Web Interface</a></li>
+						<li><a href="#DownloadSettings"><span class="wsr"></span> Download Settings</a></li>
+						<li><a href="#Quality"><span class="wsr">I</span> Quality & Post Processing</a></li>
+						<li><a href="#AdvancedSettings"><span class="wsr"></span> Advanced Settings</a></li>
+						<li><a href="#Notifications"><span class="wsr"></span> Notifications</a></li>
+					</ul>
+				</li>
+				<li><a href="#SaveSettings"><span class="wsr">C</span> Save Changes</a></li>
+			</ul>
+		</div>
 		<div id="config_wrapper"><!--config_wrapper-->
 			<div id="WebInterface"><!--Web Interface-->
 				<h1><span>C</span>Web Interface</h1>
@@ -68,7 +82,6 @@
 							</td>
 							<td>
 								<input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} />
-								
 							</td>
 						</tr>
 						<!--end Startup-->
@@ -98,10 +111,10 @@
 						<!--API-->
 							<tr>
 								<td><h2>API:</h2>
-									<h3><label for="api_enabled">Enabled/Disabled</label></h3></td>
-								<td><input class="switch" type="checkbox" name="api_enabled" id="api_enabled" value="1" ${config['api_enabled']} /></td>
+									<h3><label for="api_switch">Enabled/Disabled</label></h3></td>
+								<td><input class="switch" type="checkbox" name="api_switch" id="api_enabled" value="1" ${config['api_enabled']} /></td>
 							</tr>
-							<tr>
+							<tr id="api_switch">
 								<td>
 									<h3>Visit <a href="https://github.com/rembo10/headphones/tree/" target="_blank"><span>D</span>repo</a> for more information.</h3>
 								</td>
@@ -167,7 +180,7 @@
 			<!--end Web Interface-->
 			
 			<!--Download Settings-->
-			<div>
+			<div id="DownloadSettings">
 				<h1><span>u</span>Download Settings</h1>
 				<h3>Setup SABnzbd or BitTorrent</h3>
 				
@@ -272,7 +285,7 @@
 			<!--end Download Settings-->
 			
 			<div><!--Search Providers-->
-				<h1><span>L</span>Search Providers</h1>
+				<h2><span>L</span> Search Providers</h2>
 				<h3>"We provide you with a automated search service to locate binary files/secgments that can be found on the public access network called Usenet."</h3>
 				
 				<!--NZB Matrix-->
@@ -280,10 +293,12 @@
 					<tr>
 						<td>
 							<h2><a href="http://www.nzbmatrix.com" target="_blank"><span>D</span>NZBMatrix</a></h2>
-							<h3><label for="nzbmatrix">Enabled/Disabled</label></h3>
+							<h3><label for="nzbmatrix_switch">Enabled/Disabled</label></h3>
 						</td>
-						<td><input class="switch" type="checkbox" name="nzbmatrix" value="1" ${config['use_nzbmatrix']} /></td>
+						<td><input class="switch" type="checkbox" name="nzbmatrix_switch" value="1" ${config['use_nzbmatrix']} /></td>
 					</tr>
+				</table>
+				<table id="nzbmatrix_switch">
 					<tr>
 						<td><label for="nzbmatrix_username">Username:</label></td>
 							<td><input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30" maxlength="40" /></td>
@@ -305,8 +320,7 @@
 						<td><input class="switch" type="checkbox" name="newznab" value="1" ${config['use_newznab']} /></td>
 					</tr>
 					<tr>
-						
-						<div id="newznab_providers">
+						<div id="newznab">
 							<div class="config" id="newznab1">
 								<div class="row">
 									<label>Newznab Host</label>
@@ -325,19 +339,13 @@
 							newznab_number = 1
 							%>
 							%for newznab in config['extra_newznabs']:
-							<%
-								if newznab[2] == '1' or newznab[2] == 1:
-								newznab_enabled = "checked"
-								else:
-								newznab_enabled = ""
-							%>
 							<div class="config" id="newznab${newznab_number}">
 								<div class="row">
-								<label>Newznab Host</label>
+								<label>Newznab Host:</label>
 								<input type="text" name="newznab_host${newznab_number}" value="${newznab[0]}" size="30">
 								</div>
 								<div class="row">
-								<label>Newznab API</label>
+								<label>Newznab API:</label>
 								<input type="text" name="newznab_api${newznab_number}" value="${newznab[1]}" size="36">
 								</div>
 								<div class="row checkbox">
@@ -425,7 +433,7 @@
 			
 			<!--Quality-->
 			<div id="Quality">
-				<h1><span>I</span>Quality & Post Processing</h1>
+				<h1><span>I</span> Quality & Post Processing</h1>
 				<h3></h3>
 				<table id="AlbumQuality">
 					<tr>
@@ -905,91 +913,8 @@
 				});
 				formfields.append(removeButton);
 				formfields.append("</div>");
-				$("#add_newznab").before(formfields);
+				$("#add_newznab").after(formfields);
 			});
-			
-			//nzbs.org
-			function nzbsorg(){
-				if( $('input[name="nzbsorg"]').is(":checked") ){
-					$("table#nzbsorg").show();
-					enit();
-				}
-				else {
-					$("table#nzbsorg").hide();
-					enit();
-				}
-			}
-			nzbsorg();
-			$('input[name="nzbsorg"]').change(function(){
-				nzbsorg();
-			});
-			//end nzbs.org
-			
-			//Newzbin
-			function newzbin(){
-				if( $('input[name="newzbin"]').is(":checked") ){
-					$("table#newsbin").show();
-					enit();
-				}
-				else {
-					$("table#newsbin").hide();
-					enit();
-				}
-			}
-			newzbin();
-			$('input[name="newzbin"]').change(function(){
-				newzbin();
-			});
-			//end Newzbin
-			
-			//Prowl
-			function prowl(){
-				if( $('input[name="prowl_enabled"]').is(":checked") ){
-					$("table#prowloptions").show();
-					enit();
-				}
-				else {
-					$("table#prowloptions").hide();
-					enit();
-				}
-			}
-			prowl();
-			$('input[name="prowl_enabled"]').change(function(){
-				prowl();
-			});
-			//end Prowl
-			
-			
-			//XBMC
-			function xbmc(){
-				if(	$('input[name="xbmc_enabled"]').is(":checked") ) {
-					$("table#xbmcoptions").show();
-					enit();
-				} else {
-					$("table#xbmcoptions").hide();
-					enit();
-				}
-			}
-			xbmc();
-			$('input[name="xbmc_enabled"]').change(function(){
-				xbmc();
-			});
-			//end XBMC
-			
-			//NMA
-			function nma(){
-				if( $("#nma").is(":checked") ){
-					$("#nmaoptions").show();
-					enit();
-				} else {
-					$("#nmaoptions").hide();
-					enit();
-				}
-			}
-			$("#nma").change(function(){
-				nma();
-			});
-			//end NMA
 		
 			//Mirrors
 			
