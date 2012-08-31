@@ -8,11 +8,11 @@
 <%def name="body()">
 	<script>
 		$(document).ready(function(){
-			$('#menu_link_getextra').click(function() {
+			$('#getExtras').click(function() {
 				$('#dialog').dialog();
 				return false;
 			});
-			$('#menu_link_modifyextra').click(function() {
+			$('#modifyExtras').click(function() {
 				$('#dialog').dialog();
 			});
 		});
@@ -23,7 +23,8 @@
 			<input type="hidden" name="ArtistID" value="${artist['ArtistID']}">
 			<input type="hidden" name="newstyle" value="true">
 			%for extra in extras:
-				<input type="checkbox" id="${extra}" name="${extra}" value="1" ${extras[extra]} />${string.capwords(extra)}<br>
+				<input type="checkbox" id="${extra}" name="${extra}" value="1" ${extras[extra]} />
+					<label for="${extra}">${string.capwords(extra)}</label><br />
 			%endfor
 			<br>
 			<input id="submit" type="submit" value="Fetch Extras">
@@ -41,9 +42,9 @@
 			%endif
 			%if artist['IncludeExtras']:
 				<li><a href="removeExtras?ArtistID=${artist['ArtistID']}">Remove Extras</a></li>
-				<li><a class="menu_link_edit" href="#">Modify Extras</a></li>
+				<li><a id="modifyExtras" href="#">Modify Extras</a></li>
 			%else:	
-				<li><a id="menu_link_getextra" href="#">Get Extras</a></li>
+				<li><a id="getExtras" href="#">Get Extras</a></li>
 			%endif
 		</ul>
 		<ul id="nav-view">
@@ -73,13 +74,14 @@
   			<option value="Downloaded">Downloaded</option>
 		</select>
 		<input type="submit" value="GO">
+		<small><span class="wsr Tag"></span> Click CTRL + LMOUSE on albums to select.</small>
 	</p>
 	<div id="gridView">
 	%for album in albums:
 		<%
 		%>
 		<div class="image-container">
-			<div class="image-box ${album['Status']}">
+			<div class="image-box">
 				<div class="image-tag ${album['Status']}"></div>
 				<img />
 				<div class="image-actions">
@@ -98,7 +100,7 @@
 			
 			<div class="image-info">
 				<b style="display: none;">${artist['ArtistName']}</b>
-				<span><a href="albumPage?AlbumID=${album['AlbumID']}" title="${album['AlbumID']}">${album['AlbumTitle']}</a></span>
+				<span><a class="image-url" href="albumPage?AlbumID=${album['AlbumID']}" title="${album['AlbumID']}">${album['AlbumTitle']}</a></span>
 			</div>
 		</div>
 	%endfor
@@ -194,6 +196,19 @@
 <%def name="javascriptIncludes()">
 	<script>
 	$(document).ready(function(){
+		$(".image-box").click(function(evt) {
+			if (evt.ctrlKey)
+			{
+				var input = $(this).find('.image-select');
+				if( $(input).is(':checked') ){
+					$(input).attr('checked', false);
+				}
+				else{
+					$(input).attr('checked', true);
+				}
+			}
+		});
+		
 		//Load Art
 		getAlbumArt();
 		getArtistArt();
