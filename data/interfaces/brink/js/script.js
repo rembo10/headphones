@@ -15,7 +15,7 @@ function getArtistInfo(name,imgElem,size,artistID) {
 			} else {
 				if ( data.artist === undefined || imageUrl == "" || imageUrl == undefined ) {
 					var imageLarge = "#";
-					var imageUrl = "interfaces/brink/images/no-cover-artist.png";
+					var imageUrl = "interfaces/brink/images/no-artist-art.png";
 				} else {
 					var artist = data.artist.mbid;
 					var artistBio = data.artist.bio.summary;
@@ -42,7 +42,7 @@ function getArtistInfo(name,imgElem,size,artistID) {
 				}
 				if ( data.artist === undefined || imageUrl == "" ) {
 					var imageLarge = "#";
-					var imageUrl = "interfaces/brink/images/no-cover-artist.png";
+					var imageUrl = "interfaces/brink/images/no-artist-art.png";
 				} else {
 					var artist = data.artist.name;
 					var artistBio = data.artist.bio.summary;
@@ -101,7 +101,7 @@ function getAlbumInfo(name, album, elem,size) {
 					$(elem).css("background", "url("+ imageUrl+")");
 				} 
 				$(elem).css("background", "url("+ imageUrl+") center top no-repeat");
-				$(elem).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + name + '"></a>');
+				//$(elem).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + name + '"></a>');
 			}
 		});
 	}
