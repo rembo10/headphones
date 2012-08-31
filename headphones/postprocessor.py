@@ -160,7 +160,7 @@ def verify(albumid, albumpath):
         try:
             f = MediaFile(downloaded_track)
         except Exception, e:
-            logger.info("Exception from MediaFile for: " + downloaded_track + " : " + str(e))
+            logger.info(u"Exception from MediaFile for: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + u" : " + unicode(e))
             continue
             
         metaartist = helpers.latinToAscii(f.artist.lower()).encode('UTF-8')
@@ -222,13 +222,13 @@ def verify(albumid, albumpath):
                 doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
                 return
             
-    logger.warn('Could not identify album: %s. It may not be the intended album.' % albumpath)
+    logger.warn(u'Could not identify album: %s. It may not be the intended album.' % albumpath.decode(headphones.SYS_ENCODING, 'replace'))
     myDB.action('UPDATE snatched SET status = "Unprocessed" WHERE AlbumID=?', [albumid])
     processed = re.search(r' \(Unprocessed\)(?:\[\d+\])?', albumpath)
     if not processed:
         renameUnprocessedFolder(albumpath)
     else:
-        logger.info("Already marked as unprocessed: " + albumpath)
+        logger.info(u"Already marked as unprocessed: " + albumpath.decode(headphones.SYS_ENCODING, 'replace'))
             
 def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list):
 
@@ -313,7 +313,7 @@ def embedAlbumArt(artwork, downloaded_track_list):
         try:
             f = MediaFile(downloaded_track)
         except:
-            logger.error('Could not read %s. Not adding album art' % downloaded_track)
+            logger.error(u'Could not read %s. Not adding album art' % downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
             continue
             
         logger.debug('Adding album art to: %s' % downloaded_track)
@@ -337,7 +337,7 @@ def cleanupFiles(albumpath):
                 try:
                     os.remove(os.path.join(r, files))
                 except Exception, e:
-                    logger.error('Could not remove file: %s. Error: %s' % (files, e))
+                    logger.error(u'Could not remove file: %s. Error: %s' % (files.decode(headphones.SYS_ENCODING, 'replace'), e))
                     
 def moveFiles(albumpath, release, tracks):
 
@@ -487,9 +487,9 @@ def moveFiles(albumpath, release, tracks):
                     try:
                         os.remove(file_to_move)
                     except Exception, e:
-                        logger.error("Error deleting file '" + file_to_move.decode(headphones.SYS_ENCODING) + "' from source directory")
+                        logger.error("Error deleting file '" + file_to_move.decode(headphones.SYS_ENCODING, 'replace') + "' from source directory")
                 else:
-                    logger.error("Error copying '" + file_to_move.decode(headphones.SYS_ENCODING) + "'. Not deleting from download directory")
+                    logger.error("Error copying '" + file_to_move.decode(headphones.SYS_ENCODING, 'replace') + "'. Not deleting from download directory")
                 
     elif make_lossless_folder and not make_lossy_folder:
             
@@ -520,13 +520,13 @@ def moveFiles(albumpath, release, tracks):
             try:
                 os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING), int(headphones.FOLDER_PERMISSIONS, 8))
             except Exception, e:
-                logger.error("Error trying to change permissions on folder: %s" % temp_f)
+                logger.error("Error trying to change permissions on folder: %s" % temp_f.decode(headphones.SYS_ENCODING, 'replace'))
             
     # If we failed to move all the files out of the directory, this will fail too
     try:
         shutil.rmtree(albumpath)
     except Exception, e:
-        logger.error('Could not remove directory: %s. %s' % (albumpath, e))
+        logger.error('Could not remove directory: %s. %s' % (albumpath.decode(headphones.SYS_ENCODING, 'replace'), e))
     
     destination_paths = []
     
@@ -553,10 +553,10 @@ def correctMetadata(albumid, release, downloaded_track_list):
             elif any(downloaded_track.lower().endswith('.' + x.lower()) for x in headphones.LOSSY_MEDIA_FORMATS):
                 lossy_items.append(beets.library.Item.from_path(downloaded_track))
             else:
-                logger.warn("Skipping: " + downloaded_track.decode(headphones.SYS_ENCODING) + " because it is not a mutagen friendly file format")
+                logger.warn("Skipping: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + " because it is not a mutagen friendly file format")
         except Exception, e:
             
-            logger.error("Beets couldn't create an Item from: " + downloaded_track.decode(headphones.SYS_ENCODING) + " - not a media file?" + str(e))
+            logger.error("Beets couldn't create an Item from: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + " - not a media file?" + str(e))
 
     for items in [lossy_items, lossless_items]:
         
@@ -587,9 +587,9 @@ def correctMetadata(albumid, release, downloaded_track_list):
         for item in items:
             try:
                 item.write()
-                logger.info("Successfully applied metadata to: " + item.path.decode(headphones.SYS_ENCODING))
+                logger.info("Successfully applied metadata to: " + item.path.decode(headphones.SYS_ENCODING, 'replace'))
             except Exception, e:
-                logger.warn("Error writing metadata to " + item.path.decode(headphones.SYS_ENCODING) + ": " + str(e))
+                logger.warn("Error writing metadata to " + item.path.decode(headphones.SYS_ENCODING, 'replace') + ": " + str(e))
         
 def embedLyrics(downloaded_track_list):
     logger.info('Adding lyrics')
@@ -601,14 +601,14 @@ def embedLyrics(downloaded_track_list):
         try:
             f = MediaFile(downloaded_track)
         except:
-            logger.error('Could not read %s. Not checking lyrics' % downloaded_track)
+            logger.error('Could not read %s. Not checking lyrics' % downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
             
         if f.albumartist and f.title:
             metalyrics = lyrics.getLyrics(f.albumartist, f.title)
         elif f.artist and f.title:
             metalyrics = lyrics.getLyrics(f.artist, f.title)
         else:
-            logger.info('No artist/track metadata found for track: %s. Not fetching lyrics' % downloaded_track)
+            logger.info('No artist/track metadata found for track: %s. Not fetching lyrics' % downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
             metalyrics = None
             
         if lyrics:
@@ -628,7 +628,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
         try:
             f = MediaFile(downloaded_track)
         except:
-            logger.info("MediaFile couldn't parse: " + downloaded_track.decode(headphones.SYS_ENCODING))
+            logger.info("MediaFile couldn't parse: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
             continue
             
         if not f.track:
@@ -638,7 +638,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
         
         if not f.title:
             
-            basename = unicode(os.path.basename(downloaded_track), headphones.SYS_ENCODING, errors='replace')
+            basename = os.path.basename(downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
             title = os.path.splitext(basename)[0]
             ext = os.path.splitext(basename)[1]
             
@@ -679,7 +679,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
         try:
             os.rename(downloaded_track, new_file)
         except Exception, e:
-            logger.error('Error renaming file: %s. Error: %s' % (downloaded_track.decode(headphones.SYS_ENCODING), e))
+            logger.error('Error renaming file: %s. Error: %s' % (downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), e))
             continue
                 
 def renameUnprocessedFolder(albumpath):
