@@ -6,7 +6,13 @@
 
 <%def name="headerIncludes()">
 	<div id="subhead_container">
-		<ul id="subhead_menu">
+		
+	</div>	
+</%def>
+
+<%def name="body()">
+	<div id="nav-sub-container">
+		<ul id="nav-sub">
 			<li><a href="deleteAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">Delete Album</a></li>
 			%if album['Status'] == 'Skipped':
 			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False">Mark Album as Wanted</a></li>
@@ -18,10 +24,7 @@
 			<li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True">Try New Version</a></li>
 			%endif			
 		</ul>
-	</div>	
-</%def>
-
-<%def name="body()">
+	</div>
 	<div class="table_wrapper">
 		<a id="btnBack" class="btnStatus" href="artistPage?ArtistID=${album['ArtistID']}">
 			Back to ${album['ArtistName']}
@@ -125,7 +128,7 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-	<script src="interfaces/brink/js/libs/jquery.dataTables.min.js"></script>
+	<script src="interfaces/brink/JS/libs/jquery.dataTables.min.js"></script>
 	<script>
 	$(document).ready(function() {
 		getAlbumInfo("${album['ArtistName']}","${album['AlbumTitle']}","#albumheader .albumArt",3);

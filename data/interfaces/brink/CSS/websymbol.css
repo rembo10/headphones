@@ -1,0 +1,104 @@
+@font-face{ 
+	font-family: 'WebSymbolsRegular';
+	src: url('../fonts/websymbols-regular-webfont.eot');
+	src: url('../fonts/websymbols-regular-webfont.eot?#iefix') format('embedded-opentype'),
+	     url('../fonts/websymbols-regular-webfont.woff') format('woff'),
+	     url('../fonts/websymbols-regular-webfont.ttf') format('truetype'),
+	     url('../fonts/websymbols-regular-webfont.svg#WebSymbolsRegular') format('svg');
+}
+.wsr{font-family: 'WebSymbolsRegular';}
+.wsr.Wanted:Before{content: "I";}
+.wsr.Skipped:Before{content: "I";}
+
+
+/*Icons for content management systems*/
+.wsr.Image:Before{content: "I";}
+.wsr.Settings:Before{content: "S";}
+.wsr.Cloud:Before{content: "C";}
+.wsr.Folder:Before{	content: "F";}
+.wsr.Archive:Before{content: "Z";}
+.wsr.Movie:Before{content: "M";}
+.wsr.Code:Before{content: "H";}
+.wsr.Text:Before{content: "T";}
+.wsr.Terminal:Before{content: "_";}
+.wsr.Attachment:Before{content: "A";}
+.wsr.Logout:Before{	content: "X";}
+.wsr.Text:Before{content: "T";}
+.wsr.Indent:Before{	content: "n";}
+.wsr.Outdent:Before{ content: "o"; }
+.wsr.List:Before{ content: "p";}
+.wsr.NumberList:Before{ content: "q"; }
+.wsr.Move:Before { content: "~"; }
+.wsr.User:Before { content: "U"; }
+.wsr.OpenedLock:Before{	content: "w"; }
+.wsr.ClosedLock:Before{	content: "x"; }
+.wsr.PortraitView:Before{	content: "a"; }
+.wsr.AlbumView:Before{	content: "b"; }
+.wsr.Center:Before{	content: "`"; }
+
+/*Gallery navigation icons*/
+.wsr.ZoomIn:Before{	content: "+"; }
+.wsr.ZoomOut:Before{	content: "-"; }
+.wsr.Up:Before{	content: ":"; }
+.wsr.Down:Before{ content: ";"; }
+.wsr.Close:Before{ content: "×"; }
+.wsr.Scale:Before{ content: "&"; }
+.wsr.Back:Before{ content: "("; }
+.wsr.Forward:Before{ content: ")"; }
+.wsr.BackArrow:Before{ content: "<"; }
+.wsr.ForwardArrow:Before{ content: ">"; }
+.wsr.Rotate:Before{	content: "*"; }
+.wsr.CloseX:Before{	content: "'"; }
+
+
+/*Social networks*/
+.wsr.Twitter:Before{ content: "'"; }
+
+
+/*Icons for service sites*/
+.wsr.Favorite:Before{ content: "R"; }
+.wsr.Tag:Before{ content: ","; }
+.wsr.Comment:Before{ content: "c"; }
+.wsr.Chat:Before{ content: "d"; }
+.wsr.OpenedChat:Before{ content: "e"; }
+.wsr.Rating:Before{ content: "u"; }
+.wsr.MapPin:Before{ content: "?"; }
+.wsr.Like:Before{ content: "N"; }
+.wsr.Unlike:Before{ content: "O"; }
+.wsr.Search:Before{ content: "L"; }
+.wsr.Reblog:Before{ content: "J"; }
+.wsr.OpenNewWindow:Before{ content: "D"; }
+.wsr.Clock:Before{ content: "P"; }
+.wsr.Link:Before{ content: "K"; }
+
+/*Other*/
+.wsr.Mail:Before{ content: "@"; }
+.wsr.SortUp:Before{ content: "{"; }
+.wsr.SortDown:Before{ content: "}"; }
+.wsr.Unfold:Before{ content: "["; }
+.wsr.Icon:Before{ content: "¹"; }
+.wsr.List:Before{ content: "²"; }
+.wsr.ListWithIcons:Before{ content: "&sup3;"; }
+.wsr.Reply:Before{ content: "h"; }
+.wsr.ReplyAll:Before{ content: "i"; }
+.wsr.Forward:Before{ content: "j"; }
+.wsr.Fullscreen:Before{ content: "%"; }
+.wsr.Done:Before{ content: "."; }
+.wsr.Approved:Before{ content: "/"; }
+.wsr.Alert:Before{ content: "W"; }
+.wsr.Synchronize:Before{ content: "V"; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

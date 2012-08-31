@@ -2,17 +2,17 @@
 
 <%def name="body()">
 
-	<div id="paddingheader">
+	<div id="nav-sub-container">
 		<h1><span>L</span>Search Results</h1>
 	</div>
 	<table class="display" id="searchresults_table">
 		<thead>
 			<tr>
 			%if type == 'album':
-				<th id="albumart"></th>
+				<th id="album-art"></th>
 				<th id="albumname">Album Name</th>
 			%elif type == 'artist':
-				<th id="artistart"></th>
+				<th id="artist-art"></th>
 			%endif
 				<th id="artistname">Artist Name</th>
 				<th id="score">Score</th>
@@ -29,33 +29,36 @@
 						grade = 'Z'
 				%>
 				
-				<tr class="grade${grade}">
+				<tr class="grade${grade}" for="${result['id']}">
 					%if type == 'album':
 						<td id="albumart">
 							<div class="album-art-small">
-								<div class="status">
-									<div>
-										<a class="web-symbol" href="addReleaseById?rid=${result['albumid']}" title="Add to collection"><span>+</span></a>
-									</div>
-								</div>
 								<img />
 							</div>
 						</td>
 						<td id="albumname"><a href="${result['albumurl']}">${result['title']}</a></td>
+					%elif type == 'artist':
+						<td id="artistart">
+							<input type="hidden" value="${result['id']}" />
+							<div class="album-art-small">
+								<img alt="${result['uniquename']}"/>
+							</div>
+						</td>
 					%endif
-					<td id="artistname"><a href="${result['url']}" for="${result['id']}">${result['uniquename']}</a></td>
+					<td id="artistname">${result['uniquename']}</td>
 					<td id="score">
 						<div class="searchscore" title="The match result is: ${result['score']}%">
 							<div class="progress-container" title="Match result is ${result['score']}%">
 								<span class="searchmatch">${result['score']}%</span>
 								<div style="width: ${result['score']}%"></div>
 							</div>
-							</div>
+						</div>
 					</td>
 				%if type == 'album':	
-					<td id="add"></td>
+					<td id="add"><a class="wsr" href="addReleaseById?rid=${result['albumid']}" title="Add to collection"><span class="wsr ZoomIn"></span></a></td>
 				%elif type == 'artist':
-					<td id="add"><a class="btnAdd" href="addArtist?artistid=${result['id']}" title="Add this Artist"></a></td>
+					<td id="add"><a class="btnAdd" href="addArtist?artistid=${result['id']}" title="Add to collection"><span class="wsr ZoomIn"></span></a>
+					<a href="${result['url']}" for="${result['id']}" title="View online" target="_blank"><span class="wsr Link"></span></a></td>
 				%endif
 				</tr>
 				%endfor
@@ -71,19 +74,33 @@
 <%def name="javascriptIncludes()">
 		<script src="js/libs/jquery.dataTables.min.js"></script>
 		<script type="text/javascript">
-		function getArtistArt() {
-			$("table#searchresults_table tr td#artistname").each(function(){	
-				var id = $(this).attr('for');
-				var artist = $(this).children('a').text();
-				var image = $(this).parent().find("td#albumart img");
-				if ( !image.hasClass('done') ) {
-					image.addClass('done');
-					getArtistInfo(artist,image,1,id);
-				}
-			});
-		}
 		$(document).ready(function(){
+			%if type == 'album':
+			getAlbumArt();
+			function getAlbumArt() {
+				$("table#searchresults_table tr").each(function() {
+					$(this).fadeIn("slow", function(){
+						var element = $(this).find("#albumart img");
+						var artistname = $(this).find("#artistname").text();
+						var albumname = $(this).find("#albumname").text();
+						getAlbumInfo(artistname,albumname,element,2);
+					});
+				});
+			}
+			%elif type == 'artist':
 			getArtistArt();
+			function getArtistArt() {
+				$("table#searchresults_table tr").each(function(){	
+					var id = $(this).attr('for');
+					var artist = $(this).children('td#artistname').text();
+					var image = $(this).find("td#artistart img");
+					if ( !image.hasClass('done') ) {
+						image.addClass('done');
+						getArtistInfo(artist,image,1,id);
+					}
+				});
+			}
+			%endif
 		});
 		</script>
 </%def>
