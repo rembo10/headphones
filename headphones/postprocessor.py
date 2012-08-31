@@ -699,66 +699,55 @@ def renameUnprocessedFolder(albumpath):
             return
             
 def forcePostProcess():
-    
-    if not headphones.DOWNLOAD_DIR:
-        logger.error('No DOWNLOAD_DIR has been set. Set "Music Download Directory:" to your SAB download directory on the settings page.')
-        return
-    else:
-        processing = "nzb"
-        processing_next = "torrent"
-        while processing != "done":
-            if headphones.DOWNLOAD_DIR and processing == "nzb":
-                download_dir = headphones.DOWNLOAD_DIR.encode('utf-8')
-                if not headphones.DOWNLOAD_TORRENT_DIR:
-                    processing_next = "done"
-            if headphones.DOWNLOAD_TORRENT_DIR and processing == "torrent":
-                download_dir = headphones.DOWNLOAD_TORRENT_DIR.encode('utf-8')
-                processing_next = "done"
-            if not headphones.DOWNLOAD_DIR and processing == "nzb":
-                download_dir = headphones.DOWNLOAD_TORRENT_DIR.encode('utf-8')
-                processing_next = "done"
-        
-            logger.info('Checking to see if there are any folders to process in download_dir: %s' % download_dir)
-            # Get a list of folders in the download_dir
-            folders = [d for d in os.listdir(download_dir) if os.path.isdir(os.path.join(download_dir, d))]
-    
-            if len(folders):
-                logger.info('Found %i folders to process' % len(folders))
-                pass
-            else:
-                logger.info('Found no folders to process in: %s' % download_dir)
-                return
-    
-            # Parse the folder names to get artist album info
-            for folder in folders:
-            
-                albumpath = os.path.join(download_dir, folder)
-                folder = unicode(folder, headphones.SYS_ENCODING, errors='replace')
-        
-                logger.info('Processing: %s' % folder)
-            
-                try:
-                    name, album, year = helpers.extract_data(folder)
-                except:
-                    logger.info("Couldn't parse " + folder + " into any valid format.")
-                    continue
-                if name and album and year:
-                    
-                    myDB = db.DBConnection()
-                    release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
-                    if release:
-                        logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
-                        verify(release['AlbumID'], albumpath)
-                    else:
-                        logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (name, album))
-                        from headphones import mb
-                        try:
-                            rgid = mb.findAlbumID(helpers.latinToAscii(name), helpers.latinToAscii(album))
-                        except:
-                            logger.error('Can not get release information for this album')
-                            continue
-                        if rgid:
-                            verify(rgid, albumpath)
-                        else:
-                            logger.info('No match found on MusicBrainz for: %s - %s' % (name, album))
-            processing = processing_next            
+
+	download_dirs = []
+	if headphones.DOWNLOAD_DIR:
+		download_dirs.append(headphones.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING))
+	if headphones.TORRENT_DOWNLOAD_DIR:
+		download_dirs.append(headphones.TORRENT_DOWNLOAD_DIR.encode(headphones.SYS_ENCODING))
+		
+	logger.info('Checking to see if there are any folders to process in download_dir(s): %s' % str(download_dirs).decode(headphones.SYS_ENCODING, 'replace'))
+	# Get a list of folders in the download_dir
+	folders = []
+	for download_dir in download_dirs:
+		for folder in os.listdir(download_dir):
+			path_to_folder = os.path.join(download_dir, folder)
+			if os.path.isdir(path_to_folder):
+				folders.append(path_to_folder)
+
+	if len(folders):
+		logger.info('Found %i folders to process' % len(folders))
+	else:
+		logger.info('Found no folders to process in: %s' % str(download_dirs).decode(headphones.SYS_ENCODING, 'replace'))
+
+	# Parse the folder names to get artist album info
+	for folder in folders:
+
+		folder_basename = os.path.basename(folder).decode(headphones.SYS_ENCODING, 'replace')
+
+		logger.info('Processing: %s' % folder_basename)
+	
+		try:
+			name, album, year = helpers.extract_data(folder_basename)
+		except:
+			logger.info("Couldn't parse " + folder_basename + " into any valid format.")
+			continue
+		if name and album and year:
+			
+			myDB = db.DBConnection()
+			release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
+			if release:
+				logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
+				verify(release['AlbumID'], folder)
+			else:
+				logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (name, album))
+				from headphones import mb
+				try:
+					rgid = mb.findAlbumID(helpers.latinToAscii(name), helpers.latinToAscii(album))
+				except:
+					logger.error('Can not get release information for this album')
+					continue
+				if rgid:
+					verify(rgid, folder)
+				else:
+					logger.info('No match found on MusicBrainz for: %s - %s' % (name, album))
