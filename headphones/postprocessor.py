@@ -703,8 +703,8 @@ def forcePostProcess():
 	download_dirs = []
 	if headphones.DOWNLOAD_DIR:
 		download_dirs.append(headphones.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING))
-	if headphones.TORRENT_DOWNLOAD_DIR:
-		download_dirs.append(headphones.TORRENT_DOWNLOAD_DIR.encode(headphones.SYS_ENCODING))
+	if headphones.DOWNLOAD_TORRENT_DIR:
+		download_dirs.append(headphones.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING))
 		
 	logger.info('Checking to see if there are any folders to process in download_dir(s): %s' % str(download_dirs).decode(headphones.SYS_ENCODING, 'replace'))
 	# Get a list of folders in the download_dir
