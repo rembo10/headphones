@@ -618,7 +618,10 @@ m<%inherit file="base.html"/>
                      	</div>
                      	<div id="nmaoptions">
                      	    <div class="row">
-	                     	    <label>NotifyMyAndroid API Key</label>
+				    <div class="row checkbox">
+					<input type="checkbox" name="nma_onsnatch" value="1" ${config['nma_onsnatch']} /><label>Notify on snatch?</label>
+	                     	    </div>
+				    <label>NotifyMyAndroid API Key</label>
 	                     	    <input type="text" name="nma_apikey" value="${config['nma_apikey']}" size="30">
 	                     	    <small>Separate multiple api keys with commas</small>
                      	    </div>

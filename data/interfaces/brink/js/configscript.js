@@ -4,9 +4,36 @@ $(document).ready(function() {
     $('.ajax').ajaxForm({ 
         success: function() {
 			var noty_id = noty({
-				"text":"Settings has been saved successfully!",
-				"type":"success"
+				text:'<span class="wsr Approved"></span> Settings Saved!',
+				layout: 'bottomRight',
+				type:'success'
 			});
+			/*
+			var noty_id = noty({
+				text:'<span class="wsr Alert"></span>Carefull!',
+				layout: 'bottomRight',
+				type:'warning'
+			});
+			var noty_id = noty({
+				text:'<span class="wsr Alert"></span> Something went wrong!',
+				layout: 'bottomRight',
+				type:'error'
+			});
+			var noty_id = noty({
+				text:'<span class="wsr"></span> Settings has been saved successfully!',
+				layout: 'bottomRight',
+				type:'information'
+			});
+			var noty_id = noty({
+				text:'<span class="wsr Approved"></span> Settings has been saved successfully!',
+				layout: 'bottomRight',
+				type:'success'
+			});
+			var noty_id = noty({
+				text:'<span class="wsr Chat"></span> Settings has been saved successfully!',
+				layout: 'bottomRight',
+			});
+			*/
         } 
     }); 
 });
@@ -15,21 +42,30 @@ $(document).ready(function() {
 $(document).ready(function(){
 	$( '.switch' ).each(function(){
 		//set Label name to current active state
-		var labelName = 'label[for="' + $(this).attr("name") + '"]';
+		var labelName = 'label[for="' + $( this ).attr( "name" ) + '"]';
+		var switchId = $( this ).attr( "name" );
 		if ( $( this ).is(':checked') ){
 			$( labelName ).text( 'Enabled' );
+			$("#" + switchId ).show();
+			enit();
 		}
 		else {
 			$( labelName ).text( 'Disabled' );
+			$("#" + switchId ).hide();
+			enit();
 		}
 		//Change label
 		$( this ).change(function(){
 			if ( $( this ).is( ':checked' ) ){
 				
 				$( labelName ).text( 'Enabled' );
+				$("#" + switchId ).show();
+				enit();
 			}
 			else{
 				$( labelName ).text( 'Disabled' );
+				$("#" + switchId ).hide();
+				enit();
 			}
 		});
 	});
@@ -136,113 +172,3 @@ handleNewSelection = function () {
 		break;
 	}
 };
-
-$( 'input[type="checkbox"]' ).change(function()
-{
-	if ($("#api_enabled").is(":checked"))
-		{
-			$("#apioptions").show();
-		}
-	else
-		{
-			$("#apioptions").hide();
-		}
-	
-	$("#api_enabled").is(":checked", function(){
-		$("#apioptions").show();
-	});		
-
-	$("#api_key").click(function(){ $("#api_key").select() });
-	$("#generate_api").click(function(){
-		$.get('generateAPI', 
-			function(data){
-				if (data.error != undefined) {
-					alert(data.error);
-					return;
-				}
-				$('#api_key').val(data);
-		});
-	});
-	if ($("#encode").is(":checked"))
-		{
-			$("#encoderoptions").show();
-		}
-	else
-		{
-			$("#encoderoptions").hide();
-		}
-
-	$("#encode").click(function(){
-		if ($("#encode").is(":checked"))
-		{
-			$("#encoderoptions").show("fast");
-		}
-		else
-		{
-			$("#encoderoptions").hide("fast");
-		}
-	});
-
-	if ($("#prowl").is(":checked"))
-		{
-			$("#prowloptions").show();
-		}
-	else
-		{
-			$("#prowloptions").hide();
-		}
-	
-	$("#prowl").click(function(){
-		if ($("#prowl").is(":checked"))
-		{
-			$("#prowloptions").show("fast");
-		}
-		else
-		{
-			$("#prowloptions").hide("fast");
-		}
-	});		
-
-	if ($("#xbmc").is(":checked"))
-		{
-			$("#xbmcoptions").show();
-		}
-	else
-		{
-			$("#xbmcoptions").hide();
-		}
-	
-	$("#xbmc").click(function(){
-		if ($("#xbmc").is(":checked"))
-		{
-			$("#xbmcoptions").show("fast");
-		}
-		else
-		{
-			$("#xbmcoptions").hide("fast");
-		}
-	});		
-	
-	if ($("#nma").is(":checked"))
-		{
-			$("#nmaoptions").show();
-		}
-	else
-		{
-			$("#nmaoptions").hide();
-		}
-	
-	$("#nma").click(function(){
-		if ($("#nma").is(":checked"))
-		{
-			$("#nmaoptions").show("fast");
-		}
-		else
-		{
-			$("#nmaoptions").hide("fast");
-		}
-	});	
-	$("#mirror").change(handleNewSelection);
-	handleNewSelection.apply($("#mirror"));
-
-});

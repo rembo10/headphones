@@ -33,7 +33,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None):
         dir = dir.encode(headphones.SYS_ENCODING)
         
     if not os.path.isdir(dir):
-        logger.warn('Cannot find directory: %s. Not scanning' % dir.decode(headphones.SYS_ENCODING))
+        logger.warn('Cannot find directory: %s. Not scanning' % dir.decode(headphones.SYS_ENCODING, 'replace'))
         return
 
     myDB = db.DBConnection()
@@ -48,7 +48,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None):
 
         myDB.action('DELETE from have')
 
-    logger.info('Scanning music directory: %s' % dir)
+    logger.info('Scanning music directory: %s' % dir.decode(headphones.SYS_ENCODING, 'replace'))
 
     new_artists = []
     bitrates = []
@@ -105,7 +105,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None):
 
     # Now we start track matching
     total_number_of_songs = len(song_list)
-    logger.info("Found " + str(total_number_of_songs) + " tracks in: '" + dir + "'. Matching tracks to the appropriate releases....")
+    logger.info("Found " + str(total_number_of_songs) + " tracks in: '" + dir.decode(headphones.SYS_ENCODING, 'replace') + "'. Matching tracks to the appropriate releases....")
     
     # Sort the song_list by most vague (e.g. no trackid or releaseid) to most specific (both trackid & releaseid)
     # When we insert into the database, the tracks with the most specific information will overwrite the more general matches
@@ -299,7 +299,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None):
         
         myDB.action('INSERT INTO have (ArtistName, AlbumTitle, TrackNumber, TrackTitle, TrackLength, BitRate, Genre, Date, TrackID, Location, CleanName, Format) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [song['ArtistName'], song['AlbumTitle'], song['TrackNumber'], song['TrackTitle'], song['TrackLength'], song['BitRate'], song['Genre'], song['Date'], song['TrackID'], song['Location'], CleanName, song['Format']])
 
-    logger.info('Completed matching tracks from directory: %s' % dir)
+    logger.info('Completed matching tracks from directory: %s' % dir.decode(headphones.SYS_ENCODING, 'replace'))
     
     
     if not append:

@@ -4,6 +4,44 @@
 %>
 
 <%def name="body()">
+	<div id="nav-sub-container">
+		<ul id="nav-view">
+			<li><span class="wsr Icon"></span> Viewport</li>
+		</ul>
+	</div>
+	<div id="gridView">
+		%for artist in artists:
+			<%
+				totaltracks = artist['TotalTracks']
+				havetracks = artist['HaveTracks']
+				if not havetracks:
+					havetracks = 0
+				try:
+					percent = (havetracks*100.0)/totaltracks
+					if percent > 100:
+						percent = 100
+				except (ZeroDivisionError, TypeError):
+					percent = 0
+					totaltracks = '?'
+			%>
+			<div class="image-container">
+				<div class="image-box">
+					<img />
+					<div class="image-actions">
+						%if artist['Status'] == 'Loading':
+							<span class="wsr Loading loader"></span>
+						%else:
+							${havetracks}/${totaltracks}
+						%endif	
+					</div>
+				</div>
+				<div class="image-info">
+					<b title="${artist['ArtistID']}"><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></b>
+				</div>
+			</div>
+		%endfor
+	</div>
+	<div id="listView">
 	<table class="display" id="artist_table">
 		<thead>
 			<tr>
@@ -48,33 +86,34 @@
 					grade = 'X'
 				
 			%>
-			<tr class="grade${grade}">
-				<td id="albumart">
-					<div class="album-art-small">
-						<div class="status ${artist['Status']}">
-							<div>
-								%if artist['Status'] == 'Active':
-								<span class="web-symbol">/</span>
-								%else:
-								<span class="web-symbol loader"></span>
-								%endif	
+			
+				<tr class="grade${grade}">
+					<td id="albumart">
+						<div class="album-art-small">
+							<img />
+							<div class="album-actions">
+								%if artist['Status'] == 'Loading':
+									<div>
+									<span class="wsr Loading loader"></span>
+									</div>
+								%endif
 							</div>
 						</div>
-						<img />
-					</div>
-				</td>
-				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
-				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
-				<td id="have"><span title="${percent}"></span>
-					<div class="progress-container" title="You have ${havetracks} of ${totaltracks} total.">
-						<span class="havetracks">${havetracks}/${totaltracks}</span>
-						<div style="width:${percent}%"></div>
-					</div>
-				</td>
-			</tr>
+					</td>
+					<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
+					<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
+					<td id="have"><span title="${percent}"></span>
+						<div class="progress-container" title="You have ${havetracks} of ${totaltracks} total.">
+							<span class="havetracks">${havetracks}/${totaltracks}</span>
+							<div style="width:${percent}%"></div>
+						</div>
+					</td>
+				</tr>
+			
 		%endfor
 		</tbody>
 	</table>
+	</div>
 </%def>
 
 <%def name="headIncludes()">
@@ -85,7 +124,12 @@
 	<script type="text/javascript" src="js/libs/jquery.dataTables.min.js"></script>
 	<script type="text/javascript">
 	$(document).ready(function(){
+		//GridView
+		$("#gridView").show();
+		$("#listView").hide();
+		enit();
 		getArtistArt();
+		
 		$('#artist_table').dataTable(
 		{
 			"aaSorting": [
@@ -94,15 +138,25 @@
 			"bFilter": true
 		});
 	});
-	
 	function getArtistArt() {
+		$(".image-container").each(function() {
+			$(this).fadeIn('fast', function(){
+				var image = $(this).find("img");
+				var artist = $(this).find(".image-info b").text();
+				var id = $(this).find(".image-info b").attr('title');
+				if ( !image.hasClass('done') ) {
+					image.addClass('done');
+					getArtistInfo(artist,image,2,id);
+				}
+			});
+		});
 		$("table#artist_table tr td#name").each(function(){	
-			var id = $(this).children('a').attr('title');
-			var artist = $(this).children('a').text();
+			var id = $(this).children("a").attr("title");
+			var artist = $(this).children("a").text();
 			var image = $(this).parent().find("td#albumart img");
 			if ( !image.hasClass('done') ) {
 				image.addClass('done');
-				getArtistInfo(artist,image,1,id);
+				getArtistInfo(artist,image,2,id);
 			}
 		});
 	}

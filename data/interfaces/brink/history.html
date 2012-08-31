@@ -3,18 +3,15 @@
 	from headphones import helpers
 %>
 
-<%def name="headerIncludes()">
-	<div id="subhead_container">
-		<ul id="subhead_menu">
+<%def name="body()">
+	<div id="nav-sub-container">
+		<ul id="nav-sub">
 			<li><a href="clearhistory?type=all">Clear All History</a></li>
 			<li><a href="clearhistory?type=Processed">Clear Processed</a></li>
 			<li><a href="clearhistory?type=Unprocessed">Clear Unprocessed</a></li>
 			<li><a href="clearhistory?type=Snatched">Clear Snatched</a></li>
 		</ul>
-	</div>	
-</%def>
-
-<%def name="body()">
+	</div>
 	<table class="display" id="history_table">
 		<thead>
 			<tr>
@@ -60,7 +57,7 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-	<script src="interfaces/brink/js/libs/jquery.dataTables.min.js"></script>
+	<script src="interfaces/brink/JS/libs/jquery.dataTables.min.js"></script>
 	<script>
 	$(document).ready(function()
 	{
