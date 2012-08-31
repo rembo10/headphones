@@ -348,17 +348,19 @@ def addArtisttoDB(artistid, extrasonly=False):
                             
             if headphones.AUTOWANT_ALL:
                 newValueDict['Status'] = "Wanted"
-                
-                #start a search for the album
-                import searcher
-                searcher.searchforalbum(albumid=rg['id'])
-                
             elif album['ReleaseDate'] > helpers.today() and headphones.AUTOWANT_UPCOMING:
                 newValueDict['Status'] = "Wanted"
             else:
                 newValueDict['Status'] = "Skipped"
         
         myDB.upsert("albums", newValueDict, controlValueDict)
+        
+        #start a search for the album if it's new and autowant_all is selected:
+        # Should this run in a background thread? Don't know if we want to have a bunch of
+        # simultaneous threads running
+        if not rg_exists and headphones.AUTOWANT_ALL:    
+            from headphones import searcher
+            searcher.searchforalbum(albumid=rg['id'])
 
         myDB.action('DELETE from tracks WHERE AlbumID=?', [rg['id']])
         tracks = myDB.action('SELECT * from alltracks WHERE ReleaseID=?', [releaseid]).fetchall()
