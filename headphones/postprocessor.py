@@ -282,7 +282,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
     for albumpath in albumpaths:
         librarysync.libraryScan(dir=albumpath, append=True, ArtistID=release['ArtistID'], ArtistName=release['ArtistName'])
     
-    logger.info('Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
+    logger.info(u'Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
     
     if headphones.PROWL_ENABLED:
         pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
