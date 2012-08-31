@@ -1,0 +1,88 @@
+#!/bin/sh
+#
+# PROVIDE: headphones
+# REQUIRE: sabnzbd
+# KEYWORD: shutdown
+#
+# Add the following lines to /etc/rc.conf.local or /etc/rc.conf
+# to enable this service:
+#
+# headphones_enable (bool):     Set to NO by default.
+#                       Set it to YES to enable it.
+# headphones_user:  The user account Headphones daemon runs as what
+#                       you want it to be. It uses '_sabnzbd' user by
+#                       default. Do not sets it as empty or it will run
+#                       as root.
+# headphones_dir:       Directory where Headphones lives.
+#                       Default: /usr/local/headphones
+# headphones_chdir:  Change to this directory before running Headphones.
+#     Default is same as headphones_dir.
+# headphones_pid:  The name of the pidfile to create.
+#     Default is headphones.pid in headphones_dir.
+
+. /etc/rc.subr
+
+name="headphones"
+rcvar=${name}_enable
+
+load_rc_config ${name}
+
+: ${headphones_enable:="NO"}
+: ${headphones_user:="_sabnzbd"}
+: ${headphones_dir:="/usr/local/headphones"}
+: ${headphones_chdir:="${headphones_dir}"}
+: ${headphones_pid:="${headphones_dir}/headphones.pid"}
+: ${headphones_conf:="${headphones_dir}/config.ini"}
+
+WGET="/usr/local/bin/wget" # You need wget for this script to safely shutdown Headphones.
+if [ -e "${headphones_conf}" ]; then
+        HOST=`grep -A64 "\[General\]" "${headphones_conf}"|egrep "^http_host"|perl -wple 's/^http_host = (.*)$/$1/'`
+        PORT=`grep -A64 "\[General\]" "${headphones_conf}"|egrep "^http_port"|perl -wple 's/^http_port = (.*)$/$1/'`
+fi
+
+status_cmd="${name}_status"
+stop_cmd="${name}_stop"
+
+command="${headphones_dir}/Headphones.py"
+command_args="--daemon --quiet --nolaunch --port ${PORT} --pidfile ${headphones_pid} --config ${headphones_conf}"
+
+# Check for wget and refuse to start without it.
+if [ ! -x "${WGET}" ]; then
+  warn "Headphones not started: You need wget to safely shut down Headphones."
+  exit 1
+fi
+
+# Ensure user is root when running this script.
+if [ `id -u` != "0" ]; then
+  echo "Oops, you should be root before running this!"
+  exit 1
+fi
+
+verify_headphones_pid() {
+    # Make sure the pid corresponds to the Headphones process.
+    pid=`cat ${headphones_pid} 2>/dev/null`
+    ps -p ${pid} | grep -q "python ${headphones_dir}/Headphones.py"
+    return $?
+}
+
+# Try to stop Headphones cleanly by calling shutdown over http.
+headphones_stop() {
+    if [ ! -e "${headphones_conf}" ]; then
+        echo "Headphones' settings file does not exist. Try starting Headphones, as this should create the file."
+        exit 1
+    fi
+    echo "Stopping $name"
+    verify_headphones_pid
+    ${WGET} -O - -q --user=${SBUSR} --password=${SBPWD} "http://${HOST}:${PORT}/shutdown/" >/dev/null
+    
+    if [ -n "${pid}" ]; then
+      wait_for_pids ${pid}
+      echo "Stopped $name"
+    fi
+}
+
+headphones_status() {
+    verify_headphones_pid && echo "$name is running as ${pid}" || echo "$name is not running"
+}
+
+run_rc_command "$1"
