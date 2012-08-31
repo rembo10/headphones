@@ -171,14 +171,17 @@ class NMA:
         
         return response     
         
-    def notify(self, artist, album):
+    def notify(self, artist=None, album=None, snatched_nzb=None):
     
         apikey = self.apikey
         priority = self.priority
         
-        event = artist + ' - ' + album + ' complete!'
-        
-        description = "Headphones has downloaded and postprocessed: " + artist + ' [' + album + ']'
+        if snatched_nzb:
+            event = snatched_nzb + " snatched!"
+            description = "Headphones has snatched: " + snatched_nzb + " and has sent it to SABnzbd+"
+        else:
+            event = artist + ' - ' + album + ' complete!'
+            description = "Headphones has downloaded and postprocessed: " + artist + ' [' + album + ']'
     
         data = { 'apikey': apikey, 'application':'Headphones', 'event': event, 'description': description, 'priority': priority}
 

@@ -24,10 +24,10 @@ function getArtistInfo(name,imgElem,size,artistID) {
 				}		
 				var artistBio = artistBio;				
 				var image = imgElem;
-				var bio = $('#artistBio');	
+				var bio = $('.artist-bio-container .artist-bio');	
 				$(image).attr("src",imageUrl).removeAttr("width").removeAttr("height").hide().fadeIn();
 				if ( bio.length > 0 ) $(bio).append(artistBio);
-				$(image).wrap('<a href="albumPage?AlbumID='+ artistID +'"></a>');
+				$(image).wrap('<a href="artistPage?ArtistID='+ artistID +'"></a>');
 			}
 		}				
 	});
@@ -51,10 +51,10 @@ function getArtistInfo(name,imgElem,size,artistID) {
 				}		
 				var artistBio = artistBio;				
 				var image = imgElem;
-				var bio = $('#artistBio');	
+				var bio = $('.artist-bio-container .artist-bio');	
 				$(image).attr("src",imageUrl).removeAttr("width").removeAttr("height").hide().fadeIn();
 				if ( bio.length > 0 ) $(bio).append(artistBio);
-				$(image).wrap('<a href="'+ imageLarge +'" rel="dialog" title="' + artist + '"></a>');
+				$(image).wrap('<a href="artistPage?ArtistID=' + artistID + '" rel="dialog" title="' + artist + '"></a>');
 			}				
 		});
 	}
@@ -172,11 +172,23 @@ loader();
 function enit()
 {
 	var mainWindow = $("#main");
-	var totalHeight = $(window).height() -
-					($("#header").outerHeight() +
-					$("#footer").outerHeight()) - 3;
+	var totalHeight = $(window).height() - ($("#header").outerHeight() + $("#footer").outerHeight()) - 3;
 	$(mainWindow).height(totalHeight);
-	
-	$(mainWindow).jScrollPane({ showArrows: true, animateScroll: true });
+	$(mainWindow).jScrollPane({ showArrows: true, animateScroll: true, hijackInternalLinks: true, autoReinitialise: true });
 }
+$(document).ready(function(){
+	$("ul#nav-view li").toggle(function() {
+		$(this).children("span").removeClass("Icon");
+		$(this).children("span").addClass("List");
+		$("#gridView").hide();
+		$("#listView").show();
+		enit();
+		}, function() {
+		$(this).children("span").removeClass("List");
+		$(this).children("span").addClass("Icon");
+		$("#gridView").show();
+		$("#listView").hide();
+	});
+});
+
 

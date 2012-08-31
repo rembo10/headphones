@@ -27,7 +27,7 @@ import urllib2, cookielib
 
 from headphones.common import USER_AGENT
 from headphones import logger
-from headphones import notifiers
+from headphones import notifiers, helpers
 
 def sendNZB(nzb):
 
@@ -64,8 +64,10 @@ def sendNZB(nzb):
 
     # if we get a raw data result we want to upload it to SAB
     elif nzb.resultType == "nzbdata":
+        # Sanitize the file a bit, since we can only use ascii chars with MultiPartPostHandler
+        nzbdata = helpers.latinToAscii(nzb.extraInfo[0])
         params['mode'] = 'addfile'
-        multiPartParams = {"nzbfile": (nzb.name+".nzb", nzb.extraInfo[0])}
+        multiPartParams = {"nzbfile": (nzb.name+".nzb", nzbdata)}
 
     if not headphones.SAB_HOST.startswith('http'):
         headphones.SAB_HOST = 'http://' + headphones.SAB_HOST
@@ -78,7 +80,7 @@ def sendNZB(nzb):
     try:
 
         if nzb.resultType == "nzb":
-                f = urllib.urlopen(url)
+            f = urllib.urlopen(url)
         elif nzb.resultType == "nzbdata":
             cookies = cookielib.CookieJar()
             opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookies),
@@ -97,7 +99,11 @@ def sendNZB(nzb):
     except httplib.InvalidURL, e:
         logger.error(u"Invalid SAB host, check your config. Current host: %s" % headphones.SAB_HOST)
         return False
-
+        
+    except Exception, e:
+        logger.error(u"Error: " + str(e))
+        return False
+        
     if f == None:
         logger.info(u"No data returned from SABnzbd, NZB not sent")
         return False
@@ -118,10 +124,14 @@ def sendNZB(nzb):
 
     if sabText == "ok":
         logger.info(u"NZB sent to SAB successfully")
-        if headphones.PROWL_ONSNATCH:
-            logger.info(u"Prowl request")
+        if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
+            logger.info(u"Sending Prowl notification")
             prowl = notifiers.PROWL()
             prowl.notify(nzb.name,"Download started")
+        if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
+            logger.debug(u"Sending NMA notification")
+            nma = notifiers.NMA()
+            nma.notify(snatched_nzb=nzb.name)
 
         return True
     elif sabText == "Missing authentication":
