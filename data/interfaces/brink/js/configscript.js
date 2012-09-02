@@ -43,7 +43,7 @@ $(document).ready(function(){
 	$( '.switch' ).each(function(){
 		//set Label name to current active state
 		var labelName = 'label[for="' + $( this ).attr( "name" ) + '"]';
-		var switchId = $( this ).attr( "name" );
+		var switchId = $( this ).attr( "name" ) + "_switch";
 		if ( $( this ).is(':checked') ){
 			$( labelName ).text( 'Enabled' );
 			$("#" + switchId ).show();
