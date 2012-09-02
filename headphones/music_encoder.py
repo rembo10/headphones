@@ -49,41 +49,41 @@ def encode(albumPath):
                 if (headphones.ENCODERLOSSLESS):
                     if (music.lower().endswith('.flac')):
                         musicFiles.append(os.path.join(r, music))
-                        musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT)
+                        musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT.encode(headphones.SYS_ENCODING))
                         musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
                     else:
                         logger.debug('Music "%s" is already encoded' % (music))
                 else:
                     musicFiles.append(os.path.join(r, music))
-                    musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT)
+                    musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT.encode(headphones.SYS_ENCODING))
                     musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
                             
     if headphones.ENCODER=='lame':
-        encoder=os.path.join(headphones.ENCODERFOLDER,'lame')
+        encoder=os.path.join(headphones.ENCODERFOLDER.encode(headphones.SYS_ENCODING),'lame')
     elif headphones.ENCODER=='ffmpeg':
-        encoder=os.path.join(headphones.ENCODERFOLDER,'ffmpeg')
+        encoder=os.path.join(headphones.ENCODERFOLDER.encode(headphones.SYS_ENCODING),'ffmpeg')
     i=0
     for music in musicFiles:        
         infoMusic=MediaFile(music)
         if headphones.ENCODER == 'lame':
             if not any(music.lower().endswith('.' + x) for x in ["mp3", "wav"]):
-                logger.warn('Lame cant encode "%s" format for "%s", use ffmpeg' % (os.path.splitext(music)[1],music))
+                logger.warn(u'Lame cant encode "%s" format for "%s", use ffmpeg' % (os.path.splitext(music)[1].decode(headphones.SYS_ENCODING, 'replace'),music.decode(headphones.SYS_ENCODING, 'replace')))
             else:
                 if (music.lower().endswith('.mp3') and (infoMusic.bitrate/1000<=headphones.BITRATE)): 
-                    logger.info('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))
+                    logger.info('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music.decode(headphones.SYS_ENCODING, 'replace'),headphones.BITRATE))
                 else:
                     command(encoder,music,musicTempFiles[i],albumPath)
                     ifencoded=1
         else:
             if headphones.ENCODEROUTPUTFORMAT=='ogg':
                 if music.lower().endswith('.ogg'):
-                    logger.warn('Can not reencode .ogg music "%s"' % (music))
+                    logger.warn('Can not reencode .ogg music "%s"' % (music.decode(headphones.SYS_ENCODING, 'replace')))
                 else:
                     command(encoder,music,musicTempFiles[i],albumPath)
                     ifencoded=1
             elif (headphones.ENCODEROUTPUTFORMAT=='mp3' or headphones.ENCODEROUTPUTFORMAT=='m4a'):
                 if (music.lower().endswith('.'+headphones.ENCODEROUTPUTFORMAT) and (infoMusic.bitrate/1000<=headphones.BITRATE)):
-                    logger.info('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music,headphones.BITRATE))      
+                    logger.info('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music.decode(headphones.SYS_ENCODING, 'replace'),headphones.BITRATE))      
                 else:
                     command(encoder,music,musicTempFiles[i],albumPath)
                     ifencoded=1
@@ -97,7 +97,7 @@ def encode(albumPath):
                 musicFinalFiles.append(os.path.join(r, music))
     
     if ifencoded==0:
-        logger.info('Encoding for folder "%s" is not needed' % (albumPath))
+        logger.info('Encoding for folder "%s" is not needed' % (albumPath.decode(headphones.SYS_ENCODING, 'replace')))
     
     return musicFinalFiles
     

@@ -41,7 +41,7 @@ def artistlist_to_mbids(artistlist, forced=False):
 
     for artist in artistlist:
         
-        if not artist:
+        if not artist and not (artist == ' '):
             continue
             
         results = mb.findArtist(artist, limit=1)
@@ -102,6 +102,9 @@ def addArtisttoDB(artistid, extrasonly=False):
     if artistid == various_artists_mbid:
         logger.warn('Cannot import Various Artists.')
         return
+        
+    # We'll use this to see if we should update the 'LastUpdated' time stamp
+    errors = False
         
     myDB = db.DBConnection()
     
@@ -171,6 +174,7 @@ def addArtisttoDB(artistid, extrasonly=False):
             continue
             
         if not releaselist:
+            errors = True
             continue
         
         # This will be used later to build a hybrid release     
@@ -186,10 +190,12 @@ def addArtisttoDB(artistid, extrasonly=False):
             try:
                 releasedict = mb.getRelease(releaseid, include_artist_info=False)
             except Exception, e:
+                errors = True
                 logger.info('Unable to get release information for %s: %s' % (release['id'], e))
                 continue
            
             if not releasedict:
+                errors = True
                 continue
 
             controlValueDict = {"ReleaseID":  release['id']}
@@ -342,17 +348,19 @@ def addArtisttoDB(artistid, extrasonly=False):
                             
             if headphones.AUTOWANT_ALL:
                 newValueDict['Status'] = "Wanted"
-                
-                #start a search for the album
-                import searcher
-                searcher.searchforalbum(albumid=rg['id'])
-                
             elif album['ReleaseDate'] > helpers.today() and headphones.AUTOWANT_UPCOMING:
                 newValueDict['Status'] = "Wanted"
             else:
                 newValueDict['Status'] = "Skipped"
         
         myDB.upsert("albums", newValueDict, controlValueDict)
+        
+        #start a search for the album if it's new and autowant_all is selected:
+        # Should this run in a background thread? Don't know if we want to have a bunch of
+        # simultaneous threads running
+        if not rg_exists and headphones.AUTOWANT_ALL:    
+            from headphones import searcher
+            searcher.searchforalbum(albumid=rg['id'])
 
         myDB.action('DELETE from tracks WHERE AlbumID=?', [rg['id']])
         tracks = myDB.action('SELECT * from alltracks WHERE ReleaseID=?', [releaseid]).fetchall()
@@ -412,14 +420,18 @@ def addArtisttoDB(artistid, extrasonly=False):
                         "TotalTracks":      totaltracks,
                         "HaveTracks":       havetracks}
                         
-    newValueDict['LastUpdated'] = helpers.now()
+    if not errors:
+        newValueDict['LastUpdated'] = helpers.now()
     
     myDB.upsert("artists", newValueDict, controlValueDict)
     
     logger.info(u"Seeing if we need album art for: " + artist['artist_name'])
     cache.getThumb(ArtistID=artistid)
     
-    logger.info(u"Updating complete for: " + artist['artist_name'])
+    if errors:
+        logger.info("Finished updating artist: " + artist['artist_name'] + " but with errors, so not marking it as updated in the database")
+    else:
+        logger.info(u"Updating complete for: " + artist['artist_name'])
     
 def addReleaseById(rid):
     
