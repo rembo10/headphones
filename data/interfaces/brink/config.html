@@ -1,6 +1,7 @@
 <%inherit file="base.html"/>
 <%!
 	import headphones
+	import string
 %>
 
 <%def name="headIncludes()">
@@ -311,57 +312,70 @@
 				<!--end NZB Matrix-->
 
 				<!--Newznab-->
-				<table id="newznab" class="configtable">
+				<table class="configtable">
 					<tr>
 						<td>
-							<h2><a href="http://www.newznab.com/" target="_blank"><span class="wsr">D</span>Newznab</a></h2>
+							<h2><a href="http://www.newznab.com/" target="_blank"><span class="wsr">D</span>Newznab Providers</a></h2>
 							<br /><small><label for="newznab">Enabled/Disabled</label></small>
 						</td>
 						<td><input class="switch" type="checkbox" name="newznab" value="1" ${config['use_newznab']} /></td>
 					</tr>
 					<tr>
-						<div id="newznab">
-							<div class="config" id="newznab1">
-								<div class="row">
+					<td>
+						<table id="newznab1">
+							<tr>
+								<td>
 									<label>Newznab Host</label>
 									<input type="text" name="newznab_host" value="${config['newznab_host']}" size="30">
 									<br /><small>e.g. http://nzb.su</small>
-								</div>
-								<div class="row">
+								</td>
+							</tr>
+							<tr>
+								<td>
 									<label>Newznab API</label>
 									<input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36">
-								</div>
-								<div class="row checkbox">
-									<input id="newznab_enabled" type="checkbox" name="newznab_enabled" onclick="initConfigCheckbox($(this));" value="1" ${config['newznab_enabled']} />
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<input id="newznab_enabled" type="checkbox" name="newznab_enabled" value="1" ${config['newznab_enabled']} />
 									<label>Enabled</label>
-								</div>
-							</div>
-							<%
-							newznab_number = 1
-							%>
+								</td>
+							</tr>
+							<tr>
+								<td><input class="newznab-edit-extras" type="button" value ="Edit Extras"/></td>
+							</tr>
+						</table>
+						<div id="newznab-dialog">
 							%for newznab in config['extra_newznabs']:
-							<div class="config" id="newznab${newznab_number}">
-								<div class="row">
-								<label>Newznab Host:</label>
-								<input type="text" name="newznab_host${newznab_number}" value="${newznab[0]}" size="30">
-								</div>
-								<div class="row">
-								<label>Newznab API:</label>
-								<input type="text" name="newznab_api${newznab_number}" value="${newznab[1]}" size="36">
-								</div>
-								<div class="row checkbox">
-								<input id="newznab_enabled" type="checkbox" name="newznab_enabled${newznab_number}" value="1" ${newznab_enabled} /><label>Enabled</label>
-								</div>
-								<div class="row">
-								<input type="button" class="remove" id="newznab${newznab_number}" value="Remove ${newznab[0]}">
-								</div>
-							</div>
-							<%
-								newznab_number += 1
-							%>
+							<table id="newznab${newznab_number}">
+								<tr>
+									<td>
+										<label>Newznab Host:</label>
+										<input type="text" name="newznab_host${newznab_number}" value="${newznab[0]}" size="30">
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<label>Newznab API:</label>
+										<input type="text" name="newznab_api${newznab_number}" value="${newznab[1]}" size="36">
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<input id="newznab_enabled" type="checkbox" name="newznab_enabled${newznab_number}" value="1" ${newznab_enabled} /><label>Enabled/Disabled</label>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<input type="button" class="remove" id="newznab${newznab_number}" value="Remove ${newznab[0]}">
+									</td>
+								</tr>
+							</table>
 							%endfor
 							<input type="button" value="Add Newznab" class="add_newznab" id="add_newznab" />
 						</div>
+						</td>
 					</tr>
 				</table>
 				<!--end Newznab-->
@@ -812,7 +826,13 @@
 				</div><!--end Notifications-->
 				<div id="NAS">
 					<h2>Synology NAS</h2>
-					<input type="checkbox" name="synoindex_enabled" id="synoindex" value="1" ${config['synoindex_enabled']} /><label>Enable Synoindex</label>
+					<table>
+						<tr>
+							<td>
+								<input type="checkbox" name="synoindex_enabled" id="synoindex" value="1" ${config['synoindex_enabled']} /><label>Enable Synoindex</label>
+							</td>
+						</tr>
+					</table>
 				</div>
 				<!--Mirror-->
 				<div id="Mirror">
@@ -885,20 +905,14 @@
 <%def name="javascriptIncludes()">
 	<script>
 		$(document).ready(function(){
+			$("#newznab-dialog").hide();
+			$(".newznab-edit-extras").click(function(){
+				$("#newznab-dialog").dialog();
+			});
 			$(".submitForm").click(function(){
 				$("#config").submit();
 			});
 			//Newznab
-			function newznab(){
-				if( $('input[name="newznab"]').is(":checked") ){
-					$("table#newznab-group").show();
-					enit();
-				}
-				else {
-					$("table#newznab-group").hide();
-					enit();
-				}
-			}
 			var deletedNewznabs = 0;
 			$(".remove").click(function() {
 				$(this).parent().parent().remove();
@@ -906,17 +920,31 @@
 			});
 			
 			$("#add_newznab").click(function() {
-				var intId = $("#newznab_providers > div").size() + deletedNewznabs + 1;
-				var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
-				var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"remove\" value=\"Remove\" /></div>");
+				var intId = $("#newznab-dialog > table").size() + deletedNewznabs + 1;
+				alert(intId);
+				var rowStart = "<tr><td>";
+				var rowEnd = "</td></tr>";
+				var formfields = $("<table id='newznab" + intId + "'>" +
+								rowStart +
+								"<label>Newznab Host</label>" +
+								"<input type='text' name='newznab_host" + intId + "' size='30'>" +
+								rowEnd +
+								rowStart +
+										"<label>Newznab API</label>" +
+										"<input type='text' name='newznab_api" + intId + "' size='36'>" +
+								rowEnd +
+								rowStart +
+									"<input type='checkbox' name='newznab_enabled" + intId + "' value='1' checked />" + 
+									"<label>Enabled</label>" + 
+								rowEnd);
+				var removeButton = $(rowStart + "<input type='button' class='remove' value='Remove' />" + rowEnd);
 				removeButton.click(function() {
 				$(this).parent().remove();
-					deletedNewznabs = deletedNewznabs + 1;
-				
+					deletedNewznabs = deletedNewznabs - 1;
 				});
 				formfields.append(removeButton);
-				formfields.append("</div>");
-				$("#add_newznab").after(formfields);
+				formfields.append("</table>");
+				$("#add_newznab").before(formfields);
 			});
 		
 			//Mirrors

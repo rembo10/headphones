@@ -9,16 +9,16 @@
 	<script>
 		$(document).ready(function(){
 			$('#getExtras').click(function() {
-				$('#dialog').dialog();
+				$('#extras-dialog').dialog();
 				return false;
 			});
 			$('#modifyExtras').click(function() {
-				$('#dialog').dialog();
+				$('#extras-dialog').dialog();
 			});
 		});
 	</script>
 
-	<div id="dialog" title="Choose Which Extras to Fetch" style="display:none" class="configtable">
+	<div id="extras-dialog" title="Choose Which Extras to Fetch" style="display:none" class="configtable">
 		<form action="getExtras" method="get" class="ajax">
 			<input type="hidden" name="ArtistID" value="${artist['ArtistID']}">
 			<input type="hidden" name="newstyle" value="true">
@@ -74,8 +74,8 @@
   			<option value="Downloaded">Downloaded</option>
 		</select>
 		<input type="submit" value="GO">
-		<small><span class="wsr Tag"></span> Click CTRL + LMOUSE on albums to select.</small>
 	</p>
+	<small><span class="wsr Tag"></span> Click CTRL + LMOUSE on albums to select them in grid view.</small>
 	<div id="gridView">
 	%for album in albums:
 		<%
@@ -154,16 +154,7 @@
 				<td id="albumart">
 				<div class="album-art-small">
 					<a href="albumPage?AlbumID=${album['AlbumID']}" title="${album['AlbumID']}">
-						<div class="status">
-							%if album['Status'] == 'Skipped':
-								<a class="wsr" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Mark Wanted"><span>O</span></a>
-							%elif album['Status'] == 'Wanted':
-								<a class="wsr" href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Unmark Wanted"><span>N</span></a>
-							%else:
-								<a class="wsr" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}" title="Retry"><span>*</span></a>
-								<a class="wsr" href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True" title="Try new"><span>J</span></a>
-							%endif
-						</div>
+						<img />
 					</a>
 				</div>
 				</td>
@@ -269,6 +260,14 @@
 				var element = $(this).find("img");
 				var artistname = $(this).find(".image-info b").text();
 				var albumname = $(this).find(".image-info span").text();
+				getAlbumInfo(artistname,albumname,element,2);
+			});
+		});
+		$("table#album_table").each(function() {
+			$(this).fadeIn("slow", function(){
+				var element = $(this).find("img");
+				var artistname = $(".artist-art img").attr("alt");
+				var albumname = $(this).find("#albumname").text();
 				getAlbumInfo(artistname,albumname,element,2);
 			});
 		});
