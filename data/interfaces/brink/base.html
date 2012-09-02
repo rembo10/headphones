@@ -62,11 +62,17 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 	% if not headphones.CURRENT_VERSION:
-			$("#commits-behind").fadeIn('slow').text("${headphones.COMMITS_BEHIND}");
+			var noty_id = noty({
+				text:'<span class="wsr">V</span> New version available!',
+				layout: 'bottomRight',
+				type:'information'
+			});
 	% elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
-			$("#commits-behind").fadeIn('slow').text("(${headphones.COMMITS_BEHIND})");	
-	% else: 
-			$("#commits-behind").hide()
+			var noty_id = noty({
+				text:'<span class="wsr">V</span> You are ${headphones.COMMITS_BEHIND} commits behind',
+				layout: 'bottomRight',
+				type:'information'
+			});
 	% endif
 		});
 	</script>
