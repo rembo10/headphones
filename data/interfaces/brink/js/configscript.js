@@ -46,12 +46,12 @@ $(document).ready(function(){
 		var switchId = $( this ).attr( "name" ) + "_switch";
 		if ( $( this ).is(':checked') ){
 			$( labelName ).text( 'Enabled' );
-			$("#" + switchId ).show();
+			$("#" + switchId ).slideDown();
 			enit();
 		}
 		else {
 			$( labelName ).text( 'Disabled' );
-			$("#" + switchId ).hide();
+			$("#" + switchId ).slideUp();
 			enit();
 		}
 		//Change label
@@ -59,12 +59,12 @@ $(document).ready(function(){
 			if ( $( this ).is( ':checked' ) ){
 				
 				$( labelName ).text( 'Enabled' );
-				$("#" + switchId ).show();
+				$("#" + switchId ).slideDown();
 				enit();
 			}
 			else{
 				$( labelName ).text( 'Disabled' );
-				$("#" + switchId ).hide();
+				$("#" + switchId ).slideUp();
 				enit();
 			}
 		});

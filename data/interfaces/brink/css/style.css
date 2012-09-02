@@ -347,22 +347,14 @@ div#config_wrapper { margin: auto; width: 640px;}
 div#config_wrapper > div > table { width: 100%; border-collapse:separate; border-spacing: 10px; }
 div#config_wrapper > div > table tr td:first-child{ width: 240px; }
 div#config_wrapper > div > table tr td{ vertical-align: middle; }
-group,
 div.group {
 	padding: 5px;
 	background-color: rgba(0,0,0,0.1);
-	border: 1px solid rgba(255,255,255,0.1);
-	border-radius: 10px;
-	-moz-border-radius: 10px;
-	-webkit-border-radius: 10px;
-	-o-border-radius: 10px;
+	border-top: 1px solid rgba(0,0,0,0.1);
+	border-left: 1px solid rgba(0,0,0,0.1);
+	border-bottom: 1px solid rgba(255,255,255,0.1);
+	border-right: 1px solid rgba(255,255,255,0.1);
 	display: block;
-}
-div.group table {
-margin-left: 10px;
-}
-div.group:first-child {
-margin-left: 0px;
 }
 /*end config*/
 
