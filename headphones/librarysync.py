@@ -56,6 +56,11 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None):
     song_list = []
     
     for r,d,f in os.walk(dir):
+        try:
+            d.remove('.AppleDouble')
+            d.remove('.DS_Store')
+        except ValueError:
+            pass
         for files in f:
             # MEDIA_FORMATS = music file extensions, e.g. mp3, flac, etc
             if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
