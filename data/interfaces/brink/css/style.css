@@ -344,9 +344,9 @@ input[type="checkbox"]:checked:after{
 
 /*config*/
 div#config_wrapper { margin: auto; width: 640px;}
-div#config_wrapper > div > table { width: 100%; border-collapse:separate; border-spacing: 10px; }
-div#config_wrapper > div > table tr td:first-child{ width: 240px; }
-div#config_wrapper > div > table tr td{ vertical-align: middle; }
+div#config_wrapper div table { width: 100%; border-collapse:separate; border-spacing: 10px; }
+div#config_wrapper div table tr td:first-child{ width: 50%; }
+div#config_wrapper div table tr td{ vertical-align: middle; }
 div.group {
 	padding: 5px;
 	background-color: rgba(0,0,0,0.1);
