@@ -56,11 +56,11 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None):
     song_list = []
     
     for r,d,f in os.walk(dir):
-        try:
-            d.remove('.AppleDouble')
-            d.remove('.DS_Store')
-        except ValueError:
-            pass
+        #need to abuse slicing to get a copy of the list, doing it directly will skip the element after a deleted one
+        #using a list comprehension will not work correctly for nested subdirectories (os.walk keeps its original list)
+        for directory in d[:]:
+            if directory.startswith("."):
+                d.remove(directory)
         for files in f:
             # MEDIA_FORMATS = music file extensions, e.g. mp3, flac, etc
             if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
