@@ -17,7 +17,7 @@ http://www.crummy.com/software/BeautifulSoup/bs4/doc/
 """
 
 __author__ = "Leonard Richardson (leonardr@segfault.org)"
-__version__ = "4.1.0"
+__version__ = "4.1.3"
 __copyright__ = "Copyright (c) 2004-2012 Leonard Richardson"
 __license__ = "MIT"
 
@@ -149,7 +149,7 @@ class BeautifulSoup(Tag):
                 features = self.DEFAULT_BUILDER_FEATURES
             builder_class = builder_registry.lookup(*features)
             if builder_class is None:
-                raise ValueError(
+                raise FeatureNotFound(
                     "Couldn't find a tree builder with the features you "
                     "requested: %s. Do you need to install a parser library?"
                     % ",".join(features))
@@ -208,10 +208,10 @@ class BeautifulSoup(Tag):
         return navigable
 
     def insert_before(self, successor):
-        raise ValueError("BeautifulSoup objects don't support insert_before().")
+        raise NotImplementedError("BeautifulSoup objects don't support insert_before().")
 
     def insert_after(self, successor):
-        raise ValueError("BeautifulSoup objects don't support insert_after().")
+        raise NotImplementedError("BeautifulSoup objects don't support insert_after().")
 
     def popTag(self):
         tag = self.tagStack.pop()
@@ -267,7 +267,7 @@ class BeautifulSoup(Tag):
 
         for i in range(len(self.tagStack) - 1, 0, -1):
             if (name == self.tagStack[i].name
-                and nsprefix == self.tagStack[i].nsprefix == nsprefix):
+                and nsprefix == self.tagStack[i].prefix):
                 numPops = len(self.tagStack) - i
                 break
         if not inclusivePop:
@@ -345,6 +345,10 @@ class BeautifulStoneSoup(BeautifulSoup):
 
 
 class StopParsing(Exception):
+    pass
+
+
+class FeatureNotFound(ValueError):
     pass
 
 

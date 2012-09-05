@@ -10,18 +10,30 @@ encoding; that's the tree builder's job.
 import codecs
 from htmlentitydefs import codepoint2name
 import re
-import warnings
+import logging
 
-# Autodetects character encodings. Very useful.
-# Download from http://chardet.feedparser.org/
-#  or 'apt-get install python-chardet'
-#  or 'easy_install chardet'
+# Import a library to autodetect character encodings.
+chardet_type = None
 try:
-    import chardet
-    #import chardet.constants
-    #chardet.constants._debug = 1
+    # First try the fast C implementation.
+    #  PyPI package: cchardet
+    import cchardet
+    def chardet_dammit(s):
+        return cchardet.detect(s)['encoding']
 except ImportError:
-    chardet = None
+    try:
+        # Fall back to the pure Python implementation
+        #  Debian package: python-chardet
+        #  PyPI package: chardet
+        import chardet
+        def chardet_dammit(s):
+            return chardet.detect(s)['encoding']
+        #import chardet.constants
+        #chardet.constants._debug = 1
+    except ImportError:
+        # No chardet available.
+        def chardet_dammit(s):
+            return None
 
 # Available from http://cjkpython.i18n.org/.
 try:
@@ -207,8 +219,8 @@ class UnicodeDammit:
                         break
 
         # If no luck and we have auto-detection library, try that:
-        if not u and chardet and not isinstance(self.markup, unicode):
-            u = self._convert_from(chardet.detect(self.markup)['encoding'])
+        if not u and not isinstance(self.markup, unicode):
+            u = self._convert_from(chardet_dammit(self.markup))
 
         # As a last resort, try utf-8 and windows-1252:
         if not u:
@@ -226,10 +238,9 @@ class UnicodeDammit:
                 if proposed_encoding != "ascii":
                     u = self._convert_from(proposed_encoding, "replace")
                 if u is not None:
-                    warnings.warn(
-                        UnicodeWarning(
+                    logging.warning(
                             "Some characters could not be decoded, and were "
-                            "replaced with REPLACEMENT CHARACTER."))
+                            "replaced with REPLACEMENT CHARACTER.")
                     self.contains_replacement_characters = True
                     break
 

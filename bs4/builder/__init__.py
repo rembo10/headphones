@@ -157,7 +157,16 @@ class TreeBuilder(object):
                     # value is a whitespace-separated list of CSS
                     # classes. Split it into a list.
                     value = attrs[cdata_list_attr]
-                    values = whitespace_re.split(value)
+                    if isinstance(value, basestring):
+                        values = whitespace_re.split(value)
+                    else:
+                        # html5lib sometimes calls setAttributes twice
+                        # for the same tag when rearranging the parse
+                        # tree. On the second call the attribute value
+                        # here is already a list.  If this happens,
+                        # leave the value alone rather than trying to
+                        # split it again.
+                        values = value
                     attrs[cdata_list_attr] = values
         return attrs
 
