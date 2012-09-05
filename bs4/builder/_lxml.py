@@ -111,13 +111,33 @@ class LXMLTreeBuilderForXML(TreeBuilder):
                 attribute = NamespacedAttribute(
                     "xmlns", prefix, "http://www.w3.org/2000/xmlns/")
                 attrs[attribute] = namespace
+
+        if self.nsmaps is not None and len(self.nsmaps) > 0:
+            # Namespaces are in play. Find any attributes that came in
+            # from lxml with namespaces attached to their names, and
+            # turn then into NamespacedAttribute objects.
+            new_attrs = {}
+            for attr, value in attrs.items():
+                namespace, attr = self._getNsTag(attr)
+                if namespace is None:
+                    new_attrs[attr] = value
+                else:
+                    nsprefix = self._prefix_for_namespace(namespace)
+                    attr = NamespacedAttribute(nsprefix, attr, namespace)
+                    new_attrs[attr] = value
+            attrs = new_attrs
+
         namespace, name = self._getNsTag(name)
-        if namespace is not None:
-            for inverted_nsmap in reversed(self.nsmaps):
-                if inverted_nsmap is not None and namespace in inverted_nsmap:
-                    nsprefix = inverted_nsmap[namespace]
-                    break
+        nsprefix = self._prefix_for_namespace(namespace)
         self.soup.handle_starttag(name, namespace, nsprefix, attrs)
+
+    def _prefix_for_namespace(self, namespace):
+        """Find the currently active prefix for the given namespace."""
+        if namespace is None:
+            return None
+        for inverted_nsmap in reversed(self.nsmaps):
+            if inverted_nsmap is not None and namespace in inverted_nsmap:
+                return inverted_nsmap[namespace]
 
     def end(self, name):
         self.soup.endData()

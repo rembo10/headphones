@@ -202,6 +202,14 @@ class HTMLTreeBuilderSmokeTest(object):
             "<tbody><tr><td>Bar</td></tr></tbody>"
             "<tfoot><tr><td>Baz</td></tr></tfoot></table>")
 
+    def test_deeply_nested_multivalued_attribute(self):
+        # html5lib can set the attributes of the same tag many times
+        # as it rearranges the tree. This has caused problems with
+        # multivalued attributes.
+        markup = '<table><div><div class="css"></div></div></table>'
+        soup = self.soup(markup)
+        self.assertEqual(["css"], soup.div.div['class'])
+
     def test_angle_brackets_in_attribute_values_are_escaped(self):
         self.assertSoupEquals('<a b="<a>"></a>', '<a b="&lt;a&gt;"></a>')
 
@@ -445,6 +453,11 @@ class XMLTreeBuilderSmokeTest(object):
         self.assertEqual(
             soup.encode("utf-8"), markup)
 
+    def test_popping_namespaced_tag(self):
+        markup = '<rss xmlns:dc="foo"><dc:creator>b</dc:creator><dc:date>2012-07-02T20:33:42Z</dc:date><dc:rights>c</dc:rights><image>d</image></rss>'
+        soup = self.soup(markup)
+        self.assertEqual(
+            unicode(soup.rss), markup)
 
     def test_docstring_includes_correct_encoding(self):
         soup = self.soup("<root/>")
@@ -472,6 +485,15 @@ class XMLTreeBuilderSmokeTest(object):
         self.assertEqual("http://example.com/", root['xmlns:a'])
         self.assertEqual("http://example.net/", root['xmlns:b'])
 
+    def test_closing_namespaced_tag(self):
+        markup = '<p xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:date>20010504</dc:date></p>'
+        soup = self.soup(markup)
+        self.assertEqual(unicode(soup.p), markup)
+
+    def test_namespaced_attributes(self):
+        markup = '<foo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><bar xsi:schemaLocation="http://www.example.com"/></foo>'
+        soup = self.soup(markup)
+        self.assertEqual(unicode(soup.foo), markup)
 
 class HTML5TreeBuilderSmokeTest(HTMLTreeBuilderSmokeTest):
     """Smoke test for a tree builder that supports HTML5."""

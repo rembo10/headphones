@@ -820,7 +820,7 @@ class Tag(PageElement):
         for string in self._all_strings(True):
             yield string
 
-    def get_text(self, separator="", strip=False):
+    def get_text(self, separator=u"", strip=False):
         """
         Get all child strings, concatenated using the given separator.
         """
@@ -987,7 +987,7 @@ class Tag(PageElement):
                     if isinstance(val, list) or isinstance(val, tuple):
                         val = ' '.join(val)
                     elif not isinstance(val, basestring):
-                        val = str(val)
+                        val = unicode(val)
                     elif (
                         isinstance(val, AttributeValueWithCharsetSubstitution)
                         and eventual_encoding is not None):
@@ -995,19 +995,20 @@ class Tag(PageElement):
 
                     text = self.format_string(val, formatter)
                     decoded = (
-                        str(key) + '='
+                        unicode(key) + '='
                         + EntitySubstitution.quoted_attribute_value(text))
                 attrs.append(decoded)
         close = ''
         closeTag = ''
-        if self.is_empty_element:
-            close = '/'
-        else:
-            closeTag = '</%s>' % self.name
 
         prefix = ''
         if self.prefix:
             prefix = self.prefix + ":"
+
+        if self.is_empty_element:
+            close = '/'
+        else:
+            closeTag = '</%s%s>' % (prefix, self.name)
 
         pretty_print = (indent_level is not None)
         if pretty_print:
@@ -1120,6 +1121,7 @@ class Tag(PageElement):
         callable that takes a string and returns whether or not the
         string matches for some custom definition of 'matches'. The
         same is true of the tag name."""
+
         generator = self.descendants
         if not recursive:
             generator = self.children
@@ -1167,6 +1169,12 @@ class SoupStrainer(object):
             # attribute.
             kwargs['class'] = attrs
             attrs = None
+
+        if 'class_' in kwargs:
+            # Treat class_="foo" as a search for the 'class'
+            # attribute, overriding any non-dict value for attrs.
+            kwargs['class'] = kwargs['class_']
+            del kwargs['class_']
 
         if kwargs:
             if attrs:
