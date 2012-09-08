@@ -387,8 +387,8 @@ def get_all_releases(rgid):
         release = {}
         release['AlbumTitle'] = unicode(releasedata['title'])
         release['AlbumID'] = unicode(rgid)
-        release['AlbumASIN'] = unicode(releasedata['asin'])
-        release['ReleaseDate'] = unicode(releasedata['date'])        
+        release['AlbumASIN'] = unicode(releasedata['asin']) if 'asin' in releasedata else None
+        release['ReleaseDate'] = unicode(releasedata['date']) if 'date' in releasedata else None      
         release['ReleaseID'] = releasedata['id']
         if 'release-group' not in releasedata:
             raise Exception('No release group associated with release id ' + releasedata['id'] + ' album id' + rgid)
@@ -400,7 +400,8 @@ def get_all_releases(rgid):
             release['ArtistID'] = unicode(releasedata['artist-credit'][0]['artist']['id'])
             release['ArtistName'] = unicode(releasedata['artist-credit-phrase'])
         else:
-            raise Exception('Release ' + releasedata['id'] + ' has no Artists associated.')
+            logger.warn('Release ' + releasedata['id'] + ' has no Artists associated.')
+            return False
                 
 
         release['ReleaseCountry'] = unicode(releasedata['country']) if 'country' in releasedata else u'Unknown'
