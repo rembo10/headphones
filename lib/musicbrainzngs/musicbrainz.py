@@ -552,6 +552,7 @@ def _do_mb_query(entity, id, includes=[], params={}):
 
 	# Build the endpoint components.
 	path = '%s/%s' % (entity, id)
+	logging.debug(str(path))
 	return _mb_request(path, 'GET', auth_required, args=args)
 
 def _do_mb_search(entity, query='', fields={},
@@ -776,7 +777,7 @@ def browse_recordings(artist=None, release=None, includes=[], limit=None, offset
 
 def browse_releases(artist=None, label=None, recording=None, release_group=None, release_status=[], release_type=[], includes=[], limit=None, offset=None):
     # track_artist param doesn't work yet
-    valid_includes = ["artist-credits", "labels", "recordings", "release-groups"]
+    valid_includes = ["artist-credits", "labels", "recordings", "release-groups","media"]
     params = {"artist": artist,
               "label": label,
               "recording": recording,
