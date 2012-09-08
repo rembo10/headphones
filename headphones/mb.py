@@ -367,41 +367,50 @@ def getRelease(releaseid, include_artist_info=True):
         release['tracks'] = tracks
         
         return release
-def get_all_releases(releasegroup,include_artist_info=True):
+def get_all_releases(rgid):
     results = None
     q, sleepytime = startmb()
     try:
-        if include_artist_info:
-            results = musicbrainzngs.browse_releases(release_group=releasegroup,includes=['artist-credits','labels','recordings','release-groups','media'])
-        else:
-            results = musicbrainzngs.browse_releases(release_group=releasegroup,includes=['labels','recordings','release-groups','media'])
+        results = musicbrainzngs.browse_releases(release_group=rgid,includes=['artist-credits','labels','recordings','release-groups','media'])
     except WebServiceError, e:
-        logger.warn('Attempt to retrieve information from MusicBrainz for releasegroup "%s" failed (%s)' % (releasegroup, str(e)))
-        time.sleep(5)    
+        logger.warn('Attempt to retrieve information from MusicBrainz for release group "%s" failed (%s)' % (rgid, str(e)))
+        time.sleep(5)
+        return False
         
     if not results or 'release-list' not in results:
         return False
 
     results = results['release-list']
+        
     releases = []
     for releasedata in results:
         release = {}
-        release['AlbumASIN'] = unicode(releasedata['asin'])
-        release['AlbumID'] = unicode(releasedata['release-group']['id'])
-        release['Type'] = unicode(releasedata['release-group']['type'])
         release['AlbumTitle'] = unicode(releasedata['title'])
+        release['AlbumID'] = unicode(rgid)
+        release['AlbumASIN'] = unicode(releasedata['asin'])
+        release['ReleaseDate'] = unicode(releasedata['date'])        
+        release['ReleaseID'] = releasedata['id']
+        if 'release-group' not in releasedata:
+            raise Exception('No release group associated with release id ' + releasedata['id'] + ' album id' + rgid)
+        release['Type'] = unicode(releasedata['release-group']['type'])
+
+
         #making the assumption that the most important artist will be first in the list
-        if include_artist_info:
+        if 'artist-credit' in releasedata:
             release['ArtistID'] = unicode(releasedata['artist-credit'][0]['artist']['id'])
             release['ArtistName'] = unicode(releasedata['artist-credit-phrase'])
-        release['ReleaseCountry'] = unicode(releasedata['country'])
-        release['ReleaseDate'] = unicode(releasedata['date'])
-        #assuming that the list will contain media at all and that the format will be consistent
+        else:
+            raise Exception('Release ' + releasedata['id'] + ' has no Artists associated.')
+                
+
+        release['ReleaseCountry'] = unicode(releasedata['country']) if 'country' in releasedata else u'Unknown'
+        #assuming that the list will contain media and that the format will be consistent
         try:
             release['ReleaseFormat'] = unicode(releasedata['medium-list'][0]['format'])
         except:
             release['ReleaseFormat'] = u'Unknown'
-        release['ReleaseID'] = releasedata['id']
+
+
         
         #pasted in from getRelease
         totalTracks = 1
