@@ -367,6 +367,63 @@ def getRelease(releaseid, include_artist_info=True):
         release['tracks'] = tracks
         
         return release
+def get_all_releases(releasegroup,include_artist_info=True):
+    results = None
+    q, sleepytime = startmb()
+    try:
+        if include_artist_info:
+            results = musicbrainzngs.browse_releases(release_group=releasegroup,includes=['artist-credits','labels','recordings','release-groups','media'])
+        else:
+            results = musicbrainzngs.browse_releases(release_group=releasegroup,includes=['labels','recordings','release-groups','media'])
+    except WebServiceError, e:
+        logger.warn('Attempt to retrieve information from MusicBrainz for releasegroup "%s" failed (%s)' % (releasegroup, str(e)))
+        time.sleep(5)    
+        
+    if not results or 'release-list' not in results:
+        return False
+
+    results = results['release-list']
+    releases = []
+    for releasedata in results:
+        release = {}
+        release['AlbumASIN'] = unicode(releasedata['asin'])
+        release['AlbumID'] = unicode(releasedata['release-group']['id'])
+        release['Type'] = unicode(releasedata['release-group']['type'])
+        release['AlbumTitle'] = unicode(releasedata['title'])
+        #making the assumption that the most important artist will be first in the list
+        if include_artist_info:
+            release['ArtistID'] = unicode(releasedata['artist-credit'][0]['artist']['id'])
+            release['ArtistName'] = unicode(releasedata['artist-credit-phrase'])
+        release['ReleaseCountry'] = unicode(releasedata['country'])
+        release['ReleaseDate'] = unicode(releasedata['date'])
+        #assuming that the list will contain media at all and that the format will be consistent
+        try:
+            release['ReleaseFormat'] = unicode(releasedata['medium-list'][0]['format'])
+        except:
+            release['ReleaseFormat'] = u'Unknown'
+        release['ReleaseID'] = releasedata['id']
+        
+        #pasted in from getRelease
+        totalTracks = 1
+        tracks = []
+        for medium in releasedata['medium-list']:
+            for track in medium['track-list']:
+                tracks.append({
+                        'number':        totalTracks,
+                        'title':         unicode(track['recording']['title']),
+                        'id':            unicode(track['recording']['id']),
+                        'url':           u"http://musicbrainz.org/track/" + track['recording']['id'],
+                        'duration':      int(track['length']) if 'length' in track else 0
+                        })
+                totalTracks += 1      
+        release['Tracks'] = tracks
+        releases.append(release)
+        
+        
+        
+
+    
+    return releases
 
 # Used when there is a disambiguation
 def findArtistbyAlbum(name):
