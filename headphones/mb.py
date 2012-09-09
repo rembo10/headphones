@@ -368,19 +368,26 @@ def getRelease(releaseid, include_artist_info=True):
         
         return release
 def get_all_releases(rgid):
-    results = None
+    results = []
     q, sleepytime = startmb()
     try:
-        results = musicbrainzngs.browse_releases(release_group=rgid,includes=['artist-credits','labels','recordings','release-groups','media'])
+        limit = 100
+        newResults = None
+        while newResults == None or len(newResults) >= limit:
+            newResults = musicbrainzngs.browse_releases(release_group=rgid,includes=['artist-credits','labels','recordings','release-groups','media'],limit=limit,offset=len(results))
+            if 'release-list' not in newResults:
+                break #may want to raise an exception here instead ?
+            newResults = newResults['release-list']
+            results += newResults
+            
     except WebServiceError, e:
         logger.warn('Attempt to retrieve information from MusicBrainz for release group "%s" failed (%s)' % (rgid, str(e)))
         time.sleep(5)
         return False
         
-    if not results or 'release-list' not in results:
+    if not results or len(results) == 0:
         return False
 
-    results = results['release-list']
         
     releases = []
     for releasedata in results:
