@@ -167,69 +167,51 @@ def addArtisttoDB(artistid, extrasonly=False):
         # check if the album already exists
         rg_exists = myDB.action("SELECT * from albums WHERE AlbumID=?", [rg['id']]).fetchone()
                     
-        try:    
-            releaselist = mb.getReleaseGroup(rgid)
-        except Exception, e:
-            logger.info('Unable to get release information for %s - there may not be any official releases in this release group' % rg['title'])
-            continue
-            
-        if not releaselist:
+        releases = mb.get_all_releases(rgid)
+        if not releases:
             errors = True
+            logger.info('Unable to get release information for %s - there may not be any official releases in this release group' % rg['title'])
             continue
         
         # This will be used later to build a hybrid release     
         fullreleaselist = []
-            
-        for release in releaselist:
+
+        for release in releases:
         # What we're doing here now is first updating the allalbums & alltracks table to the most
         # current info, then moving the appropriate release into the album table and its associated
         # tracks into the tracks table
-            
-            releaseid = release['id']
-            
-            try:
-                releasedict = mb.getRelease(releaseid, include_artist_info=False)
-            except Exception, e:
-                errors = True
-                logger.info('Unable to get release information for %s: %s' % (release['id'], e))
-                continue
-           
-            if not releasedict:
-                errors = True
-                continue
+            controlValueDict = {"ReleaseID" : release['ReleaseID']}
 
-            controlValueDict = {"ReleaseID":  release['id']}
-
-            newValueDict = {"ArtistID":         artistid,
-                            "ArtistName":       artist['artist_name'],
-                            "AlbumTitle":       rg['title'],
-                            "AlbumID":          rg['id'],
-                            "AlbumASIN":        releasedict['asin'],
-                            "ReleaseDate":      releasedict['date'],
-                            "Type":             rg['type'],
-                            "ReleaseCountry":   releasedict['country'],
-                            "ReleaseFormat":    releasedict['format']
+            newValueDict = {"ArtistID":         release['ArtistID'],
+                            "ArtistName":       release['ArtistName'],
+                            "AlbumTitle":       release['AlbumTitle'],
+                            "AlbumID":          release['AlbumID'],
+                            "AlbumASIN":        release['AlbumASIN'],
+                            "ReleaseDate":      release['ReleaseDate'],
+                            "Type":             release['Type'],
+                            "ReleaseCountry":   release['ReleaseCountry'],
+                            "ReleaseFormat":    release['ReleaseFormat']
                         }
-                        
+
             myDB.upsert("allalbums", newValueDict, controlValueDict)
             
             # Build the dictionary for the fullreleaselist
-            newValueDict['ReleaseID'] = release['id']
-            newValueDict['Tracks'] = releasedict['tracks']
+            newValueDict['ReleaseID'] = release['ReleaseID']
+            newValueDict['Tracks'] = release['Tracks']
             fullreleaselist.append(newValueDict)
             
-            for track in releasedict['tracks']:
+            for track in release['Tracks']:
 
                 cleanname = helpers.cleanName(artist['artist_name'] + ' ' + rg['title'] + ' ' + track['title'])
         
                 controlValueDict = {"TrackID":      track['id'],
-                                    "ReleaseID":    release['id']}
+                                    "ReleaseID":    release['ReleaseID']}
 
-                newValueDict = {"ArtistID":         artistid,
-                                "ArtistName":       artist['artist_name'],
-                                "AlbumTitle":       rg['title'],
-                                "AlbumASIN":        releasedict['asin'],
-                                "AlbumID":          rg['id'],
+                newValueDict = {"ArtistID":         release['ArtistID'],
+                                "ArtistName":       release['ArtistName'],
+                                "AlbumTitle":       release['AlbumTitle'],
+                                "AlbumID":          release['AlbumID'],
+                                "AlbumASIN":        release['AlbumASIN'],
                                 "TrackTitle":       track['title'],
                                 "TrackDuration":    track['duration'],
                                 "TrackNumber":      track['number'],
@@ -251,7 +233,13 @@ def addArtisttoDB(artistid, extrasonly=False):
                 myDB.upsert("alltracks", newValueDict, controlValueDict)
 
         # Basically just do the same thing again for the hybrid release
-        hybridrelease = getHybridRelease(fullreleaselist)
+        # This may end up being called with an empty fullreleaselist
+        try:
+            hybridrelease = getHybridRelease(fullreleaselist)
+        except Exception, e:
+            errors = True
+            logger.warn('Unable to get hybrid release information for %s: %s' % (rg['title'],e))
+            continue
         
         # Use the ReleaseGroupID as the ReleaseID for the hybrid release to differentiate it
         # We can then use the condition WHERE ReleaseID == ReleaseGroupID to select it
@@ -584,6 +572,8 @@ def getHybridRelease(fullreleaselist):
     """
     Returns a dictionary of best group of tracks from the list of releases & earliest release date
     """
+    if len(fullreleaselist) == 0:
+        raise Exception("getHybridRelease was called with an empty fullreleaselist")
     sortable_release_list = []
         
     for release in fullreleaselist:
