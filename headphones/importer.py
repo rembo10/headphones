@@ -233,7 +233,13 @@ def addArtisttoDB(artistid, extrasonly=False):
                 myDB.upsert("alltracks", newValueDict, controlValueDict)
 
         # Basically just do the same thing again for the hybrid release
-        hybridrelease = getHybridRelease(fullreleaselist)
+        # This may end up being called with an empty fullreleaselist
+        try:
+            hybridrelease = getHybridRelease(fullreleaselist)
+        except Exception, e:
+            errors = True
+            logger.warn('Unable to get hybrid release information for %s: %s' % (rg['title'],e))
+            continue
         
         # Use the ReleaseGroupID as the ReleaseID for the hybrid release to differentiate it
         # We can then use the condition WHERE ReleaseID == ReleaseGroupID to select it
