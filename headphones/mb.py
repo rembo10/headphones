@@ -367,6 +367,80 @@ def getRelease(releaseid, include_artist_info=True):
         release['tracks'] = tracks
         
         return release
+def get_all_releases(rgid):
+    results = []
+    q, sleepytime = startmb()
+    try:
+        limit = 100
+        newResults = None
+        while newResults == None or len(newResults) >= limit:
+            newResults = musicbrainzngs.browse_releases(release_group=rgid,includes=['artist-credits','labels','recordings','release-groups','media'],limit=limit,offset=len(results))
+            if 'release-list' not in newResults:
+                break #may want to raise an exception here instead ?
+            newResults = newResults['release-list']
+            results += newResults
+            
+    except WebServiceError, e:
+        logger.warn('Attempt to retrieve information from MusicBrainz for release group "%s" failed (%s)' % (rgid, str(e)))
+        time.sleep(5)
+        return False
+        
+    if not results or len(results) == 0:
+        return False
+
+        
+    releases = []
+    for releasedata in results:
+        release = {}
+        release['AlbumTitle'] = unicode(releasedata['title'])
+        release['AlbumID'] = unicode(rgid)
+        release['AlbumASIN'] = unicode(releasedata['asin']) if 'asin' in releasedata else None
+        release['ReleaseDate'] = unicode(releasedata['date']) if 'date' in releasedata else None      
+        release['ReleaseID'] = releasedata['id']
+        if 'release-group' not in releasedata:
+            raise Exception('No release group associated with release id ' + releasedata['id'] + ' album id' + rgid)
+        release['Type'] = unicode(releasedata['release-group']['type'])
+
+
+        #making the assumption that the most important artist will be first in the list
+        if 'artist-credit' in releasedata:
+            release['ArtistID'] = unicode(releasedata['artist-credit'][0]['artist']['id'])
+            release['ArtistName'] = unicode(releasedata['artist-credit-phrase'])
+        else:
+            logger.warn('Release ' + releasedata['id'] + ' has no Artists associated.')
+            return False
+                
+
+        release['ReleaseCountry'] = unicode(releasedata['country']) if 'country' in releasedata else u'Unknown'
+        #assuming that the list will contain media and that the format will be consistent
+        try:
+            release['ReleaseFormat'] = unicode(releasedata['medium-list'][0]['format'])
+        except:
+            release['ReleaseFormat'] = u'Unknown'
+
+
+        
+        #pasted in from getRelease
+        totalTracks = 1
+        tracks = []
+        for medium in releasedata['medium-list']:
+            for track in medium['track-list']:
+                tracks.append({
+                        'number':        totalTracks,
+                        'title':         unicode(track['recording']['title']),
+                        'id':            unicode(track['recording']['id']),
+                        'url':           u"http://musicbrainz.org/track/" + track['recording']['id'],
+                        'duration':      int(track['length']) if 'length' in track else 0
+                        })
+                totalTracks += 1      
+        release['Tracks'] = tracks
+        releases.append(release)
+        
+        
+        
+
+    
+    return releases
 
 # Used when there is a disambiguation
 def findArtistbyAlbum(name):
