@@ -216,6 +216,13 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                         logger.info(u"No results found from NZBMatrix for %s" % term)
             
         if headphones.NEWZNAB:
+            
+            newznab_hosts = [(headphones.NEWZNAB_HOST, headphones.NEWZNAB_APIKEY, headphones.NEWZNAB_ENABLED)]
+            
+            for newznab_host in headphones.EXTRA_NEWZNABS:
+                if newznab_host[2] == '1' or newznab_host[2] == 1:
+                    newznab_hosts.append(newznab_host)
+            
             provider = "newznab"
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "3040"
@@ -227,44 +234,46 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             if albums['Type'] == 'Other':
                 categories = "3030"
                 logger.info("Album type is audiobook/spokenword. Using audiobook category")
+                
+            for newznab_host in newznab_hosts:
 
-            params = {    "t": "search",
-                        "apikey": headphones.NEWZNAB_APIKEY,
-                        "cat": categories,
-                        "maxage": headphones.USENET_RETENTION,
-                        "q": term
-                        }
-        
-            searchURL = headphones.NEWZNAB_HOST + '/api?' + urllib.urlencode(params)
-                
-            logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, headphones.NEWZNAB_HOST))
+                params = {    "t": "search",
+                            "apikey": newznab_host[1],
+                            "cat": categories,
+                            "maxage": headphones.USENET_RETENTION,
+                            "q": term
+                            }
             
-            try:
-                data = urllib2.urlopen(searchURL, timeout=20).read()
-            except urllib2.URLError, e:
-                logger.warn('Error fetching data from %s: %s' % (headphones.NEWZNAB_HOST, e))
-                data = False
+                searchURL = newznab_host[0] + '/api?' + urllib.urlencode(params)
+                    
+                logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, newznab_host[0]))
                 
-            if data:
-            
-                d = feedparser.parse(data)
+                try:
+                    data = urllib2.urlopen(searchURL, timeout=20).read()
+                except urllib2.URLError, e:
+                    logger.warn('Error fetching data from %s: %s' % (newznab_host[0], e))
+                    data = False
+                    
+                if data:
                 
-                if not len(d.entries):
-                    logger.info(u"No results found from %s for %s" % (headphones.NEWZNAB_HOST, term))
-                    pass
-                
-                else:
-                    for item in d.entries:
-                        try:
-                            url = item.link
-                            title = item.title
-                            size = int(item.links[1]['length'])
+                    d = feedparser.parse(data)
+                    
+                    if not len(d.entries):
+                        logger.info(u"No results found from %s for %s" % (newznab_host[0], term))
+                        pass
+                    
+                    else:
+                        for item in d.entries:
+                            try:
+                                url = item.link
+                                title = item.title
+                                size = int(item.links[1]['length'])
+                                
+                                resultlist.append((title, size, url, provider))
+                                logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size))) 
                             
-                            resultlist.append((title, size, url, provider))
-                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size))) 
-                        
-                        except Exception, e:
-                            logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
+                            except Exception, e:
+                                logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
                     
         if headphones.NZBSORG:
             provider = "nzbsorg"
@@ -417,15 +426,38 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                     albumlength = sum([pair[0] for pair in tracks])
 
                     targetsize = albumlength/1000 * int(headphones.PREFERRED_BITRATE) * 128
-                    logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
-    
-                    newlist = []
-
-                    for result in resultlist:
-                        delta = abs(targetsize - result[1])
-                        newlist.append((result[0], result[1], result[2], result[3], delta))
-        
-                    nzblist = sorted(newlist, key=lambda title: title[4])
+                    
+                    if not targetsize:
+                        logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
+                        nzblist = sorted(resultlist, key=lambda title: title[1], reverse=True)
+                    
+                    else:
+                        logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
+                        newlist = []
+                        
+                        if headphones.PREFERRED_BITRATE_HIGH_BUFFER:
+                            high_size_limit = targetsize * int(headphones.PREFERRED_BITRATE_HIGH_BUFFER)/100
+                        else:
+                            high_size_limit = None
+                        if headphones.PREFERRED_BITRATE_LOW_BUFFER:
+                            low_size_limit = targetsize * int(headphones.PREFERRED_BITRATE_LOW_BUFFER)/100
+                        else:
+                            low_size_limit = None
+                            
+                        for result in resultlist:
+                            
+                            if high_size_limit and (result[1] > high_size_limit):
+                                logger.info(result[0] + "is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit))
+                                continue
+                                
+                            if low_size_limit and (result[1] < low_size_limit):
+                                logger.info(result[0] + "is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit))
+                                continue
+                                                                
+                            delta = abs(targetsize - result[1])
+                            newlist.append((result[0], result[1], result[2], result[3], delta))
+            
+                        nzblist = sorted(newlist, key=lambda title: title[4])
                 
                 except Exception, e:
                     
@@ -487,6 +519,8 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
                 myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", nzb_folder_name])
                 return "found"
+            else:
+                return "none"
         else:      
             return "none"
 
@@ -664,7 +698,9 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 data = False
             
             if data:
-
+            
+                logger.info(u'Parsing results from <a href="%s">KAT</a>' % searchURL)
+                
                 d = feedparser.parse(data)
                 if not len(d.entries):
                     logger.info(u"No results found from %s for %s" % (provider, term))
@@ -698,7 +734,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 resultlist.append((title, size, url, provider))
                                 logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                             else:
-                                logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeders), rightformat))    
+                                logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeders), rightformat))    
                         
                         except Exception, e:
                             logger.error(u"An unknown error occurred in the KAT parser: %s" % e)
@@ -745,7 +781,9 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 data = False
 
             if data:
-
+                
+                logger.info(u'Parsing results from <a href="%s">Waffles.fm</a>' % searchURL)
+                
                 d = feedparser.parse(data)
                 if not len(d.entries):
                     logger.info(u"No results found from %s for %s" % (provider, term))
@@ -835,7 +873,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
 
         if headphones.ISOHUNT:
-            provider = "ISOhunt"    
+            provider = "isoHunt"    
             providerurl = url_fix("http://isohunt.com/js/rss/" + term)
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "7"        #music
@@ -864,6 +902,8 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             
             if data:
             
+                logger.info(u'Parsing results from <a href="%s">isoHunt</a>' % searchURL)
+                
                 d = feedparser.parse(data)
                 if not len(d.entries):
                     logger.info(u"No results found from %s for %s" % (provider, term))
@@ -901,10 +941,10 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 resultlist.append((title, size, url, provider))
                                 logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                             else:
-                                logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
+                                logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
                         
                         except Exception, e:
-                            logger.error(u"An unknown error occurred in the ISOhunt parser: %s" % e)
+                            logger.error(u"An unknown error occurred in the isoHunt parser: %s" % e)
 
         if headphones.MININOVA:
             provider = "Mininova"    
@@ -932,6 +972,8 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             
             if data:
             
+                logger.info(u'Parsing results from <a href="%s">Mininova</a>' % searchURL)
+                
                 d = feedparser.parse(data)
                 if not len(d.entries):
                     logger.info(u"No results found from %s for %s" % (provider, term))
@@ -968,10 +1010,10 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 resultlist.append((title, size, url, provider))
                                 logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                             else:
-                                logger.info('%s is larger than the maxsize, the wrong format or has to little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
+                                logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))    
                         
                         except Exception, e:
-                            logger.error(u"An unknown error occurred in the MiniNova Parser: %s" % e)
+                            logger.error(u"An unknown error occurred in the Mininova Parser: %s" % e)
 
 
 
@@ -1038,7 +1080,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             (data, bestqual) = preprocesstorrent(torrentlist)
             
             if data and bestqual:
-                logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
+                logger.info(u'Found best result from %s: <a href="%s">%s</a> - %s' % (bestqual[3], bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
                 torrent_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year) 
                 if headphones.TORRENTBLACKHOLE_DIR == "sendtracker":
 

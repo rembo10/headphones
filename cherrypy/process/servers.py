@@ -385,34 +385,43 @@ def check_port(host, port, timeout=1.0):
             if s:
                 s.close()
 
-def wait_for_free_port(host, port):
+
+# Feel free to increase these defaults on slow systems:
+free_port_timeout = 0.1
+occupied_port_timeout = 1.0
+
+def wait_for_free_port(host, port, timeout=None):
     """Wait for the specified port to become free (drop requests)."""
     if not host:
         raise ValueError("Host values of '' or None are not allowed.")
+    if timeout is None:
+        timeout = free_port_timeout
     
     for trial in range(50):
         try:
             # we are expecting a free port, so reduce the timeout
-            check_port(host, port, timeout=0.1)
+            check_port(host, port, timeout=timeout)
         except IOError:
             # Give the old server thread time to free the port.
-            time.sleep(0.1)
+            time.sleep(timeout)
         else:
             return
     
     raise IOError("Port %r not free on %r" % (port, host))
 
-def wait_for_occupied_port(host, port):
+def wait_for_occupied_port(host, port, timeout=None):
     """Wait for the specified port to become active (receive requests)."""
     if not host:
         raise ValueError("Host values of '' or None are not allowed.")
+    if timeout is None:
+        timeout = occupied_port_timeout
     
     for trial in range(50):
         try:
-            check_port(host, port)
+            check_port(host, port, timeout=timeout)
         except IOError:
             return
         else:
-            time.sleep(.1)
+            time.sleep(timeout)
     
     raise IOError("Port %r not bound on %r" % (port, host))

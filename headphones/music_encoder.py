@@ -49,13 +49,13 @@ def encode(albumPath):
                 if (headphones.ENCODERLOSSLESS):
                     if (music.lower().endswith('.flac')):
                         musicFiles.append(os.path.join(r, music))
-                        musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT).encode(headphones.SYS_ENCODING)
+                        musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT)
                         musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
                     else:
                         logger.debug('Music "%s" is already encoded' % (music))
                 else:
                     musicFiles.append(os.path.join(r, music))
-                    musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT).encode(headphones.SYS_ENCODING)
+                    musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT)
                     musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
                             
     if headphones.ENCODER=='lame':
@@ -138,7 +138,8 @@ def command(encoder,musicSource,musicDest,albumPath):
     time.sleep(10)
     return_code = call(cmd, shell=True)
     if (return_code==0) and (os.path.exists(musicDest)):
-        os.remove(musicSource)
+        if headphones.DELETE_LOSSLESS_FILES:
+            os.remove(musicSource)
         shutil.move(musicDest,albumPath)
         logger.info('Music "%s" encoded in %s' % (musicSource,getTimeEncode(startMusicTime)))
         

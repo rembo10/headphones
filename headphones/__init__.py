@@ -20,6 +20,7 @@ import os, sys, subprocess
 import threading
 import webbrowser
 import sqlite3
+import itertools
 
 from lib.apscheduler.scheduler import Scheduler
 from lib.configobj import ConfigObj
@@ -65,6 +66,7 @@ HTTP_HOST = None
 HTTP_USERNAME = None
 HTTP_PASSWORD = None
 HTTP_ROOT = None
+HTTP_PROXY = False
 LAUNCH_BROWSER = False
 
 API_ENABLED = False
@@ -82,11 +84,14 @@ CHECK_GITHUB_INTERVAL = None
 
 MUSIC_DIR = None
 DESTINATION_DIR = None
+LOSSLESS_DESTINATION_DIR = None
 FOLDER_FORMAT = None
 FILE_FORMAT = None
 PATH_TO_XML = None
 PREFERRED_QUALITY = None
 PREFERRED_BITRATE = None
+PREFERRED_BITRATE_HIGH_BUFFER = None
+PREFERRED_BITRATE_LOW_BUFFER = None
 DETECT_BITRATE = False
 ADD_ARTISTS = False
 CORRECT_METADATA = False
@@ -101,6 +106,7 @@ BLACKHOLE = None
 BLACKHOLE_DIR = None
 USENET_RETENTION = None
 INCLUDE_EXTRAS = False
+EXTRAS = None
 AUTOWANT_UPCOMING = False
 AUTOWANT_ALL = False
 
@@ -121,6 +127,8 @@ NZBMATRIX_APIKEY = None
 NEWZNAB = False
 NEWZNAB_HOST = None
 NEWZNAB_APIKEY = None
+NEWZNAB_ENABLED = False
+EXTRA_NEWZNABS = []
 
 NZBSORG = False
 NZBSORG_UID = None
@@ -164,6 +172,7 @@ ENCODEROUTPUTFORMAT = None
 ENCODERQUALITY = None
 ENCODERVBRCBR = None
 ENCODERLOSSLESS = False
+DELETE_LOSSLESS_FILES = False
 PROWL_ENABLED = True
 PROWL_PRIORITY = 1
 PROWL_KEYS = None
@@ -177,6 +186,7 @@ XBMC_NOTIFY = False
 NMA_ENABLED = False
 NMA_APIKEY = None
 NMA_PRIORITY = None
+NMA_ONSNATCH = None
 SYNOINDEX_ENABLED = False
 MIRRORLIST = ["musicbrainz.org","headphones","custom"]
 MIRROR = None
@@ -230,25 +240,26 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
     else:
         logger.debug(item_name + " -> ******")
     return my_val
-    
 
 def initialize():
 
     with INIT_LOCK:
     
         global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
-                HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, \
-                CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
-                ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, \
+                HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, \
+                CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
+                LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
+                RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, \
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, WHATCD, WHATCD_UID, WHATCD_PASSKEY, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
-                NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
+                NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS,\
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
-                ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
-                ENCODERLOSSLESS, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, MIRROR, CUSTOMHOST, CUSTOMPORT, \
-                CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, SYNOINDEX_ENABLED, \
-                ALBUM_COMPLETION_PCT
+                ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, \
+                ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, \
+                MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
+                XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
+                PREFERRED_BITRATE_LOW_BUFFER
                 
         if __INITIALIZED__:
             return False
@@ -283,6 +294,7 @@ def initialize():
         HTTP_USERNAME = check_setting_str(CFG, 'General', 'http_username', '')
         HTTP_PASSWORD = check_setting_str(CFG, 'General', 'http_password', '')
         HTTP_ROOT = check_setting_str(CFG, 'General', 'http_root', '/')
+        HTTP_PROXY = bool(check_setting_int(CFG, 'General', 'http_proxy', 0))
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
         API_ENABLED = bool(check_setting_int(CFG, 'General', 'api_enabled', 0))
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
@@ -295,8 +307,11 @@ def initialize():
         
         MUSIC_DIR = check_setting_str(CFG, 'General', 'music_dir', '')
         DESTINATION_DIR = check_setting_str(CFG, 'General', 'destination_dir', '')
+        LOSSLESS_DESTINATION_DIR = check_setting_str(CFG, 'General', 'lossless_destination_dir', '')
         PREFERRED_QUALITY = check_setting_int(CFG, 'General', 'preferred_quality', 0)
         PREFERRED_BITRATE = check_setting_int(CFG, 'General', 'preferred_bitrate', '')
+        PREFERRED_BITRATE_HIGH_BUFFER = check_setting_int(CFG, 'General', 'preferred_bitrate_high_buffer', '')
+        PREFERRED_BITRATE_LOW_BUFFER = check_setting_int(CFG, 'General', 'preferred_bitrate_low_buffer', '')
         DETECT_BITRATE = bool(check_setting_int(CFG, 'General', 'detect_bitrate', 0))
         ADD_ARTISTS = bool(check_setting_int(CFG, 'General', 'auto_add_artists', 1))
         CORRECT_METADATA = bool(check_setting_int(CFG, 'General', 'correct_metadata', 0))
@@ -313,6 +328,7 @@ def initialize():
         BLACKHOLE_DIR = check_setting_str(CFG, 'General', 'blackhole_dir', '')
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', '1500')
         INCLUDE_EXTRAS = bool(check_setting_int(CFG, 'General', 'include_extras', 0))
+        EXTRAS = check_setting_str(CFG, 'General', 'extras', '')
         AUTOWANT_UPCOMING = bool(check_setting_int(CFG, 'General', 'autowant_upcoming', 1))
         AUTOWANT_ALL = bool(check_setting_int(CFG, 'General', 'autowant_all', 0))
         
@@ -348,6 +364,11 @@ def initialize():
         NEWZNAB = bool(check_setting_int(CFG, 'Newznab', 'newznab', 0))
         NEWZNAB_HOST = check_setting_str(CFG, 'Newznab', 'newznab_host', '')
         NEWZNAB_APIKEY = check_setting_str(CFG, 'Newznab', 'newznab_apikey', '')
+        NEWZNAB_ENABLED = bool(check_setting_int(CFG, 'Newznab', 'newznab_enabled', 1))
+        
+        # Need to pack the extra newznabs back into a list of tuples
+        flattened_newznabs = check_setting_str(CFG, 'Newznab', 'extra_newznabs', [], log=False)
+        EXTRA_NEWZNABS = list(itertools.izip(*[itertools.islice(flattened_newznabs, i, None, 3) for i in range(3)]))
         
         NZBSORG = bool(check_setting_int(CFG, 'NZBsorg', 'nzbsorg', 0))
         NZBSORG_UID = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_uid', '')
@@ -372,6 +393,7 @@ def initialize():
         ENCODERQUALITY = check_setting_int(CFG, 'General', 'encoderquality', 2)
         ENCODERVBRCBR = check_setting_str(CFG, 'General', 'encodervbrcbr', 'cbr')
         ENCODERLOSSLESS = bool(check_setting_int(CFG, 'General', 'encoderlossless', 1))
+        DELETE_LOSSLESS_FILES = bool(check_setting_int(CFG, 'General', 'delete_lossless_files', 1))
 
         PROWL_ENABLED = bool(check_setting_int(CFG, 'Prowl', 'prowl_enabled', 0))
         PROWL_KEYS = check_setting_str(CFG, 'Prowl', 'prowl_keys', '')
@@ -388,6 +410,7 @@ def initialize():
         NMA_ENABLED = bool(check_setting_int(CFG, 'NMA', 'nma_enabled', 0))
         NMA_APIKEY = check_setting_str(CFG, 'NMA', 'nma_apikey', '')
         NMA_PRIORITY = check_setting_int(CFG, 'NMA', 'nma_priority', 0)
+        NMA_ONSNATCH = bool(check_setting_int(CFG, 'NMA', 'nma_onsnatch', 0)) 
         
         SYNOINDEX_ENABLED = bool(check_setting_int(CFG, 'Synoindex', 'synoindex_enabled', 0))
         
@@ -556,6 +579,7 @@ def config_write():
     new_config['General']['http_username'] = HTTP_USERNAME
     new_config['General']['http_password'] = HTTP_PASSWORD
     new_config['General']['http_root'] = HTTP_ROOT
+    new_config['General']['http_proxy'] = int(HTTP_PROXY)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
     new_config['General']['api_enabled'] = int(API_ENABLED)
     new_config['General']['api_key'] = API_KEY
@@ -568,8 +592,11 @@ def config_write():
 
     new_config['General']['music_dir'] = MUSIC_DIR
     new_config['General']['destination_dir'] = DESTINATION_DIR
+    new_config['General']['lossless_destination_dir'] = LOSSLESS_DESTINATION_DIR
     new_config['General']['preferred_quality'] = PREFERRED_QUALITY
     new_config['General']['preferred_bitrate'] = PREFERRED_BITRATE
+    new_config['General']['preferred_bitrate_high_buffer'] = PREFERRED_BITRATE_HIGH_BUFFER
+    new_config['General']['preferred_bitrate_low_buffer'] = PREFERRED_BITRATE_LOW_BUFFER
     new_config['General']['detect_bitrate'] = int(DETECT_BITRATE)
     new_config['General']['auto_add_artists'] = int(ADD_ARTISTS)
     new_config['General']['correct_metadata'] = int(CORRECT_METADATA)
@@ -586,6 +613,7 @@ def config_write():
     new_config['General']['blackhole_dir'] = BLACKHOLE_DIR
     new_config['General']['usenet_retention'] = USENET_RETENTION
     new_config['General']['include_extras'] = int(INCLUDE_EXTRAS)
+    new_config['General']['extras'] = EXTRAS
     new_config['General']['autowant_upcoming'] = int(AUTOWANT_UPCOMING)
     new_config['General']['autowant_all'] = int(AUTOWANT_ALL)
     
@@ -626,6 +654,14 @@ def config_write():
     new_config['Newznab']['newznab'] = int(NEWZNAB)
     new_config['Newznab']['newznab_host'] = NEWZNAB_HOST
     new_config['Newznab']['newznab_apikey'] = NEWZNAB_APIKEY
+    new_config['Newznab']['newznab_enabled'] = int(NEWZNAB_ENABLED)
+    # Need to unpack the extra newznabs for saving in config.ini
+    flattened_newznabs = []
+    for newznab in EXTRA_NEWZNABS:
+        for item in newznab:
+            flattened_newznabs.append(item)
+    
+    new_config['Newznab']['extra_newznabs'] = flattened_newznabs
 
     new_config['NZBsorg'] = {}
     new_config['NZBsorg']['nzbsorg'] = int(NZBSORG)
@@ -655,6 +691,7 @@ def config_write():
     new_config['NMA']['nma_enabled'] = int(NMA_ENABLED)
     new_config['NMA']['nma_apikey'] = NMA_APIKEY
     new_config['NMA']['nma_priority'] = NMA_PRIORITY
+    new_config['NMA']['nma_onsnatch'] = int(PROWL_ONSNATCH)
 
     new_config['Synoindex'] = {}
     new_config['Synoindex']['synoindex_enabled'] = int(SYNOINDEX_ENABLED)
@@ -672,7 +709,8 @@ def config_write():
     new_config['General']['encoderoutputformat'] = ENCODEROUTPUTFORMAT
     new_config['General']['encoderquality'] = ENCODERQUALITY
     new_config['General']['encodervbrcbr'] = ENCODERVBRCBR
-    new_config['General']['encoderlossless'] = ENCODERLOSSLESS
+    new_config['General']['encoderlossless'] = int(ENCODERLOSSLESS)
+    new_config['General']['delete_lossless_files'] = int(DELETE_LOSSLESS_FILES)
     
     new_config['General']['mirror'] = MIRROR
     new_config['General']['customhost'] = CUSTOMHOST
@@ -713,11 +751,13 @@ def dbcheck():
 
     conn=sqlite3.connect(DB_FILE)
     c=conn.cursor()
-    c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT, IncludeExtras INTEGER, LatestAlbum TEXT, ReleaseDate TEXT, AlbumID TEXT, HaveTracks INTEGER, TotalTracks INTEGER, LastUpdated TEXT, ArtworkURL TEXT, ThumbURL TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT, Type TEXT, ArtworkURL TEXT, ThumbURL TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT, Format TEXT)')
+    c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT, IncludeExtras INTEGER, LatestAlbum TEXT, ReleaseDate TEXT, AlbumID TEXT, HaveTracks INTEGER, TotalTracks INTEGER, LastUpdated TEXT, ArtworkURL TEXT, ThumbURL TEXT, Extras TEXT)')
+    c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT, Type TEXT, ArtworkURL TEXT, ThumbURL TEXT, ReleaseID TEXT, ReleaseCountry TEXT, ReleaseFormat TEXT)')   # ReleaseFormat here means CD,Digital,Vinyl, etc. If using the default Headphones hybrid release, ReleaseID will equal AlbumID (AlbumID is releasegroup id)
+    c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT, Format TEXT, ReleaseID TEXT)')    # Format here means mp3, flac, etc.
+    c.execute('CREATE TABLE IF NOT EXISTS allalbums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, AlbumID TEXT, Type TEXT, ReleaseID TEXT, ReleaseCountry TEXT, ReleaseFormat TEXT)')
+    c.execute('CREATE TABLE IF NOT EXISTS alltracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT, Format TEXT, ReleaseID TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT, FolderName TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS have (ArtistName TEXT, AlbumTitle TEXT, TrackNumber TEXT, TrackTitle TEXT, TrackLength TEXT, BitRate TEXT, Genre TEXT, Date TEXT, TrackID TEXT, Location TEXT, CleanName TEXT, Format TEXT)')
+    c.execute('CREATE TABLE IF NOT EXISTS have (ArtistName TEXT, AlbumTitle TEXT, TrackNumber TEXT, TrackTitle TEXT, TrackLength TEXT, BitRate TEXT, Genre TEXT, Date TEXT, TrackID TEXT, Location TEXT, CleanName TEXT, Format TEXT, Matched TEXT)') # Matched is a temporary value used to see if there was a match found in alltracks
     c.execute('CREATE TABLE IF NOT EXISTS lastfmcloud (ArtistName TEXT, ArtistID TEXT, Count INTEGER)')
     c.execute('CREATE TABLE IF NOT EXISTS descriptions (ArtistID TEXT, ReleaseGroupID TEXT, ReleaseID TEXT, Summary TEXT, Content TEXT, LastUpdated TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS blacklist (ArtistID TEXT UNIQUE)')
@@ -841,6 +881,44 @@ def dbcheck():
         c.execute('SELECT LastUpdated from descriptions')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE descriptions ADD COLUMN LastUpdated TEXT DEFAULT NULL') 
+        
+    try:
+        c.execute('SELECT ReleaseID from albums')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE albums ADD COLUMN ReleaseID TEXT DEFAULT NULL')
+        
+    try:
+        c.execute('SELECT ReleaseFormat from albums')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE albums ADD COLUMN ReleaseFormat TEXT DEFAULT NULL')
+        
+    try:
+        c.execute('SELECT ReleaseCountry from albums')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE albums ADD COLUMN ReleaseCountry TEXT DEFAULT NULL')
+        
+    try:
+        c.execute('SELECT ReleaseID from tracks')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE tracks ADD COLUMN ReleaseID TEXT DEFAULT NULL')
+        
+    try:
+        c.execute('SELECT Matched from have')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE have ADD COLUMN Matched TEXT DEFAULT NULL')
+        
+    try:
+        c.execute('SELECT Extras from artists')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE artists ADD COLUMN Extras TEXT DEFAULT NULL')
+        # Need to update some stuff when people are upgrading and have 'include extras' set globally/for an artist
+        if INCLUDE_EXTRAS:
+            EXTRAS = "1,2,3,4,5,6,7,8"
+        logger.info("Copying over current artist IncludeExtras information")
+        artists = c.execute('SELECT ArtistID, IncludeExtras from artists').fetchall()
+        for artist in artists:
+            if artist[1]:
+                c.execute('UPDATE artists SET Extras=? WHERE ArtistID=?', ("1,2,3,4,5,6,7,8", artist[0]))
     
     conn.commit()
     c.close()

@@ -4,7 +4,7 @@ import warnings
 
 import cherrypy
 from cherrypy.lib import attributes
-from cherrypy._cpcompat import basestring
+from cherrypy._cpcompat import basestring, py3k
 
 # We import * because we want to export check_port
 # et al as attributes of this module.
@@ -98,12 +98,22 @@ class Server(ServerAdapter):
     ssl_private_key = None
     """The filename of the private key to use with SSL."""
     
-    ssl_module = 'pyopenssl'
-    """The name of a registered SSL adaptation module to use with the builtin
-    WSGI server. Builtin options are 'builtin' (to use the SSL library built
-    into recent versions of Python) and 'pyopenssl' (to use the PyOpenSSL
-    project, which you must install separately). You may also register your
-    own classes in the wsgiserver.ssl_adapters dict."""
+    if py3k:
+        ssl_module = 'builtin'
+        """The name of a registered SSL adaptation module to use with the builtin
+        WSGI server. Builtin options are: 'builtin' (to use the SSL library built
+        into recent versions of Python). You may also register your
+        own classes in the wsgiserver.ssl_adapters dict."""
+    else:
+        ssl_module = 'pyopenssl'
+        """The name of a registered SSL adaptation module to use with the builtin
+        WSGI server. Builtin options are 'builtin' (to use the SSL library built
+        into recent versions of Python) and 'pyopenssl' (to use the PyOpenSSL
+        project, which you must install separately). You may also register your
+        own classes in the wsgiserver.ssl_adapters dict."""
+    
+    statistics = False
+    """Turns statistics-gathering on or off for aware HTTP servers."""
     
     nodelay = True
     """If True (the default since 3.1), sets the TCP_NODELAY socket option."""

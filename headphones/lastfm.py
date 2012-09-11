@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib
+import urllib, urllib2
 from xml.dom import minidom
 from collections import defaultdict
 import random
@@ -37,15 +37,19 @@ def getSimilar():
         url = 'http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&mbid=%s&api_key=%s' % (result['ArtistID'], api_key)
         
         try:
-            data = urllib.urlopen(url).read()
+            data = urllib2.urlopen(url, timeout=20).read()
         except:
             time.sleep(1)
             continue
             
-        if len(data) < 200:
+        if not data or len(data) < 200:
             continue
             
-        d = minidom.parseString(data)
+        try:    
+            d = minidom.parseString(data)
+        except:
+            logger.debug("Could not parse similar artist data from last.fm")
+        
         node = d.documentElement
         artists = d.getElementsByTagName("artist")
         
@@ -93,8 +97,14 @@ def getArtists():
         username = headphones.LASTFM_USERNAME
         
     url = 'http://ws.audioscrobbler.com/2.0/?method=library.getartists&limit=10000&api_key=%s&user=%s' % (api_key, username)
-    data = urllib.urlopen(url).read()
-    d = minidom.parseString(data)
+    data = urllib2.urlopen(url, timeout=20).read()
+    
+    try:
+        d = minidom.parseString(data)
+    except:
+        logger.error("Could not parse artist list from last.fm data")
+        return
+    
     artists = d.getElementsByTagName("artist")
     
     artistlist = []
@@ -131,7 +141,7 @@ def getAlbumDescription(rgid, artist, album):
             }
 
     searchURL = 'http://ws.audioscrobbler.com/2.0/?' + urllib.urlencode(params)
-    data = urllib.urlopen(searchURL).read()
+    data = urllib2.urlopen(searchURL, timeout=20).read()
     
     if data == '<?xml version="1.0" encoding="utf-8"?><lfm status="failed"><error code="6">Album not found</error></lfm>':
         return

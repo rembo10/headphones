@@ -453,13 +453,14 @@ class BackgroundTask(threading.Thread):
     it won't delay stopping the whole process.
     """
     
-    def __init__(self, interval, function, args=[], kwargs={}):
+    def __init__(self, interval, function, args=[], kwargs={}, bus=None):
         threading.Thread.__init__(self)
         self.interval = interval
         self.function = function
         self.args = args
         self.kwargs = kwargs
         self.running = False
+        self.bus = bus
     
     def cancel(self):
         self.running = False
@@ -473,8 +474,9 @@ class BackgroundTask(threading.Thread):
             try:
                 self.function(*self.args, **self.kwargs)
             except Exception:
-                self.bus.log("Error in background task thread function %r." %
-                             self.function, level=40, traceback=True)
+                if self.bus:
+                    self.bus.log("Error in background task thread function %r."
+                                 % self.function, level=40, traceback=True)
                 # Quit on first error to avoid massive logs.
                 raise
     
@@ -506,8 +508,8 @@ class Monitor(SimplePlugin):
         if self.frequency > 0:
             threadname = self.name or self.__class__.__name__
             if self.thread is None:
-                self.thread = BackgroundTask(self.frequency, self.callback)
-                self.thread.bus = self.bus
+                self.thread = BackgroundTask(self.frequency, self.callback,
+                                             bus = self.bus)
                 self.thread.setName(threadname)
                 self.thread.start()
                 self.bus.log("Started monitor thread %r." % threadname)
