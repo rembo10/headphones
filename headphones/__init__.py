@@ -155,8 +155,8 @@ WAFFLES = None
 WAFFLES_UID = None
 WAFFLES_PASSKEY = None
 WHATCD = None
-WHATCD_UID = None
-WHATCD_PASSKEY = None
+WHATCD_USERNAME = None
+WHATCD_PASSWORD = None
 DOWNLOAD_TORRENT_DIR = None
 
 INTERFACE = None
@@ -251,7 +251,7 @@ def initialize():
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
                 RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, \
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
-                TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, WHATCD, WHATCD_UID, WHATCD_PASSKEY, DOWNLOAD_TORRENT_DIR, \
+                TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS,\
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
@@ -348,8 +348,8 @@ def initialize():
         WAFFLES_PASSKEY = check_setting_str(CFG, 'Waffles', 'waffles_passkey', '')
 
         WHATCD = bool(check_setting_int(CFG, 'What.cd', 'whatcd', 0))
-        WHATCD_UID = check_setting_str(CFG, 'What.cd', 'whatcd_uid', '')
-        WHATCD_PASSKEY = check_setting_str(CFG, 'What.cd', 'whatcd_passkey', '')
+        WHATCD_USERNAME = check_setting_str(CFG, 'What.cd', 'whatcd_username', '')
+        WHATCD_PASSWORD = check_setting_str(CFG, 'What.cd', 'whatcd_password', '')
 
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
@@ -631,8 +631,8 @@ def config_write():
 
     new_config['What.cd'] = {}
     new_config['What.cd']['whatcd'] = int(WHATCD)
-    new_config['What.cd']['whatcd_uid'] = WHATCD_UID
-    new_config['What.cd']['whatcd_passkey'] = WHATCD_PASSKEY
+    new_config['What.cd']['whatcd_username'] = WHATCD_USERNAME
+    new_config['What.cd']['whatcd_password'] = WHATCD_PASSWORD
 
     new_config['General']['search_interval'] = SEARCH_INTERVAL
     new_config['General']['libraryscan_interval'] = LIBRARYSCAN_INTERVAL
