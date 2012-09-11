@@ -1,5 +1,5 @@
 # This file is part of beets.
-# Copyright 2011, Adrian Sampson.
+# Copyright 2012, Adrian Sampson.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -8,7 +8,7 @@
 # distribute, sublicense, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
@@ -16,6 +16,8 @@
 interface. To invoke the CLI, just call beets.ui.main(). The actual
 CLI commands are implemented in the ui.commands module.
 """
+from __future__ import print_function
+
 import os
 import locale
 import optparse
@@ -27,14 +29,22 @@ import logging
 import sqlite3
 import errno
 import re
+import codecs
 
 from lib.beets import library
 from lib.beets import plugins
 from lib.beets import util
+from lib.beets.util.functemplate import Template
 
+# On Windows platforms, use colorama to support "ANSI" terminal colors.
 if sys.platform == 'win32':
-    import colorama
-    colorama.init()
+    try:
+        import colorama
+    except ImportError:
+        pass
+    else:
+        colorama.init()
+
 
 # Constants.
 CONFIG_PATH_VAR = 'BEETSCONFIG'
@@ -49,9 +59,12 @@ PF_KEY_QUERIES = {
     'singleton': 'singleton:true',
 }
 DEFAULT_PATH_FORMATS = [
-    (library.PF_KEY_DEFAULT,      '$albumartist/$album/$track $title'),
-    (PF_KEY_QUERIES['singleton'], 'Non-Album/$artist/$title'),
-    (PF_KEY_QUERIES['comp'],      'Compilations/$album/$track $title'),
+  (library.PF_KEY_DEFAULT,
+   Template('$albumartist/$album%aunique{}/$track $title')),
+  (PF_KEY_QUERIES['singleton'],
+   Template('Non-Album/$artist/$title')),
+  (PF_KEY_QUERIES['comp'],
+   Template('Compilations/$album%aunique{}/$track $title')),
 ]
 DEFAULT_ART_FILENAME = 'cover'
 DEFAULT_TIMEOUT = 5.0
@@ -94,7 +107,28 @@ def print_(*strings):
         txt = u''
     if isinstance(txt, unicode):
         txt = txt.encode(_encoding(), 'replace')
-    print txt
+    print(txt)
+
+def input_(prompt=None):
+    """Like `raw_input`, but decodes the result to a Unicode string.
+    Raises a UserError if stdin is not available. The prompt is sent to
+    stdout rather than stderr. A printed between the prompt and the
+    input cursor.
+    """
+    # raw_input incorrectly sends prompts to stderr, not stdout, so we
+    # use print() explicitly to display prompts.
+    # http://bugs.python.org/issue1927
+    if prompt:
+        if isinstance(prompt, unicode):
+            prompt = prompt.encode(_encoding(), 'replace')
+        print(prompt, end=' ')
+
+    try:
+        resp = raw_input()
+    except EOFError:
+        raise UserError('stdin stream ended while input required')
+
+    return resp.decode(sys.stdin.encoding, 'ignore')
 
 def input_options(options, require=False, prompt=None, fallback_prompt=None,
                   numrange=None, default=None, color=False, max_width=72):
@@ -145,7 +179,7 @@ def input_options(options, require=False, prompt=None, fallback_prompt=None,
 
         # Mark the option's shortcut letter for display.
         if (default is None and not numrange and first) \
-           or (isinstance(default, basestring) and 
+           or (isinstance(default, basestring) and
                found_letter.lower() == default.lower()):
             # The first option is the default; mark it.
             show_letter = '[%s]' % found_letter.upper()
@@ -175,7 +209,7 @@ def input_options(options, require=False, prompt=None, fallback_prompt=None,
             default = numrange[0]
         else:
             default = display_letters[0].lower()
-    
+
     # Make a prompt if one is not provided.
     if not prompt:
         prompt_parts = []
@@ -227,16 +261,14 @@ def input_options(options, require=False, prompt=None, fallback_prompt=None,
             fallback_prompt += '%i-%i, ' % numrange
         fallback_prompt += ', '.join(display_letters) + ':'
 
-    # (raw_input(prompt) was causing problems with colors.)
-    print prompt,
-    resp = raw_input()
+    resp = input_(prompt)
     while True:
         resp = resp.strip().lower()
-        
+
         # Try default option.
         if default is not None and not resp:
             resp = default
-        
+
         # Try an integer input if available.
         if numrange:
             try:
@@ -249,16 +281,15 @@ def input_options(options, require=False, prompt=None, fallback_prompt=None,
                     return resp
                 else:
                     resp = None
-        
+
         # Try a normal letter input.
         if resp:
             resp = resp[0]
             if resp in letters:
                 return resp
-        
+
         # Prompt for new input.
-        print fallback_prompt,
-        resp = raw_input()
+        resp = input_(fallback_prompt)
 
 def input_yn(prompt, require=False, color=False):
     """Prompts the user for a "yes" or "no" response. The default is
@@ -277,7 +308,7 @@ def config_val(config, section, name, default, vtype=None):
     """
     if not config.has_section(section):
         config.add_section(section)
-    
+
     try:
         if vtype is bool:
             return config.getboolean(section, name)
@@ -371,7 +402,7 @@ def colordiff(a, b, highlight='red'):
 
     a_out = []
     b_out = []
-    
+
     matcher = SequenceMatcher(lambda x: False, a, b)
     for op, a_start, a_end, b_start, b_end in matcher.get_opcodes():
         if op == 'equal':
@@ -390,7 +421,7 @@ def colordiff(a, b, highlight='red'):
             b_out.append(colorize(highlight, b[b_start:b_end]))
         else:
             assert(False)
-    
+
     return u''.join(a_out), u''.join(b_out)
 
 def default_paths(pathmod=None):
@@ -428,6 +459,8 @@ def _get_replacements(config):
     repl_string = config_val(config, 'beets', 'replace', None)
     if not repl_string:
         return
+    if not isinstance(repl_string, unicode):
+        repl_string = repl_string.decode('utf8')
 
     parts = repl_string.strip().split()
     if not parts:
@@ -453,10 +486,12 @@ def _get_path_formats(config):
     legacy_path_format = config_val(config, 'beets', 'path_format', None)
     if legacy_path_format:
         # Old path formats override the default values.
-        path_formats = [(library.PF_KEY_DEFAULT, legacy_path_format)]
+        path_formats = [(library.PF_KEY_DEFAULT,
+                         Template(legacy_path_format))]
     else:
         # If no legacy path format, use the defaults instead.
         path_formats = DEFAULT_PATH_FORMATS
+
     if config.has_section('paths'):
         custom_path_formats = []
         for key, value in config.items('paths', True):
@@ -467,8 +502,9 @@ def _get_path_formats(config):
                 # For non-special keys (literal queries), the _
                 # character denotes a :.
                 key = key.replace('_', ':')
-            custom_path_formats.append((key, value))
+            custom_path_formats.append((key, Template(value)))
         path_formats = custom_path_formats + path_formats
+
     return path_formats
 
 
@@ -504,7 +540,7 @@ class SubcommandsOptionParser(optparse.OptionParser):
     _HelpSubcommand = Subcommand('help', optparse.OptionParser(),
         help='give detailed help on a specific sub-command',
         aliases=('?',))
-    
+
     def __init__(self, *args, **kwargs):
         """Create a new subcommand-aware option parser. All of the
         options to OptionParser.__init__ are supported in addition
@@ -513,41 +549,41 @@ class SubcommandsOptionParser(optparse.OptionParser):
         # The subcommand array, with the help command included.
         self.subcommands = list(kwargs.pop('subcommands', []))
         self.subcommands.append(self._HelpSubcommand)
-        
+
         # A more helpful default usage.
         if 'usage' not in kwargs:
             kwargs['usage'] = """
   %prog COMMAND [ARGS...]
   %prog help COMMAND"""
-        
+
         # Super constructor.
         optparse.OptionParser.__init__(self, *args, **kwargs)
-        
+
         # Adjust the help-visible name of each subcommand.
         for subcommand in self.subcommands:
             subcommand.parser.prog = '%s %s' % \
                     (self.get_prog_name(), subcommand.name)
-        
-        # Our root parser needs to stop on the first unrecognized argument.  
+
+        # Our root parser needs to stop on the first unrecognized argument.
         self.disable_interspersed_args()
-    
+
     def add_subcommand(self, cmd):
         """Adds a Subcommand object to the parser's list of commands.
         """
         self.subcommands.append(cmd)
-    
+
     # Add the list of subcommands to the help message.
     def format_help(self, formatter=None):
         # Get the original help message, to which we will append.
         out = optparse.OptionParser.format_help(self, formatter)
         if formatter is None:
             formatter = self.formatter
-        
+
         # Subcommands header.
         result = ["\n"]
         result.append(formatter.format_heading('Commands'))
         formatter.indent()
-        
+
         # Generate the display names (including aliases).
         # Also determine the help position.
         disp_names = []
@@ -557,12 +593,12 @@ class SubcommandsOptionParser(optparse.OptionParser):
             if subcommand.aliases:
                 name += ' (%s)' % ', '.join(subcommand.aliases)
             disp_names.append(name)
-                
+
             # Set the help position based on the max width.
             proposed_help_position = len(name) + formatter.current_indent + 2
             if proposed_help_position <= formatter.max_help_position:
-                help_position = max(help_position, proposed_help_position)        
-        
+                help_position = max(help_position, proposed_help_position)
+
         # Add each subcommand to the output.
         for subcommand, name in zip(self.subcommands, disp_names):
             # Lifted directly from optparse.py.
@@ -581,11 +617,11 @@ class SubcommandsOptionParser(optparse.OptionParser):
             result.extend(["%*s%s\n" % (help_position, "", line)
                            for line in help_lines[1:]])
         formatter.dedent()
-        
+
         # Concatenate the original help message with the subcommand
         # list.
         return out + "".join(result)
-    
+
     def _subcommand_for_name(self, name):
         """Return the subcommand in self.subcommands matching the
         given name. The name may either be the name of a subcommand or
@@ -596,16 +632,16 @@ class SubcommandsOptionParser(optparse.OptionParser):
                name in subcommand.aliases:
                 return subcommand
         return None
-    
+
     def parse_args(self, a=None, v=None):
         """Like OptionParser.parse_args, but returns these four items:
         - options: the options passed to the root parser
         - subcommand: the Subcommand object that was invoked
         - suboptions: the options passed to the subcommand parser
         - subargs: the positional arguments passed to the subcommand
-        """  
+        """
         options, args = optparse.OptionParser.parse_args(self, a, v)
-        
+
         if not args:
             # No command given.
             self.print_help()
@@ -615,7 +651,7 @@ class SubcommandsOptionParser(optparse.OptionParser):
             subcommand = self._subcommand_for_name(cmdname)
             if not subcommand:
                 self.error('unknown command ' + cmdname)
-        
+
         suboptions, subargs = subcommand.parser.parse_args(args)
 
         if subcommand is self._HelpSubcommand:
@@ -623,13 +659,15 @@ class SubcommandsOptionParser(optparse.OptionParser):
                 # particular
                 cmdname = subargs[0]
                 helpcommand = self._subcommand_for_name(cmdname)
+                if not helpcommand:
+                    self.error('no command named {0}'.format(cmdname))
                 helpcommand.parser.print_help()
                 self.exit()
             else:
                 # general
                 self.print_help()
                 self.exit()
-        
+
         return options, subcommand, suboptions, subargs
 
 
@@ -654,7 +692,7 @@ def main(args=None, configfh=None):
     if configpath:
         configpath = util.syspath(configpath)
         if os.path.exists(util.syspath(configpath)):
-            configfh = open(configpath)
+            configfh = codecs.open(configpath, 'r', encoding='utf-8')
         else:
             configfh = None
     if configfh:
@@ -667,7 +705,6 @@ def main(args=None, configfh=None):
     # Load requested plugins.
     plugnames = config_val(config, 'beets', 'plugins', '')
     plugins.load_plugins(plugnames.split())
-    plugins.load_listeners()
     plugins.send("pluginload")
     plugins.configure(config)
 
@@ -681,10 +718,10 @@ def main(args=None, configfh=None):
                       help="destination music directory")
     parser.add_option('-v', '--verbose', dest='verbose', action='store_true',
                       help='print debugging information')
-    
+
     # Parse the command-line!
     options, subcommand, suboptions, subargs = parser.parse_args(args)
-    
+
     # Open library file.
     libpath = options.libpath or \
         config_val(config, 'beets', 'library', default_libpath)
@@ -709,7 +746,8 @@ def main(args=None, configfh=None):
                               replacements)
     except sqlite3.OperationalError:
         raise UserError("database file %s could not be opened" % db_path)
-    
+    plugins.send("library_opened", lib=lib)
+
     # Configure the logger.
     log = logging.getLogger('beets')
     if options.verbose:
@@ -719,14 +757,17 @@ def main(args=None, configfh=None):
     log.debug(u'config file: %s' % util.displayable_path(configpath))
     log.debug(u'library database: %s' % util.displayable_path(lib.path))
     log.debug(u'library directory: %s' % util.displayable_path(lib.directory))
-    
+
     # Invoke the subcommand.
     try:
         subcommand.func(lib, config, suboptions, subargs)
-    except UserError, exc:
+    except UserError as exc:
         message = exc.args[0] if exc.args else None
         subcommand.parser.error(message)
-    except IOError, exc:
+    except util.HumanReadableException as exc:
+        exc.log(log)
+        sys.exit(1)
+    except IOError as exc:
         if exc.errno == errno.EPIPE:
             # "Broken pipe". End silently.
             pass

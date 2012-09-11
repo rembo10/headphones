@@ -61,9 +61,40 @@ class WebInterface(object):
         myDB = db.DBConnection()
         artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
         albums = myDB.select('SELECT * from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
-        if artist is None:
+        
+        # Don't redirect to the artist page until it has the bare minimum info inserted 
+        # Redirect to the home page if we still can't get it after 5 seconds       
+        retry = 0
+            
+        while retry < 5:
+            if not artist:
+                time.sleep(1)
+                artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
+                retry += 1
+            else:
+                break
+                
+        if not artist:
             raise cherrypy.HTTPRedirect("home")
-        return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums)
+            
+        # Serve the extras up as a dict to make things easier for new templates
+        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]
+        extras_dict = {}
+        
+        if not artist['Extras']:
+            artist_extras = ""
+        else:
+            artist_extras = artist['Extras']
+            
+        i = 1
+        for extra in extras_list:
+            if str(i) in artist_extras:
+                extras_dict[extra] = "checked"
+            else:
+                extras_dict[extra] = ""
+            i+=1
+
+        return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums, extras=extras_dict)
     artistPage.exposed = True
     
     
@@ -93,10 +124,27 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % artistid)
     addArtist.exposed = True
     
-    def getExtras(self, ArtistID):
+    def getExtras(self, ArtistID, newstyle=False, **kwargs):
+        # if calling this function without the newstyle, they're using the old format
+        # which doesn't separate extras, so we'll grab all of them
+        #
+        # If they are, we need to convert kwargs to string format
+        if not newstyle:
+            extras = "1,2,3,4,5,6,7,8"
+        else:
+            temp_extras_list = []
+            # TODO: Put these extras as a global variable
+            i = 1
+            for extra in ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]:
+                if extra in kwargs:
+                    temp_extras_list.append(i)
+                i += 1
+            extras = ','.join(str(n) for n in temp_extras_list)
+            
         myDB = db.DBConnection()
         controlValueDict = {'ArtistID': ArtistID}
-        newValueDict = {'IncludeExtras': 1}
+        newValueDict = {'IncludeExtras': 1,
+                        'Extras':        extras}
         myDB.upsert("artists", newValueDict, controlValueDict)
         threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True]).start()
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
@@ -211,6 +259,15 @@ class WebInterface(object):
         else:
             raise cherrypy.HTTPRedirect("home")
     deleteAlbum.exposed = True
+    
+    def switchAlbum(self, AlbumID, ReleaseID):
+        '''
+        Take the values from allalbums/alltracks (based on the ReleaseID) and swap it into the album & track tables
+        '''
+        from headphones import albumswitcher
+        albumswitcher.switch(AlbumID, ReleaseID)
+        raise cherrypy.HTTPRedirect("albumPage?AlbumID=%s" % AlbumID)
+    switchAlbum.exposed = True
 
     def upcoming(self):
         myDB = db.DBConnection()
@@ -229,9 +286,14 @@ class WebInterface(object):
         return serve_template(templatename="manageartists.html", title="Manage Artists", artists=artists)
     manageArtists.exposed = True
     
-    def manageAlbums(self):
+    def manageAlbums(self, Status=None):
         myDB = db.DBConnection()
-        albums = myDB.select('SELECT * from albums')
+        if Status == "Upcoming":
+            albums = myDB.select("SELECT * from albums WHERE ReleaseDate > date('now')")
+        elif Status:
+            albums = myDB.select('SELECT * from albums WHERE Status=?', [Status])
+        else:
+            albums = myDB.select('SELECT * from albums')
         return serve_template(templatename="managealbums.html", title="Manage Albums", albums=albums)
     manageAlbums.exposed = True
     
@@ -384,6 +446,8 @@ class WebInterface(object):
                     "use_newznab" : checked(headphones.NEWZNAB),
                     "newznab_host" : headphones.NEWZNAB_HOST,
                     "newznab_api" : headphones.NEWZNAB_APIKEY,
+                    "newznab_enabled" : checked(headphones.NEWZNAB_ENABLED),
+                    "extra_newznabs" : headphones.EXTRA_NEWZNABS,
                     "use_nzbsorg" : checked(headphones.NZBSORG),
                     "nzbsorg_uid" : headphones.NZBSORG_UID,
                     "nzbsorg_hash" : headphones.NZBSORG_HASH,
@@ -407,6 +471,8 @@ class WebInterface(object):
                     "pref_qual_3" : radio(headphones.PREFERRED_QUALITY, 3),
                     "pref_qual_2" : radio(headphones.PREFERRED_QUALITY, 2),
                     "pref_bitrate" : headphones.PREFERRED_BITRATE,
+                    "pref_bitrate_high" : headphones.PREFERRED_BITRATE_HIGH_BUFFER,
+                    "pref_bitrate_low" : headphones.PREFERRED_BITRATE_LOW_BUFFER,
                     "detect_bitrate" : checked(headphones.DETECT_BITRATE),
                     "move_files" : checked(headphones.MOVE_FILES),
                     "rename_files" : checked(headphones.RENAME_FILES),
@@ -416,6 +482,7 @@ class WebInterface(object):
                     "embed_album_art" : checked(headphones.EMBED_ALBUM_ART),
                     "embed_lyrics" : checked(headphones.EMBED_LYRICS),
                     "dest_dir" : headphones.DESTINATION_DIR,
+                    "lossless_dest_dir" : headphones.LOSSLESS_DESTINATION_DIR,
                     "folder_format" : headphones.FOLDER_FORMAT,
                     "file_format" : headphones.FILE_FORMAT,
                     "include_extras" : checked(headphones.INCLUDE_EXTRAS),
@@ -433,6 +500,7 @@ class WebInterface(object):
                     "encodervbrcbr": headphones.ENCODERVBRCBR,
                     "encoderquality": headphones.ENCODERQUALITY,
                     "encoderlossless": checked(headphones.ENCODERLOSSLESS),
+                    "delete_lossless_files": checked(headphones.DELETE_LOSSLESS_FILES),
                     "prowl_enabled": checked(headphones.PROWL_ENABLED),
                     "prowl_onsnatch": checked(headphones.PROWL_ONSNATCH),
                     "prowl_keys": headphones.PROWL_KEYS,
@@ -446,6 +514,7 @@ class WebInterface(object):
                     "nma_enabled": checked(headphones.NMA_ENABLED),
                     "nma_apikey": headphones.NMA_APIKEY,
                     "nma_priority": int(headphones.NMA_PRIORITY),
+                    "nma_onsnatch": checked(headphones.NMA_ONSNATCH),
                     "synoindex_enabled": checked(headphones.SYNOINDEX_ENABLED),
                     "mirror_list": headphones.MIRRORLIST,
                     "mirror": headphones.MIRROR,
@@ -455,19 +524,38 @@ class WebInterface(object):
                     "hpuser": headphones.HPUSER,
                     "hppass": headphones.HPPASS
                 }
+            
+        # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8
+        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]
+        extras_dict = {}
+        
+        i = 1
+        for extra in extras_list:
+            if str(i) in headphones.EXTRAS:
+                extras_dict[extra] = "checked"
+            else:
+                extras_dict[extra] = ""
+            i+=1
+                
+        config["extras"] = extras_dict
+        
         return serve_template(templatename="config.html", title="Settings", config=config)  
     config.exposed = True
     
     
-    def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None, download_scan_interval=None, nzb_search_interval=None, libraryscan_interval=None,
-        sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
-        usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
-        nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
-        torrentblackhole_dir=None, download_torrent_dir=None, numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_uid=None, whatcd_passkey=None,
-        rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, autowant_upcoming=False, autowant_all=False, interface=None, log_dir=None,
-        music_encoder=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
-        prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0, 
-        nma_enabled=False, nma_apikey=None, nma_priority=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None):
+    def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None, 
+        download_scan_interval=None, nzb_search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, 
+        sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None, usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, 
+        newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, 
+        newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None, 
+        numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, rename_files=0, correct_metadata=0, 
+        cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, 
+        include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0, remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, 
+        interface=None, log_dir=None, music_encoder=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, 
+        encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0, delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, 
+        prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0, nma_enabled=False, 
+        nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None, 
+        preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -494,6 +582,7 @@ class WebInterface(object):
         headphones.NEWZNAB = newznab
         headphones.NEWZNAB_HOST = newznab_host
         headphones.NEWZNAB_APIKEY = newznab_apikey
+        headphones.NEWZNAB_ENABLED = newznab_enabled
         headphones.NZBSORG = nzbsorg
         headphones.NZBSORG_UID = nzbsorg_uid
         headphones.NZBSORG_HASH = nzbsorg_hash
@@ -514,6 +603,8 @@ class WebInterface(object):
         headphones.WHATCD_PASSKEY = whatcd_passkey
         headphones.PREFERRED_QUALITY = int(preferred_quality)
         headphones.PREFERRED_BITRATE = preferred_bitrate
+        headphones.PREFERRED_BITRATE_HIGH_BUFFER = preferred_bitrate_high_buffer
+        headphones.PREFERRED_BITRATE_LOW_BUFFER = preferred_bitrate_low_buffer
         headphones.DETECT_BITRATE = detect_bitrate
         headphones.MOVE_FILES = move_files
         headphones.CORRECT_METADATA = correct_metadata
@@ -523,6 +614,7 @@ class WebInterface(object):
         headphones.EMBED_ALBUM_ART = embed_album_art
         headphones.EMBED_LYRICS = embed_lyrics
         headphones.DESTINATION_DIR = destination_dir
+        headphones.LOSSLESS_DESTINATION_DIR = lossless_destination_dir
         headphones.FOLDER_FORMAT = folder_format
         headphones.FILE_FORMAT = file_format
         headphones.INCLUDE_EXTRAS = include_extras
@@ -539,7 +631,8 @@ class WebInterface(object):
         headphones.ENCODEROUTPUTFORMAT = encoderoutputformat
         headphones.ENCODERVBRCBR = encodervbrcbr
         headphones.ENCODERQUALITY = int(encoderquality)
-        headphones.ENCODERLOSSLESS = encoderlossless
+        headphones.ENCODERLOSSLESS = int(encoderlossless)
+        headphones.DELETE_LOSSLESS_FILES = int(delete_lossless_files)
         headphones.PROWL_ENABLED = prowl_enabled
         headphones.PROWL_ONSNATCH = prowl_onsnatch
         headphones.PROWL_KEYS = prowl_keys
@@ -553,6 +646,7 @@ class WebInterface(object):
         headphones.NMA_ENABLED = nma_enabled
         headphones.NMA_APIKEY = nma_apikey
         headphones.NMA_PRIORITY = nma_priority
+        headphones.NMA_ONSNATCH = nma_onsnatch
         headphones.SYNOINDEX_ENABLED = synoindex_enabled
         headphones.MIRROR = mirror
         headphones.CUSTOMHOST = customhost
@@ -560,7 +654,36 @@ class WebInterface(object):
         headphones.CUSTOMSLEEP = customsleep
         headphones.HPUSER = hpuser
         headphones.HPPASS = hppass
+
+        # Handle the variable config options. Note - keys with False values aren't getting passed
         
+        headphones.EXTRA_NEWZNABS = []
+        
+        for kwarg in kwargs:
+            if kwarg.startswith('newznab_host'):
+                newznab_number = kwarg[12:]
+                newznab_host = kwargs['newznab_host' + newznab_number]
+                newznab_api = kwargs['newznab_api' + newznab_number]
+                try:
+                    newznab_enabled = int(kwargs['newznab_enabled' + newznab_number])
+                except KeyError:
+                    newznab_enabled = 0
+                
+                headphones.EXTRA_NEWZNABS.append((newznab_host, newznab_api, newznab_enabled))
+                
+        # Convert the extras to list then string. Coming in as 0 or 1
+        temp_extras_list = []
+        extras_list = [single, ep, compilation, soundtrack, live, remix, spokenword, audiobook]
+        
+        i = 1
+        for extra in extras_list:
+            if extra:
+                temp_extras_list.append(i)
+            i+=1
+        
+        headphones.EXTRAS = ','.join(str(n) for n in temp_extras_list)    
+        
+        # Write the config
         headphones.config_write()
 
         raise cherrypy.HTTPRedirect("config")

@@ -243,7 +243,7 @@ class ErrorTool(Tool):
 #                              Builtin tools                              #
 
 from cherrypy.lib import cptools, encoding, auth, static, jsontools
-from cherrypy.lib import sessions as _sessions, xmlrpc as _xmlrpc
+from cherrypy.lib import sessions as _sessions, xmlrpcutil as _xmlrpc
 from cherrypy.lib import caching as _caching
 from cherrypy.lib import auth_basic, auth_digest
 
@@ -367,7 +367,7 @@ class XMLRPCController(object):
             # http://www.cherrypy.org/ticket/533
             # if a method is not found, an xmlrpclib.Fault should be returned
             # raising an exception here will do that; see
-            # cherrypy.lib.xmlrpc.on_error
+            # cherrypy.lib.xmlrpcutil.on_error
             raise Exception('method "%s" is not supported' % attr)
         
         conf = cherrypy.serving.request.toolmaps['tools'].get("xmlrpc", {})

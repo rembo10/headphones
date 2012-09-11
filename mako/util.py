@@ -1,13 +1,15 @@
 # mako/util.py
-# Copyright (C) 2006-2011 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
 
+import imp
 import sys
 
 
 py3k = getattr(sys, 'py3kwarning', False) or sys.version_info >= (3, 0)
+py26 = sys.version_info >= (2, 6)
 py24 = sys.version_info >= (2, 4) and sys.version_info < (2, 5)
 jython = sys.platform.startswith('java')
 win32 = sys.platform.startswith('win')
@@ -33,8 +35,8 @@ except ImportError:
 if win32 or jython:
     time_func = time.clock
 else:
-    time_func = time.time 
- 
+    time_func = time.time
+
 def function_named(fn, name):
     """Return a function with a given __name__.
 
@@ -56,20 +58,57 @@ except:
         return newfunc
 
 if py24:
+    def all(iterable):
+        for i in iterable:
+            if not i:
+                return False
+        return True
+
     def exception_name(exc):
         try:
             return exc.__class__.__name__
         except AttributeError:
             return exc.__name__
 else:
+    all = all
+
     def exception_name(exc):
         return exc.__class__.__name__
- 
+
+
+class PluginLoader(object):
+    def __init__(self, group):
+        self.group = group
+        self.impls = {}
+
+    def load(self, name):
+        if name in self.impls:
+             return self.impls[name]()
+        else:
+            import pkg_resources
+            for impl in pkg_resources.iter_entry_points(
+                                self.group,
+                                name):
+                self.impls[name] = impl.load
+                return impl.load()
+            else:
+                raise exceptions.RuntimeException(
+                        "Can't load plugin %s %s" %
+                        (self.group, name))
+
+    def register(self, name, modulepath, objname):
+        def load():
+            mod = __import__(modulepath)
+            for token in modulepath.split(".")[1:]:
+                mod = getattr(mod, token)
+            return getattr(mod, objname)
+        self.impls[name] = load
+
 def verify_directory(dir):
     """create and/or verify a filesystem directory."""
- 
+
     tries = 0
- 
+
     while not os.path.exists(dir):
         try:
             tries += 1
@@ -100,20 +139,47 @@ class memoized_property(object):
         obj.__dict__[self.__name__] = result = self.fget(obj)
         return result
 
+class memoized_instancemethod(object):
+    """Decorate a method memoize its return value.
+
+    Best applied to no-arg methods: memoization is not sensitive to
+    argument values, and will always return the same value even when
+    called with different arguments.
+
+    """
+    def __init__(self, fget, doc=None):
+        self.fget = fget
+        self.__doc__ = doc or fget.__doc__
+        self.__name__ = fget.__name__
+
+    def __get__(self, obj, cls):
+        if obj is None:
+            return self
+        def oneshot(*args, **kw):
+            result = self.fget(obj, *args, **kw)
+            memo = lambda *a, **kw: result
+            memo.__name__ = self.__name__
+            memo.__doc__ = self.__doc__
+            obj.__dict__[self.__name__] = memo
+            return result
+        oneshot.__name__ = self.__name__
+        oneshot.__doc__ = self.__doc__
+        return oneshot
+
 class SetLikeDict(dict):
     """a dictionary that has some setlike methods on it"""
     def union(self, other):
         """produce a 'union' of this dict and another (at the key level).
- 
+
         values in the second dict take precedence over that of the first"""
         x = SetLikeDict(**self)
         x.update(other)
         return x
 
 class FastEncodingBuffer(object):
-    """a very rudimentary buffer that is faster than StringIO, 
+    """a very rudimentary buffer that is faster than StringIO,
     but doesn't crash on unicode data like cStringIO."""
- 
+
     def __init__(self, encoding=None, errors='strict', unicode=False):
         self.data = collections.deque()
         self.encoding = encoding
@@ -124,26 +190,27 @@ class FastEncodingBuffer(object):
         self.unicode = unicode
         self.errors = errors
         self.write = self.data.append
- 
+
     def truncate(self):
         self.data = collections.deque()
         self.write = self.data.append
- 
+
     def getvalue(self):
         if self.encoding:
-            return self.delim.join(self.data).encode(self.encoding, self.errors)
+            return self.delim.join(self.data).encode(self.encoding,
+                                                     self.errors)
         else:
             return self.delim.join(self.data)
 
 class LRUCache(dict):
-    """A dictionary-like object that stores a limited number of items, discarding
-    lesser used items periodically.
- 
+    """A dictionary-like object that stores a limited number of items,
+    discarding lesser used items periodically.
+
     this is a rewrite of LRUCache from Myghty to use a periodic timestamp-based
-    paradigm so that synchronization is not really needed.  the size management 
+    paradigm so that synchronization is not really needed.  the size management
     is inexact.
     """
- 
+
     class _Item(object):
         def __init__(self, key, value):
             self.key = key
@@ -151,26 +218,26 @@ class LRUCache(dict):
             self.timestamp = time_func()
         def __repr__(self):
             return repr(self.value)
- 
+
     def __init__(self, capacity, threshold=.5):
         self.capacity = capacity
         self.threshold = threshold
- 
+
     def __getitem__(self, key):
         item = dict.__getitem__(self, key)
         item.timestamp = time_func()
         return item.value
- 
+
     def values(self):
         return [i.value for i in dict.values(self)]
- 
+
     def setdefault(self, key, value):
         if key in self:
             return self[key]
         else:
             self[key] = value
             return value
- 
+
     def __setitem__(self, key, value):
         item = dict.get(self, key)
         if item is None:
@@ -179,17 +246,17 @@ class LRUCache(dict):
         else:
             item.value = value
         self._manage_size()
- 
+
     def _manage_size(self):
         while len(self) > self.capacity + self.capacity * self.threshold:
-            bytime = sorted(dict.values(self), 
+            bytime = sorted(dict.values(self),
                             key=operator.attrgetter('timestamp'), reverse=True)
             for item in bytime[self.capacity:]:
                 try:
                     del self[item.key]
                 except KeyError:
-                    # if we couldnt find a key, most likely some other thread broke in 
-                    # on us. loop around and try again
+                    # if we couldn't find a key, most likely some other thread
+                    # broke in on us. loop around and try again
                     break
 
 # Regexp to match python magic encoding line
@@ -198,7 +265,8 @@ _PYTHON_MAGIC_COMMENT_re = re.compile(
     re.VERBOSE)
 
 def parse_encoding(fp):
-    """Deduce the encoding of a Python source file (binary mode) from magic comment.
+    """Deduce the encoding of a Python source file (binary mode) from magic
+    comment.
 
     It does this in the same way as the `Python interpreter`__
 
@@ -227,7 +295,8 @@ def parse_encoding(fp):
                 pass
             else:
                 line2 = fp.readline()
-                m = _PYTHON_MAGIC_COMMENT_re.match(line2.decode('ascii', 'ignore'))
+                m = _PYTHON_MAGIC_COMMENT_re.match(
+                                               line2.decode('ascii', 'ignore'))
 
         if has_bom:
             if m:
@@ -244,14 +313,14 @@ def parse_encoding(fp):
 
 def sorted_dict_repr(d):
     """repr() a dictionary with the keys in order.
- 
+
     Used by the lexer unit test to compare parse trees based on strings.
- 
+
     """
     keys = d.keys()
     keys.sort()
     return "{" + ", ".join(["%r: %r" % (k, d[k]) for k in keys]) + "}"
- 
+
 def restore__ast(_ast):
     """Attempt to restore the required classes to the _ast module if it
     appears to be missing them
@@ -350,3 +419,18 @@ except ImportError:
     import inspect
     def inspect_func_args(fn):
         return inspect.getargspec(fn)
+
+def read_file(path, mode='rb'):
+    fp = open(path, mode)
+    try:
+        data = fp.read()
+        return data
+    finally:
+        fp.close()
+
+def load_module(module_id, path):
+    fp = open(path, 'rb')
+    try:
+        return imp.load_source(module_id, path, fp)
+    finally:
+        fp.close()

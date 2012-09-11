@@ -1,0 +1,8 @@
+##############################
+###   TODO LIST (18/08/12) ###
+##############################
+
+1. Add ability to fetch a specific extra, rather than pull down the whole category
+    - This requires extra calls to MB right now, so modify 1st mb artist call to pull down the
+      whole album list, then only send the desried ones to importer.py
+2. Update API with newstyle getExtras function (lacking entirely right now)

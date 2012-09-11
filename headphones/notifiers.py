@@ -171,14 +171,17 @@ class NMA:
         
         return response     
         
-    def notify(self, artist, album):
+    def notify(self, artist=None, album=None, snatched_nzb=None):
     
         apikey = self.apikey
         priority = self.priority
         
-        event = artist + ' - ' + album + ' complete!'
-        
-        description = "Headphones has downloaded and postprocessed: " + artist + ' [' + album + ']'
+        if snatched_nzb:
+            event = snatched_nzb + " snatched!"
+            description = "Headphones has snatched: " + snatched_nzb + " and has sent it to SABnzbd+"
+        else:
+            event = artist + ' - ' + album + ' complete!'
+            description = "Headphones has downloaded and postprocessed: " + artist + ' [' + album + ']'
     
         data = { 'apikey': apikey, 'application':'Headphones', 'event': event, 'description': description, 'priority': priority}
 
@@ -197,6 +200,8 @@ class Synoindex:
         return os.path.exists(self.util_loc)
 
     def notify(self, path):
+        path = os.path.abspath(path)
+
         if not self.util_exists():
             logger.warn("Error sending notification: synoindex utility not found at %s" % self.util_loc)
             return
@@ -209,12 +214,12 @@ class Synoindex:
             logger.warn("Error sending notification: Path passed to synoindex was not a file or folder.")
             return
 
-        cmd = [self.util_loc, cmd_arg, '\"%s\"' % os.path.abspath(path)]
-        logger.debug("Calling synoindex command: %s" % str(cmd))
+        cmd = [self.util_loc, cmd_arg, path]
+        logger.info("Calling synoindex command: %s" % str(cmd))
         try:
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=headphones.PROG_DIR)
             out, error = p.communicate()
-            logger.debug("Synoindex result: %s" % str(out))
+            #synoindex never returns any codes other than '0', highly irritating
         except OSError, e:
             logger.warn("Error sending notification: %s" % str(e))
 

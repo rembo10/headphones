@@ -1,5 +1,5 @@
 <%inherit file="base.html" />
-<%! 
+<%!
 	from headphones import db, helpers
 	myDB = db.DBConnection()
 %>
@@ -16,7 +16,32 @@
 			%else:
 			<a id="menu_link_retry" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true);" data-success="Retrying the same version of '${album['AlbumTitle']}'">Retry Download</a>
 			<a id="menu_link_new" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),true);" data-success="Looking for a new version of '${album['AlbumTitle']}'">Try New Version</a>
-			%endif			
+			%endif		
+			<a class="menu_link_edit" id="album_chooser" href="#">Choose Alternate Release</a>
+				<div id="dialog" title="Choose an Alternate Release" style="display:none" class="configtable">
+					<div class="links">
+						<%
+							alternate_albums = myDB.select("SELECT * from allalbums WHERE AlbumID=?", [album['AlbumID']])
+						%>
+						%if not alternate_albums:
+							<p>No alternate releases found. Try refreshing the artist (if the artist is being refreshed, please wait until it's finished)</p>
+							<h2><a id="refresh_artist" onclick="doAjaxCall('refreshArtist?ArtistID=${album['ArtistID']}', $(this)), true" href="#" data-success="'${album['ArtistName']}' is being refreshed">Refresh Artist</a></h2>
+						%else:
+							%for alternate_album in alternate_albums:
+								<%
+									track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=?", [alternate_album['ReleaseID']]))
+									have_track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=? AND Location IS NOT NULL", [alternate_album['ReleaseID']]))
+									if alternate_album['AlbumID'] == alternate_album['ReleaseID']:
+										alternate_album_name = "Headphones Default Release [" + str(have_track_count) + "/" + str(track_count) + " tracks]"
+									else:
+										alternate_album_name = alternate_album['AlbumTitle'] + " (" + alternate_album['ReleaseCountry'] + ", " + alternate_album['ReleaseFormat'] + ") [" + str(have_track_count) + "/" + str(track_count) + " tracks]"
+									
+								%>
+								<a href="#" onclick="doAjaxCall('switchAlbum?AlbumID=${album['AlbumID']}&ReleaseID=${alternate_album['ReleaseID']}', $(this), 'table');" data-success="Switched release to: ${alternate_album_name}">${alternate_album_name}</a><br>
+							%endfor
+						%endif
+					</div>
+				</div>	
 		</div>
 	</div>	
 	<a href="artistPage?ArtistID=${album['ArtistID']}" class="back">&laquo; Back to ${album['ArtistName']}</a>
@@ -82,7 +107,7 @@
 							trackduration = 'n/a'
 
 						if not track['Format']:
-							format = 'Unknown'
+							format = ''
 						else:
 							format = track['Format']
 					%>
@@ -143,9 +168,14 @@
 		getInfo(elem,id,'album');
 	}
 	
-	$(document).ready(function()	{
-		getAlbumInfo();
-		getAlbumArt();
+	function initThisPage() {
+		$('#album_chooser').click(function() {
+			$('#dialog').dialog({ width: "500px" });
+			return false;
+		});
+		$('#refresh_artist').click(function() {
+			$('#dialog').dialog("close");
+		});
 		initActions();
 		setTimeout(function(){
 			initFancybox();
@@ -155,8 +185,15 @@
 			"aaSorting": [],
 			"bFilter": false,
 			"bInfo": false,
-			"bPaginate": false
-		});
+			"bPaginate": false,
+			"bDestroy": true
+		});		
+	};
+	
+	$(document).ready(function()	{
+		getAlbumInfo();
+		getAlbumArt();
+		initThisPage();
 	});
 
 	</script>

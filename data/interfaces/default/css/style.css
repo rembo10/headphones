@@ -376,6 +376,10 @@ form .radio label {
   padding-top: 1px;
   width: auto;
 }
+.override-float {
+  float: none !important;
+  margin-bottom: 0px !important;
+}
 form .radio input {
   float: left;
   margin-bottom: 10px;
@@ -673,6 +677,13 @@ footer {
   top: 2px;
   position: relative;
   margin-right: 3px;
+}
+#dialog {
+  padding: 40px;
+}
+#dialog input#submit {
+  margin-left: 50px;
+  margin-right: auto;
 }
 #subhead .back {
   float: left;
