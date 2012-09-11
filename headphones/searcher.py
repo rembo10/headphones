@@ -15,6 +15,7 @@
 
 import urllib, urllib2, urlparse
 import lib.feedparser as feedparser
+import lib.whatapi as whatapi
 from xml.dom import minidom
 from xml.parsers.expat import ExpatError
 from StringIO import StringIO
@@ -808,69 +809,70 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
         if headphones.WHATCD:
             provider = "What.cd"
-            providerurl = url_fix("https://www.what.cd/browse.php")
 
             bitrate = None
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
-                format = "FLAC"
-                bitrate = "(Lossless)"
+                format_regex = "FLAC"
                 maxsize = 10000000000
             elif headphones.PREFERRED_QUALITY:
-                format = "FLAC OR MP3"
+                format_regex = "(FLAC|MP3)"
                 maxsize = 10000000000
             else:
-                format = "MP3"
+                format_regex = "MP3"
                 maxsize = 300000000
 
-            query_items = ['artist:"%s"' % artistterm,
-                           'album:"%s"'   % albumterm,
-                           'format:(%s)' % format,
-                           'size:[0 TO %d]' % maxsize,
-                           '-seeders:0'] # cut out dead torrents
-            if bitrate:
-                query_items.append('bitrate:"%s"' % bitrate)
-
-            params = {
-                "uid": headphones.WHATCD_UID,
-                "passkey": headphones.WHATCD_PASSKEY,
-                "rss": "1",
-                "c0": "1",
-                "s": "seeders", # sort by
-                "d": "desc" # direction
-            }
-
-            searchURL = "%s?%s&q=%s" % (providerurl, urllib.urlencode(params), urllib.quote(" ".join(query_items)))
-
             try:
-                data = urllib2.urlopen(searchURL, timeout=20).read()
-            except urllib2.URLError, e:
-                logger.warn('Error fetching data from %s: %s' % (provider, e))
-                data = False
+                whatcd = whatapi.getWhatcdNetwork(headphones.WHATCD_USERNAME, headphones.WHATCD_PASSWORD)
+            except:
+                whatcd = None
+                logger.warn("What.cd credentials incorrect or site is down.")
 
-            if data:
+            if whatcd:
+                whatcd.enableCaching()
 
-                d = feedparser.parse(data)
-                if not len(d.entries):
-                    logger.info(u"No results found from %s for %s" % (provider, term))
-                    pass
+                artist = whatcd.getArtist(artistterm)
+                artist_id = artist.getArtistId()
+            else:
+                artist_id = None
 
-                else:
-                    for item in d.entries:
-                        try:
-                            title_match = re.search(r"(.+)\[(.+)\]$", item.title)
-                            title = title_match.group(1).strip()
-                            details = title_match.group(2).split("-")
+            if artist_id: # will be None if artist not found
+                logger.info(u"What.cd artist ID: %s" % artist_id)
+                artist_releases = artist.getArtistReleases()
+                logger.info(u"Found %d releases on what.cd for %s" % (len(artist_releases), artistterm))
+                #Returns a list with all artist's releases in form of dictionary {releasetype, year, name, id}
+            else:
+                artist_releases = []
 
-                            desc_match = re.search(r"Size: (\d+)<", item.description)
-                            size = desc_match.group(1)
+            possible_matches = [ release for release in artist_releases if albumterm in release['name'] ]
 
-                            url = item.link
+            # cap at 10 matches, 1 per second to reduce hits on API...don't wanna get in trouble.
+            # Might want to turn up number of matches later.
+            max_torrent_info_reads = 10
+            info_read_rate = 1
 
-                            resultlist.append((title, size, url, provider))
-                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-                        except Exception, e:
-                            logger.error(u"An error occurred while trying to parse the response from What.cd: %s" % e)
+            match_torrents = []
+            for i, release in enumerate(possible_matches[:max_torrent_info_reads]):
+                if i > 0:
+                    time.sleep(info_read_rate)
+                match_torrents.append(whatcd.getTorrent(release['id']))
 
+            # filter on format, size, and num seeders
+            match_torrents = [ torrent for torrent in match_torrents
+                               if re.search(format_regex, torrent.getTorrentDetails(), flags=re.I)
+                                and torrent.getTorrentSize() <= maxsize
+                                and torrent.getTorrentSeeders() >= minimumseeders ]
+
+            # sort by times d/l'd
+            if not len(possible_matches):
+                logger.info(u"No results found from %s for %s after filtering" % (provider, term))
+            elif len(match_torrents) > 1:
+                match_torrents.sort(match_torrents, key=whatapi.Torrent.getTorrentSeeders)
+
+            for torrent in match_torrents:
+                resultlist.append((torrent.getTorrentFolderName(),
+                                   torrent.getTorrentSize(),
+                                   torrent.getTorrentDownloadURL(),
+                                   provider))
 
         if headphones.ISOHUNT:
             provider = "isoHunt"    
