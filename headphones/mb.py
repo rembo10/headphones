@@ -71,13 +71,10 @@ def startmb(forcemb=False):
             logger.warn("No username or password set for VIP server")
         else:
             musicbrainzngs.hpauth(mbuser,mbpass)
-
-    # Don't really need to return q anymore since ngs, but maybe we can return an 'initialized=True' instead?
-    q = musicbrainzngs
     
     logger.debug('Using the following server values:\nMBHost: %s ; MBPort: %i  ;  Sleep Interval: %i ' % (mbhost, mbport, sleepytime))
     
-    return (q, sleepytime)
+    return True
 
 def findArtist(name, limit=1):
 
@@ -89,7 +86,7 @@ def findArtist(name, limit=1):
         if any((c in chars) for c in name):
             name = '"'+name+'"'
             
-        q, sleepytime = startmb(forcemb=True)
+        startmb(forcemb=True)
 
         try:
             artistResults = musicbrainzngs.search_artists(query=name,limit=limit)['artist-list']
@@ -141,7 +138,7 @@ def findRelease(name, limit=1):
         if any((c in chars) for c in name):
             name = '"'+name+'"'
             
-        q, sleepytime = startmb(forcemb=True)
+        startmb(forcemb=True)
         
         try:
             releaseResultsngs = musicbrainzngs.search_releases(query=name,limit=limit)['release-list']
@@ -172,7 +169,7 @@ def getArtist(artistid, extrasonly=False):
     
         artist = None
         
-        q, sleepytime = startmb()
+        startmb()
         
         try:
             limit = 100
@@ -286,7 +283,7 @@ def getReleaseGroup(rgid):
         
         releaseGroup = None
         
-        q, sleepytime = startmb()
+        startmb()
         
         try:
             releaseGroup = musicbrainzngs.get_release_group_by_id(rgid,["artists","releases","media","discids",])['release-group']
@@ -308,7 +305,7 @@ def getRelease(releaseid, include_artist_info=True):
         release = {}
         results = None
         
-        q, sleepytime = startmb()
+        startmb()
         
         try:
             if include_artist_info:
@@ -369,7 +366,7 @@ def getRelease(releaseid, include_artist_info=True):
         return release
 def get_all_releases(rgid):
     results = []
-    q, sleepytime = startmb()
+    startmb()
     try:
         limit = 100
         newResults = None
@@ -460,7 +457,7 @@ def findArtistbyAlbum(name):
 
     results = None
     
-    q, sleepytime = startmb(forcemb=True)
+    startmb(forcemb=True)
     
     try:
         results = musicbrainzngs.search_release_groups(term).get('release-group-list')
@@ -495,7 +492,7 @@ def findAlbumID(artist=None, album=None):
 
     results_ngs = None
     
-    q, sleepytime = startmb(forcemb=True)
+    startmb(forcemb=True)
     
     try:
         term = '"'+album+'" AND artist:"'+artist+'"'
