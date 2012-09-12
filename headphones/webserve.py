@@ -190,6 +190,20 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("home")
     deleteArtist.exposed = True
     
+
+    def deleteEmptyArtists(self):
+        logger.info(u"Deleting all empty artists")
+        myDB = db.DBConnection()
+        emptyArtistIDs = [row['ArtistID'] for row in myDB.select("SELECT ArtistID FROM artists WHERE HaveTracks == 0 OR LatestAlbum IS NULL")]
+        for ArtistID in emptyArtistIDs:
+            logger.info(u"Deleting all traces of artist: " + ArtistID)
+            myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
+            myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
+            myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+            myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
+    deleteEmptyArtists.exposed = True     
+   
+        
     def refreshArtist(self, ArtistID):
         threading.Thread(target=importer.addArtisttoDB, args=[ArtistID]).start()  
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
