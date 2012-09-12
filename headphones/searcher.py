@@ -809,6 +809,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
         if headphones.WHATCD:
             provider = "What.cd"
+            providerurl = "http://what.cd/"
 
             bitrate = None
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
@@ -838,40 +839,45 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             if artist_id: # will be None if artist not found
                 logger.info(u"What.cd artist ID: %s" % artist_id)
                 artist_releases = artist.getArtistReleases()
-                logger.info(u"Found %d releases on what.cd for %s" % (len(artist_releases), artistterm))
+                logger.info(u"Found %d releases on %s for %s" % (len(artist_releases), provider, artistterm))
                 #Returns a list with all artist's releases in form of dictionary {releasetype, year, name, id}
             else:
                 artist_releases = []
 
-            possible_matches = [ release for release in artist_releases if albumterm in release['name'] ]
+            logger.info(u"Loading information about available torrents (this may take a while)")
+            release_torrent_groups = [ whatcd.getTorrentGroup(release['id']) for release in artist_releases if albumterm in release['name'] ]
 
+            all_children = []
+            for group in release_torrent_groups:
+                all_children += group.torrentinfo['torrent']['childrenids']
             # cap at 10 matches, 1 per second to reduce hits on API...don't wanna get in trouble.
             # Might want to turn up number of matches later.
-            max_torrent_info_reads = 10
+#            max_torrent_info_reads = 10
             info_read_rate = 1
 
             match_torrents = []
-            for i, release in enumerate(possible_matches[:max_torrent_info_reads]):
+            for i, child_id in enumerate(all_children):
                 if i > 0:
                     time.sleep(info_read_rate)
-                match_torrents.append(whatcd.getTorrent(release['id']))
+                match_torrents.append(whatcd.getTorrent(child_id))
 
             # filter on format, size, and num seeders
             match_torrents = [ torrent for torrent in match_torrents
                                if re.search(format_regex, torrent.getTorrentDetails(), flags=re.I)
-                                and torrent.getTorrentSize() <= maxsize
-                                and torrent.getTorrentSeeders() >= minimumseeders ]
+                                and helpers.mb_to_bytes(torrent.getTorrentSize()) <= maxsize
+                                and int(torrent.getTorrentSeeders()) >= minimumseeders ]
 
             # sort by times d/l'd
-            if not len(possible_matches):
+            if not len(match_torrents):
                 logger.info(u"No results found from %s for %s after filtering" % (provider, term))
             elif len(match_torrents) > 1:
-                match_torrents.sort(match_torrents, key=whatapi.Torrent.getTorrentSeeders)
+                logger.info(u"Found %d matching releases from %s for %s after filtering" % (len(match_torrents), provider, artistterm))
+                match_torrents.sort(key=lambda x: x.getTorrentSeeders)
 
             for torrent in match_torrents:
                 resultlist.append((torrent.getTorrentFolderName(),
-                                   torrent.getTorrentSize(),
-                                   torrent.getTorrentDownloadURL(),
+                                   helpers.mb_to_bytes(torrent.getTorrentSize()),
+                                   providerurl + torrent.getTorrentDownloadURL(),
                                    provider))
 
         if headphones.ISOHUNT:

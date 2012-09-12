@@ -123,7 +123,12 @@ def bytes_to_mb(bytes):
     mb = int(bytes)/1048576
     size = '%.1f MB' % mb
     return size
-    
+
+def mb_to_bytes(mb_str):
+    result = re.search('^(\d+(?:\.\d+)?)\s?(?:mb)?', mb_str, flags=re.I)
+    if result:
+        return int(float(result.group(1))*1048576)
+
 def replace_all(text, dic):
     for i, j in dic.iteritems():
         text = text.replace(i, j)
