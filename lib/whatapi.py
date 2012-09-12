@@ -785,6 +785,15 @@ class Torrent(WhatBase):
         if self.torrentinfo:
             return self.torrentinfo['torrent']['parentid']
 
+    def getTorrentChildren(self):
+        """
+            Returns list of children if is a torrent group, else returns own id in list
+        """
+        if self.isParent:
+            return self.torrentinfo['torrent']['childrenids']
+        else:
+            return [self.id]
+
     def getTorrentDownloadURL(self):
         """
             Returns relative url to download the torrent
@@ -2503,11 +2512,9 @@ class Parser(object):
                     self.debugMessage("not found  href to retrieve user id")
                 else:
                     userInfo["id"] = regid.search(hrefid).group(0)
-                    print "User id: %s" % userInfo["id"]
 
                 #retrieve user logged id
                 hrefauth = ul.findAll('li')[2].find("a")["href"]
-                print hrefauth
                 regauth = re.compile('=[0-9a-zA-Z]+')
                 if regid.search(hrefid) is None:
                     self.debugMessage("not found  href to retrieve user id")
@@ -2606,6 +2613,11 @@ class Parser(object):
         soup = BeautifulSoup(str(dom))
         if isparent:
             torrentInfo['torrent']['parentid'] = id
+            torrentInfo['torrent']['childrenids'] = []
+            for torrent in soup.findAll('tr', {'class':re.compile(r'\bgroupid_%s.+edition_\d.+group_torrent' % id)}):
+                child_id = re.search('\d+$', torrent['id']).group(0)
+                if child_id:
+                    torrentInfo['torrent']['childrenids'].append(child_id)
         else:
             groupidurl = soup.findAll('div', {'class':'linkbox'})[0].find('a')['href']
             torrentInfo['torrent']['editioninfo'] = soup.findAll('td', {'class':'edition_info'})[0].find('strong').contents[-1]
@@ -2694,7 +2706,7 @@ class Parser(object):
         tagsartist = []
         similarartists = []
         soup = BeautifulSoup(str(dom))
-        for releasetype in soup.fetch('table', {'class':'torrent_table'}):
+        for releasetype in soup.fetch('table', {'class':'torrent_table grouped release_table'}):
             releasetypenames = releasetype.findAll('strong')
             releasetypename = releasetype.findAll('strong')[0].string
             for release in releasetypenames[1:-1]:
