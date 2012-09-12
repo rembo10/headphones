@@ -30,16 +30,12 @@ mb_lock = threading.Lock()
 
 # Quick fix to add mirror switching on the fly. Need to probably return the mbhost & mbport that's
 # being used, so we can send those values to the log
-def startmb(forcemb=False):
+def startmb():
 
     mbuser = None
     mbpass = None
     
-    # Can use headphones mirror for queries
-    if headphones.MIRROR == "headphones" or "custom":
-        forcemb=False
-    
-    if forcemb or headphones.MIRROR == "musicbrainz.org":
+    if headphones.MIRROR == "musicbrainz.org":
         mbhost = "musicbrainz.org"
         mbport = 80
         sleepytime = 1
@@ -84,15 +80,11 @@ def findArtist(name, limit=1):
         if any((c in chars) for c in name):
             name = '"'+name+'"'
             
-        startmb(forcemb=True)
-
         try:
             artistResults = musicbrainzngs.search_artists(query=name,limit=limit)['artist-list']
         except WebServiceError, e:
             logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
             time.sleep(5)
-        
-        time.sleep(sleepytime)
         
         if not artistResults:
             return False        
@@ -136,16 +128,12 @@ def findRelease(name, limit=1):
         if any((c in chars) for c in name):
             name = '"'+name+'"'
             
-        startmb(forcemb=True)
-        
         try:
             releaseResultsngs = musicbrainzngs.search_releases(query=name,limit=limit)['release-list']
         except WebServiceError, e: #need to update exceptions
             logger.warn('Attempt to query MusicBrainz for "%s" failed: %s' % (name, str(e)))
             time.sleep(5)
-        
-        time.sleep(sleepytime)
-        
+
         if not releaseResultsngs:
             return False
         for result in releaseResultsngs:
@@ -167,8 +155,6 @@ def getArtist(artistid, extrasonly=False):
     
         artist = None
         
-        startmb()
-        
         try:
             limit = 100
             artist = musicbrainzngs.get_artist_by_id(artistid)['artist']
@@ -185,8 +171,6 @@ def getArtist(artistid, extrasonly=False):
         
         if not artist:
             return False
-        
-        time.sleep(sleepytime)
         
         #if 'disambiguation' in artist:
         #    uniquename = unicode(artist['sort-name'] + " (" + artist['disambiguation'] + ")")
@@ -280,9 +264,7 @@ def getReleaseGroup(rgid):
         releaselist = []
         
         releaseGroup = None
-        
-        startmb()
-        
+               
         try:
             releaseGroup = musicbrainzngs.get_release_group_by_id(rgid,["artists","releases","media","discids",])['release-group']
         except WebServiceError, e:
@@ -303,8 +285,6 @@ def getRelease(releaseid, include_artist_info=True):
         release = {}
         results = None
         
-        startmb()
-        
         try:
             if include_artist_info:
                 results = musicbrainzngs.get_release_by_id(releaseid,["artists","release-groups","media","recordings"]).get('release')
@@ -316,8 +296,6 @@ def getRelease(releaseid, include_artist_info=True):
         
         if not results:
             return False
-        
-        time.sleep(sleepytime)
 
         release['title'] = unicode(results['title'])
         release['id'] = unicode(results['id']) 
@@ -364,7 +342,6 @@ def getRelease(releaseid, include_artist_info=True):
         return release
 def get_all_releases(rgid):
     results = []
-    startmb()
     try:
         limit = 100
         newResults = None
@@ -455,15 +432,12 @@ def findArtistbyAlbum(name):
 
     results = None
     
-    startmb(forcemb=True)
-    
     try:
         results = musicbrainzngs.search_release_groups(term).get('release-group-list')
     except WebServiceError, e:
         logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
         time.sleep(5)    
     
-    time.sleep(sleepytime)
     
     if not results:
         return False
@@ -490,17 +464,13 @@ def findAlbumID(artist=None, album=None):
 
     results_ngs = None
     
-    startmb(forcemb=True)
-    
     try:
         term = '"'+album+'" AND artist:"'+artist+'"'
         results_ngs = musicbrainzngs.search_release_groups(term,1).get('release-group-list')
     except WebServiceError, e:
         logger.warn('Attempt to query MusicBrainz for %s - %s failed (%s)' % (artist, album, str(e)))
         time.sleep(5)
-    
-    time.sleep(sleepytime)
-    
+
     if not results_ngs:
         return False
 
