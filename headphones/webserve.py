@@ -694,6 +694,9 @@ class WebInterface(object):
         # Write the config
         headphones.config_write()
 
+        #reconfigure musicbrainz database connection with the new values
+        mb.startmb()
+
         raise cherrypy.HTTPRedirect("config")
         
     configUpdate.exposed = True
