@@ -54,9 +54,7 @@ def startmb(forcemb=False):
         mbpass = headphones.HPPASS
         sleepytime = 0
     else:
-        mbhost = "tbueter.com"
-        mbport = 5000
-        sleepytime = 0
+        return False
     
     musicbrainzngs.set_useragent("headphones","0.0","https://github.com/rembo10/headphones")
     musicbrainzngs.set_hostname(mbhost + ":" + str(mbport))
