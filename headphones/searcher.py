@@ -849,7 +849,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
             all_children = []
             for group in release_torrent_groups:
-                all_children += group.torrentinfo['torrent']['childrenids']
+                all_children += group.getTorrentChildren()
             # cap at 10 matches, 1 per second to reduce hits on API...don't wanna get in trouble.
             # Might want to turn up number of matches later.
 #            max_torrent_info_reads = 10
@@ -871,7 +871,8 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             if not len(match_torrents):
                 logger.info(u"No results found from %s for %s after filtering" % (provider, term))
             elif len(match_torrents) > 1:
-                logger.info(u"Found %d matching releases from %s for %s after filtering" % (len(match_torrents), provider, artistterm))
+                logger.info(u"Found %d matching releases from %s for %s - %s after filtering" %
+                            (len(match_torrents), provider, artistterm, albumterm))
                 match_torrents.sort(key=lambda x: x.getTorrentSeeders)
 
             for torrent in match_torrents:
