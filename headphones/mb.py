@@ -122,23 +122,23 @@ def findArtist(name, limit=1):
 def findRelease(name, limit=1):
 
     with mb_lock:        
-        releaselistngs = []
-        releaseResultsngs = None
+        releaselist = []
+        releaseResults = None
         
         chars = set('!?')
         if any((c in chars) for c in name):
             name = '"'+name+'"'
             
         try:
-            releaseResultsngs = musicbrainzngs.search_releases(query=name,limit=limit)['release-list']
+            releaseResults = musicbrainzngs.search_releases(query=name,limit=limit)['release-list']
         except WebServiceError, e: #need to update exceptions
             logger.warn('Attempt to query MusicBrainz for "%s" failed: %s' % (name, str(e)))
             time.sleep(5)
 
-        if not releaseResultsngs:
+        if not releaseResults:
             return False
-        for result in releaseResultsngs:
-                        releaselistngs.append({
+        for result in releaseResults:
+                        releaselist.append({
                         'uniquename':        unicode(result['artist-credit'][0]['artist']['name']),
                         'title':             unicode(result['title']),
                         'id':                unicode(result['artist-credit'][0]['artist']['id']),
@@ -147,7 +147,7 @@ def findRelease(name, limit=1):
                         'albumurl':          unicode("http://musicbrainz.org/release/" + result['id']),#probably needs to be changed
                         'score':             int(result['ext:score'])
                         })            
-        return releaselistngs
+        return releaselist
 
 def getArtist(artistid, extrasonly=False):
 
@@ -463,19 +463,19 @@ def findArtistbyAlbum(name):
     
 def findAlbumID(artist=None, album=None):
 
-    results_ngs = None
+    results = None
     
     try:
         term = '"'+album+'" AND artist:"'+artist+'"'
-        results_ngs = musicbrainzngs.search_release_groups(term,1).get('release-group-list')
+        results = musicbrainzngs.search_release_groups(term,1).get('release-group-list')
     except WebServiceError, e:
         logger.warn('Attempt to query MusicBrainz for %s - %s failed (%s)' % (artist, album, str(e)))
         time.sleep(5)
 
-    if not results_ngs:
+    if not results:
         return False
 
-    if len(results_ngs) < 1:
+    if len(results) < 1:
         return False    
-    rgid_ngs = unicode(results_ngs[0]['id'])
-    return rgid_ngs
+    rgid = unicode(results[0]['id'])
+    return rgid
