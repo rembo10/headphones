@@ -57,7 +57,8 @@ def startmb():
     if sleepytime == 0:
         musicbrainzngs.set_rate_limit(False)
     else:
-        musicbrainzngs.set_rate_limit(True)
+        #calling it with an it ends up blocking all requests after the first
+        musicbrainzngs.set_rate_limit(limit_or_interval=float(sleepytime))
 
     # Add headphones credentials
     if headphones.MIRROR == "headphones":
