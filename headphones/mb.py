@@ -329,7 +329,7 @@ def getRelease(releaseid, include_artist_info=True):
         
         return release
 
-def get_all_releases(rgid):
+def get_all_releases(rgid,includeExtras=False):
     results = []
     try:
         limit = 100
@@ -352,6 +352,11 @@ def get_all_releases(rgid):
         
     releases = []
     for releasedata in results:
+        #releasedata.get will return None if it doesn't have a status
+        #all official releases should have the Official status included
+        if not includeExtras and releasedata.get('status') != 'Official':
+            continue
+        
         release = {}
         release['AlbumTitle'] = unicode(releasedata['title'])
         release['AlbumID'] = unicode(rgid)
