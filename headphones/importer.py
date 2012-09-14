@@ -158,6 +158,16 @@ def addArtisttoDB(artistid, extrasonly=False):
     
     myDB.upsert("artists", newValueDict, controlValueDict)
 
+    # See if we need to grab extras. Artist specific extras take precedence over global option
+    # Global options are set when adding a new artist
+    myDB = db.DBConnection()
+    
+    try:
+        db_artist = myDB.action('SELECT IncludeExtras, Extras from artists WHERE ArtistID=?', [artistid]).fetchone()
+        includeExtras = db_artist['IncludeExtras']
+    except IndexError:
+        includeExtras = False  
+
     for rg in artist['releasegroups']:
         
         logger.info("Now adding/updating: " + rg['title'])
@@ -167,7 +177,10 @@ def addArtisttoDB(artistid, extrasonly=False):
         # check if the album already exists
         rg_exists = myDB.action("SELECT * from albums WHERE AlbumID=?", [rg['id']]).fetchone()
                     
-        releases = mb.get_all_releases(rgid)
+        releases = mb.get_all_releases(rgid,includeExtras)
+        if releases == []:
+            logger.info('No official releases in release group %s' % rg['title'])
+            continue
         if not releases:
             errors = True
             logger.info('Unable to get release information for %s - there may not be any official releases in this release group' % rg['title'])
