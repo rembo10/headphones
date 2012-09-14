@@ -1182,27 +1182,27 @@ class Parser(object):
             torrentInfo['torrent']['parentid'] = groupidurl[groupidurl.rfind("=") + 1:]
 
             all_tr_id_torrent = soup.findAll('tr', {'id': 'torrent%s' % id})
-#            all_torrent_a = all_tr_id_torrent[0].findAll('a')
+            all_torrent_a = all_tr_id_torrent[0].findAll('a')
 
             torrentInfo['torrent']['downloadurl'] = all_tr_id_torrent[0].findAll('a', {'title':'Download'})[0]['href']
-#            ## is freeleech or/and reported? ##
-#            #both
-#            if len(all_torrent_a[-1].contents) == 4:
-#                isreported = True
-#                isfreeleech = True
-#                torrentInfo['torrent']['details'] = all_torrent_a[-1].contents[0]
-#            #either
-#            elif len(all_torrent_a[-1].contents) == 2:
-#                if all_torrent_a[-1].contents[1].string == 'Reported':
-#                    isreported = True
-#                elif all_torrent_a[-1].contents[1].string == 'Freeleech!':
-#                    isreported = True
-#                torrentInfo['torrent']['details'] = all_torrent_a[-1].contents[0]
-#            #none
-#            else:
-#                torrentInfo['torrent']['details'] = all_torrent_a[-1].contents[0]
-#            torrentInfo['torrent']['isfreeleech'] = isfreeleech
-#            torrentInfo['torrent']['isreported'] = isreported
+            ## is freeleech or/and reported? ##
+            #both
+            if len(all_torrent_a[-1].contents) == 4:
+                isreported = True
+                isfreeleech = True
+                torrentInfo['torrent']['details'] = all_torrent_a[-1].contents[0]
+            #either
+            elif len(all_torrent_a[-1].contents) == 2:
+                if all_torrent_a[-1].contents[1].string == 'Reported':
+                    isreported = True
+                elif all_torrent_a[-1].contents[1].string == 'Freeleech!':
+                    isreported = True
+                torrentInfo['torrent']['details'] = all_torrent_a[-1].contents[0]
+            #none
+            else:
+                torrentInfo['torrent']['details'] = all_torrent_a[-1].contents[0]
+            torrentInfo['torrent']['isfreeleech'] = isfreeleech
+            torrentInfo['torrent']['isreported'] = isreported
 
             all_torrent_td = all_tr_id_torrent[0].findAll('td')
             torrentInfo['torrent']['size'] = all_torrent_td[1].string

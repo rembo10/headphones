@@ -817,6 +817,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 maxsize = 10000000000
             elif headphones.PREFERRED_QUALITY:
                 format_regex = "(FLAC|MP3)"
+                bitrate = headphones.PREFERRED_BITRATE
                 maxsize = 10000000000
             else:
                 format_regex = "MP3"
@@ -836,7 +837,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             else:
                 artist_id = None
 
-            if artist_id: # will be None if artist not found
+            if artist and artist_id: # will be None if artist not found
                 logger.info(u"What.cd artist ID: %s" % artist_id)
                 artist_releases = artist.getArtistReleases()
                 logger.info(u"Found %d releases on %s for %s" % (len(artist_releases), provider, artistterm))
@@ -845,27 +846,41 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 artist_releases = []
 
             logger.info(u"Loading information about available torrents (this may take a while)")
+            logger.info(u"Collecting individual releases...")
             release_torrent_groups = [ whatcd.getTorrentGroup(release['id']) for release in artist_releases if albumterm in release['name'] ]
+            logger.info(u"Done gathering torrentgroups.")
+
 
             all_children = []
             for group in release_torrent_groups:
+                logger.info(u"Getting individual torrents for parent ID %s" % group.getTorrentParentId())
                 all_children += group.getTorrentChildren()
+                logger.info(u"Found torrent IDs: %s" % ", ".join(all_children))
             # cap at 10 matches, 1 per second to reduce hits on API...don't wanna get in trouble.
             # Might want to turn up number of matches later.
 #            max_torrent_info_reads = 10
             info_read_rate = 1
 
+            logger.info(u"Gathering torrent objects for IDs.")
             match_torrents = []
             for i, child_id in enumerate(all_children):
                 if i > 0:
                     time.sleep(info_read_rate)
-                match_torrents.append(whatcd.getTorrent(child_id))
+                torrent_object = whatcd.getTorrent(child_id)
+                match_torrents.append(torrent_object)
+                logger.info(u"Created torrent object for %s" % torrent_object.getTorrentFolderName())
+
 
             # filter on format, size, and num seeders
-            match_torrents = [ torrent for torrent in match_torrents
-                               if re.search(format_regex, torrent.getTorrentDetails(), flags=re.I)
-                                and helpers.mb_to_bytes(torrent.getTorrentSize()) <= maxsize
-                                and int(torrent.getTorrentSeeders()) >= minimumseeders ]
+            logger.info(u"Filtering torrents by format, maximum size, and minimum seeders...")
+            match_torrents = [ torrent for torrent in match_torrents if re.search(format_regex, torrent.getTorrentDetails(), flags=re.I) ]
+            match_torrents = [ torrent for torrent in match_torrents if helpers.mb_to_bytes(torrent.getTorrentSize()) <= maxsize ]
+            match_torrents = [ torrent for torrent in match_torrents if int(torrent.getTorrentSeeders()) >= minimumseeders ]
+#            match_torrents = [ torrent for torrent in match_torrents
+#                               if re.search(format_regex, torrent.getTorrentDetails(), flags=re.I)
+#                                and helpers.mb_to_bytes(torrent.getTorrentSize()) <= maxsize
+#                                and int(torrent.getTorrentSeeders()) >= minimumseeders ] #hotspot
+            logger.info(u"Remaining torrents: %s" % ", ".join([torrent.getTorrentFolderName() for torrent in match_torrents]))
 
             # sort by times d/l'd
             if not len(match_torrents):
@@ -873,7 +888,13 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             elif len(match_torrents) > 1:
                 logger.info(u"Found %d matching releases from %s for %s - %s after filtering" %
                             (len(match_torrents), provider, artistterm, albumterm))
-                match_torrents.sort(key=lambda x: x.getTorrentSeeders)
+                logger.info("Sorting torrents by times snatched and preferred bitrate %s..." % bitrate)
+                match_torrents.sort(key=lambda x: x.getTorrentSnatched, reverse=True)
+                if bitrate:
+                    match_torrents.sort(key=lambda x: re.match("mp3", x.getTorrentDetails(), flags=re.I), reverse=True)
+                    match_torrents.sort(key=lambda x: str(bitrate) in x.getTorrentFolderName(), reverse=True)
+                logger.info(u"New order: %s" % ", ".join([u"%s - %s snatches" % (torrent.getTorrentFolderName(), torrent.getTorrentSnatched())
+                                                                        for torrent in match_torrents]))
 
             for torrent in match_torrents:
                 resultlist.append((torrent.getTorrentFolderName(),
