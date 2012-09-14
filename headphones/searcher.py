@@ -666,6 +666,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         logger.info("Searching torrents for %s since it was marked as wanted" % term)
         
         resultlist = []
+        pre_sorted_results = False
         minimumseeders = int(headphones.NUMBEROFSEEDERS) - 1
 
         if headphones.KAT:
@@ -896,6 +897,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 logger.info(u"New order: %s" % ", ".join([u"%s - %s snatches" % (torrent.getTorrentFolderName(), torrent.getTorrentSnatched())
                                                                         for torrent in match_torrents]))
 
+            pre_sorted_results = True
             for torrent in match_torrents:
                 resultlist.append((torrent.getTorrentFolderName(),
                                    helpers.mb_to_bytes(torrent.getTorrentSize()),
@@ -1055,7 +1057,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         
         if len(resultlist):    
                        
-            if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
+            if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE and not pre_sorted_results:
 
                 logger.debug('Target bitrate: %s kbps' % headphones.PREFERRED_BITRATE)
 
@@ -1081,6 +1083,10 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
                     
                     torrentlist = sorted(resultlist, key=lambda title: title[1], reverse=True)
+
+            elif pre_sorted_results:
+
+                torrentlist = resultlist
             
             else:
             
@@ -1107,7 +1113,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
             logger.info(u"Pre-processing result")
             
-            (data, bestqual) = preprocesstorrent(torrentlist)
+            (data, bestqual) = preprocesstorrent(torrentlist, pre_sorted_results)
             
             if data and bestqual:
                 logger.info(u'Found best result from %s: <a href="%s">%s</a> - %s' % (bestqual[3], bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
@@ -1145,13 +1151,16 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
                 myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", torrent_folder_name])
 
-def preprocesstorrent(resultlist):
+def preprocesstorrent(resultlist, pre_sorted_list=False):
     selresult = ""
-    for result in resultlist:
-        if selresult == "":
-            selresult = result
-        elif int(selresult[1]) < int(result[1]): # if size is lower than new result replace previous selected result (bigger size = better quality?)
-            selresult = result
+    if pre_sorted_list:
+        selresult = resultlist[0]
+    else:
+        for result in resultlist:
+            if selresult == "":
+                selresult = result
+            elif int(selresult[1]) < int(result[1]): # if size is lower than new result replace previous selected result (bigger size = better quality?)
+                selresult = result
             
     try:
         request = urllib2.Request(selresult[2])
