@@ -890,7 +890,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 logger.info(u"Found %d matching releases from %s for %s - %s after filtering" %
                             (len(match_torrents), provider, artistterm, albumterm))
                 logger.info("Sorting torrents by times snatched and preferred bitrate %s..." % bitrate)
-                match_torrents.sort(key=lambda x: x.getTorrentSnatched, reverse=True)
+                match_torrents.sort(key=lambda x: int(x.getTorrentSnatched()), reverse=True)
                 if bitrate:
                     match_torrents.sort(key=lambda x: re.match("mp3", x.getTorrentDetails(), flags=re.I), reverse=True)
                     match_torrents.sort(key=lambda x: str(bitrate) in x.getTorrentFolderName(), reverse=True)
