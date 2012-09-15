@@ -831,7 +831,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 logger.warn("What.cd credentials incorrect or site is down.")
 
             if whatcd:
-                whatcd.enableCaching()
+#                whatcd.enableCaching()
                 logger.info("Getting artist information for %s..." % artistterm)
                 artist = whatcd.getArtist(artistterm)
                 artist_id = artist.getArtistId()
