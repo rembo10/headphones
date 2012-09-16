@@ -36,6 +36,7 @@ import re
 import urllib
 import shelve
 import tempfile
+import threading
 from htmlentitydefs import name2codepoint as n2cp
 
 
@@ -339,17 +340,22 @@ def getWhatcdNetwork(username="", password=""):
 
 class _ShelfCacheBackend(object):
     """Used as a backend for caching cacheable requests."""
+    cache_lock = threading.Lock()
+
     def __init__(self, file_path=None):
         self.shelf = shelve.open(file_path)
 
     def getHTML(self, key):
-        return self.shelf[key]
+        with _ShelfCacheBackend.cache_lock:
+            return self.shelf[key]
 
     def setHTML(self, key, xml_string):
-        self.shelf[key] = xml_string
+        with _ShelfCacheBackend.cache_lock:
+            self.shelf[key] = xml_string
 
     def hasKey(self, key):
-        return key in self.shelf.keys()
+        with _ShelfCacheBackend.cache_lock:
+            return key in self.shelf.keys()
 
 
 class Request(object):
