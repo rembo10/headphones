@@ -538,6 +538,10 @@ m<%inherit file="base.html"/>
 		        				<input type="checkbox" name="autowant_all" value="1" ${config['autowant_all']} /><label>Automatically Mark All Albums as Wanted</label>
 		        			</div>
 		        		</div>                		
+                        <div class="row">
+							<label>Cache Size (in MB):</label>
+							<input type="text" name="cache_sizemb" value="${config['cache_sizemb']}" size="7">
+						</div> 
 		        	</fieldset>
 					<fieldset>
 						<legend>Interface</legend>
