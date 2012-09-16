@@ -831,7 +831,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 logger.warn("What.cd credentials incorrect or site is down.")
 
             if whatcd:
-#                whatcd.enableCaching()
+                whatcd.enableCaching()
                 logger.info("Getting artist information for %s..." % artistterm)
                 artist = whatcd.getArtist(artistterm)
                 artist_id = artist.getArtistId()
@@ -855,8 +855,9 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             all_children = []
             for group in release_torrent_groups:
                 logger.info(u"Getting individual torrents for parent ID %s" % group.getTorrentParentId())
-                all_children += group.getTorrentChildren()
-                logger.info(u"Found torrent IDs: %s" % ", ".join(all_children))
+                new_children = group.getTorrentChildren()
+                all_children += new_children
+                logger.info(u"Found torrent IDs: %s" % ", ".join(new_children))
             # cap at 10 matches, 1 per second to reduce hits on API...don't wanna get in trouble.
             # Might want to turn up number of matches later.
 #            max_torrent_info_reads = 10
