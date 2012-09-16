@@ -45,7 +45,7 @@ class DBConnection:
         #journal disabled since we never do rollbacks
         self.connection.execute("PRAGMA journal_mode = OFF")        
         #64mb of cache memory,probably need to make it user configurable
-        self.connection.execute("PRAGMA cache_size=-65536")
+        self.connection.execute("PRAGMA cache_size=-%s" % (headphones.CACHE_SIZEMB*1024))
         self.connection.row_factory = sqlite3.Row
         
     def action(self, query, args=None):
