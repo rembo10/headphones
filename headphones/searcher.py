@@ -15,7 +15,10 @@
 
 import urllib, urllib2, urlparse
 import lib.feedparser as feedparser
-import lib.whatapi as whatapi
+from lib.pygazelle import api as gazelleapi
+from lib.pygazelle import encoding as gazelleencoding
+from lib.pygazelle import format as gazelleformat
+from lib.pygazelle import media as gazellemedia
 from xml.dom import minidom
 from xml.parsers.expat import ExpatError
 from StringIO import StringIO
@@ -814,75 +817,37 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
             bitrate = None
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
-                format_regex = "FLAC"
+                format = gazelleformat.FLAC
                 maxsize = 10000000000
             elif headphones.PREFERRED_QUALITY:
-                format_regex = "(FLAC|MP3)"
+                format=None
                 bitrate = headphones.PREFERRED_BITRATE
+                if bitrate not in gazelleencoding.ALL_ENCODINGS:
+                    raise Exception("Preferred bitrate %s not recognized by %s" % (bitrate, provider))
                 maxsize = 10000000000
             else:
-                format_regex = "MP3"
+                format = gazelleformat.MP3
                 maxsize = 300000000
 
             try:
-                whatcd = whatapi.getWhatcdNetwork(headphones.WHATCD_USERNAME, headphones.WHATCD_PASSWORD)
+                gazelle = gazelleapi.GazelleAPI(headphones.WHATCD_USERNAME, headphones.WHATCD_PASSWORD)
             except:
-                whatcd = None
+                gazelle = None
                 logger.warn("What.cd credentials incorrect or site is down.")
 
-            if whatcd:
-                whatcd.enableCaching()
-                logger.info("Getting artist information for %s..." % artistterm)
-                artist = whatcd.getArtist(artistterm)
-                artist_id = artist.getArtistId()
-            else:
-                artist_id = None
-
-            if artist and artist_id: # will be None if artist not found
-                logger.info(u"What.cd artist ID: %s" % artist_id)
-                artist_releases = artist.getArtistReleases()
-                logger.info(u"Found %d releases on %s for %s" % (len(artist_releases), provider, artistterm))
-                #Returns a list with all artist's releases in form of dictionary {releasetype, year, name, id}
-            else:
-                artist_releases = []
-
-            logger.info(u"Loading information about available torrents (this may take a while)")
-            logger.info(u"Collecting individual releases...")
-            release_torrent_groups = [ whatcd.getTorrentGroup(release['id']) for release in artist_releases if albumterm in release['name'] ]
-            logger.info(u"Done gathering torrentgroups.")
-
-
-            all_children = []
-            for group in release_torrent_groups:
-                logger.info(u"Getting individual torrents for parent ID %s" % group.getTorrentParentId())
-                new_children = group.getTorrentChildren()
-                all_children += new_children
-                logger.info(u"Found torrent IDs: %s" % ", ".join(new_children))
-            # cap at 10 matches, 1 per second to reduce hits on API...don't wanna get in trouble.
-            # Might want to turn up number of matches later.
-#            max_torrent_info_reads = 10
-            info_read_rate = 1
-
-            logger.info(u"Gathering torrent objects for IDs.")
-            match_torrents = []
-            for i, child_id in enumerate(all_children):
-                if i > 0:
-                    time.sleep(info_read_rate)
-                torrent_object = whatcd.getTorrent(child_id)
-                match_torrents.append(torrent_object)
-                logger.info(u"Created torrent object for %s" % torrent_object.getTorrentFolderName())
-
+            search_results = {}
+            if gazelle:
+                logger.info(u"Searching %s..." % provider)
+                search_results = gazelle.search_torrents(artistname=artistterm, groupname=albumterm,
+                                                            format=format, encoding=bitrate)
 
             # filter on format, size, and num seeders
             logger.info(u"Filtering torrents by format, maximum size, and minimum seeders...")
-            match_torrents = [ torrent for torrent in match_torrents if re.search(format_regex, torrent.getTorrentDetails(), flags=re.I) ]
-            match_torrents = [ torrent for torrent in match_torrents if helpers.mb_to_bytes(torrent.getTorrentSize()) <= maxsize ]
-            match_torrents = [ torrent for torrent in match_torrents if int(torrent.getTorrentSeeders()) >= minimumseeders ]
-#            match_torrents = [ torrent for torrent in match_torrents
-#                               if re.search(format_regex, torrent.getTorrentDetails(), flags=re.I)
-#                                and helpers.mb_to_bytes(torrent.getTorrentSize()) <= maxsize
-#                                and int(torrent.getTorrentSeeders()) >= minimumseeders ] #hotspot
-            logger.info(u"Remaining torrents: %s" % ", ".join([torrent.getTorrentFolderName() for torrent in match_torrents]))
+            all_torrents = search_results['results']
+            match_torrents = [ torrent for torrent in all_torrents if torrent.size <= maxsize ]
+            match_torrents = [ torrent for torrent in match_torrents if torrent.seeders >= minimumseeders ]
+
+            logger.info(u"Remaining torrents: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
 
             # sort by times d/l'd
             if not len(match_torrents):
@@ -891,18 +856,19 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 logger.info(u"Found %d matching releases from %s for %s - %s after filtering" %
                             (len(match_torrents), provider, artistterm, albumterm))
                 logger.info("Sorting torrents by times snatched and preferred bitrate %s..." % bitrate)
-                match_torrents.sort(key=lambda x: int(x.getTorrentSnatched()), reverse=True)
-                if bitrate:
-                    match_torrents.sort(key=lambda x: re.match("mp3", x.getTorrentDetails(), flags=re.I), reverse=True)
-                    match_torrents.sort(key=lambda x: str(bitrate) in x.getTorrentFolderName(), reverse=True)
-                logger.info(u"New order: %s" % ", ".join([u"%s - %s snatches" % (torrent.getTorrentFolderName(), torrent.getTorrentSnatched())
-                                                                        for torrent in match_torrents]))
+                match_torrents.sort(key=lambda x: int(x.snatched), reverse=True)
+#                if bitrate:
+#                    match_torrents.sort(key=lambda x: re.match("mp3", x.getTorrentDetails(), flags=re.I), reverse=True)
+#                    match_torrents.sort(key=lambda x: str(bitrate) in x.getTorrentFolderName(), reverse=True)
+                logger.info(u"New order: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
 
             pre_sorted_results = True
             for torrent in match_torrents:
-                resultlist.append((torrent.getTorrentFolderName(),
-                                   helpers.mb_to_bytes(torrent.getTorrentSize()),
-                                   providerurl + torrent.getTorrentDownloadURL(),
+                if not torrent.file_path:
+                    torrent.group.update_group_data() # will load the file_path for the individual torrents
+                resultlist.append((torrent.file_path,
+                                   torrent.size,
+                                   gazelle.generate_torrent_link(torrent.id),
                                    provider))
 
         if headphones.ISOHUNT:
