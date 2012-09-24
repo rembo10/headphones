@@ -646,7 +646,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         except TypeError:
             year = ''
         
-        dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':'', '*':''}
+        dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':' ', '*':''}
 
         semi_cleanalbum = helpers.replace_all(albums[1], dic)
         cleanalbum = helpers.latinToAscii(semi_cleanalbum)
