@@ -848,7 +848,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             
             if rulist:
                 for ru in rulist:
-                    title = ru[0]
+                    title = ru[0].decode('utf-8')
                     size = ru[1]
                     url = ru[2]
                     resultlist.append((title, size, url, provider))

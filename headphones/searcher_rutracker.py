@@ -3,7 +3,6 @@
 
 # Headphones rutracker.org search
 # Functions called from searcher.py
-# Requires BeautifulSoup 4 for parsing http://www.crummy.com/software/BeautifulSoup/
 
 import urllib
 import urllib2
@@ -18,7 +17,7 @@ class Rutracker():
 
     logged_in = False
     # Stores a number of login attempts to prevent recursion.
-    login_counter = 0
+    #login_counter = 0
     
     def __init__(self):
 
@@ -34,7 +33,7 @@ class Rutracker():
         if login is None or password is None:
             return False
 
-        self.login_counter += 1
+        #self.login_counter += 1
         
         # No recursion wanted.
         #if self.login_counter > 1:
@@ -104,7 +103,7 @@ class Rutracker():
         try:
             
             page = self.opener.open(searchurl, timeout=60)
-            soup = BeautifulSoup(page.read(), from_encoding="utf-8")
+            soup = BeautifulSoup(page.read())
             
             # Debug
             #logger.debug (soup.prettify()) 
@@ -162,7 +161,7 @@ class Rutracker():
        
         for torrent in torrentlist:
             
-            title = torrent[0]
+            title = torrent[0].encode('utf-8')
             url = torrent[1]
             seeders = torrent[2]
             size = torrent[3]
@@ -179,8 +178,8 @@ class Rutracker():
                 self.cookiejar.set_cookie(cookielib.Cookie(version=0, name='bb_dl', value=torrent_id, port=None, port_specified=False, domain='.rutracker.org', domain_specified=False, domain_initial_dot=False, path='/', path_specified=True, secure=False, expires=None, discard=True, comment=None, comment_url=None, rest={'HttpOnly': None}, rfc2109=False))
                                           
                 # Debug
-                for cookie in self.cookiejar:
-                    logger.debug ('Cookie: %s' % cookie) 
+                #for cookie in self.cookiejar:
+                #    logger.debug ('Cookie: %s' % cookie) 
                      
                 try:
                     page = self.opener.open(url)
@@ -193,9 +192,10 @@ class Rutracker():
                     logger.error('Error getting torrent: %s' % e)  
                     return False      
                 
-                # get torrent track count
+                # get torrent track count and check for cue
                 
                 trackcount = 0
+                cuecount = 0
                 
                 if 'files' in metainfo: # multi
                     for pathfile in metainfo['files']:
@@ -203,17 +203,48 @@ class Rutracker():
                         for file in path:
                             if '.ape' in file or '.flac' in file or '.ogg' in file or '.m4a' in file or '.aac' in file or '.mp3' in file or '.wav' in file or '.aif' in file:
                                 trackcount += 1
-                            
-                logger.debug ('torrent title: %s' % title)
-                logger.debug ('hp trackcount: %s' % hptrackcount) 
-                logger.debug ('torrent trackcount: %s' % trackcount)
-                
+                            if '.cue' in file:
+                                cuecount += 1
+                                     
                 #Torrent topic page
         
                 topicurl = 'http://rutracker.org/forum/viewtopic.php?t=' + torrent_id
+                logger.debug ('torrent title: %s' % title)
+                logger.debug ('headphones trackcount: %s' % hptrackcount) 
+                logger.debug ('rutracker trackcount: %s' % trackcount)
+
+                # If torrent track count less than headphones track count, and there's a cue, then attempt to get track count from log(s)
+                # This is for the case where we have a single .flac/.wav which can be split by cue
+                # Not great, but shouldn't be doing this too often
+                
+                totallogcount = 0
+                if trackcount < hptrackcount and cuecount > 0 and cuecount < hptrackcount:
+                    page = self.opener.open(topicurl, timeout=60)
+                    soup = BeautifulSoup(page.read())
+                    findtoc = soup.find_all(text='TOC of the extracted CD')
+                    if not findtoc:
+                        findtoc = soup.find_all(text='TOC извлечённого CD')
+                    for toc in findtoc:
+                        logcount = 0
+                        for toccontent in toc.find_all_next(text=True):
+                            cut_string = toccontent.split('|')
+                            new_string = cut_string[0].lstrip().rstrip()
+                            if new_string == '1' or new_string == '01':
+                                logcount = 1
+                            elif logcount > 0:
+                                if new_string.isdigit():
+                                    logcount += 1
+                                else:
+                                    break
+                        totallogcount = totallogcount + logcount
+                            
+                if totallogcount > 0:
+                    trackcount = totallogcount        
+                    logger.debug ('rutracker logtrackcount: %s' % totallogcount)
                 
                 # If torrent track count = hp track count then return torrent, 
                 # if greater, check for deluxe/special/foreign editions
+                # if less, then allow if it's a single track with a cue
                 
                 valid = False
                 
