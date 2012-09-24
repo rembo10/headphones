@@ -648,8 +648,10 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         
         dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':'', '*':''}
 
-        cleanalbum = helpers.latinToAscii(helpers.replace_all(albums[1], dic))
-        cleanartist = helpers.latinToAscii(helpers.replace_all(albums[0], dic))
+        semi_cleanalbum = helpers.replace_all(albums[1], dic)
+        cleanalbum = helpers.latinToAscii(semi_cleanalbum)
+        semi_cleanartist = helpers.replace_all(albums[0], dic)
+        cleanartist = helpers.latinToAscii(semi_cleanartist)
 
         # FLAC usually doesn't have a year for some reason so I'll leave it out
         # Various Artist albums might be listed as VA, so I'll leave that out too
@@ -660,7 +662,9 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             term = cleanalbum + ' ' + year
         else:
             term = cleanartist + ' ' + cleanalbum
-            
+
+        semi_clean_artist_term = re.sub('[\.\-\/]', ' ', semi_cleanartist).encode('utf-8')
+        semi_clean_album_term = re.sub('[\.\-\/]', ' ', semi_cleanalbum).encode('utf-8')
         # Replace bad characters in the term and unicode it
         term = re.sub('[\.\-\/]', ' ', term).encode('utf-8')
         artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8')
@@ -838,7 +842,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             search_results = {}
             if gazelle:
                 logger.info(u"Searching %s..." % provider)
-                search_results = gazelle.search_torrents(artistname=artistterm, groupname=albumterm,
+                search_results = gazelle.search_torrents(artistname=semi_clean_artist_term, groupname=semi_clean_album_term,
                                                             format=format, encoding=bitrate)
 
             # filter on format, size, and num seeders
