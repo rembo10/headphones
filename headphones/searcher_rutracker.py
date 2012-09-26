@@ -161,15 +161,16 @@ class Rutracker():
        
         for torrent in torrentlist:
             
-            title = torrent[0].encode('utf-8')
+            returntitle = torrent[0].encode('utf-8')
             url = torrent[1]
             seeders = torrent[2]
             size = torrent[3]
             
             # Attempt to filter out unwanted
             
-            if 'Promo' not in title and 'promo' not in title and 'Vinyl' not in title and 'vinyl' not in title \
-              and 'ongbook' not in title and 'TVRip' not in title and 'HDTV' not in title and 'DVD' not in title \
+            title = returntitle.lower()
+            
+            if 'promo' not in title and 'vinyl' not in title and 'songbook' not in title and 'tvrip' not in title and 'hdtv' not in title and 'dvd' not in title \
               and int(size) <= maxsize and int(seeders) >= minseeders:
                      
                 # Check torrent info
@@ -251,13 +252,13 @@ class Rutracker():
                 if trackcount == hptrackcount:
                     valid = True
                 elif trackcount > hptrackcount:
-                    if 'eluxe' in title or 'dition' in title or 'apanese' in title or 'elease' in title:
+                    if 'deluxe' in title or 'edition' in title or 'japanese' in title:
                         valid = True
                         
                 # return 1st valid torrent if not checking by bitrate, else add to list and return at end
                 
                 if valid:
-                    rulist.append((title, size, topicurl))
+                    rulist.append((returntitle, size, topicurl))
                     if not bitrate:
                         return rulist
                          

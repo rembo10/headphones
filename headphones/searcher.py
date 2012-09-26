@@ -822,39 +822,47 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         if headphones.RUTRACKER and rulogin:
         
             provider = "rutracker.org"
-            bitrate = False
             
-            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
-                format = 'lossless'
-                maxsize = 10000000000
-            elif headphones.PREFERRED_QUALITY == 1:
-                format = 'lossless+mp3'
-                maxsize = 10000000000
+            # Ignore if release date not specified, results too unpredictable
+            
+            if not year:
+                logger.info(u'Release date not specified, ignoring for rutracker.org')
             else:
-                format = 'mp3'
-                maxsize = 300000000
-                if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
-                    bitrate = True
+            
+                bitrate = False
+            
+                if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+                    format = 'lossless'
+                    maxsize = 10000000000
+                elif headphones.PREFERRED_QUALITY == 1:
+                    format = 'lossless+mp3'
+                    maxsize = 10000000000
+                else:
+                    format = 'mp3'
+                    maxsize = 300000000
+                    if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
+                        bitrate = True
                 
-            # build search url based on above
+                # build search url based on above
             
-            searchURL = rutracker.searchurl(artistterm, albumterm, year, format)
-            logger.info(u'Parsing results from <a href="%s">rutracker.org</a>' % searchURL)
+                searchURL = rutracker.searchurl(artistterm, albumterm, year, format)
+                logger.info(u'Parsing results from <a href="%s">rutracker.org</a>' % searchURL)
             
-            # parse results and get best match
-            rulist = rutracker.search(searchURL, maxsize, minimumseeders, albumid, bitrate)
+                # parse results and get best match
             
-            # add best match to overall results list
+                rulist = rutracker.search(searchURL, maxsize, minimumseeders, albumid, bitrate)
             
-            if rulist:
-                for ru in rulist:
-                    title = ru[0].decode('utf-8')
-                    size = ru[1]
-                    url = ru[2]
-                    resultlist.append((title, size, url, provider))
-                    logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-            else:
-                logger.info(u"No valid results found from %s" % (provider))
+                # add best match to overall results list
+            
+                if rulist:
+                    for ru in rulist:
+                        title = ru[0].decode('utf-8')
+                        size = ru[1]
+                        url = ru[2]
+                        resultlist.append((title, size, url, provider))
+                        logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                else:
+                    logger.info(u"No valid results found from %s" % (provider))
                 
 
         if headphones.ISOHUNT:
