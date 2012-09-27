@@ -68,7 +68,7 @@ class GazelleAPI(object):
                 'password': self.password}
         r = self.session.post(loginpage, data=data)
         if r.status_code != 200:
-            raise LoginException
+            raise LoginException("Login error, http code %s" % r.status_code)
         accountinfo = self.request('index')
         self.userid = accountinfo['id']
         self.authkey = accountinfo['authkey']

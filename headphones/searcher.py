@@ -835,45 +835,44 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
             try:
                 gazelle = gazelleapi.GazelleAPI(headphones.WHATCD_USERNAME, headphones.WHATCD_PASSWORD)
-            except:
+            except Exception, e:
                 gazelle = None
-                logger.warn("What.cd credentials incorrect or site is down.")
+                logger.warn(u"What.cd credentials incorrect or site is down. Error: %s %s" % (e.__class__.__name__, str(e)))
 
-            search_results = {}
             if gazelle:
                 logger.info(u"Searching %s..." % provider)
                 search_results = gazelle.search_torrents(artistname=semi_clean_artist_term, groupname=semi_clean_album_term,
                                                             format=format, encoding=bitrate)
 
-            # filter on format, size, and num seeders
-            logger.info(u"Filtering torrents by format, maximum size, and minimum seeders...")
-            all_torrents = search_results['results']
-            match_torrents = [ torrent for torrent in all_torrents if torrent.size <= maxsize ]
-            match_torrents = [ torrent for torrent in match_torrents if torrent.seeders >= minimumseeders ]
+                # filter on format, size, and num seeders
+                logger.info(u"Filtering torrents by format, maximum size, and minimum seeders...")
+                all_torrents = search_results['results']
+                match_torrents = [ torrent for torrent in all_torrents if torrent.size <= maxsize ]
+                match_torrents = [ torrent for torrent in match_torrents if torrent.seeders >= minimumseeders ]
 
-            logger.info(u"Remaining torrents: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
+                logger.info(u"Remaining torrents: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
 
-            # sort by times d/l'd
-            if not len(match_torrents):
-                logger.info(u"No results found from %s for %s after filtering" % (provider, term))
-            elif len(match_torrents) > 1:
-                logger.info(u"Found %d matching releases from %s for %s - %s after filtering" %
-                            (len(match_torrents), provider, artistterm, albumterm))
-                logger.info("Sorting torrents by times snatched and preferred bitrate %s..." % bitrate)
-                match_torrents.sort(key=lambda x: int(x.snatched), reverse=True)
-#                if bitrate:
-#                    match_torrents.sort(key=lambda x: re.match("mp3", x.getTorrentDetails(), flags=re.I), reverse=True)
-#                    match_torrents.sort(key=lambda x: str(bitrate) in x.getTorrentFolderName(), reverse=True)
-                logger.info(u"New order: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
+                # sort by times d/l'd
+                if not len(match_torrents):
+                    logger.info(u"No results found from %s for %s after filtering" % (provider, term))
+                elif len(match_torrents) > 1:
+                    logger.info(u"Found %d matching releases from %s for %s - %s after filtering" %
+                                (len(match_torrents), provider, artistterm, albumterm))
+                    logger.info("Sorting torrents by times snatched and preferred bitrate %s..." % bitrate)
+                    match_torrents.sort(key=lambda x: int(x.snatched), reverse=True)
+    #                if bitrate:
+    #                    match_torrents.sort(key=lambda x: re.match("mp3", x.getTorrentDetails(), flags=re.I), reverse=True)
+    #                    match_torrents.sort(key=lambda x: str(bitrate) in x.getTorrentFolderName(), reverse=True)
+                    logger.info(u"New order: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
 
-            pre_sorted_results = True
-            for torrent in match_torrents:
-                if not torrent.file_path:
-                    torrent.group.update_group_data() # will load the file_path for the individual torrents
-                resultlist.append((torrent.file_path,
-                                   torrent.size,
-                                   gazelle.generate_torrent_link(torrent.id),
-                                   provider))
+                pre_sorted_results = True
+                for torrent in match_torrents:
+                    if not torrent.file_path:
+                        torrent.group.update_group_data() # will load the file_path for the individual torrents
+                    resultlist.append((torrent.file_path,
+                                       torrent.size,
+                                       gazelle.generate_torrent_link(torrent.id),
+                                       provider))
 
         if headphones.ISOHUNT:
             provider = "isoHunt"    
