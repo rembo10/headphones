@@ -8,7 +8,7 @@
 
 import json
 import time
-import requests
+import lib.requests as requests
 
 from user import User
 from artist import Artist
