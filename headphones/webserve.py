@@ -29,6 +29,7 @@ from headphones import logger, searcher, db, importer, mb, lastfm, librarysync
 from headphones.helpers import checked, radio
 
 import lib.simplejson as simplejson
+import json
 
 
 
@@ -437,6 +438,51 @@ class WebInterface(object):
         s = simplejson.dumps(dict)
         return s
     getLog.exposed = True
+
+    def getArtists_json(self,iDisplayStart=0,iDisplayLength=100,sSearch="",iSortCol_0='0',sSortDir_0='asc'):
+        iDisplayStart = int(iDisplayStart)
+        iDisplayLength = int(iDisplayLength)
+
+        filtered = []
+        totalcount = 0        
+        myDB = db.DBConnection()
+        
+        if sSearch == "":       
+            filtered = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
+            totalcount = len(filtered) 
+        else:
+            filtered = myDB.select('SELECT * from artists order by ArtistSortName WHERE ArtistSortName LIKE %s OR LatestAlbum LIKE %s COLLATE NOCASE' % (sSearch,sSearch))
+            totalcount = myDB.select('SELECT COUNT(*) from artists')
+
+        sortcolumn = 0
+        if iSortCol_0 == '1':
+            sortcolumn = 2
+        elif iSortCol_0 == '2':
+            sortcolumn = 1
+        filtered.sort(key=lambda x:x[sortcolumn],reverse=sSortDir_0 == "desc")
+        artists = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
+        rows = []
+        for artist in artists:
+            row = {"ArtistID":artist['ArtistID'],
+                      "ArtistSortName":artist["ArtistSortName"],
+                      "Status":artist["Status"],
+                      "TotalTracks":artist["TotalTracks"],
+                      "HaveTracks":artist["HaveTracks"] if 'HaveTracks' in artist else 0,
+                      "LatestAlbum":"",                      
+                      "ReleaseDate":"",
+                      }
+          
+            rows.append(row)
+
+
+        dict = {'iTotalDisplayRecords':len(filtered),
+                'iTotalRecords':totalcount,
+                'aaData':rows,
+                }
+        s = json.dumps(dict)
+        cherrypy.response.headers['Content-type'] = 'application/json'
+        return s
+    getArtists_json.exposed=True
 
     def clearhistory(self, type=None):
         myDB = db.DBConnection()
