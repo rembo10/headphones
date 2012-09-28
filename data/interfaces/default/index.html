@@ -27,11 +27,10 @@
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
 	function getArtistArt() {
-        console.log("getting artist art")
-		$("table#artist_table tr td#albumart #artistImg").each(function(){	
-            console.log("Getting image")
-			var id = $(this).children('img').attr('id');
-			var image = $(this).children('img');
+        var nodes = document.getElementById("artist_table").getElementsByTagName("img");
+        $("#artist_table img").each(function(){	
+			var id = $(this).attr('id');
+			var image = $(this);
 			if ( !image.hasClass('done') ) {
 				image.addClass('done');
 				getThumb(image,id,'artist');
@@ -39,7 +38,6 @@
 		});
 	}
 	function initThisPage() {
-        getArtistArt();
 		$('#artist_table').dataTable({
 			"bDestroy": true,
 			"aoColumnDefs": [
@@ -71,12 +69,15 @@
                                     },
             "fnServerData": function ( sSource, aoData, fnCallback ) {
                 /* Add some extra data to the sender */
-                $.getJSON( sSource, aoData, function (json) { 
-                    fnCallback(json)
-                } );
-            }
-		});
-        getArtistArt();
+                $.getJSON( sSource, aoData, function (json) {    fnCallback(json)                }  )
+                },
+            "fnInitComplete": function(oSettings, json) 
+            {
+                        getArtistArt();
+            }});
+
+            
+
 		resetFilters("artist or album");
 	}
 	
