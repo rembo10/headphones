@@ -395,9 +395,7 @@ class WebInterface(object):
     logs.exposed = True
     
 
-    def getLog(self,iDisplayStart=0,iDisplayLength=100,iSortCol_0=0,iSortCol_1=0,iSortCol_2=0,
-        sSortDir_0="desc",sSortDir_1="desc",sSortDir_2="desc",
-        sSearch="",**kwargs):
+    def getLog(self,iDisplayStart=0,iDisplayLength=100,iSortCol_0=0,sSortDir_0="desc",sSearch="",**kwargs):
 
         iDisplayStart = int(iDisplayStart)
         iDisplayLength = int(iDisplayLength)
