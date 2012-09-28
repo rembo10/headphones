@@ -439,7 +439,7 @@ class WebInterface(object):
         return s
     getLog.exposed = True
 
-    def getArtists_json(self,iDisplayStart=0,iDisplayLength=100,sSearch="",iSortCol_0='0',sSortDir_0='asc'):
+    def getArtists_json(self,iDisplayStart=0,iDisplayLength=100,sSearch="",iSortCol_0='0',sSortDir_0='asc',**kwargs):
         iDisplayStart = int(iDisplayStart)
         iDisplayLength = int(iDisplayLength)
 
@@ -471,7 +471,14 @@ class WebInterface(object):
                       "LatestAlbum":"",                      
                       "ReleaseDate":"",
                       }
-          
+
+            if artist['ReleaseDate'] and artist['LatestAlbum']:
+                row['ReleaseDate'] = artist['ReleaseDate']
+                row['LatestAlbum'] = artist['LatestAlbum']
+            elif artist['LatestAlbum']:
+                row['ReleaseDate'] = ''
+                row['LatestAlbum'] = artist['LatestAlbum']
+              
             rows.append(row)
 
 
