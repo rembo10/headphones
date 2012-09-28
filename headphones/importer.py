@@ -21,7 +21,12 @@ from lib.beets.mediafile import MediaFile
 import headphones
 from headphones import logger, helpers, db, mb, albumart, lastfm
 
-various_artists_mbid = '89ad4ac3-39f7-470e-963a-56509c546377'
+#[anonymous],[data],[no artist],[traditional],[unknown],Various Artists
+blacklisted_special_artists = ['f731ccc4-e22a-43af-a747-64213329e088','33cf029c-63b0-41a0-9855-be2a3665fb3b',\
+                                '314e1c25-dde7-4e4d-b2f4-0a7b9f7c56dc','eec63d3c-3b81-4ad4-b1e4-7c147d4d2b61',\
+                                '9be7f096-97ec-4615-8957-8d40b5dcbc41','125ec42a-7229-4250-afc5-e057484327fe',\
+                                '89ad4ac3-39f7-470e-963a-56509c546377']
+
         
 def is_exists(artistid):
 
@@ -63,7 +68,7 @@ def artistlist_to_mbids(artistlist, forced=False):
         
         if not forced:
             bl_artist = myDB.action('SELECT * FROM blacklist WHERE ArtistID=?', [artistid]).fetchone()
-            if bl_artist or artistid == various_artists_mbid:
+            if bl_artist or artistid in blacklisted_special_artists:
                 logger.info("Artist ID for '%s' is either blacklisted or Various Artists. To add artist, you must do it manually (Artist ID: %s)" % (artist, artistid))
                 continue
         
@@ -99,8 +104,8 @@ def addArtisttoDB(artistid, extrasonly=False):
     from headphones import cache
     
     # Can't add various artists - throws an error from MB
-    if artistid == various_artists_mbid:
-        logger.warn('Cannot import Various Artists.')
+    if artistid in blacklisted_special_artists:
+        logger.warn('Cannot import blocked special purpose artist with id' + artistid)
         return
         
     # We'll use this to see if we should update the 'LastUpdated' time stamp
