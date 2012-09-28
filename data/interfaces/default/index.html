@@ -8,58 +8,13 @@
 		<thead>
 			<tr>
 				<th id="albumart"></th>
-				<th id="name">Artist Name</th>
-				<th id="status">Status</th>
-				<th id="album">Latest Album</th>
-				<th id="have">Have</th>
+				<th id="ArtistSortName">Artist Name</th>
+				<th id="Status">Status</th>
+				<th id="LatestAlbum">Latest Album</th>
+				<th id="HaveTracks">Have</th>
 			</tr>
 		</thead>
 		<tbody>
-		%for artist in artists:
-			<%
-				totaltracks = artist['TotalTracks']
-				havetracks = artist['HaveTracks']
-				if not havetracks:
-					havetracks = 0
-				try:
-					percent = (havetracks*100.0)/totaltracks
-					if percent > 100:
-						percent = 100
-				except (ZeroDivisionError, TypeError):
-					percent = 0
-					totaltracks = '?'
-				
-				if artist['ReleaseDate'] and artist['LatestAlbum']:
-					releasedate = artist['ReleaseDate']
-					albumdisplay = '<i>%s</i> (%s)' % (artist['LatestAlbum'], artist['ReleaseDate'])
-					if releasedate > helpers.today():
-						grade = 'A'
-					else:
-						grade = 'Z'
-				elif artist['LatestAlbum']:
-					releasedate = ''
-					grade = 'Z'
-					albumdisplay = '<i>%s</i>' % artist['LatestAlbum']
-				else:
-					releasedate = ''
-					grade = 'Z'
-					albumdisplay = '<i>None</i>'
-				
-				if artist['Status'] == 'Paused':
-					grade = 'X'
-
-				if artist['Status'] == 'Loading':
-					grade = 'L'
-				
-			%>
-			<tr class="grade${grade}">
-				<td id="albumart"><div id="artistImg"><img class="albumArt" alt="" id="${artist['ArtistID']}"/></div></td>
-				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
-				<td id="status">${artist['Status']}</td>
-				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
-				<td id="have"><span title="${percent}"></span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
-			</tr>
-		%endfor
 		</tbody>
 	</table>
 </%def>
@@ -72,7 +27,9 @@
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
 	function getArtistArt() {
+        console.log("getting artist art")
 		$("table#artist_table tr td#albumart #artistImg").each(function(){	
+            console.log("Getting image")
 			var id = $(this).children('img').attr('id');
 			var image = $(this).children('img');
 			if ( !image.hasClass('done') ) {
@@ -82,25 +39,44 @@
 		});
 	}
 	function initThisPage() {
-		getArtistArt();
+        getArtistArt();
 		$('#artist_table').dataTable({
 			"bDestroy": true,
 			"aoColumnDefs": [
-			      { 'bSortable': false, 'aTargets': [ 0 ] }
-			],
-			"aoColumns": [
-				null,
-				{ "sType": "title-string"},
-				null,
-				{ "sType": "title-string"},
-				{ "sType": "title-numeric"}
-			],
+			      { 
+                    "bSortable": false, 
+                    "aTargets": [ 0 ],
+                    "mData":"ArtistID",
+                    "mRender": function ( data, type, full ) {
+                        return '<div id="artistImg"><img class="albumArt" alt="" id="'+ data + '"/></div>';
+                    }
+                   },
+                   {"aTargets":[1],"mDataProp":"ArtistSortName"},
+                   {"aTargets":[2],"mDataProp":"Status"},
+                   {"aTargets":[3],"mDataProp":"LatestAlbum"},
+                   {"aTargets":[4],"mDataProp":"HaveTracks"},
+                   
+                 ],
+			
 			"oLanguage": {
 				"sSearch": ""},
 			"bStateSave": true,
 			"iDisplayLength": 50,
-			"sPaginationType": "full_numbers"				
+			"sPaginationType": "full_numbers",
+            "bProcessing": true,
+            "bServerSide": true,
+            "sAjaxSource": 'getArtists.json',
+            "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ){
+                                    return nRow;
+                                    },
+            "fnServerData": function ( sSource, aoData, fnCallback ) {
+                /* Add some extra data to the sender */
+                $.getJSON( sSource, aoData, function (json) { 
+                    fnCallback(json)
+                } );
+            }
 		});
+        getArtistArt();
 		resetFilters("artist or album");
 	}
 	
