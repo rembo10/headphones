@@ -56,7 +56,7 @@ def initialize(options={}):
         },
         '/favicon.ico':{
             'tools.staticfile.on': True,
-            'tools.staticfile.filename': "images/favicon.ico"
+            'tools.staticfile.filename': os.path.join(os.path.abspath(os.curdir),"images" + os.sep + "favicon.ico")
         },
         '/cache':{
             'tools.staticdir.on': True,
