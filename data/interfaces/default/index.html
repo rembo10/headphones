@@ -15,51 +15,6 @@
 			</tr>
 		</thead>
 		<tbody>
-		%for artist in artists:
-			<%
-				totaltracks = artist['TotalTracks']
-				havetracks = artist['HaveTracks']
-				if not havetracks:
-					havetracks = 0
-				try:
-					percent = (havetracks*100.0)/totaltracks
-					if percent > 100:
-						percent = 100
-				except (ZeroDivisionError, TypeError):
-					percent = 0
-					totaltracks = '?'
-				
-				if artist['ReleaseDate'] and artist['LatestAlbum']:
-					releasedate = artist['ReleaseDate']
-					albumdisplay = '<i>%s</i> (%s)' % (artist['LatestAlbum'], artist['ReleaseDate'])
-					if releasedate > helpers.today():
-						grade = 'A'
-					else:
-						grade = 'Z'
-				elif artist['LatestAlbum']:
-					releasedate = ''
-					grade = 'Z'
-					albumdisplay = '<i>%s</i>' % artist['LatestAlbum']
-				else:
-					releasedate = ''
-					grade = 'Z'
-					albumdisplay = '<i>None</i>'
-				
-				if artist['Status'] == 'Paused':
-					grade = 'X'
-
-				if artist['Status'] == 'Loading':
-					grade = 'L'
-				
-			%>
-			<tr class="grade${grade}">
-				<td id="albumart"><div id="artistImg"><img class="albumArt" alt="" id="${artist['ArtistID']}"/></div></td>
-				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
-				<td id="status">${artist['Status']}</td>
-				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
-				<td id="have"><span title="${percent}"></span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
-			</tr>
-		%endfor
 		</tbody>
 	</table>
 </%def>
@@ -72,9 +27,10 @@
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
 	function getArtistArt() {
-		$("table#artist_table tr td#albumart #artistImg").each(function(){	
-			var id = $(this).children('img').attr('id');
-			var image = $(this).children('img');
+        var nodes = document.getElementById("artist_table").getElementsByTagName("img");
+        $("#artist_table img").each(function(){	
+			var id = $(this).attr('id');
+			var image = $(this);
 			if ( !image.hasClass('done') ) {
 				image.addClass('done');
 				getThumb(image,id,'artist');
@@ -82,25 +38,115 @@
 		});
 	}
 	function initThisPage() {
-		getArtistArt();
 		$('#artist_table').dataTable({
 			"bDestroy": true,
 			"aoColumnDefs": [
-			      { 'bSortable': false, 'aTargets': [ 0 ] }
-			],
-			"aoColumns": [
-				null,
-				{ "sType": "title-string"},
-				null,
-				{ "sType": "title-string"},
-				{ "sType": "title-numeric"}
-			],
+			      { 
+                    "bSortable": false, 
+                    "aTargets": [ 0 ],
+                    "mData":"ArtistID",
+                    "mRender": function ( data, type, full ) {
+                        return '<div id="artistImg"><img class="albumArt" alt="" id="'+ data + '" src="/thumbs/artist/' + data + '"/></div>';
+                    }
+                   },
+                   {
+                   "aTargets":[1],
+                   "mDataProp":"ArtistSortName",
+                   "mRender":function (data,type,full) {
+                        
+                        return '<span title="' + full['ArtistID'] + '"></span><a href="artistPage?ArtistID=' + full['ArtistID'] + '">' + data + '</a>'
+                        }
+                   },
+                   {"aTargets":[2],"mDataProp":"Status"},
+                   {
+                   "aTargets":[3],
+                   "mDataProp":"LatestAlbum",
+                   "mRender":function(data,type,full){
+                        artist = full;
+                        if (artist['ReleaseDate']  && artist['LatestAlbum'])
+                        {
+                            releasedate = artist['ReleaseDate'];
+                            albumdisplay = '<i>' + artist['LatestAlbum'] + '</i> (' + artist['ReleaseDate'] + ')';
+                        }
+                        else if(artist['LatestAlbum'])
+                        {
+                            releasedate = '';
+                            albumdisplay = '<i>' + artist['LatestAlbum'] + '</i>';
+                        }
+                        else
+                        {
+                            releasedate = '';
+                            albumdisplay = '<i>None</i>';
+                        }
+                        if (artist['ReleaseInFuture'] === 'True')
+                        {
+                            grade = 'gradeA';
+                        }
+                        else
+                        {
+                            grade = 'gradeZ';
+                        }
+                        artist['Grade'] = grade;
+                        return '<span title="' + releasedate + '"></span><a href="albumPage?AlbumID=' + full['AlbumID'] + '">' + albumdisplay + '</a>'
+                   }
+                   
+                   
+                   },
+                   {
+                   "aTargets":[4],
+                   "mDataProp":"HaveTracks",
+                   "mRender":function(data,type,full){
+                        if(full['TotalTracks'] > 0)
+                        {
+                            percent = (full['HaveTracks']*100.0)/full['TotalTracks']
+                            if(percent > 100){
+                                percent = 100;
+                            }
+                        }
+                        else
+                        {
+                            full['TotalTracks'] = '?';
+                            percent = 0;
+                        }                      
+                        
+                        return '<span title="' + percent + '"></span><div class="progress-container"><div style="width:' + percent + '%"><div class="havetracks">' + full['HaveTracks'] + '/' + full['TotalTracks'] + '</div></div></div>';
+                   
+                   }},
+                   
+                 ],
+			
 			"oLanguage": {
-				"sSearch": ""},
+				"sSearch": "",
+                "sLengthMenu":"Show _MENU_ artists per page",
+					"sInfo":"Showing _START_ to _END_ of _TOTAL_ artists",
+					"sInfoEmpty":"Showing 0 to 0 of 0 artists",
+					"sInfoFiltered":"(filtered from _MAX_ total artists)"
+                    },
 			"bStateSave": true,
 			"iDisplayLength": 50,
-			"sPaginationType": "full_numbers"				
-		});
+			"sPaginationType": "full_numbers",
+            "bProcessing": true,
+            "bServerSide": true,
+            "sAjaxSource": 'getArtists.json',
+            "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ){
+                                    $('td', nRow).closest('tr').addClass(aData['Grade'])
+                                    nRow.children[0].id = 'albumart';
+                                    nRow.children[1].id = 'name';
+                                    nRow.children[2].id = 'status'
+                                    nRow.children[3].id = 'album'
+                                    nRow.children[4].id = 'have'
+                                    return nRow;
+                                    },
+            "fnServerData": function ( sSource, aoData, fnCallback ) {
+                /* Add some extra data to the sender */
+                $.getJSON( sSource, aoData, function (json) {    fnCallback(json)                }  )
+                },
+            "fnInitComplete": function(oSettings, json) 
+            {
+            }});
+
+            
+
 		resetFilters("artist or album");
 	}
 	

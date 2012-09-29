@@ -26,9 +26,10 @@ import threading
 import headphones
 
 from headphones import logger, searcher, db, importer, mb, lastfm, librarysync
-from headphones.helpers import checked, radio
+from headphones.helpers import checked, radio,today
 
 import lib.simplejson as simplejson
+import json
 
 
 
@@ -438,6 +439,78 @@ class WebInterface(object):
         return s
     getLog.exposed = True
 
+    def getArtists_json(self,iDisplayStart=0,iDisplayLength=100,sSearch="",iSortCol_0='0',sSortDir_0='asc',**kwargs):
+        iDisplayStart = int(iDisplayStart)
+        iDisplayLength = int(iDisplayLength)
+        filtered = []
+        totalcount = 0        
+        myDB = db.DBConnection()
+        
+        
+        sortcolumn = 'ArtistSortName'
+        sortbyhavepercent = False
+        if iSortCol_0 == '2':
+            sortcolumn = 'Status'
+        elif iSortCol_0 == '3':
+            sortcolumn = 'ReleaseDate'
+        elif iSortCol_0 == '4':
+            sortbyhavepercent = True
+
+        if sSearch == "":
+            query = 'SELECT * from artists order by %s COLLATE NOCASE %s' % (sortcolumn,sSortDir_0)    
+            filtered = myDB.select(query)
+            totalcount = len(filtered) 
+        else:
+            query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch +'%"' +  'ORDER BY %s COLLATE NOCASE %s' % (sortcolumn,sSortDir_0)
+            filtered = myDB.select(query)
+            totalcount = myDB.select('SELECT COUNT(*) from artists')[0][0]
+
+        if sortbyhavepercent:
+            filtered.sort(key=lambda x:float(x['HaveTracks'])/x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0,reverse=sSortDir_0 == "asc")
+
+        #can't figure out how to change the datatables default sorting order when its using an ajax datasource so ill 
+        #just reverse it here and the first click on the "Latest Album" header will sort by descending release date
+        if sortcolumn == 'ReleaseDate':
+            filtered.reverse()
+            
+
+        artists = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
+        rows = []
+        for artist in artists:
+            row = {"ArtistID":artist['ArtistID'],
+                      "ArtistSortName":artist["ArtistSortName"],
+                      "Status":artist["Status"],
+                      "TotalTracks":artist["TotalTracks"],
+                      "HaveTracks":artist["HaveTracks"],
+                      "LatestAlbum":"",                      
+                      "ReleaseDate":"",
+                      "ReleaseInFuture":"False",
+                      "AlbumID":"",
+                      }
+
+            if artist['ReleaseDate'] and artist['LatestAlbum']:
+                row['ReleaseDate'] = artist['ReleaseDate']
+                row['LatestAlbum'] = artist['LatestAlbum']
+                row['AlbumID'] = artist['AlbumID']
+                if artist['ReleaseDate'] > today():
+                    row['ReleaseInFuture'] = "True"
+            elif artist['LatestAlbum']:
+                row['ReleaseDate'] = ''
+                row['LatestAlbum'] = artist['LatestAlbum']
+                row['AlbumID'] = artist['AlbumID']
+              
+            rows.append(row)
+
+
+        dict = {'iTotalDisplayRecords':len(filtered),
+                'iTotalRecords':totalcount,
+                'aaData':rows,
+                }
+        s = json.dumps(dict)
+        cherrypy.response.headers['Content-type'] = 'application/json'
+        return s
+    getArtists_json.exposed=True
+
     def clearhistory(self, type=None):
         myDB = db.DBConnection()
         if type == 'all':
@@ -819,3 +892,37 @@ class WebInterface(object):
         return simplejson.dumps(image_dict)
         
     getImageLinks.exposed = True
+
+class Thumbs(object):
+    def index(self):
+        return "Here be thumbs"
+    index.exposed = True
+    def default(self,ArtistOrAlbum="",ID=None):
+        from headphones import cache
+        ArtistID = None
+        AlbumID = None
+        if ArtistOrAlbum == "artist":
+            ArtistID = ID
+        elif ArtistOrAlbum == "album":
+            AlbumID = None
+    
+        relpath =  cache.getThumb(ArtistID,AlbumID)
+
+        if not relpath:
+            if ArtistOrAlbum == "artist":
+                relpath = "data/interfaces/default/images/no-cover-artist.png"
+            elif ArtistOrAlbum == "album":
+                relpath = "data/interfaces/default/images/no-cover-art.png"
+            cherrypy.response.headers['Content-type'] = 'image/png'
+            cherrypy.response.headers['Cache-Control'] = 'no-cache'
+        else:
+            fileext = os.path.splitext(relpath)[1][1::]
+            cherrypy.response.headers['Content-type'] = 'image/' + fileext
+            cherrypy.response.headers['Cache-Control'] = 'max-age=31556926'
+
+        path = os.path.abspath(relpath)
+        f = open(path,'rb')
+        return f.read()
+    default.exposed = True
+    
+WebInterface.thumbs = Thumbs()
