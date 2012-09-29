@@ -340,8 +340,7 @@ td.details {
 	line-height: 22px;
 }
 
-.paging_full_numbers span.paginate_button,
- 	.paging_full_numbers span.paginate_active {
+.paginate_button,.paginate_active {
 	background: none repeat scroll 0 0 #F3F3F3;
 	   border-radius: 5px 5px 5px 5px;
 	   margin: 0 0 0 5px;
@@ -352,11 +351,11 @@ td.details {
 	*cursor: hand;
 }
 
-.paging_full_numbers span.paginate_button:hover {
+.paginate_button:hover {
 	background-color: #e2e2e2;
 }
 
-.paging_full_numbers span.paginate_active {
+.paginate_active {
 	background-color: #4183C4;
 	color: #FFF;
 }
