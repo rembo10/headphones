@@ -876,6 +876,10 @@ div#artistheader h2 a {
   min-width: 300px;
   text-align: left;
 }
+#artist_table th#albumart{
+    width:50px;
+}
+
 #artist_table th#status,
 #artist_table th#albumart,
 #artist_table th#lastupdated {
