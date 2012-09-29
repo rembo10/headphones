@@ -46,7 +46,7 @@
                     "aTargets": [ 0 ],
                     "mData":"ArtistID",
                     "mRender": function ( data, type, full ) {
-                        return '<div id="artistImg"><img class="albumArt" alt="" id="'+ data + '"/></div>';
+                        return '<div id="artistImg"><img class="albumArt" alt="" id="'+ data + '" src="/thumbs/artist/' + data + '"/></div>';
                     }
                    },
                    {"aTargets":[1],"mDataProp":"ArtistSortName"},
@@ -73,7 +73,6 @@
                 },
             "fnInitComplete": function(oSettings, json) 
             {
-                        getArtistArt();
             }});
 
             
