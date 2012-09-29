@@ -442,24 +442,33 @@ class WebInterface(object):
     def getArtists_json(self,iDisplayStart=0,iDisplayLength=100,sSearch="",iSortCol_0='0',sSortDir_0='asc',**kwargs):
         iDisplayStart = int(iDisplayStart)
         iDisplayLength = int(iDisplayLength)
-
         filtered = []
         totalcount = 0        
         myDB = db.DBConnection()
         
-        if sSearch == "":       
-            filtered = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
+        
+        sortcolumn = 'ArtistSortName'
+        sortbyhavepercent = False
+        if iSortCol_0 == '2':
+            sortcolumn = 'Status'
+        elif iSortCol_0 == '3':
+            sortcolumn = 'ReleaseDate'
+        elif iSortCol_0 == '4':
+            sortbyhavepercent = True
+
+        if sSearch == "":
+            query = 'SELECT * from artists order by %s COLLATE NOCASE %s' % (sortcolumn,sSortDir_0)    
+            filtered = myDB.select(query)
             totalcount = len(filtered) 
         else:
-            filtered = myDB.select('SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch +'%" order by ArtistSortName COLLATE NOCASE')
+            query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch +'%"' +  'ORDER BY %s COLLATE NOCASE %s' % (sortcolumn,sSortDir_0)
+            filtered = myDB.select(query)
             totalcount = myDB.select('SELECT COUNT(*) from artists')[0][0]
 
-        sortcolumn = 0
-        if iSortCol_0 == '1':
-            sortcolumn = 2
-        elif iSortCol_0 == '2':
-            sortcolumn = 1
-        filtered.sort(key=lambda x:x[sortcolumn],reverse=sSortDir_0 == "desc")
+        if sortbyhavepercent:
+            filtered.sort(key=lambda x:float(x['HaveTracks'])/x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0,reverse=sSortDir_0 == "asc")
+            
+
         artists = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
         rows = []
         for artist in artists:
@@ -467,7 +476,7 @@ class WebInterface(object):
                       "ArtistSortName":artist["ArtistSortName"],
                       "Status":artist["Status"],
                       "TotalTracks":artist["TotalTracks"],
-                      "HaveTracks":artist["HaveTracks"] if 'HaveTracks' in artist else 0,
+                      "HaveTracks":artist["HaveTracks"],
                       "LatestAlbum":"",                      
                       "ReleaseDate":"",
                       "ReleaseInFuture":"False",
