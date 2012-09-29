@@ -26,7 +26,7 @@ import threading
 import headphones
 
 from headphones import logger, searcher, db, importer, mb, lastfm, librarysync
-from headphones.helpers import checked, radio
+from headphones.helpers import checked, radio,today
 
 import lib.simplejson as simplejson
 import json
@@ -451,8 +451,8 @@ class WebInterface(object):
             filtered = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
             totalcount = len(filtered) 
         else:
-            filtered = myDB.select('SELECT * from artists order by ArtistSortName WHERE ArtistSortName LIKE %s OR LatestAlbum LIKE %s COLLATE NOCASE' % (sSearch,sSearch))
-            totalcount = myDB.select('SELECT COUNT(*) from artists')
+            filtered = myDB.select('SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch +'%" order by ArtistSortName COLLATE NOCASE')
+            totalcount = myDB.select('SELECT COUNT(*) from artists')[0][0]
 
         sortcolumn = 0
         if iSortCol_0 == '1':
@@ -470,14 +470,20 @@ class WebInterface(object):
                       "HaveTracks":artist["HaveTracks"] if 'HaveTracks' in artist else 0,
                       "LatestAlbum":"",                      
                       "ReleaseDate":"",
+                      "ReleaseInFuture":"False",
+                      "AlbumID":"",
                       }
 
             if artist['ReleaseDate'] and artist['LatestAlbum']:
                 row['ReleaseDate'] = artist['ReleaseDate']
                 row['LatestAlbum'] = artist['LatestAlbum']
+                row['AlbumID'] = artist['AlbumID']
+                if artist['ReleaseDate'] > today():
+                    row['ReleaseInFuture'] = "True"
             elif artist['LatestAlbum']:
                 row['ReleaseDate'] = ''
                 row['LatestAlbum'] = artist['LatestAlbum']
+                row['AlbumID'] = artist['AlbumID']
               
             rows.append(row)
 
