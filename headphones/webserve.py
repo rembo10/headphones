@@ -467,6 +467,11 @@ class WebInterface(object):
 
         if sortbyhavepercent:
             filtered.sort(key=lambda x:float(x['HaveTracks'])/x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0,reverse=sSortDir_0 == "asc")
+
+        #can't figure out how to change the datatables default sorting order when its using an ajax datasource so ill 
+        #just reverse it here and the first click on the "Latest Album" header will sort by descending release date
+        if sortcolumn == 'ReleaseDate':
+            filtered.reverse()
             
 
         artists = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
