@@ -12,16 +12,16 @@
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	width: 20px;
 	height: 30px;
 	margin-left: -125px;
 	margin-top: -15px;
 	padding: 14px 0 2px 0;
-	border: 1px solid #ddd;
+	border: 2px solid #C8C8C8;
 	text-align: center;
 	color: #999;
 	font-size: 14px;
-	background-color: white;
+	color: #323232;
+	background-color: #E1E1E1;
 }
 
 .dataTables_length {
