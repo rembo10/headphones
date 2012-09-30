@@ -29,7 +29,6 @@ from headphones import logger, searcher, db, importer, mb, lastfm, librarysync
 from headphones.helpers import checked, radio,today
 
 import lib.simplejson as simplejson
-import json
 
 
 
@@ -508,7 +507,7 @@ class WebInterface(object):
                 'iTotalRecords':totalcount,
                 'aaData':rows,
                 }
-        s = json.dumps(dict)
+        s = simplejson.dumps(dict)
         cherrypy.response.headers['Content-type'] = 'application/json'
         return s
     getArtists_json.exposed=True
