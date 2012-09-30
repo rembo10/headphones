@@ -894,10 +894,11 @@ class WebInterface(object):
         
     getImageLinks.exposed = True
 
-class Thumbs(object):
+class Artwork(object):
     def index(self):
-        return "Here be thumbs"
+        return "Artwork"
     index.exposed = True
+
     def default(self,ArtistOrAlbum="",ID=None):
         from headphones import cache
         ArtistID = None
@@ -905,15 +906,12 @@ class Thumbs(object):
         if ArtistOrAlbum == "artist":
             ArtistID = ID
         elif ArtistOrAlbum == "album":
-            AlbumID = None
+            AlbumID = ID
     
-        relpath =  cache.getThumb(ArtistID,AlbumID)
+        relpath =  cache.getArtwork(ArtistID,AlbumID)
 
         if not relpath:
-            if ArtistOrAlbum == "artist":
-                relpath = "data/interfaces/default/images/no-cover-artist.png"
-            elif ArtistOrAlbum == "album":
-                relpath = "data/interfaces/default/images/no-cover-art.png"
+            relpath = "data/interfaces/default/images/no-cover-art.png"
             cherrypy.response.headers['Content-type'] = 'image/png'
             cherrypy.response.headers['Cache-Control'] = 'no-cache'
         else:
@@ -925,5 +923,37 @@ class Thumbs(object):
         f = open(path,'rb')
         return f.read()
     default.exposed = True
+
+    class Thumbs(object):
+        def index(self):
+            return "Here be thumbs"
+        index.exposed = True
+        def default(self,ArtistOrAlbum="",ID=None):
+            from headphones import cache
+            ArtistID = None
+            AlbumID = None
+            if ArtistOrAlbum == "artist":
+                ArtistID = ID
+            elif ArtistOrAlbum == "album":
+                AlbumID = ID
     
-WebInterface.thumbs = Thumbs()
+            relpath =  cache.getThumb(ArtistID,AlbumID)
+
+            if not relpath:
+                relpath = "data/interfaces/default/images/no-cover-artist.png"
+                cherrypy.response.headers['Content-type'] = 'image/png'
+                cherrypy.response.headers['Cache-Control'] = 'no-cache'
+            else:
+                fileext = os.path.splitext(relpath)[1][1::]
+                cherrypy.response.headers['Content-type'] = 'image/' + fileext
+                cherrypy.response.headers['Cache-Control'] = 'max-age=31556926'
+
+            path = os.path.abspath(relpath)
+            f = open(path,'rb')
+            return f.read()
+        default.exposed = True
+    
+    thumbs = Thumbs()
+    
+    
+WebInterface.artwork = Artwork()
