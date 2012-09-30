@@ -488,6 +488,8 @@ class WebInterface(object):
                       "AlbumID":"",
                       }
 
+            if not row['HaveTracks']:
+                row['HaveTracks'] = 0
             if artist['ReleaseDate'] and artist['LatestAlbum']:
                 row['ReleaseDate'] = artist['ReleaseDate']
                 row['LatestAlbum'] = artist['LatestAlbum']
