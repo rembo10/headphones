@@ -300,6 +300,7 @@ def initialize():
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', '')
+        CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', '')
         
         CHECK_GITHUB = bool(check_setting_int(CFG, 'General', 'check_github', 1))
         CHECK_GITHUB_ON_STARTUP = bool(check_setting_int(CFG, 'General', 'check_github_on_startup', 1))
@@ -477,8 +478,9 @@ def initialize():
         # Start the logger, silence console logging if we need to
         logger.headphones_log.initLogger(verbose=VERBOSE)
         
-        # Put the cache dir in the data dir for now
-        CACHE_DIR = os.path.join(DATA_DIR, 'cache')
+        if not CACHE_DIR:
+            # Put the cache dir in the data dir for now
+            CACHE_DIR = os.path.join(DATA_DIR, 'cache')
         if not os.path.exists(CACHE_DIR):
             try:
                 os.makedirs(CACHE_DIR)
@@ -584,6 +586,7 @@ def config_write():
     new_config['General']['api_enabled'] = int(API_ENABLED)
     new_config['General']['api_key'] = API_KEY
     new_config['General']['log_dir'] = LOG_DIR
+    new_config['General']['cache_dir'] = CACHE_DIR
     new_config['General']['git_path'] = GIT_PATH
     
     new_config['General']['check_github'] = int(CHECK_GITHUB)
