@@ -92,7 +92,7 @@ def findArtist(name, limit=1):
         q, sleepytime = startmb(forcemb=True)
 
         try:
-            artistResults = musicbrainzngs.search_artists(query=name,limit=limit)['artist-list']
+            artistResults = musicbrainzngs.search_artists(query='artist:'+name,limit=limit)['artist-list']
         except WebServiceError, e:
             logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
             time.sleep(5)
