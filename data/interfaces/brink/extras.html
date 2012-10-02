@@ -2,12 +2,24 @@
 <%def name="body()">
 	<div class="table_wrapper">
 		<h1>Suggestions</h1>
-		<div class="cloudtag">
-			<ul id="cloud">
 			%for artist in cloudlist:
-				<li><a href="addArtist?artistid=${artist['ArtistID']}" class="tag${artist['Count']}">${artist['ArtistName']}</a></li>
+				<div class="image-container">
+					<div class="image-box">
+						<div class="image-count">${artist['Count']}</div>
+						<img />
+						<div class="image-actions">
+							%if artist['Status'] == 'Loading':
+								<a href="addArtist?artistid=${artist['ArtistID']}"><span class="wsr Like"></span></a>
+							%else:
+								${havetracks}/${totaltracks}
+							%endif	
+						</div>
+					</div>
+					<div class="image-info">
+						<b title="${artist['ArtistID']}"><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></b>
+					</div>
+				</div>
 			%endfor
-			</ul>
-		</div>
+			
 	</div>
 </%def>
