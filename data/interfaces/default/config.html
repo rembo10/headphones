@@ -302,6 +302,19 @@ m<%inherit file="base.html"/>
                                 <input type="text" name="waffles_passkey" value="${config['waffles_passkey']}" size="36">
                             </div>
                         </div>
+                        <div class="row checkbox">
+                            <input id="userutracker" type="checkbox" name="rutracker" onclick="initConfigCheckbox($(this));" value="1" ${config['use_rutracker']} /><label>rutracker.org</label>
+                        </div>
+                        <div class="config">
+                            <div class="row">
+                                <label>rutracker User Name: </label>
+                                <input type="text" name="rutracker_user" value="${config['rutracker_user']}" size="36">
+                            </div>
+                            <div class="row">
+                                <label>rutracker Password: </label>
+                                <input type="password" name="rutracker_password" value="${config['rutracker_password']}" size="36">
+                            </div>
+                        </div>
                     </fieldset>
                     
                 </td>
@@ -926,6 +939,7 @@ m<%inherit file="base.html"/>
 		initConfigCheckbox("#usenewzbin");
 		initConfigCheckbox("#usenzbsorg");
 		initConfigCheckbox("#usewaffles");
+		initConfigCheckbox("#userutracker");
 		initConfigCheckbox("#useblackhole");
 		initConfigCheckbox("#useapi");
 	}

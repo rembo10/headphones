@@ -463,6 +463,9 @@ class WebInterface(object):
                     "use_waffles" : checked(headphones.WAFFLES),
                     "waffles_uid" : headphones.WAFFLES_UID,
                     "waffles_passkey": headphones.WAFFLES_PASSKEY,
+                    "use_rutracker" : checked(headphones.RUTRACKER),
+                    "rutracker_user" : headphones.RUTRACKER_USER,
+                    "rutracker_password": headphones.RUTRACKER_PASSWORD,
                     "pref_qual_0" : radio(headphones.PREFERRED_QUALITY, 0),
                     "pref_qual_1" : radio(headphones.PREFERRED_QUALITY, 1),
                     "pref_qual_3" : radio(headphones.PREFERRED_QUALITY, 3),
@@ -545,7 +548,7 @@ class WebInterface(object):
         sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None, usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, 
         newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, 
         newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None, 
-        numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, rename_files=0, correct_metadata=0, 
+        numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, 
         cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, 
         include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0, remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, 
         interface=None, log_dir=None, music_encoder=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, 
@@ -595,6 +598,9 @@ class WebInterface(object):
         headphones.WAFFLES = waffles
         headphones.WAFFLES_UID = waffles_uid
         headphones.WAFFLES_PASSKEY = waffles_passkey
+        headphones.RUTRACKER = rutracker
+        headphones.RUTRACKER_USER = rutracker_user
+        headphones.RUTRACKER_PASSWORD = rutracker_password
         headphones.PREFERRED_QUALITY = int(preferred_quality)
         headphones.PREFERRED_BITRATE = preferred_bitrate
         headphones.PREFERRED_BITRATE_HIGH_BUFFER = preferred_bitrate_high_buffer
