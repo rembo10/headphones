@@ -15,6 +15,10 @@
 
 import urllib, urllib2, urlparse
 import lib.feedparser as feedparser
+from lib.pygazelle import api as gazelleapi
+from lib.pygazelle import encoding as gazelleencoding
+from lib.pygazelle import format as gazelleformat
+from lib.pygazelle import media as gazellemedia
 from xml.dom import minidom
 from xml.parsers.expat import ExpatError
 from StringIO import StringIO
@@ -100,7 +104,8 @@ def searchforalbum(albumid=None, new=False, lossless=False):
                 else:
                     foundNZB = searchNZB(result['AlbumID'], new)
 
-            if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER) and foundNZB == "none":
+            if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
+
                 if result['Status'] == "Wanted Lossless":
                     searchTorrent(result['AlbumID'], new, losslessOnly=True)
                 else:
@@ -112,7 +117,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
         if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN) and (headphones.SAB_HOST or headphones.BLACKHOLE):
             foundNZB = searchNZB(albumid, new, lossless)
 
-        if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER) and foundNZB == "none":
+        if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
             searchTorrent(albumid, new, lossless)
 
 def searchNZB(albumid=None, new=False, losslessOnly=False):
@@ -652,10 +657,12 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         except TypeError:
             year = ''
         
-        dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':'', '*':''}
+        dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':' ', '*':''}
 
-        cleanalbum = helpers.latinToAscii(helpers.replace_all(albums[1], dic))
-        cleanartist = helpers.latinToAscii(helpers.replace_all(albums[0], dic))
+        semi_cleanalbum = helpers.replace_all(albums[1], dic)
+        cleanalbum = helpers.latinToAscii(semi_cleanalbum)
+        semi_cleanartist = helpers.replace_all(albums[0], dic)
+        cleanartist = helpers.latinToAscii(semi_cleanartist)
 
         # FLAC usually doesn't have a year for some reason so I'll leave it out
         # Various Artist albums might be listed as VA, so I'll leave that out too
@@ -666,7 +673,9 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             term = cleanalbum + ' ' + year
         else:
             term = cleanartist + ' ' + cleanalbum
-            
+
+        semi_clean_artist_term = re.sub('[\.\-\/]', ' ', semi_cleanartist).encode('utf-8')
+        semi_clean_album_term = re.sub('[\.\-\/]', ' ', semi_cleanalbum).encode('utf-8')
         # Replace bad characters in the term and unicode it
         term = re.sub('[\.\-\/]', ' ', term).encode('utf-8')
         artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8')
@@ -675,6 +684,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         logger.info("Searching torrents for %s since it was marked as wanted" % term)
         
         resultlist = []
+        pre_sorted_results = False
         minimumseeders = int(headphones.NUMBEROFSEEDERS) - 1
 
         if headphones.KAT:
@@ -815,7 +825,6 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                         except Exception, e:
                             logger.error(u"An error occurred while trying to parse the response from Waffles.fm: %s" % e)
-
         
         # rutracker.org
         
@@ -863,7 +872,69 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                 else:
                     logger.info(u"No valid results found from %s" % (provider))
-                
+
+        if headphones.WHATCD:
+            provider = "What.cd"
+            providerurl = "http://what.cd/"
+
+            bitrate = None
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+                format = gazelleformat.FLAC
+                maxsize = 10000000000
+            elif headphones.PREFERRED_QUALITY:
+                format=None
+                bitrate = headphones.PREFERRED_BITRATE
+                bitrate_string = bitrate
+                for encoding_string in gazelleencoding.ALL_ENCODINGS:
+                    if re.search(bitrate, encoding_string, flags=re.I):
+                        bitrate_string = encoding_string
+                if bitrate_string not in gazelleencoding.ALL_ENCODINGS:
+                    raise Exception("Preferred bitrate %s not recognized by %s" % (bitrate_string, provider))
+                maxsize = 10000000000
+            else:
+                format = gazelleformat.MP3
+                maxsize = 300000000
+
+            try:
+                gazelle = gazelleapi.GazelleAPI(headphones.WHATCD_USERNAME, headphones.WHATCD_PASSWORD)
+            except Exception, e:
+                gazelle = None
+                logger.warn(u"What.cd credentials incorrect or site is down. Error: %s %s" % (e.__class__.__name__, str(e)))
+
+            if gazelle:
+                logger.info(u"Searching %s..." % provider)
+                search_results = gazelle.search_torrents(artistname=semi_clean_artist_term, groupname=semi_clean_album_term,
+                                                            format=format, encoding=bitrate_string)
+
+                # filter on format, size, and num seeders
+                logger.info(u"Filtering torrents by format, maximum size, and minimum seeders...")
+                all_torrents = search_results['results']
+                match_torrents = [ torrent for torrent in all_torrents if torrent.size <= maxsize ]
+                match_torrents = [ torrent for torrent in match_torrents if torrent.seeders >= minimumseeders ]
+
+                logger.info(u"Remaining torrents: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
+
+                # sort by times d/l'd
+                if not len(match_torrents):
+                    logger.info(u"No results found from %s for %s after filtering" % (provider, term))
+                elif len(match_torrents) > 1:
+                    logger.info(u"Found %d matching releases from %s for %s - %s after filtering" %
+                                (len(match_torrents), provider, artistterm, albumterm))
+                    logger.info("Sorting torrents by times snatched and preferred bitrate %s..." % bitrate_string)
+                    match_torrents.sort(key=lambda x: int(x.snatched), reverse=True)
+    #                if bitrate:
+    #                    match_torrents.sort(key=lambda x: re.match("mp3", x.getTorrentDetails(), flags=re.I), reverse=True)
+    #                    match_torrents.sort(key=lambda x: str(bitrate) in x.getTorrentFolderName(), reverse=True)
+                    logger.info(u"New order: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
+
+                pre_sorted_results = True
+                for torrent in match_torrents:
+                    if not torrent.file_path:
+                        torrent.group.update_group_data() # will load the file_path for the individual torrents
+                    resultlist.append((torrent.file_path,
+                                       torrent.size,
+                                       gazelle.generate_torrent_link(torrent.id),
+                                       provider))
 
         if headphones.ISOHUNT:
             provider = "isoHunt"    
@@ -1018,7 +1089,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         
         if len(resultlist):    
                        
-            if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
+            if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE and not pre_sorted_results:
 
                 logger.debug('Target bitrate: %s kbps' % headphones.PREFERRED_BITRATE)
 
@@ -1044,6 +1115,10 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
                     
                     torrentlist = sorted(resultlist, key=lambda title: title[1], reverse=True)
+
+            elif pre_sorted_results:
+
+                torrentlist = resultlist
             
             else:
             
@@ -1070,7 +1145,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
             logger.info(u"Pre-processing result")
             
-            (data, bestqual) = preprocesstorrent(torrentlist)
+            (data, bestqual) = preprocesstorrent(torrentlist, pre_sorted_results)
             
             if data and bestqual:
                 logger.info(u'Found best result from %s: <a href="%s">%s</a> - %s' % (bestqual[3], bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
@@ -1113,7 +1188,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
                 myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", torrent_folder_name])
 
-def preprocesstorrent(resultlist):
+def preprocesstorrent(resultlist, pre_sorted_list=False):
     selresult = ""
     for result in resultlist:
         if selresult == "":
@@ -1126,6 +1201,15 @@ def preprocesstorrent(resultlist):
     if selresult[3] == 'rutracker.org':
         return True, selresult
                    
+    if pre_sorted_list:
+        selresult = resultlist[0]
+    else:
+        for result in resultlist:
+            if selresult == "":
+                selresult = result
+            elif int(selresult[1]) < int(result[1]): # if size is lower than new result replace previous selected result (bigger size = better quality?)
+                selresult = result
+
     try:
         request = urllib2.Request(selresult[2])
         request.add_header('Accept-encoding', 'gzip')

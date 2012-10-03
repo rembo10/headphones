@@ -1,4 +1,4 @@
-m<%inherit file="base.html"/>
+<%inherit file="base.html"/>
 <%!
 	import headphones
 	import string
@@ -313,6 +313,19 @@ m<%inherit file="base.html"/>
                             <div class="row">
                                 <label>rutracker Password: </label>
                                 <input type="password" name="rutracker_password" value="${config['rutracker_password']}" size="36">
+			    </div>
+			</div>
+                        <div class="row checkbox">    
+			    <input id="usewhatcd" type="checkbox" name="whatcd" onclick="initConfigCheckbox($(this));" value="1" ${config['use_whatcd']} /><label>What.cd</label>
+                        </div>
+                        <div class="config">
+                            <div class="row">
+                                <label>What.cd Username: </label>
+                                <input type="text" name="whatcd_username" value="${config['whatcd_username']}" size="36">
+                            </div>
+                            <div class="row">
+                                <label>What.cd Password: </label>
+                                <input type="password" name="whatcd_password" value="${config['whatcd_password']}" size="36">
                             </div>
                         </div>
                     </fieldset>
@@ -948,6 +961,7 @@ m<%inherit file="base.html"/>
 		initConfigCheckbox("#usenzbsorg");
 		initConfigCheckbox("#usewaffles");
 		initConfigCheckbox("#userutracker");
+		initConfigCheckbox("#usewhatcd");
 		initConfigCheckbox("#useblackhole");
 		initConfigCheckbox("#useapi");
 	}
