@@ -826,8 +826,12 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             elif headphones.PREFERRED_QUALITY:
                 format=None
                 bitrate = headphones.PREFERRED_BITRATE
-                if bitrate not in gazelleencoding.ALL_ENCODINGS:
-                    raise Exception("Preferred bitrate %s not recognized by %s" % (bitrate, provider))
+                bitrate_string = bitrate
+                for encoding_string in gazelleencoding.ALL_ENCODINGS:
+                    if re.search(bitrate, encoding_string, flags=re.I):
+                        bitrate_string = encoding_string
+                if bitrate_string not in gazelleencoding.ALL_ENCODINGS:
+                    raise Exception("Preferred bitrate %s not recognized by %s" % (bitrate_string, provider))
                 maxsize = 10000000000
             else:
                 format = gazelleformat.MP3
@@ -842,7 +846,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             if gazelle:
                 logger.info(u"Searching %s..." % provider)
                 search_results = gazelle.search_torrents(artistname=semi_clean_artist_term, groupname=semi_clean_album_term,
-                                                            format=format, encoding=bitrate)
+                                                            format=format, encoding=bitrate_string)
 
                 # filter on format, size, and num seeders
                 logger.info(u"Filtering torrents by format, maximum size, and minimum seeders...")
@@ -858,7 +862,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 elif len(match_torrents) > 1:
                     logger.info(u"Found %d matching releases from %s for %s - %s after filtering" %
                                 (len(match_torrents), provider, artistterm, albumterm))
-                    logger.info("Sorting torrents by times snatched and preferred bitrate %s..." % bitrate)
+                    logger.info("Sorting torrents by times snatched and preferred bitrate %s..." % bitrate_string)
                     match_torrents.sort(key=lambda x: int(x.snatched), reverse=True)
     #                if bitrate:
     #                    match_torrents.sort(key=lambda x: re.match("mp3", x.getTorrentDetails(), flags=re.I), reverse=True)
