@@ -151,17 +151,6 @@
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-	
-	function getAlbumArt() {
-		var id = "${album['AlbumID']}";
-		var name = "${album['AlbumTitle']}";
-		var image = $("div#albumImg img");
-		if ( !image.hasClass('done') ) {
-			image.addClass('done');
-			getArtwork(image,id,name,'album');
-		}
-	}
-	
 	function getAlbumInfo() {
 		var id = "${album['AlbumID']}";
 		var elem = $("#albumInfo");
@@ -192,7 +181,6 @@
 	
 	$(document).ready(function()	{
 		getAlbumInfo();
-		//getAlbumArt();
 		initThisPage();
 	});
 

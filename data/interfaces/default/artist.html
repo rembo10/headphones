@@ -161,28 +161,6 @@
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	
 	<script>
-	
-	function getArtistArt() {
-		var id = "${artist['ArtistID']}";
-		var name = "${artist['ArtistName']}";
-		var image = $("div#artistImg img#artistImage");
-		if ( !image.hasClass('done') ) {
-			image.addClass('done');
-			getArtwork(image,id,name,'artist');
-		}
-	}
-	
-	function getAlbumArt() {
-		$("table#album_table tr td#albumart").each(function(){	
-			var id = $(this).children('img').attr('id');
-			var image = $(this).children('img');
-			if ( !image.hasClass('done') ) {
-				image.addClass('done');
-				getThumb(image,id,'album');
-			}
-		});
-	}
-	
 	function getArtistBio() {
 		var id = "${artist['ArtistID']}";
 		var elem = $("#artistBio");
