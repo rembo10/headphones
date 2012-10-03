@@ -252,7 +252,7 @@ class Rutracker():
                 if trackcount == hptrackcount:
                     valid = True
                 elif trackcount > hptrackcount:
-                    if 'deluxe' in title or 'edition' in title or 'japanese' in title:
+                    if 'deluxe' in title or 'edition' in title or 'japanese' or 'exclusive' in title:
                         valid = True
                         
                 # return 1st valid torrent if not checking by bitrate, else add to list and return at end
