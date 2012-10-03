@@ -26,7 +26,7 @@ import threading
 import headphones
 
 from headphones import logger, searcher, db, importer, mb, lastfm, librarysync
-from headphones.helpers import checked, radio
+from headphones.helpers import checked, radio,today
 
 import lib.simplejson as simplejson
 
@@ -190,6 +190,20 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("home")
     deleteArtist.exposed = True
     
+
+    def deleteEmptyArtists(self):
+        logger.info(u"Deleting all empty artists")
+        myDB = db.DBConnection()
+        emptyArtistIDs = [row['ArtistID'] for row in myDB.select("SELECT ArtistID FROM artists WHERE HaveTracks == 0 OR LatestAlbum IS NULL")]
+        for ArtistID in emptyArtistIDs:
+            logger.info(u"Deleting all traces of artist: " + ArtistID)
+            myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
+            myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
+            myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+            myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
+    deleteEmptyArtists.exposed = True     
+   
+        
     def refreshArtist(self, ArtistID):
         threading.Thread(target=importer.addArtisttoDB, args=[ArtistID]).start()  
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
@@ -394,6 +408,110 @@ class WebInterface(object):
         return serve_template(templatename="logs.html", title="Log", lineList=headphones.LOG_LIST)
     logs.exposed = True
     
+
+    def getLog(self,iDisplayStart=0,iDisplayLength=100,iSortCol_0=0,sSortDir_0="desc",sSearch="",**kwargs):
+
+        iDisplayStart = int(iDisplayStart)
+        iDisplayLength = int(iDisplayLength)
+
+        filtered = []
+        if sSearch == "":
+            filtered = headphones.LOG_LIST[::]
+        else:
+            filtered = [row for row in headphones.LOG_LIST for column in row if sSearch in column]
+
+        sortcolumn = 0
+        if iSortCol_0 == '1':
+            sortcolumn = 2
+        elif iSortCol_0 == '2':
+            sortcolumn = 1
+        filtered.sort(key=lambda x:x[sortcolumn],reverse=sSortDir_0 == "desc")        
+
+        rows = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
+        rows = [[row[0],row[2],row[1]] for row in rows]
+
+        dict = {'iTotalDisplayRecords':len(filtered),
+                'iTotalRecords':len(headphones.LOG_LIST),
+                'aaData':rows,
+                }
+        s = simplejson.dumps(dict)
+        return s
+    getLog.exposed = True
+
+    def getArtists_json(self,iDisplayStart=0,iDisplayLength=100,sSearch="",iSortCol_0='0',sSortDir_0='asc',**kwargs):
+        iDisplayStart = int(iDisplayStart)
+        iDisplayLength = int(iDisplayLength)
+        filtered = []
+        totalcount = 0        
+        myDB = db.DBConnection()
+        
+        
+        sortcolumn = 'ArtistSortName'
+        sortbyhavepercent = False
+        if iSortCol_0 == '2':
+            sortcolumn = 'Status'
+        elif iSortCol_0 == '3':
+            sortcolumn = 'ReleaseDate'
+        elif iSortCol_0 == '4':
+            sortbyhavepercent = True
+
+        if sSearch == "":
+            query = 'SELECT * from artists order by %s COLLATE NOCASE %s' % (sortcolumn,sSortDir_0)    
+            filtered = myDB.select(query)
+            totalcount = len(filtered) 
+        else:
+            query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch +'%"' +  'ORDER BY %s COLLATE NOCASE %s' % (sortcolumn,sSortDir_0)
+            filtered = myDB.select(query)
+            totalcount = myDB.select('SELECT COUNT(*) from artists')[0][0]
+
+        if sortbyhavepercent:
+            filtered.sort(key=lambda x:(float(x['HaveTracks'])/x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0,x['HaveTracks'] if x['HaveTracks'] else 0.0),reverse=sSortDir_0 == "asc")
+
+        #can't figure out how to change the datatables default sorting order when its using an ajax datasource so ill 
+        #just reverse it here and the first click on the "Latest Album" header will sort by descending release date
+        if sortcolumn == 'ReleaseDate':
+            filtered.reverse()
+            
+
+        artists = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
+        rows = []
+        for artist in artists:
+            row = {"ArtistID":artist['ArtistID'],
+                      "ArtistSortName":artist["ArtistSortName"],
+                      "Status":artist["Status"],
+                      "TotalTracks":artist["TotalTracks"],
+                      "HaveTracks":artist["HaveTracks"],
+                      "LatestAlbum":"",                      
+                      "ReleaseDate":"",
+                      "ReleaseInFuture":"False",
+                      "AlbumID":"",
+                      }
+
+            if not row['HaveTracks']:
+                row['HaveTracks'] = 0
+            if artist['ReleaseDate'] and artist['LatestAlbum']:
+                row['ReleaseDate'] = artist['ReleaseDate']
+                row['LatestAlbum'] = artist['LatestAlbum']
+                row['AlbumID'] = artist['AlbumID']
+                if artist['ReleaseDate'] > today():
+                    row['ReleaseInFuture'] = "True"
+            elif artist['LatestAlbum']:
+                row['ReleaseDate'] = ''
+                row['LatestAlbum'] = artist['LatestAlbum']
+                row['AlbumID'] = artist['AlbumID']
+              
+            rows.append(row)
+
+
+        dict = {'iTotalDisplayRecords':len(filtered),
+                'iTotalRecords':totalcount,
+                'aaData':rows,
+                }
+        s = simplejson.dumps(dict)
+        cherrypy.response.headers['Content-type'] = 'application/json'
+        return s
+    getArtists_json.exposed=True
+
     def clearhistory(self, type=None):
         myDB = db.DBConnection()
         if type == 'all':
@@ -523,7 +641,8 @@ class WebInterface(object):
                     "customport": headphones.CUSTOMPORT,
                     "customsleep": headphones.CUSTOMSLEEP,
                     "hpuser": headphones.HPUSER,
-                    "hppass": headphones.HPPASS
+                    "hppass": headphones.HPPASS,
+                    "cache_sizemb":headphones.CACHE_SIZEMB,
                 }
             
         # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8
@@ -556,7 +675,7 @@ class WebInterface(object):
         encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0, delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, 
         prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0, nma_enabled=False, 
         nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None, 
-        preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, **kwargs):
+        preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None,cache_sizemb=32, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -656,6 +775,7 @@ class WebInterface(object):
         headphones.CUSTOMSLEEP = customsleep
         headphones.HPUSER = hpuser
         headphones.HPPASS = hppass
+        headphones.CACHE_SIZEMB = cache_sizemb
 
         # Handle the variable config options. Note - keys with False values aren't getting passed
         
@@ -687,6 +807,9 @@ class WebInterface(object):
         
         # Write the config
         headphones.config_write()
+
+        #reconfigure musicbrainz database connection with the new values
+        mb.startmb()
 
         raise cherrypy.HTTPRedirect("config")
         
@@ -778,3 +901,67 @@ class WebInterface(object):
         return simplejson.dumps(image_dict)
         
     getImageLinks.exposed = True
+
+class Artwork(object):
+    def index(self):
+        return "Artwork"
+    index.exposed = True
+
+    def default(self,ArtistOrAlbum="",ID=None):
+        from headphones import cache
+        ArtistID = None
+        AlbumID = None
+        if ArtistOrAlbum == "artist":
+            ArtistID = ID
+        elif ArtistOrAlbum == "album":
+            AlbumID = ID
+    
+        relpath =  cache.getArtwork(ArtistID,AlbumID)
+
+        if not relpath:
+            relpath = "data/interfaces/default/images/no-cover-art.png"
+            cherrypy.response.headers['Content-type'] = 'image/png'
+            cherrypy.response.headers['Cache-Control'] = 'no-cache'
+        else:
+            fileext = os.path.splitext(relpath)[1][1::]
+            cherrypy.response.headers['Content-type'] = 'image/' + fileext
+            cherrypy.response.headers['Cache-Control'] = 'max-age=31556926'
+
+        path = os.path.abspath(relpath)
+        f = open(path,'rb')
+        return f.read()
+    default.exposed = True
+
+    class Thumbs(object):
+        def index(self):
+            return "Here be thumbs"
+        index.exposed = True
+        def default(self,ArtistOrAlbum="",ID=None):
+            from headphones import cache
+            ArtistID = None
+            AlbumID = None
+            if ArtistOrAlbum == "artist":
+                ArtistID = ID
+            elif ArtistOrAlbum == "album":
+                AlbumID = ID
+    
+            relpath =  cache.getThumb(ArtistID,AlbumID)
+
+            if not relpath:
+                relpath = "data/interfaces/default/images/no-cover-artist.png"
+                cherrypy.response.headers['Content-type'] = 'image/png'
+                cherrypy.response.headers['Cache-Control'] = 'no-cache'
+            else:
+                fileext = os.path.splitext(relpath)[1][1::]
+                cherrypy.response.headers['Content-type'] = 'image/' + fileext
+                cherrypy.response.headers['Cache-Control'] = 'max-age=31556926'
+
+            path = os.path.abspath(relpath)
+            f = open(path,'rb')
+            return f.read()
+        default.exposed = True
+    
+    thumbs = Thumbs()
+    
+    
+WebInterface.artwork = Artwork()
