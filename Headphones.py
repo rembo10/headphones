@@ -109,6 +109,9 @@ def main():
         
     if headphones.DAEMON:
         headphones.daemonize()
+    
+    #configure the connection to the musicbrainz database
+    headphones.mb.startmb()
 
     # Force the http port if neccessary
     if args.port:

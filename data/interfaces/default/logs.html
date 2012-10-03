@@ -16,21 +16,6 @@ lossless<%inherit file="base.html"/>
 			</tr>
 		</thead>
 		<tbody>
-		%for line in lineList:
-			<%
-				timestamp, message, level, threadname = line
-				
-				if level == 'WARNING' or level == 'ERROR':
-					grade = 'X'
-				else:
-					grade = 'Z'
-			%>
-				<tr class="grade${grade}">
-					<td id="timestamp">${timestamp}</td>
-					<td id="level">${level}</td>
-					<td id="message">${message}</td>
-				</tr>
-		%endfor
 		</tbody>
 	</table>
 </%def>
@@ -42,22 +27,40 @@ lossless<%inherit file="base.html"/>
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-	$(document).ready(function()
-	{
-		$('#log_table').dataTable(
-			{
-				"oLanguage": {
+$(document).ready(function() {
+	$('#log_table').dataTable( {
+		"bProcessing": true,
+        "bServerSide": true,
+		"sAjaxSource": 'getLog',
+        "sPaginationType": "full_numbers",
+        "bStateSave": true,
+        "oLanguage": {
+                    "sSearch":"",
 					"sLengthMenu":"Show _MENU_ lines per page",
 					"sEmptyTable": "No log information available",
 					"sInfo":"Showing _START_ to _END_ of _TOTAL_ lines",
 					"sInfoEmpty":"Showing 0 to 0 of 0 lines",
 					"sInfoFiltered":"(filtered from _MAX_ total lines)"},
-				"bStateSave": true,
-				"iDisplayLength": 100,
-				"sPaginationType": "full_numbers",
-				"aaSorting": []
-
-			});
-	});
+        "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+                                if (aData[1] === "WARNING" || aData[1] === "ERROR")
+                                {
+                                    $('td', nRow).closest('tr').addClass("gradeX");
+                                }
+                                else
+                                {
+                                    $('td', nRow).closest('tr').addClass("gradeZ");
+                                }
+                                
+                                
+                                return nRow;
+                                },
+        "fnServerData": function ( sSource, aoData, fnCallback ) {
+			/* Add some extra data to the sender */
+			$.getJSON( sSource, aoData, function (json) { 
+				fnCallback(json)
+			} );
+		}
+	} );
+} );
 	</script>
 </%def>

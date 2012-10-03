@@ -12,16 +12,16 @@
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	width: 20px;
 	height: 30px;
 	margin-left: -125px;
 	margin-top: -15px;
 	padding: 14px 0 2px 0;
-	border: 1px solid #ddd;
+	border: 2px solid #C8C8C8;
 	text-align: center;
 	color: #999;
 	font-size: 14px;
-	background-color: white;
+	color: #323232;
+	background-color: #E1E1E1;
 }
 
 .dataTables_length {
@@ -340,8 +340,7 @@ td.details {
 	line-height: 22px;
 }
 
-.paging_full_numbers span.paginate_button,
- 	.paging_full_numbers span.paginate_active {
+.paginate_button,.paginate_active {
 	background: none repeat scroll 0 0 #F3F3F3;
 	   border-radius: 5px 5px 5px 5px;
 	   margin: 0 0 0 5px;
@@ -352,11 +351,11 @@ td.details {
 	*cursor: hand;
 }
 
-.paging_full_numbers span.paginate_button:hover {
+.paginate_button:hover {
 	background-color: #e2e2e2;
 }
 
-.paging_full_numbers span.paginate_active {
+.paginate_active {
 	background-color: #4183C4;
 	color: #FFF;
 }
