@@ -194,7 +194,7 @@ class WebInterface(object):
     def deleteEmptyArtists(self):
         logger.info(u"Deleting all empty artists")
         myDB = db.DBConnection()
-        emptyArtistIDs = [row['ArtistID'] for row in myDB.select("SELECT ArtistID FROM artists WHERE HaveTracks == 0 OR LatestAlbum IS NULL")]
+        emptyArtistIDs = [row['ArtistID'] for row in myDB.select("SELECT ArtistID FROM artists WHERE HaveTracks == 0")]
         for ArtistID in emptyArtistIDs:
             logger.info(u"Deleting all traces of artist: " + ArtistID)
             myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
