@@ -196,6 +196,8 @@ CUSTOMSLEEP = None
 HPUSER = None
 HPPASS = None
 
+CACHE_SIZEMB = 32
+
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
     try:
@@ -259,7 +261,7 @@ def initialize():
                 ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
-                PREFERRED_BITRATE_LOW_BUFFER
+                PREFERRED_BITRATE_LOW_BUFFER,CACHE_SIZEMB
                 
         if __INITIALIZED__:
             return False
@@ -421,6 +423,8 @@ def initialize():
         CUSTOMSLEEP = check_setting_int(CFG, 'General', 'customsleep', 1)
         HPUSER = check_setting_str(CFG, 'General', 'hpuser', '')
         HPPASS = check_setting_str(CFG, 'General', 'hppass', '')
+
+        CACHE_SIZEMB = check_setting_int(CFG,'Advanced','cache_sizemb',32)
         
         ALBUM_COMPLETION_PCT = check_setting_int(CFG, 'Advanced', 'album_completion_pct', 80)
         
@@ -724,6 +728,7 @@ def config_write():
     
     new_config['Advanced'] = {}
     new_config['Advanced']['album_completion_pct'] = ALBUM_COMPLETION_PCT
+    new_config['Advanced']['cache_sizemb'] = CACHE_SIZEMB
     
     new_config.write()
 
