@@ -878,13 +878,13 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             providerurl = "http://what.cd/"
 
             bitrate = None
+            bitrate_string = bitrate
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 format = gazelleformat.FLAC
                 maxsize = 10000000000
             elif headphones.PREFERRED_QUALITY:
                 format=None
                 bitrate = headphones.PREFERRED_BITRATE
-                bitrate_string = bitrate
                 for encoding_string in gazelleencoding.ALL_ENCODINGS:
                     if re.search(bitrate, encoding_string, flags=re.I):
                         bitrate_string = encoding_string
