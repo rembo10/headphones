@@ -90,17 +90,6 @@
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-	
-	function getAlbumArt() {
-		$("td#albumart img").each(function(){	
-			var id = $(this).attr('title');
-			var image = $(this);
-			if ( !image.hasClass('done') ) {
-				image.addClass('done');
-				getThumb(image,id,'album');
-			}
-		});
-	}
 	function initThisPage() {
 		
 		$('#wanted_table').dataTable({
