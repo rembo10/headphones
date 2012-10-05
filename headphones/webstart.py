@@ -31,6 +31,9 @@ def initialize(options={}):
                 'server.socket_port':   options['http_port'],
                 'server.socket_host':   options['http_host'],
                 'engine.autoreload_on': False,
+                'tools.encode.on' : True,
+                'tools.encode.encoding' : 'utf-8',
+                'tools.decode.on' : True,
         })
 
     conf = {
