@@ -20,7 +20,7 @@ from headphones import logger, version
 
 import lib.simplejson as simplejson
 
-user = "AdeHub"
+user = "rembo10"
 branch = "master"
 
 def runGit(args):
