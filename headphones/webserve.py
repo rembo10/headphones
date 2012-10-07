@@ -30,6 +30,8 @@ from headphones.helpers import checked, radio,today
 
 import lib.simplejson as simplejson
 
+import sys
+
 
 
 def serve_template(templatename, **kwargs):
@@ -926,14 +928,18 @@ class Artwork(object):
 
         if not relpath:
             relpath = "data/interfaces/default/images/no-cover-art.png"
+            basedir = os.path.dirname(sys.argv[0])
+            path = os.path.join(basedir,relpath)
             cherrypy.response.headers['Content-type'] = 'image/png'
             cherrypy.response.headers['Cache-Control'] = 'no-cache'
         else:
+            relpath = relpath.replace('cache/','',1)
+            path = os.path.join(headphones.CACHE_DIR,relpath)
             fileext = os.path.splitext(relpath)[1][1::]
             cherrypy.response.headers['Content-type'] = 'image/' + fileext
             cherrypy.response.headers['Cache-Control'] = 'max-age=31556926'
 
-        path = os.path.abspath(relpath)
+        path = os.path.normpath(path)
         f = open(path,'rb')
         return f.read()
     default.exposed = True
@@ -955,14 +961,18 @@ class Artwork(object):
 
             if not relpath:
                 relpath = "data/interfaces/default/images/no-cover-artist.png"
+                basedir = os.path.dirname(sys.argv[0])
+                path = os.path.join(basedir,relpath)
                 cherrypy.response.headers['Content-type'] = 'image/png'
                 cherrypy.response.headers['Cache-Control'] = 'no-cache'
             else:
+                relpath = relpath.replace('cache/','',1)
+                path = os.path.join(headphones.CACHE_DIR,relpath)
                 fileext = os.path.splitext(relpath)[1][1::]
                 cherrypy.response.headers['Content-type'] = 'image/' + fileext
                 cherrypy.response.headers['Cache-Control'] = 'max-age=31556926'
 
-            path = os.path.abspath(relpath)
+            path = os.path.normpath(path)
             f = open(path,'rb')
             return f.read()
         default.exposed = True
