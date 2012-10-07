@@ -154,6 +154,12 @@ MININOVA = None
 WAFFLES = None
 WAFFLES_UID = None
 WAFFLES_PASSKEY = None
+RUTRACKER = None
+RUTRACKER_USER = None
+RUTRACKER_PASSWORD = None
+WHATCD = None
+WHATCD_USERNAME = None
+WHATCD_PASSWORD = None
 DOWNLOAD_TORRENT_DIR = None
 
 INTERFACE = None
@@ -192,6 +198,8 @@ CUSTOMPORT = None
 CUSTOMSLEEP = None
 HPUSER = None
 HPPASS = None
+
+CACHE_SIZEMB = 32
 
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
@@ -248,7 +256,8 @@ def initialize():
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
                 RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, \
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
-                TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, DOWNLOAD_TORRENT_DIR, \
+                TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
+                RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS,\
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
@@ -256,7 +265,7 @@ def initialize():
                 ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
-                PREFERRED_BITRATE_LOW_BUFFER
+                PREFERRED_BITRATE_LOW_BUFFER,CACHE_SIZEMB
                 
         if __INITIALIZED__:
             return False
@@ -269,6 +278,8 @@ def initialize():
         CheckSection('NZBsorg')
         CheckSection('Newzbin')
         CheckSection('Waffles')
+        CheckSection('Rutracker')
+        CheckSection('What.cd')
         CheckSection('Prowl')
         CheckSection('XBMC')
         CheckSection('NMA')
@@ -296,6 +307,7 @@ def initialize():
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', '')
+        CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', '')
         
         CHECK_GITHUB = bool(check_setting_int(CFG, 'General', 'check_github', 1))
         CHECK_GITHUB_ON_STARTUP = bool(check_setting_int(CFG, 'General', 'check_github_on_startup', 1))
@@ -305,7 +317,7 @@ def initialize():
         DESTINATION_DIR = check_setting_str(CFG, 'General', 'destination_dir', '')
         LOSSLESS_DESTINATION_DIR = check_setting_str(CFG, 'General', 'lossless_destination_dir', '')
         PREFERRED_QUALITY = check_setting_int(CFG, 'General', 'preferred_quality', 0)
-        PREFERRED_BITRATE = check_setting_int(CFG, 'General', 'preferred_bitrate', '')
+        PREFERRED_BITRATE = check_setting_str(CFG, 'General', 'preferred_bitrate', '')
         PREFERRED_BITRATE_HIGH_BUFFER = check_setting_int(CFG, 'General', 'preferred_bitrate_high_buffer', '')
         PREFERRED_BITRATE_LOW_BUFFER = check_setting_int(CFG, 'General', 'preferred_bitrate_low_buffer', '')
         DETECT_BITRATE = bool(check_setting_int(CFG, 'General', 'detect_bitrate', 0))
@@ -342,6 +354,14 @@ def initialize():
         WAFFLES = bool(check_setting_int(CFG, 'Waffles', 'waffles', 0))
         WAFFLES_UID = check_setting_str(CFG, 'Waffles', 'waffles_uid', '')
         WAFFLES_PASSKEY = check_setting_str(CFG, 'Waffles', 'waffles_passkey', '')
+        
+        RUTRACKER = bool(check_setting_int(CFG, 'Rutracker', 'rutracker', 0))
+        RUTRACKER_USER = check_setting_str(CFG, 'Rutracker', 'rutracker_user', '')
+        RUTRACKER_PASSWORD = check_setting_str(CFG, 'Rutracker', 'rutracker_password', '')
+
+        WHATCD = bool(check_setting_int(CFG, 'What.cd', 'whatcd', 0))
+        WHATCD_USERNAME = check_setting_str(CFG, 'What.cd', 'whatcd_username', '')
+        WHATCD_PASSWORD = check_setting_str(CFG, 'What.cd', 'whatcd_password', '')
 
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
@@ -412,6 +432,8 @@ def initialize():
         CUSTOMSLEEP = check_setting_int(CFG, 'General', 'customsleep', 1)
         HPUSER = check_setting_str(CFG, 'General', 'hpuser', '')
         HPPASS = check_setting_str(CFG, 'General', 'hppass', '')
+
+        CACHE_SIZEMB = check_setting_int(CFG,'Advanced','cache_sizemb',32)
         
         ALBUM_COMPLETION_PCT = check_setting_int(CFG, 'Advanced', 'album_completion_pct', 80)
         
@@ -469,8 +491,9 @@ def initialize():
         # Start the logger, silence console logging if we need to
         logger.headphones_log.initLogger(verbose=VERBOSE)
         
-        # Put the cache dir in the data dir for now
-        CACHE_DIR = os.path.join(DATA_DIR, 'cache')
+        if not CACHE_DIR:
+            # Put the cache dir in the data dir for now
+            CACHE_DIR = os.path.join(DATA_DIR, 'cache')
         if not os.path.exists(CACHE_DIR):
             try:
                 os.makedirs(CACHE_DIR)
@@ -576,6 +599,7 @@ def config_write():
     new_config['General']['api_enabled'] = int(API_ENABLED)
     new_config['General']['api_key'] = API_KEY
     new_config['General']['log_dir'] = LOG_DIR
+    new_config['General']['cache_dir'] = CACHE_DIR
     new_config['General']['git_path'] = GIT_PATH
     
     new_config['General']['check_github'] = int(CHECK_GITHUB)
@@ -620,6 +644,16 @@ def config_write():
     new_config['Waffles']['waffles'] = int(WAFFLES)
     new_config['Waffles']['waffles_uid'] = WAFFLES_UID
     new_config['Waffles']['waffles_passkey'] = WAFFLES_PASSKEY
+    
+    new_config['Rutracker'] = {}
+    new_config['Rutracker']['rutracker'] = int(RUTRACKER)
+    new_config['Rutracker']['rutracker_user'] = RUTRACKER_USER
+    new_config['Rutracker']['rutracker_password'] = RUTRACKER_PASSWORD
+
+    new_config['What.cd'] = {}
+    new_config['What.cd']['whatcd'] = int(WHATCD)
+    new_config['What.cd']['whatcd_username'] = WHATCD_USERNAME
+    new_config['What.cd']['whatcd_password'] = WHATCD_PASSWORD
 
     new_config['General']['search_interval'] = SEARCH_INTERVAL
     new_config['General']['libraryscan_interval'] = LIBRARYSCAN_INTERVAL
@@ -708,6 +742,7 @@ def config_write():
     
     new_config['Advanced'] = {}
     new_config['Advanced']['album_completion_pct'] = ALBUM_COMPLETION_PCT
+    new_config['Advanced']['cache_sizemb'] = CACHE_SIZEMB
     
     new_config.write()
 

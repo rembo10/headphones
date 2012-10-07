@@ -31,6 +31,9 @@ def initialize(options={}):
                 'server.socket_port':   options['http_port'],
                 'server.socket_host':   options['http_host'],
                 'engine.autoreload_on': False,
+                'tools.encode.on' : True,
+                'tools.encode.encoding' : 'utf-8',
+                'tools.decode.on' : True,
         })
 
     conf = {
@@ -56,7 +59,7 @@ def initialize(options={}):
         },
         '/favicon.ico':{
             'tools.staticfile.on': True,
-            'tools.staticfile.filename': "images/favicon.ico"
+            'tools.staticfile.filename': os.path.join(os.path.abspath(os.curdir),"images" + os.sep + "favicon.ico")
         },
         '/cache':{
             'tools.staticdir.on': True,

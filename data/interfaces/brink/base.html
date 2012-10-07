@@ -42,6 +42,7 @@
 	
 	<!--Global Script-->
 	<script src="interfaces/brink/js/script.js"></script>
+	<script src="interfaces/brink/js/plugins.js"></script>
 	
 	<!--Datatables-->
 	<script type="text/javascript" src="/js/libs/jquery.dataTables.min.js"></script>
@@ -61,11 +62,17 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 	% if not headphones.CURRENT_VERSION:
-			$("#commits-behind").fadeIn('slow').text("${headphones.COMMITS_BEHIND}");
+			var noty_id = noty({
+				text:'<span class="wsr">V</span> <strong>Headpones Update Available!</strong><br />A new version is ready to be installed.',
+				layout: 'bottomRight',
+				type:'information
+			});
 	% elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
-			$("#commits-behind").fadeIn('slow').text("(${headphones.COMMITS_BEHIND})");	
-	% else: 
-			$("#commits-behind").hide()
+			var noty_id = noty({
+				text:'<span class="wsr">V</span> You are ${headphones.COMMITS_BEHIND} commits behind',
+				layout: 'bottomRight',
+				type:'information'
+			});
 	% endif
 		});
 	</script>
@@ -128,8 +135,7 @@
 					<a href="forceSearch"><span class="wsr">I</span> Wanted Albums</a>
 					<a href="forceUpdate"><span class="wsr">U</span> Active Artists</a>
 					<a href="forcePostProcess"><span class="wsr">J</span> Post-Process</a>
-					<a href="checkGithub" onclick="javascript:return confirm('Do you wish to Update Headphones now?')"><span class="wsr">V</span> Update
-						<span id="commits-behind"></span>
+					<a href="update" onclick="javascript:return confirm('Do you wish to Update Headphones now?')"><span class="wsr">V</span> Update
 					</a>
 				</div>
 				<div class="btn right">

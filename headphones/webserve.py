@@ -26,9 +26,11 @@ import threading
 import headphones
 
 from headphones import logger, searcher, db, importer, mb, lastfm, librarysync
-from headphones.helpers import checked, radio
+from headphones.helpers import checked, radio,today
 
 import lib.simplejson as simplejson
+
+import sys
 
 
 
@@ -190,6 +192,20 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("home")
     deleteArtist.exposed = True
     
+
+    def deleteEmptyArtists(self):
+        logger.info(u"Deleting all empty artists")
+        myDB = db.DBConnection()
+        emptyArtistIDs = [row['ArtistID'] for row in myDB.select("SELECT ArtistID FROM artists WHERE HaveTracks == 0")]
+        for ArtistID in emptyArtistIDs:
+            logger.info(u"Deleting all traces of artist: " + ArtistID)
+            myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
+            myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
+            myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+            myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
+    deleteEmptyArtists.exposed = True     
+   
+        
     def refreshArtist(self, ArtistID):
         threading.Thread(target=importer.addArtisttoDB, args=[ArtistID]).start()  
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
@@ -394,6 +410,110 @@ class WebInterface(object):
         return serve_template(templatename="logs.html", title="Log", lineList=headphones.LOG_LIST)
     logs.exposed = True
     
+
+    def getLog(self,iDisplayStart=0,iDisplayLength=100,iSortCol_0=0,sSortDir_0="desc",sSearch="",**kwargs):
+
+        iDisplayStart = int(iDisplayStart)
+        iDisplayLength = int(iDisplayLength)
+
+        filtered = []
+        if sSearch == "":
+            filtered = headphones.LOG_LIST[::]
+        else:
+            filtered = [row for row in headphones.LOG_LIST for column in row if sSearch in column]
+
+        sortcolumn = 0
+        if iSortCol_0 == '1':
+            sortcolumn = 2
+        elif iSortCol_0 == '2':
+            sortcolumn = 1
+        filtered.sort(key=lambda x:x[sortcolumn],reverse=sSortDir_0 == "desc")        
+
+        rows = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
+        rows = [[row[0],row[2],row[1]] for row in rows]
+
+        dict = {'iTotalDisplayRecords':len(filtered),
+                'iTotalRecords':len(headphones.LOG_LIST),
+                'aaData':rows,
+                }
+        s = simplejson.dumps(dict)
+        return s
+    getLog.exposed = True
+
+    def getArtists_json(self,iDisplayStart=0,iDisplayLength=100,sSearch="",iSortCol_0='0',sSortDir_0='asc',**kwargs):
+        iDisplayStart = int(iDisplayStart)
+        iDisplayLength = int(iDisplayLength)
+        filtered = []
+        totalcount = 0        
+        myDB = db.DBConnection()
+        
+        
+        sortcolumn = 'ArtistSortName'
+        sortbyhavepercent = False
+        if iSortCol_0 == '2':
+            sortcolumn = 'Status'
+        elif iSortCol_0 == '3':
+            sortcolumn = 'ReleaseDate'
+        elif iSortCol_0 == '4':
+            sortbyhavepercent = True
+
+        if sSearch == "":
+            query = 'SELECT * from artists order by %s COLLATE NOCASE %s' % (sortcolumn,sSortDir_0)    
+            filtered = myDB.select(query)
+            totalcount = len(filtered) 
+        else:
+            query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch +'%"' +  'ORDER BY %s COLLATE NOCASE %s' % (sortcolumn,sSortDir_0)
+            filtered = myDB.select(query)
+            totalcount = myDB.select('SELECT COUNT(*) from artists')[0][0]
+
+        if sortbyhavepercent:
+            filtered.sort(key=lambda x:(float(x['HaveTracks'])/x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0,x['HaveTracks'] if x['HaveTracks'] else 0.0),reverse=sSortDir_0 == "asc")
+
+        #can't figure out how to change the datatables default sorting order when its using an ajax datasource so ill 
+        #just reverse it here and the first click on the "Latest Album" header will sort by descending release date
+        if sortcolumn == 'ReleaseDate':
+            filtered.reverse()
+            
+
+        artists = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
+        rows = []
+        for artist in artists:
+            row = {"ArtistID":artist['ArtistID'],
+                      "ArtistSortName":artist["ArtistSortName"],
+                      "Status":artist["Status"],
+                      "TotalTracks":artist["TotalTracks"],
+                      "HaveTracks":artist["HaveTracks"],
+                      "LatestAlbum":"",                      
+                      "ReleaseDate":"",
+                      "ReleaseInFuture":"False",
+                      "AlbumID":"",
+                      }
+
+            if not row['HaveTracks']:
+                row['HaveTracks'] = 0
+            if artist['ReleaseDate'] and artist['LatestAlbum']:
+                row['ReleaseDate'] = artist['ReleaseDate']
+                row['LatestAlbum'] = artist['LatestAlbum']
+                row['AlbumID'] = artist['AlbumID']
+                if artist['ReleaseDate'] > today():
+                    row['ReleaseInFuture'] = "True"
+            elif artist['LatestAlbum']:
+                row['ReleaseDate'] = ''
+                row['LatestAlbum'] = artist['LatestAlbum']
+                row['AlbumID'] = artist['AlbumID']
+              
+            rows.append(row)
+
+
+        dict = {'iTotalDisplayRecords':len(filtered),
+                'iTotalRecords':totalcount,
+                'aaData':rows,
+                }
+        s = simplejson.dumps(dict)
+        cherrypy.response.headers['Content-type'] = 'application/json'
+        return s
+    getArtists_json.exposed=True
+
     def clearhistory(self, type=None):
         myDB = db.DBConnection()
         if type == 'all':
@@ -463,6 +583,12 @@ class WebInterface(object):
                     "use_waffles" : checked(headphones.WAFFLES),
                     "waffles_uid" : headphones.WAFFLES_UID,
                     "waffles_passkey": headphones.WAFFLES_PASSKEY,
+                    "use_rutracker" : checked(headphones.RUTRACKER),
+                    "rutracker_user" : headphones.RUTRACKER_USER,
+                    "rutracker_password": headphones.RUTRACKER_PASSWORD,
+                    "use_whatcd" : checked(headphones.WHATCD),
+                    "whatcd_username" : headphones.WHATCD_USERNAME,
+                    "whatcd_password": headphones.WHATCD_PASSWORD,
                     "pref_qual_0" : radio(headphones.PREFERRED_QUALITY, 0),
                     "pref_qual_1" : radio(headphones.PREFERRED_QUALITY, 1),
                     "pref_qual_3" : radio(headphones.PREFERRED_QUALITY, 3),
@@ -486,6 +612,7 @@ class WebInterface(object):
                     "autowant_upcoming" : checked(headphones.AUTOWANT_UPCOMING),
                     "autowant_all" : checked(headphones.AUTOWANT_ALL),
                     "log_dir" : headphones.LOG_DIR,
+                    "cache_dir" : headphones.CACHE_DIR,
                     "interface_list" : interface_list,
                     "music_encoder":        checked(headphones.MUSIC_ENCODER),
                     "encoder":      headphones.ENCODER,
@@ -519,7 +646,8 @@ class WebInterface(object):
                     "customport": headphones.CUSTOMPORT,
                     "customsleep": headphones.CUSTOMSLEEP,
                     "hpuser": headphones.HPUSER,
-                    "hppass": headphones.HPPASS
+                    "hppass": headphones.HPPASS,
+                    "cache_sizemb":headphones.CACHE_SIZEMB,
                 }
             
         # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8
@@ -538,21 +666,21 @@ class WebInterface(object):
         
         return serve_template(templatename="config.html", title="Settings", config=config)  
     config.exposed = True
-    
-    
+
+
     def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None, 
         download_scan_interval=None, nzb_search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, 
         sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None, usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, 
         newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, 
         newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None, 
-        numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, rename_files=0, correct_metadata=0, 
-        cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, 
-        include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0, remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, 
-        interface=None, log_dir=None, music_encoder=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, 
-        encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0, delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, 
-        prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0, nma_enabled=False, 
-        nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None, 
-        preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, **kwargs):
+        numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
+        rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, 
+        destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0,
+        remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, bitrate=None, 
+        samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0, 
+        delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, 
+        xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, 
+        customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, cache_sizemb=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -595,6 +723,12 @@ class WebInterface(object):
         headphones.WAFFLES = waffles
         headphones.WAFFLES_UID = waffles_uid
         headphones.WAFFLES_PASSKEY = waffles_passkey
+        headphones.RUTRACKER = rutracker
+        headphones.RUTRACKER_USER = rutracker_user
+        headphones.RUTRACKER_PASSWORD = rutracker_password
+        headphones.WHATCD = whatcd
+        headphones.WHATCD_USERNAME = whatcd_username
+        headphones.WHATCD_PASSWORD = whatcd_password
         headphones.PREFERRED_QUALITY = int(preferred_quality)
         headphones.PREFERRED_BITRATE = preferred_bitrate
         headphones.PREFERRED_BITRATE_HIGH_BUFFER = preferred_bitrate_high_buffer
@@ -616,6 +750,7 @@ class WebInterface(object):
         headphones.AUTOWANT_ALL = autowant_all
         headphones.INTERFACE = interface
         headphones.LOG_DIR = log_dir
+        headphones.CACHE_DIR = cache_dir
         headphones.MUSIC_ENCODER = music_encoder
         headphones.ENCODER = encoder
         headphones.BITRATE = int(bitrate)
@@ -648,6 +783,7 @@ class WebInterface(object):
         headphones.CUSTOMSLEEP = customsleep
         headphones.HPUSER = hpuser
         headphones.HPPASS = hppass
+        headphones.CACHE_SIZEMB = cache_sizemb
 
         # Handle the variable config options. Note - keys with False values aren't getting passed
         
@@ -679,6 +815,9 @@ class WebInterface(object):
         
         # Write the config
         headphones.config_write()
+
+        #reconfigure musicbrainz database connection with the new values
+        mb.startmb()
 
         raise cherrypy.HTTPRedirect("config")
         
@@ -770,3 +909,75 @@ class WebInterface(object):
         return simplejson.dumps(image_dict)
         
     getImageLinks.exposed = True
+
+class Artwork(object):
+    def index(self):
+        return "Artwork"
+    index.exposed = True
+
+    def default(self,ArtistOrAlbum="",ID=None):
+        from headphones import cache
+        ArtistID = None
+        AlbumID = None
+        if ArtistOrAlbum == "artist":
+            ArtistID = ID
+        elif ArtistOrAlbum == "album":
+            AlbumID = ID
+    
+        relpath =  cache.getArtwork(ArtistID,AlbumID)
+
+        if not relpath:
+            relpath = "data/interfaces/default/images/no-cover-art.png"
+            basedir = os.path.dirname(sys.argv[0])
+            path = os.path.join(basedir,relpath)
+            cherrypy.response.headers['Content-type'] = 'image/png'
+            cherrypy.response.headers['Cache-Control'] = 'no-cache'
+        else:
+            relpath = relpath.replace('cache/','',1)
+            path = os.path.join(headphones.CACHE_DIR,relpath)
+            fileext = os.path.splitext(relpath)[1][1::]
+            cherrypy.response.headers['Content-type'] = 'image/' + fileext
+            cherrypy.response.headers['Cache-Control'] = 'max-age=31556926'
+
+        path = os.path.normpath(path)
+        f = open(path,'rb')
+        return f.read()
+    default.exposed = True
+
+    class Thumbs(object):
+        def index(self):
+            return "Here be thumbs"
+        index.exposed = True
+        def default(self,ArtistOrAlbum="",ID=None):
+            from headphones import cache
+            ArtistID = None
+            AlbumID = None
+            if ArtistOrAlbum == "artist":
+                ArtistID = ID
+            elif ArtistOrAlbum == "album":
+                AlbumID = ID
+    
+            relpath =  cache.getThumb(ArtistID,AlbumID)
+
+            if not relpath:
+                relpath = "data/interfaces/default/images/no-cover-artist.png"
+                basedir = os.path.dirname(sys.argv[0])
+                path = os.path.join(basedir,relpath)
+                cherrypy.response.headers['Content-type'] = 'image/png'
+                cherrypy.response.headers['Cache-Control'] = 'no-cache'
+            else:
+                relpath = relpath.replace('cache/','',1)
+                path = os.path.join(headphones.CACHE_DIR,relpath)
+                fileext = os.path.splitext(relpath)[1][1::]
+                cherrypy.response.headers['Content-type'] = 'image/' + fileext
+                cherrypy.response.headers['Cache-Control'] = 'max-age=31556926'
+
+            path = os.path.normpath(path)
+            f = open(path,'rb')
+            return f.read()
+        default.exposed = True
+    
+    thumbs = Thumbs()
+    
+    
+WebInterface.artwork = Artwork()

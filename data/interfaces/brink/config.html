@@ -1,6 +1,7 @@
 <%inherit file="base.html"/>
 <%!
 	import headphones
+	import string
 %>
 
 <%def name="headIncludes()">
@@ -77,7 +78,7 @@
 						</tr>
 						<tr>
 							<td>
-								<label for="launch_browser">Launch browser:</label><br />
+								<label for="launch_browser">Launch browser:</label>
 								<br /><small>Enabling this feature will open Headphones at startup.</small>
 							</td>
 							<td>
@@ -111,15 +112,19 @@
 						<!--API-->
 							<tr>
 								<td><h2>API:</h2>
-									<small><label for="api_switch">Enabled/Disabled</label></small></td>
-								<td><input class="switch" type="checkbox" name="api_switch" id="api_enabled" value="1" ${config['api_enabled']} /></td>
+									<small><label for="api_enabled">Enabled/Disabled</label></small></td>
+								<td><input class="switch" type="checkbox" name="api_enabled" id="api_enabled" value="1" ${config['api_enabled']} /></td>
 							</tr>
-							<tr id="api_switch">
+							<tr id="api_enabled_switch">
 								<td>
-									<small>Visit <a href="https://github.com/rembo10/headphones/tree/" target="_blank"><span>D</span>repo</a> for more information.</small>
-								</td>
-								<td>
-									<input type="text" name="api_key" value="${config['api_key']}" size="30"><input class="submit" type="button" value="Generate" id="generate_api">
+									<table>
+										<tr>
+											<td colspan="2">
+											<small>Current API:<strong id="api_key">${config['api_key']}</strong></small>
+											<input class="submit" type="button" value="Generate" id="generate_api" />
+											</td>
+										</tr>
+									</table>
 								</td>
 							</tr>
 						<!--end API-->
@@ -289,123 +294,146 @@
 				<small>"We provide you with a automated search service to locate binary files/secgments that can be found on the public access network called Usenet."</small>
 				
 				<!--NZB Matrix-->
+				<div class="group">
 				<table id="nzbmatrix">
 					<tr>
+						<td><input class="switch" type="checkbox" name="nzbmatrix" value="1" ${config['use_nzbmatrix']} /></td>
 						<td>
 							<h2><a href="http://www.nzbmatrix.com" target="_blank"><span class="wsr">D</span>NZBMatrix</a></h2>
-							<br /><small><label for="nzbmatrix_switch">Enabled/Disabled</label></small>
+							<small><label for="nzbmatrix">Enabled/Disabled</label></small>
 						</td>
-						<td><input class="switch" type="checkbox" name="nzbmatrix_switch" value="1" ${config['use_nzbmatrix']} /></td>
 					</tr>
 				</table>
-				<table id="nzbmatrix_switch">
-					<tr>
-						<td><label for="nzbmatrix_username">Username:</label></td>
-							<td><input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30" maxlength="40" /></td>
-					</tr>
-					<tr>
-						<td><label for="nzbmatrix_apikey">API:</label></td>
-							<td><input type="text" name="nzbmatrix_apikey" value="${config['nzbmatrix_api']}" size="36" maxlength="40" /></td>
-					</tr>
-				</table>
+				<div class="group" id="nzbmatrix_switch">
+					<table>
+						<tr>
+							<td><label for="nzbmatrix_username">Username:</label></td>
+								<td><input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30" maxlength="40" /></td>
+						</tr>
+						<tr>
+							<td><label for="nzbmatrix_apikey">API:</label></td>
+								<td><input type="text" name="nzbmatrix_apikey" value="${config['nzbmatrix_api']}" size="36" maxlength="40" /></td>
+						</tr>
+					</table>
+				</div>
+				</div>
 				<!--end NZB Matrix-->
 
 				<!--Newznab-->
-				<table id="newznab" class="configtable">
-					<tr>
-						<td>
-							<h2><a href="http://www.newznab.com/" target="_blank"><span class="wsr">D</span>Newznab</a></h2>
-							<br /><small><label for="newznab">Enabled/Disabled</label></small>
-						</td>
-						<td><input class="switch" type="checkbox" name="newznab" value="1" ${config['use_newznab']} /></td>
-					</tr>
-					<tr>
-						<div id="newznab">
-							<div class="config" id="newznab1">
-								<div class="row">
-									<label>Newznab Host</label>
-									<input type="text" name="newznab_host" value="${config['newznab_host']}" size="30">
-									<br /><small>e.g. http://nzb.su</small>
-								</div>
-								<div class="row">
-									<label>Newznab API</label>
-									<input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36">
-								</div>
-								<div class="row checkbox">
-									<input id="newznab_enabled" type="checkbox" name="newznab_enabled" onclick="initConfigCheckbox($(this));" value="1" ${config['newznab_enabled']} />
-									<label>Enabled</label>
-								</div>
-							</div>
-							<%
-							newznab_number = 1
-							%>
+				<div class="group">
+					<table class="configtable">
+						<tr>
+							<td><input class="switch" type="checkbox" name="newznab" value="1" ${config['use_newznab']} /></td>
+							<td>
+								<h2><a href="http://www.newznab.com/" target="_blank"><span class="wsr">D</span>Newznab Providers</a></h2>
+								<small><label for="newznab">Enabled/Disabled</label></small>
+							</td>
+						</tr>
+					</table>
+					<div class="group" id="newznab_switch">
+						<div>
+							<table id="newznab1">
+								<tr><td>
+										<label>Host:</label>
+										<input type="text" name="newznab_host" value="${config['newznab_host']}" size="30">
+										<br /><small>e.g. http://nzb.su</small>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<label>API</label>
+										<input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36">
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<input id="newznab_enabled" type="checkbox" name="newznab_enabled" value="1" ${config['newznab_enabled']} />
+										<label>Enabled</label>
+									</td>
+								</tr>
+								<tr>
+									<td><input class="newznab-edit-extras" type="button" value ="Edit Extras"/></td>
+								</tr>
+							</table>
+						</div>
+						<div id="newznab-dialog">
 							%for newznab in config['extra_newznabs']:
-							<div class="config" id="newznab${newznab_number}">
-								<div class="row">
-								<label>Newznab Host:</label>
-								<input type="text" name="newznab_host${newznab_number}" value="${newznab[0]}" size="30">
-								</div>
-								<div class="row">
-								<label>Newznab API:</label>
-								<input type="text" name="newznab_api${newznab_number}" value="${newznab[1]}" size="36">
-								</div>
-								<div class="row checkbox">
-								<input id="newznab_enabled" type="checkbox" name="newznab_enabled${newznab_number}" value="1" ${newznab_enabled} /><label>Enabled</label>
-								</div>
-								<div class="row">
-								<input type="button" class="remove" id="newznab${newznab_number}" value="Remove ${newznab[0]}">
-								</div>
-							</div>
-							<%
-								newznab_number += 1
-							%>
+							<table id="newznab${newznab_number}">
+								<tr>
+									<td>
+										<label>Newznab Host:</label>
+										<input type="text" name="newznab_host${newznab_number}" value="${newznab[0]}" size="30">
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<label>Newznab API:</label>
+										<input type="text" name="newznab_api${newznab_number}" value="${newznab[1]}" size="36">
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<input id="newznab_enabled" type="checkbox" name="newznab_enabled${newznab_number}" value="1" ${newznab_enabled} /><label>Enabled/Disabled</label>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<input type="button" class="remove" id="newznab${newznab_number}" value="Remove ${newznab[0]}">
+									</td>
+								</tr>
+							</table>
 							%endfor
 							<input type="button" value="Add Newznab" class="add_newznab" id="add_newznab" />
 						</div>
-					</tr>
-				</table>
+					</div>
+				</div>
 				<!--end Newznab-->
 
 				<!--NZBs.org-->
-				<table>
-					<tr>
-						<td>
-							<h2><a href="http://nzbs.org/" target="_blank"><span class="wsr">D</span>Nzbs</a></h2>
-							<small></small>
-						</td>
-						<td><input class="switch" type="checkbox" name="nzbsorg" value="1" ${config['use_nzbsorg']} /><small><label for="nzbsorg"></label></small></td>
-					</tr>
-				</table>
-				<table id="nzbsorg">
-					<tr>
-						<td><label for="nzbsorg_hash">API Key:</label></td>
-						<td><input type="text" name="nzbsorg_hash" value="${config['nzbsorg_hash']}" size="30" maxlength="40"></td>
-					</tr>
-				</table>
+				<div class="group">
+					<table>
+						<tr>
+							<td><input class="switch" type="checkbox" name="nzbsorg" value="1" ${config['use_nzbsorg']} /></td>
+							<td><h2><a href="http://nzbs.org/" target="_blank"><span class="wsr">D</span>Nzbs.org</a></h2>
+								<small><label for="nzbsorg"></label></small>
+							</td>
+						</tr>
+					</table>
+					<div class="group" id="nzbsorg_switch">
+						<table>
+							<tr>
+								<td><label for="nzbsorg_hash">API Key:</label></td>
+								<td><input type="text" name="nzbsorg_hash" value="${config['nzbsorg_hash']}" size="30" maxlength="40"></td>
+							</tr>
+						</table>
+					</div>
+				</div>
 				<!--end NZBs.org-->
 				
 				<!--Newzbin-->
+				<div class="group">
 				<table>
 					<tr>
+						<td><input class="switch" type="checkbox" name="newzbin" value="1" ${config['use_newzbin']} /></td>
 						<td>
 							<h2><a href="http://www.newsbin.com/" target="_blank"><span class="wsr">D</span>Newzbin</a></h2>
 							<small><label for="newzbin">Enabled/Disabled</label></small>
 						</td>
-						<td>
-							<input class="switch" type="checkbox" name="newzbin" value="1" ${config['use_newzbin']} />
-						</td>
 					</tr>
 				</table>
-				<table id="newsbin" class="configtable">
-					<tr>
-						<td><label for="newzbin_uid">UID:</label></td>
-						<td><input type="text" name="newzbin_uid" value="${config['newzbin_uid']}" size="30" maxlength="40" /></td>
-					</tr>
-					<tr>
-						<td><label for="newzbin_password">Password:</label></td>
-						<td><input type="text" name="newzbin_password" value="${config['newzbin_pass']}" size="36" maxlength="40" /></td>
-					</tr>
-				</table>
+				<div class="group" id="newzbin_switch">
+					<table>
+						<tr>
+							<td><label for="newzbin_uid">UID:</label></td>
+							<td><input type="text" name="newzbin_uid" value="${config['newzbin_uid']}" size="30" maxlength="40" /></td>
+						</tr>
+						<tr>
+							<td><label for="newzbin_password">Password:</label></td>
+							<td><input type="text" name="newzbin_password" value="${config['newzbin_pass']}" size="36" maxlength="40" /></td>
+						</tr>
+					</table>
+				</div>
+				</div>
 				<!--end Newzbin-->
 					
 				<!--Torrents-->
@@ -559,6 +587,15 @@
 								<input type="text" name="log_dir" value="${config['log_dir']}" size="40" />
 							</td>
 						</tr><!--end Logs-->
+						<!--Cache-->
+						<tr>
+							<td>
+								<label for="cache_dir">Cache Directory:</label>
+							</td>
+							<td>
+								<input type="text" name="cache_dir" value="${config['cache_dir']}" size="40" />
+							</td>
+						</tr><!--end Cache-->
 					</table>
 				</div><!--end Miscellaneous-->
 				
@@ -569,7 +606,7 @@
 					<div><!--Encoder Options-->
 						<table id="encoderoptions">
 							<tr>
-								<td><h2>Encoder Options</h2></td>
+								<td colspan="2"><h2>Encoder Options</h2></td>
 							</tr>
 							<tr>
 								<td><label for="encoderlossless">Only re-encode lossless files (.flac)</label></td>
@@ -702,15 +739,17 @@
 					<h1><span class="wsr">W</span> Notifications</h1>
 					<small></small>
 					<!--Prowl-->
+					<div class="group">
 					<table>
 						<tr>
+							<td><input class="switch" type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} /></td>
 							<td><h2>Prowl Options</h2>
 								<small><label for="prowl_enabled">Enabled/Disabled</label></small>
 							</td>
-							<td><input class="switch" type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} /></td>
 						</tr>
 					</table>
-					<table id="prowloptions">
+					<div class="group" id="prowl_enabled_switch">
+					<table>
 						
 						<tr>
 							<td><label for="prowl_keys">API key:</label></td>
@@ -723,17 +762,22 @@
 							<tr><td><label for="prowl_priority">Priority (-2,-1,0,1 or 2):</label></td>
 							<td><input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2"></td>
 						</tr>
-					</table><!--end Prowl-->
+					</table>
+					</div>
+					</div>
+					<!--end Prowl-->
 					<!--XBMC-->
+					<div class="group">
 					<table>
 						<tr>
+							<td><input class="switch" type="checkbox" name="xbmc_enabled" id="xbmc" value="1" ${config['xbmc_enabled']} /></td>
 							<td><h2>XBMC</h2>
 								<small><label for="xbmc_enabled">Enabled/Disabled</label></small>
 							</td>
-							<td><input class="switch" type="checkbox" name="xbmc_enabled" id="xbmc" value="1" ${config['xbmc_enabled']} /></td>
 						</tr>
 					</table>
-					<table id="xbmcoptions">
+					<div class="group" id="xbmc_enabled_switch">
+					<table>
 						<tr>
 							<td><label for="xbmc_host">XBMC Host:</label>
 								<small>e.g. http://localhost:8080. Separate hosts with commas</small>
@@ -757,19 +801,24 @@
 							<td><label>Send Notification to XBMC:</label></td>
 							<td><input type="checkbox" name="xbmc_notify" value="1" ${config['xbmc_notify']} /></td>
 						</tr>
-					</table><!--end XBMC-->
+					</table>
+					</div>
+					</div>
+					<!--end XBMC-->
 					
 					<!--NMA Options-->
+					<div class="group">
 					<table>
 						<tr>
+							<td><input class="switch" type="checkbox" name="nma_enabled" id="nma" value="1" ${config['nma_enabled']} /></td>
 							<td>
 								<h2>Notify My Android</h2>
 								<small><label for="nma_enabled">Enabled/Disabled</label></small>
 							</td>
-							<td><input class="switch" type="checkbox" name="nma_enabled" id="nma" value="1" ${config['nma_enabled']} /></td>
 						</tr>
 					</table>
-					<table id="nmaoptions">
+					<div class="group" id="nma_enabled_switch">
+					<table>
 						<tr>
 							<td><label for="nma_apikey">NotifyMyAndroid API Key:</label>
 								<small>Separate multiple api keys with ",".</small>
@@ -778,6 +827,11 @@
 						</tr>
 						<tr>
 							<td><a href="https://play.google.com/store/apps/details?id=com.usk.app.notifymyandroid">Get NotifyMyAndroid</a></td>
+						</tr>
+						
+						<tr>
+							<td><label for="nma_onsnatch">Notify on snatch?</label></td>
+								<td><input type="checkbox" name="nma_onsnatch" value="1" ${config['nma_onsnatch']} /></td>
 						</tr>
 						
 						<!--Priority-->
@@ -809,10 +863,18 @@
 							</td>
 						</tr><!--end Priority-->
 					</table><!--end NMA Options-->
+					</div>
 				</div><!--end Notifications-->
+				
 				<div id="NAS">
 					<h2>Synology NAS</h2>
-					<input type="checkbox" name="synoindex_enabled" id="synoindex" value="1" ${config['synoindex_enabled']} /><label>Enable Synoindex</label>
+					<table>
+						<tr>
+							<td>
+								<input type="checkbox" name="synoindex_enabled" id="synoindex" value="1" ${config['synoindex_enabled']} /><label>Enable Synoindex</label>
+							</td>
+						</tr>
+					</table>
 				</div>
 				<!--Mirror-->
 				<div id="Mirror">
@@ -885,20 +947,26 @@
 <%def name="javascriptIncludes()">
 	<script>
 		$(document).ready(function(){
+			$('#api_key').click(function(){ $('#api_key').select() });
+			$("#generate_api").click(function(){
+				$.get('generateAPI', 
+					function(data){
+						if (data.error != undefined) {
+							alert(data.error);
+							return;
+						}
+						$('#api_key').val(data);
+				});
+			});
+		
+			$("#newznab-dialog").hide();
+			$(".newznab-edit-extras").click(function(){
+				$("#newznab-dialog").dialog();
+			});
 			$(".submitForm").click(function(){
 				$("#config").submit();
 			});
 			//Newznab
-			function newznab(){
-				if( $('input[name="newznab"]').is(":checked") ){
-					$("table#newznab-group").show();
-					enit();
-				}
-				else {
-					$("table#newznab-group").hide();
-					enit();
-				}
-			}
 			var deletedNewznabs = 0;
 			$(".remove").click(function() {
 				$(this).parent().parent().remove();
@@ -906,17 +974,31 @@
 			});
 			
 			$("#add_newznab").click(function() {
-				var intId = $("#newznab_providers > div").size() + deletedNewznabs + 1;
-				var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
-				var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"remove\" value=\"Remove\" /></div>");
+				var intId = $("#newznab-dialog > table").size() + deletedNewznabs + 1;
+				alert(intId);
+				var rowStart = "<tr><td>";
+				var rowEnd = "</td></tr>";
+				var formfields = $("<table id='newznab" + intId + "'>" +
+								rowStart +
+								"<label>Newznab Host</label>" +
+								"<input type='text' name='newznab_host" + intId + "' size='30'>" +
+								rowEnd +
+								rowStart +
+										"<label>Newznab API</label>" +
+										"<input type='text' name='newznab_api" + intId + "' size='36'>" +
+								rowEnd +
+								rowStart +
+									"<input type='checkbox' name='newznab_enabled" + intId + "' value='1' checked />" + 
+									"<label>Enabled</label>" + 
+								rowEnd);
+				var removeButton = $(rowStart + "<input type='button' class='remove' value='Remove' />" + rowEnd);
 				removeButton.click(function() {
 				$(this).parent().remove();
-					deletedNewznabs = deletedNewznabs + 1;
-				
+					deletedNewznabs = deletedNewznabs - 1;
 				});
 				formfields.append(removeButton);
-				formfields.append("</div>");
-				$("#add_newznab").after(formfields);
+				formfields.append("</table>");
+				$("#add_newznab").before(formfields);
 			});
 		
 			//Mirrors

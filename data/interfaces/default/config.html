@@ -1,4 +1,4 @@
-m<%inherit file="base.html"/>
+<%inherit file="base.html"/>
 <%!
 	import headphones
 	import string
@@ -302,6 +302,32 @@ m<%inherit file="base.html"/>
                                 <input type="text" name="waffles_passkey" value="${config['waffles_passkey']}" size="36">
                             </div>
                         </div>
+                        <div class="row checkbox">
+                            <input id="userutracker" type="checkbox" name="rutracker" onclick="initConfigCheckbox($(this));" value="1" ${config['use_rutracker']} /><label>rutracker.org</label>
+                        </div>
+                        <div class="config">
+                            <div class="row">
+                                <label>rutracker User Name: </label>
+                                <input type="text" name="rutracker_user" value="${config['rutracker_user']}" size="36">
+                            </div>
+                            <div class="row">
+                                <label>rutracker Password: </label>
+                                <input type="password" name="rutracker_password" value="${config['rutracker_password']}" size="36">
+			    </div>
+			</div>
+                        <div class="row checkbox">    
+			    <input id="usewhatcd" type="checkbox" name="whatcd" onclick="initConfigCheckbox($(this));" value="1" ${config['use_whatcd']} /><label>What.cd</label>
+                        </div>
+                        <div class="config">
+                            <div class="row">
+                                <label>What.cd Username: </label>
+                                <input type="text" name="whatcd_username" value="${config['whatcd_username']}" size="36">
+                            </div>
+                            <div class="row">
+                                <label>What.cd Password: </label>
+                                <input type="password" name="whatcd_password" value="${config['whatcd_password']}" size="36">
+                            </div>
+                        </div>
                     </fieldset>
                     
                 </td>
@@ -538,6 +564,10 @@ m<%inherit file="base.html"/>
 		        				<input type="checkbox" name="autowant_all" value="1" ${config['autowant_all']} /><label>Automatically Mark All Albums as Wanted</label>
 		        			</div>
 		        		</div>                		
+                        <div class="row">
+							<label>Cache Size (in MB):</label>
+							<input type="text" name="cache_sizemb" value="${config['cache_sizemb']}" size="7">
+						</div> 
 		        	</fieldset>
 					<fieldset>
 						<legend>Interface</legend>
@@ -559,6 +589,10 @@ m<%inherit file="base.html"/>
 						<div class="row">
 							<label>Log Directory:</label>
 							<input type="text" name="log_dir" value="${config['log_dir']}" size="50">
+						</div>
+						<div class="row">
+							<label>Cache Directory:</label>
+							<input type="text" name="cache_dir" value="${config['cache_dir']}" size="50">
 						</div>
 					</fieldset>
 						            	
@@ -926,6 +960,8 @@ m<%inherit file="base.html"/>
 		initConfigCheckbox("#usenewzbin");
 		initConfigCheckbox("#usenzbsorg");
 		initConfigCheckbox("#usewaffles");
+		initConfigCheckbox("#userutracker");
+		initConfigCheckbox("#usewhatcd");
 		initConfigCheckbox("#useblackhole");
 		initConfigCheckbox("#useapi");
 	}
