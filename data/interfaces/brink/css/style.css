@@ -159,6 +159,7 @@ ul#nav li a{
 	color: rgba(0,0,0,0.9);
 	text-shadow: 1px 1px rgba(0,145,255,0.2);
 }
+
 /* *
  * Sub navigation
  */
@@ -223,6 +224,11 @@ ul#nav-sub > li:hover > a {
 	border-bottom: 2px solid rgb(0,145,255);
 	cursor: pointer;
 }
+ul#nav-sub > li > a.active {
+	color: rgb(0,145,255);
+	border-bottom: 2px solid rgb(0,145,255);
+	cursor: pointer;
+}
  
 ul#content-container{
 	overflow: hidden;
@@ -248,11 +254,12 @@ input, textarea, select, option {
 	appearance:none;
 	-moz-appearance:none; /* Firefox */
 	-webkit-appearance:none; /* Safari and Chrome */
+	-0-appearance:none; /* Safari and Chrome */
 	padding-left: 5px;
 	padding-right: 5px;
 	font-size: .8em;
 	color: rgba(255,255,255,0.6);
-	line-height: 25px;
+	line-height: 2em;
 	font-weight: bold;
 	margin: 0;
 }
@@ -279,6 +286,8 @@ input[type="button"],
 input[type="submit"]{
 	background-color: rgba(0,0,0,.1);
 	border: 1px solid rgba(0,0,0,.3);
+	height: 2.3em;
+	display: inline;
 }
 select:hover,
 input[type="button"]:hover, 
@@ -288,6 +297,7 @@ input[type="submit"]:hover{
 }
 select option{
 	background: rgb(31,31,31);
+	border: 0;
 }
 select option:hover{
 	background: rgb(255,255,255);
@@ -335,8 +345,17 @@ input[type="checkbox"]:checked:after{
 /*config*/
 div#config_wrapper { margin: auto; width: 640px;}
 div#config_wrapper div table { width: 100%; border-collapse:separate; border-spacing: 10px; }
-div#config_wrapper div table tr td:first-child{ width: 240px; }
+div#config_wrapper div table tr td:first-child{ width: 50%; }
 div#config_wrapper div table tr td{ vertical-align: middle; }
+div.group {
+	padding: 5px;
+	background-color: rgba(0,0,0,0.1);
+	border-top: 1px solid rgba(0,0,0,0.1);
+	border-left: 1px solid rgba(0,0,0,0.1);
+	border-bottom: 1px solid rgba(255,255,255,0.1);
+	border-right: 1px solid rgba(255,255,255,0.1);
+	display: block;
+}
 /*end config*/
 
 /* Artist Table Style*/
@@ -424,35 +443,38 @@ table#album_table td#albumart { vertical-align: middle; text-align: left; }
 	height: 126px;
 	width: 126px;
 	position: relative;
-	box-shadow: 0 0 6px #000;
-	-moz-box-shadow: 0 0 6px #000;
-	-webkit-box-shadow: 0 0 6px #000;
-	overflow: hidden;
 }
-.image-container  .image-box img { 
+.image-container .image-box img { 
 	width: 100%;
-	min-height: 100%;
+	height: 100%;
 	position: absolute;
 	top: 0px;
 	left: 0px;
 	z-index: 1;
 	border: 0;
+	box-shadow: 0px 0px 10px rgb(0,0,0);
+	-moz-box-shadow: 0px 0px 10px rgb(0,0,0);
+	-webkit-box-shadow: 0px 0px 10px rgb(0,0,0);
+	-o-box-shadow: 0px 0px 10px rgb(0,0,0);
 }
 
-.image-container  input {
+.image-container .image-box input {
 	position: absolute;
 	top: 0px;
-	z-index: 2;
 	width: 100%;
 	height: 100%;
-	text-align: right; 
+	text-align: center;
 }
-.image-container  input:checked {
-	content: "";
-	background: rgba(0,0,0,0.1);
-	box-shadow: 0 0 10px rgb(0,145,255);
-	-moz-box-shadow: 0 0 10px rgb(0,145,255);
-	-webkit-box-shadow: 0 0 10px rgb(0,145,255);
+.image-container .image-box input:checked {
+	box-shadow: 0px 0px 10px rgb(0,145,255);
+	-moz-box-shadow: 0px 0px 10px rgb(0,145,255);
+	-webkit-box-shadow: 0px 0px 10px rgb(0,145,255);
+	-0-box-shadow: 0px 0px 10px rgb(0,145,255);
+}
+.image-container .image-box .image-count {
+	width: 100%;
+	height: 100%;
+	font-size: 10em;
 }
 .image-container .image-actions {
 	display: none;

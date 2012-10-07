@@ -62,21 +62,28 @@ class Cache(object):
     def __init__(self):
         
         pass
-        
-    def _exists(self, type):
 
-        self.artwork_files = glob.glob(os.path.join(self.path_to_art_cache, self.id + '*'))
-        self.thumb_files = glob.glob(os.path.join(self.path_to_art_cache, 'T_' + self.id + '*'))
+    def _findfilesstartingwith(self,pattern,folder):
+        files = []
+        if os.path.exists(folder):
+            for fname in os.listdir(folder):
+                if fname.startswith(pattern):
+                    files.append(os.path.join(folder,fname))
+        return files
+   
+    def _exists(self, type):
+        self.artwork_files = []
+        self.thumb_files = []
 
         if type == 'artwork':
-
+            self.artwork_files = self._findfilesstartingwith(self.id,self.path_to_art_cache)
             if self.artwork_files:
                 return True
             else:
                 return False
-                
+
         elif type == 'thumb':
-            
+            self.thumb_files = self._findfilesstartingwith("T_" + self.id,self.path_to_art_cache)
             if self.thumb_files:
                 return True
             else:
