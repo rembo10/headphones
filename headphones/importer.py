@@ -21,7 +21,7 @@ from lib.beets.mediafile import MediaFile
 import headphones
 from headphones import logger, helpers, db, mb, albumart, lastfm
 
-#[anonymous],[data],[no artist],[traditional],[unknown],Various Artists
+blacklisted_special_artist_names = ['[anonymous]','[data]','[no artist]','[traditional]','[unknown]','Various Artists']
 blacklisted_special_artists = ['f731ccc4-e22a-43af-a747-64213329e088','33cf029c-63b0-41a0-9855-be2a3665fb3b',\
                                 '314e1c25-dde7-4e4d-b2f4-0a7b9f7c56dc','eec63d3c-3b81-4ad4-b1e4-7c147d4d2b61',\
                                 '9be7f096-97ec-4615-8957-8d40b5dcbc41','125ec42a-7229-4250-afc5-e057484327fe',\
@@ -138,6 +138,14 @@ def addArtisttoDB(artistid, extrasonly=False):
         
     artist = mb.getArtist(artistid, extrasonly)
     
+    if artist and artist.get('artist_name') in blacklisted_special_artist_names:
+        logger.warn('Cannot import blocked special purpose artist: %s' % artist.get('artist_name'))
+        myDB.action('DELETE from artists WHERE ArtistID=?', [artistid])
+        #in case it's already in the db
+        myDB.action('DELETE from albums WHERE ArtistID=?', [artistid])
+        myDB.action('DELETE from tracks WHERE ArtistID=?', [artistid])
+        return
+
     if not artist:
         logger.warn("Error fetching artist info. ID: " + artistid)
         if dbartist is None:
