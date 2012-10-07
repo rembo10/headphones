@@ -65,7 +65,8 @@ class Cache(object):
 
     def _findfilesstartingwith(self,pattern,folder):
         files = []
-        for fname in os.listdir(folder):
+        if os.path.exists(folder):
+            for fname in os.listdir(folder):
                 if fname.startswith(pattern):
                     files.append(os.path.join(folder,fname))
         return files
