@@ -40,7 +40,7 @@
 		%for album in wanted:
 			<tr class="gradeZ">
 				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></th>
-				<td id="albumart"><img title="${album['AlbumID']}" height="64" width="64" src="/artwork/thumbs/album/${album['AlbumID']}"></td>
+				<td id="albumart"><img title="${album['AlbumID']}" height="64" width="64" src="artwork/thumbs/album/${album['AlbumID']}"></td>
 				<td id="artistname"><a href="artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a></td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
@@ -70,7 +70,7 @@
 		<tbody>
 		%for album in upcoming:
 			<tr class="gradeZ">
-				<td id="albumart"><img title="${album['AlbumID']}" height="64" width="64" src="/artwork/thumbs/album/${album['AlbumID']}"></td>
+				<td id="albumart"><img title="${album['AlbumID']}" height="64" width="64" src="artwork/thumbs/album/${album['AlbumID']}"></td>
 				<td id="artistname"><a href="artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a></td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
