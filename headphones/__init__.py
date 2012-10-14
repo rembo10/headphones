@@ -584,7 +584,7 @@ def launch_browser(host, port, root):
 
 def config_write():
 
-    new_config = ConfigObj()
+    new_config = ConfigObj(encoding="UTF-8")
     new_config.filename = CONFIG_FILE
 
     new_config['General'] = {}
