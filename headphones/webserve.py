@@ -352,6 +352,12 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("home")
     importLastFM.exposed = True
     
+    def importLastFMTag(self, tag, limit):
+        threading.Thread(target=lastfm.getTagTopArtists, args=(tag, limit)).start()
+        time.sleep(10)
+        raise cherrypy.HTTPRedirect("home")
+    importLastFMTag.exposed = True
+
     def importItunes(self, path):
         headphones.PATH_TO_XML = path
         headphones.config_write()
