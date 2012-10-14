@@ -35,6 +35,10 @@ def dbFilename(filename="headphones.db"):
     return os.path.join(headphones.DATA_DIR, filename)
     
 def getCacheSize():
+    #this will protect against typecasting problems produced by empty string and None settings
+    if not headphones.CACHE_SIZEMB:
+        #sqlite will work with this (very slowly)
+        return 0
     return int(headphones.CACHE_SIZEMB)
 
 class DBConnection:
