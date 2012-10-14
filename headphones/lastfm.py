@@ -158,7 +158,7 @@ def getTagTopArtists(tag, limit=50):
     from headphones import importer
 
     for artistid in artistlist:
-        importet.addArtisttoDB(artistid)
+        importer.addArtisttoDB(artistid)
 
 
 def getAlbumDescription(rgid, artist, album):
