@@ -179,6 +179,8 @@ def getArtist(artistid, extrasonly=False):
         #    uniquename = unicode(artist['sort-name'])
         
         artist_dict['artist_name'] = unicode(artist['name'])
+        #returning the artist id will help deal with artists that have multiple ids
+        artist_dict['artist_id'] = unicode(artist['id'])
         
         # Not using the following values anywhere yet so we don't need to grab them.
         # Was causing an exception to be raised if they didn't exist.

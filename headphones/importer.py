@@ -146,6 +146,19 @@ def addArtisttoDB(artistid, extrasonly=False):
         myDB.action('DELETE from tracks WHERE ArtistID=?', [artistid])
         return
 
+    #check if were accessing the artist with a secondary id (redirected)
+    if artist and artist['artist_id'] != artistid:
+        logger.warn("Artist accessed through secondary id, retrying with primary id")
+        myDB.action('DELETE from artists WHERE ArtistID=?', [artistid])
+        #in case the artist is already in the database with the secondary id assign everything to the correct primary id
+        myDB.action("UPDATE albums SET ArtistID=? WHERE ArtistID=?",[artist['artist_id'],artistid])
+        myDB.action("UPDATE tracks SET ArtistID=? WHERE ArtistID=?",[artist['artist_id'],artistid])
+        myDB.action("UPDATE allalbums SET ArtistID=? WHERE ArtistID=?",[artist['artist_id'],artistid])
+        myDB.action("UPDATE alltracks SET ArtistID=? WHERE ArtistID=?",[artist['artist_id'],artistid])
+        #retry with the correct artist id
+        addArtisttoDB(artist['artist_id'])
+        return
+
     if not artist:
         logger.warn("Error fetching artist info. ID: " + artistid)
         if dbartist is None:
