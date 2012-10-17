@@ -87,7 +87,27 @@
 			</fieldset>
 			<input type="button" value="Save changes" onclick="doAjaxCall('importLastFM',$(this),'tabs',true);return false;" data-success="Last.fm artists will be imported" data-error="Fill in a last.fm username"/>
 		</form>
-	</div>
+        <br/>
+        <form action="importLastFMTag" method="GET" id="importLastFMTag">
+            <fieldset>
+            <legend>Import Last.FM Tag</legend>
+            <p>Enter tag from which you want import top artists:</p>
+            <br/>
+            <div class="row">
+                <label>Tag</label>
+			    <input type="text" value="" onfocus="if
+                (this.value==this.defaultValue) this.value='';" name="tag" id="tag" size="18" />
+                <br/>
+                <label>Limit</label>
+			    <input type="text" value="50" onfocus="if
+			    (this.value==this.defaultValue) this.value='';" name="limit" id="limit" size="18" />
+            </div>
+            </fieldset>
+            <input type="submit" />
+        </form>
+    </div>
+
+
 	
 	<div id="tabs-3" class="configtable">
 		<fieldset>

@@ -126,6 +126,41 @@ def getArtists():
     for artistid in artistlist:
         importer.addArtisttoDB(artistid)
     
+def getTagTopArtists(tag, limit=50):
+    myDB = db.DBConnection()
+    results = myDB.select('SELECT ArtistID from artists')
+
+    url = 'http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&limit=%s&tag=%s&api_key=%s' % (limit, tag, api_key)
+    data = urllib2.urlopen(url, timeout=20).read()
+
+    try:
+        d = minidom.parseString(data)
+    except:
+        logger.error("Could not parse artist list from last.fm data")
+        return
+
+    artists = d.getElementsByTagName("artist")
+
+    artistlist = []
+
+    for artist in artists:
+        mbidnode = artist.getElementsByTagName("mbid")[0].childNodes
+
+        for node in mbidnode:
+            artist_mbid = node.data
+
+        try:
+            if not any(artist_mbid in x for x in results):
+                artistlist.append(artist_mbid)
+        except:
+            continue
+
+    from headphones import importer
+
+    for artistid in artistlist:
+        importer.addArtisttoDB(artistid)
+
+
 def getAlbumDescription(rgid, artist, album):
     
     myDB = db.DBConnection()    
