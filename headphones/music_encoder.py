@@ -66,23 +66,23 @@ def encode(albumPath):
     for music in musicFiles:        
         infoMusic=MediaFile(music)
         if headphones.ENCODER == 'lame':
-            if not any(music.lower().endswith('.' + x) for x in ["mp3", "wav"]):
+            if not any(music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.' + x) for x in ["mp3", "wav"]):
                 logger.warn(u'Lame cant encode "%s" format for "%s", use ffmpeg' % (os.path.splitext(music)[1].decode(headphones.SYS_ENCODING, 'replace'),music.decode(headphones.SYS_ENCODING, 'replace')))
             else:
-                if (music.lower().endswith('.mp3') and (infoMusic.bitrate/1000<=headphones.BITRATE)): 
+                if (music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.mp3') and (int(infoMusic.bitrate/1000)<=headphones.BITRATE)): 
                     logger.info('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music.decode(headphones.SYS_ENCODING, 'replace'),headphones.BITRATE))
                 else:
                     command(encoder,music,musicTempFiles[i],albumPath)
                     ifencoded=1
         else:
             if headphones.ENCODEROUTPUTFORMAT=='ogg':
-                if music.lower().endswith('.ogg'):
+                if music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.ogg'):
                     logger.warn('Can not reencode .ogg music "%s"' % (music.decode(headphones.SYS_ENCODING, 'replace')))
                 else:
                     command(encoder,music,musicTempFiles[i],albumPath)
                     ifencoded=1
             elif (headphones.ENCODEROUTPUTFORMAT=='mp3' or headphones.ENCODEROUTPUTFORMAT=='m4a'):
-                if (music.lower().endswith('.'+headphones.ENCODEROUTPUTFORMAT) and (infoMusic.bitrate/1000<=headphones.BITRATE)):
+                if (music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.'+headphones.ENCODEROUTPUTFORMAT) and (int(infoMusic.bitrate/1000)<=headphones.BITRATE)):
                     logger.info('Music "%s" has bitrate<="%skbit" will not be reencoded' % (music.decode(headphones.SYS_ENCODING, 'replace'),headphones.BITRATE))      
                 else:
                     command(encoder,music,musicTempFiles[i],albumPath)
@@ -102,6 +102,7 @@ def encode(albumPath):
     return musicFinalFiles
     
 def command(encoder,musicSource,musicDest,albumPath):
+    
     return_code=1
     cmd=''
     startMusicTime=time.time()
@@ -134,15 +135,19 @@ def command(encoder,musicSource,musicDest,albumPath):
         else:
             cmd=cmd+' '+ headphones.ADVANCEDENCODER
         cmd=cmd+ ' "' + musicDest + '"'
-    print cmd
-    time.sleep(10)
-    return_code = call(cmd, shell=True)
-    if (return_code==0) and (os.path.exists(musicDest)):
-        if headphones.DELETE_LOSSLESS_FILES:
-            os.remove(musicSource)
-        shutil.move(musicDest,albumPath)
-        logger.info('Music "%s" encoded in %s' % (musicSource,getTimeEncode(startMusicTime)))
-        
+
+    try:
+        return_code = call(cmd, shell=True)
+
+        if (return_code==0) and (os.path.exists(musicDest)):
+            if headphones.DELETE_LOSSLESS_FILES:
+                os.remove(musicSource)
+            shutil.move(musicDest,albumPath)
+            logger.info('Music "%s" encoded in %s' % (musicSource,getTimeEncode(startMusicTime)))
+
+    except subprocess.CalledProcessError, e:
+        logger.warn('Music "%s" encoding error : %s' % (musicSource, e.output))
+
 def getTimeEncode(start):
     seconds =int(time.time()-start)
     hours = seconds / 3600
