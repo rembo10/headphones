@@ -136,6 +136,7 @@ def command(encoder,musicSource,musicDest,albumPath):
             cmd=cmd+' '+ headphones.ADVANCEDENCODER
         cmd=cmd+ ' "' + musicDest + '"'
 
+    logger.debug(cmd)
     try:
         return_code = call(cmd, shell=True)
 
