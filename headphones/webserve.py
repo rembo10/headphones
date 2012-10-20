@@ -352,13 +352,11 @@ class WebInterface(object):
         headphones.LASTFM_USERNAME = username
         headphones.config_write()
         threading.Thread(target=lastfm.getArtists).start()
-        time.sleep(10)
         raise cherrypy.HTTPRedirect("home")
     importLastFM.exposed = True
     
     def importLastFMTag(self, tag, limit):
         threading.Thread(target=lastfm.getTagTopArtists, args=(tag, limit)).start()
-        time.sleep(10)
         raise cherrypy.HTTPRedirect("home")
     importLastFMTag.exposed = True
 
@@ -370,23 +368,15 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("home")
     importItunes.exposed = True
     
-    def musicSave(self, path, redirect=None, autoadd=0):
+    def musicScan(self, path, scan=0, redirect=None, autoadd=0):
         headphones.ADD_ARTISTS = autoadd
         headphones.MUSIC_DIR = path
-        headphones.config_write()
-        if redirect:
-            raise cherrypy.HTTPRedirect(redirect)
-    musicSave.exposed = True
-    
-    def musicScan(self, path, redirect=None, autoadd=0):
-        headphones.ADD_ARTISTS = autoadd
-        headphones.MUSIC_DIR = path
-        headphones.config_write()
-        try:    
-            threading.Thread(target=librarysync.libraryScan).start()
-        except Exception, e:
-            logger.error('Unable to complete the scan: %s' % e)
-        time.sleep(10)
+        headphones.config_write() 
+        if scan:
+            try:    
+                threading.Thread(target=librarysync.libraryScan).start()
+            except Exception, e:
+                logger.error('Unable to complete the scan: %s' % e)
         if redirect:
             raise cherrypy.HTTPRedirect(redirect)
         else:
@@ -421,7 +411,6 @@ class WebInterface(object):
         myDB = db.DBConnection()
         history = myDB.select('''SELECT * from snatched order by DateAdded DESC''')
         return serve_template(templatename="history.html", title="History", history=history)
-        return page
     history.exposed = True
     
     def logs(self):
