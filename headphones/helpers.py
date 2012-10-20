@@ -226,11 +226,13 @@ def extract_song_data(s):
         
 def smartMove(src, dest, delete=True):
     
+    from headphones import logger
+
     source_dir = os.path.dirname(src)
     filename = os.path.basename(src)
     
     if os.path.isfile(os.path.join(dest, filename)):
-        logger.info('Destination file exists: %s' % os.path.join(dest, filename).decode(headphones.SYS_ENCODING))
+        logger.info('Destination file exists: %s' % os.path.join(dest, filename).decode(headphones.SYS_ENCODING, 'replace'))
         title = os.path.splitext(filename)[0]
         ext = os.path.splitext(filename)[1]
         i = 1
@@ -244,7 +246,7 @@ def smartMove(src, dest, delete=True):
                     os.rename(src, os.path.join(source_dir, newfile))
                     filename = newfile
                 except Exception, e:
-                    logger.warn('Error renaming %s: %s' % (src.decode(headphones.SYS_ENCODING), e))
+                    logger.warn('Error renaming %s: %s' % (src.decode(headphones.SYS_ENCODING, 'replace'), str(e).decode(headphones.SYS_ENCODING, 'replace')))
                 break
 
     try:
@@ -254,4 +256,4 @@ def smartMove(src, dest, delete=True):
             shutil.copy(os.path.join(source_dir, filename), os.path.join(dest, filename))
             return True
     except Exception, e:
-        logger.warn('Error moving file %s: %s' % (filename.decode(headphones.SYS_ENCODING), e))
+        logger.warn('Error moving file %s: %s' % (filename.decode(headphones.SYS_ENCODING, 'replace'), str(e).decode(headphones.SYS_ENCODING, 'replace')))
