@@ -58,12 +58,12 @@
 					%endif
 					</div>
 					<div class="row checkbox"> 
-					<input type="checkbox" name="autoadd" value="1" ${checked(headphones.ADD_ARTISTS)}><label>Automatically add new artists</label>
+					<input type="checkbox" name="autoadd" id="autoadd" value="1" ${checked(headphones.ADD_ARTISTS)}><label>Automatically add new artists</label>
 					</div>
 								
 				</fieldset>
-				<input type="button" value="Save Changes" onclick="doAjaxCall('musicSave',$(this),'tabs',true);return false;" data-success="Changes have been saved">
-				<input type="button" value="Save Changes + Scan" onclick="doAjaxCall('musicScan',$(this),'tabs',true);return false;" data-success="Changes saved. Library will be scanned">
+				<input type="button" value="Save Changes and Scan" onclick="addScanAction();doAjaxCall('musicScan',$(this),'tabs',true);return false;" data-success="Changes saved. Library will be scanned">
+				<input type="button" value="Save Changes without Scanning Library" onclick="doAjaxCall('musicScan',$(this),'tabs',true);return false;" data-success="Changes Saved Successfully">
 			</form>
 		</div>
 
@@ -139,6 +139,10 @@
 </%def>
 <%def name="javascriptIncludes()">
 	<script>
+		function addScanAction() {
+			$('#autoadd').append('<input type="hidden" name="scan" value=1 />');
+		};
+		
 		function initThisPage() {
 			$('#manage_albums').click(function() {
 				$('#dialog').dialog();
