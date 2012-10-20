@@ -194,16 +194,10 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("home")
     deleteArtist.exposed = True
     
-    def returnEmptyArtists(self):
-        mydb = db.DBConnection()
-        emptyArtistNames = [row['ArtistID'] for row in myDB.select("SELECT ArtistName FROM artists WHERE LatestAlbum == None")]
-        return EmptyArtistNames
-    returnEmptyArtists.exposed = True
-    
     def deleteEmptyArtists(self):
         logger.info(u"Deleting all empty artists")
         myDB = db.DBConnection()
-        emptyArtistIDs = [row['ArtistID'] for row in myDB.select("SELECT ArtistID FROM artists WHERE LatestAlbum == None")]
+        emptyArtistIDs = [row['ArtistID'] for row in myDB.select("SELECT ArtistID FROM artists WHERE LatestAlbum IS NULL")]
         for ArtistID in emptyArtistIDs:
             logger.info(u"Deleting all traces of artist: " + ArtistID)
             myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
@@ -301,7 +295,9 @@ class WebInterface(object):
     upcoming.exposed = True
     
     def manage(self):
-        return serve_template(templatename="manage.html", title="Manage")
+        myDB = db.DBConnection()
+        emptyArtists = myDB.select("SELECT * FROM artists WHERE LatestAlbum IS NULL")
+        return serve_template(templatename="manage.html", title="Manage", emptyArtists=emptyArtists)
     manage.exposed = True
     
     def manageArtists(self):
