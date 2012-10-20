@@ -34,7 +34,7 @@
 		<ul>
 			<li><a href="#tabs-1">Scan Music Library</a></li>
 			<li><a href="#tabs-2">Imports</a></li>
-			<li><a href="#tabs-3">Force search</a></li>
+			<li><a href="#tabs-3">Force Actions</a></li>
 		</ul>
 		<div id="tabs-1" class="configtable">
 			<fieldset>
@@ -117,7 +117,19 @@
 				<a href="#" onclick="doAjaxCall('forceUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><span class="ui-icon ui-icon-heart"></span>Force Update Active Artists</a>
 				<a href="#" onclick="doAjaxCall('forcePostProcess',$(this))" data-success="Post-Processor is being loaded" data-error="Error during Post-Processing"><span class="ui-icon ui-icon-wrench"></span>Force Post-Process Albums in Download Folder</a>
 				<a href="#" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update successful" data-error="Error checking for update"><span class="ui-icon ui-icon-refresh"></span>Check for Headphones Updates</a>
-				<a href="#" onclick="doAjaxCall('deleteEmptyArtists',$(this))" data-success="Empty Artists deleted" data-error="Error deleting empty artists"><span class="ui-icon ui-icon-trash"></span>Delete empty Artists</a>
+				<a href="#" id="delete_empty_artists"><span class="ui-icon ui-icon-trash"></span>Delete empty Artists</a>
+					<div id="emptyartistdialog" title="Confirm Artist Deletion" style="display:none" class="configtable">
+					    %if emptyArtists:
+						<h3>The following artists will be deleted:</h3>
+						
+						%for emptyArtist in emptyArtists:
+							<p>${emptyArtist['ArtistName']}</p>
+						%endfor
+						<input type="button" value="Delete Empty Artists" onclick="doAjaxCall('deleteEmptyArtists',$(this))" data-success="Empty Artists deleted" data-error="Error deleting empty artists">
+					    %else:
+					        No empty artists found.
+					    %endif
+					</div>
 			</div>
 		</fieldset>
 		
@@ -129,6 +141,10 @@
 		function initThisPage() {
 			$('#manage_albums').click(function() {
 				$('#dialog').dialog();
+				return false;
+			});
+			$('#delete_empty_artists').click(function() {
+				$('#emptyartistdialog').dialog();
 				return false;
 			});
 			jQuery( "#tabs" ).tabs();
