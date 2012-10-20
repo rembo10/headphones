@@ -62,7 +62,8 @@
 					</div>
 								
 				</fieldset>
-				<input type="button" value="Save Changes" onclick="doAjaxCall('musicScan',$(this),'tabs',true);return false;" data-success="Library will be scanned">
+				<input type="button" value="Save Changes" onclick="doAjaxCall('musicSave',$(this),'tabs',true);return false;" data-success="Changes have been saved">
+				<input type="button" value="Save Changes + Scan" onclick="doAjaxCall('musicScan',$(this),'tabs',true);return false;" data-success="Changes saved. Library will be scanned">
 			</form>
 		</div>
 
