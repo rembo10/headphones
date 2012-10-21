@@ -620,8 +620,8 @@ def preprocess(resultlist):
 
                     #TODO: Do we want rar checking in here to try to keep unknowns out?
                     #or at least the option to do so?
-            except ExpatError:
-                logger.error('Unable to parse the best result NZB. Skipping.')
+            except Exception, e:
+                logger.error('Unable to parse the best result NZB. Error: ' + str(e) + '. (Make sure your username/password/API is correct for provider: ' + result[3])
                 continue
             return nzb, result
         else:

@@ -376,7 +376,7 @@ def moveFiles(albumpath, release, tracks):
             
     
     folder = helpers.replace_all(headphones.FOLDER_FORMAT, values)
-    folder = folder.replace('./', '_/').replace(':','_').replace('?','_').replace('/.','/_')
+    folder = folder.replace('./', '_/').replace(':','_').replace('?','_').replace('/.','/_').replace('<','_').replace('>','_')
     
     if folder.endswith('.'):
         folder = folder.replace(folder[len(folder)-1], '_')
@@ -676,7 +676,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
             logger.debug("Renaming for: " + downloaded_track.decode(headphones.SYS_ENCODING) + " is not neccessary")
             continue
 
-        logger.debug('Renaming %s ---> %s' % (downloaded_track.decode(headphones.SYS_ENCODING), new_file_name.decode(headphones.SYS_ENCODING)))
+        logger.debug('Renaming %s ---> %s' % (downloaded_track.decode(headphones.SYS_ENCODING,'replace'), new_file_name.decode(headphones.SYS_ENCODING,'replace')))
         try:
             os.rename(downloaded_track, new_file)
         except Exception, e:
