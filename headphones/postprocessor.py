@@ -603,6 +603,7 @@ def embedLyrics(downloaded_track_list):
             f = MediaFile(downloaded_track)
         except:
             logger.error('Could not read %s. Not checking lyrics' % downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+            continue
             
         if f.albumartist and f.title:
             metalyrics = lyrics.getLyrics(f.albumartist, f.title)
@@ -613,7 +614,7 @@ def embedLyrics(downloaded_track_list):
             metalyrics = None
             
         if lyrics:
-            logger.debug('Adding lyrics to: %s' % downloaded_track)
+            logger.debug('Adding lyrics to: %s' % downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
             f.lyrics = metalyrics
             f.save()
 
