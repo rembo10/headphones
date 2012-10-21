@@ -188,24 +188,26 @@ class WebInterface(object):
         myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
         myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
         myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+        myDB.action('DELETE from allalbums WHERE ArtistID=?', [ArtistID])
+        myDB.action('DELETE from alltracks WHERE ArtistID=?', [ArtistID])
         myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
         raise cherrypy.HTTPRedirect("home")
     deleteArtist.exposed = True
     
-
     def deleteEmptyArtists(self):
         logger.info(u"Deleting all empty artists")
         myDB = db.DBConnection()
-        emptyArtistIDs = [row['ArtistID'] for row in myDB.select("SELECT ArtistID FROM artists WHERE HaveTracks == 0")]
+        emptyArtistIDs = [row['ArtistID'] for row in myDB.select("SELECT ArtistID FROM artists WHERE LatestAlbum IS NULL")]
         for ArtistID in emptyArtistIDs:
             logger.info(u"Deleting all traces of artist: " + ArtistID)
             myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
             myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
             myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+            myDB.action('DELETE from allalbums WHERE ArtistID=?', [ArtistID])
+            myDB.action('DELETE from alltracks WHERE ArtistID=?', [ArtistID])
             myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
     deleteEmptyArtists.exposed = True     
-   
-        
+
     def refreshArtist(self, ArtistID):
         threading.Thread(target=importer.addArtisttoDB, args=[ArtistID]).start()  
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
@@ -293,7 +295,9 @@ class WebInterface(object):
     upcoming.exposed = True
     
     def manage(self):
-        return serve_template(templatename="manage.html", title="Manage")
+        myDB = db.DBConnection()
+        emptyArtists = myDB.select("SELECT * FROM artists WHERE LatestAlbum IS NULL")
+        return serve_template(templatename="manage.html", title="Manage", emptyArtists=emptyArtists)
     manage.exposed = True
     
     def manageArtists(self):
@@ -348,10 +352,14 @@ class WebInterface(object):
         headphones.LASTFM_USERNAME = username
         headphones.config_write()
         threading.Thread(target=lastfm.getArtists).start()
-        time.sleep(10)
         raise cherrypy.HTTPRedirect("home")
     importLastFM.exposed = True
     
+    def importLastFMTag(self, tag, limit):
+        threading.Thread(target=lastfm.getTagTopArtists, args=(tag, limit)).start()
+        raise cherrypy.HTTPRedirect("home")
+    importLastFMTag.exposed = True
+
     def importItunes(self, path):
         headphones.PATH_TO_XML = path
         headphones.config_write()
@@ -360,15 +368,15 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("home")
     importItunes.exposed = True
     
-    def musicScan(self, path, redirect=None, autoadd=0):
+    def musicScan(self, path, scan=0, redirect=None, autoadd=0):
         headphones.ADD_ARTISTS = autoadd
         headphones.MUSIC_DIR = path
-        headphones.config_write()
-        try:    
-            threading.Thread(target=librarysync.libraryScan).start()
-        except Exception, e:
-            logger.error('Unable to complete the scan: %s' % e)
-        time.sleep(10)
+        headphones.config_write() 
+        if scan:
+            try:    
+                threading.Thread(target=librarysync.libraryScan).start()
+            except Exception, e:
+                logger.error('Unable to complete the scan: %s' % e)
         if redirect:
             raise cherrypy.HTTPRedirect(redirect)
         else:
@@ -403,7 +411,6 @@ class WebInterface(object):
         myDB = db.DBConnection()
         history = myDB.select('''SELECT * from snatched order by DateAdded DESC''')
         return serve_template(templatename="history.html", title="History", history=history)
-        return page
     history.exposed = True
     
     def logs(self):
@@ -680,7 +687,7 @@ class WebInterface(object):
         samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0, 
         delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, 
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, 
-        customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, cache_sizemb=None, **kwargs):
+        customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, cache_sizemb=0, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -783,7 +790,7 @@ class WebInterface(object):
         headphones.CUSTOMSLEEP = customsleep
         headphones.HPUSER = hpuser
         headphones.HPPASS = hppass
-        headphones.CACHE_SIZEMB = cache_sizemb
+        headphones.CACHE_SIZEMB = int(cache_sizemb)
 
         # Handle the variable config options. Note - keys with False values aren't getting passed
         
