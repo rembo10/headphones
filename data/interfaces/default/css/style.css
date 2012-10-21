@@ -296,6 +296,23 @@ input[type=button] {
   text-decoration: none;
   text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
 }
+.configsubmit {
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  background: #222222 url("../images/button.png") repeat-x;
+  border: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+  color: #fff;
+  cursor: pointer;
+  margin-left: 75%;
+  margin-top: 5px;
+  text-align: center;
+  width: 200px;
+  padding: 4px 10px;
+  text-decoration: none;
+  text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
+}
 form legend,
 form h2 {
   font-size: 16px;
@@ -506,7 +523,7 @@ header #logo {
 }
 footer {
   display: table;
-  margin: 60px auto 50px auto;
+  margin: 40px auto 50px auto;
   width: 960px;
   padding-top: 10px;
   border-top: 1px solid #EEE;
@@ -532,6 +549,29 @@ footer {
   margin-top: 10px;
 }
 .message .ui-icon {
+  float: left;
+  margin-right: 5px;
+  position: relative;
+  top: 4px;
+}
+.configmessage {
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+  background-image: -moz-linear-gradient(#fcf5c2, #fff6a9) !important;
+  background-image: linear-gradient(#fcf5c2, #fff6a9) !important;
+  background-image: -webkit-linear-gradient(#fcf5c2, #fff6a9) !important;
+  background-image: -o-linear-gradient(#fcf5c2, #fff6a9) !important;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  text-align: center;
+  padding: 3px 5px;
+  width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 5px;
+}
+.configmessage .ui-icon {
   float: left;
   margin-right: 5px;
   position: relative;
