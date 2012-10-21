@@ -93,7 +93,13 @@
 	                </fieldset>
                 </td>
             </tr>
+	    <tr>
+		<div class="configmessage">
+        	    <span class="ui-icon ui-icon-info" ></span>Web Interface changes require a restart to take effect
+		</div>
+	    </tr>
         </table>
+	<input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
 	</div>
 	
 	<div id="tabs-2">
@@ -173,6 +179,7 @@
             </tr>            
     
 	    </table>
+	    <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
 	</div>
 	<div id="tabs-3">
         <table class="configtable" summary="Search Providers">
@@ -334,6 +341,7 @@
 
             </tr>
         </table>
+	<input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
 	</div>
 	<div id="tabs-4">
         <table class="configtable" summary="Quality & Post Processing">
@@ -384,6 +392,7 @@
                </td>
             </tr>
 		</table>
+		<input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
 	</div>
 	<div id="tabs-5">
         <table class="configtable" summary="Advanced Settings">
@@ -736,11 +745,8 @@
 				</td>
 			</tr>
         </table>
+	<input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
     </div>	
-        <input type="button" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
-        <div class="message">
-        	<p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>Web Interface changes require a restart to take effect</p>
-		</div>
 
       </form>
  </div>
