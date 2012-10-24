@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib, urllib2, urlparse
+import urllib, urllib2, urlparse, httplib
 import lib.feedparser as feedparser
 from lib.pygazelle import api as gazelleapi
 from lib.pygazelle import encoding as gazelleencoding
@@ -84,7 +84,17 @@ def url_fix(s, charset='utf-8'):
     scheme, netloc, path, qs, anchor = urlparse.urlsplit(s)
     path = urllib.quote(path, '/%')
     qs = urllib.quote_plus(qs, ':&=')
-    return urlparse.urlunsplit((scheme, netloc, path, qs, anchor))    
+    return urlparse.urlunsplit((scheme, netloc, path, qs, anchor))
+    
+def patch_http_response_read(func):
+    def inner(*args):
+        try:
+            return func(*args)
+        except httplib.IncompleteRead, e:
+            return e.partial
+
+    return inner
+httplib.HTTPResponse.read = patch_http_response_read(httplib.HTTPResponse.read)
     
     
 def searchforalbum(albumid=None, new=False, lossless=False):
