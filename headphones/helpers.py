@@ -118,6 +118,17 @@ def now():
     now = datetime.datetime.now()
     return now.strftime("%Y-%m-%d %H:%M:%S")
     
+def get_age(date):
+
+    split_date = date.split('-')
+    
+    try:
+        days_old = int(split_date[0])*365 + int(split_date[1])*30 + int(split_date[2])
+    except IndexError:
+        days_old = False
+        
+    return days_old
+    
 def bytes_to_mb(bytes):
 
     mb = int(bytes)/1048576

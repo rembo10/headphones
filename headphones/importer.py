@@ -358,11 +358,17 @@ def addArtisttoDB(artistid, extrasonly=False):
             
         if not rg_exists:
             
-            newValueDict['DateAdded']= helpers.today()
+            today = helpers.today()
+            
+            newValueDict['DateAdded']= today
                             
             if headphones.AUTOWANT_ALL:
                 newValueDict['Status'] = "Wanted"
-            elif album['ReleaseDate'] > helpers.today() and headphones.AUTOWANT_UPCOMING:
+            elif album['ReleaseDate'] > today and headphones.AUTOWANT_UPCOMING:
+                newValueDict['Status'] = "Wanted"
+            # Sometimes "new" albums are added to musicbrainz after their release date, so let's try to catch these
+            # The first test just makes sure we have year-month-day
+            elif helpers.get_age(album['ReleaseDate']) and helpers.get_age(today) - helpers.get_age(album['ReleaseDate']) < 21 and headphones.AUTOWANT_UPCOMING:
                 newValueDict['Status'] = "Wanted"
             else:
                 newValueDict['Status'] = "Skipped"
