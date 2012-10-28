@@ -116,7 +116,7 @@ def main():
     # Force the http port if neccessary
     if args.port:
         http_port = args.port
-        logger.info('Starting Headphones on foced port: %i' % http_port)
+        logger.info('Starting Headphones on forced port: %i' % http_port)
     else:
         http_port = int(headphones.HTTP_PORT)
         
