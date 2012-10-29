@@ -140,7 +140,10 @@ def main():
     
     while True:
         if not headphones.SIGNAL:
-            time.sleep(1)
+            try:
+                time.sleep(1)
+            except KeyboardInterrupt:
+                headphones.SIGNAL = 'shutdown'
         else:
             logger.info('Received signal: ' + headphones.SIGNAL)
             if headphones.SIGNAL == 'shutdown':
