@@ -28,15 +28,6 @@ from lib.beets.mediafile import MediaFile
 import headphones
 from headphones import db, albumart, librarysync, lyrics, logger, helpers
 
-# xld
-      
-if headphones.ADVANCEDENCODER.lower().startswith('xld'):
-    XLDPROFILE = headphones.ADVANCEDENCODER[4:]
-    import getXldProfile
-    XLD = True
-else:
-    XLD = False
-
 postprocessor_lock = threading.Lock()
 
 def checkFolder():
@@ -167,9 +158,11 @@ def verify(albumid, albumpath):
     
     # use xld to split cue 
    
-    if XLD and headphones.MUSIC_ENCODER and downloaded_cuecount and downloaded_cuecount >= len(downloaded_track_list):
-    	
-        (xldProfile, xldFormat, xldBitrate) = getXldProfile.getXldProfile(XLDPROFILE)
+    if headphones.ENCODER == 'xld' and headphones.MUSIC_ENCODER and downloaded_cuecount and downloaded_cuecount >= len(downloaded_track_list):
+    
+        import getXldProfile
+        
+        (xldProfile, xldFormat, xldBitrate) = getXldProfile.getXldProfile(headphones.XLDPROFILE)
         if not xldFormat:
             logger.info(u'Details for xld profile "%s" not found, cannot split cue' % (xldProfile))
         else:
