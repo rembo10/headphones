@@ -29,8 +29,7 @@ except ImportError:
 
 # xld
       
-if headphones.ADVANCEDENCODER.lower().startswith('xld'):
-    XLDPROFILE = headphones.ADVANCEDENCODER[4:]
+if headphones.ENCODER == 'xld':
     import getXldProfile
     XLD = True
 else:
@@ -42,7 +41,7 @@ def encode(albumPath):
     
     if XLD:
         global xldProfile
-        (xldProfile, xldFormat, xldBitrate) = getXldProfile.getXldProfile(XLDPROFILE)
+        (xldProfile, xldFormat, xldBitrate) = getXldProfile.getXldProfile(headphones.XLDPROFILE)
         if not xldFormat:
             logger.error(u'Details for xld profile "%s" not found, will not be reencoded' % (xldProfile))
             return None
