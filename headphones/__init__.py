@@ -168,6 +168,7 @@ FOLDER_PERMISSIONS = None
 MUSIC_ENCODER = False
 ENCODERFOLDER = None
 ENCODER = None
+XLDPROFILE = None
 BITRATE = None
 SAMPLINGFREQUENCY = None
 ADVANCEDENCODER = None
@@ -261,7 +262,7 @@ def initialize():
                 LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS,\
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
-                ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, \
+                ENCODERFOLDER, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, \
                 ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
@@ -397,6 +398,7 @@ def initialize():
         
         ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')        
         ENCODER = check_setting_str(CFG, 'General', 'encoder', 'ffmpeg')
+        XLDPROFILE = check_setting_str(CFG, 'General', 'xldprofile', '')
         BITRATE = check_setting_int(CFG, 'General', 'bitrate', 192)
         SAMPLINGFREQUENCY= check_setting_int(CFG, 'General', 'samplingfrequency', 44100)
         MUSIC_ENCODER = bool(check_setting_int(CFG, 'General', 'music_encoder', 0))
@@ -723,6 +725,7 @@ def config_write():
 
     new_config['General']['music_encoder'] = int(MUSIC_ENCODER)
     new_config['General']['encoder'] = ENCODER
+    new_config['General']['xldprofile'] = XLDPROFILE
     new_config['General']['bitrate'] = int(BITRATE)
     new_config['General']['samplingfrequency'] = int(SAMPLINGFREQUENCY)
     new_config['General']['encoderfolder'] = ENCODERFOLDER
