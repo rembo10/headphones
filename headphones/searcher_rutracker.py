@@ -146,18 +146,18 @@ class Rutracker():
             
          # get headphones track count for album, return if not found
         
-        hptrackcount = 0
-        
         myDB = db.DBConnection()
-        tracks = myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=?', [albumid])
-        for track in tracks:
-            hptrackcount += 1
+        tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
+        hptrackcount = len(tracks)
         
         if not hptrackcount:
             logger.info('headphones track info not found, cannot compare to torrent') 
             return False
         
         # Return the first valid torrent, unless we want a preferred bitrate then we want all valid entries
+        unwantedlist = ['promo', 'vinyl', '[lp]', 'songbook', 'tvrip', 'hdtv', 'dvd']
+        formatlist = ['.ape', '.flac', '.ogg', '.m4a', '.aac', '.mp3', '.wav', '.aif']
+        deluxelist = ['deluxe', 'edition', 'japanese', 'exclusive']
        
         for torrent in torrentlist:
             
@@ -170,8 +170,7 @@ class Rutracker():
             
             title = returntitle.lower()
             
-            if 'promo' not in title and 'vinyl' not in title and 'songbook' not in title and 'tvrip' not in title and 'hdtv' not in title and 'dvd' not in title \
-              and int(size) <= maxsize and int(seeders) >= minseeders:
+            if not any(unwanted in title for unwanted in unwantedlist) and int(size) <= maxsize and int(seeders) >= minseeders:
                      
                 # Check torrent info
                 
@@ -202,7 +201,7 @@ class Rutracker():
                     for pathfile in metainfo['files']:
                         path = pathfile['path']
                         for file in path:
-                            if '.ape' in file or '.flac' in file or '.ogg' in file or '.m4a' in file or '.aac' in file or '.mp3' in file or '.wav' in file or '.aif' in file:
+                            if any(format in file for format in formatlist):
                                 trackcount += 1
                             if '.cue' in file:
                                 cuecount += 1
@@ -252,7 +251,7 @@ class Rutracker():
                 if trackcount == hptrackcount:
                     valid = True
                 elif trackcount > hptrackcount:
-                    if 'deluxe' in title or 'edition' in title or 'japanese' or 'exclusive' in title:
+                    if any(deluxe in title for deluxe in deluxelist):
                         valid = True
                         
                 # return 1st valid torrent if not checking by bitrate, else add to list and return at end
