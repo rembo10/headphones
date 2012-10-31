@@ -36,6 +36,7 @@ PROG_DIR = None
 ARGS = None
 SIGNAL = None
 
+SYS_PLATFORM = None
 SYS_ENCODING = None
 
 VERBOSE = 1
@@ -251,7 +252,7 @@ def initialize():
 
     with INIT_LOCK:
     
-        global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
+        global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, SYS_PLATFORM, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, \
                 CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
@@ -759,7 +760,7 @@ def start():
         # Start our scheduled background tasks
         from headphones import updater, searcher, librarysync, postprocessor
 
-        SCHED.add_interval_job(updater.dbUpdate, hours=48)
+        SCHED.add_interval_job(updater.dbUpdate, hours=24)
         SCHED.add_interval_job(searcher.searchforalbum, minutes=SEARCH_INTERVAL)
         SCHED.add_interval_job(librarysync.libraryScan, minutes=LIBRARYSCAN_INTERVAL)
         

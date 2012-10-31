@@ -20,6 +20,7 @@ import time
 import threading
 import music_encoder
 import urllib, shutil, re
+import uuid
 from headphones import notifiers
 import lib.beets as beets
 from lib.beets import autotag
@@ -27,6 +28,7 @@ from lib.beets.mediafile import MediaFile
 
 import headphones
 from headphones import db, albumart, librarysync, lyrics, logger, helpers
+from headphones.helpers import sab_replace_dots, sab_replace_spaces
 
 postprocessor_lock = threading.Lock()
 
@@ -40,15 +42,27 @@ def checkFolder():
         for album in snatched:
         
             if album['FolderName']:
+                
+                # Need to check for variations due to sab renaming. Ideally we'd check the sab config via api to 
+                # figure out which options are checked, but oh well
 
-                nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
+                nzb_album_possibilities = [ album['FolderName'],
+                                            sab_replace_dots(album['FolderName']),
+                                            sab_replace_spaces(album['FolderName']),
+                                            sab_replace_dots(sab_replace_spaces(album['FolderName']))
+                                        ]
+
                 torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
 
-                if os.path.exists(nzb_album_path):
-                    logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
-                    verify(album['AlbumID'], nzb_album_path)
+                for nzb_folder_name in nzb_album_possibilities:
+                    
+                    nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING)
 
-                elif os.path.exists(torrent_album_path):
+                    if os.path.exists(nzb_album_path):
+                        logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
+                        verify(album['AlbumID'], nzb_album_path)
+
+                if os.path.exists(torrent_album_path):
                     logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
                     verify(album['AlbumID'], torrent_album_path)
 
@@ -789,20 +803,21 @@ def forcePostProcess():
         logger.info('Found no folders to process in: %s' % str(download_dirs).decode(headphones.SYS_ENCODING, 'replace'))
 
     # Parse the folder names to get artist album info
+    myDB = db.DBConnection()
+    
     for folder in folders:
 
         folder_basename = os.path.basename(folder).decode(headphones.SYS_ENCODING, 'replace')
 
         logger.info('Processing: %s' % folder_basename)
-    
+        
         try:
             name, album, year = helpers.extract_data(folder_basename)
         except:
-            logger.info("Couldn't parse " + folder_basename + " into any valid format.")
-            continue
+            name = None
+
         if name and album and year:
             
-            myDB = db.DBConnection()
             release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
             if release:
                 logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
@@ -819,3 +834,25 @@ def forcePostProcess():
                     verify(rgid, folder)
                 else:
                     logger.info('No match found on MusicBrainz for: %s - %s' % (name, album))
+                    continue
+                    
+        else:
+            try:
+                possible_rgid = folder_basename[-36:]
+                # re pattern match: [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12} 
+                rgid = uuid.UUID(possible_rgid)
+                    
+            except:
+                logger.info("Couldn't parse " + folder_basename + " into any valid format. If adding albums from another source, they must be in an 'Artist - Album [Year]' format, or end with the musicbrainz release group id")
+                continue
+            
+            
+            if rgid:
+                rgid = possible_rgid
+                release = myDB.action('SELECT ArtistName, AlbumTitle, AlbumID from albums WHERE AlbumID=?', [rgid]).fetchone()
+                if release:
+                    logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
+                    verify(release['AlbumID'], folder)
+                else:
+                    logger.info('Found a (possibly) valid Musicbrainz identifier in album folder name - continuing post-processing')
+                    verify(rgid, folder)

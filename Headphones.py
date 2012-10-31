@@ -41,6 +41,7 @@ def main():
     headphones.ARGS = sys.argv[1:]
     
     # From sickbeard
+    headphones.SYS_PLATFORM = sys.platform
     headphones.SYS_ENCODING = None
 
     try:
