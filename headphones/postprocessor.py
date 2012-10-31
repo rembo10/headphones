@@ -519,7 +519,7 @@ def moveFiles(albumpath, release, tracks):
             except Exception, e:
                 logger.error('Could not create lossless folder for %s. (Error: %s)' % (release['AlbumTitle'], e))
                 if not make_lossy_folder:
-                    return albumpath
+                    return [albumpath]
                 
     if make_lossy_folder:
         if os.path.exists(lossy_destination_path) and 'album' in last_folder.lower():
@@ -541,7 +541,7 @@ def moveFiles(albumpath, release, tracks):
                 os.makedirs(lossy_destination_path)
             except Exception, e:
                 logger.error('Could not create folder for %s. Not moving: %s' % (release['AlbumTitle'], e))
-                return albumpath
+                return [albumpath]
     
     logger.info('Checking which files we need to move.....')
 
