@@ -112,6 +112,7 @@ AUTOWANT_UPCOMING = False
 AUTOWANT_ALL = False
 
 SEARCH_INTERVAL = 360
+LIBRARYSCAN = False
 LIBRARYSCAN_INTERVAL = 300
 DOWNLOAD_SCAN_INTERVAL = 5
 
@@ -260,7 +261,7 @@ def initialize():
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
-                LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
+                LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS,\
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, \
@@ -343,6 +344,7 @@ def initialize():
         AUTOWANT_ALL = bool(check_setting_int(CFG, 'General', 'autowant_all', 0))
         
         SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'search_interval', 360)
+        LIBRARYSCAN = bool(check_setting_int(CFG, 'General', 'libraryscan', 1))
         LIBRARYSCAN_INTERVAL = check_setting_int(CFG, 'General', 'libraryscan_interval', 300)
         DOWNLOAD_SCAN_INTERVAL = check_setting_int(CFG, 'General', 'download_scan_interval', 5)
         
@@ -659,6 +661,7 @@ def config_write():
     new_config['What.cd']['whatcd_password'] = WHATCD_PASSWORD
 
     new_config['General']['search_interval'] = SEARCH_INTERVAL
+    new_config['General']['libraryscan'] = int(LIBRARYSCAN)
     new_config['General']['libraryscan_interval'] = LIBRARYSCAN_INTERVAL
     new_config['General']['download_scan_interval'] = DOWNLOAD_SCAN_INTERVAL
 
@@ -762,7 +765,7 @@ def start():
 
         SCHED.add_interval_job(updater.dbUpdate, hours=24)
         SCHED.add_interval_job(searcher.searchforalbum, minutes=SEARCH_INTERVAL)
-        SCHED.add_interval_job(librarysync.libraryScan, minutes=LIBRARYSCAN_INTERVAL)
+        SCHED.add_interval_job(librarysync.libraryScan, minutes=LIBRARYSCAN_INTERVAL, kwargs={'cron':True})
         
         if CHECK_GITHUB:
             SCHED.add_interval_job(versioncheck.checkGithub, minutes=CHECK_GITHUB_INTERVAL)
