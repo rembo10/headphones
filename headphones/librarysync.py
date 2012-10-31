@@ -22,8 +22,11 @@ import headphones
 from headphones import db, logger, helpers, importer
 
 # You can scan a single directory and append it to the current library by specifying append=True, ArtistID & ArtistName
-def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None):
+def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=False):
 
+    if cron and not headphones.LIBRARYSCAN:
+        return
+        
     if not dir:
         dir = headphones.MUSIC_DIR
     
