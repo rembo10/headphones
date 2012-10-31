@@ -240,6 +240,11 @@ def verify(albumid, albumpath):
             logger.info(u"Exception from MediaFile for: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + u" : " + unicode(e))
             continue
             
+        if not f.artist:
+            continue
+        if not f.album:
+            continue
+            
         metaartist = helpers.latinToAscii(f.artist.lower()).encode('UTF-8')
         dbartist = helpers.latinToAscii(release['ArtistName'].lower()).encode('UTF-8')
         metaalbum = helpers.latinToAscii(f.album.lower()).encode('UTF-8')
@@ -259,6 +264,9 @@ def verify(albumid, albumpath):
         split_track_name = re.sub('[\.\-\_]', ' ', track_name).lower()
         for track in tracks:
             
+            if not track['TrackTitle']:
+                continue
+                
             dbtrack = helpers.latinToAscii(track['TrackTitle'].lower()).encode('UTF-8')
             filetrack = helpers.latinToAscii(split_track_name).encode('UTF-8')
             logger.debug('Checking if track title: %s is in file name: %s' % (dbtrack, filetrack))
