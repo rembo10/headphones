@@ -120,7 +120,10 @@ def now():
     
 def get_age(date):
 
-    split_date = date.split('-')
+    try:
+        split_date = date.split('-')
+    except:
+        return False
     
     try:
         days_old = int(split_date[0])*365 + int(split_date[1])*30 + int(split_date[2])
