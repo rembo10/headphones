@@ -144,6 +144,10 @@ def mb_to_bytes(mb_str):
         return int(float(result.group(1))*1048576)
 
 def replace_all(text, dic):
+    
+    if not text:
+        return ''
+        
     for i, j in dic.iteritems():
         text = text.replace(i, j)
     return text
