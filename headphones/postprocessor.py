@@ -462,8 +462,7 @@ def moveFiles(albumpath, release, tracks):
                 '$first':   firstchar.lower()
             }
             
-    
-    folder = helpers.replace_all(headphones.FOLDER_FORMAT, values)
+    folder = helpers.replace_all(headphones.FOLDER_FORMAT.strip(), values)
     folder = folder.replace('./', '_/').replace(':','_').replace('?','_').replace('/.','/_').replace('<','_').replace('>','_')
     
     if folder.endswith('.'):
@@ -503,7 +502,7 @@ def moveFiles(albumpath, release, tracks):
     else:
         make_lossy_folder = True
 
-    last_folder = headphones.FOLDER_FORMAT.split('/')[-1]
+    last_folder = headphones.FOLDER_FORMAT.strip().split('/')[-1]
     
     if make_lossless_folder:
         # Only rename the folder if they use the album name, otherwise merge into existing folder
@@ -751,7 +750,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
                         
             ext = os.path.splitext(downloaded_track)[1]
             
-            new_file_name = helpers.replace_all(headphones.FILE_FORMAT, values).replace('/','_') + ext
+            new_file_name = helpers.replace_all(headphones.FILE_FORMAT.strip(), values).replace('/','_') + ext
         
         
         new_file_name = new_file_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING)
