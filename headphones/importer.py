@@ -374,13 +374,6 @@ def addArtisttoDB(artistid, extrasonly=False):
                 newValueDict['Status'] = "Skipped"
         
         myDB.upsert("albums", newValueDict, controlValueDict)
-        
-        #start a search for the album if it's new and autowant_all is selected:
-        # Should this run in a background thread? Don't know if we want to have a bunch of
-        # simultaneous threads running
-        if not rg_exists and headphones.AUTOWANT_ALL:    
-            from headphones import searcher
-            searcher.searchforalbum(albumid=rg['id'])
 
         myDB.action('DELETE from tracks WHERE AlbumID=?', [rg['id']])
         tracks = myDB.action('SELECT * from alltracks WHERE ReleaseID=?', [releaseid]).fetchall()
@@ -411,16 +404,24 @@ def addArtisttoDB(artistid, extrasonly=False):
 
         # Mark albums as downloaded if they have at least 80% (by default, configurable) of the album
         have_track_count = len(myDB.select('SELECT * from tracks WHERE AlbumID=? AND Location IS NOT NULL', [rg['id']]))
+        marked_as_downloaded = False
         
         if rg_exists:
             if rg_exists['Status'] == 'Skipped' and ((have_track_count/float(total_track_count)) >= (headphones.ALBUM_COMPLETION_PCT/100.0)):
                 myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', rg['id']])
+                marked_as_downloaded = True
         else:
             if ((have_track_count/float(total_track_count)) >= (headphones.ALBUM_COMPLETION_PCT/100.0)):
                 myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', rg['id']])
+                marked_as_downloaded = True
 
         logger.info(u"Seeing if we need album art for " + rg['title'])
         cache.getThumb(AlbumID=rg['id'])
+        
+        #start a search for the album if it's new, hasn't been marked as downloaded and autowant_all is selected:
+        if not rg_exists and not marked_as_downloaded and headphones.AUTOWANT_ALL:    
+            from headphones import searcher
+            searcher.searchforalbum(albumid=rg['id'])
 
     latestalbum = myDB.action('SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [artistid]).fetchone()
     totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid]))
