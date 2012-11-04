@@ -574,6 +574,11 @@ def verifyresult(title, artistterm, term):
 
     #another attempt to weed out substrings. We don't want "Vol III" when we were looking for "Vol II"
     
+    # Filter out remix search results (if we're not looking for it)
+    if 'remix' not in term and 'remix' in title:
+        logger.info("Removed " + title + " from results because it's a remix album and we're not looking for a remix album right now")
+        return False
+    
     tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
     for token in tokens:
 

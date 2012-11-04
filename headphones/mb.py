@@ -157,7 +157,7 @@ def getArtist(artistid, extrasonly=False):
         artist = None
         
         try:
-            limit = 100
+            limit = 200
             artist = musicbrainzngs.get_artist_by_id(artistid)['artist']
             newRgs = None
             artist['release-group-list'] = []
