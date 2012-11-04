@@ -254,6 +254,17 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 logger.info("Album type is audiobook/spokenword. Using audiobook category")
                 
             for newznab_host in newznab_hosts:
+                
+                # Add a little mod for kere.ws
+                if newznab_host[0] == "http://kere.ws":
+                    if categories == "3040":
+                        categories = categories + ",4070"
+                    elif categories == "3040,3010":
+                        categories = categories + ",4070,4010"
+                    elif categories == "3010":
+                        categories = categories + ",4010"
+                    else:
+                        categories = categories + ",4050"
 
                 params = {    "t": "search",
                             "apikey": newznab_host[1],
