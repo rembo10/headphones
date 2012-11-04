@@ -489,8 +489,8 @@ def moveFiles(albumpath, release, tracks):
     make_lossy_folder = False
     make_lossless_folder = False
     
-    lossy_destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING)
-    lossless_destination_path = os.path.normpath(os.path.join(headphones.LOSSLESS_DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING)
+    lossy_destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING, 'replace')
+    lossless_destination_path = os.path.normpath(os.path.join(headphones.LOSSLESS_DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING, 'replace')
     
     # If they set a destination dir for lossless media, only create the lossy folder if there is lossy media
     if headphones.LOSSLESS_DESTINATION_DIR:
@@ -513,7 +513,7 @@ def moveFiles(albumpath, release, tracks):
             i = 1
             while True:
                 newfolder = temp_folder + '[%i]' % i
-                lossless_destination_path = os.path.normpath(os.path.join(headphones.LOSSLESS_DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING)
+                lossless_destination_path = os.path.normpath(os.path.join(headphones.LOSSLESS_DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING, 'replace')
                 if os.path.exists(lossless_destination_path):
                     i += 1
                 else:
@@ -536,7 +536,7 @@ def moveFiles(albumpath, release, tracks):
             i = 1
             while True:
                 newfolder = temp_folder + '[%i]' % i
-                lossy_destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING)
+                lossy_destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING, 'replace')
                 if os.path.exists(lossy_destination_path):
                     i += 1
                 else:
@@ -606,7 +606,7 @@ def moveFiles(albumpath, release, tracks):
             temp_f = os.path.join(temp_f, f)
     
             try:
-                os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING), int(headphones.FOLDER_PERMISSIONS, 8))
+                os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING, 'replace'), int(headphones.FOLDER_PERMISSIONS, 8))
             except Exception, e:
                 logger.error("Error trying to change permissions on folder: %s" % temp_f.decode(headphones.SYS_ENCODING, 'replace'))
             
@@ -753,7 +753,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
             new_file_name = helpers.replace_all(headphones.FILE_FORMAT.strip(), values).replace('/','_') + ext
         
         
-        new_file_name = new_file_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING)
+        new_file_name = new_file_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING, 'replace')
 
         if new_file_name.startswith('.'):
             new_file_name = new_file_name.replace(0, '_')
@@ -761,7 +761,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
         new_file = os.path.join(albumpath, new_file_name)
         
         if downloaded_track == new_file_name:
-            logger.debug("Renaming for: " + downloaded_track.decode(headphones.SYS_ENCODING) + " is not neccessary")
+            logger.debug("Renaming for: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + " is not neccessary")
             continue
 
         logger.debug('Renaming %s ---> %s' % (downloaded_track.decode(headphones.SYS_ENCODING,'replace'), new_file_name.decode(headphones.SYS_ENCODING,'replace')))
@@ -791,9 +791,9 @@ def forcePostProcess():
 
     download_dirs = []
     if headphones.DOWNLOAD_DIR:
-        download_dirs.append(headphones.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING))
+        download_dirs.append(headphones.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING, 'replace'))
     if headphones.DOWNLOAD_TORRENT_DIR:
-        download_dirs.append(headphones.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING))
+        download_dirs.append(headphones.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
         
     logger.info('Checking to see if there are any folders to process in download_dir(s): %s' % str(download_dirs).decode(headphones.SYS_ENCODING, 'replace'))
     # Get a list of folders in the download_dir

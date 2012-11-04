@@ -696,12 +696,12 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         else:
             term = cleanartist + ' ' + cleanalbum
 
-        semi_clean_artist_term = re.sub('[\.\-\/]', ' ', semi_cleanartist).encode('utf-8')
-        semi_clean_album_term = re.sub('[\.\-\/]', ' ', semi_cleanalbum).encode('utf-8')
+        semi_clean_artist_term = re.sub('[\.\-\/]', ' ', semi_cleanartist).encode('utf-8', 'replace')
+        semi_clean_album_term = re.sub('[\.\-\/]', ' ', semi_cleanalbum).encode('utf-8', 'replace')
         # Replace bad characters in the term and unicode it
         term = re.sub('[\.\-\/]', ' ', term).encode('utf-8')
-        artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8')
-        albumterm  = re.sub('[\.\-\/]', ' ', cleanalbum).encode('utf-8')
+        artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8', 'replace')
+        albumterm  = re.sub('[\.\-\/]', ' ', cleanalbum).encode('utf-8', 'replace')
 
         logger.info("Searching torrents for %s since it was marked as wanted" % term)
         
