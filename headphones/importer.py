@@ -50,7 +50,7 @@ def artistlist_to_mbids(artistlist, forced=False):
             continue
             
 
-        # If adding artists through Manage New Artists, there coming through as non-unicode (utf-8?)
+        # If adding artists through Manage New Artists, they're coming through as non-unicode (utf-8?)
         # and screwing everything up
         if not isinstance(artist, unicode):
             try:
