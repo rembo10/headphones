@@ -58,10 +58,14 @@
 					%endif
 					</div>
 					<div class="row checkbox"> 
-					<input type="checkbox" name="autoadd" id="autoadd" value="1" ${checked(headphones.ADD_ARTISTS)}><label>Automatically add new artists</label>
+					<input type="checkbox" name="libraryscan" id="libraryscan" value="1" ${checked(headphones.LIBRARYSCAN)}><label>Automatically scan library</label>
+					</div>
+					<div class="row checkbox"> 
+					<input type="checkbox" name="autoadd" id="autoadd" value="1" ${checked(headphones.ADD_ARTISTS)}><label>Auto-add new artists</label>
 					</div>
 								
 				</fieldset>
+				<br>
 				<input type="button" value="Save Changes and Scan" onclick="addScanAction();doAjaxCall('musicScan',$(this),'tabs',true);return false;" data-success="Changes saved. Library will be scanned">
 				<input type="button" value="Save Changes without Scanning Library" onclick="doAjaxCall('musicScan',$(this),'tabs',true);return false;" data-success="Changes Saved Successfully">
 			</form>

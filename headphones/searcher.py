@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib, urllib2, urlparse
+import urllib, urllib2, urlparse, httplib
 import lib.feedparser as feedparser
 from lib.pygazelle import api as gazelleapi
 from lib.pygazelle import encoding as gazelleencoding
@@ -84,7 +84,17 @@ def url_fix(s, charset='utf-8'):
     scheme, netloc, path, qs, anchor = urlparse.urlsplit(s)
     path = urllib.quote(path, '/%')
     qs = urllib.quote_plus(qs, ':&=')
-    return urlparse.urlunsplit((scheme, netloc, path, qs, anchor))    
+    return urlparse.urlunsplit((scheme, netloc, path, qs, anchor))
+    
+def patch_http_response_read(func):
+    def inner(*args):
+        try:
+            return func(*args)
+        except httplib.IncompleteRead, e:
+            return e.partial
+
+    return inner
+httplib.HTTPResponse.read = patch_http_response_read(httplib.HTTPResponse.read)
     
     
 def searchforalbum(albumid=None, new=False, lossless=False):
@@ -244,6 +254,17 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 logger.info("Album type is audiobook/spokenword. Using audiobook category")
                 
             for newznab_host in newznab_hosts:
+                
+                # Add a little mod for kere.ws
+                if newznab_host[0] == "http://kere.ws":
+                    if categories == "3040":
+                        categories = categories + ",4070"
+                    elif categories == "3040,3010":
+                        categories = categories + ",4070,4010"
+                    elif categories == "3010":
+                        categories = categories + ",4010"
+                    else:
+                        categories = categories + ",4050"
 
                 params = {    "t": "search",
                             "apikey": newznab_host[1],
@@ -503,7 +524,8 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             
             if data and bestqual:
                 logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
-                nzb_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year) 
+                # Get rid of any dodgy chars here so we can prevent sab from renaming our downloads
+                nzb_folder_name = helpers.sab_sanitize_foldername(bestqual[0]) + '.' + albums[2]
                 if headphones.SAB_HOST and not headphones.BLACKHOLE:
 
                     nzb = classes.NZBDataSearchResult()
@@ -551,6 +573,11 @@ def verifyresult(title, artistterm, term):
     #        return False
 
     #another attempt to weed out substrings. We don't want "Vol III" when we were looking for "Vol II"
+    
+    # Filter out remix search results (if we're not looking for it)
+    if 'remix' not in term and 'remix' in title:
+        logger.info("Removed " + title + " from results because it's a remix album and we're not looking for a remix album right now")
+        return False
     
     tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
     for token in tokens:
@@ -674,12 +701,12 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         else:
             term = cleanartist + ' ' + cleanalbum
 
-        semi_clean_artist_term = re.sub('[\.\-\/]', ' ', semi_cleanartist).encode('utf-8')
-        semi_clean_album_term = re.sub('[\.\-\/]', ' ', semi_cleanalbum).encode('utf-8')
+        semi_clean_artist_term = re.sub('[\.\-\/]', ' ', semi_cleanartist).encode('utf-8', 'replace')
+        semi_clean_album_term = re.sub('[\.\-\/]', ' ', semi_cleanalbum).encode('utf-8', 'replace')
         # Replace bad characters in the term and unicode it
         term = re.sub('[\.\-\/]', ' ', term).encode('utf-8')
-        artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8')
-        albumterm  = re.sub('[\.\-\/]', ' ', cleanalbum).encode('utf-8')
+        artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8', 'replace')
+        albumterm  = re.sub('[\.\-\/]', ' ', cleanalbum).encode('utf-8', 'replace')
 
         logger.info("Searching torrents for %s since it was marked as wanted" % term)
         

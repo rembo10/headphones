@@ -41,6 +41,7 @@ def main():
     headphones.ARGS = sys.argv[1:]
     
     # From sickbeard
+    headphones.SYS_PLATFORM = sys.platform
     headphones.SYS_ENCODING = None
 
     try:
@@ -116,7 +117,7 @@ def main():
     # Force the http port if neccessary
     if args.port:
         http_port = args.port
-        logger.info('Starting Headphones on foced port: %i' % http_port)
+        logger.info('Starting Headphones on forced port: %i' % http_port)
     else:
         http_port = int(headphones.HTTP_PORT)
         
@@ -140,7 +141,10 @@ def main():
     
     while True:
         if not headphones.SIGNAL:
-            time.sleep(1)
+            try:
+                time.sleep(1)
+            except KeyboardInterrupt:
+                headphones.SIGNAL = 'shutdown'
         else:
             logger.info('Received signal: ' + headphones.SIGNAL)
             if headphones.SIGNAL == 'shutdown':

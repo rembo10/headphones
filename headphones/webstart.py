@@ -74,6 +74,7 @@ def initialize(options={}):
             'tools.auth_basic.checkpassword':  cherrypy.lib.auth_basic.checkpassword_dict(
                     {options['http_username']:options['http_password']})
         })
+        conf['/api'] = { 'tools.auth_basic.on': False }
         
 
     # Prevent time-outs

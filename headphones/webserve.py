@@ -368,7 +368,8 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("home")
     importItunes.exposed = True
     
-    def musicScan(self, path, scan=0, redirect=None, autoadd=0):
+    def musicScan(self, path, scan=0, redirect=None, autoadd=0, libraryscan=0):
+        headphones.LIBRARYSCAN = libraryscan
         headphones.ADD_ARTISTS = autoadd
         headphones.MUSIC_DIR = path
         headphones.config_write() 
@@ -623,6 +624,7 @@ class WebInterface(object):
                     "interface_list" : interface_list,
                     "music_encoder":        checked(headphones.MUSIC_ENCODER),
                     "encoder":      headphones.ENCODER,
+                    "xldprofile":   headphones.XLDPROFILE,
                     "bitrate":      int(headphones.BITRATE),
                     "encoderfolder":    headphones.ENCODERFOLDER,
                     "advancedencoder":  headphones.ADVANCEDENCODER,
@@ -683,11 +685,11 @@ class WebInterface(object):
         numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
         rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, 
         destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0,
-        remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, bitrate=None, 
-        samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0, 
+        remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
+        bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0, 
         delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, 
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False, mirror=None, customhost=None, customport=None, 
-        customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, cache_sizemb=0, **kwargs):
+        customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, cache_sizemb=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -760,6 +762,7 @@ class WebInterface(object):
         headphones.CACHE_DIR = cache_dir
         headphones.MUSIC_ENCODER = music_encoder
         headphones.ENCODER = encoder
+        headphones.XLDPROFILE = xldprofile
         headphones.BITRATE = int(bitrate)
         headphones.SAMPLINGFREQUENCY = int(samplingfrequency)
         headphones.ENCODERFOLDER = encoderfolder
