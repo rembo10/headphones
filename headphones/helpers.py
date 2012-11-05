@@ -118,6 +118,20 @@ def now():
     now = datetime.datetime.now()
     return now.strftime("%Y-%m-%d %H:%M:%S")
     
+def get_age(date):
+
+    try:
+        split_date = date.split('-')
+    except:
+        return False
+    
+    try:
+        days_old = int(split_date[0])*365 + int(split_date[1])*30 + int(split_date[2])
+    except IndexError:
+        days_old = False
+        
+    return days_old
+    
 def bytes_to_mb(bytes):
 
     mb = int(bytes)/1048576
@@ -130,6 +144,10 @@ def mb_to_bytes(mb_str):
         return int(float(result.group(1))*1048576)
 
 def replace_all(text, dic):
+    
+    if not text:
+        return ''
+        
     for i, j in dic.iteritems():
         text = text.replace(i, j)
     return text
@@ -153,8 +171,6 @@ def cleanTitle(title):
     return title
     
 def extract_data(s):
-    
-    from headphones import logger
 
     #headphones default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
@@ -165,8 +181,6 @@ def extract_data(s):
         album = match.group("album")
         year = match.group("year")
         return (name, album, year)
-    else:
-        logger.info("Couldn't parse " + s + " into a valid default format")
     
     #newzbin default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
@@ -177,8 +191,7 @@ def extract_data(s):
         year = match.group("year")
         return (name, album, year)
     else:
-        logger.info("Couldn't parse " + s + " into a valid Newbin format")
-        return (name, album, year)
+        return (None, None, None)
         
 def extract_logline(s):
     # Default log format
@@ -257,3 +270,55 @@ def smartMove(src, dest, delete=True):
             return True
     except Exception, e:
         logger.warn('Error moving file %s: %s' % (filename.decode(headphones.SYS_ENCODING, 'replace'), str(e).decode(headphones.SYS_ENCODING, 'replace')))
+
+#########################
+#Sab renaming functions #
+#########################
+
+# TODO: Grab config values from sab to know when these options are checked. For now we'll just iterate through all combinations
+
+def sab_replace_dots(name):
+    return name.replace('.',' ')
+def sab_replace_spaces(name):
+    return name.replace(' ','_')
+
+def sab_sanitize_foldername(name):
+    """ Return foldername with dodgy chars converted to safe ones
+        Remove any leading and trailing dot and space characters
+    """
+    CH_ILLEGAL = r'\/<>?*|"'
+    CH_LEGAL   = r'++{}!@#`'
+    
+    FL_ILLEGAL = CH_ILLEGAL + ':\x92"'
+    FL_LEGAL   = CH_LEGAL +   "-''"
+    
+    uFL_ILLEGAL = FL_ILLEGAL.decode('latin-1')
+    uFL_LEGAL   = FL_LEGAL.decode('latin-1')
+    
+    if not name:
+        return name
+    if isinstance(name, unicode):
+        illegal = uFL_ILLEGAL
+        legal   = uFL_LEGAL
+    else:
+        illegal = FL_ILLEGAL
+        legal   = FL_LEGAL
+
+    lst = []
+    for ch in name.strip():
+        if ch in illegal:
+            ch = legal[illegal.find(ch)]
+            lst.append(ch)
+        else:
+            lst.append(ch)
+    name = ''.join(lst)
+
+    name = name.strip('. ')
+    if not name:
+        name = 'unknown'
+
+    #maxlen = cfg.folder_max_length()
+    #if len(name) > maxlen:
+    #    name = name[:maxlen]
+
+    return name

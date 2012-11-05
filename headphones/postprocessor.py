@@ -20,6 +20,7 @@ import time
 import threading
 import music_encoder
 import urllib, shutil, re
+import uuid
 from headphones import notifiers
 import lib.beets as beets
 from lib.beets import autotag
@@ -27,6 +28,7 @@ from lib.beets.mediafile import MediaFile
 
 import headphones
 from headphones import db, albumart, librarysync, lyrics, logger, helpers
+from headphones.helpers import sab_replace_dots, sab_replace_spaces
 
 postprocessor_lock = threading.Lock()
 
@@ -40,15 +42,27 @@ def checkFolder():
         for album in snatched:
         
             if album['FolderName']:
+                
+                # Need to check for variations due to sab renaming. Ideally we'd check the sab config via api to 
+                # figure out which options are checked, but oh well
 
-                nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
+                nzb_album_possibilities = [ album['FolderName'],
+                                            sab_replace_dots(album['FolderName']),
+                                            sab_replace_spaces(album['FolderName']),
+                                            sab_replace_dots(sab_replace_spaces(album['FolderName']))
+                                        ]
+
                 torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
 
-                if os.path.exists(nzb_album_path):
-                    logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
-                    verify(album['AlbumID'], nzb_album_path)
+                for nzb_folder_name in nzb_album_possibilities:
+                    
+                    nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING)
 
-                elif os.path.exists(torrent_album_path):
+                    if os.path.exists(nzb_album_path):
+                        logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
+                        verify(album['AlbumID'], nzb_album_path)
+
+                if os.path.exists(torrent_album_path):
                     logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
                     verify(album['AlbumID'], torrent_album_path)
 
@@ -147,12 +161,75 @@ def verify(albumid, albumpath):
         tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
     
     downloaded_track_list = []
-    
+    downloaded_cuecount = 0
+        
     for r,d,f in os.walk(albumpath):
         for files in f:
             if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
                 downloaded_track_list.append(os.path.join(r, files))    
+            elif files.lower().endswith('.cue'):
+                downloaded_cuecount += 1
     
+    # use xld to split cue 
+   
+    if headphones.ENCODER == 'xld' and headphones.MUSIC_ENCODER and downloaded_cuecount and downloaded_cuecount >= len(downloaded_track_list):
+    
+        import getXldProfile
+        
+        (xldProfile, xldFormat, xldBitrate) = getXldProfile.getXldProfile(headphones.XLDPROFILE)
+        if not xldFormat:
+            logger.info(u'Details for xld profile "%s" not found, cannot split cue' % (xldProfile))
+        else:
+            if headphones.ENCODERFOLDER:
+                xldencoder = os.path.join(headphones.ENCODERFOLDER, 'xld')
+            else:
+                xldencoder = os.path.join('/Applications','xld')
+        
+            for r,d,f in os.walk(albumpath):
+                xldfolder = r
+                xldfile = ''
+                xldcue = ''
+                for file in f:
+                    if any(file.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS) and not xldfile:
+                        xldfile = os.path.join(r, file)
+                    elif file.lower().endswith('.cue') and not xldcue:
+                        xldcue = os.path.join(r, file)
+            
+                if xldfile and xldcue and xldfolder:
+                    xldcmd = xldencoder
+                    xldcmd = xldcmd + ' "' + xldfile + '"'
+                    xldcmd = xldcmd + ' -c'
+                    xldcmd = xldcmd + ' "' + xldcue + '"'
+                    xldcmd = xldcmd + ' --profile'
+                    xldcmd = xldcmd + ' "' + xldProfile + '"'
+                    xldcmd = xldcmd + ' -o'
+                    xldcmd = xldcmd + ' "' + xldfolder + '"'
+                    logger.info(u"Cue found, splitting file " + xldfile.decode(headphones.SYS_ENCODING, 'replace'))
+                    logger.debug(xldcmd)
+                    os.system(xldcmd)
+        
+            # count files, should now be more than original if xld successfully split
+        
+            new_downloaded_track_list_count = 0
+            for r,d,f in os.walk(albumpath):       
+                for file in f:
+                    if any(file.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
+                        new_downloaded_track_list_count += 1
+        
+            if new_downloaded_track_list_count > len(downloaded_track_list):
+        
+                # rename original unsplit files
+                for downloaded_track in downloaded_track_list:
+                    os.rename(downloaded_track, downloaded_track + '.original')
+        	
+                #reload
+    
+                downloaded_track_list = []
+                for r,d,f in os.walk(albumpath):       
+                    for file in f:
+                        if any(file.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
+                            downloaded_track_list.append(os.path.join(r, file))
+
     # test #1: metadata - usually works
     logger.debug('Verifying metadata...')
 
@@ -161,6 +238,11 @@ def verify(albumid, albumpath):
             f = MediaFile(downloaded_track)
         except Exception, e:
             logger.info(u"Exception from MediaFile for: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + u" : " + unicode(e))
+            continue
+            
+        if not f.artist:
+            continue
+        if not f.album:
             continue
             
         metaartist = helpers.latinToAscii(f.artist.lower()).encode('UTF-8')
@@ -182,6 +264,9 @@ def verify(albumid, albumpath):
         split_track_name = re.sub('[\.\-\_]', ' ', track_name).lower()
         for track in tracks:
             
+            if not track['TrackTitle']:
+                continue
+                
             dbtrack = helpers.latinToAscii(track['TrackTitle'].lower()).encode('UTF-8')
             filetrack = helpers.latinToAscii(split_track_name).encode('UTF-8')
             logger.debug('Checking if track title: %s is in file name: %s' % (dbtrack, filetrack))
@@ -233,9 +318,12 @@ def verify(albumid, albumpath):
 def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list):
 
     logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
-    #start enconding
+    #start encoding
     if headphones.MUSIC_ENCODER:
         downloaded_track_list=music_encoder.encode(albumpath)
+       
+        if not downloaded_track_list:
+            return
     
     album_art_path = albumart.getAlbumArt(albumid)
     
@@ -374,8 +462,7 @@ def moveFiles(albumpath, release, tracks):
                 '$first':   firstchar.lower()
             }
             
-    
-    folder = helpers.replace_all(headphones.FOLDER_FORMAT, values)
+    folder = helpers.replace_all(headphones.FOLDER_FORMAT.strip(), values)
     folder = folder.replace('./', '_/').replace(':','_').replace('?','_').replace('/.','/_').replace('<','_').replace('>','_')
     
     if folder.endswith('.'):
@@ -402,8 +489,8 @@ def moveFiles(albumpath, release, tracks):
     make_lossy_folder = False
     make_lossless_folder = False
     
-    lossy_destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING)
-    lossless_destination_path = os.path.normpath(os.path.join(headphones.LOSSLESS_DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING)
+    lossy_destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING, 'replace')
+    lossless_destination_path = os.path.normpath(os.path.join(headphones.LOSSLESS_DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING, 'replace')
     
     # If they set a destination dir for lossless media, only create the lossy folder if there is lossy media
     if headphones.LOSSLESS_DESTINATION_DIR:
@@ -415,7 +502,7 @@ def moveFiles(albumpath, release, tracks):
     else:
         make_lossy_folder = True
 
-    last_folder = headphones.FOLDER_FORMAT.split('/')[-1]
+    last_folder = headphones.FOLDER_FORMAT.strip().split('/')[-1]
     
     if make_lossless_folder:
         # Only rename the folder if they use the album name, otherwise merge into existing folder
@@ -426,7 +513,7 @@ def moveFiles(albumpath, release, tracks):
             i = 1
             while True:
                 newfolder = temp_folder + '[%i]' % i
-                lossless_destination_path = os.path.normpath(os.path.join(headphones.LOSSLESS_DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING)
+                lossless_destination_path = os.path.normpath(os.path.join(headphones.LOSSLESS_DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING, 'replace')
                 if os.path.exists(lossless_destination_path):
                     i += 1
                 else:
@@ -439,7 +526,7 @@ def moveFiles(albumpath, release, tracks):
             except Exception, e:
                 logger.error('Could not create lossless folder for %s. (Error: %s)' % (release['AlbumTitle'], e))
                 if not make_lossy_folder:
-                    return albumpath
+                    return [albumpath]
                 
     if make_lossy_folder:
         if os.path.exists(lossy_destination_path) and 'album' in last_folder.lower():
@@ -449,7 +536,7 @@ def moveFiles(albumpath, release, tracks):
             i = 1
             while True:
                 newfolder = temp_folder + '[%i]' % i
-                lossy_destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING)
+                lossy_destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING, 'replace')
                 if os.path.exists(lossy_destination_path):
                     i += 1
                 else:
@@ -461,7 +548,7 @@ def moveFiles(albumpath, release, tracks):
                 os.makedirs(lossy_destination_path)
             except Exception, e:
                 logger.error('Could not create folder for %s. Not moving: %s' % (release['AlbumTitle'], e))
-                return albumpath
+                return [albumpath]
     
     logger.info('Checking which files we need to move.....')
 
@@ -519,7 +606,7 @@ def moveFiles(albumpath, release, tracks):
             temp_f = os.path.join(temp_f, f)
     
             try:
-                os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING), int(headphones.FOLDER_PERMISSIONS, 8))
+                os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING, 'replace'), int(headphones.FOLDER_PERMISSIONS, 8))
             except Exception, e:
                 logger.error("Error trying to change permissions on folder: %s" % temp_f.decode(headphones.SYS_ENCODING, 'replace'))
             
@@ -663,10 +750,10 @@ def renameFiles(albumpath, downloaded_track_list, release):
                         
             ext = os.path.splitext(downloaded_track)[1]
             
-            new_file_name = helpers.replace_all(headphones.FILE_FORMAT, values).replace('/','_') + ext
+            new_file_name = helpers.replace_all(headphones.FILE_FORMAT.strip(), values).replace('/','_') + ext
         
         
-        new_file_name = new_file_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING)
+        new_file_name = new_file_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING, 'replace')
 
         if new_file_name.startswith('.'):
             new_file_name = new_file_name.replace(0, '_')
@@ -674,7 +761,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
         new_file = os.path.join(albumpath, new_file_name)
         
         if downloaded_track == new_file_name:
-            logger.debug("Renaming for: " + downloaded_track.decode(headphones.SYS_ENCODING) + " is not neccessary")
+            logger.debug("Renaming for: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + " is not neccessary")
             continue
 
         logger.debug('Renaming %s ---> %s' % (downloaded_track.decode(headphones.SYS_ENCODING,'replace'), new_file_name.decode(headphones.SYS_ENCODING,'replace')))
@@ -704,9 +791,9 @@ def forcePostProcess():
 
     download_dirs = []
     if headphones.DOWNLOAD_DIR:
-        download_dirs.append(headphones.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING))
+        download_dirs.append(headphones.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING, 'replace'))
     if headphones.DOWNLOAD_TORRENT_DIR:
-        download_dirs.append(headphones.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING))
+        download_dirs.append(headphones.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
         
     logger.info('Checking to see if there are any folders to process in download_dir(s): %s' % str(download_dirs).decode(headphones.SYS_ENCODING, 'replace'))
     # Get a list of folders in the download_dir
@@ -723,20 +810,21 @@ def forcePostProcess():
         logger.info('Found no folders to process in: %s' % str(download_dirs).decode(headphones.SYS_ENCODING, 'replace'))
 
     # Parse the folder names to get artist album info
+    myDB = db.DBConnection()
+    
     for folder in folders:
 
         folder_basename = os.path.basename(folder).decode(headphones.SYS_ENCODING, 'replace')
 
         logger.info('Processing: %s' % folder_basename)
-    
+        
         try:
             name, album, year = helpers.extract_data(folder_basename)
         except:
-            logger.info("Couldn't parse " + folder_basename + " into any valid format.")
-            continue
+            name = None
+
         if name and album and year:
             
-            myDB = db.DBConnection()
             release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
             if release:
                 logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
@@ -753,3 +841,25 @@ def forcePostProcess():
                     verify(rgid, folder)
                 else:
                     logger.info('No match found on MusicBrainz for: %s - %s' % (name, album))
+                    continue
+                    
+        else:
+            try:
+                possible_rgid = folder_basename[-36:]
+                # re pattern match: [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12} 
+                rgid = uuid.UUID(possible_rgid)
+                    
+            except:
+                logger.info("Couldn't parse " + folder_basename + " into any valid format. If adding albums from another source, they must be in an 'Artist - Album [Year]' format, or end with the musicbrainz release group id")
+                continue
+            
+            
+            if rgid:
+                rgid = possible_rgid
+                release = myDB.action('SELECT ArtistName, AlbumTitle, AlbumID from albums WHERE AlbumID=?', [rgid]).fetchone()
+                if release:
+                    logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
+                    verify(release['AlbumID'], folder)
+                else:
+                    logger.info('Found a (possibly) valid Musicbrainz identifier in album folder name - continuing post-processing')
+                    verify(rgid, folder)

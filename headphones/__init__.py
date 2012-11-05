@@ -36,6 +36,7 @@ PROG_DIR = None
 ARGS = None
 SIGNAL = None
 
+SYS_PLATFORM = None
 SYS_ENCODING = None
 
 VERBOSE = 1
@@ -111,6 +112,7 @@ AUTOWANT_UPCOMING = False
 AUTOWANT_ALL = False
 
 SEARCH_INTERVAL = 360
+LIBRARYSCAN = False
 LIBRARYSCAN_INTERVAL = 300
 DOWNLOAD_SCAN_INTERVAL = 5
 
@@ -168,6 +170,7 @@ FOLDER_PERMISSIONS = None
 MUSIC_ENCODER = False
 ENCODERFOLDER = None
 ENCODER = None
+XLDPROFILE = None
 BITRATE = None
 SAMPLINGFREQUENCY = None
 ADVANCEDENCODER = None
@@ -250,7 +253,7 @@ def initialize():
 
     with INIT_LOCK:
     
-        global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
+        global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, SYS_PLATFORM, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, \
                 CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
@@ -258,10 +261,10 @@ def initialize():
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
-                LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
+                LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS,\
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
-                ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, \
+                ENCODERFOLDER, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, \
                 ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
@@ -341,6 +344,7 @@ def initialize():
         AUTOWANT_ALL = bool(check_setting_int(CFG, 'General', 'autowant_all', 0))
         
         SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'search_interval', 360)
+        LIBRARYSCAN = bool(check_setting_int(CFG, 'General', 'libraryscan', 1))
         LIBRARYSCAN_INTERVAL = check_setting_int(CFG, 'General', 'libraryscan_interval', 300)
         DOWNLOAD_SCAN_INTERVAL = check_setting_int(CFG, 'General', 'download_scan_interval', 5)
         
@@ -397,6 +401,7 @@ def initialize():
         
         ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')        
         ENCODER = check_setting_str(CFG, 'General', 'encoder', 'ffmpeg')
+        XLDPROFILE = check_setting_str(CFG, 'General', 'xldprofile', '')
         BITRATE = check_setting_int(CFG, 'General', 'bitrate', 192)
         SAMPLINGFREQUENCY= check_setting_int(CFG, 'General', 'samplingfrequency', 44100)
         MUSIC_ENCODER = bool(check_setting_int(CFG, 'General', 'music_encoder', 0))
@@ -656,6 +661,7 @@ def config_write():
     new_config['What.cd']['whatcd_password'] = WHATCD_PASSWORD
 
     new_config['General']['search_interval'] = SEARCH_INTERVAL
+    new_config['General']['libraryscan'] = int(LIBRARYSCAN)
     new_config['General']['libraryscan_interval'] = LIBRARYSCAN_INTERVAL
     new_config['General']['download_scan_interval'] = DOWNLOAD_SCAN_INTERVAL
 
@@ -723,6 +729,7 @@ def config_write():
 
     new_config['General']['music_encoder'] = int(MUSIC_ENCODER)
     new_config['General']['encoder'] = ENCODER
+    new_config['General']['xldprofile'] = XLDPROFILE
     new_config['General']['bitrate'] = int(BITRATE)
     new_config['General']['samplingfrequency'] = int(SAMPLINGFREQUENCY)
     new_config['General']['encoderfolder'] = ENCODERFOLDER
@@ -756,9 +763,9 @@ def start():
         # Start our scheduled background tasks
         from headphones import updater, searcher, librarysync, postprocessor
 
-        SCHED.add_interval_job(updater.dbUpdate, hours=48)
+        SCHED.add_interval_job(updater.dbUpdate, hours=24)
         SCHED.add_interval_job(searcher.searchforalbum, minutes=SEARCH_INTERVAL)
-        SCHED.add_interval_job(librarysync.libraryScan, minutes=LIBRARYSCAN_INTERVAL)
+        SCHED.add_interval_job(librarysync.libraryScan, minutes=LIBRARYSCAN_INTERVAL, kwargs={'cron':True})
         
         if CHECK_GITHUB:
             SCHED.add_interval_job(versioncheck.checkGithub, minutes=CHECK_GITHUB_INTERVAL)

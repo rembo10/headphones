@@ -27,7 +27,25 @@ try:
 except ImportError:
     import lib.argparse as argparse
 
+# xld
+      
+if headphones.ENCODER == 'xld':
+    import getXldProfile
+    XLD = True
+else:
+    XLD = False
+
 def encode(albumPath):
+
+    # Return if xld details not found
+    
+    if XLD:
+        global xldProfile
+        (xldProfile, xldFormat, xldBitrate) = getXldProfile.getXldProfile(headphones.XLDPROFILE)
+        if not xldFormat:
+            logger.error(u'Details for xld profile "%s" not found, will not be reencoded' % (xldProfile))
+            return None
+
     tempDirEncode=os.path.join(albumPath,"temp")
     musicFiles=[]
     musicFinalFiles=[]
@@ -46,26 +64,48 @@ def encode(albumPath):
     for r,d,f in os.walk(albumPath):
         for music in f:
             if any(music.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
+                
+                if not XLD:
+                    encoderFormat = headphones.ENCODEROUTPUTFORMAT.encode(headphones.SYS_ENCODING)
+                else:
+                    xldMusicFile = os.path.join(r, music)
+                    xldInfoMusic = MediaFile(xldMusicFile)
+                    encoderFormat = xldFormat
+                
                 if (headphones.ENCODERLOSSLESS):
-                    if (music.lower().endswith('.flac')):
+                    ext = os.path.normpath(os.path.splitext(music)[1].lstrip(".")).lower()
+                    if not XLD and ext == 'flac' or XLD and (ext != xldFormat and (xldInfoMusic.bitrate / 1000 > 500)):
                         musicFiles.append(os.path.join(r, music))
-                        musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT.encode(headphones.SYS_ENCODING))
+                        musicTemp = os.path.normpath(os.path.splitext(music)[0] + '.' + encoderFormat)
                         musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
                     else:
                         logger.debug('Music "%s" is already encoded' % (music))
                 else:
                     musicFiles.append(os.path.join(r, music))
-                    musicTemp = os.path.normpath(os.path.splitext(music)[0]+'.'+headphones.ENCODEROUTPUTFORMAT.encode(headphones.SYS_ENCODING))
+                    musicTemp = os.path.normpath(os.path.splitext(music)[0] + '.' + encoderFormat)
                     musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
-                            
-    if headphones.ENCODER=='lame':
+
+    if XLD:
+        if headphones.ENCODERFOLDER:
+            encoder = os.path.join(headphones.ENCODERFOLDER.encode(headphones.SYS_ENCODING), 'xld')
+        else:
+            encoder = os.path.join('/Applications', 'xld')                            
+    elif headphones.ENCODER=='lame':
         encoder=os.path.join(headphones.ENCODERFOLDER.encode(headphones.SYS_ENCODING),'lame')
     elif headphones.ENCODER=='ffmpeg':
         encoder=os.path.join(headphones.ENCODERFOLDER.encode(headphones.SYS_ENCODING),'ffmpeg')
+
     i=0
     for music in musicFiles:        
         infoMusic=MediaFile(music)
-        if headphones.ENCODER == 'lame':
+        
+        if XLD:
+            if xldBitrate and (infoMusic.bitrate / 1000 <= xldBitrate):
+                logger.info('Music "%s" has bitrate <= "%skbit", will not be reencoded' % (music.decode(headphones.SYS_ENCODING, 'replace'), xldBitrate))      
+            else:
+                command(encoder,music,musicTempFiles[i],albumPath)
+                ifencoded=1
+        elif headphones.ENCODER == 'lame':
             if not any(music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.' + x) for x in ["mp3", "wav"]):
                 logger.warn(u'Lame cant encode "%s" format for "%s", use ffmpeg' % (os.path.splitext(music)[1].decode(headphones.SYS_ENCODING, 'replace'),music.decode(headphones.SYS_ENCODING, 'replace')))
             else:
@@ -106,7 +146,17 @@ def command(encoder,musicSource,musicDest,albumPath):
     return_code=1
     cmd=''
     startMusicTime=time.time()
-    if headphones.ENCODER == 'lame':
+
+    if XLD:
+        xldDestDir = os.path.split(musicDest)[0]
+        cmd = encoder
+        cmd = cmd + ' "' + musicSource + '"'
+        cmd = cmd + ' --profile'
+        cmd = cmd + ' "' + xldProfile + '"'
+        cmd = cmd + ' -o'
+        cmd = cmd + ' "' + xldDestDir + '"'
+        
+    elif headphones.ENCODER == 'lame':
         if headphones.ADVANCEDENCODER =='':
             cmd=encoder + ' -h'     
             if headphones.ENCODERVBRCBR=='cbr':

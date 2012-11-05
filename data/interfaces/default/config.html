@@ -85,7 +85,6 @@
 	                    	<label>Download Scan Interval</label>
 	                    	<input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="4">mins
 	                    </div>
-	                
 	                    <div class="row">
 	                   	 	<label>Library Scan Interval</label>
 	                    	<input type="text" name="libraryscan_interval" value="${config['libraryscan_interval']}" size="4">mins
@@ -417,7 +416,7 @@
                 	
                 	<fieldset>
     	           		 <legend>Re-Encoding Options</legend>
-    	           		 <small class="heading"><span style="float: left; margin-right: .3em; margin-top: 4px;" class="ui-icon ui-icon-info"></span>Note: this option requires the lame or ffmpeg encoder</small>
+    	           		 <small class="heading"><span style="float: left; margin-right: .3em; margin-top: 4px;" class="ui-icon ui-icon-info"></span>Note: this option requires the lame, ffmpeg or xld encoder</small>
     	           		 <div class="checkbox row clearfix">
     	                  		<input type="checkbox" name="music_encoder" id="music_encoder" value="1" ${config['music_encoder']}/><label>Re-encode downloads during postprocessing</label>
     	                	</div>
@@ -434,35 +433,42 @@
     							if config['encoder'] == 'lame':
     								lameselect = 'selected="selected"'
     								ffmpegselect = ''
-    							else:
+								xldselect = ''
+    							elif config['encoder'] == 'ffmpeg':
     								lameselect = ''
     								ffmpegselect = 'selected="selected"'
+								xldselect = ''
+							else:
+								lameselect = ''
+								ffmpegselect = ''
+								xldselect = 'selected="selected"'
     						%>
     						<div class="row">
     							<label>Encoder</label>
-    							<select name="encoder">
+    							<select name="encoder" id="encoder">
     								<option value="lame" ${lameselect}>lame</option>
     								<option value="ffmpeg" ${ffmpegselect}>ffmpeg</option>
+								<option value="xld" ${xldselect}>xld</option>
     							</select>
     						</div>
-    						<div class="row">
-    						<label>Format</label>
-    						<select name="encoderoutputformat">
-    						%for x in ['mp3', 'ogg', 'm4a']:
-    							<%
-    								if config['encoderoutputformat'] == x:
-    									outputselect = 'selected'
-    								else:
-    									outputselect = ''
-    							%>
-    							<option value=${x} ${outputselect}>${x}</option>
-    						%endfor
-    						</select>
-    						</div>
     	           	</fieldset>
-    				
+			    <div id="lameffmpegproperties">
     				<fieldset>
     				 	<legend>Audio Properties</legend>
+					<div class="row">
+					<label>Format</label>
+					<select name="encoderoutputformat">
+					%for x in ['mp3', 'ogg', 'm4a']:
+						<%
+							if config['encoderoutputformat'] == x:
+								outputselect = 'selected'
+							else:
+								outputselect = ''
+						%>
+						<option value=${x} ${outputselect}>${x}</option>
+					%endfor
+					</select>
+					</div>
     				 	<div class="row">						
     				 	<label>VBR/CBR</label>
     				 	<select name="encodervbrcbr">
@@ -530,13 +536,19 @@
     						<label>(ignores audio properties)</label>
     						<input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43">
     					</div>
-    					<div class="row">
+    					
+    				</fieldset>
+			    </div>
+			    <div id="xldproperties">
+				    <div class="row">
+					<label>XLD Profile</label>
+					<input type="text" name="xldprofile" value="${config['xldprofile']}" size="43">
+				    </div>
+			    </div>
+				    <div class="row">
     					    <label>Path to Encoder</label>
     					    <input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43">
     					</div>
-    					
-    				</fieldset>
-    				
 				</td>
 				<td>
 					
@@ -760,7 +772,12 @@
 		$("#hpserveroptions").slideUp();
 	};
 	
-	handleNewSelection = function () {
+	hideEncoderDivs = function () {
+		$("#lameffmpegproperties").slideUp();
+		$("#xldproperties").slideUp();
+	};
+	
+	handleNewServerSelection = function () {
 	
 		hideServerDivs();
 		
@@ -770,6 +787,23 @@
 			break;
 			case 'headphones':
 				$("#hpserveroptions").slideDown();
+			break;
+		}
+	};
+	
+	handleNewEncoderSelection = function () {
+	
+		hideEncoderDivs();
+		
+		switch ($(this).val()) {
+			case 'xld':
+				$("#xldproperties").slideDown();
+			break;
+			case 'ffmpeg':
+				$("#lameffmpegproperties").slideDown();
+			break;
+			case 'lame':
+				$("#lameffmpegproperties").slideDown();
 			break;
 		}
 	};
@@ -914,8 +948,11 @@
 			}
 		});	
 		
-		$("#mirror").change(handleNewSelection);
-			handleNewSelection.apply($("#mirror"));
+		$("#mirror").change(handleNewServerSelection);
+			handleNewServerSelection.apply($("#mirror"));
+			
+		$("#encoder").change(handleNewEncoderSelection);
+			handleNewEncoderSelection.apply($("#encoder"));
 		
 		var deletedNewznabs = 0;
 		
