@@ -407,6 +407,17 @@ def getTracksFromRelease(release):
 # Used when there is a disambiguation
 def findArtistbyAlbum(name):
 
+    # Somehow non unicode is getting passed into this function?
+    if not isinstance(name, unicode):
+        try:
+            name = name.decode('latin-1', 'replace')
+        except:
+            try:
+                name = name.decode(headphones.SYS_ENCODING, 'replace')
+            except:
+                logger.warn("Unable to convert artist to unicode so cannot do a database lookup")
+                return False
+
     myDB = db.DBConnection()
     
     artist = myDB.action('SELECT AlbumTitle from have WHERE ArtistName=? AND AlbumTitle IS NOT NULL ORDER BY RANDOM()', [name]).fetchone()
