@@ -128,6 +128,10 @@ def sendNZB(nzb):
             logger.info(u"Sending Prowl notification")
             prowl = notifiers.PROWL()
             prowl.notify(nzb.name,"Download started")
+        if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
+            logger.info(u"Sending Pushover notification")
+            prowl = notifiers.PUSHOVER()
+            prowl.notify(nzb.name,"Download started")
         if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
             logger.debug(u"Sending NMA notification")
             nma = notifiers.NMA()
