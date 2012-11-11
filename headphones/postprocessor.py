@@ -395,6 +395,12 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
         for albumpath in albumpaths:
             syno.notify(albumpath)
     
+    if headphones.PUSHOVER_ENABLED:
+        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
+        logger.info(u"Pushover request")
+        pushover = notifiers.PUSHOVER()
+        pushover.notify(pushmessage,"Download and Postprocessing completed")
+        
 def embedAlbumArt(artwork, downloaded_track_list):
     logger.info('Embedding album art')
     
@@ -795,6 +801,9 @@ def forcePostProcess():
     if headphones.DOWNLOAD_TORRENT_DIR:
         download_dirs.append(headphones.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
         
+    # If DOWNLOAD_DIR and DOWNLOAD_TORRENT_DIR are the same, remove the duplicate to prevent us from trying to process the same folder twice.
+    download_dirs = list(set(download_dirs))
+    
     logger.info('Checking to see if there are any folders to process in download_dir(s): %s' % str(download_dirs).decode(headphones.SYS_ENCODING, 'replace'))
     # Get a list of folders in the download_dir
     folders = []
