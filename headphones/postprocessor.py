@@ -454,7 +454,7 @@ def moveFiles(albumpath, release, tracks):
                 '$Album':   album,
                 '$Year':        year,
                 '$Type':  releasetype,
-                '$First':   firstchar,
+                '$First':   firstchar.upper(),
                 '$artist':  artist.lower(),
                 '$album':   album.lower(),
                 '$year':        year,
