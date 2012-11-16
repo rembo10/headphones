@@ -454,7 +454,7 @@ def moveFiles(albumpath, release, tracks):
                 '$Album':   album,
                 '$Year':        year,
                 '$Type':  releasetype,
-                '$First':   firstchar,
+                '$First':   firstchar.upper(),
                 '$artist':  artist.lower(),
                 '$album':   album.lower(),
                 '$year':        year,
@@ -818,6 +818,15 @@ def forcePostProcess():
 
         logger.info('Processing: %s' % folder_basename)
         
+        # First try to see if there's a match in the snatched table, then we'll try to parse the foldername
+        snatched = myDB.action('SELECT AlbumID, Title from snatched WHERE FolderName LIKE ?', [folder_basename])
+        if snatched:
+            logger.info('Found a match in the database: %s. Verifying to make sure it is the correct album' % snatched['Title'])
+            verify(snatched['AlbumID'], folder)
+            continue
+        
+        # Try to parse the folder name into a valid format
+        # TODO: Add metadata lookup
         try:
             name, album, year = helpers.extract_data(folder_basename)
         except:

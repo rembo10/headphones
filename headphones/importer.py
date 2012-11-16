@@ -49,6 +49,16 @@ def artistlist_to_mbids(artistlist, forced=False):
         if not artist and not (artist == ' '):
             continue
             
+
+        # If adding artists through Manage New Artists, they're coming through as non-unicode (utf-8?)
+        # and screwing everything up
+        if not isinstance(artist, unicode):
+            try:
+                artist = artist.decode('utf-8', 'replace')
+            except:
+                logger.warn("Unable to convert artist to unicode so cannot do a database lookup")
+                continue
+            
         results = mb.findArtist(artist, limit=1)
         
         if not results:
