@@ -72,7 +72,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
 
                 # We need the unicode path to use for logging, inserting into database
                 if not isinstance(song,unicode):
-                unicode_song_path = song.decode(headphones.SYS_ENCODING, 'replace')
+                    unicode_song_path = song.decode(headphones.SYS_ENCODING, 'replace')
                 else:
                     unicode_song_path = song
                 # Try to read the metadata
