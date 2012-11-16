@@ -32,7 +32,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
     
     # If we're appending a dir, it's coming from the post processor which is
     # already bytestring
-    if not append:
+    if not append and not isinstance(dir,unicode):
         dir = dir.encode(headphones.SYS_ENCODING)
         
     if not os.path.isdir(dir):
@@ -71,14 +71,16 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                 song = os.path.join(r, files)
 
                 # We need the unicode path to use for logging, inserting into database
+                if not isinstance(song,unicode):
                 unicode_song_path = song.decode(headphones.SYS_ENCODING, 'replace')
-
+                else:
+                    unicode_song_path = song
                 # Try to read the metadata
                 try:
                     f = MediaFile(song)
 
-                except:
-                    logger.error('Cannot read file: ' + unicode_song_path)
+                except Exception as e:
+                    logger.error('Cannot read file: ' + unicode_song_path + ' ' + e.message)
                     continue
                     
                 # Grab the bitrates for the auto detect bit rate option
@@ -347,4 +349,3 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         
         havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [ArtistID])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [ArtistName]))
         myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, ArtistID])
-    
