@@ -801,6 +801,9 @@ def forcePostProcess():
     if headphones.DOWNLOAD_TORRENT_DIR:
         download_dirs.append(headphones.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
         
+    # If DOWNLOAD_DIR and DOWNLOAD_TORRENT_DIR are the same, remove the duplicate to prevent us from trying to process the same folder twice.
+    download_dirs = list(set(download_dirs))
+    
     logger.info('Checking to see if there are any folders to process in download_dir(s): %s' % str(download_dirs).decode(headphones.SYS_ENCODING, 'replace'))
     # Get a list of folders in the download_dir
     folders = []
