@@ -194,6 +194,10 @@ NMA_APIKEY = None
 NMA_PRIORITY = None
 NMA_ONSNATCH = None
 SYNOINDEX_ENABLED = False
+PUSHOVER_ENABLED = True
+PUSHOVER_PRIORITY = 1
+PUSHOVER_KEYS = None
+PUSHOVER_ONSNATCH = True
 MIRRORLIST = ["musicbrainz.org","headphones","custom"]
 MIRROR = None
 CUSTOMHOST = None
@@ -265,7 +269,8 @@ def initialize():
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS,\
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, \
-                ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, MIRRORLIST, \
+                ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, \
+                PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
                 PREFERRED_BITRATE_LOW_BUFFER,CACHE_SIZEMB
@@ -284,6 +289,7 @@ def initialize():
         CheckSection('Rutracker')
         CheckSection('What.cd')
         CheckSection('Prowl')
+        CheckSection('Pushover')
         CheckSection('XBMC')
         CheckSection('NMA')
         CheckSection('Synoindex')
@@ -430,6 +436,11 @@ def initialize():
         NMA_ONSNATCH = bool(check_setting_int(CFG, 'NMA', 'nma_onsnatch', 0)) 
         
         SYNOINDEX_ENABLED = bool(check_setting_int(CFG, 'Synoindex', 'synoindex_enabled', 0))
+        
+        PUSHOVER_ENABLED = bool(check_setting_int(CFG, 'Pushover', 'pushover_enabled', 0))
+        PUSHOVER_KEYS = check_setting_str(CFG, 'Pushover', 'pushover_keys', '')
+        PUSHOVER_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_onsnatch', 0)) 
+        PUSHOVER_PRIORITY = check_setting_int(CFG, 'Pushover', 'pushover_priority', 0)
         
         MIRROR = check_setting_str(CFG, 'General', 'mirror', 'musicbrainz.org')
         CUSTOMHOST = check_setting_str(CFG, 'General', 'customhost', 'localhost')
@@ -720,6 +731,12 @@ def config_write():
     new_config['NMA']['nma_priority'] = NMA_PRIORITY
     new_config['NMA']['nma_onsnatch'] = int(PROWL_ONSNATCH)
 
+    new_config['Pushover'] = {}
+    new_config['Pushover']['pushover_enabled'] = int(PUSHOVER_ENABLED)
+    new_config['Pushover']['pushover_keys'] = PUSHOVER_KEYS
+    new_config['Pushover']['pushover_onsnatch'] = int(PUSHOVER_ONSNATCH)
+    new_config['Pushover']['pushover_priority'] = int(PUSHOVER_PRIORITY)
+    
     new_config['Synoindex'] = {}
     new_config['Synoindex']['synoindex_enabled'] = int(SYNOINDEX_ENABLED)
     
