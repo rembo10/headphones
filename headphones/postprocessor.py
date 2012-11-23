@@ -828,7 +828,7 @@ def forcePostProcess():
         logger.info('Processing: %s' % folder_basename)
         
         # First try to see if there's a match in the snatched table, then we'll try to parse the foldername
-        snatched = myDB.action('SELECT AlbumID, Title from snatched WHERE FolderName LIKE ?', [folder_basename])
+        snatched = myDB.action('SELECT AlbumID, Title from snatched WHERE FolderName LIKE ?', [folder_basename]).fetchone()
         if snatched:
             logger.info('Found a match in the database: %s. Verifying to make sure it is the correct album' % snatched['Title'])
             verify(snatched['AlbumID'], folder)
