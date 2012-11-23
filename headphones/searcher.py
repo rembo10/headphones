@@ -209,7 +209,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                         "term": term
                         }
                         
-            searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
+            searchURL = "https://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
             logger.info(u'Parsing results from <a href="%s">NZBMatrix</a>' % searchURL)
             try:
                 data = urllib2.urlopen(searchURL, timeout=20).read()
