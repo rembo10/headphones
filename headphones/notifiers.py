@@ -263,3 +263,62 @@ class Synoindex:
         if isinstance(path_list, list):
             for path in path_list:
                 self.notify(path)
+class PUSHOVER:
+
+    application_token = "LdPCoy0dqC21ktsbEyAVCcwvQiVlsz"
+    keys = []
+    priority = []
+
+    def __init__(self):
+        self.enabled = headphones.PUSHOVER_ENABLED
+        self.keys = headphones.PUSHOVER_KEYS
+        self.priority = headphones.PUSHOVER_PRIORITY   
+        pass
+
+    def conf(self, options):
+        return cherrypy.config['config'].get('Pushover', options)
+
+    def notify(self, message, event):
+        if not headphones.PUSHOVER_ENABLED:
+            return
+
+        http_handler = HTTPSConnection("api.pushover.net")
+                                                
+        data = {'token': self.application_token, 
+                'user': headphones.PUSHOVER_KEYS,
+                'title': event,
+                'message': message.encode("utf-8"),
+                'priority': headphones.PUSHOVER_PRIORITY }
+
+        http_handler.request("POST",
+                                "/1/messages.json",
+                                headers = {'Content-type': "application/x-www-form-urlencoded"},
+                                body = urlencode(data))
+        response = http_handler.getresponse()
+        request_status = response.status
+        logger.debug(u"Pushover response status: %r" % request_status)
+        logger.debug(u"Pushover response headers: %r" % response.getheaders())
+        logger.debug(u"Pushover response body: %r" % response.read())
+
+        if request_status == 200:
+                logger.info(u"Pushover notifications sent.")
+                return True
+        elif request_status >= 400 and request_status < 500: 
+                logger.info(u"Pushover request failed: %s" % response.reason)
+                return False
+        else:
+                logger.info(u"Pushover notification failed.")
+                return False
+
+    def updateLibrary(self):
+        #For uniformity reasons not removed
+        return
+
+    def test(self, keys, priority):
+
+        self.enabled = True
+        self.keys = keys
+        self.priority = priority
+
+        self.notify('Main Screen Activate', 'Test Message')
+        
