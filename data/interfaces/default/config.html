@@ -715,6 +715,26 @@
                         </div>
                     </fieldset>
 
+					<fieldset>		
+						<h3>Pushover</h3>				
+						<div class="row checkbox">
+						     <input type="checkbox" name="pushover_enabled" id="pushover" value="1" ${config['pushover_enabled']} /><label>Enable Pushover Notifications</label>
+						 </div>
+						 <div id="pushoveroptions">
+						     <div class="row">
+						     	<label>User key</label><input type="text" name="pushover_keys" value="${config['pushover_keys']}" size="50">
+						     </div>
+						 	<div class="row checkbox">
+						 		<input type="checkbox" name="pushover_onsnatch" value="1" ${config['pushover_onsnatch']} /><label>Notify on snatch?</label>
+						 	</div>
+						 	<div class="row">
+						 		<label>Priority (-1,0, or 1):</label>
+						 		<input type="text" name="pushover_priority" value="${config['pushover_priority']}" size="2">
+						 	</div>
+						 </div>						
+					</fieldset>
+					
+                      
                  	<fieldset>
                  		<legend>Musicbrainz</legend>
                  		<div class="row">
@@ -928,6 +948,26 @@
 				$("#nmaoptions").slideUp();
 			}
 		});
+		if ($("#pushover").is(":checked"))
+			{
+				$("#pushoveroptions").show();
+			}
+		else
+			{
+				$("#pushoveroptions").hide();
+			}
+		
+		$("#pushover").click(function(){
+			if ($("#pushover").is(":checked"))
+			{
+				$("#pushoveroptions").slideDown();
+			}
+			else
+			{
+				$("#pushoveroptions").slideUp();
+			}
+		});		
+
 		if ($("#preferred_bitrate").is(":checked"))
 			{
 				$("#preferred_bitrate_options").show();
