@@ -110,7 +110,7 @@ class Rutracker():
             
             # Title
              
-            for link in soup.find_all('b', attrs={'class' : 'med tLink hl-tags bold'}): 
+            for link in soup.find_all('a', attrs={'class' : 'med tLink bold'}):  
                 title = link.get_text()
                 titles.append(title)
             
