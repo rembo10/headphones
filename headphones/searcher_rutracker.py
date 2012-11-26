@@ -110,7 +110,7 @@ class Rutracker():
             
             # Title
              
-            for link in soup.find_all('a', attrs={'class' : 'med tLink hl-tags bold'}): 
+            for link in soup.find_all('b', attrs={'class' : 'med tLink hl-tags bold'}): 
                 title = link.get_text()
                 titles.append(title)
             
@@ -144,7 +144,7 @@ class Rutracker():
         if not torrentlist:
             return False
             
-         # get headphones track count for album, return if not found
+        # get headphones track count for album, return if not found
         
         myDB = db.DBConnection()
         tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
@@ -155,6 +155,7 @@ class Rutracker():
             return False
         
         # Return the first valid torrent, unless we want a preferred bitrate then we want all valid entries
+        
         unwantedlist = ['promo', 'vinyl', '[lp]', 'songbook', 'tvrip', 'hdtv', 'dvd']
         formatlist = ['.ape', '.flac', '.ogg', '.m4a', '.aac', '.mp3', '.wav', '.aif']
         deluxelist = ['deluxe', 'edition', 'japanese', 'exclusive']
@@ -173,7 +174,7 @@ class Rutracker():
             if not any(unwanted in title for unwanted in unwantedlist) and int(size) <= maxsize and int(seeders) >= minseeders:
                      
                 # Check torrent info
-                    
+    
                 torrent_id = dict([part.split('=') for part in urlparse(url)[4].split('&')])['t']
                 self.cookiejar.set_cookie(cookielib.Cookie(version=0, name='bb_dl', value=torrent_id, port=None, port_specified=False, domain='.rutracker.org', domain_specified=False, domain_initial_dot=False, path='/', path_specified=True, secure=False, expires=None, discard=True, comment=None, comment_url=None, rest={'HttpOnly': None}, rfc2109=False))
                                           
