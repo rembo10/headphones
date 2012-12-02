@@ -67,12 +67,13 @@ def initialize(options={}):
         }
     }
     
-    if options['http_password'] != "":
+    # If no user is configured there is still an empty string element in the dict which we have to ignore
+    if len(options['http_user_dict']) > 0 and not options['http_user_dict'].has_key(''):
         conf['/'].update({
             'tools.auth_basic.on': True,
             'tools.auth_basic.realm': 'Headphones',
             'tools.auth_basic.checkpassword':  cherrypy.lib.auth_basic.checkpassword_dict(
-                    {options['http_username']:options['http_password']})
+                headphones.HTTP_USER_DICT)
         })
         conf['/api'] = { 'tools.auth_basic.on': False }
         

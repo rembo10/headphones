@@ -46,15 +46,46 @@
 	            		      <label>HTTP Port</label>
 	            		      <input type="text" name="http_port" value="${config['http_port']}" size="10">
 	            		 </div>
-	            		 <div class="row">
-	            		     <label>HTTP Username</label>
-	            		     <input type="text" name="http_username" value="${config['http_user']}" size="30">
-	            		 </div>
-	            		 
-	            		 <div class="row">
-	            		   <label>HTTP Password</label>
-	            		   <input type="password" name="http_password" value="${config['http_pass']}" size="30">
-	            		 </div>
+                                 <div id="http_users">
+                                     <%
+                                         ## If no users are configured there is still an empty string element
+                                         ## in the dict which we have to ignore
+                                         if not config['http_user_dict'].has_key(''):
+                                             http_user_count = len(config['http_user_dict'])
+                                         else:
+                                             http_user_count = 0
+                                     %>
+                                     %if http_user_count == 0:
+                                         <div class="config" id="http_user0">
+                                             <div class="row">
+                                                 <label>HTTP Username</label>
+                                                 <input type="text" name="http_user_name0" value="" size="30">
+                                             </div>
+                                             <div class="row">
+                                                 <label>HTTP Password</label>
+                                                 <input type="password" name="http_user_password0" value="" size="30">
+                                             </div>
+                                         </div>
+                                     %else:
+                                         %for http_user_number in range(len(config['http_user_dict'])):
+                                         <div class="config" id="http_user${http_user_number}">
+                                             <div class="row">
+                                                 <label>HTTP Username</label>
+                                                 <input type="text" name="http_user_name${http_user_number}" value="${config['http_user_dict'].items()[http_user_number][0]}" size="30">
+                                             </div>
+                                             <div class="row">
+                                                 <label>HTTP Password</label>
+                                                 <input type="password" name="http_user_password${http_user_number}" value="${config['http_user_dict'].items()[http_user_number][1]}" size="30">
+                                             </div>
+                                             <div class="row">
+                                                 <input type="button" class="removeHttpUser" id="http_user${http_user_number}" value="Remove">
+                                             </div>
+
+                                         </div>
+                                         %endfor
+                                     %endif
+                                     <input type="button" value="Add HTTP User" class="add_http_user" id="add_http_user" />
+                                 </div>
 	            		 <div class="row checkbox">	                   
 	            		     <input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} /> <label>Launch Browser on Startup</label> 
 	            		 </div>
@@ -244,7 +275,7 @@
 						<input id="newznab_enabled" type="checkbox" name="newznab_enabled${newznab_number}" value="1" ${newznab_enabled} /><label>Enabled</label>
 					    </div>
 					    <div class="row">
-						<input type="button" class="remove" id="newznab${newznab_number}" value="Remove ${newznab[0]}">
+						<input type="button" class="removeNewznab" id="newznab${newznab_number}" value="Remove ${newznab[0]}">
 					    </div>
 					</div>
 					<%
@@ -996,7 +1027,7 @@
 		
 		var deletedNewznabs = 0;
 		
-		$(".remove").click(function() {
+		$(".removeNewznab").click(function() {
 		    $(this).parent().parent().remove();
 		    deletedNewznabs = deletedNewznabs + 1;
 		});
@@ -1023,7 +1054,7 @@
 		$("#add_newznab").click(function() {
 		    var intId = $("#newznab_providers > div").size() + deletedNewznabs + 1;
 		    var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
-		    var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"remove\" value=\"Remove\" /></div>");
+		    var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"removeNewznab\" value=\"Remove\" /></div>");
 		    removeButton.click(function() {
 			$(this).parent().remove();
 			deletedNewznabs = deletedNewznabs + 1;
@@ -1034,6 +1065,27 @@
 		    $("#add_newznab").before(formfields);
 		});
 		
+                var deletedHttpUsers = 0;
+
+		$(".removeHttpUser").click(function() {
+		    $(this).parent().parent().remove();
+		    deletedHttpUsers = deletedHttpUsers + 1;
+		});
+
+		$("#add_http_user").click(function() {
+		    var intId = $("#http_users > div").size() + deletedHttpUsers + 1;
+		    var formfields = $("<div class=\"config\" id=\"http_user" + intId + "\"><div class=\"row\"><label>HTTP Username</label><input type=\"text\" name=\"http_user_name" + intId + "\" size=\"30\"></div><div class=\"row\"><label>HTTP Password</label><input type=\"password\" name=\"http_user_password" + intId + "\" size=\"30\"></div></div>");
+		    var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"removeHttpUser\" value=\"Remove\" /></div>");
+		    removeButton.click(function() {
+			$(this).parent().remove();
+			deletedHttpUsers = deletedHttpUsers + 1;
+			
+		    });
+		    formfields.append(removeButton);
+		    formfields.append("</div>");
+		    $("#add_http_user").before(formfields);
+		});
+
 		$(function() {
 			$( "#tabs" ).tabs();
 		});
