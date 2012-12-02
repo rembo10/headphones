@@ -110,7 +110,7 @@ class Rutracker():
             
             # Title
              
-            for link in soup.find_all('a', attrs={'class' : 'med tLink bold'}): 
+            for link in soup.find_all('a', attrs={'class' : 'med tLink hl-tags bold'}): 
                 title = link.get_text()
                 titles.append(title)
             
@@ -144,7 +144,7 @@ class Rutracker():
         if not torrentlist:
             return False
             
-         # get headphones track count for album, return if not found
+        # get headphones track count for album, return if not found
         
         myDB = db.DBConnection()
         tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
@@ -155,6 +155,7 @@ class Rutracker():
             return False
         
         # Return the first valid torrent, unless we want a preferred bitrate then we want all valid entries
+        
         unwantedlist = ['promo', 'vinyl', '[lp]', 'songbook', 'tvrip', 'hdtv', 'dvd']
         formatlist = ['.ape', '.flac', '.ogg', '.m4a', '.aac', '.mp3', '.wav', '.aif']
         deluxelist = ['deluxe', 'edition', 'japanese', 'exclusive']
