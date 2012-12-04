@@ -69,7 +69,7 @@ class RotatingLogger(object):
         if level != 'DEBUG':
             headphones.LOG_LIST.insert(0, (helpers.now(), message, level, threadname))
         
-        message = threadname + ' : ' + message
+        message = u"%s : %s" (threadname,message)
 
         if level == 'DEBUG':
             logger.debug(message)

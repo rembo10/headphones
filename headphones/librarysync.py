@@ -30,13 +30,12 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
     if not dir:
         dir = headphones.MUSIC_DIR
     
-    # If we're appending a dir, it's coming from the post processor which is
-    # already bytestring
-    if not append and not isinstance(dir,unicode):
-        dir = dir.encode(headphones.SYS_ENCODING)
-        
+    # if the directory is not Unicode we have a problem
+    if not isinstance(dir,unicode):
+        logger.error(u"LibraryScan called with dir that is not unicode: %s" % repr(dir))
+
     if not os.path.isdir(dir):
-        logger.warn('Cannot find directory: %s. Not scanning' % dir.decode(headphones.SYS_ENCODING, 'replace'))
+        logger.warn(u'Cannot find directory: %s. Not scanning' % dir)
         return
 
     myDB = db.DBConnection()
@@ -46,12 +45,12 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         tracks = myDB.select('SELECT Location, TrackID from tracks WHERE Location IS NOT NULL')
     
         for track in tracks:
-            if not os.path.isfile(track['Location'].encode(headphones.SYS_ENCODING)):
+            if not os.path.isfile(track['Location']):
                 myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [None, None, None, track['TrackID']])
 
         myDB.action('DELETE from have')
 
-    logger.info('Scanning music directory: %s' % dir.decode(headphones.SYS_ENCODING, 'replace'))
+    logger.info(u'Scanning music directory: %s' % dir)
 
     new_artists = []
     bitrates = []
@@ -72,15 +71,14 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
 
                 # We need the unicode path to use for logging, inserting into database
                 if not isinstance(song,unicode):
-                    unicode_song_path = song.decode(headphones.SYS_ENCODING, 'replace')
-                else:
-                    unicode_song_path = song
+                    raise PathIsNotUnicode(song)
+
                 # Try to read the metadata
                 try:
                     f = MediaFile(song)
 
                 except Exception as e:
-                    logger.error('Cannot read file: ' + unicode_song_path + ' ' + e.message)
+                    logger.error(u'Cannot read file: %s, %s' % (song, str(e)))
                     continue
                     
                 # Grab the bitrates for the auto detect bit rate option
@@ -109,14 +107,13 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                               'TrackTitle' : f.title,
                               'BitRate'    : f.bitrate,
                               'Format'     : f.format,
-                              'Location'   : unicode_song_path }
+                              'Location'   : song }
                               
                 song_list.append(song_dict)
 
     # Now we start track matching
     total_number_of_songs = len(song_list)
-    logger.info("Found " + str(total_number_of_songs) + " tracks in: '" + dir.decode(headphones.SYS_ENCODING, 'replace') + "'. Matching tracks to the appropriate releases....")
-    
+    logger.info("Found %i tracks in: '%s'. Matching tracks to the appropriate releases...." % (total_number_of_songs, dir))
     # Sort the song_list by most vague (e.g. no trackid or releaseid) to most specific (both trackid & releaseid)
     # When we insert into the database, the tracks with the most specific information will overwrite the more general matches
     
@@ -131,7 +128,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         completion_percentage = float(song_count)/total_number_of_songs * 100
         
         if completion_percentage%10 == 0:
-            logger.info("Track matching is " + str(completion_percentage) + "% complete")
+            logger.info("Track matching is %d%% complete" % (completion_percentage))
         
         # If the track has a trackid & releaseid (beets: albumid) that the most surefire way
         # of identifying a track to a specific release so we'll use that first
@@ -309,7 +306,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         
         myDB.action('INSERT INTO have (ArtistName, AlbumTitle, TrackNumber, TrackTitle, TrackLength, BitRate, Genre, Date, TrackID, Location, CleanName, Format) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [song['ArtistName'], song['AlbumTitle'], song['TrackNumber'], song['TrackTitle'], song['TrackLength'], song['BitRate'], song['Genre'], song['Date'], song['TrackID'], song['Location'], CleanName, song['Format']])
 
-    logger.info('Completed matching tracks from directory: %s' % dir.decode(headphones.SYS_ENCODING, 'replace'))
+    logger.info(u'Completed matching tracks from directory: %s' % dir)
     
     
     if not append:
