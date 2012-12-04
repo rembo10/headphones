@@ -51,7 +51,7 @@ def main():
         pass
 
     # for OSes that are poorly configured I'll just force UTF-8
-    if not headphones.SYS_ENCODING or headphones.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII', 'ASCII','cp1252'):
+    if not headphones.SYS_ENCODING or headphones.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII', 'ASCII'):
         headphones.SYS_ENCODING = 'UTF-8'
     
     # Set up and gather command line arguments
