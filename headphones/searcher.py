@@ -525,7 +525,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             if data and bestqual:
                 logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
                 # Get rid of any dodgy chars here so we can prevent sab from renaming our downloads
-                nzb_folder_name = helpers.sab_sanitize_foldername(bestqual[0]) + '.' + albums[2]
+                nzb_folder_name = helpers.sab_sanitize_foldername(bestqual[0])
                 if headphones.SAB_HOST and not headphones.BLACKHOLE:
 
                     nzb = classes.NZBDataSearchResult()
