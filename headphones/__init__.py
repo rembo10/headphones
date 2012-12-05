@@ -169,6 +169,7 @@ FOLDER_PERMISSIONS = None
 
 MUSIC_ENCODER = False
 ENCODERFOLDER = None
+ENCODER_PATH = None
 ENCODER = None
 XLDPROFILE = None
 BITRATE = None
@@ -268,7 +269,7 @@ def initialize():
                 LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS,\
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
-                ENCODERFOLDER, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, \
+                ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, \
                 ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, \
                 PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
@@ -405,7 +406,8 @@ def initialize():
         INTERFACE = check_setting_str(CFG, 'General', 'interface', 'default')
         FOLDER_PERMISSIONS = check_setting_str(CFG, 'General', 'folder_permissions', '0755')
         
-        ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')        
+        ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')
+        ENCODER_PATH = check_setting_str(CFG, 'General', 'encoder_path', '')  
         ENCODER = check_setting_str(CFG, 'General', 'encoder', 'ffmpeg')
         XLDPROFILE = check_setting_str(CFG, 'General', 'xldprofile', '')
         BITRATE = check_setting_int(CFG, 'General', 'bitrate', 192)
@@ -493,6 +495,18 @@ def initialize():
             FOLDER_FORMAT = replace_all(FOLDER_FORMAT, folder_values)
             
             CONFIG_VERSION = '2'
+            
+        if CONFIG_VERSION == '2':
+            
+            # Update the config to use direct path to the encoder rather than the encoder folder
+            if ENCODERFOLDER:
+                if ENCODER == "xld":
+                    ENCODER_PATH = os.path.join(headphones.ENCODERFOLDER.encode(headphones.SYS_ENCODING), 'xld')
+                elif ENCODER == "ffmpeg":
+                    ENCODER_PATH = os.path.join(headphones.ENCODERFOLDER.encode(headphones.SYS_ENCODING), 'ffmpeg')
+                elif ENCODER == "lame":
+                    ENCODER_PATH = os.path.join(headphones.ENCODERFOLDER.encode(headphones.SYS_ENCODING), 'lame')
+            CONFIG_VERSION = '3'
         
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
@@ -749,7 +763,7 @@ def config_write():
     new_config['General']['xldprofile'] = XLDPROFILE
     new_config['General']['bitrate'] = int(BITRATE)
     new_config['General']['samplingfrequency'] = int(SAMPLINGFREQUENCY)
-    new_config['General']['encoderfolder'] = ENCODERFOLDER
+    new_config['General']['encoder_path'] = ENCODER_PATH
     new_config['General']['advancedencoder'] = ADVANCEDENCODER
     new_config['General']['encoderoutputformat'] = ENCODEROUTPUTFORMAT
     new_config['General']['encoderquality'] = ENCODERQUALITY
