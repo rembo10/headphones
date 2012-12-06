@@ -98,7 +98,7 @@ def encode(albumPath):
                 encoder="lame"
         elif headphones.ENCODER =='ffmpeg':
             if headphones.SYS_PLATFORM == "win32":
-                encoder = "C:/Program Files/ffmpeg/ffmpeg.exe"
+                encoder = "C:/Program Files/ffmpeg/bin/ffmpeg.exe"
             else:
                 encoder="ffmpeg"
 
