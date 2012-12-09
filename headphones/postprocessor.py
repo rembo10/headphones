@@ -49,7 +49,7 @@ def checkFolder():
                 nzb_album_possibilities = [ album['FolderName'],
                                             sab_replace_dots(album['FolderName']),
                                             sab_replace_spaces(album['FolderName']),
-                                            sab_replace_dots(sab_replace_spaces(album['FolderName']))
+                                            sab_replace_spaces(sab_replace_dots(album['FolderName']))
                                         ]
 
                 torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
