@@ -274,12 +274,17 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                             }
             
                 searchURL = newznab_host[0] + '/api?' + urllib.urlencode(params)
-                    
+                
+                # Add a user-agent
+                request = urllib2.Request(searchURL)
+                request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+                opener = urllib2.build_opener()
+                
                 logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, newznab_host[0]))
                 
                 try:
-                    data = urllib2.urlopen(searchURL, timeout=20).read()
-                except urllib2.URLError, e:
+                    data = opener.open(request).read()
+                except Exception, e:
                     logger.warn('Error fetching data from %s: %s' % (newznab_host[0], e))
                     data = False
                     
