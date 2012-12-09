@@ -476,11 +476,11 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                         for result in resultlist:
                             
                             if high_size_limit and (result[1] > high_size_limit):
-                                logger.info(result[0] + "is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit))
+                                logger.info(result[0] + " is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit))
                                 continue
                                 
                             if low_size_limit and (result[1] < low_size_limit):
-                                logger.info(result[0] + "is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit))
+                                logger.info(result[0] + " is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit))
                                 continue
                                                                 
                             delta = abs(targetsize - result[1])
