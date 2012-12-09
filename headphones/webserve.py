@@ -832,6 +832,11 @@ class WebInterface(object):
         
         headphones.EXTRAS = ','.join(str(n) for n in temp_extras_list)    
         
+        # Sanity checking
+        if headphones.SEARCH_INTERVAL < 360:
+            logger.info("Search interval too low. Resetting to 6 hour minimum")
+            headphones.SEARCH_INTERVAL = 360
+        
         # Write the config
         headphones.config_write()
 

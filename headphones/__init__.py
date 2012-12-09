@@ -350,7 +350,7 @@ def initialize():
         AUTOWANT_UPCOMING = bool(check_setting_int(CFG, 'General', 'autowant_upcoming', 1))
         AUTOWANT_ALL = bool(check_setting_int(CFG, 'General', 'autowant_all', 0))
         
-        SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'search_interval', 360)
+        SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'search_interval', 1440)
         LIBRARYSCAN = bool(check_setting_int(CFG, 'General', 'libraryscan', 1))
         LIBRARYSCAN_INTERVAL = check_setting_int(CFG, 'General', 'libraryscan_interval', 300)
         DOWNLOAD_SCAN_INTERVAL = check_setting_int(CFG, 'General', 'download_scan_interval', 5)
@@ -529,6 +529,11 @@ def initialize():
                 os.makedirs(CACHE_DIR)
             except OSError:
                 logger.error('Could not create cache dir. Check permissions of datadir: ' + DATA_DIR)
+                
+        # Sanity check for search interval. Set it to at least 6 hours
+        if SEARCH_INTERVAL < 360:
+            logger.info("Search interval too low. Resetting to 6 hour minimum")
+            SEARCH_INTERVAL = 360
         
         # Initialize the database
         logger.info('Checking to see if the database has all tables....')
