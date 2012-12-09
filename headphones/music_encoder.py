@@ -85,15 +85,22 @@ def encode(albumPath):
                     musicTemp = os.path.normpath(os.path.splitext(music)[0] + '.' + encoderFormat)
                     musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
 
-    if XLD:
-        if headphones.ENCODERFOLDER:
-            encoder = os.path.join(headphones.ENCODERFOLDER.encode(headphones.SYS_ENCODING), 'xld')
-        else:
+    if headphones.ENCODER_PATH:
+        encoder = headphones.ENCODER_PATH.encode(headphones.SYS_ENCODING)
+    else:
+        if XLD:
             encoder = os.path.join('/Applications', 'xld')                            
-    elif headphones.ENCODER=='lame':
-        encoder=os.path.join(headphones.ENCODERFOLDER.encode(headphones.SYS_ENCODING),'lame')
-    elif headphones.ENCODER=='ffmpeg':
-        encoder=os.path.join(headphones.ENCODERFOLDER.encode(headphones.SYS_ENCODING),'ffmpeg')
+        elif headphones.ENCODER =='lame':
+            if headphones.SYS_PLATFORM == "win32":
+                ## NEED THE DEFAULT LAME INSTALL ON WIN!
+                encoder = "C:/Program Files/lame/lame.exe"
+            else:
+                encoder="lame"
+        elif headphones.ENCODER =='ffmpeg':
+            if headphones.SYS_PLATFORM == "win32":
+                encoder = "C:/Program Files/ffmpeg/bin/ffmpeg.exe"
+            else:
+                encoder="ffmpeg"
 
     i=0
     for music in musicFiles:        

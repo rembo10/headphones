@@ -274,12 +274,17 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                             }
             
                 searchURL = newznab_host[0] + '/api?' + urllib.urlencode(params)
-                    
+                
+                # Add a user-agent
+                request = urllib2.Request(searchURL)
+                request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+                opener = urllib2.build_opener()
+                
                 logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, newznab_host[0]))
                 
                 try:
-                    data = urllib2.urlopen(searchURL, timeout=20).read()
-                except urllib2.URLError, e:
+                    data = opener.open(request).read()
+                except Exception, e:
                     logger.warn('Error fetching data from %s: %s' % (newznab_host[0], e))
                     data = False
                     
@@ -476,11 +481,11 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                         for result in resultlist:
                             
                             if high_size_limit and (result[1] > high_size_limit):
-                                logger.info(result[0] + "is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit))
+                                logger.info(result[0] + " is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit))
                                 continue
                                 
                             if low_size_limit and (result[1] < low_size_limit):
-                                logger.info(result[0] + "is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit))
+                                logger.info(result[0] + " is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit))
                                 continue
                                                                 
                             delta = abs(targetsize - result[1])
@@ -525,7 +530,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             if data and bestqual:
                 logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
                 # Get rid of any dodgy chars here so we can prevent sab from renaming our downloads
-                nzb_folder_name = helpers.sab_sanitize_foldername(bestqual[0]) + '.' + albums[2]
+                nzb_folder_name = helpers.sab_sanitize_foldername(bestqual[0])
                 if headphones.SAB_HOST and not headphones.BLACKHOLE:
 
                     nzb = classes.NZBDataSearchResult()

@@ -626,7 +626,7 @@ class WebInterface(object):
                     "encoder":      headphones.ENCODER,
                     "xldprofile":   headphones.XLDPROFILE,
                     "bitrate":      int(headphones.BITRATE),
-                    "encoderfolder":    headphones.ENCODERFOLDER,
+                    "encoderfolder":    headphones.ENCODER_PATH,
                     "advancedencoder":  headphones.ADVANCEDENCODER,
                     "encoderoutputformat": headphones.ENCODEROUTPUTFORMAT,
                     "samplingfrequency": headphones.SAMPLINGFREQUENCY,
@@ -770,7 +770,7 @@ class WebInterface(object):
         headphones.XLDPROFILE = xldprofile
         headphones.BITRATE = int(bitrate)
         headphones.SAMPLINGFREQUENCY = int(samplingfrequency)
-        headphones.ENCODERFOLDER = encoderfolder
+        headphones.ENCODER_PATH = encoderfolder
         headphones.ADVANCEDENCODER = advancedencoder
         headphones.ENCODEROUTPUTFORMAT = encoderoutputformat
         headphones.ENCODERVBRCBR = encodervbrcbr
@@ -831,6 +831,11 @@ class WebInterface(object):
             i+=1
         
         headphones.EXTRAS = ','.join(str(n) for n in temp_extras_list)    
+        
+        # Sanity checking
+        if headphones.SEARCH_INTERVAL < 360:
+            logger.info("Search interval too low. Resetting to 6 hour minimum")
+            headphones.SEARCH_INTERVAL = 360
         
         # Write the config
         headphones.config_write()
