@@ -43,13 +43,13 @@ def checkFolder():
         
             if album['FolderName']:
                 
-                # Need to check for variations due to sab renaming. Ideally we'd check the sab config via api to 
-                # figure out which options are checked, but oh well
+                # We're now checking sab config options after sending to determine renaming - but we'll keep the
+                # iterations in just in case we can't read the config for some reason
 
                 nzb_album_possibilities = [ album['FolderName'],
                                             sab_replace_dots(album['FolderName']),
                                             sab_replace_spaces(album['FolderName']),
-                                            sab_replace_dots(sab_replace_spaces(album['FolderName']))
+                                            sab_replace_spaces(sab_replace_dots(album['FolderName']))
                                         ]
 
                 torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
@@ -828,6 +828,8 @@ def forcePostProcess():
         logger.info('Processing: %s' % folder_basename)
         
         # First try to see if there's a match in the snatched table, then we'll try to parse the foldername
+        # TODO: Iterate through underscores -> spaces, spaces -> dots, underscores -> dots (this might be hit or miss since it assumes
+        # all spaces/underscores came from sab replacing values
         snatched = myDB.action('SELECT AlbumID, Title from snatched WHERE FolderName LIKE ?', [folder_basename]).fetchone()
         if snatched:
             logger.info('Found a match in the database: %s. Verifying to make sure it is the correct album' % snatched['Title'])
