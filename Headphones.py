@@ -109,7 +109,10 @@ def main():
     headphones.initialize()
         
     if headphones.DAEMON:
-        headphones.daemonize()
+        if sys.platform == "win32":
+            print "Daemonize not supported under Windows, starting normally"
+        else:
+            headphones.daemonize()
     
     #configure the connection to the musicbrainz database
     headphones.mb.startmb()
