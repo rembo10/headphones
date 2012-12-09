@@ -500,12 +500,7 @@ def initialize():
             
             # Update the config to use direct path to the encoder rather than the encoder folder
             if ENCODERFOLDER:
-                if ENCODER == "xld":
-                    ENCODER_PATH = os.path.join(headphones.ENCODERFOLDER.encode(headphones.SYS_ENCODING), 'xld')
-                elif ENCODER == "ffmpeg":
-                    ENCODER_PATH = os.path.join(headphones.ENCODERFOLDER.encode(headphones.SYS_ENCODING), 'ffmpeg')
-                elif ENCODER == "lame":
-                    ENCODER_PATH = os.path.join(headphones.ENCODERFOLDER.encode(headphones.SYS_ENCODING), 'lame')
+                ENCODER_PATH = os.path.join(ENCODERFOLDER, ENCODER)
             CONFIG_VERSION = '3'
         
         if not LOG_DIR:
