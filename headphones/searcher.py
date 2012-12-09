@@ -537,6 +537,15 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                     nzb.extraInfo.append(data)
                     nzb.name = nzb_folder_name
                     sab.sendNZB(nzb)
+                    
+                    # If we sent the file to sab, we can check how it was renamed and insert that into the snatched table
+                    (replace_spaces, replace_dots) = sab.checkConfig()
+                    print replace_spaces
+                    print replace_dots
+                    if replace_dots:
+                        nzb_folder_name = helpers.sab_replace_dots(nzb_folder_name)
+                    if replace_spaces:
+                        nzb_folder_name = helpers.sab_replace_spaces(nzb_folder_name)
 
                 elif headphones.BLACKHOLE:
                 
