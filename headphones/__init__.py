@@ -21,6 +21,7 @@ import threading
 import webbrowser
 import sqlite3
 import itertools
+import json
 
 from lib.apscheduler.scheduler import Scheduler
 from lib.configobj import ConfigObj
@@ -254,6 +255,23 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
         logger.debug(item_name + " -> ******")
     return my_val
 
+def check_setting_json(config, cfg_name, item_name, def_val, log=True):
+    try:
+        my_val = json.loads(config[cfg_name][item_name])
+    except:
+        my_val = def_val
+        try:
+            config[cfg_name][item_name] = json.dumps(my_val)
+        except:
+            config[cfg_name] = {}
+            config[cfg_name][item_name] = json.dumps(my_val)
+
+    if log:
+        logger.debug("%s -> %s" % (item_name, my_val) )
+    else:
+        logger.debug("%s -> ******" % item_name)
+    return my_val
+
 def initialize():
 
     with INIT_LOCK:
@@ -274,7 +292,7 @@ def initialize():
                 PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
-                PREFERRED_BITRATE_LOW_BUFFER,CACHE_SIZEMB
+                PREFERRED_BITRATE_LOW_BUFFER,CACHE_SIZEMB, HTTP_USER_DICT
                 
         if __INITIALIZED__:
             return False
@@ -310,6 +328,7 @@ def initialize():
         HTTP_HOST = check_setting_str(CFG, 'General', 'http_host', '0.0.0.0')
         HTTP_USERNAME = check_setting_str(CFG, 'General', 'http_username', '')
         HTTP_PASSWORD = check_setting_str(CFG, 'General', 'http_password', '')
+        HTTP_USER_DICT = check_setting_json(CFG, 'General', 'http_user_dict', {HTTP_USERNAME: HTTP_PASSWORD})
         HTTP_ROOT = check_setting_str(CFG, 'General', 'http_root', '/')
         HTTP_PROXY = bool(check_setting_int(CFG, 'General', 'http_proxy', 0))
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
@@ -623,6 +642,7 @@ def config_write():
     new_config['General']['http_host'] = HTTP_HOST
     new_config['General']['http_username'] = HTTP_USERNAME
     new_config['General']['http_password'] = HTTP_PASSWORD
+    new_config['General']['http_user_dict'] = json.dumps(HTTP_USER_DICT)
     new_config['General']['http_root'] = HTTP_ROOT
     new_config['General']['http_proxy'] = int(HTTP_PROXY)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
@@ -979,7 +999,7 @@ def dbcheck():
         for artist in artists:
             if artist[1]:
                 c.execute('UPDATE artists SET Extras=? WHERE ArtistID=?', ("1,2,3,4,5,6,7,8", artist[0]))
-    
+
     conn.commit()
     c.close()
 

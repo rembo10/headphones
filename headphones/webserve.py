@@ -553,6 +553,7 @@ class WebInterface(object):
                     "http_user" : headphones.HTTP_USERNAME,
                     "http_port" : headphones.HTTP_PORT,
                     "http_pass" : headphones.HTTP_PASSWORD,
+                    "http_user_dict" : headphones.HTTP_USER_DICT,
                     "launch_browser" : checked(headphones.LAUNCH_BROWSER),
                     "api_enabled" : checked(headphones.API_ENABLED),
                     "api_key" : headphones.API_KEY,
@@ -807,6 +808,7 @@ class WebInterface(object):
         # Handle the variable config options. Note - keys with False values aren't getting passed
         
         headphones.EXTRA_NEWZNABS = []
+        headphones.HTTP_USER_DICT = {}
         
         for kwarg in kwargs:
             if kwarg.startswith('newznab_host'):
@@ -819,6 +821,13 @@ class WebInterface(object):
                     newznab_enabled = 0
                 
                 headphones.EXTRA_NEWZNABS.append((newznab_host, newznab_api, newznab_enabled))
+
+            if kwarg.startswith('http_user_name'):
+                http_user_number = kwarg[14:]
+                http_user_name = kwargs['http_user_name' + http_user_number]
+                http_user_password = kwargs['http_user_password' + http_user_number]
+
+                headphones.HTTP_USER_DICT[http_user_name] = http_user_password
                 
         # Convert the extras to list then string. Coming in as 0 or 1
         temp_extras_list = []

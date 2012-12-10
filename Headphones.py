@@ -132,6 +132,7 @@ def main():
                     'http_proxy':       headphones.HTTP_PROXY,
                     'http_username':    headphones.HTTP_USERNAME,
                     'http_password':    headphones.HTTP_PASSWORD,
+                    'http_user_dict':   headphones.HTTP_USER_DICT,
             })
     
     logger.info('Starting Headphones on port: %i' % http_port)
