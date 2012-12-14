@@ -140,6 +140,10 @@ NEWZBIN = False
 NEWZBIN_UID = None
 NEWZBIN_PASSWORD = None
 
+NZBSRUS = False
+NZBSRUS_UID = None
+NZBSRUS_APIKEY = None
+
 LASTFM_USERNAME = None
 
 LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a"]
@@ -268,7 +272,7 @@ def initialize():
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS,\
-                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
+                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, \
                 ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, \
                 PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
@@ -285,6 +289,7 @@ def initialize():
         CheckSection('NZBMatrix')
         CheckSection('Newznab')
         CheckSection('NZBsorg')
+        CheckSection('NZBsRus')
         CheckSection('Newzbin')
         CheckSection('Waffles')
         CheckSection('Rutracker')
@@ -400,6 +405,10 @@ def initialize():
         NEWZBIN = bool(check_setting_int(CFG, 'Newzbin', 'newzbin', 0))
         NEWZBIN_UID = check_setting_str(CFG, 'Newzbin', 'newzbin_uid', '')
         NEWZBIN_PASSWORD = check_setting_str(CFG, 'Newzbin', 'newzbin_password', '')
+        
+        NZBSRUS = bool(check_setting_int(CFG, 'NZBsRus', 'nzbsrus', 0))
+        NZBSRUS_UID = check_setting_str(CFG, 'NZBsRus', 'nzbsrus_uid', '')
+        NZBSRUS_APIKEY = check_setting_str(CFG, 'NZBsRus', 'nzbsrus_apikey', '')
 
         LASTFM_USERNAME = check_setting_str(CFG, 'General', 'lastfm_username', '')
         
@@ -724,6 +733,11 @@ def config_write():
     new_config['Newzbin']['newzbin'] = int(NEWZBIN)
     new_config['Newzbin']['newzbin_uid'] = NEWZBIN_UID
     new_config['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
+    
+    new_config['NZBsRus'] = {}
+    new_config['NZBsRus']['nzbsrus'] = int(NZBSRUS)
+    new_config['NZBsRus']['nzbsrus_uid'] = NZBSRUS_UID
+    new_config['NZBsRus']['nzbsrus_apikey'] = NZBSRUS_APIKEY
     
     new_config['Prowl'] = {}
     new_config['Prowl']['prowl_enabled'] = int(PROWL_ENABLED)
