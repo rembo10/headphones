@@ -41,6 +41,7 @@ SYS_ENCODING = None
 
 VERBOSE = 1
 DAEMON = False
+CREATEPID = False
 PIDFILE= None
 
 SCHED = Scheduler()
@@ -577,42 +578,34 @@ def daemonize():
 
     # Do first fork
     try:
-        pid = os.fork()
-        if pid == 0:
-            pass
-        else:
-            # Exit the parent process
-            logger.debug('Forking once...')
-            os._exit(0)
+        pid = os.fork()  # @UndefinedVariable - only available in UNIX
+        if pid != 0:
+            sys.exit(0)
     except OSError, e:
-        sys.exit("1st fork failed: %s [%d]" % (e.strerror, e.errno))
+        raise RuntimeError("1st fork failed: %s [%d]" % (e.strerror, e.errno))
 
     os.setsid()
 
-    # Do second fork
+    # Make sure I can read my own files and shut out others
+    prev = os.umask(0)  # @UndefinedVariable - only available in UNIX
+    os.umask(prev and int('077', 8))
+
+    # Make the child a session-leader by detaching from the terminal
     try:
-        pid = os.fork()
-        if pid > 0:
-            logger.debug('Forking twice...')
-            os._exit(0) # Exit second parent process
+        pid = os.fork()  # @UndefinedVariable - only available in UNIX
+        if pid != 0:
+            sys.exit(0)
     except OSError, e:
-        sys.exit("2nd fork failed: %s [%d]" % (e.strerror, e.errno))
+        raise RuntimeError("2nd fork failed: %s [%d]" % (e.strerror, e.errno))
 
-    os.chdir("/")
-    os.umask(0)
+    dev_null = file('/dev/null', 'r')
+    os.dup2(dev_null.fileno(), sys.stdin.fileno())
 
-    si = open('/dev/null', "r")
-    so = open('/dev/null', "a+")
-    se = open('/dev/null', "a+")
-
-    os.dup2(si.fileno(), sys.stdin.fileno())
-    os.dup2(so.fileno(), sys.stdout.fileno())
-    os.dup2(se.fileno(), sys.stderr.fileno())
-
-    pid = os.getpid()
+    pid = str(os.getpid())
     logger.info('Daemonized to PID: %s' % pid)
-    if PIDFILE:
-        logger.info('Writing PID %s to %s' % (pid, PIDFILE))
+
+    if CREATEPID:
+        logger.info("Writing PID " + pid + " to " + str(PIDFILE))
         file(PIDFILE, 'w').write("%s\n" % pid)
 
 def launch_browser(host, port, root):
@@ -827,6 +820,11 @@ def start():
 
         started = True
 
+def sig_handler(signum=None, frame=None):
+    if type(signum) != type(None):
+        logger.info("Signal %i caught, saving and exiting..." % int(signum))
+        shutdown()
+
 def dbcheck():
 
     conn=sqlite3.connect(DB_FILE)
@@ -1013,6 +1011,7 @@ def shutdown(restart=False, update=False):
 
     if not restart and not update:
         logger.info('Headphones is shutting down...')
+
     if update:
         logger.info('Headphones is updating...')
         try:
@@ -1020,7 +1019,7 @@ def shutdown(restart=False, update=False):
         except Exception, e:
             logger.warn('Headphones failed to update: %s. Restarting.' % e)
 
-    if PIDFILE :
+    if CREATEPID :
         logger.info ('Removing pidfile %s' % PIDFILE)
         os.remove(PIDFILE)
 
