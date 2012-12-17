@@ -41,6 +41,7 @@ SYS_ENCODING = None
 
 VERBOSE = 1
 DAEMON = False
+CREATEPID = False
 PIDFILE= None
 
 SCHED = Scheduler()
@@ -74,6 +75,8 @@ API_ENABLED = False
 API_KEY = None
 
 GIT_PATH = None
+GIT_USER = None
+GIT_BRANCH =None
 INSTALL_TYPE = None
 CURRENT_VERSION = None
 LATEST_VERSION = None
@@ -261,9 +264,9 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
 def initialize():
 
     with INIT_LOCK:
-    
+
         global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, SYS_PLATFORM, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
-                HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, \
+                HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, GIT_USER, GIT_BRANCH, \
                 CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
                 RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, \
@@ -279,10 +282,10 @@ def initialize():
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
                 PREFERRED_BITRATE_LOW_BUFFER,CACHE_SIZEMB
-                
+
         if __INITIALIZED__:
             return False
-                
+
         # Make sure all the config sections exist
         CheckSection('General')
         CheckSection('SABnzbd')
@@ -300,18 +303,18 @@ def initialize():
         CheckSection('NMA')
         CheckSection('Synoindex')
         CheckSection('Advanced')
-        
+
         # Set global variables based on config file or use defaults
         CONFIG_VERSION = check_setting_str(CFG, 'General', 'config_version', '0')
-        
+
         try:
             HTTP_PORT = check_setting_int(CFG, 'General', 'http_port', 8181)
         except:
             HTTP_PORT = 8181
-            
+
         if HTTP_PORT < 21 or HTTP_PORT > 65535:
             HTTP_PORT = 8181
-            
+
         HTTP_HOST = check_setting_str(CFG, 'General', 'http_host', '0.0.0.0')
         HTTP_USERNAME = check_setting_str(CFG, 'General', 'http_username', '')
         HTTP_PASSWORD = check_setting_str(CFG, 'General', 'http_password', '')
@@ -321,13 +324,15 @@ def initialize():
         API_ENABLED = bool(check_setting_int(CFG, 'General', 'api_enabled', 0))
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
+        GIT_USER = check_setting_str(CFG, 'General', 'git_user', 'rembo10')
+        GIT_BRANCH = check_setting_str(CFG, 'General', 'git_branch', 'master')
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', '')
         CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', '')
-        
+
         CHECK_GITHUB = bool(check_setting_int(CFG, 'General', 'check_github', 1))
         CHECK_GITHUB_ON_STARTUP = bool(check_setting_int(CFG, 'General', 'check_github_on_startup', 1))
         CHECK_GITHUB_INTERVAL = check_setting_int(CFG, 'General', 'check_github_interval', 360)
-        
+
         MUSIC_DIR = check_setting_str(CFG, 'General', 'music_dir', '')
         DESTINATION_DIR = check_setting_str(CFG, 'General', 'destination_dir', '')
         LOSSLESS_DESTINATION_DIR = check_setting_str(CFG, 'General', 'lossless_destination_dir', '')
@@ -354,12 +359,12 @@ def initialize():
         EXTRAS = check_setting_str(CFG, 'General', 'extras', '')
         AUTOWANT_UPCOMING = bool(check_setting_int(CFG, 'General', 'autowant_upcoming', 1))
         AUTOWANT_ALL = bool(check_setting_int(CFG, 'General', 'autowant_all', 0))
-        
+
         SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'search_interval', 1440)
         LIBRARYSCAN = bool(check_setting_int(CFG, 'General', 'libraryscan', 1))
         LIBRARYSCAN_INTERVAL = check_setting_int(CFG, 'General', 'libraryscan_interval', 300)
         DOWNLOAD_SCAN_INTERVAL = check_setting_int(CFG, 'General', 'download_scan_interval', 5)
-        
+
         TORRENTBLACKHOLE_DIR = check_setting_str(CFG, 'General', 'torrentblackhole_dir', '')
         NUMBEROFSEEDERS = check_setting_str(CFG, 'General', 'numberofseeders', '10')
         ISOHUNT = bool(check_setting_int(CFG, 'General', 'isohunt', 0))
@@ -370,7 +375,7 @@ def initialize():
         WAFFLES = bool(check_setting_int(CFG, 'Waffles', 'waffles', 0))
         WAFFLES_UID = check_setting_str(CFG, 'Waffles', 'waffles_uid', '')
         WAFFLES_PASSKEY = check_setting_str(CFG, 'Waffles', 'waffles_passkey', '')
-        
+
         RUTRACKER = bool(check_setting_int(CFG, 'Rutracker', 'rutracker', 0))
         RUTRACKER_USER = check_setting_str(CFG, 'Rutracker', 'rutracker_user', '')
         RUTRACKER_PASSWORD = check_setting_str(CFG, 'Rutracker', 'rutracker_password', '')
@@ -384,20 +389,20 @@ def initialize():
         SAB_PASSWORD = check_setting_str(CFG, 'SABnzbd', 'sab_password', '')
         SAB_APIKEY = check_setting_str(CFG, 'SABnzbd', 'sab_apikey', '')
         SAB_CATEGORY = check_setting_str(CFG, 'SABnzbd', 'sab_category', '')
-        
+
         NZBMATRIX = bool(check_setting_int(CFG, 'NZBMatrix', 'nzbmatrix', 0))
         NZBMATRIX_USERNAME = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_username', '')
         NZBMATRIX_APIKEY = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_apikey', '')
-        
+
         NEWZNAB = bool(check_setting_int(CFG, 'Newznab', 'newznab', 0))
         NEWZNAB_HOST = check_setting_str(CFG, 'Newznab', 'newznab_host', '')
         NEWZNAB_APIKEY = check_setting_str(CFG, 'Newznab', 'newznab_apikey', '')
         NEWZNAB_ENABLED = bool(check_setting_int(CFG, 'Newznab', 'newznab_enabled', 1))
-        
+
         # Need to pack the extra newznabs back into a list of tuples
         flattened_newznabs = check_setting_str(CFG, 'Newznab', 'extra_newznabs', [], log=False)
         EXTRA_NEWZNABS = list(itertools.izip(*[itertools.islice(flattened_newznabs, i, None, 3) for i in range(3)]))
-        
+
         NZBSORG = bool(check_setting_int(CFG, 'NZBsorg', 'nzbsorg', 0))
         NZBSORG_UID = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_uid', '')
         NZBSORG_HASH = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_hash', '')
@@ -405,18 +410,18 @@ def initialize():
         NEWZBIN = bool(check_setting_int(CFG, 'Newzbin', 'newzbin', 0))
         NEWZBIN_UID = check_setting_str(CFG, 'Newzbin', 'newzbin_uid', '')
         NEWZBIN_PASSWORD = check_setting_str(CFG, 'Newzbin', 'newzbin_password', '')
-        
+
         NZBSRUS = bool(check_setting_int(CFG, 'NZBsRus', 'nzbsrus', 0))
         NZBSRUS_UID = check_setting_str(CFG, 'NZBsRus', 'nzbsrus_uid', '')
         NZBSRUS_APIKEY = check_setting_str(CFG, 'NZBsRus', 'nzbsrus_apikey', '')
 
         LASTFM_USERNAME = check_setting_str(CFG, 'General', 'lastfm_username', '')
-        
+
         INTERFACE = check_setting_str(CFG, 'General', 'interface', 'default')
         FOLDER_PERMISSIONS = check_setting_str(CFG, 'General', 'folder_permissions', '0755')
-        
+
         ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')
-        ENCODER_PATH = check_setting_str(CFG, 'General', 'encoder_path', '')  
+        ENCODER_PATH = check_setting_str(CFG, 'General', 'encoder_path', '')
         ENCODER = check_setting_str(CFG, 'General', 'encoder', 'ffmpeg')
         XLDPROFILE = check_setting_str(CFG, 'General', 'xldprofile', '')
         BITRATE = check_setting_int(CFG, 'General', 'bitrate', 192)
@@ -431,28 +436,28 @@ def initialize():
 
         PROWL_ENABLED = bool(check_setting_int(CFG, 'Prowl', 'prowl_enabled', 0))
         PROWL_KEYS = check_setting_str(CFG, 'Prowl', 'prowl_keys', '')
-        PROWL_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_onsnatch', 0)) 
+        PROWL_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_onsnatch', 0))
         PROWL_PRIORITY = check_setting_int(CFG, 'Prowl', 'prowl_priority', 0)
-        
+
         XBMC_ENABLED = bool(check_setting_int(CFG, 'XBMC', 'xbmc_enabled', 0))
         XBMC_HOST = check_setting_str(CFG, 'XBMC', 'xbmc_host', '')
         XBMC_USERNAME = check_setting_str(CFG, 'XBMC', 'xbmc_username', '')
         XBMC_PASSWORD = check_setting_str(CFG, 'XBMC', 'xbmc_password', '')
         XBMC_UPDATE = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update', 0))
         XBMC_NOTIFY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify', 0))
-        
+
         NMA_ENABLED = bool(check_setting_int(CFG, 'NMA', 'nma_enabled', 0))
         NMA_APIKEY = check_setting_str(CFG, 'NMA', 'nma_apikey', '')
         NMA_PRIORITY = check_setting_int(CFG, 'NMA', 'nma_priority', 0)
-        NMA_ONSNATCH = bool(check_setting_int(CFG, 'NMA', 'nma_onsnatch', 0)) 
-        
+        NMA_ONSNATCH = bool(check_setting_int(CFG, 'NMA', 'nma_onsnatch', 0))
+
         SYNOINDEX_ENABLED = bool(check_setting_int(CFG, 'Synoindex', 'synoindex_enabled', 0))
-        
+
         PUSHOVER_ENABLED = bool(check_setting_int(CFG, 'Pushover', 'pushover_enabled', 0))
         PUSHOVER_KEYS = check_setting_str(CFG, 'Pushover', 'pushover_keys', '')
-        PUSHOVER_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_onsnatch', 0)) 
+        PUSHOVER_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_onsnatch', 0))
         PUSHOVER_PRIORITY = check_setting_int(CFG, 'Pushover', 'pushover_priority', 0)
-        
+
         MIRROR = check_setting_str(CFG, 'General', 'mirror', 'musicbrainz.org')
         CUSTOMHOST = check_setting_str(CFG, 'General', 'customhost', 'localhost')
         CUSTOMPORT = check_setting_int(CFG, 'General', 'customport', 5000)
@@ -461,9 +466,9 @@ def initialize():
         HPPASS = check_setting_str(CFG, 'General', 'hppass', '')
 
         CACHE_SIZEMB = check_setting_int(CFG,'Advanced','cache_sizemb',32)
-        
+
         ALBUM_COMPLETION_PCT = check_setting_int(CFG, 'Advanced', 'album_completion_pct', 80)
-        
+
         # update folder formats in the config & bump up config version
         if CONFIG_VERSION == '0':
             from headphones.helpers import replace_all
@@ -471,9 +476,9 @@ def initialize():
             folder_values = { 'artist' : 'Artist', 'album':'Album', 'year' : 'Year', 'releasetype' : 'Type', 'first' : 'First', 'lowerfirst' : 'first' }
             FILE_FORMAT = replace_all(FILE_FORMAT, file_values)
             FOLDER_FORMAT = replace_all(FOLDER_FORMAT, folder_values)
-            
+
             CONFIG_VERSION = '1'
-            
+
         if CONFIG_VERSION == '1':
 
             from headphones.helpers import replace_all
@@ -499,32 +504,32 @@ def initialize():
                                 'year':     '$year',
                                 'type':     '$type',
                                 'first':    '$first'
-                            }   
+                            }
             FILE_FORMAT = replace_all(FILE_FORMAT, file_values)
             FOLDER_FORMAT = replace_all(FOLDER_FORMAT, folder_values)
-            
+
             CONFIG_VERSION = '2'
-            
+
         if CONFIG_VERSION == '2':
-            
+
             # Update the config to use direct path to the encoder rather than the encoder folder
             if ENCODERFOLDER:
                 ENCODER_PATH = os.path.join(ENCODERFOLDER, ENCODER)
             CONFIG_VERSION = '3'
-        
+
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
-        
+
         if not os.path.exists(LOG_DIR):
             try:
                 os.makedirs(LOG_DIR)
             except OSError:
                 if VERBOSE:
                     print 'Unable to create the log directory. Logging to screen only.'
-        
+
         # Start the logger, silence console logging if we need to
         logger.headphones_log.initLogger(verbose=VERBOSE)
-        
+
         if not CACHE_DIR:
             # Put the cache dir in the data dir for now
             CACHE_DIR = os.path.join(DATA_DIR, 'cache')
@@ -533,23 +538,23 @@ def initialize():
                 os.makedirs(CACHE_DIR)
             except OSError:
                 logger.error('Could not create cache dir. Check permissions of datadir: ' + DATA_DIR)
-                
+
         # Sanity check for search interval. Set it to at least 6 hours
         if SEARCH_INTERVAL < 360:
             logger.info("Search interval too low. Resetting to 6 hour minimum")
             SEARCH_INTERVAL = 360
-        
+
         # Initialize the database
         logger.info('Checking to see if the database has all tables....')
         try:
             dbcheck()
         except Exception, e:
             logger.error("Can't connect to the database: %s" % e)
-            
+
         # Get the currently installed version - returns None, 'win32' or the git hash
         # Also sets INSTALL_TYPE variable to 'win', 'git' or 'source'
         CURRENT_VERSION = versioncheck.getVersion()
-        
+
         # Check for new versions
         if CHECK_GITHUB_ON_STARTUP:
             try:
@@ -561,62 +566,62 @@ def initialize():
 
         __INITIALIZED__ = True
         return True
-    
+
 def daemonize():
 
     if threading.activeCount() != 1:
         logger.warn('There are %r active threads. Daemonizing may cause \
                         strange behavior.' % threading.enumerate())
-    
+
     sys.stdout.flush()
     sys.stderr.flush()
-    
+
     # Do first fork
     try:
-        pid = os.fork()
-        if pid == 0:
-            pass
-        else:
-            # Exit the parent process
-            logger.debug('Forking once...')
-            os._exit(0)
+        pid = os.fork()  # @UndefinedVariable - only available in UNIX
+        if pid != 0:
+            sys.exit(0)
     except OSError, e:
-        sys.exit("1st fork failed: %s [%d]" % (e.strerror, e.errno))
-        
+        raise RuntimeError("1st fork failed: %s [%d]" % (e.strerror, e.errno))
+
     os.setsid()
 
-    # Do second fork
-    try:
-        pid = os.fork()
-        if pid > 0:
-            logger.debug('Forking twice...')
-            os._exit(0) # Exit second parent process
-    except OSError, e:
-        sys.exit("2nd fork failed: %s [%d]" % (e.strerror, e.errno))
+    # Make sure I can read my own files and shut out others
+    prev = os.umask(0)  # @UndefinedVariable - only available in UNIX
+    os.umask(prev and int('077', 8))
 
-    os.chdir("/")
-    os.umask(0)
-    
+    # Make the child a session-leader by detaching from the terminal
+    try:
+        pid = os.fork()  # @UndefinedVariable - only available in UNIX
+        if pid != 0:
+            sys.exit(0)
+    except OSError, e:
+        raise RuntimeError("2nd fork failed: %s [%d]" % (e.strerror, e.errno))
+
+    dev_null = file('/dev/null', 'r')
+    os.dup2(dev_null.fileno(), sys.stdin.fileno())
+
     si = open('/dev/null', "r")
     so = open('/dev/null', "a+")
     se = open('/dev/null', "a+")
-    
+
     os.dup2(si.fileno(), sys.stdin.fileno())
     os.dup2(so.fileno(), sys.stdout.fileno())
     os.dup2(se.fileno(), sys.stderr.fileno())
 
-    pid = os.getpid()
+    pid = str(os.getpid())
     logger.info('Daemonized to PID: %s' % pid)
-    if PIDFILE:
-        logger.info('Writing PID %s to %s' % (pid, PIDFILE))
+
+    if CREATEPID:
+        logger.info("Writing PID " + pid + " to " + str(PIDFILE))
         file(PIDFILE, 'w').write("%s\n" % pid)
 
 def launch_browser(host, port, root):
 
     if host == '0.0.0.0':
         host = 'localhost'
-    
-    try:    
+
+    try:
         webbrowser.open('http://%s:%i%s' % (host, port, root))
     except Exception, e:
         logger.error('Could not launch browser: %s' % e)
@@ -640,7 +645,9 @@ def config_write():
     new_config['General']['log_dir'] = LOG_DIR
     new_config['General']['cache_dir'] = CACHE_DIR
     new_config['General']['git_path'] = GIT_PATH
-    
+    new_config['General']['git_user'] = GIT_USER
+    new_config['General']['git_branch'] = GIT_BRANCH
+
     new_config['General']['check_github'] = int(CHECK_GITHUB)
     new_config['General']['check_github_on_startup'] = int(CHECK_GITHUB_ON_STARTUP)
     new_config['General']['check_github_interval'] = CHECK_GITHUB_INTERVAL
@@ -671,7 +678,7 @@ def config_write():
     new_config['General']['extras'] = EXTRAS
     new_config['General']['autowant_upcoming'] = int(AUTOWANT_UPCOMING)
     new_config['General']['autowant_all'] = int(AUTOWANT_ALL)
-    
+
     new_config['General']['numberofseeders'] = NUMBEROFSEEDERS
     new_config['General']['torrentblackhole_dir'] = TORRENTBLACKHOLE_DIR
     new_config['General']['isohunt'] = int(ISOHUNT)
@@ -683,7 +690,7 @@ def config_write():
     new_config['Waffles']['waffles'] = int(WAFFLES)
     new_config['Waffles']['waffles_uid'] = WAFFLES_UID
     new_config['Waffles']['waffles_passkey'] = WAFFLES_PASSKEY
-    
+
     new_config['Rutracker'] = {}
     new_config['Rutracker']['rutracker'] = int(RUTRACKER)
     new_config['Rutracker']['rutracker_user'] = RUTRACKER_USER
@@ -721,30 +728,30 @@ def config_write():
     for newznab in EXTRA_NEWZNABS:
         for item in newznab:
             flattened_newznabs.append(item)
-    
+
     new_config['Newznab']['extra_newznabs'] = flattened_newznabs
 
     new_config['NZBsorg'] = {}
     new_config['NZBsorg']['nzbsorg'] = int(NZBSORG)
     new_config['NZBsorg']['nzbsorg_uid'] = NZBSORG_UID
     new_config['NZBsorg']['nzbsorg_hash'] = NZBSORG_HASH
-    
+
     new_config['Newzbin'] = {}
     new_config['Newzbin']['newzbin'] = int(NEWZBIN)
     new_config['Newzbin']['newzbin_uid'] = NEWZBIN_UID
     new_config['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
-    
+
     new_config['NZBsRus'] = {}
     new_config['NZBsRus']['nzbsrus'] = int(NZBSRUS)
     new_config['NZBsRus']['nzbsrus_uid'] = NZBSRUS_UID
     new_config['NZBsRus']['nzbsrus_apikey'] = NZBSRUS_APIKEY
-    
+
     new_config['Prowl'] = {}
     new_config['Prowl']['prowl_enabled'] = int(PROWL_ENABLED)
     new_config['Prowl']['prowl_keys'] = PROWL_KEYS
     new_config['Prowl']['prowl_onsnatch'] = int(PROWL_ONSNATCH)
     new_config['Prowl']['prowl_priority'] = int(PROWL_PRIORITY)
-    
+
     new_config['XBMC'] = {}
     new_config['XBMC']['xbmc_enabled'] = int(XBMC_ENABLED)
     new_config['XBMC']['xbmc_host'] = XBMC_HOST
@@ -752,7 +759,7 @@ def config_write():
     new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
     new_config['XBMC']['xbmc_update'] = int(XBMC_UPDATE)
     new_config['XBMC']['xbmc_notify'] = int(XBMC_NOTIFY)
-    
+
     new_config['NMA'] = {}
     new_config['NMA']['nma_enabled'] = int(NMA_ENABLED)
     new_config['NMA']['nma_apikey'] = NMA_APIKEY
@@ -764,10 +771,10 @@ def config_write():
     new_config['Pushover']['pushover_keys'] = PUSHOVER_KEYS
     new_config['Pushover']['pushover_onsnatch'] = int(PUSHOVER_ONSNATCH)
     new_config['Pushover']['pushover_priority'] = int(PUSHOVER_PRIORITY)
-    
+
     new_config['Synoindex'] = {}
     new_config['Synoindex']['synoindex_enabled'] = int(SYNOINDEX_ENABLED)
-    
+
     new_config['General']['lastfm_username'] = LASTFM_USERNAME
     new_config['General']['interface'] = INTERFACE
     new_config['General']['folder_permissions'] = FOLDER_PERMISSIONS
@@ -784,43 +791,48 @@ def config_write():
     new_config['General']['encodervbrcbr'] = ENCODERVBRCBR
     new_config['General']['encoderlossless'] = int(ENCODERLOSSLESS)
     new_config['General']['delete_lossless_files'] = int(DELETE_LOSSLESS_FILES)
-    
+
     new_config['General']['mirror'] = MIRROR
     new_config['General']['customhost'] = CUSTOMHOST
     new_config['General']['customport'] = CUSTOMPORT
     new_config['General']['customsleep'] = CUSTOMSLEEP
     new_config['General']['hpuser'] = HPUSER
     new_config['General']['hppass'] = HPPASS
-    
+
     new_config['Advanced'] = {}
     new_config['Advanced']['album_completion_pct'] = ALBUM_COMPLETION_PCT
     new_config['Advanced']['cache_sizemb'] = CACHE_SIZEMB
-    
+
     new_config.write()
 
-    
+
 def start():
-    
+
     global __INITIALIZED__, started
-    
+
     if __INITIALIZED__:
-    
+
         # Start our scheduled background tasks
         from headphones import updater, searcher, librarysync, postprocessor
 
         SCHED.add_interval_job(updater.dbUpdate, hours=24)
         SCHED.add_interval_job(searcher.searchforalbum, minutes=SEARCH_INTERVAL)
         SCHED.add_interval_job(librarysync.libraryScan, minutes=LIBRARYSCAN_INTERVAL, kwargs={'cron':True})
-        
+
         if CHECK_GITHUB:
             SCHED.add_interval_job(versioncheck.checkGithub, minutes=CHECK_GITHUB_INTERVAL)
-        
+
         SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
 
         SCHED.start()
-        
+
         started = True
-    
+
+def sig_handler(signum=None, frame=None):
+    if type(signum) != type(None):
+        logger.info("Signal %i caught, saving and exiting..." % int(signum))
+        shutdown()
+
 def dbcheck():
 
     conn=sqlite3.connect(DB_FILE)
@@ -839,37 +851,37 @@ def dbcheck():
     c.execute('CREATE TABLE IF NOT EXISTS releases (ReleaseID TEXT, ReleaseGroupID TEXT, UNIQUE(ReleaseID, ReleaseGroupID))')
     c.execute('CREATE INDEX IF NOT EXISTS tracks_albumid ON tracks(AlbumID ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS album_artistid_reldate ON albums(ArtistID ASC, ReleaseDate DESC)')
-    
+
     try:
         c.execute('SELECT IncludeExtras from artists')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE artists ADD COLUMN IncludeExtras INTEGER DEFAULT 0')
-        
+
     try:
         c.execute('SELECT LatestAlbum from artists')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE artists ADD COLUMN LatestAlbum TEXT')
-        
+
     try:
         c.execute('SELECT ReleaseDate from artists')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE artists ADD COLUMN ReleaseDate TEXT')
-        
+
     try:
         c.execute('SELECT AlbumID from artists')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE artists ADD COLUMN AlbumID TEXT')
-        
+
     try:
         c.execute('SELECT HaveTracks from artists')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE artists ADD COLUMN HaveTracks INTEGER DEFAULT 0')
-        
+
     try:
         c.execute('SELECT TotalTracks from artists')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE artists ADD COLUMN TotalTracks INTEGER DEFAULT 0')
-        
+
     try:
         c.execute('SELECT Type from albums')
     except sqlite3.OperationalError:
@@ -879,108 +891,108 @@ def dbcheck():
         c.execute('SELECT TrackNumber from tracks')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE tracks ADD COLUMN TrackNumber INTEGER')
-        
+
     try:
         c.execute('SELECT FolderName from snatched')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE snatched ADD COLUMN FolderName TEXT')
-    
+
     try:
         c.execute('SELECT Location from tracks')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE tracks ADD COLUMN Location TEXT')
-        
+
     try:
         c.execute('SELECT Location from have')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE have ADD COLUMN Location TEXT')
-    
+
     try:
         c.execute('SELECT BitRate from tracks')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE tracks ADD COLUMN BitRate INTEGER')  
-        
+        c.execute('ALTER TABLE tracks ADD COLUMN BitRate INTEGER')
+
     try:
         c.execute('SELECT CleanName from tracks')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE tracks ADD COLUMN CleanName TEXT')  
-        
+        c.execute('ALTER TABLE tracks ADD COLUMN CleanName TEXT')
+
     try:
         c.execute('SELECT CleanName from have')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE have ADD COLUMN CleanName TEXT')  
-    
+        c.execute('ALTER TABLE have ADD COLUMN CleanName TEXT')
+
     # Add the Format column
     try:
         c.execute('SELECT Format from have')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE have ADD COLUMN Format TEXT DEFAULT NULL')  
-    
+        c.execute('ALTER TABLE have ADD COLUMN Format TEXT DEFAULT NULL')
+
     try:
         c.execute('SELECT Format from tracks')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE tracks ADD COLUMN Format TEXT DEFAULT NULL')
-        
+
     try:
         c.execute('SELECT LastUpdated from artists')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE artists ADD COLUMN LastUpdated TEXT DEFAULT NULL')
-        
+
     try:
         c.execute('SELECT ArtworkURL from artists')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE artists ADD COLUMN ArtworkURL TEXT DEFAULT NULL') 
-        
+        c.execute('ALTER TABLE artists ADD COLUMN ArtworkURL TEXT DEFAULT NULL')
+
     try:
         c.execute('SELECT ArtworkURL from albums')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE albums ADD COLUMN ArtworkURL TEXT DEFAULT NULL') 
-        
+        c.execute('ALTER TABLE albums ADD COLUMN ArtworkURL TEXT DEFAULT NULL')
+
     try:
         c.execute('SELECT ThumbURL from artists')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE artists ADD COLUMN ThumbURL TEXT DEFAULT NULL') 
-        
+        c.execute('ALTER TABLE artists ADD COLUMN ThumbURL TEXT DEFAULT NULL')
+
     try:
         c.execute('SELECT ThumbURL from albums')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE albums ADD COLUMN ThumbURL TEXT DEFAULT NULL') 
-        
+        c.execute('ALTER TABLE albums ADD COLUMN ThumbURL TEXT DEFAULT NULL')
+
     try:
         c.execute('SELECT ArtistID from descriptions')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE descriptions ADD COLUMN ArtistID TEXT DEFAULT NULL') 
-        
+        c.execute('ALTER TABLE descriptions ADD COLUMN ArtistID TEXT DEFAULT NULL')
+
     try:
         c.execute('SELECT LastUpdated from descriptions')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE descriptions ADD COLUMN LastUpdated TEXT DEFAULT NULL') 
-        
+        c.execute('ALTER TABLE descriptions ADD COLUMN LastUpdated TEXT DEFAULT NULL')
+
     try:
         c.execute('SELECT ReleaseID from albums')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE albums ADD COLUMN ReleaseID TEXT DEFAULT NULL')
-        
+
     try:
         c.execute('SELECT ReleaseFormat from albums')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE albums ADD COLUMN ReleaseFormat TEXT DEFAULT NULL')
-        
+
     try:
         c.execute('SELECT ReleaseCountry from albums')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE albums ADD COLUMN ReleaseCountry TEXT DEFAULT NULL')
-        
+
     try:
         c.execute('SELECT ReleaseID from tracks')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE tracks ADD COLUMN ReleaseID TEXT DEFAULT NULL')
-        
+
     try:
         c.execute('SELECT Matched from have')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE have ADD COLUMN Matched TEXT DEFAULT NULL')
-        
+
     try:
         c.execute('SELECT Extras from artists')
     except sqlite3.OperationalError:
@@ -993,31 +1005,32 @@ def dbcheck():
         for artist in artists:
             if artist[1]:
                 c.execute('UPDATE artists SET Extras=? WHERE ArtistID=?', ("1,2,3,4,5,6,7,8", artist[0]))
-    
+
     conn.commit()
     c.close()
 
-    
+
 def shutdown(restart=False, update=False):
 
     cherrypy.engine.exit()
     SCHED.shutdown(wait=False)
-    
+
     config_write()
-    
+
     if not restart and not update:
         logger.info('Headphones is shutting down...')
+
     if update:
         logger.info('Headphones is updating...')
         try:
             versioncheck.update()
         except Exception, e:
-            logger.warn('Headphones failed to update: %s. Restarting.' % e) 
+            logger.warn('Headphones failed to update: %s. Restarting.' % e)
 
-    if PIDFILE :
+    if CREATEPID :
         logger.info ('Removing pidfile %s' % PIDFILE)
         os.remove(PIDFILE)
-        
+
     if restart:
         logger.info('Headphones is restarting...')
         popen_list = [sys.executable, FULL_PATH]
@@ -1026,5 +1039,5 @@ def shutdown(restart=False, update=False):
             popen_list += ['--nolaunch']
         logger.info('Restarting Headphones with ' + str(popen_list))
         subprocess.Popen(popen_list, cwd=os.getcwd())
-        
+
     os._exit(0)
