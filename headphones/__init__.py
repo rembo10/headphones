@@ -601,6 +601,14 @@ def daemonize():
     dev_null = file('/dev/null', 'r')
     os.dup2(dev_null.fileno(), sys.stdin.fileno())
 
+    si = open('/dev/null', "r")
+    so = open('/dev/null', "a+")
+    se = open('/dev/null', "a+")
+
+    os.dup2(si.fileno(), sys.stdin.fileno())
+    os.dup2(so.fileno(), sys.stdout.fileno())
+    os.dup2(se.fileno(), sys.stderr.fileno())
+
     pid = str(os.getpid())
     logger.info('Daemonized to PID: %s' % pid)
 
@@ -637,8 +645,8 @@ def config_write():
     new_config['General']['log_dir'] = LOG_DIR
     new_config['General']['cache_dir'] = CACHE_DIR
     new_config['General']['git_path'] = GIT_PATH
-    new_config['General']['git_path'] = GIT_USER
-    new_config['General']['git_path'] = GIT_BRANCH
+    new_config['General']['git_user'] = GIT_USER
+    new_config['General']['git_branch'] = GIT_BRANCH
 
     new_config['General']['check_github'] = int(CHECK_GITHUB)
     new_config['General']['check_github_on_startup'] = int(CHECK_GITHUB_ON_STARTUP)
