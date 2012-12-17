@@ -17,6 +17,7 @@ import platform, subprocess, re, os, urllib2, tarfile
 
 import headphones
 from headphones import logger, version
+from headphones.exceptions import ex
 
 import lib.simplejson as simplejson
 
@@ -105,7 +106,7 @@ def checkGithub():
 
     # Get the latest commit available from github
     url = 'https://api.github.com/repos/%s/headphones/commits/%s' % (headphones.GIT_USER, headphones.GIT_BRANCH)
-    logger.info ('Retrieving latest version information from github')
+    logger.info('Retrieving latest version information from github')
     try:
         result = urllib2.urlopen(url).read()
         git = simplejson.JSONDecoder().decode(result)
@@ -201,7 +202,7 @@ def update():
         # Find update dir name
         update_dir_contents = [x for x in os.listdir(update_dir) if os.path.isdir(os.path.join(update_dir, x))]
         if len(update_dir_contents) != 1:
-            logger.error(u"Invalid update data, update failed: "+str(update_dir_contents))
+            logger.error("Invalid update data, update failed: "+str(update_dir_contents))
             return
         content_dir = os.path.join(update_dir, update_dir_contents[0])
 
@@ -222,5 +223,5 @@ def update():
             ver_file.write(headphones.LATEST_VERSION)
             ver_file.close()
         except IOError, e:
-            logger.error(u"Unable to write current version to version.txt, update not complete: "+ex(e))
+            logger.error("Unable to write current version to version.txt, update not complete: "+ex(e))
             return
