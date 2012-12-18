@@ -156,8 +156,12 @@
                    		<label>Music Download Directory</label>
                    		<input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="50">
                    		<small>Full path where your torrent client downloads your music e.g. /Users/name/Downloads/music</small>
-                   		</div>                   		
-                   	</fieldset>
+                   		</div>        
+				<div class="row checkbox">
+				<label>Keep Files for Seeding</label>
+				<input type="checkbox" name="keep_torrent_files" value="1" ${config['keep_torrent_files']}>		
+				</div>
+			</fieldset>
                    	<fieldset>
                    		<legend>Usenet</legend>
                    	    <div class="row checkbox">                    	 
@@ -355,9 +359,8 @@
                 		<div class="row checkbox left clearfix">
                 		 	<input type="checkbox" name="move_files" value="1" ${config['move_files']} /><label>Move downloads to Destination Folder</label>
                 		 	<input type="checkbox" name="rename_files" value="1" ${config['rename_files']} /><label>Rename files</label>
-     
-                		   <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} /><label>Correct metadata</label>
-                		   <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} /><label>Delete leftover files <small>(.m3u, .nfo, .sfv, .nzb, etc.)</small></label>                	
+				        <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} /><label>Correct metadata</label>
+                		        <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} /><label>Delete leftover files <small>(.m3u, .nfo, .sfv, .nzb, etc.)</small></label>                	
                 		 	<input type="checkbox" name="add_album_art" value="1" ${config['add_album_art']}><label>Add album art as 'folder.jpg' to album folder</label>
                 		 	<input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}><label>Embed album art in each file</label>
                 		 	<input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}><label>Embed lyrics</label>
