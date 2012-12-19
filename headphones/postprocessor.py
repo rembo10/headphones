@@ -319,7 +319,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
 
     logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
     # Check to see if we're preserving the torrent dir
-    if headphones.KEEP_TORRENT_FILES and Kind="torrent":
+    if headphones.KEEP_TORRENT_FILES and Kind=="torrent":
         new_folder = os.path.join(os.path.dirname(albumpath), ('temp' + release['AlbumTitle'][:5]).encode(headphones.SYS_ENCODING, 'replace'))
         try:
             shutil.copytree(albumpath, new_folder)
@@ -842,7 +842,7 @@ def forcePostProcess():
         snatched = myDB.action('SELECT AlbumID, Title, Kind from snatched WHERE FolderName LIKE ?', [folder_basename]).fetchone()
         if snatched:
             logger.info('Found a match in the database: %s. Verifying to make sure it is the correct album' % snatched['Title'])
-            verify(snatched['AlbumID'], folder, kind)
+            verify(snatched['AlbumID'], folder, Snatched['Kind'])
             continue
         
         # Try to parse the folder name into a valid format
