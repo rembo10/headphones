@@ -156,8 +156,12 @@
                    		<label>Music Download Directory</label>
                    		<input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="50">
                    		<small>Full path where your torrent client downloads your music e.g. /Users/name/Downloads/music</small>
-                   		</div>                   		
-                   	</fieldset>
+                   		</div>        
+				<div class="row checkbox">
+				<label>Keep Files for Seeding</label>
+				<input type="checkbox" name="keep_torrent_files" value="1" ${config['keep_torrent_files']}>		
+				</div>
+			</fieldset>
                    	<fieldset>
                    		<legend>Usenet</legend>
                    	    <div class="row checkbox">                    	 
@@ -184,23 +188,7 @@
         <table class="configtable" summary="Search Providers">
 	    <tr>
                 <td>
-                	<fieldset>
-                		<legend>NZBMatrix</legend>
-                		<div class="row checkbox">                    	
-                			<input id="usenzbmatrix" type="checkbox" onclick="initConfigCheckbox($(this));" name="nzbmatrix" value="1" ${config['use_nzbmatrix']} /><label>Use NZBMatrix</label> 
-                		</div>
-                		<div class="config">
-	                		<div class="row">
-	                			<label>NZBMatrix Username</label>
-	                			<input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30">
-	                		</div>
-	                		<div class="row">
-	                		 	<label>NZBMatrix API</label>
-	                		   <input type="text" name="nzbmatrix_apikey" value="${config['nzbmatrix_api']}" size="36">
-	                		 </div>
-                		</div>
-                	</fieldset>
-                	
+		    <legend>NZBs</legend>
                 	<fieldset>
                 		<legend>Newznab</legend>
                 		<div class="row checkbox">                    	
@@ -254,9 +242,7 @@
 				    <input type="button" value="Add Newznab" class="add_newznab" id="add_newznab" />
 				</div>
                 	</fieldset>
-                </td>
-        
-                <td>
+
                 	<fieldset>
                 		<legend>NZBs.org</legend>
                 		<div class="row checkbox">                    	
@@ -270,21 +256,24 @@
                 		</div>
                 	</fieldset>
                 	<fieldset>
-                		<legend>Newsbin</legend>
+                		<legend>NZBsRus</legend>
                 		<div class="row checkbox">                    	
-                			<input id="usenewzbin" type="checkbox" name="newzbin" onclick="initConfigCheckbox($(this));" value="1" ${config['use_newzbin']} /><label>Use Newzbin</label> 
+                			<input id="usenzbsrus" type="checkbox" name="nzbsrus" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbsrus']} /><label>Use NZBsRus</label> 
                 		</div>
                 		<div class="config">
                 			<div class="row">
-                			<label>Newzbin UID</label>
-                			 <input type="text" name="newzbin_uid" value="${config['newzbin_uid']}" size="30">
+                			<label>NZBsRus UID</label>
+                			 <input type="text" name="nzbsrus_uid" value="${config['nzbsrus_uid']}" size="10">
                 			</div>
                 			<div class="row">
-                			<label>Newzbin Password</label>
-                			  <input type="password" name="newzbin_password" value="${config['newzbin_pass']}" size="36">
+                			<label>NZBsRus API Key</label>
+                			  <input type="text" name="nzbsrus_apikey" value="${config['nzbsrus_apikey']}" size="10">
                 			</div>
                 		</div>
                 	</fieldset>
+                </td>
+        
+                <td>
                     <fieldset>
                     	<legend>Torrents</legend>
                     	<div class="row checkbox">                    	
@@ -370,9 +359,8 @@
                 		<div class="row checkbox left clearfix">
                 		 	<input type="checkbox" name="move_files" value="1" ${config['move_files']} /><label>Move downloads to Destination Folder</label>
                 		 	<input type="checkbox" name="rename_files" value="1" ${config['rename_files']} /><label>Rename files</label>
-     
-                		   <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} /><label>Correct metadata</label>
-                		   <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} /><label>Delete leftover files <small>(.m3u, .nfo, .sfv, .nzb, etc.)</small></label>                	
+				        <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} /><label>Correct metadata</label>
+                		        <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} /><label>Delete leftover files <small>(.m3u, .nfo, .sfv, .nzb, etc.)</small></label>                	
                 		 	<input type="checkbox" name="add_album_art" value="1" ${config['add_album_art']}><label>Add album art as 'folder.jpg' to album folder</label>
                 		 	<input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}><label>Embed album art in each file</label>
                 		 	<input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}><label>Embed lyrics</label>
@@ -1038,9 +1026,8 @@
 			$( "#tabs" ).tabs();
 		});
 		initActions();
-		initConfigCheckbox("#usenzbmatrix");
 		initConfigCheckbox("#usenewznab");
-		initConfigCheckbox("#usenewzbin");
+		initConfigCheckbox("#usenzbsrus");
 		initConfigCheckbox("#usenzbsorg");
 		initConfigCheckbox("#usewaffles");
 		initConfigCheckbox("#userutracker");

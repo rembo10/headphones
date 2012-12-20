@@ -60,13 +60,13 @@ def checkFolder():
 
                     if os.path.exists(nzb_album_path):
                         logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
-                        verify(album['AlbumID'], nzb_album_path)
+                        verify(album['AlbumID'], nzb_album_path, album['Kind'])
 
                 if os.path.exists(torrent_album_path):
                     logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
-                    verify(album['AlbumID'], torrent_album_path)
+                    verify(album['AlbumID'], torrent_album_path, album['Kind'])
 
-def verify(albumid, albumpath):
+def verify(albumid, albumpath, Kind=None):
 
     myDB = db.DBConnection()
     release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
@@ -254,7 +254,7 @@ def verify(albumid, albumpath):
         logger.debug('Matching metadata album: %s with album name: %s' % (metaalbum, dbalbum))
         
         if metaartist == dbartist and metaalbum == dbalbum:
-            doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
+            doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind)
             return
             
     # test #2: filenames
@@ -272,7 +272,7 @@ def verify(albumid, albumpath):
             logger.debug('Checking if track title: %s is in file name: %s' % (dbtrack, filetrack))
         
             if dbtrack in filetrack:
-                doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
+                doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind)
                 return
             
     # test #3: number of songs and duration
@@ -304,7 +304,7 @@ def verify(albumid, albumpath):
             logger.debug('Database track duration: %i' % db_track_duration)
             delta = abs(downloaded_track_duration - db_track_duration)
             if delta < 240:
-                doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list)
+                doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind)
                 return
             
     logger.warn(u'Could not identify album: %s. It may not be the intended album.' % albumpath.decode(headphones.SYS_ENCODING, 'replace'))
@@ -315,9 +315,18 @@ def verify(albumid, albumpath):
     else:
         logger.info(u"Already marked as unprocessed: " + albumpath.decode(headphones.SYS_ENCODING, 'replace'))
             
-def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list):
+def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind=None):
 
     logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
+    # Check to see if we're preserving the torrent dir
+    if headphones.KEEP_TORRENT_FILES and Kind=="torrent":
+        new_folder = os.path.join(os.path.dirname(albumpath), ('temp' + release['AlbumTitle'][:5]).encode(headphones.SYS_ENCODING, 'replace'))
+        try:
+            shutil.copytree(albumpath, new_folder)
+            albumpath = new_folder
+        except Exception, e:
+            logger.warn("Cannot copy/move files to temp folder: " + new_folder.decode(headphones.SYS_ENCODING, 'replace') + ". Not continuing. Error: " + str(e))
+            return
     #start encoding
     if headphones.MUSIC_ENCODER:
         downloaded_track_list=music_encoder.encode(albumpath)
@@ -830,10 +839,10 @@ def forcePostProcess():
         # First try to see if there's a match in the snatched table, then we'll try to parse the foldername
         # TODO: Iterate through underscores -> spaces, spaces -> dots, underscores -> dots (this might be hit or miss since it assumes
         # all spaces/underscores came from sab replacing values
-        snatched = myDB.action('SELECT AlbumID, Title from snatched WHERE FolderName LIKE ?', [folder_basename]).fetchone()
+        snatched = myDB.action('SELECT AlbumID, Title, Kind from snatched WHERE FolderName LIKE ?', [folder_basename]).fetchone()
         if snatched:
             logger.info('Found a match in the database: %s. Verifying to make sure it is the correct album' % snatched['Title'])
-            verify(snatched['AlbumID'], folder)
+            verify(snatched['AlbumID'], folder, Snatched['Kind'])
             continue
         
         # Try to parse the folder name into a valid format

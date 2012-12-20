@@ -156,7 +156,7 @@ def command(encoder,musicSource,musicDest,albumPath):
 
     if XLD:
         xldDestDir = os.path.split(musicDest)[0]
-        cmd = encoder
+        cmd = '"' + encoder + '"'
         cmd = cmd + ' "' + musicSource + '"'
         cmd = cmd + ' --profile'
         cmd = cmd + ' "' + xldProfile + '"'
@@ -165,7 +165,7 @@ def command(encoder,musicSource,musicDest,albumPath):
         
     elif headphones.ENCODER == 'lame':
         if headphones.ADVANCEDENCODER =='':
-            cmd=encoder + ' -h'     
+            cmd='"' + encoder + '"' + ' -h'     
             if headphones.ENCODERVBRCBR=='cbr':
                 cmd=cmd+ ' --resample ' + str(headphones.SAMPLINGFREQUENCY) + ' -b ' + str(headphones.BITRATE)
             elif headphones.ENCODERVBRCBR=='vbr':
@@ -177,7 +177,7 @@ def command(encoder,musicSource,musicDest,albumPath):
         cmd=cmd+ ' "' + musicDest +'"'
         
     elif headphones.ENCODER == 'ffmpeg':
-        cmd=encoder+ ' -i'
+        cmd='"' + encoder + '"' + ' -i'
         cmd=cmd+ ' "' + musicSource + '"'
         if headphones.ADVANCEDENCODER =='':
             if headphones.ENCODEROUTPUTFORMAT=='ogg':
