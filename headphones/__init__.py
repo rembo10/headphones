@@ -110,6 +110,7 @@ INCLUDE_EXTRAS = False
 EXTRAS = None
 AUTOWANT_UPCOMING = False
 AUTOWANT_ALL = False
+KEEP_TORRENT_FILES = False
 
 SEARCH_INTERVAL = 360
 LIBRARYSCAN = False
@@ -139,6 +140,10 @@ NZBSORG_HASH = None
 NEWZBIN = False
 NEWZBIN_UID = None
 NEWZBIN_PASSWORD = None
+
+NZBSRUS = False
+NZBSRUS_UID = None
+NZBSRUS_APIKEY = None
 
 LASTFM_USERNAME = None
 
@@ -262,13 +267,13 @@ def initialize():
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, \
                 CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
-                RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, \
+                RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, \
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS,\
-                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
+                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, \
                 ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, \
                 PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
@@ -285,6 +290,7 @@ def initialize():
         CheckSection('NZBMatrix')
         CheckSection('Newznab')
         CheckSection('NZBsorg')
+        CheckSection('NZBsRus')
         CheckSection('Newzbin')
         CheckSection('Waffles')
         CheckSection('Rutracker')
@@ -349,6 +355,7 @@ def initialize():
         EXTRAS = check_setting_str(CFG, 'General', 'extras', '')
         AUTOWANT_UPCOMING = bool(check_setting_int(CFG, 'General', 'autowant_upcoming', 1))
         AUTOWANT_ALL = bool(check_setting_int(CFG, 'General', 'autowant_all', 0))
+        KEEP_TORRENT_FILES = bool(check_setting_int(CFG, 'General', 'keep_torrent_files', 0))
         
         SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'search_interval', 1440)
         LIBRARYSCAN = bool(check_setting_int(CFG, 'General', 'libraryscan', 1))
@@ -400,6 +407,10 @@ def initialize():
         NEWZBIN = bool(check_setting_int(CFG, 'Newzbin', 'newzbin', 0))
         NEWZBIN_UID = check_setting_str(CFG, 'Newzbin', 'newzbin_uid', '')
         NEWZBIN_PASSWORD = check_setting_str(CFG, 'Newzbin', 'newzbin_password', '')
+        
+        NZBSRUS = bool(check_setting_int(CFG, 'NZBsRus', 'nzbsrus', 0))
+        NZBSRUS_UID = check_setting_str(CFG, 'NZBsRus', 'nzbsrus_uid', '')
+        NZBSRUS_APIKEY = check_setting_str(CFG, 'NZBsRus', 'nzbsrus_apikey', '')
 
         LASTFM_USERNAME = check_setting_str(CFG, 'General', 'lastfm_username', '')
         
@@ -662,6 +673,7 @@ def config_write():
     new_config['General']['extras'] = EXTRAS
     new_config['General']['autowant_upcoming'] = int(AUTOWANT_UPCOMING)
     new_config['General']['autowant_all'] = int(AUTOWANT_ALL)
+    new_config['General']['keep_torrent_files'] = int(KEEP_TORRENT_FILES)
     
     new_config['General']['numberofseeders'] = NUMBEROFSEEDERS
     new_config['General']['torrentblackhole_dir'] = TORRENTBLACKHOLE_DIR
@@ -724,6 +736,11 @@ def config_write():
     new_config['Newzbin']['newzbin'] = int(NEWZBIN)
     new_config['Newzbin']['newzbin_uid'] = NEWZBIN_UID
     new_config['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
+    
+    new_config['NZBsRus'] = {}
+    new_config['NZBsRus']['nzbsrus'] = int(NZBSRUS)
+    new_config['NZBsRus']['nzbsrus_uid'] = NZBSRUS_UID
+    new_config['NZBsRus']['nzbsrus_apikey'] = NZBSRUS_APIKEY
     
     new_config['Prowl'] = {}
     new_config['Prowl']['prowl_enabled'] = int(PROWL_ENABLED)
@@ -816,7 +833,7 @@ def dbcheck():
     c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT, Format TEXT, ReleaseID TEXT)')    # Format here means mp3, flac, etc.
     c.execute('CREATE TABLE IF NOT EXISTS allalbums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, AlbumID TEXT, Type TEXT, ReleaseID TEXT, ReleaseCountry TEXT, ReleaseFormat TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS alltracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT, Format TEXT, ReleaseID TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT, FolderName TEXT)')
+    c.execute('CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT, FolderName TEXT, Kind TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS have (ArtistName TEXT, AlbumTitle TEXT, TrackNumber TEXT, TrackTitle TEXT, TrackLength TEXT, BitRate TEXT, Genre TEXT, Date TEXT, TrackID TEXT, Location TEXT, CleanName TEXT, Format TEXT, Matched TEXT)') # Matched is a temporary value used to see if there was a match found in alltracks
     c.execute('CREATE TABLE IF NOT EXISTS lastfmcloud (ArtistName TEXT, ArtistID TEXT, Count INTEGER)')
     c.execute('CREATE TABLE IF NOT EXISTS descriptions (ArtistID TEXT, ReleaseGroupID TEXT, ReleaseID TEXT, Summary TEXT, Content TEXT, LastUpdated TEXT)')
@@ -979,6 +996,11 @@ def dbcheck():
         for artist in artists:
             if artist[1]:
                 c.execute('UPDATE artists SET Extras=? WHERE ArtistID=?', ("1,2,3,4,5,6,7,8", artist[0]))
+                
+    try:
+        c.execute('SELECT Kind from snatched')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE snatched ADD COLUMN Kind TEXT DEFAULT NULL')
     
     conn.commit()
     c.close()
