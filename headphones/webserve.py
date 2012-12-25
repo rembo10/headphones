@@ -286,6 +286,15 @@ class WebInterface(object):
         albumswitcher.switch(AlbumID, ReleaseID)
         raise cherrypy.HTTPRedirect("albumPage?AlbumID=%s" % AlbumID)
     switchAlbum.exposed = True
+    
+    def editSearchTerm(self, AlbumID, SearchTerm):
+        logger.info(u"Updating search term for albumid: " + AlbumID)
+        myDB = db.DBConnection()
+        controlValueDict = {'AlbumID': AlbumID}
+        newValueDict = {'SearchTerm': SearchTerm}
+        myDB.upsert("albums", newValueDict, controlValueDict)
+        raise cherrypy.HTTPRedirect("albumPage?AlbumID=%s" % AlbumID)
+    editSearchTerm.exposed = True
 
     def upcoming(self):
         myDB = db.DBConnection()
