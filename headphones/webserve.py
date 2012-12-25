@@ -286,6 +286,15 @@ class WebInterface(object):
         albumswitcher.switch(AlbumID, ReleaseID)
         raise cherrypy.HTTPRedirect("albumPage?AlbumID=%s" % AlbumID)
     switchAlbum.exposed = True
+    
+    def editSearchTerm(self, AlbumID, SearchTerm):
+        logger.info(u"Updating search term for albumid: " + AlbumID)
+        myDB = db.DBConnection()
+        controlValueDict = {'AlbumID': AlbumID}
+        newValueDict = {'SearchTerm': SearchTerm}
+        myDB.upsert("albums", newValueDict, controlValueDict)
+        raise cherrypy.HTTPRedirect("albumPage?AlbumID=%s" % AlbumID)
+    editSearchTerm.exposed = True
 
     def upcoming(self):
         myDB = db.DBConnection()
@@ -585,6 +594,7 @@ class WebInterface(object):
                     "use_nzbsrus" : checked(headphones.NZBSRUS),
                     "nzbsrus_uid" : headphones.NZBSRUS_UID,
                     "nzbsrus_apikey" : headphones.NZBSRUS_APIKEY,
+                    "use_nzbx" : checked(headphones.NZBX),
                     "torrentblackhole_dir" : headphones.TORRENTBLACKHOLE_DIR,
                     "download_torrent_dir" : headphones.DOWNLOAD_TORRENT_DIR,
                     "numberofseeders" : headphones.NUMBEROFSEEDERS,
@@ -688,7 +698,7 @@ class WebInterface(object):
     def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None, 
         download_scan_interval=None, nzb_search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, 
         sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None, usenet_retention=None, newznab=0, newznab_host=None, newznab_apikey=None, 
-        newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, preferred_quality=0, preferred_bitrate=None, 
+        newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, nzbx=None, preferred_quality=0, preferred_bitrate=None, 
         detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None, 
         numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
         rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, 
@@ -735,6 +745,7 @@ class WebInterface(object):
         headphones.NZBSRUS = nzbsrus
         headphones.NZBSRUS_UID = nzbsrus_uid
         headphones.NZBSRUS_APIKEY = nzbsrus_apikey
+        headphones.NZBX = nzbx
         headphones.TORRENTBLACKHOLE_DIR = torrentblackhole_dir
         headphones.NUMBEROFSEEDERS = numberofseeders
         headphones.DOWNLOAD_TORRENT_DIR = download_torrent_dir

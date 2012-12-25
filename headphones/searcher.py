@@ -21,6 +21,7 @@ from lib.pygazelle import format as gazelleformat
 from lib.pygazelle import media as gazellemedia
 from xml.dom import minidom
 from xml.parsers.expat import ExpatError
+import lib.simplejson as json
 from StringIO import StringIO
 import gzip
 
@@ -135,9 +136,9 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
     myDB = db.DBConnection()
     
     if albumid:
-        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate, Type from albums WHERE AlbumID=?', [albumid])
+        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate, Type, SearchTerm from albums WHERE AlbumID=?', [albumid])
     else:
-        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate, Type from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
+        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate, Type, SearchTerm from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
         new = True
         
     for albums in results:
@@ -154,19 +155,25 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
         cleanalbum = helpers.latinToAscii(helpers.replace_all(albums[1], dic))
         cleanartist = helpers.latinToAscii(helpers.replace_all(albums[0], dic))
-
-        # FLAC usually doesn't have a year for some reason so I'll leave it out
-        # Various Artist albums might be listed as VA, so I'll leave that out too
-        # Only use the year if the term could return a bunch of different albums, i.e. self-titled albums
-        if albums[0] in albums[1] or len(albums[0]) < 4 or len(albums[1]) < 4:
-            term = cleanartist + ' ' + cleanalbum + ' ' + year
-        elif albums[0] == 'Various Artists':
-            term = cleanalbum + ' ' + year
+        
+        # Use the provided search term if available, otherwise build a search term
+        if albums[5]:
+            term = albums[5]
+        
         else:
-            term = cleanartist + ' ' + cleanalbum
+            # FLAC usually doesn't have a year for some reason so I'll leave it out
+            # Various Artist albums might be listed as VA, so I'll leave that out too
+            # Only use the year if the term could return a bunch of different albums, i.e. self-titled albums
+            if albums[0] in albums[1] or len(albums[0]) < 4 or len(albums[1]) < 4:
+                term = cleanartist + ' ' + cleanalbum + ' ' + year
+            elif albums[0] == 'Various Artists':
+                term = cleanalbum + ' ' + year
+            else:
+                term = cleanartist + ' ' + cleanalbum
             
         # Replace bad characters in the term and unicode it
         term = re.sub('[\.\-\/]', ' ', term).encode('utf-8')
+        
         artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8')
         
         logger.info("Searching for %s since it was marked as wanted" % term)
@@ -417,6 +424,55 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                             resultlist.append((title, size, url, provider))
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size))) 
                         
+                        except Exception, e:
+                            logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
+                            
+        if headphones.NZBX:
+            provider = "nzbx"
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+                categories = "3040"
+            elif headphones.PREFERRED_QUALITY:
+                categories = "3040,3010"
+            else:
+                categories = "3010"
+                
+            if albums['Type'] == 'Other':
+                categories = "3030"
+                logger.info("Album type is audiobook/spokenword. Using audiobook category")
+
+            params = {  "source" : "headphones",
+                        "cat": categories,
+                        "q": term
+                        }
+        
+            searchURL = 'https://nzbx.co/api/search?' + urllib.urlencode(params)
+                
+            logger.info(u'Parsing results from <a href="%s">nzbx.co</a>' % searchURL)
+            
+            try:
+                data = urllib2.urlopen(searchURL, timeout=20).read()
+            except urllib2.URLError, e:
+                logger.warn('Error fetching data from nzbx.co: %s' % str(e))
+                data = False
+                
+            if data:
+                
+                d = json.loads(data)
+                
+                if not len(d):
+                    logger.info(u"No results found from nzbx.co for %s" % term)
+                    pass
+                
+                else:
+                    for item in d:
+                        try:
+                            url = item['nzb']
+                            title = item['name']
+                            size = item['size']
+                            
+                            resultlist.append((title, size, url, provider))
+                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                            
                         except Exception, e:
                             logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
 
@@ -740,9 +796,9 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
     myDB = db.DBConnection()
     
     if albumid:
-        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE AlbumID=?', [albumid])
+        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate, SearchTerm from albums WHERE AlbumID=?', [albumid])
     else:
-        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
+        results = myDB.select('SELECT ArtistName, AlbumTitle, AlbumID, ReleaseDate, SearchTerm from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
         new = True
         
     # rutracker login
@@ -768,16 +824,22 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         cleanalbum = helpers.latinToAscii(semi_cleanalbum)
         semi_cleanartist = helpers.replace_all(albums[0], dic)
         cleanartist = helpers.latinToAscii(semi_cleanartist)
-
-        # FLAC usually doesn't have a year for some reason so I'll leave it out
-        # Various Artist albums might be listed as VA, so I'll leave that out too
-        # Only use the year if the term could return a bunch of different albums, i.e. self-titled albums
-        if albums[0] in albums[1] or len(albums[0]) < 4 or len(albums[1]) < 4:
-            term = cleanartist + ' ' + cleanalbum + ' ' + year
-        elif albums[0] == 'Various Artists':
-            term = cleanalbum + ' ' + year
+        
+        # Use provided term if available, otherwise build our own (this code needs to be cleaned up since a lot
+        # of these torrent providers are just using cleanartist/cleanalbum terms
+        if albums[4]:
+            term = albums[4]
+            
         else:
-            term = cleanartist + ' ' + cleanalbum
+            # FLAC usually doesn't have a year for some reason so I'll leave it out
+            # Various Artist albums might be listed as VA, so I'll leave that out too
+            # Only use the year if the term could return a bunch of different albums, i.e. self-titled albums
+            if albums[0] in albums[1] or len(albums[0]) < 4 or len(albums[1]) < 4:
+                term = cleanartist + ' ' + cleanalbum + ' ' + year
+            elif albums[0] == 'Various Artists':
+                term = cleanalbum + ' ' + year
+            else:
+                term = cleanartist + ' ' + cleanalbum
 
         semi_clean_artist_term = re.sub('[\.\-\/]', ' ', semi_cleanartist).encode('utf-8', 'replace')
         semi_clean_album_term = re.sub('[\.\-\/]', ' ', semi_cleanalbum).encode('utf-8', 'replace')
