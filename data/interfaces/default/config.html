@@ -271,6 +271,12 @@
                 			</div>
                 		</div>
                 	</fieldset>
+                	<fieldset>
+                		<legend>nzbX</legend>
+                		<div class="row checkbox">                    	
+                			<input id="usenzbx" type="checkbox" name="nzbx" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbx']} /><label>Use nzbX</label> 
+                		</div>
+                	</fieldset>
                 </td>
         
                 <td>
@@ -1029,6 +1035,7 @@
 		initConfigCheckbox("#usenewznab");
 		initConfigCheckbox("#usenzbsrus");
 		initConfigCheckbox("#usenzbsorg");
+		initConfigCheckbox("#usenzbx");
 		initConfigCheckbox("#usewaffles");
 		initConfigCheckbox("#userutracker");
 		initConfigCheckbox("#usewhatcd");

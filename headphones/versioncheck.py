@@ -108,7 +108,7 @@ def checkGithub():
     url = 'https://api.github.com/repos/%s/headphones/commits/%s' % (headphones.GIT_USER, headphones.GIT_BRANCH)
     logger.info('Retrieving latest version information from github')
     try:
-        result = urllib2.urlopen(url).read()
+        result = urllib2.urlopen(url, timeout=20).read()
         git = simplejson.JSONDecoder().decode(result)
         headphones.LATEST_VERSION = git['sha']
     except:
@@ -122,7 +122,7 @@ def checkGithub():
         url = 'https://api.github.com/repos/%s/headphones/compare/%s...%s' % (headphones.GIT_USER, headphones.CURRENT_VERSION, headphones.LATEST_VERSION)
 
         try:
-            result = urllib2.urlopen(url).read()
+            result = urllib2.urlopen(url, timeout=20).read()
             git = simplejson.JSONDecoder().decode(result)
             headphones.COMMITS_BEHIND = git['total_commits']
         except:
