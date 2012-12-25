@@ -21,6 +21,7 @@ from lib.pygazelle import format as gazelleformat
 from lib.pygazelle import media as gazellemedia
 from xml.dom import minidom
 from xml.parsers.expat import ExpatError
+import lib.simplejson as json
 from StringIO import StringIO
 import gzip
 
@@ -423,6 +424,55 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                             resultlist.append((title, size, url, provider))
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size))) 
                         
+                        except Exception, e:
+                            logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
+                            
+        if headphones.NZBX:
+            provider = "nzbx"
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+                categories = "3040"
+            elif headphones.PREFERRED_QUALITY:
+                categories = "3040,3010"
+            else:
+                categories = "3010"
+                
+            if albums['Type'] == 'Other':
+                categories = "3030"
+                logger.info("Album type is audiobook/spokenword. Using audiobook category")
+
+            params = {  "source" : "headphones",
+                        "cat": categories,
+                        "q": term
+                        }
+        
+            searchURL = 'https://nzbx.co/api/search?' + urllib.urlencode(params)
+                
+            logger.info(u'Parsing results from <a href="%s">nzbx.co</a>' % searchURL)
+            
+            try:
+                data = urllib2.urlopen(searchURL, timeout=20).read()
+            except urllib2.URLError, e:
+                logger.warn('Error fetching data from nzbx.co: %s' % str(e))
+                data = False
+                
+            if data:
+                
+                d = json.loads(data)
+                
+                if not len(d):
+                    logger.info(u"No results found from nzbx.co for %s" % term)
+                    pass
+                
+                else:
+                    for item in d:
+                        try:
+                            url = item['nzb']
+                            title = item['name']
+                            size = item['size']
+                            
+                            resultlist.append((title, size, url, provider))
+                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                            
                         except Exception, e:
                             logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
 
