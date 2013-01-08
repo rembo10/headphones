@@ -109,7 +109,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
          
         for result in results:
             foundNZB = "none"
-            if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN or headphones.NZBX) and (headphones.SAB_HOST or headphones.BLACKHOLE):
+            if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE):
                 if result['Status'] == "Wanted Lossless":
                     foundNZB = searchNZB(result['AlbumID'], new, losslessOnly=True)
                 else:
