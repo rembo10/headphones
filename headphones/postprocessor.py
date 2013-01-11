@@ -840,11 +840,15 @@ def forcePostProcess():
         # First try to see if there's a match in the snatched table, then we'll try to parse the foldername
         # TODO: Iterate through underscores -> spaces, spaces -> dots, underscores -> dots (this might be hit or miss since it assumes
         # all spaces/underscores came from sab replacing values
-        snatched = myDB.action('SELECT AlbumID, Title, Kind from snatched WHERE FolderName LIKE ?', [folder_basename]).fetchone()
+        snatched = myDB.action('SELECT AlbumID, Title, Kind, Status from snatched WHERE FolderName LIKE ?', [folder_basename]).fetchone()
         if snatched:
-            logger.info('Found a match in the database: %s. Verifying to make sure it is the correct album' % snatched['Title'])
-            verify(snatched['AlbumID'], folder, snatched['Kind'])
-            continue
+            if headphones.KEEP_TORRENT_FILES and snatched['Kind'] == 'torrent' and snatched['Status'] == 'Processed':
+                logger.info(folder_basename + ' is a torrent folder being preserved for seeding and has already been processed. Skipping.')
+                continue
+            else:
+                logger.info('Found a match in the database: %s. Verifying to make sure it is the correct album' % snatched['Title'])
+                verify(snatched['AlbumID'], folder, snatched['Kind'])
+                continue
         
         # Try to parse the folder name into a valid format
         # TODO: Add metadata lookup
