@@ -354,7 +354,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         cleanupFiles(albumpath)
         
     if headphones.ADD_ALBUM_ART and artwork:
-        addAlbumArt(artwork, albumpath)
+        addAlbumArt(artwork, albumpath, release)
         
     if headphones.CORRECT_METADATA:
         correctMetadata(albumid, release, downloaded_track_list)
@@ -425,11 +425,30 @@ def embedAlbumArt(artwork, downloaded_track_list):
         f.art = artwork
         f.save()
         
-def addAlbumArt(artwork, albumpath):
+def addAlbumArt(artwork, albumpath, release):
     logger.info('Adding album art to folder')
     
-    artwork_file_name = os.path.join(albumpath, 'folder.jpg')
-    file = open(artwork_file_name, 'wb')
+    try:
+        year = release['ReleaseDate'][:4]
+    except TypeError:
+        year = ''
+    
+    values = {  '$Artist':      release['ArtistName'],
+                '$Album':       release['AlbumTitle'],
+                '$Year':        year,
+                '$artist':      release['ArtistName'].lower(),
+                '$album':       release['AlbumTitle'].lower(),
+                '$year':        year
+                }
+    
+    album_art_name = helpers.replace_all(headphones.ALBUM_ART_FORMAT.strip(), values).replace('/','_') + ".jpg"
+
+    album_art_name = album_art_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING, 'replace')
+
+    if album_art_name.startswith('.'):
+        album_art_name = album_art_name.replace(0, '_')
+
+    file = open(os.path.join(albumpath, album_art_name), 'wb')
     file.write(artwork)
     file.close()
     

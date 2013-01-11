@@ -371,7 +371,13 @@
                 		 	<input type="checkbox" name="rename_files" value="1" ${config['rename_files']} /><label>Rename files</label>
 				        <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} /><label>Correct metadata</label>
                 		        <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} /><label>Delete leftover files <small>(.m3u, .nfo, .sfv, .nzb, etc.)</small></label>                	
-                		 	<input type="checkbox" name="add_album_art" value="1" ${config['add_album_art']}><label>Add album art as 'folder.jpg' to album folder</label>
+                		 	<input type="checkbox" name="add_album_art" id="add_album_art" value="1" ${config['add_album_art']}><label>Add album art jpeg to album folder</label>
+                			<div id="album_art_options">
+					    <div class="row">    					
+                		 	        as <input type="text" class="override-float" name="album_art_format" value="${config['album_art_format']}" size="10">.jpg
+					    </div>	
+					    <small>Use $Artist/$artist, $Album/$album, $Year/$year</small>				    
+					</div>
                 		 	<input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}><label>Embed album art in each file</label>
                 		 	<input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}><label>Embed lyrics</label>
                 		</div>
@@ -884,6 +890,26 @@
 			else
 			{
 				$("#encoderoptions").slideUp();
+			}
+		});
+		
+		if ($("#add_album_art").is(":checked"))
+			{
+				$("#album_art_options").show();
+			}
+		else
+			{
+				$("#album_art_options").hide();
+			}
+		
+		$("#add_album_art").click(function(){
+			if ($("#add_album_art").is(":checked"))
+			{
+				$("#album_art_options").slideDown();
+			}
+			else
+			{
+				$("#album_art_options").slideUp();
 			}
 		});
 
