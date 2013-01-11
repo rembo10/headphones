@@ -617,12 +617,14 @@ class WebInterface(object):
                     "pref_bitrate" : headphones.PREFERRED_BITRATE,
                     "pref_bitrate_high" : headphones.PREFERRED_BITRATE_HIGH_BUFFER,
                     "pref_bitrate_low" : headphones.PREFERRED_BITRATE_LOW_BUFFER,
+                    "pref_bitrate_allow_lossless" : checked(headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS),
                     "detect_bitrate" : checked(headphones.DETECT_BITRATE),
                     "move_files" : checked(headphones.MOVE_FILES),
                     "rename_files" : checked(headphones.RENAME_FILES),
                     "correct_metadata" : checked(headphones.CORRECT_METADATA),
                     "cleanup_files" : checked(headphones.CLEANUP_FILES),
                     "add_album_art" : checked(headphones.ADD_ALBUM_ART),
+                    "album_art_format" : headphones.ALBUM_ART_FORMAT,
                     "embed_album_art" : checked(headphones.EMBED_ALBUM_ART),
                     "embed_lyrics" : checked(headphones.EMBED_LYRICS),
                     "dest_dir" : headphones.DESTINATION_DIR,
@@ -701,14 +703,14 @@ class WebInterface(object):
         newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, nzbx=0, preferred_quality=0, preferred_bitrate=None, 
         detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None, 
         numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
-        rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, 
+        rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0, 
         destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0,
         remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
         bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0, 
         delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, 
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False, 
         pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, mirror=None, customhost=None, customport=None, 
-        customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, cache_sizemb=None, **kwargs):
+        customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -765,12 +767,14 @@ class WebInterface(object):
         headphones.PREFERRED_BITRATE = preferred_bitrate
         headphones.PREFERRED_BITRATE_HIGH_BUFFER = preferred_bitrate_high_buffer
         headphones.PREFERRED_BITRATE_LOW_BUFFER = preferred_bitrate_low_buffer
+        headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS = preferred_bitrate_allow_lossless
         headphones.DETECT_BITRATE = detect_bitrate
         headphones.MOVE_FILES = move_files
         headphones.CORRECT_METADATA = correct_metadata
         headphones.RENAME_FILES = rename_files
         headphones.CLEANUP_FILES = cleanup_files
         headphones.ADD_ALBUM_ART = add_album_art
+        headphones.ALBUM_ART_FORMAT = album_art_format
         headphones.EMBED_ALBUM_ART = embed_album_art
         headphones.EMBED_LYRICS = embed_lyrics
         headphones.DESTINATION_DIR = destination_dir

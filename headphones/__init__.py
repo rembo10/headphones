@@ -96,6 +96,7 @@ PREFERRED_QUALITY = None
 PREFERRED_BITRATE = None
 PREFERRED_BITRATE_HIGH_BUFFER = None
 PREFERRED_BITRATE_LOW_BUFFER = None
+PREFERRED_BITRATE_ALLOW_LOSSLESS = False
 DETECT_BITRATE = False
 ADD_ARTISTS = False
 CORRECT_METADATA = False
@@ -103,6 +104,7 @@ MOVE_FILES = False
 RENAME_FILES = False
 CLEANUP_FILES = False
 ADD_ALBUM_ART = False
+ALBUM_ART_FORMAT = None
 EMBED_ALBUM_ART = False
 EMBED_LYRICS = False
 DOWNLOAD_DIR = None
@@ -273,7 +275,7 @@ def initialize():
                 CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
                 RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, \
-                ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
+                ADD_ALBUM_ART, ALBUM_ART_FORMAT, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
@@ -284,7 +286,7 @@ def initialize():
                 PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
-                PREFERRED_BITRATE_LOW_BUFFER,CACHE_SIZEMB
+                PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB
 
         if __INITIALIZED__:
             return False
@@ -344,6 +346,7 @@ def initialize():
         PREFERRED_BITRATE = check_setting_str(CFG, 'General', 'preferred_bitrate', '')
         PREFERRED_BITRATE_HIGH_BUFFER = check_setting_int(CFG, 'General', 'preferred_bitrate_high_buffer', '')
         PREFERRED_BITRATE_LOW_BUFFER = check_setting_int(CFG, 'General', 'preferred_bitrate_low_buffer', '')
+        PREFERRED_BITRATE_ALLOW_LOSSLESS = bool(check_setting_int(CFG, 'General', 'preferred_bitrate_allow_lossless', 0))
         DETECT_BITRATE = bool(check_setting_int(CFG, 'General', 'detect_bitrate', 0))
         ADD_ARTISTS = bool(check_setting_int(CFG, 'General', 'auto_add_artists', 1))
         CORRECT_METADATA = bool(check_setting_int(CFG, 'General', 'correct_metadata', 0))
@@ -353,6 +356,7 @@ def initialize():
         FILE_FORMAT = check_setting_str(CFG, 'General', 'file_format', 'Track Artist - Album [Year]- Title')
         CLEANUP_FILES = bool(check_setting_int(CFG, 'General', 'cleanup_files', 0))
         ADD_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'add_album_art', 0))
+        ALBUM_ART_FORMAT = check_setting_str(CFG, 'General', 'album_art_format', 'folder')
         EMBED_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'embed_album_art', 0))
         EMBED_LYRICS = bool(check_setting_int(CFG, 'General', 'embed_lyrics', 0))
         DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'download_dir', '')
@@ -666,6 +670,7 @@ def config_write():
     new_config['General']['preferred_bitrate'] = PREFERRED_BITRATE
     new_config['General']['preferred_bitrate_high_buffer'] = PREFERRED_BITRATE_HIGH_BUFFER
     new_config['General']['preferred_bitrate_low_buffer'] = PREFERRED_BITRATE_LOW_BUFFER
+    new_config['General']['preferred_bitrate_allow_lossless'] = int(PREFERRED_BITRATE_ALLOW_LOSSLESS)
     new_config['General']['detect_bitrate'] = int(DETECT_BITRATE)
     new_config['General']['auto_add_artists'] = int(ADD_ARTISTS)
     new_config['General']['correct_metadata'] = int(CORRECT_METADATA)
@@ -675,6 +680,7 @@ def config_write():
     new_config['General']['file_format'] = FILE_FORMAT
     new_config['General']['cleanup_files'] = int(CLEANUP_FILES)
     new_config['General']['add_album_art'] = int(ADD_ALBUM_ART)
+    new_config['General']['album_art_format'] = ALBUM_ART_FORMAT
     new_config['General']['embed_album_art'] = int(EMBED_ALBUM_ART)
     new_config['General']['embed_lyrics'] = int(EMBED_LYRICS)
     new_config['General']['download_dir'] = DOWNLOAD_DIR
