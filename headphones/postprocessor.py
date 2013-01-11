@@ -320,7 +320,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
     # Check to see if we're preserving the torrent dir
     if headphones.KEEP_TORRENT_FILES and Kind=="torrent":
-        new_folder = os.path.join(os.path.dirname(albumpath), ('temp' + release['AlbumTitle'][:5]).encode(headphones.SYS_ENCODING, 'replace'))
+        new_folder = os.path.join(os.path.dirname(albumpath), ('temp' + release['AlbumTitle'][:8]).encode(headphones.SYS_ENCODING, 'replace'))
+        new_folder = new_folder.strip()
         try:
             shutil.copytree(albumpath, new_folder)
             albumpath = new_folder
