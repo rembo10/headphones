@@ -351,6 +351,10 @@
                 			<div id="preferred_bitrate_options">
 					    Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['pref_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['pref_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br><br>
 					    <div class="row checkbox left">    					
+                		 	        <input type="checkbox" name="preferred_bitrate_allow_lossless" value="1" ${config['pref_bitrate_allow_lossless']} />
+                		 	        <label>Allow lossless if no good lossy match found</label>
+					    </div>
+					    <div class="row checkbox left">    					
                 		 	        <input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />
                 		 	        <label>Auto-Detect Preferred Bitrate</label>
 					    </div>					    
