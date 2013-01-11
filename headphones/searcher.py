@@ -562,7 +562,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
         #when looking for "Foo - Foo" we don't want "Foobar"
         #this should be less of an issue when it isn't a self-titled album so we'll only check vs artist
         if len(resultlist):
-            resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm, term)]
+            resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
         
         if len(resultlist):    
                        
@@ -686,7 +686,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
 
 
-def verifyresult(title, artistterm, term):
+def verifyresult(title, artistterm, term, lossless):
     
     title = re.sub('[\.\-\/\_]', ' ', title)
     
@@ -705,8 +705,13 @@ def verifyresult(title, artistterm, term):
     #another attempt to weed out substrings. We don't want "Vol III" when we were looking for "Vol II"
     
     # Filter out remix search results (if we're not looking for it)
-    if 'remix' not in term and 'remix' in title:
+    if 'remix' not in term.lower() and 'remix' in title.lower():
         logger.info("Removed " + title + " from results because it's a remix album and we're not looking for a remix album right now")
+        return False
+    
+    # Filter out FLAC if we're not specifically looking for it    
+    if headphones.PREFERRED_QUALITY == (0 or '0') and 'flac' in title.lower() and not lossless:
+        logger.info("Removed " + title + " from results because it's a lossless album and we're not looking for a lossless album right now")
         return False
     
     tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
@@ -1252,7 +1257,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         #when looking for "Foo - Foo" we don't want "Foobar"
         #this should be less of an issue when it isn't a self-titled album so we'll only check vs artist
         if len(resultlist):
-            resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm, term)]
+            resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
         
         if len(resultlist):    
                        
