@@ -638,6 +638,10 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                     else:
                         logger.info('No more results found for %s' % term)
                         return "none"
+                        
+            if not len(nzblist):
+                logger.info('No appropriate matches found for %s' % term)
+                return "none"
 
             logger.info(u"Pre-processing result")
             
