@@ -754,7 +754,13 @@ def renameFiles(albumpath, downloaded_track_list, release):
         except:
             logger.info("MediaFile couldn't parse: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
             continue
-            
+    
+	if not f.
+        if not f.disc:
+			discnumber = ''
+		else:
+			discnumber = f.disc
+				
         if not f.track:
             tracknumber = ''
         else:
@@ -771,7 +777,8 @@ def renameFiles(albumpath, downloaded_track_list, release):
         else:
             title = f.title
             
-            values = {  '$Track':       tracknumber,
+            values = {  '$Disc':		discnumber,
+						'$Track':       tracknumber,
                         '$Title':       title,
                         '$Artist':      release['ArtistName'],
                         '$Album':       release['AlbumTitle'],
