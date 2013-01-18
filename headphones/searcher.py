@@ -562,7 +562,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
         #when looking for "Foo - Foo" we don't want "Foobar"
         #this should be less of an issue when it isn't a self-titled album so we'll only check vs artist
         if len(resultlist):
-            resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm, term)]
+            resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
         
         if len(resultlist):    
                        
@@ -584,6 +584,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                     else:
                         logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
                         newlist = []
+                        flac_list = []
                         
                         if headphones.PREFERRED_BITRATE_HIGH_BUFFER:
                             high_size_limit = targetsize * int(headphones.PREFERRED_BITRATE_HIGH_BUFFER)/100
@@ -598,6 +599,11 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                             
                             if high_size_limit and (result[1] > high_size_limit):
                                 logger.info(result[0] + " is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit))
+                                
+                                # Add lossless nzbs to the "flac list" which we can use if there are no good lossy matches
+                                if 'flac' in result[0].lower():
+                                    flac_list.append((result[0], result[1], result[2], result[3]))
+                                
                                 continue
                                 
                             if low_size_limit and (result[1] < low_size_limit):
@@ -608,6 +614,10 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                             newlist.append((result[0], result[1], result[2], result[3], delta))
             
                         nzblist = sorted(newlist, key=lambda title: title[4])
+                        
+                        if not len(nzblist) and len(flac_list) and headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
+                            logger.info("Since there were no appropriate lossy matches, going to use lossless instead")
+                            nzblist = sorted(flac_list, key=lambda title: title[1], reverse=True)
                 
                 except Exception, e:
                     
@@ -690,7 +700,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
 
 
-def verifyresult(title, artistterm, term):
+def verifyresult(title, artistterm, term, lossless):
     
     title = re.sub('[\.\-\/\_]', ' ', title)
     
@@ -709,8 +719,13 @@ def verifyresult(title, artistterm, term):
     #another attempt to weed out substrings. We don't want "Vol III" when we were looking for "Vol II"
     
     # Filter out remix search results (if we're not looking for it)
-    if 'remix' not in term and 'remix' in title:
+    if 'remix' not in term.lower() and 'remix' in title.lower():
         logger.info("Removed " + title + " from results because it's a remix album and we're not looking for a remix album right now")
+        return False
+    
+    # Filter out FLAC if we're not specifically looking for it
+    if headphones.PREFERRED_QUALITY == (0 or '0') and 'flac' in title.lower() and not lossless:
+        logger.info("Removed " + title + " from results because it's a lossless album and we're not looking for a lossless album right now")
         return False
     
     tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
@@ -1256,7 +1271,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         #when looking for "Foo - Foo" we don't want "Foobar"
         #this should be less of an issue when it isn't a self-titled album so we'll only check vs artist
         if len(resultlist):
-            resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm, term)]
+            resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
         
         if len(resultlist):    
                        
