@@ -394,6 +394,31 @@
                 	</fieldset>
                </td>
             </tr>
+	    <tr>
+		<td>
+                	<fieldset>
+                		<legend>Quality</legend>
+                		<div class="row radio clearfix">
+				    <input type="radio" name="preferred_quality" value="0" ${config['pref_qual_0']} /><label>Highest Quality excluding Lossless</label>
+                		    <input type="radio" name="preferred_quality" value="1" ${config['pref_qual_1']} /><label>Highest Quality including Lossless</label>
+                		    <input type="radio" name="preferred_quality" value="3" ${config['pref_qual_3']} /><label>Lossless Only</label>
+                		    <input type="radio" id="preferred_bitrate" name="preferred_quality" value="2" ${config['pref_qual_2']} />Preferred Bitrate: <input type="text" class="override-float" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3">kbps<br>
+                			<div id="preferred_bitrate_options">
+					    Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['pref_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['pref_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br><br>
+					    <div class="row checkbox left">    					
+                		 	        <input type="checkbox" name="preferred_bitrate_allow_lossless" value="1" ${config['pref_bitrate_allow_lossless']} />
+                		 	        <label>Allow lossless if no good lossy match found</label>
+					    </div>
+					    <div class="row checkbox left">    					
+                		 	        <input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />
+                		 	        <label>Auto-Detect Preferred Bitrate</label>
+					    </div>					    
+					</div>
+				</div>
+                		
+                	</fieldset>
+		</td>
+	    </tr>
 		</table>
 		<input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
 	</div>
