@@ -109,7 +109,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
          
         for result in results:
             foundNZB = "none"
-            if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE):
+            if (headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE):
                 if result['Status'] == "Wanted Lossless":
                     foundNZB = searchNZB(result['AlbumID'], new, losslessOnly=True)
                 else:
@@ -179,66 +179,6 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
         logger.info("Searching for %s since it was marked as wanted" % term)
         
         resultlist = []
-        
-#        if headphones.NZBMATRIX:
-#            provider = "nzbmatrix"
-#            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
-#                categories = "23" 
-#            elif headphones.PREFERRED_QUALITY:
-#                categories = "23,22"
-#            else:
-#                categories = "22"
-#                
-#            # Search Audiobooks/Singles/etc
-#            if albums['Type'] == "Other":
-#                categories = "49"
-#                logger.info("Album type is audiobook/spokenword. Using audiobook category")
-#            if albums['Type'] == "Single":
-#                categories = "47"
-#                logger.info("Album type is 'Single'. Using singles category")
-#                
-#            # For some reason NZBMatrix is erroring out/timing out when the term starts with a "The" right now
-#            # so we'll strip it out for the time being. This may get fixed on their end, it may not, but
-#            # hopefully this will fix it for now. If you notice anything else it gets stuck on, please post it
-#            # on Github so it can be added
-#            if term.lower().startswith("the "):
-#                term = term[4:]
-#            
-#            
-#            params = {    "page": "download",
-#                        "username": headphones.NZBMATRIX_USERNAME,
-#                        "apikey": headphones.NZBMATRIX_APIKEY,
-#                        "subcat": categories,
-#                        "maxage": headphones.USENET_RETENTION,
-#                        "english": 1,
-#                        "ssl": 1,
-#                        "scenename": 1,
-#                        "term": term
-#                        }
-#                        
-#            searchURL = "https://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
-#            logger.info(u'Parsing results from <a href="%s">NZBMatrix</a>' % searchURL)
-#            try:
-#                data = urllib2.urlopen(searchURL, timeout=20).read()
-#            except urllib2.URLError, e:
-#                logger.warn('Error fetching data from NZBMatrix: %s' % e)
-#                data = False   
-#                
-#            if data:
-#            
-#                d = feedparser.parse(data)
-#                
-#                for item in d.entries:
-#                    try:
-#                        url = item.link
-#                        title = item.title
-#                        size = int(item.links[1]['length'])
-#                        
-#                        resultlist.append((title, size, url, provider))
-#                        logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-#                    
-#                    except AttributeError, e:
-#                        logger.info(u"No results found from NZBMatrix for %s" % term)
             
         if headphones.NEWZNAB:
             
@@ -476,88 +416,6 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                         except Exception, e:
                             logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
 
-#        if headphones.NEWZBIN:
-#            provider = "newzbin"    
-#            providerurl = "https://www.newzbin2.es/"
-#            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
-#                categories = "7"        #music
-#                format = "2"             #flac
-#            elif headphones.PREFERRED_QUALITY:
-#                categories = "7"        #music
-#                format = "10"            #mp3+flac
-#            else:
-#                categories = "7"        #music
-#                format = "8"            #mp3      
-#
-#            if albums['Type'] == 'Other':
-#                categories = "13"
-#                format = "16"
-#                logger.info("Album type is audiobook/spokenword. Using audiobook category")
-#            
-#            params = {   
-#                        "fpn": "p",
-#                        'u_nfo_posts_only': 0,
-#                        'u_url_posts_only': 0,
-#                        'u_comment_posts_only': 0,
-#                        'u_show_passworded': 0,
-#                        "searchaction": "Search",
-#                        #"dl": 1,
-#                        "category": categories,
-#                        "retention": headphones.USENET_RETENTION,
-#                        "ps_rb_audio_format": format,
-#                        "feed": "rss",
-#                        "u_post_results_amt": 50,        #this can default to a high number per user
-#                        "hauth": 1,
-#                        "q": term
-#                      }
-#            searchURL = providerurl + "search/?%s" % urllib.urlencode(params)
-#            try:
-#                data = getNewzbinURL(searchURL)
-#            except exceptions.NewzbinAPIThrottled:
-#                #try again if we were throttled
-#                data = getNewzbinURL(searchURL)
-#            if data:
-#                logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, providerurl))
-#                
-#                try:    
-#                    d = minidom.parseString(data)
-#                    node = d.documentElement
-#                    items = d.getElementsByTagName("item")
-#                except ExpatError:
-#                    logger.info('Unable to get the NEWZBIN feed. Check that your settings are correct - post a bug if they are')
-#                    items = []
-#            
-#            if len(items):
-#            
-#                for item in items:
-#        
-#                    sizenode = item.getElementsByTagName("report:size")[0].childNodes
-#                    titlenode = item.getElementsByTagName("title")[0].childNodes
-#                    linknode = item.getElementsByTagName("link")[0].childNodes
-#    
-#                    for node in sizenode:
-#                        size = int(node.data)
-#                    for node in titlenode:
-#                        title = node.data
-#                    for node in linknode:
-#                        url = node.data
-#                        
-#                        #exract the reportid from the link nodes
-#                        id_regex = re.escape(providerurl) + 'browse/post/(\d+)/'
-#                        id_match = re.match(id_regex, url)
-#                        if not id_match:
-#                            logger.info("Didn't find a valid Newzbin reportid in linknode")
-#                        else:
-#                            url = id_match.group(1) #we have to make a post request later, need the id                            
-#                    if url:
-#                        resultlist.append((title, size, url, provider))
-#                        logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-#                    else:
-#                        logger.info('No url link found in nzb. Skipping.')    
-#                
-#            else:
-#                logger.info('No results found from NEWZBIN for %s' % term)
-#
         #attempt to verify that this isn't a substring result
         #when looking for "Foo - Foo" we don't want "Foobar"
         #this should be less of an issue when it isn't a self-titled album so we'll only check vs artist
@@ -616,7 +474,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                         nzblist = sorted(newlist, key=lambda title: title[4])
                         
                         if not len(nzblist) and len(flac_list) and headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
-                            logger.info("Since there were no appropriate lossy matches, going to use lossless instead")
+                            logger.info("Since there were no appropriate lossy matches (and at least one lossless match), going to use lossless instead")
                             nzblist = sorted(flac_list, key=lambda title: title[1], reverse=True)
                 
                 except Exception, e:
@@ -670,8 +528,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                     
                     # If we sent the file to sab, we can check how it was renamed and insert that into the snatched table
                     (replace_spaces, replace_dots) = sab.checkConfig()
-                    print replace_spaces
-                    print replace_dots
+
                     if replace_dots:
                         nzb_folder_name = helpers.sab_replace_dots(nzb_folder_name)
                     if replace_spaces:
@@ -727,6 +584,18 @@ def verifyresult(title, artistterm, term, lossless):
     if headphones.PREFERRED_QUALITY == (0 or '0') and 'flac' in title.lower() and not lossless:
         logger.info("Removed " + title + " from results because it's a lossless album and we're not looking for a lossless album right now")
         return False
+        
+    if headphones.IGNORED_WORDS:
+        for each_word in helpers.split_string(headphones.IGNORED_WORDS):
+            if each_word.lower() in title.lower():
+                logger.info("Removed " + title + " from results because it contains ignored word: '" + each_word + "'")
+                return False
+                
+    if headphones.REQUIRED_WORDS:
+        for each_word in helpers.split_string(headphones.REQUIRED_WORDS):
+            if each_word.lower() not in title.lower():
+                logger.info("Removed " + title + " from results because it doesn't contain required word: '" + each_word + "'")
+                return False
     
     tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
     for token in tokens:
