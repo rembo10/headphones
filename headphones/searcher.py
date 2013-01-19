@@ -474,7 +474,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                                 
                                 # Add lossless nzbs to the "flac list" which we can use if there are no good lossy matches
                                 if 'flac' in result[0].lower():
-                                    flac_list.append((result[0], result[1], result[2], result[3], results[4]))
+                                    flac_list.append((result[0], result[1], result[2], result[3], result[4]))
                                 
                                 continue
                                 
@@ -483,7 +483,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                                 continue
                                                                 
                             delta = abs(targetsize - result[1])
-                            newlist.append((result[0], result[1], result[2], result[3], results[4], delta))
+                            newlist.append((result[0], result[1], result[2], result[3], result[4], delta))
             
                         nzblist = sorted(newlist, key=lambda title: (-title[4], title[5]))
                         
