@@ -292,32 +292,6 @@
 			<div><!--Search Providers-->
 				<h2><span class="wsr">L</span> Search Providers</h2>
 				<small>"We provide you with a automated search service to locate binary files/secgments that can be found on the public access network called Usenet."</small>
-				
-				<!--NZB Matrix-->
-				<div class="group">
-				<table id="nzbmatrix">
-					<tr>
-						<td><input class="switch" type="checkbox" name="nzbmatrix" value="1" ${config['use_nzbmatrix']} /></td>
-						<td>
-							<h2><a href="https://www.nzbmatrix.com" target="_blank"><span class="wsr">D</span>NZBMatrix</a></h2>
-							<small><label for="nzbmatrix">Enabled/Disabled</label></small>
-						</td>
-					</tr>
-				</table>
-				<div class="group" id="nzbmatrix_switch">
-					<table>
-						<tr>
-							<td><label for="nzbmatrix_username">Username:</label></td>
-								<td><input type="text" name="nzbmatrix_username" value="${config['nzbmatrix_user']}" size="30" maxlength="40" /></td>
-						</tr>
-						<tr>
-							<td><label for="nzbmatrix_apikey">API:</label></td>
-								<td><input type="text" name="nzbmatrix_apikey" value="${config['nzbmatrix_api']}" size="36" maxlength="40" /></td>
-						</tr>
-					</table>
-				</div>
-				</div>
-				<!--end NZB Matrix-->
 
 				<!--Newznab-->
 				<div class="group">
@@ -409,32 +383,6 @@
 					</div>
 				</div>
 				<!--end NZBs.org-->
-				
-				<!--Newzbin-->
-				<div class="group">
-				<table>
-					<tr>
-						<td><input class="switch" type="checkbox" name="newzbin" value="1" ${config['use_newzbin']} /></td>
-						<td>
-							<h2><a href="http://www.newsbin.com/" target="_blank"><span class="wsr">D</span>Newzbin</a></h2>
-							<small><label for="newzbin">Enabled/Disabled</label></small>
-						</td>
-					</tr>
-				</table>
-				<div class="group" id="newzbin_switch">
-					<table>
-						<tr>
-							<td><label for="newzbin_uid">UID:</label></td>
-							<td><input type="text" name="newzbin_uid" value="${config['newzbin_uid']}" size="30" maxlength="40" /></td>
-						</tr>
-						<tr>
-							<td><label for="newzbin_password">Password:</label></td>
-							<td><input type="text" name="newzbin_password" value="${config['newzbin_pass']}" size="36" maxlength="40" /></td>
-						</tr>
-					</table>
-				</div>
-				</div>
-				<!--end Newzbin-->
 					
 				<!--Torrents-->
 				<table>
