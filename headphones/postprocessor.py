@@ -741,77 +741,76 @@ def embedLyrics(downloaded_track_list):
             f.save()
 
 def renameFiles(albumpath, downloaded_track_list, release):
-    logger.info('Renaming files')
-    try:
-        year = release['ReleaseDate'][:4]
-    except TypeError:
-        year = ''
-    # Until tagging works better I'm going to rely on the already provided metadata
-
-    for downloaded_track in downloaded_track_list:
-        try:
-            f = MediaFile(downloaded_track)
-        except:
-            logger.info("MediaFile couldn't parse: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
-            continue
-    
-	if not f.
-        if not f.disc:
-			discnumber = ''
-		else:
-			discnumber = f.disc
+	logger.info('Renaming files')
+	
+	try:
+		year = release['ReleaseDate'][:4]
+	except TypeError:
+		year = ''
+	
+	try:
+		for downloaded_track in downloaded_track_list:
+			try:
+				f = MediaFile(downloaded_track)
+			except:
+				logger.info("MediaFile couldn't parse: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+				continue
+			
+			if not f.disc:
+				discnumber = ''
+			else:
+				discnumber = str(f.disc)
 				
-        if not f.track:
-            tracknumber = ''
-        else:
-            tracknumber = '%02d' % f.track
-        
-        if not f.title:
-            
-            basename = os.path.basename(downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
-            title = os.path.splitext(basename)[0]
-            ext = os.path.splitext(basename)[1]
-            
-            new_file_name = helpers.cleanTitle(title) + ext
-            
-        else:
-            title = f.title
-            
-            values = {  '$Disc':		discnumber,
-						'$Track':       tracknumber,
-                        '$Title':       title,
-                        '$Artist':      release['ArtistName'],
-                        '$Album':       release['AlbumTitle'],
-                        '$Year':        year,
-                        '$track':       tracknumber,
-                        '$title':       title.lower(),
-                        '$artist':      release['ArtistName'].lower(),
-                        '$album':       release['AlbumTitle'].lower(),
-                        '$year':        year
-                        }
-                        
-            ext = os.path.splitext(downloaded_track)[1]
-            
-            new_file_name = helpers.replace_all(headphones.FILE_FORMAT.strip(), values).replace('/','_') + ext
-        
-        
-        new_file_name = new_file_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING, 'replace')
+			if not f.track:
+				tracknumber = ''
+			else:
+				tracknumber = '%02d' % f.track
+			
+			if not f.title:
+				basename = os.path.basename(downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+				title = os.path.splitext(basename)[0]
+				ext = os.path.splitext(basename)[1]
+				
+				new_file_name = helpers.cleanTitle(title) + ext
+			else:
+				title = f.title
+				
+				values = {  '$Disc':		discnumber,
+							'$Track':       tracknumber,
+							'$Title':       title,
+							'$Artist':      release['ArtistName'],
+							'$Album':       release['AlbumTitle'],
+							'$Year':        year,
+							'$track':       tracknumber,
+							'$title':       title.lower(),
+							'$artist':      release['ArtistName'].lower(),
+							'$album':       release['AlbumTitle'].lower(),
+							'$year':        year
+							}
+							
+				ext = os.path.splitext(downloaded_track)[1]
+				new_file_name = helpers.replace_all(headphones.FILE_FORMAT.strip(), values).replace('/','_') + ext
+			
+			new_file_name = new_file_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING, 'replace')
 
-        if new_file_name.startswith('.'):
-            new_file_name = new_file_name.replace(0, '_')
-        
-        new_file = os.path.join(albumpath, new_file_name)
-        
-        if downloaded_track == new_file_name:
-            logger.debug("Renaming for: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + " is not neccessary")
-            continue
+			if new_file_name.startswith('.'):
+				new_file_name = new_file_name.replace(0, '_')
+			
+			new_file = os.path.join(albumpath, new_file_name)
+			
+			if downloaded_track == new_file_name:
+				logger.debug("Renaming for: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + " is not neccessary")
+				continue
 
-        logger.debug('Renaming %s ---> %s' % (downloaded_track.decode(headphones.SYS_ENCODING,'replace'), new_file_name.decode(headphones.SYS_ENCODING,'replace')))
-        try:
-            os.rename(downloaded_track, new_file)
-        except Exception, e:
-            logger.error('Error renaming file: %s. Error: %s' % (downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), e))
-            continue
+			logger.debug('Renaming %s ---> %s' % (downloaded_track.decode(headphones.SYS_ENCODING,'replace'), new_file_name.decode(headphones.SYS_ENCODING,'replace')))
+			try:
+				os.rename(downloaded_track, new_file)
+			except Exception, e:
+				logger.error('Error renaming file: %s. Error: %s' % (downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), e))
+				continue
+	except Exception, e:
+		import traceback
+		logger.warn("Something went while renaming files: {0}".format(e))
                 
 def renameUnprocessedFolder(albumpath):
     
