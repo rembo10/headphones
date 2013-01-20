@@ -758,7 +758,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
         if not f.disc:
             discnumber = ''
         else:
-            discnumber = f.disc
+            discnumber = '%d' % f.disc
 
         if not f.track:
             tracknumber = ''
@@ -776,7 +776,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
         else:
             title = f.title
             
-            values = {  '$Disc':		discnumber,
+            values = {  '$Disc':        discnumber,
                         '$Track':       tracknumber,
                         '$Title':       title,
                         '$Artist':      release['ArtistName'],
