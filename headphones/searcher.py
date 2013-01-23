@@ -348,18 +348,18 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 
             if data:
             
-                d = feedparser.parse(data)
+                d = eval(data.replace('null','None'))
                 
-                if not len(d.entries):
+                if  d['matches'] <= 0:
                     logger.info(u"No results found from NZBsRus for %s" % term)
                     pass
                 
                 else:
-                    for item in d.entries:
+                    for item in d['results']:
                         try:
-                            url = item.link
-                            title = item.title
-                            size = int(item.links[1]['length'])
+                            url = "http://www.nzbsrus.com/nzbdownload_rss.php/" + item['id'] + "/" + headphones.NZBSRUS_UID + "/" + item['key']
+                            title = item['name']
+                            size = int(item['size'])
                             
                             resultlist.append((title, size, url, provider))
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size))) 
