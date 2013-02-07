@@ -361,7 +361,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         
     if headphones.EMBED_LYRICS:
         embedLyrics(downloaded_track_list)
-        
+        shutil.rmtree(os.path.join(albumpath,"temp"))   
+       
     if headphones.RENAME_FILES:
         renameFiles(albumpath, downloaded_track_list, release)
     
