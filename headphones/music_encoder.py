@@ -136,7 +136,6 @@ def encode(albumPath):
                     ifencoded=1
         i=i+1
         
-    shutil.rmtree(tempDirEncode)
     time.sleep(1)   
     for r,d,f in os.walk(albumPath):
         for music in f:
