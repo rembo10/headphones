@@ -405,7 +405,7 @@ def initialize():
         SAB_CATEGORY = check_setting_str(CFG, 'SABnzbd', 'sab_category', '')
 
         NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', 'tegbzn6789')
-        NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', 'tv')
+        NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', 'music')
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
 		
         NZBMATRIX = bool(check_setting_int(CFG, 'NZBMatrix', 'nzbmatrix', 0))
