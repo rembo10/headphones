@@ -448,9 +448,11 @@ def addAlbumArt(artwork, albumpath, release):
     if album_art_name.startswith('.'):
         album_art_name = album_art_name.replace(0, '_')
 
+    prev = os.umask(0002)
     file = open(os.path.join(albumpath, album_art_name), 'wb')
     file.write(artwork)
     file.close()
+    os.umask(prev)
     
 def cleanupFiles(albumpath):
     logger.info('Cleaning up files')
