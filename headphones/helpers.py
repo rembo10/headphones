@@ -322,3 +322,9 @@ def sab_sanitize_foldername(name):
     #    name = name[:maxlen]
 
     return name
+
+def split_string(mystring):
+    mylist = []
+    for each_word in mystring.split(','):
+        mylist.append(each_word.strip())
+    return mylist
