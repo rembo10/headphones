@@ -362,6 +362,25 @@
 				</div>
                 		
                 	</fieldset>
+                	<fieldset>
+                		<legend>Search Words</legend>
+				<small>Separate words with a comma, e.g. "word1,word2,word3"</small>
+                		<div class="row">
+	                		<label>Ignored Words</label>
+	                		<input type="text" name="ignored_words" value="${config['ignored_words']}" size="50">
+					<small>Results with any of these words in the title will be filtered out</small>
+				</div>
+                		<div class="row">
+	                		<label>Preferred Words</label>
+	                		<input type="text" name="preferred_words" value="${config['preferred_words']}" size="50">
+					<small>Results with these words in the title will be preferred over results without them</small>
+				</div>
+                		<div class="row">
+	                		<label>Required Words</label>
+	                		<input type="text" name="required_words" value="${config['required_words']}" size="50">
+	                		<small>Results without these words in the title will be filtered out</small>
+				</div>
+                	</fieldset>
                	</td>
                 <td>
                 	<fieldset>
@@ -414,7 +433,7 @@
                 		 <div class="row">
                 		  	<label>File Format</label>
                 		  	<input type="text" name="file_format" value="${config['file_format']}" size="43">
-                		   	<small>Use: $Track/$track (track #), $Title/$title, $Artist/$artist, $Album/$album and $Year/$year</small>
+                		   	<small>Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title, $Artist/$artist, $Album/$album and $Year/$year</small>
                 		</div>
                 	</fieldset>
                 	
