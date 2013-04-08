@@ -497,7 +497,7 @@ def _mb_request(path, method='GET', auth_required=False, client_required=False,
 	req.add_header('User-Agent', _useragent)
 	
 	# Add headphones credentials
-	if hostname == '178.63.142.150:8181':
+	if hostname == '192.30.34.130:8181':
 		base64string = base64.encodestring('%s:%s' % (hpuser, hppassword)).replace('\n', '')
 		req.add_header("Authorization", "Basic %s" % base64string)
 	
