@@ -52,11 +52,11 @@ def checkFolder():
                                             sab_replace_spaces(sab_replace_dots(album['FolderName']))
                                         ]
 
-                torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
+                torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
 
                 for nzb_folder_name in nzb_album_possibilities:
                     
-                    nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING)
+                    nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING, 'replace')
 
                     if os.path.exists(nzb_album_path):
                         logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
@@ -481,7 +481,7 @@ def moveFiles(albumpath, release, tracks):
     else:
         sortname = release['ArtistName']
     
-    if sortname.isdigit():
+    if sortname[0].isdigit():
         firstchar = '0-9'
     else:
         firstchar = sortname[0]
