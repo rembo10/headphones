@@ -477,7 +477,7 @@ def moveFiles(albumpath, release, tracks):
     releasetype = release['Type'].replace('/', '_')
 
     if release['ArtistName'].startswith('The '):
-        sortname = release['ArtistName'][4:]
+        sortname = release['ArtistName'][4:] + ", The"
     else:
         sortname = release['ArtistName']
     
@@ -488,11 +488,13 @@ def moveFiles(albumpath, release, tracks):
     
 
     values = {  '$Artist':  artist,
+                '$SortArtist': sortname,
                 '$Album':   album,
                 '$Year':        year,
                 '$Type':  releasetype,
                 '$First':   firstchar.upper(),
                 '$artist':  artist.lower(),
+                '$sortartist': sortname.lower(),
                 '$album':   album.lower(),
                 '$year':        year,
                 '$type':  releasetype.lower(),
@@ -782,17 +784,24 @@ def renameFiles(albumpath, downloaded_track_list, release):
                 artistname = f.artist
             else:
                 artistname = release['ArtistName']
+                
+            if artistname.startswith('The '):
+                sortname = artistname[4:] + ", The"
+            else:
+                sortname = artistname
             
             values = {  '$Disc':        discnumber,
                         '$Track':       tracknumber,
                         '$Title':       title,
                         '$Artist':      artistname,
+                        '$SortArtist':  sortname,
                         '$Album':       release['AlbumTitle'],
                         '$Year':        year,
                         '$disc':        discnumber,
                         '$track':       tracknumber,
                         '$title':       title.lower(),
                         '$artist':      artistname.lower(),
+                        '$sortartist':  sortname.lower(),
                         '$album':       release['AlbumTitle'].lower(),
                         '$year':        year
                         }
