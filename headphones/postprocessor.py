@@ -778,16 +778,21 @@ def renameFiles(albumpath, downloaded_track_list, release):
         else:
             title = f.title
             
+            if release['ArtistName'] == "Various Artists" and f.artist:
+                artistname = f.artist
+            else:
+                artistname = release['ArtistName']
+            
             values = {  '$Disc':        discnumber,
                         '$Track':       tracknumber,
                         '$Title':       title,
-                        '$Artist':      release['ArtistName'],
+                        '$Artist':      artistname,
                         '$Album':       release['AlbumTitle'],
                         '$Year':        year,
                         '$disc':        discnumber,
                         '$track':       tracknumber,
                         '$title':       title.lower(),
-                        '$artist':      release['ArtistName'].lower(),
+                        '$artist':      artistname.lower(),
                         '$album':       release['AlbumTitle'].lower(),
                         '$year':        year
                         }
