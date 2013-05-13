@@ -125,7 +125,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
     else:        
     
         foundNZB = "none"
-        if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN) and (headphones.SAB_HOST or headphones.BLACKHOLE):
+        if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE):
             foundNZB = searchNZB(albumid, new, lossless)
 
         if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
@@ -745,6 +745,12 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             else:
                 term = cleanartist + ' ' + cleanalbum
 
+        # Save user search term
+        if albums[4]:
+            usersearchterm = term
+        else:
+            usersearchterm = ''
+
         semi_clean_artist_term = re.sub('[\.\-\/]', ' ', semi_cleanartist).encode('utf-8', 'replace')
         semi_clean_album_term = re.sub('[\.\-\/]', ' ', semi_cleanalbum).encode('utf-8', 'replace')
         # Replace bad characters in the term and unicode it
@@ -846,11 +852,17 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 format = "MP3"
                 maxsize = 300000000
 
-            query_items = ['artist:"%s"' % artistterm,
-                           'album:"%s"'   % albumterm,
-                           'format:(%s)' % format,
-                           'size:[0 TO %d]' % maxsize,
-                           '-seeders:0'] # cut out dead torrents
+            if not usersearchterm:
+                query_items = ['artist:"%s"' % artistterm,
+                               'album:"%s"' % albumterm,
+                               'year:(%s)' % year]
+            else:
+                query_items = [usersearchterm]
+
+            query_items.extend(['format:(%s)' % format,
+                                'size:[0 TO %d]' % maxsize,
+                                '-seeders:0']) # cut out dead torrents
+
             if bitrate:
                 query_items.append('bitrate:"%s"' % bitrate)
 
@@ -905,7 +917,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             
             # Ignore if release date not specified, results too unpredictable
             
-            if not year:
+            if not year and not usersearchterm:
                 logger.info(u'Release date not specified, ignoring for rutracker.org')
             else:
             
@@ -924,8 +936,12 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         bitrate = True
                 
                 # build search url based on above
-            
-                searchURL = rutracker.searchurl(artistterm, albumterm, year, format)
+
+                if not usersearchterm:
+                    searchURL = rutracker.searchurl(artistterm, albumterm, year, format)
+                else:
+                    searchURL = rutracker.searchurl(usersearchterm, ' ', ' ', format)
+
                 logger.info(u'Parsing results from <a href="%s">rutracker.org</a>' % searchURL)
             
                 # parse results and get best match
