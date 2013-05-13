@@ -318,7 +318,10 @@ def getRelease(releaseid, include_artist_info=True):
             if 'release-group' in results:
                 release['rgid'] = unicode(results['release-group']['id'])
                 release['rg_title'] = unicode(results['release-group']['title'])
-                release['rg_type'] = unicode(results['release-group']['type'])
+                try:
+                    release['rg_type'] = unicode(results['release-group']['type'])
+                except KeyError:
+                    release['rg_type'] = u'Unknown'
             else:
                 logger.warn("Release " + releaseid + "had no ReleaseGroup associated")
 
