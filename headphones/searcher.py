@@ -553,9 +553,11 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                     nzb_name = nzb_folder_name + '.nzb'
                     download_path = os.path.join(headphones.BLACKHOLE_DIR, nzb_name)
                     try:
+                        prev = os.umask(headphones.UMASK)
                         f = open(download_path, 'w')
                         f.write(data)
                         f.close()
+                        os.umask(prev)
                         logger.info('File saved to: %s' % nzb_name)
                     except Exception, e:
                         logger.error('Couldn\'t write NZB file: %s' % e)
@@ -1239,9 +1241,11 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 			                    break
                         else:  
 			                #Write the torrent file to a path derived from the TORRENTBLACKHOLE_DIR and file name.
+                            prev = os.umask(headphones.UMASK)
 			                torrent_file = open(download_path, 'wb')
 			                torrent_file.write(data)
 			                torrent_file.close()
+                            os.umask(prev)
 			                
 			            #Open the fresh torrent file again so we can extract the proper torrent name
 			            #Used later in post-processing.
