@@ -1236,19 +1236,19 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     download_path = os.path.join(headphones.TORRENTBLACKHOLE_DIR, torrent_name)
                     try:
                         if bestqual[3] == 'rutracker.org':
-			                download_path = rutracker.get_torrent(bestqual[2], headphones.TORRENTBLACKHOLE_DIR)
-			                if not download_path:
-			                    break
+                            download_path = rutracker.get_torrent(bestqual[2], headphones.TORRENTBLACKHOLE_DIR)
+                            if not download_path:
+                                break
                         else:  
-			                #Write the torrent file to a path derived from the TORRENTBLACKHOLE_DIR and file name.
+                            #Write the torrent file to a path derived from the TORRENTBLACKHOLE_DIR and file name.
                             prev = os.umask(headphones.UMASK)
-			                torrent_file = open(download_path, 'wb')
-			                torrent_file.write(data)
-			                torrent_file.close()
+                            torrent_file = open(download_path, 'wb')
+                            torrent_file.write(data)
+                            torrent_file.close()
                             os.umask(prev)
-			                
-			            #Open the fresh torrent file again so we can extract the proper torrent name
-			            #Used later in post-processing.
+                            
+                        #Open the fresh torrent file again so we can extract the proper torrent name
+                        #Used later in post-processing.
                         torrent_file = open(download_path, 'rb')
                         torrent_info = bencode.bdecode(torrent_file.read())
                         torrent_file.close()
