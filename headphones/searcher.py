@@ -125,7 +125,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
     else:        
     
         foundNZB = "none"
-        if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN) and (headphones.SAB_HOST or headphones.BLACKHOLE):
+        if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE):
             foundNZB = searchNZB(albumid, new, lossless)
 
         if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
@@ -348,18 +348,18 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 
             if data:
             
-                d = feedparser.parse(data)
+                d = json.loads(data.replace('null','None'))
                 
-                if not len(d.entries):
+                if  d['matches'] <= 0:
                     logger.info(u"No results found from NZBsRus for %s" % term)
                     pass
                 
                 else:
-                    for item in d.entries:
+                    for item in d['results']:
                         try:
-                            url = item.link
-                            title = item.title
-                            size = int(item.links[1]['length'])
+                            url = "http://www.nzbsrus.com/nzbdownload_rss.php/" + item['id'] + "/" + headphones.NZBSRUS_UID + "/" + item['key']
+                            title = item['name']
+                            size = int(item['size'])
                             
                             resultlist.append((title, size, url, provider))
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size))) 
@@ -553,9 +553,11 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                     nzb_name = nzb_folder_name + '.nzb'
                     download_path = os.path.join(headphones.BLACKHOLE_DIR, nzb_name)
                     try:
+                        prev = os.umask(headphones.UMASK)
                         f = open(download_path, 'w')
                         f.write(data)
                         f.close()
+                        os.umask(prev)
                         logger.info('File saved to: %s' % nzb_name)
                     except Exception, e:
                         logger.error('Couldn\'t write NZB file: %s' % e)
@@ -743,6 +745,12 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             else:
                 term = cleanartist + ' ' + cleanalbum
 
+        # Save user search term
+        if albums[4]:
+            usersearchterm = term
+        else:
+            usersearchterm = ''
+
         semi_clean_artist_term = re.sub('[\.\-\/]', ' ', semi_cleanartist).encode('utf-8', 'replace')
         semi_clean_album_term = re.sub('[\.\-\/]', ' ', semi_cleanalbum).encode('utf-8', 'replace')
         # Replace bad characters in the term and unicode it
@@ -844,11 +852,17 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 format = "MP3"
                 maxsize = 300000000
 
-            query_items = ['artist:"%s"' % artistterm,
-                           'album:"%s"'   % albumterm,
-                           'format:(%s)' % format,
-                           'size:[0 TO %d]' % maxsize,
-                           '-seeders:0'] # cut out dead torrents
+            if not usersearchterm:
+                query_items = ['artist:"%s"' % artistterm,
+                               'album:"%s"' % albumterm,
+                               'year:(%s)' % year]
+            else:
+                query_items = [usersearchterm]
+
+            query_items.extend(['format:(%s)' % format,
+                                'size:[0 TO %d]' % maxsize,
+                                '-seeders:0']) # cut out dead torrents
+
             if bitrate:
                 query_items.append('bitrate:"%s"' % bitrate)
 
@@ -903,7 +917,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             
             # Ignore if release date not specified, results too unpredictable
             
-            if not year:
+            if not year and not usersearchterm:
                 logger.info(u'Release date not specified, ignoring for rutracker.org')
             else:
             
@@ -922,8 +936,12 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         bitrate = True
                 
                 # build search url based on above
-            
-                searchURL = rutracker.searchurl(artistterm, albumterm, year, format)
+
+                if not usersearchterm:
+                    searchURL = rutracker.searchurl(artistterm, albumterm, year, format)
+                else:
+                    searchURL = rutracker.searchurl(usersearchterm, ' ', ' ', format)
+
                 logger.info(u'Parsing results from <a href="%s">rutracker.org</a>' % searchURL)
             
                 # parse results and get best match
@@ -1234,17 +1252,19 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     download_path = os.path.join(headphones.TORRENTBLACKHOLE_DIR, torrent_name)
                     try:
                         if bestqual[3] == 'rutracker.org':
-			                download_path = rutracker.get_torrent(bestqual[2], headphones.TORRENTBLACKHOLE_DIR)
-			                if not download_path:
-			                    break
+                            download_path = rutracker.get_torrent(bestqual[2], headphones.TORRENTBLACKHOLE_DIR)
+                            if not download_path:
+                                break
                         else:  
-			                #Write the torrent file to a path derived from the TORRENTBLACKHOLE_DIR and file name.
-			                torrent_file = open(download_path, 'wb')
-			                torrent_file.write(data)
-			                torrent_file.close()
-			                
-			            #Open the fresh torrent file again so we can extract the proper torrent name
-			            #Used later in post-processing.
+                            #Write the torrent file to a path derived from the TORRENTBLACKHOLE_DIR and file name.
+                            prev = os.umask(headphones.UMASK)
+                            torrent_file = open(download_path, 'wb')
+                            torrent_file.write(data)
+                            torrent_file.close()
+                            os.umask(prev)
+                            
+                        #Open the fresh torrent file again so we can extract the proper torrent name
+                        #Used later in post-processing.
                         torrent_file = open(download_path, 'rb')
                         torrent_info = bencode.bdecode(torrent_file.read())
                         torrent_file.close()

@@ -52,11 +52,11 @@ def checkFolder():
                                             sab_replace_spaces(sab_replace_dots(album['FolderName']))
                                         ]
 
-                torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING)
+                torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
 
                 for nzb_folder_name in nzb_album_possibilities:
                     
-                    nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING)
+                    nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING, 'replace')
 
                     if os.path.exists(nzb_album_path):
                         logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
@@ -448,9 +448,11 @@ def addAlbumArt(artwork, albumpath, release):
     if album_art_name.startswith('.'):
         album_art_name = album_art_name.replace(0, '_')
 
+    prev = os.umask(headphones.UMASK)
     file = open(os.path.join(albumpath, album_art_name), 'wb')
     file.write(artwork)
     file.close()
+    os.umask(prev)
     
 def cleanupFiles(albumpath):
     logger.info('Cleaning up files')
@@ -475,22 +477,24 @@ def moveFiles(albumpath, release, tracks):
     releasetype = release['Type'].replace('/', '_')
 
     if release['ArtistName'].startswith('The '):
-        sortname = release['ArtistName'][4:]
+        sortname = release['ArtistName'][4:] + ", The"
     else:
         sortname = release['ArtistName']
     
-    if sortname.isdigit():
+    if sortname[0].isdigit():
         firstchar = '0-9'
     else:
         firstchar = sortname[0]
     
 
     values = {  '$Artist':  artist,
+                '$SortArtist': sortname,
                 '$Album':   album,
                 '$Year':        year,
                 '$Type':  releasetype,
                 '$First':   firstchar.upper(),
                 '$artist':  artist.lower(),
+                '$sortartist': sortname.lower(),
                 '$album':   album.lower(),
                 '$year':        year,
                 '$type':  releasetype.lower(),
@@ -776,16 +780,28 @@ def renameFiles(albumpath, downloaded_track_list, release):
         else:
             title = f.title
             
+            if release['ArtistName'] == "Various Artists" and f.artist:
+                artistname = f.artist
+            else:
+                artistname = release['ArtistName']
+                
+            if artistname.startswith('The '):
+                sortname = artistname[4:] + ", The"
+            else:
+                sortname = artistname
+            
             values = {  '$Disc':        discnumber,
                         '$Track':       tracknumber,
                         '$Title':       title,
-                        '$Artist':      release['ArtistName'],
+                        '$Artist':      artistname,
+                        '$SortArtist':  sortname,
                         '$Album':       release['AlbumTitle'],
                         '$Year':        year,
                         '$disc':        discnumber,
                         '$track':       tracknumber,
                         '$title':       title.lower(),
-                        '$artist':      release['ArtistName'].lower(),
+                        '$artist':      artistname.lower(),
+                        '$sortartist':  sortname.lower(),
                         '$album':       release['AlbumTitle'].lower(),
                         '$year':        year
                         }
