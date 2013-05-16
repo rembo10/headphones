@@ -966,20 +966,25 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
             bitrate = None
             bitrate_string = bitrate
-            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
-                format = gazelleformat.FLAC
+
+            if headphones.PREFERRED_QUALITY == 2 or losslessOnly:  # Lossless Only mode
+                search_formats = [gazelleformat.FLAC]
                 maxsize = 10000000000
-            elif headphones.PREFERRED_QUALITY:
-                format=None
+            elif headphones.PREFERRED_QUALITY == 3:  # Preferred quality mode
+                search_formats=[None]  # should return all
                 bitrate = headphones.PREFERRED_BITRATE
-                for encoding_string in gazelleencoding.ALL_ENCODINGS:
-                    if re.search(bitrate, encoding_string, flags=re.I):
-                        bitrate_string = encoding_string
-                if bitrate_string not in gazelleencoding.ALL_ENCODINGS:
-                    raise Exception("Preferred bitrate %s not recognized by %s" % (bitrate_string, provider))
+                if bitrate:
+                    for encoding_string in gazelleencoding.ALL_ENCODINGS:
+                        if re.search(bitrate, encoding_string, flags=re.I):
+                            bitrate_string = encoding_string
+                    if bitrate_string not in gazelleencoding.ALL_ENCODINGS:
+                        raise Exception("Preferred bitrate %s not recognized by %s" % (bitrate_string, provider))
                 maxsize = 10000000000
-            else:
-                format = gazelleformat.MP3
+            elif headphones.PREFERRED_QUALITY == 1:  # Highest quality including lossless
+                search_formats = [gazelleformat.FLAC, gazelleformat.MP3]
+                maxsize = 10000000000
+            else:  # Highest quality excluding lossless
+                search_formats = [gazelleformat.MP3]
                 maxsize = 300000000
 
             try:
@@ -990,12 +995,14 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
             if gazelle:
                 logger.info(u"Searching %s..." % provider)
-                search_results = gazelle.search_torrents(artistname=semi_clean_artist_term, groupname=semi_clean_album_term,
-                                                            format=format, encoding=bitrate_string)
+                all_torrents = []
+                for search_format in search_formats:
+                    all_torrents.extend(gazelle.search_torrents(artistname=semi_clean_artist_term,
+                                                                  groupname=semi_clean_album_term,
+                                                                  format=search_format, encoding=bitrate_string)['results'])
 
                 # filter on format, size, and num seeders
                 logger.info(u"Filtering torrents by format, maximum size, and minimum seeders...")
-                all_torrents = search_results['results']
                 match_torrents = [ torrent for torrent in all_torrents if torrent.size <= maxsize ]
                 match_torrents = [ torrent for torrent in match_torrents if torrent.seeders >= minimumseeders ]
 
@@ -1009,6 +1016,11 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 (len(match_torrents), provider, artistterm, albumterm))
                     logger.info("Sorting torrents by times snatched and preferred bitrate %s..." % bitrate_string)
                     match_torrents.sort(key=lambda x: int(x.snatched), reverse=True)
+                    if gazelleformat.MP3 in search_formats:
+                        # sort by size after rounding to nearest 10MB...hacky, but will favor highest quality
+                        match_torrents.sort(key=lambda x: int(10 * round(x.size/1024./1024./10.)), reverse=True)
+                    if search_formats and None not in search_formats:
+                        match_torrents.sort(key=lambda x: int(search_formats.index(x.format)))  # prefer lossless
     #                if bitrate:
     #                    match_torrents.sort(key=lambda x: re.match("mp3", x.getTorrentDetails(), flags=re.I), reverse=True)
     #                    match_torrents.sort(key=lambda x: str(bitrate) in x.getTorrentFolderName(), reverse=True)
