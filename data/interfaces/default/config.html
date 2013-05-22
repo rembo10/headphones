@@ -290,6 +290,20 @@
                     	</div>
                     	<div class="row checkbox">
                     	<input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Kick Ass Torrents</label></div>
+                        </div>
+                        <div class="row checkbox">
+                            <input id="uset411" type="checkbox" name="t411" onclick="initConfigCheckbox($(this));" value="1" ${config['use_t411']} /><label>T411</label>
+                        </div>
+                        <div class="config">
+                            <div class="row">
+                                <label>T411 Login </label>
+                                <input type="text" name="t411_login" value="${config['t411_login']}" size="36">
+                            </div>
+                            <div class="row">
+                                <label>T411 Password </label>
+                                <input type="text" name="t411_password" value="${config['t411_password']}" size="36">
+                            </div>
+                        </div>
                         <div class="row checkbox">
                             <input id="usewaffles" type="checkbox" name="waffles" onclick="initConfigCheckbox($(this));" value="1" ${config['use_waffles']} /><label>Waffles.fm</label>
                         </div>

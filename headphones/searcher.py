@@ -35,6 +35,8 @@ import lib.bencode as bencode
 
 import headphones.searcher_rutracker as rutrackersearch
 rutracker = rutrackersearch.Rutracker()
+import headphones.t411 as t411search
+t411 = t411search.T411()
 
 class NewzbinDownloader(urllib.FancyURLopener):
 
@@ -115,7 +117,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
                 else:
                     foundNZB = searchNZB(result['AlbumID'], new)
 
-            if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
+            if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.T411 or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
 
                 if result['Status'] == "Wanted Lossless":
                     searchTorrent(result['AlbumID'], new, losslessOnly=True)
@@ -128,7 +130,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
         if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE):
             foundNZB = searchNZB(albumid, new, lossless)
 
-        if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
+        if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.T411 or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
             searchTorrent(albumid, new, lossless)
 
 def searchNZB(albumid=None, new=False, losslessOnly=False):
@@ -909,6 +911,50 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         except Exception, e:
                             logger.error(u"An error occurred while trying to parse the response from Waffles.fm: %s" % e)
         
+        #T411
+        if headphones.T411:
+        
+            provider = "T411"
+            
+            # Ignore if release date not specified, results too unpredictable
+            bitrate = False
+            
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+                format = 'lossless'
+                maxsize = 10000000000
+            elif headphones.PREFERRED_QUALITY == 1:
+                format = 'lossless+mp3'
+                maxsize = 10000000000
+            else:
+                format = 'mp3'
+                maxsize = 300000000
+                if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
+                    bitrate = True
+                
+                # build search url based on above
+
+            if not usersearchterm:
+                searchURL = t411.searchurl(artistterm, albumterm, year, format)
+            else:
+                searchURL = t411.searchurl(usersearchterm, ' ', ' ', format)
+
+            logger.info(u'Parsing results from <a href="%s">t411</a>' % searchURL)
+            
+                # parse results and get best match
+            
+            rulist = t411.search(searchURL, maxsize, minimumseeders, albumid, bitrate)
+            
+             # add best match to overall results list
+            
+            if rulist:
+                for ru in rulist:
+                    title = ru.title.decode('utf-8')
+                    size = 150
+                    url = ru.url
+                    resultlist.append((title, size, url, provider))
+                    logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+            else:
+                logger.info(u"No valid results found from %s" % (provider))
         # rutracker.org
         
         if headphones.RUTRACKER and rulogin:
@@ -1265,6 +1311,10 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     try:
                         if bestqual[3] == 'rutracker.org':
                             download_path = rutracker.get_torrent(bestqual[2], headphones.TORRENTBLACKHOLE_DIR)
+                            if not download_path:
+                                break
+                        elif bestqual[3] == 'T411':
+                            download_path = t411.get_torrent(bestqual[2], headphones.TORRENTBLACKHOLE_DIR, cleanartist+' '+ cleanalbum+' ['+year+']')
                             if not download_path:
                                 break
                         else:  
