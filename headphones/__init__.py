@@ -716,6 +716,8 @@ def config_write():
     new_config['General']['autowant_upcoming'] = int(AUTOWANT_UPCOMING)
     new_config['General']['autowant_all'] = int(AUTOWANT_ALL)
     new_config['General']['keep_torrent_files'] = int(KEEP_TORRENT_FILES)
+    new_config['General']['git_user'] = 'sarakha63'
+    new_config['General']['git_branch'] = 'develop'
 
     new_config['General']['numberofseeders'] = NUMBEROFSEEDERS
     new_config['General']['torrentblackhole_dir'] = TORRENTBLACKHOLE_DIR
