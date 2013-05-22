@@ -289,8 +289,8 @@
                     		<input type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /><label>Mininova</label>
                     	</div>
                     	<div class="row checkbox">
-                    	<input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Kick Ass Torrents</label></div>
-                        </div>
+                    		<input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Kick Ass Torrents</label>
+                    	</div>
                         <div class="row checkbox">
                             <input id="uset411" type="checkbox" name="t411" onclick="initConfigCheckbox($(this));" value="1" ${config['use_t411']} /><label>T411</label>
                         </div>
@@ -328,10 +328,10 @@
                             <div class="row">
                                 <label>rutracker Password: </label>
                                 <input type="password" name="rutracker_password" value="${config['rutracker_password']}" size="36">
-			    </div>
-			</div>
+			    			</div>
+						</div>
                         <div class="row checkbox">    
-			    <input id="usewhatcd" type="checkbox" name="whatcd" onclick="initConfigCheckbox($(this));" value="1" ${config['use_whatcd']} /><label>What.cd</label>
+			    			<input id="usewhatcd" type="checkbox" name="whatcd" onclick="initConfigCheckbox($(this));" value="1" ${config['use_whatcd']} /><label>What.cd</label>
                         </div>
                         <div class="config">
                             <div class="row">
@@ -632,7 +632,7 @@
 						<div class="row">
 							<label>Interface</label> 
 							<select name="interface"><h3>
-							%for interface in config['interface_list']:
+							%for interface in ['default']:
 								<%
 									if interface == headphones.INTERFACE:
 										selected = 'selected="selected"'
@@ -1098,7 +1098,8 @@
 		initConfigCheckbox("#usenewznab");
 		initConfigCheckbox("#usenzbsrus");
 		initConfigCheckbox("#usenzbsorg");
-		initConfigCheckbox("#usenzbx");
+		initConfigCheckbox("#usenzbx");		
+		initConfigCheckbox("#uset411");
 		initConfigCheckbox("#usewaffles");
 		initConfigCheckbox("#userutracker");
 		initConfigCheckbox("#usewhatcd");
