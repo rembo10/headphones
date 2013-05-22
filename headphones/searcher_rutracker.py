@@ -279,7 +279,7 @@ class Rutracker():
             fp = open (download_path, 'wb')
             fp.write (torrent)
             fp.close ()            
-            os.chmod(download_path, 777)
+            os.chmod(download_path, 0777)
         except Exception, e:
             logger.error('Error getting torrent: %s' % e)  
             return False      

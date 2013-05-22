@@ -153,7 +153,7 @@ def update():
 
     elif headphones.INSTALL_TYPE == 'git':
 
-        output, err = runGit('pull origin ' + version.HEADPHONES_VERSION)
+        output, err = runGit('pull origin ' + headphones.GIT_BRANCH)
 
         if not output:
             logger.error('Couldn\'t download latest version')
