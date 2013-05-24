@@ -1323,6 +1323,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                             torrent_file = open(download_path, 'wb')
                             torrent_file.write(data)
                             torrent_file.close()
+                            os.chmod(download_path, 0777)
                             os.umask(prev)
                             
                         #Open the fresh torrent file again so we can extract the proper torrent name
