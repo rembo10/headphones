@@ -226,7 +226,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 
                 # Add a user-agent
                 request = urllib2.Request(searchURL)
-                request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+                request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.2) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31')
                 opener = urllib2.build_opener()
                 
                 logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, newznab_host[0]))
