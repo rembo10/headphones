@@ -615,6 +615,7 @@
 		        	</fieldset>
 					<fieldset>
 						<legend>Interface</legend>
+						%if len(config['interface_list'])>1:
 						<div class="row">
 							<label>Interface</label> 
 							<select name="interface"><h3>
@@ -630,6 +631,7 @@
 							</select>
 							
 						</div>
+						%endif
 						<div class="row">
 							<label>Log Directory:</label>
 							<input type="text" name="log_dir" value="${config['log_dir']}" size="50">
