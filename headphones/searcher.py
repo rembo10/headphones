@@ -236,12 +236,15 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                     data = False
                     
                 if data:
-                
                     d = feedparser.parse(data)
                     
                     if not len(d.entries):
-                        logger.info(u"No results found from %s for %s" % (newznab_host[0], term))
-                        pass
+                        if d.feed and d.feed.error:
+                            error = d.feed.error
+                            logger.error(u"Error from %s, %s: %s" % (newznab_host[0], error['code'], error['description']))
+                        else:
+                            logger.info(u"No results found from %s for %s" % (newznab_host[0], term))
+                            pass
                     
                     else:
                         for item in d.entries:
