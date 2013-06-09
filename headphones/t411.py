@@ -80,27 +80,22 @@ class T411():
 
         results = []
         logger.debug(u"Search string: " + searchurl)
-        logger.debug(u"Search string: 1 ")
+        
         r = self.opener.open( searchurl )
         soup = BeautifulSoup( r, "html.parser" )
-        logger.debug(u"Search string: 2 ")
         resultsTable = soup.find("table", { "class" : "results" })
         if resultsTable:
             rows = resultsTable.find("tbody").findAll("tr")
     
             for row in rows:
                 link = row.find("a", title=True)
-                logger.debug(u"Search string: 3")
                 title = link['title']
-                logger.debug(u"Search string: 4 ")
                 id = row.find_all('td')[2].find_all('a')[0]['href'][1:].replace('torrents/nfo/?id=','')
-                logger.debug(u"Search string: 5 ")
                 downloadURL = ('http://www.t411.me/torrents/download/?id=%s' % id)
-                logger.debug(u"Search string: 6")
                 
                 
                 results.append( T411SearchResult( self.opener, link['title'], downloadURL ) )
-                logger.debug(u"Search string: 7 ")
+                
                 
         return results
     

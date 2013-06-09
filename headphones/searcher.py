@@ -949,17 +949,13 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             if rulist:
                 for ru in rulist:
                     try:
-                        logger.debug(u"Search string: 8 ")
                         title = ru.title.decode('utf-8')
-                        logger.debug(u"Search string: 9 ")
                     except:
-                        logger.debug(u"Search string: 10 ")
-                        title = ru.title.decode('latin-1')
-                        logger.debug(u"Search string: 11 ")
+                        title=ru.title
                     size = 150
                     url = ru.url
                     resultlist.append((title, size, url, provider))
-                    #logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                    logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
             else:
                 logger.info(u"No valid results found from %s" % (provider))
         # rutracker.org
