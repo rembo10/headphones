@@ -949,9 +949,13 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             if rulist:
                 for ru in rulist:
                     try:
+                        logger.debug(u"Search string: 8 ")
                         title = ru.title.decode('utf-8')
+                        logger.debug(u"Search string: 9 ")
                     except:
+                        logger.debug(u"Search string: 10 ")
                         title = ru.title.decode('latin-1')
+                        logger.debug(u"Search string: 11 ")
                     size = 150
                     url = ru.url
                     resultlist.append((title, size, url, provider))
