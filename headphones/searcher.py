@@ -955,7 +955,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     size = 150
                     url = ru.url
                     resultlist.append((title, size, url, provider))
-                    logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                    #logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
             else:
                 logger.info(u"No valid results found from %s" % (provider))
         # rutracker.org
