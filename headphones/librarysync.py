@@ -107,6 +107,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                               'TrackTitle' : f.title,
                               'BitRate'    : f.bitrate,
                               'Format'     : f.format,
+                              'AlbumArtist': f.albumartist,
                               'Location'   : unicode_song_path }
                               
                 song_list.append(song_dict)
@@ -232,7 +233,11 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
     
             if not track:
                 track = myDB.action('SELECT ArtistName, AlbumTitle, TrackTitle from tracks WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [song['ArtistName'], song['AlbumTitle'], song['TrackTitle']]).fetchone()
-                
+            if not track:
+                track = myDB.action('SELECT ArtistName, AlbumTitle, TrackTitle from alltracks WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [song['AlbumArtist'], song['AlbumTitle'], song['TrackTitle']]).fetchone()
+            if not track:
+                track = myDB.action('SELECT ArtistName, AlbumTitle, TrackTitle from tracks WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [song['AlbumArtist'], song['AlbumTitle'], song['TrackTitle']]).fetchone()
+            
             if track:
                 controlValueDict = { 'ArtistName' : track['ArtistName'],
                                      'AlbumTitle' : track['AlbumTitle'],
