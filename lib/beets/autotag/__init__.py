@@ -188,4 +188,4 @@ def apply_metadata(album_info, mapping, per_disc_numbering=False):
         item.disctitle = track_info.disctitle
         
         # Headphones seal of approval
-        item.comments = 'tagged by headphones/beets'
+        item.comments = ''
