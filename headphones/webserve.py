@@ -670,6 +670,9 @@ class WebInterface(object):
                     "nma_apikey": headphones.NMA_APIKEY,
                     "nma_priority": int(headphones.NMA_PRIORITY),
                     "nma_onsnatch": checked(headphones.NMA_ONSNATCH),
+                    "pushalot_enabled": checked(headphones.PUSHALOT_ENABLED),
+                    "pushalot_apikey": headphones.PUSHALOT_APIKEY,
+                    "pushalot_onsnatch": checked(headphones.PUSHALOT_ONSNATCH),
                     "synoindex_enabled": checked(headphones.SYNOINDEX_ENABLED),
                     "pushover_enabled": checked(headphones.PUSHOVER_ENABLED),
                     "pushover_onsnatch": checked(headphones.PUSHOVER_ONSNATCH),
@@ -714,7 +717,7 @@ class WebInterface(object):
         remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
         bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0, 
         delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, 
-        xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False, 
+        xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, pushalot_enabled=False, pushalot_apikey=None, pushalot_onsnatch=0, synoindex_enabled=False, 
         pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, mirror=None, customhost=None, customport=None, 
         customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, **kwargs):
 
@@ -826,6 +829,9 @@ class WebInterface(object):
         headphones.NMA_APIKEY = nma_apikey
         headphones.NMA_PRIORITY = nma_priority
         headphones.NMA_ONSNATCH = nma_onsnatch
+        headphones.PUSHALOT_ENABLED = pushalot_enabled
+        headphones.PUSHALOT_APIKEY = pushalot_apikey
+        headphones.PUSHALOT_ONSNATCH = pushalot_onsnatch
         headphones.SYNOINDEX_ENABLED = synoindex_enabled
         headphones.PUSHOVER_ENABLED = pushover_enabled
         headphones.PUSHOVER_ONSNATCH = pushover_onsnatch

@@ -225,7 +225,55 @@ class NMA:
         request = self._send(data)
         
         if not request:
-            logger.warn('Error sending notification request to NotifyMyAndroid')        
+            logger.warn('Error sending notification request to NotifyMyAndroid')
+
+class PUSHALOT:
+    
+    def __init__(self):
+    
+        self.apikey = headphones.PUSHALOT_APIKEY
+      
+    def _send(self, data):
+        http_handler = HTTPSConnection("pushalot.com")
+        
+        try:
+            http_handler.request("POST",
+                                    "/api/sendmessage",
+                                    headers = {'Content-type': "application/x-www-form-urlencoded"},
+                                    body = urlencode(data))
+        except:
+            return
+        response = http_handler.getresponse()
+        request_status = response.status
+
+        if request_status == 200:
+                logger.debug(u"Pushalot notifications sent.")
+                return response
+        elif request_status == 410: 
+                logger.error(u"Pushalot auth failed: %s" % response.reason)
+                return
+        else:
+                logger.error(u"Pushalot notification failed.")
+                return
+                        
+    def notify(self, artist=None, album=None, snatched_nzb=None):
+    
+        apikey = self.apikey
+        
+        if snatched_nzb:
+            event = snatched_nzb + " snatched!"
+            description = "Headphones has snatched: " + snatched_nzb + " and has sent it to SABnzbd+"
+        else:
+            event = artist + ' - ' + album + ' complete!'
+            description = "Headphones has downloaded and postprocessed: " + artist + ' [' + album + ']'
+    
+        data = { 'AuthorizationToken': apikey, 'Title': event, 'Body': description}
+
+        logger.info('Sending notification request to Pushalot')
+        request = self._send(data)
+        
+        if not request:
+            logger.warn('Error sending notification request to Pushalot')
         
 
 class Synoindex:

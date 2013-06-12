@@ -702,6 +702,21 @@
                      		</div>
                      	</div>
                      </fieldset>
+                     
+                     <fieldset>		
+						<h3>Pushalot</h3>				
+						<div class="row checkbox">
+						     <input type="checkbox" name="pushalot_enabled" id="pushalot" value="1" ${config['pushalot_enabled']} /><label>Enable Pushalot Notifications</label>
+						 </div>
+						 <div id="pushalotoptions">
+						     <div class="row">
+						     	<label>API key</label><input type="text" name="pushalot_apikey" value="${config['pushalot_apikey']}" size="50">
+						     </div>
+						 	<div class="row checkbox">
+						 		<input type="checkbox" name="pushalot_onsnatch" value="1" ${config['pushalot_onsnatch']} /><label>Notify on snatch?</label>
+						 	</div>						 	
+						 </div>						
+					</fieldset>
                       
                      <fieldset>
                      	<h3>NotifyMyAndroid</h3>
@@ -946,13 +961,33 @@
 			}
 		});
 
-		if ($("#prowl").is(":checked"))
+		if ($("#pushalot").is(":checked"))
 			{
-				$("#prowloptions").show();
+				$("#pushalotoptions").show();
 			}
 		else
 			{
-				$("#prowloptions").hide();
+				$("#pushalotoptions").hide();
+			}
+		
+		$("#pushalot").click(function(){
+			if ($("#pushalot").is(":checked"))
+			{
+				$("#pushalotoptions").slideDown();
+			}
+			else
+			{
+				$("#pushalotoptions").slideUp();
+			}
+		});		
+
+		if ($("#pushalot").is(":checked"))
+			{
+				$("#pushalotoptions").show();
+			}
+		else
+			{
+				$("#pushalotoptions").hide();
 			}
 		
 		$("#prowl").click(function(){
@@ -965,7 +1000,7 @@
 				$("#prowloptions").slideUp();
 			}
 		});		
-
+		
 		if ($("#xbmc").is(":checked"))
 			{
 				$("#xbmcoptions").show();

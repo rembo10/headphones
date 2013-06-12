@@ -461,6 +461,11 @@
                       	<h3><input type="checkbox" name="xbmc_update" value="1" ${config['xbmc_update']} />Update XBMC Library</h3><br>
                       	<h3><input type="checkbox" name="xbmc_notify" value="1" ${config['xbmc_notify']} />Send Notification to XBMC</h3><br>
                       </div>
+                      <h3><input type="checkbox" name="pushalot_enabled" id="pushalot" value="1" ${config['pushalot_enabled']} />Enable Pushalot Notifications</h3><br>
+                      <div id="pushalotoptions">
+		      	        <h3>API key:</h3><input type="text" name="pushalot_apikey" value="${config['pushalot_apikey']}" size="50"><br><br>
+                      	<h3><input type="checkbox" name="pushalot_onsnatch" value="1" ${config['pushalot_onsnatch']} />Notify on snatch?</h3><br>
+                      </div>
                      <h3><input type="checkbox" name="nma_enabled" id="nma" value="1" ${config['nma_enabled']} />Enable NotifyMyAndroid</h3><br>
                       <div id="nmaoptions">
 		      	        <h3>NotifyMyAndroid API Key:</h3><input type="text" name="nma_apikey" value="${config['nma_apikey']}" size="30"><br>
@@ -639,6 +644,26 @@
 			else
 			{
 				$("#xbmcoptions").hide("fast");
+			}
+		});		
+		
+		if ($("#prowl").is(":checked"))
+			{
+				$("#prowloptions").show();
+			}
+		else
+			{
+				$("#prowloptions").hide();
+			}
+		
+		$("#pushalot").click(function(){
+			if ($("#pushalot").is(":checked"))
+			{
+				$("#pushalotoptions").show("fast");
+			}
+			else
+			{
+				$("#pushalotoptions").hide("fast");
 			}
 		});		
 		

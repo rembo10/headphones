@@ -131,6 +131,10 @@ def sendNZB(nzb):
             logger.debug(u"Sending NMA notification")
             nma = notifiers.NMA()
             nma.notify(snatched_nzb=nzb.name)
+        if headphones.PUSHALOT_ENABLED and headphones.PUSHALOT_ONSNATCH:
+            logger.debug(u"Sending Pushalot notification")
+            pushalot = notifiers.PUSHALOT()
+            pushalot.notify(snatched_nzb=nzb.name)
 
         return True
     elif sabText == "Missing authentication":
