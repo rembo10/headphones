@@ -29,7 +29,7 @@ import os, re, time
 import string
 
 import headphones, exceptions
-from headphones import logger, db, helpers, classes, sab
+from headphones import logger, db, helpers, classes, sab, notifiers
 
 import lib.bencode as bencode
 
@@ -1342,6 +1342,22 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         
                 myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
                 myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", torrent_folder_name, "torrent"])
+                if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
+                    logger.info(u"Sending Prowl notification")
+                    prowl = notifiers.PROWL()
+                    prowl.notify(snatched_nzb=torrent_folder_name,"Download started")
+                if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
+                    logger.info(u"Sending Pushover notification")
+                    prowl = notifiers.PUSHOVER()
+                    prowl.notify(snatched_nzb=torrent_folder_name,"Download started")
+                if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
+                    logger.debug(u"Sending NMA notification")
+                    nma = notifiers.NMA()
+                    nma.notify(snatched_nzb=torrent_folder_name)
+                if headphones.PUSHALOT_ENABLED and headphones.PUSHALOT_ONSNATCH:
+                    logger.debug(u"Sending Pushalot notification")
+                    pushalot = notifiers.PUSHALOT()
+                    pushalot.notify(snatched_nzb=torrent_folder_name)
 
 def preprocesstorrent(resultlist, pre_sorted_list=False):
     selresult = ""

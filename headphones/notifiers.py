@@ -214,7 +214,7 @@ class NMA:
         
         if snatched_nzb:
             event = snatched_nzb + " snatched!"
-            description = "Headphones has snatched: " + snatched_nzb + " and has sent it to SABnzbd+"
+            description = "Headphones has snatched: " + snatched_nzb
         else:
             event = artist + ' - ' + album + ' complete!'
             description = "Headphones has downloaded and postprocessed: " + artist + ' [' + album + ']'
@@ -262,7 +262,7 @@ class PUSHALOT:
         
         if snatched_nzb:
             event = snatched_nzb + " snatched!"
-            description = "Headphones has snatched: " + snatched_nzb + " and has sent it to SABnzbd+"
+            description = "Headphones has snatched: " + snatched_nzb
         else:
             event = artist + ' - ' + album + ' complete!'
             description = "Headphones has downloaded and postprocessed: " + artist + ' [' + album + ']'
