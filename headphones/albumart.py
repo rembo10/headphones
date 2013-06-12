@@ -31,6 +31,7 @@ def getAlbumArt(albumid):
 def getCachedArt(albumid):
     
     from headphones import cache
+    from headphones import logger
     
     c = cache.Cache()
     

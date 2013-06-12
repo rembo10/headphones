@@ -207,6 +207,8 @@ def extract_logline(s):
         return None
         
 def extract_song_data(s):
+    
+    from headphones import logger
 
     #headphones default format
     music_dir = headphones.MUSIC_DIR

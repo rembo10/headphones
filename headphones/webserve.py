@@ -892,7 +892,7 @@ class WebInterface(object):
         headphones.SIGNAL = 'shutdown'
         message = 'Shutting Down...'
         return serve_template(templatename="shutdown.html", title="Shutting Down", message=message, timer=15)
-        return page
+        
 
     shutdown.exposed = True
 
@@ -905,15 +905,15 @@ class WebInterface(object):
     def update(self):
         headphones.SIGNAL = 'update'
         message = 'Updating...'
-        return serve_template(templatename="shutdown.html", title="Updating", message=message, timer=120)
-        return page
+        return serve_template(templatename="shutdown.html", title="Updating", message=message, timer=60)
+        
     update.exposed = True
         
     def extras(self):
         myDB = db.DBConnection()
         cloudlist = myDB.select('SELECT * from lastfmcloud')
         return serve_template(templatename="extras.html", title="Extras", cloudlist=cloudlist)
-        return page
+        
     extras.exposed = True
 
     def addReleaseById(self, rid):
