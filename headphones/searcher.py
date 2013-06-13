@@ -789,7 +789,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             searchURL = providerurl + "/?%s" % urllib.urlencode(params)
             
             try:
-                data = urllib2.urlopen(searchURL, timeout=20).read()
+                data = urllib2.urlopen(searchURL, timeout=20)
             except urllib2.URLError, e:
                 logger.warn('Error fetching data from %s: %s' % (provider, e))
                 data = False
@@ -799,6 +799,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 logger.info(u'Parsing results from <a href="%s">KAT</a>' % searchURL)
                 
                 d = feedparser.parse(data)
+
                 if not len(d.entries):
                     logger.info(u"No results found from %s for %s" % (provider, term))
                     pass
@@ -807,10 +808,10 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     for item in d.entries:
                         try:
                             rightformat = True
-                            title = item.title
-                            seeders = item.seeds
-                            url = item.links[1]['url']
-                            size = int(item.links[1]['length'])
+                            title = item['title']
+                            seeders = item['torrent_seeds']
+                            url = item['links'][1]['href']
+                            size = int(item['links'][1]['length'])
                             try:
                                 if format == "2":
                                     request = urllib2.Request(url)
