@@ -1370,6 +1370,10 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                             download_path = t411.get_torrent(bestqual[2], headphones.TORRENTBLACKHOLE_DIR, cleanartist+' '+ cleanalbum+' ['+year+']')
                             if not download_path:
                                 break
+                        elif bestqual[3] == 'GKS':
+                            download_path = gks.get_torrent(bestqual[2], headphones.TORRENTBLACKHOLE_DIR, bestqual[0])
+                            if not download_path:
+                                break
                         else:  
                             #Write the torrent file to a path derived from the TORRENTBLACKHOLE_DIR and file name.
                             prev = os.umask(headphones.UMASK)
@@ -1403,11 +1407,11 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
                     logger.debug(u"Sending NMA notification")
                     nma = notifiers.NMA()
-                    nma.notify(snatched_nzb=torrent_folder_name)
+                    nma.notify(snatched_nzb=torrent_folder_name + ' on ' + provider)
                 if headphones.PUSHALOT_ENABLED and headphones.PUSHALOT_ONSNATCH:
                     logger.debug(u"Sending Pushalot notification")
                     pushalot = notifiers.PUSHALOT()
-                    pushalot.notify(snatched_nzb=torrent_folder_name)
+                    pushalot.notify(snatched_nzb=torrent_folder_name + ' on ' + provider)
 
 def preprocesstorrent(resultlist, pre_sorted_list=False):
     selresult = ""
