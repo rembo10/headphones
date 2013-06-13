@@ -607,6 +607,8 @@ class WebInterface(object):
                     "use_t411" : checked(headphones.T411),
                     "t411_login" : headphones.T411_LOGIN,
                     "t411_password": headphones.T411_PASSWORD,
+                    "use_gks" : checked(headphones.GKS),
+                    "gks_key" : headphones.GKS_KEY,
                     "use_waffles" : checked(headphones.WAFFLES),
                     "waffles_uid" : headphones.WAFFLES_UID,
                     "waffles_passkey": headphones.WAFFLES_PASSKEY,
@@ -711,7 +713,7 @@ class WebInterface(object):
         sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None, usenet_retention=None, newznab=0, newznab_host=None, newznab_apikey=None, 
         newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, nzbx=0, preferred_words=None, required_words=None, ignored_words=None,
         preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None, 
-        numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, t411=0, t411_login = None, t411_password=None, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
+        numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, t411=0, t411_login = None, t411_password=None, gks=0, gks_key = None, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
         rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0, 
         destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0,
         remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
@@ -769,6 +771,8 @@ class WebInterface(object):
         headphones.T411 = t411
         headphones.T411_LOGIN = t411_login
         headphones.T411_PASSWORD = t411_password
+        headphones.GKS = gks
+        headphones.GKS_KEY = gks_key
         headphones.WAFFLES = waffles
         headphones.WAFFLES_UID = waffles_uid
         headphones.WAFFLES_PASSKEY = waffles_passkey

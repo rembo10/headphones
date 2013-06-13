@@ -94,7 +94,7 @@ class T411():
                 downloadURL = ('http://www.t411.me/torrents/download/?id=%s' % id)
                 
                 
-                results.append( T411SearchResult( self.opener, link['title'], downloadURL ) )
+                results.append( T411SearchResult( self.opener, title, downloadURL ) )
                 
                 
         return results

@@ -171,6 +171,8 @@ MININOVA = None
 T411=None
 T411_LOGIN= None
 T411_PASSWORD= None
+GKS=None
+GKS_KEY= None
 WAFFLES = None
 WAFFLES_UID = None
 WAFFLES_PASSKEY = None
@@ -287,7 +289,7 @@ def initialize():
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
                 RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, \
                 ADD_ALBUM_ART, ALBUM_ART_FORMAT, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
-                TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, T411, T411_LOGIN, T411_PASSWORD, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
+                TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, T411, T411_LOGIN, T411_PASSWORD, GKS, GKS_KEY, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS, \
@@ -314,6 +316,7 @@ def initialize():
         CheckSection('nzbX')
         CheckSection('Newzbin')
         CheckSection('T411')
+        CheckSection('Gks')
         CheckSection('Waffles')
         CheckSection('Rutracker')
         CheckSection('What.cd')
@@ -399,6 +402,9 @@ def initialize():
         T411 = bool(check_setting_int(CFG, 'T411', 't411', 0))
         T411_LOGIN = check_setting_str(CFG, 'T411', 't411_login', '')
         T411_PASSWORD = check_setting_str(CFG, 'T411', 't411_password', '')
+        
+        GKS = bool(check_setting_int(CFG, 'Gks', 'gks', 0))
+        GKS_KEY = check_setting_str(CFG, 'Gks', 'gks_key', '')
         
         WAFFLES = bool(check_setting_int(CFG, 'Waffles', 'waffles', 0))
         WAFFLES_UID = check_setting_str(CFG, 'Waffles', 'waffles_uid', '')
@@ -737,6 +743,10 @@ def config_write():
     new_config['T411']['t411'] = int(T411)
     new_config['T411']['t411_login'] = T411_LOGIN
     new_config['T411']['t411_password'] = T411_PASSWORD
+    
+    new_config['Gks'] = {}
+    new_config['Gks']['gks'] = int(GKS)
+    new_config['Gks']['gks_key'] = GKS_KEY
     
     new_config['Waffles'] = {}
     new_config['Waffles']['waffles'] = int(WAFFLES)

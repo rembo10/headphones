@@ -36,7 +36,9 @@ import lib.bencode as bencode
 import headphones.searcher_rutracker as rutrackersearch
 rutracker = rutrackersearch.Rutracker()
 import headphones.t411 as t411search
+import headphones.gks as gkssearch
 t411 = t411search.T411()
+gks = gkssearch.gks()
 
 class NewzbinDownloader(urllib.FancyURLopener):
 
@@ -117,7 +119,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
                 else:
                     foundNZB = searchNZB(result['AlbumID'], new)
 
-            if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.T411 or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
+            if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.T411 or headphones.GKS or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
 
                 if result['Status'] == "Wanted Lossless":
                     searchTorrent(result['AlbumID'], new, losslessOnly=True)
@@ -130,7 +132,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
         if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE):
             foundNZB = searchNZB(albumid, new, lossless)
 
-        if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.T411 or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
+        if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.T411 or headphones.GKS or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
             searchTorrent(albumid, new, lossless)
 
 def searchNZB(albumid=None, new=False, losslessOnly=False):
@@ -943,6 +945,54 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 # parse results and get best match
             
             rulist = t411.search(searchURL, maxsize, minimumseeders, albumid, bitrate)
+            
+             # add best match to overall results list
+            
+            if rulist:
+                for ru in rulist:
+                    try:
+                        title = ru.title.decode('utf-8')
+                    except:
+                        title=ru.title
+                    size = 150
+                    url = ru.url
+                    resultlist.append((title, size, url, provider))
+                    logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+            else:
+                logger.info(u"No valid results found from %s" % (provider))
+                
+        #gks
+        if headphones.GKS and headphones.PREFERRED_QUALITY in [3,1]:
+        
+            provider = "GKS"
+            
+            # Ignore if release date not specified, results too unpredictable
+            bitrate = False
+            
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+                format = 'lossless'
+                maxsize = 10000000000
+            elif headphones.PREFERRED_QUALITY == 1:
+                format = 'lossless+mp3'
+                maxsize = 10000000000
+            else:
+                format = 'mp3'
+                maxsize = 300000000
+                if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
+                    bitrate = True
+                
+                # build search url based on above
+
+            if not usersearchterm:
+                searchURL = gks.searchurl(artistterm, albumterm, year, format)
+            else:
+                searchURL = gks.searchurl(usersearchterm, ' ', ' ', format)
+
+            logger.info(u'Parsing results from <a href="%s">t411</a>' % searchURL)
+            
+                # parse results and get best match
+            
+            rulist = gks.search(searchURL, maxsize, minimumseeders, albumid, bitrate)
             
              # add best match to overall results list
             

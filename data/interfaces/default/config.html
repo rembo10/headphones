@@ -305,6 +305,16 @@
                             </div>
                         </div>
                         <div class="row checkbox">
+                            <input id="usegks" type="checkbox" name="gks" onclick="initConfigCheckbox($(this));" value="1" ${config['use_gks']} /><label>GKS (only FLAC)</label>
+                        </div>
+                        <div class="config">
+                            <div class="row">
+                                <label>GKS Key </label>
+                                <input type="text" name="gks_key" value="${config['gks_key']}" size="36">
+                            </div>
+                            
+                        </div>
+                        <div class="row checkbox">
                             <input id="usewaffles" type="checkbox" name="waffles" onclick="initConfigCheckbox($(this));" value="1" ${config['use_waffles']} /><label>Waffles.fm</label>
                         </div>
                         <div class="config">
@@ -1134,7 +1144,8 @@
 		initConfigCheckbox("#usenzbsrus");
 		initConfigCheckbox("#usenzbsorg");
 		initConfigCheckbox("#usenzbx");		
-		initConfigCheckbox("#uset411");
+		initConfigCheckbox("#uset411");				
+		initConfigCheckbox("#usegks");
 		initConfigCheckbox("#usewaffles");
 		initConfigCheckbox("#userutracker");
 		initConfigCheckbox("#usewhatcd");
