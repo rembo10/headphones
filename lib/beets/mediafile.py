@@ -703,9 +703,7 @@ class MediaFile(object):
             raise UnreadableFileError('Mutagen raised an exception')
 
         if self.mgfile is None: # Mutagen couldn't guess the type
-            self.mgfile.__name__ == 'WavPack'
-            self.type = 'wv'
-            #raise FileTypeError('file type unsupported by Mutagen')
+            raise FileTypeError('file type unsupported by Mutagen or is a wav file if so continuing')
         elif type(self.mgfile).__name__ == 'M4A' or \
              type(self.mgfile).__name__ == 'MP4':
             self.type = 'mp4'
