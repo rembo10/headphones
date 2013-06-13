@@ -1,3 +1,4 @@
+# -*- coding: latin-1 -*-
 #  This file is part of Headphones.
 #
 #  Headphones is free software: you can redistribute it and/or modify
@@ -155,7 +156,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
         except TypeError:
             year = ''
         
-        dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':'', '*':'', '.':'', ':':''}
+        dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':'', '*':'', '.':'', ':':'', '!':'','¡':''}
 
         cleanalbum = helpers.latinToAscii(helpers.replace_all(albums[1], dic)).strip()
         cleanartist = helpers.latinToAscii(helpers.replace_all(albums[0], dic)).strip()
@@ -726,7 +727,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         except TypeError:
             year = ''
         
-        dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':' ', '*':''}
+        dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':'', '*':'', '.':'', ':':'', '!':'','¡':''}
 
         semi_cleanalbum = helpers.replace_all(albums[1], dic)
         cleanalbum = helpers.latinToAscii(semi_cleanalbum)
@@ -946,7 +947,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             
             rulist = t411.search(searchURL, maxsize, minimumseeders, albumid, bitrate)
             
-             # add best match to overall results list
+            # add best match to overall results list
             
             if rulist:
                 for ru in rulist:
@@ -994,7 +995,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             
             rulist = gks.search(searchURL, maxsize, minimumseeders, albumid, bitrate)
             
-             # add best match to overall results list
+            # add best match to overall results list
             
             if rulist:
                 for ru in rulist:
