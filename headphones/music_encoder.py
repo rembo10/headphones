@@ -104,7 +104,8 @@ def encode(albumPath):
 
     i=0
     for music in musicFiles:        
-        infoMusic=MediaFile(music)
+        if ext != 'wav':
+            infoMusic=MediaFile(music)
         
         if XLD:
             if xldBitrate and (infoMusic.bitrate / 1000 <= xldBitrate):
