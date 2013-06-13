@@ -954,7 +954,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         title = ru.title.decode('utf-8')
                     except:
                         title=ru.title
-                    size = 150
+                    size = ru.size
                     url = ru.url
                     resultlist.append((title, size, url, provider))
                     logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
@@ -1002,7 +1002,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         title = ru.title.decode('utf-8')
                     except:
                         title=ru.title
-                    size = 150
+                    size = ru.size
                     url = ru.url
                     resultlist.append((title, size, url, provider))
                     logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))

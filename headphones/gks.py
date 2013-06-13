@@ -3,13 +3,11 @@ from xml.dom.minidom import Node
 import urllib
 import urllib2
 import cookielib
-from urlparse import urlparse
-from bs4 import BeautifulSoup
-from headphones import logger, db
-import lib.bencode as bencode
+from headphones import logger
 import os
-import hashlib
 import headphones
+from datetime import datetime
+import re
 
 class gks():
 
@@ -100,33 +98,18 @@ class gks():
                         for x in desc_values:
                             x_values=x.split(" : ")
                             dict_attr[x_values[0]]=x_values[1]
-                        date=""
                         size=""
-                        leechers=""
                         seeders=""
-                        if "ajoute le" in dict_attr:
-                            date=dict_attr["ajoute le"]
                         if "taille" in dict_attr:
                             size=dict_attr["taille"]
                         if "seeders" in dict_attr:
                             seeders=dict_attr["seeders"]
-                        if "leechers" in dict_attr:
-                            leechers=dict_attr["leechers"]
-                        def extra_check(item):
-                                return True
-                            
-                        #new = {}
-                        #new['id'] = title
-                        #new['name'] = title.strip()
-                        #new['url'] = downloadURL
-                        #new['detail_url'] = searchUrl
-                           
-                        #new['size'] = self.parseSize(size)
-                        #new['age'] = self.ageToDays(date)
-                        #new['seeders'] = tryInt(seeders)
-                        #new['leechers'] = tryInt(leechers)
-                        #new['extra_check'] = extra_check
-                        results.append( GKSSearchResult( self.opener, title, downloadURL ) )
+                                                                           
+                        size = parseSize(size)
+                        size= tryInt(size)
+                        seeders = tryInt(seeders)
+                        
+                        results.append( GKSSearchResult( self.opener, title, downloadURL, size, seeders ) )
                     
             return results  
     
@@ -150,19 +133,47 @@ class gks():
         return download_path
     
     
-    def _get_title_and_url(self, item):
-        return (item.title, item.url)
+def parseSize(size):
+        
+        sizeGb = ['gb', 'gib', 'go']
+        sizeMb = ['mb', 'mib', 'mo']
+        sizeKb = ['kb', 'kib', 'ko']
+        
+        sizeRaw = size.lower()
+        size = tryFloat(re.sub(r'[^0-9.]', '', size).strip())
+
+        for s in sizeGb:
+            if s in sizeRaw:
+                return size * 1024 * 1048576
+
+        for s in sizeMb:
+            if s in sizeRaw:
+                return size * 1048576
+
+        for s in sizeKb:
+            if s in sizeRaw:
+                return size /1024 *1048576
+
+        return
+def tryInt(s):
+    try: return int(s)
+    except: return 0
+
+def tryFloat(s):
+    try: return float(s) if '.' in s else tryInt(s)
+    except: return 0
     
 class GKSSearchResult:
     
-    def __init__(self, opener, title, url):
+    def __init__(self, opener, title, url, size, seeders):
         self.opener = opener
         self.title = title
         self.url = url
+        self.size = size
+        self.seeders = seeders
         
     def getNZB(self):
         return self.opener.open( self.url , 'wb').read()
     
     
 provider = gks()
- 

@@ -26,6 +26,7 @@ from headphones import logger, db
 import lib.bencode as bencode
 import os
 import headphones
+import re
 
 class T411():
 
@@ -90,11 +91,17 @@ class T411():
             for row in rows:
                 link = row.find("a", title=True)
                 title = link['title']
+                size = row.find_all('td')[5].text
+                                
+                seeders = row.find_all('td')[7].text
+                size = parseSize(size)
+                size = tryInt(size)
+                seeders = tryInt(seeders)
                 id = row.find_all('td')[2].find_all('a')[0]['href'][1:].replace('torrents/nfo/?id=','')
                 downloadURL = ('http://www.t411.me/torrents/download/?id=%s' % id)
                 
                 
-                results.append( T411SearchResult( self.opener, title, downloadURL ) )
+                results.append( T411SearchResult( self.opener, title, downloadURL,size, seeders ) )
                 
                 
         return results
@@ -126,13 +133,45 @@ class T411():
         result.provider = self
 
         return result    
+
+def parseSize(size):
+        
+        sizeGb = ['gb', 'gib', 'go']
+        sizeMb = ['mb', 'mib', 'mo']
+        sizeKb = ['kb', 'kib', 'ko']
+        
+        sizeRaw = size.lower()
+        size = tryFloat(re.sub(r'[^0-9.]', '', size).strip())
+
+        for s in sizeGb:
+            if s in sizeRaw:
+                return size * 1024 * 1048576
+
+        for s in sizeMb:
+            if s in sizeRaw:
+                return size * 1048576
+
+        for s in sizeKb:
+            if s in sizeRaw:
+                return size /1024 *1048576
+
+        return
+def tryInt(s):
+    try: return int(s)
+    except: return 0
+
+def tryFloat(s):
+    try: return float(s) if '.' in s else tryInt(s)
+    except: return 0
     
 class T411SearchResult:
     
-    def __init__(self, opener, title, url):
+    def __init__(self, opener, title, url, size, seeders):
         self.opener = opener
         self.title = title
         self.url = url
+        self.size = size
+        self.seeders = seeders
         
     def getNZB(self):
         return self.opener.open( self.url , 'wb').read()
