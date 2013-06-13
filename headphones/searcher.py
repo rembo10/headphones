@@ -348,7 +348,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 
             if data:
             
-                d = json.loads(data.replace('null','None'))
+                d = json.loads(data)
                 
                 if  d['matches'] <= 0:
                     logger.info(u"No results found from NZBsRus for %s" % term)
