@@ -158,7 +158,7 @@ REQUIRED_WORDS = None
 LASTFM_USERNAME = None
 
 LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a"]
-LOSSLESS_MEDIA_FORMATS = ["flac"]
+LOSSLESS_MEDIA_FORMATS = ["flac","wav"]
 MEDIA_FORMATS = LOSSY_MEDIA_FORMATS + LOSSLESS_MEDIA_FORMATS
 
 ALBUM_COMPLETION_PCT = None    # This is used in importer.py to determine how complete an album needs to be - to be considered "downloaded". Percentage from 0-100
