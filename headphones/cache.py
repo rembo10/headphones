@@ -213,6 +213,7 @@ class Cache(object):
             
             params = {  "method": "artist.getInfo",
                         "api_key": lastfm_apikey,
+                        "lang": 'fr',
                         "mbid": ArtistID,
                         "format": "json"
                         }
@@ -296,6 +297,7 @@ class Cache(object):
             
             params = {  "method": "artist.getInfo",
                         "api_key": lastfm_apikey,
+                        "lang": 'fr',
                         "mbid": self.id,
                         "format": "json"
                         }

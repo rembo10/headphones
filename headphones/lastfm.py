@@ -171,6 +171,7 @@ def getAlbumDescription(rgid, artist, album):
         
     params = {  "method": 'album.getInfo',
                 "api_key": api_key,
+                "lang": 'fr',
                 "artist": artist.encode('utf-8'),
                 "album": album.encode('utf-8')
             }
