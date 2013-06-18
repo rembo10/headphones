@@ -52,7 +52,7 @@ def startmb():
     else:
         return False
     
-    musicbrainzngs.set_useragent("headphones","0.0","https://github.com/rembo10/headphones")
+    musicbrainzngs.set_useragent('User-Agent', 'Mozilla/5.0 (Windows NT 6.2) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31')
     musicbrainzngs.set_hostname(mbhost + ":" + str(mbport))
     if sleepytime == 0:
         musicbrainzngs.set_rate_limit(False)
