@@ -48,7 +48,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         for track in tracks:
             if not os.path.isfile(track['Location'].encode(headphones.SYS_ENCODING)):
                 myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [None, None, None, track['TrackID']])
-
+                myDB.action('UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE TrackID=?', [None, None, None, track['TrackID']])
         myDB.action('DELETE from have')
 
     logger.info('Scanning music directory: %s' % dir.decode(headphones.SYS_ENCODING, 'replace'))
