@@ -770,7 +770,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
         if headphones.KAT:
             provider = "Kick Ass Torrent"
-            providerurl = url_fix("https://kickass.to/search/" + term)
+            providerurl = url_fix("http://kickass.to/search/" + term)
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "7"        #music
                 format = "2"             #flac
@@ -793,7 +793,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             searchURL = providerurl + "/?%s" % urllib.urlencode(params)
             
             try:
-                data = urllib2.urlopen(searchURL, timeout=20).read()
+                data = urllib2.urlopen(searchURL, timeout=20)
             except urllib2.URLError, e:
                 logger.warn('Error fetching data from %s: %s' % (provider, e))
                 data = False
@@ -812,7 +812,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         try:
                             rightformat = True
                             title = item.title
-                            seeders = item.seeds
+                            seeders = item.torrent_seeds
                             url = item.links[1]['url']
                             size = int(item.links[1]['length'])
                             try:
