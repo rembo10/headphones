@@ -770,7 +770,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
         if headphones.KAT:
             provider = "Kick Ass Torrent"
-            providerurl = url_fix("http://www.kat.ph/search/" + term)
+            providerurl = url_fix("http://www.kat.to/search/" + term)
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "7"        #music
                 format = "2"             #flac
