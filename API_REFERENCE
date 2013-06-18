@@ -35,6 +35,7 @@ findArtist&name=$artistname[&limit=$limit] (perform artist query on musicbrainz.
 findAlbum&name=$albumname[&limit=$limit]  (perform album query on musicbrainz. Returns: title, url (artist), id (artist), albumurl, albumid, score, uniquename (artist - with disambiguation)
 
 addArtist&id=$artistid (add an artist to the db by artistid)
+addAlbum&id=$releaseid (add an album to the db by album release id)
 
 delArtist&id=$artistid (delete artist from db by artistid)
 
