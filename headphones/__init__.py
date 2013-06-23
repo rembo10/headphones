@@ -128,6 +128,11 @@ SAB_PASSWORD = None
 SAB_APIKEY = None
 SAB_CATEGORY = None
 
+NZBGET_USERNAME = None
+NZBGET_PASSWORD = None
+NZBGET_CATEGORY = None
+NZBGET_HOST = None
+
 NZBMATRIX = False
 NZBMATRIX_USERNAME = None
 NZBMATRIX_APIKEY = None
@@ -285,7 +290,7 @@ def initialize():
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
-                NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS, \
+                NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, NZBX, \
                 PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, \
                 LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
@@ -302,6 +307,7 @@ def initialize():
         # Make sure all the config sections exist
         CheckSection('General')
         CheckSection('SABnzbd')
+        CheckSection('NZBget')
         CheckSection('NZBMatrix')
         CheckSection('Newznab')
         CheckSection('NZBsorg')
@@ -407,6 +413,11 @@ def initialize():
         SAB_APIKEY = check_setting_str(CFG, 'SABnzbd', 'sab_apikey', '')
         SAB_CATEGORY = check_setting_str(CFG, 'SABnzbd', 'sab_category', '')
 
+        NZBGET_USERNAME = check_setting_str(CFG, 'NZBget', 'nzbget_username', '')
+        NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', '')
+        NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', '')
+        NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
+		
         NZBMATRIX = bool(check_setting_int(CFG, 'NZBMatrix', 'nzbmatrix', 0))
         NZBMATRIX_USERNAME = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_username', '')
         NZBMATRIX_APIKEY = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_apikey', '')
@@ -742,6 +753,12 @@ def config_write():
     new_config['SABnzbd']['sab_password'] = SAB_PASSWORD
     new_config['SABnzbd']['sab_apikey'] = SAB_APIKEY
     new_config['SABnzbd']['sab_category'] = SAB_CATEGORY
+	
+    new_config['NZBget'] = {}
+    new_config['NZBget']['nzbget_username'] = NZBGET_USERNAME
+    new_config['NZBget']['nzbget_password'] = NZBGET_PASSWORD
+    new_config['NZBget']['nzbget_category'] = NZBGET_CATEGORY
+    new_config['NZBget']['nzbget_host'] = NZBGET_HOST
 
     new_config['NZBMatrix'] = {}
     new_config['NZBMatrix']['nzbmatrix'] = int(NZBMATRIX)

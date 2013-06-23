@@ -573,6 +573,10 @@ class WebInterface(object):
                     "sab_api" : headphones.SAB_APIKEY,
                     "sab_pass" : headphones.SAB_PASSWORD,
                     "sab_cat" : headphones.SAB_CATEGORY,
+                    "nzbget_host" : headphones.NZBGET_HOST,
+                    "nzbget_user" : headphones.NZBGET_USERNAME,
+                    "nzbget_pass" : headphones.NZBGET_PASSWORD,
+                    "nzbget_cat" : headphones.NZBGET_CATEGORY,
                     "download_dir" : headphones.DOWNLOAD_DIR,
                     "use_blackhole" : checked(headphones.BLACKHOLE),
                     "blackhole_dir" : headphones.BLACKHOLE_DIR,
@@ -702,7 +706,7 @@ class WebInterface(object):
 
     def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None, 
         download_scan_interval=None, nzb_search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, 
-        sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None, usenet_retention=None, newznab=0, newznab_host=None, newznab_apikey=None, 
+        sab_category=None, nzbget_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, download_dir=None, blackhole=0, blackhole_dir=None, usenet_retention=None, newznab=0, newznab_host=None, newznab_apikey=None, 
         newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, nzbx=0, preferred_words=None, required_words=None, ignored_words=None,
         preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None, 
         numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
@@ -730,6 +734,10 @@ class WebInterface(object):
         headphones.SAB_PASSWORD = sab_password      
         headphones.SAB_APIKEY = sab_apikey
         headphones.SAB_CATEGORY = sab_category
+        headphones.NZBGET_HOST = nzbget_host
+        headphones.NZBGET_USERNAME = nzbget_username
+        headphones.NZBGET_PASSWORD = nzbget_password
+        headphones.NZBGET_CATEGORY = nzbget_category
         headphones.DOWNLOAD_DIR = download_dir
         headphones.BLACKHOLE = blackhole
         headphones.BLACKHOLE_DIR = blackhole_dir
