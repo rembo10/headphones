@@ -187,7 +187,7 @@
 			<!--Download Settings-->
 			<div id="DownloadSettings">
 				<h1><span class="wsr">u</span>Download Settings</h1>
-				<small>Setup SABnzbd or BitTorrent</small>
+				<small>Setup SABnzbd, NZBGET or BitTorrent</small>
 				
 				<!--Sabnzdb-->
 				<div>
@@ -230,13 +230,51 @@
 						<tr>
 							<td>
 								<label for="download_dir">Download Directory:</label>
-								<br /><small>Full path to the directory where SAB downloads your music.</small>
+								<br /><small>Full path to the directory where SAB or NZBget downloads your music.</small>
 							</td>
 							<td><input type="text" name="download_dir" value="${config['download_dir']}" size="40" /></td>
 						</tr>
 					</table>
 				</div>
 				<!--end Sabnzdb-->
+				
+				<!--NZBget-->
+				<div>
+					<table>
+						<tr>
+							<td>
+								<h2>NZBget</h2>
+								<small></small>
+							</td>
+							<td></td>
+						</tr>
+						<tr>
+							<td><label for="nzbget_host">Host:</label>
+								<br /><small>Usually http://localhost:9092</small>
+							</td>
+							<td><input type="text" name="nzbget_host" value="${config['nzbget_host']}" size="30" maxlength="40" /></td>
+						</tr>
+						<tr>
+							<td><label for="nzbget_username">Username:</label>
+								<br /><small>Type the user name for NZBget</small>
+							</td>
+							<td><input type="text" name="nzbget_username" value="${config['nzbget_user']}" size="20" maxlength="40" /></td>
+						</tr>
+						<tr>
+							<td><label for="nzbget_password">Password:</label>
+								<br /><small>Enter the password for NZBget</small>
+							</td>
+							<td><input type="password" name="nzbget_password" value="${config['nzbget_pass']}" size="20" maxlength="40" /></td>
+						</tr>
+						<tr>
+							<td><label for="nzbget_category">Category:</label>
+								<small>Write the category label name from NZBget</small>
+							</td>
+							<td><input type="text" name="nzbget_category" value="${config['nzbget_cat']}" size="20" maxlength="40" /></td>
+						</tr>
+					</table>
+				</div>
+				<!--end NZBget-->				
 				
 				<!--Torrents-->
 				<div>
