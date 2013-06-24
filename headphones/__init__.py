@@ -13,6 +13,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
+# NZBGet support added by CurlyMo <development@xbian.org> as a part of XBian - XBMC on the Raspberry Pi
+
 from __future__ import with_statement
 
 import os, sys, subprocess
@@ -413,7 +415,7 @@ def initialize():
         SAB_APIKEY = check_setting_str(CFG, 'SABnzbd', 'sab_apikey', '')
         SAB_CATEGORY = check_setting_str(CFG, 'SABnzbd', 'sab_category', '')
 
-        NZBGET_USERNAME = check_setting_str(CFG, 'NZBget', 'nzbget_username', '')
+        NZBGET_USERNAME = check_setting_str(CFG, 'NZBget', 'nzbget_username', 'nzbget')
         NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', '')
         NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', '')
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
