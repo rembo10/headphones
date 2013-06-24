@@ -13,6 +13,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
+# NZBGet support added by CurlyMo <development@xbian.org> as a part of XBian - XBMC on the Raspberry Pi
+
 import urllib, urllib2, urlparse, httplib
 import lib.feedparser as feedparser
 from lib.pygazelle import api as gazelleapi
