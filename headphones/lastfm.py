@@ -171,7 +171,8 @@ def getAlbumDescription(rgid, artist, album):
     if result:
         return
 
-    params = {  "method": 'album.getInfo',
+    params = {
+                "method": 'album.getInfo',
                 "api_key": api_key,
                 "artist": artist.encode('utf-8'),
                 "album": album.encode('utf-8')
@@ -203,6 +204,7 @@ def getAlbumDescription(rgid, artist, album):
 
     except:
         return
+
 
 def getAlbumDescriptionOld(rgid, releaselist):
     """
@@ -247,5 +249,3 @@ def getAlbumDescriptionOld(rgid, releaselist):
 
         except:
             continue
-
-
