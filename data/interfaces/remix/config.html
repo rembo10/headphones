@@ -116,10 +116,36 @@
                 <td>
                     <h3>Music Download Directory:</h3><input type="text" name="download_dir" value="${config['download_dir']}" size="50"><br>
 
-                    <i class="smalltext">Full path to the directory where SAB downloads your music<br>
+                    <i class="smalltext">Full path to the directory where SAB or NZBget downloads your music<br>
                     e.g. /Users/name/Downloads/music</i>
                 </td>
             </tr>
+			
+			<tr>
+                <td>
+                    <h2>NZBget:</h2>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h3>NZBget Host:</h3><input type="text" name="nzbget_host" value="${config['nzbget_host']}" size="30" maxlength="40"><br>
+
+                    <i class="smalltext">usually http://localhost:6789</i>
+                </td>
+
+                <td>
+                    <h3>NZBget Username:</h3><input type="text" name="nzbget_username" value="${config['nzbget_user']}" size="20" maxlength="40">
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    <h3>NZBget Password:</h3><input type="password" name="nzbget_password" value="${config['nzbget_pass']}" size="20" maxlength="40">
+                </td>
+                <td>
+                    <h3>NZBget Category:</h3><input type="text" name="nzbget_category" value="${config['nzbget_cat']}" size="20" maxlength="40">
+                </td>
+            </tr>			
 
             <tr>
                 <td>
