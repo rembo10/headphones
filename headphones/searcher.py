@@ -13,6 +13,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
+# NZBGet support added by CurlyMo <development@xbian.org> as a part of XBian - XBMC on the Raspberry Pi
+
 import urllib, urllib2, urlparse, httplib
 import lib.feedparser as feedparser
 from lib.pygazelle import api as gazelleapi
@@ -29,7 +31,7 @@ import os, re, time
 import string
 
 import headphones, exceptions
-from headphones import logger, db, helpers, classes, sab
+from headphones import logger, db, helpers, classes, sab, nzbget
 
 import lib.bencode as bencode
 
@@ -109,7 +111,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
          
         for result in results:
             foundNZB = "none"
-            if (headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE):
+            if (headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE or headphones.NZBGET_HOST):
                 if result['Status'] == "Wanted Lossless":
                     foundNZB = searchNZB(result['AlbumID'], new, losslessOnly=True)
                 else:
@@ -125,7 +127,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
     else:        
     
         foundNZB = "none"
-        if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE):
+        if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE or headphones.NZBGET_HOST):
             foundNZB = searchNZB(albumid, new, lossless)
 
         if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
@@ -533,7 +535,14 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
                 # Get rid of any dodgy chars here so we can prevent sab from renaming our downloads
                 nzb_folder_name = helpers.sab_sanitize_foldername(bestqual[0])
-                if headphones.SAB_HOST and not headphones.BLACKHOLE:
+                if headphones.NZBGET_HOST and not headphones.BLACKHOLE and not headphones.SAB_HOST:
+
+                    nzb = classes.NZBDataSearchResult()
+                    nzb.extraInfo.append(data)
+                    nzb.name = nzb_folder_name
+                    nzbget.sendNZB(nzb)
+
+                elif headphones.SAB_HOST and not headphones.BLACKHOLE and not headphones.NZBGET_HOST:
 
                     nzb = classes.NZBDataSearchResult()
                     nzb.extraInfo.append(data)
