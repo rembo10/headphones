@@ -536,7 +536,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             if data and bestqual:
                 logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
                 # Get rid of any dodgy chars here so we can prevent sab from renaming our downloads
-                nzb_folder_name = helpers.sab_sanitize_foldername(bestqual[0])+' on ' + provider 
+                nzb_folder_name = helpers.sab_sanitize_foldername(bestqual[0])+' on ' + bestqual[3] 
                 if headphones.SAB_HOST and not headphones.BLACKHOLE:
 
                     nzb = classes.NZBDataSearchResult()
@@ -1399,19 +1399,19 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
                     logger.info(u"Sending Prowl notification")
                     prowl = notifiers.PROWL()
-                    prowl.notify(torrent_folder_name + ' on ' + provider,"Download started")
+                    prowl.notify(torrent_folder_name + ' on ' + bestqual[3],"Download started")
                 if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
                     logger.info(u"Sending Pushover notification")
                     prowl = notifiers.PUSHOVER()
-                    prowl.notify(torrent_folder_name + ' on ' + provider,"Download started")
+                    prowl.notify(torrent_folder_name + ' on ' + bestqual[3],"Download started")
                 if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
                     logger.debug(u"Sending NMA notification")
                     nma = notifiers.NMA()
-                    nma.notify(snatched_nzb=torrent_folder_name + ' on ' + provider)
+                    nma.notify(snatched_nzb=torrent_folder_name + ' on ' + bestqual[3])
                 if headphones.PUSHALOT_ENABLED and headphones.PUSHALOT_ONSNATCH:
                     logger.debug(u"Sending Pushalot notification")
                     pushalot = notifiers.PUSHALOT()
-                    pushalot.notify(snatched_nzb=torrent_folder_name + ' on ' + provider)
+                    pushalot.notify(snatched_nzb=torrent_folder_name + ' on ' + bestqual[3])
 
 def preprocesstorrent(resultlist, pre_sorted_list=False):
     selresult = ""
