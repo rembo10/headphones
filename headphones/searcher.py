@@ -535,14 +535,14 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
                 # Get rid of any dodgy chars here so we can prevent sab from renaming our downloads
                 nzb_folder_name = helpers.sab_sanitize_foldername(bestqual[0])
-                if headphones.NZBGET_HOST and not headphones.BLACKHOLE and not headphones.SAB_HOST:
+                if headphones.NZB_DOWNLOADER == 1:
 
                     nzb = classes.NZBDataSearchResult()
                     nzb.extraInfo.append(data)
                     nzb.name = nzb_folder_name
                     nzbget.sendNZB(nzb)
 
-                elif headphones.SAB_HOST and not headphones.BLACKHOLE and not headphones.NZBGET_HOST:
+                elif headphones.NZB_DOWNLOADER == 0:
 
                     nzb = classes.NZBDataSearchResult()
                     nzb.extraInfo.append(data)
@@ -557,7 +557,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                     if replace_spaces:
                         nzb_folder_name = helpers.sab_replace_spaces(nzb_folder_name)
 
-                elif headphones.BLACKHOLE:
+                else:
                 
                     nzb_name = nzb_folder_name + '.nzb'
                     download_path = os.path.join(headphones.BLACKHOLE_DIR, nzb_name)
