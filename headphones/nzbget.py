@@ -1,4 +1,4 @@
-# This file is modified to work with headphones by CurlyMo <development@xbian.org> as a part of XBian - XBMC on the Raspberry Pi
+# This file is modified to work with headphones by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
 
 # Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
