@@ -153,14 +153,7 @@
 	                    </div>
                     </fieldset>
                     
-                    <fieldset id="nzb_download_dir">
-                       	<div class="row">
-                            <label>Music Download Directory:</label>
-                            <input type="text" name="download_dir" value="${config['download_dir']}" size="50">
-                            <small>Full path where SAB or NZBget downloads your music. e.g. /Users/name/Downloads/music</small>
-                        </div>
-                    </fieldset>
-           
+            
 					<fieldset id="blackhole_options">
 						  <div class="row">
 	                   	        <label>Black Hole Directory</label>
@@ -168,6 +161,14 @@
 	                   	        <small>Folder your Download program watches for NZBs</small>
 	                   	  </div>
 	                </fieldset>
+                    
+                    <fieldset id="nzb_download_dir">
+                       	<div class="row">
+                            <label>Music Download Directory:</label>
+                            <input type="text" name="download_dir" value="${config['download_dir']}" size="50">
+                            <small>Full path where SAB or NZBget downloads your music. e.g. /Users/name/Downloads/music</small>
+                        </div>
+                    </fieldset>
 	                
                    	<div class="checkbox row">                    	
                    	    	<input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5"><label>Usenet Retention</label>
@@ -1040,17 +1041,17 @@
 			
 		if ($("#nzb_downloader_sabnzbd").is(":checked"))
 			{
-				$("#sabnzbd_options,#nzb_download_dir").show();
+				$("#sabnzbd_options").show();
 				$("#nzbget_options,#blackhole_options").hide();
 			}
 		if ($("#nzb_downloader_nzbget").is(":checked"))
 			{
 				$("#sabnzbd_options,#blackhole_options").hide();
-				$("#nzbget_options,#nzb_download_dir").show();
+				$("#nzbget_options").show();
 			}
 		if ($("#nzb_downloader_blackhole").is(":checked"))
 			{
-				$("#sabnzbd_options,#nzbget_options,#nzb_download_dir").hide();
+				$("#sabnzbd_options,#nzbget_options").hide();
 				$("#blackhole_options").show();
 			}
 
@@ -1073,15 +1074,15 @@
 			}
 			if ($("#nzb_downloader_sabnzbd").is(":checked"))
 			{
-				$("#nzbget_options,#blackhole_options").fadeOut("fast", function() { $("#sabnzbd_options,#nzb_download_dir").fadeIn() });
+				$("#nzbget_options,#blackhole_options").fadeOut("fast", function() { $("#sabnzbd_options").fadeIn() });
 			}
 			if ($("#nzb_downloader_nzbget").is(":checked"))
 			{
-				$("#sabnzbd_options,#blackhole_options").fadeOut("fast", function() { $("#nzbget_options,#nzb_download_dir").fadeIn() });
+				$("#sabnzbd_options,#blackhole_options").fadeOut("fast", function() { $("#nzbget_options").fadeIn() });
 			}
 			if ($("#nzb_downloader_blackhole").is(":checked"))
 			{
-				$("#sabnzbd_options,#nzbget_options,#nzb_download_dir").fadeOut("fast", function() { $("#blackhole_options").fadeIn() });
+				$("#sabnzbd_options,#nzbget_options").fadeOut("fast", function() { $("#blackhole_options").fadeIn() });
 			}
 		});	
 		
