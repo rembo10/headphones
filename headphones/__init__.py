@@ -109,6 +109,7 @@ ADD_ALBUM_ART = False
 ALBUM_ART_FORMAT = None
 EMBED_ALBUM_ART = False
 EMBED_LYRICS = False
+NZB_DOWNLOADER = None
 DOWNLOAD_DIR = None
 BLACKHOLE = None
 BLACKHOLE_DIR = None
@@ -294,7 +295,7 @@ def initialize():
                 LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, NZBX, \
-                PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, \
+                NZB_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, \
                 LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
                 MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, \
                 PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
@@ -375,6 +376,7 @@ def initialize():
         ALBUM_ART_FORMAT = check_setting_str(CFG, 'General', 'album_art_format', 'folder')
         EMBED_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'embed_album_art', 0))
         EMBED_LYRICS = bool(check_setting_int(CFG, 'General', 'embed_lyrics', 0))
+        NZB_DOWNLOADER = check_setting_int(CFG, 'General', 'nzb_downloader', 0)
         DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'download_dir', '')
         BLACKHOLE = bool(check_setting_int(CFG, 'General', 'blackhole', 0))
         BLACKHOLE_DIR = check_setting_str(CFG, 'General', 'blackhole_dir', '')
@@ -552,6 +554,12 @@ def initialize():
             if ENCODERFOLDER:
                 ENCODER_PATH = os.path.join(ENCODERFOLDER, ENCODER)
             CONFIG_VERSION = '3'
+            
+        if CONFIG_VERSION == '3':
+			#Update the BLACKHOLE option to the NZB_DOWNLOADER format
+			if BLACKHOLE:
+				NZB_DOWNLOADER = 2
+			CONFIG_VERSION = '4'
 
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
@@ -712,8 +720,8 @@ def config_write():
     new_config['General']['album_art_format'] = ALBUM_ART_FORMAT
     new_config['General']['embed_album_art'] = int(EMBED_ALBUM_ART)
     new_config['General']['embed_lyrics'] = int(EMBED_LYRICS)
+    new_config['General']['nzb_downloader'] = NZB_DOWNLOADER
     new_config['General']['download_dir'] = DOWNLOAD_DIR
-    new_config['General']['blackhole'] = int(BLACKHOLE)
     new_config['General']['blackhole_dir'] = BLACKHOLE_DIR
     new_config['General']['usenet_retention'] = USENET_RETENTION
     new_config['General']['include_extras'] = int(INCLUDE_EXTRAS)

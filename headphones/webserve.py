@@ -579,13 +579,13 @@ class WebInterface(object):
                     "nzbget_user" : headphones.NZBGET_USERNAME,
                     "nzbget_pass" : headphones.NZBGET_PASSWORD,
                     "nzbget_cat" : headphones.NZBGET_CATEGORY,
+                    "nzb_downloader_sabnzbd" : radio(headphones.NZB_DOWNLOADER, 0),
+                    "nzb_downloader_nzbget" : radio(headphones.NZB_DOWNLOADER, 1),
+                    "nzb_downloader_blackhole" : radio(headphones.NZB_DOWNLOADER, 2),
                     "download_dir" : headphones.DOWNLOAD_DIR,
                     "use_blackhole" : checked(headphones.BLACKHOLE),
                     "blackhole_dir" : headphones.BLACKHOLE_DIR,
                     "usenet_retention" : headphones.USENET_RETENTION,
-#                    "use_nzbmatrix" : checked(headphones.NZBMATRIX),
-#                    "nzbmatrix_user" : headphones.NZBMATRIX_USERNAME,
-#                    "nzbmatrix_api" : headphones.NZBMATRIX_APIKEY,
                     "use_newznab" : checked(headphones.NEWZNAB),
                     "newznab_host" : headphones.NEWZNAB_HOST,
                     "newznab_api" : headphones.NEWZNAB_APIKEY,
@@ -594,9 +594,6 @@ class WebInterface(object):
                     "use_nzbsorg" : checked(headphones.NZBSORG),
                     "nzbsorg_uid" : headphones.NZBSORG_UID,
                     "nzbsorg_hash" : headphones.NZBSORG_HASH,
-#                    "use_newzbin" : checked(headphones.NEWZBIN),
-#                    "newzbin_uid" : headphones.NEWZBIN_UID,
-#                    "newzbin_pass" : headphones.NEWZBIN_PASSWORD,
                     "use_nzbsrus" : checked(headphones.NZBSRUS),
                     "nzbsrus_uid" : headphones.NZBSRUS_UID,
                     "nzbsrus_apikey" : headphones.NZBSRUS_APIKEY,
@@ -708,7 +705,7 @@ class WebInterface(object):
 
     def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None, 
         download_scan_interval=None, nzb_search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, 
-        sab_category=None, nzbget_host=None, nzbget_username='nzbget', nzbget_password=None, nzbget_category=None, download_dir=None, blackhole=0, blackhole_dir=None, usenet_retention=None, newznab=0, newznab_host=None, newznab_apikey=None, 
+        sab_category=None, nzbget_host=None, nzbget_username='nzbget', nzbget_password=None, nzbget_category=None, nzb_downloader=0, download_dir=None, blackhole=0, blackhole_dir=None, usenet_retention=None, newznab=0, newznab_host=None, newznab_apikey=None, 
         newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, nzbx=0, preferred_words=None, required_words=None, ignored_words=None,
         preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None, 
         numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
@@ -740,13 +737,11 @@ class WebInterface(object):
         headphones.NZBGET_USERNAME = nzbget_username
         headphones.NZBGET_PASSWORD = nzbget_password
         headphones.NZBGET_CATEGORY = nzbget_category
+        headphones.NZB_DOWNLOADER = int(nzb_downloader)
         headphones.DOWNLOAD_DIR = download_dir
         headphones.BLACKHOLE = blackhole
         headphones.BLACKHOLE_DIR = blackhole_dir
         headphones.USENET_RETENTION = usenet_retention
-#        headphones.NZBMATRIX = nzbmatrix
-#        headphones.NZBMATRIX_USERNAME = nzbmatrix_username
-#        headphones.NZBMATRIX_APIKEY = nzbmatrix_apikey
         headphones.NEWZNAB = newznab
         headphones.NEWZNAB_HOST = newznab_host
         headphones.NEWZNAB_APIKEY = newznab_apikey
@@ -754,9 +749,6 @@ class WebInterface(object):
         headphones.NZBSORG = nzbsorg
         headphones.NZBSORG_UID = nzbsorg_uid
         headphones.NZBSORG_HASH = nzbsorg_hash
-#        headphones.NEWZBIN = newzbin
-#        headphones.NEWZBIN_UID = newzbin_uid
-#        headphones.NEWZBIN_PASSWORD = newzbin_password
         headphones.NZBSRUS = nzbsrus
         headphones.NZBSRUS_UID = nzbsrus_uid
         headphones.NZBSRUS_APIKEY = nzbsrus_apikey
