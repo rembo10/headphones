@@ -177,20 +177,32 @@
                 <td>
                    	<fieldset>
                    		<legend>Torrents</legend>
-                   		<div class="row">               
-                   		    <label>Black Hole Directory</label>
-                   		    <input type="text" name="torrentblackhole_dir" value="${config['torrentblackhole_dir']}" size="50">
-                   		    <small>Folder your Download program watches for Torrents</small>
-                   		</div>
+						<input type="radio" name="torrent_downloader" id="torrent_downloader_blackhole" value="0" ${config['torrent_downloader_blackhole']}>Black Hole <input type="radio" name="torrent_downloader" id="torrent_downloader_transmission" value="1" ${config['torrent_downloader_transmission']}> Transmission
+					</fieldset>	
+						<fieldset id="torrent_blackhole_options">	
+							<div class="row">               
+								<label>Black Hole Directory</label>
+								<input type="text" name="torrentblackhole_dir" value="${config['torrentblackhole_dir']}" size="50">
+								<small>Folder your Download program watches for Torrents</small>
+							</div>
+						</fieldset>
+						<fieldset id="transmission_options">
+							<div class="row">               
+								<label>Transmission Host</label>
+								<input type="text" name="" value="" size="50">
+								<small>Transmission Host</small>
+							</div>
+						</fieldset>
+
+						<div class="row">
+								<label>Minimum seeders:</label>
+								<input type="text" name="numberofseeders" value="${config['numberofseeders']}" size="5">
+								<small>Number of minimum seeders a torrent must have to be accepted</small>
+						</div>
                    		<div class="row">
-                   		    <label>Minimum seeders:</label>
-                   		    <input type="text" name="numberofseeders" value="${config['numberofseeders']}" size="5">
-                   		    <small>Number of minimum seeders a torrent must have to be accepted</small>
-                   		</div>
-                   		<div class="row">
-                   		<label>Music Download Directory</label>
-                   		<input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="50">
-                   		<small>Full path where your torrent client downloads your music e.g. /Users/name/Downloads/music</small>
+							<label>Music Download Directory</label>
+							<input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="50">
+							<small>Full path where your torrent client downloads your music e.g. /Users/name/Downloads/music</small>
                    		</div>        
 				<div class="row checkbox">
 				<label>Keep Files for Seeding</label>
@@ -1054,6 +1066,17 @@
 				$("#sabnzbd_options,#nzbget_options").hide();
 				$("#blackhole_options").show();
 			}
+			
+		if ($("#torrent_downloader_blackhole").is(":checked"))
+			{
+				$("#transmission_options").hide();
+				$("#torrent_blackhole_options").show();
+			}
+		if ($("#torrent_downloader_transmission").is(":checked"))
+			{
+				$("#torrent_blackhole_options").hide();
+				$("#transmission_options").show();
+			}
 
 		$('input[type=radio]').change(function(){
 			if ($("#preferred_bitrate").is(":checked"))
@@ -1083,6 +1106,14 @@
 			if ($("#nzb_downloader_blackhole").is(":checked"))
 			{
 				$("#sabnzbd_options,#nzbget_options").fadeOut("fast", function() { $("#blackhole_options").fadeIn() });
+			}
+			if ($("#torrent_downloader_blackhole").is(":checked"))
+			{
+				$("#transmission_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
+			}
+			if ($("#torrent_downloader_transmission").is(":checked"))
+			{
+				$("#torrent_blackhole_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
 			}
 		});	
 		
