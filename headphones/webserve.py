@@ -584,6 +584,7 @@ class WebInterface(object):
                     "nzb_downloader_blackhole" : radio(headphones.NZB_DOWNLOADER, 2),
                     "torrent_downloader_blackhole" : radio(headphones.TORRENT_DOWNLOADER, 0),
                     "torrent_downloader_transmission" : radio(headphones.TORRENT_DOWNLOADER, 1),
+                    "torrent_downloader_utorrent" : radio(headphones.TORRENT_DOWNLOADER, 2),
                     "download_dir" : headphones.DOWNLOAD_DIR,
                     "use_blackhole" : checked(headphones.BLACKHOLE),
                     "blackhole_dir" : headphones.BLACKHOLE_DIR,
