@@ -177,7 +177,7 @@
                 <td>
                    	<fieldset>
                    		<legend>Torrents</legend>
-						<input type="radio" name="torrent_downloader" id="torrent_downloader_blackhole" value="0" ${config['torrent_downloader_blackhole']}>Black Hole <input type="radio" name="torrent_downloader" id="torrent_downloader_transmission" value="1" ${config['torrent_downloader_transmission']}> Transmission
+						<input type="radio" name="torrent_downloader" id="torrent_downloader_blackhole" value="0" ${config['torrent_downloader_blackhole']}>Black Hole <input type="radio" name="torrent_downloader" id="torrent_downloader_transmission" value="1" ${config['torrent_downloader_transmission']}> Transmission <input type="radio" name="torrent_downloader" id="torrent_downloader_utorrent" value="2" ${config['torrent_downloader_utorrent']}> uTorrent
 					</fieldset>	
 						<fieldset id="torrent_blackhole_options">	
 							<div class="row">               
@@ -193,7 +193,13 @@
 								<small>Transmission Host</small>
 							</div>
 						</fieldset>
-
+						<fieldset id="utorrent_options">
+							<div class="row">               
+								<label>Utorrent Host</label>
+								<input type="text" name="" value="" size="50">
+								<small>Utorrent Host</small>
+							</div>
+						</fieldset>
 						<div class="row">
 								<label>Minimum seeders:</label>
 								<input type="text" name="numberofseeders" value="${config['numberofseeders']}" size="5">
@@ -1069,13 +1075,18 @@
 			
 		if ($("#torrent_downloader_blackhole").is(":checked"))
 			{
-				$("#transmission_options").hide();
+				$("#transmission_options,#utorrent_options").hide();
 				$("#torrent_blackhole_options").show();
 			}
 		if ($("#torrent_downloader_transmission").is(":checked"))
 			{
-				$("#torrent_blackhole_options").hide();
+				$("#torrent_blackhole_options,#utorrent_options").hide();
 				$("#transmission_options").show();
+			}
+		if ($("#torrent_downloader_utorrent").is(":checked"))
+			{
+				$("#torrent_blackhole_options,#transmission_options").hide();
+				$("#utorrent_options").show();
 			}
 
 		$('input[type=radio]').change(function(){
@@ -1109,11 +1120,15 @@
 			}
 			if ($("#torrent_downloader_blackhole").is(":checked"))
 			{
-				$("#transmission_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
+				$("#transmission_options,#utorrent_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
 			}
 			if ($("#torrent_downloader_transmission").is(":checked"))
 			{
-				$("#torrent_blackhole_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
+				$("#torrent_blackhole_options,#utorrent_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
+			}
+			if ($("#torrent_downloader_utorrent").is(":checked"))
+			{
+				$("#torrent_blackhole_options,#transmission_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
 			}
 		});	
 		
