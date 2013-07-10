@@ -162,7 +162,7 @@
 	                   	  </div>
 	                </fieldset>
                     
-                    <fieldset id="general_nzb_options2">
+                    <fieldset id="general_nzb_options">
                        	<div class="row">
                             <label>Music Download Directory:</label>
                             <input type="text" name="download_dir" value="${config['download_dir']}" size="50">
@@ -187,18 +187,34 @@
 							</div>
 						</fieldset>
 						<fieldset id="transmission_options">
-							<div class="row">               
-								<label>Transmission Host</label>
-								<input type="text" name="" value="" size="50">
-								<small>Transmission Host</small>
-							</div>
+		                	<div class="row">
+			                    <label>Transmission Host:</label>
+			                    <input type="text" name="transmission_host" value="${config['transmission_host']}" size="30">
+			                    <small>usually http://localhost:9091</small>
+		                    </div>
+		                    <div class="row">
+			                    <label>Transmission Username:</label>
+			                    <input type="text" name="transmission_username" value="${config['transmission_user']}" size="30">
+		                    </div>
+		                    <div class="row">
+			                    <label>Transmission Password:</label>
+			                    <input type="text" name="transmission_password" value="${config['transmission_pass']}" size="30">
+		                    </div>
 						</fieldset>
 						<fieldset id="utorrent_options">
-							<div class="row">               
-								<label>Utorrent Host</label>
-								<input type="text" name="" value="" size="50">
-								<small>Utorrent Host</small>
-							</div>
+		                	<div class="row">
+			                    <label>uTorrent Host:</label>
+			                    <input type="text" name="utorrent_host" value="${config['utorrent_host']}" size="30">
+			                    <small>usually http://localhost:9091</small>
+		                    </div>
+		                    <div class="row">
+			                    <label>uTorrent Username:</label>
+			                    <input type="text" name="utorrent_username" value="${config['utorrent_user']}" size="30">
+		                    </div>
+		                    <div class="row">
+			                    <label>uTorrent Password:</label>
+			                    <input type="text" name="utorrent_password" value="${config['utorrent_pass']}" size="30">
+		                    </div>
 						</fieldset>
 						<fieldset id="general_torrent_options">
 							<div class="row">
