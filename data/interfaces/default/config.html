@@ -162,17 +162,17 @@
 	                   	  </div>
 	                </fieldset>
                     
-                    <fieldset id="nzb_download_dir">
+                    <fieldset id="general_nzb_options2">
                        	<div class="row">
                             <label>Music Download Directory:</label>
                             <input type="text" name="download_dir" value="${config['download_dir']}" size="50">
                             <small>Full path where SAB or NZBget downloads your music. e.g. /Users/name/Downloads/music</small>
                         </div>
-                    </fieldset>
 	                
-                   	<div class="checkbox row">                    	
+						<div class="checkbox row">                    	
                    	    	<input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5"><label>Usenet Retention</label>
-                   	 </div>
+						</div>
+					</fieldset>
 	            </td>
                 <td>
                    	<fieldset>
@@ -200,21 +200,22 @@
 								<small>Utorrent Host</small>
 							</div>
 						</fieldset>
-						<div class="row">
-								<label>Minimum seeders:</label>
-								<input type="text" name="numberofseeders" value="${config['numberofseeders']}" size="5">
-								<small>Number of minimum seeders a torrent must have to be accepted</small>
-						</div>
-                   		<div class="row">
-							<label>Music Download Directory</label>
-							<input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="50">
-							<small>Full path where your torrent client downloads your music e.g. /Users/name/Downloads/music</small>
-                   		</div>        
-				<div class="row checkbox">
-				<label>Keep Files for Seeding</label>
-				<input type="checkbox" name="keep_torrent_files" value="1" ${config['keep_torrent_files']}>		
-				</div>
-			</fieldset>
+						<fieldset id="general_torrent_options">
+							<div class="row">
+									<label>Minimum seeders:</label>
+									<input type="text" name="numberofseeders" value="${config['numberofseeders']}" size="5">
+									<small>Number of minimum seeders a torrent must have to be accepted</small>
+							</div>
+	                   		<div class="row">
+								<label>Music Download Directory</label>
+								<input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="50">
+								<small>Full path where your torrent client downloads your music e.g. /Users/name/Downloads/music</small>
+	                   		</div>   
+	                   		<div class="row checkbox">
+								<label>Keep Files for Seeding</label>
+								<input type="checkbox" name="keep_torrent_files" value="1" ${config['keep_torrent_files']}>		
+							</div>
+	                   	</fieldset>     
                 </td>
             </tr>            
     
