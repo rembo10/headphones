@@ -157,7 +157,7 @@ class Rutracker():
         # Return the first valid torrent, unless we want a preferred bitrate then we want all valid entries
         
         unwantedlist = ['promo', 'vinyl', '[lp]', 'songbook', 'tvrip', 'hdtv', 'dvd']
-        formatlist = ['.ape', '.flac', '.ogg', '.m4a', '.aac', '.mp3', '.wav', '.aif']
+        formatlist = ['ape', 'flac', 'ogg', 'm4a', 'aac', 'mp3', 'wav', 'aif']
         deluxelist = ['deluxe', 'edition', 'japanese', 'exclusive']
        
         for torrent in torrentlist:
@@ -202,7 +202,7 @@ class Rutracker():
                     for pathfile in metainfo['files']:
                         path = pathfile['path']
                         for file in path:
-                            if any(format in file for format in formatlist):
+                            if any(file.lower().endswith('.' + x.lower()) for x in formatlist):
                                 trackcount += 1
                             if '.cue' in file:
                                 cuecount += 1
@@ -261,7 +261,10 @@ class Rutracker():
                     rulist.append((returntitle, size, topicurl))
                     if not bitrate:
                         return rulist
-                         
+                else:
+                    if topicurl:
+                        logger.info(u'<a href="%s">Torrent</a> found with %s tracks but the selected headphones release has %s tracks, skipping for rutracker.org' % (topicurl, trackcount, hptrackcount))
+
         return rulist
 
 
