@@ -39,6 +39,6 @@ Album Page with track overview:
 
 ![preview thumb](http://i.imgur.com/kcjES.png)
 
-If you run into any issues, visit http://headphones.codeshy.com/forum and report an issue. 
+If you run into any issues, use the GitHub issue tracker at: http://github.com/rembo10/headphones/issues. 
 
 This is free software under the GPL v3 open source license - so feel free to do with it what you wish.
