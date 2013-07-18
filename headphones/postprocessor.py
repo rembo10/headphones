@@ -860,6 +860,9 @@ def forcePostProcess():
     # Get a list of folders in the download_dir
     folders = []
     for download_dir in download_dirs:
+        if not os.path.isdir(download_dir):
+            logger.warn('Directory ' + download_dir.decode(headphones.SYS_ENCODING, 'replace') + ' does not exist. Skipping')
+            continue
         for folder in os.listdir(download_dir):
             path_to_folder = os.path.join(download_dir, folder)
             if os.path.isdir(path_to_folder):
