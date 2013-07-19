@@ -158,8 +158,6 @@ NZBSRUS = False
 NZBSRUS_UID = None
 NZBSRUS_APIKEY = None
 
-NZBX = False
-
 PREFERRED_WORDS = None
 IGNORED_WORDS = None
 REQUIRED_WORDS = None
@@ -294,7 +292,7 @@ def initialize():
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS, \
-                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, NZBX, \
+                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, \
                 NZB_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, \
                 LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
                 MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, \
@@ -315,7 +313,6 @@ def initialize():
         CheckSection('Newznab')
         CheckSection('NZBsorg')
         CheckSection('NZBsRus')
-        CheckSection('nzbX')
         CheckSection('Newzbin')
         CheckSection('Waffles')
         CheckSection('Rutracker')
@@ -421,7 +418,7 @@ def initialize():
         NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', '')
         NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', '')
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
-		
+
         NZBMATRIX = bool(check_setting_int(CFG, 'NZBMatrix', 'nzbmatrix', 0))
         NZBMATRIX_USERNAME = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_username', '')
         NZBMATRIX_APIKEY = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_apikey', '')
@@ -446,9 +443,7 @@ def initialize():
         NZBSRUS = bool(check_setting_int(CFG, 'NZBsRus', 'nzbsrus', 0))
         NZBSRUS_UID = check_setting_str(CFG, 'NZBsRus', 'nzbsrus_uid', '')
         NZBSRUS_APIKEY = check_setting_str(CFG, 'NZBsRus', 'nzbsrus_apikey', '')
-        
-        NZBX = bool(check_setting_int(CFG, 'nzbX', 'nzbx', 0))
-        
+
         PREFERRED_WORDS = check_setting_str(CFG, 'General', 'preferred_words', '')
         IGNORED_WORDS = check_setting_str(CFG, 'General', 'ignored_words', '')
         REQUIRED_WORDS = check_setting_str(CFG, 'General', 'required_words', '')
@@ -554,7 +549,7 @@ def initialize():
             if ENCODERFOLDER:
                 ENCODER_PATH = os.path.join(ENCODERFOLDER, ENCODER)
             CONFIG_VERSION = '3'
-            
+
         if CONFIG_VERSION == '3':
 			#Update the BLACKHOLE option to the NZB_DOWNLOADER format
 			if BLACKHOLE:
@@ -763,7 +758,7 @@ def config_write():
     new_config['SABnzbd']['sab_password'] = SAB_PASSWORD
     new_config['SABnzbd']['sab_apikey'] = SAB_APIKEY
     new_config['SABnzbd']['sab_category'] = SAB_CATEGORY
-	
+
     new_config['NZBget'] = {}
     new_config['NZBget']['nzbget_username'] = NZBGET_USERNAME
     new_config['NZBget']['nzbget_password'] = NZBGET_PASSWORD
@@ -802,10 +797,7 @@ def config_write():
     new_config['NZBsRus']['nzbsrus'] = int(NZBSRUS)
     new_config['NZBsRus']['nzbsrus_uid'] = NZBSRUS_UID
     new_config['NZBsRus']['nzbsrus_apikey'] = NZBSRUS_APIKEY
-    
-    new_config['nzbX'] = {}
-    new_config['nzbX']['nzbx'] = int(NZBX)
-    
+
     new_config['General']['preferred_words'] = PREFERRED_WORDS
     new_config['General']['ignored_words'] = IGNORED_WORDS
     new_config['General']['required_words'] = REQUIRED_WORDS
@@ -1069,17 +1061,17 @@ def dbcheck():
         for artist in artists:
             if artist[1]:
                 c.execute('UPDATE artists SET Extras=? WHERE ArtistID=?', ("1,2,3,4,5,6,7,8", artist[0]))
-                
+
     try:
         c.execute('SELECT Kind from snatched')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE snatched ADD COLUMN Kind TEXT DEFAULT NULL')
-        
+
     try:
         c.execute('SELECT SearchTerm from albums')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE albums ADD COLUMN SearchTerm TEXT DEFAULT NULL')
-    
+
     conn.commit()
     c.close()
 
