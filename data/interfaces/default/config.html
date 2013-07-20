@@ -104,9 +104,12 @@
 	<div id="tabs-2">
         <table class="configtable" summary="Download Settings">
 	    <tr>
-                <td>
-                	<fieldset>
-                		<legend>SABnzbd</legend>
+			<td>
+				<fieldset>
+				<legend>Usenet</legend>
+				<input type="radio" name="nzb_downloader" id="nzb_downloader_sabnzbd" value="0" ${config['nzb_downloader_sabnzbd']}>Sabnzbd <input type="radio" name="nzb_downloader" id="nzb_downloader_nzbget" value="1" ${config['nzb_downloader_nzbget']}> NZBget <input type="radio" name="nzb_downloader" id="nzb_downloader_blackhole" value="2" ${config['nzb_downloader_blackhole']}> Blackhole
+                </fieldset>
+                	<fieldset id="sabnzbd_options">
 	                	<div class="row">
 		                    <label>SABnzbd Host:</label>
 		                    <input type="text" name="sab_host" value="${config['sab_host']}" size="30">
@@ -116,7 +119,7 @@
 		                    <label>SABnzbd Username</label>
 		                    <input type="text" name="sab_username" value="${config['sab_user']}" size="20">
 	                    </div>
-				<div class="row">
+						<div class="row">
 		                    <label>SABnzbd Password:</label>
 		                    <input type="password" name="sab_password" value="${config['sab_pass']}" size="20">
 	                    </div>               
@@ -128,17 +131,49 @@
 	                        <label>SABnzbd Category:</label>
 	                        <input type="text" name="sab_category" value="${config['sab_cat']}" size="20">
 	                    </div>
+                    </fieldset>                  
+				
+                	<fieldset id="nzbget_options">
+	                	<div class="row">
+		                    <label>NZBget Host:</label>
+		                    <input type="text" name="nzbget_host" value="${config['nzbget_host']}" size="30">
+		                    <small>usually http://localhost:6789</small>
+	                    </div>
+	                   	<div class="row">
+		                    <label>NZBget Username</label>
+		                    <input type="text" name="nzbget_username" value="${config['nzbget_user']}" size="20">
+	                    </div>
+				        <div class="row">
+		                    <label>NZBget Password:</label>
+		                    <input type="password" name="nzbget_password" value="${config['nzbget_pass']}" size="20">
+	                    </div>               
+	                    <div class="row">
+	                        <label>NZBget Category:</label>
+	                        <input type="text" name="nzbget_category" value="${config['nzbget_cat']}" size="20">
+	                    </div>
                     </fieldset>
-                    <fieldset>
-                    		<legend>Downloads</legend>
+                    
+            
+					<fieldset id="blackhole_options">
+						  <div class="row">
+	                   	        <label>Black Hole Directory</label>
+	                   	        <input type="text" name="blackhole_dir" value="${config['blackhole_dir']}" size="50">
+	                   	        <small>Folder your Download program watches for NZBs</small>
+	                   	  </div>
+	                </fieldset>
+                    
+                    <fieldset id="nzb_download_dir">
                        	<div class="row">
                             <label>Music Download Directory:</label>
                             <input type="text" name="download_dir" value="${config['download_dir']}" size="50">
-                            <small>Full path where SAB downloads your music. e.g. /Users/name/Downloads/music</small>
+                            <small>Full path where SAB or NZBget downloads your music. e.g. /Users/name/Downloads/music</small>
                         </div>
-                    </fieldset>                    
-                </td>
-           
+                    </fieldset>
+	                
+                   	<div class="checkbox row">                    	
+                   	    	<input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5"><label>Usenet Retention</label>
+                   	 </div>
+	            </td>
                 <td>
                    	<fieldset>
                    		<legend>Torrents</legend>
@@ -162,22 +197,6 @@
 				<input type="checkbox" name="keep_torrent_files" value="1" ${config['keep_torrent_files']}>		
 				</div>
 			</fieldset>
-                   	<fieldset>
-                   		<legend>Usenet</legend>
-                   	    <div class="row checkbox">                    	 
-                   	    	<input id="useblackhole" type="checkbox" name="blackhole" value=1 ${config['use_blackhole']} /><label>Use Black Hole</label>
-                   	    </div>
-                   	    <div class="config">
-	                   	    <div class="row">
-	                   	        <label>Black Hole Directory</label>
-	                   	        <input type="text" name="blackhole_dir" value="${config['blackhole_dir']}" size="50">
-	                   	        <small>Folder your Download program watches for NZBs</small>
-	                   	    </div>
-                   	    </div>
-                   	    <div class="checkbox row">                    	
-                   	    	<input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5"><label>Usenet Retention</label>
-                   	    </div>
-                   	 </fieldset>
                 </td>
             </tr>            
     
@@ -368,9 +387,9 @@
                 	<fieldset>
                 		<legend>Quality</legend>
                 		<div class="row radio clearfix">
-				    <input type="radio" name="preferred_quality" value="0" ${config['pref_qual_0']} /><label>Highest Quality excluding Lossless</label>
-                		    <input type="radio" name="preferred_quality" value="1" ${config['pref_qual_1']} /><label>Highest Quality including Lossless</label>
-                		    <input type="radio" name="preferred_quality" value="3" ${config['pref_qual_3']} /><label>Lossless Only</label>
+				            <input type="radio" name="preferred_quality" id="preferred_quality0" value="0" ${config['pref_qual_0']} /><label>Highest Quality excluding Lossless</label>
+                		    <input type="radio" name="preferred_quality" id="preferred_quality1" value="1" ${config['pref_qual_1']} /><label>Highest Quality including Lossless</label>
+                		    <input type="radio" name="preferred_quality" id="preferred_quality3" value="3" ${config['pref_qual_3']} /><label>Lossless Only</label>
                 		    <input type="radio" id="preferred_bitrate" name="preferred_quality" value="2" ${config['pref_qual_2']} />Preferred Bitrate: <input type="text" class="override-float" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3">kbps<br>
                 			<div id="preferred_bitrate_options">
 					    Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['pref_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['pref_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br><br>
@@ -1078,15 +1097,51 @@
 			{
 				$("#preferred_bitrate_options").hide();
 			}
-		
+			
+		if ($("#nzb_downloader_sabnzbd").is(":checked"))
+			{
+				$("#sabnzbd_options").show();
+				$("#nzbget_options,#blackhole_options").hide();
+			}
+		if ($("#nzb_downloader_nzbget").is(":checked"))
+			{
+				$("#sabnzbd_options,#blackhole_options").hide();
+				$("#nzbget_options").show();
+			}
+		if ($("#nzb_downloader_blackhole").is(":checked"))
+			{
+				$("#sabnzbd_options,#nzbget_options").hide();
+				$("#blackhole_options").show();
+			}
+
 		$('input[type=radio]').change(function(){
 			if ($("#preferred_bitrate").is(":checked"))
 			{
 				$("#preferred_bitrate_options").slideDown("fast");
 			}
-			else
+			if ($("#preferred_quality0").is(":checked"))
 			{
 				$("#preferred_bitrate_options").slideUp("fast");
+			}
+			if ($("#preferred_quality1").is(":checked"))
+			{
+				$("#preferred_bitrate_options").slideUp("fast");
+			}
+			if ($("#preferred_quality3").is(":checked"))
+			{
+				$("#preferred_bitrate_options").slideUp("fast");
+			}
+			if ($("#nzb_downloader_sabnzbd").is(":checked"))
+			{
+				$("#nzbget_options,#blackhole_options").fadeOut("fast", function() { $("#sabnzbd_options").fadeIn() });
+			}
+			if ($("#nzb_downloader_nzbget").is(":checked"))
+			{
+				$("#sabnzbd_options,#blackhole_options").fadeOut("fast", function() { $("#nzbget_options").fadeIn() });
+			}
+			if ($("#nzb_downloader_blackhole").is(":checked"))
+			{
+				$("#sabnzbd_options,#nzbget_options").fadeOut("fast", function() { $("#blackhole_options").fadeIn() });
 			}
 		});	
 		

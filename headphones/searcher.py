@@ -13,6 +13,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
+# NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
+
 import urllib, urllib2, urlparse, httplib
 import lib.feedparser as feedparser
 from lib.pygazelle import api as gazelleapi
@@ -29,7 +31,7 @@ import os, re, time
 import string
 
 import headphones, exceptions
-from headphones import logger, db, helpers, classes, sab, notifiers
+from headphones import logger, db, helpers, classes, sab, notifiers, nzbget
 
 import lib.bencode as bencode
 
@@ -113,7 +115,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
          
         for result in results:
             foundNZB = "none"
-            if (headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE):
+            if (headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
                 if result['Status'] == "Wanted Lossless":
                     foundNZB = searchNZB(result['AlbumID'], new, losslessOnly=True)
                 else:
@@ -129,7 +131,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
     else:        
     
         foundNZB = "none"
-        if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE):
+        if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
             foundNZB = searchNZB(albumid, new, lossless)
 
         if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.T411 or headphones.GKS or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
@@ -536,8 +538,15 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             if data and bestqual:
                 logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
                 # Get rid of any dodgy chars here so we can prevent sab from renaming our downloads
-                nzb_folder_name = helpers.sab_sanitize_foldername(bestqual[0])+' on ' + bestqual[3] 
-                if headphones.SAB_HOST and not headphones.BLACKHOLE:
+                nzb_folder_name = helpers.sab_sanitize_foldername(bestqual[0])
+                if headphones.NZB_DOWNLOADER == 1:
+
+                    nzb = classes.NZBDataSearchResult()
+                    nzb.extraInfo.append(data)
+                    nzb.name = nzb_folder_name
+                    nzbget.sendNZB(nzb)
+
+                elif headphones.NZB_DOWNLOADER == 0:
 
                     nzb = classes.NZBDataSearchResult()
                     nzb.extraInfo.append(data)
@@ -552,7 +561,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                     if replace_spaces:
                         nzb_folder_name = helpers.sab_replace_spaces(nzb_folder_name)
 
-                elif headphones.BLACKHOLE:
+                else:
                 
                     nzb_name = nzb_folder_name + '.nzb'
                     download_path = os.path.join(headphones.BLACKHOLE_DIR, nzb_name)
@@ -811,10 +820,10 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     for item in d.entries:
                         try:
                             rightformat = True
-                            title = item.title
-                            seeders = item.torrent_seeds
-                            url = item.links[1]['url']
-                            size = int(item.links[1]['length'])
+                            title = item['title']
+                            seeders = item['torrent_seeds']
+                            url = item['links'][1]['href']
+                            size = int(item['links'][1]['length'])
                             try:
                                 if format == "2":
                                     request = urllib2.Request(url)

@@ -23,7 +23,7 @@ import copy
 
 cmd_list = [ 'getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSimilar', 'getHistory', 'getLogs', 
             'findArtist', 'findAlbum', 'addArtist', 'delArtist', 'pauseArtist', 'resumeArtist', 'refreshArtist',
-            'queueAlbum', 'unqueueAlbum', 'forceSearch', 'forceProcess', 'getVersion', 'checkGithub', 
+            'addAlbum', 'queueAlbum', 'unqueueAlbum', 'forceSearch', 'forceProcess', 'getVersion', 'checkGithub', 
             'shutdown', 'restart', 'update', 'getArtistArt', 'getAlbumArt', 'getArtistInfo', 'getAlbumInfo', 'getArtistThumb', 'getAlbumThumb']
 
 class Api(object):
@@ -242,6 +242,20 @@ class Api(object):
             
         try:
             importer.addArtisttoDB(self.id)
+        except Exception, e:
+            self.data = e
+            
+        return
+        
+    def _addAlbum(self, **kwargs):
+        if 'id' not in kwargs:
+            self.data = 'Missing parameter: id'
+            return
+        else:
+            self.id = kwargs['id']
+            
+        try:
+            importer.addReleaseById(self.id)
         except Exception, e:
             self.data = e
             
