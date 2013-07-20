@@ -25,7 +25,7 @@ from xml.dom import minidom
 from xml.parsers.expat import ExpatError
 import lib.simplejson as json
 from StringIO import StringIO
-import gzip
+import gzip, base64
 
 import os, re, time
 import string
@@ -111,7 +111,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
 
         for result in results:
             foundNZB = "none"
-            if (headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
+            if (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
                 if result['Status'] == "Wanted Lossless":
                     foundNZB = searchNZB(result['AlbumID'], new, losslessOnly=True)
                 else:
@@ -127,7 +127,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
     else:
 
         foundNZB = "none"
-        if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
+        if (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
             foundNZB = searchNZB(albumid, new, lossless)
 
         if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
@@ -182,6 +182,66 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
         resultlist = []
 
+        if headphones.HEADPHONES_INDEXER:
+
+            provider = "headphones"
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+                categories = "3040"
+            elif headphones.PREFERRED_QUALITY:
+                categories = "3040,3010"
+            else:
+                categories = "3010"
+
+            if albums['Type'] == 'Other':
+                categories = "3030"
+                logger.info("Album type is audiobook/spokenword. Using audiobook category")
+
+            params = {    "t": "search",
+                        "cat": categories,
+                        "apikey": '89edf227c1de9b3de50383fff11466c6',
+                        "maxage": headphones.USENET_RETENTION,
+                        "q": term
+                        }
+
+            searchURL = 'http://headphones.codeshy.com/newznab/api?' + urllib.urlencode(params)
+
+            # Add a user-agent
+            request = urllib2.Request(searchURL)
+            request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+            base64string = base64.encodestring('%s:%s' % (headphones.HPUSER, headphones.HPPASS)).replace('\n', '')
+            request.add_header("Authorization", "Basic %s" % base64string)
+            
+            opener = urllib2.build_opener()
+
+            logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, 'Headphones Index'))
+
+            try:
+                data = opener.open(request).read()
+            except Exception, e:
+                logger.warn('Error fetching data from %s: %s' % ('Headphones Index', e))
+                data = False
+
+            if data:
+
+                d = feedparser.parse(data)
+
+                if not len(d.entries):
+                    logger.info(u"No results found from %s for %s" % ('Headphones Index', term))
+                    pass
+
+                else:
+                    for item in d.entries:
+                        try:
+                            url = item.link
+                            title = item.title
+                            size = int(item.links[1]['length'])
+
+                            resultlist.append((title, size, url, provider))
+                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+
+                        except Exception, e:
+                            logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
+                                
         if headphones.NEWZNAB:
 
             newznab_hosts = [(headphones.NEWZNAB_HOST, headphones.NEWZNAB_APIKEY, headphones.NEWZNAB_ENABLED)]

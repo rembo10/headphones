@@ -209,6 +209,26 @@
                 <td>
 		    <legend>NZBs</legend>
                 	<fieldset>
+                		<legend>Headphones Indexer</legend>
+                		<div class="row checkbox">
+                			<input id="use_headphones_indexer" type="checkbox" name="use_headphones_indexer" onclick="initConfigCheckbox($(this));" value="1" ${config['use_headphones_indexer']} /><label>Use Headphones Indexer</label>
+                		</div>
+                		<div class="config">
+                			<div class="row">
+                			<label>Username</label>
+					  <input class="hpuser" type="text" value="${config['hpuser']}" size="20">
+					  <small>Headphones VIP Server username & password</small>
+                			</div>
+                			<div class="row">
+                			<label>Password</label>
+                			  <input class="hppass" type="password" value="${config['hppass']}" size="20">
+                			</div>
+					<div class="row">
+					<a href="http://headphones.codeshy.com/vip" id="vipserver">Get an Account!</a>
+					</div>
+                		</div>
+                	</fieldset>
+                	<fieldset>
                 		<legend>Newznab</legend>
                 		<div class="row checkbox">
                 			<input  id="usenewznab" type="checkbox" name="newznab" onclick="initConfigCheckbox($(this));" value="1" ${config['use_newznab']} /><label>Use Newznab</label>
@@ -801,10 +821,10 @@
 
                  		<div id="hpserveroptions">
                  			<div class="row">
-                 				<label>Username:</label><input type="text" name="hpuser" value="${config['hpuser']}" size="20">
+                 				<label>Username:</label><input type="text" class="hpuser" name="hpuser" value="${config['hpuser']}" size="20">
                  			</div>
                  			<div class="row">
-                 				<label>Password:</label><input type="password" name="hppass" value="${config['hppass']}" size="15"><br>
+                 				<label>Password:</label><input type="password" class="hppass" name="hppass" value="${config['hppass']}" size="15"><br>
                  				<a href="http://headphones.codeshy.com/vip" id="vipserver">Get an Account!</a>
                  			</div>
                  		</div>
@@ -1124,6 +1144,14 @@
 		    formfields.append(removeButton);
 		    formfields.append("</div>");
 		    $("#add_newznab").before(formfields);
+		});
+		
+		$(".hpuser").keyup(function() {
+		    $(".hpuser").val($(this).val());
+		});
+
+		$(".hppass").keyup(function() {
+		    $(".hppass").val($(this).val());
 		});
 
 		$(function() {
