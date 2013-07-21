@@ -20,7 +20,7 @@
 		<h1 class="clearfix"><img src="interfaces/default/images/icon_gear.png" alt="settings"/>Settings</h1>
 	</div>
 	<form action="configUpdate" method="post" class="form" id="configUpdate">
-	
+
 	<div id="tabs">
 		<ul>
 			<li><a href="#tabs-1">Web Interface</a></li>
@@ -30,8 +30,8 @@
 			<li><a href="#tabs-5">Advanced Settings</a></li>
 		</ul>
 		<div id="tabs-1">
-		
-		
+
+
         <table class="configtable" summary="Web Interface">
             <tr>
             	<td>
@@ -41,7 +41,7 @@
 	            		 	<label>HTTP Host</label>
 	            		   <input type="text" name="http_host" value="${config['http_host']}" size="30">
 	            		   <small>e.g. localhost or 0.0.0.0</small>
-	            		</div> 
+	            		</div>
 	            		<div class="row">
 	            		      <label>HTTP Port</label>
 	            		      <input type="text" name="http_port" value="${config['http_port']}" size="10">
@@ -50,20 +50,20 @@
 	            		     <label>HTTP Username</label>
 	            		     <input type="text" name="http_username" value="${config['http_user']}" size="30">
 	            		 </div>
-	            		 
+
 	            		 <div class="row">
 	            		   <label>HTTP Password</label>
 	            		   <input type="password" name="http_password" value="${config['http_pass']}" size="30">
 	            		 </div>
-	            		 <div class="row checkbox">	                   
-	            		     <input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} /> <label>Launch Browser on Startup</label> 
+	            		 <div class="row checkbox">
+	            		     <input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} /> <label>Launch Browser on Startup</label>
 	            		 </div>
             		 </fieldset>
             	</td>
-                <td>          
+                <td>
                    <fieldset>
 	                   	<legend>API</legend>
-	                    <div class="row checkbox">	                   
+	                    <div class="row checkbox">
 		                    <input type="checkbox" id="useapi" name="api_enabled" id="api_enabled" value="1" ${config['api_enabled']} /><label>Enable API</label>
 		                 </div>
 	                     <div id="apioptions" class="row">
@@ -73,14 +73,14 @@
 			      	        <small>Current API key: <strong>${config['api_key']}</strong></small>
 	                     </div>
                     </fieldset>
-                    
+
                     <fieldset>
                     	<legend>Interval</legend>
 	                   	<div class="row">
 	                    	<label>NZB Search Interval</label>
 	                    	<input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="4">mins
 	                    </div>
-	            
+
 	                	<div class="row">
 	                    	<label>Download Scan Interval</label>
 	                    	<input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="4">mins
@@ -100,7 +100,7 @@
         </table>
 	<input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
 	</div>
-	
+
 	<div id="tabs-2">
         <table class="configtable" summary="Download Settings">
 	    <tr>
@@ -122,7 +122,7 @@
 						<div class="row">
 		                    <label>SABnzbd Password:</label>
 		                    <input type="password" name="sab_password" value="${config['sab_pass']}" size="20">
-	                    </div>               
+	                    </div>
 	                	<div class="row">
 		                    <label>SABnzbd API:</label>
 		                    <input type="text" name="sab_apikey" value="${config['sab_api']}" size="36">
@@ -131,8 +131,8 @@
 	                        <label>SABnzbd Category:</label>
 	                        <input type="text" name="sab_category" value="${config['sab_cat']}" size="20">
 	                    </div>
-                    </fieldset>                  
-				
+                    </fieldset>
+
                 	<fieldset id="nzbget_options">
 	                	<div class="row">
 		                    <label>NZBget Host:</label>
@@ -146,14 +146,14 @@
 				        <div class="row">
 		                    <label>NZBget Password:</label>
 		                    <input type="password" name="nzbget_password" value="${config['nzbget_pass']}" size="20">
-	                    </div>               
+	                    </div>
 	                    <div class="row">
 	                        <label>NZBget Category:</label>
 	                        <input type="text" name="nzbget_category" value="${config['nzbget_cat']}" size="20">
 	                    </div>
                     </fieldset>
-                    
-            
+
+
 					<fieldset id="blackhole_options">
 						  <div class="row">
 	                   	        <label>Black Hole Directory</label>
@@ -161,7 +161,7 @@
 	                   	        <small>Folder your Download program watches for NZBs</small>
 	                   	  </div>
 	                </fieldset>
-                    
+
                     <fieldset id="nzb_download_dir">
                        	<div class="row">
                             <label>Music Download Directory:</label>
@@ -169,15 +169,15 @@
                             <small>Full path where SAB or NZBget downloads your music. e.g. /Users/name/Downloads/music</small>
                         </div>
                     </fieldset>
-	                
-                   	<div class="checkbox row">                    	
+
+                   	<div class="checkbox row">
                    	    	<input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5"><label>Usenet Retention</label>
                    	 </div>
 	            </td>
                 <td>
                    	<fieldset>
                    		<legend>Torrents</legend>
-                   		<div class="row">               
+                   		<div class="row">
                    		    <label>Black Hole Directory</label>
                    		    <input type="text" name="torrentblackhole_dir" value="${config['torrentblackhole_dir']}" size="50">
                    		    <small>Folder your Download program watches for Torrents</small>
@@ -191,15 +191,15 @@
                    		<label>Music Download Directory</label>
                    		<input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="50">
                    		<small>Full path where your torrent client downloads your music e.g. /Users/name/Downloads/music</small>
-                   		</div>        
+                   		</div>
 				<div class="row checkbox">
 				<label>Keep Files for Seeding</label>
-				<input type="checkbox" name="keep_torrent_files" value="1" ${config['keep_torrent_files']}>		
+				<input type="checkbox" name="keep_torrent_files" value="1" ${config['keep_torrent_files']}>
 				</div>
 			</fieldset>
                 </td>
-            </tr>            
-    
+            </tr>
+
 	    </table>
 	    <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
 	</div>
@@ -209,8 +209,28 @@
                 <td>
 		    <legend>NZBs</legend>
                 	<fieldset>
+                		<legend>Headphones Indexer</legend>
+                		<div class="row checkbox">
+                			<input id="use_headphones_indexer" type="checkbox" name="use_headphones_indexer" onclick="initConfigCheckbox($(this));" value="1" ${config['use_headphones_indexer']} /><label>Use Headphones Indexer</label>
+                		</div>
+                		<div class="config">
+                			<div class="row">
+                			<label>Username</label>
+					  <input class="hpuser" type="text" value="${config['hpuser']}" size="20">
+					  <small>Headphones VIP Server username & password</small>
+                			</div>
+                			<div class="row">
+                			<label>Password</label>
+                			  <input class="hppass" type="password" value="${config['hppass']}" size="20">
+                			</div>
+					<div class="row">
+					<a href="http://headphones.codeshy.com/vip" id="vipserver">Get an Account!</a>
+					</div>
+                		</div>
+                	</fieldset>
+                	<fieldset>
                 		<legend>Newznab</legend>
-                		<div class="row checkbox">                    	
+                		<div class="row checkbox">
                 			<input  id="usenewznab" type="checkbox" name="newznab" onclick="initConfigCheckbox($(this));" value="1" ${config['use_newznab']} /><label>Use Newznab</label>
                 		</div>
 				<div id="newznab_providers">
@@ -264,7 +284,7 @@
 
                 	<fieldset>
                 		<legend>NZBs.org</legend>
-                		<div class="row checkbox">                    	
+                		<div class="row checkbox">
                 			<input id="usenzbsorg" type="checkbox" name="nzbsorg" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbsorg']} /><label>Use NZBs.org</label>
                 		</div>
                 		<div class="config">
@@ -276,8 +296,8 @@
                 	</fieldset>
                 	<fieldset>
                 		<legend>NZBsRus</legend>
-                		<div class="row checkbox">                    	
-                			<input id="usenzbsrus" type="checkbox" name="nzbsrus" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbsrus']} /><label>Use NZBsRus</label> 
+                		<div class="row checkbox">
+                			<input id="usenzbsrus" type="checkbox" name="nzbsrus" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbsrus']} /><label>Use NZBsRus</label>
                 		</div>
                 		<div class="config">
                 			<div class="row">
@@ -290,21 +310,15 @@
                 			</div>
                 		</div>
                 	</fieldset>
-                	<fieldset>
-                		<legend>nzbX</legend>
-                		<div class="row checkbox">                    	
-                			<input id="usenzbx" type="checkbox" name="nzbx" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbx']} /><label>Use nzbX</label> 
-                		</div>
-                	</fieldset>
                 </td>
-        
+
                 <td>
                     <fieldset>
                     	<legend>Torrents</legend>
-                    	<div class="row checkbox">                    	
-                    		<input type="checkbox" name="use_isohunt" value="1" ${config['use_isohunt']} /><label>Isohunt</label> 
+                    	<div class="row checkbox">
+                    		<input type="checkbox" name="use_isohunt" value="1" ${config['use_isohunt']} /><label>Isohunt</label>
                     	</div>
-                    	<div class="row checkbox">                    	 
+                    	<div class="row checkbox">
                     		<input type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /><label>Mininova</label>
                     	</div>
                     	<div class="row checkbox">
@@ -335,7 +349,7 @@
                                 <input type="password" name="rutracker_password" value="${config['rutracker_password']}" size="36">
 			    </div>
 			</div>
-                        <div class="row checkbox">    
+                        <div class="row checkbox">
 			    <input id="usewhatcd" type="checkbox" name="whatcd" onclick="initConfigCheckbox($(this));" value="1" ${config['use_whatcd']} /><label>What.cd</label>
                         </div>
                         <div class="config">
@@ -349,7 +363,7 @@
                             </div>
                         </div>
                     </fieldset>
-                    
+
                 </td>
 
             </tr>
@@ -369,17 +383,17 @@
                 		    <input type="radio" id="preferred_bitrate" name="preferred_quality" value="2" ${config['pref_qual_2']} />Preferred Bitrate: <input type="text" class="override-float" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3">kbps<br>
                 			<div id="preferred_bitrate_options">
 					    Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['pref_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['pref_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br><br>
-					    <div class="row checkbox left">    					
+					    <div class="row checkbox left">
                 		 	        <input type="checkbox" name="preferred_bitrate_allow_lossless" value="1" ${config['pref_bitrate_allow_lossless']} />
                 		 	        <label>Allow lossless if no good lossy match found</label>
 					    </div>
-					    <div class="row checkbox left">    					
+					    <div class="row checkbox left">
                 		 	        <input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />
                 		 	        <label>Auto-Detect Preferred Bitrate</label>
-					    </div>					    
+					    </div>
 					</div>
 				</div>
-                		
+
                 	</fieldset>
                 	<fieldset>
                 		<legend>Search Words</legend>
@@ -408,13 +422,13 @@
                 		 	<input type="checkbox" name="move_files" value="1" ${config['move_files']} /><label>Move downloads to Destination Folder</label>
                 		 	<input type="checkbox" name="rename_files" value="1" ${config['rename_files']} /><label>Rename files</label>
 				        <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} /><label>Correct metadata</label>
-                		        <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} /><label>Delete leftover files <small>(.m3u, .nfo, .sfv, .nzb, etc.)</small></label>                	
+                		        <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} /><label>Delete leftover files <small>(.m3u, .nfo, .sfv, .nzb, etc.)</small></label>
                 		 	<input type="checkbox" name="add_album_art" id="add_album_art" value="1" ${config['add_album_art']}><label>Add album art jpeg to album folder</label>
                 			<div id="album_art_options">
-					    <div class="row">    					
+					    <div class="row">
                 		 	        as <input type="text" class="override-float" name="album_art_format" value="${config['album_art_format']}" size="10">.jpg
-					    </div>	
-					    <small>Use $Artist/$artist, $Album/$album, $Year/$year</small>				    
+					    </div>
+					    <small>Use $Artist/$artist, $Album/$album, $Year/$year</small>
 					</div>
                 		 	<input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}><label>Embed album art in each file</label>
                 		 	<input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}><label>Embed lyrics</label>
@@ -439,7 +453,7 @@
         <table class="configtable" summary="Advanced Settings">
             <tr>
                 <td>
-                
+
                 	<fieldset>
                 		<legend>Renaming options</legend>
                 		<div class="row">
@@ -447,7 +461,7 @@
                 		     <input type="text" name="folder_format" value="${config['folder_format']}" size="43">
                 		     <small>Use: $Artist/$artist, $Album/$album, $Year/$year, $Type/$type (release type) and $First/$first (first letter in artist name)
                 		       				E.g.: $Type/$First/$artist/$album [$year] = Album/G/girl talk/all day [2010]</small>
-                		
+
                 		 </div>
                 		 <div class="row">
                 		  	<label>File Format</label>
@@ -455,7 +469,7 @@
                 		   	<small>Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title, $Artist/$artist, $Album/$album and $Year/$year</small>
                 		</div>
                 	</fieldset>
-                	
+
                 	<fieldset>
     	           		 <legend>Re-Encoding Options</legend>
     	           		 <small class="heading"><span style="float: left; margin-right: .3em; margin-top: 4px;" class="ui-icon ui-icon-info"></span>Note: this option requires the lame, ffmpeg or xld encoder</small>
@@ -467,7 +481,7 @@
     	                  		<input type="checkbox" name="encoderlossless" value="1" ${config['encoderlossless']}/><label>Only re-encode lossless files (.flac)</label>
 				    </div>
 				    <br>
-				    <div class="row">	
+				    <div class="row">
 					<input type="checkbox" name="delete_lossless_files" value="1" ${config['delete_lossless_files']}/><label>Delete original lossless files after encoding</label>
 				    </div>
 				</div>
@@ -511,7 +525,7 @@
 					%endfor
 					</select>
 					</div>
-    				 	<div class="row">						
+    				 	<div class="row">
     				 	<label>VBR/CBR</label>
     				 	<select name="encodervbrcbr">
     				 	%for x in ['cbr', 'vbr']:
@@ -553,8 +567,8 @@
     				 	%endfor
     				 	</select>
     				 	</div>
-    				 	
-    				 	
+
+
     				 	<%
     				 		if config["samplingfrequency"] == 44100:
     				 			freq44100 = 'selected="selected"'
@@ -571,14 +585,14 @@
     				 	</select>
     				 	</div>
     				 </fieldset>
-    				
+
     				<fieldset>
     					<legend>Advanced Encoding Options</legend>
     					<div class="row">
     						<label>(ignores audio properties)</label>
     						<input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43">
     					</div>
-    					
+
     				</fieldset>
 			    </div>
 			    <div id="xldproperties">
@@ -593,7 +607,7 @@
     					</div>
 				</td>
 				<td>
-					
+
 		        	<fieldset>
 		        		<legend>Miscellaneous</legend>
 		        		<div class="checkbox left row">
@@ -622,20 +636,20 @@
 						</div>
 					</div>
 		        		<div class="row left checkbox">
-		        			<input type="checkbox" name="autowant_upcoming" value="1" ${config['autowant_upcoming']} /><label>Automatically Mark Upcoming Albums as Wanted</label>	
+		        			<input type="checkbox" name="autowant_upcoming" value="1" ${config['autowant_upcoming']} /><label>Automatically Mark Upcoming Albums as Wanted</label>
 		        			<div class="row leftcheckbox">
 		        				<input type="checkbox" name="autowant_all" value="1" ${config['autowant_all']} /><label>Automatically Mark All Albums as Wanted</label>
 		        			</div>
-		        		</div>                		
+		        		</div>
                         <div class="row">
 							<label>Cache Size (in MB):</label>
 							<input type="text" name="cache_sizemb" value="${config['cache_sizemb']}" size="7">
-						</div> 
+						</div>
 		        	</fieldset>
 					<fieldset>
 						<legend>Interface</legend>
 						<div class="row">
-							<label>Interface</label> 
+							<label>Interface</label>
 							<select name="interface"><h3>
 							%for interface in config['interface_list']:
 								<%
@@ -647,7 +661,7 @@
 								<option value="${interface}" ${selected}>${interface}</option>
 							%endfor
 							</select>
-							
+
 						</div>
 						<div class="row">
 							<label>Log Directory:</label>
@@ -658,12 +672,12 @@
 							<input type="text" name="cache_dir" value="${config['cache_dir']}" size="50">
 						</div>
 					</fieldset>
-						            	
-                                        
-            
-					<h2>Notifications</h2>                                
-					<fieldset>		
-						<h3>Prowl</h3>				
+
+
+
+					<h2>Notifications</h2>
+					<fieldset>
+						<h3>Prowl</h3>
 						<div class="row checkbox">
 						     <input type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} /><label>Enable Prowl Notifications</label>
 						 </div>
@@ -678,12 +692,12 @@
 						 		<label>Priority (-2,-1,0,1 or 2):</label>
 						 		<input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2">
 						 	</div>
-						 </div>						
+						 </div>
 					</fieldset>
-					
-                      
-                     <fieldset>    
-                     	<h3>XBMC</h3>                 	
+
+
+                     <fieldset>
+                     	<h3>XBMC</h3>
                      	<div class="checkbox row">
                      		<input type="checkbox" name="xbmc_enabled" id="xbmc" value="1" ${config['xbmc_enabled']} /><label>Enable XBMC Updates</label>
                      	</div>
@@ -693,7 +707,7 @@
                      	    	<input type="text" name="xbmc_host" value="${config['xbmc_host']}" size="30">
                      	    	<small>e.g. http://localhost:8080. Separate hosts with commas</small>
                      	    </div>
-                     	    <div class="row">                     	    
+                     	    <div class="row">
                      	    <label>XBMC Username</label><input type="text" name="xbmc_username" value="${config['xbmc_username']}" size="30">
                      	    </div>
                      	    <div class="row">
@@ -707,7 +721,7 @@
                      		</div>
                      	</div>
                      </fieldset>
-                      
+
                      <fieldset>
                      	<h3>NotifyMyAndroid</h3>
                      	<div class="checkbox row">
@@ -731,7 +745,7 @@
                      						nma_priority_selected = 'selected'
                      					else:
                      						nma_priority_selected = ''
-                     					
+
                      					if x == -2:
                      						nma_priority_value = 'Very Low'
                      					elif x == -1:
@@ -757,8 +771,8 @@
                         </div>
                     </fieldset>
 
-					<fieldset>		
-						<h3>Pushover</h3>				
+					<fieldset>
+						<h3>Pushover</h3>
 						<div class="row checkbox">
 						     <input type="checkbox" name="pushover_enabled" id="pushover" value="1" ${config['pushover_enabled']} /><label>Enable Pushover Notifications</label>
 						 </div>
@@ -773,10 +787,10 @@
 						 		<label>Priority (-1,0, or 1):</label>
 						 		<input type="text" name="pushover_priority" value="${config['pushover_priority']}" size="2">
 						 	</div>
-						 </div>						
+						 </div>
 					</fieldset>
-					
-                      
+
+
                  	<fieldset>
                  		<legend>Musicbrainz</legend>
                  		<div class="row">
@@ -804,23 +818,23 @@
                  				<label>Sleep Interval</label><input type="text" name="customsleep" value="${config['customsleep']}" size="4">
                  			</div>
                  		</div>
-                 		
+
                  		<div id="hpserveroptions">
                  			<div class="row">
-                 				<label>Username:</label><input type="text" name="hpuser" value="${config['hpuser']}" size="20">
+                 				<label>Username:</label><input type="text" class="hpuser" name="hpuser" value="${config['hpuser']}" size="20">
                  			</div>
                  			<div class="row">
-                 				<label>Password:</label><input type="password" name="hppass" value="${config['hppass']}" size="15"><br>
+                 				<label>Password:</label><input type="password" class="hppass" name="hppass" value="${config['hppass']}" size="15"><br>
                  				<a href="http://headphones.codeshy.com/vip" id="vipserver">Get an Account!</a>
                  			</div>
                  		</div>
                  	</fieldset>
-                 	
+
 				</td>
 			</tr>
         </table>
 	<input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
-    </div>	
+    </div>
 
       </form>
  </div>
@@ -828,21 +842,21 @@
 
 <%def name="javascriptIncludes()">
 	<script>
-	
+
 	hideServerDivs = function () {
 		$("#customoptions").slideUp();
 		$("#hpserveroptions").slideUp();
 	};
-	
+
 	hideEncoderDivs = function () {
 		$("#lameffmpegproperties").slideUp();
 		$("#xldproperties").slideUp();
 	};
-	
+
 	handleNewServerSelection = function () {
-	
+
 		hideServerDivs();
-		
+
 		switch ($(this).val()) {
 			case 'custom':
 				$("#customoptions").slideDown();
@@ -852,11 +866,11 @@
 			break;
 		}
 	};
-	
+
 	handleNewEncoderSelection = function () {
-	
+
 		hideEncoderDivs();
-		
+
 		switch ($(this).val()) {
 			case 'xld':
 				$("#xldproperties").slideDown();
@@ -869,16 +883,16 @@
 			break;
 		}
 	};
-	
+
 	function openExtrasDialog() {
-	    $("#dialog").dialog({ close: function(){ 
+	    $("#dialog").dialog({ close: function(){
 	        var elem = '<input type="button" data-success="Changes saved successfully">';
-		doAjaxCall('configUpdate', elem,'tabs',true); 
+		doAjaxCall('configUpdate', elem,'tabs',true);
 	    }}).dialog("open");
 	};
-	
-	function initThisPage() 
-	
+
+	function initThisPage()
+
 	{
 		if ($("#api_enabled").is(":checked"))
 			{
@@ -888,7 +902,7 @@
 			{
 				$("#apioptions").hide();
 			}
-		
+
 		$("#api_enabled").click(function(){
 			if ($("#api_enabled").is(":checked"))
 			{
@@ -898,11 +912,11 @@
 			{
 				$("#apioptions").slideUp();
 			}
-		});		
-    
+		});
+
     	$('#api_key').click(function(){ $('#api_key').select() });
     	$("#generate_api").click(function(){
-    	    $.get('generateAPI', 
+    	    $.get('generateAPI',
     	        function(data){
     	            if (data.error != undefined) {
     	                alert(data.error);
@@ -930,7 +944,7 @@
 				$("#encoderoptions").slideUp();
 			}
 		});
-		
+
 		if ($("#add_album_art").is(":checked"))
 			{
 				$("#album_art_options").show();
@@ -939,7 +953,7 @@
 			{
 				$("#album_art_options").hide();
 			}
-		
+
 		$("#add_album_art").click(function(){
 			if ($("#add_album_art").is(":checked"))
 			{
@@ -959,7 +973,7 @@
 			{
 				$("#prowloptions").hide();
 			}
-		
+
 		$("#prowl").click(function(){
 			if ($("#prowl").is(":checked"))
 			{
@@ -969,7 +983,7 @@
 			{
 				$("#prowloptions").slideUp();
 			}
-		});		
+		});
 
 		if ($("#xbmc").is(":checked"))
 			{
@@ -979,7 +993,7 @@
 			{
 				$("#xbmcoptions").hide();
 			}
-		
+
 		$("#xbmc").click(function(){
 			if ($("#xbmc").is(":checked"))
 			{
@@ -989,8 +1003,8 @@
 			{
 				$("#xbmcoptions").slideUp();
 			}
-		});		
-		
+		});
+
 		if ($("#nma").is(":checked"))
 			{
 				$("#nmaoptions").show();
@@ -999,7 +1013,7 @@
 			{
 				$("#nmaoptions").hide();
 			}
-		
+
 		$("#nma").click(function(){
 			if ($("#nma").is(":checked"))
 			{
@@ -1018,7 +1032,7 @@
 			{
 				$("#pushoveroptions").hide();
 			}
-		
+
 		$("#pushover").click(function(){
 			if ($("#pushover").is(":checked"))
 			{
@@ -1028,7 +1042,7 @@
 			{
 				$("#pushoveroptions").slideUp();
 			}
-		});		
+		});
 
 		if ($("#preferred_bitrate").is(":checked"))
 			{
@@ -1038,7 +1052,7 @@
 			{
 				$("#preferred_bitrate_options").hide();
 			}
-			
+
 		if ($("#nzb_downloader_sabnzbd").is(":checked"))
 			{
 				$("#sabnzbd_options").show();
@@ -1084,29 +1098,29 @@
 			{
 				$("#sabnzbd_options,#nzbget_options").fadeOut("fast", function() { $("#blackhole_options").fadeIn() });
 			}
-		});	
-		
+		});
+
 		$("#mirror").change(handleNewServerSelection);
 			handleNewServerSelection.apply($("#mirror"));
-			
+
 		$("#encoder").change(handleNewEncoderSelection);
 			handleNewEncoderSelection.apply($("#encoder"));
-		
+
 		var deletedNewznabs = 0;
-		
+
 		$(".remove").click(function() {
 		    $(this).parent().parent().remove();
 		    deletedNewznabs = deletedNewznabs + 1;
 		});
-		
+
 		$("#modify_extras").click(openExtrasDialog);
-		
+
 		$("#include_extras").click(function(){
 		    if ($("#include_extras").is(":checked")){
 			openExtrasDialog();
 		    }
 		});
-		
+
 		%for extra in config['extras']:
 		$("#${extra}_temp").click(function(){
 		    if ($(this).is(":checked")){
@@ -1116,8 +1130,8 @@
 			$("#${extra}").attr("checked", false);
 		    }
 		});
-		%endfor	
-		    
+		%endfor
+
 		$("#add_newznab").click(function() {
 		    var intId = $("#newznab_providers > div").size() + deletedNewznabs + 1;
 		    var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
@@ -1125,13 +1139,21 @@
 		    removeButton.click(function() {
 			$(this).parent().remove();
 			deletedNewznabs = deletedNewznabs + 1;
-			
+
 		    });
 		    formfields.append(removeButton);
 		    formfields.append("</div>");
 		    $("#add_newznab").before(formfields);
 		});
 		
+		$(".hpuser").keyup(function() {
+		    $(".hpuser").val($(this).val());
+		});
+
+		$(".hppass").keyup(function() {
+		    $(".hppass").val($(this).val());
+		});
+
 		$(function() {
 			$( "#tabs" ).tabs();
 		});
@@ -1139,7 +1161,6 @@
 		initConfigCheckbox("#usenewznab");
 		initConfigCheckbox("#usenzbsrus");
 		initConfigCheckbox("#usenzbsorg");
-		initConfigCheckbox("#usenzbx");
 		initConfigCheckbox("#usewaffles");
 		initConfigCheckbox("#userutracker");
 		initConfigCheckbox("#usewhatcd");
@@ -1149,6 +1170,6 @@
 	$(document).ready(function() {
 	    initThisPage();
 	});
-	
+
 	</script>
 </%def>
