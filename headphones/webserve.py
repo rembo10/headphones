@@ -40,17 +40,17 @@ def serve_template(templatename, **kwargs):
 
     interface_dir = os.path.join(str(headphones.PROG_DIR), 'data/interfaces/')
     template_dir = os.path.join(str(interface_dir), headphones.INTERFACE)
-    
+
     _hplookup = TemplateLookup(directories=[template_dir])
-    
+
     try:
         template = _hplookup.get_template(templatename)
         return template.render(**kwargs)
     except:
         return exceptions.html_error_template().render()
-    
+
 class WebInterface(object):
-    
+
     def index(self):
         raise cherrypy.HTTPRedirect("home")
     index.exposed=True
@@ -65,11 +65,11 @@ class WebInterface(object):
         myDB = db.DBConnection()
         artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
         albums = myDB.select('SELECT * from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
-        
-        # Don't redirect to the artist page until it has the bare minimum info inserted 
-        # Redirect to the home page if we still can't get it after 5 seconds       
+
+        # Don't redirect to the artist page until it has the bare minimum info inserted
+        # Redirect to the home page if we still can't get it after 5 seconds
         retry = 0
-            
+
         while retry < 5:
             if not artist:
                 time.sleep(1)
@@ -77,19 +77,19 @@ class WebInterface(object):
                 retry += 1
             else:
                 break
-                
+
         if not artist:
             raise cherrypy.HTTPRedirect("home")
-            
+
         # Serve the extras up as a dict to make things easier for new templates
         extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]
         extras_dict = {}
-        
+
         if not artist['Extras']:
             artist_extras = ""
         else:
             artist_extras = artist['Extras']
-            
+
         i = 1
         for extra in extras_list:
             if str(i) in artist_extras:
@@ -100,8 +100,8 @@ class WebInterface(object):
 
         return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums, extras=extras_dict)
     artistPage.exposed = True
-    
-    
+
+
     def albumPage(self, AlbumID):
         myDB = db.DBConnection()
         album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
@@ -110,8 +110,8 @@ class WebInterface(object):
         title = album['ArtistName'] + ' - ' + album['AlbumTitle']
         return serve_template(templatename="album.html", title=title, album=album, tracks=tracks, description=description)
     albumPage.exposed = True
-    
-    
+
+
     def search(self, name, type):
         if len(name) == 0:
             raise cherrypy.HTTPRedirect("home")
@@ -127,7 +127,7 @@ class WebInterface(object):
         threading.Thread(target=lastfm.getSimilar).start()
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % artistid)
     addArtist.exposed = True
-    
+
     def getExtras(self, ArtistID, newstyle=False, **kwargs):
         # if calling this function without the newstyle, they're using the old format
         # which doesn't separate extras, so we'll grab all of them
@@ -144,7 +144,7 @@ class WebInterface(object):
                     temp_extras_list.append(i)
                 i += 1
             extras = ','.join(str(n) for n in temp_extras_list)
-            
+
         myDB = db.DBConnection()
         controlValueDict = {'ArtistID': ArtistID}
         newValueDict = {'IncludeExtras': 1,
@@ -153,7 +153,7 @@ class WebInterface(object):
         threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True]).start()
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     getExtras.exposed = True
-    
+
     def removeExtras(self, ArtistID):
         myDB = db.DBConnection()
         controlValueDict = {'ArtistID': ArtistID}
@@ -165,7 +165,7 @@ class WebInterface(object):
             myDB.action('DELETE from albums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     removeExtras.exposed = True
-    
+
     def pauseArtist(self, ArtistID):
         logger.info(u"Pausing artist: " + ArtistID)
         myDB = db.DBConnection()
@@ -174,7 +174,7 @@ class WebInterface(object):
         myDB.upsert("artists", newValueDict, controlValueDict)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     pauseArtist.exposed = True
-    
+
     def resumeArtist(self, ArtistID):
         logger.info(u"Resuming artist: " + ArtistID)
         myDB = db.DBConnection()
@@ -183,7 +183,7 @@ class WebInterface(object):
         myDB.upsert("artists", newValueDict, controlValueDict)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     resumeArtist.exposed = True
-    
+
     def deleteArtist(self, ArtistID):
         logger.info(u"Deleting all traces of artist: " + ArtistID)
         myDB = db.DBConnection()
@@ -221,13 +221,13 @@ class WebInterface(object):
             myDB.action('DELETE from allalbums WHERE ArtistID=?', [ArtistID])
             myDB.action('DELETE from alltracks WHERE ArtistID=?', [ArtistID])
             myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
-    deleteEmptyArtists.exposed = True     
+    deleteEmptyArtists.exposed = True
 
     def refreshArtist(self, ArtistID):
-        threading.Thread(target=importer.addArtisttoDB, args=[ArtistID]).start()  
+        threading.Thread(target=importer.addArtisttoDB, args=[ArtistID]).start()
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
-    refreshArtist.exposed=True  
-    
+    refreshArtist.exposed=True
+
     def markAlbums(self, ArtistID=None, action=None, **args):
         myDB = db.DBConnection()
         if action == 'WantedNew' or action == 'WantedLossless':
@@ -250,12 +250,12 @@ class WebInterface(object):
         else:
             raise cherrypy.HTTPRedirect("upcoming")
     markAlbums.exposed = True
-    
+
     def addArtists(self, **args):
         threading.Thread(target=importer.artistlist_to_mbids, args=[args, True]).start()
         raise cherrypy.HTTPRedirect("home")
     addArtists.exposed = True
-    
+
     def queueAlbum(self, AlbumID, ArtistID=None, new=False, redirect=None, lossless=False):
         logger.info(u"Marking album: " + AlbumID + " as wanted...")
         myDB = db.DBConnection()
@@ -263,7 +263,7 @@ class WebInterface(object):
         if lossless:
             newValueDict = {'Status': 'Wanted Lossless'}
             logger.info("...lossless only!")
-        else:   
+        else:
             newValueDict = {'Status': 'Wanted'}
         myDB.upsert("albums", newValueDict, controlValueDict)
         searcher.searchforalbum(AlbumID, new)
@@ -281,7 +281,7 @@ class WebInterface(object):
         myDB.upsert("albums", newValueDict, controlValueDict)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     unqueueAlbum.exposed = True
-    
+
     def deleteAlbum(self, AlbumID, ArtistID=None):
         logger.info(u"Deleting all traces of album: " + AlbumID)
         myDB = db.DBConnection()
@@ -292,7 +292,7 @@ class WebInterface(object):
         else:
             raise cherrypy.HTTPRedirect("home")
     deleteAlbum.exposed = True
-    
+
     def switchAlbum(self, AlbumID, ReleaseID):
         '''
         Take the values from allalbums/alltracks (based on the ReleaseID) and swap it into the album & track tables
@@ -301,7 +301,7 @@ class WebInterface(object):
         albumswitcher.switch(AlbumID, ReleaseID)
         raise cherrypy.HTTPRedirect("albumPage?AlbumID=%s" % AlbumID)
     switchAlbum.exposed = True
-    
+
     def editSearchTerm(self, AlbumID, SearchTerm):
         logger.info(u"Updating search term for albumid: " + AlbumID)
         myDB = db.DBConnection()
@@ -317,19 +317,19 @@ class WebInterface(object):
         wanted = myDB.select("SELECT * from albums WHERE Status='Wanted'")
         return serve_template(templatename="upcoming.html", title="Upcoming", upcoming=upcoming, wanted=wanted)
     upcoming.exposed = True
-    
+
     def manage(self):
         myDB = db.DBConnection()
         emptyArtists = myDB.select("SELECT * FROM artists WHERE LatestAlbum IS NULL")
         return serve_template(templatename="manage.html", title="Manage", emptyArtists=emptyArtists)
     manage.exposed = True
-    
+
     def manageArtists(self):
         myDB = db.DBConnection()
         artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
         return serve_template(templatename="manageartists.html", title="Manage Artists", artists=artists)
     manageArtists.exposed = True
-    
+
     def manageAlbums(self, Status=None):
         myDB = db.DBConnection()
         if Status == "Upcoming":
@@ -340,13 +340,13 @@ class WebInterface(object):
             albums = myDB.select('SELECT * from albums')
         return serve_template(templatename="managealbums.html", title="Manage Albums", albums=albums)
     manageAlbums.exposed = True
-    
+
     def manageNew(self):
         myDB = db.DBConnection()
         newartists = myDB.select('SELECT * from newartists')
         return serve_template(templatename="managenew.html", title="Manage New Artists", newartists=newartists)
-    manageNew.exposed = True    
-    
+    manageNew.exposed = True
+
     def markArtists(self, action=None, **args):
         myDB = db.DBConnection()
         artistsToAdd = []
@@ -363,7 +363,7 @@ class WebInterface(object):
             elif action == 'resume':
                 controlValueDict = {'ArtistID': ArtistID}
                 newValueDict = {'Status': 'Active'}
-                myDB.upsert("artists", newValueDict, controlValueDict)              
+                myDB.upsert("artists", newValueDict, controlValueDict)
             else:
                 artistsToAdd.append(ArtistID)
         if len(artistsToAdd) > 0:
@@ -371,14 +371,14 @@ class WebInterface(object):
             threading.Thread(target=importer.addArtistIDListToDB, args=[artistsToAdd]).start()
         raise cherrypy.HTTPRedirect("home")
     markArtists.exposed = True
-    
+
     def importLastFM(self, username):
         headphones.LASTFM_USERNAME = username
         headphones.config_write()
         threading.Thread(target=lastfm.getArtists).start()
         raise cherrypy.HTTPRedirect("home")
     importLastFM.exposed = True
-    
+
     def importLastFMTag(self, tag, limit):
         threading.Thread(target=lastfm.getTagTopArtists, args=(tag, limit)).start()
         raise cherrypy.HTTPRedirect("home")
@@ -391,14 +391,14 @@ class WebInterface(object):
         time.sleep(10)
         raise cherrypy.HTTPRedirect("home")
     importItunes.exposed = True
-    
+
     def musicScan(self, path, scan=0, redirect=None, autoadd=0, libraryscan=0):
         headphones.LIBRARYSCAN = libraryscan
         headphones.ADD_ARTISTS = autoadd
         headphones.MUSIC_DIR = path
-        headphones.config_write() 
+        headphones.config_write()
         if scan:
-            try:    
+            try:
                 threading.Thread(target=librarysync.libraryScan).start()
             except Exception, e:
                 logger.error('Unable to complete the scan: %s' % e)
@@ -407,41 +407,41 @@ class WebInterface(object):
         else:
             raise cherrypy.HTTPRedirect("home")
     musicScan.exposed = True
-    
+
     def forceUpdate(self):
         from headphones import updater
         threading.Thread(target=updater.dbUpdate).start()
         raise cherrypy.HTTPRedirect("home")
     forceUpdate.exposed = True
-    
+
     def forceSearch(self):
         from headphones import searcher
         threading.Thread(target=searcher.searchforalbum).start()
         raise cherrypy.HTTPRedirect("home")
     forceSearch.exposed = True
-    
+
     def forcePostProcess(self):
         from headphones import postprocessor
         threading.Thread(target=postprocessor.forcePostProcess).start()
         raise cherrypy.HTTPRedirect("home")
     forcePostProcess.exposed = True
-    
+
     def checkGithub(self):
         from headphones import versioncheck
         versioncheck.checkGithub()
         raise cherrypy.HTTPRedirect("home")
     checkGithub.exposed = True
-    
+
     def history(self):
         myDB = db.DBConnection()
         history = myDB.select('''SELECT * from snatched order by DateAdded DESC''')
         return serve_template(templatename="history.html", title="History", history=history)
     history.exposed = True
-    
+
     def logs(self):
         return serve_template(templatename="logs.html", title="Log", lineList=headphones.LOG_LIST)
     logs.exposed = True
-    
+
 
     def getLog(self,iDisplayStart=0,iDisplayLength=100,iSortCol_0=0,sSortDir_0="desc",sSearch="",**kwargs):
 
@@ -459,7 +459,7 @@ class WebInterface(object):
             sortcolumn = 2
         elif iSortCol_0 == '2':
             sortcolumn = 1
-        filtered.sort(key=lambda x:x[sortcolumn],reverse=sSortDir_0 == "desc")        
+        filtered.sort(key=lambda x:x[sortcolumn],reverse=sSortDir_0 == "desc")
 
         rows = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
         rows = [[row[0],row[2],row[1]] for row in rows]
@@ -476,10 +476,10 @@ class WebInterface(object):
         iDisplayStart = int(iDisplayStart)
         iDisplayLength = int(iDisplayLength)
         filtered = []
-        totalcount = 0        
+        totalcount = 0
         myDB = db.DBConnection()
-        
-        
+
+
         sortcolumn = 'ArtistSortName'
         sortbyhavepercent = False
         if iSortCol_0 == '2':
@@ -490,9 +490,9 @@ class WebInterface(object):
             sortbyhavepercent = True
 
         if sSearch == "":
-            query = 'SELECT * from artists order by %s COLLATE NOCASE %s' % (sortcolumn,sSortDir_0)    
+            query = 'SELECT * from artists order by %s COLLATE NOCASE %s' % (sortcolumn,sSortDir_0)
             filtered = myDB.select(query)
-            totalcount = len(filtered) 
+            totalcount = len(filtered)
         else:
             query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch +'%"' +  'ORDER BY %s COLLATE NOCASE %s' % (sortcolumn,sSortDir_0)
             filtered = myDB.select(query)
@@ -501,11 +501,11 @@ class WebInterface(object):
         if sortbyhavepercent:
             filtered.sort(key=lambda x:(float(x['HaveTracks'])/x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0,x['HaveTracks'] if x['HaveTracks'] else 0.0),reverse=sSortDir_0 == "asc")
 
-        #can't figure out how to change the datatables default sorting order when its using an ajax datasource so ill 
+        #can't figure out how to change the datatables default sorting order when its using an ajax datasource so ill
         #just reverse it here and the first click on the "Latest Album" header will sort by descending release date
         if sortcolumn == 'ReleaseDate':
             filtered.reverse()
-            
+
 
         artists = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
         rows = []
@@ -515,7 +515,7 @@ class WebInterface(object):
                       "Status":artist["Status"],
                       "TotalTracks":artist["TotalTracks"],
                       "HaveTracks":artist["HaveTracks"],
-                      "LatestAlbum":"",                      
+                      "LatestAlbum":"",
                       "ReleaseDate":"",
                       "ReleaseInFuture":"False",
                       "AlbumID":"",
@@ -533,7 +533,7 @@ class WebInterface(object):
                 row['ReleaseDate'] = ''
                 row['LatestAlbum'] = artist['LatestAlbum']
                 row['AlbumID'] = artist['AlbumID']
-              
+
             rows.append(row)
 
 
@@ -556,23 +556,23 @@ class WebInterface(object):
             myDB.action('DELETE from snatched WHERE Status=?', [type])
         raise cherrypy.HTTPRedirect("history")
     clearhistory.exposed = True
-    
+
     def generateAPI(self):
 
         import hashlib, random
-        
+
         apikey = hashlib.sha224( str(random.getrandbits(256)) ).hexdigest()[0:32]
         logger.info("New API generated")
         return apikey
-    
+
     generateAPI.exposed = True
-    
+
     def config(self):
-    
+
         interface_dir = os.path.join(headphones.PROG_DIR, 'data/interfaces/')
         interface_list = [ name for name in os.listdir(interface_dir) if os.path.isdir(os.path.join(interface_dir, name)) ]
 
-        config = { 
+        config = {
                     "http_host" : headphones.HTTP_HOST,
                     "http_user" : headphones.HTTP_USERNAME,
                     "http_port" : headphones.HTTP_PORT,
@@ -599,9 +599,7 @@ class WebInterface(object):
                     "use_blackhole" : checked(headphones.BLACKHOLE),
                     "blackhole_dir" : headphones.BLACKHOLE_DIR,
                     "usenet_retention" : headphones.USENET_RETENTION,
-#                    "use_nzbmatrix" : checked(headphones.NZBMATRIX),
-#                    "nzbmatrix_user" : headphones.NZBMATRIX_USERNAME,
-#                    "nzbmatrix_api" : headphones.NZBMATRIX_APIKEY,
+                    "use_headphones_indexer" : checked(headphones.HEADPHONES_INDEXER),
                     "use_newznab" : checked(headphones.NEWZNAB),
                     "newznab_host" : headphones.NEWZNAB_HOST,
                     "newznab_api" : headphones.NEWZNAB_APIKEY,
@@ -610,13 +608,9 @@ class WebInterface(object):
                     "use_nzbsorg" : checked(headphones.NZBSORG),
                     "nzbsorg_uid" : headphones.NZBSORG_UID,
                     "nzbsorg_hash" : headphones.NZBSORG_HASH,
-#                    "use_newzbin" : checked(headphones.NEWZBIN),
-#                    "newzbin_uid" : headphones.NEWZBIN_UID,
-#                    "newzbin_pass" : headphones.NEWZBIN_PASSWORD,
                     "use_nzbsrus" : checked(headphones.NZBSRUS),
                     "nzbsrus_uid" : headphones.NZBSRUS_UID,
                     "nzbsrus_apikey" : headphones.NZBSRUS_APIKEY,
-                    "use_nzbx" : checked(headphones.NZBX),
                     "preferred_words" : headphones.PREFERRED_WORDS,
                     "ignored_words" : headphones.IGNORED_WORDS,
                     "required_words" : headphones.REQUIRED_WORDS,
@@ -711,11 +705,11 @@ class WebInterface(object):
                     "hppass": headphones.HPPASS,
                     "cache_sizemb":headphones.CACHE_SIZEMB,
                 }
-            
+
         # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8
         extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]
         extras_dict = {}
-        
+
         i = 1
         for extra in extras_list:
             if str(i) in headphones.EXTRAS:
@@ -723,17 +717,18 @@ class WebInterface(object):
             else:
                 extras_dict[extra] = ""
             i+=1
-                
+
         config["extras"] = extras_dict
-        
-        return serve_template(templatename="config.html", title="Settings", config=config)  
+
+        return serve_template(templatename="config.html", title="Settings", config=config)
     config.exposed = True
 
 
-    def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None, 
-        download_scan_interval=None, nzb_search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, 
-        sab_category=None, nzbget_host=None, nzbget_username='nzbget', nzbget_password=None, nzbget_category=None, nzb_downloader=0, download_dir=None, blackhole=0, blackhole_dir=None, usenet_retention=None, newznab=0, newznab_host=None, newznab_apikey=None, 
-        newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, nzbx=0, preferred_words=None, required_words=None, ignored_words=None,
+    def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None,
+        download_scan_interval=None, nzb_search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None,
+        sab_category=None, nzbget_host=None, nzbget_username='nzbget', nzbget_password=None, nzbget_category=None, nzb_downloader=0, download_dir=None, blackhole=0, blackhole_dir=None, usenet_retention=None, 
+        use_headphones_indexer=0,newznab=0, newznab_host=None, newznab_apikey=None, 
+		newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, preferred_words=None, required_words=None, ignored_words=None,
         preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None, 
         numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, t411=0, t411_login = None, t411_password=None, gks=0, gks_key = None, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
         rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0, 
@@ -757,7 +752,7 @@ class WebInterface(object):
         headphones.LIBRARYSCAN_INTERVAL = libraryscan_interval
         headphones.SAB_HOST = sab_host
         headphones.SAB_USERNAME = sab_username
-        headphones.SAB_PASSWORD = sab_password      
+        headphones.SAB_PASSWORD = sab_password
         headphones.SAB_APIKEY = sab_apikey
         headphones.SAB_CATEGORY = sab_category
         headphones.NZBGET_HOST = nzbget_host
@@ -769,9 +764,7 @@ class WebInterface(object):
         headphones.BLACKHOLE = blackhole
         headphones.BLACKHOLE_DIR = blackhole_dir
         headphones.USENET_RETENTION = usenet_retention
-#        headphones.NZBMATRIX = nzbmatrix
-#        headphones.NZBMATRIX_USERNAME = nzbmatrix_username
-#        headphones.NZBMATRIX_APIKEY = nzbmatrix_apikey
+        headphones.HEADPHONES_INDEXER = use_headphones_indexer
         headphones.NEWZNAB = newznab
         headphones.NEWZNAB_HOST = newznab_host
         headphones.NEWZNAB_APIKEY = newznab_apikey
@@ -779,13 +772,9 @@ class WebInterface(object):
         headphones.NZBSORG = nzbsorg
         headphones.NZBSORG_UID = nzbsorg_uid
         headphones.NZBSORG_HASH = nzbsorg_hash
-#        headphones.NEWZBIN = newzbin
-#        headphones.NEWZBIN_UID = newzbin_uid
-#        headphones.NEWZBIN_PASSWORD = newzbin_password
         headphones.NZBSRUS = nzbsrus
         headphones.NZBSRUS_UID = nzbsrus_uid
         headphones.NZBSRUS_APIKEY = nzbsrus_apikey
-        headphones.NZBX = nzbx
         headphones.PREFERRED_WORDS = preferred_words
         headphones.IGNORED_WORDS = ignored_words
         headphones.REQUIRED_WORDS = required_words
@@ -877,9 +866,9 @@ class WebInterface(object):
         headphones.CACHE_SIZEMB = int(cache_sizemb)
 
         # Handle the variable config options. Note - keys with False values aren't getting passed
-        
+
         headphones.EXTRA_NEWZNABS = []
-        
+
         for kwarg in kwargs:
             if kwarg.startswith('newznab_host'):
                 newznab_number = kwarg[12:]
@@ -889,26 +878,26 @@ class WebInterface(object):
                     newznab_enabled = int(kwargs['newznab_enabled' + newznab_number])
                 except KeyError:
                     newznab_enabled = 0
-                
+
                 headphones.EXTRA_NEWZNABS.append((newznab_host, newznab_api, newznab_enabled))
-                
+
         # Convert the extras to list then string. Coming in as 0 or 1
         temp_extras_list = []
         extras_list = [single, ep, compilation, soundtrack, live, remix, spokenword, audiobook]
-        
+
         i = 1
         for extra in extras_list:
             if extra:
                 temp_extras_list.append(i)
             i+=1
-        
-        headphones.EXTRAS = ','.join(str(n) for n in temp_extras_list)    
-        
+
+        headphones.EXTRAS = ','.join(str(n) for n in temp_extras_list)
+
         # Sanity checking
         if headphones.SEARCH_INTERVAL < 360:
             logger.info("Search interval too low. Resetting to 6 hour minimum")
             headphones.SEARCH_INTERVAL = 360
-        
+
         # Write the config
         headphones.config_write()
 
@@ -916,14 +905,14 @@ class WebInterface(object):
         mb.startmb()
 
         raise cherrypy.HTTPRedirect("config")
-        
+
     configUpdate.exposed = True
 
     def shutdown(self):
         headphones.SIGNAL = 'shutdown'
         message = 'Shutting Down...'
         return serve_template(templatename="shutdown.html", title="Shutting Down", message=message, timer=15)
-        
+        return page
 
     shutdown.exposed = True
 
@@ -932,78 +921,78 @@ class WebInterface(object):
         message = 'Restarting...'
         return serve_template(templatename="shutdown.html", title="Restarting", message=message, timer=30)
     restart.exposed = True
-    
+
     def update(self):
         headphones.SIGNAL = 'update'
         message = 'Updating...'
         return serve_template(templatename="shutdown.html", title="Updating", message=message, timer=60)
-        
+        return page
     update.exposed = True
-        
+
     def extras(self):
         myDB = db.DBConnection()
         cloudlist = myDB.select('SELECT * from lastfmcloud')
         return serve_template(templatename="extras.html", title="Extras", cloudlist=cloudlist)
-        
+        return page
     extras.exposed = True
 
     def addReleaseById(self, rid):
         threading.Thread(target=importer.addReleaseById, args=[rid]).start()
         raise cherrypy.HTTPRedirect("home")
     addReleaseById.exposed = True
-    
+
     def updateCloud(self):
-        
+
         lastfm.getSimilar()
         raise cherrypy.HTTPRedirect("extras")
-        
+
     updateCloud.exposed = True
-    
+
     def api(self, *args, **kwargs):
-        
+
         from headphones.api import Api
-                
+
         a = Api()
-        
+
         a.checkParams(*args, **kwargs)
-        
+
         data = a.fetchData()
-        
+
         return data
-        
+
     api.exposed = True
-    
+
     def getInfo(self, ArtistID=None, AlbumID=None):
-        
+
         from headphones import cache
         info_dict = cache.getInfo(ArtistID, AlbumID)
-        
+
         return simplejson.dumps(info_dict)
-        
+
     getInfo.exposed = True
-    
+
     def getArtwork(self, ArtistID=None, AlbumID=None):
-        
+
         from headphones import cache
         return cache.getArtwork(ArtistID, AlbumID)
-        
+
     getArtwork.exposed = True
-    
+
     def getThumb(self, ArtistID=None, AlbumID=None):
-        
+
         from headphones import cache
         return cache.getThumb(ArtistID, AlbumID)
-        
+
     getThumb.exposed = True
-    
+
     # If you just want to get the last.fm image links for an album, make sure to pass a releaseid and not a releasegroupid
     def getImageLinks(self, ArtistID=None, AlbumID=None):
-        
+
         from headphones import cache
         image_dict = cache.getImageLinks(ArtistID, AlbumID)
-        
+
         return simplejson.dumps(image_dict)
-        
+
     getImageLinks.exposed = True
 
 class Artwork(object):
@@ -1019,7 +1008,7 @@ class Artwork(object):
             ArtistID = ID
         elif ArtistOrAlbum == "album":
             AlbumID = ID
-    
+
         relpath =  cache.getArtwork(ArtistID,AlbumID)
 
         if not relpath:
@@ -1052,7 +1041,7 @@ class Artwork(object):
                 ArtistID = ID
             elif ArtistOrAlbum == "album":
                 AlbumID = ID
-    
+
             relpath =  cache.getThumb(ArtistID,AlbumID)
 
             if not relpath:
@@ -1072,8 +1061,8 @@ class Artwork(object):
             f = open(path,'rb')
             return f.read()
         default.exposed = True
-    
+
     thumbs = Thumbs()
-    
-    
+
+
 WebInterface.artwork = Artwork()

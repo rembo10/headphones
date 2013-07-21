@@ -179,11 +179,11 @@ class AuthenticationError(WebServiceError):
 # Helpers for validating and formatting allowed sets.
 
 def _check_includes_impl(includes, valid_includes):
-	for i in includes:
-		if i not in valid_includes:
-			raise InvalidIncludeError("Bad includes", "%s is not a valid include" % i)
+    for i in includes:
+        if i not in valid_includes:
+            raise InvalidIncludeError("Bad includes", "%s is not a valid include" % i)
 def _check_includes(entity, inc):
-	_check_includes_impl(inc, VALID_INCLUDES[entity])
+    _check_includes_impl(inc, VALID_INCLUDES[entity])
 
 def _check_filter(values, valid):
 	for v in values:
@@ -243,21 +243,21 @@ def hpauth(u, p):
 	hppassword = p
 
 def set_useragent(app, version, contact=None):
-	"""Set the User-Agent to be used for requests to the MusicBrainz webservice.
+    """Set the User-Agent to be used for requests to the MusicBrainz webservice.
     This must be set before requests are made."""
-	global _useragent, _client
-	if contact is not None:
-		_useragent = "%s/%s python-musicbrainz-ngs/%s ( %s )" % (app, version, _version, contact)
-	else:
-		_useragent = "%s/%s python-musicbrainz-ngs/%s" % (app, version, _version)
-	_client = "%s-%s" % (app, version)
-	_log.debug("set user-agent to %s" % _useragent)
+    global _useragent, _client
+    if contact is not None:
+        _useragent = "%s/%s python-musicbrainz-ngs/%s ( %s )" % (app, version, _version, contact)
+    else:
+        _useragent = "%s/%s python-musicbrainz-ngs/%s" % (app, version, _version)
+    _client = "%s-%s" % (app, version)
+    _log.debug("set user-agent to %s" % _useragent)
 
 def set_hostname(new_hostname):
-	"""Set the base hostname for MusicBrainz webservice requests.
-	Defaults to 'musicbrainz.org'."""
-	global hostname
-	hostname = new_hostname
+    """Set the base hostname for MusicBrainz webservice requests.
+    Defaults to 'musicbrainz.org'."""
+    global hostname
+    hostname = new_hostname
 
 # Rate limiting.
 
@@ -266,71 +266,73 @@ limit_requests = 1
 do_rate_limit = True
 
 def set_rate_limit(limit_or_interval=1.0, new_requests=1):
-	"""Sets the rate limiting behavior of the module. Must be invoked
+    """Sets the rate limiting behavior of the module. Must be invoked
     before the first Web service call.
     If the `limit_or_interval` parameter is set to False then
     rate limiting will be disabled. If it is a number then only
     a set number of requests (`new_requests`) will be made per
     given interval (`limit_or_interval`).
     """
-	global limit_interval
-	global limit_requests
-	global do_rate_limit
-	if isinstance(limit_or_interval, bool):
-		do_rate_limit = limit_or_interval
-	else:
-		if limit_or_interval <= 0.0:
-			raise ValueError("limit_or_interval can't be less than 0")
-		if new_requests <= 0:
-			raise ValueError("new_requests can't be less than 0")
-		do_rate_limit = True
-		limit_interval = limit_or_interval
-		limit_requests = new_requests
+    global limit_interval
+    global limit_requests
+    global do_rate_limit
+    if isinstance(limit_or_interval, bool):
+        do_rate_limit = limit_or_interval
+    else:
+        if limit_or_interval <= 0.0:
+            raise ValueError("limit_or_interval can't be less than 0")
+        if new_requests <= 0:
+            raise ValueError("new_requests can't be less than 0")
+        do_rate_limit = True
+        limit_interval = limit_or_interval
+        limit_requests = new_requests
 
 class _rate_limit(object):
-	"""A decorator that limits the rate at which the function may be
+    """A decorator that limits the rate at which the function may be
     called. The rate is controlled by the `limit_interval` and
     `limit_requests` global variables.  The limiting is thread-safe;
     only one thread may be in the function at a time (acts like a
     monitor in this sense). The globals must be set before the first
     call to the limited function.
     """
-	def __init__(self, fun):
-		self.fun = fun
-		self.last_call = 0.0
-		self.lock = threading.Lock()
-		self.remaining_requests = None # Set on first invocation.
+    def __init__(self, fun):
+        self.fun = fun
+        self.last_call = 0.0
+        self.lock = threading.Lock()
+        self.remaining_requests = None # Set on first invocation.
 
-	def _update_remaining(self):
-		"""Update remaining requests based on the elapsed time since
+    def _update_remaining(self):
+        """Update remaining requests based on the elapsed time since
         they were last calculated.
         """
-		# On first invocation, we have the maximum number of requests
-		# available.
-		if self.remaining_requests is None:
-			self.remaining_requests = float(limit_requests)
+        # On first invocation, we have the maximum number of requests
+        # available.
+        if self.remaining_requests is None:
+            self.remaining_requests = float(limit_requests)
 
-		else:
-			since_last_call = time.time() - self.last_call
-			self.remaining_requests += since_last_call * \
+        else:
+            since_last_call = time.time() - self.last_call
+            self.remaining_requests += since_last_call * \
                                        (limit_requests / limit_interval)
-			self.remaining_requests = min(self.remaining_requests,
+            self.remaining_requests = min(self.remaining_requests,
                                           float(limit_requests))
 
-		self.last_call = time.time()
+        self.last_call = time.time()
 
-	def __call__(self, *args, **kwargs):
-		with self.lock:
-			if do_rate_limit:
-				self._update_remaining()
-				# Delay if necessary.
-				while self.remaining_requests < 0.999:
-					time.sleep((1.0 - self.remaining_requests) *
+    def __call__(self, *args, **kwargs):
+        with self.lock:
+            if do_rate_limit:
+                self._update_remaining()
+
+                # Delay if necessary.
+                while self.remaining_requests < 0.999:
+                    time.sleep((1.0 - self.remaining_requests) *
                                (limit_requests / limit_interval))
-					self._update_remaining()
-				# Call the original function, "paying" for this call.
-				self.remaining_requests -= 1.0
-			return self.fun(*args, **kwargs)
+                    self._update_remaining()
+
+                # Call the original function, "paying" for this call.
+                self.remaining_requests -= 1.0
+            return self.fun(*args, **kwargs)
 
 # From pymb2
 class _RedirectPasswordMgr(compat.HTTPPasswordMgr):
@@ -738,55 +740,55 @@ def get_works_by_iswc(iswc, includes=[]):
 	return _do_mb_query("iswc", iswc, includes)
 
 def _browse_impl(entity, includes, valid_includes, limit, offset, params, release_status=[], release_type=[]):
-	_check_includes_impl(includes, valid_includes)
-	p = {}
-	for k,v in params.items():
-		if v:
-			p[k] = v
-	if len(p) > 1:
-		raise Exception("Can't have more than one of " + ", ".join(params.keys()))
-	if limit: p["limit"] = limit
-	if offset: p["offset"] = offset
-	filterp = _check_filter_and_make_params(entity, includes, release_status, release_type)
-	p.update(filterp)
-	return _do_mb_query(entity, "", includes, p)
+    _check_includes_impl(includes, valid_includes)
+    p = {}
+    for k,v in params.items():
+        if v:
+            p[k] = v
+    if len(p) > 1:
+        raise Exception("Can't have more than one of " + ", ".join(params.keys()))
+    if limit: p["limit"] = limit
+    if offset: p["offset"] = offset
+    filterp = _check_filter_and_make_params(entity, includes, release_status, release_type)
+    p.update(filterp)
+    return _do_mb_query(entity, "", includes, p)
 
 # Browse methods
 # Browse include are a subset of regular get includes, so we check them here
 # and the test in _do_mb_query will pass anyway.
 def browse_artists(recording=None, release=None, release_group=None, includes=[], limit=None, offset=None):
-	# optional parameter work?
-	valid_includes = ["aliases", "tags", "ratings", "user-tags", "user-ratings"]
-	params = {"recording": recording,
+    # optional parameter work?
+    valid_includes = ["aliases", "tags", "ratings", "user-tags", "user-ratings"]
+    params = {"recording": recording,
               "release": release,
               "release-group": release_group}
-	return _browse_impl("artist", includes, valid_includes, limit, offset, params)
+    return _browse_impl("artist", includes, valid_includes, limit, offset, params)
 
 def browse_labels(release=None, includes=[], limit=None, offset=None):
-	valid_includes = ["aliases", "tags", "ratings", "user-tags", "user-ratings"]
-	params = {"release": release}
-	return _browse_impl("label", includes, valid_includes, limit, offset, params)
+    valid_includes = ["aliases", "tags", "ratings", "user-tags", "user-ratings"]
+    params = {"release": release}
+    return _browse_impl("label", includes, valid_includes, limit, offset, params)
 
 def browse_recordings(artist=None, release=None, includes=[], limit=None, offset=None):
-	valid_includes = ["artist-credits", "tags", "ratings", "user-tags", "user-ratings"]
-	params = {"artist": artist,
+    valid_includes = ["artist-credits", "tags", "ratings", "user-tags", "user-ratings"]
+    params = {"artist": artist,
               "release": release}
-	return _browse_impl("recording", includes, valid_includes, limit, offset, params)
+    return _browse_impl("recording", includes, valid_includes, limit, offset, params)
 
 def browse_releases(artist=None, label=None, recording=None, release_group=None, release_status=[], release_type=[], includes=[], limit=None, offset=None):
-	# track_artist param doesn't work yet
-	valid_includes = ["artist-credits", "labels", "recordings", "release-groups","media"]
-	params = {"artist": artist,
+    # track_artist param doesn't work yet
+    valid_includes = ["artist-credits", "labels", "recordings", "release-groups","media"]
+    params = {"artist": artist,
               "label": label,
               "recording": recording,
               "release-group": release_group}
-	return _browse_impl("release", includes, valid_includes, limit, offset, params, release_status, release_type)
+    return _browse_impl("release", includes, valid_includes, limit, offset, params, release_status, release_type)
 
 def browse_release_groups(artist=None, release=None, release_type=[], includes=[], limit=None, offset=None):
-	valid_includes = ["artist-credits", "tags", "ratings", "user-tags", "user-ratings"]
-	params = {"artist": artist,
+    valid_includes = ["artist-credits", "tags", "ratings", "user-tags", "user-ratings"]
+    params = {"artist": artist,
               "release": release}
-	return _browse_impl("release-group", includes, valid_includes, limit, offset, params, [], release_type)
+    return _browse_impl("release-group", includes, valid_includes, limit, offset, params, [], release_type)
 
 # browse_work is defined in the docs but has no browse criteria
 
@@ -808,58 +810,58 @@ def submit_barcodes(barcodes):
 	return _do_mb_post("release", query)
 
 def submit_puids(puids):
-	"""Submit PUIDs.
+    """Submit PUIDs.
 
     Must call auth(user, pass) first"""
-	query = mbxml.make_puid_request(puids)
-	return _do_mb_post("recording", query)
+    query = mbxml.make_puid_request(puids)
+    return _do_mb_post("recording", query)
 
 def submit_echoprints(echoprints):
-	"""Submit echoprints.
+    """Submit echoprints.
 
     Must call auth(user, pass) first"""
-	query = mbxml.make_echoprint_request(echoprints)
-	return _do_mb_post("recording", query)
+    query = mbxml.make_echoprint_request(echoprints)
+    return _do_mb_post("recording", query)
 
 def submit_isrcs(recordings_isrcs):
-	"""Submit ISRCs.
+    """Submit ISRCs.
     Submits a set of {recording-id: [isrc1, isrc2, ...]}
 
     Must call auth(user, pass) first"""
-	query = mbxml.make_isrc_request(recordings_isrcs=recordings_isrcs)
-	return _do_mb_post("recording", query)
+    query = mbxml.make_isrc_request(recordings_isrcs=recordings_isrcs)
+    return _do_mb_post("recording", query)
 
 def submit_tags(artist_tags={}, recording_tags={}):
-	"""Submit user tags.
+    """Submit user tags.
     Artist or recording parameters are of the form:
     {'entityid': [taglist]}
 
     Must call auth(user, pass) first"""
-	query = mbxml.make_tag_request(artist_tags, recording_tags)
-	return _do_mb_post("tag", query)
+    query = mbxml.make_tag_request(artist_tags, recording_tags)
+    return _do_mb_post("tag", query)
 
 def submit_ratings(artist_ratings={}, recording_ratings={}):
-	""" Submit user ratings.
+    """ Submit user ratings.
     Artist or recording parameters are of the form:
     {'entityid': rating}
 
     Must call auth(user, pass) first"""
-	query = mbxml.make_rating_request(artist_ratings, recording_ratings)
-	return _do_mb_post("rating", query)
+    query = mbxml.make_rating_request(artist_ratings, recording_ratings)
+    return _do_mb_post("rating", query)
 
 def add_releases_to_collection(collection, releases=[]):
-	"""Add releases to a collection.
+    """Add releases to a collection.
     Collection and releases should be identified by their MBIDs
 
     Must call auth(user, pass) first"""
-	# XXX: Maximum URI length of 16kb means we should only allow ~400 releases
-	releaselist = ";".join(releases)
-	_do_mb_put("collection/%s/releases/%s" % (collection, releaselist))
+    # XXX: Maximum URI length of 16kb means we should only allow ~400 releases
+    releaselist = ";".join(releases)
+    _do_mb_put("collection/%s/releases/%s" % (collection, releaselist))
 
 def remove_releases_from_collection(collection, releases=[]):
-	"""Remove releases from a collection.
+    """Remove releases from a collection.
     Collection and releases should be identified by their MBIDs
 
     Must call auth(user, pass) first"""
-	releaselist = ";".join(releases)
-	_do_mb_delete("collection/%s/releases/%s" % (collection, releaselist))
+    releaselist = ";".join(releases)
+    _do_mb_delete("collection/%s/releases/%s" % (collection, releaselist))
