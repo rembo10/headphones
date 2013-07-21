@@ -669,6 +669,18 @@ def getresultNZB(result):
             getresultNZB(result)
         except AttributeError:
             logger.warn("AttributeError in getresultNZB.")
+    elif result[3] == 'headphones':
+        request = urllib2.Request(result[2])
+        request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+        base64string = base64.encodestring('%s:%s' % (headphones.HPUSER, headphones.HPPASS)).replace('\n', '')
+        request.add_header("Authorization", "Basic %s" % base64string)
+        
+        opener = urllib2.build_opener()
+        
+        try:
+            nzb = opener.open(request).read()
+        except Exception, e:
+            logger.warn('Error fetching nzb from url: ' + result[2] + ' %s' % e)
     else:
         request = urllib2.Request(result[2])
         request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
