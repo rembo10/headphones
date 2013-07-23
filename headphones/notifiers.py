@@ -289,6 +289,13 @@ class Synoindex:
         if not self.util_exists():
             logger.warn("Error sending notification: synoindex utility not found at %s" % self.util_loc)
             return
+        parentpath = os.path.abspath(os.path.join(path, os.path.pardir))
+        nbfolders = len([f for f in os.listdir(parentpath) if os.path.isdir(os.path.join(parentpath, f))])
+        if nbfolders == 1:
+            path = parentpath
+            logger.info("First album for this artist")
+        else:
+            logger.info("Artist had one album or more")
 
         if os.path.isfile(path):
             cmd_arg = '-a'
