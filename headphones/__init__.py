@@ -178,6 +178,7 @@ NUMBEROFSEEDERS = 10
 ISOHUNT = None
 KAT = None
 MININOVA = None
+PIRATEBAY = None
 WAFFLES = None
 WAFFLES_UID = None
 WAFFLES_PASSKEY = None
@@ -291,7 +292,7 @@ def initialize():
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
                 RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, \
                 ADD_ALBUM_ART, ALBUM_ART_FORMAT, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
-                TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
+                TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, PIRATEBAY, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, TRANSMISSION_HOST, TRANSMISSION_USERNAME, TRANSMISSION_PASSWORD, \
@@ -399,6 +400,7 @@ def initialize():
         NUMBEROFSEEDERS = check_setting_str(CFG, 'General', 'numberofseeders', '10')
         ISOHUNT = bool(check_setting_int(CFG, 'General', 'isohunt', 0))
         KAT = bool(check_setting_int(CFG, 'General', 'kat', 0))
+        PIRATEBAY = bool(check_setting_int(CFG, 'General', 'piratebay', 0))
         MININOVA = bool(check_setting_int(CFG, 'General', 'mininova', 0))
         DOWNLOAD_TORRENT_DIR = check_setting_str(CFG, 'General', 'download_torrent_dir', '')
 
@@ -739,6 +741,7 @@ def config_write():
     new_config['General']['isohunt'] = int(ISOHUNT)
     new_config['General']['kat'] = int(KAT)
     new_config['General']['mininova'] = int(MININOVA)
+    new_config['General']['piratebay'] = int(PIRATEBAY)
     new_config['General']['download_torrent_dir'] = DOWNLOAD_TORRENT_DIR
 
     new_config['Waffles'] = {}

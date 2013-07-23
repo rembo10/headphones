@@ -337,13 +337,17 @@
                     <fieldset>
                     	<legend>Torrents</legend>
                     	<div class="row checkbox">                    	
+                    		<input type="checkbox" name="use_piratebay" value="1" ${config['use_piratebay']} /><label>Pirate Bay</label> 
+			</div>
+                    	<div class="row checkbox">                    	
                     		<input type="checkbox" name="use_isohunt" value="1" ${config['use_isohunt']} /><label>Isohunt</label> 
                     	</div>
                     	<div class="row checkbox">                    	 
                     		<input type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /><label>Mininova</label>
                     	</div>
                     	<div class="row checkbox">
-                    	<input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Kick Ass Torrents</label></div>
+                    	<input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Kick Ass Torrents</label>
+			</div>
                         <div class="row checkbox">
                             <input id="usewaffles" type="checkbox" name="waffles" onclick="initConfigCheckbox($(this));" value="1" ${config['use_waffles']} /><label>Waffles.fm</label>
                         </div>
