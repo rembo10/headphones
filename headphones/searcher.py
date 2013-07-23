@@ -1196,7 +1196,17 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         if len(resultlist):
             resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
         
-        if len(resultlist):    
+        if len(resultlist):
+            
+            # Add a priority if it has any of the preferred words
+            temp_list = []
+            for result in resultlist:
+                if any(word.lower() in result[0].lower() for word in helpers.split_string(headphones.PREFERRED_WORDS)):
+                    temp_list.append((result[0],result[1],result[2],result[3],1))
+                else:
+                    temp_list.append((result[0],result[1],result[2],result[3],0))
+                        
+            resultlist = temp_list
                        
             if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
 
@@ -1211,7 +1221,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     
                     if not targetsize:
                         logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
-                        nzblist = sorted(resultlist, key=lambda title: (-title[4] , -title[1]))
+                        torrentlist = sorted(resultlist, key=lambda title: (-title[4] , -title[1]))
                     
                     else:
                         logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
@@ -1245,22 +1255,22 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                             delta = abs(targetsize - result[1])
                             newlist.append((result[0], result[1], result[2], result[3], result[4], delta))
             
-                        nzblist = sorted(newlist, key=lambda title: (-title[4], title[5]))
+                        torrentlist = sorted(newlist, key=lambda title: (-title[4], title[5]))
                         
                         if not len(nzblist) and len(flac_list) and headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                             logger.info("Since there were no appropriate lossy matches (and at least one lossless match), going to use lossless instead")
-                            nzblist = sorted(flac_list, key=lambda title: (-title[4], -title[1]))
+                            torrentlist = sorted(flac_list, key=lambda title: (-title[4], -title[1]))
                 
                 except Exception, e:
                     
                     logger.debug('Error: %s' % str(e))
                     logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
                     
-                    nzblist = sorted(resultlist, key=lambda title: (-title[4], -title[1]))
+                    torrentlist = sorted(resultlist, key=lambda title: (-title[4], -title[1]))
             
             else:
             
-                torrentlist = sorted(resultlist, key=lambda title: title[1], reverse=True)
+                torrentlist = sorted(resultlist, key=lambda title: (-title[4], -title[1]))
             
             
             if new:
