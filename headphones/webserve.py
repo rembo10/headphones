@@ -615,6 +615,7 @@ class WebInterface(object):
                     "numberofseeders" : headphones.NUMBEROFSEEDERS,
                     "use_isohunt" : checked(headphones.ISOHUNT),
                     "use_kat" : checked(headphones.KAT),
+                    "use_piratebay" : checked(headphones.PIRATEBAY),
                     "use_mininova" : checked(headphones.MININOVA),
                     "use_waffles" : checked(headphones.WAFFLES),
                     "waffles_uid" : headphones.WAFFLES_UID,
@@ -718,7 +719,7 @@ class WebInterface(object):
         utorrent_host=None, utorrent_username=None, utorrent_password=None, nzb_downloader=0, torrent_downloader=0, download_dir=None, blackhole=0, blackhole_dir=None, 
         usenet_retention=None, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, 
         nzbsrus_apikey=None, nzbx=0, preferred_words=None, required_words=None, ignored_words=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None, 
-        numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
+        numberofseeders=10, use_isohunt=0, use_kat=0, use_piratebay=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
         rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0, 
         destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0,
         remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
@@ -778,6 +779,7 @@ class WebInterface(object):
         headphones.DOWNLOAD_TORRENT_DIR = download_torrent_dir
         headphones.ISOHUNT = use_isohunt
         headphones.KAT = use_kat
+        headphones.PIRATEBAY = use_piratebay
         headphones.MININOVA = use_mininova
         headphones.WAFFLES = waffles
         headphones.WAFFLES_UID = waffles_uid

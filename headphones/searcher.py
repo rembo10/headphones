@@ -17,6 +17,7 @@
 
 import urllib, urllib2, urlparse, httplib
 import lib.feedparser as feedparser
+from bs4 import BeautifulSoup
 from lib.pygazelle import api as gazelleapi
 from lib.pygazelle import encoding as gazelleencoding
 from lib.pygazelle import format as gazelleformat
@@ -117,7 +118,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
                 else:
                     foundNZB = searchNZB(result['AlbumID'], new)
 
-            if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
+            if (headphones.KAT or headphones.PIRATEBAY or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
 
                 if result['Status'] == "Wanted Lossless":
                     searchTorrent(result['AlbumID'], new, losslessOnly=True)
@@ -127,10 +128,10 @@ def searchforalbum(albumid=None, new=False, lossless=False):
     else:        
     
         foundNZB = "none"
-        if (headphones.NZBMATRIX or headphones.NEWZNAB or headphones.NZBSORG or headphones.NEWZBIN or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
+        if (headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBX or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
             foundNZB = searchNZB(albumid, new, lossless)
 
-        if (headphones.KAT or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
+        if (headphones.KAT or headphones.PIRATEBAY or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
             searchTorrent(albumid, new, lossless)
 
 def searchNZB(albumid=None, new=False, losslessOnly=False):
@@ -1045,6 +1046,58 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                        gazelle.generate_torrent_link(torrent.id),
                                        provider))
 
+        # Pirate Bay
+        if headphones.PIRATEBAY and headphones.TORRENT_DOWNLOADER != 0:
+            provider = "The Pirate Bay"    
+            providerurl = url_fix("http://thepiratebay.sx/search/" + term + "/0/99/")
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+                category = '104'          #flac
+                maxsize = 10000000000
+            elif headphones.PREFERRED_QUALITY:
+                category = '100'          #audio cat
+                maxsize = 10000000000
+            else:
+                category = '101'          #mp3
+                maxsize = 300000000        
+
+            searchURL = providerurl + category
+            
+            try:
+                data = urllib2.urlopen(searchURL, timeout=20).read()
+            except urllib2.URLError, e:
+                logger.warn('Error fetching data from The Pirate Bay: %s' % e)
+                data = False
+            
+            if data:
+            
+                logger.info(u'Parsing results from <a href="%s">The Pirate Bay</a>' % searchURL)
+                
+                soup = BeautifulSoup(data)
+                table = soup.find('table')
+                rows = table.findAll('tr')
+                
+                if len(rows) == '1':
+                    logger.info(u"No results found from %s for %s" % (provider, term))
+                    pass
+                
+                else:
+                    for item in rows[1:]:
+                        try:
+                            rightformat = True
+                            title = ''.join(item.find("a", {"class" : "detLink"}))
+                            seeds = int(''.join(item.find("td", {"align" : "right"})))
+                            url = item.findAll("a")[3]['href']
+                            formatted_size = re.search('Size (.*),', unicode(item)).group(1).replace(u'\xa0', ' ')
+                            size = helpers.piratesize(formatted_size)
+                            if size < maxsize and minimumseeders < seeds:
+                                resultlist.append((title, size, url, provider))
+                                logger.info('Found %s. Size: %s' % (title, formatted_size))
+                            else:
+                                logger.info('%s is larger than the maxsize or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i)' % (title, size, int(seeds)))    
+                        
+                        except Exception, e:
+                            logger.error(u"An unknown error occurred in the Pirate Bay parser: %s" % e)
+
         if headphones.ISOHUNT:
             provider = "isoHunt"    
             providerurl = url_fix("http://isohunt.com/js/rss/" + term)
@@ -1295,6 +1348,8 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             
             (data, bestqual) = preprocesstorrent(torrentlist, pre_sorted_results)
             
+            logger.info(u"Made it out")
+            
             if data and bestqual:
                 logger.info(u'Found best result from %s: <a href="%s">%s</a> - %s' % (bestqual[3], bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
                 torrent_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year) 
@@ -1345,10 +1400,9 @@ def preprocesstorrent(resultlist, pre_sorted_list=False):
             selresult = result
         elif int(selresult[1]) < int(result[1]): # if size is lower than new result replace previous selected result (bigger size = better quality?)
             selresult = result
-             
-    # get outta here if rutracker
-        
-    if selresult[3] == 'rutracker.org':
+
+    # get outta here if rutracker or piratebay
+    if selresult[3] == 'rutracker.org' or selresult[3] == 'The Pirate Bay':
         return True, selresult
                    
     if pre_sorted_list:
