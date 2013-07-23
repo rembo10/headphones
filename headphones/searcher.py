@@ -1198,7 +1198,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         
         if len(resultlist):    
                        
-            if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE and not pre_sorted_results:
+            if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
 
                 logger.debug('Target bitrate: %s kbps' % headphones.PREFERRED_BITRATE)
 
@@ -1208,26 +1208,55 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     albumlength = sum([pair[0] for pair in tracks])
 
                     targetsize = albumlength/1000 * int(headphones.PREFERRED_BITRATE) * 128
-                    logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
-    
-                    newlist = []
-
-                    for result in resultlist:
-                        delta = abs(targetsize - result[1])
-                        newlist.append((result[0], result[1], result[2], result[3], delta))
-        
-                    torrentlist = sorted(newlist, key=lambda title: title[4])
+                    
+                    if not targetsize:
+                        logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
+                        nzblist = sorted(resultlist, key=lambda title: (-title[4] , -title[1]))
+                    
+                    else:
+                        logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
+                        newlist = []
+                        flac_list = []
+                        
+                        if headphones.PREFERRED_BITRATE_HIGH_BUFFER:
+                            high_size_limit = targetsize * int(headphones.PREFERRED_BITRATE_HIGH_BUFFER)/100
+                        else:
+                            high_size_limit = None
+                        if headphones.PREFERRED_BITRATE_LOW_BUFFER:
+                            low_size_limit = targetsize * int(headphones.PREFERRED_BITRATE_LOW_BUFFER)/100
+                        else:
+                            low_size_limit = None
+                            
+                        for result in resultlist:
+                            
+                            if high_size_limit and (result[1] > high_size_limit):
+                                logger.info(result[0] + " is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit))
+                                
+                                # Add lossless nzbs to the "flac list" which we can use if there are no good lossy matches
+                                if 'flac' in result[0].lower():
+                                    flac_list.append((result[0], result[1], result[2], result[3], result[4]))
+                                
+                                continue
+                                
+                            if low_size_limit and (result[1] < low_size_limit):
+                                logger.info(result[0] + " is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit))
+                                continue
+                                                                
+                            delta = abs(targetsize - result[1])
+                            newlist.append((result[0], result[1], result[2], result[3], result[4], delta))
+            
+                        nzblist = sorted(newlist, key=lambda title: (-title[4], title[5]))
+                        
+                        if not len(nzblist) and len(flac_list) and headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
+                            logger.info("Since there were no appropriate lossy matches (and at least one lossless match), going to use lossless instead")
+                            nzblist = sorted(flac_list, key=lambda title: (-title[4], -title[1]))
                 
                 except Exception, e:
                     
                     logger.debug('Error: %s' % str(e))
                     logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
                     
-                    torrentlist = sorted(resultlist, key=lambda title: title[1], reverse=True)
-
-            elif pre_sorted_results:
-
-                torrentlist = resultlist
+                    nzblist = sorted(resultlist, key=lambda title: (-title[4], -title[1]))
             
             else:
             
