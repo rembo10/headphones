@@ -1293,7 +1293,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         for result in resultlist:
                             
                             if high_size_limit and (result[1] > high_size_limit):
-                                logger.info(result[0] + " is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit))
+                                logger.info(result[0] + " is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit) + ")")
                                 
                                 # Add lossless nzbs to the "flac list" which we can use if there are no good lossy matches
                                 if 'flac' in result[0].lower():
@@ -1302,7 +1302,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 continue
                                 
                             if low_size_limit and (result[1] < low_size_limit):
-                                logger.info(result[0] + " is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit))
+                                logger.info(result[0] + " is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit) + ")")
                                 continue
                                                                 
                             delta = abs(targetsize - result[1])
@@ -1310,7 +1310,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             
                         torrentlist = sorted(newlist, key=lambda title: (-title[4], title[5]))
                         
-                        if not len(nzblist) and len(flac_list) and headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
+                        if not len(torrentlist) and len(flac_list) and headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                             logger.info("Since there were no appropriate lossy matches (and at least one lossless match), going to use lossless instead")
                             torrentlist = sorted(flac_list, key=lambda title: (-title[4], -title[1]))
                 
@@ -1347,8 +1347,6 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             logger.info(u"Pre-processing result")
             
             (data, bestqual) = preprocesstorrent(torrentlist, pre_sorted_results)
-            
-            logger.info(u"Made it out")
             
             if data and bestqual:
                 logger.info(u'Found best result from %s: <a href="%s">%s</a> - %s' % (bestqual[3], bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
