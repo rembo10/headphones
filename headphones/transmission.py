@@ -19,6 +19,7 @@ from headphones import logger, notifiers
 import urllib2
 import lib.simplejson as json
 import base64
+import time
 
 # This is just a simple script to send torrents to transmission. The
 # intention is to turn this into a class where we can check the state
@@ -26,7 +27,52 @@ import base64
 # TODO: Store the session id so we don't need to make 2 calls
 #       Store torrent id so we can check up on it
 
-def sendTorrent(link):
+def addTorrent(link):
+    method = 'torrent-add'
+    arguments = {'filename': link, 'download-dir':headphones.DOWNLOAD_TORRENT_DIR}
+    
+    response = torrentAction(method,arguments)
+    
+
+    if response['result'] == 'success':
+        name = response['arguments']['torrent-added']['name']
+        logger.info(u"Torrent sent to Transmission successfully")
+        if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
+            logger.info(u"Sending Prowl notification")
+            prowl = notifiers.PROWL()
+            prowl.notify(name,"Download started")
+        if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
+            logger.info(u"Sending Pushover notification")
+            prowl = notifiers.PUSHOVER()
+            prowl.notify(name,"Download started")
+        if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
+            logger.debug(u"Sending NMA notification")
+            nma = notifiers.NMA()
+            nma.notify(snatched_nzb=name)
+
+        return response['arguments']['torrent-added']['id']
+        
+def getTorrentFolder(torrentid):
+    method = 'torrent-get'
+    arguments = { 'ids': torrentid, 'fields': ['name','percentDone']}
+    
+    response = torrentAction(method, arguments)
+    percentdone = response['arguments']['torrents'][0]['percentDone']
+    torrent_folder_name = response['arguments']['torrents'][0]['name']
+    print torrent_folder_name
+    
+    while percentdone == 0:
+        print "In the while loop"
+        time.sleep(5)
+        response = torrentAction(method, arguments)
+        percentdone = response['arguments']['torrents'][0]['percentDone']
+        print "Attempting to get folder name, percent done: " + str(percentdone)
+    
+    torrent_folder_name = response['arguments']['torrents'][0]['name']
+    print torrent_folder_name + " updated and finished!"
+    return torrent_folder_name
+    
+def torrentAction(method, arguments):
     
     host = headphones.TRANSMISSION_HOST
     username = headphones.TRANSMISSION_USERNAME
@@ -61,9 +107,8 @@ def sendTorrent(link):
         
     request.add_header('x-transmission-session-id', sessionid)
         
-    postdata = json.dumps({ 'method': 'torrent-add', 
-                       'arguments': { 'filename': link, 
-                                      'download-dir': headphones.DOWNLOAD_TORRENT_DIR } })
+    postdata = json.dumps({ 'method': method, 
+                       'arguments': arguments })
                                       
     request.add_data(postdata)
                                       
@@ -72,21 +117,5 @@ def sendTorrent(link):
     except Exception, e:
         logger.error("Error sending torrent to Transmission: " + str(e))
         return
-
-    if response['result'] == 'success':
-        name = response['arguments']['torrent-added']['name']
-        logger.info(u"Torrent sent to Transmission successfully")
-        if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
-            logger.info(u"Sending Prowl notification")
-            prowl = notifiers.PROWL()
-            prowl.notify(name,"Download started")
-        if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
-            logger.info(u"Sending Pushover notification")
-            prowl = notifiers.PUSHOVER()
-            prowl.notify(name,"Download started")
-        if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
-            logger.debug(u"Sending NMA notification")
-            nma = notifiers.NMA()
-            nma.notify(snatched_nzb=name)
-
-        return True
+        
+    return response

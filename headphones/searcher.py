@@ -1386,8 +1386,9 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         
                 elif headphones.TORRENT_DOWNLOADER == 1:
                     logger.info("Sending torrent to Transmission")
-                    transmission.sendTorrent(bestqual[2])
-
+                    torrentid = transmission.addTorrent(bestqual[2])
+                    torrent_folder_name = transmission.getTorrentFolder(torrentid)
+                    
                         
                 myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
                 myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", torrent_folder_name, "torrent"])
