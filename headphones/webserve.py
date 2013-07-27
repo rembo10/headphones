@@ -712,13 +712,11 @@ class WebInterface(object):
         return serve_template(templatename="config.html", title="Settings", config=config)
     config.exposed = True
 
-
-<<<<<<< HEAD
     def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None,
         download_scan_interval=None, nzb_search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None,
         sab_category=None, nzbget_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, transmission_host=None, transmission_username=None, transmission_password=None, 
         utorrent_host=None, utorrent_username=None, utorrent_password=None, nzb_downloader=0, torrent_downloader=0, download_dir=None, blackhole_dir=None, usenet_retention=None, 
-        use_headphones_indexer=0,newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, 
+        use_headphones_indexer=0, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, 
         preferred_words=None, required_words=None, ignored_words=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None,
         numberofseeders=None, use_piratebay=0, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
         rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0,
@@ -758,7 +756,6 @@ class WebInterface(object):
         headphones.NZB_DOWNLOADER = int(nzb_downloader)
         headphones.TORRENT_DOWNLOADER = int(torrent_downloader)
         headphones.DOWNLOAD_DIR = download_dir
-        headphones.BLACKHOLE = blackhole
         headphones.BLACKHOLE_DIR = blackhole_dir
         headphones.USENET_RETENTION = usenet_retention
         headphones.HEADPHONES_INDEXER = use_headphones_indexer
