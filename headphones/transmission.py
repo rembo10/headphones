@@ -13,4 +13,80 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
+import headphones
+from headphones import logger, notifiers
 
+import urllib2
+import lib.simplejson as json
+import base64
+
+# This is just a simple script to send torrents to transmission. The
+# intention is to turn this into a class where we can check the state
+# of the download, set the download dir, etc. 
+# TODO: Store the session id so we don't need to make 2 calls
+#       Store torrent id so we can check up on it
+
+def sendTorrent(link):
+    
+    host = headphones.TRANSMISSION_HOST
+    username = headphones.TRANSMISSION_USERNAME
+    password = headphones.TRANSMISSION_PASSWORD
+    sessionid = None
+    
+    if not host.startswith('http'):
+        host = 'http://' + host
+
+    if host.endswith('/'):
+        host = host[:-1]
+	
+    host = host + "/transmission/rpc"
+    request = urllib2.Request(host)
+    if username and password:
+        base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+        request.add_header("Authorization", "Basic %s" % base64string)
+    opener = urllib2.build_opener()
+    try:
+        data = opener.open(request).read()
+    except urllib2.HTTPError, e:
+        if e.code == 409:
+            sessionid = e.hdrs['x-transmission-session-id']
+        else:
+            logger.error('Could not connect to Transmission. Error: ' + str(e))
+    except Exception, e:
+        logger.error('Could not connect to Transmission. Error: ' + str(e))
+    
+    if not sessionid:
+        logger.error("Error getting Session ID from Transmission")
+        return
+        
+    request.add_header('x-transmission-session-id', sessionid)
+        
+    postdata = json.dumps({ 'method': 'torrent-add', 
+                       'arguments': { 'filename': link, 
+                                      'download-dir': headphones.DOWNLOAD_TORRENT_DIR } })
+                                      
+    request.add_data(postdata)
+                                      
+    try:    
+        response = json.loads(opener.open(request).read())
+    except Exception, e:
+        logger.error("Error sending torrent to Transmission: " + str(e))
+        return
+
+    if response['result'] == 'success':
+        name = response['arguments']['torrent-added']['name']
+        logger.info(u"Torrent sent to Transmission successfully")
+        if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
+            logger.info(u"Sending Prowl notification")
+            prowl = notifiers.PROWL()
+            prowl.notify(name,"Download started")
+        if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
+            logger.info(u"Sending Pushover notification")
+            prowl = notifiers.PUSHOVER()
+            prowl.notify(name,"Download started")
+        if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
+            logger.debug(u"Sending NMA notification")
+            nma = notifiers.NMA()
+            nma.notify(snatched_nzb=name)
+
+        return True
