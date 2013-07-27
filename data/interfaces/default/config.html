@@ -177,7 +177,7 @@
                 <td>
                    	<fieldset>
                    		<legend>Torrents</legend>
-						<input type="radio" name="torrent_downloader" id="torrent_downloader_blackhole" value="0" ${config['torrent_downloader_blackhole']}>Black Hole <input type="radio" name="torrent_downloader" id="torrent_downloader_transmission" value="1" ${config['torrent_downloader_transmission']}> Transmission <input type="radio" name="torrent_downloader" id="torrent_downloader_utorrent" value="2" ${config['torrent_downloader_utorrent']}> uTorrent
+						<input type="radio" name="torrent_downloader" id="torrent_downloader_blackhole" value="0" ${config['torrent_downloader_blackhole']}>Black Hole <input type="radio" name="torrent_downloader" id="torrent_downloader_transmission" value="1" ${config['torrent_downloader_transmission']}> Transmission <!--  <input type="radio" name="torrent_downloader" id="torrent_downloader_utorrent" value="2" ${config['torrent_downloader_utorrent']}> uTorrent -->
 					</fieldset>	
 						<fieldset id="torrent_blackhole_options">	
 							<div class="row">               
@@ -186,7 +186,7 @@
 								<small>Folder your Download program watches for Torrents</small>
 							</div>
 						</fieldset>
-						<fieldset id="transmission_options">
+				    <fieldset id="transmission_options">
 		                	<div class="row">
 			                    <label>Transmission Host:</label>
 			                    <input type="text" name="transmission_host" value="${config['transmission_host']}" size="30">
@@ -200,8 +200,11 @@
 			                    <label>Transmission Password:</label>
 			                    <input type="password" name="transmission_password" value="${config['transmission_pass']}" size="30">
 		                    </div>
+				    <div class="row">
+				    				    <small>Note: With Transmission, you can specify a different download directory for downloads sent from Headphones.
+								    Set it in the Music Download Directory below</small></div>
 						</fieldset>
-						<fieldset id="utorrent_options">
+				   <fieldset id="utorrent_options">
 		                	<div class="row">
 			                    <label>uTorrent Host:</label>
 			                    <input type="text" name="utorrent_host" value="${config['utorrent_host']}" size="30">
