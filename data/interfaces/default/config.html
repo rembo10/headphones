@@ -162,41 +162,81 @@
 	                   	  </div>
 	                </fieldset>
 
-                    <fieldset id="nzb_download_dir">
+                    <fieldset id="general_nzb_options">
+
                        	<div class="row">
                             <label>Music Download Directory:</label>
                             <input type="text" name="download_dir" value="${config['download_dir']}" size="50">
                             <small>Full path where SAB or NZBget downloads your music. e.g. /Users/name/Downloads/music</small>
                         </div>
-                    </fieldset>
 
-                   	<div class="checkbox row">
-                   	    	<input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5"><label>Usenet Retention</label>
-                   	 </div>
+	                
+			<div class="row">                    	
+			    <input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5"><label>Usenet Retention</label>
+			</div>
+		    </fieldset>
 	            </td>
                 <td>
                    	<fieldset>
                    		<legend>Torrents</legend>
-                   		<div class="row">
-                   		    <label>Black Hole Directory</label>
-                   		    <input type="text" name="torrentblackhole_dir" value="${config['torrentblackhole_dir']}" size="50">
-                   		    <small>Folder your Download program watches for Torrents</small>
-                   		</div>
-                   		<div class="row">
-                   		    <label>Minimum seeders:</label>
-                   		    <input type="text" name="numberofseeders" value="${config['numberofseeders']}" size="5">
-                   		    <small>Number of minimum seeders a torrent must have to be accepted</small>
-                   		</div>
-                   		<div class="row">
-                   		<label>Music Download Directory</label>
-                   		<input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="50">
-                   		<small>Full path where your torrent client downloads your music e.g. /Users/name/Downloads/music</small>
-                   		</div>
-				<div class="row checkbox">
-				<label>Keep Files for Seeding</label>
-				<input type="checkbox" name="keep_torrent_files" value="1" ${config['keep_torrent_files']}>
+				<input type="radio" name="torrent_downloader" id="torrent_downloader_blackhole" value="0" ${config['torrent_downloader_blackhole']}>Black Hole <input type="radio" name="torrent_downloader" id="torrent_downloader_transmission" value="1" ${config['torrent_downloader_transmission']}> Transmission <!--  <input type="radio" name="torrent_downloader" id="torrent_downloader_utorrent" value="2" ${config['torrent_downloader_utorrent']}> uTorrent -->
+			</fieldset>	
+			<fieldset id="torrent_blackhole_options">	
+			        <div class="row">               
+					<label>Black Hole Directory</label>
+					<input type="text" name="torrentblackhole_dir" value="${config['torrentblackhole_dir']}" size="50">
+					<small>Folder your Download program watches for Torrents</small>
 				</div>
 			</fieldset>
+			<fieldset id="transmission_options">
+				<div class="row">
+					<label>Transmission Host:</label>
+					<input type="text" name="transmission_host" value="${config['transmission_host']}" size="30">
+					<small>usually http://localhost:9091</small>
+				</div>
+				<div class="row">
+					<label>Transmission Username:</label>
+					<input type="text" name="transmission_username" value="${config['transmission_user']}" size="30">
+				</div>
+				<div class="row">
+					<label>Transmission Password:</label>
+					<input type="password" name="transmission_password" value="${config['transmission_pass']}" size="30">
+				</div>
+				<div class="row">
+					<small>Note: With Transmission, you can specify a different download directory for downloads sent from Headphones.
+					Set it in the Music Download Directory below</small></div>
+			</fieldset>
+			<fieldset id="utorrent_options">
+				<div class="row">
+					<label>uTorrent Host:</label>
+					<input type="text" name="utorrent_host" value="${config['utorrent_host']}" size="30">
+					<small>usually http://localhost:9091</small>
+				</div>
+				<div class="row">
+					<label>uTorrent Username:</label>
+					<input type="text" name="utorrent_username" value="${config['utorrent_user']}" size="30">
+				</div>
+				<div class="row">
+					<label>uTorrent Password:</label>
+					<input type="text" name="utorrent_password" value="${config['utorrent_pass']}" size="30">
+				</div>
+			</fieldset>
+			<fieldset id="general_torrent_options">
+				<div class="row">
+					<label>Minimum seeders:</label>
+					<input type="text" name="numberofseeders" value="${config['numberofseeders']}" size="5">
+					<small>Number of minimum seeders a torrent must have to be accepted</small>
+				</div>
+				<div class="row">
+					<label>Music Download Directory</label>
+					<input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="50">
+					<small>Full path where your torrent client downloads your music e.g. /Users/name/Downloads/music</small>
+				</div>   
+				<div class="row checkbox">
+					<label>Keep Files for Seeding</label>
+					<input type="checkbox" name="keep_torrent_files" value="1" ${config['keep_torrent_files']}>		
+				</div>
+			</fieldset>     
                 </td>
             </tr>
 
@@ -315,14 +355,18 @@
                 <td>
                     <fieldset>
                     	<legend>Torrents</legend>
-                    	<div class="row checkbox">
-                    		<input type="checkbox" name="use_isohunt" value="1" ${config['use_isohunt']} /><label>Isohunt</label>
+                    	<div class="row checkbox">                    	
+                    		<input type="checkbox" name="use_piratebay" value="1" ${config['use_piratebay']} /><label>The Pirate Bay</label> 
+			</div>
+                    	<div class="row checkbox">                    	
+                    		<input type="checkbox" name="use_isohunt" value="1" ${config['use_isohunt']} /><label>Isohunt</label> 
                     	</div>
                     	<div class="row checkbox">
                     		<input type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /><label>Mininova</label>
                     	</div>
                     	<div class="row checkbox">
-                    	<input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Kick Ass Torrents</label></div>
+                    	<input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Kick Ass Torrents</label>
+			</div>
                         <div class="row checkbox">
                             <input id="usewaffles" type="checkbox" name="waffles" onclick="initConfigCheckbox($(this));" value="1" ${config['use_waffles']} /><label>Waffles.fm</label>
                         </div>
@@ -1068,6 +1112,22 @@
 				$("#sabnzbd_options,#nzbget_options").hide();
 				$("#blackhole_options").show();
 			}
+			
+		if ($("#torrent_downloader_blackhole").is(":checked"))
+			{
+				$("#transmission_options,#utorrent_options").hide();
+				$("#torrent_blackhole_options").show();
+			}
+		if ($("#torrent_downloader_transmission").is(":checked"))
+			{
+				$("#torrent_blackhole_options,#utorrent_options").hide();
+				$("#transmission_options").show();
+			}
+		if ($("#torrent_downloader_utorrent").is(":checked"))
+			{
+				$("#torrent_blackhole_options,#transmission_options").hide();
+				$("#utorrent_options").show();
+			}
 
 		$('input[type=radio]').change(function(){
 			if ($("#preferred_bitrate").is(":checked"))
@@ -1098,7 +1158,19 @@
 			{
 				$("#sabnzbd_options,#nzbget_options").fadeOut("fast", function() { $("#blackhole_options").fadeIn() });
 			}
-		});
+			if ($("#torrent_downloader_blackhole").is(":checked"))
+			{
+				$("#transmission_options,#utorrent_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
+			}
+			if ($("#torrent_downloader_transmission").is(":checked"))
+			{
+				$("#torrent_blackhole_options,#utorrent_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
+			}
+			if ($("#torrent_downloader_utorrent").is(":checked"))
+			{
+				$("#torrent_blackhole_options,#transmission_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
+			}
+		});	
 
 		$("#mirror").change(handleNewServerSelection);
 			handleNewServerSelection.apply($("#mirror"));
