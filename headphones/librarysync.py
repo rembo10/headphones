@@ -28,7 +28,10 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         return
         
     if not dir:
-        dir = headphones.MUSIC_DIR
+        if not headphones.MUSIC_DIR:
+            return
+        else:
+            dir = headphones.MUSIC_DIR
     
     # If we're appending a dir, it's coming from the post processor which is
     # already bytestring

@@ -579,9 +579,18 @@ class WebInterface(object):
                     "nzbget_user" : headphones.NZBGET_USERNAME,
                     "nzbget_pass" : headphones.NZBGET_PASSWORD,
                     "nzbget_cat" : headphones.NZBGET_CATEGORY,
+                    "transmission_host" : headphones.TRANSMISSION_HOST,
+                    "transmission_user" : headphones.TRANSMISSION_USERNAME,
+                    "transmission_pass" : headphones.TRANSMISSION_PASSWORD,
+                    "utorrent_host" : headphones.UTORRENT_HOST,
+                    "utorrent_user" : headphones.UTORRENT_USERNAME,
+                    "utorrent_pass" : headphones.UTORRENT_PASSWORD,
                     "nzb_downloader_sabnzbd" : radio(headphones.NZB_DOWNLOADER, 0),
                     "nzb_downloader_nzbget" : radio(headphones.NZB_DOWNLOADER, 1),
                     "nzb_downloader_blackhole" : radio(headphones.NZB_DOWNLOADER, 2),
+                    "torrent_downloader_blackhole" : radio(headphones.TORRENT_DOWNLOADER, 0),
+                    "torrent_downloader_transmission" : radio(headphones.TORRENT_DOWNLOADER, 1),
+                    "torrent_downloader_utorrent" : radio(headphones.TORRENT_DOWNLOADER, 2),
                     "download_dir" : headphones.DOWNLOAD_DIR,
                     "use_blackhole" : checked(headphones.BLACKHOLE),
                     "blackhole_dir" : headphones.BLACKHOLE_DIR,
@@ -606,6 +615,7 @@ class WebInterface(object):
                     "numberofseeders" : headphones.NUMBEROFSEEDERS,
                     "use_isohunt" : checked(headphones.ISOHUNT),
                     "use_kat" : checked(headphones.KAT),
+                    "use_piratebay" : checked(headphones.PIRATEBAY),
                     "use_mininova" : checked(headphones.MININOVA),
                     "use_waffles" : checked(headphones.WAFFLES),
                     "waffles_uid" : headphones.WAFFLES_UID,
@@ -703,13 +713,14 @@ class WebInterface(object):
     config.exposed = True
 
 
+<<<<<<< HEAD
     def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None,
         download_scan_interval=None, nzb_search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None,
-        sab_category=None, nzbget_host=None, nzbget_username='nzbget', nzbget_password=None, nzbget_category=None, nzb_downloader=0, download_dir=None, blackhole=0, blackhole_dir=None, usenet_retention=None, 
-        use_headphones_indexer=0,newznab=0, newznab_host=None, newznab_apikey=None,
-        newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, preferred_words=None, required_words=None, ignored_words=None,
-        preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None,
-        numberofseeders=10, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
+        sab_category=None, nzbget_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, transmission_host=None, transmission_username=None, transmission_password=None, 
+        utorrent_host=None, utorrent_username=None, utorrent_password=None, nzb_downloader=0, torrent_downloader=0, download_dir=None, blackhole_dir=None, usenet_retention=None, 
+        use_headphones_indexer=0,newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, 
+        preferred_words=None, required_words=None, ignored_words=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None,
+        numberofseeders=None, use_piratebay=0, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
         rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0,
         destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0,
         remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
@@ -738,7 +749,14 @@ class WebInterface(object):
         headphones.NZBGET_USERNAME = nzbget_username
         headphones.NZBGET_PASSWORD = nzbget_password
         headphones.NZBGET_CATEGORY = nzbget_category
+        headphones.TRANSMISSION_HOST = transmission_host
+        headphones.TRANSMISSION_USERNAME = transmission_username
+        headphones.TRANSMISSION_PASSWORD = transmission_password
+        headphones.UTORRENT_HOST = utorrent_host
+        headphones.UTORRENT_USERNAME = utorrent_username
+        headphones.UTORRENT_PASSWORD = utorrent_password
         headphones.NZB_DOWNLOADER = int(nzb_downloader)
+        headphones.TORRENT_DOWNLOADER = int(torrent_downloader)
         headphones.DOWNLOAD_DIR = download_dir
         headphones.BLACKHOLE = blackhole
         headphones.BLACKHOLE_DIR = blackhole_dir
@@ -762,6 +780,7 @@ class WebInterface(object):
         headphones.DOWNLOAD_TORRENT_DIR = download_torrent_dir
         headphones.ISOHUNT = use_isohunt
         headphones.KAT = use_kat
+        headphones.PIRATEBAY = use_piratebay
         headphones.MININOVA = use_mininova
         headphones.WAFFLES = waffles
         headphones.WAFFLES_UID = waffles_uid

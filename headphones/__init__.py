@@ -109,7 +109,8 @@ ADD_ALBUM_ART = False
 ALBUM_ART_FORMAT = None
 EMBED_ALBUM_ART = False
 EMBED_LYRICS = False
-NZB_DOWNLOADER = None
+NZB_DOWNLOADER = None    # 0: sabnzbd, 1: nzbget, 2: blackhole
+TORRENT_DOWNLOADER = None # 0: blackhole, 1: transmission, 2: utorrent
 DOWNLOAD_DIR = None
 BLACKHOLE = None
 BLACKHOLE_DIR = None
@@ -138,9 +139,13 @@ NZBGET_HOST = None
 
 HEADPHONES_INDEXER = False
 
-NZBMATRIX = False
-NZBMATRIX_USERNAME = None
-NZBMATRIX_APIKEY = None
+TRANSMISSION_HOST = None
+TRANSMISSION_USERNAME = None
+TRANSMISSION_PASSWORD = None
+
+UTORRENT_HOST = None
+UTORRENT_USERNAME = None
+UTORRENT_PASSWORD = None
 
 NEWZNAB = False
 NEWZNAB_HOST = None
@@ -151,10 +156,6 @@ EXTRA_NEWZNABS = []
 NZBSORG = False
 NZBSORG_UID = None
 NZBSORG_HASH = None
-
-NEWZBIN = False
-NEWZBIN_UID = None
-NEWZBIN_PASSWORD = None
 
 NZBSRUS = False
 NZBSRUS_UID = None
@@ -177,6 +178,7 @@ NUMBEROFSEEDERS = 10
 ISOHUNT = None
 KAT = None
 MININOVA = None
+PIRATEBAY = None
 WAFFLES = None
 WAFFLES_UID = None
 WAFFLES_PASSKEY = None
@@ -290,19 +292,18 @@ def initialize():
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
                 RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, \
                 ADD_ALBUM_ART, ALBUM_ART_FORMAT, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
-                TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
+                TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, PIRATEBAY, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
-                NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, HEADPHONES_INDEXER, NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS, \
-                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, \
-                NZB_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, \
+                NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, HEADPHONES_INDEXER, NZBMATRIX, TRANSMISSION_HOST, TRANSMISSION_USERNAME, TRANSMISSION_PASSWORD, \
+                UTORRENT_HOST, UTORRENT_USERNAME, UTORRENT_PASSWORD, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS, \
+                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, \
                 LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
                 MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, \
                 PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
-                PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, \
-                UMASK
+                PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, UMASK
 
         if __INITIALIZED__:
             return False
@@ -311,12 +312,12 @@ def initialize():
         CheckSection('General')
         CheckSection('SABnzbd')
         CheckSection('NZBget')
+        CheckSection('Transmission')
+        CheckSection('uTorrent')
         CheckSection('Headphones')
-        CheckSection('NZBMatrix')
         CheckSection('Newznab')
         CheckSection('NZBsorg')
         CheckSection('NZBsRus')
-        CheckSection('Newzbin')
         CheckSection('Waffles')
         CheckSection('Rutracker')
         CheckSection('What.cd')
@@ -377,6 +378,7 @@ def initialize():
         EMBED_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'embed_album_art', 0))
         EMBED_LYRICS = bool(check_setting_int(CFG, 'General', 'embed_lyrics', 0))
         NZB_DOWNLOADER = check_setting_int(CFG, 'General', 'nzb_downloader', 0)
+        TORRENT_DOWNLOADER = check_setting_int(CFG, 'General', 'torrent_downloader', 0)
         DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'download_dir', '')
         BLACKHOLE = bool(check_setting_int(CFG, 'General', 'blackhole', 0))
         BLACKHOLE_DIR = check_setting_str(CFG, 'General', 'blackhole_dir', '')
@@ -396,6 +398,7 @@ def initialize():
         NUMBEROFSEEDERS = check_setting_str(CFG, 'General', 'numberofseeders', '10')
         ISOHUNT = bool(check_setting_int(CFG, 'General', 'isohunt', 0))
         KAT = bool(check_setting_int(CFG, 'General', 'kat', 0))
+        PIRATEBAY = bool(check_setting_int(CFG, 'General', 'piratebay', 0))
         MININOVA = bool(check_setting_int(CFG, 'General', 'mininova', 0))
         DOWNLOAD_TORRENT_DIR = check_setting_str(CFG, 'General', 'download_torrent_dir', '')
 
@@ -424,9 +427,13 @@ def initialize():
 
         HEADPHONES_INDEXER = bool(check_setting_int(CFG, 'Headphones', 'headphones_indexer', 0))
         
-        NZBMATRIX = bool(check_setting_int(CFG, 'NZBMatrix', 'nzbmatrix', 0))
-        NZBMATRIX_USERNAME = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_username', '')
-        NZBMATRIX_APIKEY = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_apikey', '')
+        TRANSMISSION_HOST = check_setting_str(CFG, 'Transmission', 'transmission_host', '')
+        TRANSMISSION_USERNAME = check_setting_str(CFG, 'Transmission', 'transmission_username', '')
+        TRANSMISSION_PASSWORD = check_setting_str(CFG, 'Transmission', 'transmission_password', '')
+        
+        UTORRENT_HOST = check_setting_str(CFG, 'uTorrent', 'utorrent_host', '')
+        UTORRENT_USERNAME = check_setting_str(CFG, 'uTorrent', 'utorrent_username', '')
+        UTORRENT_PASSWORD = check_setting_str(CFG, 'uTorrent', 'utorrent_password', '')
 
         NEWZNAB = bool(check_setting_int(CFG, 'Newznab', 'newznab', 0))
         NEWZNAB_HOST = check_setting_str(CFG, 'Newznab', 'newznab_host', '')
@@ -440,10 +447,6 @@ def initialize():
         NZBSORG = bool(check_setting_int(CFG, 'NZBsorg', 'nzbsorg', 0))
         NZBSORG_UID = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_uid', '')
         NZBSORG_HASH = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_hash', '')
-
-        NEWZBIN = bool(check_setting_int(CFG, 'Newzbin', 'newzbin', 0))
-        NEWZBIN_UID = check_setting_str(CFG, 'Newzbin', 'newzbin_uid', '')
-        NEWZBIN_PASSWORD = check_setting_str(CFG, 'Newzbin', 'newzbin_password', '')
 
         NZBSRUS = bool(check_setting_int(CFG, 'NZBsRus', 'nzbsrus', 0))
         NZBSRUS_UID = check_setting_str(CFG, 'NZBsRus', 'nzbsrus_uid', '')
@@ -727,6 +730,7 @@ def config_write():
     new_config['General']['embed_album_art'] = int(EMBED_ALBUM_ART)
     new_config['General']['embed_lyrics'] = int(EMBED_LYRICS)
     new_config['General']['nzb_downloader'] = NZB_DOWNLOADER
+    new_config['General']['torrent_downloader'] = TORRENT_DOWNLOADER
     new_config['General']['download_dir'] = DOWNLOAD_DIR
     new_config['General']['blackhole_dir'] = BLACKHOLE_DIR
     new_config['General']['usenet_retention'] = USENET_RETENTION
@@ -741,6 +745,7 @@ def config_write():
     new_config['General']['isohunt'] = int(ISOHUNT)
     new_config['General']['kat'] = int(KAT)
     new_config['General']['mininova'] = int(MININOVA)
+    new_config['General']['piratebay'] = int(PIRATEBAY)
     new_config['General']['download_torrent_dir'] = DOWNLOAD_TORRENT_DIR
 
     new_config['Waffles'] = {}
@@ -775,14 +780,19 @@ def config_write():
     new_config['NZBget']['nzbget_password'] = NZBGET_PASSWORD
     new_config['NZBget']['nzbget_category'] = NZBGET_CATEGORY
     new_config['NZBget']['nzbget_host'] = NZBGET_HOST
-    
+
     new_config['Headphones'] = {}
     new_config['Headphones']['headphones_indexer'] = int(HEADPHONES_INDEXER)
 
-    new_config['NZBMatrix'] = {}
-    new_config['NZBMatrix']['nzbmatrix'] = int(NZBMATRIX)
-    new_config['NZBMatrix']['nzbmatrix_username'] = NZBMATRIX_USERNAME
-    new_config['NZBMatrix']['nzbmatrix_apikey'] = NZBMATRIX_APIKEY
+    new_config['Transmission'] = {}
+    new_config['Transmission']['transmission_host'] = TRANSMISSION_HOST
+    new_config['Transmission']['transmission_username'] = TRANSMISSION_USERNAME
+    new_config['Transmission']['transmission_password'] = TRANSMISSION_PASSWORD
+    
+    new_config['uTorrent'] = {}
+    new_config['uTorrent']['utorrent_host'] = UTORRENT_HOST
+    new_config['uTorrent']['utorrent_username'] = UTORRENT_USERNAME
+    new_config['uTorrent']['utorrent_password'] = UTORRENT_PASSWORD
 
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab'] = int(NEWZNAB)
@@ -801,11 +811,6 @@ def config_write():
     new_config['NZBsorg']['nzbsorg'] = int(NZBSORG)
     new_config['NZBsorg']['nzbsorg_uid'] = NZBSORG_UID
     new_config['NZBsorg']['nzbsorg_hash'] = NZBSORG_HASH
-
-    new_config['Newzbin'] = {}
-    new_config['Newzbin']['newzbin'] = int(NEWZBIN)
-    new_config['Newzbin']['newzbin_uid'] = NEWZBIN_UID
-    new_config['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
 
     new_config['NZBsRus'] = {}
     new_config['NZBsRus']['nzbsrus'] = int(NZBSRUS)
