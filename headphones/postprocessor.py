@@ -320,14 +320,28 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
     # Check to see if we're preserving the torrent dir
     if headphones.KEEP_TORRENT_FILES and Kind=="torrent":
-        new_folder = os.path.join(os.path.dirname(albumpath), ('temp' + release['AlbumTitle'][:8]).encode(headphones.SYS_ENCODING, 'replace'))
-        new_folder = new_folder.strip()
+        new_folder = os.path.join(albumpath, 'headphones-modified').encode(headphones.SYS_ENCODING, 'replace')
+        logger.info("Copying files to 'headphones-modified' subfolder to preserve downleaded files for seeding")
         try:
             shutil.copytree(albumpath, new_folder)
+            # Update the album path with the new location
             albumpath = new_folder
         except Exception, e:
             logger.warn("Cannot copy/move files to temp folder: " + new_folder.decode(headphones.SYS_ENCODING, 'replace') + ". Not continuing. Error: " + str(e))
             return
+            
+        # Need to update the downloaded track list with the new location. 
+        # Could probably just throw in the "headphones-modified" folder,
+        # but this is good to make sure we're not counting files that may have failed to move
+        downloaded_track_list = []
+        downloaded_cuecount = 0
+            
+        for r,d,f in os.walk(albumpath):
+            for files in f:
+                if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
+                    downloaded_track_list.append(os.path.join(r, files))    
+                elif files.lower().endswith('.cue'):
+                    downloaded_cuecount += 1
     #start encoding
     if headphones.MUSIC_ENCODER:
         downloaded_track_list=music_encoder.encode(albumpath)
