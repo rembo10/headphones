@@ -33,6 +33,7 @@ import string
 
 import headphones, exceptions
 from headphones import logger, db, helpers, classes, sab, nzbget
+from headphones import transmission
 
 import lib.bencode as bencode
 
@@ -473,7 +474,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                         for result in resultlist:
                             
                             if high_size_limit and (result[1] > high_size_limit):
-                                logger.info(result[0] + " is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit))
+                                logger.info(result[0] + " is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit) + ")")
                                 
                                 # Add lossless nzbs to the "flac list" which we can use if there are no good lossy matches
                                 if 'flac' in result[0].lower():
@@ -482,7 +483,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                                 continue
                                 
                             if low_size_limit and (result[1] < low_size_limit):
-                                logger.info(result[0] + " is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit))
+                                logger.info(result[0] + " is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit) + ")")
                                 continue
                                                                 
                             delta = abs(targetsize - result[1])
@@ -1351,14 +1352,9 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             if data and bestqual:
                 logger.info(u'Found best result from %s: <a href="%s">%s</a> - %s' % (bestqual[3], bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
                 torrent_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year) 
-                if headphones.TORRENTBLACKHOLE_DIR == "sendtracker":
 
-                    torrent = classes.TorrentDataSearchResult()
-                    torrent.extraInfo.append(data)
-                    torrent.name = torrent_folder_name
-                    sab.sendTorrent(torrent)
-
-                elif headphones.TORRENTBLACKHOLE_DIR != "":
+                # Blackhole
+                if headphones.TORRENT_DOWNLOADER == 0:
                 
                     # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
 
@@ -1388,6 +1384,11 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         logger.error('Couldn\'t get name from Torrent file: %s' % e)
                         break
                         
+                elif headphones.TORRENT_DOWNLOADER == 1:
+                    logger.info("Sending torrent to Transmission")
+                    transmission.sendTorrent(bestqual[2])
+
+                        
                 myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
                 myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", torrent_folder_name, "torrent"])
 
@@ -1399,8 +1400,10 @@ def preprocesstorrent(resultlist, pre_sorted_list=False):
         elif int(selresult[1]) < int(result[1]): # if size is lower than new result replace previous selected result (bigger size = better quality?)
             selresult = result
 
-    # get outta here if rutracker or piratebay
+    # get outta here if rutracker or piratebay, or if we're using Transmission or uTorrent
     if selresult[3] == 'rutracker.org' or selresult[3] == 'The Pirate Bay':
+        return True, selresult
+    if headphones.TORRENT_DOWNLOADER != 0:
         return True, selresult
                    
     if pre_sorted_list:
