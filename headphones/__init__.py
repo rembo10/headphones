@@ -372,7 +372,7 @@ def initialize():
         MOVE_FILES = bool(check_setting_int(CFG, 'General', 'move_files', 0))
         RENAME_FILES = bool(check_setting_int(CFG, 'General', 'rename_files', 0))
         FOLDER_FORMAT = check_setting_str(CFG, 'General', 'folder_format', 'Artist/Album [Year]')
-        FILE_FORMAT = check_setting_str(CFG, 'General', 'file_format', 'Track Artist - Album [Year]- Title')
+        FILE_FORMAT = check_setting_str(CFG, 'General', 'file_format', 'Track Artist - Album [Year] - Title')
         CLEANUP_FILES = bool(check_setting_int(CFG, 'General', 'cleanup_files', 0))
         ADD_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'add_album_art', 0))
         ALBUM_ART_FORMAT = check_setting_str(CFG, 'General', 'album_art_format', 'folder')

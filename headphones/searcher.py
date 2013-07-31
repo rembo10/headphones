@@ -1073,6 +1073,8 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                        provider))
 
         # Pirate Bay
+        if headphones.PIRATEBAY and headphones.TORRENT_DOWNLOADER == 0:
+            logger.warn("Cannot search Pirate Bay with Blackhole option set")
         if headphones.PIRATEBAY and headphones.TORRENT_DOWNLOADER != 0:
             provider = "The Pirate Bay"    
             providerurl = url_fix("http://thepiratebay.sx/search/" + term + "/0/99/")
@@ -1437,7 +1439,7 @@ def preprocesstorrent(resultlist, pre_sorted_list=False):
             return True, result
 
         try:
-            request = urllib2.Request(selresult[2])
+            request = urllib2.Request(result[2])
             request.add_header('Accept-encoding', 'gzip')
     
             if result[3] == 'Kick Ass Torrent':
