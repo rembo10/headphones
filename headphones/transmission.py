@@ -59,17 +59,14 @@ def getTorrentFolder(torrentid):
     response = torrentAction(method, arguments)
     percentdone = response['arguments']['torrents'][0]['percentDone']
     torrent_folder_name = response['arguments']['torrents'][0]['name']
-    print torrent_folder_name
     
     while percentdone == 0:
-        print "In the while loop"
         time.sleep(5)
         response = torrentAction(method, arguments)
         percentdone = response['arguments']['torrents'][0]['percentDone']
-        print "Attempting to get folder name, percent done: " + str(percentdone)
     
     torrent_folder_name = response['arguments']['torrents'][0]['name']
-    print torrent_folder_name + " updated and finished!"
+
     return torrent_folder_name
     
 def torrentAction(method, arguments):
