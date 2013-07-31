@@ -1073,6 +1073,8 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                        provider))
 
         # Pirate Bay
+        if headphones.PIRATEBAY and headphones.TORRENT_DOWNLOADER == 0:
+            logger.warn("Cannot search Pirate Bay with Blackhole option set")
         if headphones.PIRATEBAY and headphones.TORRENT_DOWNLOADER != 0:
             provider = "The Pirate Bay"    
             providerurl = url_fix("http://thepiratebay.sx/search/" + term + "/0/99/")
