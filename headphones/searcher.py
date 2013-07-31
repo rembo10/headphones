@@ -1286,6 +1286,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     temp_list.append((result[0],result[1],result[2],result[3],0))
                         
             resultlist = temp_list
+            print resultlist
                        
             if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
 
@@ -1333,8 +1334,10 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                                                 
                             delta = abs(targetsize - result[1])
                             newlist.append((result[0], result[1], result[2], result[3], result[4], delta))
-            
+
+                        print newlist
                         torrentlist = sorted(newlist, key=lambda title: (-title[4], title[5]))
+                        print torrentlist
                         
                         if not len(torrentlist) and len(flac_list) and headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                             logger.info("Since there were no appropriate lossy matches (and at least one lossless match), going to use lossless instead")
@@ -1380,6 +1383,10 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
                 # Blackhole
                 if headphones.TORRENT_DOWNLOADER == 0:
+                    
+                    if bestqual[2].startswith("magnet:"):
+                        logger.error("Cannot save magnet files to blackhole. Please switch your torrent downloader to Transmission or uTorrent")
+                        return
                 
                     # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
 
@@ -1418,43 +1425,33 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", torrent_folder_name, "torrent"])
 
 def preprocesstorrent(resultlist, pre_sorted_list=False):
-    selresult = ""
-    for result in resultlist:
-        if selresult == "":
-            selresult = result
-        elif int(selresult[1]) < int(result[1]): # if size is lower than new result replace previous selected result (bigger size = better quality?)
-            selresult = result
 
-    # get outta here if rutracker or piratebay, or if we're using Transmission or uTorrent
-    if selresult[3] == 'rutracker.org' or selresult[3] == 'The Pirate Bay':
-        return True, selresult
+    # Get out of here if we're using Transmission or uTorrent
     if headphones.TORRENT_DOWNLOADER != 0:
-        return True, selresult
+        return True, resultlist[0]
+        
+    for result in resultlist:
 
-    if pre_sorted_list:
-        selresult = resultlist[0]
-    else:
-        for result in resultlist:
-            if selresult == "":
-                selresult = result
-            elif int(selresult[1]) < int(result[1]): # if size is lower than new result replace previous selected result (bigger size = better quality?)
-                selresult = result
+        # get outta here if rutracker or piratebay
+        if result[3] == 'rutracker.org' or result[3] == 'The Pirate Bay':
+            return True, result
 
-    try:
-        request = urllib2.Request(selresult[2])
-        request.add_header('Accept-encoding', 'gzip')
+        try:
+            request = urllib2.Request(selresult[2])
+            request.add_header('Accept-encoding', 'gzip')
+    
+            if result[3] == 'Kick Ass Torrent':
+                request.add_header('Referer', 'http://kat.ph/')
 
-        if selresult[3] == 'Kick Ass Torrent':
-            request.add_header('Referer', 'http://kat.ph/')
+            response = urllib2.urlopen(request)
+            if response.info().get('Content-Encoding') == 'gzip':
+                buf = StringIO(response.read())
+                f = gzip.GzipFile(fileobj=buf)
+                torrent = f.read()
+            else:
+                torrent = response.read()
+        except ExpatError:
+            logger.error('Unable to torrent %s' % result[2])
+            continue
 
-        response = urllib2.urlopen(request)
-        if response.info().get('Content-Encoding') == 'gzip':
-            buf = StringIO(response.read())
-            f = gzip.GzipFile(fileobj=buf)
-            torrent = f.read()
-        else:
-            torrent = response.read()
-    except ExpatError:
-        logger.error('Unable to torrent %s' % selresult[2])
-
-    return torrent, selresult
+        return torrent, result
