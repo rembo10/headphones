@@ -50,7 +50,7 @@ class DBConnection:
         #don't wait for the disk to finish writing
         self.connection.execute("PRAGMA synchronous = OFF")
         #journal disabled since we never do rollbacks
-        self.connection.execute("PRAGMA journal_mode = OFF")        
+        self.connection.execute("PRAGMA journal_mode = %s" % headphones.JOURNAL_MODE)        
         #64mb of cache memory,probably need to make it user configurable
         self.connection.execute("PRAGMA cache_size=-%s" % (getCacheSize()*1024))
         self.connection.row_factory = sqlite3.Row
