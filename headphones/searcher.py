@@ -1437,7 +1437,7 @@ def preprocesstorrent(resultlist, pre_sorted_list=False):
             return True, result
 
         try:
-            request = urllib2.Request(selresult[2])
+            request = urllib2.Request(result[2])
             request.add_header('Accept-encoding', 'gzip')
     
             if result[3] == 'Kick Ass Torrent':
