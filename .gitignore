@@ -9,7 +9,7 @@
 # Logs and databases #
 ######################
 *.log
-*.db
+*.db*
 *.db-journal
 *.ini
 logs/*
