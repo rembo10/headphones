@@ -66,7 +66,7 @@ def checkFolder():
                     logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
                     verify(album['AlbumID'], torrent_album_path, album['Kind'])
 
-def verify(albumid, albumpath, Kind=None):
+def verify(albumid, albumpath, Kind=None, forced=False):
 
     myDB = db.DBConnection()
     release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
@@ -169,6 +169,10 @@ def verify(albumid, albumpath, Kind=None):
                 downloaded_track_list.append(os.path.join(r, files))    
             elif files.lower().endswith('.cue'):
                 downloaded_cuecount += 1
+            # if any of the files end in *.part, we know the torrent isn't done yet. Process if forced, though
+            elif files.lower().endswith('.part') and not forced:
+                return
+
     
     # use xld to split cue 
    
@@ -952,7 +956,7 @@ def forcePostProcess():
                 release = myDB.action('SELECT ArtistName, AlbumTitle, AlbumID from albums WHERE AlbumID=?', [rgid]).fetchone()
                 if release:
                     logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
-                    verify(release['AlbumID'], folder)
+                    verify(release['AlbumID'], folder, forced=True)
                 else:
                     logger.info('Found a (possibly) valid Musicbrainz identifier in album folder name - continuing post-processing')
-                    verify(rgid, folder)
+                    verify(rgid, folder, forced=True)
