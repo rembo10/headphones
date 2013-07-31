@@ -66,7 +66,7 @@ def checkFolder():
                     logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
                     verify(album['AlbumID'], torrent_album_path, album['Kind'])
 
-def verify(albumid, albumpath, Kind=None):
+def verify(albumid, albumpath, Kind=None, forced=False):
 
     myDB = db.DBConnection()
     release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
@@ -169,6 +169,11 @@ def verify(albumid, albumpath, Kind=None):
                 downloaded_track_list.append(os.path.join(r, files))    
             elif files.lower().endswith('.cue'):
                 downloaded_cuecount += 1
+            # if any of the files end in *.part, we know the torrent isn't done yet. Process if forced, though
+            elif files.lower().endswith('.part') and not forced:
+                logger.info("Looks like " + os.path.basename(albumpath).decode(headphones.SYS_ENCODING, 'replace') + " isn't complete yet. Will try again on the next run")
+                return
+
     
     # use xld to split cue 
    
@@ -320,14 +325,28 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
     # Check to see if we're preserving the torrent dir
     if headphones.KEEP_TORRENT_FILES and Kind=="torrent":
-        new_folder = os.path.join(os.path.dirname(albumpath), ('temp' + release['AlbumTitle'][:8]).encode(headphones.SYS_ENCODING, 'replace'))
-        new_folder = new_folder.strip()
+        new_folder = os.path.join(albumpath, 'headphones-modified').encode(headphones.SYS_ENCODING, 'replace')
+        logger.info("Copying files to 'headphones-modified' subfolder to preserve downleaded files for seeding")
         try:
             shutil.copytree(albumpath, new_folder)
+            # Update the album path with the new location
             albumpath = new_folder
         except Exception, e:
             logger.warn("Cannot copy/move files to temp folder: " + new_folder.decode(headphones.SYS_ENCODING, 'replace') + ". Not continuing. Error: " + str(e))
             return
+            
+        # Need to update the downloaded track list with the new location. 
+        # Could probably just throw in the "headphones-modified" folder,
+        # but this is good to make sure we're not counting files that may have failed to move
+        downloaded_track_list = []
+        downloaded_cuecount = 0
+            
+        for r,d,f in os.walk(albumpath):
+            for files in f:
+                if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
+                    downloaded_track_list.append(os.path.join(r, files))    
+                elif files.lower().endswith('.cue'):
+                    downloaded_cuecount += 1
     #start encoding
     if headphones.MUSIC_ENCODER:
         downloaded_track_list=music_encoder.encode(albumpath)
@@ -860,6 +879,9 @@ def forcePostProcess():
     # Get a list of folders in the download_dir
     folders = []
     for download_dir in download_dirs:
+        if not os.path.isdir(download_dir):
+            logger.warn('Directory ' + download_dir.decode(headphones.SYS_ENCODING, 'replace') + ' does not exist. Skipping')
+            continue
         for folder in os.listdir(download_dir):
             path_to_folder = os.path.join(download_dir, folder)
             if os.path.isdir(path_to_folder):
@@ -935,7 +957,7 @@ def forcePostProcess():
                 release = myDB.action('SELECT ArtistName, AlbumTitle, AlbumID from albums WHERE AlbumID=?', [rgid]).fetchone()
                 if release:
                     logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
-                    verify(release['AlbumID'], folder)
+                    verify(release['AlbumID'], folder, forced=True)
                 else:
                     logger.info('Found a (possibly) valid Musicbrainz identifier in album folder name - continuing post-processing')
-                    verify(rgid, folder)
+                    verify(rgid, folder, forced=True)

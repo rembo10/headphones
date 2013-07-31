@@ -142,6 +142,23 @@ def mb_to_bytes(mb_str):
     result = re.search('^(\d+(?:\.\d+)?)\s?(?:mb)?', mb_str, flags=re.I)
     if result:
         return int(float(result.group(1))*1048576)
+        
+def piratesize(size):
+    split = size.split(" ")
+    factor = float(split[0])
+    unit = split[1]
+    if unit == 'MiB':
+        size = factor * 1048576
+    elif unit == 'GiB':
+        size = factor * 1073741824
+    elif unit == 'KiB':
+        size = factor * 1024
+    elif unit == "B":
+        size = factor
+    else:
+        size = 0
+    
+    return size
 
 def replace_all(text, dic):
     
