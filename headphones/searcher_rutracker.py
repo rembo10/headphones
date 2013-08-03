@@ -9,9 +9,11 @@ import urllib2
 import cookielib
 from urlparse import urlparse
 from bs4 import BeautifulSoup
+import headphones
 from headphones import logger, db
 import lib.bencode as bencode
 import os
+from tempfile import mkdtemp
 
 class Rutracker():
 
@@ -90,7 +92,7 @@ class Rutracker():
     
     def search(self, searchurl, maxsize, minseeders, albumid, bitrate):
         """
-        Parse the search results and return the first valid torrent
+        Parse the search results and return valid torrent list
         """
         
         titles = []
@@ -154,10 +156,11 @@ class Rutracker():
             logger.info('headphones track info not found, cannot compare to torrent') 
             return False
         
-        # Return the first valid torrent, unless we want a preferred bitrate then we want all valid entries
+        # Return all valid entries, ignored, required words now checked in searcher.py
         
-        unwantedlist = ['promo', 'vinyl', '[lp]', 'songbook', 'tvrip', 'hdtv', 'dvd']
-        formatlist = ['.ape', '.flac', '.ogg', '.m4a', '.aac', '.mp3', '.wav', '.aif']
+        #unwantedlist = ['promo', 'vinyl', '[lp]', 'songbook', 'tvrip', 'hdtv', 'dvd']
+
+        formatlist = ['ape', 'flac', 'ogg', 'm4a', 'aac', 'mp3', 'wav', 'aif']
         deluxelist = ['deluxe', 'edition', 'japanese', 'exclusive']
        
         for torrent in torrentlist:
@@ -167,11 +170,9 @@ class Rutracker():
             seeders = torrent[2]
             size = torrent[3]
             
-            # Attempt to filter out unwanted
-            
             title = returntitle.lower()
             
-            if not any(unwanted in title for unwanted in unwantedlist) and int(size) <= maxsize and int(seeders) >= minseeders:
+            if int(size) <= maxsize and int(seeders) >= minseeders:
                      
                 # Check torrent info
                 
@@ -202,7 +203,7 @@ class Rutracker():
                     for pathfile in metainfo['files']:
                         path = pathfile['path']
                         for file in path:
-                            if any(format in file for format in formatlist):
+                            if any(file.lower().endswith('.' + x.lower()) for x in formatlist):
                                 trackcount += 1
                             if '.cue' in file:
                                 cuecount += 1
@@ -255,33 +256,42 @@ class Rutracker():
                     if any(deluxe in title for deluxe in deluxelist):
                         valid = True
                         
-                # return 1st valid torrent if not checking by bitrate, else add to list and return at end
+                # Add to list
                 
                 if valid:
                     rulist.append((returntitle, size, topicurl))
-                    if not bitrate:
-                        return rulist
-                         
+                else:
+                    if topicurl:
+                        logger.info(u'<a href="%s">Torrent</a> found with %s tracks but the selected headphones release has %s tracks, skipping for rutracker.org' % (topicurl, trackcount, hptrackcount))
+
+            else:
+                logger.info('%s is larger than the maxsize or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i)' % (returntitle, int(size), int(seeders)))
+
+
         return rulist
 
+    def get_torrent(self, url, savelocation=None):
 
-    def get_torrent(self, url, savelocation):
-    
         torrent_id = dict([part.split('=') for part in urlparse(url)[4].split('&')])['t']
         self.cookiejar.set_cookie(cookielib.Cookie(version=0, name='bb_dl', value=torrent_id, port=None, port_specified=False, domain='.rutracker.org', domain_specified=False, domain_initial_dot=False, path='/', path_specified=True, secure=False, expires=None, discard=True, comment=None, comment_url=None, rest={'HttpOnly': None}, rfc2109=False))
-        downloadurl = 'http://dl.rutracker.org/forum/dl.php?t=' + torrent_id                  
+        downloadurl = 'http://dl.rutracker.org/forum/dl.php?t=' + torrent_id
         torrent_name = torrent_id + '.torrent'
-        download_path = os.path.join(savelocation, torrent_name)
-        
+
         try:
+            prev = os.umask(headphones.UMASK)
             page = self.opener.open(downloadurl)
             torrent = page.read()
+            if savelocation:
+                download_path = os.path.join(savelocation, torrent_name)
+            else:
+                tempdir = mkdtemp(suffix='_rutracker_torrents')
+                download_path = os.path.join(tempdir, torrent_name)
             fp = open (download_path, 'wb')
             fp.write (torrent)
             fp.close ()
+            os.umask(prev)
         except Exception, e:
-            logger.error('Error getting torrent: %s' % e)  
-            return False      
-        
+            logger.error('Error getting torrent: %s' % e)
+            return False
+
         return download_path
-        
