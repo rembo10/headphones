@@ -928,22 +928,19 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 logger.info(u'Parsing results from <a href="%s">Waffles.fm</a>' % searchURL)
 
                 d = feedparser.parse(data)
+
                 if not len(d.entries):
                     logger.info(u"No results found from %s for %s" % (provider, term))
                     pass
 
                 else:
                     for item in d.entries:
-                        try:
-                            title_match = re.search(r"(.+)\[(.+)\]$", item.title)
-                            title = title_match.group(1).strip()
-                            details = title_match.group(2).split("-")
 
+                        try:
+                            title = item.title
                             desc_match = re.search(r"Size: (\d+)<", item.description)
                             size = desc_match.group(1)
-
                             url = item.link
-
                             resultlist.append((title, size, url, provider))
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                         except Exception, e:
