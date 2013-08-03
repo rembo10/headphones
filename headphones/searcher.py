@@ -30,6 +30,7 @@ import gzip, base64
 
 import os, re, time
 import string
+import shutil
 
 import headphones, exceptions
 from headphones import logger, db, helpers, classes, sab, nzbget
@@ -447,7 +448,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             # Add a priority if it has any of the preferred words
             temp_list = []
             for result in resultlist:
-                if any(word.lower() in result[0].lower() for word in helpers.split_string(headphones.PREFERRED_WORDS)):
+                if headphones.PREFERRED_WORDS and any(word.lower() in result[0].lower() for word in helpers.split_string(headphones.PREFERRED_WORDS)):
                     temp_list.append((result[0],result[1],result[2],result[3],1))
                 else:
                     temp_list.append((result[0],result[1],result[2],result[3],0))
@@ -467,7 +468,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
                     if not targetsize:
                         logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
-                        nzblist = sorted(resultlist, key=lambda title: (-title[4] , -title[1]))
+                        nzblist = sorted(resultlist, key=lambda title: (title[4], title[1]), reverse=True)
 
                     else:
                         logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
@@ -499,25 +500,27 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                                 logger.info(result[0] + " is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit) + ")")
                                 continue
 
-                            delta = abs(targetsize - result[1])
+                            delta = abs(targetsize - int(result[1]))
                             newlist.append((result[0], result[1], result[2], result[3], result[4], delta))
 
                         nzblist = sorted(newlist, key=lambda title: (-title[4], title[5]))
 
                         if not len(nzblist) and len(flac_list) and headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                             logger.info("Since there were no appropriate lossy matches (and at least one lossless match), going to use lossless instead")
-                            nzblist = sorted(flac_list, key=lambda title: (-title[4], -title[1]))
+                            nzblist = sorted(flac_list, key=lambda title: (title[4], title[1]), reverse=True)
 
                 except Exception, e:
 
                     logger.debug('Error: %s' % str(e))
                     logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
 
-                    nzblist = sorted(resultlist, key=lambda title: (-title[4], -title[1]))
+                    nzblist = sorted(resultlist, key=lambda title: (title[4], title[1]), reverse=True)
+
 
             else:
 
-                nzblist = sorted(resultlist, key=lambda title: (-title[4], -title[1]))
+                nzblist = sorted(resultlist, key=lambda title: (title[4], title[1]), reverse=True)
+
 
 
             if new:
@@ -1282,14 +1285,13 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             # Add a priority if it has any of the preferred words
             temp_list = []
             for result in resultlist:
-                if any(word.lower() in result[0].lower() for word in helpers.split_string(headphones.PREFERRED_WORDS)):
+                if headphones.PREFERRED_WORDS and any(word.lower() in result[0].lower() for word in helpers.split_string(headphones.PREFERRED_WORDS)):
                     temp_list.append((result[0],result[1],result[2],result[3],1))
                 else:
                     temp_list.append((result[0],result[1],result[2],result[3],0))
                         
             resultlist = temp_list
-            print resultlist
-                       
+
             if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
 
                 logger.debug('Target bitrate: %s kbps' % headphones.PREFERRED_BITRATE)
@@ -1303,7 +1305,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
     
                     if not targetsize:
                         logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
-                        torrentlist = sorted(resultlist, key=lambda title: (-title[4] , -title[1]))
+                        torrentlist = sorted(resultlist, key=lambda title: (title[4], title[1]), reverse=True)
                     
                     else:
                         logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
@@ -1334,27 +1336,25 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 logger.info(result[0] + " is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit) + ")")
                                 continue
                                                                 
-                            delta = abs(targetsize - result[1])
+                            delta = abs(targetsize - int(result[1]))
                             newlist.append((result[0], result[1], result[2], result[3], result[4], delta))
 
-                        print newlist
                         torrentlist = sorted(newlist, key=lambda title: (-title[4], title[5]))
-                        print torrentlist
                         
                         if not len(torrentlist) and len(flac_list) and headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                             logger.info("Since there were no appropriate lossy matches (and at least one lossless match), going to use lossless instead")
-                            torrentlist = sorted(flac_list, key=lambda title: (-title[4], -title[1]))
+                            torrentlist = sorted(flac_list, key=lambda title: (title[4], title[1]), reverse=True)
                 
                 except Exception, e:
 
                     logger.debug('Error: %s' % str(e))
                     logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
-                    
-                    torrentlist = sorted(resultlist, key=lambda title: (-title[4], -title[1]))
+
+                    torrentlist = sorted(resultlist, key=lambda title: (title[4], title[1]), reverse=True)
             
             else:
-            
-                torrentlist = sorted(resultlist, key=lambda title: (-title[4], -title[1]))
+
+                torrentlist = sorted(resultlist, key=lambda title: (title[4], title[1]), reverse=True)
 
             if new:
 
@@ -1420,8 +1420,23 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         
                 elif headphones.TORRENT_DOWNLOADER == 1:
                     logger.info("Sending torrent to Transmission")
-                    torrentid = transmission.addTorrent(bestqual[2])
+
+                    # rutracker needs cookies to be set, pass the .torrent file instead of url
+                    if bestqual[3] == 'rutracker.org':
+                        file_or_url = rutracker.get_torrent(bestqual[2])
+                    else:
+                        file_or_url = bestqual[2]
+
+                    torrentid = transmission.addTorrent(file_or_url)
                     torrent_folder_name = transmission.getTorrentFolder(torrentid)
+                    logger.info('Torrent folder name: %s' % torrent_folder_name)
+
+                    # remove temp .torrent file created above
+                    if bestqual[3] == 'rutracker.org':
+                        try:
+                            shutil.rmtree(os.path.split(file_or_url)[0])
+                        except Exception, e:
+                            logger.warning('Couldn\'t remove temp dir %s' % e)
 
                 myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [albums[2]])
                 myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)', [albums[2], bestqual[0], bestqual[1], bestqual[2], "Snatched", torrent_folder_name, "torrent"])
