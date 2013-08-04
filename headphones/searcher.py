@@ -468,7 +468,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
                     if not targetsize:
                         logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
-                        nzblist = sorted(resultlist, key=lambda title: (title[4], title[1]), reverse=True)
+                        nzblist = sorted(resultlist, key=lambda title: (title[4], int(title[1])), reverse=True)
 
                     else:
                         logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
@@ -507,19 +507,19 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
                         if not len(nzblist) and len(flac_list) and headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                             logger.info("Since there were no appropriate lossy matches (and at least one lossless match), going to use lossless instead")
-                            nzblist = sorted(flac_list, key=lambda title: (title[4], title[1]), reverse=True)
+                            nzblist = sorted(flac_list, key=lambda title: (title[4], int(title[1])), reverse=True)
 
                 except Exception, e:
 
                     logger.debug('Error: %s' % str(e))
                     logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
 
-                    nzblist = sorted(resultlist, key=lambda title: (title[4], title[1]), reverse=True)
+                    nzblist = sorted(resultlist, key=lambda title: (title[4], int(title[1])), reverse=True)
 
 
             else:
 
-                nzblist = sorted(resultlist, key=lambda title: (title[4], title[1]), reverse=True)
+                nzblist = sorted(resultlist, key=lambda title: (title[4], int(title[1])), reverse=True)
 
 
 
@@ -1302,7 +1302,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
     
                     if not targetsize:
                         logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
-                        torrentlist = sorted(resultlist, key=lambda title: (title[4], title[1]), reverse=True)
+                        torrentlist = sorted(resultlist, key=lambda title: (title[4], int(title[1])), reverse=True)
                     
                     else:
                         logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
@@ -1340,18 +1340,18 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         
                         if not len(torrentlist) and len(flac_list) and headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                             logger.info("Since there were no appropriate lossy matches (and at least one lossless match), going to use lossless instead")
-                            torrentlist = sorted(flac_list, key=lambda title: (title[4], title[1]), reverse=True)
+                            torrentlist = sorted(flac_list, key=lambda title: (title[4], int(title[1])), reverse=True)
                 
                 except Exception, e:
 
                     logger.debug('Error: %s' % str(e))
                     logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
 
-                    torrentlist = sorted(resultlist, key=lambda title: (title[4], title[1]), reverse=True)
+                    torrentlist = sorted(resultlist, key=lambda title: (title[4], int(title[1])), reverse=True)
             
             else:
 
-                torrentlist = sorted(resultlist, key=lambda title: (title[4], title[1]), reverse=True)
+                torrentlist = sorted(resultlist, key=lambda title: (title[4], int(title[1])), reverse=True)
 
             if new:
 
