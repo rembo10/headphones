@@ -1102,9 +1102,11 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 
                 soup = BeautifulSoup(data)
                 table = soup.find('table')
-                rows = table.findAll('tr')
+                rows = None
+                if table:
+                    rows = table.findAll('tr')
                 
-                if len(rows) == '1':
+                if not rows or len(rows) == '1':
                     logger.info(u"No results found from %s for %s" % (provider, term))
                     pass
                 
