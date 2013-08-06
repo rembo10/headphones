@@ -326,7 +326,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     # Check to see if we're preserving the torrent dir
     if headphones.KEEP_TORRENT_FILES and Kind=="torrent":
         new_folder = os.path.join(albumpath, 'headphones-modified').encode(headphones.SYS_ENCODING, 'replace')
-        logger.info("Copying files to 'headphones-modified' subfolder to preserve downleaded files for seeding")
+        logger.info("Copying files to 'headphones-modified' subfolder to preserve downloaded files for seeding")
         try:
             shutil.copytree(albumpath, new_folder)
             # Update the album path with the new location
