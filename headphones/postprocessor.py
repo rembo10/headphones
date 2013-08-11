@@ -464,6 +464,9 @@ def addAlbumArt(artwork, albumpath, release):
 
     album_art_name = album_art_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING, 'replace')
 
+    if headphones.FILE_UNDERSCORES:
+        album_art_name = album_art_name.replace(' ', '_')
+
     if album_art_name.startswith('.'):
         album_art_name = album_art_name.replace(0, '_')
 
@@ -493,6 +496,10 @@ def moveFiles(albumpath, release, tracks):
         
     artist = release['ArtistName'].replace('/', '_')
     album = release['AlbumTitle'].replace('/', '_')
+    if headphones.FILE_UNDERSCORES:
+        artist = artist.replace(' ', '_')
+        album = album.replace(' ', '_')
+
     releasetype = release['Type'].replace('/', '_')
 
     if release['ArtistName'].startswith('The '):
@@ -831,6 +838,9 @@ def renameFiles(albumpath, downloaded_track_list, release):
         
         
         new_file_name = new_file_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING, 'replace')
+
+        if headphones.FILE_UNDERSCORES:
+            new_file_name = new_file_name.replace(' ', '_')
 
         if new_file_name.startswith('.'):
             new_file_name = new_file_name.replace(0, '_')
