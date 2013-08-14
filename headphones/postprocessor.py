@@ -43,28 +43,31 @@ def checkFolder():
         
             if album['FolderName']:
                 
-                # We're now checking sab config options after sending to determine renaming - but we'll keep the
-                # iterations in just in case we can't read the config for some reason
+                if album['Kind'] == 'nzb':
+                    # We're now checking sab config options after sending to determine renaming - but we'll keep the
+                    # iterations in just in case we can't read the config for some reason
 
-                nzb_album_possibilities = [ album['FolderName'],
-                                            sab_replace_dots(album['FolderName']),
-                                            sab_replace_spaces(album['FolderName']),
-                                            sab_replace_spaces(sab_replace_dots(album['FolderName']))
+                    nzb_album_possibilities = [ album['FolderName'],
+                                                sab_replace_dots(album['FolderName']),
+                                                sab_replace_spaces(album['FolderName']),
+                                                sab_replace_spaces(sab_replace_dots(album['FolderName']))
                                         ]
-
-                torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
-
-                for nzb_folder_name in nzb_album_possibilities:
                     
-                    nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING, 'replace')
+                    for nzb_folder_name in nzb_album_possibilities:
+                        
+                        nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING, 'replace')
+    
+                        if os.path.exists(nzb_album_path):
+                            logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
+                            verify(album['AlbumID'], nzb_album_path, 'nzb')
+                            
+                if album['Kind'] == 'torrent':
 
-                    if os.path.exists(nzb_album_path):
-                        logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
-                        verify(album['AlbumID'], nzb_album_path, album['Kind'])
-
-                if os.path.exists(torrent_album_path):
-                    logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
-                    verify(album['AlbumID'], torrent_album_path, album['Kind'])
+                    torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
+    
+                    if os.path.exists(torrent_album_path):
+                        logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
+                        verify(album['AlbumID'], torrent_album_path, 'torrent')
 
 def verify(albumid, albumpath, Kind=None, forced=False):
 
