@@ -224,9 +224,9 @@ def command(encoder,musicSource,musicDest,albumPath):
         opts = []
         if headphones.ADVANCEDENCODER =='':
             if headphones.ENCODEROUTPUTFORMAT=='ogg':
-                opts.extend(['-acodec libvorbis'])
+                opts.extend(['-acodec', 'libvorbis'])
             if headphones.ENCODEROUTPUTFORMAT=='m4a':
-                opts.extend(['-strict experimental'])
+                opts.extend(['-strict', 'experimental'])
             if headphones.ENCODERVBRCBR=='cbr':
                 opts.extend(['-ar', str(headphones.SAMPLINGFREQUENCY), '-ab', str(headphones.BITRATE) + 'k'])
             elif headphones.ENCODERVBRCBR=='vbr':
