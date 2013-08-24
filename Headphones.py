@@ -152,6 +152,9 @@ def main():
                     'http_host':        headphones.HTTP_HOST,
                     'http_root':        headphones.HTTP_ROOT,
                     'http_proxy':       headphones.HTTP_PROXY,
+                    'enable_https':     headphones.ENABLE_HTTPS,
+                    'https_cert':       headphones.HTTPS_CERT,
+                    'https_key':        headphones.HTTPS_KEY,
                     'http_username':    headphones.HTTP_USERNAME,
                     'http_password':    headphones.HTTP_PASSWORD,
             })
