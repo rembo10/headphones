@@ -351,6 +351,8 @@ def create_https_certificates(ssl_cert, ssl_key):
     Stolen from SickBeard (http://github.com/midgetspy/Sick-Beard):
     Create self-signed HTTPS certificares and store in paths 'ssl_cert' and 'ssl_key'
     """
+    from headphones import logger
+    
     try:
         from OpenSSL import crypto #@UnresolvedImport
         from lib.certgen import createKeyPair, createCertRequest, createCertificate, TYPE_RSA, serial #@UnresolvedImport
