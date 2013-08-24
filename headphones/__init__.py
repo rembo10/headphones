@@ -73,6 +73,10 @@ HTTP_ROOT = None
 HTTP_PROXY = False
 LAUNCH_BROWSER = False
 
+ENABLE_HTTPS = False
+HTTPS_CERT = None
+HTTPS_KEY = None
+
 API_ENABLED = False
 API_KEY = None
 
@@ -304,7 +308,7 @@ def initialize():
                 PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
-                PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK
+                PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY
 
         if __INITIALIZED__:
             return False
@@ -345,6 +349,9 @@ def initialize():
         HTTP_PASSWORD = check_setting_str(CFG, 'General', 'http_password', '')
         HTTP_ROOT = check_setting_str(CFG, 'General', 'http_root', '/')
         HTTP_PROXY = bool(check_setting_int(CFG, 'General', 'http_proxy', 0))
+        ENABLE_HTTPS = bool(check_setting_int(CFG, 'General', 'enable_https', 0))
+        HTTPS_CERT = check_setting_str(CFG, 'General', 'https_cert', os.path.join(DATA_DIR, 'server.crt'))
+        HTTPS_KEY = check_setting_str(CFG, 'General', 'https_key', os.path.join(DATA_DIR, 'server.key'))
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
         API_ENABLED = bool(check_setting_int(CFG, 'General', 'api_enabled', 0))
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
@@ -679,9 +686,14 @@ def launch_browser(host, port, root):
 
     if host == '0.0.0.0':
         host = 'localhost'
+        
+    if ENABLE_HTTPS:
+        protocol = 'https'
+    else:
+        protocol = 'http'
 
     try:
-        webbrowser.open('http://%s:%i%s' % (host, port, root))
+        webbrowser.open('%s://%s:%i%s' % (protocol, host, port, root))
     except Exception, e:
         logger.error('Could not launch browser: %s' % e)
 
@@ -698,6 +710,9 @@ def config_write():
     new_config['General']['http_password'] = HTTP_PASSWORD
     new_config['General']['http_root'] = HTTP_ROOT
     new_config['General']['http_proxy'] = int(HTTP_PROXY)
+    new_config['General']['enable_https'] = int(ENABLE_HTTPS)
+    new_config['General']['https_cert'] = HTTPS_CERT
+    new_config['General']['https_key'] = HTTPS_KEY
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
     new_config['General']['api_enabled'] = int(API_ENABLED)
     new_config['General']['api_key'] = API_KEY
