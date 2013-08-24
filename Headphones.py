@@ -142,7 +142,7 @@ def main():
     # Force the http port if neccessary
     if args.port:
         http_port = args.port
-        logger.info('Starting Headphones on forced port: %i' % http_port)
+        logger.info('Using forced port: %i' % http_port)
     else:
         http_port = int(headphones.HTTP_PORT)
 
@@ -158,8 +158,6 @@ def main():
                     'http_username':    headphones.HTTP_USERNAME,
                     'http_password':    headphones.HTTP_PASSWORD,
             })
-
-    logger.info('Starting Headphones on port: %i' % http_port)
 
     if headphones.LAUNCH_BROWSER and not args.nolaunch:
         headphones.launch_browser(headphones.HTTP_HOST, http_port, headphones.HTTP_ROOT)
