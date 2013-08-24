@@ -97,6 +97,7 @@ DESTINATION_DIR = None
 LOSSLESS_DESTINATION_DIR = None
 FOLDER_FORMAT = None
 FILE_FORMAT = None
+FILE_UNDERSCORES = False
 PATH_TO_XML = None
 PREFERRED_QUALITY = None
 PREFERRED_BITRATE = None
@@ -295,7 +296,7 @@ def initialize():
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, GIT_USER, GIT_BRANCH, \
                 CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
-                RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, \
+                RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, FILE_UNDERSCORES, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, \
                 ADD_ALBUM_ART, ALBUM_ART_FORMAT, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, PIRATEBAY, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
@@ -380,6 +381,7 @@ def initialize():
         RENAME_FILES = bool(check_setting_int(CFG, 'General', 'rename_files', 0))
         FOLDER_FORMAT = check_setting_str(CFG, 'General', 'folder_format', 'Artist/Album [Year]')
         FILE_FORMAT = check_setting_str(CFG, 'General', 'file_format', 'Track Artist - Album [Year] - Title')
+        FILE_UNDERSCORES = bool(check_setting_int(CFG, 'General', 'file_underscores', 0))
         CLEANUP_FILES = bool(check_setting_int(CFG, 'General', 'cleanup_files', 0))
         ADD_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'add_album_art', 0))
         ALBUM_ART_FORMAT = check_setting_str(CFG, 'General', 'album_art_format', 'folder')
@@ -741,6 +743,7 @@ def config_write():
     new_config['General']['rename_files'] = int(RENAME_FILES)
     new_config['General']['folder_format'] = FOLDER_FORMAT
     new_config['General']['file_format'] = FILE_FORMAT
+    new_config['General']['file_underscores'] = int(FILE_UNDERSCORES)
     new_config['General']['cleanup_files'] = int(CLEANUP_FILES)
     new_config['General']['add_album_art'] = int(ADD_ALBUM_ART)
     new_config['General']['album_art_format'] = ALBUM_ART_FORMAT
