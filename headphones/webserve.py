@@ -565,6 +565,9 @@ class WebInterface(object):
                     "http_port" : headphones.HTTP_PORT,
                     "http_pass" : headphones.HTTP_PASSWORD,
                     "launch_browser" : checked(headphones.LAUNCH_BROWSER),
+                    "enable_https" : checked(headphones.ENABLE_HTTPS),
+                    "https_cert" : headphones.HTTPS_CERT,
+                    "https_key" : headphones.HTTPS_KEY,
                     "api_enabled" : checked(headphones.API_ENABLED),
                     "api_key" : headphones.API_KEY,
                     "download_scan_interval" : headphones.DOWNLOAD_SCAN_INTERVAL,
@@ -726,13 +729,17 @@ class WebInterface(object):
         delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False,
         pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, mirror=None, customhost=None, customport=None,
-        customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, **kwargs):
+        customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
+        enable_https=0, https_cert=None, https_key=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
         headphones.HTTP_USERNAME = http_username
         headphones.HTTP_PASSWORD = http_password
         headphones.LAUNCH_BROWSER = launch_browser
+        headphones.ENABLE_HTTPS = enable_https
+        headphones.HTTPS_CERT = https_cert
+        headphones.HTTPS_KEY = https_key
         headphones.API_ENABLED = api_enabled
         headphones.API_KEY = api_key
         headphones.DOWNLOAD_SCAN_INTERVAL = download_scan_interval
