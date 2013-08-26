@@ -15,6 +15,11 @@
 logs/*
 cache/*
 
+# HTTPS Cert/Key #
+##################
+*.crt
+*.key
+
 # OS generated files #
 ######################
 .DS_Store?
