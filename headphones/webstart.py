@@ -20,12 +20,31 @@ import cherrypy
 
 import headphones
 
+from headphones import logger
 from headphones.webserve import WebInterface
+from headphones.helpers import create_https_certificates
 
 def initialize(options={}):
 
+    #HTTPS stuff stolen from sickbeard
+    enable_https = options['enable_https']
+    https_cert = options['https_cert']
+    https_key = options['https_key']
 
-    cherrypy.config.update({
+    if enable_https:
+        # If either the HTTPS certificate or key do not exist, make some self-signed ones.
+        if not (https_cert and os.path.exists(https_cert)) or not (https_key and os.path.exists(https_key)):
+            if not create_https_certificates(https_cert, https_key):
+                logger.warn(u"Unable to create cert/key files, disabling HTTPS")
+                headphones.ENABLE_HTTPS = False
+                enable_https = False
+
+        if not (os.path.exists(https_cert) and os.path.exists(https_key)):
+            logger.warn(u"Disabled HTTPS because of missing CERT and KEY files")
+            headphones.ENABLE_HTTPS = False
+            enable_https = False
+        
+    options_dict = {
                 'log.screen':           False,
                 'server.thread_pool':   10,
                 'server.socket_port':   options['http_port'],
@@ -34,7 +53,17 @@ def initialize(options={}):
                 'tools.encode.on' : True,
                 'tools.encode.encoding' : 'utf-8',
                 'tools.decode.on' : True,
-        })
+        }
+        
+    if enable_https:
+        options_dict['server.ssl_certificate'] = https_cert
+        options_dict['server.ssl_private_key'] = https_key
+        protocol = "https"
+    else:
+        protocol = "http"
+    
+    logger.info(u"Starting Headphones on " + protocol + "://" + str(options['http_host']) + ":" + str(options['http_port']) + "/")
+    cherrypy.config.update(options_dict)
 
     conf = {
         '/': {

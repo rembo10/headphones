@@ -73,6 +73,10 @@ HTTP_ROOT = None
 HTTP_PROXY = False
 LAUNCH_BROWSER = False
 
+ENABLE_HTTPS = False
+HTTPS_CERT = None
+HTTPS_KEY = None
+
 API_ENABLED = False
 API_KEY = None
 
@@ -93,6 +97,7 @@ DESTINATION_DIR = None
 LOSSLESS_DESTINATION_DIR = None
 FOLDER_FORMAT = None
 FILE_FORMAT = None
+FILE_UNDERSCORES = False
 PATH_TO_XML = None
 PREFERRED_QUALITY = None
 PREFERRED_BITRATE = None
@@ -306,7 +311,7 @@ def initialize():
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, GIT_USER, GIT_BRANCH, \
                 CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
-                RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, \
+                RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, FILE_UNDERSCORES, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, \
                 ADD_ALBUM_ART, ALBUM_ART_FORMAT, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, PIRATEBAY, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
@@ -320,7 +325,8 @@ def initialize():
                 OSX_NOTIFY_ENABLED, OSX_NOTIFY_ONSNATCH, EMAIL_ENABLED, EMAIL_FROM, EMAIL_TO, EMAIL_SMTP_SERVER, EMAIL_SMTP_USER, EMAIL_SMTP_PASSWORD, EMAIL_ONSNATCH,\
                 MIRRORLIST, MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, \
                 XBMC_PASSWORD, XBMC_UPDATE, XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, \
-                PREFERRED_BITRATE_HIGH_BUFFER, PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK
+                PREFERRED_BITRATE_HIGH_BUFFER, PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, \
+                ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY
 
         if __INITIALIZED__:
             return False
@@ -363,6 +369,9 @@ def initialize():
         HTTP_PASSWORD = check_setting_str(CFG, 'General', 'http_password', '')
         HTTP_ROOT = check_setting_str(CFG, 'General', 'http_root', '/')
         HTTP_PROXY = bool(check_setting_int(CFG, 'General', 'http_proxy', 0))
+        ENABLE_HTTPS = bool(check_setting_int(CFG, 'General', 'enable_https', 0))
+        HTTPS_CERT = check_setting_str(CFG, 'General', 'https_cert', os.path.join(DATA_DIR, 'server.crt'))
+        HTTPS_KEY = check_setting_str(CFG, 'General', 'https_key', os.path.join(DATA_DIR, 'server.key'))
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
         API_ENABLED = bool(check_setting_int(CFG, 'General', 'api_enabled', 0))
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
@@ -391,6 +400,7 @@ def initialize():
         RENAME_FILES = bool(check_setting_int(CFG, 'General', 'rename_files', 0))
         FOLDER_FORMAT = check_setting_str(CFG, 'General', 'folder_format', 'Artist/Album [Year]')
         FILE_FORMAT = check_setting_str(CFG, 'General', 'file_format', 'Track Artist - Album [Year] - Title')
+        FILE_UNDERSCORES = bool(check_setting_int(CFG, 'General', 'file_underscores', 0))
         CLEANUP_FILES = bool(check_setting_int(CFG, 'General', 'cleanup_files', 0))
         ADD_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'add_album_art', 0))
         ALBUM_ART_FORMAT = check_setting_str(CFG, 'General', 'album_art_format', 'folder')
@@ -708,9 +718,14 @@ def launch_browser(host, port, root):
 
     if host == '0.0.0.0':
         host = 'localhost'
+        
+    if ENABLE_HTTPS:
+        protocol = 'https'
+    else:
+        protocol = 'http'
 
     try:
-        webbrowser.open('http://%s:%i%s' % (host, port, root))
+        webbrowser.open('%s://%s:%i%s' % (protocol, host, port, root))
     except Exception, e:
         logger.error('Could not launch browser: %s' % e)
 
@@ -727,6 +742,9 @@ def config_write():
     new_config['General']['http_password'] = HTTP_PASSWORD
     new_config['General']['http_root'] = HTTP_ROOT
     new_config['General']['http_proxy'] = int(HTTP_PROXY)
+    new_config['General']['enable_https'] = int(ENABLE_HTTPS)
+    new_config['General']['https_cert'] = HTTPS_CERT
+    new_config['General']['https_key'] = HTTPS_KEY
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
     new_config['General']['api_enabled'] = int(API_ENABLED)
     new_config['General']['api_key'] = API_KEY
@@ -755,6 +773,7 @@ def config_write():
     new_config['General']['rename_files'] = int(RENAME_FILES)
     new_config['General']['folder_format'] = FOLDER_FORMAT
     new_config['General']['file_format'] = FILE_FORMAT
+    new_config['General']['file_underscores'] = int(FILE_UNDERSCORES)
     new_config['General']['cleanup_files'] = int(CLEANUP_FILES)
     new_config['General']['add_album_art'] = int(ADD_ALBUM_ART)
     new_config['General']['album_art_format'] = ALBUM_ART_FORMAT

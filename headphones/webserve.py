@@ -565,6 +565,9 @@ class WebInterface(object):
                     "http_port" : headphones.HTTP_PORT,
                     "http_pass" : headphones.HTTP_PASSWORD,
                     "launch_browser" : checked(headphones.LAUNCH_BROWSER),
+                    "enable_https" : checked(headphones.ENABLE_HTTPS),
+                    "https_cert" : headphones.HTTPS_CERT,
+                    "https_key" : headphones.HTTPS_KEY,
                     "api_enabled" : checked(headphones.API_ENABLED),
                     "api_key" : headphones.API_KEY,
                     "download_scan_interval" : headphones.DOWNLOAD_SCAN_INTERVAL,
@@ -647,6 +650,7 @@ class WebInterface(object):
                     "lossless_dest_dir" : headphones.LOSSLESS_DESTINATION_DIR,
                     "folder_format" : headphones.FOLDER_FORMAT,
                     "file_format" : headphones.FILE_FORMAT,
+                    "file_underscores" : checked(headphones.FILE_UNDERSCORES),
                     "include_extras" : checked(headphones.INCLUDE_EXTRAS),
                     "autowant_upcoming" : checked(headphones.AUTOWANT_UPCOMING),
                     "autowant_all" : checked(headphones.AUTOWANT_ALL),
@@ -729,20 +733,23 @@ class WebInterface(object):
         preferred_words=None, required_words=None, ignored_words=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None,
         numberofseeders=None, use_piratebay=0, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
         rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0,
-        destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0,
+        destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, file_underscores=0, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0,
         remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
         bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
         delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0,
         nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False, pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0,
         osx_notify_enabled=0, osx_notify_onsnatch=0, email_enabled=0, email_from=None, email_to=None, email_smtp_server=None, email_smtp_user=None, email_smtp_password=None, email_onsnatch=0,
         mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None,
-        preferred_bitrate_allow_lossless=0, cache_sizemb=None, **kwargs):
+        preferred_bitrate_allow_lossless=0, cache_sizemb=None, enable_https=0, https_cert=None, https_key=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
         headphones.HTTP_USERNAME = http_username
         headphones.HTTP_PASSWORD = http_password
         headphones.LAUNCH_BROWSER = launch_browser
+        headphones.ENABLE_HTTPS = enable_https
+        headphones.HTTPS_CERT = https_cert
+        headphones.HTTPS_KEY = https_key
         headphones.API_ENABLED = api_enabled
         headphones.API_KEY = api_key
         headphones.DOWNLOAD_SCAN_INTERVAL = download_scan_interval
@@ -816,6 +823,7 @@ class WebInterface(object):
         headphones.LOSSLESS_DESTINATION_DIR = lossless_destination_dir
         headphones.FOLDER_FORMAT = folder_format
         headphones.FILE_FORMAT = file_format
+        headphones.FILE_UNDERSCORES = file_underscores
         headphones.INCLUDE_EXTRAS = include_extras
         headphones.AUTOWANT_UPCOMING = autowant_upcoming
         headphones.AUTOWANT_ALL = autowant_all

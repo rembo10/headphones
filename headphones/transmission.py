@@ -33,6 +33,9 @@ def addTorrent(link):
     
     response = torrentAction(method,arguments)
 
+    if not response:
+        return False
+        
     if response['result'] == 'success':
         name = response['arguments']['torrent-added']['name']
         logger.info(u"Torrent sent to Transmission successfully")

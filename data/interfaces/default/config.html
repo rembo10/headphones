@@ -54,6 +54,19 @@
                                 <div class="row checkbox">
                                     <input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} /> <label>Launch Browser on Startup</label>
                                 </div>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="enable_https" id="enable_https" value="1" ${config['enable_https']} /> <label>Enable HTTPS</label>
+                                </div>
+                                <div id="https_options">
+                                    <div class="row">
+                                        <label>HTTPS Cert</label>
+                                        <input type="text" name="https_cert" value="${config['https_cert']}" size="30">
+                                    </div>
+                                    <div class="row">
+                                        <label>HTTPS Key</label>
+                                        <input type="text" name="https_key" value="${config['https_key']}" size="30">
+                                    </div>
+                                </div>
                             </fieldset>
                         </td>
                         <td>
@@ -367,7 +380,7 @@
                                     </div>
                                     <div class="row">
                                         <label>Waffles Passkey: </label>
-                                        <input type="text" name="waffles_passkey" value="${config['waffles_passkey']}" size="36">
+                                        <input type="password" name="waffles_passkey" value="${config['waffles_passkey']}" size="36">
                                     </div>
                                 </div>
                                 <div class="row checkbox">
@@ -497,6 +510,9 @@
                                 <label>File Format</label>
                                 <input type="text" name="file_format" value="${config['file_format']}" size="43">
                                 <small>Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title, $Artist/$artist, $Album/$album and $Year/$year</small>
+                            </div>
+                            <div class="checkbox row clearfix">
+                                <input type="checkbox" name="file_underscores" id="file_underscores" value="1" ${config['file_underscores']}/><label>Use underscores instead of spaces</label>
                             </div>
                         </fieldset>
 
@@ -984,6 +1000,25 @@
                     $('#api_key').val(data);
             });
         });
+                if ($("#enable_https").is(":checked"))
+                        {
+                                $("#https_options").show();
+                        }
+                else
+                        {
+                                $("#https_options").hide();
+                        }
+
+                $("#enable_https").click(function(){
+                        if ($("#enable_https").is(":checked"))
+                        {
+                                $("#https_options").slideDown();
+                        }
+                        else
+                        {
+                                $("#https_options").slideUp();
+                        }
+                });
                 if ($("#music_encoder").is(":checked"))
                         {
                                 $("#encoderoptions").show();
@@ -1294,6 +1329,7 @@
                 initConfigCheckbox("#userutracker");
                 initConfigCheckbox("#usewhatcd");
                 initConfigCheckbox("#useapi");
+                initConfigCheckbox("#enable_https");
         }
         $(document).ready(function() {
             initThisPage();

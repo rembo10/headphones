@@ -1082,9 +1082,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                        provider))
 
         # Pirate Bay
-        if headphones.PIRATEBAY and headphones.TORRENT_DOWNLOADER == 0:
-            logger.warn("Cannot search Pirate Bay with Blackhole option set")
-        if headphones.PIRATEBAY and headphones.TORRENT_DOWNLOADER != 0:
+        if headphones.PIRATEBAY:
             provider = "The Pirate Bay"    
             providerurl = url_fix("http://thepiratebay.sx/search/" + term + "/0/99/")
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
@@ -1126,9 +1124,15 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                             title = ''.join(item.find("a", {"class" : "detLink"}))
                             seeds = int(''.join(item.find("td", {"align" : "right"})))
                             url = item.findAll("a")[3]['href']
+                            if headphones.TORRENT_DOWNLOADER == 0:
+                                tor_hash = re.findall("urn:btih:(.*?)&", url)
+                                if len(tor_hash) > 0:
+                                    url = "http://torrage.com/torrent/"+str(tor_hash[0]).upper()+".torrent"
+                                else:
+                                    url = None
                             formatted_size = re.search('Size (.*),', unicode(item)).group(1).replace(u'\xa0', ' ')
                             size = helpers.piratesize(formatted_size)
-                            if size < maxsize and minimumseeders < seeds:
+                            if size < maxsize and minimumseeders < seeds and url != None:
                                 resultlist.append((title, size, url, provider))
                                 logger.info('Found %s. Size: %s' % (title, formatted_size))
                             else:
@@ -1202,6 +1206,9 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                         rightformat = False
                             except Exception, e:
                                 rightformat = False
+                            for findterm in term.split(" "):
+                                if not findterm in title:
+                                    rightformat = False
                             if rightformat == True and size < maxsize and minimumseeders < seeds:
                                 resultlist.append((title, size, url, provider))
                                 logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
@@ -1440,6 +1447,9 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
                     if torrentid:
                         notify.notify(albums[0], albums[1], bestqual[3], torrentname)
+                    else:
+                        logger.error("Error sending torrent to Transmission. Are you sure it's running?")
+                        return
 
                     torrent_folder_name = transmission.getTorrentFolder(torrentid)
                     logger.info('Torrent folder name: %s' % torrent_folder_name)
@@ -1462,8 +1472,8 @@ def preprocesstorrent(resultlist, pre_sorted_list=False):
         
     for result in resultlist:
 
-        # get outta here if rutracker or piratebay
-        if result[3] == 'rutracker.org' or result[3] == 'The Pirate Bay':
+        # get outta here if rutracker
+        if result[3] == 'rutracker.org':
             return True, result
 
         try:
