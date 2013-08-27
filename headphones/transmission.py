@@ -14,7 +14,7 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import headphones
-from headphones import logger, notifiers
+from headphones import logger
 
 import urllib2
 import lib.simplejson as json
@@ -32,25 +32,12 @@ def addTorrent(link):
     arguments = {'filename': link, 'download-dir':headphones.DOWNLOAD_TORRENT_DIR}
     
     response = torrentAction(method,arguments)
-    
 
     if response['result'] == 'success':
         name = response['arguments']['torrent-added']['name']
         logger.info(u"Torrent sent to Transmission successfully")
-        if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
-            logger.info(u"Sending Prowl notification")
-            prowl = notifiers.PROWL()
-            prowl.notify(name,"Download started")
-        if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
-            logger.info(u"Sending Pushover notification")
-            prowl = notifiers.PUSHOVER()
-            prowl.notify(name,"Download started")
-        if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
-            logger.debug(u"Sending NMA notification")
-            nma = notifiers.NMA()
-            nma.notify(snatched_nzb=name)
-
-        return response['arguments']['torrent-added']['id']
+        id = response['arguments']['torrent-added']['id']
+        return id, name
         
 def getTorrentFolder(torrentid):
     method = 'torrent-get'
@@ -60,7 +47,8 @@ def getTorrentFolder(torrentid):
     percentdone = response['arguments']['torrents'][0]['percentDone']
     torrent_folder_name = response['arguments']['torrents'][0]['name']
     
-    while percentdone == 0:
+    timeout = time.time() + 60
+    while percentdone == 0 and time.time() < timeout:
         time.sleep(5)
         response = torrentAction(method, arguments)
         percentdone = response['arguments']['torrents'][0]['percentDone']

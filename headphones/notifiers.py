@@ -24,6 +24,9 @@ from urllib import urlencode
 import os.path
 import subprocess
 import lib.simplejson as simplejson
+from email.mime.text import MIMEText
+import smtplib
+import email.utils
 
 class PROWL:
 
@@ -59,7 +62,7 @@ class PROWL:
         request_status = response.status
 
         if request_status == 200:
-                logger.info(u"Prowl notifications sent.")
+                logger.info(u"Prowl notification sent.")
                 return True
         elif request_status == 401: 
                 logger.info(u"Prowl auth failed: %s" % response.reason)
@@ -207,28 +210,21 @@ class NMA:
         
         return response     
         
-    def notify(self, artist=None, album=None, snatched_nzb=None):
+    def notify(self, title, event):
     
         apikey = self.apikey
         priority = self.priority
-        
-        if snatched_nzb:
-            event = snatched_nzb + " snatched!"
-            description = "Headphones has snatched: " + snatched_nzb + " and has sent it to SABnzbd+"
-        else:
-            event = artist + ' - ' + album + ' complete!'
-            description = "Headphones has downloaded and postprocessed: " + artist + ' [' + album + ']'
     
-        data = { 'apikey': apikey, 'application':'Headphones', 'event': event, 'description': description, 'priority': priority}
+        data = { 'apikey': apikey, 'application':'Headphones', 'event': title, 'description': event, 'priority': priority}
 
         logger.info('Sending notification request to NotifyMyAndroid')
         request = self._send(data)
         
         if not request:
             logger.warn('Error sending notification request to NotifyMyAndroid')        
-        
 
 class Synoindex:
+
     def __init__(self, util_loc='/usr/syno/bin/synoindex'):
         self.util_loc = util_loc
 
@@ -263,6 +259,7 @@ class Synoindex:
         if isinstance(path_list, list):
             for path in path_list:
                 self.notify(path)
+
 class PUSHOVER:
 
     application_token = "LdPCoy0dqC21ktsbEyAVCcwvQiVlsz"
@@ -321,4 +318,26 @@ class PUSHOVER:
         self.priority = priority
 
         self.notify('Main Screen Activate', 'Test Message')
-        
+
+class EMAIL:
+
+    def notify(self, title, event):
+
+        message = MIMEText(event)
+        message['Subject'] = title
+        message['From'] = email.utils.formataddr(('Headphones', headphones.EMAIL_FROM))
+        message['To'] = headphones.EMAIL_TO
+
+        try:
+            mailserver = smtplib.SMTP(headphones.EMAIL_SMTP_SERVER)
+
+            if len(headphones.EMAIL_SMTP_USER) > 0:
+                mailserver.login(headphones.EMAIL_SMTP_USER, headphones.EMAIL_SMTP_PASSWORD)
+
+            mailserver.sendmail(headphones.EMAIL_FROM, headphones.EMAIL_TO, message.as_string())
+            mailserver.quit()
+            return True
+
+        except Exception, e:
+            logger.warn('Error sending Email: %s' % e)
+            return False

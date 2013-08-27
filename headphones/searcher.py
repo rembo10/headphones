@@ -34,7 +34,7 @@ import shutil
 
 import headphones, exceptions
 from headphones import logger, db, helpers, classes, sab, nzbget
-from headphones import transmission
+from headphones import transmission, notify
 
 import lib.bencode as bencode
 
@@ -254,7 +254,6 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 if newznab_host[2] == '1' or newznab_host[2] == 1:
                     newznab_hosts.append(newznab_host)
 
-            provider = "newznab"
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "3040"
             elif headphones.PREFERRED_QUALITY:
@@ -267,6 +266,11 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 logger.info("Album type is audiobook/spokenword. Using audiobook category")
 
             for newznab_host in newznab_hosts:
+
+                if newznab_host[0].startswith('http://') or newznab_host[0].startswith('https://'):
+                    provider = newznab_host[0].split("//")[1]
+                else:
+                    provider = newznab_host[0]
 
                 # Add a little mod for kere.ws
                 if newznab_host[0] == "http://kere.ws":
@@ -293,12 +297,12 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                 request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
                 opener = urllib2.build_opener()
 
-                logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, newznab_host[0]))
+                logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, provider))
 
                 try:
                     data = opener.open(request).read()
                 except Exception, e:
-                    logger.warn('Error fetching data from %s: %s' % (newznab_host[0], e))
+                    logger.warn('Error fetching data from %s: %s' % (provider, e))
                     data = False
 
                 if data:
@@ -306,7 +310,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                     d = feedparser.parse(data)
 
                     if not len(d.entries):
-                        logger.info(u"No results found from %s for %s" % (newznab_host[0], term))
+                        logger.info(u"No results found from %s for %s" % (provider, term))
                         pass
 
                     else:
@@ -550,7 +554,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
             (data, bestqual) = preprocess(nzblist)
 
             if data and bestqual:
-                logger.info(u'Found best result: <a href="%s">%s</a> - %s' % (bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
+                logger.info(u'Found best result from %s: <a href="%s">%s</a> - %s' % (bestqual[3], bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
                 # Get rid of any dodgy chars here so we can prevent sab from renaming our downloads
                 nzb_folder_name = helpers.sab_sanitize_foldername(bestqual[0])
                 if headphones.NZB_DOWNLOADER == 1:
@@ -558,14 +562,18 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                     nzb = classes.NZBDataSearchResult()
                     nzb.extraInfo.append(data)
                     nzb.name = nzb_folder_name
-                    nzbget.sendNZB(nzb)
+
+                    if nzbget.sendNZB(nzb):
+                        notify.notify(albums[0], albums[1], bestqual[3], nzb.name)
 
                 elif headphones.NZB_DOWNLOADER == 0:
 
                     nzb = classes.NZBDataSearchResult()
                     nzb.extraInfo.append(data)
                     nzb.name = nzb_folder_name
-                    sab.sendNZB(nzb)
+
+                    if sab.sendNZB(nzb):
+                        notify.notify(albums[0], albums[1], bestqual[3], nzb.name)
 
                     # If we sent the file to sab, we can check how it was renamed and insert that into the snatched table
                     (replace_spaces, replace_dots) = sab.checkConfig()
@@ -586,6 +594,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                         f.close()
                         os.umask(prev)
                         logger.info('File saved to: %s' % nzb_name)
+                        notify.notify(albums[0], albums[1], bestqual[3], nzb_name)
                     except Exception, e:
                         logger.error('Couldn\'t write NZB file: %s' % e)
                         break
@@ -804,7 +813,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         minimumseeders = int(headphones.NUMBEROFSEEDERS) - 1
 
         if headphones.KAT:
-            provider = "Kick Ass Torrent"
+            provider = "Kick Ass Torrents"
             providerurl = url_fix("http://www.kat.ph/search/" + term)
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "7"        #music
@@ -1412,6 +1421,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         torrent_info = bencode.bdecode(torrent_file.read())
                         torrent_file.close()
                         torrent_folder_name = torrent_info['info'].get('name','').decode('utf-8')
+                        notify.notify(albums[0], albums[1], bestqual[3], torrent_folder_name)
                         logger.info('Torrent folder name: %s' % torrent_folder_name)
                     except Exception, e:
                         logger.error('Couldn\'t get name from Torrent file: %s' % e)
@@ -1426,7 +1436,11 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     else:
                         file_or_url = bestqual[2]
 
-                    torrentid = transmission.addTorrent(file_or_url)
+                    torrentid, torrentname = transmission.addTorrent(file_or_url)
+
+                    if torrentid:
+                        notify.notify(albums[0], albums[1], bestqual[3], torrentname)
+
                     torrent_folder_name = transmission.getTorrentFolder(torrentid)
                     logger.info('Torrent folder name: %s' % torrent_folder_name)
 
@@ -1456,7 +1470,7 @@ def preprocesstorrent(resultlist, pre_sorted_list=False):
             request = urllib2.Request(result[2])
             request.add_header('Accept-encoding', 'gzip')
     
-            if result[3] == 'Kick Ass Torrent':
+            if result[3] == 'Kick Ass Torrents':
                 request.add_header('Referer', 'http://kat.ph/')
 
             response = urllib2.urlopen(request)
