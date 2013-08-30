@@ -38,14 +38,21 @@ def getCachedArt(albumid):
     
     if not artwork_path:
         return None
-    
+
     if artwork_path.startswith('http://'):
         try:
             artwork = urllib2.urlopen(artwork_path, timeout=20).read()
-            return artwork
+            return artwork, artwork_path
         except:
             logger.warn("Unable to open url: " + artwork_path)
-            return None
+            return None, None
     else:
         artwork = open(artwork_path, "r").read()
-        return artwork
+        return artwork, None
+
+def getAlbumArtURL(albumid):
+
+    myDB = db.DBConnection()
+    artwork_path = myDB.action('SELECT ArtworkURL from albums WHERE AlbumID=?', [albumid]).fetchone()[0]
+
+    return artwork_path

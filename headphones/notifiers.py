@@ -164,7 +164,11 @@ class XBMC:
 
         header = "Headphones"
         message = "%s - %s added to your library" % (artist, album)
-        time = "3000" # in ms
+        time = "9000" # in ms
+
+        # Use headphones image if no artwork
+        if not albumartpath:
+            albumartpath = 'https://github.com/rembo10/headphones/raw/master/data/images/headphoneslogo.png'
 
         for host in hosts:
             logger.info('Sending notification command to XMBC @ '+host)

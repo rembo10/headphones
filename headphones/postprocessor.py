@@ -363,7 +363,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
             artwork = urllib.urlopen(album_art_path).read()
         if not album_art_path or len(artwork) < 100:
             logger.info("No suitable album art found from Amazon. Checking Last.FM....")
-            artwork = albumart.getCachedArt(albumid)
+            artwork, album_art_path = albumart.getCachedArt(albumid)
             if not artwork or len(artwork) < 100:
                 artwork = False
                 logger.info("No suitable album art found from Last.FM. Not adding album art")
@@ -403,6 +403,9 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         librarysync.libraryScan(dir=albumpath, append=True, ArtistID=release['ArtistID'], ArtistName=release['ArtistName'])
     
     logger.info(u'Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
+
+    if not album_art_path:
+        album_art_path = albumart.getAlbumArtURL(albumid)
 
     notify.notify(release['ArtistName'], release['AlbumTitle'], '', '', album_art_path, albumpaths)
         
@@ -857,7 +860,7 @@ def forcePostProcess():
         download_dirs.append(headphones.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING, 'replace'))
     if headphones.DOWNLOAD_TORRENT_DIR:
         download_dirs.append(headphones.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
-        
+
     # If DOWNLOAD_DIR and DOWNLOAD_TORRENT_DIR are the same, remove the duplicate to prevent us from trying to process the same folder twice.
     download_dirs = list(set(download_dirs))
     
