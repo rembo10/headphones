@@ -21,13 +21,12 @@ import threading
 import music_encoder
 import urllib, shutil, re
 import uuid
-from headphones import notifiers
 import lib.beets as beets
 from lib.beets import autotag
 from lib.beets.mediafile import MediaFile
 
 import headphones
-from headphones import db, albumart, librarysync, lyrics, logger, helpers
+from headphones import db, albumart, librarysync, lyrics, logger, helpers, notify
 from headphones.helpers import sab_replace_dots, sab_replace_spaces
 
 postprocessor_lock = threading.Lock()
@@ -364,7 +363,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
             artwork = urllib.urlopen(album_art_path).read()
         if not album_art_path or len(artwork) < 100:
             logger.info("No suitable album art found from Amazon. Checking Last.FM....")
-            artwork = albumart.getCachedArt(albumid)
+            artwork, album_art_path = albumart.getCachedArt(albumid)
             if not artwork or len(artwork) < 100:
                 artwork = False
                 logger.info("No suitable album art found from Last.FM. Not adding album art")
@@ -404,34 +403,11 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         librarysync.libraryScan(dir=albumpath, append=True, ArtistID=release['ArtistID'], ArtistName=release['ArtistName'])
     
     logger.info(u'Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
-    
-    if headphones.PROWL_ENABLED:
-        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
-        logger.info(u"Prowl request")
-        prowl = notifiers.PROWL()
-        prowl.notify(pushmessage,"Download and Postprocessing completed")
-        
-    if headphones.XBMC_ENABLED:
-        xbmc = notifiers.XBMC()
-        if headphones.XBMC_UPDATE:
-            xbmc.update()
-        if headphones.XBMC_NOTIFY:
-            xbmc.notify(release['ArtistName'], release['AlbumTitle'], album_art_path)
-            
-    if headphones.NMA_ENABLED:
-        nma = notifiers.NMA()
-        nma.notify(release['ArtistName'], release['AlbumTitle'])
 
-    if headphones.SYNOINDEX_ENABLED:
-        syno = notifiers.Synoindex()
-        for albumpath in albumpaths:
-            syno.notify(albumpath)
-    
-    if headphones.PUSHOVER_ENABLED:
-        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
-        logger.info(u"Pushover request")
-        pushover = notifiers.PUSHOVER()
-        pushover.notify(pushmessage,"Download and Postprocessing completed")
+    if not album_art_path:
+        album_art_path = albumart.getAlbumArtURL(albumid)
+
+    notify.notify(release['ArtistName'], release['AlbumTitle'], '', '', album_art_path, albumpaths)
         
 def embedAlbumArt(artwork, downloaded_track_list):
     logger.info('Embedding album art')
@@ -884,7 +860,7 @@ def forcePostProcess():
         download_dirs.append(headphones.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING, 'replace'))
     if headphones.DOWNLOAD_TORRENT_DIR:
         download_dirs.append(headphones.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
-        
+
     # If DOWNLOAD_DIR and DOWNLOAD_TORRENT_DIR are the same, remove the duplicate to prevent us from trying to process the same folder twice.
     download_dirs = list(set(download_dirs))
     

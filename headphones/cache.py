@@ -139,7 +139,7 @@ class Cache(object):
         else:
             self.id = AlbumID
             self.id_type = 'album'
-        
+
         if self._exists('artwork') and self._is_current(filename=self.artwork_files[0]):
             return self.artwork_files[0]
         else:

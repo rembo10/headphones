@@ -689,6 +689,15 @@ class WebInterface(object):
                     "pushover_onsnatch": checked(headphones.PUSHOVER_ONSNATCH),
                     "pushover_keys": headphones.PUSHOVER_KEYS,
                     "pushover_priority": headphones.PUSHOVER_PRIORITY,
+                    "osx_notify_enabled": checked(headphones.OSX_NOTIFY_ENABLED),
+                    "osx_notify_onsnatch": checked(headphones.OSX_NOTIFY_ONSNATCH),
+                    "email_enabled": checked(headphones.EMAIL_ENABLED),
+                    "email_from": headphones.EMAIL_FROM,
+                    "email_to": headphones.EMAIL_TO,
+                    "email_smtp_server": headphones.EMAIL_SMTP_SERVER,
+                    "email_smtp_user": headphones.EMAIL_SMTP_USER,
+                    "email_smtp_password": headphones.EMAIL_SMTP_PASSWORD,
+                    "email_onsnatch": checked(headphones.EMAIL_ONSNATCH),
                     "mirror_list": headphones.MIRRORLIST,
                     "mirror": headphones.MIRROR,
                     "customhost": headphones.CUSTOMHOST,
@@ -727,11 +736,11 @@ class WebInterface(object):
         destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, file_underscores=0, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0,
         remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
         bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
-        delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
-        xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False,
-        pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, mirror=None, customhost=None, customport=None,
-        customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
-        enable_https=0, https_cert=None, https_key=None, **kwargs):
+        delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None, xbmc_update=0, xbmc_notify=0,
+        nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False, pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0,
+        osx_notify_enabled=0, osx_notify_onsnatch=0, email_enabled=0, email_from=None, email_to=None, email_smtp_server=None, email_smtp_user=None, email_smtp_password=None, email_onsnatch=0,
+        mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None,
+        preferred_bitrate_allow_lossless=0, cache_sizemb=None, enable_https=0, https_cert=None, https_key=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -853,6 +862,15 @@ class WebInterface(object):
         headphones.PUSHOVER_ONSNATCH = pushover_onsnatch
         headphones.PUSHOVER_KEYS = pushover_keys
         headphones.PUSHOVER_PRIORITY = pushover_priority
+        headphones.OSX_NOTIFY_ENABLED = osx_notify_enabled
+        headphones.OSX_NOTIFY_ONSNATCH = osx_notify_onsnatch
+        headphones.EMAIL_ENABLED = email_enabled
+        headphones.EMAIL_FROM = email_from
+        headphones.EMAIL_TO = email_to
+        headphones.EMAIL_SMTP_SERVER = email_smtp_server
+        headphones.EMAIL_SMTP_USER = email_smtp_user
+        headphones.EMAIL_SMTP_PASSWORD = email_smtp_password
+        headphones.EMAIL_ONSNATCH = email_onsnatch
         headphones.MIRROR = mirror
         headphones.CUSTOMHOST = customhost
         headphones.CUSTOMPORT = customport
@@ -893,6 +911,10 @@ class WebInterface(object):
         if headphones.SEARCH_INTERVAL < 360:
             logger.info("Search interval too low. Resetting to 6 hour minimum")
             headphones.SEARCH_INTERVAL = 360
+
+        if headphones.OSX_NOTIFY_ENABLED and not headphones.OSX_MOUNTAINLION:
+            logger.info("OS X Notifications require Mountain Lion or above")
+            headphones.OSX_NOTIFY_ENABLED = False
 
         # Write the config
         headphones.config_write()

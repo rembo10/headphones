@@ -829,6 +829,45 @@
                             </fieldset>
 
                             <fieldset>
+                                <h3>OS X</h3>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="osx_notify_enabled" id="osx_notify" value="1" ${config['osx_notify_enabled']} /><label>Enable OS X Notifications</label>
+                                </div>
+                                <div id="osx_notify_options">
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="osx_notify_onsnatch" value="1" ${config['osx_notify_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <h3>Email</h3>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="email_enabled" id="email" value="1" ${config['email_enabled']} /><label>Enable Email Notifications</label>
+                                </div>
+                                <div id="email_options">
+                                    <div class="row">
+                                        <label>From</label><input type="text" name="email_from" value="${config['email_from']}" size="254">
+                                    </div>
+                                    <div class="row">
+                                        <label>To</label><input type="text" name="email_to" value="${config['email_to']}" size="254">
+                                    </div>
+                                    <div class="row">
+                                        <label>SMTP Server</label><input type="text" name="email_smtp_server" value="${config['email_smtp_server']}" size="254">
+                                    </div>
+                                    <div class="row">
+                                        <label>SMTP User</label><input type="text" name="email_smtp_user" value="${config['email_smtp_user']}" size="254">
+                                    </div>
+                                    <div class="row">
+                                        <label>SMTP Password</label><input type="password" name="email_smtp_password" value="${config['email_smtp_password']}" size="50">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="email_onsnatch" value="1" ${config['email_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
                                 <legend>Musicbrainz</legend>
                                 <div class="row">
                                     <label>Muscbrainz Mirror</label>
@@ -1079,6 +1118,7 @@
                                 $("#nmaoptions").slideUp();
                         }
                 });
+
                 if ($("#pushover").is(":checked"))
                         {
                                 $("#pushoveroptions").show();
@@ -1098,6 +1138,46 @@
                                 $("#pushoveroptions").slideUp();
                         }
                 });
+
+                if ($("#osx_notify").is(":checked"))
+                {
+                    $("#osx_notify_options").show();
+                }
+                else
+                {
+                    $("#osx_notify_options").hide();
+                }
+
+                $("#osx_notify").click(function(){
+                    if ($("#osx_notify").is(":checked"))
+                    {
+                        $("#osx_notify_options").slideDown();
+                    }
+                    else
+                    {
+                        $("#osx_notify_options").slideUp();
+                    }
+                });
+
+            if ($("#email").is(":checked"))
+            {
+                $("#email_options").show();
+            }
+            else
+            {
+                $("#email_options").hide();
+            }
+
+            $("#email").click(function(){
+                if ($("#email").is(":checked"))
+                {
+                    $("#email_options").slideDown();
+                }
+                else
+                {
+                    $("#email_options").slideUp();
+                }
+            });
 
                 if ($("#preferred_bitrate").is(":checked"))
                         {
