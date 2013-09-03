@@ -164,7 +164,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
         # Use the provided search term if available, otherwise build a search term
         if albums[5]:
-            term = albums[5]
+            term = helpers.latinToAscii(helpers.replace_all(albums[5], dic)).strip()
 
         else:
             # FLAC usually doesn't have a year for some reason so I'll leave it out
@@ -771,7 +771,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         # Use provided term if available, otherwise build our own (this code needs to be cleaned up since a lot
         # of these torrent providers are just using cleanartist/cleanalbum terms
         if albums[4]:
-            term = albums[4]
+            term = helpers.latinToAscii(helpers.replace_all(albums[4], dic)).strip()
 
         else:
             # FLAC usually doesn't have a year for some reason so I'll leave it out
