@@ -35,24 +35,27 @@ def addTorrent(link):
 
     if not response:
         return False
-        
-    if response['result'] == 'success':
-        name = response['arguments']['torrent-added']['name']
-        logger.info(u"Torrent sent to Transmission successfully")
-        if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
-            logger.info(u"Sending Prowl notification")
-            prowl = notifiers.PROWL()
-            prowl.notify(name,"Download started")
-        if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
-            logger.info(u"Sending Pushover notification")
-            prowl = notifiers.PUSHOVER()
-            prowl.notify(name,"Download started")
-        if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
-            logger.debug(u"Sending NMA notification")
-            nma = notifiers.NMA()
-            nma.notify(snatched_nzb=name)
 
-        return response['arguments']['torrent-added']['id']
+    if response['result'] == 'success':
+        try:
+            name = response['arguments']['torrent-added']['name']
+            logger.info(u"Torrent sent to Transmission successfully")
+            if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
+                logger.info(u"Sending Prowl notification")
+                prowl = notifiers.PROWL()
+                prowl.notify(name,"Download started")
+            if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
+                logger.info(u"Sending Pushover notification")
+                prowl = notifiers.PUSHOVER()
+                prowl.notify(name,"Download started")
+            if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
+                logger.debug(u"Sending NMA notification")
+                nma = notifiers.NMA()
+                nma.notify(snatched_nzb=name)
+            return response['arguments']['torrent-added']['id']
+        except KeyError:
+            logger.warn(u"Torrent was not sent to Transmission")
+            return False
         
 def getTorrentFolder(torrentid):
     method = 'torrent-get'
@@ -60,13 +63,6 @@ def getTorrentFolder(torrentid):
     
     response = torrentAction(method, arguments)
     percentdone = response['arguments']['torrents'][0]['percentDone']
-    torrent_folder_name = response['arguments']['torrents'][0]['name']
-    
-    while percentdone == 0:
-        time.sleep(5)
-        response = torrentAction(method, arguments)
-        percentdone = response['arguments']['torrents'][0]['percentDone']
-    
     torrent_folder_name = response['arguments']['torrents'][0]['name']
 
     return torrent_folder_name
