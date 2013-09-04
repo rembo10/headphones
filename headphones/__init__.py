@@ -158,10 +158,6 @@ NEWZNAB_APIKEY = None
 NEWZNAB_ENABLED = False
 EXTRA_NEWZNABS = []
 
-NZBSORG = False
-NZBSORG_UID = None
-NZBSORG_HASH = None
-
 NZBSRUS = False
 NZBSRUS_UID = None
 NZBSRUS_APIKEY = None
@@ -303,7 +299,7 @@ def initialize():
                 LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, HEADPHONES_INDEXER, NZBMATRIX, TRANSMISSION_HOST, TRANSMISSION_USERNAME, TRANSMISSION_PASSWORD, \
                 UTORRENT_HOST, UTORRENT_USERNAME, UTORRENT_PASSWORD, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS, \
-                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, \
+                NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, \
                 LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
                 MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, \
                 PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
@@ -322,7 +318,6 @@ def initialize():
         CheckSection('uTorrent')
         CheckSection('Headphones')
         CheckSection('Newznab')
-        CheckSection('NZBsorg')
         CheckSection('NZBsRus')
         CheckSection('Waffles')
         CheckSection('Rutracker')
@@ -453,10 +448,6 @@ def initialize():
         # Need to pack the extra newznabs back into a list of tuples
         flattened_newznabs = check_setting_str(CFG, 'Newznab', 'extra_newznabs', [], log=False)
         EXTRA_NEWZNABS = list(itertools.izip(*[itertools.islice(flattened_newznabs, i, None, 3) for i in range(3)]))
-
-        NZBSORG = bool(check_setting_int(CFG, 'NZBsorg', 'nzbsorg', 0))
-        NZBSORG_UID = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_uid', '')
-        NZBSORG_HASH = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_hash', '')
 
         NZBSRUS = bool(check_setting_int(CFG, 'NZBsRus', 'nzbsrus', 0))
         NZBSRUS_UID = check_setting_str(CFG, 'NZBsRus', 'nzbsrus_uid', '')
@@ -826,11 +817,6 @@ def config_write():
             flattened_newznabs.append(item)
 
     new_config['Newznab']['extra_newznabs'] = flattened_newznabs
-
-    new_config['NZBsorg'] = {}
-    new_config['NZBsorg']['nzbsorg'] = int(NZBSORG)
-    new_config['NZBsorg']['nzbsorg_uid'] = NZBSORG_UID
-    new_config['NZBsorg']['nzbsorg_hash'] = NZBSORG_HASH
 
     new_config['NZBsRus'] = {}
     new_config['NZBsRus']['nzbsrus'] = int(NZBSRUS)

@@ -326,34 +326,6 @@
                                 </div>
                             </fieldset>
 
-                            <fieldset>
-                                <legend>NZBs.org</legend>
-                                <div class="row checkbox">
-                                    <input id="usenzbsorg" type="checkbox" name="nzbsorg" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbsorg']} /><label>Use NZBs.org</label>
-                                </div>
-                                <div class="config">
-                                    <div class="row">
-                                        <label>NZBs.org API Key</label>
-                                        <input type="text" name="nzbsorg_hash" value="${config['nzbsorg_hash']}" size="30">
-                                    </div>
-                                </div>
-                            </fieldset>
-                            <fieldset>
-                                <legend>NZBsRus</legend>
-                                <div class="row checkbox">
-                                    <input id="usenzbsrus" type="checkbox" name="nzbsrus" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbsrus']} /><label>Use NZBsRus</label>
-                                </div>
-                                <div class="config">
-                                    <div class="row">
-                                        <label>NZBsRus UID</label>
-                                        <input type="text" name="nzbsrus_uid" value="${config['nzbsrus_uid']}" size="10">
-                                    </div>
-                                    <div class="row">
-                                        <label>NZBsRus API Key</label>
-                                        <input type="text" name="nzbsrus_apikey" value="${config['nzbsrus_apikey']}" size="10">
-                                    </div>
-                                </div>
-                            </fieldset>
                         </td>
                         <td>
                             <fieldset>
@@ -1244,7 +1216,6 @@
                 initConfigCheckbox("#use_headphones_indexer");
                 initConfigCheckbox("#usenewznab");
                 initConfigCheckbox("#usenzbsrus");
-                initConfigCheckbox("#usenzbsorg");
                 initConfigCheckbox("#usewaffles");
                 initConfigCheckbox("#userutracker");
                 initConfigCheckbox("#usewhatcd");
