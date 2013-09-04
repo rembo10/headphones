@@ -114,7 +114,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
 
         for result in results:
             foundNZB = "none"
-            if (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
+            if (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
                 if result['Status'] == "Wanted Lossless":
                     foundNZB = searchNZB(result['AlbumID'], new, losslessOnly=True)
                 else:
@@ -131,7 +131,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
 
         foundNZB = "none"
         
-        if (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
+        if (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
             foundNZB = searchNZB(albumid, new, lossless)
 
         if (headphones.KAT or headphones.PIRATEBAY or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
@@ -321,57 +321,6 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
                             except Exception, e:
                                 logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
-
-        if headphones.NZBSORG:
-            provider = "nzbsorg"
-            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
-                categories = "3040"
-            elif headphones.PREFERRED_QUALITY:
-                categories = "3040,3010"
-            else:
-                categories = "3010"
-
-            if albums['Type'] == 'Other':
-                categories = "3030"
-                logger.info("Album type is audiobook/spokenword. Using audiobook category")
-
-            params = {    "t": "search",
-                        "apikey": headphones.NZBSORG_HASH,
-                        "cat": categories,
-                        "maxage": headphones.USENET_RETENTION,
-                        "q": term
-                        }
-
-            searchURL = 'http://beta.nzbs.org/api?' + urllib.urlencode(params)
-
-            logger.info(u'Parsing results from <a href="%s">nzbs.org</a>' % searchURL)
-
-            try:
-                data = urllib2.urlopen(searchURL, timeout=20).read()
-            except urllib2.URLError, e:
-                logger.warn('Error fetching data from nzbs.org: %s' % e)
-                data = False
-
-            if data:
-
-                d = feedparser.parse(data)
-
-                if not len(d.entries):
-                    logger.info(u"No results found from nzbs.org for %s" % term)
-                    pass
-
-                else:
-                    for item in d.entries:
-                        try:
-                            url = item.link
-                            title = item.title
-                            size = int(item.links[1]['length'])
-
-                            resultlist.append((title, size, url, provider))
-                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-
-                        except Exception, e:
-                            logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
 
         if headphones.NZBSRUS:
 
