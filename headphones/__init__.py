@@ -471,7 +471,7 @@ def initialize():
 
         INTERFACE = check_setting_str(CFG, 'General', 'interface', 'default')
         FOLDER_PERMISSIONS = check_setting_str(CFG, 'General', 'folder_permissions', '0755')
-        FILE_PERSMISSIONS = check_setting_str(CFG, 'General', 'file_permissions', '0644')
+        FILE_PERMISSIONS = check_setting_str(CFG, 'General', 'file_permissions', '0644')
 
         ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')
         ENCODER_PATH = check_setting_str(CFG, 'General', 'encoder_path', '')
