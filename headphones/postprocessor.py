@@ -871,7 +871,7 @@ def updateFilePermissions(albumpaths):
             for files in f:
                 full_path = os.path.join(r, files)
                 try:
-                    os.chmod(full_path, int(headphones.FILE_PERMISSIONS))
+                    os.chmod(full_path, int(headphones.FILE_PERMISSIONS, 8))
                 except:
                     logger.error("Could not change permissions for file: " + full_path.decode(headphones.SYS_ENCODING, 'replace'))
                     continue
