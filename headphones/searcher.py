@@ -1075,7 +1075,20 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         # Pirate Bay
         if headphones.PIRATEBAY:
             provider = "The Pirate Bay"    
-            providerurl = url_fix("http://thepiratebay.sx/search/" + term + "/0/99/")
+            if headphones.PIRATEBAY_PROXY_URL:
+                #Might need to clean up the user submitted url
+                pirate_proxy = headphones.PIRATEBAY_PROXY_URL
+                
+                if not pirate_proxy.startswith('http'):
+                    pirate_proxy = 'http://' + pirate_proxy
+                if pirate_proxy.endswith('/'):
+                    pirate_proxy = pirate_proxy[:-1]
+                    
+                providerurl = url_fix(pirate_proxy + "/search/" + term + "/0/99/")
+                
+            else:
+                providerurl = url_fix("http://thepiratebay.sx/search/" + term + "/0/99/")
+                
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 category = '104'          #flac
                 maxsize = 10000000000
