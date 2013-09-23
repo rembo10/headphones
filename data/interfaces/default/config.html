@@ -359,7 +359,13 @@
                             <fieldset>
                                 <legend>Torrents</legend>
                                 <div class="row checkbox">
-                                    <input type="checkbox" name="use_piratebay" value="1" ${config['use_piratebay']} /><label>The Pirate Bay</label>
+                                    <input id="usepiratebay" type="checkbox" name="use_piratebay" value="1" ${config['use_piratebay']} /><label>The Pirate Bay</label>
+                                </div>
+                                <div class="config">
+                                    <div class="row">
+                                        <label>Proxy URL (Optional): </label>
+                                        <input type="text" name="piratebay_proxy_url" value="${config['piratebay_proxy_url']}" size="36">
+                                    </div>
                                 </div>
                                 <div class="row checkbox">
                                     <input type="checkbox" name="use_isohunt" value="1" ${config['use_isohunt']} /><label>Isohunt</label>
@@ -1253,6 +1259,7 @@
                 initConfigCheckbox("#usenewznab");
                 initConfigCheckbox("#usenzbsrus");
                 initConfigCheckbox("#usenzbsorg");
+                initConfigCheckbox("#usepiratebay");
                 initConfigCheckbox("#usewaffles");
                 initConfigCheckbox("#userutracker");
                 initConfigCheckbox("#usewhatcd");
