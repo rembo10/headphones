@@ -222,7 +222,7 @@ def addArtisttoDB(artistid, extrasonly=False):
         rgid = rg['id']
         skip_log = 0
         #Make a user configurable variable to skip update of albums with release dates older than this date (in days)
-        pause_delta = 365
+        pause_delta = headphones.MB_IGNORE_AGE
 
         check_release_date = myDB.action("SELECT ReleaseDate from albums WHERE ArtistID=? AND AlbumTitle=?", (artistid, al_title)).fetchone()
         if check_release_date:
