@@ -163,6 +163,8 @@ class WebInterface(object):
         for album in extraalbums:
             myDB.action('DELETE from tracks WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
             myDB.action('DELETE from albums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
+            myDB.action('DELETE from allalbums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
+            myDB.action('DELETE from alltracks WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     removeExtras.exposed = True
 
@@ -274,6 +276,8 @@ class WebInterface(object):
         myDB = db.DBConnection()
         myDB.action('DELETE from albums WHERE AlbumID=?', [AlbumID])
         myDB.action('DELETE from tracks WHERE AlbumID=?', [AlbumID])
+        myDB.action('DELETE from allalbums WHERE AlbumID=?', [AlbumID])
+        myDB.action('DELETE from alltracks WHERE AlbumID=?', [AlbumID])
         if ArtistID:
             raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
         else:
@@ -342,6 +346,8 @@ class WebInterface(object):
                 myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
                 myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
                 myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+                myDB.action('DELETE from allalbums WHERE AlbumID=?', [AlbumID])
+                myDB.action('DELETE from alltracks WHERE AlbumID=?', [AlbumID])
                 myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
             elif action == 'pause':
                 controlValueDict = {'ArtistID': ArtistID}

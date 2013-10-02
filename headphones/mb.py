@@ -363,15 +363,16 @@ def get_new_releases(rgid,includeExtras=False):
                 release_list.append(unicode(release_mark['id']))
                 release_title = release_mark['title']
             remove_missing_releases = myDB.action("SELECT ReleaseID FROM allalbums WHERE AlbumID=?", [rgid])
-            for items in remove_missing_releases:
-                if items['ReleaseID'] not in release_list and items['ReleaseID'] != rgid:
-                    # Remove all from albums/tracks that aren't in release
-                    myDB.action("DELETE FROM albums WHERE ReleaseID=?", [items['ReleaseID']])
-                    myDB.action("DELETE FROM tracks WHERE ReleaseID=?", [items['ReleaseID']])
-                    myDB.action("DELETE FROM allalbums WHERE ReleaseID=?", [items['ReleaseID']])
-                    myDB.action("DELETE FROM alltracks WHERE ReleaseID=?", [items['ReleaseID']])
-                    logger.info("Removing all references to release %s to reflect MusicBrainz" % items['ReleaseID'])
-                    force_repackage1 = 1
+            if remove_missing_releases:
+                for items in remove_missing_releases:
+                    if items['ReleaseID'] not in release_list and items['ReleaseID'] != rgid:
+                        # Remove all from albums/tracks that aren't in release
+                        myDB.action("DELETE FROM albums WHERE ReleaseID=?", [items['ReleaseID']])
+                        myDB.action("DELETE FROM tracks WHERE ReleaseID=?", [items['ReleaseID']])
+                        myDB.action("DELETE FROM allalbums WHERE ReleaseID=?", [items['ReleaseID']])
+                        myDB.action("DELETE FROM alltracks WHERE ReleaseID=?", [items['ReleaseID']])
+                        logger.info("Removing all references to release %s to reflect MusicBrainz" % items['ReleaseID'])
+                        force_repackage1 = 1
         else:
             logger.info("Error pulling data from MusicBrainz:  Maintaining dB")
 
