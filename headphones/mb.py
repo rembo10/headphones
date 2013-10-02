@@ -357,7 +357,7 @@ def get_new_releases(rgid,includeExtras=False):
 
         #Clean all references to releases in dB that are no longer referenced in musicbrainz
         release_list = []
-        force_repackage = 0
+        force_repackage1 = 0
         if len(results) != 0:
             for release_mark in results:
                 release_list.append(unicode(release_mark['id']))
@@ -371,7 +371,7 @@ def get_new_releases(rgid,includeExtras=False):
                     myDB.action("DELETE FROM allalbums WHERE ReleaseID=?", [items['ReleaseID']])
                     myDB.action("DELETE FROM alltracks WHERE ReleaseID=?", [items['ReleaseID']])
                     logger.info("Removing all references to release %s to reflect MusicBrainz" % items['ReleaseID'])
-                    force_repackage = 1
+                    force_repackage1 = 1
         else:
             logger.info("Error pulling data from MusicBrainz:  Maintaining dB")
 
@@ -435,7 +435,6 @@ def get_new_releases(rgid,includeExtras=False):
 
                 myDB.upsert("allalbums", newValueDict, controlValueDict)
                 
-               
                 for track in release['Tracks']:
 
                     cleanname = helpers.cleanName(release['ArtistName'] + ' ' + release['AlbumTitle'] + ' ' + track['title'])
@@ -471,7 +470,7 @@ def get_new_releases(rgid,includeExtras=False):
                 #print releasedata['title']
                 #print num_new_releases
                 logger.info('New release %s (%s) added' % (release['AlbumTitle'], rel_id_check))
-        if force_repackage == 1:
+        if force_repackage1 == 1:
             num_new_releases = -1
             logger.info('Forcing repackage of %s, since dB releases have been removed' % release_title)
         else:
