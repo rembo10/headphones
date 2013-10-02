@@ -150,7 +150,7 @@ class WebInterface(object):
         newValueDict = {'IncludeExtras': 1,
                         'Extras':        extras}
         myDB.upsert("artists", newValueDict, controlValueDict)
-        threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True]).start()
+        threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True, False]).start()
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     getExtras.exposed = True
 
@@ -403,9 +403,15 @@ class WebInterface(object):
 
     def forceUpdate(self):
         from headphones import updater
-        threading.Thread(target=updater.dbUpdate).start()
+        threading.Thread(target=updater.dbUpdate, args=[False]).start()
         raise cherrypy.HTTPRedirect("home")
     forceUpdate.exposed = True
+
+    def forceFullUpdate(self):
+        from headphones import updater
+        threading.Thread(target=updater.dbUpdate, args=[True]).start()
+        raise cherrypy.HTTPRedirect("home")
+    forceFullUpdate.exposed = True
 
     def forceSearch(self):
         from headphones import searcher

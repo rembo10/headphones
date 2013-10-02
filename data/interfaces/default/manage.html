@@ -119,7 +119,8 @@
 			<legend>Force Search</legend>
 			<div class="links">
 				<a href="#" onclick="doAjaxCall('forceSearch',$(this))" data-success="Checking for wanted albums successful" data-error="Error checking wanted albums"><span class="ui-icon ui-icon-search"></span>Force Check for Wanted Albums</a>
-				<a href="#" onclick="doAjaxCall('forceUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><span class="ui-icon ui-icon-heart"></span>Force Update Active Artists</a>
+				<a href="#" onclick="doAjaxCall('forceUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><span class="ui-icon ui-icon-heart"></span>Force Update Active Artists [Fast]</a>
+				<a href="#" onclick="doAjaxCall('forceFullUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><span class="ui-icon ui-icon-heart"></span>Force Update Active Artists [Comprehensive]</a>
 				<a href="#" onclick="doAjaxCall('forcePostProcess',$(this))" data-success="Post-Processor is being loaded" data-error="Error during Post-Processing"><span class="ui-icon ui-icon-wrench"></span>Force Post-Process Albums in Download Folder</a>
 				<a href="#" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update successful" data-error="Error checking for update"><span class="ui-icon ui-icon-refresh"></span>Check for Headphones Updates</a>
 				<a href="#" id="delete_empty_artists"><span class="ui-icon ui-icon-trash"></span>Delete empty Artists</a>

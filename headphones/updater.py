@@ -17,7 +17,7 @@ import headphones
 
 from headphones import logger, db, importer
 
-def dbUpdate():
+def dbUpdate(forcefull=False):
 
     myDB = db.DBConnection()
 
@@ -28,6 +28,6 @@ def dbUpdate():
     for artist in activeartists:
     
         artistid = artist[0]
-        importer.addArtisttoDB(artistid)
+        importer.addArtisttoDB(artistid=artistid, extrasonly=False, forcefull=forcefull)
         
     logger.info('Update complete')

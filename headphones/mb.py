@@ -332,7 +332,7 @@ def getRelease(releaseid, include_artist_info=True):
         
         return release
 
-def get_new_releases(rgid,includeExtras=False):
+def get_new_releases(rgid,includeExtras=False,forcefull=False):
 
     myDB = db.DBConnection()
     results = []
@@ -388,7 +388,7 @@ def get_new_releases(rgid,includeExtras=False):
         artistid = unicode(releasedata['artist-credit'][0]['artist']['id'])
 
         album_checker = myDB.action('SELECT * from allalbums WHERE ReleaseID=?', [rel_id_check]).fetchone()
-        if not album_checker:
+        if not album_checker or forcefull:
             release['AlbumTitle'] = unicode(releasedata['title'])
             release['AlbumID'] = unicode(rgid)
             release['AlbumASIN'] = unicode(releasedata['asin']) if 'asin' in releasedata else None
