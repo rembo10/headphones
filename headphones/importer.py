@@ -221,7 +221,8 @@ def addArtisttoDB(artistid, extrasonly=False):
         today = helpers.today()
         rgid = rg['id']
         skip_log = 0
-        #new_releases = 0
+        #Make a user configurable variable to skip update of albums with release dates older than this date (in days)
+        pause_delta = 365
 
         check_release_date = myDB.action("SELECT ReleaseDate from albums WHERE ArtistID=? AND AlbumTitle=?", (artistid, al_title)).fetchone()
         if check_release_date:
@@ -232,11 +233,11 @@ def addArtisttoDB(artistid, extrasonly=False):
                 logger.info("Now updating: " + rg['title'])
                 new_releases = mb.get_new_releases(rgid,includeExtras)         
             else:
-                if helpers.get_age(today) - helpers.get_age(check_release_date[0]) < 365:
+                if helpers.get_age(today) - helpers.get_age(check_release_date[0]) < pause_delta:
                     logger.info("Now updating: " + rg['title'])
                     new_releases = mb.get_new_releases(rgid,includeExtras)
                 else:
-                    logger.info('%s is over a year old; not updating' % al_title)
+                    logger.info('%s is over %s days old; not updating' % (al_title, pause_delta))
                     skip_log = 1
                     new_releases = 0
         else:
