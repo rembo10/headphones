@@ -109,7 +109,7 @@ def addArtistIDListToDB(artistidlist):
     for artistid in artistidlist:
         addArtisttoDB(artistid)
 
-def addArtisttoDB(artistid, extrasonly=False):
+def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
     
     # Putting this here to get around the circular import. We're using this to update thumbnails for artist/albums
     from headphones import cache
@@ -224,31 +224,35 @@ def addArtisttoDB(artistid, extrasonly=False):
         #Make a user configurable variable to skip update of albums with release dates older than this date (in days)
         pause_delta = headphones.MB_IGNORE_AGE
 
-        check_release_date = myDB.action("SELECT ReleaseDate from albums WHERE ArtistID=? AND AlbumTitle=?", (artistid, al_title)).fetchone()
-        if check_release_date:
-            if check_release_date[0] is None:
-                logger.info("Now updating: " + rg['title'])
-                new_releases = mb.get_new_releases(rgid,includeExtras)   
-            elif len(check_release_date[0])!=10:
-                logger.info("Now updating: " + rg['title'])
-                new_releases = mb.get_new_releases(rgid,includeExtras)         
-            else:
-                if helpers.get_age(today) - helpers.get_age(check_release_date[0]) < pause_delta:
+        if not forcefull:
+            check_release_date = myDB.action("SELECT ReleaseDate from albums WHERE ArtistID=? AND AlbumTitle=?", (artistid, al_title)).fetchone()
+            if check_release_date:
+                if check_release_date[0] is None:
                     logger.info("Now updating: " + rg['title'])
-                    new_releases = mb.get_new_releases(rgid,includeExtras)
+                    new_releases = mb.get_new_releases(rgid,includeExtras)   
+                elif len(check_release_date[0])!=10:
+                    logger.info("Now updating: " + rg['title'])
+                    new_releases = mb.get_new_releases(rgid,includeExtras)         
                 else:
-                    logger.info('%s is over %s days old; not updating' % (al_title, pause_delta))
-                    skip_log = 1
-                    new_releases = 0
+                    if helpers.get_age(today) - helpers.get_age(check_release_date[0]) < pause_delta:
+                        logger.info("Now updating: " + rg['title'])
+                        new_releases = mb.get_new_releases(rgid,includeExtras)
+                    else:
+                        logger.info('%s is over %s days old; not updating' % (al_title, pause_delta))
+                        skip_log = 1
+                        new_releases = 0
+            else:
+                logger.info("Now adding/updating: " + rg['title'])
+                new_releases = mb.get_new_releases(rgid,includeExtras)
+
+            if force_repackage == 1:
+                new_releases = -1
+                logger.info('Forcing repackage of %s, since dB groups have been removed' % al_title)
+            else:
+                new_releases = new_releases
         else:
             logger.info("Now adding/updating: " + rg['title'])
-            new_releases = mb.get_new_releases(rgid,includeExtras)
-
-        if force_repackage == 1:
-            new_releases = -1
-            logger.info('Forcing repackage of %s, since dB groups have been removed' % al_title)
-        else:
-            new_releases = new_releases
+            new_releases = mb.get_new_releases(rgid,includeExtras,forcefull)
         
         #What this does is adds new releases per artist to the allalbums + alltracks databases
         #new_releases = mb.get_new_releases(rgid,includeExtras)
@@ -411,9 +415,12 @@ def addArtisttoDB(artistid, extrasonly=False):
                     newValueDict['Status'] = "Skipped"
             
             #Only update albums table with hybrid release if user didn't choose an alternate release
-            check_alternate_release = myDB.action("SELECT AlbumID, ReleaseID FROM albums WHERE ArtistID=? AND AlbumID=?", ([artistid], [rg['id']])).fetchone()
-            if check_alternate_release[0] == check_alternate_release[1]:
-                myDB.upsert("albums", newValueDict, controlValueDict)
+            check_alternate_release = myDB.action("SELECT AlbumID, ReleaseID FROM albums WHERE ArtistID=? AND AlbumID=?", (artistid, rg['id'])).fetchone()
+            if check_alternate_release:
+                if check_alternate_release[0] == check_alternate_release[1]:
+                    myDB.upsert("albums", newValueDict, controlValueDict)
+            else:
+               myDB.upsert("albums", newValueDict, controlValueDict) 
 
             myDB.action('DELETE from tracks WHERE AlbumID=?', [rg['id']])
             tracks = myDB.action('SELECT * from alltracks WHERE ReleaseID=?', [releaseid]).fetchall()
@@ -441,9 +448,12 @@ def addArtisttoDB(artistid, extrasonly=False):
                             }
                             
                 #Only update tracks table with hybrid release if user didn't choose an alternate release
-                check_alternate_release = myDB.action("SELECT AlbumID, ReleaseID FROM albums WHERE ArtistID=? AND AlbumID=?", ([artistid], [rg['id']])).fetchone()
-                if check_alternate_release[0] == check_alternate_release[1]:
-                    myDB.upsert("tracks", newValueDict, controlValueDict)
+                check_alternate_release = myDB.action("SELECT AlbumID, ReleaseID FROM albums WHERE ArtistID=? AND AlbumID=?", (artistid, rg['id'])).fetchone()
+                if check_alternate_release:
+                    if check_alternate_release[0] == check_alternate_release[1]:
+                        myDB.upsert("tracks", newValueDict, controlValueDict)
+                else:
+                    myDB.upsert("tracks", newValueDict, controlValueDict) 
 
             # Mark albums as downloaded if they have at least 80% (by default, configurable) of the album
             have_track_count = len(myDB.select('SELECT * from tracks WHERE AlbumID=? AND Location IS NOT NULL', [rg['id']]))
