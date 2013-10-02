@@ -232,7 +232,7 @@ def addArtisttoDB(artistid, extrasonly=False):
                 logger.info("Now updating: " + rg['title'])
                 new_releases = mb.get_new_releases(rgid,includeExtras)         
             else:
-                if helpers.get_age(today) - helpers.get_age(check_release_date[0]) < 36500:
+                if helpers.get_age(today) - helpers.get_age(check_release_date[0]) < 365:
                     logger.info("Now updating: " + rg['title'])
                     new_releases = mb.get_new_releases(rgid,includeExtras)
                 else:
