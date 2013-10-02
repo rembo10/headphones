@@ -199,9 +199,9 @@ def addArtisttoDB(artistid, extrasonly=False):
     if len(artist['releasegroups']) != 0 and not extrasonly:
         for groups in artist['releasegroups']:
             group_list.append(groups['id'])
-        remove_missing_groups_from_albums = myDB.action("SELECT ReleaseID FROM albums WHERE ArtistID=?", [artistid])
+        remove_missing_groups_from_albums = myDB.action("SELECT AlbumID, ReleaseID FROM albums WHERE ArtistID=?", [artistid])
         for items in remove_missing_groups_from_albums:
-            if items['ReleaseID'] not in group_list:
+            if items['ReleaseID'] not in group_list and items['AlbumID']==items['ReleaseID']: #added 2nd clause for when user picks alternate release
                 # Remove all from albums/tracks that aren't in release groups
                 myDB.action("DELETE FROM albums WHERE ReleaseID=?", [items['ReleaseID']])
                 myDB.action("DELETE FROM allalbums WHERE ReleaseID=?", [items['ReleaseID']])
@@ -410,7 +410,10 @@ def addArtisttoDB(artistid, extrasonly=False):
                 else:
                     newValueDict['Status'] = "Skipped"
             
-            myDB.upsert("albums", newValueDict, controlValueDict)
+            #Only update albums table with hybrid release if user didn't choose an alternate release
+            check_alternate_release = myDB.action("SELECT AlbumID, ReleaseID FROM albums WHERE ArtistID=? AND AlbumID=?", ([artistid], [rg['id']])).fetchone()
+            if check_alternate_release[0] == check_alternate_release[1]:
+                myDB.upsert("albums", newValueDict, controlValueDict)
 
             myDB.action('DELETE from tracks WHERE AlbumID=?', [rg['id']])
             tracks = myDB.action('SELECT * from alltracks WHERE ReleaseID=?', [releaseid]).fetchall()
@@ -437,7 +440,10 @@ def addArtisttoDB(artistid, extrasonly=False):
                             "BitRate":          track['BitRate']
                             }
                             
-                myDB.upsert("tracks", newValueDict, controlValueDict)
+                #Only update tracks table with hybrid release if user didn't choose an alternate release
+                check_alternate_release = myDB.action("SELECT AlbumID, ReleaseID FROM albums WHERE ArtistID=? AND AlbumID=?", ([artistid], [rg['id']])).fetchone()
+                if check_alternate_release[0] == check_alternate_release[1]:
+                    myDB.upsert("tracks", newValueDict, controlValueDict)
 
             # Mark albums as downloaded if they have at least 80% (by default, configurable) of the album
             have_track_count = len(myDB.select('SELECT * from tracks WHERE AlbumID=? AND Location IS NOT NULL', [rg['id']]))
