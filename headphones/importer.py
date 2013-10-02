@@ -196,7 +196,7 @@ def addArtisttoDB(artistid, extrasonly=False):
     group_list = []
     force_repackage = 0
     #Don't nuke the database if there's a MusicBrainz error
-    if len(artist['releasegroups']) != 0:
+    if len(artist['releasegroups']) != 0 and not extrasonly:
         for groups in artist['releasegroups']:
             group_list.append(groups['id'])
         remove_missing_groups_from_albums = myDB.action("SELECT ReleaseID FROM albums WHERE ArtistID=?", [artistid])
@@ -246,7 +246,7 @@ def addArtisttoDB(artistid, extrasonly=False):
 
         if force_repackage == 1:
             new_releases = -1
-            logger.info('Forcing repackage of %s, since dB references have been removed' % al_title)
+            logger.info('Forcing repackage of %s, since dB groups have been removed' % al_title)
         else:
             new_releases = new_releases
         
