@@ -350,12 +350,13 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                     newValueDict['Location'] = match['Location']
                     newValueDict['BitRate'] = match['BitRate']
                     newValueDict['Format'] = match['Format']
-                    myDB.action('UPDATE have SET Matched="True" WHERE Location=?', [match['Location']])
+                    #myDB.action('UPDATE have SET Matched="True" WHERE Location=?', [match['Location']])
+                    myDB.action('UPDATE have SET Matched=? WHERE Location=?', (rg['id'], match['Location']))
                                 
                 myDB.upsert("alltracks", newValueDict, controlValueDict)
             
             # Delete matched tracks from the have table
-            myDB.action('DELETE from have WHERE Matched="True"')
+            #myDB.action('DELETE from have WHERE Matched="True"')
             
             # If there's no release in the main albums tables, add the default (hybrid)
             # If there is a release, check the ReleaseID against the AlbumID to see if they differ (user updated)
@@ -481,7 +482,8 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
 
     latestalbum = myDB.action('SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [artistid]).fetchone()
     totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid]))
-    havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['artist_name']]))
+    #havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['artist_name']]))
+    havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched IS NULL', [artist['artist_name']]))
 
     controlValueDict = {"ArtistID":     artistid}
     
@@ -616,7 +618,7 @@ def addReleaseById(rid):
                 newValueDict['Location'] = match['Location']
                 newValueDict['BitRate'] = match['BitRate']
                 newValueDict['Format'] = match['Format']
-                myDB.action('DELETE from have WHERE Location=?', [match['Location']])
+                #myDB.action('DELETE from have WHERE Location=?', [match['Location']])
         
             myDB.upsert("tracks", newValueDict, controlValueDict)
                 

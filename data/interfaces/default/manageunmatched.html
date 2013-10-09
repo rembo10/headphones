@@ -1,0 +1,157 @@
+<%inherit file="base.html" />
+<%!
+	import headphones
+	import json
+	from headphones import db, helpers
+	myDB = db.DBConnection()
+	artist_json = {}
+	counter = 0
+	artist_list = myDB.action("SELECT ArtistName from artists ORDER BY ArtistName COLLATE NOCASE")
+	for artist in artist_list:
+		artist_json[counter] = artist['ArtistName'] 
+		counter+=1
+	json_artists = json.dumps(artist_json)
+%>
+
+<%def name="headerIncludes()">
+	<div id="subhead_container">
+		<div id="subhead_menu">
+		</div>		
+	</div>	
+	<a href="manage" class="back">&laquo; Back to manage overview</a>
+</%def>
+
+
+<%def name="body()">
+	<div class="table_wrapper">
+	<div id="manageheader" class="title">
+		<h1 class="clearfix"><img src="interfaces/default/images/icon_manage.png" alt="manage"/>Manage Unmatched Albums</h1>
+	</div>
+
+	<table class="display" id="artist_table">
+		<thead>
+			<tr>
+				<th id="artist" align="center">Local Artist</th>
+				<th id="album" align="center">Local Album</th>
+				<th id="matchartist" align="center">Match Artist</th>	
+				<th id="matchalbum" align="center">Match Album</th>
+			</tr>
+		</thead>
+		<tbody>
+		<% count_albums=0 %>
+		%for album in unmatchedalbums:
+			<tr class="gradeZ">
+				<td id="artist" align="center">${album['ArtistName']}
+				<form action="markUnmatched" method="get">
+					<input type="hidden" name="action" value="ignoreArtist">
+					<input type="hidden" name="existing_artist" value="${album['ArtistName']}">
+					<input type="submit" value="(-) Ignore Artist">
+				</form>
+				</td>
+				<td id="album" align="center">${album['AlbumTitle']}
+				<form action="markUnmatched" method="get">
+					<input type="hidden" name="action" value="ignoreAlbum">
+					<input type="hidden" name="existing_artist" value="${album['ArtistName']}">
+					<input type="hidden" name="existing_album" value="${album['AlbumTitle']}">
+					<input type="submit" value="(-) Ignore Album">
+				</form>
+				</td>
+				<td id="matchartist" align="center">
+				<button id="LoadArtists${count_albums}" onClick="click_Artist(this.id)">Load Artist List</button>
+				<form id="matchArtist_form${count_albums}" action="markUnmatched" method="get">
+					<input type="hidden" name="action" value="matchArtist">
+					<input type="hidden" name="existing_artist" value="${album['ArtistName']}">
+					<select id="artist_options${count_albums}" name="new_artist">
+					<option value="Null/None" selected="selected">Click "Load Artists" For List</option>
+					</select>
+				<input type="submit" value="(->) Match Artist">
+				</form>
+				</td>
+				<td id="matchalbum" align="center">
+				<button id="LoadAlbumArtists${count_albums}" onClick="click_AlbumArtist(this.id)">Load Artist List</button>
+				<form id="matchAlbumArtist_form${count_albums}" action="markUnmatched" method="get">
+					<input type="hidden" name="action" value="matchAlbum">
+					<input type="hidden" name="existing_artist" value="${album['ArtistName']}">
+					<input type="hidden" name="existing_album" value="${album['AlbumTitle']}">
+					<select id="album_artist_options${count_albums}" name="new_artist">
+					<option value="Null/None" selected="selected">Click "Load Artists" For List</option>
+					</select>
+					<select id="album_options${count_albums}" name="new_album">
+					<option value="Null/None" selected="selected">Select an Artist to View</option>
+					</select>
+				<input type="submit" value="(->) Match Album">
+				</form>
+				</td>
+			</tr>
+		<% count_albums+=1 %>
+		%endfor
+		</tbody>
+	</table>
+	</div>
+</%def>
+
+<%def name="headIncludes()">
+	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script>
+	$(document).ready(function()
+	{
+		$('#artist_table').dataTable(
+			{
+				"bStateSave": true,
+				"bPaginate": true,
+				"oLanguage": {
+					"sSearch": "",
+	                "sLengthMenu":"Show _MENU_ albums per page",
+						"sInfo":"Showing _START_ to _END_ of _TOTAL_ albums",
+						"sInfoEmpty":"Showing 0 to 0 of 0 albums",
+						"sInfoFiltered":"(filtered from _MAX_ total albums)",
+						"sEmptyTable": " ",
+	                    },
+	            "sPaginationType": "full_numbers",
+	         });
+
+initActions();
+	});
+	function click_Artist(clicked_id) {
+		n=clicked_id.replace("LoadArtists","");
+		$('#artist_options'+n).html('');
+		$.each(${json_artists}, function(key, value) {
+    		$('#artist_options'+n).append($("<option/>", {
+        		value: value,
+        		text: value
+    		}));
+		});
+	}
+	function click_AlbumArtist(clicked_id) {
+		n=clicked_id.replace("LoadAlbumArtists","");
+		$('#album_artist_options'+n).html('');
+		$.each(${json_artists}, function(key, value) {
+    		$('#album_artist_options'+n).append($("<option/>", {
+        		value: value,
+        		text: value
+    		}));
+		});
+		update_albums(n)
+	}
+
+	function update_albums(n) {
+		$("#album_artist_options"+n).change(function(){
+			var selected_artist = $("#album_artist_options"+n).find("option:selected").text();
+			$('#album_options'+n).html('')
+			$.getJSON("getAlbumsByArtist_json?artist="+selected_artist, function( data ) {
+				$.each( data, function( key, value ) {
+				    $('#album_options'+n).append($("<option/>", {
+	        		value: value,
+	        		text: value
+	    			}));
+				});
+			});
+	    });
+	}
+
+	</script>
+</%def>

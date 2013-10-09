@@ -138,7 +138,7 @@
 					</tr>
 				%endfor
 				<%
-				unmatched = myDB.select('SELECT * from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ?', [album['ArtistName'], album['AlbumTitle']])			
+				unmatched_temp = myDB.select('SELECT * from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND Matched is null ORDER BY CAST(TrackNumber AS INTEGER)', [album['ArtistName'], album['AlbumTitle']])
 				%>
 				%if unmatched:
 					 %for track in unmatched:

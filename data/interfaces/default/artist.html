@@ -93,7 +93,7 @@
 
 				myDB = db.DBConnection()					
 				totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=?', [album['AlbumID']]))
-				havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=? AND Location IS NOT NULL', [album['AlbumID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle LIKE ?', [album['ArtistName'], album['AlbumTitle']]))
+				havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=? AND Location IS NOT NULL', [album['AlbumID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle LIKE ? AND Matched IS NULL', [album['ArtistName'], album['AlbumTitle']]))
 				
 				try:
 					percent = (havetracks*100.0)/totaltracks
