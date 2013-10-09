@@ -22,6 +22,7 @@
 			%if not headphones.ADD_ARTISTS:
 			<a class="menu_link_edit" href="manageNew">Manage New Artists</a>
 			%endif
+			<a class="menu_link_edit" href="manageUnmatched">Manage Unmatched</a>
 		</div>
 	</div>	
 </%def>
@@ -35,6 +36,7 @@
 			<li><a href="#tabs-1">Scan Music Library</a></li>
 			<li><a href="#tabs-2">Imports</a></li>
 			<li><a href="#tabs-3">Force Actions</a></li>
+			<li><a href="#tabs-4">Force Legacy</a></li>
 		</ul>
 		<div id="tabs-1" class="configtable">
 			<fieldset>
@@ -120,7 +122,6 @@
 			<div class="links">
 				<a href="#" onclick="doAjaxCall('forceSearch',$(this))" data-success="Checking for wanted albums successful" data-error="Error checking wanted albums"><span class="ui-icon ui-icon-search"></span>Force Check for Wanted Albums</a>
 				<a href="#" onclick="doAjaxCall('forceUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><span class="ui-icon ui-icon-heart"></span>Force Update Active Artists [Fast]</a>
-				<a href="#" onclick="doAjaxCall('forceFullUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><span class="ui-icon ui-icon-heart"></span>Force Update Active Artists [Comprehensive]</a>
 				<a href="#" onclick="doAjaxCall('forcePostProcess',$(this))" data-success="Post-Processor is being loaded" data-error="Error during Post-Processing"><span class="ui-icon ui-icon-wrench"></span>Force Post-Process Albums in Download Folder</a>
 				<a href="#" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update successful" data-error="Error checking for update"><span class="ui-icon ui-icon-refresh"></span>Check for Headphones Updates</a>
 				<a href="#" id="delete_empty_artists"><span class="ui-icon ui-icon-trash"></span>Delete empty Artists</a>
@@ -140,6 +141,23 @@
 		</fieldset>
 		
 	</div>
+
+
+	<div id="tabs-4" class="configtable">
+		<fieldset>
+			<legend>Force Legacy</legend>
+				<p><strong>Comprehensive Updating</strong></p>
+				<p>Please note that these functions will take a significant amount of time to complete.</p>
+			<div class="links">
+				<a href="#" onclick="doAjaxCall('forceFullUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><span class="ui-icon ui-icon-heart"></span>Force Update Active Artists [Comprehensive]</a>
+				<a href="#" onclick="doAjaxCall('forceScan',$(this))" data-success="Library scan successful" data-error="Error forcing library scan"><span class="ui-icon ui-icon-refresh"></span>Force Re-scan Library [Comprehensive]</a>
+		</div>
+		</fieldset>
+		
+	</div>
+
+
+
 </div>
 </%def>
 <%def name="javascriptIncludes()">

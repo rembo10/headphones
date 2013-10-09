@@ -463,7 +463,7 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
                     newValueDict['Location'] = match['Location']
                     newValueDict['BitRate'] = match['BitRate']
                     newValueDict['Format'] = match['Format']
-                    myDB.action('UPDATE have SET Matched="True" WHERE Location=?', [match['Location']])
+                    #myDB.action('UPDATE have SET Matched="True" WHERE Location=?', [match['Location']])
                                 
                 myDB.upsert("alltracks", newValueDict, controlValueDict)
             num_new_releases = num_new_releases + 1
