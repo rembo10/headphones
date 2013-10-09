@@ -191,7 +191,9 @@ class WebInterface(object):
     def deleteArtist(self, ArtistID):
         logger.info(u"Deleting all traces of artist: " + ArtistID)
         myDB = db.DBConnection()
-        artistname = myDB.select('SELECT ArtistName from artists where ArtistID=?', [ArtistID]).fetchone()
+        namecheck = myDB.select('SELECT ArtistName from artists where ArtistID=?', [ArtistID])
+        for name in namecheck:
+            artistname=name['ArtistName']
         myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
         myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
         myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
@@ -451,7 +453,7 @@ class WebInterface(object):
                             update_count+=1
                     #This was throwing errors and I don't know why, but it seems to be working fine.
                     #else:
-                        #logger.info("There was an error modifying Artist %s / Album %s. This should not have happened" % (existing_artist, existing_album))
+                        #logger.info("There was an error modifying Artist %s / Album %s with clean name %s" % (existing_artist, existing_album, existing_clean_string))
                 logger.info("Manual matching yielded %s new matches for Artist %s / Album %s" % (update_count, new_artist, new_album))
                 if update_count > 0:
                     librarysync.update_album_status()
