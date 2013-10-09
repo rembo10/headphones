@@ -138,8 +138,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                 if not check_exist_song:
                     myDB.upsert("have", newValueDict, controlValueDict)
                     new_song_count+=1
-                #We're going to have to think about metadata changing, and setting Matched = None when/if we do
-                elif check_exist_song['CleanName'] != CleanName and check_exist_song['Matched'] != "Manual":
+                elif check_exist_song['ArtistName'] != f_artist or check_exist_song['AlbumTitle'] != f.album or check_exist_song['TrackTitle'] != f.title:
                     newValueDict['Matched'] = None
                     myDB.upsert("have", newValueDict, controlValueDict)
                     new_song_count+=1
