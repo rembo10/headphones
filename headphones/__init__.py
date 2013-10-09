@@ -954,6 +954,169 @@ def dbcheck():
     c.execute('CREATE INDEX IF NOT EXISTS tracks_albumid ON tracks(AlbumID ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS album_artistid_reldate ON albums(ArtistID ASC, ReleaseDate DESC)')
 
+    try:
+        c.execute('SELECT IncludeExtras from artists')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE artists ADD COLUMN IncludeExtras INTEGER DEFAULT 0')
+
+    try:
+        c.execute('SELECT LatestAlbum from artists')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE artists ADD COLUMN LatestAlbum TEXT')
+
+    try:
+        c.execute('SELECT ReleaseDate from artists')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE artists ADD COLUMN ReleaseDate TEXT')
+
+    try:
+        c.execute('SELECT AlbumID from artists')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE artists ADD COLUMN AlbumID TEXT')
+
+    try:
+        c.execute('SELECT HaveTracks from artists')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE artists ADD COLUMN HaveTracks INTEGER DEFAULT 0')
+
+    try:
+        c.execute('SELECT TotalTracks from artists')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE artists ADD COLUMN TotalTracks INTEGER DEFAULT 0')
+
+    try:
+        c.execute('SELECT Type from albums')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE albums ADD COLUMN Type TEXT DEFAULT "Album"')
+
+    try:
+        c.execute('SELECT TrackNumber from tracks')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE tracks ADD COLUMN TrackNumber INTEGER')
+
+    try:
+        c.execute('SELECT FolderName from snatched')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE snatched ADD COLUMN FolderName TEXT')
+
+    try:
+        c.execute('SELECT Location from tracks')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE tracks ADD COLUMN Location TEXT')
+
+    try:
+        c.execute('SELECT Location from have')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE have ADD COLUMN Location TEXT')
+
+    try:
+        c.execute('SELECT BitRate from tracks')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE tracks ADD COLUMN BitRate INTEGER')
+
+    try:
+        c.execute('SELECT CleanName from tracks')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE tracks ADD COLUMN CleanName TEXT')
+
+    try:
+        c.execute('SELECT CleanName from have')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE have ADD COLUMN CleanName TEXT')
+
+    # Add the Format column
+    try:
+        c.execute('SELECT Format from have')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE have ADD COLUMN Format TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT Format from tracks')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE tracks ADD COLUMN Format TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT LastUpdated from artists')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE artists ADD COLUMN LastUpdated TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT ArtworkURL from artists')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE artists ADD COLUMN ArtworkURL TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT ArtworkURL from albums')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE albums ADD COLUMN ArtworkURL TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT ThumbURL from artists')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE artists ADD COLUMN ThumbURL TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT ThumbURL from albums')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE albums ADD COLUMN ThumbURL TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT ArtistID from descriptions')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE descriptions ADD COLUMN ArtistID TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT LastUpdated from descriptions')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE descriptions ADD COLUMN LastUpdated TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT ReleaseID from albums')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE albums ADD COLUMN ReleaseID TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT ReleaseFormat from albums')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE albums ADD COLUMN ReleaseFormat TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT ReleaseCountry from albums')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE albums ADD COLUMN ReleaseCountry TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT ReleaseID from tracks')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE tracks ADD COLUMN ReleaseID TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT Matched from have')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE have ADD COLUMN Matched TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT Extras from artists')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE artists ADD COLUMN Extras TEXT DEFAULT NULL')
+        # Need to update some stuff when people are upgrading and have 'include extras' set globally/for an artist
+        if INCLUDE_EXTRAS:
+            EXTRAS = "1,2,3,4,5,6,7,8"
+        logger.info("Copying over current artist IncludeExtras information")
+        artists = c.execute('SELECT ArtistID, IncludeExtras from artists').fetchall()
+        for artist in artists:
+            if artist[1]:
+                c.execute('UPDATE artists SET Extras=? WHERE ArtistID=?', ("1,2,3,4,5,6,7,8", artist[0]))
+
+    try:
+        c.execute('SELECT Kind from snatched')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE snatched ADD COLUMN Kind TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT SearchTerm from albums')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE albums ADD COLUMN SearchTerm TEXT DEFAULT NULL')
 
 
     conn.commit()
