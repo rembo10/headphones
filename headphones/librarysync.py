@@ -315,13 +315,14 @@ def update_album_status(AlbumID=None):
             album_completion = 0
             logger.info('Album %s does not have any tracks in database' % album['AlbumTitle'])
 
-        if album['Status'] == "Downloaded" or album['Status'] == "Skipped":
-            if album_completion >= headphones.ALBUM_COMPLETION_PCT:
-                new_album_status = "Downloaded"
-                myDB.upsert("albums", {'Status'   : "Downloaded"}, {'AlbumID'   : album['AlbumID']})
-            else:
+        if album_completion >= headphones.ALBUM_COMPLETION_PCT:
+            new_album_status = "Downloaded"
+        else:
+            if album['Status'] == "Skipped" or album['Status'] == "Downloaded":
                 new_album_status = "Skipped"
-                myDB.upsert("albums", {'Status'   : "Skipped"}, {'AlbumID'   : album['AlbumID']})
-            if new_album_status != album['Status']:
-                logger.info('Album %s changed to %s' % (album['AlbumTitle'], new_album_status))
+            else:
+                new_album_status = album['Status']
+        myDB.upsert("albums", {'Status'   : new_album_status}, {'AlbumID'   : album['AlbumID']})
+        if new_album_status != album['Status']:
+            logger.info('Album %s changed to %s' % (album['AlbumTitle'], new_album_status))
     logger.info('Album status update complete')
