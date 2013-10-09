@@ -408,17 +408,18 @@ class WebInterface(object):
                         match_alltracks = myDB.action('SELECT CleanName from alltracks WHERE CleanName=?', [new_clean_filename]).fetchone()
                         if match_alltracks:
                             myDB.upsert("alltracks", newValueDict, controlValueDict)
-                        match_tracks = myDB.action('SELECT CleanName from tracks WHERE CleanName=?', [new_clean_filename]).fetchone()
+                        match_tracks = myDB.action('SELECT CleanName, AlbumID from tracks WHERE CleanName=?', [new_clean_filename]).fetchone()
                         if match_tracks:
                             myDB.upsert("tracks", newValueDict, controlValueDict)
                             myDB.action('UPDATE have SET Matched="Manual" WHERE CleanName=?', [new_clean_filename])
+                            album_id = match_tracks['AlbumID']
                             update_count+=1
                     #This was throwing errors and I don't know why, but it seems to be working fine.
                     #else:
                         #logger.info("There was an error modifying Artist %s. This should not have happened" % existing_artist)
                 logger.info("Manual matching yielded %s new matches for Artist %s" % (update_count, new_artist))
                 if update_count > 0:
-                    librarysync.update_album_status()
+                    librarysync.update_album_status(album_id)
             else:
                 logger.info("Artist %s already named appropriately; nothing to modify" % existing_artist)
 
