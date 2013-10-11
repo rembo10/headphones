@@ -619,6 +619,7 @@ class WebInterface(object):
                     "use_isohunt" : checked(headphones.ISOHUNT),
                     "use_kat" : checked(headphones.KAT),
                     "use_piratebay" : checked(headphones.PIRATEBAY),
+                    "piratebay_proxy_url" : headphones.PIRATEBAY_PROXY_URL,
                     "use_mininova" : checked(headphones.MININOVA),
                     "use_waffles" : checked(headphones.WAFFLES),
                     "waffles_uid" : headphones.WAFFLES_UID,
@@ -696,7 +697,9 @@ class WebInterface(object):
                     "customsleep": headphones.CUSTOMSLEEP,
                     "hpuser": headphones.HPUSER,
                     "hppass": headphones.HPPASS,
-                    "cache_sizemb":headphones.CACHE_SIZEMB,
+                    "cache_sizemb": headphones.CACHE_SIZEMB,
+                    "file_permissions": headphones.FILE_PERMISSIONS,
+                    "folder_permissions": headphones.FOLDER_PERMISSIONS
                 }
 
         # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8
@@ -722,7 +725,7 @@ class WebInterface(object):
         utorrent_host=None, utorrent_username=None, utorrent_password=None, nzb_downloader=0, torrent_downloader=0, download_dir=None, blackhole_dir=None, usenet_retention=None, 
         use_headphones_indexer=0, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, 
         preferred_words=None, required_words=None, ignored_words=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None,
-        numberofseeders=None, use_piratebay=0, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
+        numberofseeders=None, use_piratebay=0, piratebay_proxy_url=None, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
         rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0,
         destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, file_underscores=0, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0,
         remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
@@ -731,7 +734,7 @@ class WebInterface(object):
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False,
         pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, mirror=None, customhost=None, customport=None,
         customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
-        enable_https=0, https_cert=None, https_key=None, **kwargs):
+        enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -786,6 +789,7 @@ class WebInterface(object):
         headphones.ISOHUNT = use_isohunt
         headphones.KAT = use_kat
         headphones.PIRATEBAY = use_piratebay
+        headphones.PIRATEBAY_PROXY_URL = piratebay_proxy_url
         headphones.MININOVA = use_mininova
         headphones.WAFFLES = waffles
         headphones.WAFFLES_UID = waffles_uid
@@ -860,6 +864,8 @@ class WebInterface(object):
         headphones.HPUSER = hpuser
         headphones.HPPASS = hppass
         headphones.CACHE_SIZEMB = int(cache_sizemb)
+        headphones.FILE_PERMISSIONS = file_permissions
+        headphones.FOLDER_PERMISSIONS = folder_permissions
 
         # Handle the variable config options. Note - keys with False values aren't getting passed
 
