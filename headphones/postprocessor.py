@@ -29,6 +29,7 @@ from lib.beets.mediafile import MediaFile
 import headphones
 from headphones import db, albumart, librarysync, lyrics, logger, helpers
 from headphones.helpers import sab_replace_dots, sab_replace_spaces
+from headphones import transmission
 
 postprocessor_lock = threading.Lock()
 
@@ -42,7 +43,6 @@ def checkFolder():
         for album in snatched:
         
             if album['FolderName']:
-                
                 if album['Kind'] == 'nzb':
                     # We're now checking sab config options after sending to determine renaming - but we'll keep the
                     # iterations in just in case we can't read the config for some reason
@@ -62,12 +62,21 @@ def checkFolder():
                             verify(album['AlbumID'], nzb_album_path, 'nzb')
                             
                 if album['Kind'] == 'torrent':
-
-                    torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
+                    if album['FolderName'].startswith('hash:'):
+                        torrent_hash = album['FolderName'].split("hash:")[1]
+                        torrent_folder_name = transmission.getTorrentFolder(torrent_hash)
+                        if torrent_folder_name:
+                            torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, torrent_folder_name)
+                        else:
+                            logger.warn(u"Could not find torrent %s in Transmission queue, might have been deleted? Retry downloading same torrent again or clear Headphone snatch history" % album['FolderName'])
+                    else:
+                        torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
     
                     if os.path.exists(torrent_album_path):
-                        logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
+                        logger.debug('Found %s in torrent download folder. Verifying....' % torrent_folder_name)
                         verify(album['AlbumID'], torrent_album_path, 'torrent')
+                    else:
+                        logger.debug("Path does not exists %s " % torrent_album_path)
 
 def verify(albumid, albumpath, Kind=None, forced=False):
 

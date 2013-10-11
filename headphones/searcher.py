@@ -1433,14 +1433,14 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     else:
                         file_or_url = bestqual[2]
 
-                    torrentid = transmission.addTorrent(file_or_url)
+                    hashString = transmission.addTorrent(file_or_url)
                     
-                    if not torrentid:
+                    if not hashString:
                         logger.error("Error sending torrent to Transmission. Are you sure it's running?")
                         return
                         
-                    torrent_folder_name = transmission.getTorrentFolder(torrentid)
-                    logger.info('Torrent folder name: %s' % torrent_folder_name)
+                    torrent_folder_name = 'hash:' + hashString
+                    logger.info('Torrent %s' % torrent_folder_name)
 
                     # remove temp .torrent file created above
                     if bestqual[3] == 'rutracker.org':

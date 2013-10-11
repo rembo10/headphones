@@ -52,21 +52,23 @@ def addTorrent(link):
                 logger.debug(u"Sending NMA notification")
                 nma = notifiers.NMA()
                 nma.notify(snatched_nzb=name)
-            return response['arguments']['torrent-added']['id']
+            return response['arguments']['torrent-added']['hashString']
         except KeyError:
             logger.warn(u"Torrent was not sent to Transmission")
             return False
         
 def getTorrentFolder(torrentid):
     method = 'torrent-get'
-    arguments = { 'ids': torrentid, 'fields': ['name','percentDone']}
+    arguments = { 'ids': torrentid, 'fields': ['name']}
     
     response = torrentAction(method, arguments)
-    percentdone = response['arguments']['torrents'][0]['percentDone']
-    torrent_folder_name = response['arguments']['torrents'][0]['name']
 
-    return torrent_folder_name
-    
+    try:
+        torrent_folder_name = response['arguments']['torrents'][0]['name']
+        return torrent_folder_name
+    except IndexError, e:
+        return False
+
 def torrentAction(method, arguments):
     
     host = headphones.TRANSMISSION_HOST
@@ -107,8 +109,10 @@ def torrentAction(method, arguments):
                                       
     request.add_data(postdata)
                                       
-    try:    
+    try:
+        #logger.debug(u"Req: %s" % postdata)
         response = json.loads(opener.open(request).read())
+        #logger.debug(u"Rsp: %s" % response)
     except Exception, e:
         logger.error("Error sending torrent to Transmission: " + str(e))
         return
