@@ -184,6 +184,7 @@ ISOHUNT = None
 KAT = None
 MININOVA = None
 PIRATEBAY = None
+PIRATEBAY_PROXY_URL = None
 WAFFLES = None
 WAFFLES_UID = None
 WAFFLES_PASSKEY = None
@@ -197,6 +198,7 @@ DOWNLOAD_TORRENT_DIR = None
 
 INTERFACE = None
 FOLDER_PERMISSIONS = None
+FILE_PERMISSIONS = None
 
 MUSIC_ENCODER = False
 ENCODERFOLDER = None
@@ -298,13 +300,13 @@ def initialize():
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
                 RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, FILE_UNDERSCORES, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, \
                 ADD_ALBUM_ART, ALBUM_ART_FORMAT, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
-                TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, PIRATEBAY, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
+                TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, PIRATEBAY, PIRATEBAY_PROXY_URL, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, HEADPHONES_INDEXER, NZBMATRIX, TRANSMISSION_HOST, TRANSMISSION_USERNAME, TRANSMISSION_PASSWORD, \
                 UTORRENT_HOST, UTORRENT_USERNAME, UTORRENT_PASSWORD, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, \
-                LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
+                LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, FILE_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
                 MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, \
                 PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
@@ -409,6 +411,7 @@ def initialize():
         ISOHUNT = bool(check_setting_int(CFG, 'General', 'isohunt', 0))
         KAT = bool(check_setting_int(CFG, 'General', 'kat', 0))
         PIRATEBAY = bool(check_setting_int(CFG, 'General', 'piratebay', 0))
+        PIRATEBAY_PROXY_URL = check_setting_str(CFG, 'General', 'piratebay_proxy_url', '')
         MININOVA = bool(check_setting_int(CFG, 'General', 'mininova', 0))
         DOWNLOAD_TORRENT_DIR = check_setting_str(CFG, 'General', 'download_torrent_dir', '')
 
@@ -470,6 +473,7 @@ def initialize():
 
         INTERFACE = check_setting_str(CFG, 'General', 'interface', 'default')
         FOLDER_PERMISSIONS = check_setting_str(CFG, 'General', 'folder_permissions', '0755')
+        FILE_PERMISSIONS = check_setting_str(CFG, 'General', 'file_permissions', '0644')
 
         ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')
         ENCODER_PATH = check_setting_str(CFG, 'General', 'encoder_path', '')
@@ -766,6 +770,7 @@ def config_write():
     new_config['General']['kat'] = int(KAT)
     new_config['General']['mininova'] = int(MININOVA)
     new_config['General']['piratebay'] = int(PIRATEBAY)
+    new_config['General']['piratebay_proxy_url'] = PIRATEBAY_PROXY_URL
     new_config['General']['download_torrent_dir'] = DOWNLOAD_TORRENT_DIR
 
     new_config['Waffles'] = {}
@@ -873,6 +878,7 @@ def config_write():
     new_config['General']['lastfm_username'] = LASTFM_USERNAME
     new_config['General']['interface'] = INTERFACE
     new_config['General']['folder_permissions'] = FOLDER_PERMISSIONS
+    new_config['General']['file_permissions'] = FILE_PERMISSIONS
 
     new_config['General']['music_encoder'] = int(MUSIC_ENCODER)
     new_config['General']['encoder'] = ENCODER
