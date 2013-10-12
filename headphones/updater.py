@@ -19,11 +19,21 @@ from headphones import logger, db, importer
 
 def dbUpdate(forcefull=False):
 
+	logger.info('Starting update for %i active artists' % len(activeartists))
+
     myDB = db.DBConnection()
 
-    activeartists = myDB.select('SELECT ArtistID, ArtistName from artists WHERE Status="Active" or Status="Loading" order by LastUpdated ASC')
+    #This can be updated to NOT include: paused artists, artists with extras enabled, wanted albums, albums matched to specific releases, etc
+    #But it absolutely FLIES if these dB's are destroyed in their entirety.  With the new system, there's really no need to pause artists.
+    if forcefull==True:
+    	myDB.select('DELETE from albums')
+    	myDB.select('DELETE from allalbums')
+    	myDB.select('DELETE from tracks')
+    	myDB.select('DELETE from alltracks')
+    	myDB.select('DELETE from descriptions')
+    	myDB.select('UPDATE artists SET LatestAlbum=?, ReleaseDate=?, AlbumID=?, HaveTracks=?, TotalTracks=?', [None, None, None, None, None])
 
-    logger.info('Starting update for %i active artists' % len(activeartists))
+    activeartists = myDB.select('SELECT ArtistID, ArtistName from artists WHERE Status="Active" or Status="Loading" order by LastUpdated ASC')
     
     for artist in activeartists:
     
