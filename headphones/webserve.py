@@ -26,6 +26,7 @@ import time
 import threading
 import string
 import json
+from operator import itemgetter
 
 import headphones
 
@@ -378,7 +379,7 @@ class WebInterface(object):
 
     def markUnmatched(self, action=None, existing_artist=None, existing_album=None, new_artist=None, new_album=None):
         myDB = db.DBConnection()
-        
+     
         if action == "ignoreArtist":
             artist = existing_artist
             myDB.action('UPDATE have SET Matched="Ignored" WHERE ArtistName=? AND Matched IS NULL', [artist])
@@ -412,14 +413,13 @@ class WebInterface(object):
                         if match_tracks:
                             myDB.upsert("tracks", newValueDict, controlValueDict)
                             myDB.action('UPDATE have SET Matched="Manual" WHERE CleanName=?', [new_clean_filename])
-                            album_id = match_tracks['AlbumID']
                             update_count+=1
                     #This was throwing errors and I don't know why, but it seems to be working fine.
                     #else:
                         #logger.info("There was an error modifying Artist %s. This should not have happened" % existing_artist)
-                logger.info("Manual matching yielded %s new matches for Artist %s" % (update_count, new_artist))
+                logger.info("Manual matching yielded %s new matches for Artist: %s" % (update_count, new_artist))
                 if update_count > 0:
-                    librarysync.update_album_status(album_id)
+                    librarysync.update_album_status()
             else:
                 logger.info("Artist %s already named appropriately; nothing to modify" % existing_artist)
 
@@ -451,20 +451,89 @@ class WebInterface(object):
                         if match_tracks:
                             myDB.upsert("tracks", newValueDict, controlValueDict)
                             myDB.action('UPDATE have SET Matched="Manual" WHERE CleanName=?', [new_clean_filename])
+                            album_id = match_tracks['AlbumID']
                             update_count+=1
                     #This was throwing errors and I don't know why, but it seems to be working fine.
                     #else:
                         #logger.info("There was an error modifying Artist %s / Album %s with clean name %s" % (existing_artist, existing_album, existing_clean_string))
-                logger.info("Manual matching yielded %s new matches for Artist %s / Album %s" % (update_count, new_artist, new_album))
+                logger.info("Manual matching yielded %s new matches for Artist: %s / Album: %s" % (update_count, new_artist, new_album))
                 if update_count > 0:
-                    librarysync.update_album_status()
+                    librarysync.update_album_status(album_id)
             else:
                 logger.info("Artist %s / Album %s already named appropriately; nothing to modify" % (existing_artist, existing_album))
-
-
-     
-        raise cherrypy.HTTPRedirect('manageUnmatched')
+                
     markUnmatched.exposed = True
+
+    def manageManual(self):
+        myDB = db.DBConnection()
+        manual_albums = []
+        manualalbums = myDB.select('SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched from have')
+        for albums in manualalbums:
+            original_clean = helpers.cleanName(albums['ArtistName']+" "+albums['AlbumTitle']+" "+albums['TrackTitle'])
+            if albums['Matched'] == "Ignored" or albums['Matched'] == "Manual" or albums['CleanName'] != original_clean:
+                if albums['Matched'] == "Ignored":
+                    album_status = "Ignored"
+                elif albums['Matched'] == "Manual" or albums['CleanName'] != original_clean:
+                    album_status = "Matched"
+                manual_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'], 'AlbumStatus' : album_status }
+                if manual_dict not in manual_albums: 
+                    manual_albums.append(manual_dict)
+        manual_albums_sorted = sorted(manual_albums, key=itemgetter('ArtistName', 'AlbumTitle'))
+
+        return serve_template(templatename="managemanual.html", title="Manage Manual Items", manualalbums=manual_albums_sorted)
+    manageManual.exposed = True
+
+    def markManual(self, action=None, existing_artist=None, existing_album=None):
+        myDB = db.DBConnection()
+        if action == "unignoreArtist":
+            artist = existing_artist
+            myDB.action('UPDATE have SET Matched=NULL WHERE ArtistName=? AND Matched="Ignored"', [artist])
+            logger.info("Artist: %s successfully restored to unmatched list" % artist)
+
+        elif action == "unignoreAlbum":
+            artist = existing_artist
+            album = existing_album
+            myDB.action('UPDATE have SET Matched=NULL WHERE ArtistName=? AND AlbumTitle=? AND Matched="Ignored"', (artist, album))
+            logger.info("Album: %s successfully restored to unmatched list" % album)
+
+        elif action == "unmatchArtist":
+            artist = existing_artist
+            update_clean = myDB.select('SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched from have WHERE ArtistName=?', [artist])
+            update_count = 0
+            for tracks in update_clean:
+                original_clean = helpers.cleanName(tracks['ArtistName']+" "+tracks['AlbumTitle']+" "+tracks['TrackTitle']).lower()
+                album = tracks['AlbumTitle']
+                track_title = tracks['TrackTitle']
+                if tracks['CleanName'] != original_clean:
+                    myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?', [None, None, None, tracks['CleanName']])
+                    myDB.action('UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?', [None, None, None, tracks['CleanName']])
+                    myDB.action('UPDATE have SET CleanName=?, Matched=NULL WHERE ArtistName=? AND AlbumTitle=? AND TrackTitle=?', (original_clean, artist, album, track_title))
+                    update_count+=1
+            if update_count > 0:
+                librarysync.update_album_status()
+            logger.info("Artist: %s successfully restored to unmatched list" % artist)
+
+        elif action == "unmatchAlbum":
+            artist = existing_artist
+            album = existing_album
+            update_clean = myDB.select('SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched from have WHERE ArtistName=? AND AlbumTitle=?', (artist, album))
+            update_count = 0
+            for tracks in update_clean:
+                original_clean = helpers.cleanName(tracks['ArtistName']+" "+tracks['AlbumTitle']+" "+tracks['TrackTitle']).lower()
+                track_title = tracks['TrackTitle']
+                if tracks['CleanName'] != original_clean:
+                    album_id_check = myDB.action('SELECT AlbumID from tracks WHERE CleanName=?', [tracks['CleanName']]).fetchone()
+                    if album_id_check:
+                        album_id = album_id_check[0]
+                    myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?', [None, None, None, tracks['CleanName']])
+                    myDB.action('UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?', [None, None, None, tracks['CleanName']])
+                    myDB.action('UPDATE have SET CleanName=?, Matched=NULL WHERE ArtistName=? AND AlbumTitle=? AND TrackTitle=?', (original_clean, artist, album, track_title))
+                    update_count+=1
+            if update_count > 0:
+                librarysync.update_album_status(album_id)
+            logger.info("Album: %s successfully restored to unmatched list" % album)
+
+    markManual.exposed = True
 
     def markArtists(self, action=None, **args):
         myDB = db.DBConnection()
