@@ -20,7 +20,6 @@ from headphones import logger, db, importer
 def dbUpdate(forcefull=False):
 
     myDB = db.DBConnection()
-    logger.info('Starting update for %i active artists' % len(activeartists))
 
     #This can be updated to NOT include: paused artists, artists with extras enabled, wanted albums, albums matched to specific releases, etc
     #But it absolutely FLIES if these dB's are destroyed in their entirety.  With the new system, there's really no need to pause artists.
@@ -33,6 +32,7 @@ def dbUpdate(forcefull=False):
         myDB.select('UPDATE artists SET LatestAlbum=?, ReleaseDate=?, AlbumID=?, HaveTracks=?, TotalTracks=?', [None, None, None, None, None])
 
     activeartists = myDB.select('SELECT ArtistID, ArtistName from artists WHERE Status="Active" or Status="Loading" order by LastUpdated ASC')
+    logger.info('Starting update for %i active artists' % len(activeartists))
     
     for artist in activeartists:
     
