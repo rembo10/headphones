@@ -147,12 +147,9 @@
 		<fieldset>
 			<legend>Force Legacy</legend>
 				<p>Please note that these functions will take a significant amount of time to complete.</p>
-				<BR>
 			<div class="links">
 				<a href="#" onclick="doAjaxCall('forceFullUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><span class="ui-icon ui-icon-heart"></span>Force Update Active Artists [Comprehensive]</a> 
 				<BR>
-				<small>*Warning: If you choose [Force Update Active Artists], artist "extras" will be reset, manual album release matching will be reset, "paused" artists will lose ALL information, and "wanted" albums will be reset to include only recent/future albums.  It's recommended you activate all paused artists before running.</small>
-				<BR><BR>
 				<a href="#" onclick="doAjaxCall('forceScan',$(this))" data-success="Library scan successful" data-error="Error forcing library scan"><span class="ui-icon ui-icon-refresh"></span>Force Re-scan Library [Comprehensive]</a> 
 				<BR>
 				<small>*Warning: If you choose [Force Re-scan Library], any manually ignored/matched artists/albums will be reset to "unmatched".</small>
