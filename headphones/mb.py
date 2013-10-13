@@ -389,6 +389,9 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
 
         album_checker = myDB.action('SELECT * from allalbums WHERE ReleaseID=?', [rel_id_check]).fetchone()
         if not album_checker or forcefull:
+            #DELETE all references to this release since we're updating it anyway.
+            myDB.action('DELETE from allalbums WHERE ReleaseID=?', [rel_id_check])
+            myDB.action('DELETE from alltracks WHERE ReleaseID=?', [rel_id_check])
             release['AlbumTitle'] = unicode(releasedata['title'])
             release['AlbumID'] = unicode(rgid)
             release['AlbumASIN'] = unicode(releasedata['asin']) if 'asin' in releasedata else None

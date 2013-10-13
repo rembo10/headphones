@@ -21,16 +21,6 @@ def dbUpdate(forcefull=False):
 
     myDB = db.DBConnection()
 
-    #This can be updated to NOT include: paused artists, artists with extras enabled, wanted albums, albums matched to specific releases, etc
-    #But it absolutely FLIES if these dB's are destroyed in their entirety.  With the new system, there's really no need to pause artists.
-    if forcefull==True:
-        myDB.select('DELETE from albums')
-        myDB.select('DELETE from allalbums')
-        myDB.select('DELETE from tracks')
-        myDB.select('DELETE from alltracks')
-        myDB.select('DELETE from descriptions')
-        myDB.select('UPDATE artists SET LatestAlbum=?, ReleaseDate=?, AlbumID=?, HaveTracks=?, TotalTracks=?', [None, None, None, None, None])
-
     activeartists = myDB.select('SELECT ArtistID, ArtistName from artists WHERE Status="Active" or Status="Loading" order by LastUpdated ASC')
     logger.info('Starting update for %i active artists' % len(activeartists))
     
@@ -39,4 +29,4 @@ def dbUpdate(forcefull=False):
         artistid = artist[0]
         importer.addArtisttoDB(artistid=artistid, extrasonly=False, forcefull=forcefull)
         
-    logger.info('Update complete')
+    logger.info('Active artist update complete')

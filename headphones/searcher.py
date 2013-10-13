@@ -137,6 +137,8 @@ def searchforalbum(albumid=None, new=False, lossless=False):
         if (headphones.KAT or headphones.PIRATEBAY or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
             searchTorrent(albumid, new, lossless)
 
+    logger.info('Search for Wanted albums complete')
+    
 def searchNZB(albumid=None, new=False, losslessOnly=False):
 
     myDB = db.DBConnection()

@@ -199,15 +199,15 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
     if len(artist['releasegroups']) != 0 and not extrasonly:
         for groups in artist['releasegroups']:
             group_list.append(groups['id'])
-        remove_missing_groups_from_albums = myDB.action("SELECT AlbumID, ReleaseID FROM albums WHERE ArtistID=?", [artistid])
+        remove_missing_groups_from_albums = myDB.action("SELECT AlbumID FROM albums WHERE ArtistID=?", [artistid])
         for items in remove_missing_groups_from_albums:
-            if items['ReleaseID'] not in group_list and items['AlbumID']==items['ReleaseID']: #added 2nd clause for when user picks alternate release
+            if items['AlbumID'] not in group_list:
                 # Remove all from albums/tracks that aren't in release groups
-                myDB.action("DELETE FROM albums WHERE ReleaseID=?", [items['ReleaseID']])
-                myDB.action("DELETE FROM allalbums WHERE ReleaseID=?", [items['ReleaseID']])
-                myDB.action("DELETE FROM tracks WHERE ReleaseID=?", [items['ReleaseID']])
-                myDB.action("DELETE FROM alltracks WHERE ReleaseID=?", [items['ReleaseID']])
-                logger.info("Removing all references to group %s to reflect MusicBrainz" % items['ReleaseID'])
+                myDB.action("DELETE FROM albums WHERE AlbumID=?", [items['AlbumID']])
+                myDB.action("DELETE FROM allalbums WHERE AlbumID=?", [items['AlbumID']])
+                myDB.action("DELETE FROM tracks WHERE AlbumID=?", [items['AlbumID']])
+                myDB.action("DELETE FROM alltracks WHERE AlbumID=?", [items['AlbumID']])
+                logger.info("Removing all references to group %s to reflect MusicBrainz" % items['AlbumID'])
                 force_repackage = 1
     else:
         logger.info("Error pulling data from MusicBrainz:  Maintaining dB")
@@ -247,7 +247,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
 
             if force_repackage == 1:
                 new_releases = -1
-                logger.info('Forcing repackage of %s, since dB groups have been removed' % al_title)
+                logger.info('Forcing repackage of %s, since release groups have been removed' % al_title)
             else:
                 new_releases = new_releases
         else:
@@ -260,6 +260,11 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
         #print new_releases
 
         if new_releases != 0:
+            #Dump existing hybrid release since we're repackaging/replacing it
+            myDB.action("DELETE from albums WHERE ReleaseID=?", [rg['id']])
+            myDB.action("DELETE from allalbums WHERE ReleaseID=?", [rg['id']])
+            myDB.action("DELETE from tracks WHERE ReleaseID=?", [rg['id']])
+            myDB.action("DELETE from alltracks WHERE ReleaseID=?", [rg['id']])
             # This will be used later to build a hybrid release     
             fullreleaselist = []
             #Search for releases within a release group
@@ -364,22 +369,6 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             rg_exists = myDB.action("SELECT * from albums WHERE AlbumID=?", [rg['id']]).fetchone()
             if not rg_exists:
                 releaseid = rg['id']
-            elif rg_exists and not rg_exists['ReleaseID']:
-                # Need to do some importing here - to transition the old format of using the release group
-                # only to using releasegroup & releaseid. These are the albums that are missing a ReleaseID
-                # so we'll need to move over the locations, bitrates & formats from the tracks table to the new
-                # alltracks table. Thankfully we can just use TrackIDs since they span releases/releasegroups
-                logger.info("Copying current track information to alternate releases")
-                tracks = myDB.action('SELECT * from tracks WHERE AlbumID=?', [rg['id']]).fetchall()
-                for track in tracks:
-                    if track['Location']:
-                        controlValueDict = {"TrackID":  track['TrackID']}
-                        newValueDict = {"Location":     track['Location'],
-                                        "BitRate":      track['BitRate'],
-                                        "Format":       track['Format'],
-                                        }
-                        myDB.upsert("alltracks", newValueDict, controlValueDict)
-                releaseid = rg['id']
             else:
                 releaseid = rg_exists['ReleaseID']
             
@@ -415,15 +404,8 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                 else:
                     newValueDict['Status'] = "Skipped"
             
-            #Only update albums table with hybrid release if user didn't choose an alternate release
-            check_alternate_release = myDB.action("SELECT AlbumID, ReleaseID FROM albums WHERE ArtistID=? AND AlbumID=?", (artistid, rg['id'])).fetchone()
-            if check_alternate_release:
-                if check_alternate_release[0] == check_alternate_release[1]:
-                    myDB.upsert("albums", newValueDict, controlValueDict)
-            else:
-               myDB.upsert("albums", newValueDict, controlValueDict) 
+            myDB.upsert("albums", newValueDict, controlValueDict) 
 
-            myDB.action('DELETE from tracks WHERE AlbumID=?', [rg['id']])
             tracks = myDB.action('SELECT * from alltracks WHERE ReleaseID=?', [releaseid]).fetchall()
 
             # This is used to see how many tracks you have from an album - to mark it as downloaded. Default is 80%, can be set in config as ALBUM_COMPLETION_PCT
@@ -448,13 +430,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                             "BitRate":          track['BitRate']
                             }
                             
-                #Only update tracks table with hybrid release if user didn't choose an alternate release
-                check_alternate_release = myDB.action("SELECT AlbumID, ReleaseID FROM albums WHERE ArtistID=? AND AlbumID=?", (artistid, rg['id'])).fetchone()
-                if check_alternate_release:
-                    if check_alternate_release[0] == check_alternate_release[1]:
-                        myDB.upsert("tracks", newValueDict, controlValueDict)
-                else:
-                    myDB.upsert("tracks", newValueDict, controlValueDict) 
+                myDB.upsert("tracks", newValueDict, controlValueDict) 
 
             # Mark albums as downloaded if they have at least 80% (by default, configurable) of the album
             have_track_count = len(myDB.select('SELECT * from tracks WHERE AlbumID=? AND Location IS NOT NULL', [rg['id']]))
