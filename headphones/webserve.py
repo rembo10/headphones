@@ -360,10 +360,13 @@ class WebInterface(object):
         have_albums = myDB.select('SELECT ArtistName, AlbumTitle, TrackTitle, CleanName from have WHERE Matched IS NULL GROUP BY AlbumTitle ORDER BY ArtistName')
         for albums in have_albums:
             #Have to skip over manually matched tracks
-            original_clean = helpers.cleanName(albums['ArtistName']+" "+albums['AlbumTitle']+" "+albums['TrackTitle'])
-            if original_clean == albums['CleanName']:
-                have_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'] }  
-                have_album_dictionary.append(have_dict)
+            if albums['ArtistName'] and albums['AlbumTitle'] and albums['TrackTitle']:
+                original_clean = helpers.cleanName(albums['ArtistName']+" "+albums['AlbumTitle']+" "+albums['TrackTitle'])
+            # else:
+            #     original_clean = None
+                if original_clean == albums['CleanName']:
+                    have_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'] }  
+                    have_album_dictionary.append(have_dict)
         headphones_albums = myDB.select('SELECT ArtistName, AlbumTitle from albums ORDER BY ArtistName')
         for albums in headphones_albums:
             headphones_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'] }  
