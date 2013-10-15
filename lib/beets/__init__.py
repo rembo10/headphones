@@ -1,5 +1,5 @@
 # This file is part of beets.
-# Copyright 2012, Adrian Sampson.
+# Copyright 2013, Adrian Sampson.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -12,11 +12,12 @@
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
-#
-# MODIFIED TO WORK WITH HEADPHONES!!
-#
-
-__version__ = '1.0b15'
+__version__ = '1.3.2'
 __author__ = 'Adrian Sampson <adrian@radbox.org>'
 
+
 from lib.beets.library import Library
+
+from beets.util import confit
+
+config = confit.LazyConfig('beets', __name__)
