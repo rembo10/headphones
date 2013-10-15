@@ -146,7 +146,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
 
     # Now we start track matching
     logger.info("%s new/modified songs found and added to the database" % new_song_count)
-    song_list = myDB.action("SELECT * FROM have WHERE Matched IS NULL AND LOCATION LIKE ?", [dir+"%"])
+    song_list = myDB.action("SELECT * FROM have WHERE Matched IS NULL AND CleanName IS NOT NULL AND LOCATION LIKE ?", [dir+"%"])
     total_number_of_songs = myDB.action("SELECT COUNT(*) FROM have WHERE Matched IS NULL AND LOCATION LIKE ?", [dir+"%"]).fetchone()[0]
     logger.info("Found " + str(total_number_of_songs) + " unmatched tracks in: '" + dir.decode(headphones.SYS_ENCODING, 'replace') + "'. Matching tracks to the appropriate releases....")
     
