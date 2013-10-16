@@ -472,15 +472,16 @@ class WebInterface(object):
         manual_albums = []
         manualalbums = myDB.select('SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched from have')
         for albums in manualalbums:
-            original_clean = helpers.cleanName(albums['ArtistName']+" "+albums['AlbumTitle']+" "+albums['TrackTitle'])
-            if albums['Matched'] == "Ignored" or albums['Matched'] == "Manual" or albums['CleanName'] != original_clean:
-                if albums['Matched'] == "Ignored":
-                    album_status = "Ignored"
-                elif albums['Matched'] == "Manual" or albums['CleanName'] != original_clean:
-                    album_status = "Matched"
-                manual_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'], 'AlbumStatus' : album_status }
-                if manual_dict not in manual_albums: 
-                    manual_albums.append(manual_dict)
+            if albums['ArtistName'] and albums['AlbumTitle'] and albums['TrackTitle']:
+                original_clean = helpers.cleanName(albums['ArtistName']+" "+albums['AlbumTitle']+" "+albums['TrackTitle'])
+                if albums['Matched'] == "Ignored" or albums['Matched'] == "Manual" or albums['CleanName'] != original_clean:
+                    if albums['Matched'] == "Ignored":
+                        album_status = "Ignored"
+                    elif albums['Matched'] == "Manual" or albums['CleanName'] != original_clean:
+                        album_status = "Matched"
+                    manual_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'], 'AlbumStatus' : album_status }
+                    if manual_dict not in manual_albums: 
+                        manual_albums.append(manual_dict)
         manual_albums_sorted = sorted(manual_albums, key=itemgetter('ArtistName', 'AlbumTitle'))
 
         return serve_template(templatename="managemanual.html", title="Manage Manual Items", manualalbums=manual_albums_sorted)
