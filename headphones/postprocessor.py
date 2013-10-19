@@ -69,6 +69,7 @@ def checkFolder():
                             torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, torrent_folder_name)
                         else:
                             logger.warn(u"Could not find torrent %s in Transmission queue, might have been deleted? Retry downloading same torrent again or clear Headphone snatch history" % album['FolderName'])
+                            torrent_album_path = "nonexistent torrent"
                     else:
                         torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
     
