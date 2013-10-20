@@ -1308,7 +1308,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             else:
                 searchURL = gks.searchurl(usersearchterm, ' ', ' ', format)
 
-            logger.info(u'Parsing results from <a href="%s">t411</a>' % searchURL)
+            logger.info(u'Parsing results from <a href="%s">gks</a>' % searchURL)
 
                 # parse results and get best match
 
