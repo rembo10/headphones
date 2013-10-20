@@ -47,6 +47,8 @@
 					fileid = 'torrent'
 				if item['URL'].find('rutracker') != -1:
 					fileid = 'torrent'
+                if item['URL'].find('gks') != -1:
+        +          fileid = 'torrent'
 			%>
 			<tr class="grade${grade}">
 				<td id="dateadded">${item['DateAdded']}</td>

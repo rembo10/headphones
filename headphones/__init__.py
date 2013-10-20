@@ -193,6 +193,8 @@ RUTRACKER_PASSWORD = None
 WHATCD = None
 WHATCD_USERNAME = None
 WHATCD_PASSWORD = None
+GKS = None
+GKS_KEY = None
 DOWNLOAD_TORRENT_DIR = None
 
 INTERFACE = None
@@ -309,7 +311,8 @@ def initialize():
                 PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
-                PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY
+                PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
+                GKS, GKS_KEY
 
         if __INITIALIZED__:
             return False
@@ -326,6 +329,7 @@ def initialize():
         CheckSection('NZBsRus')
         CheckSection('Waffles')
         CheckSection('Rutracker')
+        CheckSection('gks.gs')
         CheckSection('What.cd')
         CheckSection('Prowl')
         CheckSection('Pushover')
@@ -419,6 +423,9 @@ def initialize():
         RUTRACKER = bool(check_setting_int(CFG, 'Rutracker', 'rutracker', 0))
         RUTRACKER_USER = check_setting_str(CFG, 'Rutracker', 'rutracker_user', '')
         RUTRACKER_PASSWORD = check_setting_str(CFG, 'Rutracker', 'rutracker_password', '')
+
+        GKS = bool(check_setting_int(CFG, 'gks.gs', 'gks', 0))
+        GKS_KEY = check_setting_str(CFG, 'gks.gs', 'gks_passkey', '')
 
         WHATCD = bool(check_setting_int(CFG, 'What.cd', 'whatcd', 0))
         WHATCD_USERNAME = check_setting_str(CFG, 'What.cd', 'whatcd_username', '')
@@ -777,6 +784,11 @@ def config_write():
     new_config['Rutracker']['rutracker'] = int(RUTRACKER)
     new_config['Rutracker']['rutracker_user'] = RUTRACKER_USER
     new_config['Rutracker']['rutracker_password'] = RUTRACKER_PASSWORD
+
+
+    new_config['gks.gs'] = {}
+    new_config['gks.gs']['gks'] = int(GKS)
+    new_config['gks.gs']['gks_passkey'] = GKS_KEY
 
     new_config['What.cd'] = {}
     new_config['What.cd']['whatcd'] = int(WHATCD)

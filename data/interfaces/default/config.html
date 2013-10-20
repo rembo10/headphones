@@ -409,6 +409,15 @@
                                         <input type="password" name="whatcd_password" value="${config['whatcd_password']}" size="36">
                                     </div>
                                 </div>
+                                <div class="row checkbox">
+                                    <input id="usegks" type="checkbox" name="gks" onclick="initConfigCheckbox($(this));" value="1" ${config['use_gks']} /><label>Gks.gs</label>
+                                </div>
+                                <div class="config">
+                                    <div class="row">
+                                        <label>Gks.gs Passkey: </label>
+                                        <input type="text" name="gks_passkey" value="${config['gks_passkey']}" size="36">
+                                    </div>
+                                </div>
                             </fieldset>
                         </td>
                     </tr>
@@ -1248,6 +1257,7 @@
                 initConfigCheckbox("#usewaffles");
                 initConfigCheckbox("#userutracker");
                 initConfigCheckbox("#usewhatcd");
+                initConfigCheckbox("#usegks");
                 initConfigCheckbox("#useapi");
                 initConfigCheckbox("#enable_https");
         }

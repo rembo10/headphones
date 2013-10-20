@@ -41,6 +41,9 @@ import lib.bencode as bencode
 import headphones.searcher_rutracker as rutrackersearch
 rutracker = rutrackersearch.Rutracker()
 
+import headphones.gks as gkssearch
+gks = gkssearch.gks()
+
 class NewzbinDownloader(urllib.FancyURLopener):
 
     def __init__(self):
@@ -120,7 +123,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
                 else:
                     foundNZB = searchNZB(result['AlbumID'], new)
 
-            if (headphones.KAT or headphones.PIRATEBAY or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
+            if (headphones.KAT or headphones.PIRATEBAY or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD or headphones.GKS) and foundNZB == "none":
 
                 if result['Status'] == "Wanted Lossless":
                     searchTorrent(result['AlbumID'], new, losslessOnly=True)
@@ -134,7 +137,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
         if (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
             foundNZB = searchNZB(albumid, new, lossless)
 
-        if (headphones.KAT or headphones.PIRATEBAY or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
+        if (headphones.KAT or headphones.PIRATEBAY or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD or headphones.GKS) and foundNZB == "none":
             searchTorrent(albumid, new, lossless)
 
 def searchNZB(albumid=None, new=False, losslessOnly=False):
@@ -1278,7 +1281,53 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         except Exception, e:
                             logger.error(u"An unknown error occurred in the Mininova Parser: %s" % e)
 
+        #gks
+        if headphones.GKS and headphones.PREFERRED_QUALITY in [3,1]:
 
+            provider = "GKS"
+
+            # Ignore if release date not specified, results too unpredictable
+            bitrate = False
+
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+                format = 'lossless'
+                maxsize = 10000000000
+            elif headphones.PREFERRED_QUALITY == 1:
+                format = 'lossless+mp3'
+                maxsize = 10000000000
+            else:
+                format = 'mp3'
+                maxsize = 300000000
+                if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
+                    bitrate = True
+
+                # build search url based on above
+
+            if not usersearchterm:
+                searchURL = gks.searchurl(artistterm, albumterm, year, format)
+            else:
+                searchURL = gks.searchurl(usersearchterm, ' ', ' ', format)
+
+            logger.info(u'Parsing results from <a href="%s">t411</a>' % searchURL)
+
+                # parse results and get best match
+
+            rulist = gks.search(searchURL, maxsize, minimumseeders, albumid, bitrate)
+
+            # add best match to overall results list
+
+            if rulist:
+                for ru in rulist:
+                    try:
+                        title = ru.title.decode('utf-8')
+                    except:
+                        title=ru.title
+                    size = ru.size
+                    url = ru.url
+                    resultlist.append((title, size, url, provider))
+                    logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+            else:
+                logger.info(u"No valid results found from %s" % (provider))
 
         #attempt to verify that this isn't a substring result
         #when looking for "Foo - Foo" we don't want "Foobar"
@@ -1403,6 +1452,10 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     try:
                         if bestqual[3] == 'rutracker.org':
                             download_path = rutracker.get_torrent(bestqual[2], headphones.TORRENTBLACKHOLE_DIR)
+                            if not download_path:
+                                break
+                        elif bestqual[3] == 'GKS':
+                            download_path = gks.get_torrent(bestqual[2], headphones.TORRENTBLACKHOLE_DIR, bestqual[0])
                             if not download_path:
                                 break
                         else:

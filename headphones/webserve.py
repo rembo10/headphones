@@ -626,6 +626,8 @@ class WebInterface(object):
                     "use_rutracker" : checked(headphones.RUTRACKER),
                     "rutracker_user" : headphones.RUTRACKER_USER,
                     "rutracker_password": headphones.RUTRACKER_PASSWORD,
+                    "use_gks" : checked(headphones.GKS),
+                    "gks_passkey" : headphones.GKS_KEY,
                     "use_whatcd" : checked(headphones.WHATCD),
                     "whatcd_username" : headphones.WHATCD_USERNAME,
                     "whatcd_password": headphones.WHATCD_PASSWORD,
@@ -731,7 +733,7 @@ class WebInterface(object):
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False,
         pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, mirror=None, customhost=None, customport=None,
         customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
-        enable_https=0, https_cert=None, https_key=None, **kwargs):
+        enable_https=0, https_cert=None, https_key=None, gks=0, gks_passkey=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -790,6 +792,8 @@ class WebInterface(object):
         headphones.WAFFLES = waffles
         headphones.WAFFLES_UID = waffles_uid
         headphones.WAFFLES_PASSKEY = waffles_passkey
+        headphones.GKS = gks
+        headphones.GKS_KEY = gks_passkey
         headphones.RUTRACKER = rutracker
         headphones.RUTRACKER_USER = rutracker_user
         headphones.RUTRACKER_PASSWORD = rutracker_password
