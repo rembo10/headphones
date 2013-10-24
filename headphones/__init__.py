@@ -953,6 +953,9 @@ def dbcheck():
     c.execute('CREATE TABLE IF NOT EXISTS releases (ReleaseID TEXT, ReleaseGroupID TEXT, UNIQUE(ReleaseID, ReleaseGroupID))')
     c.execute('CREATE INDEX IF NOT EXISTS tracks_albumid ON tracks(AlbumID ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS album_artistid_reldate ON albums(ArtistID ASC, ReleaseDate DESC)')
+    c.execute('CREATE INDEX IF NOT EXISTS alltracks_relid ON alltracks(ReleaseID ASC, TrackID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS allalbums_relid ON allalbums(ReleaseID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS have_location ON have(Location ASC)')
 
     try:
         c.execute('SELECT IncludeExtras from artists')
