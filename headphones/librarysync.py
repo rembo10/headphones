@@ -61,7 +61,6 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
             encoded_track_string = track['Location'].encode(headphones.SYS_ENCODING)
             if not os.path.isfile(encoded_track_string):
                 myDB.action('DELETE FROM have WHERE Location=?', [track['Location']])
-                myDB.action('UPDATE have SET Matched=NULL WHERE Matched=?', [track['Matched']])
                 logger.info('File %s removed from Headphones, as it is no longer on disk' % encoded_track_string.decode(headphones.SYS_ENCODING, 'replace'))
            ###############myDB.action('DELETE from have')
 
