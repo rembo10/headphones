@@ -52,7 +52,7 @@ def addTorrent(link):
                 logger.debug(u"Sending NMA notification")
                 nma = notifiers.NMA()
                 nma.notify(snatched_nzb=name)
-            return response['arguments']['torrent-added']['hashString']
+            return response['arguments']['torrent-added']['name'],response['arguments']['torrent-added']['hashString']
         except KeyError:
             logger.warn(u"Torrent was not sent to Transmission")
             return False

@@ -1433,13 +1433,13 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     else:
                         file_or_url = bestqual[2]
 
-                    hashString = transmission.addTorrent(file_or_url)
+                    torrent_name,hashString = transmission.addTorrent(file_or_url)
                     
                     if not hashString:
                         logger.error("Error sending torrent to Transmission. Are you sure it's running?")
                         return
                         
-                    torrent_folder_name = 'hash:' + hashString
+                    torrent_folder_name = torrent_name + '_hash:' + hashString
                     logger.info('Torrent %s' % torrent_folder_name)
 
                     # remove temp .torrent file created above

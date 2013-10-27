@@ -63,14 +63,19 @@ def checkFolder():
                             verify(album['AlbumID'], nzb_album_path, 'nzb')
                             
                 if album['Kind'] == 'torrent':
-                    if album['FolderName'].startswith('hash:'):
-                        torrent_hash = album['FolderName'].split("hash:")[1]
+                    if 'hash:' in album['FolderName']:
+                        torrent_name,torrent_hash = album['FolderName'].split("_hash:")
                         torrent_folder_name = transmission.getTorrentFolder(torrent_hash)
                         if torrent_folder_name:
                             torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, torrent_folder_name)
                         else:
-                            logger.info(u"Could not find torrent %s in Transmission queue, might have been deleted? Retry downloading same torrent again or clear Headphone snatch history" % album['FolderName'])
-                            torrent_album_path = "nonexistent torrent"
+                            logger.debug(u"Could not find torrent %s in Transmission queue using hash search, might have been deleted? Retry downloading same torrent again or clear Headphone snatch history" % torrent_name)
+                            torrent_folder_name = transmission.getTorrentFolder(torrent_name)
+                            if torrent_folder_name:
+                                torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, torrent_folder_name)
+                            else:
+                                logger.info(u"Could not find torrent %s in Transmission queue using name search, might have been deleted? Retry downloading same torrent again or clear Headphone snatch history" % torrent_name)
+                                torrent_album_path = "nonexistent torrent"
                     else:
                         torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
     
