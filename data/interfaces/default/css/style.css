@@ -1137,12 +1137,17 @@ div#artistheader h2 a {
   padding: 2px 10px;
 }
 #searchresults_table th#albumname {
-  min-width: 225px;
+  min-width: 250px;
   text-align: left;
 }
 #searchresults_table th#artistname {
-  min-width: 325px;
+  min-width: 200px;
   text-align: left;
+}
+#searchresults_table th#reldate {
+    min-width: 70px;
+    text-align: center;
+    width: 100px;
 }
 #searchresults_table #artistImg {
   background: url("../images/loader_black.gif") no-repeat scroll center center #ffffff;
@@ -1160,7 +1165,7 @@ div#artistheader h2 a {
   vertical-align: middle;
 }
 #searchresults_table td#artistname {
-  min-width: 300px;
+  min-width: 200px;
   text-align: left;
   vertical-align: middle;
 }
@@ -1390,6 +1395,7 @@ div#artistheader h2 a {
 #album_table td#albumname,
 #album_table td#artistname,
 #album_table td#reldate,
+#searchresults_table td#reldate,
 #album_table td#type,
 #track_table td#duration,
 #upcoming_table td#select,

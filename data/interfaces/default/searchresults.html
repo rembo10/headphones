@@ -13,38 +13,52 @@
 					<th id="albumname">Album Name</th>
 				%endif
 				<th id="artistname">Artist Name</th>
+                %if type == 'album':
+                    <th id="reldate">Date</th>
+                %endif
 				<th id="score">Score</th>
 				<th id="add"></th>
 			</tr>
 		</thead>
 		<tbody>
-			%if searchresults:
-				%for result in searchresults:
-				<%
-					if result['score'] == 100:
-						grade = 'A'
-					else:
-						grade = 'Z'
-				%>
-				<tr class="grade${grade}">
-				%if type == 'album':
-					<td id="albumart"><div id="artistImg"><img title="${result['albumid']}" class="albumArt" height="50" width="50"></div></td>
-				%else:
-					<td id="albumart"><div id="artistImg"><img title="${result['id']}" class="albumArt" height="50" width="50"></div></td>
-				%endif
-				%if type == 'album':
-					<td id="albumname"><a href="${result['albumurl']}">${result['title']}</a></td>
-				%endif
-					<td id="artistname"><a href="${result['url']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
-					<td id="score"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></td>
-				%if type == 'album':	
-					<td id="add"><a href="addReleaseById?rid=${result['albumid']}"><span class="ui-icon ui-icon-plus"></span> Add this album</a></td>
-				%else:
-					<td id="add"><a href="addArtist?artistid=${result['id']}"><span class="ui-icon ui-icon-plus"></span> Add this artist</a></td>
-				%endif
-				</tr>
-				%endfor
-			%endif
+        %if searchresults:
+            %for result in searchresults:
+            <%
+                if result['score'] == 100:
+                    grade = 'A'
+                else:
+                    grade = 'Z'
+
+                # TODO: HTMLify this bit
+                if type == 'album':
+                    title = result['title']
+                    if result['disambiguation']:
+                        title += ' (' + result['disambiguation'] + ')'
+                    albuminfo = 'Country: ' + result['country'] + ', Format: ' + result['formats']
+                    albuminfo = albuminfo.replace('"', "&quot;")
+            %>
+                <tr class="grade${grade}">
+                    %if type == 'album':
+                        <td id="albumart"><div id="artistImg"><img title="${result['albumid']}" class="albumArt" height="50" width="50"></div></td>
+                    %else:
+                        <td id="albumart"><div id="artistImg"><img title="${result['id']}" class="albumArt" height="50" width="50"></div></td>
+                    %endif
+                    %if type == 'album':
+                        <td id="albumname"><a href="${result['albumurl']} "title="${albuminfo}" >${title}</a></td>
+                    %endif
+                    <td id="artistname"><a href="${result['url']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
+                    %if type == 'album':
+                        <td id="reldate">${result['date']}</td>
+                    %endif
+                    <td id="score"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></td>
+                    %if type == 'album':
+                        <td id="add"><a href="addReleaseById?rid=${result['albumid']}"><span class="ui-icon ui-icon-plus"></span> Add this album</a></td>
+                    %else:
+                        <td id="add"><a href="addArtist?artistid=${result['id']}"><span class="ui-icon ui-icon-plus"></span> Add this artist</a></td>
+                    %endif
+                </tr>
+            %endfor
+        %endif
 		</tbody>
 	</table>
 	</div>
@@ -57,10 +71,10 @@
 <%def name="javascriptIncludes()">
 
 	<script src="js/libs/jquery.dataTables.min.js"></script>
-	
+
 	<script>
 	function getArt() {
-		$("table#searchresults_table tr td#albumart img").each(function(){	
+		$("table#searchresults_table tr td#albumart img").each(function(){
 			var id = $(this).attr('title');
 			var image = $(this);
 			if ( !image.hasClass('done') ) {
@@ -71,12 +85,12 @@
 	}
 	function initThisPage() {
 		getArt();
-		$('#searchresults_table').dataTable(
+        $('#searchresults_table').dataTable(
 			{
 				"bDestroy": true,
 				"aoColumnDefs": [
-			          { 'bSortable': false, 'aTargets': [ 0,3 ] }
-				],	
+			          { 'bSortable': false, 'aTargets': [ 0 ] }
+				],
 				"oLanguage": {
 					"sLengthMenu":"Show _MENU_ results per page",
 					"sEmptyTable": "No results",
@@ -91,7 +105,7 @@
 			resetFilters("album");
 	}
 	$(document).ready(function(){
-			initThisPage();		
+			initThisPage();
 	});
 	$(window).load(function(){
 		initFancybox();

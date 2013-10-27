@@ -230,6 +230,19 @@ PUSHOVER_ENABLED = True
 PUSHOVER_PRIORITY = 1
 PUSHOVER_KEYS = None
 PUSHOVER_ONSNATCH = True
+EMAIL_ENABLED = False
+EMAIL_FROM = None
+EMAIL_TO = None
+EMAIL_SMTP_SERVER = None
+EMAIL_SMTP_USER = None
+EMAIL_SMTP_PASSWORD = None
+EMAIL_ONSNATCH = False
+OSX_NOTIFY_ENABLED = False
+OSX_NOTIFY_ONSNATCH = False
+BOXCAR_ENABLED = False
+BOXCAR_EMAIL = None
+BOXCAR_APIKEY = None
+BOXCAR_ONSNATCH = False
 MIRRORLIST = ["musicbrainz.org","headphones","custom"]
 MIRROR = None
 CUSTOMHOST = None
@@ -242,6 +255,9 @@ CACHE_SIZEMB = 32
 JOURNAL_MODE = None
 
 UMASK = None
+
+OSX_MOUNTAINLION = False
+DEFAULT_TO_ALBUM_SEARCH = False
 
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
@@ -306,10 +322,12 @@ def initialize():
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, \
                 LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
                 MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, \
-                PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
-                MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
-                XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
-                PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY
+                PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH,\
+                EMAIL_ENABLED, EMAIL_FROM, EMAIL_TO, EMAIL_SMTP_SERVER, EMAIL_SMTP_USER, EMAIL_SMTP_PASSWORD, EMAIL_ONSNATCH, OSX_NOTIFY_ENABLED, OSX_NOTIFY_ONSNATCH,\
+                BOXCAR_ENABLED, BOXCAR_EMAIL, BOXCAR_APIKEY, BOXCAR_ONSNATCH, MIRRORLIST, MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, \
+                XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, \
+                SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, \
+                JOURNAL_MODE, UMASK, OSX_MOUNTAINLION, DEFAULT_TO_ALBUM_SEARCH, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY
 
         if __INITIALIZED__:
             return False
@@ -329,6 +347,9 @@ def initialize():
         CheckSection('What.cd')
         CheckSection('Prowl')
         CheckSection('Pushover')
+        CheckSection('Email')
+        CheckSection('OSX_Notify')
+        CheckSection('Boxcar')
         CheckSection('XBMC')
         CheckSection('NMA')
         CheckSection('Synoindex')
@@ -509,6 +530,22 @@ def initialize():
         PUSHOVER_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_onsnatch', 0))
         PUSHOVER_PRIORITY = check_setting_int(CFG, 'Pushover', 'pushover_priority', 0)
 
+        EMAIL_ENABLED = bool(check_setting_int(CFG, 'Email', 'email_enabled', 0))
+        EMAIL_FROM = check_setting_str(CFG, 'Email', 'email_from', '')
+        EMAIL_TO = check_setting_str(CFG, 'Email', 'email_to', '')
+        EMAIL_SMTP_SERVER = check_setting_str(CFG, 'Email', 'email_smtp_server', '')
+        EMAIL_SMTP_USER = check_setting_str(CFG, 'Email', 'email_smtp_user', '')
+        EMAIL_SMTP_PASSWORD = check_setting_str(CFG, 'Email', 'email_smtp_password', '')
+        EMAIL_ONSNATCH = bool(check_setting_int(CFG, 'Email', 'email_onsnatch', 0))
+
+        OSX_NOTIFY_ENABLED = bool(check_setting_int(CFG, 'OSX_Notify', 'osx_notify_enabled', 0))
+        OSX_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'OSX_Notify', 'osx_notify_onsnatch', 0))
+
+        BOXCAR_ENABLED = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_enabled', 0))
+        BOXCAR_EMAIL = check_setting_str(CFG, 'Boxcar', 'boxcar_email', '')
+        BOXCAR_APIKEY = check_setting_str(CFG, 'Boxcar', 'boxcar_apikey', '')
+        BOXCAR_ONSNATCH = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_onsnatch', 0))
+
         MIRROR = check_setting_str(CFG, 'General', 'mirror', 'musicbrainz.org')
         CUSTOMHOST = check_setting_str(CFG, 'General', 'customhost', 'localhost')
         CUSTOMPORT = check_setting_int(CFG, 'General', 'customport', 5000)
@@ -520,6 +557,8 @@ def initialize():
         JOURNAL_MODE = check_setting_int(CFG,'Advanced', 'journal_mode', 'wal')
 
         ALBUM_COMPLETION_PCT = check_setting_int(CFG, 'Advanced', 'album_completion_pct', 80)
+
+        DEFAULT_TO_ALBUM_SEARCH = bool(check_setting_int(CFG, 'General', 'default_to_album_search', 0))
 
         # update folder formats in the config & bump up config version
         if CONFIG_VERSION == '0':
@@ -607,6 +646,16 @@ def initialize():
         if SEARCH_INTERVAL < 360:
             logger.info("Search interval too low. Resetting to 6 hour minimum")
             SEARCH_INTERVAL = 360
+
+        # OS X >= Mountain Lion for Notifications
+        if platform.system().lower() == 'darwin' and [int(n) for n in platform.mac_ver()[0].split('.')] >= [10, 8]:
+            OSX_MOUNTAINLION = True
+        else:
+            OSX_MOUNTAINLION = False
+
+        if OSX_NOTIFY_ENABLED and not OSX_MOUNTAINLION:
+            logger.info("OS X Notifications require Mountain Lion or above")
+            OSX_NOTIFY_ENABLED = False
 
         # Initialize the database
         logger.info('Checking to see if the database has all tables....')
@@ -867,6 +916,25 @@ def config_write():
     new_config['Pushover']['pushover_onsnatch'] = int(PUSHOVER_ONSNATCH)
     new_config['Pushover']['pushover_priority'] = int(PUSHOVER_PRIORITY)
 
+    new_config['Email'] = {}
+    new_config['Email']['email_enabled'] = int(EMAIL_ENABLED)
+    new_config['Email']['email_from'] = EMAIL_FROM
+    new_config['Email']['email_to'] = EMAIL_TO
+    new_config['Email']['email_smtp_server'] = EMAIL_SMTP_SERVER
+    new_config['Email']['email_smtp_user'] = EMAIL_SMTP_USER
+    new_config['Email']['email_smtp_password'] = EMAIL_SMTP_PASSWORD
+    new_config['Email']['email_onsnatch'] = int(EMAIL_ONSNATCH)
+
+    new_config['OSX_Notify'] = {}
+    new_config['OSX_Notify']['osx_notify_enabled'] = int(OSX_NOTIFY_ENABLED)
+    new_config['OSX_Notify']['osx_notify_onsnatch'] = int(OSX_NOTIFY_ONSNATCH)
+
+    new_config['Boxcar'] = {}
+    new_config['Boxcar']['boxcar_enabled'] = int(BOXCAR_ENABLED)
+    new_config['Boxcar']['boxcar_email'] = BOXCAR_EMAIL
+    new_config['Boxcar']['boxcar_apikey'] = BOXCAR_APIKEY
+    new_config['Boxcar']['boxcar_onsnatch'] = int(BOXCAR_ONSNATCH)
+
     new_config['Synoindex'] = {}
     new_config['Synoindex']['synoindex_enabled'] = int(SYNOINDEX_ENABLED)
 
@@ -898,6 +966,8 @@ def config_write():
     new_config['Advanced']['album_completion_pct'] = ALBUM_COMPLETION_PCT
     new_config['Advanced']['cache_sizemb'] = CACHE_SIZEMB
     new_config['Advanced']['journal_mode'] = JOURNAL_MODE
+
+    new_config['General']['default_to_album_search'] = int(DEFAULT_TO_ALBUM_SEARCH)
 
     new_config.write()
 

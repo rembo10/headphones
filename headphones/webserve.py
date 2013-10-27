@@ -689,6 +689,19 @@ class WebInterface(object):
                     "pushover_onsnatch": checked(headphones.PUSHOVER_ONSNATCH),
                     "pushover_keys": headphones.PUSHOVER_KEYS,
                     "pushover_priority": headphones.PUSHOVER_PRIORITY,
+                    "email_enabled": checked(headphones.EMAIL_ENABLED),
+                    "email_from": headphones.EMAIL_FROM,
+                    "email_to": headphones.EMAIL_TO,
+                    "email_smtp_server": headphones.EMAIL_SMTP_SERVER,
+                    "email_smtp_user": headphones.EMAIL_SMTP_USER,
+                    "email_smtp_password": headphones.EMAIL_SMTP_PASSWORD,
+                    "email_onsnatch": checked(headphones.EMAIL_ONSNATCH),
+                    "osx_notify_enabled": checked(headphones.OSX_NOTIFY_ENABLED),
+                    "osx_notify_onsnatch": checked(headphones.OSX_NOTIFY_ONSNATCH),
+                    "boxcar_enabled": checked(headphones.BOXCAR_ENABLED),
+                    "boxcar_email": headphones.BOXCAR_EMAIL,
+                    "boxcar_apikey": headphones.BOXCAR_APIKEY,
+                    "boxcar_onsnatch": checked(headphones.BOXCAR_ONSNATCH),
                     "mirror_list": headphones.MIRRORLIST,
                     "mirror": headphones.MIRROR,
                     "customhost": headphones.CUSTOMHOST,
@@ -697,6 +710,7 @@ class WebInterface(object):
                     "hpuser": headphones.HPUSER,
                     "hppass": headphones.HPPASS,
                     "cache_sizemb":headphones.CACHE_SIZEMB,
+                    "default_to_album_search" : checked(headphones.DEFAULT_TO_ALBUM_SEARCH),
                 }
 
         # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8
@@ -729,7 +743,10 @@ class WebInterface(object):
         bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
         delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False,
-        pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, mirror=None, customhost=None, customport=None,
+        pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0,
+        email_enabled=0, email_from=None, email_to=None, email_smtp_server=None, email_smtp_user=None, email_smtp_password=None, email_onsnatch=0,
+        osx_notify_enabled=0, osx_notify_onsnatch=0, boxcar_enabled=0, boxcar_email=None, boxcar_apikey=None, boxcar_onsnatch=0, default_to_album_search=False,
+        mirror=None, customhost=None, customport=None,
         customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
         enable_https=0, https_cert=None, https_key=None, **kwargs):
 
@@ -853,6 +870,19 @@ class WebInterface(object):
         headphones.PUSHOVER_ONSNATCH = pushover_onsnatch
         headphones.PUSHOVER_KEYS = pushover_keys
         headphones.PUSHOVER_PRIORITY = pushover_priority
+        headphones.EMAIL_ENABLED = email_enabled
+        headphones.EMAIL_FROM = email_from
+        headphones.EMAIL_TO = email_to
+        headphones.EMAIL_SMTP_SERVER = email_smtp_server
+        headphones.EMAIL_SMTP_USER = email_smtp_user
+        headphones.EMAIL_SMTP_PASSWORD = email_smtp_password
+        headphones.EMAIL_ONSNATCH = email_onsnatch
+        headphones.OSX_NOTIFY_ENABLED = osx_notify_enabled
+        headphones.OSX_NOTIFY_ONSNATCH = osx_notify_onsnatch
+        headphones.BOXCAR_ENABLED = boxcar_enabled
+        headphones.BOXCAR_EMAIL = boxcar_email
+        headphones.BOXCAR_APIKEY = boxcar_apikey
+        headphones.BOXCAR_ONSNATCH = boxcar_onsnatch
         headphones.MIRROR = mirror
         headphones.CUSTOMHOST = customhost
         headphones.CUSTOMPORT = customport
@@ -860,11 +890,12 @@ class WebInterface(object):
         headphones.HPUSER = hpuser
         headphones.HPPASS = hppass
         headphones.CACHE_SIZEMB = int(cache_sizemb)
+        headphones.DEFAULT_TO_ALBUM_SEARCH = default_to_album_search
 
         # Handle the variable config options. Note - keys with False values aren't getting passed
 
         headphones.EXTRA_NEWZNABS = []
-
+        
         for kwarg in kwargs:
             if kwarg.startswith('newznab_host'):
                 newznab_number = kwarg[12:]
@@ -893,6 +924,10 @@ class WebInterface(object):
         if headphones.SEARCH_INTERVAL < 360:
             logger.info("Search interval too low. Resetting to 6 hour minimum")
             headphones.SEARCH_INTERVAL = 360
+
+        if headphones.OSX_NOTIFY_ENABLED and not headphones.OSX_MOUNTAINLION:
+            logger.info("OS X Notifications require Mountain Lion or above")
+            headphones.OSX_NOTIFY_ENABLED = False
 
         # Write the config
         headphones.config_write()

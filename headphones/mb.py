@@ -25,6 +25,8 @@ from headphones.helpers import multikeysort, replace_all
 import lib.musicbrainzngs as musicbrainzngs
 from lib.musicbrainzngs import WebServiceError
 
+from lib.simplejson import OrderedDict
+
 mb_lock = threading.Lock()
 
 
@@ -124,28 +126,57 @@ def findRelease(name, limit=1):
     with mb_lock:        
         releaselist = []
         releaseResults = None
-        
+
         chars = set('!?')
         if any((c in chars) for c in name):
             name = '"'+name+'"'
-            
+
+        # additional artist search
+        if ':' in name:
+            name, artist = name.split(":")
+        else:
+            artist = None
+
         try:
-            releaseResults = musicbrainzngs.search_releases(query=name,limit=limit)['release-list']
+            releaseResults = musicbrainzngs.search_releases(query=name,limit=limit,artist=artist)['release-list']
         except WebServiceError, e: #need to update exceptions
             logger.warn('Attempt to query MusicBrainz for "%s" failed: %s' % (name, str(e)))
             time.sleep(5)
 
         if not releaseResults:
             return False
+
         for result in releaseResults:
-                        releaselist.append({
+
+            # Get formats as a string (there's probably a much better way of doing this!)
+            format_dict = OrderedDict()
+            for medium in result['medium-list']:
+                if 'format' in medium:
+                    format = unicode(medium['format'])
+                    if format not in format_dict:
+                        format_dict[format] = 0
+                    format_dict[format] += 1
+
+            formats = ''
+            for format, count in format_dict.items():
+                if formats:
+                    formats += ' + '
+                if count > 1:
+                    formats += str(count) + 'x'
+                formats += format
+
+            releaselist.append({
                         'uniquename':        unicode(result['artist-credit'][0]['artist']['name']),
                         'title':             unicode(result['title']),
                         'id':                unicode(result['artist-credit'][0]['artist']['id']),
                         'albumid':           unicode(result['id']),
                         'url':               unicode("http://musicbrainz.org/artist/" + result['artist-credit'][0]['artist']['id']),#probably needs to be changed
                         'albumurl':          unicode("http://musicbrainz.org/release/" + result['id']),#probably needs to be changed
-                        'score':             int(result['ext:score'])
+                        'score':             int(result['ext:score']),
+                        'disambiguation':    unicode(result['disambiguation']) if 'disambiguation' in result else '',
+                        'date':              unicode(result['date']) if 'date' in result else '',
+                        'country':           unicode(result['country']) if 'country' in result else '',
+                        'formats':           formats
                         })            
         return releaselist
 

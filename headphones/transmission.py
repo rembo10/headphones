@@ -14,7 +14,7 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import headphones
-from headphones import logger, notifiers
+from headphones import logger
 
 import urllib2
 import lib.simplejson as json
@@ -39,18 +39,6 @@ def addTorrent(link):
     if response['result'] == 'success':
         name = response['arguments']['torrent-added']['name']
         logger.info(u"Torrent sent to Transmission successfully")
-        if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
-            logger.info(u"Sending Prowl notification")
-            prowl = notifiers.PROWL()
-            prowl.notify(name,"Download started")
-        if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
-            logger.info(u"Sending Pushover notification")
-            prowl = notifiers.PUSHOVER()
-            prowl.notify(name,"Download started")
-        if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
-            logger.debug(u"Sending NMA notification")
-            nma = notifiers.NMA()
-            nma.notify(snatched_nzb=name)
 
         return response['arguments']['torrent-added']['id']
         

@@ -58,8 +58,13 @@
                     <input type="text" value="" placeholder="Search" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" />
                     <span class="mini-icon"></span>
                     <select name="type">
-  						<option value="artist">Artist</option>
-  						<option value="album">Album</option>
+                        % if not headphones.DEFAULT_TO_ALBUM_SEARCH:
+  						    <option value="artist">Artist</option>
+  						    <option value="album">Album</option>
+                        % elif headphones.DEFAULT_TO_ALBUM_SEARCH:
+                            <option value="album">Album</option>
+                            <option value="artist">Artist</option>
+                        % endif
 					</select>
                     <input type="submit" value="Add"/>
                 </form>

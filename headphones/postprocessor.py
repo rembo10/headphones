@@ -395,6 +395,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     else:
         albumpaths = [albumpath]
         
+    updateFilePermissions(albumpaths)
+        
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Downloaded" WHERE AlbumID=?', [albumid])
     myDB.action('UPDATE snatched SET status = "Processed" WHERE AlbumID=?', [albumid])
@@ -432,7 +434,24 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         logger.info(u"Pushover request")
         pushover = notifiers.PUSHOVER()
         pushover.notify(pushmessage,"Download and Postprocessing completed")
-        
+
+    if headphones.EMAIL_ENABLED:
+        logger.info(u"Sending Email notification")
+        email = notifiers.EMAIL()
+        subject = release['ArtistName'] + ' - ' + release['AlbumTitle']
+        email.notify(subject, "Download and Postprocessing completed")
+
+    if headphones.OSX_NOTIFY_ENABLED:
+        logger.info(u"Sending OS X notification")
+        osx_notify = notifiers.OSX_NOTIFY()
+        osx_notify.notify(release['ArtistName'], release['AlbumTitle'], "Download and Postprocessing completed")
+
+    if headphones.BOXCAR_ENABLED:
+        logger.info(u"Sending Boxcar notification")
+        boxcar = notifiers.BOXCAR()
+        title = release['ArtistName'] + ' - ' + release['AlbumTitle']
+        boxcar.notify(title, "Download and Postprocessing completed")
+
 def embedAlbumArt(artwork, downloaded_track_list):
     logger.info('Embedding album art')
     
@@ -860,7 +879,20 @@ def renameFiles(albumpath, downloaded_track_list, release):
         except Exception, e:
             logger.error('Error renaming file: %s. Error: %s' % (downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), e))
             continue
-                
+            
+def updateFilePermissions(albumpaths):
+
+    for folder in albumpaths:
+        logger.info("Updating file permissions in " + folder.decode(headphones.SYS_ENCODING, 'replace'))
+        for r,d,f in os.walk(folder):
+            for files in f:
+                full_path = os.path.join(r, files)
+                try:
+                    os.chmod(full_path, int(headphones.FILE_PERMISSIONS, 8))
+                except:
+                    logger.error("Could not change permissions for file: " + full_path.decode(headphones.SYS_ENCODING, 'replace'))
+                    continue
+
 def renameUnprocessedFolder(albumpath):
     
     i = 0

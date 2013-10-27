@@ -239,12 +239,14 @@ table#wanted_table td#reldate { vertical-align: middle; text-align: center; min-
 table#wanted_table td#type { vertical-align: middle; text-align: center; min-width: 75px; }
 table#wanted_table td#status { vertical-align: middle; text-align: center; }
 
-table#searchresults_table th#albumname { text-align: left; min-width: 225px; }
-table#searchresults_table th#artistname { text-align: center; min-width: 325px; }
+table#searchresults_table th#albumname { text-align: left; min-width: 250px; }
+table#searchresults_table th#artistname { text-align: center; min-width: 200px; }
+table#searchresults_table th#reldate { width: 100px; text-align: center; min-width: 70px; }
 table#searchresults_table th#score { text-align: center; min-width: 75px; }
 
-table#searchresults_table td#albumname { vertical-align: middle; text-align: left; min-width: 200px; }
-table#searchresults_table td#artistname { vertical-align: middle; text-align: left; min-width: 300px; }
+table#searchresults_table td#albumname { vertical-align: middle; text-align: left; min-width: 225px; }
+table#searchresults_table td#artistname { vertical-align: middle; text-align: left; min-width: 175px; }
+table#searchresults_table td#reldate { vertical-align: middle; text-align: center; }
 table#searchresults_table td#score { vertical-align: middle; text-align: center; min-width: 75px; }
 
 div.progress-container { border: 1px solid #ccc; width: 100px; height: 14px; margin: 2px 5px 2px 0; padding: 1px; float: left; background: white; }

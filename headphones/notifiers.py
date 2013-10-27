@@ -24,6 +24,10 @@ from urllib import urlencode
 import os.path
 import subprocess
 import lib.simplejson as simplejson
+from email.mime.text import MIMEText
+import smtplib
+import email.utils
+import time
 
 class PROWL:
 
@@ -263,6 +267,7 @@ class Synoindex:
         if isinstance(path_list, list):
             for path in path_list:
                 self.notify(path)
+
 class PUSHOVER:
 
     application_token = "LdPCoy0dqC21ktsbEyAVCcwvQiVlsz"
@@ -321,4 +326,118 @@ class PUSHOVER:
         self.priority = priority
 
         self.notify('Main Screen Activate', 'Test Message')
-        
+
+class EMAIL:
+
+    def notify(self, subject, message):
+
+        message = MIMEText(message, 'plain', "utf-8")
+        message['Subject'] = subject
+        message['From'] = email.utils.formataddr(('Headphones', headphones.EMAIL_FROM))
+        message['To'] = headphones.EMAIL_TO
+
+        try:
+            mailserver = smtplib.SMTP(headphones.EMAIL_SMTP_SERVER)
+
+            if headphones.EMAIL_SMTP_USER:
+                mailserver.login(headphones.EMAIL_SMTP_USER, headphones.EMAIL_SMTP_PASSWORD)
+
+            mailserver.sendmail(headphones.EMAIL_FROM, headphones.EMAIL_TO, message.as_string())
+            mailserver.quit()
+            return True
+
+        except Exception, e:
+            logger.warn('Error sending Email: %s' % e)
+            return False
+
+class OSX_NOTIFY:
+
+    objc = None
+
+    def __init__(self):
+        try:
+            self.objc = __import__("objc")
+        except:
+            return False
+
+    def swizzle(self, cls, SEL, func):
+        old_IMP = cls.instanceMethodForSelector_(SEL)
+        def wrapper(self, *args, **kwargs):
+            return func(self, old_IMP, *args, **kwargs)
+        new_IMP = self.objc.selector(wrapper, selector=old_IMP.selector,
+            signature=old_IMP.signature)
+        self.objc.classAddMethod(cls, SEL, new_IMP)
+
+    def notify(self, title, subtitle=None, text=None, sound=True):
+
+        try:
+            self.swizzle(self.objc.lookUpClass('NSBundle'),
+                b'bundleIdentifier',
+                self.swizzled_bundleIdentifier)
+
+            NSUserNotification = self.objc.lookUpClass('NSUserNotification')
+            NSUserNotificationCenter = self.objc.lookUpClass('NSUserNotificationCenter')
+            NSAutoreleasePool = self.objc.lookUpClass('NSAutoreleasePool')
+
+            if not NSUserNotification or not NSUserNotificationCenter:
+                return False
+
+            pool = NSAutoreleasePool.alloc().init()
+
+            notification = NSUserNotification.alloc().init()
+            notification.setTitle_(title)
+            if subtitle:
+                notification.setSubtitle_(subtitle)
+            if text:
+                notification.setInformativeText_(text)
+            if sound:
+                notification.setSoundName_("NSUserNotificationDefaultSoundName")
+            #notification.setOtherButtonTitle_("Close")
+            notification.setHasActionButton_(False)
+            #notification.setActionButtonTitle_("Show")
+
+            notification_center = NSUserNotificationCenter.defaultUserNotificationCenter()
+            notification_center.deliverNotification_(notification)
+
+            del pool
+            return True
+
+        except Exception, e:
+            logger.warn('Error sending OS X Notification: %s' % e)
+            return False
+
+    def swizzled_bundleIdentifier(self, original, swizzled):
+        return 'com.headphones.osxnotify'
+
+class BOXCAR:
+
+    def __init__(self):
+
+        # headphones has been submitted to boxcar as a provider but hasn't been accepted for general use yet.
+        # When it does, then the following key can be hard coded:
+        # OLQdnTklG95vgeAL3s8Q
+
+        self.apikey = headphones.BOXCAR_APIKEY if headphones.BOXCAR_APIKEY else 'OLQdnTklG95vgeAL3s8Q'
+
+    def notify(self, title, message):
+
+        try:
+            data = urllib.urlencode({
+                'email': headphones.BOXCAR_EMAIL,
+                'notification[from_screen_name]': title.encode('utf-8'),
+                'notification[message]': message.encode('utf-8'),
+                'notification[from_remote_service_id]': int(time.time()),
+                })
+
+            apiurl = 'https://boxcar.io/devices/providers/' + self.apikey + '/notifications'
+
+            url = urllib2.Request(apiurl)
+            handle = urllib2.urlopen(url, data)
+            handle.close()
+            return True
+
+        except urllib2.URLError, e:
+            logger.warn('Error sending Boxcar Notification: %s' % e)
+            return False
+
+
