@@ -35,30 +35,28 @@ def addTorrent(link):
 
     if not response:
         return False
-        
-    if response['result'] == 'success':
-        name = response['arguments']['torrent-added']['name']
-        logger.info(u"Torrent sent to Transmission successfully")
 
-        return response['arguments']['torrent-added']['id']
+    if response['result'] == 'success':
+        try:
+            name = response['arguments']['torrent-added']['name']
+            logger.info(u"Torrent sent to Transmission successfully")
+            return response['arguments']['torrent-added']['name'],response['arguments']['torrent-added']['hashString']
+        except KeyError:
+            logger.warn(u"Torrent was not sent to Transmission")
+            return False
         
 def getTorrentFolder(torrentid):
     method = 'torrent-get'
-    arguments = { 'ids': torrentid, 'fields': ['name','percentDone']}
+    arguments = { 'ids': torrentid, 'fields': ['name']}
     
     response = torrentAction(method, arguments)
-    percentdone = response['arguments']['torrents'][0]['percentDone']
-    torrent_folder_name = response['arguments']['torrents'][0]['name']
-    
-    while percentdone == 0:
-        time.sleep(5)
-        response = torrentAction(method, arguments)
-        percentdone = response['arguments']['torrents'][0]['percentDone']
-    
-    torrent_folder_name = response['arguments']['torrents'][0]['name']
 
-    return torrent_folder_name
-    
+    try:
+        torrent_folder_name = response['arguments']['torrents'][0]['name']
+        return torrent_folder_name
+    except IndexError, e:
+        return False
+
 def torrentAction(method, arguments):
     
     host = headphones.TRANSMISSION_HOST
@@ -99,7 +97,7 @@ def torrentAction(method, arguments):
                                       
     request.add_data(postdata)
                                       
-    try:    
+    try:
         response = json.loads(opener.open(request).read())
     except Exception, e:
         logger.error("Error sending torrent to Transmission: " + str(e))

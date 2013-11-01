@@ -172,10 +172,6 @@ def getXldProfile(xldProfile):
                 if ShortDesc != 'normal':
                     xldBitrate = int(profile.get('XLDWavpackOutput_BitRate'))
 
-            # Lossless
-            if xldFormat and not xldBitrate:
-                xldBitrate = 400
-
             return(xldProfileForCmd, xldFormat, xldBitrate)
 
     return(xldProfileNotFound, None, None)

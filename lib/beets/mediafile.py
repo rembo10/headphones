@@ -1061,3 +1061,11 @@ class MediaFile(object):
     def format(self):
         """A string describing the file format/codec."""
         return TYPES[self.type]
+
+    # headphones
+    @property
+    def lossless(self):
+        if hasattr(self.mgfile.info, 'bitrate') and self.mgfile.info.bitrate:
+            return False
+        else:
+            return True

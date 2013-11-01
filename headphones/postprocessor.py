@@ -29,6 +29,7 @@ from lib.beets.mediafile import MediaFile
 import headphones
 from headphones import db, albumart, librarysync, lyrics, logger, helpers
 from headphones.helpers import sab_replace_dots, sab_replace_spaces
+from headphones import transmission
 
 postprocessor_lock = threading.Lock()
 
@@ -63,11 +64,24 @@ def checkFolder():
                             
                 if album['Kind'] == 'torrent':
 
-                    torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
-    
+                    # Get path using torrent hash for transmission torrents
+                    torrent_not_found = False
+                    if '_hash:' in album['FolderName']:
+                        torrent_name, torrent_hash = album['FolderName'].split("_hash:")
+                        torrent_folder_name = transmission.getTorrentFolder(torrent_hash)
+                        if not torrent_folder_name:
+                            torrent_not_found = True
+                            torrent_folder_name = torrent_name.encode(headphones.SYS_ENCODING,'replace')
+                        torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, torrent_folder_name)
+                    else:
+                        torrent_folder_name = album['FolderName']
+                        torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, torrent_folder_name).encode(headphones.SYS_ENCODING,'replace')
+
                     if os.path.exists(torrent_album_path):
-                        logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
+                        logger.debug('Found %s in torrent download folder. Verifying....' % torrent_folder_name)
                         verify(album['AlbumID'], torrent_album_path, 'torrent')
+                    elif torrent_not_found:
+                        logger.debug(u"Could not find torrent %s in Transmission queue, may have been deleted? Retry downloading same torrent again or clear Headphones snatch history" % torrent_name)
 
 def verify(albumid, albumpath, Kind=None, forced=False):
 
@@ -939,7 +953,22 @@ def forcePostProcess():
 
     # Parse the folder names to get artist album info
     myDB = db.DBConnection()
-    
+
+    # Get folder name for snatched transmission torrents
+    if folders and headphones.DOWNLOAD_TORRENT_DIR:
+        snatched = myDB.select('SELECT * from snatched WHERE Status="Snatched" AND Kind="torrent" AND FolderName Like "%_hash:%"')
+        for album in snatched:
+            if '_hash' in album['FolderName']:
+                torrent_name, torrent_hash = album['FolderName'].split("_hash:")
+                torrent_folder_name = transmission.getTorrentFolder(torrent_hash)
+                if not torrent_folder_name:
+                    torrent_folder_name = torrent_name.encode(headphones.SYS_ENCODING,'replace')
+                torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, torrent_folder_name)
+                if os.path.exists(torrent_album_path):
+                    myDB.action('UPDATE snatched SET FolderName=? WHERE AlbumID=?', [torrent_folder_name, album[0]])
+                else:
+                    logger.debug(u"Could not find torrent %s in Transmission queue, may have been deleted? Retry downloading same torrent again or clear Headphones snatch history" % torrent_name)
+
     for folder in folders:
 
         folder_basename = os.path.basename(folder).decode(headphones.SYS_ENCODING, 'replace')
