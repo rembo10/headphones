@@ -895,7 +895,7 @@ class WebInterface(object):
         # Handle the variable config options. Note - keys with False values aren't getting passed
 
         headphones.EXTRA_NEWZNABS = []
-        
+
         for kwarg in kwargs:
             if kwarg.startswith('newznab_host'):
                 newznab_number = kwarg[12:]
