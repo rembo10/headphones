@@ -962,11 +962,14 @@ def forcePostProcess():
                 torrent_name, torrent_hash = album['FolderName'].split("_hash:")
                 torrent_folder_name = transmission.getTorrentFolder(torrent_hash)
                 if not torrent_folder_name:
+                    torrent_found = False
                     torrent_folder_name = torrent_name.encode(headphones.SYS_ENCODING,'replace')
+                else:
+                    torrent_found = True
                 torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, torrent_folder_name)
                 if os.path.exists(torrent_album_path):
                     myDB.action('UPDATE snatched SET FolderName=? WHERE AlbumID=?', [torrent_folder_name, album[0]])
-                else:
+                elif not torrent_found:
                     logger.debug(u"Could not find torrent %s in Transmission queue, may have been deleted? Retry downloading same torrent again or clear Headphones snatch history" % torrent_name)
 
     for folder in folders:
