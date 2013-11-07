@@ -5,18 +5,21 @@
 #
 # Loosely based on the API implementation from 'whatbetter', by Zachary Denton
 # See https://github.com/zacharydenton/whatbetter
+from HTMLParser import HTMLParser
 
+import sys
 import json
 import time
-import lib.requests as requests
+import requests
 
-from user import User
-from artist import Artist
-from tag import Tag
-from request import Request
-from torrent_group import TorrentGroup
-from torrent import Torrent
-from category import Category
+from .user import User
+from .artist import Artist
+from .tag import Tag
+from .request import Request
+from .torrent_group import TorrentGroup
+from .torrent import Torrent
+from .category import Category
+from .inbox import Mailbox
 
 class LoginException(Exception):
     pass
@@ -40,7 +43,8 @@ class GazelleAPI(object):
 
 
     def __init__(self, username=None, password=None):
-        self.session = requests.session(headers=self.default_headers)
+        self.session = requests.session()
+        self.session.headers = self.default_headers
         self.username = username
         self.password = password
         self.authkey = None
@@ -55,58 +59,98 @@ class GazelleAPI(object):
         self.cached_requests = {}
         self.cached_categories = {}
         self.site = "https://what.cd/"
-        self.rate_limit = 2.0 # seconds between requests
-        self._login()
+        self.past_request_timestamps = []
+
+    def wait_for_rate_limit(self):
+        # maximum is 5 requests within 10 secs
+        time_frame = 10
+        max_reqs = 5
+
+        slice_point = 0
+
+        while len(self.past_request_timestamps) >= max_reqs:
+            for i, timestamp in enumerate(self.past_request_timestamps):
+                if timestamp < time.time() - time_frame:
+                    slice_point = i + 1
+                else:
+                    break
+
+            if slice_point:
+                self.past_request_timestamps = self.past_request_timestamps[slice_point:]
+            else:
+                time.sleep(0.1)
+
+    def logged_in(self):
+        return self.logged_in_user is not None and self.logged_in_user.id == self.userid
 
     def _login(self):
         """
         Private method.
         Logs in user and gets authkey from server.
         """
+
+        if self.logged_in():
+            return
+
+        self.wait_for_rate_limit()
+
         loginpage = 'https://what.cd/login.php'
         data = {'username': self.username,
                 'password': self.password}
         r = self.session.post(loginpage, data=data)
         if r.status_code != 200:
-            raise LoginException("Login error, http code %s" % r.status_code)
+            raise LoginException
         accountinfo = self.request('index')
+        if not accountinfo or 'id' not in accountinfo:
+            raise LoginException
         self.userid = accountinfo['id']
         self.authkey = accountinfo['authkey']
         self.passkey = accountinfo['passkey']
         self.logged_in_user = User(self.userid, self)
         self.logged_in_user.set_index_data(accountinfo)
+        self.past_request_timestamps.append(time.time())
 
-    def request(self, action, **kwargs):
+    def request(self, action, autologin=True, **kwargs):
         """
         Makes an AJAX request at a given action.
         Pass an action and relevant arguments for that action.
         """
-
-        ajaxpage = 'ajax.php'
-        content = self.unparsed_request(ajaxpage, action, **kwargs)
-        try:
-            parsed = json.loads(content)
-            if parsed['status'] != 'success':
+        def make_request(action, **kwargs):
+            ajaxpage = 'ajax.php'
+            content = self.unparsed_request(ajaxpage, action, **kwargs)
+            try:
+                if not isinstance(content, text_type):
+                    content = content.decode('utf-8')
+                parsed = json.loads(content)
+                if parsed['status'] != 'success':
+                    raise RequestException
+                return parsed['response']
+            except ValueError:
                 raise RequestException
-            return parsed['response']
-        except ValueError:
-            raise RequestException
 
-    def unparsed_request(self, page, action, **kwargs):
+        try:
+            return make_request(action, **kwargs)
+        except Exception as e:
+            if autologin and not self.logged_in():
+                self._login()
+                return make_request(action, **kwargs)
+            else:
+                raise e
+
+    def unparsed_request(self, sitepage, action, **kwargs):
         """
         Makes a generic HTTP request at a given page with a given action.
         Also pass relevant arguments for that action.
         """
-        while time.time() - self.last_request < self.rate_limit:
-            time.sleep(0.1)
+        self.wait_for_rate_limit()
 
-        url = "%s/%s" % (self.site, page)
+        url = "%s%s" % (self.site, sitepage)
         params = {'action': action}
         if self.authkey:
             params['auth'] = self.authkey
         params.update(kwargs)
         r = self.session.get(url, params=params, allow_redirects=False)
-        self.last_request = time.time()
+        self.past_request_timestamps.append(time.time())
         return r.content
 
     def get_user(self, id):
@@ -141,18 +185,37 @@ class GazelleAPI(object):
 
         return found_users
 
-    def get_artist(self, id, name=None):
+    def get_inbox(self, page='1', sort='unread'):
+        """
+        Returns the inbox Mailbox for the logged in user
+        """
+        return Mailbox(self, 'inbox', page, sort)
+        
+    def get_sentbox(self, page='1', sort='unread'):
+        """
+        Returns the sentbox Mailbox for the logged in user
+        """
+        return Mailbox(self, 'sentbox', page, sort)
+
+    def get_artist(self, id=None, name=None):
         """
         Returns an Artist for the passed ID, associated with this API object. You'll need to call Artist.update_data()
         if the artist hasn't already been cached. This is done on demand to reduce unnecessary API calls.
         """
-        id = int(id)
-        if id in self.cached_artists.keys():
-            artist = self.cached_artists[id]
+        if id:
+            id = int(id)
+            if id in self.cached_artists.keys():
+                artist = self.cached_artists[id]
+            else:
+                artist = Artist(id, self)
+            if name:
+                artist.name = HTMLParser().unescape(name)
+        elif name:
+            artist = Artist(-1, self)
+            artist.name = HTMLParser().unescape(name)
         else:
-            artist = Artist(id, self)
-        if name:
-            artist.name = name
+            raise Exception("You must specify either an ID or a Name to get an artist.")
+
         return artist
 
     def get_tag(self, name):
@@ -189,13 +252,31 @@ class GazelleAPI(object):
 
     def get_torrent(self, id):
         """
-        Returns a TorrentGroup for the passed ID, associated with this API object.
+        Returns a Torrent for the passed ID, associated with this API object.
         """
         id = int(id)
         if id in self.cached_torrents.keys():
             return self.cached_torrents[id]
         else:
             return Torrent(id, self)
+
+    def get_torrent_from_info_hash(self, info_hash):
+        """
+        Returns a Torrent for the passed info hash (if one exists), associated with this API object.
+        """
+        try:
+            response = self.request(action='torrent', hash=info_hash.upper())
+        except RequestException:
+            return None
+
+        id = int(response['torrent']['id'])
+        if id in self.cached_torrents.keys():
+            torrent = self.cached_torrents[id]
+        else:
+            torrent = Torrent(id, self)
+
+        torrent.set_torrent_complete_data(response)
+        return torrent
 
     def get_category(self, id, name=None):
         """
@@ -209,6 +290,45 @@ class GazelleAPI(object):
         if name:
             cat.name = name
         return cat
+
+    def get_top_10(self, type="torrents", limit=25):
+        """
+        Lists the top <limit> items of <type>. Type can be "torrents", "tags", or "users". Limit MUST be
+        10, 25, or 100...it can't just be an arbitrary number (unfortunately). Results are organized into a list of hashes.
+        Each hash contains the results for a specific time frame, like 'day', or 'week'. In the hash, the 'results' key
+        contains a list of objects appropriate to the passed <type>.
+        """
+
+        response = self.request(action='top10', type=type, limit=limit)
+        top_items = []
+        if not response:
+            raise RequestException
+        for category in response:
+            results = []
+            if type == "torrents":
+                for item in category['results']:
+                    torrent = self.get_torrent(item['torrentId'])
+                    torrent.set_torrent_top_10_data(item)
+                    results.append(torrent)
+            elif type == "tags":
+                for item in category['results']:
+                    tag = self.get_tag(item['name'])
+                    results.append(tag)
+            elif type == "users":
+                for item in category['results']:
+                    user = self.get_user(item['id'])
+                    results.append(user)
+            else:
+                raise Exception("%s is an invalid type argument for GazelleAPI.get_top_ten()" % type)
+
+            top_items.append({
+                "caption": category['caption'],
+                "tag": category['tag'],
+                "limit": category['limit'],
+                "results": results
+            })
+
+        return top_items
 
     def search_torrents(self, **kwargs):
         """
@@ -281,3 +401,8 @@ class GazelleAPI(object):
             id=id, authkey=self.logged_in_user.authkey, torrent_pass=self.logged_in_user.passkey)
         with open(dest, 'w+') as dest_file:
             dest_file.write(file_data)
+
+if sys.version_info[0] == 3:
+    text_type = str
+else:
+    text_type = unicode
