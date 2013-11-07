@@ -67,9 +67,9 @@ class User(object):
         Takes parsed JSON response from 'user' action on api, and updates relevant user information.
         To avoid problems, only pass in user data from an API call that used this user's ID as an argument.
         """
-        if self.id != user_json_response['id']:
-            raise InvalidUserException("Tried to update a user's information from a 'user' API call with a different id." +
-                               " Should be %s, got %s" % (self.id, user_json_response['id']) )
+        if self.username and self.username != user_json_response['username']:
+            raise InvalidUserException("Tried to update a user's information from a 'user' API call with a different username." +
+                               " Should be %s, got %s" % (self.username, user_json_response['username']) )
 
         self.username = user_json_response['username']
         self.avatar = user_json_response['avatar']
@@ -106,3 +106,112 @@ class User(object):
 
     def __repr__(self):
         return "User: %s - ID: %s" % (self.username, self.id)
+
+#URL:
+#ajax.php?action=usersearch
+#Argument:
+#search - The search term.
+#{
+#    "status": "success",
+#    "response": {
+#        "currentPage": 1,
+#        "pages": 1,
+#        "results": [
+#                       {
+#                           "userId": 469,
+#                           "username": "dr4g0n",
+#                           "donor": true,
+#                           "warned": false,
+#                           "enabled": true,
+#                           "class": "VIP"
+#                       },
+#                   // ...
+#        ]
+#    }
+#}
+
+#URL:
+#ajax.php?action=user
+#
+#Arguments:
+#id - id of the user to display
+#
+#Response format:
+#{
+#    "status": "success",
+#    "response": {
+#        "username": "xxxx",
+#        "avatar": "http://asdf.com/asdf.png",
+#        "isFriend": false,
+#        "profileText": "",
+#        "stats": {
+#            "joinedDate": "2007-10-28 14:26:12",
+#            "lastAccess": "2012-08-09 00:17:52",
+#            "uploaded": 585564424629,
+#            "downloaded": 177461229738,
+#            "ratio": 3.3,
+#            "requiredRatio": 0.6
+#        },
+#        "ranks": {
+#            "uploaded": 98,
+#            "downloaded": 95,
+#            "uploads": 85,
+#            "requests": 0,
+#            "bounty": 79,
+#            "posts": 98,
+#            "artists": 0,
+#            "overall": 85
+#        },
+#        "personal": {
+#            "class": "VIP",
+#            "paranoia": 0,
+#            "paranoiaText": "Off",
+#            "donor": true,
+#            "warned": false,
+#            "enabled": true,
+#            "passkey": "31d59d20ac9233bf2038e35e72c4d61e"
+#        },
+#        "community": {
+#            "posts": 863,
+#            "torrentComments": 13,
+#            "collagesStarted": 0,
+#            "collagesContrib": 0,
+#            "requestsFilled": 0,
+#            "requestsVoted": 13,
+#            "perfectFlacs": 2,
+#            "uploaded": 29,
+#            "groups": 14,
+#            "seeding": 309,
+#            "leeching": 0,
+#            "snatched": 678,
+#            "invited": 7
+#        }
+#    }
+#}
+
+#URL:
+#ajax.php?action=index
+#
+#Arguments: None
+#{
+#    "status": "success",
+#    "response": {
+#        "username": "xxxx",
+#        "id": 0000,
+#        "authkey": "redacted",
+#        "passkey": "redacted",
+#        "notifications": {
+#            "messages": 0,
+#            "notifications": 9000,
+#            "newAnnouncement": false,
+#            "newBlog": false
+#        },
+#        "userstats": {
+#            "uploaded": 585564424629,
+#            "downloaded": 177461229738,
+#            "ratio": 3.29,
+#            "requiredratio": 0.6,
+#            "class": "VIP"
+#        }
+#    }
+#}
