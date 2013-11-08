@@ -449,10 +449,11 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
         if len(resultlist):
 
-            # Add a priority if it has any of the preferred words
+            # Add a priority if the title has any of the preferred words or the word is a search provider
             temp_list = []
             for result in resultlist:
-                if headphones.PREFERRED_WORDS and any(word.lower() in result[0].lower() for word in helpers.split_string(headphones.PREFERRED_WORDS)):
+                title_provider = result[0].lower() + ' ' + result[3].lower()
+                if headphones.PREFERRED_WORDS and any(word.lower() in title_provider for word in helpers.split_string(headphones.PREFERRED_WORDS)):
                     temp_list.append((result[0],result[1],result[2],result[3],1))
                 else:
                     temp_list.append((result[0],result[1],result[2],result[3],0))
@@ -1295,15 +1296,19 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
         if len(resultlist):
             
-            # Add a priority if it has any of the preferred words
+            # Add a priority if the title has any of the preferred words or the word is a search provider
             temp_list = []
             for result in resultlist:
-                if headphones.PREFERRED_WORDS and any(word.lower() in result[0].lower() for word in helpers.split_string(headphones.PREFERRED_WORDS)):
+                title_provider = result[0].lower() + ' ' + result[3].lower()
+                if headphones.PREFERRED_WORDS and any(word.lower() in title_provider for word in helpers.split_string(headphones.PREFERRED_WORDS)):
                     temp_list.append((result[0],result[1],result[2],result[3],1))
                 else:
                     temp_list.append((result[0],result[1],result[2],result[3],0))
                         
             resultlist = temp_list
+
+            print 'ade resultlist'
+            print resultlist
 
             if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
 
