@@ -1307,9 +1307,6 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         
             resultlist = temp_list
 
-            print 'ade resultlist'
-            print resultlist
-
             if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
 
                 logger.debug('Target bitrate: %s kbps' % headphones.PREFERRED_BITRATE)
