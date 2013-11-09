@@ -491,7 +491,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
                         for result in resultlist:
 
-                            if high_size_limit and (result[1] > high_size_limit):
+                            if high_size_limit and (int(result[1]) > high_size_limit):
 
                                 logger.info(result[0] + " is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit) + ")")
 
@@ -501,7 +501,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
                                 continue
 
-                            if low_size_limit and (result[1] < low_size_limit):
+                            if low_size_limit and (int(result[1]) < low_size_limit):
                                 logger.info(result[0] + " is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit) + ")")
                                 continue
 
@@ -521,6 +521,25 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
                     nzblist = sorted(resultlist, key=lambda title: (title[4], int(title[1])), reverse=True)
 
+            # lossless - ignore results less than default minimum size
+            elif headphones.PREFERRED_QUALITY == 3 and headphones.LOSSLESS_MIN_BITRATE:
+
+                nzblist = []
+                tracks = myDB.select('SELECT TrackDuration from tracks WHERE AlbumID=?', [albumid])
+
+                if len(tracks):
+
+                    albumlength = sum([pair[0] for pair in tracks])
+                    targetsize = albumlength/1000 * int(headphones.LOSSLESS_MIN_BITRATE) * 128
+
+                    if targetsize:
+                        for i, result in reversed(list(enumerate(resultlist))):
+                            if int(result[1]) < targetsize:
+                                logger.info(result[0] + " is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(targetsize) + ")")
+                                del resultlist[i]
+
+                if len (resultlist):
+                    nzblist = sorted(resultlist, key=lambda title: (title[4], int(title[1])), reverse=True)
 
             else:
 
@@ -1338,7 +1357,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                             
                         for result in resultlist:
                             
-                            if high_size_limit and (result[1] > high_size_limit):
+                            if high_size_limit and (int(result[1]) > high_size_limit):
                                 logger.info(result[0] + " is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit) + ")")
                                 
                                 # Add lossless nzbs to the "flac list" which we can use if there are no good lossy matches
@@ -1347,7 +1366,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 
                                 continue
                                 
-                            if low_size_limit and (result[1] < low_size_limit):
+                            if low_size_limit and (int(result[1]) < low_size_limit):
                                 logger.info(result[0] + " is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit) + ")")
                                 continue
                                                                 
@@ -1366,7 +1385,27 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
 
                     torrentlist = sorted(resultlist, key=lambda title: (title[4], int(title[1])), reverse=True)
-            
+
+            # lossless - ignore results less than default minimum size
+            elif headphones.PREFERRED_QUALITY == 3 and headphones.LOSSLESS_MIN_BITRATE:
+
+                torrentlist = []
+                tracks = myDB.select('SELECT TrackDuration from tracks WHERE AlbumID=?', [albumid])
+
+                if len(tracks):
+
+                    albumlength = sum([pair[0] for pair in tracks])
+                    targetsize = albumlength/1000 * int(headphones.LOSSLESS_MIN_BITRATE) * 128
+
+                    if targetsize:
+                        for i, result in reversed(list(enumerate(resultlist))):
+                            if int(result[1]) < targetsize:
+                                logger.info(result[0] + " is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(targetsize) + ")")
+                                del resultlist[i]
+
+                if len (resultlist):
+                    torrentlist = sorted(resultlist, key=lambda title: (title[4], int(title[1])), reverse=True)
+
             else:
 
                 torrentlist = sorted(resultlist, key=lambda title: (title[4], int(title[1])), reverse=True)
