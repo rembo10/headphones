@@ -560,6 +560,7 @@ def initialize():
         ALBUM_COMPLETION_PCT = check_setting_int(CFG, 'Advanced', 'album_completion_pct', 80)
 
         DEFAULT_TO_ALBUM_SEARCH = bool(check_setting_int(CFG, 'General', 'default_to_album_search', 0))
+        LOSSLESS_MIN_BITRATE = check_setting_int(CFG, 'General', 'lossless_min_bitrate', 350)
 
         # update folder formats in the config & bump up config version
         if CONFIG_VERSION == '0':
@@ -969,6 +970,7 @@ def config_write():
     new_config['Advanced']['journal_mode'] = JOURNAL_MODE
 
     new_config['General']['default_to_album_search'] = int(DEFAULT_TO_ALBUM_SEARCH)
+    new_config['General']['lossless_min_bitrate'] = LOSSLESS_MIN_BITRATE
 
     new_config.write()
 
