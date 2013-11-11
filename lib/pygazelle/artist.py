@@ -1,4 +1,4 @@
-
+from HTMLParser import HTMLParser
 
 class InvalidArtistException(Exception):
     pass
@@ -26,15 +26,28 @@ class Artist(object):
         self.parent_api.cached_artists[self.id] = self # add self to cache of known Artist objects
 
     def update_data(self):
-        response = self.parent_api.request(action='artist', id=self.id)
+        if self.id > 0:
+            response = self.parent_api.request(action='artist', id=self.id)
+        elif self.name:
+            self.name = HTMLParser().unescape(self.name)
+            try:
+                response = self.parent_api.request(action='artist', artistname=self.name)
+            except Exception:
+                self.name = self.name.split(" & ")[0]
+                response = self.parent_api.request(action='artist', artistname=self.name)
+        else:
+            raise InvalidArtistException("Neither ID or Artist Name is valid, can't update data.")
         self.set_data(response)
 
     def set_data(self, artist_json_response):
-        if self.id != artist_json_response['id']:
+        if self.id > 0 and self.id != artist_json_response['id']:
             raise InvalidArtistException("Tried to update an artists's information from an 'artist' API call with a different id." +
                                " Should be %s, got %s" % (self.id, artist_json_response['id']) )
+        elif self.name:
+            self.id = artist_json_response['id']
+            self.parent_api.cached_artists[self.id] = self
 
-        self.name = artist_json_response['name']
+        self.name = HTMLParser().unescape(artist_json_response['name'])
         self.notifications_enabled = artist_json_response['notificationsEnabled']
         self.has_bookmarked = artist_json_response['hasBookmarked']
         self.image = artist_json_response['image']

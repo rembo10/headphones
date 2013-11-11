@@ -67,9 +67,9 @@ class User(object):
         Takes parsed JSON response from 'user' action on api, and updates relevant user information.
         To avoid problems, only pass in user data from an API call that used this user's ID as an argument.
         """
-        if self.id != user_json_response['id']:
-            raise InvalidUserException("Tried to update a user's information from a 'user' API call with a different id." +
-                               " Should be %s, got %s" % (self.id, user_json_response['id']) )
+        if self.username and self.username != user_json_response['username']:
+            raise InvalidUserException("Tried to update a user's information from a 'user' API call with a different username." +
+                                       " Should be %s, got %s" % (self.username, user_json_response['username']) )
 
         self.username = user_json_response['username']
         self.avatar = user_json_response['avatar']
