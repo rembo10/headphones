@@ -41,6 +41,10 @@ import lib.bencode as bencode
 import headphones.searcher_rutracker as rutrackersearch
 rutracker = rutrackersearch.Rutracker()
 
+# Persistent What.cd API object
+gazelle = None
+
+
 class NewzbinDownloader(urllib.FancyURLopener):
 
     def __init__(self):
@@ -735,6 +739,7 @@ def preprocess(resultlist):
 
 
 def searchTorrent(albumid=None, new=False, losslessOnly=False):
+    global gazelle  # persistent what.cd api object to reduce number of login attempts
 
     myDB = db.DBConnection()
 
@@ -1024,13 +1029,16 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 search_formats = [gazelleformat.MP3]
                 maxsize = 300000000
 
-            try:
-                gazelle = gazelleapi.GazelleAPI(headphones.WHATCD_USERNAME, headphones.WHATCD_PASSWORD)
-            except Exception, e:
-                gazelle = None
-                logger.warn(u"What.cd credentials incorrect or site is down. Error: %s %s" % (e.__class__.__name__, str(e)))
+            if not gazelle or not gazelle.logged_in():
+                try:
+                    logger.info(u"Attempting to log in to What.cd...")
+                    gazelle = gazelleapi.GazelleAPI(headphones.WHATCD_USERNAME, headphones.WHATCD_PASSWORD)
+                    gazelle._login()
+                except Exception, e:
+                    gazelle = None
+                    logger.error(u"What.cd credentials incorrect or site is down. Error: %s %s" % (e.__class__.__name__, str(e)))
 
-            if gazelle:
+            if gazelle and gazelle.logged_in():
                 logger.info(u"Searching %s..." % provider)
                 all_torrents = []
                 for search_format in search_formats:
