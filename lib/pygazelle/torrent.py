@@ -1,3 +1,4 @@
+from HTMLParser import HTMLParser
 import re
 
 class InvalidTorrentException(Exception):
@@ -34,6 +35,40 @@ class Torrent(object):
         self.user = None
 
         self.parent_api.cached_torrents[self.id] = self
+
+    def set_torrent_complete_data(self, torrent_json_response):
+        if self.id != torrent_json_response['torrent']['id']:
+            raise InvalidTorrentException("Tried to update a Torrent's information from an 'artist' API call with a different id." +
+                                       " Should be %s, got %s" % (self.id, torrent_json_response['id']) )
+
+        self.group = self.parent_api.get_torrent_group(torrent_json_response['group']['id'])
+        had_complete_list = self.group.has_complete_torrent_list
+        self.group.set_group_data(torrent_json_response)
+        self.group.has_complete_torrent_list = had_complete_list
+
+        self.media = torrent_json_response['torrent']['media']
+        self.format = torrent_json_response['torrent']['format']
+        self.encoding = torrent_json_response['torrent']['encoding']
+        self.remaster_year = torrent_json_response['torrent']['remasterYear']
+        self.remastered = torrent_json_response['torrent']['remastered']
+        self.remaster_title = torrent_json_response['torrent']['remasterTitle']
+        self.remaster_record_label = torrent_json_response['torrent']['remasterRecordLabel']
+        self.scene = torrent_json_response['torrent']['scene']
+        self.has_log = torrent_json_response['torrent']['hasLog']
+        self.has_cue = torrent_json_response['torrent']['hasCue']
+        self.log_score = torrent_json_response['torrent']['logScore']
+        self.file_count = torrent_json_response['torrent']['fileCount']
+        self.free_torrent = torrent_json_response['torrent']['freeTorrent']
+        self.size = torrent_json_response['torrent']['size']
+        self.leechers = torrent_json_response['torrent']['leechers']
+        self.seeders = torrent_json_response['torrent']['seeders']
+        self.snatched = torrent_json_response['torrent']['snatched']
+        self.time = torrent_json_response['torrent']['time']
+        self.description = torrent_json_response['torrent']['description']
+        self.file_list = [ re.match("(.+){{{(\d+)}}}", item).groups()
+                           for item in torrent_json_response['torrent']['fileList'].split("|||") ] # tuple ( filename, filesize )
+        self.file_path = torrent_json_response['torrent']['filePath']
+        self.user = self.parent_api.get_user(torrent_json_response['torrent']['userId'])
 
     def set_torrent_artist_data(self, artist_torrent_json_response):
         if self.id != artist_torrent_json_response['id']:
@@ -118,6 +153,26 @@ class Torrent(object):
         self.free_torrent = search_torrent_json_response['isFreeleech'] or search_torrent_json_response['isPersonalFreeleech']
         self.time = search_torrent_json_response['time']
 
+    def set_torrent_top_10_data(self, top_10_json_response):
+        if self.id != top_10_json_response['torrentId']:
+            raise InvalidTorrentException("Tried to update a Torrent's information from a 'browse'/search API call with a different id." +
+                                          " Should be %s, got %s" % (self.id, top_10_json_response['torrentId']) )
+
+        # TODO: Add conditionals to handle torrents that aren't music
+        self.group = self.parent_api.get_torrent_group(top_10_json_response['groupId'])
+        self.group.name = top_10_json_response['groupName']
+        if not self.group.music_info and top_10_json_response['artist']:
+            self.group.music_info = {'artists': [self.parent_api.get_artist(name=HTMLParser().unescape(top_10_json_response['artist']))]}
+        self.remaster_title = top_10_json_response['remasterTitle']
+        self.media = top_10_json_response['media']
+        self.format = top_10_json_response['format']
+        self.encoding = top_10_json_response['encoding']
+        self.has_log = top_10_json_response['hasLog']
+        self.has_cue = top_10_json_response['hasCue']
+        self.scene = top_10_json_response['scene']
+        self.seeders = top_10_json_response['seeders']
+        self.leechers = top_10_json_response['leechers']
+        self.snatched = top_10_json_response['snatched']
 
 
     def __repr__(self):
