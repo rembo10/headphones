@@ -239,6 +239,9 @@ CUSTOMPORT = None
 CUSTOMSLEEP = None
 HPUSER = None
 HPPASS = None
+RIVEU_ENABLED = False
+RIVEU_USERNAME = ""
+RIVEU_PASSWORD = ""
 
 CACHE_SIZEMB = 32
 JOURNAL_MODE = None
@@ -311,7 +314,8 @@ def initialize():
                 PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
-                PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY
+                PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
+                RIVEU_ENABLED, RIVEU_USERNAME, RIVEU_PASSWORD
 
         if __INITIALIZED__:
             return False
@@ -512,6 +516,10 @@ def initialize():
         PUSHOVER_KEYS = check_setting_str(CFG, 'Pushover', 'pushover_keys', '')
         PUSHOVER_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_onsnatch', 0))
         PUSHOVER_PRIORITY = check_setting_int(CFG, 'Pushover', 'pushover_priority', 0)
+        
+        RIVEU_ENABLED = bool(check_setting_int(CFG, 'Riveu', 'riveu_enabled', 0))
+        RIVEU_USERNAME = check_setting_str(CFG, 'Riveu', 'riveu_username', '')
+        RIVEU_PASSWORD = check_setting_str(CFG, 'Riveu', 'riveu_password', '')
 
         MIRROR = check_setting_str(CFG, 'General', 'mirror', 'musicbrainz.org')
         CUSTOMHOST = check_setting_str(CFG, 'General', 'customhost', 'localhost')
@@ -871,6 +879,11 @@ def config_write():
     new_config['Pushover']['pushover_keys'] = PUSHOVER_KEYS
     new_config['Pushover']['pushover_onsnatch'] = int(PUSHOVER_ONSNATCH)
     new_config['Pushover']['pushover_priority'] = int(PUSHOVER_PRIORITY)
+    
+    new_config['Riveu'] = {}
+    new_config['Riveu']['riveu_enabled'] = int(RIVEU_ENABLED)
+    new_config['Riveu']['riveu_username'] = RIVEU_USERNAME
+    new_config['Riveu']['riveu_password'] = RIVEU_PASSWORD
 
     new_config['Synoindex'] = {}
     new_config['Synoindex']['synoindex_enabled'] = int(SYNOINDEX_ENABLED)

@@ -322,3 +322,36 @@ class PUSHOVER:
 
         self.notify('Main Screen Activate', 'Test Message')
         
+class RIVEU:
+    def __init__(self):
+        self.enabled = headphones.RIVEU_ENABLED
+        self.username = headphones.RIVEU_USERNAME
+        self.password = headphones.RIVEU_PASSWORD   
+
+    def conf(self, options):
+        return cherrypy.config['config'].get('Pushover', options)
+
+    def notify(self, message, event):
+        if not headphones.RIVEU_ENABLED:
+            return   
+	data = "CMD=SEND_NOTIFICATION&Username=" + headphones.RIVEU_USERNAME + "&Password=" + headphones.RIVEU_PASSWORD + "&Message=" + urllib.quote_plus(message)
+	
+	url = 'http://riveu.com/API.aspx?' + data
+	logger.info(url)
+
+	try:
+	    handle = urllib2.urlopen(url)
+	    logger.info(u"Riveu Notification Sent")
+	except Exception, e:
+	    logger.warn('Error connecting to Riveu url')
+	return
+	
+    def updateLibrary(self):
+        #For uniformity reasons not removed
+        return
+
+    def test(self, keys, priority):
+
+        self.enabled = True
+
+        self.notify('Main Screen Activate', 'Test Message')	
