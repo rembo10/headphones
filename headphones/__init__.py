@@ -130,6 +130,8 @@ SEARCH_INTERVAL = 360
 LIBRARYSCAN = False
 LIBRARYSCAN_INTERVAL = 300
 DOWNLOAD_SCAN_INTERVAL = 5
+UPDATE_DB_INTERVAL = 24
+MB_IGNORE_AGE = 365
 
 SAB_HOST = None
 SAB_USERNAME = None
@@ -302,7 +304,7 @@ def initialize():
                 ADD_ALBUM_ART, ALBUM_ART_FORMAT, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, PIRATEBAY, PIRATEBAY_PROXY_URL, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
-                LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
+                LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, UPDATE_DB_INTERVAL, MB_IGNORE_AGE, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, HEADPHONES_INDEXER, NZBMATRIX, TRANSMISSION_HOST, TRANSMISSION_USERNAME, TRANSMISSION_PASSWORD, \
                 UTORRENT_HOST, UTORRENT_USERNAME, UTORRENT_PASSWORD, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, \
@@ -405,6 +407,8 @@ def initialize():
         LIBRARYSCAN = bool(check_setting_int(CFG, 'General', 'libraryscan', 1))
         LIBRARYSCAN_INTERVAL = check_setting_int(CFG, 'General', 'libraryscan_interval', 300)
         DOWNLOAD_SCAN_INTERVAL = check_setting_int(CFG, 'General', 'download_scan_interval', 5)
+        UPDATE_DB_INTERVAL = check_setting_int(CFG, 'General', 'update_db_interval', 24)
+        MB_IGNORE_AGE = check_setting_int(CFG, 'General', 'mb_ignore_age', 365)
 
         TORRENTBLACKHOLE_DIR = check_setting_str(CFG, 'General', 'torrentblackhole_dir', '')
         NUMBEROFSEEDERS = check_setting_str(CFG, 'General', 'numberofseeders', '10')
@@ -792,6 +796,8 @@ def config_write():
     new_config['General']['libraryscan'] = int(LIBRARYSCAN)
     new_config['General']['libraryscan_interval'] = LIBRARYSCAN_INTERVAL
     new_config['General']['download_scan_interval'] = DOWNLOAD_SCAN_INTERVAL
+    new_config['General']['update_db_interval'] = UPDATE_DB_INTERVAL
+    new_config['General']['mb_ignore_age'] = MB_IGNORE_AGE
 
     new_config['SABnzbd'] = {}
     new_config['SABnzbd']['sab_host'] = SAB_HOST
@@ -917,7 +923,7 @@ def start():
         # Start our scheduled background tasks
         from headphones import updater, searcher, librarysync, postprocessor
 
-        SCHED.add_interval_job(updater.dbUpdate, hours=24)
+        SCHED.add_interval_job(updater.dbUpdate, hours=UPDATE_DB_INTERVAL)
         SCHED.add_interval_job(searcher.searchforalbum, minutes=SEARCH_INTERVAL)
         SCHED.add_interval_job(librarysync.libraryScan, minutes=LIBRARYSCAN_INTERVAL, kwargs={'cron':True})
 
@@ -1117,6 +1123,7 @@ def dbcheck():
         c.execute('SELECT SearchTerm from albums')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE albums ADD COLUMN SearchTerm TEXT DEFAULT NULL')
+
 
     conn.commit()
     c.close()

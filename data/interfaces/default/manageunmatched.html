@@ -1,0 +1,259 @@
+<%inherit file="base.html" />
+<%!
+	import headphones
+	import json
+	from headphones import db, helpers
+	myDB = db.DBConnection()
+	artist_json = {}
+	counter = 0
+	artist_list = myDB.action("SELECT ArtistName from artists ORDER BY ArtistName COLLATE NOCASE")
+	for artist in artist_list:
+		artist_json[counter] = artist['ArtistName'] 
+		counter+=1
+	json_artists = json.dumps(artist_json)
+%>
+
+<%def name="headerIncludes()">
+	<div id="subhead_container">
+		<div id="subhead_menu">
+		<a class="menu_link_edit" href="manageManual">Manage Manually Matched & Ignored</a>
+		</div>		
+	</div>	
+	<a href="manage" class="back">&laquo; Back to manage overview</a>
+</%def>
+
+
+<%def name="body()">
+	<div class="table_wrapper">
+	<div id="manageheader" class="title">
+		<h1 class="clearfix"><img src="interfaces/default/images/icon_manage.png" alt="manage"/>Manage Unmatched Albums</h1>
+	</div>
+
+	<table class="display" id="artist_table">
+		<thead>
+			<tr>
+				<th id="artist">Local Artist</th>
+				<th id="album">Local Album</th>
+			</tr>
+		</thead>
+		<tbody>
+		<% count_albums=0 %>
+		%for album in unmatchedalbums:
+			<tr class="gradeZ">
+				<% 
+					old_artist_clean = album['ArtistName'].replace('&','%26').replace("'","%27")
+					old_album_clean = album['AlbumTitle'].replace('&','%26').replace("'","%27")
+					old_artist_js = album['ArtistName'].replace("'","\\'").replace('"','\\"')
+					old_album_js = album['AlbumTitle'].replace("'","\\'").replace('"','\\"')
+				%>
+				<td id="artist">${album['ArtistName']}<BR>
+				<button id="ignore_artists${count_albums}" onClick="ignore_Artist(this.id)">(-) Ignore Artist</button>
+				<div id="ignore_artist_dialog${count_albums}" title="Ignore Artist" style="display:none">
+					<table>
+					<tr><td>Are you sure you want to ignore Local Artist: ${album['ArtistName']} from future matching?</td></tr>
+					<tr><td align="right"><BR>
+					<button href="#" onclick="doAjaxCall('markUnmatched?action=ignoreArtist&existing_artist=${old_artist_clean}', $(this), 'page');" data-success="Successfully ignored ${album['ArtistName']} from future matching">Ignore Artist</button>
+					</td></tr>
+					</table>
+				</div>
+
+				<button id="match_artists${count_albums}" onClick="load_Artist(this.id)">(->) Match Artist</button>
+				<div id="artist_dialog${count_albums}" title="Match Artist" style="display:none">
+					<table width=400>
+					<tr><td>Local Artist:</td><td>${album['ArtistName']}</td></tr>
+						<tr><td>Match Artist</td><td>
+						<select id="artist_options${count_albums}" name="new_artist">
+						</select>
+						</td></tr>
+					<tr><td></td><td align="right"><BR>
+					<button href="#" onclick="artist_matcher(${count_albums}, '${old_artist_js}')">Match Artist</button>
+					</td></tr>
+					</table>
+				</div>
+
+				</td>
+				<td id="album">${album['AlbumTitle']}<BR>
+				<button id="ignore_albums${count_albums}" onClick="ignore_Album(this.id)">(-) Ignore Album</button>
+				<div id="ignore_album_dialog${count_albums}" title="Ignore Album" style="display:none">
+					<table>
+					<tr><td>Are you sure you want to ignore Local Album: ${album['AlbumTitle']} from future matching?</td></tr>
+					<tr><td align="right"><BR>
+					<button href="#" onclick="doAjaxCall('markUnmatched?action=ignoreAlbum&existing_artist=${old_artist_clean}&existing_album=${old_album_clean}', $(this), 'page');" data-success="Successfully ignored ${album['AlbumTitle']} from future matching">Ignore Album</button>
+					</td></tr>
+					</table>
+				</div>
+
+				<button id="match_albums${count_albums}" onClick="load_AlbumArtist(this.id)">(->) Match Album</button>
+				<div id="album_dialog${count_albums}" title="Match Album" style="display:none">
+					<table width=650>
+					<tr><td>Local Artist:</td><td>${album['ArtistName']}</td></tr>
+					<tr><td>Local Album:</td><td>${album['AlbumTitle']}</td></tr>
+					<tr><td>Match Artist</td><td>
+					<select id="album_artist_options${count_albums}" name="new_artist">
+					</select>
+					</td></tr>
+					<tr><td>Match Album</td><td>
+					<select id="album_options${count_albums}" name="new_album">
+					</select>
+					</td></tr>
+					<tr><td></td><td align="right"><BR>
+					<button href="#" onclick="album_matcher(${count_albums}, '${old_artist_js}', '${old_album_js}')">Match Album</button>
+					</td></tr>
+					</table>
+				</div>
+
+				</td>
+			</tr>
+		<% count_albums+=1 %>
+		%endfor
+		</tbody>
+	</table>
+	</div>
+</%def>
+
+<%def name="headIncludes()">
+	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script>
+	$(document).ready(function()
+	{
+		$('#artist_table').dataTable(
+			{
+				"bStateSave": true,
+				"bPaginate": true,
+				"oLanguage": {
+					"sSearch": "",
+	                "sLengthMenu":"Show _MENU_ albums per page",
+						"sInfo":"Showing _START_ to _END_ of _TOTAL_ albums",
+						"sInfoEmpty":"Showing 0 to 0 of 0 albums",
+						"sInfoFiltered":"(filtered from _MAX_ total albums)",
+						"sEmptyTable": " ",
+	                    },
+	            "sPaginationType": "full_numbers",
+	         });
+
+initActions();
+	});
+
+	function ignore_Artist(clicked_id) {
+		n=clicked_id.replace("ignore_artists","");
+		$("#ignore_artist_dialog"+n).dialog();
+		return false;
+	}
+
+	function ignore_Album(clicked_id) {
+		n=clicked_id.replace("ignore_albums","");
+		$("#ignore_album_dialog"+n).dialog();
+		return false;
+	}
+
+
+	function load_Artist(clicked_id) {
+		n=clicked_id.replace("match_artists","");
+		var d = $("#artist_dialog"+n).dialog();
+    	d.dialog("option", "width", 450);
+    	d.dialog("option", "position", "center");
+		$('#artist_options'+n).html('');
+		$.each(${json_artists}, function(key, value) {
+    		$('#artist_options'+n).append($("<option/>", {
+        		value: value,
+        		text: value
+    		}));
+		});
+		change_artist(n)
+		return false;
+	}
+
+	function change_artist(n) {
+		selected_artist = $("#artist_options"+n).find("option:selected").text();
+		selected_artist_clean = selected_artist.replace('&', '%26').replace('+', '%2B');
+		$("#artist_options"+n).change(function() {
+			selected_artist = $("#artist_options"+n).find("option:selected").text();
+			selected_artist_clean = selected_artist.replace('&', '%26').replace('+', '%2B');
+			});
+	}
+
+	function artist_matcher(n, existing_artist) {
+		var existing_artist = existing_artist.toString();
+		var existing_artist_clean = existing_artist.replace('&', '%26').replace('+', '%2B');
+		$('#match_artists'+n).attr('data-success', 'Successfully matched '+existing_artist+' with '+selected_artist);
+		doAjaxCall('markUnmatched?action=matchArtist&existing_artist='+existing_artist_clean+'&new_artist='+selected_artist_clean, $('#match_artists'+n), 'page'); 
+		}
+
+
+	function load_AlbumArtist(clicked_id) {
+		n=clicked_id.replace("match_albums","");
+		var d = $("#album_dialog"+n).dialog();
+    	d.dialog("option", "width", 700);
+    	d.dialog("option", "position", "center");
+    	$('#album_artist_options'+n).html('');
+		$.each(${json_artists}, function(key, value) {
+    		$('#album_artist_options'+n).append($("<option/>", {
+        		value: value,
+        		text: value
+    		}));
+		});
+		load_json_albums(n)
+		return false;
+	}
+
+
+	function load_json_albums(n) {
+		selected_album_artist = $("#album_artist_options"+n).find("option:selected").text();
+		selected_album_artist_clean = selected_album_artist.replace('&', '%26').replace('+', '%2B');
+		$('#album_options'+n).html('')
+		$.getJSON("getAlbumsByArtist_json?artist="+selected_album_artist_clean, function( data ) {
+			$.each( data, function( key, value ) {
+			    $('#album_options'+n).append($("<option/>", {
+        		value: value,
+        		text: value
+    			}));
+			});
+		selected_album= $("#album_options"+n).find("option:selected").text();
+		selected_album_clean = selected_album.replace('&', '%26').replace('+', '%2B');
+		});
+		change_json_albums(n)
+		change_album(n)
+	}
+
+
+	function change_json_albums(n) {
+		$("#album_artist_options"+n).change(function(){
+			selected_album_artist = $("#album_artist_options"+n).find("option:selected").text();
+			selected_album_artist_clean = selected_album_artist.replace('&', '%26').replace('+', '%2B');
+			$('#album_options'+n).html('')
+			$.getJSON("getAlbumsByArtist_json?artist="+selected_album_artist_clean, function( data ) {
+				$.each( data, function( key, value ) {
+				    $('#album_options'+n).append($("<option/>", {
+	        		value: value,
+	        		text: value
+	    			}));
+				});
+				selected_album= $("#album_options"+n).find("option:selected").text();
+				selected_album_clean = selected_album.replace('&', '%26').replace('+', '%2B');
+			});
+		change_album(n)
+	    });
+	}
+
+	function change_album(n) {
+		$("#album_options"+n).change(function() {
+			selected_album= $("#album_options"+n).find("option:selected").text();
+			selected_album_clean = selected_album.replace('&', '%26').replace('+', '%2B');
+			});
+	}
+
+	function album_matcher(n, existing_artist, existing_album) {
+		var existing_artist = existing_artist.toString();
+		var existing_artist_clean = existing_artist.replace('&', '%26').replace('+', '%2B');
+		var existing_album = existing_album.toString();
+		var existing_album_clean = existing_album.replace('&', '%26').replace('+', '%2B');
+		$('#match_albums'+n).attr('data-success', 'Successfully matched '+existing_album+' with '+selected_album);
+		doAjaxCall('markUnmatched?action=matchAlbum&existing_artist='+existing_artist_clean+'&new_artist='+selected_album_artist_clean+'&existing_album='+existing_album_clean+'&new_album='+selected_album_clean, $('#match_albums'+n), 'page'); 
+	}
+
+	</script>
+</%def>
