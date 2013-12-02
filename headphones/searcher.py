@@ -1011,11 +1011,11 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             bitrate = None
             bitrate_string = bitrate
 
-            if headphones.PREFERRED_QUALITY == 2 or losslessOnly:  # Lossless Only mode
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:  # Lossless Only mode
                 search_formats = [gazelleformat.FLAC]
                 maxsize = 10000000000
-            elif headphones.PREFERRED_QUALITY == 3:  # Preferred quality mode
-                search_formats=[None]  # should return all
+            elif headphones.PREFERRED_QUALITY == 2:  # Preferred quality mode
+                search_formats = [None]  # should return all
                 bitrate = headphones.PREFERRED_BITRATE
                 if bitrate:
                     for encoding_string in gazelleencoding.ALL_ENCODINGS:
