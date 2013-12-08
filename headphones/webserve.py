@@ -108,7 +108,7 @@ class WebInterface(object):
     def albumPage(self, AlbumID):
         myDB = db.DBConnection()
         album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
-        tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [AlbumID])
+        tracks = myDB.select('SELECT * from tracks WHERE AlbumID=? ORDER BY CAST(TrackNumber AS INTEGER)', [AlbumID])
         description = myDB.action('SELECT * from descriptions WHERE ReleaseGroupID=?', [AlbumID]).fetchone()
         title = album['ArtistName'] + ' - ' + album['AlbumTitle']
         return serve_template(templatename="album.html", title=title, album=album, tracks=tracks, description=description)
