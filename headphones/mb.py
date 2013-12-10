@@ -486,9 +486,13 @@ def getTracksFromRelease(release):
     tracks = []
     for medium in release['medium-list']:
         for track in medium['track-list']:
+            try:
+                track_title = unicode(track['title'])
+            except:
+                track_title = unicode(track['recording']['title'])
             tracks.append({
                     'number':        totalTracks,
-                    'title':         unicode(track['recording']['title']),
+                    'title':         track_title,
                     'id':            unicode(track['recording']['id']),
                     'url':           u"http://musicbrainz.org/track/" + track['recording']['id'],
                     'duration':      int(track['length']) if 'length' in track else 0
