@@ -414,7 +414,18 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
             release['ReleaseCountry'] = unicode(releasedata['country']) if 'country' in releasedata else u'Unknown'
             #assuming that the list will contain media and that the format will be consistent
             try:
-                release['ReleaseFormat'] = unicode(releasedata['medium-list'][0]['format'])
+                additional_medium=''
+                for position in releasedata['medium-list']:
+                    if position['format'] == releasedata['medium-list'][0]['format']:
+                        medium_count = int(position['position'])
+                    else:
+                        additional_medium = additional_medium+' + '+position['format']
+                if medium_count == 1:
+                    disc_number = ''
+                else:
+                    disc_number = str(medium_count)+'x'
+                packaged_medium = disc_number+releasedata['medium-list'][0]['format']+additional_medium
+                release['ReleaseFormat'] = unicode(packaged_medium)
             except:
                 release['ReleaseFormat'] = u'Unknown'
      
