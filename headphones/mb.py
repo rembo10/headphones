@@ -483,10 +483,13 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
             num_new_releases = num_new_releases + 1
             #print releasedata['title']
             #print num_new_releases
-            logger.info('New release %s (%s) added' % (release['AlbumTitle'], rel_id_check))
+            if album_checker:
+                logger.info('[%s] Existing release %s (%s) updated' % (release['ArtistName'], release['AlbumTitle'], rel_id_check))
+            else:
+                logger.info('[%s] New release %s (%s) added' % (release['ArtistName'], release['AlbumTitle'], rel_id_check))
     if force_repackage1 == 1:
         num_new_releases = -1
-        logger.info('Forcing repackage of %s, since dB releases have been removed' % release_title)
+        logger.info('[%s] Forcing repackage of %s, since dB releases have been removed' % (release['ArtistName'], release_title))
     else:
         num_new_releases = num_new_releases
 
