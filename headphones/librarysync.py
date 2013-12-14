@@ -89,11 +89,12 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
             # MEDIA_FORMATS = music file extensions, e.g. mp3, flac, etc
             if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
 
-                latest_subdirectory.append(r.replace(dir,''))
+                subdirectory = r.replace(dir,'')
+                latest_subdirectory.append(subdirectory)
                 if file_count == 0 and r.replace(dir,'') !='':
-                    logger.info("[%s] Now scanning subdirectory %s" % (dir, r.replace(dir,'')))
+                    logger.info("[%s] Now scanning subdirectory %s" % (dir.decode(headphones.SYS_ENCODING, 'replace'), subdirectory.decode(headphones.SYS_ENCODING, 'replace')))
                 elif latest_subdirectory[file_count] != latest_subdirectory[file_count-1] and file_count !=0:
-                    logger.info("[%s] Now scanning subdirectory %s" % (dir, r.replace(dir,'')))
+                    logger.info("[%s] Now scanning subdirectory %s" % (dir.decode(headphones.SYS_ENCODING, 'replace'), subdirectory.decode(headphones.SYS_ENCODING, 'replace')))
 
                 song = os.path.join(r, files)
 
