@@ -919,7 +919,7 @@ def start():
 
         SCHED.add_interval_job(updater.dbUpdate, hours=UPDATE_DB_INTERVAL)
         SCHED.add_interval_job(searcher.searchforalbum, minutes=SEARCH_INTERVAL)
-        SCHED.add_interval_job(librarysync.libraryScan, minutes=LIBRARYSCAN_INTERVAL, kwargs={'cron':True})
+        SCHED.add_interval_job(librarysync.libraryScan, hours=LIBRARYSCAN_INTERVAL, kwargs={'cron':True})
 
         if CHECK_GITHUB:
             SCHED.add_interval_job(versioncheck.checkGithub, minutes=CHECK_GITHUB_INTERVAL)
@@ -964,6 +964,8 @@ def dbcheck():
     c.execute('CREATE INDEX IF NOT EXISTS tracks_CleanName ON tracks(CleanName ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS alltracks_Metadata ON alltracks(ArtistName ASC, AlbumTitle ASC, TrackTitle ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS alltracks_CleanName ON alltracks(CleanName ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS tracks_Location ON tracks(Location ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS alltracks_Location ON alltracks(Location ASC)')
 
     try:
         c.execute('SELECT IncludeExtras from artists')
