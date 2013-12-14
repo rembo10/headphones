@@ -464,7 +464,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
     latestalbum = myDB.action('SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [artistid]).fetchone()
     totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid]))
     #havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['artist_name']]))
-    havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched IS NULL', [artist['artist_name']]))
+    havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"', [artist['artist_name']]))
 
     controlValueDict = {"ArtistID":     artistid}
     
@@ -491,6 +491,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
     if errors:
         logger.info("[%s] Finished updating artist: %s but with errors, so not marking it as updated in the database" % (artist['artist_name'], artist['artist_name']))
     else:
+        myDB.action('DELETE FROM newartists WHERE ArtistName = ?', [artist['artist_name']])
         logger.info(u"Updating complete for: %s" % artist['artist_name'])
 
     
