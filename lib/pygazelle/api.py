@@ -51,6 +51,7 @@ class GazelleAPI(object):
         self.passkey = None
         self.userid = None
         self.logged_in_user = None
+        self.default_timeout = 30
         self.cached_users = {}
         self.cached_artists = {}
         self.cached_tags = {}
@@ -97,7 +98,8 @@ class GazelleAPI(object):
         loginpage = 'https://what.cd/login.php'
         data = {'username': self.username,
                 'password': self.password}
-        r = self.session.post(loginpage, data=data)
+        r = self.session.post(loginpage, data=data, timeout=self.default_timeout)
+        self.past_request_timestamps.append(time.time())
         if r.status_code != 200:
             raise LoginException("Login returned status code %s" % r.status_code)
 
@@ -112,7 +114,6 @@ class GazelleAPI(object):
         self.passkey = accountinfo['passkey']
         self.logged_in_user = User(self.userid, self)
         self.logged_in_user.set_index_data(accountinfo)
-        self.past_request_timestamps.append(time.time())
 
     def request(self, action, autologin=True, **kwargs):
         """
@@ -153,7 +154,7 @@ class GazelleAPI(object):
         if self.authkey:
             params['auth'] = self.authkey
         params.update(kwargs)
-        r = self.session.get(url, params=params, allow_redirects=False)
+        r = self.session.get(url, params=params, allow_redirects=False, timeout=self.default_timeout)
         self.past_request_timestamps.append(time.time())
         return r.content
 
