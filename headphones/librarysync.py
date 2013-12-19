@@ -44,6 +44,9 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         return
 
     myDB = db.DBConnection()
+    new_artists = []
+
+    logger.info('Scanning music directory: %s' % dir.decode(headphones.SYS_ENCODING, 'replace'))
     
     if not append:
         # Clean up bad filepaths
@@ -55,22 +58,25 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                 myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE Location=?', [None, None, None, track['Location']])
                 myDB.action('UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE Location=?', [None, None, None, track['Location']])
     
-        del_have_tracks = myDB.select('SELECT Location, Matched from have')
+        del_have_tracks = myDB.select('SELECT Location, Matched, ArtistName from have')
 
         for track in del_have_tracks:
             encoded_track_string = track['Location'].encode(headphones.SYS_ENCODING)
             if not os.path.isfile(encoded_track_string):
+                if track['ArtistName']:
+                    #Make sure deleted files get accounted for when updating artist track counts
+                    new_artists.append(track['ArtistName'])
                 myDB.action('DELETE FROM have WHERE Location=?', [track['Location']])
                 logger.info('File %s removed from Headphones, as it is no longer on disk' % encoded_track_string.decode(headphones.SYS_ENCODING, 'replace'))
            ###############myDB.action('DELETE from have')
 
-    logger.info('Scanning music directory: %s' % dir.decode(headphones.SYS_ENCODING, 'replace'))
-
-    new_artists = []
     bitrates = []
     
     song_list = []
     new_song_count = 0
+    file_count = 0
+
+    latest_subdirectory = []
     
     for r,d,f in os.walk(dir):
         #need to abuse slicing to get a copy of the list, doing it directly will skip the element after a deleted one
@@ -79,8 +85,16 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
             if directory.startswith("."):
                 d.remove(directory)
         for files in f:
+
             # MEDIA_FORMATS = music file extensions, e.g. mp3, flac, etc
             if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
+
+                subdirectory = r.replace(dir,'')
+                latest_subdirectory.append(subdirectory)
+                if file_count == 0 and r.replace(dir,'') !='':
+                    logger.info("[%s] Now scanning subdirectory %s" % (dir.decode(headphones.SYS_ENCODING, 'replace'), subdirectory.decode(headphones.SYS_ENCODING, 'replace')))
+                elif latest_subdirectory[file_count] != latest_subdirectory[file_count-1] and file_count !=0:
+                    logger.info("[%s] Now scanning subdirectory %s" % (dir.decode(headphones.SYS_ENCODING, 'replace'), subdirectory.decode(headphones.SYS_ENCODING, 'replace')))
 
                 song = os.path.join(r, files)
 
@@ -135,19 +149,39 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                 check_exist_song = myDB.action("SELECT * FROM have WHERE Location=?", [unicode_song_path]).fetchone()
                 #Only attempt to match songs that are new, haven't yet been matched, or metadata has changed.
                 if not check_exist_song:
+                    #This is a new track
+                    if f_artist:
+                        new_artists.append(f_artist)
                     myDB.upsert("have", newValueDict, controlValueDict)
                     new_song_count+=1
-                elif check_exist_song['ArtistName'] != f_artist or check_exist_song['AlbumTitle'] != f.album or check_exist_song['TrackTitle'] != f.title:
-                    newValueDict['Matched'] = None
-                    myDB.upsert("have", newValueDict, controlValueDict)
-                    new_song_count+=1
+                else:
+                    if check_exist_song['ArtistName'] != f_artist or check_exist_song['AlbumTitle'] != f.album or check_exist_song['TrackTitle'] != f.title:
+                        #Important track metadata has been modified, need to run matcher again
+                        if f_artist and f_artist != check_exist_song['ArtistName']:
+                            new_artists.append(f_artist)
+                        elif f_artist and f_artist == check_exist_song['ArtistName'] and check_exist_song['Matched'] != "Ignored":
+                            new_artists.append(f_artist)
+                        else:
+                            continue
+
+                        newValueDict['Matched'] = None
+                        myDB.upsert("have", newValueDict, controlValueDict)
+                        myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE Location=?', [None, None, None, unicode_song_path])
+                        myDB.action('UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE Location=?', [None, None, None, unicode_song_path])
+                        new_song_count+=1
+                    else:
+                        #This track information hasn't changed
+                        if f_artist and check_exist_song['Matched'] != "Ignored":
+                            new_artists.append(f_artist)
+
+                file_count+=1
 
 
     # Now we start track matching
     logger.info("%s new/modified songs found and added to the database" % new_song_count)
-    song_list = myDB.action("SELECT * FROM have WHERE Matched IS NULL AND CleanName IS NOT NULL AND LOCATION LIKE ?", [dir+"%"])
+    song_list = myDB.action("SELECT * FROM have WHERE Matched IS NULL AND LOCATION LIKE ?", [dir+"%"])
     total_number_of_songs = myDB.action("SELECT COUNT(*) FROM have WHERE Matched IS NULL AND LOCATION LIKE ?", [dir+"%"]).fetchone()[0]
-    logger.info("Found " + str(total_number_of_songs) + " unmatched tracks in: '" + dir.decode(headphones.SYS_ENCODING, 'replace') + "'. Matching tracks to the appropriate releases....")
+    logger.info("Found " + str(total_number_of_songs) + " new/modified tracks in: '" + dir.decode(headphones.SYS_ENCODING, 'replace') + "'. Matching tracks to the appropriate releases....")
     
     # Sort the song_list by most vague (e.g. no trackid or releaseid) to most specific (both trackid & releaseid)
     # When we insert into the database, the tracks with the most specific information will overwrite the more general matches
@@ -191,9 +225,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                                  'Format'   : song['Format'] }
                 myDB.upsert("tracks", newValueDict, controlValueDict)
 
-                controlValueDict2 = { 'ArtistName' : song['ArtistName'],
-                                     'AlbumTitle' : song['AlbumTitle'],
-                                     'TrackTitle' : song['TrackTitle'] }
+                controlValueDict2 = { 'Location' : song['Location']}
                 newValueDict2 = { 'Matched' : track['AlbumID']}
                 myDB.upsert("have", newValueDict2, controlValueDict2)
             else:
@@ -205,8 +237,12 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                                      'Format'   : song['Format'] }               
                     myDB.upsert("tracks", newValueDict, controlValueDict)
 
-                    controlValueDict2 = { 'CleanName' : song['CleanName']}
+                    controlValueDict2 = { 'Location' : song['Location']}
                     newValueDict2 = { 'Matched' : track['AlbumID']}
+                    myDB.upsert("have", newValueDict2, controlValueDict2)
+                else:
+                    controlValueDict2 = { 'Location' : song['Location']}
+                    newValueDict2 = { 'Matched' : "Failed"}
                     myDB.upsert("have", newValueDict2, controlValueDict2)
   
 
@@ -220,9 +256,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                                  'Format'   : song['Format'] }
                 myDB.upsert("alltracks", newValueDict, controlValueDict)
 
-                controlValueDict2 = { 'ArtistName' : song['ArtistName'],
-                                     'AlbumTitle' : song['AlbumTitle'],
-                                     'TrackTitle' : song['TrackTitle'] } 
+                controlValueDict2 = { 'Location' : song['Location']}
                 newValueDict2 = { 'Matched' : alltrack['AlbumID']}
                 myDB.upsert("have", newValueDict2, controlValueDict2)
             else:
@@ -234,16 +268,17 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                                      'Format'   : song['Format'] }               
                     myDB.upsert("alltracks", newValueDict, controlValueDict)
 
-                    controlValueDict2 = { 'CleanName' : song['CleanName']}
+                    controlValueDict2 = { 'Location' : song['Location']}
                     newValueDict2 = { 'Matched' : alltrack['AlbumID']}
                     myDB.upsert("have", newValueDict2, controlValueDict2)
-   
-        
-        # if we can't find a match in the database on a track level, it might be a new artist or it might be on a non-mb release
-        if song['ArtistName']:
-            new_artists.append(song['ArtistName'])
+                else:
+                    controlValueDict2 = { 'Location' : song['Location']}
+                    newValueDict2 = { 'Matched' : "Failed"}
+                    myDB.upsert("have", newValueDict2, controlValueDict2)
         else:
-            continue
+            controlValueDict2 = { 'Location' : song['Location']}
+            newValueDict2 = { 'Matched' : "Failed"}
+            myDB.upsert("have", newValueDict2, controlValueDict2)
         
         #######myDB.action('INSERT INTO have (ArtistName, AlbumTitle, TrackNumber, TrackTitle, TrackLength, BitRate, Genre, Date, TrackID, Location, CleanName, Format) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [song['ArtistName'], song['AlbumTitle'], song['TrackNumber'], song['TrackTitle'], song['TrackLength'], song['BitRate'], song['Genre'], song['Date'], song['TrackID'], song['Location'], CleanName, song['Format']])
 
@@ -251,21 +286,25 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
 
     
     if not append:
+        logger.info('Updating scanned artist track counts')
+        
         # Clean up the new artist list
         unique_artists = {}.fromkeys(new_artists).keys()
         current_artists = myDB.select('SELECT ArtistName, ArtistID from artists')
 
         #There was a bug where artists with special characters (-,') would show up in new artists.     
         artist_list = [f for f in unique_artists if helpers.cleanName(f).lower() not in [helpers.cleanName(x[0]).lower() for x in current_artists]]
-        
+        artists_checked = [f for f in unique_artists if helpers.cleanName(f).lower() in [helpers.cleanName(x[0]).lower() for x in current_artists]]
+
         # Update track counts
-        logger.info('Updating current artist track counts')
     
-        for artist in current_artists:
+        for artist in artists_checked:
             # Have tracks are selected from tracks table and not all tracks because of duplicates
             # We update the track count upon an album switch to compliment this
-            havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artist['ArtistID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched IS NULL', [artist['ArtistName']]))
-            myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, artist['ArtistID']])
+            havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistName like ? AND Location IS NOT NULL', [artist])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"', [artist]))
+            #Note, some people complain about having "artist have tracks" > # of tracks total in artist official releases 
+            # (can fix by getting rid of second len statement)
+            myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistName=?', [havetracks, artist])
             
         logger.info('Found %i new artists' % len(artist_list))
     
@@ -275,9 +314,9 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                 importer.artistlist_to_mbids(artist_list)
             else:
                 logger.info('To add these artists, go to Manage->Manage New Artists')
-                myDB.action('DELETE from newartists')
+                #myDB.action('DELETE from newartists')
                 for artist in artist_list:
-                    myDB.action('INSERT into newartists VALUES (?)', [artist])
+                    myDB.action('INSERT OR IGNORE INTO newartists VALUES (?)', [artist])
         
         if headphones.DETECT_BITRATE:
             headphones.PREFERRED_BITRATE = sum(bitrates)/len(bitrates)/1000
@@ -286,7 +325,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         # If we're appending a new album to the database, update the artists total track counts
         logger.info('Updating artist track counts')
         
-        havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [ArtistID])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched IS NULL', [ArtistName]))
+        havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [ArtistID])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"', [ArtistName]))
         myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, ArtistID])
 
     update_album_status()
