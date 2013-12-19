@@ -1005,7 +1005,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         try:
                             title = item.title
                             desc_match = re.search(r"Size: (\d+)<", item.description)
-                            size = desc_match.group(1)
+                            size = int(desc_match.group(1))
                             url = item.link
                             resultlist.append((title, size, url, provider))
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
