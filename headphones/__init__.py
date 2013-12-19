@@ -166,6 +166,10 @@ NZBSRUS = False
 NZBSRUS_UID = None
 NZBSRUS_APIKEY = None
 
+OMGWTFNZBS = False
+OMGWTFNZBS_UID = None
+OMGWTFNZBS_APIKEY = None
+
 PREFERRED_WORDS = None
 IGNORED_WORDS = None
 REQUIRED_WORDS = None
@@ -305,8 +309,9 @@ def initialize():
                 LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, HEADPHONES_INDEXER, NZBMATRIX, TRANSMISSION_HOST, TRANSMISSION_USERNAME, TRANSMISSION_PASSWORD, \
                 UTORRENT_HOST, UTORRENT_USERNAME, UTORRENT_PASSWORD, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS, \
-                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, \
-                LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, FILE_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
+                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, OMGWTFNZBS, OMGWTFNZBS_UID, OMGWTFNZBS_APIKEY, \
+		NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, LASTFM_USERNAME, \
+                INTERFACE, FOLDER_PERMISSIONS, FILE_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
                 MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, \
                 PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
@@ -326,6 +331,7 @@ def initialize():
         CheckSection('Newznab')
         CheckSection('NZBsorg')
         CheckSection('NZBsRus')
+        CheckSection('omgwtfnzbs')
         CheckSection('Waffles')
         CheckSection('Rutracker')
         CheckSection('What.cd')
@@ -464,6 +470,10 @@ def initialize():
         NZBSRUS = bool(check_setting_int(CFG, 'NZBsRus', 'nzbsrus', 0))
         NZBSRUS_UID = check_setting_str(CFG, 'NZBsRus', 'nzbsrus_uid', '')
         NZBSRUS_APIKEY = check_setting_str(CFG, 'NZBsRus', 'nzbsrus_apikey', '')
+
+        OMGWTFNZBS = bool(check_setting_int(CFG, 'omgwtfnzbs', 'omgwtfnzbs', 0))
+        OMGWTFNZBS_UID = check_setting_str(CFG, 'omgwtfnzbs', 'omgwtfnzbs_uid', '')
+        OMGWTFNZBS_APIKEY = check_setting_str(CFG, 'omgwtfnzbs', 'omgwtfnzbs_apikey', '')
 
         PREFERRED_WORDS = check_setting_str(CFG, 'General', 'preferred_words', '')
         IGNORED_WORDS = check_setting_str(CFG, 'General', 'ignored_words', '')
@@ -841,6 +851,11 @@ def config_write():
     new_config['NZBsRus']['nzbsrus'] = int(NZBSRUS)
     new_config['NZBsRus']['nzbsrus_uid'] = NZBSRUS_UID
     new_config['NZBsRus']['nzbsrus_apikey'] = NZBSRUS_APIKEY
+
+    new_config['omgwtfnzbs'] = {}
+    new_config['omgwtfnzbs']['omgwtfnzbs'] = int(OMGWTFNZBS)
+    new_config['omgwtfnzbs']['omgwtfnzbs_uid'] = OMGWTFNZBS_UID
+    new_config['omgwtfnzbs']['omgwtfnzbs_apikey'] = OMGWTFNZBS_APIKEY
 
     new_config['General']['preferred_words'] = PREFERRED_WORDS
     new_config['General']['ignored_words'] = IGNORED_WORDS

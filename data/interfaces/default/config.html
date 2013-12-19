@@ -354,6 +354,22 @@
                                     </div>
                                 </div>
                             </fieldset>
+                            <fieldset>
+                                <legend>omgwtfnzbs</legend>
+                                <div class="row checkbox">
+                                    <input id="useomgwtfnzbs" type="checkbox" name="omgwtfnzbs" onclick="initConfigCheckbox($(this));" value="1" ${config['use_omgwtfnzbs']} /><label>Use omgwtfnzbs</label>
+                                </div>
+                                <div class="config">
+                                    <div class="row">
+                                        <label>omgwtfnzbs UID</label>
+                                        <input type="text" name="omgwtfnzbs_uid" value="${config['omgwtfnzbs_uid']}" size="10">
+                                    </div>
+                                    <div class="row">
+                                        <label>omgwtfnzbs API Key</label>
+                                        <input type="text" name="omgwtfnzbs_apikey" value="${config['omgwtfnzbs_apikey']}" size="10">
+                                    </div>
+                                </div>
+                            </fieldset>
                         </td>
                         <td>
                             <fieldset>
@@ -1259,6 +1275,7 @@
                 initConfigCheckbox("#usenewznab");
                 initConfigCheckbox("#usenzbsrus");
                 initConfigCheckbox("#usenzbsorg");
+                initConfigCheckbox("#useomgwtfnzbs");
                 initConfigCheckbox("#usepiratebay");
                 initConfigCheckbox("#usewaffles");
                 initConfigCheckbox("#userutracker");
