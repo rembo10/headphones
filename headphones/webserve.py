@@ -357,7 +357,7 @@ class WebInterface(object):
         have_album_dictionary = []
         headphones_album_dictionary = []
         unmatched_albums = []
-        have_albums = myDB.select('SELECT ArtistName, AlbumTitle, TrackTitle, CleanName from have WHERE Matched IS NULL GROUP BY AlbumTitle ORDER BY ArtistName')
+        have_albums = myDB.select('SELECT ArtistName, AlbumTitle, TrackTitle, CleanName from have WHERE Matched = "Failed" GROUP BY AlbumTitle ORDER BY ArtistName')
         for albums in have_albums:
             #Have to skip over manually matched tracks
             if albums['ArtistName'] and albums['AlbumTitle'] and albums['TrackTitle']:
@@ -385,12 +385,12 @@ class WebInterface(object):
      
         if action == "ignoreArtist":
             artist = existing_artist
-            myDB.action('UPDATE have SET Matched="Ignored" WHERE ArtistName=? AND Matched IS NULL', [artist])
+            myDB.action('UPDATE have SET Matched="Ignored" WHERE ArtistName=? AND Matched = "Failed"', [artist])
         
         elif action == "ignoreAlbum":
             artist = existing_artist
             album = existing_album
-            myDB.action('UPDATE have SET Matched="Ignored" WHERE ArtistName=? AND AlbumTitle=? AND Matched IS NULL', (artist, album))
+            myDB.action('UPDATE have SET Matched="Ignored" WHERE ArtistName=? AND AlbumTitle=? AND Matched = "Failed"', (artist, album))
         
         elif action == "matchArtist":
             existing_artist_clean = helpers.cleanName(existing_artist).lower()
@@ -491,13 +491,13 @@ class WebInterface(object):
         myDB = db.DBConnection()
         if action == "unignoreArtist":
             artist = existing_artist
-            myDB.action('UPDATE have SET Matched=NULL WHERE ArtistName=? AND Matched="Ignored"', [artist])
+            myDB.action('UPDATE have SET Matched="Failed" WHERE ArtistName=? AND Matched="Ignored"', [artist])
             logger.info("Artist: %s successfully restored to unmatched list" % artist)
 
         elif action == "unignoreAlbum":
             artist = existing_artist
             album = existing_album
-            myDB.action('UPDATE have SET Matched=NULL WHERE ArtistName=? AND AlbumTitle=? AND Matched="Ignored"', (artist, album))
+            myDB.action('UPDATE have SET Matched="Failed" WHERE ArtistName=? AND AlbumTitle=? AND Matched="Ignored"', (artist, album))
             logger.info("Album: %s successfully restored to unmatched list" % album)
 
         elif action == "unmatchArtist":
@@ -511,7 +511,7 @@ class WebInterface(object):
                 if tracks['CleanName'] != original_clean:
                     myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?', [None, None, None, tracks['CleanName']])
                     myDB.action('UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?', [None, None, None, tracks['CleanName']])
-                    myDB.action('UPDATE have SET CleanName=?, Matched=NULL WHERE ArtistName=? AND AlbumTitle=? AND TrackTitle=?', (original_clean, artist, album, track_title))
+                    myDB.action('UPDATE have SET CleanName=?, Matched="Failed" WHERE ArtistName=? AND AlbumTitle=? AND TrackTitle=?', (original_clean, artist, album, track_title))
                     update_count+=1
             if update_count > 0:
                 librarysync.update_album_status()
@@ -531,7 +531,7 @@ class WebInterface(object):
                         album_id = album_id_check[0]
                     myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?', [None, None, None, tracks['CleanName']])
                     myDB.action('UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?', [None, None, None, tracks['CleanName']])
-                    myDB.action('UPDATE have SET CleanName=?, Matched=NULL WHERE ArtistName=? AND AlbumTitle=? AND TrackTitle=?', (original_clean, artist, album, track_title))
+                    myDB.action('UPDATE have SET CleanName=?, Matched="Failed" WHERE ArtistName=? AND AlbumTitle=? AND TrackTitle=?', (original_clean, artist, album, track_title))
                     update_count+=1
             if update_count > 0:
                 librarysync.update_album_status(album_id)

@@ -414,7 +414,18 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
             release['ReleaseCountry'] = unicode(releasedata['country']) if 'country' in releasedata else u'Unknown'
             #assuming that the list will contain media and that the format will be consistent
             try:
-                release['ReleaseFormat'] = unicode(releasedata['medium-list'][0]['format'])
+                additional_medium=''
+                for position in releasedata['medium-list']:
+                    if position['format'] == releasedata['medium-list'][0]['format']:
+                        medium_count = int(position['position'])
+                    else:
+                        additional_medium = additional_medium+' + '+position['format']
+                if medium_count == 1:
+                    disc_number = ''
+                else:
+                    disc_number = str(medium_count)+'x'
+                packaged_medium = disc_number+releasedata['medium-list'][0]['format']+additional_medium
+                release['ReleaseFormat'] = unicode(packaged_medium)
             except:
                 release['ReleaseFormat'] = u'Unknown'
      
@@ -460,22 +471,26 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
             
                 if not match:
                     match = myDB.action('SELECT Location, BitRate, Format from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [release['ArtistName'], release['AlbumTitle'], track['title']]).fetchone()
-                if not match:
-                    match = myDB.action('SELECT Location, BitRate, Format from have WHERE TrackID=?', [track['id']]).fetchone()         
+                #if not match:
+                    #match = myDB.action('SELECT Location, BitRate, Format from have WHERE TrackID=?', [track['id']]).fetchone()         
                 if match:
                     newValueDict['Location'] = match['Location']
                     newValueDict['BitRate'] = match['BitRate']
                     newValueDict['Format'] = match['Format']
                     #myDB.action('UPDATE have SET Matched="True" WHERE Location=?', [match['Location']])
+                    myDB.action('UPDATE have SET Matched=? WHERE Location=?', (release['AlbumID'], match['Location']))
                                 
                 myDB.upsert("alltracks", newValueDict, controlValueDict)
             num_new_releases = num_new_releases + 1
             #print releasedata['title']
             #print num_new_releases
-            logger.info('New release %s (%s) added' % (release['AlbumTitle'], rel_id_check))
+            if album_checker:
+                logger.info('[%s] Existing release %s (%s) updated' % (release['ArtistName'], release['AlbumTitle'], rel_id_check))
+            else:
+                logger.info('[%s] New release %s (%s) added' % (release['ArtistName'], release['AlbumTitle'], rel_id_check))
     if force_repackage1 == 1:
         num_new_releases = -1
-        logger.info('Forcing repackage of %s, since dB releases have been removed' % release_title)
+        logger.info('[%s] Forcing repackage of %s, since dB releases have been removed' % (release['ArtistName'], release_title))
     else:
         num_new_releases = num_new_releases
 
@@ -486,9 +501,13 @@ def getTracksFromRelease(release):
     tracks = []
     for medium in release['medium-list']:
         for track in medium['track-list']:
+            try:
+                track_title = unicode(track['title'])
+            except:
+                track_title = unicode(track['recording']['title'])
             tracks.append({
                     'number':        totalTracks,
-                    'title':         unicode(track['recording']['title']),
+                    'title':         track_title,
                     'id':            unicode(track['recording']['id']),
                     'url':           u"http://musicbrainz.org/track/" + track['recording']['id'],
                     'duration':      int(track['length']) if 'length' in track else 0
