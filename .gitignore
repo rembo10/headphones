@@ -60,5 +60,3 @@ _ReSharper*/
 /logs
 .project
 .pydevproject
-
-headphones/music_encoder.py
