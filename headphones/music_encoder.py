@@ -244,7 +244,16 @@ def command(encoder,musicSource,musicDest,albumPath):
     logger.info('Encoding %s...' % (musicSource.decode(headphones.SYS_ENCODING, 'replace')))
     logger.debug(subprocess.list2cmdline(cmd))
 
-    p = subprocess.Popen(cmd, stdin=open(os.devnull, 'rb'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # stop windows opening the cmd
+    startupinfo = None
+    if headphones.SYS_PLATFORM == "win32":
+        startupinfo = subprocess.STARTUPINFO()
+        try:
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        except AttributeError:
+            startupinfo.dwFlags |= subprocess._subprocess.STARTF_USESHOWWINDOW
+
+    p = subprocess.Popen(cmd, startupinfo=startupinfo, stdin=open(os.devnull, 'rb'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     stdout, stderr = p.communicate(headphones.ENCODER)
 
