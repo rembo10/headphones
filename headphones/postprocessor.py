@@ -34,17 +34,25 @@ from headphones import transmission
 postprocessor_lock = threading.Lock()
 
 def checkFolder():
-    
+
+    logger.debug('Post-Processing started')
+
     with postprocessor_lock:
 
         myDB = db.DBConnection()
         snatched = myDB.select('SELECT * from snatched WHERE Status="Snatched"')
 
+        if not len(snatched):
+            logger.debug('No snatched database records found to process')
+
         for album in snatched:
-        
+
             if album['FolderName']:
                 
                 if album['Kind'] == 'nzb':
+
+                    logger.debug('Snatched NZB found, checking the NZB download folder. Title: %s. Folder Name: %s ' % (album['Title'], album['FolderName']))
+
                     # We're now checking sab config options after sending to determine renaming - but we'll keep the
                     # iterations in just in case we can't read the config for some reason
 
@@ -54,15 +62,22 @@ def checkFolder():
                                                 sab_replace_spaces(sab_replace_dots(album['FolderName']))
                                         ]
                     
+                    folder_found = False
                     for nzb_folder_name in nzb_album_possibilities:
                         
                         nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING, 'replace')
     
                         if os.path.exists(nzb_album_path):
+                            folder_found = True
                             logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
                             verify(album['AlbumID'], nzb_album_path, 'nzb')
-                            
+
+                    if not folder_found:
+                        logger.debug("The NZB download folder isn't ready to process yet, will try again on the next run. Folder: %s" % album['FolderName'])
+
                 if album['Kind'] == 'torrent':
+
+                    logger.debug('Snatched Torrent found, checking the Torrent download folder. Title: %s. Folder Name: %s ' % (album['Title'], album['FolderName']))
 
                     # Get path using torrent hash for transmission torrents
                     torrent_not_found = False
@@ -74,14 +89,21 @@ def checkFolder():
                             torrent_folder_name = torrent_name.encode(headphones.SYS_ENCODING,'replace')
                         torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, torrent_folder_name)
                     else:
+                        torrent_hash = None
                         torrent_folder_name = album['FolderName']
                         torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, torrent_folder_name).encode(headphones.SYS_ENCODING,'replace')
 
                     if os.path.exists(torrent_album_path):
+                        if torrent_hash:
+                            myDB.action('UPDATE snatched SET FolderName=? WHERE AlbumID=?', [torrent_folder_name, album[0]])
                         logger.debug('Found %s in torrent download folder. Verifying....' % torrent_folder_name)
                         verify(album['AlbumID'], torrent_album_path, 'torrent')
                     elif torrent_not_found:
                         logger.debug(u"Could not find torrent %s in Transmission queue, may have been deleted? Retry downloading same torrent again or clear Headphones snatch history" % torrent_name)
+                    else:
+                        logger.debug("The Torrent download folder isn't ready to process yet, will try again on the next run. Folder: %s" % album['FolderName'])
+
+    logger.debug('Post-Processing ended')
 
 def verify(albumid, albumpath, Kind=None, forced=False):
 
@@ -925,6 +947,8 @@ def renameUnprocessedFolder(albumpath):
             
 def forcePostProcess():
 
+    logger.debug('Force Post-Processing started')
+
     download_dirs = []
     if headphones.DOWNLOAD_DIR:
         download_dirs.append(headphones.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING, 'replace'))
@@ -955,7 +979,7 @@ def forcePostProcess():
     myDB = db.DBConnection()
 
     # Get folder name for snatched transmission torrents
-    if folders and headphones.DOWNLOAD_TORRENT_DIR:
+    if len(folders) and headphones.DOWNLOAD_TORRENT_DIR:
         snatched = myDB.select('SELECT * from snatched WHERE Status="Snatched" AND Kind="torrent" AND FolderName Like "%_hash:%"')
         for album in snatched:
             if '_hash' in album['FolderName']:
@@ -981,6 +1005,7 @@ def forcePostProcess():
         # First try to see if there's a match in the snatched table, then we'll try to parse the foldername
         # TODO: Iterate through underscores -> spaces, spaces -> dots, underscores -> dots (this might be hit or miss since it assumes
         # all spaces/underscores came from sab replacing values
+        logger.debug("Checking if there's a match in the snatched database for folder: %s" % folder_basename)
         snatched = myDB.action('SELECT AlbumID, Title, Kind, Status from snatched WHERE FolderName LIKE ?', [folder_basename]).fetchone()
         if snatched:
             if headphones.KEEP_TORRENT_FILES and snatched['Kind'] == 'torrent' and snatched['Status'] == 'Processed':
@@ -990,21 +1015,27 @@ def forcePostProcess():
                 logger.info('Found a match in the database: %s. Verifying to make sure it is the correct album' % snatched['Title'])
                 verify(snatched['AlbumID'], folder, snatched['Kind'])
                 continue
+        else:
+            logger.debug('No match found in the snatched database for folder: %s'  % folder_basename)
         
         # Try to parse the folder name into a valid format
         # TODO: Add metadata lookup
         try:
+            logger.debug("Parsing Artist, Album and Year using 'Artist - Album [Year]' format from folder: %s"  % folder_basename)
             name, album, year = helpers.extract_data(folder_basename)
         except:
             name = None
 
         if name and album and year:
-            
+
+            logger.debug("Checking if there's a match in the database using parsed - Artist: %s, Album: %s, Year: %s, from folder: %s"  % (name, album, year, folder_basename))
+
             release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
             if release:
                 logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
                 verify(release['AlbumID'], folder)
             else:
+                logger.debug('No match found in the database for:  %s - %s' % (name, album))
                 logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (name, album))
                 from headphones import mb
                 try:
@@ -1038,3 +1069,5 @@ def forcePostProcess():
                 else:
                     logger.info('Found a (possibly) valid Musicbrainz identifier in album folder name - continuing post-processing')
                     verify(rgid, folder, forced=True)
+
+    logger.debug('Force Post-Processing ended')

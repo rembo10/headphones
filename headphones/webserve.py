@@ -188,8 +188,18 @@ class WebInterface(object):
         logger.info(u"Deleting all traces of artist: " + ArtistID)
         myDB = db.DBConnection()
         myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
+
+        rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM albums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+        for rgid in rgids:
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
         myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
         myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+
+        rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM allalbums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+        for rgid in rgids:
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
         myDB.action('DELETE from allalbums WHERE ArtistID=?', [ArtistID])
         myDB.action('DELETE from alltracks WHERE ArtistID=?', [ArtistID])
         myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
@@ -695,6 +705,8 @@ class WebInterface(object):
                     "email_smtp_server": headphones.EMAIL_SMTP_SERVER,
                     "email_smtp_user": headphones.EMAIL_SMTP_USER,
                     "email_smtp_password": headphones.EMAIL_SMTP_PASSWORD,
+                    "email_ssl": checked(headphones.EMAIL_SSL),
+                    "email_tls": checked(headphones.EMAIL_TLS),
                     "email_onsnatch": checked(headphones.EMAIL_ONSNATCH),
                     "osx_notify_enabled": checked(headphones.OSX_NOTIFY_ENABLED),
                     "osx_notify_onsnatch": checked(headphones.OSX_NOTIFY_ONSNATCH),
@@ -744,7 +756,7 @@ class WebInterface(object):
         delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False,
         pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0,
-        email_enabled=0, email_from=None, email_to=None, email_smtp_server=None, email_smtp_user=None, email_smtp_password=None, email_onsnatch=0,
+        email_enabled=0, email_from=None, email_to=None, email_smtp_server=None, email_smtp_user=None, email_smtp_password=None, email_ssl=0, email_tls=0, email_onsnatch=0,
         osx_notify_enabled=0, osx_notify_onsnatch=0, boxcar_enabled=0, boxcar_email=None, boxcar_apikey=None, boxcar_onsnatch=0, default_to_album_search=False,
         mirror=None, customhost=None, customport=None,
         customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
@@ -876,6 +888,8 @@ class WebInterface(object):
         headphones.EMAIL_SMTP_SERVER = email_smtp_server
         headphones.EMAIL_SMTP_USER = email_smtp_user
         headphones.EMAIL_SMTP_PASSWORD = email_smtp_password
+        headphones.EMAIL_SSL = email_ssl
+        headphones.EMAIL_TLS = email_tls
         headphones.EMAIL_ONSNATCH = email_onsnatch
         headphones.OSX_NOTIFY_ENABLED = osx_notify_enabled
         headphones.OSX_NOTIFY_ONSNATCH = osx_notify_onsnatch

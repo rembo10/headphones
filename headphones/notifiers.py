@@ -337,7 +337,15 @@ class EMAIL:
         message['To'] = headphones.EMAIL_TO
 
         try:
-            mailserver = smtplib.SMTP(headphones.EMAIL_SMTP_SERVER)
+            if headphones.EMAIL_SSL:
+                mailserver = smtplib.SMTP_SSL(headphones.EMAIL_SMTP_SERVER)
+            else:
+                mailserver = smtplib.SMTP(headphones.EMAIL_SMTP_SERVER)
+
+            if (headphones.EMAIL_TLS):
+                mailserver.starttls()
+
+            mailserver.ehlo()
 
             if headphones.EMAIL_SMTP_USER:
                 mailserver.login(headphones.EMAIL_SMTP_USER, headphones.EMAIL_SMTP_PASSWORD)

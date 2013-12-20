@@ -44,7 +44,7 @@
                         <td id="albumart"><div id="artistImg"><img title="${result['id']}" class="albumArt" height="50" width="50"></div></td>
                     %endif
                     %if type == 'album':
-                        <td id="albumname"><a href="${result['albumurl']} "title="${albuminfo}" >${title}</a></td>
+                        <td id="albumname"><a href="${result['albumurl']}" title="${albuminfo}" >${title}</a></td>
                     %endif
                     <td id="artistname"><a href="${result['url']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
                     %if type == 'album':

@@ -46,7 +46,7 @@ def radio(variable, pos):
         return 'Checked'
     else:
         return ''
-        
+
 def latinToAscii(unicrap):
     """
     From couch potato
@@ -190,9 +190,9 @@ def cleanTitle(title):
 def extract_data(s):
 
     #headphones default format
-    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
+    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s[\[\(](?P<year>.*?)[\]\)]', re.VERBOSE)
     match = pattern.match(s)
-    
+
     if match:
         name = match.group("name")
         album = match.group("album")
@@ -209,7 +209,7 @@ def extract_data(s):
         return (name, album, year)
     else:
         return (None, None, None)
-        
+
 def extract_logline(s):
     # Default log format
     pattern = re.compile(r'(?P<timestamp>.*?)\s\-\s(?P<level>.*?)\s*\:\:\s(?P<thread>.*?)\s\:\s(?P<message>.*)', re.VERBOSE)

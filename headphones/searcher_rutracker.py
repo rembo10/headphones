@@ -151,7 +151,7 @@ class Rutracker():
         myDB = db.DBConnection()
         tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
         hptrackcount = len(tracks)
-        
+
         if not hptrackcount:
             logger.info('headphones track info not found, cannot compare to torrent') 
             return False
@@ -250,7 +250,7 @@ class Rutracker():
                 
                 valid = False
                 
-                if trackcount == hptrackcount:
+                if trackcount <= hptrackcount:
                     valid = True
                 elif trackcount > hptrackcount:
                     if any(deluxe in title for deluxe in deluxelist):

@@ -133,7 +133,7 @@ def findRelease(name, limit=1):
 
         # additional artist search
         if ':' in name:
-            name, artist = name.split(":")
+            name, artist = name.rsplit(":",1)
         else:
             artist = None
 

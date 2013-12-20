@@ -639,6 +639,12 @@
                                         <label>SMTP Password</label><input type="password" name="email_smtp_password" value="${config['email_smtp_password']}" size="50">
                                     </div>
                                     <div class="row checkbox">
+                                        <input type="checkbox" name="email_ssl" value="1" ${config['email_ssl']} /><label>SSL</label>
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="email_tls" value="1" ${config['email_tls']} /><label>TLS</label>
+                                    </div>
+                                    <div class="row checkbox">
                                         <input type="checkbox" name="email_onsnatch" value="1" ${config['email_onsnatch']} /><label>Notify on snatch?</label>
                                     </div>
                                 </div>
