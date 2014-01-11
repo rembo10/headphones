@@ -85,10 +85,12 @@ def torrentAction(method, arguments):
     if host.endswith('/'):
         host = host[:-1]
 
-    if host.endswith(':\d{2,4}'):
-        host = host + "/transmission/rpc"
-    else
-        host = host + "/rpc"
+    if not host.endswith('/rpc'):
+        if host.endswith(':\d{2,6}'):
+            host = host + "/transmission/rpc"
+        else:
+            host = host + "/rpc"
+
     request = urllib2.Request(host)
     if username and password:
         base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
