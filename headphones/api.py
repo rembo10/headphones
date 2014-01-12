@@ -123,8 +123,9 @@ class Api(object):
     
         artist = self._dic_from_query('SELECT * from artists WHERE ArtistID="' + self.id + '"')
         albums = self._dic_from_query('SELECT * from albums WHERE ArtistID="' + self.id + '" order by ReleaseDate DESC')
+		description = self._dic_from_query('SELECT * from descriptions WHERE ArtistID="' + self.id + '"')
         
-        self.data = { 'artist': artist, 'albums': albums }
+        self.data = { 'artist': artist, 'albums': albums, 'description' : description }
         return
     
     def _getAlbum(self, **kwargs):
