@@ -123,8 +123,8 @@ class Rutracker():
                 urls.append(url)
                 
             # Seeders
-             
-            for link in soup.find_all('td', attrs={'class' : 'row4 seedmed'}): 
+
+            for link in soup.find_all('b', attrs={'class' : 'seedmed'}):
                 seeder = link.get_text()
                 seeders.append(seeder)
             
