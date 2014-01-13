@@ -19,7 +19,7 @@ import time
 import threading
 
 import headphones
-from headphones import logger, db
+from headphones import logger, db, helpers
 from headphones.helpers import multikeysort, replace_all
 
 import lib.musicbrainzngs as musicbrainzngs
@@ -332,7 +332,9 @@ def getRelease(releaseid, include_artist_info=True):
         
         return release
 
-def get_all_releases(rgid,includeExtras=False):
+def get_new_releases(rgid,includeExtras=False,forcefull=False):
+
+    myDB = db.DBConnection()
     results = []
     try:
         limit = 100
@@ -352,8 +354,29 @@ def get_all_releases(rgid,includeExtras=False):
     if not results or len(results) == 0:
         return False
 
-        
-    releases = []
+    #Clean all references to releases in dB that are no longer referenced in musicbrainz
+    release_list = []
+    force_repackage1 = 0
+    if len(results) != 0:
+        for release_mark in results:
+            release_list.append(unicode(release_mark['id']))
+            release_title = release_mark['title']
+        remove_missing_releases = myDB.action("SELECT ReleaseID FROM allalbums WHERE AlbumID=?", [rgid])
+        if remove_missing_releases:
+            for items in remove_missing_releases:
+                if items['ReleaseID'] not in release_list and items['ReleaseID'] != rgid:
+                    # Remove all from albums/tracks that aren't in release
+                    myDB.action("DELETE FROM albums WHERE ReleaseID=?", [items['ReleaseID']])
+                    myDB.action("DELETE FROM tracks WHERE ReleaseID=?", [items['ReleaseID']])
+                    myDB.action("DELETE FROM allalbums WHERE ReleaseID=?", [items['ReleaseID']])
+                    myDB.action("DELETE FROM alltracks WHERE ReleaseID=?", [items['ReleaseID']])
+                    logger.info("Removing all references to release %s to reflect MusicBrainz" % items['ReleaseID'])
+                    force_repackage1 = 1
+    else:
+        logger.info("Error pulling data from MusicBrainz:  Maintaining dB")
+
+    num_new_releases = 0
+
     for releasedata in results:
         #releasedata.get will return None if it doesn't have a status
         #all official releases should have the Official status included
@@ -361,45 +384,130 @@ def get_all_releases(rgid,includeExtras=False):
             continue
         
         release = {}
-        release['AlbumTitle'] = unicode(releasedata['title'])
-        release['AlbumID'] = unicode(rgid)
-        release['AlbumASIN'] = unicode(releasedata['asin']) if 'asin' in releasedata else None
-        release['ReleaseDate'] = unicode(releasedata['date']) if 'date' in releasedata else None      
-        release['ReleaseID'] = releasedata['id']
-        if 'release-group' not in releasedata:
-            raise Exception('No release group associated with release id ' + releasedata['id'] + ' album id' + rgid)
-        release['Type'] = unicode(releasedata['release-group']['type'])
+        rel_id_check = releasedata['id']
+        artistid = unicode(releasedata['artist-credit'][0]['artist']['id'])
+
+        album_checker = myDB.action('SELECT * from allalbums WHERE ReleaseID=?', [rel_id_check]).fetchone()
+        if not album_checker or forcefull:
+            #DELETE all references to this release since we're updating it anyway.
+            myDB.action('DELETE from allalbums WHERE ReleaseID=?', [rel_id_check])
+            myDB.action('DELETE from alltracks WHERE ReleaseID=?', [rel_id_check])
+            release['AlbumTitle'] = unicode(releasedata['title'])
+            release['AlbumID'] = unicode(rgid)
+            release['AlbumASIN'] = unicode(releasedata['asin']) if 'asin' in releasedata else None
+            release['ReleaseDate'] = unicode(releasedata['date']) if 'date' in releasedata else None      
+            release['ReleaseID'] = releasedata['id']
+            if 'release-group' not in releasedata:
+                raise Exception('No release group associated with release id ' + releasedata['id'] + ' album id' + rgid)
+            release['Type'] = unicode(releasedata['release-group']['type'])
 
 
-        #making the assumption that the most important artist will be first in the list
-        if 'artist-credit' in releasedata:
-            release['ArtistID'] = unicode(releasedata['artist-credit'][0]['artist']['id'])
-            release['ArtistName'] = unicode(releasedata['artist-credit-phrase'])
-        else:
-            logger.warn('Release ' + releasedata['id'] + ' has no Artists associated.')
-            return False
-                
+            #making the assumption that the most important artist will be first in the list
+            if 'artist-credit' in releasedata:
+                release['ArtistID'] = unicode(releasedata['artist-credit'][0]['artist']['id'])
+                release['ArtistName'] = unicode(releasedata['artist-credit-phrase'])
+            else:
+                logger.warn('Release ' + releasedata['id'] + ' has no Artists associated.')
+                return False
+                    
 
-        release['ReleaseCountry'] = unicode(releasedata['country']) if 'country' in releasedata else u'Unknown'
-        #assuming that the list will contain media and that the format will be consistent
-        try:
-            release['ReleaseFormat'] = unicode(releasedata['medium-list'][0]['format'])
-        except:
-            release['ReleaseFormat'] = u'Unknown'
- 
-        release['Tracks'] = getTracksFromRelease(releasedata)
-        releases.append(release)
+            release['ReleaseCountry'] = unicode(releasedata['country']) if 'country' in releasedata else u'Unknown'
+            #assuming that the list will contain media and that the format will be consistent
+            try:
+                additional_medium=''
+                for position in releasedata['medium-list']:
+                    if position['format'] == releasedata['medium-list'][0]['format']:
+                        medium_count = int(position['position'])
+                    else:
+                        additional_medium = additional_medium+' + '+position['format']
+                if medium_count == 1:
+                    disc_number = ''
+                else:
+                    disc_number = str(medium_count)+'x'
+                packaged_medium = disc_number+releasedata['medium-list'][0]['format']+additional_medium
+                release['ReleaseFormat'] = unicode(packaged_medium)
+            except:
+                release['ReleaseFormat'] = u'Unknown'
+     
+            release['Tracks'] = getTracksFromRelease(releasedata)
 
-    return releases
+        # What we're doing here now is first updating the allalbums & alltracks table to the most
+        # current info, then moving the appropriate release into the album table and its associated
+        # tracks into the tracks table
+            controlValueDict = {"ReleaseID" : release['ReleaseID']}
+
+            newValueDict = {"ArtistID":         release['ArtistID'],
+                            "ArtistName":       release['ArtistName'],
+                            "AlbumTitle":       release['AlbumTitle'],
+                            "AlbumID":          release['AlbumID'],
+                            "AlbumASIN":        release['AlbumASIN'],
+                            "ReleaseDate":      release['ReleaseDate'],
+                            "Type":             release['Type'],
+                            "ReleaseCountry":   release['ReleaseCountry'],
+                            "ReleaseFormat":    release['ReleaseFormat']
+                        }
+
+            myDB.upsert("allalbums", newValueDict, controlValueDict)
+            
+            for track in release['Tracks']:
+
+                cleanname = helpers.cleanName(release['ArtistName'] + ' ' + release['AlbumTitle'] + ' ' + track['title'])
+        
+                controlValueDict = {"TrackID":      track['id'],
+                                    "ReleaseID":    release['ReleaseID']}
+
+                newValueDict = {"ArtistID":         release['ArtistID'],
+                                "ArtistName":       release['ArtistName'],
+                                "AlbumTitle":       release['AlbumTitle'],
+                                "AlbumID":          release['AlbumID'],
+                                "AlbumASIN":        release['AlbumASIN'],
+                                "TrackTitle":       track['title'],
+                                "TrackDuration":    track['duration'],
+                                "TrackNumber":      track['number'],
+                                "CleanName":        cleanname
+                            }
+                            
+                match = myDB.action('SELECT Location, BitRate, Format from have WHERE CleanName=?', [cleanname]).fetchone()
+            
+                if not match:
+                    match = myDB.action('SELECT Location, BitRate, Format from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [release['ArtistName'], release['AlbumTitle'], track['title']]).fetchone()
+                #if not match:
+                    #match = myDB.action('SELECT Location, BitRate, Format from have WHERE TrackID=?', [track['id']]).fetchone()         
+                if match:
+                    newValueDict['Location'] = match['Location']
+                    newValueDict['BitRate'] = match['BitRate']
+                    newValueDict['Format'] = match['Format']
+                    #myDB.action('UPDATE have SET Matched="True" WHERE Location=?', [match['Location']])
+                    myDB.action('UPDATE have SET Matched=? WHERE Location=?', (release['AlbumID'], match['Location']))
+                                
+                myDB.upsert("alltracks", newValueDict, controlValueDict)
+            num_new_releases = num_new_releases + 1
+            #print releasedata['title']
+            #print num_new_releases
+            if album_checker:
+                logger.info('[%s] Existing release %s (%s) updated' % (release['ArtistName'], release['AlbumTitle'], rel_id_check))
+            else:
+                logger.info('[%s] New release %s (%s) added' % (release['ArtistName'], release['AlbumTitle'], rel_id_check))
+    if force_repackage1 == 1:
+        num_new_releases = -1
+        logger.info('[%s] Forcing repackage of %s, since dB releases have been removed' % (release['ArtistName'], release_title))
+    else:
+        num_new_releases = num_new_releases
+
+    return num_new_releases
 
 def getTracksFromRelease(release):
     totalTracks = 1
     tracks = []
     for medium in release['medium-list']:
         for track in medium['track-list']:
+            try:
+                track_title = unicode(track['title'])
+            except:
+                track_title = unicode(track['recording']['title'])
             tracks.append({
                     'number':        totalTracks,
-                    'title':         unicode(track['recording']['title']),
+                    'title':         track_title,
                     'id':            unicode(track['recording']['id']),
                     'url':           u"http://musicbrainz.org/track/" + track['recording']['id'],
                     'duration':      int(track['length']) if 'length' in track else 0

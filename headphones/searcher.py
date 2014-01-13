@@ -118,7 +118,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
 
         for result in results:
             foundNZB = "none"
-            if (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
+            if (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS or headphones.OMGWTFNZBS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
                 if result['Status'] == "Wanted Lossless":
                     foundNZB = searchNZB(result['AlbumID'], new, losslessOnly=True)
                 else:
@@ -135,12 +135,14 @@ def searchforalbum(albumid=None, new=False, lossless=False):
 
         foundNZB = "none"
         
-        if (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
+        if (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS or headphones.OMGWTFNZBS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
             foundNZB = searchNZB(albumid, new, lossless)
 
         if (headphones.KAT or headphones.PIRATEBAY or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
             searchTorrent(albumid, new, lossless)
 
+    logger.info('Search for Wanted albums complete')
+    
 def searchNZB(albumid=None, new=False, losslessOnly=False):
 
     myDB = db.DBConnection()
@@ -436,6 +438,65 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
                         except Exception, e:
                             logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
+
+
+        if headphones.OMGWTFNZBS:
+
+            provider = "omgwtfnzbs"
+
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+                categories = "22"
+            elif headphones.PREFERRED_QUALITY:
+                categories = "22,7"
+            else:
+                 categories = "7"
+
+            if albums['Type'] == 'Other':
+                categories = "29"
+                logger.info("Album type is audiobook/spokenword. Searching all music categories")
+
+            params = {  "user": headphones.OMGWTFNZBS_UID,
+                        "api": headphones.OMGWTFNZBS_APIKEY,
+                        "catid": categories,
+                        "retention": headphones.USENET_RETENTION,
+                        "search": term
+                        }
+
+            searchURL = 'http://api.omgwtfnzbs.org/json/?' + urllib.urlencode(params)
+
+            # Add a user-agent
+            request = urllib2.Request(searchURL)
+            request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+            opener = urllib2.build_opener()
+
+            logger.info(u'Parsing results from <a href="%s">omgwtfnzbs</a>' % searchURL)
+
+            try:
+                data = opener.open(request).read()
+            except Exception, e:
+                logger.warn('Error fetching data from omgwtfnzbs: %s' % e)
+                data = False
+
+            if data:
+
+                d = json.loads(data)
+
+                if 'notice' in data: 
+                    logger.info(u"No results returned from omgwtfnzbs: %s" % d['notice'])
+                    pass
+
+                else:
+                    for item in d:
+                        try:
+                            url = item['getnzb']
+                            title = item['release']
+                            size = int(item['sizebytes'])
+
+                            resultlist.append((title, size, url, provider))
+                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+
+                        except Exception, e:
+                            logger.error(u"An unknown error occurred trying to parse the results: %s" % e)
 
         # attempt to verify that this isn't a substring result
         # when looking for "Foo - Foo" we don't want "Foobar"
@@ -944,7 +1005,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         try:
                             title = item.title
                             desc_match = re.search(r"Size: (\d+)<", item.description)
-                            size = desc_match.group(1)
+                            size = int(desc_match.group(1))
                             url = item.link
                             resultlist.append((title, size, url, provider))
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
@@ -1009,11 +1070,11 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             bitrate = None
             bitrate_string = bitrate
 
-            if headphones.PREFERRED_QUALITY == 2 or losslessOnly:  # Lossless Only mode
+            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:  # Lossless Only mode
                 search_formats = [gazelleformat.FLAC]
                 maxsize = 10000000000
-            elif headphones.PREFERRED_QUALITY == 3:  # Preferred quality mode
-                search_formats=[None]  # should return all
+            elif headphones.PREFERRED_QUALITY == 2:  # Preferred quality mode
+                search_formats = [None]  # should return all
                 bitrate = headphones.PREFERRED_BITRATE
                 if bitrate:
                     for encoding_string in gazelleencoding.ALL_ENCODINGS:
