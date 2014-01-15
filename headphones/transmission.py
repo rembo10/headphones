@@ -85,11 +85,23 @@ def torrentAction(method, arguments):
     if host.endswith('/'):
         host = host[:-1]
 
+    # Either the host ends with a port, or some directory, or rpc
+    # If it ends with /rpc we don't have to do anything
+    # If it ends with a port we add /transmission/rpc
+    # anything else we just add rpc
     if not host.endswith('/rpc'):
-        if host.endswith(':\d{2,6}'):
-            host = host + "/transmission/rpc"
+        # Check if it ends in a port number
+        i = host.rfind(':')
+        if i >= 0:
+            possible_port = host[i+1]
+            try:
+                port = int(possible_port)
+                host = host + "/transmission/rpc"
+            except ValueError:
+                host = host + "/rpc"
         else:
-            host = host + "/rpc"
+            logger.error('Transmission port missing')
+            return
 
     request = urllib2.Request(host)
     if username and password:
