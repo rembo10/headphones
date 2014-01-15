@@ -30,7 +30,7 @@ from operator import itemgetter
 
 import headphones
 
-from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers
+from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers, notifiers
 from headphones.helpers import checked, radio,today, cleanName
 
 import lib.simplejson as simplejson
@@ -942,6 +942,8 @@ class WebInterface(object):
                     "pushover_onsnatch": checked(headphones.PUSHOVER_ONSNATCH),
                     "pushover_keys": headphones.PUSHOVER_KEYS,
                     "pushover_priority": headphones.PUSHOVER_PRIORITY,
+                    "twitter_enabled": checked(headphones.TWITTER_ENABLED),
+                    "twitter_onsnatch": checked(headphones.TWITTER_ONSNATCH),
                     "mirror_list": headphones.MIRRORLIST,
                     "mirror": headphones.MIRROR,
                     "customhost": headphones.CUSTOMHOST,
@@ -984,7 +986,7 @@ class WebInterface(object):
         bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
         delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False,
-        pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, mirror=None, customhost=None, customport=None,
+        pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, twitter_enabled=0, twitter_onsnatch=0, mirror=None, customhost=None, customport=None,
         customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
         enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None, **kwargs):
 
@@ -1114,6 +1116,8 @@ class WebInterface(object):
         headphones.PUSHOVER_ONSNATCH = pushover_onsnatch
         headphones.PUSHOVER_KEYS = pushover_keys
         headphones.PUSHOVER_PRIORITY = pushover_priority
+        headphones.TWITTER_ENABLED = twitter_enabled
+        headphones.TWITTER_ONSNATCH = twitter_onsnatch
         headphones.MIRROR = mirror
         headphones.CUSTOMHOST = customhost
         headphones.CUSTOMPORT = customport
@@ -1253,6 +1257,33 @@ class WebInterface(object):
         return simplejson.dumps(image_dict)
 
     getImageLinks.exposed = True
+
+    def twitterStep1(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        tweet = notifiers.TwitterNotifier()
+        return tweet._get_authorization()
+    twitterStep1.exposed = True
+
+    def twitterStep2(self, key):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        tweet = notifiers.TwitterNotifier()
+        result = tweet._get_credentials(key)
+        logger.info(u"result: "+str(result))
+        if result:
+            return "Key verification successful"
+        else:
+            return "Unable to verify key"
+    twitterStep2.exposed = True
+
+    def testTwitter(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        tweet = notifiers.TwitterNotifier()
+        result = tweet.test_notify()
+        if result:
+            return "Tweet successful, check your twitter to make sure it worked"
+        else:
+            return "Error sending tweet"
+    testTwitter.exposed = True
 
 class Artwork(object):
     def index(self):
