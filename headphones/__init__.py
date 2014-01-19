@@ -944,8 +944,14 @@ def start():
 
         if CHECK_GITHUB:
             SCHED.add_interval_job(versioncheck.checkGithub, minutes=CHECK_GITHUB_INTERVAL)
+<<<<<<< HEAD
+        
+        if DOWNLOAD_SCAN_INTERVAL > 0:
+            SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
+=======
 
         SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
+>>>>>>> upstream/master
 
         SCHED.start()
 
