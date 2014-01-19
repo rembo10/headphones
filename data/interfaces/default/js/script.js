@@ -315,6 +315,7 @@ function doAjaxCall(url,elem,reload,form) {
 	  				console.log('refresh'); refreshTable();
 	  			}
 	  			if ( reload == "tabs") 	refreshTab();
+	  			if ( reload == "page") 	location.reload();
 	  			if ( form ) {
 	  				// Change the option to 'choose...'
 	  				$(formID + " select").children('option[disabled=disabled]').attr('selected','selected');

@@ -40,7 +40,7 @@
 <%def name="body()">
 	<div id="artistheader" class="clearfix">
 		<div id="artistImg">
-			<img id="artistImage" class="albumArt" alt="" />
+			<img id="artistImage" class="albumArt" alt="" src="artwork/artist/${artist['ArtistID']}"/>
 		</div>
 		<h1>	
 			%if artist['Status'] == 'Loading':	
@@ -93,7 +93,7 @@
 
 				myDB = db.DBConnection()					
 				totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=?', [album['AlbumID']]))
-				havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=? AND Location IS NOT NULL', [album['AlbumID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle LIKE ?', [album['ArtistName'], album['AlbumTitle']]))
+				havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=? AND Location IS NOT NULL', [album['AlbumID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle LIKE ? AND Matched = "Failed"', [album['ArtistName'], album['AlbumTitle']]))
 				
 				try:
 					percent = (havetracks*100.0)/totaltracks
@@ -122,7 +122,7 @@
 			%>
 			<tr class="grade${grade}">
 				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></td>
-				<td id="albumart"><img class="albumArt" id="${album['AlbumID']}" height="64" width="64"></td>
+				<td id="albumart"><img class="albumArt" id="${album['AlbumID']}" src="artwork/thumbs/album/${album['AlbumID']}" height="64" width="64"></td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
@@ -161,28 +161,6 @@
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	
 	<script>
-	
-	function getArtistArt() {
-		var id = "${artist['ArtistID']}";
-		var name = "${artist['ArtistName']}";
-		var image = $("div#artistImg img#artistImage");
-		if ( !image.hasClass('done') ) {
-			image.addClass('done');
-			getArtwork(image,id,name,'artist');
-		}
-	}
-	
-	function getAlbumArt() {
-		$("table#album_table tr td#albumart").each(function(){	
-			var id = $(this).children('img').attr('id');
-			var image = $(this).children('img');
-			if ( !image.hasClass('done') ) {
-				image.addClass('done');
-				getThumb(image,id,'album');
-			}
-		});
-	}
-	
 	function getArtistBio() {
 		var id = "${artist['ArtistID']}";
 		var elem = $("#artistBio");
@@ -202,8 +180,6 @@
 		%if artist['Status'] == 'Loading':
 			showMsg("Getting artist information",true);
 		%endif
-		getArtistArt();
-		getAlbumArt();
 		$('#album_table').dataTable({
 			"bDestroy": true,
 			"aoColumns": [

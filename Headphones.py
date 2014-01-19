@@ -16,6 +16,7 @@
 
 import os, sys, locale
 import time
+import signal
 
 from lib.configobj import ConfigObj
 
@@ -27,7 +28,10 @@ try:
     import argparse
 except ImportError:
     import lib.argparse as argparse
-    
+
+signal.signal(signal.SIGINT, headphones.sig_handler)
+signal.signal(signal.SIGTERM, headphones.sig_handler)
+
 
 def main():
 
@@ -36,11 +40,12 @@ def main():
         headphones.FULL_PATH = os.path.abspath(sys.executable)
     else:
         headphones.FULL_PATH = os.path.abspath(__file__)
-    
+
     headphones.PROG_DIR = os.path.dirname(headphones.FULL_PATH)
     headphones.ARGS = sys.argv[1:]
-    
+
     # From sickbeard
+    headphones.SYS_PLATFORM = sys.platform
     headphones.SYS_ENCODING = None
 
     try:
@@ -52,7 +57,7 @@ def main():
     # for OSes that are poorly configured I'll just force UTF-8
     if not headphones.SYS_ENCODING or headphones.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII', 'ASCII'):
         headphones.SYS_ENCODING = 'UTF-8'
-    
+
     # Set up and gather command line arguments
     parser = argparse.ArgumentParser(description='Music add-on for SABnzbd+')
 
@@ -64,80 +69,108 @@ def main():
     parser.add_argument('--config', help='Specify a config file to use')
     parser.add_argument('--nolaunch', action='store_true', help='Prevent browser from launching on startup')
     parser.add_argument('--pidfile', help='Create a pid file (only relevant when running as a daemon)')
-    
+
     args = parser.parse_args()
 
     if args.verbose:
         headphones.VERBOSE = 2
     elif args.quiet:
         headphones.VERBOSE = 0
-    
+
     if args.daemon:
-        headphones.DAEMON=True
-        headphones.VERBOSE = 0
-        if args.pidfile :
-            headphones.PIDFILE = args.pidfile
+        if sys.platform == 'win32':
+            print "Daemonize not supported under Windows, starting normally"
+        else:
+            headphones.DAEMON=True
+            headphones.VERBOSE = False
+
+    if args.pidfile:
+        headphones.PIDFILE = str(args.pidfile)
+
+        # If the pidfile already exists, headphones may still be running, so exit
+        if os.path.exists(headphones.PIDFILE):
+            sys.exit("PID file '" + headphones.PIDFILE + "' already exists. Exiting.")
+
+        # The pidfile is only useful in daemon mode, make sure we can write the file properly
+        if headphones.DAEMON:
+            headphones.CREATEPID = True
+            try:
+                file(headphones.PIDFILE, 'w').write("pid\n")
+            except IOError, e:
+                raise SystemExit("Unable to write PID file: %s [%d]" % (e.strerror, e.errno))
+        else:
+            logger.warn("Not running in daemon mode. PID file creation disabled.")
 
     if args.datadir:
         headphones.DATA_DIR = args.datadir
     else:
         headphones.DATA_DIR = headphones.PROG_DIR
-            
+
     if args.config:
         headphones.CONFIG_FILE = args.config
     else:
         headphones.CONFIG_FILE = os.path.join(headphones.DATA_DIR, 'config.ini')
-        
+
     # Try to create the DATA_DIR if it doesn't exist
     if not os.path.exists(headphones.DATA_DIR):
         try:
             os.makedirs(headphones.DATA_DIR)
         except OSError:
             raise SystemExit('Could not create data directory: ' + headphones.DATA_DIR + '. Exiting....')
-    
+
     # Make sure the DATA_DIR is writeable
     if not os.access(headphones.DATA_DIR, os.W_OK):
         raise SystemExit('Cannot write to the data directory: ' + headphones.DATA_DIR + '. Exiting...')
-    
+
     # Put the database in the DATA_DIR
     headphones.DB_FILE = os.path.join(headphones.DATA_DIR, 'headphones.db')
-    
+
     headphones.CFG = ConfigObj(headphones.CONFIG_FILE, encoding='utf-8')
-    
+
     # Read config & start logging
     headphones.initialize()
-        
+
     if headphones.DAEMON:
-        headphones.daemonize()
+        if sys.platform == "win32":
+            print "Daemonize not supported under Windows, starting normally"
+        else:
+            headphones.daemonize()
+
+    #configure the connection to the musicbrainz database
+    headphones.mb.startmb()
 
     # Force the http port if neccessary
     if args.port:
         http_port = args.port
-        logger.info('Starting Headphones on foced port: %i' % http_port)
+        logger.info('Using forced port: %i' % http_port)
     else:
         http_port = int(headphones.HTTP_PORT)
-        
-    # Try to start the server. 
+
+    # Try to start the server.
     webstart.initialize({
                     'http_port':        http_port,
                     'http_host':        headphones.HTTP_HOST,
                     'http_root':        headphones.HTTP_ROOT,
                     'http_proxy':       headphones.HTTP_PROXY,
+                    'enable_https':     headphones.ENABLE_HTTPS,
+                    'https_cert':       headphones.HTTPS_CERT,
+                    'https_key':        headphones.HTTPS_KEY,
                     'http_username':    headphones.HTTP_USERNAME,
                     'http_password':    headphones.HTTP_PASSWORD,
             })
-    
-    logger.info('Starting Headphones on port: %i' % http_port)
-    
+
     if headphones.LAUNCH_BROWSER and not args.nolaunch:
         headphones.launch_browser(headphones.HTTP_HOST, http_port, headphones.HTTP_ROOT)
-        
+
     # Start the background threads
     headphones.start()
-    
+
     while True:
         if not headphones.SIGNAL:
-            time.sleep(1)
+            try:
+                time.sleep(1)
+            except KeyboardInterrupt:
+                headphones.SIGNAL = 'shutdown'
         else:
             logger.info('Received signal: ' + headphones.SIGNAL)
             if headphones.SIGNAL == 'shutdown':
@@ -146,9 +179,9 @@ def main():
                 headphones.shutdown(restart=True)
             else:
                 headphones.shutdown(restart=True, update=True)
-            
+
             headphones.SIGNAL = None
-            
+
     return
 
 if __name__ == "__main__":

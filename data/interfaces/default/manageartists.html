@@ -66,7 +66,7 @@
 			%>
 			<tr class="grade${grade}">
 				<td id="select"><input type="checkbox" name="${artist['ArtistID']}" class="checkbox" /></td>
-				<td id="albumart"><div id="artistImg"><img class="albumArt" id="${artist['ArtistID']}" height="50" width="50"></div></td>
+				<td id="albumart"><div id="artistImg"><img class="albumArt" id="${artist['ArtistID']}" src="artwork/thumbs/artist/${artist['ArtistID']}" height="50" width="50"></div></td>
 				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
 				<td id="status">${artist['Status']}</td>	
 				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
@@ -86,19 +86,7 @@
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-	function getArtistArt() {
-		$("table#artist_table tr td#albumart #artistImg").each(function(){	
-			var id = $(this).children('img').attr('id');
-			var image = $(this).children('img');
-			if ( !image.hasClass('done') ) {
-				image.addClass('done');
-				getThumb(image,id,'artist');
-			}
-		});
-	}
-
 	function initThisPage() {
-		getArtistArt();
 		$('#artist_table').dataTable({	
 			"bDestroy":true,		
 			"aoColumns": [
@@ -110,7 +98,9 @@
 				null
 			],
 			"oLanguage": {
-				"sSearch" : ""},
+				"sSearch" : "",
+				"sEmptyTable": " "
+			},
 			"bStateSave": true,
 			"bPaginate": false
 		});

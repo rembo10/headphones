@@ -23,7 +23,7 @@ import copy
 
 cmd_list = [ 'getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSimilar', 'getHistory', 'getLogs', 
             'findArtist', 'findAlbum', 'addArtist', 'delArtist', 'pauseArtist', 'resumeArtist', 'refreshArtist',
-            'queueAlbum', 'unqueueAlbum', 'forceSearch', 'forceProcess', 'getVersion', 'checkGithub', 
+            'addAlbum', 'queueAlbum', 'unqueueAlbum', 'forceSearch', 'forceProcess', 'getVersion', 'checkGithub', 
             'shutdown', 'restart', 'update', 'getArtistArt', 'getAlbumArt', 'getArtistInfo', 'getAlbumInfo', 'getArtistThumb', 'getAlbumThumb']
 
 class Api(object):
@@ -123,8 +123,9 @@ class Api(object):
     
         artist = self._dic_from_query('SELECT * from artists WHERE ArtistID="' + self.id + '"')
         albums = self._dic_from_query('SELECT * from albums WHERE ArtistID="' + self.id + '" order by ReleaseDate DESC')
+        description = self._dic_from_query('SELECT * from descriptions WHERE ArtistID="' + self.id + '"')
         
-        self.data = { 'artist': artist, 'albums': albums }
+        self.data = { 'artist': artist, 'albums': albums, 'description' : description }
         return
     
     def _getAlbum(self, **kwargs):
@@ -242,6 +243,20 @@ class Api(object):
             
         try:
             importer.addArtisttoDB(self.id)
+        except Exception, e:
+            self.data = e
+            
+        return
+        
+    def _addAlbum(self, **kwargs):
+        if 'id' not in kwargs:
+            self.data = 'Missing parameter: id'
+            return
+        else:
+            self.id = kwargs['id']
+            
+        try:
+            importer.addReleaseById(self.id)
         except Exception, e:
             self.data = e
             

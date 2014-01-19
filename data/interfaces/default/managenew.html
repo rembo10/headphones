@@ -20,7 +20,10 @@
 	</div>
 	<form action="addArtists" method="get">
 	<div id="markalbum">
-		Add selected artists
+	    <select name="action">
+        	<option value="add">(+) ADD Selected Artists</option>
+        	<option value="ignore">(-) IGNORE Selected Artists</option>
+       	</select>
 		<input type="submit" value="Go">
 	</div>
 	<table class="display" id="artist_table">

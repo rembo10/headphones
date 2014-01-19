@@ -45,6 +45,8 @@
 					fileid = 'nzb'
 				if item['URL'].find('torrent') != -1:
 					fileid = 'torrent'
+				if item['URL'].find('rutracker') != -1:
+					fileid = 'torrent'
 			%>
 			<tr class="grade${grade}">
 				<td id="dateadded">${item['DateAdded']}</td>
@@ -70,7 +72,7 @@
 			"bDestroy": true,
 			"oLanguage": {
 				"sLengthMenu":"Show _MENU_ items per page",
-				"sEmptyTable": "<em>No History to Display</em>",
+				"sEmptyTable": " ",
 				"sInfo":"Showing _START_ to _END_ of _TOTAL_ items",
 				"sInfoEmpty":"Showing 0 to 0 of 0 items",
 				"sInfoFiltered":"(filtered from _MAX_ total items)"},

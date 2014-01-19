@@ -22,6 +22,7 @@
 			%if not headphones.ADD_ARTISTS:
 			<a class="menu_link_edit" href="manageNew">Manage New Artists</a>
 			%endif
+			<a class="menu_link_edit" href="manageUnmatched">Manage Unmatched</a>
 		</div>
 	</div>	
 </%def>
@@ -34,7 +35,8 @@
 		<ul>
 			<li><a href="#tabs-1">Scan Music Library</a></li>
 			<li><a href="#tabs-2">Imports</a></li>
-			<li><a href="#tabs-3">Force search</a></li>
+			<li><a href="#tabs-3">Force Actions</a></li>
+			<li><a href="#tabs-4">Force Legacy</a></li>
 		</ul>
 		<div id="tabs-1" class="configtable">
 			<fieldset>
@@ -58,11 +60,16 @@
 					%endif
 					</div>
 					<div class="row checkbox"> 
-					<input type="checkbox" name="autoadd" value="1" ${checked(headphones.ADD_ARTISTS)}><label>Automatically add new artists</label>
+					<input type="checkbox" name="libraryscan" id="libraryscan" value="1" ${checked(headphones.LIBRARYSCAN)}><label>Automatically scan library</label>
+					</div>
+					<div class="row checkbox"> 
+					<input type="checkbox" name="autoadd" id="autoadd" value="1" ${checked(headphones.ADD_ARTISTS)}><label>Auto-add new artists</label>
 					</div>
 								
 				</fieldset>
-				<input type="button" value="Save Changes" onclick="doAjaxCall('musicScan',$(this),'tabs',true);return false;" data-success="Library will be scanned">
+				<br>
+				<input type="button" value="Save Changes and Scan" onclick="addScanAction();doAjaxCall('musicScan',$(this),'tabs',true);return false;" data-success="Changes saved. Library will be scanned">
+				<input type="button" value="Save Changes without Scanning Library" onclick="doAjaxCall('musicScan',$(this),'tabs',true);return false;" data-success="Changes Saved Successfully">
 			</form>
 		</div>
 
@@ -87,27 +94,88 @@
 			</fieldset>
 			<input type="button" value="Save changes" onclick="doAjaxCall('importLastFM',$(this),'tabs',true);return false;" data-success="Last.fm artists will be imported" data-error="Fill in a last.fm username"/>
 		</form>
-	</div>
+        <br/>
+        <form action="importLastFMTag" method="GET" id="importLastFMTag">
+            <fieldset>
+            <legend>Import Last.FM Tag</legend>
+            <p>Enter tag from which you want import top artists:</p>
+            <br/>
+            <div class="row">
+                <label>Tag</label>
+			    <input type="text" value="" onfocus="if
+                (this.value==this.defaultValue) this.value='';" name="tag" id="tag" size="18" />
+                <br/>
+                <label>Limit</label>
+			    <input type="text" value="50" onfocus="if
+			    (this.value==this.defaultValue) this.value='';" name="limit" id="limit" size="18" />
+            </div>
+            </fieldset>
+            <input type="submit" />
+        </form>
+    </div>
+
+
 	
 	<div id="tabs-3" class="configtable">
 		<fieldset>
 			<legend>Force Search</legend>
 			<div class="links">
 				<a href="#" onclick="doAjaxCall('forceSearch',$(this))" data-success="Checking for wanted albums successful" data-error="Error checking wanted albums"><span class="ui-icon ui-icon-search"></span>Force Check for Wanted Albums</a>
-				<a href="#" onclick="doAjaxCall('forceUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><span class="ui-icon ui-icon-heart"></span>Force Update Active Artists</a>
+				<a href="#" onclick="doAjaxCall('forceUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><span class="ui-icon ui-icon-heart"></span>Force Update Active Artists [Fast]</a>
 				<a href="#" onclick="doAjaxCall('forcePostProcess',$(this))" data-success="Post-Processor is being loaded" data-error="Error during Post-Processing"><span class="ui-icon ui-icon-wrench"></span>Force Post-Process Albums in Download Folder</a>
 				<a href="#" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update successful" data-error="Error checking for update"><span class="ui-icon ui-icon-refresh"></span>Check for Headphones Updates</a>
+				<a href="#" id="delete_empty_artists"><span class="ui-icon ui-icon-trash"></span>Delete empty Artists</a>
+					<div id="emptyartistdialog" title="Confirm Artist Deletion" style="display:none" class="configtable">
+					    %if emptyArtists:
+						<h3>The following artists will be deleted:</h3>
+						
+						%for emptyArtist in emptyArtists:
+							<p>${emptyArtist['ArtistName']}</p>
+						%endfor
+						<input type="button" value="Delete Empty Artists" onclick="doAjaxCall('deleteEmptyArtists',$(this))" data-success="Empty Artists deleted" data-error="Error deleting empty artists">
+					    %else:
+					        No empty artists found.
+					    %endif
+					</div>
 			</div>
 		</fieldset>
 		
 	</div>
+
+
+	<div id="tabs-4" class="configtable">
+		<fieldset>
+			<legend>Force Legacy</legend>
+				<p>Please note that these functions will take a significant amount of time to complete.</p>
+			<div class="links">
+				<a href="#" onclick="doAjaxCall('forceFullUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><span class="ui-icon ui-icon-heart"></span>Force Update Active Artists [Comprehensive]</a> 
+				<BR>
+				<a href="#" onclick="doAjaxCall('forceScan',$(this))" data-success="Library scan successful" data-error="Error forcing library scan"><span class="ui-icon ui-icon-refresh"></span>Force Re-scan Library [Comprehensive]</a> 
+				<BR>
+				<small>*Warning: If you choose [Force Re-scan Library], any manually ignored/matched artists/albums will be reset to "unmatched".</small>
+
+		</div>
+		</fieldset>
+		
+	</div>
+
+
+
 </div>
 </%def>
 <%def name="javascriptIncludes()">
 	<script>
+		function addScanAction() {
+			$('#autoadd').append('<input type="hidden" name="scan" value=1 />');
+		};
+		
 		function initThisPage() {
 			$('#manage_albums').click(function() {
 				$('#dialog').dialog();
+				return false;
+			});
+			$('#delete_empty_artists').click(function() {
+				$('#emptyartistdialog').dialog();
 				return false;
 			});
 			jQuery( "#tabs" ).tabs();

@@ -24,6 +24,7 @@ import headphones
 
 from lib import MultipartPostHandler
 import urllib2, cookielib
+import ast
 
 from headphones.common import USER_AGENT
 from headphones import logger
@@ -41,12 +42,6 @@ def sendNZB(nzb):
         params['apikey'] = headphones.SAB_APIKEY
     if headphones.SAB_CATEGORY:
         params['cat'] = headphones.SAB_CATEGORY
-
-
-#    # if released recently make it high priority
-#    for curEp in nzb.episodes:
-#        if datetime.date.today() - curEp.airdate <= datetime.timedelta(days=7):
-#            params['priority'] = 1
 
     # if it's a normal result we just pass SAB the URL
     if nzb.resultType == "nzb":
@@ -128,6 +123,10 @@ def sendNZB(nzb):
             logger.info(u"Sending Prowl notification")
             prowl = notifiers.PROWL()
             prowl.notify(nzb.name,"Download started")
+        if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
+            logger.info(u"Sending Pushover notification")
+            prowl = notifiers.PUSHOVER()
+            prowl.notify(nzb.name,"Download started")
         if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
             logger.debug(u"Sending NMA notification")
             nma = notifiers.NMA()
@@ -140,3 +139,37 @@ def sendNZB(nzb):
     else:
         logger.info(u"Unknown failure sending NZB to sab. Return text is: " + sabText)
         return False
+        
+def checkConfig():
+
+    params = { 'mode' : 'get_config', 
+               'section' : 'misc' 
+               }
+
+    if headphones.SAB_USERNAME:
+        params['ma_username'] = headphones.SAB_USERNAME
+    if headphones.SAB_PASSWORD:
+        params['ma_password'] = headphones.SAB_PASSWORD
+    if headphones.SAB_APIKEY:
+        params['apikey'] = headphones.SAB_APIKEY
+
+    if not headphones.SAB_HOST.startswith('http'):
+        headphones.SAB_HOST = 'http://' + headphones.SAB_HOST
+
+    if headphones.SAB_HOST.endswith('/'):
+        headphones.SAB_HOST = headphones.SAB_HOST[0:len(headphones.SAB_HOST)-1]
+    
+    url = headphones.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
+    
+    try:
+        f = urllib.urlopen(url).read()
+    except Exception, e:
+        logger.warn("Unable to read SABnzbd config file - cannot determine renaming options (might affect auto & forced post processing)")
+        return (0, 0)
+        
+    config_options = ast.literal_eval(f)
+    
+    replace_spaces = config_options['misc']['replace_spaces']
+    replace_dots = config_options['misc']['replace_dots']
+    
+    return (replace_spaces, replace_dots)
