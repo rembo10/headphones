@@ -196,6 +196,9 @@ case "$1" in
         stop_headphones
         start_headphones
         ;;
+    status)
+        status_of_proc -p "$PID_FILE" "$DAEMON" "$DESC"
+        ;;
     *)
         N=/etc/init.d/$NAME
         echo "Usage: $N {start|stop|restart|force-reload}" >&2

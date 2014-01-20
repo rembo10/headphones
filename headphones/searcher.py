@@ -134,7 +134,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
     else:
 
         foundNZB = "none"
-        
+
         if (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS or headphones.OMGWTFNZBS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
             foundNZB = searchNZB(albumid, new, lossless)
 
@@ -142,7 +142,7 @@ def searchforalbum(albumid=None, new=False, lossless=False):
             searchTorrent(albumid, new, lossless)
 
     logger.info('Search for Wanted albums complete')
-    
+
 def searchNZB(albumid=None, new=False, losslessOnly=False):
 
     myDB = db.DBConnection()
@@ -217,10 +217,10 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
             # Add a user-agent
             request = urllib2.Request(searchURL)
-            request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+            request.add_header('User-Agent', 'Mozilla')
             base64string = base64.encodestring('%s:%s' % (headphones.HPUSER, headphones.HPPASS)).replace('\n', '')
             request.add_header("Authorization", "Basic %s" % base64string)
-            
+
             opener = urllib2.build_opener()
 
             logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, 'Headphones Index'))
@@ -251,7 +251,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
                         except Exception, e:
                             logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
-                                
+
         if headphones.NEWZNAB:
 
             newznab_hosts = [(headphones.NEWZNAB_HOST, headphones.NEWZNAB_APIKEY, headphones.NEWZNAB_ENABLED)]
@@ -481,7 +481,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
                 d = json.loads(data)
 
-                if 'notice' in data: 
+                if 'notice' in data:
                     logger.info(u"No results returned from omgwtfnzbs: %s" % d['notice'])
                     pass
 
@@ -746,9 +746,9 @@ def getresultNZB(result):
         request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
         base64string = base64.encodestring('%s:%s' % (headphones.HPUSER, headphones.HPPASS)).replace('\n', '')
         request.add_header("Authorization", "Basic %s" % base64string)
-        
+
         opener = urllib2.build_opener()
-        
+
         try:
             nzb = opener.open(request).read()
         except Exception, e:
@@ -1143,21 +1143,21 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
         # Pirate Bay
         if headphones.PIRATEBAY:
-            provider = "The Pirate Bay"    
+            provider = "The Pirate Bay"
             if headphones.PIRATEBAY_PROXY_URL:
                 #Might need to clean up the user submitted url
                 pirate_proxy = headphones.PIRATEBAY_PROXY_URL
-                
+
                 if not pirate_proxy.startswith('http'):
                     pirate_proxy = 'http://' + pirate_proxy
                 if pirate_proxy.endswith('/'):
                     pirate_proxy = pirate_proxy[:-1]
-                    
+
                 providerurl = url_fix(pirate_proxy + "/search/" + term + "/0/99/")
-                
+
             else:
                 providerurl = url_fix("http://thepiratebay.sx/search/" + term + "/0/99/")
-                
+
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 category = '104'          #flac
                 maxsize = 10000000000
@@ -1166,30 +1166,30 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 maxsize = 10000000000
             else:
                 category = '101'          #mp3
-                maxsize = 300000000        
+                maxsize = 300000000
 
             searchURL = providerurl + category
-            
+
             try:
                 data = urllib2.urlopen(searchURL, timeout=20).read()
             except urllib2.URLError, e:
                 logger.warn('Error fetching data from The Pirate Bay: %s' % e)
                 data = False
-            
+
             if data:
-            
+
                 logger.info(u'Parsing results from <a href="%s">The Pirate Bay</a>' % searchURL)
-                
+
                 soup = BeautifulSoup(data)
                 table = soup.find('table')
                 rows = None
                 if table:
                     rows = table.findAll('tr')
-                
+
                 if not rows or len(rows) == '1':
                     logger.info(u"No results found from %s for %s" % (provider, term))
                     pass
-                
+
                 else:
                     for item in rows[1:]:
                         try:
@@ -1209,8 +1209,8 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 resultlist.append((title, size, url, provider))
                                 logger.info('Found %s. Size: %s' % (title, formatted_size))
                             else:
-                                logger.info('%s is larger than the maxsize or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i)' % (title, size, int(seeds)))    
-                        
+                                logger.info('%s is larger than the maxsize or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i)' % (title, size, int(seeds)))
+
                         except Exception, e:
                             logger.error(u"An unknown error occurred in the Pirate Bay parser: %s" % e)
 
@@ -1369,7 +1369,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
 
         if len(resultlist):
-            
+
             # Add a priority if it has any of the preferred words
             temp_list = []
             for result in resultlist:
@@ -1377,7 +1377,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     temp_list.append((result[0],result[1],result[2],result[3],1))
                 else:
                     temp_list.append((result[0],result[1],result[2],result[3],0))
-                        
+
             resultlist = temp_list
 
             if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
@@ -1390,16 +1390,16 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     albumlength = sum([pair[0] for pair in tracks])
 
                     targetsize = albumlength/1000 * int(headphones.PREFERRED_BITRATE) * 128
-    
+
                     if not targetsize:
                         logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
                         torrentlist = sorted(resultlist, key=lambda title: (title[4], int(title[1])), reverse=True)
-                    
+
                     else:
                         logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
                         newlist = []
                         flac_list = []
-                        
+
                         if headphones.PREFERRED_BITRATE_HIGH_BUFFER:
                             high_size_limit = targetsize * int(headphones.PREFERRED_BITRATE_HIGH_BUFFER)/100
                         else:
@@ -1408,38 +1408,38 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                             low_size_limit = targetsize * int(headphones.PREFERRED_BITRATE_LOW_BUFFER)/100
                         else:
                             low_size_limit = None
-                            
+
                         for result in resultlist:
-                            
+
                             if high_size_limit and (result[1] > high_size_limit):
                                 logger.info(result[0] + " is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit) + ")")
-                                
+
                                 # Add lossless nzbs to the "flac list" which we can use if there are no good lossy matches
                                 if 'flac' in result[0].lower():
                                     flac_list.append((result[0], result[1], result[2], result[3], result[4]))
-                                
+
                                 continue
-                                
+
                             if low_size_limit and (result[1] < low_size_limit):
                                 logger.info(result[0] + " is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit) + ")")
                                 continue
-                                                                
+
                             delta = abs(targetsize - int(result[1]))
                             newlist.append((result[0], result[1], result[2], result[3], result[4], delta))
 
                         torrentlist = sorted(newlist, key=lambda title: (-title[4], title[5]))
-                        
+
                         if not len(torrentlist) and len(flac_list) and headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                             logger.info("Since there were no appropriate lossy matches (and at least one lossless match), going to use lossless instead")
                             torrentlist = sorted(flac_list, key=lambda title: (title[4], int(title[1])), reverse=True)
-                
+
                 except Exception, e:
 
                     logger.debug('Error: %s' % str(e))
                     logger.info('No track information for %s - %s. Defaulting to highest quality' % (albums[0], albums[1]))
 
                     torrentlist = sorted(resultlist, key=lambda title: (title[4], int(title[1])), reverse=True)
-            
+
             else:
 
                 torrentlist = sorted(resultlist, key=lambda title: (title[4], int(title[1])), reverse=True)
@@ -1469,15 +1469,15 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             if data and bestqual:
                 logger.info(u'Found best result from %s: <a href="%s">%s</a> - %s' % (bestqual[3], bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1])))
 
-                torrent_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year) 
+                torrent_folder_name = '%s - %s [%s]' % (helpers.latinToAscii(albums[0]).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(albums[1]).encode('UTF-8').replace('/', '_'), year)
 
                 # Blackhole
                 if headphones.TORRENT_DOWNLOADER == 0:
-                    
+
                     if bestqual[2].startswith("magnet:"):
                         logger.error("Cannot save magnet files to blackhole. Please switch your torrent downloader to Transmission or uTorrent")
                         return
-                
+
                     # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
 
                     torrent_name = torrent_folder_name + '.torrent'
@@ -1505,7 +1505,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     except Exception, e:
                         logger.error('Couldn\'t get name from Torrent file: %s' % e)
                         break
-                        
+
                 elif headphones.TORRENT_DOWNLOADER == 1:
                     logger.info("Sending torrent to Transmission")
 
@@ -1516,11 +1516,11 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         file_or_url = bestqual[2]
 
                     torrentid = transmission.addTorrent(file_or_url)
-                    
+
                     if not torrentid:
                         logger.error("Error sending torrent to Transmission. Are you sure it's running?")
                         return
-                        
+
                     torrent_folder_name = transmission.getTorrentFolder(torrentid)
                     logger.info('Torrent folder name: %s' % torrent_folder_name)
 
@@ -1539,7 +1539,7 @@ def preprocesstorrent(resultlist, pre_sorted_list=False):
     # Get out of here if we're using Transmission or uTorrent
     if headphones.TORRENT_DOWNLOADER != 0:
         return True, resultlist[0]
-        
+
     for result in resultlist:
 
         # get outta here if rutracker or piratebay
@@ -1549,7 +1549,7 @@ def preprocesstorrent(resultlist, pre_sorted_list=False):
         try:
             request = urllib2.Request(result[2])
             request.add_header('Accept-encoding', 'gzip')
-    
+
             if result[3] == 'Kick Ass Torrent':
                 request.add_header('Referer', 'http://kat.ph/')
 
