@@ -52,6 +52,10 @@ def addTorrent(link):
             logger.debug(u"Sending NMA notification")
             nma = notifiers.NMA()
             nma.notify(snatched_nzb=name)
+        if headphones.PUSHALOT_ENABLED and headphones.PUSHALOT_ONSNATCH:
+            logger.info(u"Sending Pushalot notification")
+            pushalot = notifiers.PUSHALOT()
+            pushalot.notify(name,"Download started")
 
         return response['arguments']['torrent-added']['id']
         

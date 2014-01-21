@@ -227,6 +227,44 @@ class NMA:
         if not request:
             logger.warn('Error sending notification request to NotifyMyAndroid')        
         
+class PUSHALOT:
+
+    def notify(self, message, event):
+        if not headphones.PUSHALOT_ENABLED:
+            return
+
+	pushalot_authorizationtoken = headphones.PUSHALOT_APIKEY
+
+	logger.debug(u"Pushalot event: " + event)
+	logger.debug(u"Pushalot message: " + message)
+	logger.debug(u"Pushalot api: " + pushalot_authorizationtoken)
+
+        http_handler = HTTPSConnection("pushalot.com")
+                                                
+        data = {'AuthorizationToken': pushalot_authorizationtoken, 
+                'Title': event.encode('utf-8'),
+                'Body': message.encode("utf-8") }
+
+        http_handler.request("POST",
+                                "/api/sendmessage",
+                                headers = {'Content-type': "application/x-www-form-urlencoded"},
+                                body = urlencode(data))
+        response = http_handler.getresponse()
+        request_status = response.status
+
+        logger.debug(u"Pushalot response status: %r" % request_status)
+        logger.debug(u"Pushalot response headers: %r" % response.getheaders())
+        logger.debug(u"Pushalot response body: %r" % response.read())
+
+        if request_status == 200:
+                logger.info(u"Pushalot notifications sent.")
+                return True
+        elif request_status == 410: 
+                logger.info(u"Pushalot auth failed: %s" % response.reason)
+                return False
+        else:
+                logger.info(u"Pushalot notification failed.")
+                return False
 
 class Synoindex:
     def __init__(self, util_loc='/usr/syno/bin/synoindex'):
