@@ -508,6 +508,11 @@
                                     <input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}><label>Embed lyrics</label>
                                 </div>
                                 <div class="row">
+                                    <label>Path to Post-Processing Folder</label>
+                                    <input type="text" name="post_processing_dir" value="${config['post_processing_dir']}" size="50">
+                                    <small>Set this to where your download client puts its completed downloads in</small>
+                                </div>
+                                <div class="row">
                                     <label>Path to Destination Folder</label>
                                     <input type="text" name="destination_dir" value="${config['dest_dir']}" size="50">
                                     <small>e.g. /Users/name/Music/iTunes or /Volumes/share/music</small>
