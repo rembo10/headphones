@@ -839,7 +839,22 @@
                                     </div>
                                 </div>
                             </fieldset>
-
+                            <fieldset>
+                                <h3>Pushalot</h3>
+                                <div class="checkbox row">
+                                    <input type="checkbox" name="pushalot_enabled" id="pushalot" value="1" ${config['pushalot_enabled']} /><label>Enable Pushalot</label>
+                                </div>
+                                <div id="pushalotoptions">
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="pushalot_onsnatch" value="1" ${config['pushalot_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                    <div class="row">
+                                        <label>Pushalot API Key</label>
+                                        <input type="text" name="pushalot_apikey" value="${config['pushalot_apikey']}" size="30">
+                                        <small>Separate multiple api keys with commas</small>
+                                    </div>
+                                </div>
+                            </fieldset>
                             <fieldset>
                                 <h3>Synology NAS</h3>
                                 <div class="checkbox row">
@@ -1117,6 +1132,27 @@
                                 $("#nmaoptions").slideUp();
                         }
                 });
+
+                if ($("#pushalot").is(":checked"))
+                        {
+                                $("#pushalotoptions").show();
+                        }
+                else
+                        {
+                                $("#pushalotoptions").hide();
+                        }
+
+                $("#pushalot").click(function(){
+                        if ($("#pushalot").is(":checked"))
+                        {
+                                $("#pushalotoptions").slideDown();
+                        }
+                        else
+                        {
+                                $("#pushalotoptions").slideUp();
+                        }
+                });
+
                 if ($("#pushover").is(":checked"))
                         {
                                 $("#pushoveroptions").show();
