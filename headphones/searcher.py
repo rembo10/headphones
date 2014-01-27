@@ -1553,6 +1553,9 @@ def preprocesstorrent(resultlist, pre_sorted_list=False):
             if result[3] == 'Kick Ass Torrent':
                 request.add_header('Referer', 'http://kat.ph/')
 
+            if result[3] == 'What.cd':
+                request.add_header('User-Agent', 'Headphones')
+
             response = urllib2.urlopen(request)
             if response.info().get('Content-Encoding') == 'gzip':
                 buf = StringIO(response.read())
