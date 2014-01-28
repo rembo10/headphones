@@ -3,7 +3,7 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">
-			<a href="#" id="menu_link_scan" onclick="doAjaxCall('forceSearch',$(this))" data-success="Checking for wanted albums successful" data-error="Error checking wanted albums">Force Check</a>
+			<a href="#" id="menu_link_scan" onclick="doAjaxCall('forceSearch',$(this))" data-success="Checking for wanted albums successful" data-error="Error checking wanted albums"><i class="fa fa-search"></i> Force Check</a>
 		</div>
 	</div>	
 </%def>
@@ -12,7 +12,7 @@
 <%def name="body()">
 	
 	<div class="title">
-		<h1 class="clearfix"><img src="interfaces/default/images/icon_wanted.png" alt="Wanted Albums"/>Wanted Albums</h1>
+		<h1 class="clearfix"><i class="fa fa-heart"></i> Wanted Albums</h1>
 	</div>
 	<form action="markAlbums" method="get" id="markAlbums">
 	<div id="markalbum" style="top:0;">
@@ -53,7 +53,7 @@
 	</form>
 	</div>
 	<div class="title">
-		<h1 class="clearfix"><img src="interfaces/default/images/icon_upcoming.png" alt="Upcoming Albums"/>Upcoming Albums</h1>
+		<h1 class="clearfix"><i class="fa fa-calendar"></i> Upcoming Albums</h1>
 	</div>
 	<div class="table_wrapper">
 		<table class="display_no_select" id="upcoming_table">
