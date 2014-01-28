@@ -8,18 +8,18 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">		
-			<a id="menu_link_refresh" onclick="doAjaxCall('refreshArtist?ArtistID=${artist['ArtistID']}', $(this)),'table'" href="#" data-success="'${artist['ArtistName']}' is being refreshed">Refresh Artist</a>
-			<a id="menu_link_delete" href="deleteArtist?ArtistID=${artist['ArtistID']}">Delete Artist</a>
+			<a id="menu_link_refresh" onclick="doAjaxCall('refreshArtist?ArtistID=${artist['ArtistID']}', $(this)),'table'" href="#" data-success="'${artist['ArtistName']}' is being refreshed"><i class="fa fa-refresh"></i> Refresh Artist</a>
+			<a id="menu_link_delete" href="deleteArtist?ArtistID=${artist['ArtistID']}"><i class="fa fa-trash-o"></i> Delete Artist</a>
 			%if artist['Status'] == 'Paused':
-				<a id="menu_link_resume" href="#" onclick="doAjaxCall('resumeArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} resumed">Resume Artist</a>
+				<a id="menu_link_resume" href="#" onclick="doAjaxCall('resumeArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} resumed"><i class="fa fa-play"></i> Resume Artist</a>
 			%else:
-				<a id="menu_link_pauze" href="#" onclick="doAjaxCall('pauseArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} paused">Pause Artist</a>
+				<a id="menu_link_pauze" href="#" onclick="doAjaxCall('pauseArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} paused"><i class="fa fa-pause"></i> Pause Artist</a>
 			%endif
 			%if artist['IncludeExtras']:
-				<a id="menu_link_removeextra" href="#" onclick="doAjaxCall('removeExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Extras removed for ${artist['ArtistName']}">Remove Extras</a>
-				<a class="menu_link_edit" id="menu_link_modifyextra" href="#">Modify Extras</a>
+				<a id="menu_link_removeextra" href="#" onclick="doAjaxCall('removeExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Extras removed for ${artist['ArtistName']}"><i class="fa fa-minus"></i> Remove Extras</a>
+				<a class="menu_link_edit" id="menu_link_modifyextra" href="#"><i class="fa fa-pencil"></i> Modify Extras</a>
 			%else:	
-				<a id="menu_link_getextra" href="#">Get Extras</a>
+				<a id="menu_link_getextra" href="#"><i class="fa fa-plus"></i> Get Extras</a>
 			%endif
 					<div id="dialog" title="Choose Which Extras to Fetch" style="display:none" class="configtable">
 						<form action="getExtras" method="get" class="form">
@@ -44,7 +44,7 @@
 		</div>
 		<h1>	
 			%if artist['Status'] == 'Loading':	
-				<img src="interfaces/default/images/loader_black.gif" alt="loading" style="float:left; margin-right: 5px;"/> 
+				<i class="fa fa-refresh fa-spin"></i>
 			%endif
 			<a href="http://musicbrainz.org/artist/${artist['ArtistID']}">${artist['ArtistName']}</a>
 			%if artist['Status'] == 'Loading':
