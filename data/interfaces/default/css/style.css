@@ -491,10 +491,10 @@ ul#nav li a.config {
   height: 28px;
   width: 10px;
 }
-ul#nav li a.config img {
+ul#nav li a.config i {
   position: relative;
-  top: -7px;
-  left: -7px;
+  top: 0px;
+  left: -6px;
 }
 ul#nav li a.log {
   font-size: 13px;
@@ -1239,11 +1239,11 @@ div#artistheader h2 a {
   background-image: url("../images/ui-icons_70b2e1_256x240.png");
 }
 #toTop {
-  background: url("../images/toTop.gif") no-repeat scroll 10px center #f7f7f7;
+  background: #f7f7f7;
   border-radius: 5px 0 0 0;
   bottom: 0;
   display: none;
-  padding: 10px 10px 10px 40px;
+  padding: 10px 10px 10px 10px;
   position: fixed;
   right: 0;
 }

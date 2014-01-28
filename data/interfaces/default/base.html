@@ -22,6 +22,7 @@
 	<link rel="apple-touch-icon" href="images/headphoneslogo.png">
 	<link rel="stylesheet" href="interfaces/default/css/style.css">
 	<link rel="stylesheet" href="interfaces/default/css/jquery-ui.css">
+	<link rel="stylesheet" href="interfaces/default/css/font-awesome.min.css">
 	${next.headIncludes()}
 
 	<script src="js/libs/modernizr-1.7.min.js"></script>
@@ -51,7 +52,7 @@
 				<li><a href="manage">manage</a></li>
 				<li><a href="history">history</a></li>
 				<li><a href="logs" class="log">logs</a></li>
-				<li><a href="config" class="config"><img src="interfaces/default/images/icon_gear.png" alt="settings"/></a></li>
+				<li><a href="config" class="config"><i class="fa fa-gear fa-lg"></i></a></li>
 			</ul>
 			<div id="searchbar">
                 <form action="search" method="get">
@@ -78,9 +79,9 @@
 		<footer>
 			<div id="actions">
 				<small>
-				<a href="shutdown"><span class="ui-button-icon-primary ui-icon ui-icon-power"></span>Shutdown</a> |
-				<a href="restart"><span class="ui-button-icon-primary ui-icon ui-icon-power"></span>Restart</a> |
-				<a href="#" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update successful" data-error="Error checking for update"><span class="ui-icon ui-icon-refresh"></span>Check for new version</a>
+				<a href="shutdown"><i class="fa fa-power-off"></i> Shutdown</a> |
+				<a href="restart"><i class="fa fa-power-off"></i> Restart</a> |
+				<a href="#" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update successful" data-error="Error checking for update"><i class="fa fa-refresh"></i> Check for new version</a>
 				</small>
 			</div>
 			<div id="version">
@@ -90,7 +91,7 @@
 				%endif
 			</div>
 		</footer>
-		<a href="#main" id="toTop"><span>Back to top</span></a>
+		<a href="#main" id="toTop"><i class="fa fa-angle-double-up"></i> <span>Back to top</span></a>
 	</div>
 
 	<script src="js/libs/jquery-1.7.2.min.js"></script>

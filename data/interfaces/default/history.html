@@ -6,17 +6,17 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">
-			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=all',$(this),'table')" data-success="All History cleared">Clear All History</a>
-			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=Processed',$(this),'table')" data-success="All Processed cleared">Clear Processed</a>
-			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=Unprocessed',$(this),'table')" data-success="All Unprocessed cleared">Clear Unprocessed</a>
-			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=Snatched',$(this),'table')" data-success="All Snatched cleared">Clear Snatched</a>
+			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=all',$(this),'table')" data-success="All History cleared"><i class="fa fa-trash-o"></i> Clear All History</a>
+			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=Processed',$(this),'table')" data-success="All Processed cleared"><i class="fa fa-trash-o"></i> Clear Processed</a>
+			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=Unprocessed',$(this),'table')" data-success="All Unprocessed cleared"><i class="fa fa-trash-o"></i> Clear Unprocessed</a>
+			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=Snatched',$(this),'table')" data-success="All Snatched cleared"><i class="fa fa-trash-o"></i> Clear Snatched</a>
 		</div>
 	</div>	
 </%def>
 
 <%def name="body()">
 	<div id="paddingheader">
-		<h1 class="clearfix"><img src="interfaces/default/images/icon_history.png" alt="History"/>History</h1>
+		<h1 class="clearfix"><i class="fa fa-calendar"></i> History</h1>
 	</div>
 	<table class="display" id="history_table">
 		<thead>
