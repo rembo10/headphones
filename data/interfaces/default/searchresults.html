@@ -3,7 +3,7 @@
 <%def name="body()">
 	<div class="table_wrapper">
 	<div id="paddingheader">
-		<h1 class="clearfix"><img src="interfaces/default/images/icon_search.png" alt="Search results"/>Search Result</h1>
+		<h1 class="clearfix"><i class="fa fa-search"></i> Search Result</h1>
 	</div>
 	<table class="display" id="searchresults_table">
 		<thead>
@@ -38,9 +38,9 @@
 					<td id="artistname"><a href="${result['url']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
 					<td id="score"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></td>
 				%if type == 'album':	
-					<td id="add"><a href="addReleaseById?rid=${result['albumid']}"><span class="ui-icon ui-icon-plus"></span> Add this album</a></td>
+					<td id="add"><a href="addReleaseById?rid=${result['albumid']}"><i class="fa fa-plus"></i> Add this album</a></td>
 				%else:
-					<td id="add"><a href="addArtist?artistid=${result['id']}"><span class="ui-icon ui-icon-plus"></span> Add this artist</a></td>
+					<td id="add"><a href="addArtist?artistid=${result['id']}"><i class="fa fa-plus"></i> Add this artist</a></td>
 				%endif
 				</tr>
 				%endfor
