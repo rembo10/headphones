@@ -170,7 +170,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
         # Use the provided search term if available, otherwise build a search term
         if albums[5]:
-            term = albums[5]
+            term = helpers.latinToAscii(helpers.replace_all(albums[5], dic)).strip()
 
         else:
             # FLAC usually doesn't have a year for some reason so I'll leave it out
@@ -837,7 +837,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
         # Use provided term if available, otherwise build our own (this code needs to be cleaned up since a lot
         # of these torrent providers are just using cleanartist/cleanalbum terms
         if albums[4]:
-            term = albums[4]
+            term = helpers.latinToAscii(helpers.replace_all(albums[4], dic)).strip()
 
         else:
             # FLAC usually doesn't have a year for some reason so I'll leave it out
@@ -1515,14 +1515,14 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                     else:
                         file_or_url = bestqual[2]
 
-                    torrentid = transmission.addTorrent(file_or_url)
+                    torrent_name,hashString = transmission.addTorrent(file_or_url)
                     
-                    if not torrentid:
+                    if not hashString:
                         logger.error("Error sending torrent to Transmission. Are you sure it's running?")
                         return
                         
-                    torrent_folder_name = transmission.getTorrentFolder(torrentid)
-                    logger.info('Torrent folder name: %s' % torrent_folder_name)
+                    torrent_folder_name = torrent_name + '_hash:' + hashString
+                    logger.info('Torrent %s' % torrent_folder_name)
 
                     # remove temp .torrent file created above
                     if bestqual[3] == 'rutracker.org':

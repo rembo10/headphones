@@ -29,6 +29,7 @@ from lib.beets.mediafile import MediaFile
 import headphones
 from headphones import db, albumart, librarysync, lyrics, logger, helpers
 from headphones.helpers import sab_replace_dots, sab_replace_spaces
+from headphones import transmission
 
 postprocessor_lock = threading.Lock()
 
@@ -40,9 +41,9 @@ def checkFolder():
         snatched = myDB.select('SELECT * from snatched WHERE Status="Snatched"')
 
         for album in snatched:
+            logger.debug(u"Processing %s" % album['FolderName'])
         
             if album['FolderName']:
-                
                 if album['Kind'] == 'nzb':
                     # We're now checking sab config options after sending to determine renaming - but we'll keep the
                     # iterations in just in case we can't read the config for some reason
@@ -62,12 +63,27 @@ def checkFolder():
                             verify(album['AlbumID'], nzb_album_path, 'nzb')
                             
                 if album['Kind'] == 'torrent':
-
-                    torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
+                    if 'hash:' in album['FolderName']:
+                        torrent_name,torrent_hash = album['FolderName'].split("_hash:")
+                        torrent_folder_name = transmission.getTorrentFolder(torrent_hash)
+                        if torrent_folder_name:
+                            torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, torrent_folder_name)
+                        else:
+                            logger.debug(u"Could not find torrent %s in Transmission queue using hash search, might have been deleted? Retry downloading same torrent again or clear Headphone snatch history" % torrent_name)
+                            torrent_folder_name = transmission.getTorrentFolder(torrent_name)
+                            if torrent_folder_name:
+                                torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, torrent_folder_name)
+                            else:
+                                logger.info(u"Could not find torrent %s in Transmission queue using name search, might have been deleted? Retry downloading same torrent again or clear Headphone snatch history" % torrent_name)
+                                torrent_album_path = "nonexistent torrent"
+                    else:
+                        torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
     
                     if os.path.exists(torrent_album_path):
-                        logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
+                        logger.debug('Found %s in torrent download folder. Verifying....' % torrent_folder_name)
                         verify(album['AlbumID'], torrent_album_path, 'torrent')
+                    else:
+                        logger.debug("Path does not exists %s " % torrent_album_path)
 
 def verify(albumid, albumpath, Kind=None, forced=False):
 
@@ -165,7 +181,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
     
     downloaded_track_list = []
     downloaded_cuecount = 0
-        
+    
     for r,d,f in os.walk(albumpath):
         for files in f:
             if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
@@ -851,14 +867,13 @@ def renameFiles(albumpath, downloaded_track_list, release):
         if new_file_name.startswith('.'):
             new_file_name = new_file_name.replace(0, '_')
         
-        new_file = os.path.join(albumpath, new_file_name)
-        
         if downloaded_track == new_file_name:
-            logger.debug("Renaming for: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + " is not neccessary")
+            logger.debug(u"Renaming for: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + " is not neccessary")
             continue
 
-        logger.debug('Renaming %s ---> %s' % (downloaded_track.decode(headphones.SYS_ENCODING,'replace'), new_file_name.decode(headphones.SYS_ENCODING,'replace')))
+        logger.debug(u'Renaming %s ---> %s' % (downloaded_track.decode(headphones.SYS_ENCODING,'replace'), new_file_name.decode(headphones.SYS_ENCODING,'replace')))
         try:
+            new_file = os.path.join(albumpath, new_file_name.decode(headphones.SYS_ENCODING,'replace'))
             os.rename(downloaded_track, new_file)
         except Exception, e:
             logger.error('Error renaming file: %s. Error: %s' % (downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), e))
