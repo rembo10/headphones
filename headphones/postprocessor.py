@@ -435,6 +435,13 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         pushover = notifiers.PUSHOVER()
         pushover.notify(pushmessage,"Download and Postprocessing completed")
         
+    if headphones.RIVEU_ENABLED:
+        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
+        logger.info(u"Sending Riveu Notification")
+        riveu = notifiers.RIVEU()
+        riveu.notify(pushmessage, 'Sending Message')
+     
+        
 def embedAlbumArt(artwork, downloaded_track_list):
     logger.info('Embedding album art')
     

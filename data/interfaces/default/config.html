@@ -669,7 +669,7 @@
                                     </div>
                                 </fieldset>
                             </div>
-                            
+
                             <div id="xldproperties">
                                 <div class="row">
                                     <label>XLD Profile</label>
@@ -753,7 +753,7 @@
                                     <input type="text" name="cache_dir" value="${config['cache_dir']}" size="50">
                                 </div>
                             </fieldset>
-                            
+
                             <h2>Notifications</h2>
                             <fieldset>
                                 <h3>Prowl</h3>
@@ -821,7 +821,7 @@
                                                 nma_priority_selected = 'selected'
                                             else:
                                                 nma_priority_selected = ''
-                                                
+
                                             if x == -2:
                                                 nma_priority_value = 'Very Low'
                                             elif x == -1:
@@ -862,6 +862,21 @@
                                     <div class="row">
                                         <label>Priority (-1,0, or 1):</label>
                                         <input type="text" name="pushover_priority" value="${config['pushover_priority']}" size="2">
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+								<h3>Riveu</h3>
+								<div class="checkbox row">
+									<input type="checkbox" name="riveu_enabled" id="riveu" value="1" ${config['riveu_enabled']} /><label>Enable Riveu Notifications</label>
+								</div>
+								<div id="riveuoptions">
+									<div class="row">
+										<label>Username</label><input type="text" name="riveu_username" value="${config['riveu_username']}" size="30">
+									</div>
+									<div class="row">
+										<label>Password</label><input type="password" name="riveu_password" value="${config['riveu_password']}" size="30">
                                     </div>
                                 </div>
                             </fieldset>
@@ -1117,24 +1132,45 @@
                                 $("#nmaoptions").slideUp();
                         }
                 });
-                if ($("#pushover").is(":checked"))
-                        {
-                                $("#pushoveroptions").show();
-                        }
-                else
-                        {
-                                $("#pushoveroptions").hide();
-                        }
 
-                $("#pushover").click(function(){
-                        if ($("#pushover").is(":checked"))
-                        {
-                                $("#pushoveroptions").slideDown();
-                        }
-                        else
-                        {
-                                $("#pushoveroptions").slideUp();
-                        }
+                if ($("#pushover").is(":checked"))
+						{
+								$("#pushoveroptions").show();
+						}
+				else
+						{
+								$("#pushoveroptions").hide();
+						}
+
+				$("#pushover").click(function(){
+						if ($("#pushover").is(":checked"))
+						{
+								$("#pushoveroptions").slideDown();
+						}
+						else
+						{
+								$("#pushoveroptions").slideUp();
+						}
+                });
+
+                if ($("#riveu").is(":checked"))
+						{
+								$("#riveuoptions").show();
+						}
+				else
+						{
+								$("#riveuoptions").hide();
+						}
+
+				$("#riveu").click(function(){
+						if ($("#riveu").is(":checked"))
+						{
+								$("#riveuoptions").slideDown();
+						}
+						else
+						{
+								$("#riveuoptions").slideUp();
+						}
                 });
 
                 if ($("#preferred_bitrate").is(":checked"))

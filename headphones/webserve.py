@@ -951,7 +951,10 @@ class WebInterface(object):
                     "hppass": headphones.HPPASS,
                     "cache_sizemb": headphones.CACHE_SIZEMB,
                     "file_permissions": headphones.FILE_PERMISSIONS,
-                    "folder_permissions": headphones.FOLDER_PERMISSIONS
+                    "folder_permissions": headphones.FOLDER_PERMISSIONS,
+                    "riveu_enabled": checked(headphones.RIVEU_ENABLED),
+                    "riveu_username": headphones.RIVEU_USERNAME,
+                    "riveu_password": headphones.RIVEU_PASSWORD
                 }
 
         # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8
@@ -986,7 +989,7 @@ class WebInterface(object):
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False,
         pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, mirror=None, customhost=None, customport=None,
         customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
-        enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None, **kwargs):
+        enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None,riveu_enabled=0,riveu_username=None,riveu_password=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -1123,6 +1126,9 @@ class WebInterface(object):
         headphones.CACHE_SIZEMB = int(cache_sizemb)
         headphones.FILE_PERMISSIONS = file_permissions
         headphones.FOLDER_PERMISSIONS = folder_permissions
+        headphones.RIVEU_ENABLED = riveu_enabled
+        headphones.RIVEU_USERNAME = riveu_username
+        headphones.RIVEU_PASSWORD = riveu_password
 
         # Handle the variable config options. Note - keys with False values aren't getting passed
 
