@@ -871,7 +871,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
         if headphones.KAT:
             provider = "Kick Ass Torrent"
-            providerurl = url_fix("http://www.kat.ph/search/" + term)
+            providerurl = url_fix("http://kickass.to/usearch" + term)
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "7"        #music
                 format = "2"             #flac
@@ -1156,7 +1156,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 providerurl = url_fix(pirate_proxy + "/search/" + term + "/0/99/")
                 
             else:
-                providerurl = url_fix("http://thepiratebay.sx/search/" + term + "/0/99/")
+                providerurl = url_fix("http://thepiratebay.se/search/" + term + "/0/99/")
                 
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 category = '104'          #flac
@@ -1551,7 +1551,7 @@ def preprocesstorrent(resultlist, pre_sorted_list=False):
             request.add_header('Accept-encoding', 'gzip')
     
             if result[3] == 'Kick Ass Torrent':
-                request.add_header('Referer', 'http://kat.ph/')
+                request.add_header('Referer', 'http://kickass.to/')
 
             response = urllib2.urlopen(request)
             if response.info().get('Content-Encoding') == 'gzip':
