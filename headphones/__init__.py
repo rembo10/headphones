@@ -245,6 +245,7 @@ CUSTOMPORT = None
 CUSTOMSLEEP = None
 HPUSER = None
 HPPASS = None
+SONGKICK_APIKEY = "vDtvjogcJwz6gi6J"
 
 CACHE_SIZEMB = 32
 JOURNAL_MODE = None
@@ -449,11 +450,11 @@ def initialize():
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
 
         HEADPHONES_INDEXER = bool(check_setting_int(CFG, 'Headphones', 'headphones_indexer', 0))
-        
+
         TRANSMISSION_HOST = check_setting_str(CFG, 'Transmission', 'transmission_host', '')
         TRANSMISSION_USERNAME = check_setting_str(CFG, 'Transmission', 'transmission_username', '')
         TRANSMISSION_PASSWORD = check_setting_str(CFG, 'Transmission', 'transmission_password', '')
-        
+
         UTORRENT_HOST = check_setting_str(CFG, 'uTorrent', 'utorrent_host', '')
         UTORRENT_USERNAME = check_setting_str(CFG, 'uTorrent', 'utorrent_username', '')
         UTORRENT_PASSWORD = check_setting_str(CFG, 'uTorrent', 'utorrent_password', '')
@@ -592,7 +593,7 @@ def initialize():
 			if BLACKHOLE:
 				NZB_DOWNLOADER = 2
 			CONFIG_VERSION = '4'
-            
+
         # Enable Headphones Indexer if they have a VIP account
         if CONFIG_VERSION == '4':
             if HPUSER and HPPASS:
@@ -706,7 +707,7 @@ def launch_browser(host, port, root):
 
     if host == '0.0.0.0':
         host = 'localhost'
-        
+
     if ENABLE_HTTPS:
         protocol = 'https'
     else:
@@ -829,7 +830,7 @@ def config_write():
     new_config['Transmission']['transmission_host'] = TRANSMISSION_HOST
     new_config['Transmission']['transmission_username'] = TRANSMISSION_USERNAME
     new_config['Transmission']['transmission_password'] = TRANSMISSION_PASSWORD
-    
+
     new_config['uTorrent'] = {}
     new_config['uTorrent']['utorrent_host'] = UTORRENT_HOST
     new_config['uTorrent']['utorrent_username'] = UTORRENT_USERNAME
