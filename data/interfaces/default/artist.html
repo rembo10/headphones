@@ -7,7 +7,7 @@
 
 <%def name="headerIncludes()">
 	<div id="subhead_container">
-		<div id="subhead_menu">		
+		<div id="subhead_menu">
 			<a id="menu_link_refresh" onclick="doAjaxCall('refreshArtist?ArtistID=${artist['ArtistID']}', $(this)),'table'" href="#" data-success="'${artist['ArtistName']}' is being refreshed">Refresh Artist</a>
 			<a id="menu_link_delete" href="deleteArtist?ArtistID=${artist['ArtistID']}">Delete Artist</a>
 			%if artist['Status'] == 'Paused':
@@ -18,7 +18,7 @@
 			%if artist['IncludeExtras']:
 				<a id="menu_link_removeextra" href="#" onclick="doAjaxCall('removeExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Extras removed for ${artist['ArtistName']}">Remove Extras</a>
 				<a class="menu_link_edit" id="menu_link_modifyextra" href="#">Modify Extras</a>
-			%else:	
+			%else:
 				<a id="menu_link_getextra" href="#">Get Extras</a>
 			%endif
 					<div id="dialog" title="Choose Which Extras to Fetch" style="display:none" class="configtable">
@@ -33,7 +33,7 @@
 						</form>
 					</div>
 		</div>
-	</div>	
+	</div>
 	<a href="home" class="back">&laquo; Back to overview</a>
 </%def>
 
@@ -42,20 +42,21 @@
 		<div id="artistImg">
 			<img id="artistImage" class="albumArt" alt="" src="artwork/artist/${artist['ArtistID']}"/>
 		</div>
-		<h1>	
-			%if artist['Status'] == 'Loading':	
-				<img src="interfaces/default/images/loader_black.gif" alt="loading" style="float:left; margin-right: 5px;"/> 
+		<h1>
+			%if artist['Status'] == 'Loading':
+				<img src="interfaces/default/images/loader_black.gif" alt="loading" style="float:left; margin-right: 5px;"/>
 			%endif
 			<a href="http://musicbrainz.org/artist/${artist['ArtistID']}">${artist['ArtistName']}</a>
 			%if artist['Status'] == 'Loading':
 				<h3><i>(Album information for this artist is currently being loaded)</i></h3>
-			%endif	
+			%endif
 		</h1>
-		<div id="artistBio"></div>	
+		<div id="artistBio"></div>
 	</div>
+	<ul id="artistCalendar" style="display:none;"></ul>
 	<form action="markAlbums" method="get" id="markAlbums">
 	<input type="hidden" name="ArtistID" value=${artist['ArtistID']}>
-	<div id="markalbum">Mark selected albums as 
+	<div id="markalbum">Mark selected albums as
 		<select name="action" onChange="doAjaxCall('markAlbums',$(this),'table',true);" data-error="You didn't select any albums">
   			<option disabled="disabled" selected="selected">Choose...</option>
   			<option value="Wanted">Wanted</option>
@@ -91,10 +92,10 @@
 				else:
 					grade = 'A'
 
-				myDB = db.DBConnection()					
+				myDB = db.DBConnection()
 				totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=?', [album['AlbumID']]))
 				havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=? AND Location IS NOT NULL', [album['AlbumID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle LIKE ? AND Matched = "Failed"', [album['ArtistName'], album['AlbumTitle']]))
-				
+
 				try:
 					percent = (havetracks*100.0)/totaltracks
 					if percent > 100:
@@ -102,7 +103,7 @@
 				except (ZeroDivisionError, TypeError):
 					percent = 0
 					totaltracks = '?'
-					
+
 				avgbitrate = myDB.action("SELECT AVG(BitRate) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
 				if avgbitrate:
 					bitrate = str(int(avgbitrate)/1000) + ' kbps'
@@ -143,7 +144,7 @@
 				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
 				<td id="bitrate">${bitrate}</td>
 				<td id="albumformat">${albumformat}</td>
-			</tr>			
+			</tr>
 		%endfor
 		</tbody>
 	</table>
@@ -159,7 +160,7 @@
 
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
-	
+
 	<script>
 	function getArtistBio() {
 		var id = "${artist['ArtistID']}";
@@ -167,7 +168,40 @@
 		getInfo(elem,id,'artist');
 	}
 
-	
+
+	function getArtistsCalendar() {
+		var template, calendarDomNode;
+
+		calendarDomNode = $("#artistCalendar");
+
+		template = '<li><a target="_blank" href="URI"><span class="sk-name">NAME</span><span class="sk-location">LOC</span></a></li>';
+
+		$.getJSON("http://api.songkick.com/api/3.0/artists/mbid:${artist['ArtistID']}/calendar.json?apikey=${headphones.SONGKICK_APIKEY}&jsoncallback=?",
+			function(data){
+				if (data['resultsPage'].totalEntries >= 1) {
+					var tourDate;
+
+					calendarDomNode.show();
+					$("#artistImg").addClass('on-tour');
+
+					jQuery.each( data['resultsPage'].results.event, function( i, event ) {
+						tourDate = template;
+						tourDate = tourDate.replace('URI',event.uri);
+						tourDate = tourDate.replace('NAME',event.displayName);
+						tourDate = tourDate.replace('LOC',event.location.city);
+
+						calendarDomNode.append(tourDate);
+					});
+
+					calendarDomNode.append('<li><img src="interfaces/default/images/songkick.png" alt="concerts by songkick" class="sk-logo" /></li>');
+
+				}
+				console.warn(data);
+				console.warn(data['resultsPage'].totalEntries);
+			// data is JSON response object
+		});
+	}
+
 	function initThisPage() {
 		$('#menu_link_getextra').click(function() {
 			$('#dialog').dialog();
@@ -176,7 +210,7 @@
 		$('#menu_link_modifyextra').click(function() {
 			$('#dialog').dialog();
 		});
-		
+
 		%if artist['Status'] == 'Loading':
 			showMsg("Getting artist information",true);
 		%endif
@@ -195,7 +229,7 @@
 			],
 			"aoColumnDefs": [
 			          { 'bSortable': false, 'aTargets': [ 0,1 ] }
-			],				
+			],
 			"oLanguage": {
 				"sLengthMenu":"Show _MENU_ albums per page",
 				"sEmptyTable": "No album information available",
@@ -206,17 +240,18 @@
 			"bPaginate": false,
 			"aaSorting": [[4, 'asc'],[3,'desc']]
 
-		});			
+		});
 		resetFilters("albums");
 		setTimeout(function(){
 			initFancybox();
 		},1500)
 	}
-	
-	$(document).ready(function() {		
+
+	$(document).ready(function() {
 		initActions();
 		initThisPage();
 		getArtistBio();
+		getArtistsCalendar();
 	});
 
 	</script>
