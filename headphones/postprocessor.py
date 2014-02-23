@@ -976,11 +976,16 @@ def forcePostProcess():
         # TODO: Add metadata lookup
         try:
             name, album, year = helpers.extract_data(folder_basename)
-        except:
+
+            # Try to deduce the name, album and year from the tag info in the
+            # media files.
+            if name is None:
+                name, album, year = helpers.extract_metadata(folder)
+        except Exception as e:
+            print e
             name = None
 
         if name and album and year:
-            
             release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
             if release:
                 logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
