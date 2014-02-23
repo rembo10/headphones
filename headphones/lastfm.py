@@ -95,7 +95,9 @@ def getArtists():
         
     else:
         username = headphones.LASTFM_USERNAME
-        
+
+    logger.info("Starting Last.FM artists import with username '%s'" % username)
+
     url = 'http://ws.audioscrobbler.com/2.0/?method=library.getartists&limit=10000&api_key=%s&user=%s' % (api_key, username)
     data = urllib2.urlopen(url, timeout=20).read()
     
@@ -106,6 +108,7 @@ def getArtists():
         return
     
     artists = d.getElementsByTagName("artist")
+    logger.info("Fetched %d artists from Last.FM" % len(artists))
     
     artistlist = []
     
@@ -125,6 +128,8 @@ def getArtists():
     
     for artistid in artistlist:
         importer.addArtisttoDB(artistid)
+
+    logger.info("Imported %d new artists from Last.FM" % len(artistid))
     
 def getTagTopArtists(tag, limit=50):
     myDB = db.DBConnection()
