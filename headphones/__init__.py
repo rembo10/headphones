@@ -240,6 +240,9 @@ NMA_ENABLED = False
 NMA_APIKEY = None
 NMA_PRIORITY = None
 NMA_ONSNATCH = None
+PUSHALOT_ENABLED = False
+PUSHALOT_APIKEY = None
+PUSHALOT_ONSNATCH = None
 SYNOINDEX_ENABLED = False
 PUSHOVER_ENABLED = True
 PUSHOVER_PRIORITY = 1
@@ -332,7 +335,11 @@ def initialize():
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
                 PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
+<<<<<<< HEAD
 		PLEX_ENABLED, PLEX_SERVER_HOST, PLEX_CLIENT_HOST, PLEX_USERNAME, PLEX_PASSWORD, PLEX_UPDATE, PLEX_NOTIFY
+=======
+		PUSHALOT_ENABLED, PUSHALOT_APIKEY, PUSHALOT_ONSNATCH
+>>>>>>> echel0n/pushalot
 
         if __INITIALIZED__:
             return False
@@ -356,6 +363,7 @@ def initialize():
         CheckSection('XBMC')
         CheckSection('Plex')
         CheckSection('NMA')
+        CheckSection('Pushalot')
         CheckSection('Synoindex')
         CheckSection('Twitter')
         CheckSection('Advanced')
@@ -543,6 +551,10 @@ def initialize():
         NMA_APIKEY = check_setting_str(CFG, 'NMA', 'nma_apikey', '')
         NMA_PRIORITY = check_setting_int(CFG, 'NMA', 'nma_priority', 0)
         NMA_ONSNATCH = bool(check_setting_int(CFG, 'NMA', 'nma_onsnatch', 0))
+
+        PUSHALOT_ENABLED = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_enabled', 0))
+        PUSHALOT_APIKEY = check_setting_str(CFG, 'Pushalot', 'pushalot_apikey', '')
+        PUSHALOT_ONSNATCH = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_onsnatch', 0))
 
         SYNOINDEX_ENABLED = bool(check_setting_int(CFG, 'Synoindex', 'synoindex_enabled', 0))
 
@@ -924,7 +936,12 @@ def config_write():
     new_config['NMA']['nma_enabled'] = int(NMA_ENABLED)
     new_config['NMA']['nma_apikey'] = NMA_APIKEY
     new_config['NMA']['nma_priority'] = NMA_PRIORITY
-    new_config['NMA']['nma_onsnatch'] = int(PROWL_ONSNATCH)
+    new_config['NMA']['nma_onsnatch'] = int(NMA_ONSNATCH)
+
+    new_config['Pushalot'] = {}
+    new_config['Pushalot']['pushalot_enabled'] = int(PUSHALOT_ENABLED)
+    new_config['Pushalot']['pushalot_apikey'] = PUSHALOT_APIKEY
+    new_config['Pushalot']['pushalot_onsnatch'] = int(PUSHALOT_ONSNATCH)
 
     new_config['Pushover'] = {}
     new_config['Pushover']['pushover_enabled'] = int(PUSHOVER_ENABLED)

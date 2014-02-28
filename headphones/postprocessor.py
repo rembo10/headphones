@@ -431,6 +431,12 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         nma = notifiers.NMA()
         nma.notify(release['ArtistName'], release['AlbumTitle'])
 
+    if headphones.PUSHALOT_ENABLED:
+        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
+        logger.info(u"Pushalot request")
+        pushalot = notifiers.PUSHALOT()
+        pushalot.notify(pushmessage,"Download and Postprocessing completed")
+
     if headphones.SYNOINDEX_ENABLED:
         syno = notifiers.Synoindex()
         for albumpath in albumpaths:
