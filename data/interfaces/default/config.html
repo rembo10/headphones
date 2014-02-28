@@ -865,6 +865,27 @@
                                     </div>
                                 </div>
                             </fieldset>
+                            <fieldset>
+                                <h3>Twitter</h3>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="twitter_enabled" id="twitter" value="1" ${config['twitter_enabled']} /><label>Enable Twitter Notifications</label>
+                                </div>
+                                <div id="twitteroptions">
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="twitter_onsnatch" value="1" ${config['twitter_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                    <div class="row">
+                                        <input type="button" value="Request Authorization" id="twitterStep1" />
+                                    </div>
+                                    <div class="row">
+                                        <input type="text" id="twitter_key" value="" size="35" placeholder="Input Authorization Key" />
+                                        <input type="button" value="Verify Key" id="twitterStep2" />
+                                    </div>
+                                    <div class="row">
+                                        <input type="button" value="Test Twitter" id="testTwitter" />
+                                    </div>
+                                </div>
+                            </fieldset>
 
                             <fieldset>
                                 <legend>Musicbrainz</legend>
@@ -1137,6 +1158,26 @@
                         }
                 });
 
+                if ($("#twitter").is(":checked"))
+                        {
+                                $("#twitteroptions").show();
+                        }
+                else
+                        {
+                                $("#twitteroptions").hide();
+                        }
+
+                $("#twitter").click(function(){
+                        if ($("#twitter").is(":checked"))
+                        {
+                                $("#twitteroptions").slideDown();
+                        }
+                        else
+                        {
+                                $("#twitteroptions").slideUp();
+                        }
+                });
+
                 if ($("#preferred_bitrate").is(":checked"))
                         {
                                 $("#preferred_bitrate_options").show();
@@ -1290,7 +1331,28 @@
                 initConfigCheckbox("#usewhatcd");
                 initConfigCheckbox("#useapi");
                 initConfigCheckbox("#enable_https");
+        
+
+
+                $('#twitterStep1').click(function () {
+                    $.get("/twitterStep1", function (data) {window.open(data); })
+                    .done(function () { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>Confirm Authorization. Check pop-up blocker if no response.</div>"); });
+                    $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
+                });
+
+                $('#twitterStep2').click(function () {
+                    var twitter_key = $("#twitter_key").val();
+                    $.get("/twitterStep2", {'key': twitter_key}, function (data) { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>"); });
+                    $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
+                });
+
+                $('#testTwitter').click(function () {
+                    $.get("/testTwitter",
+                        function (data) { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>"); });
+                    $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
+                });
         }
+
         $(document).ready(function() {
             initThisPage();
         });

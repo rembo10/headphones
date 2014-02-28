@@ -434,6 +434,12 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         logger.info(u"Pushover request")
         pushover = notifiers.PUSHOVER()
         pushover.notify(pushmessage,"Download and Postprocessing completed")
+
+    if headphones.TWITTER_ENABLED:
+        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
+        logger.info(u"Sending Twitter notification")
+        twitter = notifiers.TwitterNotifier()
+        twitter.notify_download(pushmessage)
         
 def embedAlbumArt(artwork, downloaded_track_list):
     logger.info('Embedding album art')
