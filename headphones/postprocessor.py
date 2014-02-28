@@ -420,6 +420,13 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         if headphones.XBMC_NOTIFY:
             xbmc.notify(release['ArtistName'], release['AlbumTitle'], album_art_path)
             
+    if headphones.PLEX_ENABLED:
+        plex = notifiers.Plex()
+        if headphones.PLEX_UPDATE:
+            plex.update()
+        if headphones.PLEX_NOTIFY:
+            plex.notify(release['ArtistName'], release['AlbumTitle'], album_art_path)
+
     if headphones.NMA_ENABLED:
         nma = notifiers.NMA()
         nma.notify(release['ArtistName'], release['AlbumTitle'])

@@ -933,6 +933,13 @@ class WebInterface(object):
                     "xbmc_password": headphones.XBMC_PASSWORD,
                     "xbmc_update": checked(headphones.XBMC_UPDATE),
                     "xbmc_notify": checked(headphones.XBMC_NOTIFY),
+                    "plex_enabled": checked(headphones.PLEX_ENABLED),
+                    "plex_server_host": headphones.PLEX_SERVER_HOST,
+                    "plex_client_host": headphones.PLEX_CLIENT_HOST,
+                    "plex_username": headphones.PLEX_USERNAME,
+                    "plex_password": headphones.PLEX_PASSWORD,
+                    "plex_update": checked(headphones.PLEX_UPDATE),
+                    "plex_notify": checked(headphones.PLEX_NOTIFY),
                     "nma_enabled": checked(headphones.NMA_ENABLED),
                     "nma_apikey": headphones.NMA_APIKEY,
                     "nma_priority": int(headphones.NMA_PRIORITY),
@@ -988,7 +995,8 @@ class WebInterface(object):
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False,
         pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, twitter_enabled=0, twitter_onsnatch=0, mirror=None, customhost=None, customport=None,
         customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
-        enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None, **kwargs):
+        enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None, plex_enabled=0, plex_server_host=None, plex_client_host=None, plex_username=None, 
+        plex_password=None, plex_update=0, plex_notify=0, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -1107,6 +1115,13 @@ class WebInterface(object):
         headphones.XBMC_PASSWORD = xbmc_password
         headphones.XBMC_UPDATE = xbmc_update
         headphones.XBMC_NOTIFY = xbmc_notify
+        headphones.PLEX_ENABLED = plex_enabled
+        headphones.PLEX_SERVER_HOST = plex_server_host
+        headphones.PLEX_CLIENT_HOST = plex_client_host
+        headphones.PLEX_USERNAME = plex_username
+        headphones.PLEX_PASSWORD = plex_password
+        headphones.PLEX_UPDATE = plex_update
+        headphones.PLEX_NOTIFY = plex_notify
         headphones.NMA_ENABLED = nma_enabled
         headphones.NMA_APIKEY = nma_apikey
         headphones.NMA_PRIORITY = nma_priority

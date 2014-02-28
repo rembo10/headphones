@@ -229,6 +229,13 @@ XBMC_USERNAME = None
 XBMC_PASSWORD = None
 XBMC_UPDATE = False
 XBMC_NOTIFY = False
+PLEX_ENABLED = False
+PLEX_SERVER_HOST = None
+PLEX_CLIENT_HOST = None
+PLEX_USERNAME = None
+PLEX_PASSWORD = None
+PLEX_UPDATE = False
+PLEX_NOTIFY = False
 NMA_ENABLED = False
 NMA_APIKEY = None
 NMA_PRIORITY = None
@@ -324,7 +331,8 @@ def initialize():
                 TWITTER_ENABLED, TWITTER_ONSNATCH, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
-                PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY
+                PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
+		PLEX_ENABLED, PLEX_SERVER_HOST, PLEX_CLIENT_HOST, PLEX_USERNAME, PLEX_PASSWORD, PLEX_UPDATE, PLEX_NOTIFY
 
         if __INITIALIZED__:
             return False
@@ -346,6 +354,7 @@ def initialize():
         CheckSection('Prowl')
         CheckSection('Pushover')
         CheckSection('XBMC')
+        CheckSection('Plex')
         CheckSection('NMA')
         CheckSection('Synoindex')
         CheckSection('Twitter')
@@ -521,6 +530,14 @@ def initialize():
         XBMC_PASSWORD = check_setting_str(CFG, 'XBMC', 'xbmc_password', '')
         XBMC_UPDATE = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update', 0))
         XBMC_NOTIFY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify', 0))
+
+	PLEX_ENABLED = bool(check_setting_int(CFG, 'Plex', 'plex_enabled', 0))
+	PLEX_SERVER_HOST = check_setting_str(CFG, 'Plex', 'plex_server_host', '')
+	PLEX_CLIENT_HOST = check_setting_str(CFG, 'Plex', 'plex_client_host', '')
+        PLEX_USERNAME = check_setting_str(CFG, 'Plex', 'plex_username', '')
+        PLEX_PASSWORD = check_setting_str(CFG, 'Plex', 'plex_password', '')
+	PLEX_UPDATE = bool(check_setting_int(CFG, 'Plex', 'plex_update', 0))
+	PLEX_NOTIFY = bool(check_setting_int(CFG, 'Plex', 'plex_notify', 0))
 
         NMA_ENABLED = bool(check_setting_int(CFG, 'NMA', 'nma_enabled', 0))
         NMA_APIKEY = check_setting_str(CFG, 'NMA', 'nma_apikey', '')
@@ -893,6 +910,15 @@ def config_write():
     new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
     new_config['XBMC']['xbmc_update'] = int(XBMC_UPDATE)
     new_config['XBMC']['xbmc_notify'] = int(XBMC_NOTIFY)
+
+    new_config['Plex'] = {}
+    new_config['Plex']['plex_enabled'] = int(PLEX_ENABLED)
+    new_config['Plex']['plex_server_host'] = PLEX_SERVER_HOST
+    new_config['Plex']['plex_client_host'] = PLEX_CLIENT_HOST
+    new_config['Plex']['plex_username'] = PLEX_USERNAME
+    new_config['Plex']['plex_password'] = PLEX_PASSWORD
+    new_config['Plex']['plex_update'] = int(PLEX_UPDATE)
+    new_config['Plex']['plex_notify'] = int(PLEX_NOTIFY)
 
     new_config['NMA'] = {}
     new_config['NMA']['nma_enabled'] = int(NMA_ENABLED)

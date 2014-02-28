@@ -25,6 +25,7 @@ from urllib import urlencode
 import os.path
 import subprocess
 import lib.simplejson as simplejson
+from xml.dom import minidom
 
 try:
     from urlparse import parse_qsl #@UnusedImport
@@ -191,6 +192,93 @@ class XBMC:
 
             except:
                 logger.warn('Error sending notification request to XBMC')
+
+class Plex:
+
+    def __init__(self):
+    
+        self.server_hosts = headphones.PLEX_SERVER_HOST
+        self.client_hosts = headphones.PLEX_CLIENT_HOST
+        self.username = headphones.PLEX_USERNAME
+        self.password = headphones.PLEX_PASSWORD
+
+    def _sendhttp(self, host, command):
+
+        username = self.username
+        password = self.password
+        
+        url_command = urllib.urlencode(command)
+        
+        url = host + '/xbmcCmds/xbmcHttp/?' + url_command
+            
+        req = urllib2.Request(url)
+            
+        if password:
+            base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+            req.add_header("Authorization", "Basic %s" % base64string)
+                
+        logger.info('Plex url: %s' % url)
+            
+        try:
+            handle = urllib2.urlopen(req)
+        except Exception, e:
+            logger.warn('Error opening Plex url: %s' % e)
+            return
+    
+        response = handle.read().decode(headphones.SYS_ENCODING)
+            
+        return response
+    
+    def update(self):
+                    
+        # From what I read you can't update the music library on a per directory or per path basis
+        # so need to update the whole thing
+
+        hosts = [x.strip() for x in self.server_hosts.split(',')]
+
+        for host in hosts:
+            logger.info('Sending library update command to Plex Media Server@ '+host)
+            url = "%s/library/sections" % host
+            try:
+                xml_sections = minidom.parse(urllib.urlopen(url))
+            except IOError, e:
+                logger.warn("Error while trying to contact Plex Media Server: %s" % e)
+                return False
+
+            sections = xml_sections.getElementsByTagName('Directory')
+            if not sections:
+                logger.info(u"Plex Media Server not running on: " + host)
+                return False
+
+            for s in sections:
+                if s.getAttribute('type') == "artist":
+                    url = "%s/library/sections/%s/refresh" % (host, s.getAttribute('key'))
+                    try:
+                        urllib.urlopen(url)
+                    except Exception, e:
+                        logger.warn("Error updating library section for Plex Media Server: %s" % e)
+                        return False
+            
+    def notify(self, artist, album, albumartpath):
+
+        hosts = [x.strip() for x in self.client_hosts.split(',')]
+
+        header = "Headphones"
+        message = "%s - %s added to your library" % (artist, album)
+        time = "3000" # in ms
+
+        for host in hosts:
+            logger.info('Sending notification command to Plex Media Server @ '+host)
+            try:
+		notification = header + "," + message + "," + time + "," + albumartpath
+		notifycommand = {'command': 'ExecBuiltIn', 'parameter': 'Notification('+notification+')'}
+		request = self._sendhttp(host, notifycommand)
+
+		if not request:
+			raise Exception
+
+            except:
+                logger.warn('Error sending notification request to Plex Media Server')
 
 class NMA:
 

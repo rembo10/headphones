@@ -799,6 +799,38 @@
                                 </div>
                             </fieldset>
                             <fieldset>
+                                <h3>Plex Media Server</h3>
+                                <div class="checkbox row">
+                                    <input type="checkbox" name="plex_enabled" id="plex" value="1" ${config['plex_enabled']} /><label>Enable Plex Updates</label>
+                                </div>
+                                <div id="plexoptions">
+                                    <div class="row">
+                                        <label>Plex Server Host:Port</label>
+                                        <input type="text" name="plex_server_host" value="${config['plex_server_host']}" size="30">
+                                        <small>Host running Plex Media Server (eg. http://192.168.1.100:32400)</small>
+                                    </div>
+                                    <div class="row">
+                                        <label>Plex Client Host:Port</label>
+                                        <input type="text" name="plex_client_host" value="${config['plex_client_host']}" size="30">
+                                        <small>Host running Plex Client (eg. http://192.168.1.100:3000)</small>
+                                    </div>
+                                    <div class="row">
+                                        <label>Plex Username</label><input type="text" name="plex_username" value="${config['plex_username']}" size="30">
+					<small>Username of your Plex client API (blank for none)</small>
+                                    </div>
+                                    <div class="row">
+                                        <label>Plex Password</label><input type="password" name="plex_password" value="${config['plex_password']}" size="30">
+					<small>Password of your Plex client API (blank for none)</small>
+                                    </div>
+                                    <div class="checkbox row">
+                                        <input type="checkbox" name="plex_update" value="1" ${config['plex_update']} /><label>Update Plex Library</label>
+                                    </div>
+                                    <div class="checkbox row">
+                                        <input type="checkbox" name="plex_notify" value="1" ${config['plex_notify']} /><label>Send Notifications to Plex</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset>
                                 <h3>NotifyMyAndroid</h3>
                                 <div class="checkbox row">
                                     <input type="checkbox" name="nma_enabled" id="nma" value="1" ${config['nma_enabled']} /><label>Enable NotifyMyAndroid</label>
@@ -1116,6 +1148,26 @@
                         else
                         {
                                 $("#xbmcoptions").slideUp();
+                        }
+                });
+
+                if ($("#plex").is(":checked"))
+                        {
+                                $("#plexoptions").show();
+                        }
+                else
+                        {
+                                $("#plexoptions").hide();
+                        }
+
+                $("#plex").click(function(){
+                        if ($("#plex").is(":checked"))
+                        {
+                                $("#plexoptions").slideDown();
+                        }
+                        else
+                        {
+                                $("#plexoptions").slideUp();
                         }
                 });
 
