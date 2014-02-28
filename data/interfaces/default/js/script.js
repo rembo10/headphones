@@ -142,21 +142,21 @@ function initConfigCheckbox(elem) {
 	});
 }     
 function initActions() {
-	$("#subhead_menu #menu_link_refresh").button({ icons: { primary: "ui-icon-refresh" }  });
-	$("#subhead_menu #menu_link_edit").button({ icons: { primary: "ui-icon-pencil" }  });
-	$("#subhead_menu .menu_link_edit").button({ icons: { primary: "ui-icon-pencil" }  });
-    $("#subhead_menu #menu_link_delete" ).button({ icons: { primary: "ui-icon-trash" } });
-    $("#subhead_menu #menu_link_pauze").button({ icons: { primary: "ui-icon-pause"} });
-    $("#subhead_menu #menu_link_resume").button({ icons: { primary: "ui-icon-play"} });
-    $("#subhead_menu #menu_link_getextra").button({ icons: { primary: "ui-icon-plus"} });
-    $("#subhead_menu #menu_link_removeextra").button({ icons: { primary: "ui-icon-minus" } });    
-    $("#subhead_menu #menu_link_wanted" ).button({ icons: { primary: "ui-icon-heart" } });
-    $("#subhead_menu #menu_link_check").button({ icons: { primary: "ui-icon-arrowrefresh-1-w"} });
-    $("#subhead_menu #menu_link_skipped").button({ icons: { primary: "ui-icon-seek-end"} });
-    $("#subhead_menu #menu_link_retry").button({ icons: { primary: "ui-icon-arrowrefresh-1-e"} });
-    $("#subhead_menu #menu_link_new").button({ icons: { primary: "ui-icon-arrowreturnthick-1-s" } });
-    $("#subhead_menu #menu_link_shutdown").button({ icons: { primary: "ui-icon-power"} });
-    $("#subhead_menu #menu_link_scan").button({ icons: { primary: "ui-icon-search"} });
+	$("#subhead_menu #menu_link_refresh").button();
+	$("#subhead_menu #menu_link_edit").button();
+	$("#subhead_menu .menu_link_edit").button();
+    $("#subhead_menu #menu_link_delete" ).button();
+    $("#subhead_menu #menu_link_pauze").button();
+    $("#subhead_menu #menu_link_resume").button();
+    $("#subhead_menu #menu_link_getextra").button();
+    $("#subhead_menu #menu_link_removeextra").button();
+    $("#subhead_menu #menu_link_wanted" ).button();
+    $("#subhead_menu #menu_link_check").button();
+    $("#subhead_menu #menu_link_skipped").button();
+    $("#subhead_menu #menu_link_retry").button();
+    $("#subhead_menu #menu_link_new").button();
+    $("#subhead_menu #menu_link_shutdown").button();
+    $("#subhead_menu #menu_link_scan").button();
 }
 
 function refreshSubmenu() {
@@ -214,7 +214,7 @@ function showMsg(msg,loader,timeout,ms) {
 	feedback.fadeIn();
 	var message = $("<div class='msg'>" + msg + "</div>");
 	if (loader) {
-		var message = $("<div class='msg'><img src='interfaces/default/images/loader_black.gif' alt='loading' class='loader' style='position: relative;top:10px;margin-top:-15px; margin-left:-10px;'/>" + msg + "</div>");
+		var message = $("<i class='fa fa-refresh fa-spin'></i> " + msg + "</div>");
 		feedback.css("padding","14px 10px")
 	}
 	$(feedback).prepend(message);
@@ -246,7 +246,7 @@ function doAjaxCall(url,elem,reload,form) {
 		var dataString = $(formID).serialize();
 	}
 	// Loader Image
-	var loader = $("<img src='interfaces/default/images/loader_black.gif' alt='loading' class='loader'/>");
+	var loader = $("<i class='fa fa-refresh fa-spin'></i>");
 	// Data Success Message
 	var dataSucces = $(elem).data('success');
 	if (typeof dataSucces === "undefined") {
@@ -260,8 +260,8 @@ function doAjaxCall(url,elem,reload,form) {
 		var dataError = "There was an error";
 	} 	
 	// Get Success & Error message from inline data, else use standard message
-	var succesMsg = $("<div class='msg'><span class='ui-icon ui-icon-check'></span>" + dataSucces + "</div>");
-	var errorMsg = $("<div class='msg'><span class='ui-icon ui-icon-alert'></span>" + dataError + "</div>");
+	var succesMsg = $("<div class='msg'><i class='fa fa-check'></i> " + dataSucces + "</div>");
+	var errorMsg = $("<div class='msg'><i class='fa fa-exclamation-triangle'></i> " + dataError + "</div>");
 	
 	// Check if checkbox is selected
 	if ( form ) {
