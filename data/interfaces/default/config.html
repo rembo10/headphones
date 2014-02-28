@@ -674,7 +674,7 @@
                                     </div>
                                 </fieldset>
                             </div>
-                            
+
                             <div id="xldproperties">
                                 <div class="row">
                                     <label>XLD Profile</label>
@@ -758,7 +758,7 @@
                                     <input type="text" name="cache_dir" value="${config['cache_dir']}" size="50">
                                 </div>
                             </fieldset>
-                            
+
                             <h2>Notifications</h2>
                             <fieldset>
                                 <h3>Prowl</h3>
@@ -858,7 +858,7 @@
                                                 nma_priority_selected = 'selected'
                                             else:
                                                 nma_priority_selected = ''
-                                                
+
                                             if x == -2:
                                                 nma_priority_value = 'Very Low'
                                             elif x == -1:
@@ -975,6 +975,14 @@
                                         <label>Password:</label><input type="password" class="hppass" name="hppass" value="${config['hppass']}" size="15"><br>
                                         <a href="http://headphones.codeshy.com/vip" id="vipserver" target="_blank">Get an Account!</a>
                                     </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <legend>Songkick</legend>
+                                <div class="row">
+                                    <label>API Key:</label>
+                                    <input type="text" name="songkick_apikey" value="${config['songkick_apikey']}" size="50">
                                 </div>
                             </fieldset>
 
