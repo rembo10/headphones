@@ -7,17 +7,17 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">
-			<a id="menu_link_delete" href="deleteAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">Delete Album</a>
+			<a id="menu_link_delete" href="deleteAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}"><i class="fa fa-trash-o"></i> Delete Album</a>
 			%if album['Status'] == 'Skipped':
-			<a id="menu_link_wanted" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true)" data-success="'${album['AlbumTitle']}' added to queue">Mark Album as Wanted</a>
+			<a id="menu_link_wanted" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true)" data-success="'${album['AlbumTitle']}' added to queue"><i class="fa fa-heart"></i> Mark Album as Wanted</a>
 			%elif album['Status'] == 'Wanted':
-			<a id="menu_link_check" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this));" data-success="Forced checking successful">Force Check</a>
-			<a id="menu_link_skipped" href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),true);" data-success="'${album['AlbumTitle']}' marked as Skipped">Mark Album as Skipped</a>
+			<a id="menu_link_check" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this));" data-success="Forced checking successful"><i class="fa fa-search"></i> Force Check</a>
+			<a id="menu_link_skipped" href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),true);" data-success="'${album['AlbumTitle']}' marked as Skipped"><i class="fa fa-step-forward"></i> Mark Album as Skipped</a>
 			%else:
-			<a id="menu_link_retry" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true);" data-success="Retrying the same version of '${album['AlbumTitle']}'">Retry Download</a>
-			<a id="menu_link_new" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),true);" data-success="Looking for a new version of '${album['AlbumTitle']}'">Try New Version</a>
+			<a id="menu_link_retry" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true);" data-success="Retrying the same version of '${album['AlbumTitle']}'"><i class="fa fa-refresh"></i> Retry Download</a>
+			<a id="menu_link_new" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),true);" data-success="Looking for a new version of '${album['AlbumTitle']}'"><i class="fa fa-download"></i> Try New Version</a>
 			%endif		
-			<a class="menu_link_edit" id="album_chooser" href="#">Choose Alternate Release</a>
+			<a class="menu_link_edit" id="album_chooser" href="#"><i class="fa fa-pencil"></i> Choose Alternate Release</a>
 				<div id="dialog" title="Choose an Alternate Release" style="display:none" class="configtable">
 					<div class="links">
 						<%
@@ -42,7 +42,7 @@
 						%endif
 					</div>
 				</div>
-			<a class="menu_link_edit" id="edit_search_term" href="#">Edit Search Term</a>
+			<a class="menu_link_edit" id="edit_search_term" href="#"><i class="fa fa-pencil"></i> Edit Search Term</a>
 				<div id="dialog2" title="Enter your own search term for this album" style="display:none" class="configtable">
 					<form action="editSearchTerm" method="GET" id="editSearchTerm">
 						<input type="hidden" name="AlbumID" value="${album['AlbumID']}">

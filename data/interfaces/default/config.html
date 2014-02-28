@@ -7,15 +7,15 @@
 <%def name="headerIncludes()">
     <div id="subhead_container">
         <div id="subhead_menu">
-            <a id="menu_link_shutdown" href="shutdown">Shut Down</a>
-            <a id="menu_link_shutdown" href="restart">Restart</a>
+            <a id="menu_link_shutdown" href="shutdown"><i class="fa fa-power-off"></i> Shut Down</a>
+            <a id="menu_link_shutdown" href="restart"><i class="fa fa-power-off"></i> Restart</a>
         </div>
     </div>
 </%def>
 <%def name="body()">
 
     <div id="paddingheader">
-        <h1 class="clearfix"><img src="interfaces/default/images/icon_gear.png" alt="settings"/>Settings</h1>
+        <h1 class="clearfix"><i class="fa fa-gear"></i> Settings</h1>
     </div>
     <form action="configUpdate" method="post" class="form" id="configUpdate">
 
@@ -110,7 +110,7 @@
                     </tr>
                     <tr>
                         <div class="configmessage">
-                            <span class="ui-icon ui-icon-info" ></span>Web Interface changes require a restart to take effect
+                            <i class="fa fa-info-circle"></i> Web Interface changes require a restart to take effect
                         </div>
                     </tr>
                 </table>
@@ -553,7 +553,7 @@
 
                         <fieldset>
                             <legend>Re-Encoding Options</legend>
-                            <small class="heading"><span style="float: left; margin-right: .3em; margin-top: 4px;" class="ui-icon ui-icon-info"></span>Note: this option requires the lame, ffmpeg or xld encoder</small>
+                            <small class="heading"><i class="fa fa-info-circle"></i> Note: this option requires the lame, ffmpeg or xld encoder</small>
                             <div class="checkbox row clearfix">
                                 <input type="checkbox" name="music_encoder" id="music_encoder" value="1" ${config['music_encoder']}/><label>Re-encode downloads during postprocessing</label>
                             </div>
