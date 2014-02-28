@@ -1156,7 +1156,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 providerurl = url_fix(pirate_proxy + "/search/" + term + "/0/99/")
                 
             else:
-                providerurl = url_fix("http://thepiratebay.sx/search/" + term + "/0/99/")
+                providerurl = url_fix("http://thepiratebay.se/search/" + term + "/0/99/")
                 
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 category = '104'          #flac
