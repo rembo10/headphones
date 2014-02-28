@@ -92,6 +92,7 @@ CHECK_GITHUB = False
 CHECK_GITHUB_ON_STARTUP = False
 CHECK_GITHUB_INTERVAL = None
 
+POST_PROCESSING_DIR = None
 MUSIC_DIR = None
 DESTINATION_DIR = None
 LOSSLESS_DESTINATION_DIR = None
@@ -327,7 +328,7 @@ def initialize():
                 NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, HEADPHONES_INDEXER, NZBMATRIX, TRANSMISSION_HOST, TRANSMISSION_USERNAME, TRANSMISSION_PASSWORD, \
                 UTORRENT_HOST, UTORRENT_USERNAME, UTORRENT_PASSWORD, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, OMGWTFNZBS, OMGWTFNZBS_UID, OMGWTFNZBS_APIKEY, \
-		NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, LASTFM_USERNAME, \
+                NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, LASTFM_USERNAME, \
                 INTERFACE, FOLDER_PERMISSIONS, FILE_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
                 MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, \
                 PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
@@ -335,11 +336,9 @@ def initialize():
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
                 PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
-<<<<<<< HEAD
-		PLEX_ENABLED, PLEX_SERVER_HOST, PLEX_CLIENT_HOST, PLEX_USERNAME, PLEX_PASSWORD, PLEX_UPDATE, PLEX_NOTIFY
-=======
-		PUSHALOT_ENABLED, PUSHALOT_APIKEY, PUSHALOT_ONSNATCH
->>>>>>> echel0n/pushalot
+                PLEX_ENABLED, PLEX_SERVER_HOST, PLEX_CLIENT_HOST, PLEX_USERNAME, PLEX_PASSWORD, PLEX_UPDATE, PLEX_NOTIFY, PUSHALOT_ENABLED, PUSHALOT_APIKEY, PUSHALOT_ONSNATCH, \
+                POST_PROCESSING_DIR
+
 
         if __INITIALIZED__:
             return False
@@ -400,6 +399,7 @@ def initialize():
         CHECK_GITHUB_ON_STARTUP = bool(check_setting_int(CFG, 'General', 'check_github_on_startup', 1))
         CHECK_GITHUB_INTERVAL = check_setting_int(CFG, 'General', 'check_github_interval', 360)
 
+        POST_PROCESSING_DIR = check_setting_str(CFG, 'General', 'post_processing_dir', '')
         MUSIC_DIR = check_setting_str(CFG, 'General', 'music_dir', '')
         DESTINATION_DIR = check_setting_str(CFG, 'General', 'destination_dir', '')
         LOSSLESS_DESTINATION_DIR = check_setting_str(CFG, 'General', 'lossless_destination_dir', '')
@@ -539,13 +539,13 @@ def initialize():
         XBMC_UPDATE = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update', 0))
         XBMC_NOTIFY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify', 0))
 
-	PLEX_ENABLED = bool(check_setting_int(CFG, 'Plex', 'plex_enabled', 0))
-	PLEX_SERVER_HOST = check_setting_str(CFG, 'Plex', 'plex_server_host', '')
-	PLEX_CLIENT_HOST = check_setting_str(CFG, 'Plex', 'plex_client_host', '')
+        PLEX_ENABLED = bool(check_setting_int(CFG, 'Plex', 'plex_enabled', 0))
+        PLEX_SERVER_HOST = check_setting_str(CFG, 'Plex', 'plex_server_host', '')
+        PLEX_CLIENT_HOST = check_setting_str(CFG, 'Plex', 'plex_client_host', '')
         PLEX_USERNAME = check_setting_str(CFG, 'Plex', 'plex_username', '')
         PLEX_PASSWORD = check_setting_str(CFG, 'Plex', 'plex_password', '')
-	PLEX_UPDATE = bool(check_setting_int(CFG, 'Plex', 'plex_update', 0))
-	PLEX_NOTIFY = bool(check_setting_int(CFG, 'Plex', 'plex_notify', 0))
+        PLEX_UPDATE = bool(check_setting_int(CFG, 'Plex', 'plex_update', 0))
+        PLEX_NOTIFY = bool(check_setting_int(CFG, 'Plex', 'plex_notify', 0))
 
         NMA_ENABLED = bool(check_setting_int(CFG, 'NMA', 'nma_enabled', 0))
         NMA_APIKEY = check_setting_str(CFG, 'NMA', 'nma_apikey', '')
@@ -788,6 +788,7 @@ def config_write():
     new_config['General']['check_github_on_startup'] = int(CHECK_GITHUB_ON_STARTUP)
     new_config['General']['check_github_interval'] = CHECK_GITHUB_INTERVAL
 
+    new_config['General']['post_processing_dir'] = POST_PROCESSING_DIR
     new_config['General']['music_dir'] = MUSIC_DIR
     new_config['General']['destination_dir'] = DESTINATION_DIR
     new_config['General']['lossless_destination_dir'] = LOSSLESS_DESTINATION_DIR

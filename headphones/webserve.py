@@ -963,7 +963,8 @@ class WebInterface(object):
                     "hppass": headphones.HPPASS,
                     "cache_sizemb": headphones.CACHE_SIZEMB,
                     "file_permissions": headphones.FILE_PERMISSIONS,
-                    "folder_permissions": headphones.FOLDER_PERMISSIONS
+                    "folder_permissions": headphones.FOLDER_PERMISSIONS,
+                    "post_processing_dir" : headphones.POST_PROCESSING_DIR
                 }
 
         # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8
@@ -999,7 +1000,7 @@ class WebInterface(object):
         pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, twitter_enabled=0, twitter_onsnatch=0, mirror=None, customhost=None, customport=None,
         customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
         enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None, plex_enabled=0, plex_server_host=None, plex_client_host=None, plex_username=None, 
-        plex_password=None, plex_update=0, plex_notify=0, **kwargs):
+        plex_password=None, plex_update=0, plex_notify=0, post_processing_dir=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -1148,6 +1149,7 @@ class WebInterface(object):
         headphones.CACHE_SIZEMB = int(cache_sizemb)
         headphones.FILE_PERMISSIONS = file_permissions
         headphones.FOLDER_PERMISSIONS = folder_permissions
+	headphones.POST_PROCESSING_DIR = post_processing_dir
 
         # Handle the variable config options. Note - keys with False values aren't getting passed
 

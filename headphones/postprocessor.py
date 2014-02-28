@@ -55,7 +55,7 @@ def checkFolder():
                     
                     for nzb_folder_name in nzb_album_possibilities:
                         
-                        nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING, 'replace')
+                        nzb_album_path = os.path.join(headphones.POST_PROCESSING_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING, 'replace')
     
                         if os.path.exists(nzb_album_path):
                             logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
@@ -63,7 +63,7 @@ def checkFolder():
                             
                 if album['Kind'] == 'torrent':
 
-                    torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
+                    torrent_album_path = os.path.join(headphones.POST_PROCESSING_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
     
                     if os.path.exists(torrent_album_path):
                         logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
@@ -915,15 +915,10 @@ def renameUnprocessedFolder(albumpath):
 def forcePostProcess():
 
     download_dirs = []
-    if headphones.DOWNLOAD_DIR:
-        download_dirs.append(headphones.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING, 'replace'))
-    if headphones.DOWNLOAD_TORRENT_DIR:
-        download_dirs.append(headphones.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
+    if headphones.POST_PROCESSING_DIR:
+        download_dirs.append(headphones.POST_PROCESSING_DIR.encode(headphones.SYS_ENCODING, 'replace'))
         
-    # If DOWNLOAD_DIR and DOWNLOAD_TORRENT_DIR are the same, remove the duplicate to prevent us from trying to process the same folder twice.
-    download_dirs = list(set(download_dirs))
-    
-    logger.info('Checking to see if there are any folders to process in download_dir(s): %s' % str(download_dirs).decode(headphones.SYS_ENCODING, 'replace'))
+    logger.info('Checking to see if there are any folders to process in: %s' % str(download_dirs).decode(headphones.SYS_ENCODING, 'replace'))
     # Get a list of folders in the download_dir
     folders = []
     for download_dir in download_dirs:
