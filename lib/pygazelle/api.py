@@ -98,7 +98,7 @@ class GazelleAPI(object):
         loginpage = 'https://what.cd/login.php'
         data = {'username': self.username,
                 'password': self.password}
-        r = self.session.post(loginpage, data=data, timeout=self.default_timeout)
+        r = self.session.post(loginpage, data=data, timeout=self.default_timeout, headers=self.default_headers)
         self.past_request_timestamps.append(time.time())
         if r.status_code != 200:
             raise LoginException("Login returned status code %s" % r.status_code)
