@@ -33,7 +33,7 @@ table { border-collapse: collapse; border-spacing: 0; }
 hr { display: block; height: 1px; border: 0; border-top: 1px solid #ccc; margin: 1em 0; padding: 0; }
 input, select { vertical-align: middle; }
 
-body { font:13px/1.231 sans-serif; *font-size:small; } 
+body { font:13px/1.231 sans-serif; *font-size:small; }
 select, input, textarea, button { font:99% sans-serif; }
 pre, code, kbd, samp { font-family: monospace, sans-serif; }
 
@@ -52,7 +52,7 @@ sub { bottom: -0.25em; }
 
 pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word; padding: 15px; }
 textarea { overflow: auto; }
-.ie6 legend, .ie7 legend { margin-left: -7px; } 
+.ie6 legend, .ie7 legend { margin-left: -7px; }
 input[type="radio"] { vertical-align: text-bottom; }
 input[type="checkbox"] { vertical-align: bottom; }
 .ie7 input[type="checkbox"] { vertical-align: baseline; }
@@ -81,20 +81,20 @@ h1, h2, h3, h4, h5, h6 { font-weight: bold; }
 */
 
 a:link {
-	color: #5E2612; 
-  	text-decoration: none; 
+	color: #5E2612;
+  	text-decoration: none;
   	}
 a:visited {
-  	color: #5E2612; 
-	text-decoration: none; 
+  	color: #5E2612;
+	text-decoration: none;
 	}
 a:hover { /*this effect is not shown in NN4.xx*/
-  	color: #999999; 
+  	color: #999999;
 	text-decoration: underline;
   	}
-a:active {/*colour in NN4.xx is red*/ 
-  	color: #5E2612; 
-  	text-decoration: underline; 
+a:active {/*colour in NN4.xx is red*/
+  	color: #5E2612;
+  	text-decoration: underline;
 	}
 a.blue {
 	color: blue;
@@ -274,8 +274,6 @@ div#shutdown{ text-align: center; vertical-align: middle; }
 #cloud { margin: 0; }
 #cloud li { display: inline; }
 
-
-
 .ir { display: block; text-indent: -999em; overflow: hidden; background-repeat: no-repeat; text-align: left; direction: ltr; }
 .hidden { display: none; visibility: hidden; }
 .visuallyhidden { border: 0; clip: rect(0 0 0 0); height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; width: 1px; }
@@ -303,11 +301,11 @@ div#shutdown{ text-align: center; vertical-align: middle; }
 
 @media print {
   * { background: transparent !important; color: black !important; text-shadow: none !important; filter:none !important;
-  -ms-filter: none !important; } 
+  -ms-filter: none !important; }
   a, a:visited { color: #444 !important; text-decoration: underline; }
   a[href]:after { content: " (" attr(href) ")"; }
   abbr[title]:after { content: " (" attr(title) ")"; }
-  .ir a:after, a[href^="javascript:"]:after, a[href^="#"]:after { content: ""; }  
+  .ir a:after, a[href^="javascript:"]:after, a[href^="#"]:after { content: ""; }
   pre, blockquote { border: 1px solid #999; page-break-inside: avoid; }
   thead { display: table-header-group; }
   tr, img { page-break-inside: avoid; }

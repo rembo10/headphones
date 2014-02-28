@@ -365,12 +365,12 @@ class WebInterface(object):
             # else:
             #     original_clean = None
                 if original_clean == albums['CleanName']:
-                    have_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'] }  
+                    have_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'] }
                     have_album_dictionary.append(have_dict)
         headphones_albums = myDB.select('SELECT ArtistName, AlbumTitle from albums ORDER BY ArtistName')
         for albums in headphones_albums:
-            headphones_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'] }  
-            headphones_album_dictionary.append(headphones_dict) 
+            headphones_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'] }
+            headphones_album_dictionary.append(headphones_dict)
         #unmatchedalbums = [f for f in have_album_dictionary if f not in [x for x in headphones_album_dictionary]]
 
         check = set([(cleanName(d['ArtistName']).lower(), cleanName(d['AlbumTitle']).lower()) for d in headphones_album_dictionary])
@@ -382,16 +382,16 @@ class WebInterface(object):
 
     def markUnmatched(self, action=None, existing_artist=None, existing_album=None, new_artist=None, new_album=None):
         myDB = db.DBConnection()
-     
+
         if action == "ignoreArtist":
             artist = existing_artist
             myDB.action('UPDATE have SET Matched="Ignored" WHERE ArtistName=? AND Matched = "Failed"', [artist])
-        
+
         elif action == "ignoreAlbum":
             artist = existing_artist
             album = existing_album
             myDB.action('UPDATE have SET Matched="Ignored" WHERE ArtistName=? AND AlbumTitle=? AND Matched = "Failed"', (artist, album))
-        
+
         elif action == "matchArtist":
             existing_artist_clean = helpers.cleanName(existing_artist).lower()
             new_artist_clean = helpers.cleanName(new_artist).lower()
@@ -464,7 +464,7 @@ class WebInterface(object):
                     librarysync.update_album_status(album_id)
             else:
                 logger.info("Artist %s / Album %s already named appropriately; nothing to modify" % (existing_artist, existing_album))
-                
+
     markUnmatched.exposed = True
 
     def manageManual(self):
@@ -480,7 +480,7 @@ class WebInterface(object):
                     elif albums['Matched'] == "Manual" or albums['CleanName'] != original_clean:
                         album_status = "Matched"
                     manual_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'], 'AlbumStatus' : album_status }
-                    if manual_dict not in manual_albums: 
+                    if manual_dict not in manual_albums:
                         manual_albums.append(manual_dict)
         manual_albums_sorted = sorted(manual_albums, key=itemgetter('ArtistName', 'AlbumTitle'))
 
@@ -755,7 +755,7 @@ class WebInterface(object):
             album_json[counter] = album['AlbumTitle']
             counter+=1
         json_albums = json.dumps(album_json)
-        
+
         cherrypy.response.headers['Content-type'] = 'application/json'
         return json_albums
     getAlbumsByArtist_json.exposed=True
@@ -961,6 +961,7 @@ class WebInterface(object):
                     "customsleep": headphones.CUSTOMSLEEP,
                     "hpuser": headphones.HPUSER,
                     "hppass": headphones.HPPASS,
+                    "songkick_apikey": headphones.SONGKICK_APIKEY,
                     "cache_sizemb": headphones.CACHE_SIZEMB,
                     "file_permissions": headphones.FILE_PERMISSIONS,
                     "folder_permissions": headphones.FOLDER_PERMISSIONS,
@@ -986,9 +987,9 @@ class WebInterface(object):
 
     def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None,
         download_scan_interval=None, update_db_interval=None, mb_ignore_age=None, nzb_search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None,
-        sab_category=None, nzbget_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, transmission_host=None, transmission_username=None, transmission_password=None, 
-        utorrent_host=None, utorrent_username=None, utorrent_password=None, nzb_downloader=0, torrent_downloader=0, download_dir=None, blackhole_dir=None, usenet_retention=None, 
-        use_headphones_indexer=0, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, omgwtfnzbs=0, omgwtfnzbs_uid=None, omgwtfnzbs_apikey=None, 
+        sab_category=None, nzbget_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, transmission_host=None, transmission_username=None, transmission_password=None,
+        utorrent_host=None, utorrent_username=None, utorrent_password=None, nzb_downloader=0, torrent_downloader=0, download_dir=None, blackhole_dir=None, usenet_retention=None,
+        use_headphones_indexer=0, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, omgwtfnzbs=0, omgwtfnzbs_uid=None, omgwtfnzbs_apikey=None,
         preferred_words=None, required_words=None, ignored_words=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None,
         numberofseeders=None, use_piratebay=0, piratebay_proxy_url=None, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
         rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0,
@@ -1000,7 +1001,7 @@ class WebInterface(object):
         pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, twitter_enabled=0, twitter_onsnatch=0, mirror=None, customhost=None, customport=None,
         customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
         enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None, plex_enabled=0, plex_server_host=None, plex_client_host=None, plex_username=None, 
-        plex_password=None, plex_update=0, plex_notify=0, post_processing_dir=None, **kwargs):
+        plex_password=None, plex_update=0, plex_notify=0, post_processing_dir=None, songkick_apikey=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -1146,10 +1147,11 @@ class WebInterface(object):
         headphones.CUSTOMSLEEP = customsleep
         headphones.HPUSER = hpuser
         headphones.HPPASS = hppass
+        headphones.SONGKICK_APIKEY = songkick_apikey
         headphones.CACHE_SIZEMB = int(cache_sizemb)
         headphones.FILE_PERMISSIONS = file_permissions
         headphones.FOLDER_PERMISSIONS = folder_permissions
-	headphones.POST_PROCESSING_DIR = post_processing_dir
+        headphones.POST_PROCESSING_DIR = post_processing_dir
 
         # Handle the variable config options. Note - keys with False values aren't getting passed
 
