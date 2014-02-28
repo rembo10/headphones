@@ -33,6 +33,7 @@ import string
 import shutil
 
 import headphones, exceptions
+from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget
 from headphones import transmission
 
@@ -217,7 +218,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
             # Add a user-agent
             request = urllib2.Request(searchURL)
-            request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+            request.add_header('User-Agent', USER_AGENT)
             base64string = base64.encodestring('%s:%s' % (headphones.HPUSER, headphones.HPPASS)).replace('\n', '')
             request.add_header("Authorization", "Basic %s" % base64string)
             
@@ -296,7 +297,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
                 # Add a user-agent
                 request = urllib2.Request(searchURL)
-                request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+                request.add_header('User-Agent', USER_AGENT)
                 opener = urllib2.build_opener()
 
                 logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, newznab_host[0]))
@@ -407,7 +408,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
             # Add a user-agent
             request = urllib2.Request(searchURL)
-            request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+            request.add_header('User-Agent', USER_AGENT)
             opener = urllib2.build_opener()
 
             logger.info(u'Parsing results from <a href="%s">NZBsRus</a>' % searchURL)
@@ -466,7 +467,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
             # Add a user-agent
             request = urllib2.Request(searchURL)
-            request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+            request.add_header('User-Agent', USER_AGENT)
             opener = urllib2.build_opener()
 
             logger.info(u'Parsing results from <a href="%s">omgwtfnzbs</a>' % searchURL)
@@ -743,7 +744,7 @@ def getresultNZB(result):
             logger.warn("AttributeError in getresultNZB.")
     elif result[3] == 'headphones':
         request = urllib2.Request(result[2])
-        request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+        request.add_header('User-Agent', USER_AGENT)
         base64string = base64.encodestring('%s:%s' % (headphones.HPUSER, headphones.HPPASS)).replace('\n', '')
         request.add_header("Authorization", "Basic %s" % base64string)
         
@@ -755,7 +756,7 @@ def getresultNZB(result):
             logger.warn('Error fetching nzb from url: ' + result[2] + ' %s' % e)
     else:
         request = urllib2.Request(result[2])
-        request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+        request.add_header('User-Agent', USER_AGENT)
         opener = urllib2.build_opener()
 
         try:
