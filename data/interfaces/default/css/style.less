@@ -1,4 +1,4 @@
-// Config 
+// Config
 @import "config.less";
 
 html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,abbr,address,cite,code,del,dfn,em,img,ins,kbd,q,samp,small,strong,sub,sup,var,b,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,figcaption,figure,footer,header,hgroup,menu,nav,section,summary,time,mark,audio,video {
@@ -26,7 +26,7 @@ body {
     padding: 0;
 }
 
-// Links 
+// Links
 a {
 	color: @link-color;
 	text-decoration: none;
@@ -37,11 +37,11 @@ a {
 	&.blue {
 	    color: blue;
 	}
-	.ui-icon { 
+	.ui-icon {
 		display:inline-block;
 		position: relative;
 		top: 2px;
-	
+
 	}
 }
 .links {
@@ -204,7 +204,7 @@ form {
         	line-height: normal;
         	max-width: 230px;
         	margin-right: 5px;
-        	padding: 3px 5px;        	
+        	padding: 3px 5px;
         }
         small {
             color: #999;
@@ -295,18 +295,18 @@ ul#nav {
             	 .rounded(3px);
             	 .shadow(0 1px 0 #FAFAFA);
             	 .shadow(0 1px 0 #FAFAFA inset);
-            	-webkit-transition:color .2s ease-in;  
-            	-moz-transition:color .2s ease-in;  
-            	-o-transition:color .2s ease-in;  
-            	transition:color .2s ease-in;  
+            	-webkit-transition:color .2s ease-in;
+            	-moz-transition:color .2s ease-in;
+            	-o-transition:color .2s ease-in;
+            	transition:color .2s ease-in;
             }
             &.config {
                 height: 28px;
                 width: 10px;
-                img {
+                i {
                 	position: relative;
-                	top:  -7px;
-                	left: -7px;
+                	top:  0px;
+                	left: -6px;
                 }
             }
             &.log {
@@ -412,7 +412,7 @@ footer {
 }
 
 #updatebar {
-    #ajaxMsg; 
+    #ajaxMsg;
     display: block;
     .gradient(#FCF5C2,@msg-bg);
 }
@@ -442,7 +442,7 @@ footer {
               	&:hover {
               		.gradient(#599BDC, #3072B3);
               		color: #FFF;
-              		border-color: #518CC6 #518CC6 #2A65A0; 
+              		border-color: #518CC6 #518CC6 #2A65A0;
               	}
             }
         }
@@ -504,7 +504,7 @@ div#searchbar {
     }
 }
 
-// TABLES 
+// TABLES
 
 // wrappers
 .table_wrapper {
@@ -533,8 +533,8 @@ div#searchbar {
     h1 {
         line-height: 33px;
         width: 450px;
-        img { 
-        	float:left; 
+        img {
+        	float:left;
         	margin-right: 5px;
         }
     }
@@ -545,7 +545,7 @@ div#nopaddingheader {
     text-align: center;
 }
 
-// Artist 
+// Artist
 div#artistheader {
     margin-top: 50px;
     min-height: 200px;
@@ -560,12 +560,26 @@ div#artistheader {
         overflow: hidden;
         text-indent: -3000px;
         width: 200px;
+        position: relative;
+
+        &.on-tour:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -2px;
+            width: 100px;
+            height: 100px;
+            z-index: 2;
+            background-image: url('../images/songkick_ribon.png');
+            background-repeat: no-repeat;
+        }
     }
     #artistBio {
         font-size: 16px;
         line-height: 24px;
         margin-top: 10px;
     }
+
     h1 {
         a {
             font-size: 32px;
@@ -579,6 +593,25 @@ div#artistheader {
             font-weight: bold;
             font-family: @alt-font-face;
         }
+    }
+}
+
+#artistCalendar {
+    list-style-type: none;
+    margin: 0px;
+    display: block;
+    background: #FEF2EB;
+    padding: 10px;
+    font-size: 16px;
+
+    .sk-location {
+        display: inline-block;
+        padding-left: 6px;
+    }
+
+    .sk-logo {
+        width: 100px;
+        padding-top: 16px;
     }
 }
 
@@ -625,7 +658,7 @@ div#artistheader {
         text-align: left;
         vertical-align: middle;
     }
-    td#album {        
+    td#album {
     	min-width: 300px;
         text-align: left;
         vertical-align: middle;
@@ -638,7 +671,7 @@ div#artistheader {
     display: inline-block;
 }
 
-// Album 
+// Album
 #albumheader {
     margin-top: 50px;
     min-height: 200px;
@@ -733,7 +766,7 @@ div#artistheader {
     }
 }
 
-// Manage 
+// Manage
 #manageheader {
     margin-top: 45px;
     margin-bottom: 0;
@@ -777,7 +810,7 @@ div#artistheader {
     }
 }
 
-// History 
+// History
 #history_table {
     background-color: #FFF;
     font-size: 13px;
@@ -802,7 +835,7 @@ div#artistheader {
     }
 }
 
-// Logs 
+// Logs
 #log_table {
 	background-color: #FFF;
     th#timestamp {
@@ -867,7 +900,7 @@ div#artistheader {
     			font-size: 11px;
     			vertical-align: middle;
     			line-height: normal;
-    			.gradient(#A3E532,#90CC2A); 
+    			.gradient(#A3E532,#90CC2A);
     		}
     	}
     }
@@ -920,11 +953,11 @@ div#artistheader {
 	}
 }
 #toTop {
-    background: url("../images/toTop.gif") no-repeat scroll 10px center #f7f7f7;
+    background: #f7f7f7;
     border-radius: 5px 0 0 0;
     bottom: 0;
     display: none;
-    padding: 10px 10px 10px 40px;
+    padding: 10px 10px 10px 10px;
     position: fixed;
     right: 0;
 }
@@ -988,7 +1021,7 @@ div#artistheader {
                 font-weight: 900;
             }
         }
-        li { 
+        li {
         	display: inline-block;
         	margin: 5px 10px;
          }
@@ -1041,7 +1074,7 @@ div#artistheader {
     &:after { clear: both; }
 }
 
-// Table width 
+// Table width
 #album_table th#albumname, #upcoming_table th#artistname, #wanted_table th#artistname {
     min-width: 150px;
     text-align: center;
