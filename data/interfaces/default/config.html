@@ -692,6 +692,25 @@
                                     </div>
                                 </div>
                             </fieldset>
+
+                            <fieldset>
+                                <h3>Pushbullet</h3>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="pushbullet_enabled" id="pushbullet" value="1" ${config['pushbullet_enabled']} /><label>Enable PushBullet Notifications</label>
+                                </div>
+                                <div id="pushbulletoptions">
+                                    <div class="row">
+                                        <label>User key</label><input type="text" name="pushbullet_apikey" value="${config['pushbullet_apikey']}" size="50">
+                                    </div>
+                                    <div class="row">
+                                        <label>Device ID</label><input type="text" name="pushbullet_deviceid" value="${config['pushbullet_deviceid']}" size="50">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="pushbullet_onsnatch" value="1" ${config['pushbullet_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
                             <fieldset>
                                 <h3>Twitter</h3>
                                 <div class="row checkbox">
@@ -1266,6 +1285,26 @@
                         else
                         {
                                 $("#pushoveroptions").slideUp();
+                        }
+                });
+
+                if ($("#pushbullet").is(":checked"))
+                        {
+                                $("#pushbulletoptions").show();
+                        }
+                else
+                        {
+                                $("#pushbulletoptions").hide();
+                        }
+
+                $("#pushbullet").click(function(){
+                        if ($("#pushbullet").is(":checked"))
+                        {
+                                $("#pushbulletoptions").slideDown();
+                        }
+                        else
+                        {
+                                $("#pushbulletoptions").slideUp();
                         }
                 });
 
