@@ -249,6 +249,10 @@ PUSHOVER_ENABLED = True
 PUSHOVER_PRIORITY = 1
 PUSHOVER_KEYS = None
 PUSHOVER_ONSNATCH = True
+PUSHBULLET_ENABLED = True
+PUSHBULLET_APIKEY = None
+PUSHBULLET_DEVICEID = None
+PUSHBULLET_ONSNATCH = True
 TWITTER_ENABLED = False
 TWITTER_ONSNATCH = False
 TWITTER_USERNAME = None
@@ -334,6 +338,7 @@ def initialize():
                 MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, \
                 PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
                 TWITTER_ENABLED, TWITTER_ONSNATCH, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
+                PUSHBULLET_ENABLED, PUSHBULLET_APIKEY, PUSHBULLET_DEVICEID, PUSHBULLET_ONSNATCH, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
                 PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
@@ -360,6 +365,7 @@ def initialize():
         CheckSection('What.cd')
         CheckSection('Prowl')
         CheckSection('Pushover')
+        CheckSection('PushBullet')
         CheckSection('XBMC')
         CheckSection('Plex')
         CheckSection('NMA')
@@ -563,6 +569,11 @@ def initialize():
         PUSHOVER_KEYS = check_setting_str(CFG, 'Pushover', 'pushover_keys', '')
         PUSHOVER_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_onsnatch', 0))
         PUSHOVER_PRIORITY = check_setting_int(CFG, 'Pushover', 'pushover_priority', 0)
+
+        PUSHBULLET_ENABLED = bool(check_setting_int(CFG, 'PushBullet', 'pushbullet_enabled', 0))
+        PUSHBULLET_APIKEY = check_setting_str(CFG, 'PushBullet', 'pushbullet_apikey', '')
+        PUSHBULLET_DEVICEID = check_setting_str(CFG, 'PushBullet', 'pushbullet_deviceid', '')
+        PUSHBULLET_ONSNATCH = bool(check_setting_int(CFG, 'PushBullet', 'pushbullet_onsnatch', 0))
 
         TWITTER_ENABLED = bool(check_setting_int(CFG, 'Twitter', 'twitter_enabled', 0))
         TWITTER_ONSNATCH = bool(check_setting_int(CFG, 'Twitter', 'twitter_onsnatch', 0))
@@ -950,6 +961,12 @@ def config_write():
     new_config['Pushover']['pushover_keys'] = PUSHOVER_KEYS
     new_config['Pushover']['pushover_onsnatch'] = int(PUSHOVER_ONSNATCH)
     new_config['Pushover']['pushover_priority'] = int(PUSHOVER_PRIORITY)
+
+    new_config['PushBullet'] = {}
+    new_config['PushBullet']['pushbullet_enabled'] = int(PUSHBULLET_ENABLED)
+    new_config['PushBullet']['pushbullet_apikey'] = PUSHBULLET_APIKEY
+    new_config['PushBullet']['pushbullet_deviceid'] = PUSHBULLET_DEVICEID
+    new_config['PushBullet']['pushbullet_onsnatch'] = int(PUSHBULLET_ONSNATCH)
 
     new_config['Twitter'] = {}
     new_config['Twitter']['twitter_enabled'] = int(TWITTER_ENABLED)
