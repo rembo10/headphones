@@ -7,15 +7,12 @@
 start on desktop-session-start
 stop on desktop-shutdown
 
-env CONFIG=""$XDG_CONFIG_HOME"/headphones/headphones.ini"
+env CONFIG=""$XDG_CONFIG_HOME"/headphones"
 env DATA=""$XDG_DATA_HOME"/headphones"
 
 pre-start script
-    [ -d "$XDG_CONFIG_HOME"/headphones ] || mkdir -p "$XDG_CONFIG_HOME"/headphones
+    [ -d "$CONFIG" ] || mkdir -p "$CONFIG"
     [ -d "$DATA" ] || mkdir -p "$DATA"
-    [ -f "$CONFIG ] || touch "$CONFIG"
 end script
 
-exec headphones.py --daemon --nolaunch --quiet
-                   --config "$CONFIG"
-                   --datadir "$DATA"
+exec Headphones.py --nolaunch --config "$CONFIG"/config.ini --datadir "$DATA"
