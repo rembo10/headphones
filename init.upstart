@@ -4,8 +4,8 @@
 # if headphones is installed system wide, and into $XDG_CONFIG_HOME/upstart if
 # headphones is installed per user. Change the executable path appropiately.
 
-start on desktop-session-start
-stop on desktop-shutdown
+start on desktop-start
+stop on desktop-end
 
 env CONFIG=""$XDG_CONFIG_HOME"/headphones"
 env DATA=""$XDG_DATA_HOME"/headphones"
