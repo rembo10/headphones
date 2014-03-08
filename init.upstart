@@ -1,0 +1,21 @@
+# headphones - Automatic music downloader
+#
+# This is a session/user job. Install this file into /usr/share/upstart/sessions
+# if headphones is installed system wide, and into $XDG_CONFIG_HOME/upstart if
+# headphones is installed per user. Change the executable path appropiately.
+
+start on desktop-session-start
+stop on desktop-shutdown
+
+env CONFIG=""$XDG_CONFIG_HOME"/headphones/headphones.ini"
+env DATA=""$XDG_DATA_HOME"/headphones"
+
+pre-start script
+    [ -d "$XDG_CONFIG_HOME"/headphones ] || mkdir -p "$XDG_CONFIG_HOME"/headphones
+    [ -d "$DATA" ] || mkdir -p "$DATA"
+    [ -f "$CONFIG ] || touch "$CONFIG"
+end script
+
+exec headphones.py --daemon --nolaunch --quiet
+                   --config "$CONFIG"
+                   --datadir "$DATA"
