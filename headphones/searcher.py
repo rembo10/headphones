@@ -1525,7 +1525,11 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         return
                         
                     torrent_folder_name = transmission.getTorrentFolder(torrentid)
-                    logger.info('Torrent folder name: %s' % torrent_folder_name)
+                    if torrent_folder_name:
+                        logger.info('Torrent folder name: %s' % torrent_folder_name)
+                    else:
+                        logger.error('Torrent folder name could not be determined')
+                        return
 
                     # remove temp .torrent file created above
                     if bestqual[3] == 'rutracker.org':
