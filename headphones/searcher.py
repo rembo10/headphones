@@ -113,23 +113,26 @@ def searchforalbum(albumid=None, new=False, lossless=False):
 
         myDB = db.DBConnection()
 
-        results = myDB.select('SELECT AlbumID, Status from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
+        results = myDB.select('SELECT AlbumID, AlbumTitle, ArtistName, Status from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
         new = True
-
+        
         for result in results:
             foundNZB = "none"
-            if (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS or headphones.OMGWTFNZBS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
-                if result['Status'] == "Wanted Lossless":
-                    foundNZB = searchNZB(result['AlbumID'], new, losslessOnly=True)
-                else:
-                    foundNZB = searchNZB(result['AlbumID'], new)
-
-            if (headphones.KAT or headphones.PIRATEBAY or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
-
-                if result['Status'] == "Wanted Lossless":
-                    searchTorrent(result['AlbumID'], new, losslessOnly=True)
-                else:
-                    searchTorrent(result['AlbumID'], new)
+            if not result['AlbumTitle'] or not result['ArtistName']:
+                logger.warn('Skipping release %s. No title available' % result['AlbumID'])
+            else:
+                if (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS or headphones.OMGWTFNZBS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
+                    if result['Status'] == "Wanted Lossless":
+                        foundNZB = searchNZB(result['AlbumID'], new, losslessOnly=True)
+                    else:
+                        foundNZB = searchNZB(result['AlbumID'], new)
+    
+                if (headphones.KAT or headphones.PIRATEBAY or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
+    
+                    if result['Status'] == "Wanted Lossless":
+                        searchTorrent(result['AlbumID'], new, losslessOnly=True)
+                    else:
+                        searchTorrent(result['AlbumID'], new)
 
     else:
 
