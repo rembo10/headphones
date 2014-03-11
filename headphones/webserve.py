@@ -110,7 +110,14 @@ class WebInterface(object):
         album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
         tracks = myDB.select('SELECT * from tracks WHERE AlbumID=? ORDER BY CAST(TrackNumber AS INTEGER)', [AlbumID])
         description = myDB.action('SELECT * from descriptions WHERE ReleaseGroupID=?', [AlbumID]).fetchone()
-        title = album['ArtistName'] + ' - ' + album['AlbumTitle']
+        if not album['ArtistName']:
+            title =  ' - '
+        else:
+            title = album['ArtistName'] + ' - '
+        if not album['AlbumTitle']:
+            title = title + ""
+        else:
+            title = title + album['AlbumTitle']
         return serve_template(templatename="album.html", title=title, album=album, tracks=tracks, description=description)
     albumPage.exposed = True
 
