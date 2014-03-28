@@ -43,7 +43,7 @@
                    "mDataProp":"ArtistSortName",
                    "mRender":function (data,type,full) {
                         
-                        return '<span title="' + full['ArtistID'] + '"></span><a href="artistPage?ArtistID=' + full['ArtistID'] + '">' + data + '</a>'
+                        return '<span title="' + full['ArtistID'] + '"></span><a href="artistPage?ArtistID=' + full['ArtistID'] + '">' + full['ArtistName'] + '</a>'
                         }
                    },
                    {"aTargets":[2],"mDataProp":"Status"},

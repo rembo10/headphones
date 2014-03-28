@@ -718,6 +718,7 @@ class WebInterface(object):
         rows = []
         for artist in artists:
             row = {"ArtistID":artist['ArtistID'],
+                      "ArtistName":artist["ArtistName"],
                       "ArtistSortName":artist["ArtistSortName"],
                       "Status":artist["Status"],
                       "TotalTracks":artist["TotalTracks"],
