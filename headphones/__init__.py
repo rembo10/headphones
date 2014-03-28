@@ -583,7 +583,7 @@ def initialize():
         TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
         TWITTER_PREFIX = check_setting_str(CFG, 'Twitter', 'twitter_prefix', 'Headphones')
         
-        SONGKICK_ENABLED = bool(check_setting_int(CFG, 'Songkick', 'songkick_enabled', 0))
+        SONGKICK_ENABLED = bool(check_setting_int(CFG, 'Songkick', 'songkick_enabled', 1))
         SONGKICK_APIKEY = check_setting_str(CFG, 'Songkick', 'songkick_apikey', 'nd1We7dFW2RqxPw8')
         SONGKICK_LOCATION = check_setting_str(CFG, 'Songkick', 'songkick_location', '')
         SONGKICK_FILTER_ENABLED = bool(check_setting_int(CFG, 'Songkick', 'songkick_filter_enabled', 0))
