@@ -265,7 +265,10 @@ CUSTOMPORT = None
 CUSTOMSLEEP = None
 HPUSER = None
 HPPASS = None
-SONGKICK_APIKEY = "nd1We7dFW2RqxPw8"
+SONGKICK_ENABLED = False
+SONGKICK_APIKEY = None
+SONGKICK_LOCATION = None
+SONGKICK_FILTER_ENABLED = False
 
 CACHE_SIZEMB = 32
 JOURNAL_MODE = None
@@ -342,7 +345,7 @@ def initialize():
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
                 PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
-                PLEX_ENABLED, PLEX_SERVER_HOST, PLEX_CLIENT_HOST, PLEX_USERNAME, PLEX_PASSWORD, PLEX_UPDATE, PLEX_NOTIFY, PUSHALOT_ENABLED, PUSHALOT_APIKEY, PUSHALOT_ONSNATCH, \
+                PLEX_ENABLED, PLEX_SERVER_HOST, PLEX_CLIENT_HOST, PLEX_USERNAME, PLEX_PASSWORD, PLEX_UPDATE, PLEX_NOTIFY, PUSHALOT_ENABLED, PUSHALOT_APIKEY, PUSHALOT_ONSNATCH, SONGKICK_ENABLED, SONGKICK_APIKEY, SONGKICK_LOCATION, SONGKICK_FILTER_ENABLED, \
                 POST_PROCESSING_DIR
 
 
@@ -580,6 +583,11 @@ def initialize():
         TWITTER_USERNAME = check_setting_str(CFG, 'Twitter', 'twitter_username', '')
         TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
         TWITTER_PREFIX = check_setting_str(CFG, 'Twitter', 'twitter_prefix', 'Headphones')
+        
+        SONGKICK_ENABLED = bool(check_setting_str(CFG, 'Songkick', 'songkick_enabled', 0))
+        SONGKICK_APIKEY = check_setting_str(CFG, 'Songkick', 'songkick_apikey', '')
+        SONGKICK_LOCATION = check_setting_str(CFG, 'Songkick', 'songkick_location', '')
+        SONGKICK_FILTER_ENABLED = bool(check_setting_str(CFG, 'Songkick', 'songkick_filter_enabled', 0))
 
         MIRROR = check_setting_str(CFG, 'General', 'mirror', 'musicbrainz.org')
         CUSTOMHOST = check_setting_str(CFG, 'General', 'customhost', 'localhost')
@@ -974,6 +982,12 @@ def config_write():
     new_config['Twitter']['twitter_username'] = TWITTER_USERNAME
     new_config['Twitter']['twitter_password'] = TWITTER_PASSWORD
     new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX
+
+    new_config['Songkick'] = {}
+    new_config['Songkick']['songkick_enabled'] = SONGKICK_ENABLED
+    new_config['Songkick']['songkick_apikey'] = SONGKICK_APIKEY
+    new_config['Songkick']['songkick_location'] = SONGKICK_LOCATION
+    new_config['Songkick']['songkick_filter_enabled'] = SONGKICK_FILTER_ENABLED
 
     new_config['Synoindex'] = {}
     new_config['Synoindex']['synoindex_enabled'] = int(SYNOINDEX_ENABLED)
