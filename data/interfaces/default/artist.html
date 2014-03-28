@@ -269,7 +269,9 @@
 		initActions();
 		initThisPage();
 		getArtistBio();
-		getArtistsCalendar();
+		if( ${headphones.SONGKICK_ENABLED} ){
+      getArtistsCalendar();
+    }
 	});
 
 	</script>

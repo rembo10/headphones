@@ -973,6 +973,7 @@ class WebInterface(object):
                     "customsleep": headphones.CUSTOMSLEEP,
                     "hpuser": headphones.HPUSER,
                     "hppass": headphones.HPPASS,
+                    "songkick_enabled": checked(headphones.SONGKICK_ENABLED),
                     "songkick_apikey": headphones.SONGKICK_APIKEY,
                     "songkick_location": headphones.SONGKICK_LOCATION,
                     "songkick_filter_enabled": checked(headphones.SONGKICK_FILTER_ENABLED),
@@ -1015,7 +1016,7 @@ class WebInterface(object):
         pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, pushbullet_enabled=0, pushbullet_onsnatch=0, pushbullet_apikey=None, pushbullet_deviceid=None, twitter_enabled=0, twitter_onsnatch=0, mirror=None, customhost=None, customport=None,
         customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
         enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None, plex_enabled=0, plex_server_host=None, plex_client_host=None, plex_username=None, 
-        plex_password=None, plex_update=0, plex_notify=0, post_processing_dir=None, songkick_apikey=None, songkick_location=None, songkick_filter_enabled=0, **kwargs):
+        plex_password=None, plex_update=0, plex_notify=0, post_processing_dir=None, songkick_enabled=0, songkick_apikey=None, songkick_location=None, songkick_filter_enabled=0, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -1157,6 +1158,7 @@ class WebInterface(object):
         headphones.PUSHBULLET_ONSNATCH = pushbullet_onsnatch
         headphones.PUSHBULLET_APIKEY = pushbullet_apikey
         headphones.PUSHBULLET_DEVICEID = pushbullet_deviceid
+        headphones.SONGKICK_ENABLED = songkick_enabled
         headphones.SONGKICK_APIKEY = songkick_apikey
         headphones.SONGKICK_LOCATION = songkick_location
         headphones.SONGKICK_FILTER_ENABLED = songkick_filter_enabled
