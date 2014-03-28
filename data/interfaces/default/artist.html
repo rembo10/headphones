@@ -7,7 +7,7 @@
 
 <%def name="headerIncludes()">
 	<div id="subhead_container">
-		<div id="subhead_menu">		
+		<div id="subhead_menu">
 			<a id="menu_link_refresh" onclick="doAjaxCall('refreshArtist?ArtistID=${artist['ArtistID']}', $(this)),'table'" href="#" data-success="'${artist['ArtistName']}' is being refreshed"><i class="fa fa-refresh"></i> Refresh Artist</a>
 			<a id="menu_link_delete" href="deleteArtist?ArtistID=${artist['ArtistID']}"><i class="fa fa-trash-o"></i> Delete Artist</a>
 			%if artist['Status'] == 'Paused':
@@ -18,7 +18,7 @@
 			%if artist['IncludeExtras']:
 				<a id="menu_link_removeextra" href="#" onclick="doAjaxCall('removeExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Extras removed for ${artist['ArtistName']}"><i class="fa fa-minus"></i> Remove Extras</a>
 				<a class="menu_link_edit" id="menu_link_modifyextra" href="#"><i class="fa fa-pencil"></i> Modify Extras</a>
-			%else:	
+			%else:
 				<a id="menu_link_getextra" href="#"><i class="fa fa-plus"></i> Get Extras</a>
 			%endif
 					<div id="dialog" title="Choose Which Extras to Fetch" style="display:none" class="configtable">
@@ -42,8 +42,8 @@
 		<div id="artistImg">
 			<img id="artistImage" class="albumArt" alt="" src="artwork/artist/${artist['ArtistID']}"/>
 		</div>
-		<h1>	
-			%if artist['Status'] == 'Loading':	
+		<h1>
+			%if artist['Status'] == 'Loading':
 				<i class="fa fa-refresh fa-spin"></i>
 			%endif
 			<a href="http://musicbrainz.org/artist/${artist['ArtistID']}">${artist['ArtistName']}</a>
@@ -196,8 +196,6 @@
 					calendarDomNode.append('<li><img src="interfaces/default/images/songkick.png" alt="concerts by songkick" class="sk-logo" /></li>');
 
 				}
-				console.warn(data);
-				console.warn(data['resultsPage'].totalEntries);
 			// data is JSON response object
 		});
 	}
