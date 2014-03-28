@@ -965,9 +965,23 @@
 
                             <fieldset>
                                 <legend>Songkick</legend>
-                                <div class="row">
-                                    <label>API Key:</label>
-                                    <input type="text" name="songkick_apikey" value="${config['songkick_apikey']}" size="50">
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="songkick_enabled" id="songkick" value="1" ${config['songkick_enabled']} /><label>Display concerts by Songkick</label>
+                                </div>
+                                <div id="songkickoptions">
+                                  <div class="row">
+                                      <label>API Key:</label>
+                                      <input type="text" name="songkick_apikey" value="${config['songkick_apikey']}" size="50">
+                                  </div>
+                                  <div class="row checkbox">
+                                      <input type="checkbox" name="songkick_filter_enabled" id="songkick_filter" value="1" ${config['songkick_filter_enabled']} /><label>Enable Songkick filter per area</label>
+                                  </div>
+                                  <div id="songkick_filteroptions">
+                                    <div class="row">
+                                      <label>Location:</label>
+                                      <input type="text" name="songkick_location" value="${config['songkick_location']}" size="50">
+                                    </div>
+                                  </div>
                                 </div>
                             </fieldset>
                             
@@ -1320,6 +1334,46 @@
                         else
                         {
                                 $("#twitteroptions").slideUp();
+                        }
+                });
+                
+                 if ($("#songkick").is(":checked"))
+                        {
+                                $("#songkickoptions").show();
+                        }
+                else
+                        {
+                                $("#songkickoptions").hide();
+                        }
+
+                $("#songkick").click(function(){
+                        if ($("#songkick").is(":checked"))
+                        {
+                                $("#songkickoptions").slideDown();
+                        }
+                        else
+                        {
+                                $("#songkickoptions").slideUp();
+                        }
+                });
+                
+                if ($("#songkick_filter").is(":checked"))
+                        {
+                                $("#songkick_filteroptions").show();
+                        }
+                else
+                        {
+                                $("#songkick_filteroptions").hide();
+                        }
+
+                $("#songkick_filter").click(function(){
+                        if ($("#songkick_filter").is(":checked"))
+                        {
+                                $("#songkick_filteroptions").slideDown();
+                        }
+                        else
+                        {
+                                $("#songkick_filteroptions").slideUp();
                         }
                 });
 

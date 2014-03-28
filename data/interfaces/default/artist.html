@@ -178,7 +178,14 @@
 
 		$.getJSON("http://api.songkick.com/api/3.0/artists/mbid:${artist['ArtistID']}/calendar.json?apikey=${headphones.SONGKICK_APIKEY}&jsoncallback=?",
 			function(data){
-				if (data['resultsPage'].totalEntries >= 1) {
+				if (data['resultsPage'].totalEntries >= 1) {          
+          
+          if( ${headphones.SONGKICK_FILTER_ENABLED} ) {
+            data.resultsPage.results.event = $.grep(data.resultsPage.results.event, function(element,index){
+              return element.venue.metroArea.id == ${headphones.SONGKICK_LOCATION};
+            });
+          }
+          
 					var tourDate;
 
 					calendarDomNode.show();
@@ -262,7 +269,9 @@
 		initActions();
 		initThisPage();
 		getArtistBio();
-		getArtistsCalendar();
+		if( ${headphones.SONGKICK_ENABLED} ){
+      getArtistsCalendar();
+    }
 	});
 
 	</script>
