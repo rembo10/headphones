@@ -974,6 +974,15 @@
                                     <label>API Key:</label>
                                     <input type="text" name="songkick_apikey" value="${config['songkick_apikey']}" size="50">
                                 </div>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="songkick_filter_enabled" id="songkick_filter" value="1" ${config['songkick_filter_enabled']} /><label>Enable Songkick filter per area</label>
+                                </div>
+                                <div id="songkick_filteroptions">
+                                  <div class="row">
+                                    <label>Location:</label>
+                                    <input type="text" name="songkick_location" value="${config['songkick_location']}" size="50">
+                                  </div>
+                                </div>
                             </fieldset>
                             
                             <fieldset>
@@ -1325,6 +1334,26 @@
                         else
                         {
                                 $("#twitteroptions").slideUp();
+                        }
+                });
+                
+                if ($("#songkick_filter").is(":checked"))
+                        {
+                                $("#songkick_filteroptions").show();
+                        }
+                else
+                        {
+                                $("#songkick_filteroptions").hide();
+                        }
+
+                $("#songkick_filter").click(function(){
+                        if ($("#songkick_filter").is(":checked"))
+                        {
+                                $("#songkick_filteroptions").slideDown();
+                        }
+                        else
+                        {
+                                $("#songkick_filteroptions").slideUp();
                         }
                 });
 
