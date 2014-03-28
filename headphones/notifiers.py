@@ -323,6 +323,60 @@ class NMA:
         
         if not request:
             logger.warn('Error sending notification request to NotifyMyAndroid')        
+
+class PUSHBULLET:
+
+    def __init__(self):
+        self.apikey = headphones.PUSHBULLET_APIKEY
+        self.deviceid = headphones.PUSHBULLET_DEVICEID
+
+    def conf(self, options):
+        return cherrypy.config['config'].get('PUSHBULLET', options)
+
+    def notify(self, message, event):
+        if not headphones.PUSHBULLET_ENABLED:
+            return
+
+        http_handler = HTTPSConnection("api.pushbullet.com")
+                                                
+        data = {'device_iden': headphones.PUSHBULLET_DEVICEID,
+                'type': "note",
+                'title': "Headphones",
+                'body': message.encode("utf-8") }
+
+        http_handler.request("POST",
+                                "/api/pushes",
+                                headers = {'Content-type': "application/x-www-form-urlencoded",
+                                            'Authorization' : 'Basic %s' % base64.b64encode(headphones.PUSHBULLET_APIKEY + ":") },
+                                body = urlencode(data))
+        response = http_handler.getresponse()
+        request_status = response.status
+        logger.debug(u"PushBullet response status: %r" % request_status)
+        logger.debug(u"PushBullet response headers: %r" % response.getheaders())
+        logger.debug(u"PushBullet response body: %r" % response.read())
+
+        if request_status == 200:
+                logger.info(u"PushBullet notifications sent.")
+                return True
+        elif request_status >= 400 and request_status < 500: 
+                logger.info(u"PushBullet request failed: %s" % response.reason)
+                return False
+        else:
+                logger.info(u"PushBullet notification failed serverside.")
+                return False
+
+    def updateLibrary(self):
+        #For uniformity reasons not removed
+        return
+
+    def test(self, apikey, deviceid):
+
+        self.enabled = True
+        self.apikey = apikey
+        self.deviceid = deviceid
+
+        self.notify('Main Screen Activate', 'Test Message')
+
         
 class PUSHALOT:
 
