@@ -92,7 +92,6 @@ CHECK_GITHUB = False
 CHECK_GITHUB_ON_STARTUP = False
 CHECK_GITHUB_INTERVAL = None
 
-POST_PROCESSING_DIR = None
 MUSIC_DIR = None
 DESTINATION_DIR = None
 LOSSLESS_DESTINATION_DIR = None
@@ -342,8 +341,7 @@ def initialize():
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
                 PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
-                PLEX_ENABLED, PLEX_SERVER_HOST, PLEX_CLIENT_HOST, PLEX_USERNAME, PLEX_PASSWORD, PLEX_UPDATE, PLEX_NOTIFY, PUSHALOT_ENABLED, PUSHALOT_APIKEY, PUSHALOT_ONSNATCH, \
-                POST_PROCESSING_DIR
+                PLEX_ENABLED, PLEX_SERVER_HOST, PLEX_CLIENT_HOST, PLEX_USERNAME, PLEX_PASSWORD, PLEX_UPDATE, PLEX_NOTIFY, PUSHALOT_ENABLED, PUSHALOT_APIKEY, PUSHALOT_ONSNATCH
 
 
         if __INITIALIZED__:
@@ -406,7 +404,6 @@ def initialize():
         CHECK_GITHUB_ON_STARTUP = bool(check_setting_int(CFG, 'General', 'check_github_on_startup', 1))
         CHECK_GITHUB_INTERVAL = check_setting_int(CFG, 'General', 'check_github_interval', 360)
 
-        POST_PROCESSING_DIR = check_setting_str(CFG, 'General', 'post_processing_dir', '')
         MUSIC_DIR = check_setting_str(CFG, 'General', 'music_dir', '')
         DESTINATION_DIR = check_setting_str(CFG, 'General', 'destination_dir', '')
         LOSSLESS_DESTINATION_DIR = check_setting_str(CFG, 'General', 'lossless_destination_dir', '')
@@ -800,7 +797,6 @@ def config_write():
     new_config['General']['check_github_on_startup'] = int(CHECK_GITHUB_ON_STARTUP)
     new_config['General']['check_github_interval'] = CHECK_GITHUB_INTERVAL
 
-    new_config['General']['post_processing_dir'] = POST_PROCESSING_DIR
     new_config['General']['music_dir'] = MUSIC_DIR
     new_config['General']['destination_dir'] = DESTINATION_DIR
     new_config['General']['lossless_destination_dir'] = LOSSLESS_DESTINATION_DIR
