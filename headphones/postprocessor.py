@@ -448,6 +448,12 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         pushover = notifiers.PUSHOVER()
         pushover.notify(pushmessage,"Download and Postprocessing completed")
 
+    if headphones.PUSHBULLET_ENABLED:
+        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
+        logger.info(u"PushBullet request")
+        pushbullet = notifiers.PUSHBULLET()
+        pushbullet.notify(pushmessage, "Download and Postprocessing completed")
+
     if headphones.TWITTER_ENABLED:
         pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
         logger.info(u"Sending Twitter notification")
