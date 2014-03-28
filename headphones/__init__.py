@@ -314,7 +314,7 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
             config[cfg_name][item_name] = my_val
 
     if log:
-        logger.debug(item_name + " -> " + str(my_val))
+        logger.debug(item_name + " -> " + my_val)
     else:
         logger.debug(item_name + " -> ******")
     return my_val
@@ -583,10 +583,10 @@ def initialize():
         TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
         TWITTER_PREFIX = check_setting_str(CFG, 'Twitter', 'twitter_prefix', 'Headphones')
         
-        SONGKICK_ENABLED = bool(check_setting_str(CFG, 'Songkick', 'songkick_enabled', 0))
+        SONGKICK_ENABLED = bool(check_setting_int(CFG, 'Songkick', 'songkick_enabled', 0))
         SONGKICK_APIKEY = check_setting_str(CFG, 'Songkick', 'songkick_apikey', 'nd1We7dFW2RqxPw8')
         SONGKICK_LOCATION = check_setting_str(CFG, 'Songkick', 'songkick_location', '')
-        SONGKICK_FILTER_ENABLED = bool(check_setting_str(CFG, 'Songkick', 'songkick_filter_enabled', 0))
+        SONGKICK_FILTER_ENABLED = bool(check_setting_int(CFG, 'Songkick', 'songkick_filter_enabled', 0))
 
         MIRROR = check_setting_str(CFG, 'General', 'mirror', 'musicbrainz.org')
         CUSTOMHOST = check_setting_str(CFG, 'General', 'customhost', 'localhost')
@@ -982,10 +982,10 @@ def config_write():
     new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX
 
     new_config['Songkick'] = {}
-    new_config['Songkick']['songkick_enabled'] = SONGKICK_ENABLED
+    new_config['Songkick']['songkick_enabled'] = int(SONGKICK_ENABLED)
     new_config['Songkick']['songkick_apikey'] = SONGKICK_APIKEY
     new_config['Songkick']['songkick_location'] = SONGKICK_LOCATION
-    new_config['Songkick']['songkick_filter_enabled'] = SONGKICK_FILTER_ENABLED
+    new_config['Songkick']['songkick_filter_enabled'] = int(SONGKICK_FILTER_ENABLED)
 
     new_config['Synoindex'] = {}
     new_config['Synoindex']['synoindex_enabled'] = int(SYNOINDEX_ENABLED)
