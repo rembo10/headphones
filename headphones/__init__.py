@@ -314,7 +314,7 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
             config[cfg_name][item_name] = my_val
 
     if log:
-        logger.debug(item_name + " -> " + my_val)
+        logger.debug(item_name + " -> " + str(my_val))
     else:
         logger.debug(item_name + " -> ******")
     return my_val
