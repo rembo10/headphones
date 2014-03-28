@@ -55,7 +55,7 @@ def checkFolder():
                     
                     for nzb_folder_name in nzb_album_possibilities:
                         
-                        nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING, 'replace')
+                        nzb_album_path = os.path.join(headphones.POST_PROCESSING_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING, 'replace')
     
                         if os.path.exists(nzb_album_path):
                             logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
@@ -63,7 +63,7 @@ def checkFolder():
                             
                 if album['Kind'] == 'torrent':
 
-                    torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
+                    torrent_album_path = os.path.join(headphones.POST_PROCESSING_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
     
                     if os.path.exists(torrent_album_path):
                         logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
@@ -420,9 +420,22 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         if headphones.XBMC_NOTIFY:
             xbmc.notify(release['ArtistName'], release['AlbumTitle'], album_art_path)
             
+    if headphones.PLEX_ENABLED:
+        plex = notifiers.Plex()
+        if headphones.PLEX_UPDATE:
+            plex.update()
+        if headphones.PLEX_NOTIFY:
+            plex.notify(release['ArtistName'], release['AlbumTitle'], album_art_path)
+
     if headphones.NMA_ENABLED:
         nma = notifiers.NMA()
         nma.notify(release['ArtistName'], release['AlbumTitle'])
+
+    if headphones.PUSHALOT_ENABLED:
+        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
+        logger.info(u"Pushalot request")
+        pushalot = notifiers.PUSHALOT()
+        pushalot.notify(pushmessage,"Download and Postprocessing completed")
 
     if headphones.SYNOINDEX_ENABLED:
         syno = notifiers.Synoindex()
@@ -434,6 +447,18 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         logger.info(u"Pushover request")
         pushover = notifiers.PUSHOVER()
         pushover.notify(pushmessage,"Download and Postprocessing completed")
+
+    if headphones.PUSHBULLET_ENABLED:
+        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
+        logger.info(u"PushBullet request")
+        pushbullet = notifiers.PUSHBULLET()
+        pushbullet.notify(pushmessage, "Download and Postprocessing completed")
+
+    if headphones.TWITTER_ENABLED:
+        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
+        logger.info(u"Sending Twitter notification")
+        twitter = notifiers.TwitterNotifier()
+        twitter.notify_download(pushmessage)
         
 def embedAlbumArt(artwork, downloaded_track_list):
     logger.info('Embedding album art')
@@ -896,15 +921,10 @@ def renameUnprocessedFolder(albumpath):
 def forcePostProcess():
 
     download_dirs = []
-    if headphones.DOWNLOAD_DIR:
-        download_dirs.append(headphones.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING, 'replace'))
-    if headphones.DOWNLOAD_TORRENT_DIR:
-        download_dirs.append(headphones.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
+    if headphones.POST_PROCESSING_DIR:
+        download_dirs.append(headphones.POST_PROCESSING_DIR.encode(headphones.SYS_ENCODING, 'replace'))
         
-    # If DOWNLOAD_DIR and DOWNLOAD_TORRENT_DIR are the same, remove the duplicate to prevent us from trying to process the same folder twice.
-    download_dirs = list(set(download_dirs))
-    
-    logger.info('Checking to see if there are any folders to process in download_dir(s): %s' % str(download_dirs).decode(headphones.SYS_ENCODING, 'replace'))
+    logger.info('Checking to see if there are any folders to process in: %s' % str(download_dirs).decode(headphones.SYS_ENCODING, 'replace'))
     # Get a list of folders in the download_dir
     folders = []
     for download_dir in download_dirs:

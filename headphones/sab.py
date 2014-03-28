@@ -127,10 +127,22 @@ def sendNZB(nzb):
             logger.info(u"Sending Pushover notification")
             prowl = notifiers.PUSHOVER()
             prowl.notify(nzb.name,"Download started")
+        if headphones.PUSHBULLET_ENABLED and headphones.PUSHBULLET_ONSNATCH:
+            logger.info(u"Sending PushBullet notification")
+            pushbullet = notifiers.PUSHBULLET()
+            pushbullet.notify(nzb.name + " has been snatched!", "Download started")
+        if headphones.TWITTER_ENABLED and headphones.TWITTER_ONSNATCH:
+            logger.info(u"Sending Twitter notification")
+            twitter = notifiers.TwitterNotifier()
+            twitter.notify_snatch(nzb.name)
         if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
             logger.debug(u"Sending NMA notification")
             nma = notifiers.NMA()
             nma.notify(snatched_nzb=nzb.name)
+        if headphones.PUSHALOT_ENABLED and headphones.PUSHALOT_ONSNATCH:
+            logger.info(u"Sending Pushalot notification")
+            pushalot = notifiers.PUSHALOT()
+            pushalot.notify(nzb.name,"Download started")
 
         return True
     elif sabText == "Missing authentication":

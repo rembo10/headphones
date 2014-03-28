@@ -38,7 +38,16 @@ def addTorrent(link):
         return False
         
     if response['result'] == 'success':
-        name = response['arguments']['torrent-added']['name']
+        if 'torrent-added' in response['arguments']:
+            name = response['arguments']['torrent-added']['name']
+            retid = response['arguments']['torrent-added']['id']
+        elif 'torrent-duplicate' in response['arguments']:
+            name = response['arguments']['torrent-duplicate']['name']
+            retid = response['arguments']['torrent-duplicate']['id']
+        else:
+            name = link
+            retid = False
+
         logger.info(u"Torrent sent to Transmission successfully")
         if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
             logger.info(u"Sending Prowl notification")
@@ -48,12 +57,24 @@ def addTorrent(link):
             logger.info(u"Sending Pushover notification")
             prowl = notifiers.PUSHOVER()
             prowl.notify(name,"Download started")
+        if headphones.TWITTER_ENABLED and headphones.TWITTER_ONSNATCH:
+            logger.info(u"Sending Twitter notification")
+            twitter = notifiers.TwitterNotifier()
+            twitter.notify_snatch(nzb.name)
         if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
-            logger.debug(u"Sending NMA notification")
+            logger.info(u"Sending NMA notification")
             nma = notifiers.NMA()
             nma.notify(snatched_nzb=name)
+        if headphones.PUSHALOT_ENABLED and headphones.PUSHALOT_ONSNATCH:
+            logger.info(u"Sending Pushalot notification")
+            pushalot = notifiers.PUSHALOT()
+            pushalot.notify(name,"Download started")
 
-        return response['arguments']['torrent-added']['id']
+        return retid
+        
+    else:
+        logger.info('Transmission returned status %s' % response['result'])
+        return False
         
 def getTorrentFolder(torrentid):
     method = 'torrent-get'
@@ -63,7 +84,10 @@ def getTorrentFolder(torrentid):
     percentdone = response['arguments']['torrents'][0]['percentDone']
     torrent_folder_name = response['arguments']['torrents'][0]['name']
     
-    while percentdone == 0:
+    tries = 1
+    
+    while percentdone == 0  and tries <10:
+        tries+=1
         time.sleep(5)
         response = torrentAction(method, arguments)
         percentdone = response['arguments']['torrents'][0]['percentDone']

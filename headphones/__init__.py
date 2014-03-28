@@ -92,6 +92,7 @@ CHECK_GITHUB = False
 CHECK_GITHUB_ON_STARTUP = False
 CHECK_GITHUB_INTERVAL = None
 
+POST_PROCESSING_DIR = None
 MUSIC_DIR = None
 DESTINATION_DIR = None
 LOSSLESS_DESTINATION_DIR = None
@@ -229,15 +230,34 @@ XBMC_USERNAME = None
 XBMC_PASSWORD = None
 XBMC_UPDATE = False
 XBMC_NOTIFY = False
+PLEX_ENABLED = False
+PLEX_SERVER_HOST = None
+PLEX_CLIENT_HOST = None
+PLEX_USERNAME = None
+PLEX_PASSWORD = None
+PLEX_UPDATE = False
+PLEX_NOTIFY = False
 NMA_ENABLED = False
 NMA_APIKEY = None
 NMA_PRIORITY = None
 NMA_ONSNATCH = None
+PUSHALOT_ENABLED = False
+PUSHALOT_APIKEY = None
+PUSHALOT_ONSNATCH = None
 SYNOINDEX_ENABLED = False
 PUSHOVER_ENABLED = True
 PUSHOVER_PRIORITY = 1
 PUSHOVER_KEYS = None
 PUSHOVER_ONSNATCH = True
+PUSHBULLET_ENABLED = True
+PUSHBULLET_APIKEY = None
+PUSHBULLET_DEVICEID = None
+PUSHBULLET_ONSNATCH = True
+TWITTER_ENABLED = False
+TWITTER_ONSNATCH = False
+TWITTER_USERNAME = None
+TWITTER_PASSWORD = None
+TWITTER_PREFIX = None
 MIRRORLIST = ["musicbrainz.org","headphones","custom"]
 MIRROR = None
 CUSTOMHOST = None
@@ -245,6 +265,7 @@ CUSTOMPORT = None
 CUSTOMSLEEP = None
 HPUSER = None
 HPPASS = None
+SONGKICK_APIKEY = "nd1We7dFW2RqxPw8"
 
 CACHE_SIZEMB = 32
 JOURNAL_MODE = None
@@ -312,13 +333,18 @@ def initialize():
                 NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, HEADPHONES_INDEXER, NZBMATRIX, TRANSMISSION_HOST, TRANSMISSION_USERNAME, TRANSMISSION_PASSWORD, \
                 UTORRENT_HOST, UTORRENT_USERNAME, UTORRENT_PASSWORD, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, OMGWTFNZBS, OMGWTFNZBS_UID, OMGWTFNZBS_APIKEY, \
-		NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, LASTFM_USERNAME, \
+                NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, LASTFM_USERNAME, \
                 INTERFACE, FOLDER_PERMISSIONS, FILE_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
                 MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, \
                 PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
+                TWITTER_ENABLED, TWITTER_ONSNATCH, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
+                PUSHBULLET_ENABLED, PUSHBULLET_APIKEY, PUSHBULLET_DEVICEID, PUSHBULLET_ONSNATCH, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
-                PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY
+                PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
+                PLEX_ENABLED, PLEX_SERVER_HOST, PLEX_CLIENT_HOST, PLEX_USERNAME, PLEX_PASSWORD, PLEX_UPDATE, PLEX_NOTIFY, PUSHALOT_ENABLED, PUSHALOT_APIKEY, PUSHALOT_ONSNATCH, \
+                POST_PROCESSING_DIR
+
 
         if __INITIALIZED__:
             return False
@@ -339,9 +365,13 @@ def initialize():
         CheckSection('What.cd')
         CheckSection('Prowl')
         CheckSection('Pushover')
+        CheckSection('PushBullet')
         CheckSection('XBMC')
+        CheckSection('Plex')
         CheckSection('NMA')
+        CheckSection('Pushalot')
         CheckSection('Synoindex')
+        CheckSection('Twitter')
         CheckSection('Advanced')
 
         # Set global variables based on config file or use defaults
@@ -376,6 +406,7 @@ def initialize():
         CHECK_GITHUB_ON_STARTUP = bool(check_setting_int(CFG, 'General', 'check_github_on_startup', 1))
         CHECK_GITHUB_INTERVAL = check_setting_int(CFG, 'General', 'check_github_interval', 360)
 
+        POST_PROCESSING_DIR = check_setting_str(CFG, 'General', 'post_processing_dir', '')
         MUSIC_DIR = check_setting_str(CFG, 'General', 'music_dir', '')
         DESTINATION_DIR = check_setting_str(CFG, 'General', 'destination_dir', '')
         LOSSLESS_DESTINATION_DIR = check_setting_str(CFG, 'General', 'lossless_destination_dir', '')
@@ -449,11 +480,11 @@ def initialize():
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
 
         HEADPHONES_INDEXER = bool(check_setting_int(CFG, 'Headphones', 'headphones_indexer', 0))
-        
+
         TRANSMISSION_HOST = check_setting_str(CFG, 'Transmission', 'transmission_host', '')
         TRANSMISSION_USERNAME = check_setting_str(CFG, 'Transmission', 'transmission_username', '')
         TRANSMISSION_PASSWORD = check_setting_str(CFG, 'Transmission', 'transmission_password', '')
-        
+
         UTORRENT_HOST = check_setting_str(CFG, 'uTorrent', 'utorrent_host', '')
         UTORRENT_USERNAME = check_setting_str(CFG, 'uTorrent', 'utorrent_username', '')
         UTORRENT_PASSWORD = check_setting_str(CFG, 'uTorrent', 'utorrent_password', '')
@@ -515,10 +546,22 @@ def initialize():
         XBMC_UPDATE = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update', 0))
         XBMC_NOTIFY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify', 0))
 
+        PLEX_ENABLED = bool(check_setting_int(CFG, 'Plex', 'plex_enabled', 0))
+        PLEX_SERVER_HOST = check_setting_str(CFG, 'Plex', 'plex_server_host', '')
+        PLEX_CLIENT_HOST = check_setting_str(CFG, 'Plex', 'plex_client_host', '')
+        PLEX_USERNAME = check_setting_str(CFG, 'Plex', 'plex_username', '')
+        PLEX_PASSWORD = check_setting_str(CFG, 'Plex', 'plex_password', '')
+        PLEX_UPDATE = bool(check_setting_int(CFG, 'Plex', 'plex_update', 0))
+        PLEX_NOTIFY = bool(check_setting_int(CFG, 'Plex', 'plex_notify', 0))
+
         NMA_ENABLED = bool(check_setting_int(CFG, 'NMA', 'nma_enabled', 0))
         NMA_APIKEY = check_setting_str(CFG, 'NMA', 'nma_apikey', '')
         NMA_PRIORITY = check_setting_int(CFG, 'NMA', 'nma_priority', 0)
         NMA_ONSNATCH = bool(check_setting_int(CFG, 'NMA', 'nma_onsnatch', 0))
+
+        PUSHALOT_ENABLED = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_enabled', 0))
+        PUSHALOT_APIKEY = check_setting_str(CFG, 'Pushalot', 'pushalot_apikey', '')
+        PUSHALOT_ONSNATCH = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_onsnatch', 0))
 
         SYNOINDEX_ENABLED = bool(check_setting_int(CFG, 'Synoindex', 'synoindex_enabled', 0))
 
@@ -526,6 +569,17 @@ def initialize():
         PUSHOVER_KEYS = check_setting_str(CFG, 'Pushover', 'pushover_keys', '')
         PUSHOVER_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_onsnatch', 0))
         PUSHOVER_PRIORITY = check_setting_int(CFG, 'Pushover', 'pushover_priority', 0)
+
+        PUSHBULLET_ENABLED = bool(check_setting_int(CFG, 'PushBullet', 'pushbullet_enabled', 0))
+        PUSHBULLET_APIKEY = check_setting_str(CFG, 'PushBullet', 'pushbullet_apikey', '')
+        PUSHBULLET_DEVICEID = check_setting_str(CFG, 'PushBullet', 'pushbullet_deviceid', '')
+        PUSHBULLET_ONSNATCH = bool(check_setting_int(CFG, 'PushBullet', 'pushbullet_onsnatch', 0))
+
+        TWITTER_ENABLED = bool(check_setting_int(CFG, 'Twitter', 'twitter_enabled', 0))
+        TWITTER_ONSNATCH = bool(check_setting_int(CFG, 'Twitter', 'twitter_onsnatch', 0))
+        TWITTER_USERNAME = check_setting_str(CFG, 'Twitter', 'twitter_username', '')
+        TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
+        TWITTER_PREFIX = check_setting_str(CFG, 'Twitter', 'twitter_prefix', 'Headphones')
 
         MIRROR = check_setting_str(CFG, 'General', 'mirror', 'musicbrainz.org')
         CUSTOMHOST = check_setting_str(CFG, 'General', 'customhost', 'localhost')
@@ -592,7 +646,7 @@ def initialize():
 			if BLACKHOLE:
 				NZB_DOWNLOADER = 2
 			CONFIG_VERSION = '4'
-            
+
         # Enable Headphones Indexer if they have a VIP account
         if CONFIG_VERSION == '4':
             if HPUSER and HPPASS:
@@ -706,7 +760,7 @@ def launch_browser(host, port, root):
 
     if host == '0.0.0.0':
         host = 'localhost'
-        
+
     if ENABLE_HTTPS:
         protocol = 'https'
     else:
@@ -746,6 +800,7 @@ def config_write():
     new_config['General']['check_github_on_startup'] = int(CHECK_GITHUB_ON_STARTUP)
     new_config['General']['check_github_interval'] = CHECK_GITHUB_INTERVAL
 
+    new_config['General']['post_processing_dir'] = POST_PROCESSING_DIR
     new_config['General']['music_dir'] = MUSIC_DIR
     new_config['General']['destination_dir'] = DESTINATION_DIR
     new_config['General']['lossless_destination_dir'] = LOSSLESS_DESTINATION_DIR
@@ -829,7 +884,7 @@ def config_write():
     new_config['Transmission']['transmission_host'] = TRANSMISSION_HOST
     new_config['Transmission']['transmission_username'] = TRANSMISSION_USERNAME
     new_config['Transmission']['transmission_password'] = TRANSMISSION_PASSWORD
-    
+
     new_config['uTorrent'] = {}
     new_config['uTorrent']['utorrent_host'] = UTORRENT_HOST
     new_config['uTorrent']['utorrent_username'] = UTORRENT_USERNAME
@@ -881,17 +936,44 @@ def config_write():
     new_config['XBMC']['xbmc_update'] = int(XBMC_UPDATE)
     new_config['XBMC']['xbmc_notify'] = int(XBMC_NOTIFY)
 
+    new_config['Plex'] = {}
+    new_config['Plex']['plex_enabled'] = int(PLEX_ENABLED)
+    new_config['Plex']['plex_server_host'] = PLEX_SERVER_HOST
+    new_config['Plex']['plex_client_host'] = PLEX_CLIENT_HOST
+    new_config['Plex']['plex_username'] = PLEX_USERNAME
+    new_config['Plex']['plex_password'] = PLEX_PASSWORD
+    new_config['Plex']['plex_update'] = int(PLEX_UPDATE)
+    new_config['Plex']['plex_notify'] = int(PLEX_NOTIFY)
+
     new_config['NMA'] = {}
     new_config['NMA']['nma_enabled'] = int(NMA_ENABLED)
     new_config['NMA']['nma_apikey'] = NMA_APIKEY
     new_config['NMA']['nma_priority'] = NMA_PRIORITY
-    new_config['NMA']['nma_onsnatch'] = int(PROWL_ONSNATCH)
+    new_config['NMA']['nma_onsnatch'] = int(NMA_ONSNATCH)
+
+    new_config['Pushalot'] = {}
+    new_config['Pushalot']['pushalot_enabled'] = int(PUSHALOT_ENABLED)
+    new_config['Pushalot']['pushalot_apikey'] = PUSHALOT_APIKEY
+    new_config['Pushalot']['pushalot_onsnatch'] = int(PUSHALOT_ONSNATCH)
 
     new_config['Pushover'] = {}
     new_config['Pushover']['pushover_enabled'] = int(PUSHOVER_ENABLED)
     new_config['Pushover']['pushover_keys'] = PUSHOVER_KEYS
     new_config['Pushover']['pushover_onsnatch'] = int(PUSHOVER_ONSNATCH)
     new_config['Pushover']['pushover_priority'] = int(PUSHOVER_PRIORITY)
+
+    new_config['PushBullet'] = {}
+    new_config['PushBullet']['pushbullet_enabled'] = int(PUSHBULLET_ENABLED)
+    new_config['PushBullet']['pushbullet_apikey'] = PUSHBULLET_APIKEY
+    new_config['PushBullet']['pushbullet_deviceid'] = PUSHBULLET_DEVICEID
+    new_config['PushBullet']['pushbullet_onsnatch'] = int(PUSHBULLET_ONSNATCH)
+
+    new_config['Twitter'] = {}
+    new_config['Twitter']['twitter_enabled'] = int(TWITTER_ENABLED)
+    new_config['Twitter']['twitter_onsnatch'] = int(TWITTER_ONSNATCH)
+    new_config['Twitter']['twitter_username'] = TWITTER_USERNAME
+    new_config['Twitter']['twitter_password'] = TWITTER_PASSWORD
+    new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX
 
     new_config['Synoindex'] = {}
     new_config['Synoindex']['synoindex_enabled'] = int(SYNOINDEX_ENABLED)
@@ -945,7 +1027,8 @@ def start():
         if CHECK_GITHUB:
             SCHED.add_interval_job(versioncheck.checkGithub, minutes=CHECK_GITHUB_INTERVAL)
 
-        SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
+	if DOWNLOAD_SCAN_INTERVAL > 0:
+            SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
 
         SCHED.start()
 
