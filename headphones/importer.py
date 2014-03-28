@@ -210,7 +210,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                 logger.info("[%s] Removing all references to release group %s to reflect MusicBrainz" % (artist['artist_name'], items['AlbumID']))
                 force_repackage = 1
     else:
-        logger.info("[%s] Error pulling data from MusicBrainz:  Maintaining dB" % artist['artist_name'])
+        logger.info("[%s] There was either an error pulling data from MusicBrainz or there might not be any releases for this category" % artist['artist_name'])
     
     # Then search for releases within releasegroups, if releases don't exist, then remove from allalbums/alltracks
 
