@@ -169,6 +169,21 @@
 	}
 
 
+	<%
+    if headphones.SONGKICK_FILTER_ENABLED:
+        songkick_filter_enabled = "true"
+    else:
+        songkick_filter_enabled = "false"
+    
+    if not headphones.SONGKICK_LOCATION:
+    	headphones.SONGKICK_LOCATION = "none"
+    	
+    if headphones.SONGKICK_ENABLED:
+        songkick_enabled = "true"
+    else:
+        songkick_enabled = "false"
+	
+	%>
 	function getArtistsCalendar() {
 		var template, calendarDomNode;
 
@@ -180,7 +195,7 @@
 			function(data){
 				if (data['resultsPage'].totalEntries >= 1) {          
           
-          if( ${headphones.SONGKICK_FILTER_ENABLED} ) {
+          if( ${songkick_filter_enabled} ) {
             data.resultsPage.results.event = $.grep(data.resultsPage.results.event, function(element,index){
               return element.venue.metroArea.id == ${headphones.SONGKICK_LOCATION};
             });
@@ -269,7 +284,7 @@
 		initActions();
 		initThisPage();
 		getArtistBio();
-		if( ${headphones.SONGKICK_ENABLED} ){
+		if( ${songkick_enabled} ){
       getArtistsCalendar();
     }
 	});
