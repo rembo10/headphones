@@ -33,6 +33,7 @@ import string
 import shutil
 
 import headphones, exceptions
+from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget
 from headphones import transmission
 
@@ -113,23 +114,26 @@ def searchforalbum(albumid=None, new=False, lossless=False):
 
         myDB = db.DBConnection()
 
-        results = myDB.select('SELECT AlbumID, Status from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
+        results = myDB.select('SELECT AlbumID, AlbumTitle, ArtistName, Status from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
         new = True
-
+        
         for result in results:
             foundNZB = "none"
-            if (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS or headphones.OMGWTFNZBS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
-                if result['Status'] == "Wanted Lossless":
-                    foundNZB = searchNZB(result['AlbumID'], new, losslessOnly=True)
-                else:
-                    foundNZB = searchNZB(result['AlbumID'], new)
-
-            if (headphones.KAT or headphones.PIRATEBAY or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
-
-                if result['Status'] == "Wanted Lossless":
-                    searchTorrent(result['AlbumID'], new, losslessOnly=True)
-                else:
-                    searchTorrent(result['AlbumID'], new)
+            if not result['AlbumTitle'] or not result['ArtistName']:
+                logger.warn('Skipping release %s. No title available' % result['AlbumID'])
+            else:
+                if (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS or headphones.OMGWTFNZBS) and (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST):
+                    if result['Status'] == "Wanted Lossless":
+                        foundNZB = searchNZB(result['AlbumID'], new, losslessOnly=True)
+                    else:
+                        foundNZB = searchNZB(result['AlbumID'], new)
+    
+                if (headphones.KAT or headphones.PIRATEBAY or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD) and foundNZB == "none":
+    
+                    if result['Status'] == "Wanted Lossless":
+                        searchTorrent(result['AlbumID'], new, losslessOnly=True)
+                    else:
+                        searchTorrent(result['AlbumID'], new)
 
     else:
 
@@ -217,7 +221,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
             # Add a user-agent
             request = urllib2.Request(searchURL)
-            request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+            request.add_header('User-Agent', USER_AGENT)
             base64string = base64.encodestring('%s:%s' % (headphones.HPUSER, headphones.HPPASS)).replace('\n', '')
             request.add_header("Authorization", "Basic %s" % base64string)
             
@@ -296,7 +300,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
                 # Add a user-agent
                 request = urllib2.Request(searchURL)
-                request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+                request.add_header('User-Agent', USER_AGENT)
                 opener = urllib2.build_opener()
 
                 logger.info(u'Parsing results from <a href="%s">%s</a>' % (searchURL, newznab_host[0]))
@@ -407,7 +411,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
             # Add a user-agent
             request = urllib2.Request(searchURL)
-            request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+            request.add_header('User-Agent', USER_AGENT)
             opener = urllib2.build_opener()
 
             logger.info(u'Parsing results from <a href="%s">NZBsRus</a>' % searchURL)
@@ -466,7 +470,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
             # Add a user-agent
             request = urllib2.Request(searchURL)
-            request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+            request.add_header('User-Agent', USER_AGENT)
             opener = urllib2.build_opener()
 
             logger.info(u'Parsing results from <a href="%s">omgwtfnzbs</a>' % searchURL)
@@ -743,7 +747,7 @@ def getresultNZB(result):
             logger.warn("AttributeError in getresultNZB.")
     elif result[3] == 'headphones':
         request = urllib2.Request(result[2])
-        request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+        request.add_header('User-Agent', USER_AGENT)
         base64string = base64.encodestring('%s:%s' % (headphones.HPUSER, headphones.HPPASS)).replace('\n', '')
         request.add_header("Authorization", "Basic %s" % base64string)
         
@@ -755,7 +759,7 @@ def getresultNZB(result):
             logger.warn('Error fetching nzb from url: ' + result[2] + ' %s' % e)
     else:
         request = urllib2.Request(result[2])
-        request.add_header('User-Agent', 'headphones/0.0 +https://github.com/rembo10/headphones')
+        request.add_header('User-Agent', USER_AGENT)
         opener = urllib2.build_opener()
 
         try:
@@ -871,7 +875,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
         if headphones.KAT:
             provider = "Kick Ass Torrent"
-            providerurl = url_fix("http://www.kat.ph/search/" + term)
+            providerurl = url_fix("http://kickass.to/usearch/" + term)
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 categories = "7"        #music
                 format = "2"             #flac
@@ -1156,7 +1160,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                 providerurl = url_fix(pirate_proxy + "/search/" + term + "/0/99/")
                 
             else:
-                providerurl = url_fix("http://thepiratebay.sx/search/" + term + "/0/99/")
+                providerurl = url_fix("http://thepiratebay.se/search/" + term + "/0/99/")
                 
             if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
                 category = '104'          #flac
@@ -1522,7 +1526,11 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                         return
                         
                     torrent_folder_name = transmission.getTorrentFolder(torrentid)
-                    logger.info('Torrent folder name: %s' % torrent_folder_name)
+                    if torrent_folder_name:
+                        logger.info('Torrent folder name: %s' % torrent_folder_name)
+                    else:
+                        logger.error('Torrent folder name could not be determined')
+                        return
 
                     # remove temp .torrent file created above
                     if bestqual[3] == 'rutracker.org':
@@ -1552,6 +1560,9 @@ def preprocesstorrent(resultlist, pre_sorted_list=False):
     
             if result[3] == 'Kick Ass Torrent':
                 request.add_header('Referer', 'http://kat.ph/')
+
+            if result[3] == 'What.cd':
+                request.add_header('User-Agent', 'Headphones')
 
             response = urllib2.urlopen(request)
             if response.info().get('Content-Encoding') == 'gzip':

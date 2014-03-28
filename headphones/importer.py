@@ -224,8 +224,14 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
         #Make a user configurable variable to skip update of albums with release dates older than this date (in days)
         pause_delta = headphones.MB_IGNORE_AGE
 
+        check_release_date = myDB.action("SELECT ReleaseDate, Status from albums WHERE ArtistID=? AND AlbumTitle=?", (artistid, al_title)).fetchone()
+
+        #Skip update if Status set
+        if check_release_date and check_release_date[1]:
+            logger.info("[%s] Not updating: %s (Status is %s, skipping)" % (artist['artist_name'], rg['title'], check_release_date[1]))
+            continue
+
         if not forcefull:
-            check_release_date = myDB.action("SELECT ReleaseDate from albums WHERE ArtistID=? AND AlbumTitle=?", (artistid, al_title)).fetchone()
             if check_release_date:
                 if check_release_date[0] is None:
                     logger.info("[%s] Now updating: %s (No Release Date)" % (artist['artist_name'], rg['title']))

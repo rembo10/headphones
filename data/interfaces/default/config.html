@@ -7,15 +7,15 @@
 <%def name="headerIncludes()">
     <div id="subhead_container">
         <div id="subhead_menu">
-            <a id="menu_link_shutdown" href="shutdown">Shut Down</a>
-            <a id="menu_link_shutdown" href="restart">Restart</a>
+            <a id="menu_link_shutdown" href="shutdown"><i class="fa fa-power-off"></i> Shut Down</a>
+            <a id="menu_link_shutdown" href="restart"><i class="fa fa-power-off"></i> Restart</a>
         </div>
     </div>
 </%def>
 <%def name="body()">
 
     <div id="paddingheader">
-        <h1 class="clearfix"><img src="interfaces/default/images/icon_gear.png" alt="settings"/>Settings</h1>
+        <h1 class="clearfix"><i class="fa fa-gear"></i> Settings</h1>
     </div>
     <form action="configUpdate" method="post" class="form" id="configUpdate">
 
@@ -25,7 +25,8 @@
                 <li><a href="#tabs-2">Download settings</a></li>
                 <li><a href="#tabs-3">Search providers</a></li>
                 <li><a href="#tabs-4">Quality &amp; Post Processing</a></li>
-                <li><a href="#tabs-5">Advanced Settings</a></li>
+                <li><a href="#tabs-5">Notifications</a></li>
+                <li><a href="#tabs-6">Advanced Settings</a></li>
             </ul>
             <div id="tabs-1">
 
@@ -110,7 +111,7 @@
                     </tr>
                     <tr>
                         <div class="configmessage">
-                            <span class="ui-icon ui-icon-info" ></span>Web Interface changes require a restart to take effect
+                            <i class="fa fa-info-circle"></i> Web Interface changes require a restart to take effect
                         </div>
                     </tr>
                 </table>
@@ -508,6 +509,11 @@
                                     <input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}><label>Embed lyrics</label>
                                 </div>
                                 <div class="row">
+                                    <label>Path to Post-Processing Folder</label>
+                                    <input type="text" name="post_processing_dir" value="${config['post_processing_dir']}" size="50">
+                                    <small>Set this to where your download client puts its completed downloads in</small>
+                                </div>
+                                <div class="row">
                                     <label>Path to Destination Folder</label>
                                     <input type="text" name="destination_dir" value="${config['dest_dir']}" size="50">
                                     <small>e.g. /Users/name/Music/iTunes or /Volumes/share/music</small>
@@ -524,6 +530,214 @@
                 <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
             </div>
             <div id="tabs-5">
+                <table class="configtable" summary="Notifications">
+                    <tr>
+                        <td>
+                            <fieldset>
+                                <h3>Prowl</h3>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} /><label>Enable Prowl Notifications</label>
+                                </div>
+                                <div id="prowloptions">
+                                    <div class="row">
+                                        <label>API key</label><input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                    <div class="row">
+                                        <label>Priority (-2,-1,0,1 or 2):</label>
+                                        <input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2">
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <h3>XBMC</h3>
+                                <div class="checkbox row">
+                                    <input type="checkbox" name="xbmc_enabled" id="xbmc" value="1" ${config['xbmc_enabled']} /><label>Enable XBMC Updates</label>
+                                </div>
+                                <div id="xbmcoptions">
+                                    <div class="row">
+                                        <label>XBMC Host:Port</label>
+                                        <input type="text" name="xbmc_host" value="${config['xbmc_host']}" size="30">
+                                        <small>e.g. http://localhost:8080. Separate hosts with commas</small>
+                                    </div>
+                                    <div class="row">
+                                        <label>XBMC Username</label><input type="text" name="xbmc_username" value="${config['xbmc_username']}" size="30">
+                                    </div>
+                                    <div class="row">
+                                        <label>XBMC Password</label><input type="password" name="xbmc_password" value="${config['xbmc_password']}" size="30">
+                                    </div>
+                                    <div class="checkbox row">
+                                        <input type="checkbox" name="xbmc_update" value="1" ${config['xbmc_update']} /><label>Update XBMC Library</label>
+                                    </div>
+                                    <div class="checkbox row">
+                                        <input type="checkbox" name="xbmc_notify" value="1" ${config['xbmc_notify']} /><label>Send Notification to XBMC</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <h3>Plex Media Server</h3>
+                                <div class="checkbox row">
+                                    <input type="checkbox" name="plex_enabled" id="plex" value="1" ${config['plex_enabled']} /><label>Enable Plex Updates</label>
+                                </div>
+                                <div id="plexoptions">
+                                    <div class="row">
+                                        <label>Plex Server Host:Port</label>
+                                        <input type="text" name="plex_server_host" value="${config['plex_server_host']}" size="30">
+                                        <small>Host running Plex Media Server (eg. http://192.168.1.100:32400)</small>
+                                    </div>
+                                    <div class="row">
+                                        <label>Plex Client Host:Port</label>
+                                        <input type="text" name="plex_client_host" value="${config['plex_client_host']}" size="30">
+                                        <small>Host running Plex Client (eg. http://192.168.1.100:3000)</small>
+                                    </div>
+                                    <div class="row">
+                                        <label>Plex Username</label><input type="text" name="plex_username" value="${config['plex_username']}" size="30">
+					                    <small>Username of your Plex client API (blank for none)</small>
+                                    </div>
+                                    <div class="row">
+                                        <label>Plex Password</label><input type="password" name="plex_password" value="${config['plex_password']}" size="30">
+					                    <small>Password of your Plex client API (blank for none)</small>
+                                    </div>
+                                    <div class="checkbox row">
+                                        <input type="checkbox" name="plex_update" value="1" ${config['plex_update']} /><label>Update Plex Library</label>
+                                    </div>
+                                    <div class="checkbox row">
+                                        <input type="checkbox" name="plex_notify" value="1" ${config['plex_notify']} /><label>Send Notifications to Plex</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <h3>NotifyMyAndroid</h3>
+                                <div class="checkbox row">
+                                    <input type="checkbox" name="nma_enabled" id="nma" value="1" ${config['nma_enabled']} /><label>Enable NotifyMyAndroid</label>
+                                </div>
+                                <div id="nmaoptions">
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="nma_onsnatch" value="1" ${config['nma_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                    <div class="row">
+                                        <label>NotifyMyAndroid API Key</label>
+                                        <input type="text" name="nma_apikey" value="${config['nma_apikey']}" size="30">
+                                        <small>Separate multiple api keys with commas</small>
+                                    </div>
+                                    <div class="row">
+                                        <label>Priority</label>
+                                        <select name="nma_priority">
+                                        %for x in [-2,-1,0,1,2]:
+                                        <%
+                                            if config['nma_priority'] == x:
+                                                nma_priority_selected = 'selected'
+                                            else:
+                                                nma_priority_selected = ''
+
+                                            if x == -2:
+                                                nma_priority_value = 'Very Low'
+                                            elif x == -1:
+                                                nma_priority_value = 'Moderate'
+                                            elif x == 0:
+                                                nma_priority_value = 'Normal'
+                                            elif x == 1:
+                                                nma_priority_value = 'High'
+                                            else:
+                                                nma_priority_value = 'Emergency'
+                                        %>
+                                            <option value=${x} ${nma_priority_selected}>${nma_priority_value}</option>
+                                        %endfor
+                                        </select>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            </td>
+                            <td>
+                            <fieldset>
+                                <h3>Pushalot</h3>
+                                <div class="checkbox row">
+                                    <input type="checkbox" name="pushalot_enabled" id="pushalot" value="1" ${config['pushalot_enabled']} /><label>Enable Pushalot</label>
+                                </div>
+                                <div id="pushalotoptions">
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="pushalot_onsnatch" value="1" ${config['pushalot_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                    <div class="row">
+                                        <label>Pushalot API Key</label>
+                                        <input type="text" name="pushalot_apikey" value="${config['pushalot_apikey']}" size="30">
+                                        <small>Separate multiple api keys with commas</small>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <h3>Synology NAS</h3>
+                                <div class="checkbox row">
+                                    <input type="checkbox" name="synoindex_enabled" id="synoindex" value="1" ${config['synoindex_enabled']} /><label>Enable Synoindex</label>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <h3>Pushover</h3>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="pushover_enabled" id="pushover" value="1" ${config['pushover_enabled']} /><label>Enable Pushover Notifications</label>
+                                </div>
+                                <div id="pushoveroptions">
+                                    <div class="row">
+                                        <label>User key</label><input type="text" name="pushover_keys" value="${config['pushover_keys']}" size="50">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="pushover_onsnatch" value="1" ${config['pushover_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                    <div class="row">
+                                        <label>Priority (-1,0, or 1):</label>
+                                        <input type="text" name="pushover_priority" value="${config['pushover_priority']}" size="2">
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <h3>Pushbullet</h3>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="pushbullet_enabled" id="pushbullet" value="1" ${config['pushbullet_enabled']} /><label>Enable PushBullet Notifications</label>
+                                </div>
+                                <div id="pushbulletoptions">
+                                    <div class="row">
+                                        <label>API Key</label><input type="text" name="pushbullet_apikey" value="${config['pushbullet_apikey']}" size="50">
+                                    </div>
+                                    <div class="row">
+                                        <label>Device ID</label><input type="text" name="pushbullet_deviceid" value="${config['pushbullet_deviceid']}" size="50">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="pushbullet_onsnatch" value="1" ${config['pushbullet_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <h3>Twitter</h3>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="twitter_enabled" id="twitter" value="1" ${config['twitter_enabled']} /><label>Enable Twitter Notifications</label>
+                                </div>
+                                <div id="twitteroptions">
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="twitter_onsnatch" value="1" ${config['twitter_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                    <div class="row">
+                                        <input type="button" value="Request Authorization" id="twitterStep1" />
+                                    </div>
+                                    <div class="row">
+                                        <input type="text" id="twitter_key" value="" size="35" placeholder="Input Authorization Key" />
+                                        <input type="button" value="Verify Key" id="twitterStep2" />
+                                    </div>
+                                    <div class="row">
+                                        <input type="button" value="Test Twitter" id="testTwitter" />
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </td>
+                    </tr>
+                </table>
+                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
+            </div>
+            <div id="tabs-6">
                 <table class="configtable" summary="Advanced Settings">
                     <tr>
                         <td>
@@ -548,7 +762,7 @@
 
                         <fieldset>
                             <legend>Re-Encoding Options</legend>
-                            <small class="heading"><span style="float: left; margin-right: .3em; margin-top: 4px;" class="ui-icon ui-icon-info"></span>Note: this option requires the lame, ffmpeg or xld encoder</small>
+                            <small class="heading"><i class="fa fa-info-circle"></i> Note: this option requires the lame, ffmpeg or xld encoder</small>
                             <div class="checkbox row clearfix">
                                 <input type="checkbox" name="music_encoder" id="music_encoder" value="1" ${config['music_encoder']}/><label>Re-encode downloads during postprocessing</label>
                             </div>
@@ -669,7 +883,7 @@
                                     </div>
                                 </fieldset>
                             </div>
-                            
+
                             <div id="xldproperties">
                                 <div class="row">
                                     <label>XLD Profile</label>
@@ -753,119 +967,15 @@
                                     <input type="text" name="cache_dir" value="${config['cache_dir']}" size="50">
                                 </div>
                             </fieldset>
+
+                            <fieldset>
+                                <legend>Songkick</legend>
+                                <div class="row">
+                                    <label>API Key:</label>
+                                    <input type="text" name="songkick_apikey" value="${config['songkick_apikey']}" size="50">
+                                </div>
+                            </fieldset>
                             
-                            <h2>Notifications</h2>
-                            <fieldset>
-                                <h3>Prowl</h3>
-                                <div class="row checkbox">
-                                    <input type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} /><label>Enable Prowl Notifications</label>
-                                </div>
-                                <div id="prowloptions">
-                                    <div class="row">
-                                        <label>API key</label><input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50">
-                                    </div>
-                                    <div class="row checkbox">
-                                        <input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} /><label>Notify on snatch?</label>
-                                    </div>
-                                    <div class="row">
-                                        <label>Priority (-2,-1,0,1 or 2):</label>
-                                        <input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2">
-                                    </div>
-                                </div>
-                            </fieldset>
-                            <fieldset>
-                                <h3>XBMC</h3>
-                                <div class="checkbox row">
-                                    <input type="checkbox" name="xbmc_enabled" id="xbmc" value="1" ${config['xbmc_enabled']} /><label>Enable XBMC Updates</label>
-                                </div>
-                                <div id="xbmcoptions">
-                                    <div class="row">
-                                        <label>XBMC Host:Port</label>
-                                        <input type="text" name="xbmc_host" value="${config['xbmc_host']}" size="30">
-                                        <small>e.g. http://localhost:8080. Separate hosts with commas</small>
-                                    </div>
-                                    <div class="row">
-                                        <label>XBMC Username</label><input type="text" name="xbmc_username" value="${config['xbmc_username']}" size="30">
-                                    </div>
-                                    <div class="row">
-                                        <label>XBMC Password</label><input type="password" name="xbmc_password" value="${config['xbmc_password']}" size="30">
-                                    </div>
-                                    <div class="checkbox row">
-                                        <input type="checkbox" name="xbmc_update" value="1" ${config['xbmc_update']} /><label>Update XBMC Library</label>
-                                    </div>
-                                    <div class="checkbox row">
-                                        <input type="checkbox" name="xbmc_notify" value="1" ${config['xbmc_notify']} /><label>Send Notification to XBMC</label>
-                                    </div>
-                                </div>
-                            </fieldset>
-                            <fieldset>
-                                <h3>NotifyMyAndroid</h3>
-                                <div class="checkbox row">
-                                    <input type="checkbox" name="nma_enabled" id="nma" value="1" ${config['nma_enabled']} /><label>Enable NotifyMyAndroid</label>
-                                </div>
-                                <div id="nmaoptions">
-                                    <div class="row checkbox">
-                                        <input type="checkbox" name="nma_onsnatch" value="1" ${config['nma_onsnatch']} /><label>Notify on snatch?</label>
-                                    </div>
-                                    <div class="row">
-                                        <label>NotifyMyAndroid API Key</label>
-                                        <input type="text" name="nma_apikey" value="${config['nma_apikey']}" size="30">
-                                        <small>Separate multiple api keys with commas</small>
-                                    </div>
-                                    <div class="row">
-                                        <label>Priority</label>
-                                        <select name="nma_priority">
-                                        %for x in [-2,-1,0,1,2]:
-                                        <%
-                                            if config['nma_priority'] == x:
-                                                nma_priority_selected = 'selected'
-                                            else:
-                                                nma_priority_selected = ''
-                                                
-                                            if x == -2:
-                                                nma_priority_value = 'Very Low'
-                                            elif x == -1:
-                                                nma_priority_value = 'Moderate'
-                                            elif x == 0:
-                                                nma_priority_value = 'Normal'
-                                            elif x == 1:
-                                                nma_priority_value = 'High'
-                                            else:
-                                                nma_priority_value = 'Emergency'
-                                        %>
-                                            <option value=${x} ${nma_priority_selected}>${nma_priority_value}</option>
-                                        %endfor
-                                        </select>
-                                    </div>
-                                </div>
-                            </fieldset>
-
-                            <fieldset>
-                                <h3>Synology NAS</h3>
-                                <div class="checkbox row">
-                                    <input type="checkbox" name="synoindex_enabled" id="synoindex" value="1" ${config['synoindex_enabled']} /><label>Enable Synoindex</label>
-                                </div>
-                            </fieldset>
-
-                            <fieldset>
-                                <h3>Pushover</h3>
-                                <div class="row checkbox">
-                                    <input type="checkbox" name="pushover_enabled" id="pushover" value="1" ${config['pushover_enabled']} /><label>Enable Pushover Notifications</label>
-                                </div>
-                                <div id="pushoveroptions">
-                                    <div class="row">
-                                        <label>User key</label><input type="text" name="pushover_keys" value="${config['pushover_keys']}" size="50">
-                                    </div>
-                                    <div class="row checkbox">
-                                        <input type="checkbox" name="pushover_onsnatch" value="1" ${config['pushover_onsnatch']} /><label>Notify on snatch?</label>
-                                    </div>
-                                    <div class="row">
-                                        <label>Priority (-1,0, or 1):</label>
-                                        <input type="text" name="pushover_priority" value="${config['pushover_priority']}" size="2">
-                                    </div>
-                                </div>
-                            </fieldset>
-
                             <fieldset>
                                 <legend>Musicbrainz</legend>
                                 <div class="row">
@@ -1098,6 +1208,26 @@
                         }
                 });
 
+                if ($("#plex").is(":checked"))
+                        {
+                                $("#plexoptions").show();
+                        }
+                else
+                        {
+                                $("#plexoptions").hide();
+                        }
+
+                $("#plex").click(function(){
+                        if ($("#plex").is(":checked"))
+                        {
+                                $("#plexoptions").slideDown();
+                        }
+                        else
+                        {
+                                $("#plexoptions").slideUp();
+                        }
+                });
+
                 if ($("#nma").is(":checked"))
                         {
                                 $("#nmaoptions").show();
@@ -1117,6 +1247,27 @@
                                 $("#nmaoptions").slideUp();
                         }
                 });
+
+                if ($("#pushalot").is(":checked"))
+                        {
+                                $("#pushalotoptions").show();
+                        }
+                else
+                        {
+                                $("#pushalotoptions").hide();
+                        }
+
+                $("#pushalot").click(function(){
+                        if ($("#pushalot").is(":checked"))
+                        {
+                                $("#pushalotoptions").slideDown();
+                        }
+                        else
+                        {
+                                $("#pushalotoptions").slideUp();
+                        }
+                });
+
                 if ($("#pushover").is(":checked"))
                         {
                                 $("#pushoveroptions").show();
@@ -1134,6 +1285,46 @@
                         else
                         {
                                 $("#pushoveroptions").slideUp();
+                        }
+                });
+
+                if ($("#pushbullet").is(":checked"))
+                        {
+                                $("#pushbulletoptions").show();
+                        }
+                else
+                        {
+                                $("#pushbulletoptions").hide();
+                        }
+
+                $("#pushbullet").click(function(){
+                        if ($("#pushbullet").is(":checked"))
+                        {
+                                $("#pushbulletoptions").slideDown();
+                        }
+                        else
+                        {
+                                $("#pushbulletoptions").slideUp();
+                        }
+                });
+
+                if ($("#twitter").is(":checked"))
+                        {
+                                $("#twitteroptions").show();
+                        }
+                else
+                        {
+                                $("#twitteroptions").hide();
+                        }
+
+                $("#twitter").click(function(){
+                        if ($("#twitter").is(":checked"))
+                        {
+                                $("#twitteroptions").slideDown();
+                        }
+                        else
+                        {
+                                $("#twitteroptions").slideUp();
                         }
                 });
 
@@ -1290,7 +1481,28 @@
                 initConfigCheckbox("#usewhatcd");
                 initConfigCheckbox("#useapi");
                 initConfigCheckbox("#enable_https");
+        
+
+
+                $('#twitterStep1').click(function () {
+                    $.get("/twitterStep1", function (data) {window.open(data); })
+                    .done(function () { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>Confirm Authorization. Check pop-up blocker if no response.</div>"); });
+                    $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
+                });
+
+                $('#twitterStep2').click(function () {
+                    var twitter_key = $("#twitter_key").val();
+                    $.get("/twitterStep2", {'key': twitter_key}, function (data) { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>"); });
+                    $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
+                });
+
+                $('#testTwitter').click(function () {
+                    $.get("/testTwitter",
+                        function (data) { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>"); });
+                    $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
+                });
         }
+
         $(document).ready(function() {
             initThisPage();
         });

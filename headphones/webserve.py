@@ -30,7 +30,7 @@ from operator import itemgetter
 
 import headphones
 
-from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers
+from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers, notifiers
 from headphones.helpers import checked, radio,today, cleanName
 
 import lib.simplejson as simplejson
@@ -110,7 +110,14 @@ class WebInterface(object):
         album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
         tracks = myDB.select('SELECT * from tracks WHERE AlbumID=? ORDER BY CAST(TrackNumber AS INTEGER)', [AlbumID])
         description = myDB.action('SELECT * from descriptions WHERE ReleaseGroupID=?', [AlbumID]).fetchone()
-        title = album['ArtistName'] + ' - ' + album['AlbumTitle']
+        if not album['ArtistName']:
+            title =  ' - '
+        else:
+            title = album['ArtistName'] + ' - '
+        if not album['AlbumTitle']:
+            title = title + ""
+        else:
+            title = title + album['AlbumTitle']
         return serve_template(templatename="album.html", title=title, album=album, tracks=tracks, description=description)
     albumPage.exposed = True
 
@@ -365,12 +372,12 @@ class WebInterface(object):
             # else:
             #     original_clean = None
                 if original_clean == albums['CleanName']:
-                    have_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'] }  
+                    have_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'] }
                     have_album_dictionary.append(have_dict)
         headphones_albums = myDB.select('SELECT ArtistName, AlbumTitle from albums ORDER BY ArtistName')
         for albums in headphones_albums:
-            headphones_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'] }  
-            headphones_album_dictionary.append(headphones_dict) 
+            headphones_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'] }
+            headphones_album_dictionary.append(headphones_dict)
         #unmatchedalbums = [f for f in have_album_dictionary if f not in [x for x in headphones_album_dictionary]]
 
         check = set([(cleanName(d['ArtistName']).lower(), cleanName(d['AlbumTitle']).lower()) for d in headphones_album_dictionary])
@@ -382,16 +389,16 @@ class WebInterface(object):
 
     def markUnmatched(self, action=None, existing_artist=None, existing_album=None, new_artist=None, new_album=None):
         myDB = db.DBConnection()
-     
+
         if action == "ignoreArtist":
             artist = existing_artist
             myDB.action('UPDATE have SET Matched="Ignored" WHERE ArtistName=? AND Matched = "Failed"', [artist])
-        
+
         elif action == "ignoreAlbum":
             artist = existing_artist
             album = existing_album
             myDB.action('UPDATE have SET Matched="Ignored" WHERE ArtistName=? AND AlbumTitle=? AND Matched = "Failed"', (artist, album))
-        
+
         elif action == "matchArtist":
             existing_artist_clean = helpers.cleanName(existing_artist).lower()
             new_artist_clean = helpers.cleanName(new_artist).lower()
@@ -464,7 +471,7 @@ class WebInterface(object):
                     librarysync.update_album_status(album_id)
             else:
                 logger.info("Artist %s / Album %s already named appropriately; nothing to modify" % (existing_artist, existing_album))
-                
+
     markUnmatched.exposed = True
 
     def manageManual(self):
@@ -480,7 +487,7 @@ class WebInterface(object):
                     elif albums['Matched'] == "Manual" or albums['CleanName'] != original_clean:
                         album_status = "Matched"
                     manual_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'], 'AlbumStatus' : album_status }
-                    if manual_dict not in manual_albums: 
+                    if manual_dict not in manual_albums:
                         manual_albums.append(manual_dict)
         manual_albums_sorted = sorted(manual_albums, key=itemgetter('ArtistName', 'AlbumTitle'))
 
@@ -755,7 +762,7 @@ class WebInterface(object):
             album_json[counter] = album['AlbumTitle']
             counter+=1
         json_albums = json.dumps(album_json)
-        
+
         cherrypy.response.headers['Content-type'] = 'application/json'
         return json_albums
     getAlbumsByArtist_json.exposed=True
@@ -933,15 +940,31 @@ class WebInterface(object):
                     "xbmc_password": headphones.XBMC_PASSWORD,
                     "xbmc_update": checked(headphones.XBMC_UPDATE),
                     "xbmc_notify": checked(headphones.XBMC_NOTIFY),
+                    "plex_enabled": checked(headphones.PLEX_ENABLED),
+                    "plex_server_host": headphones.PLEX_SERVER_HOST,
+                    "plex_client_host": headphones.PLEX_CLIENT_HOST,
+                    "plex_username": headphones.PLEX_USERNAME,
+                    "plex_password": headphones.PLEX_PASSWORD,
+                    "plex_update": checked(headphones.PLEX_UPDATE),
+                    "plex_notify": checked(headphones.PLEX_NOTIFY),
                     "nma_enabled": checked(headphones.NMA_ENABLED),
                     "nma_apikey": headphones.NMA_APIKEY,
                     "nma_priority": int(headphones.NMA_PRIORITY),
                     "nma_onsnatch": checked(headphones.NMA_ONSNATCH),
+                    "pushalot_enabled": checked(headphones.PUSHALOT_ENABLED),
+                    "pushalot_apikey": headphones.PUSHALOT_APIKEY,
+                    "pushalot_onsnatch": checked(headphones.PUSHALOT_ONSNATCH),
                     "synoindex_enabled": checked(headphones.SYNOINDEX_ENABLED),
                     "pushover_enabled": checked(headphones.PUSHOVER_ENABLED),
                     "pushover_onsnatch": checked(headphones.PUSHOVER_ONSNATCH),
                     "pushover_keys": headphones.PUSHOVER_KEYS,
                     "pushover_priority": headphones.PUSHOVER_PRIORITY,
+                    "pushbullet_enabled": checked(headphones.PUSHBULLET_ENABLED),
+                    "pushbullet_onsnatch": checked(headphones.PUSHBULLET_ONSNATCH),
+                    "pushbullet_apikey": headphones.PUSHBULLET_APIKEY,
+                    "pushbullet_deviceid": headphones.PUSHBULLET_DEVICEID,
+                    "twitter_enabled": checked(headphones.TWITTER_ENABLED),
+                    "twitter_onsnatch": checked(headphones.TWITTER_ONSNATCH),
                     "mirror_list": headphones.MIRRORLIST,
                     "mirror": headphones.MIRROR,
                     "customhost": headphones.CUSTOMHOST,
@@ -949,9 +972,11 @@ class WebInterface(object):
                     "customsleep": headphones.CUSTOMSLEEP,
                     "hpuser": headphones.HPUSER,
                     "hppass": headphones.HPPASS,
+                    "songkick_apikey": headphones.SONGKICK_APIKEY,
                     "cache_sizemb": headphones.CACHE_SIZEMB,
                     "file_permissions": headphones.FILE_PERMISSIONS,
-                    "folder_permissions": headphones.FOLDER_PERMISSIONS
+                    "folder_permissions": headphones.FOLDER_PERMISSIONS,
+                    "post_processing_dir" : headphones.POST_PROCESSING_DIR
                 }
 
         # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8
@@ -973,9 +998,9 @@ class WebInterface(object):
 
     def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None,
         download_scan_interval=None, update_db_interval=None, mb_ignore_age=None, nzb_search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None,
-        sab_category=None, nzbget_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, transmission_host=None, transmission_username=None, transmission_password=None, 
-        utorrent_host=None, utorrent_username=None, utorrent_password=None, nzb_downloader=0, torrent_downloader=0, download_dir=None, blackhole_dir=None, usenet_retention=None, 
-        use_headphones_indexer=0, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, omgwtfnzbs=0, omgwtfnzbs_uid=None, omgwtfnzbs_apikey=None, 
+        sab_category=None, nzbget_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, transmission_host=None, transmission_username=None, transmission_password=None,
+        utorrent_host=None, utorrent_username=None, utorrent_password=None, nzb_downloader=0, torrent_downloader=0, download_dir=None, blackhole_dir=None, usenet_retention=None,
+        use_headphones_indexer=0, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, omgwtfnzbs=0, omgwtfnzbs_uid=None, omgwtfnzbs_apikey=None,
         preferred_words=None, required_words=None, ignored_words=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None,
         numberofseeders=None, use_piratebay=0, piratebay_proxy_url=None, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
         rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0,
@@ -983,10 +1008,11 @@ class WebInterface(object):
         remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
         bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
         delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
-        xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, synoindex_enabled=False,
-        pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, mirror=None, customhost=None, customport=None,
+        xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, pushalot_enabled=False, pushalot_apikey=None, pushalot_onsnatch=0, synoindex_enabled=False,
+        pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, pushbullet_enabled=0, pushbullet_onsnatch=0, pushbullet_apikey=None, pushbullet_deviceid=None, twitter_enabled=0, twitter_onsnatch=0, mirror=None, customhost=None, customport=None,
         customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
-        enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None, **kwargs):
+        enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None, plex_enabled=0, plex_server_host=None, plex_client_host=None, plex_username=None, 
+        plex_password=None, plex_update=0, plex_notify=0, post_processing_dir=None, songkick_apikey=None, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -1105,24 +1131,42 @@ class WebInterface(object):
         headphones.XBMC_PASSWORD = xbmc_password
         headphones.XBMC_UPDATE = xbmc_update
         headphones.XBMC_NOTIFY = xbmc_notify
+        headphones.PLEX_ENABLED = plex_enabled
+        headphones.PLEX_SERVER_HOST = plex_server_host
+        headphones.PLEX_CLIENT_HOST = plex_client_host
+        headphones.PLEX_USERNAME = plex_username
+        headphones.PLEX_PASSWORD = plex_password
+        headphones.PLEX_UPDATE = plex_update
+        headphones.PLEX_NOTIFY = plex_notify
         headphones.NMA_ENABLED = nma_enabled
         headphones.NMA_APIKEY = nma_apikey
         headphones.NMA_PRIORITY = nma_priority
         headphones.NMA_ONSNATCH = nma_onsnatch
+        headphones.PUSHALOT_ENABLED = pushalot_enabled
+        headphones.PUSHALOT_APIKEY = pushalot_apikey
+        headphones.PUSHALOT_ONSNATCH = pushalot_onsnatch
         headphones.SYNOINDEX_ENABLED = synoindex_enabled
         headphones.PUSHOVER_ENABLED = pushover_enabled
         headphones.PUSHOVER_ONSNATCH = pushover_onsnatch
         headphones.PUSHOVER_KEYS = pushover_keys
         headphones.PUSHOVER_PRIORITY = pushover_priority
+        headphones.PUSHBULLET_ENABLED = pushbullet_enabled
+        headphones.PUSHBULLET_ONSNATCH = pushbullet_onsnatch
+        headphones.PUSHBULLET_APIKEY = pushbullet_apikey
+        headphones.PUSHBULLET_DEVICEID = pushbullet_deviceid
+        headphones.TWITTER_ENABLED = twitter_enabled
+        headphones.TWITTER_ONSNATCH = twitter_onsnatch
         headphones.MIRROR = mirror
         headphones.CUSTOMHOST = customhost
         headphones.CUSTOMPORT = customport
         headphones.CUSTOMSLEEP = customsleep
         headphones.HPUSER = hpuser
         headphones.HPPASS = hppass
+        headphones.SONGKICK_APIKEY = songkick_apikey
         headphones.CACHE_SIZEMB = int(cache_sizemb)
         headphones.FILE_PERMISSIONS = file_permissions
         headphones.FOLDER_PERMISSIONS = folder_permissions
+        headphones.POST_PROCESSING_DIR = post_processing_dir
 
         # Handle the variable config options. Note - keys with False values aren't getting passed
 
@@ -1253,6 +1297,33 @@ class WebInterface(object):
         return simplejson.dumps(image_dict)
 
     getImageLinks.exposed = True
+
+    def twitterStep1(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        tweet = notifiers.TwitterNotifier()
+        return tweet._get_authorization()
+    twitterStep1.exposed = True
+
+    def twitterStep2(self, key):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        tweet = notifiers.TwitterNotifier()
+        result = tweet._get_credentials(key)
+        logger.info(u"result: "+str(result))
+        if result:
+            return "Key verification successful"
+        else:
+            return "Unable to verify key"
+    twitterStep2.exposed = True
+
+    def testTwitter(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        tweet = notifiers.TwitterNotifier()
+        result = tweet.test_notify()
+        if result:
+            return "Tweet successful, check your twitter to make sure it worked"
+        else:
+            return "Error sending tweet"
+    testTwitter.exposed = True
 
 class Artwork(object):
     def index(self):

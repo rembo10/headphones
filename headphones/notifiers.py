@@ -13,7 +13,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import logger
+from headphones import logger, helpers, common
+from headphones.exceptions import ex
 import base64
 import cherrypy
 import urllib
@@ -24,6 +25,15 @@ from urllib import urlencode
 import os.path
 import subprocess
 import lib.simplejson as simplejson
+from xml.dom import minidom
+
+try:
+    from urlparse import parse_qsl #@UnusedImport
+except:
+    from cgi import parse_qsl #@Reimport
+
+import lib.oauth2 as oauth
+import lib.pythontwitter as twitter
 
 class PROWL:
 
@@ -183,6 +193,93 @@ class XBMC:
             except:
                 logger.warn('Error sending notification request to XBMC')
 
+class Plex:
+
+    def __init__(self):
+    
+        self.server_hosts = headphones.PLEX_SERVER_HOST
+        self.client_hosts = headphones.PLEX_CLIENT_HOST
+        self.username = headphones.PLEX_USERNAME
+        self.password = headphones.PLEX_PASSWORD
+
+    def _sendhttp(self, host, command):
+
+        username = self.username
+        password = self.password
+        
+        url_command = urllib.urlencode(command)
+        
+        url = host + '/xbmcCmds/xbmcHttp/?' + url_command
+            
+        req = urllib2.Request(url)
+            
+        if password:
+            base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+            req.add_header("Authorization", "Basic %s" % base64string)
+                
+        logger.info('Plex url: %s' % url)
+            
+        try:
+            handle = urllib2.urlopen(req)
+        except Exception, e:
+            logger.warn('Error opening Plex url: %s' % e)
+            return
+    
+        response = handle.read().decode(headphones.SYS_ENCODING)
+            
+        return response
+    
+    def update(self):
+                    
+        # From what I read you can't update the music library on a per directory or per path basis
+        # so need to update the whole thing
+
+        hosts = [x.strip() for x in self.server_hosts.split(',')]
+
+        for host in hosts:
+            logger.info('Sending library update command to Plex Media Server@ '+host)
+            url = "%s/library/sections" % host
+            try:
+                xml_sections = minidom.parse(urllib.urlopen(url))
+            except IOError, e:
+                logger.warn("Error while trying to contact Plex Media Server: %s" % e)
+                return False
+
+            sections = xml_sections.getElementsByTagName('Directory')
+            if not sections:
+                logger.info(u"Plex Media Server not running on: " + host)
+                return False
+
+            for s in sections:
+                if s.getAttribute('type') == "artist":
+                    url = "%s/library/sections/%s/refresh" % (host, s.getAttribute('key'))
+                    try:
+                        urllib.urlopen(url)
+                    except Exception, e:
+                        logger.warn("Error updating library section for Plex Media Server: %s" % e)
+                        return False
+            
+    def notify(self, artist, album, albumartpath):
+
+        hosts = [x.strip() for x in self.client_hosts.split(',')]
+
+        header = "Headphones"
+        message = "%s - %s added to your library" % (artist, album)
+        time = "3000" # in ms
+
+        for host in hosts:
+            logger.info('Sending notification command to Plex Media Server @ '+host)
+            try:
+		notification = header + "," + message + "," + time + "," + albumartpath
+		notifycommand = {'command': 'ExecBuiltIn', 'parameter': 'Notification('+notification+')'}
+		request = self._sendhttp(host, notifycommand)
+
+		if not request:
+			raise Exception
+
+            except:
+                logger.warn('Error sending notification request to Plex Media Server')
+
 class NMA:
 
     def __init__(self):
@@ -226,7 +323,99 @@ class NMA:
         
         if not request:
             logger.warn('Error sending notification request to NotifyMyAndroid')        
+
+class PUSHBULLET:
+
+    def __init__(self):
+        self.apikey = headphones.PUSHBULLET_APIKEY
+        self.deviceid = headphones.PUSHBULLET_DEVICEID
+
+    def conf(self, options):
+        return cherrypy.config['config'].get('PUSHBULLET', options)
+
+    def notify(self, message, event):
+        if not headphones.PUSHBULLET_ENABLED:
+            return
+
+        http_handler = HTTPSConnection("api.pushbullet.com")
+                                                
+        data = {'device_iden': headphones.PUSHBULLET_DEVICEID,
+                'type': "note",
+                'title': "Headphones",
+                'body': message.encode("utf-8") }
+
+        http_handler.request("POST",
+                                "/api/pushes",
+                                headers = {'Content-type': "application/x-www-form-urlencoded",
+                                            'Authorization' : 'Basic %s' % base64.b64encode(headphones.PUSHBULLET_APIKEY + ":") },
+                                body = urlencode(data))
+        response = http_handler.getresponse()
+        request_status = response.status
+        logger.debug(u"PushBullet response status: %r" % request_status)
+        logger.debug(u"PushBullet response headers: %r" % response.getheaders())
+        logger.debug(u"PushBullet response body: %r" % response.read())
+
+        if request_status == 200:
+                logger.info(u"PushBullet notifications sent.")
+                return True
+        elif request_status >= 400 and request_status < 500: 
+                logger.info(u"PushBullet request failed: %s" % response.reason)
+                return False
+        else:
+                logger.info(u"PushBullet notification failed serverside.")
+                return False
+
+    def updateLibrary(self):
+        #For uniformity reasons not removed
+        return
+
+    def test(self, apikey, deviceid):
+
+        self.enabled = True
+        self.apikey = apikey
+        self.deviceid = deviceid
+
+        self.notify('Main Screen Activate', 'Test Message')
+
         
+class PUSHALOT:
+
+    def notify(self, message, event):
+        if not headphones.PUSHALOT_ENABLED:
+            return
+
+	pushalot_authorizationtoken = headphones.PUSHALOT_APIKEY
+
+	logger.debug(u"Pushalot event: " + event)
+	logger.debug(u"Pushalot message: " + message)
+	logger.debug(u"Pushalot api: " + pushalot_authorizationtoken)
+
+        http_handler = HTTPSConnection("pushalot.com")
+                                                
+        data = {'AuthorizationToken': pushalot_authorizationtoken, 
+                'Title': event.encode('utf-8'),
+                'Body': message.encode("utf-8") }
+
+        http_handler.request("POST",
+                                "/api/sendmessage",
+                                headers = {'Content-type': "application/x-www-form-urlencoded"},
+                                body = urlencode(data))
+        response = http_handler.getresponse()
+        request_status = response.status
+
+        logger.debug(u"Pushalot response status: %r" % request_status)
+        logger.debug(u"Pushalot response headers: %r" % response.getheaders())
+        logger.debug(u"Pushalot response body: %r" % response.read())
+
+        if request_status == 200:
+                logger.info(u"Pushalot notifications sent.")
+                return True
+        elif request_status == 410: 
+                logger.info(u"Pushalot auth failed: %s" % response.reason)
+                return False
+        else:
+                logger.info(u"Pushalot notification failed.")
+                return False
 
 class Synoindex:
     def __init__(self, util_loc='/usr/syno/bin/synoindex'):
@@ -322,3 +511,107 @@ class PUSHOVER:
 
         self.notify('Main Screen Activate', 'Test Message')
         
+class TwitterNotifier:
+
+    consumer_key = "oYKnp2ddX5gbARjqX8ZAAg"
+    consumer_secret = "A4Xkw9i5SjHbTk7XT8zzOPqivhj9MmRDR9Qn95YA9sk"
+    
+    REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
+    ACCESS_TOKEN_URL  = 'https://api.twitter.com/oauth/access_token'
+    AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authorize'
+    SIGNIN_URL        = 'https://api.twitter.com/oauth/authenticate'
+    
+    def notify_snatch(self, title):
+        if headphones.TWITTER_ONSNATCH:
+            self._notifyTwitter(common.notifyStrings[common.NOTIFY_SNATCH]+': '+title+' at '+helpers.now())
+
+    def notify_download(self, title):
+        if headphones.TWITTER_ENABLED:
+            self._notifyTwitter(common.notifyStrings[common.NOTIFY_DOWNLOAD]+': '+title+' at '+helpers.now())
+
+    def test_notify(self):
+        return self._notifyTwitter("This is a test notification from Headphones at "+helpers.now(), force=True)
+
+    def _get_authorization(self):
+    
+        signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1() #@UnusedVariable
+        oauth_consumer             = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
+        oauth_client               = oauth.Client(oauth_consumer)
+    
+        logger.info('Requesting temp token from Twitter')
+    
+        resp, content = oauth_client.request(self.REQUEST_TOKEN_URL, 'GET')
+    
+        if resp['status'] != '200':
+            logger.info('Invalid respond from Twitter requesting temp token: %s' % resp['status'])
+        else:
+            request_token = dict(parse_qsl(content))
+    
+            headphones.TWITTER_USERNAME = request_token['oauth_token']
+            headphones.TWITTER_PASSWORD = request_token['oauth_token_secret']
+    
+            return self.AUTHORIZATION_URL+"?oauth_token="+ request_token['oauth_token']
+    
+    def _get_credentials(self, key):
+        request_token = {}
+    
+        request_token['oauth_token'] = headphones.TWITTER_USERNAME
+        request_token['oauth_token_secret'] = headphones.TWITTER_PASSWORD
+        request_token['oauth_callback_confirmed'] = 'true'
+    
+        token = oauth.Token(request_token['oauth_token'], request_token['oauth_token_secret'])
+        token.set_verifier(key)
+    
+        logger.info('Generating and signing request for an access token using key '+key)
+    
+        signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1() #@UnusedVariable
+        oauth_consumer             = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
+        logger.info('oauth_consumer: '+str(oauth_consumer))
+        oauth_client  = oauth.Client(oauth_consumer, token)
+        logger.info('oauth_client: '+str(oauth_client))
+        resp, content = oauth_client.request(self.ACCESS_TOKEN_URL, method='POST', body='oauth_verifier=%s' % key)
+        logger.info('resp, content: '+str(resp)+','+str(content))
+    
+        access_token  = dict(parse_qsl(content))
+        logger.info('access_token: '+str(access_token))
+    
+        logger.info('resp[status] = '+str(resp['status']))
+        if resp['status'] != '200':
+            logger.info('The request for a token with did not succeed: '+str(resp['status']), logger.ERROR)
+            return False
+        else:
+            logger.info('Your Twitter Access Token key: %s' % access_token['oauth_token'])
+            logger.info('Access Token secret: %s' % access_token['oauth_token_secret'])
+            headphones.TWITTER_USERNAME = access_token['oauth_token']
+            headphones.TWITTER_PASSWORD = access_token['oauth_token_secret']
+            return True
+    
+    
+    def _send_tweet(self, message=None):
+    
+        username=self.consumer_key
+        password=self.consumer_secret
+        access_token_key=headphones.TWITTER_USERNAME
+        access_token_secret=headphones.TWITTER_PASSWORD
+    
+        logger.info(u"Sending tweet: "+message)
+    
+        api = twitter.Api(username, password, access_token_key, access_token_secret)
+    
+        try:
+            api.PostUpdate(message)
+        except Exception, e:
+            logger.info(u"Error Sending Tweet: %s" % e)
+            return False
+    
+        return True
+    
+    def _notifyTwitter(self, message='', force=False):
+        prefix = headphones.TWITTER_PREFIX
+    
+        if not headphones.TWITTER_ENABLED and not force:
+            return False
+    
+        return self._send_tweet(prefix+": "+message)
+
+notifier = TwitterNotifier
