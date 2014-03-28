@@ -176,7 +176,9 @@
         songkick_filter_enabled = "false"
     
     if not headphones.SONGKICK_LOCATION:
-    	headphones.SONGKICK_LOCATION = "none"
+    	songkick_location = "none"
+    else:
+        songkick_location = headphones.SONGKICK_LOCATION
     	
     if headphones.SONGKICK_ENABLED:
         songkick_enabled = "true"
@@ -197,7 +199,7 @@
           
           if( ${songkick_filter_enabled} ) {
             data.resultsPage.results.event = $.grep(data.resultsPage.results.event, function(element,index){
-              return element.venue.metroArea.id == ${headphones.SONGKICK_LOCATION};
+              return element.venue.metroArea.id == ${songkick_location};
             });
           }
           
