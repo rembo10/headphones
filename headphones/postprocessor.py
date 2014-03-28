@@ -798,8 +798,12 @@ def embedLyrics(downloaded_track_list):
         if lyrics:
             logger.debug('Adding lyrics to: %s' % downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
             f.lyrics = metalyrics
-            f.save()
-
+            try:
+            	f.save()
+			except:
+				logger.error('Cannot save lyrics to: %s. Skipping' % downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+				continue
+				
 def renameFiles(albumpath, downloaded_track_list, release):
     logger.info('Renaming files')
     try:
