@@ -194,6 +194,19 @@
 					});
 
 					calendarDomNode.append('<li><img src="interfaces/default/images/songkick.png" alt="concerts by songkick" class="sk-logo" /></li>');
+					
+				$(function() {
+				  $("#artistCalendar").each(function() {
+					$("li:gt(4)", this).hide(); /* :gt() is zero-indexed */
+					$("li:nth-child(5)", this).after("<br><li class='more'><a href='#'>More...</a></li>"); /* :nth-child() is one-indexed */
+				  });
+				  $("li.more a").live("click", function() {
+					var li = $(this).parents("li:first");
+					li.parent().children().show();
+					li.remove();
+					return false;
+				  });
+				});
 
 				}
 			// data is JSON response object
