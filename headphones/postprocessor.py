@@ -400,7 +400,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Downloaded" WHERE AlbumID=?', [albumid])
     myDB.action('UPDATE snatched SET status = "Processed" WHERE AlbumID=?', [albumid])
-        
+
     # Update the have tracks for all created dirs:
     for albumpath in albumpaths:
         librarysync.libraryScan(dir=albumpath, append=True, ArtistID=release['ArtistID'], ArtistName=release['ArtistName'])
@@ -500,11 +500,11 @@ def addAlbumArt(artwork, albumpath, release):
     if album_art_name.startswith('.'):
         album_art_name = album_art_name.replace(0, '_')
 
-    prev = os.umask(headphones.UMASK)
+    #prev = os.umask(headphones.UMASK)
     file = open(os.path.join(albumpath, album_art_name), 'wb')
     file.write(artwork)
     file.close()
-    os.umask(prev)
+    #os.umask(prev)
     
 def cleanupFiles(albumpath):
     logger.info('Cleaning up files')
@@ -799,11 +799,11 @@ def embedLyrics(downloaded_track_list):
             logger.debug('Adding lyrics to: %s' % downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
             f.lyrics = metalyrics
             try:
-            	f.save()
-			except:
-				logger.error('Cannot save lyrics to: %s. Skipping' % downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
-				continue
-				
+                f.save()
+            except:
+                logger.error('Cannot save lyrics to: %s. Skipping' % downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+                continue
+
 def renameFiles(albumpath, downloaded_track_list, release):
     logger.info('Renaming files')
     try:
