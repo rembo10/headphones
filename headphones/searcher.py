@@ -258,7 +258,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
                                 
         if headphones.NEWZNAB:
 
-            newznab_hosts = [(headphones.NEWZNAB_HOST, headphones.NEWZNAB_APIKEY, headphones.NEWZNAB_ENABLED)]
+            newznab_hosts = []
 
             for newznab_host in headphones.EXTRA_NEWZNABS:
                 if newznab_host[2] == '1' or newznab_host[2] == 1:
@@ -555,7 +555,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
                         for result in resultlist:
 
-                            if high_size_limit and (result[1] > high_size_limit):
+                            if high_size_limit and (int(result[1]) > high_size_limit):
 
                                 logger.info(result[0] + " is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit) + ")")
 
@@ -565,7 +565,7 @@ def searchNZB(albumid=None, new=False, losslessOnly=False):
 
                                 continue
 
-                            if low_size_limit and (result[1] < low_size_limit):
+                            if low_size_limit and (int(result[1]) < low_size_limit):
                                 logger.info(result[0] + " is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit) + ")")
                                 continue
 
@@ -1415,7 +1415,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                             
                         for result in resultlist:
                             
-                            if high_size_limit and (result[1] > high_size_limit):
+                            if high_size_limit and (int(result[1]) > high_size_limit):
                                 logger.info(result[0] + " is too large for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Maxsize: " + helpers.bytes_to_mb(high_size_limit) + ")")
                                 
                                 # Add lossless nzbs to the "flac list" which we can use if there are no good lossy matches
@@ -1424,7 +1424,7 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
                                 
                                 continue
                                 
-                            if low_size_limit and (result[1] < low_size_limit):
+                            if low_size_limit and (int(result[1]) < low_size_limit):
                                 logger.info(result[0] + " is too small for this album - not considering it. (Size: " + helpers.bytes_to_mb(result[1]) + ", Minsize: " + helpers.bytes_to_mb(low_size_limit) + ")")
                                 continue
                                                                 
