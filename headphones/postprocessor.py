@@ -446,7 +446,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
         logger.info(u"Pushover request")
         pushover = notifiers.PUSHOVER()
-        pushover.notify(pushmessage,"Download and Postprocessing completed")
+        pushover.notify(pushmessage,"Headphones")
 
     if headphones.PUSHBULLET_ENABLED:
         pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
