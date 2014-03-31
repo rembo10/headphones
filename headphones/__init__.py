@@ -219,6 +219,10 @@ ENCODERQUALITY = None
 ENCODERVBRCBR = None
 ENCODERLOSSLESS = False
 DELETE_LOSSLESS_FILES = False
+GROWL_ENABLED = True
+GROWL_HOST = None
+GROWL_PASSWORD = None
+GROWL_ONSNATCH = True
 PROWL_ENABLED = True
 PROWL_PRIORITY = 1
 PROWL_KEYS = None
@@ -338,7 +342,7 @@ def initialize():
                 NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, LASTFM_USERNAME, \
                 INTERFACE, FOLDER_PERMISSIONS, FILE_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
                 MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, \
-                PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
+                GROWL_ENABLED, GROWL_HOST, GROWL_PASSWORD, GROWL_ONSNATCH, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
                 TWITTER_ENABLED, TWITTER_ONSNATCH, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 PUSHBULLET_ENABLED, PUSHBULLET_APIKEY, PUSHBULLET_DEVICEID, PUSHBULLET_ONSNATCH, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
@@ -365,6 +369,7 @@ def initialize():
         CheckSection('Waffles')
         CheckSection('Rutracker')
         CheckSection('What.cd')
+        CheckSection('Growl')
         CheckSection('Prowl')
         CheckSection('Pushover')
         CheckSection('PushBullet')
@@ -535,6 +540,11 @@ def initialize():
         ENCODERVBRCBR = check_setting_str(CFG, 'General', 'encodervbrcbr', 'cbr')
         ENCODERLOSSLESS = bool(check_setting_int(CFG, 'General', 'encoderlossless', 1))
         DELETE_LOSSLESS_FILES = bool(check_setting_int(CFG, 'General', 'delete_lossless_files', 1))
+
+        GROWL_ENABLED = bool(check_setting_int(CFG, 'Growl', 'growl_enabled', 0))
+        GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
+        GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
+        GROWL_ONSNATCH = bool(check_setting_int(CFG, 'Growl', 'growl_onsnatch', 0))
 
         PROWL_ENABLED = bool(check_setting_int(CFG, 'Prowl', 'prowl_enabled', 0))
         PROWL_KEYS = check_setting_str(CFG, 'Prowl', 'prowl_keys', '')
@@ -927,6 +937,12 @@ def config_write():
     new_config['General']['preferred_words'] = PREFERRED_WORDS
     new_config['General']['ignored_words'] = IGNORED_WORDS
     new_config['General']['required_words'] = REQUIRED_WORDS
+
+    new_config['Growl'] = {}
+    new_config['Growl']['growl_enabled'] = int(GROWL_ENABLED)
+    new_config['Growl']['growl_host'] = GROWL_HOST
+    new_config['Growl']['growl_password'] = GROWL_PASSWORD
+    new_config['Growl']['growl_onsnatch'] = int(GROWL_ONSNATCH)
 
     new_config['Prowl'] = {}
     new_config['Prowl']['prowl_enabled'] = int(PROWL_ENABLED)

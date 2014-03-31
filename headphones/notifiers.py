@@ -34,6 +34,83 @@ except:
 
 import lib.oauth2 as oauth
 import lib.pythontwitter as twitter
+import lib.gntp.notifier as gntp_notifier
+
+class GROWL:
+
+    def __init__(self):
+        self.enabled = headphones.GROWL_ENABLED
+        self.host = headphones.GROWL_HOST
+        self.password = headphones.GROWL_PASSWORD
+
+    def conf(self, options):
+        return cherrypy.config['config'].get('Growl', options)
+
+    def notify(self, message, event):
+        if not self.enabled:
+            return
+
+        # Split host and port
+        if self.host == "":
+            host, port = "localhost", 23053
+        if ":" in self.host:
+            host, port = self.host.split(':', 1)
+            port = int(port)
+        else:
+            host, port = self.host, 23053
+
+        # If password is empty, assume none
+        if self.password == "":
+            password = None
+        else:
+            password = self.password
+
+        # Register notification
+        growl = gntp_notifier.GrowlNotifier(
+            applicationName='Headphones',
+            notifications=['New Event'],
+            defaultNotifications=['New Event'],
+            hostname=host,
+            port=port,
+            password=password
+        )
+
+        try:
+            growl.register()
+        except gntp_notifier.errors.NetworkError:
+            logger.info(u'Growl notification failed: network error')
+            return
+        except gntp_notifier.errors.AuthError:
+            logger.info(u'Growl notification failed: authentication error')
+            return
+
+        # Send it, including an image
+        image_file = os.path.join(str(headphones.PROG_DIR), 'data/images/headphoneslogo.png')
+        image = open(image_file, 'rb').read()
+
+        try:
+            growl.notify(
+                noteType='New Event',
+                title=event,
+                description=message,
+                icon=image
+            )
+        except gntp_notifier.errors.NetworkError:
+            logger.info(u'Growl notification failed: network error')
+            return
+
+        logger.info(u"Growl notifications sent.")
+
+    def updateLibrary(self):
+        #For uniformity reasons not removed
+        return
+
+    def test(self, host, password):
+        self.enabled = True
+        self.host = host
+        self.password = password
+
+        self.notify('ZOMG Lazors Pewpewpew!', 'Test Message')
 
 class PROWL:
 
@@ -44,7 +121,6 @@ class PROWL:
         self.enabled = headphones.PROWL_ENABLED
         self.keys = headphones.PROWL_KEYS
         self.priority = headphones.PROWL_PRIORITY   
-        pass
 
     def conf(self, options):
         return cherrypy.config['config'].get('Prowl', options)

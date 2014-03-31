@@ -119,6 +119,10 @@ def sendNZB(nzb):
 
     if sabText == "ok":
         logger.info(u"NZB sent to SAB successfully")
+        if headphones.GROWL_ENABLED and headphones.GROWL_ONSNATCH:
+            logger.info(u"Sending Growl notification")
+            growl = notifiers.GROWL()
+            growl.notify(nzb.name,"Download started")
         if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
             logger.info(u"Sending Prowl notification")
             prowl = notifiers.PROWL()
