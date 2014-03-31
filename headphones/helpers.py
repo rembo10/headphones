@@ -18,7 +18,7 @@ from operator import itemgetter
 import datetime
 import re, shutil
 
-from lib.beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
+from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 
 import headphones
 
