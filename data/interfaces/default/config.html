@@ -792,6 +792,18 @@
                                     <option value="xld" ${xldselect}>xld</option>
                                 </select>
                             </div>
+                            <div class="row">
+                                <div class="row">
+                                    <input type="checkbox" name="encoder_multicore" value="1" ${config['encoder_multicore']}/><label>Enable multi-core</label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="row">
+                                    <label>Multi-core count:</label>
+                                    <input type="text" name="encoder_multicore_count" value="${config['encoder_multicore_count']}" size="7">
+                                    <small>Set equal to the number of cores, or 0 for auto</small>
+                                </div>
+                            </div>
                         </fieldset>
                         <fieldset>
                             <legend>Audio Properties</legend>
