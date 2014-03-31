@@ -20,7 +20,7 @@ import time
 
 import subprocess
 from headphones import logger
-from lib.beets.mediafile import MediaFile
+from beets.mediafile import MediaFile
 
 try:
     import argparse

@@ -22,9 +22,9 @@ import music_encoder
 import urllib, shutil, re
 import uuid
 from headphones import notifiers
-import lib.beets as beets
-from lib.beets import autotag
-from lib.beets.mediafile import MediaFile
+import beets
+from beets import autotag
+from beets.mediafile import MediaFile
 
 import headphones
 from headphones import db, albumart, librarysync, lyrics, logger, helpers
