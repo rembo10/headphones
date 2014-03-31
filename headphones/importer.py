@@ -17,7 +17,7 @@ from lib.pyItunes import *
 import time
 import threading
 import os
-from lib.beets.mediafile import MediaFile
+from beets.mediafile import MediaFile
 
 import headphones
 from headphones import logger, helpers, db, mb, albumart, lastfm

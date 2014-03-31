@@ -16,7 +16,7 @@
 import os
 import glob
 
-from lib.beets.mediafile import MediaFile
+from beets.mediafile import MediaFile
 
 import headphones
 from headphones import db, logger, helpers, importer
