@@ -12,6 +12,9 @@
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
+# This particular version has been slightly modified to work with headphones
+# https://github.com/rembo10/headphones
+
 __version__ = '1.3.4'
 __author__ = 'Adrian Sampson <adrian@radbox.org>'
 

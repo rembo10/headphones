@@ -242,3 +242,6 @@ def apply_metadata(album_info, mapping):
                 item[field] = value
         if track_info.disctitle is not None:
             item.disctitle = track_info.disctitle
+        
+        # Headphones seal of approval
+        item.comments = 'tagged by headphones/beets'
