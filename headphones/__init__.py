@@ -178,7 +178,7 @@ REQUIRED_WORDS = None
 
 LASTFM_USERNAME = None
 
-LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a"]
+LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a", "asf", "wma"]
 LOSSLESS_MEDIA_FORMATS = ["flac"]
 MEDIA_FORMATS = LOSSY_MEDIA_FORMATS + LOSSLESS_MEDIA_FORMATS
 
