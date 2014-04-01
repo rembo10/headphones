@@ -1,5 +1,5 @@
 # mako/_ast_util.py
-# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -31,7 +31,7 @@
     :license: Python License.
 """
 from _ast import *
-
+from mako.compat import arg_stringname
 
 BOOLOP_SYMBOLS = {
     And:        'and',
@@ -403,10 +403,10 @@ class SourceGenerator(NodeVisitor):
                 self.visit(default)
         if node.vararg is not None:
             write_comma()
-            self.write('*' + node.vararg)
+            self.write('*' + arg_stringname(node.vararg))
         if node.kwarg is not None:
             write_comma()
-            self.write('**' + node.kwarg)
+            self.write('**' + arg_stringname(node.kwarg))
 
     def decorators(self, node):
         for decorator in node.decorator_list:
@@ -658,6 +658,12 @@ class SourceGenerator(NodeVisitor):
 
     def visit_Name(self, node):
         self.write(node.id)
+
+    def visit_NameConstant(self, node):
+        self.write(str(node.value))
+
+    def visit_arg(self, node):
+        self.write(node.arg)
 
     def visit_Str(self, node):
         self.write(repr(node.s))

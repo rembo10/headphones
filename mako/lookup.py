@@ -1,5 +1,5 @@
 # mako/lookup.py
-# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -169,9 +169,11 @@ class TemplateLookup(TemplateCollection):
                         buffer_filters=(),
                         strict_undefined=False,
                         imports=None,
+                        future_imports=None,
                         enable_loop=True,
                         input_encoding=None,
-                        preprocessor=None):
+                        preprocessor=None,
+                        lexer_cls=None):
 
         self.directories = [posixpath.normpath(d) for d in
                             util.to_list(directories, ())
@@ -208,8 +210,11 @@ class TemplateLookup(TemplateCollection):
             'buffer_filters':buffer_filters,
             'strict_undefined':strict_undefined,
             'imports':imports,
+            'future_imports':future_imports,
             'enable_loop':enable_loop,
-            'preprocessor':preprocessor}
+            'preprocessor':preprocessor,
+            'lexer_cls':lexer_cls
+        }
 
         if collection_size == -1:
             self._collection = {}

@@ -1,13 +1,14 @@
 # mako/lexer.py
-# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
 
 """provides the Lexer class for parsing template strings into parse trees."""
 
-import re, codecs
-from mako import parsetree, exceptions, util
+import re
+import codecs
+from mako import parsetree, exceptions, compat
 from mako.pygen import adjust_whitespace
 
 _regexp_cache = {}
@@ -29,7 +30,7 @@ class Lexer(object):
         self.disable_unicode = disable_unicode
         self.encoding = input_encoding
 
-        if util.py3k and disable_unicode:
+        if compat.py3k and disable_unicode:
             raise exceptions.UnsupportedError(
                                     "Mako for Python 3 does not "
                                     "support disabling Unicode")
@@ -173,7 +174,7 @@ class Lexer(object):
            or raw if decode_raw=False
 
         """
-        if isinstance(text, unicode):
+        if isinstance(text, compat.text_type):
             m = self._coding_re.match(text)
             encoding = m and m.group(1) or known_encoding or 'ascii'
             return encoding, text
@@ -198,7 +199,7 @@ class Lexer(object):
         if decode_raw:
             try:
                 text = text.decode(parsed_encoding)
-            except UnicodeDecodeError, e:
+            except UnicodeDecodeError:
                 raise exceptions.CompileException(
                            "Unicode decode operation of encoding '%s' failed" %
                            parsed_encoding,
@@ -343,8 +344,6 @@ class Lexer(object):
                                              # consumed newline and whitespace
                  |
                  (?=\${)      # an expression
-                 |
-                 (?=\#\*)     # multiline comment
                  |
                  (?=</?[%&])  # a substitution or block or call start or end
                               # - don't consume

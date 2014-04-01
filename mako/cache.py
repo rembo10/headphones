@@ -1,10 +1,10 @@
 # mako/cache.py
-# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
 
-from mako import exceptions, util
+from mako import compat, util
 
 _cache_plugins = util.PluginLoader("mako.cache")
 
@@ -64,7 +64,7 @@ class Cache(object):
     def __init__(self, template, *args):
         # check for a stale template calling the
         # constructor
-        if isinstance(template, basestring) and args:
+        if isinstance(template, compat.string_types) and args:
             return
         self.template = template
         self.id = template.module.__name__

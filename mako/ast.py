@@ -1,5 +1,5 @@
 # mako/ast.py
-# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -7,7 +7,8 @@
 """utilities for analyzing expressions and blocks of Python
 code, as well as generating Python from AST nodes"""
 
-from mako import exceptions, pyparser, util
+from mako import exceptions, pyparser, compat
+from mako.compat import arg_stringname
 import re
 
 class PythonCode(object):
@@ -33,7 +34,7 @@ class PythonCode(object):
         # - AST is less likely to break with version changes
         # (for example, the behavior of co_names changed a little bit
         # in python version 2.5)
-        if isinstance(code, basestring):
+        if isinstance(code, compat.string_types):
             expr = pyparser.parse(code.lstrip(), "exec", **exception_kwargs)
         else:
             expr = code
@@ -48,7 +49,7 @@ class ArgumentList(object):
         self.args = []
         self.declared_identifiers = set()
         self.undeclared_identifiers = set()
-        if isinstance(code, basestring):
+        if isinstance(code, compat.string_types):
             if re.match(r"\S", code) and not re.match(r",\s*$", code):
                 # if theres text and no trailing comma, insure its parsed
                 # as a tuple by adding a trailing comma
@@ -126,10 +127,10 @@ class FunctionDecl(object):
         for arg in argnames:
             default = None
             if kwargs:
-                arg = "**" + arg
+                arg = "**" + arg_stringname(arg)
                 kwargs = False
             elif varargs:
-                arg = "*" + arg
+                arg = "*" + arg_stringname(arg)
                 varargs = False
             else:
                 default = len(defaults) and defaults.pop() or None

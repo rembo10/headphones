@@ -1,5 +1,5 @@
 # mako/pyparser.py
-# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -10,11 +10,11 @@ Parsing to AST is done via _ast on Python > 2.5, otherwise the compiler
 module is used.
 """
 
-from StringIO import StringIO
-from mako import exceptions, util
+from mako import exceptions, util, compat
+from mako.compat import StringIO, arg_stringname
 import operator
 
-if util.py3k:
+if compat.py3k:
     # words that cannot be assigned to (notably
     # smaller than the total keys in __builtins__)
     reserved = set(['True', 'False', 'None', 'print'])
@@ -33,11 +33,12 @@ else:
 try:
     import _ast
     util.restore__ast(_ast)
-    import _ast_util
+    from mako import _ast_util
 except ImportError:
     _ast = None
     from compiler import parse as compiler_parse
     from compiler import visitor
+
 
 
 def parse(code, mode='exec', **exception_kwargs):
@@ -48,14 +49,14 @@ def parse(code, mode='exec', **exception_kwargs):
         if _ast:
             return _ast_util.parse(code, '<unknown>', mode)
         else:
-            if isinstance(code, unicode):
+            if isinstance(code, compat.text_type):
                 code = code.encode('ascii', 'backslashreplace')
             return compiler_parse(code, mode)
-    except Exception, e:
+    except Exception:
         raise exceptions.SyntaxException(
                     "(%s) %s (%r)" % (
-                        e.__class__.__name__,
-                        e,
+                        compat.exception_as().__class__.__name__,
+                        compat.exception_as(),
                         code[0:50]
                     ), **exception_kwargs)
 
@@ -92,7 +93,7 @@ if _ast:
                 self.visit(n)
             self.in_assign_targets = in_a
 
-        if util.py3k:
+        if compat.py3k:
 
             # ExceptHandler is in Python 2, but this block only works in
             # Python 3 (and is required there)
@@ -112,6 +113,14 @@ if _ast:
             self._add_declared(node.name)
             self._visit_function(node, False)
 
+        def _expand_tuples(self, args):
+            for arg in args:
+                if isinstance(arg, _ast.Tuple):
+                    for n in arg.elts:
+                        yield n
+                else:
+                    yield arg
+
         def _visit_function(self, node, islambda):
 
             # push function state onto stack.  dont log any more
@@ -125,7 +134,7 @@ if _ast:
 
             local_ident_stack = self.local_ident_stack
             self.local_ident_stack = local_ident_stack.union([
-                arg_id(arg) for arg in node.args.args
+                arg_id(arg) for arg in self._expand_tuples(node.args.args)
             ])
             if islambda:
                 self.visit(node.body)
@@ -148,7 +157,7 @@ if _ast:
 
         def visit_Name(self, node):
             if isinstance(node.ctx, _ast.Store):
-                # this is eqiuvalent to visit_AssName in 
+                # this is eqiuvalent to visit_AssName in
                 # compiler
                 self._add_declared(node.id)
             elif node.id not in reserved and node.id \
@@ -207,14 +216,13 @@ if _ast:
             self.listener.funcname = node.name
             argnames = [arg_id(arg) for arg in node.args.args]
             if node.args.vararg:
-                argnames.append(node.args.vararg)
+                argnames.append(arg_stringname(node.args.vararg))
             if node.args.kwarg:
-                argnames.append(node.args.kwarg)
+                argnames.append(arg_stringname(node.args.kwarg))
             self.listener.argnames = argnames
             self.listener.defaults = node.args.defaults  # ast
             self.listener.varargs = node.args.vararg
             self.listener.kwargs = node.args.kwarg
-
 
     class ExpressionGenerator(object):
 
@@ -261,6 +269,14 @@ else:
             self._add_declared(node.name)
             self._visit_function(node, args)
 
+        def _expand_tuples(self, args):
+            for arg in args:
+                if isinstance(arg, tuple):
+                    for n in arg:
+                        yield n
+                else:
+                    yield arg
+
         def _visit_function(self, node, args):
 
             # push function state onto stack.  dont log any more
@@ -274,7 +290,7 @@ else:
 
             local_ident_stack = self.local_ident_stack
             self.local_ident_stack = local_ident_stack.union([
-                arg for arg in node.argnames
+                arg for arg in self._expand_tuples(node.argnames)
             ])
 
             for n in node.getChildNodes():
@@ -524,11 +540,32 @@ else:
                     self.visit(a)
             self.buf.write(')')
 
+        def visitLambda(self, node, *args):
+            self.buf.write('lambda ')
+
+            argnames = list(node.argnames)
+
+            kw = arg = None
+            if node.kwargs > 0:
+                kw = argnames.pop(-1)
+            if node.varargs > 0:
+                arg = argnames.pop(-1)
+
+            if arg:
+                argnames.append("*%s" % arg)
+            if kw:
+                argnames.append("**%s" % kw)
+
+            self.buf.write(", ".join(argnames))
+
+            self.buf.write(': ')
+            self.visit(node.code)
+
 
     class walker(visitor.ASTVisitor):
 
         def dispatch(self, node, *args):
-            print 'Node:', str(node)
+            print('Node:', str(node))
 
             # print "dir:", dir(node)
 

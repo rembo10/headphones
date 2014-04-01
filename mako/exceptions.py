@@ -1,13 +1,15 @@
 # mako/exceptions.py
-# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
 
 """exception classes"""
 
-import traceback, sys, re
-from mako import util
+import traceback
+import sys
+import re
+from mako import util, compat
 
 class MakoException(Exception):
     pass
@@ -84,12 +86,12 @@ class RichTraceback(object):
 
     @property
     def errorname(self):
-        return util.exception_name(self.error)
+        return compat.exception_name(self.error)
 
     def _init_message(self):
         """Find a unicode representation of self.error"""
         try:
-            self.message = unicode(self.error)
+            self.message = compat.text_type(self.error)
         except UnicodeError:
             try:
                 self.message = str(self.error)
@@ -97,8 +99,8 @@ class RichTraceback(object):
                 # Fallback to args as neither unicode nor
                 # str(Exception(u'\xe6')) work in Python < 2.6
                 self.message = self.error.args[0]
-        if not isinstance(self.message, unicode):
-            self.message = unicode(self.message, 'ascii', 'replace')
+        if not isinstance(self.message, compat.text_type):
+            self.message = compat.text_type(self.message, 'ascii', 'replace')
 
     def _get_reformatted_records(self, records):
         for rec in records:
@@ -150,7 +152,7 @@ class RichTraceback(object):
                     template_filename = info.template_filename or filename
                 except KeyError:
                     # A normal .py file (not a Template)
-                    if not util.py3k:
+                    if not compat.py3k:
                         try:
                             fp = open(filename, 'rb')
                             encoding = util.parse_encoding(fp)
@@ -233,14 +235,24 @@ ${tback.errorname}: ${tback.message}
 """)
 
 
-try:
+def _install_pygments():
+    global syntax_highlight, pygments_html_formatter
     from mako.ext.pygmentplugin import syntax_highlight,\
             pygments_html_formatter
-except ImportError:
+
+def _install_fallback():
+    global syntax_highlight, pygments_html_formatter
     from mako.filters import html_escape
     pygments_html_formatter = None
     def syntax_highlight(filename='', language=None):
         return html_escape
+
+def _install_highlighting():
+    try:
+        _install_pygments()
+    except ImportError:
+        _install_fallback()
+_install_highlighting()
 
 def html_error_template():
     """Provides a template that renders a stack trace in an HTML format,
