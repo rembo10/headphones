@@ -15,6 +15,14 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import os, sys, locale
+from os.path import dirname
+
+# Headphones path
+base_path = dirname(os.path.abspath(__file__))
+
+# Ensure lib added to path
+sys.path.insert(0, os.path.join(base_path, 'lib'))
+
 import time
 import signal
 
