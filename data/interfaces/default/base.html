@@ -31,15 +31,15 @@
 	<div id="container">
 		<div id="ajaxMsg"></div>
 		% if not headphones.CURRENT_VERSION:
-            <div id="updatebar">
-                You're running an unknown version of Headphones. <a href="update">Update</a> or
-                <a href="#" onclick="$('#updatebar').slideUp('slow');">Close</a>
-            </div>
-            % elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
-            <div id="updatebar">
-                A <a href="https://github.com/${headphones.GIT_USER}/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}"> newer version</a> is available. You're ${headphones.COMMITS_BEHIND} commits behind. <a href="update">Update</a> or <a href="#" onclick="$('#updatebar').slideUp('slow');">Close</a>
-            </div>
-			% endif
+			<div id="updatebar">
+				You're running an unknown version of Headphones. <a href="update">Update</a> or
+				<a href="#" onclick="$('#updatebar').slideUp('slow');">Close</a>
+			</div>
+		% elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.COMMITS_BEHIND > 0 and headphones.INSTALL_TYPE != 'win':
+			<div id="updatebar">
+				A <a href="https://github.com/${headphones.GIT_USER}/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}"> newer version</a> is available. You're ${headphones.COMMITS_BEHIND} commits behind. <a href="update">Update</a> or <a href="#" onclick="$('#updatebar').slideUp('slow');">Close</a>
+			</div>
+		% endif
 
 		<header>
 			<div class="wrapper">
@@ -55,16 +55,16 @@
 				<li><a href="config" class="config"><i class="fa fa-gear fa-lg"></i></a></li>
 			</ul>
 			<div id="searchbar">
-                <form action="search" method="get">
-                    <input type="text" value="" placeholder="Search" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" />
-                    <i class='fa fa-search mini-icon'></i>
-                    <select name="type">
-  						<option value="artist">Artist</option>
-  						<option value="album">Album</option>
+				<form action="search" method="get">
+					<input type="text" value="" placeholder="Search" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" />
+					<i class='fa fa-search mini-icon'></i>
+					<select name="type">
+						<option value="artist">Artist</option>
+						<option value="album">Album</option>
 					</select>
-                    <input type="submit" value="Add"/>
-                </form>
-            </div>
+					<input type="submit" value="Add"/>
+				</form>
+			</div>
 
 			</div>
 		</header>
