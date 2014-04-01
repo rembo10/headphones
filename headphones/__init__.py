@@ -82,7 +82,8 @@ API_KEY = None
 
 GIT_PATH = None
 GIT_USER = None
-GIT_BRANCH =None
+GIT_BRANCH = None
+DO_NOT_OVERRIDE_GIT_BRANCH = False
 INSTALL_TYPE = None
 CURRENT_VERSION = None
 LATEST_VERSION = None
@@ -331,7 +332,7 @@ def initialize():
     with INIT_LOCK:
 
         global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, SYS_PLATFORM, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
-                HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, GIT_USER, GIT_BRANCH, \
+                HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, GIT_USER, GIT_BRANCH, DO_NOT_OVERRIDE_GIT_BRANCH, \
                 CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
                 RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, FILE_UNDERSCORES, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, \
@@ -410,6 +411,7 @@ def initialize():
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
         GIT_USER = check_setting_str(CFG, 'General', 'git_user', 'rembo10')
         GIT_BRANCH = check_setting_str(CFG, 'General', 'git_branch', 'master')
+        DO_NOT_OVERRIDE_GIT_BRANCH = check_setting_int(CFG, 'General', 'do_not_override_git_branch', 0)
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', '')
         CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', '')
 
@@ -712,7 +714,7 @@ def initialize():
 
         # Get the currently installed version - returns None, 'win32' or the git hash
         # Also sets INSTALL_TYPE variable to 'win', 'git' or 'source'
-        CURRENT_VERSION = versioncheck.getVersion()
+        CURRENT_VERSION, GIT_BRANCH = versioncheck.getVersion()
 
         # Check for new versions
         if CHECK_GITHUB_ON_STARTUP:
@@ -818,6 +820,7 @@ def config_write():
     new_config['General']['git_path'] = GIT_PATH
     new_config['General']['git_user'] = GIT_USER
     new_config['General']['git_branch'] = GIT_BRANCH
+    new_config['General']['do_not_override_git_branch'] = int(DO_NOT_OVERRIDE_GIT_BRANCH)
 
     new_config['General']['check_github'] = int(CHECK_GITHUB)
     new_config['General']['check_github_on_startup'] = int(CHECK_GITHUB_ON_STARTUP)
