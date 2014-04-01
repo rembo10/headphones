@@ -49,6 +49,10 @@ def addTorrent(link):
             retid = False
 
         logger.info(u"Torrent sent to Transmission successfully")
+        if headphones.GROWL_ENABLED and headphones.GROWL_ONSNATCH:
+            logger.info(u"Sending Growl notification")
+            growl = notifiers.GROWL()
+            growl.notify(name,"Download started")
         if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
             logger.info(u"Sending Prowl notification")
             prowl = notifiers.PROWL()
