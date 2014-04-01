@@ -82,7 +82,7 @@ def getSimilar():
     myDB.action('''DELETE from lastfmcloud''')
     for tuple in top_list:
         artist_name, artist_mbid = tuple[0]
-        count = tuple[1]    
+        count = tuple[1]
         myDB.action('INSERT INTO lastfmcloud VALUES( ?, ?, ?)', [artist_name, artist_mbid, count])
         
 def getArtists():
@@ -96,7 +96,7 @@ def getArtists():
     else:
         username = headphones.LASTFM_USERNAME
 
-    logger.info("Starting Last.FM artists import with username '%s'" % username)
+    logger.info("Starting Last.FM artists import with username '%s'", username)
 
     url = 'http://ws.audioscrobbler.com/2.0/?method=library.getartists&limit=10000&api_key=%s&user=%s' % (api_key, username)
     data = urllib2.urlopen(url, timeout=20).read()
@@ -108,7 +108,7 @@ def getArtists():
         return
     
     artists = d.getElementsByTagName("artist")
-    logger.info("Fetched %d artists from Last.FM" % len(artists))
+    logger.info("Fetched %d artists from Last.FM", len(artists))
     
     artistlist = []
     
@@ -129,7 +129,7 @@ def getArtists():
     for artistid in artistlist:
         importer.addArtisttoDB(artistid)
 
-    logger.info("Imported %d new artists from Last.FM" % len(artistid))
+    logger.info("Imported %d new artists from Last.FM", len(artistid))
     
 def getTagTopArtists(tag, limit=50):
     myDB = db.DBConnection()
@@ -141,7 +141,7 @@ def getTagTopArtists(tag, limit=50):
     try:
         d = minidom.parseString(data)
     except:
-        logger.error("Could not parse artist list from last.fm data")
+        logger.error("Could not parse artist list from Last.FM data")
         return
 
     artists = d.getElementsByTagName("artist")
@@ -205,6 +205,7 @@ def getAlbumDescription(rgid, artist, album):
         myDB.upsert("descriptions", newValueDict, controlValueDict) 
         
     except:
+        logger.exception("Unhandled exception")
         return
 
 def getAlbumDescriptionOld(rgid, releaselist):
@@ -213,7 +214,7 @@ def getAlbumDescriptionOld(rgid, releaselist):
     because I may use it to fetch and cache album art
     """
 
-    myDB = db.DBConnection()    
+    myDB = db.DBConnection()
     result = myDB.select('SELECT Summary from descriptions WHERE ReleaseGroupID=?', [rgid])
     
     if result:
@@ -240,15 +241,13 @@ def getAlbumDescriptionOld(rgid, releaselist):
                     summary = node.data
                 for node in contentnode:
                     content = node.data
-                    
+
             controlValueDict = {'ReleaseGroupID': rgid}
             newValueDict = {'ReleaseID': mbid,
                             'Summary': summary,
                             'Content': content}
-            myDB.upsert("descriptions", newValueDict, controlValueDict) 
+            myDB.upsert("descriptions", newValueDict, controlValueDict)
             break
-        
         except:
+            logger.exception("Unhandled exception")
             continue
-        
-    

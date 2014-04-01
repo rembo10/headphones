@@ -341,7 +341,7 @@ def extract_song_data(s):
         year = match.group("year")
         return (name, album, year)
     else:
-        logger.info("Couldn't parse " + s + " into a valid default format")
+        logger.info("Couldn't parse %s into a valid default format", s)
     
     #newzbin default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
@@ -352,7 +352,7 @@ def extract_song_data(s):
         year = match.group("year")
         return (name, album, year)
     else:
-        logger.info("Couldn't parse " + s + " into a valid Newbin format")
+        logger.info("Couldn't parse %s into a valid Newbin format", s)
         return (name, album, year)
         
 def smartMove(src, dest, delete=True):
@@ -363,7 +363,7 @@ def smartMove(src, dest, delete=True):
     filename = os.path.basename(src)
     
     if os.path.isfile(os.path.join(dest, filename)):
-        logger.info('Destination file exists: %s' % os.path.join(dest, filename).decode(headphones.SYS_ENCODING, 'replace'))
+        logger.info('Destination file exists: %s', os.path.join(dest, filename).decode(headphones.SYS_ENCODING, 'replace'))
         title = os.path.splitext(filename)[0]
         ext = os.path.splitext(filename)[1]
         i = 1
@@ -372,12 +372,12 @@ def smartMove(src, dest, delete=True):
             if os.path.isfile(os.path.join(dest, newfile)):
                 i += 1
             else:
-                logger.info('Renaming to %s' % newfile)
-                try:    
+                logger.info('Renaming to %s', newfile)
+                try:
                     os.rename(src, os.path.join(source_dir, newfile))
                     filename = newfile
                 except Exception, e:
-                    logger.warn('Error renaming %s: %s' % (src.decode(headphones.SYS_ENCODING, 'replace'), str(e).decode(headphones.SYS_ENCODING, 'replace')))
+                    logger.warn('Error renaming %s: %s', src.decode(headphones.SYS_ENCODING, 'replace'), e)
                 break
 
     try:
@@ -387,7 +387,7 @@ def smartMove(src, dest, delete=True):
             shutil.copy(os.path.join(source_dir, filename), os.path.join(dest, filename))
             return True
     except Exception, e:
-        logger.warn('Error moving file %s: %s' % (filename.decode(headphones.SYS_ENCODING, 'replace'), str(e).decode(headphones.SYS_ENCODING, 'replace')))
+        logger.warn('Error moving file %s: %s', filename.decode(headphones.SYS_ENCODING, 'replace'), e)
 
 #########################
 #Sab renaming functions #
@@ -453,12 +453,12 @@ def create_https_certificates(ssl_cert, ssl_key):
     Create self-signed HTTPS certificares and store in paths 'ssl_cert' and 'ssl_key'
     """
     from headphones import logger
-    
+
     try:
-        from OpenSSL import crypto #@UnresolvedImport
-        from lib.certgen import createKeyPair, createCertRequest, createCertificate, TYPE_RSA, serial #@UnresolvedImport
+        from OpenSSL import crypto
+        from lib.certgen import createKeyPair, createCertRequest, createCertificate, TYPE_RSA, serial
     except:
-        logger.warn(u"pyopenssl module missing, please install for https access")
+        logger.warn("pyOpenSSL module missing, please install to enable HTTPS")
         return False
 
     # Create the CA Certificate
@@ -475,8 +475,8 @@ def create_https_certificates(ssl_cert, ssl_key):
     try:
         open(ssl_key, 'w').write(crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey))
         open(ssl_cert, 'w').write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
-    except:
-        logger.error(u"Error creating SSL key and certificate")
+    except Exception, e:
+        logger.error("Error creating SSL key and certificate: %s", e)
         return False
 
     return True

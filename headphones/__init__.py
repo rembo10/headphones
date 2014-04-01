@@ -306,7 +306,7 @@ def check_setting_int(config, cfg_name, item_name, def_val):
         except:
             config[cfg_name] = {}
             config[cfg_name][item_name] = my_val
-    logger.debug(item_name + " -> " + str(my_val))
+    logger.debug("%s -> %s", item_name, my_val)
     return my_val
 
 ################################################################################
@@ -323,10 +323,7 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
             config[cfg_name] = {}
             config[cfg_name][item_name] = my_val
 
-    if log:
-        logger.debug(item_name + " -> " + my_val)
-    else:
-        logger.debug(item_name + " -> ******")
+    logger.debug("%s -> %s", item_name, my_val if log else "******")
     return my_val
 
 def initialize():
@@ -702,7 +699,7 @@ def initialize():
             try:
                 os.makedirs(CACHE_DIR)
             except OSError:
-                logger.error('Could not create cache dir. Check permissions of datadir: ' + DATA_DIR)
+                logger.error('Could not create cache dir. Check permissions of datadir: %s', DATA_DIR)
 
         # Sanity check for search interval. Set it to at least 6 hours
         if SEARCH_INTERVAL < 360:
@@ -714,7 +711,7 @@ def initialize():
         try:
             dbcheck()
         except Exception, e:
-            logger.error("Can't connect to the database: %s" % e)
+            logger.error("Can't connect to the database: %s", e)
 
         # Get the currently installed version - returns None, 'win32' or the git hash
         # Also sets INSTALL_TYPE variable to 'win', 'git' or 'source'
@@ -751,7 +748,7 @@ def daemonize():
         if pid != 0:
             sys.exit(0)
     except OSError, e:
-        raise RuntimeError("1st fork failed: %s [%d]" % (e.strerror, e.errno))
+        raise RuntimeError("1st fork failed: %s [%d]", e.strerror, e.errno)
 
     os.setsid()
 
@@ -765,7 +762,7 @@ def daemonize():
         if pid != 0:
             sys.exit(0)
     except OSError, e:
-        raise RuntimeError("2nd fork failed: %s [%d]" % (e.strerror, e.errno))
+        raise RuntimeError("2nd fork failed: %s [%d]", e.strerror, e.errno)
 
     dev_null = file('/dev/null', 'r')
     os.dup2(dev_null.fileno(), sys.stdin.fileno())
@@ -782,8 +779,9 @@ def daemonize():
     logger.info('Daemonized to PID: %s' % pid)
 
     if CREATEPID:
-        logger.info("Writing PID " + pid + " to " + str(PIDFILE))
-        file(PIDFILE, 'w').write("%s\n" % pid)
+        logger.info("Writing PID %d to %s", pid, PIDFILE)
+        with file(PIDFILE, 'w') as fp:
+            fp.write("%s\n" % pid)
 
 def launch_browser(host, port, root):
 
@@ -798,7 +796,7 @@ def launch_browser(host, port, root):
     try:
         webbrowser.open('%s://%s:%i%s' % (protocol, host, port, root))
     except Exception, e:
-        logger.error('Could not launch browser: %s' % e)
+        logger.error('Could not launch browser: %s', e)
 
 def config_write():
 
@@ -1082,7 +1080,7 @@ def start():
 
 def sig_handler(signum=None, frame=None):
     if type(signum) != type(None):
-        logger.info("Signal %i caught, saving and exiting..." % int(signum))
+        logger.info("Signal %i caught, saving and exiting...", signum)
         shutdown()
 
 def dbcheck():
@@ -1301,10 +1299,10 @@ def shutdown(restart=False, update=False):
         try:
             versioncheck.update()
         except Exception, e:
-            logger.warn('Headphones failed to update: %s. Restarting.' % e)
+            logger.warn('Headphones failed to update: %s. Restarting.', e)
 
     if CREATEPID :
-        logger.info ('Removing pidfile %s' % PIDFILE)
+        logger.info ('Removing pidfile %s', PIDFILE)
         os.remove(PIDFILE)
 
     if restart:
@@ -1313,7 +1311,7 @@ def shutdown(restart=False, update=False):
         popen_list += ARGS
         if '--nolaunch' not in popen_list:
             popen_list += ['--nolaunch']
-        logger.info('Restarting Headphones with ' + str(popen_list))
+        logger.info('Restarting Headphones with %s', popen_list)
         subprocess.Popen(popen_list, cwd=os.getcwd())
 
     os._exit(0)
