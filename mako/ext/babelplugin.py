@@ -1,14 +1,13 @@
 # ext/babelplugin.py
-# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
 
 """gettext message extraction via Babel: http://babel.edgewall.org/"""
-from StringIO import StringIO
-
 from babel.messages.extract import extract_python
-
+from mako.compat import StringIO
+from mako import compat
 from mako import lexer, parsetree
 
 def extract(fileobj, keywords, comment_tags, options):
@@ -77,46 +76,41 @@ def extract_nodes(nodes, keywords, comment_tags, options):
         elif isinstance(node, parsetree.PageTag):
             code = node.body_decl.code
         elif isinstance(node, parsetree.CallNamespaceTag):
-            attribs = ', '.join(['%s=%s' % (key, val)
-                                 for key, val in node.attributes.iteritems()])
-            code = '{%s}' % attribs
+            code = node.expression
             child_nodes = node.nodes
         elif isinstance(node, parsetree.ControlLine):
             if node.isend:
-                translator_comments = []
                 in_translator_comments = False
                 continue
             code = node.text
         elif isinstance(node, parsetree.Code):
-            # <% and <%! blocks would provide their own translator comments
-            translator_comments = []
             in_translator_comments = False
-
             code = node.code.code
         elif isinstance(node, parsetree.Expression):
             code = node.code.code
         else:
-            translator_comments = []
-            in_translator_comments = False
             continue
 
         # Comments don't apply unless they immediately preceed the message
         if translator_comments and \
                 translator_comments[-1][0] < node.lineno - 1:
             translator_comments = []
-        else:
-            translator_comments = \
-                [comment[1] for comment in translator_comments]
 
-        if isinstance(code, unicode):
+        translator_strings = [comment[1] for comment in translator_comments]
+
+        if isinstance(code, compat.text_type):
             code = code.encode('ascii', 'backslashreplace')
-        code = StringIO(code)
+
+        used_translator_comments = False
+        code = compat.byte_buffer(code)
         for lineno, funcname, messages, python_translator_comments \
                 in extract_python(code, keywords, comment_tags, options):
             yield (node.lineno + (lineno - 1), funcname, messages,
-                   translator_comments + python_translator_comments)
+                   translator_strings + python_translator_comments)
+            used_translator_comments = True
 
-        translator_comments = []
+        if used_translator_comments:
+            translator_comments = []
         in_translator_comments = False
 
         if child_nodes:

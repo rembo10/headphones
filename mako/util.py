@@ -1,41 +1,15 @@
 # mako/util.py
-# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
 
-import imp
-import sys
-
-
-py3k = getattr(sys, 'py3kwarning', False) or sys.version_info >= (3, 0)
-py26 = sys.version_info >= (2, 6)
-py24 = sys.version_info >= (2, 4) and sys.version_info < (2, 5)
-jython = sys.platform.startswith('java')
-win32 = sys.platform.startswith('win')
-
-if py3k:
-    from io import StringIO
-else:
-    try:
-        from cStringIO import StringIO
-    except:
-        from StringIO import StringIO
-
-import codecs, re, weakref, os, time, operator
+import re
 import collections
-
-try:
-    import threading
-    import thread
-except ImportError:
-    import dummy_threading as threading
-    import dummy_thread as thread
-
-if win32 or jython:
-    time_func = time.clock
-else:
-    time_func = time.time
+import codecs
+import os
+from mako import compat
+import operator
 
 def function_named(fn, name):
     """Return a function with a given __name__.
@@ -47,34 +21,6 @@ def function_named(fn, name):
     fn.__name__ = name
     return fn
 
-try:
-    from functools import partial
-except:
-    def partial(func, *args, **keywords):
-        def newfunc(*fargs, **fkeywords):
-            newkeywords = keywords.copy()
-            newkeywords.update(fkeywords)
-            return func(*(args + fargs), **newkeywords)
-        return newfunc
-
-if py24:
-    def all(iterable):
-        for i in iterable:
-            if not i:
-                return False
-        return True
-
-    def exception_name(exc):
-        try:
-            return exc.__class__.__name__
-        except AttributeError:
-            return exc.__name__
-else:
-    all = all
-
-    def exception_name(exc):
-        return exc.__class__.__name__
-
 
 class PluginLoader(object):
     def __init__(self, group):
@@ -83,7 +29,7 @@ class PluginLoader(object):
 
     def load(self, name):
         if name in self.impls:
-             return self.impls[name]()
+            return self.impls[name]()
         else:
             import pkg_resources
             for impl in pkg_resources.iter_entry_points(
@@ -92,6 +38,7 @@ class PluginLoader(object):
                 self.impls[name] = impl.load
                 return impl.load()
             else:
+                from mako import exceptions
                 raise exceptions.RuntimeException(
                         "Can't load plugin %s %s" %
                         (self.group, name))
@@ -112,7 +59,7 @@ def verify_directory(dir):
     while not os.path.exists(dir):
         try:
             tries += 1
-            os.makedirs(dir, 0775)
+            os.makedirs(dir, compat.octal("0775"))
         except:
             if tries > 5:
                 raise
@@ -180,14 +127,14 @@ class FastEncodingBuffer(object):
     """a very rudimentary buffer that is faster than StringIO,
     but doesn't crash on unicode data like cStringIO."""
 
-    def __init__(self, encoding=None, errors='strict', unicode=False):
+    def __init__(self, encoding=None, errors='strict', as_unicode=False):
         self.data = collections.deque()
         self.encoding = encoding
-        if unicode:
-            self.delim = u''
+        if as_unicode:
+            self.delim = compat.u('')
         else:
             self.delim = ''
-        self.unicode = unicode
+        self.as_unicode = as_unicode
         self.errors = errors
         self.write = self.data.append
 
@@ -215,7 +162,7 @@ class LRUCache(dict):
         def __init__(self, key, value):
             self.key = key
             self.value = value
-            self.timestamp = time_func()
+            self.timestamp = compat.time_func()
         def __repr__(self):
             return repr(self.value)
 
@@ -225,7 +172,7 @@ class LRUCache(dict):
 
     def __getitem__(self, key):
         item = dict.__getitem__(self, key)
-        item.timestamp = time_func()
+        item.timestamp = compat.time_func()
         return item.value
 
     def values(self):
@@ -300,9 +247,8 @@ def parse_encoding(fp):
 
         if has_bom:
             if m:
-                raise SyntaxError, \
-                      "python refuses to compile code with both a UTF8" \
-                      " byte-order-mark and a magic encoding comment"
+                raise SyntaxError("python refuses to compile code with both a UTF8" \
+                      " byte-order-mark and a magic encoding comment")
             return 'utf_8'
         elif m:
             return m.group(1)
@@ -317,7 +263,7 @@ def sorted_dict_repr(d):
     Used by the lexer unit test to compare parse trees based on strings.
 
     """
-    keys = d.keys()
+    keys = list(d.keys())
     keys.sort()
     return "{" + ", ".join(["%r: %r" % (k, d[k]) for k in keys]) + "}"
 
@@ -397,28 +343,6 @@ mako in baz not in mako""", '<unknown>', 'exec', _ast.PyCF_ONLY_AST)
     _ast.NotIn = type(m.body[12].value.ops[1])
 
 
-try:
-    from inspect import CO_VARKEYWORDS, CO_VARARGS
-    def inspect_func_args(fn):
-        co = fn.func_code
-
-        nargs = co.co_argcount
-        names = co.co_varnames
-        args = list(names[:nargs])
-
-        varargs = None
-        if co.co_flags & CO_VARARGS:
-            varargs = co.co_varnames[nargs]
-            nargs = nargs + 1
-        varkw = None
-        if co.co_flags & CO_VARKEYWORDS:
-            varkw = co.co_varnames[nargs]
-
-        return args, varargs, varkw, fn.func_defaults
-except ImportError:
-    import inspect
-    def inspect_func_args(fn):
-        return inspect.getargspec(fn)
 
 def read_file(path, mode='rb'):
     fp = open(path, mode)
@@ -428,9 +352,14 @@ def read_file(path, mode='rb'):
     finally:
         fp.close()
 
-def load_module(module_id, path):
-    fp = open(path, 'rb')
+def read_python_file(path):
+    fp = open(path, "rb")
     try:
-        return imp.load_source(module_id, path, fp)
+        encoding = parse_encoding(fp)
+        data = fp.read()
+        if encoding:
+            data = data.decode(encoding)
+        return data
     finally:
         fp.close()
+

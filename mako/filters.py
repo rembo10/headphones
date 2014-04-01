@@ -1,29 +1,38 @@
 # mako/filters.py
-# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
 
 
-import re, urllib, htmlentitydefs, codecs
-from StringIO import StringIO
-from mako import util
+import re
+import codecs
+
+from mako.compat import quote_plus, unquote_plus, codepoint2name, \
+        name2codepoint
+
+from mako import compat
 
 xml_escapes = {
-    '&' : '&amp;',
-    '>' : '&gt;',
-    '<' : '&lt;',
-    '"' : '&#34;',   # also &quot; in html-only
-    "'" : '&#39;'    # also &apos; in html-only
+    '&': '&amp;',
+    '>': '&gt;',
+    '<': '&lt;',
+    '"': '&#34;',   # also &quot; in html-only
+    "'": '&#39;'    # also &apos; in html-only
 }
 
 # XXX: &quot; is valid in HTML and XML
 #      &apos; is not valid HTML, but is valid XML
 
-def legacy_html_escape(string):
+def legacy_html_escape(s):
     """legacy HTML escape for non-unicode mode."""
+    s = s.replace("&", "&amp;")
+    s = s.replace(">", "&gt;")
+    s = s.replace("<", "&lt;")
+    s = s.replace('"', "&#34;")
+    s = s.replace("'", "&#39;")
+    return s
 
-    return re.sub(r'([&<"\'>])', lambda m: xml_escapes[m.group()], string)
 
 try:
     import markupsafe
@@ -31,17 +40,16 @@ try:
 except ImportError:
     html_escape = legacy_html_escape
 
-
 def xml_escape(string):
     return re.sub(r'([&<"\'>])', lambda m: xml_escapes[m.group()], string)
 
 def url_escape(string):
     # convert into a list of octets
     string = string.encode("utf8")
-    return urllib.quote_plus(string)
+    return quote_plus(string)
 
 def url_unescape(string):
-    text = urllib.unquote_plus(string)
+    text = unquote_plus(string)
     if not is_ascii_str(text):
         text = text.decode("utf8")
     return text
@@ -53,12 +61,12 @@ def trim(string):
 class Decode(object):
     def __getattr__(self, key):
         def decode(x):
-            if isinstance(x, unicode):
+            if isinstance(x, compat.text_type):
                 return x
-            elif not isinstance(x, str):
-                return unicode(str(x), encoding=key)
+            elif not isinstance(x, compat.binary_type):
+                return compat.text_type(str(x), encoding=key)
             else:
-                return unicode(x, encoding=key)
+                return compat.text_type(x, encoding=key)
         return decode
 decode = Decode()
 
@@ -72,8 +80,8 @@ def is_ascii_str(text):
 
 class XMLEntityEscaper(object):
     def __init__(self, codepoint2name, name2codepoint):
-        self.codepoint2entity = dict([(c, u'&%s;' % n)
-                                      for c,n in codepoint2name.iteritems()])
+        self.codepoint2entity = dict([(c, compat.text_type('&%s;' % n))
+                                      for c, n in codepoint2name.items()])
         self.name2codepoint = name2codepoint
 
     def escape_entities(self, text):
@@ -81,7 +89,7 @@ class XMLEntityEscaper(object):
 
         Only characters corresponding to a named entity are replaced.
         """
-        return unicode(text).translate(self.codepoint2entity)
+        return compat.text_type(text).translate(self.codepoint2entity)
 
     def __escape(self, m):
         codepoint = ord(m.group())
@@ -102,7 +110,7 @@ class XMLEntityEscaper(object):
 
         The return value is guaranteed to be ASCII.
         """
-        return self.__escapable.sub(self.__escape, unicode(text)
+        return self.__escapable.sub(self.__escape, compat.text_type(text)
                                     ).encode('ascii')
 
     # XXX: This regexp will not match all valid XML entity names__.
@@ -127,7 +135,7 @@ class XMLEntityEscaper(object):
             # U+FFFD = "REPLACEMENT CHARACTER"
         if codepoint < 128:
             return chr(codepoint)
-        return unichr(codepoint)
+        return chr(codepoint)
 
     def unescape(self, text):
         """Unescape character references.
@@ -138,8 +146,7 @@ class XMLEntityEscaper(object):
         return self.__characterrefs.sub(self.__unescape, text)
 
 
-_html_entities_escaper = XMLEntityEscaper(htmlentitydefs.codepoint2name,
-                                          htmlentitydefs.name2codepoint)
+_html_entities_escaper = XMLEntityEscaper(codepoint2name, name2codepoint)
 
 html_entities_escape = _html_entities_escaper.escape_entities
 html_entities_unescape = _html_entities_escaper.unescape
@@ -159,7 +166,7 @@ def htmlentityreplace_errors(ex):
         # Handle encoding errors
         bad_text = ex.object[ex.start:ex.end]
         text = _html_entities_escaper.escape(bad_text)
-        return (unicode(text), ex.end)
+        return (compat.text_type(text), ex.end)
     raise ex
 
 codecs.register_error('htmlentityreplace', htmlentityreplace_errors)
@@ -168,20 +175,20 @@ codecs.register_error('htmlentityreplace', htmlentityreplace_errors)
 # TODO: options to make this dynamic per-compilation will be added in a later
 # release
 DEFAULT_ESCAPES = {
-    'x':'filters.xml_escape',
-    'h':'filters.html_escape',
-    'u':'filters.url_escape',
-    'trim':'filters.trim',
-    'entity':'filters.html_entities_escape',
-    'unicode':'unicode',
-    'decode':'decode',
-    'str':'str',
-    'n':'n'
+    'x': 'filters.xml_escape',
+    'h': 'filters.html_escape',
+    'u': 'filters.url_escape',
+    'trim': 'filters.trim',
+    'entity': 'filters.html_entities_escape',
+    'unicode': 'unicode',
+    'decode': 'decode',
+    'str': 'str',
+    'n': 'n'
 }
 
-if util.py3k:
+if compat.py3k:
     DEFAULT_ESCAPES.update({
-        'unicode':'str'
+        'unicode': 'str'
     })
 
 NON_UNICODE_ESCAPES = DEFAULT_ESCAPES.copy()

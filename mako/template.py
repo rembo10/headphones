@@ -1,5 +1,5 @@
 # mako/template.py
-# Copyright (C) 2006-2012 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -8,8 +8,15 @@
 template strings, as well as template runtime operations."""
 
 from mako.lexer import Lexer
-from mako import runtime, util, exceptions, codegen, cache
-import os, re, shutil, stat, sys, tempfile, types, weakref
+from mako import runtime, util, exceptions, codegen, cache, compat
+import os
+import re
+import shutil
+import stat
+import sys
+import tempfile
+import types
+import weakref
 
 
 class Template(object):
@@ -112,6 +119,15 @@ class Template(object):
      preamble of all generated Python modules. See the example
      in :ref:`filtering_default_filters`.
 
+    :param future_imports: String list of names to import from `__future__`.
+     These will be concatenated into a comma-separated string and inserted
+     into the beginning of the template, e.g. ``futures_imports=['FOO',
+     'BAR']`` results in ``from __future__ import FOO, BAR``.  If you're
+     interested in using features like the new division operator, you must
+     use future_imports to convey that to the renderer, as otherwise the
+     import will not appear as the first executed statement in the generated
+     code and will therefore not have the desired effect.
+
     :param input_encoding: Encoding of the template's source code.  Can
      be used in lieu of the coding comment. See
      :ref:`usage_unicode` as well as :ref:`unicode_toplevel` for
@@ -154,7 +170,7 @@ class Template(object):
 
          from mako.template import Template
          mytemplate = Template(
-                         file="index.html",
+                         filename="index.html",
                          module_directory="/path/to/modules",
                          module_writer=module_writer
                      )
@@ -171,6 +187,12 @@ class Template(object):
      the full template source before it is parsed. The return
      result of the callable will be used as the template source
      code.
+
+    :param lexer_cls: A :class:`.Lexer` class used to parse
+     the template.   The :class:`.Lexer` class is used by
+     default.
+
+     .. versionadded:: 0.7.4
 
     :param strict_undefined: Replaces the automatic usage of
      ``UNDEFINED`` for any undeclared variables not located in
@@ -189,6 +211,8 @@ class Template(object):
      ``module_directory`` is specified.
 
     """
+
+    lexer_cls = Lexer
 
     def __init__(self,
                     text=None,
@@ -215,8 +239,10 @@ class Template(object):
                     buffer_filters=(),
                     strict_undefined=False,
                     imports=None,
+                    future_imports=None,
                     enable_loop=True,
-                    preprocessor=None):
+                    preprocessor=None,
+                    lexer_cls=None):
         if uri:
             self.module_id = re.sub(r'\W', "_", uri)
             self.uri = uri
@@ -248,7 +274,7 @@ class Template(object):
         self.strict_undefined = strict_undefined
         self.module_writer = module_writer
 
-        if util.py3k and disable_unicode:
+        if compat.py3k and disable_unicode:
             raise exceptions.UnsupportedError(
                                     "Mako for Python 3 does not "
                                     "support disabling Unicode")
@@ -257,7 +283,7 @@ class Template(object):
                                     "output_encoding must be set to "
                                     "None when disable_unicode is used.")
         if default_filters is None:
-            if util.py3k or self.disable_unicode:
+            if compat.py3k or self.disable_unicode:
                 self.default_filters = ['str']
             else:
                 self.default_filters = ['unicode']
@@ -266,7 +292,11 @@ class Template(object):
         self.buffer_filters = buffer_filters
 
         self.imports = imports
+        self.future_imports = future_imports
         self.preprocessor = preprocessor
+
+        if lexer_cls is not None:
+            self.lexer_cls = lexer_cls
 
         # if plain text, compile code in memory only
         if text is not None:
@@ -307,6 +337,7 @@ class Template(object):
             cache_type, cache_dir, cache_url
         )
 
+
     @util.memoized_property
     def reserved_names(self):
         if self.enable_loop:
@@ -345,7 +376,7 @@ class Template(object):
                             filename,
                             path,
                             self.module_writer)
-            module = util.load_module(self.module_id, path)
+            module = compat.load_module(self.module_id, path)
             del sys.modules[self.module_id]
             if module._magic_number != codegen.MAGIC_NUMBER:
                 data = util.read_file(filename)
@@ -355,7 +386,7 @@ class Template(object):
                             filename,
                             path,
                             self.module_writer)
-                module = util.load_module(self.module_id, path)
+                module = compat.load_module(self.module_id, path)
                 del sys.modules[self.module_id]
             ModuleInfo(module, path, self, filename, None, None)
         else:
@@ -495,7 +526,7 @@ class ModuleTemplate(Template):
         self.bytestring_passthrough = bytestring_passthrough or disable_unicode
         self.enable_loop = module._enable_loop
 
-        if util.py3k and disable_unicode:
+        if compat.py3k and disable_unicode:
             raise exceptions.UnsupportedError(
                                     "Mako for Python 3 does not "
                                     "support disabling Unicode")
@@ -570,13 +601,13 @@ class ModuleInfo(object):
         if self.module_source is not None:
             return self.module_source
         else:
-            return util.read_file(self.module_filename)
+            return util.read_python_file(self.module_filename)
 
     @property
     def source(self):
         if self.template_source is not None:
             if self.module._source_encoding and \
-                    not isinstance(self.template_source, unicode):
+                    not isinstance(self.template_source, compat.text_type):
                 return self.template_source.decode(
                                 self.module._source_encoding)
             else:
@@ -589,11 +620,11 @@ class ModuleInfo(object):
                 return data
 
 def _compile(template, text, filename, generate_magic_comment):
-    lexer = Lexer(text,
-                    filename,
-                    disable_unicode=template.disable_unicode,
-                    input_encoding=template.input_encoding,
-                    preprocessor=template.preprocessor)
+    lexer = template.lexer_cls(text,
+                           filename,
+                           disable_unicode=template.disable_unicode,
+                           input_encoding=template.input_encoding,
+                           preprocessor=template.preprocessor)
     node = lexer.parse()
     source = codegen.compile(node,
                             template.uri,
@@ -601,6 +632,7 @@ def _compile(template, text, filename, generate_magic_comment):
                             default_filters=template.default_filters,
                             buffer_filters=template.buffer_filters,
                             imports=template.imports,
+                            future_imports=template.future_imports,
                             source_encoding=lexer.encoding,
                             generate_magic_comment=generate_magic_comment,
                             disable_unicode=template.disable_unicode,
@@ -615,19 +647,20 @@ def _compile_text(template, text, filename):
                         generate_magic_comment=template.disable_unicode)
 
     cid = identifier
-    if not util.py3k and isinstance(cid, unicode):
+    if not compat.py3k and isinstance(cid, compat.text_type):
         cid = cid.encode()
     module = types.ModuleType(cid)
     code = compile(source, cid, 'exec')
-    exec code in module.__dict__, module.__dict__
+
+    # this exec() works for 2.4->3.3.
+    exec(code, module.__dict__, module.__dict__)
     return (source, module)
 
 def _compile_module_file(template, text, filename, outputpath, module_writer):
-    identifier = template.module_id
     source, lexer = _compile(template, text, filename,
                         generate_magic_comment=True)
 
-    if isinstance(source, unicode):
+    if isinstance(source, compat.text_type):
         source = source.encode(lexer.encoding or 'ascii')
 
     if module_writer:
@@ -643,7 +676,10 @@ def _compile_module_file(template, text, filename, outputpath, module_writer):
         shutil.move(name, outputpath)
 
 def _get_module_info_from_callable(callable_):
-    return _get_module_info(callable_.func_globals['__name__'])
+    if compat.py3k:
+        return _get_module_info(callable_.__globals__['__name__'])
+    else:
+        return _get_module_info(callable_.func_globals['__name__'])
 
 def _get_module_info(filename):
     return ModuleInfo._modules[filename]
