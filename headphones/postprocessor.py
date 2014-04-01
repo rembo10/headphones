@@ -22,9 +22,9 @@ import music_encoder
 import urllib, shutil, re
 import uuid
 from headphones import notifiers
-import lib.beets as beets
-from lib.beets import autotag
-from lib.beets.mediafile import MediaFile
+import beets
+from beets import autotag
+from beets.mediafile import MediaFile
 
 import headphones
 from headphones import db, albumart, librarysync, lyrics, logger, helpers
@@ -960,15 +960,17 @@ def forcePostProcess():
     myDB = db.DBConnection()
     
     for folder in folders:
-
         folder_basename = os.path.basename(folder).decode(headphones.SYS_ENCODING, 'replace')
-
         logger.info('Processing: %s' % folder_basename)
-        
-        # First try to see if there's a match in the snatched table, then we'll try to parse the foldername
-        # TODO: Iterate through underscores -> spaces, spaces -> dots, underscores -> dots (this might be hit or miss since it assumes
-        # all spaces/underscores came from sab replacing values
+
+        # Attempt 1: First try to see if there's a match in the snatched table,
+        # then we'll try to parse the foldername.
+        # TODO: Iterate through underscores -> spaces, spaces -> dots,
+        # underscores -> dots (this might be hit or miss since it assumes all
+        # spaces/underscores came from sab replacing values
+        logger.debug('Attempting to find album in the snatched table')
         snatched = myDB.action('SELECT AlbumID, Title, Kind, Status from snatched WHERE FolderName LIKE ?', [folder_basename]).fetchone()
+
         if snatched:
             if headphones.KEEP_TORRENT_FILES and snatched['Kind'] == 'torrent' and snatched['Status'] == 'Processed':
                 logger.info(folder_basename + ' is a torrent folder being preserved for seeding and has already been processed. Skipping.')
@@ -977,16 +979,23 @@ def forcePostProcess():
                 logger.info('Found a match in the database: %s. Verifying to make sure it is the correct album' % snatched['Title'])
                 verify(snatched['AlbumID'], folder, snatched['Kind'])
                 continue
-        
-        # Try to parse the folder name into a valid format
-        # TODO: Add metadata lookup
+
+        # Attempt 2a: parse the folder name into a valid format
         try:
+            logger.debug('Attempting to extract name, album and year from folder name')
             name, album, year = helpers.extract_data(folder_basename)
-        except:
+        except Exception as e:
             name = None
 
+        # Attempt 2b: deduce meta data into a valid format
+        if name is None:
+            try:
+                logger.debug('Attempting to extract name, album and year from metadata')
+                name, album, year = helpers.extract_metadata(folder)
+            except Exception as e:
+                name = None
+
         if name and album and year:
-            
             release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
             if release:
                 logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
@@ -998,30 +1007,28 @@ def forcePostProcess():
                     rgid = mb.findAlbumID(helpers.latinToAscii(name), helpers.latinToAscii(album))
                 except:
                     logger.error('Can not get release information for this album')
-                    continue
                 if rgid:
                     verify(rgid, folder)
+                    continue
                 else:
                     logger.info('No match found on MusicBrainz for: %s - %s' % (name, album))
-                    continue
-                    
-        else:
-            try:
-                possible_rgid = folder_basename[-36:]
-                # re pattern match: [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12} 
-                rgid = uuid.UUID(possible_rgid)
-                    
-            except:
-                logger.info("Couldn't parse " + folder_basename + " into any valid format. If adding albums from another source, they must be in an 'Artist - Album [Year]' format, or end with the musicbrainz release group id")
-                continue
-            
-            
-            if rgid:
-                rgid = possible_rgid
-                release = myDB.action('SELECT ArtistName, AlbumTitle, AlbumID from albums WHERE AlbumID=?', [rgid]).fetchone()
-                if release:
-                    logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
-                    verify(release['AlbumID'], folder, forced=True)
-                else:
-                    logger.info('Found a (possibly) valid Musicbrainz identifier in album folder name - continuing post-processing')
-                    verify(rgid, folder, forced=True)
+
+        # Attempt 3: strip release group id from filename
+        try:
+            logger.debug('Attempting to extract release group from folder name')
+            possible_rgid = folder_basename[-36:]
+            # re pattern match: [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
+            rgid = uuid.UUID(possible_rgid)
+        except:
+            logger.info("Couldn't parse " + folder_basename + " into any valid format. If adding albums from another source, they must be in an 'Artist - Album [Year]' format, or end with the musicbrainz release group id")
+            rgid = None
+
+        if rgid:
+            rgid = possible_rgid
+            release = myDB.action('SELECT ArtistName, AlbumTitle, AlbumID from albums WHERE AlbumID=?', [rgid]).fetchone()
+            if release:
+                logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
+                verify(release['AlbumID'], folder, forced=True)
+            else:
+                logger.info('Found a (possibly) valid Musicbrainz identifier in album folder name - continuing post-processing')
+                verify(rgid, folder, forced=True)

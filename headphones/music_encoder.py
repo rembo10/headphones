@@ -17,10 +17,11 @@ import os
 import headphones
 import shutil
 import time
+import multiprocessing
 
 import subprocess
 from headphones import logger
-from lib.beets.mediafile import MediaFile
+from beets.mediafile import MediaFile
 
 try:
     import argparse
@@ -100,6 +101,7 @@ def encode(albumPath):
 
     i=0
     encoder_failed = False
+    jobs = []
 
     for music in musicFiles:        
         infoMusic=MediaFile(music)
@@ -131,14 +133,44 @@ def encode(albumPath):
                     encode = True
         # encode
         if encode:
-            if not command(encoder,music,musicTempFiles[i],albumPath):
-                encoder_failed = True
-                break
+            job = (encoder, music, musicTempFiles[i], albumPath)
+            jobs.append(job)
         else:
             musicFiles[i] = None
             musicTempFiles[i] = None
 
         i=i+1
+
+    # Encode music files
+    if len(jobs) > 0:
+        if headphones.ENCODER_MULTICORE:
+            if headphones.ENCODER_MULTICORE_COUNT == 0:
+                processes = multiprocessing.cpu_count()
+            else:
+                processes = headphones.ENCODER_MULTICORE_COUNT
+
+            logger.debug("Multi-core encoding enabled, %d processes" % processes)
+        else:
+            processes = 1
+
+        # Use multiprocessing only if it's worth the overhead. and if it is
+        # enabled. If not, then use the old fashioned way.
+        if processes > 1:
+            pool = multiprocessing.Pool(processes=processes)
+            results = pool.map_async(command_map, jobs)
+
+            # No new processes will be created, so close it and wait for all
+            # processes to finish
+            pool.close()
+            pool.join()
+
+            # Retrieve the results
+            results = results.get()
+        else:
+            results = map(command_map, jobs)
+
+        # The results are either True or False, so determine if one is False
+        encoder_failed = not all(results)
 
     musicFiles = filter(None, musicFiles)
     musicTempFiles = filter(None, musicTempFiles)
@@ -187,7 +219,10 @@ def encode(albumPath):
         logger.info('Encoding for folder %s is not required' % (albumPath.decode(headphones.SYS_ENCODING, 'replace')))
     
     return musicFinalFiles
-    
+
+def command_map(args):
+    return command(*args)
+
 def command(encoder,musicSource,musicDest,albumPath):
 
     cmd=[]
