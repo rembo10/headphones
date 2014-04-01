@@ -176,7 +176,7 @@ def main():
             except KeyboardInterrupt:
                 headphones.SIGNAL = 'shutdown'
         else:
-            logger.info('Received signal: %d', headphones.SIGNAL)
+            logger.info('Received signal: %s', headphones.SIGNAL)
             if headphones.SIGNAL == 'shutdown':
                 headphones.shutdown()
             elif headphones.SIGNAL == 'restart':

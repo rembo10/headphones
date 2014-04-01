@@ -775,8 +775,8 @@ def daemonize():
     os.dup2(so.fileno(), sys.stdout.fileno())
     os.dup2(se.fileno(), sys.stderr.fileno())
 
-    pid = str(os.getpid())
-    logger.info('Daemonized to PID: %s' % pid)
+    pid = os.getpid()
+    logger.info('Daemonized to PID: %d', pid)
 
     if CREATEPID:
         logger.info("Writing PID %d to %s", pid, PIDFILE)

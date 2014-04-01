@@ -14,7 +14,9 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import sys
 import logging
+import traceback
 import headphones
 
 from logging import handlers
@@ -78,6 +80,24 @@ def initLogger(verbose=1):
             console_handler.setLevel(logging.DEBUG)
 
         logger.addHandler(console_handler)
+
+    # Any exceptions uncaught will pass through this handle
+    sys.excepthook = excepthook
+
+def excepthook(*exception_info):
+    """
+    Log uncaught exceptions via the logger.error() method. This is especially
+    useful for daemons.
+    """
+
+    # We should always catch this to prevent loops!
+    try:
+        logger.error("Uncaught excaption: %s", traceback.print_exception(*exception_info))
+    except:
+        pass
+
+    # Original excepthook
+    sys.__excepthook__(*exception_info)
 
 # Expose logger methods
 info = logger.info
