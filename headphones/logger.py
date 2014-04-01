@@ -34,7 +34,7 @@ class LogListHandler(logging.Handler):
     """
 
     def emit(self, record):
-        headphones.LOG_LIST.insert(0, (helpers.now(), record.msg, record.levelname, record.threadName))
+        headphones.LOG_LIST.insert(0, (helpers.now(), self.format(record), record.levelname, record.threadName))
 
 def initLogger(verbose=1):
     """

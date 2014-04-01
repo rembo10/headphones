@@ -62,7 +62,7 @@ def initialize(options={}):
     else:
         protocol = "http"
     
-    logger.info(u"Starting Headphones on " + protocol + "://" + str(options['http_host']) + ":" + str(options['http_port']) + "/")
+    logger.info("Starting Headphones on %s://%s:%d/", protocol, options['http_host'], options['http_port'])
     cherrypy.config.update(options_dict)
 
     conf = {

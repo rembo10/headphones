@@ -521,10 +521,10 @@ def addReleaseById(rid):
         try:
             release_dict = mb.getRelease(rid)
         except Exception, e:
-            logger.info('Unable to get release information for Release: ' + str(rid) + " " + str(e))
+            logger.info('Unable to get release information for Release %s: %s', rid, e)
             return
         if not release_dict:
-            logger.info('Unable to get release information for Release: ' + str(rid) + " no dict")
+            logger.info('Unable to get release information for Release %s: no dict', rid)
             return
         
         rgid = release_dict['rgid']
@@ -664,7 +664,7 @@ def getHybridRelease(fullreleaselist):
             '2xVinyl':          '2',
             'Vinyl':            '2',
             'CD':               '0',
-            'Cassette':         '3',            
+            'Cassette':         '3',
             '2xCD':             '1',
             'Digital Media':    '0'
             }
@@ -681,7 +681,7 @@ def getHybridRelease(fullreleaselist):
             format = 3
             
         try:
-            country = int(countries[release['Country']])                
+            country = int(countries[release['Country']])
         except:
             country = 3
         

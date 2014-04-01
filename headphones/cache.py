@@ -218,12 +218,12 @@ class Cache(object):
                         }
             
             url = "http://ws.audioscrobbler.com/2.0/?" + urllib.urlencode(params)
-            logger.debug('Retrieving artist information from: ' + url)
+            logger.debug('Retrieving artist information from: %s', url)
             
             try:
                 result = urllib2.urlopen(url, timeout=20).read()
             except:
-                logger.warn('Could not open url: ' + url)
+                logger.warn('Could not open url: %s', url)
                 return
             
             if result:
@@ -231,18 +231,18 @@ class Cache(object):
                 try:
                     data = simplejson.JSONDecoder().decode(result)
                 except:
-                    logger.warn('Could not parse data from url: ' + url)
+                    logger.warn('Could not parse data from url: %s', url)
                     return
 
                 try:
                     image_url = data['artist']['image'][-1]['#text']
                 except Exception:
-                    logger.debug('No artist image found on url: ' + url)
+                    logger.debug('No artist image found on url: %s', url)
                     image_url = None
                 
                 thumb_url = self._get_thumb_url(data)
                 if not thumb_url:
-                    logger.debug('No artist thumbnail image found on url: ' + url)
+                    logger.debug('No artist thumbnail image found on url: %s', url)
                     
         else:
             
@@ -255,12 +255,12 @@ class Cache(object):
                         }
             
             url = "http://ws.audioscrobbler.com/2.0/?" + urllib.urlencode(params)
-            logger.debug('Retrieving album information from: ' + url)
+            logger.debug('Retrieving album information from: %s', url)
             
             try:
                 result = urllib2.urlopen(url, timeout=20).read()
             except:
-                logger.warn('Could not open url: ' + url)
+                logger.warn('Could not open url: %s', url)
                 return
             
             if result:
@@ -268,19 +268,19 @@ class Cache(object):
                 try:
                     data = simplejson.JSONDecoder().decode(result)
                 except:
-                    logger.warn('Could not parse data from url: ' + url)
+                    logger.warn('Could not parse data from url: %s', url)
                     return
                     
                 try:
                     image_url = data['artist']['image'][-1]['#text']
                 except Exception:
-                    logger.debug('No artist image found on url: ' + url)
+                    logger.debug('No artist image found on url: %s', url)
                     image_url = None
                 
                 thumb_url = self._get_thumb_url(data)
                 
                 if not thumb_url:
-                    logger.debug('No artist thumbnail image found on url: ' + url)
+                    logger.debug('No artist thumbnail image found on url: %s', url)
                     
         image_dict = {'artwork' : image_url, 'thumbnail' : thumb_url }
         return image_dict
@@ -301,12 +301,12 @@ class Cache(object):
                         }
             
             url = "http://ws.audioscrobbler.com/2.0/?" + urllib.urlencode(params)
-            logger.debug('Retrieving artist information from: ' + url)
+            logger.debug('Retrieving artist information from: %s', url)
             
             try:
                 result = urllib2.urlopen(url, timeout=20).read()
             except:
-                logger.warn('Could not open url: ' + url)
+                logger.warn('Could not open url: %s', url)
                 return
             
             if result:
@@ -314,27 +314,27 @@ class Cache(object):
                 try:
                     data = simplejson.JSONDecoder().decode(result)
                 except:
-                    logger.warn('Could not parse data from url: ' + url)
+                    logger.warn('Could not parse data from url: %s', url)
                     return
                 try:
                     self.info_summary = data['artist']['bio']['summary']
                 except Exception:
-                    logger.debug('No artist bio summary found on url: ' + url)
+                    logger.debug('No artist bio summary found on url: %s', url)
                     self.info_summary = None
                 try:
                     self.info_content = data['artist']['bio']['content']
                 except Exception:
-                    logger.debug('No artist bio found on url: ' + url)
+                    logger.debug('No artist bio found on url: %s', url)
                     self.info_content = None
                 try:
                     image_url = data['artist']['image'][-1]['#text']
                 except Exception:
-                    logger.debug('No artist image found on url: ' + url)
+                    logger.debug('No artist image found on url: %s', url)
                     image_url = None
                 
                 thumb_url = self._get_thumb_url(data)
                 if not thumb_url:
-                    logger.debug('No artist thumbnail image found on url: ' + url)
+                    logger.debug('No artist thumbnail image found on url: %s', url)
         
         else:
 
@@ -349,39 +349,39 @@ class Cache(object):
                         
             url = "http://ws.audioscrobbler.com/2.0/?" + urllib.urlencode(params)
         
-            logger.debug('Retrieving artist information from: ' + url)
+            logger.debug('Retrieving artist information from: %s', url)
             try:
                 result = urllib2.urlopen(url, timeout=20).read()
             except:
-                logger.warn('Could not open url: ' + url)
+                logger.warn('Could not open url: %s', url)
                 return
                 
             if result:
                 try:    
                     data = simplejson.JSONDecoder().decode(result)
                 except:
-                    logger.warn('Could not parse data from url: ' + url)
+                    logger.warn('Could not parse data from url: %s', url)
                     return
                 try:    
                     self.info_summary = data['album']['wiki']['summary']
                 except Exception:
-                    logger.debug('No album summary found from: ' + url)
+                    logger.debug('No album summary found from: %s', url)
                     self.info_summary = None
                 try:    
                     self.info_content = data['album']['wiki']['content']
                 except Exception:
-                    logger.debug('No album infomation found from: ' + url)
+                    logger.debug('No album infomation found from: %s', url)
                     self.info_content = None
                 try:
                     image_url = data['album']['image'][-1]['#text']
                 except Exception:
-                    logger.debug('No album image link found on url: ' + url)
+                    logger.debug('No album image link found on url: %s', url)
                     image_url = None
                 
                 thumb_url = self._get_thumb_url(data)
 
                 if not thumb_url:
-                    logger.debug('No album thumbnail image found on url: ' + url)
+                    logger.debug('No album thumbnail image found on url: %s', url)
                     
         #Save the content & summary to the database no matter what if we've opened up the url
         if self.id_type == 'artist':
@@ -414,7 +414,7 @@ class Cache(object):
             try:
                 artwork = urllib2.urlopen(image_url, timeout=20).read()
             except Exception, e:
-                logger.error('Unable to open url "' + image_url + '". Error: ' + str(e))
+                logger.error('Unable to open url "%s". Error: %s', image_url, e)
                 artwork = None
                 
             if artwork:
@@ -424,7 +424,7 @@ class Cache(object):
                     try:
                         os.makedirs(self.path_to_art_cache)
                     except Exception, e:
-                        logger.error('Unable to create artwork cache dir. Error: ' + str(e))
+                        logger.error('Unable to create artwork cache dir. Error: %s', e)
                         self.artwork_errors = True
                         self.artwork_url = image_url
                         
@@ -433,7 +433,7 @@ class Cache(object):
                     try:
                         os.remove(artwork_file)
                     except:
-                        logger.error('Error deleting file from the cache: ' + artwork_file)
+                        logger.error('Error deleting file from the cache: %s', artwork_file)
                         
                 ext = os.path.splitext(image_url)[1]
                         
@@ -443,7 +443,7 @@ class Cache(object):
                     f.write(artwork)
                     f.close()
                 except Exception, e:
-                    logger.error('Unable to write to the cache dir: ' + str(e))
+                    logger.error('Unable to write to the cache dir: %s', e)
                     self.artwork_errors = True
                     self.artwork_url = image_url
                     
@@ -453,7 +453,7 @@ class Cache(object):
             try:
                 artwork = urllib2.urlopen(thumb_url, timeout=20).read()
             except Exception, e:
-                logger.error('Unable to open url "' + thumb_url + '". Error: ' + str(e))
+                logger.error('Unable to open url "%s". Error: %s', thumb_url, e)
                 artwork = None
                 
             if artwork:
@@ -463,7 +463,7 @@ class Cache(object):
                     try:
                         os.makedirs(self.path_to_art_cache)
                     except Exception, e:
-                        logger.error('Unable to create artwork cache dir. Error: ' + str(e))
+                        logger.error('Unable to create artwork cache dir. Error: %s' + e)
                         self.thumb_errors = True
                         self.thumb_url = thumb_url
                         
@@ -472,7 +472,7 @@ class Cache(object):
                     try:
                         os.remove(thumb_file)
                     except:
-                        logger.error('Error deleting file from the cache: ' + thumb_file)
+                        logger.error('Error deleting file from the cache: %s', thumb_file)
                         
                 ext = os.path.splitext(image_url)[1]
                         
@@ -482,7 +482,7 @@ class Cache(object):
                     f.write(artwork)
                     f.close()
                 except Exception, e:
-                    logger.error('Unable to write to the cache dir: ' + str(e))
+                    logger.error('Unable to write to the cache dir: %s', e)
                     self.thumb_errors = True
                     self.thumb_url = image_url
 
