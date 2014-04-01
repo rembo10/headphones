@@ -207,6 +207,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                 myDB.action("DELETE FROM allalbums WHERE AlbumID=?", [items['AlbumID']])
                 myDB.action("DELETE FROM tracks WHERE AlbumID=?", [items['AlbumID']])
                 myDB.action("DELETE FROM alltracks WHERE AlbumID=?", [items['AlbumID']])
+                myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [items['AlbumID']])
                 logger.info("[%s] Removing all references to release group %s to reflect MusicBrainz" % (artist['artist_name'], items['AlbumID']))
                 force_repackage = 1
     else:
@@ -276,6 +277,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             myDB.action("DELETE from allalbums WHERE ReleaseID=?", [rg['id']])
             myDB.action("DELETE from tracks WHERE ReleaseID=?", [rg['id']])
             myDB.action("DELETE from alltracks WHERE ReleaseID=?", [rg['id']])
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rg['id']])
             # This will be used later to build a hybrid release     
             fullreleaselist = []
             #Search for releases within a release group
