@@ -690,10 +690,10 @@ def initialize():
                 os.makedirs(LOG_DIR)
             except OSError:
                 if VERBOSE:
-                    print 'Unable to create the log directory. Logging to screen only.'
+                    sys.stderr.write('Unable to create the log directory. Logging to screen only.\n')
 
         # Start the logger, silence console logging if we need to
-        logger.headphones_log.initLogger(verbose=VERBOSE)
+        logger.initLogger(verbose=VERBOSE)
 
         if not CACHE_DIR:
             # Put the cache dir in the data dir for now

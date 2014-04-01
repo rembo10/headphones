@@ -14,83 +14,75 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import threading
 import logging
-from logging import handlers
-
 import headphones
+
+from logging import handlers
 from headphones import helpers
 
-MAX_SIZE = 1000000 # 1mb
+MAX_SIZE = 1000000 # 1 MB
 MAX_FILES = 5
 
+FILENAME = 'headphones.log'
 
-# Simple rotating log handler that uses RotatingFileHandler
-class RotatingLogger(object):
+# Headphones logger
+logger = logging.getLogger('headphones')
 
-    def __init__(self, filename, max_size, max_files):
-    
-        self.filename = filename
-        self.max_size = max_size
-        self.max_files = max_files
-        
-        
-    def initLogger(self, verbose=1):
-    
-        l = logging.getLogger('headphones')
-        l.setLevel(logging.DEBUG)
-        
-        self.filename = os.path.join(headphones.LOG_DIR, self.filename)
-        
-        filehandler = handlers.RotatingFileHandler(self.filename, maxBytes=self.max_size, backupCount=self.max_files)
-        filehandler.setLevel(logging.DEBUG)
-        
-        fileformatter = logging.Formatter('%(asctime)s - %(levelname)-7s :: %(message)s', '%d-%b-%Y %H:%M:%S')
-        
-        filehandler.setFormatter(fileformatter)
-        l.addHandler(filehandler)
-        
-        if verbose:
-            consolehandler = logging.StreamHandler()
-            if verbose == 1:
-                consolehandler.setLevel(logging.INFO)
-            if verbose == 2:
-                consolehandler.setLevel(logging.DEBUG)
-            consoleformatter = logging.Formatter('%(asctime)s - %(levelname)s :: %(message)s', '%d-%b-%Y %H:%M:%S')
-            consolehandler.setFormatter(consoleformatter)
-            l.addHandler(consolehandler)    
-        
-    def log(self, message, level):
+class LogListHandler(logging.Handler):
+    """
+    Log handler for Web UI.
+    """
 
-        logger = logging.getLogger('headphones')
-        
-        threadname = threading.currentThread().getName()
-        
-        if level != 'DEBUG':
-            headphones.LOG_LIST.insert(0, (helpers.now(), message, level, threadname))
-        
-        message = threadname + ' : ' + message
+    def emit(self, record):
+        headphones.LOG_LIST.insert(0, (helpers.now(), record.msg, record.levelname, record.threadName))
 
-        if level == 'DEBUG':
-            logger.debug(message)
-        elif level == 'INFO':
-            logger.info(message)
-        elif level == 'WARNING':
-            logger.warn(message)
-        else:
-            logger.error(message)
+def initLogger(verbose=1):
+    """
+    Setup logging for Headphones. It uses the logger instance with the name
+    'headphones'. Three log handlers are added:
 
-headphones_log = RotatingLogger('headphones.log', MAX_SIZE, MAX_FILES)
+    * RotatingFileHandler: for the file headphones.log
+    * LogListHandler: for Web UI
+    * StreamHandler: for console (if verbose > 0)
+    """
 
-def debug(message):
-    headphones_log.log(message, level='DEBUG')
+    # Configure the logger to accept all messages
+    logger.propagate = False
+    logger.setLevel(logging.DEBUG)
 
-def info(message):
-    headphones_log.log(message, level='INFO')
-    
-def warn(message):
-    headphones_log.log(message, level='WARNING')
-    
-def error(message):
-    headphones_log.log(message, level='ERROR')
-    
+    # Setup file logger
+    filename = os.path.join(headphones.LOG_DIR, FILENAME)
+
+    file_formatter = logging.Formatter('%(asctime)s - %(levelname)-7s :: %(threadName)s : %(message)s', '%d-%b-%Y %H:%M:%S')
+    file_handler = handlers.RotatingFileHandler(filename, maxBytes=MAX_SIZE, backupCount=MAX_FILES)
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(file_formatter)
+
+    logger.addHandler(file_handler)
+
+    # Add list logger
+    loglist_handler = LogListHandler()
+    loglist_handler.setLevel(logging.INFO)
+
+    logger.addHandler(loglist_handler)
+
+    # Setup console logger
+    if verbose:
+        console_formatter = logging.Formatter('%(asctime)s - %(levelname)s :: %(threadName)s : %(message)s', '%d-%b-%Y %H:%M:%S')
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(console_formatter)
+
+        if verbose == 1:
+            console_handler.setLevel(logging.INFO)
+        elif verbose == 2:
+            console_handler.setLevel(logging.DEBUG)
+
+        logger.addHandler(console_handler)
+
+# Expose logger methods
+info = logger.info
+warn = logger.warn
+error = logger.error
+debug = logger.debug
+warning = logger.warning
+exception = logger.exception
