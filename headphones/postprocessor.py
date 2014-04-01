@@ -407,6 +407,12 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     
     logger.info(u'Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
     
+    if headphones.GROWL_ENABLED:
+        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
+        logger.info(u"Growl request")
+        growl = notifiers.GROWL()
+        growl.notify(pushmessage,"Download and Postprocessing completed")
+
     if headphones.PROWL_ENABLED:
         pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
         logger.info(u"Prowl request")
