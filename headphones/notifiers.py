@@ -24,6 +24,7 @@ from httplib import HTTPSConnection
 from urllib import urlencode
 import os.path
 import subprocess
+import gntp.notifier
 import lib.simplejson as simplejson
 from xml.dom import minidom
 
@@ -34,7 +35,6 @@ except:
 
 import lib.oauth2 as oauth
 import lib.pythontwitter as twitter
-import lib.gntp.notifier as gntp_notifier
 
 class GROWL:
 
@@ -66,7 +66,7 @@ class GROWL:
             password = self.password
 
         # Register notification
-        growl = gntp_notifier.GrowlNotifier(
+        growl = gntp.notifier.GrowlNotifier(
             applicationName='Headphones',
             notifications=['New Event'],
             defaultNotifications=['New Event'],
@@ -77,10 +77,10 @@ class GROWL:
 
         try:
             growl.register()
-        except gntp_notifier.errors.NetworkError:
+        except gntp.notifier.errors.NetworkError:
             logger.info(u'Growl notification failed: network error')
             return
-        except gntp_notifier.errors.AuthError:
+        except gntp.notifier.errors.AuthError:
             logger.info(u'Growl notification failed: authentication error')
             return
 
@@ -95,7 +95,7 @@ class GROWL:
                 description=message,
                 icon=image
             )
-        except gntp_notifier.errors.NetworkError:
+        except gntp.notifier.errors.NetworkError:
             logger.info(u'Growl notification failed: network error')
             return
 
