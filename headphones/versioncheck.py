@@ -82,7 +82,21 @@ def getVersion():
             logger.error('Output doesn\'t look like a hash, not using it')
             return None
 
-        return cur_commit_hash
+        if headphones.DO_NOT_OVERRIDE_GIT_BRANCH and headphones.GIT_BRANCH:
+            branch_name = headphones.GIT_BRANCH
+
+        else:
+            branch_name, err = runGit('rev-parse --abbrev-ref HEAD')
+            branch_name = branch_name.strip()
+
+            if not branch_name and headphones.GIT_BRANCH:
+                logger.error('Could not retrieve branch name from git. Falling back to %s' % headphones.GIT_BRANCH)
+                branch_name = headphones.GIT_BRANCH
+            if not branch_name:
+                logger.error('Could not retrieve branch name from git. Defaulting to master')
+                branch_name = 'master'
+
+        return cur_commit_hash, branch_name
 
     else:
 
@@ -153,7 +167,7 @@ def update():
 
     elif headphones.INSTALL_TYPE == 'git':
 
-        output, err = runGit('pull origin ' + version.HEADPHONES_VERSION)
+        output, err = runGit('pull origin ' + headphones.GIT_BRANCH)
 
         if not output:
             logger.error('Couldn\'t download latest version')
