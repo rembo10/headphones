@@ -930,6 +930,8 @@ class WebInterface(object):
                     "encodervbrcbr": headphones.ENCODERVBRCBR,
                     "encoderquality": headphones.ENCODERQUALITY,
                     "encoderlossless": checked(headphones.ENCODERLOSSLESS),
+                    "encoder_multicore": checked(headphones.ENCODER_MULTICORE),
+                    "encoder_multicore_count": int(headphones.ENCODER_MULTICORE_COUNT),
                     "delete_lossless_files": checked(headphones.DELETE_LOSSLESS_FILES),
                     "growl_enabled": checked(headphones.GROWL_ENABLED),
                     "growl_onsnatch": checked(headphones.GROWL_ONSNATCH),
@@ -963,6 +965,7 @@ class WebInterface(object):
                     "pushover_enabled": checked(headphones.PUSHOVER_ENABLED),
                     "pushover_onsnatch": checked(headphones.PUSHOVER_ONSNATCH),
                     "pushover_keys": headphones.PUSHOVER_KEYS,
+                    "pushover_apitoken": headphones.PUSHOVER_APITOKEN,
                     "pushover_priority": headphones.PUSHOVER_PRIORITY,
                     "pushbullet_enabled": checked(headphones.PUSHBULLET_ENABLED),
                     "pushbullet_onsnatch": checked(headphones.PUSHBULLET_ONSNATCH),
@@ -1016,10 +1019,10 @@ class WebInterface(object):
         bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
         delete_lossless_files=0, growl_enabled=0, growl_onsnatch=0, growl_host=None, growl_password=None, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, pushalot_enabled=False, pushalot_apikey=None, pushalot_onsnatch=0, synoindex_enabled=False,
-        pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, pushbullet_enabled=0, pushbullet_onsnatch=0, pushbullet_apikey=None, pushbullet_deviceid=None, twitter_enabled=0, twitter_onsnatch=0, mirror=None, customhost=None, customport=None,
+        pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, pushover_apitoken=None, pushbullet_enabled=0, pushbullet_onsnatch=0, pushbullet_apikey=None, pushbullet_deviceid=None, twitter_enabled=0, twitter_onsnatch=0, mirror=None, customhost=None, customport=None,
         customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
         enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None, plex_enabled=0, plex_server_host=None, plex_client_host=None, plex_username=None, 
-        plex_password=None, plex_update=0, plex_notify=0, songkick_enabled=0, songkick_apikey=None, songkick_location=None, songkick_filter_enabled=0, **kwargs):
+        plex_password=None, plex_update=0, plex_notify=0, songkick_enabled=0, songkick_apikey=None, songkick_location=None, songkick_filter_enabled=0, encoder_multicore=False, encoder_multicore_count=0, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -1127,6 +1130,8 @@ class WebInterface(object):
         headphones.ENCODERVBRCBR = encodervbrcbr
         headphones.ENCODERQUALITY = int(encoderquality)
         headphones.ENCODERLOSSLESS = int(encoderlossless)
+        headphones.ENCODER_MULTICORE = encoder_multicore
+        headphones.ENCODER_MULTICORE_COUNT = max(0, int(encoder_multicore_count))
         headphones.DELETE_LOSSLESS_FILES = int(delete_lossless_files)
         headphones.GROWL_ENABLED = growl_enabled
         headphones.GROWL_ONSNATCH = growl_onsnatch
@@ -1161,6 +1166,7 @@ class WebInterface(object):
         headphones.PUSHOVER_ONSNATCH = pushover_onsnatch
         headphones.PUSHOVER_KEYS = pushover_keys
         headphones.PUSHOVER_PRIORITY = pushover_priority
+        headphones.PUSHOVER_APITOKEN = pushover_apitoken
         headphones.PUSHBULLET_ENABLED = pushbullet_enabled
         headphones.PUSHBULLET_ONSNATCH = pushbullet_onsnatch
         headphones.PUSHBULLET_APIKEY = pushbullet_apikey

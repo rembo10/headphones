@@ -702,6 +702,9 @@
                                         <label>Priority (-1,0, or 1):</label>
                                         <input type="text" name="pushover_priority" value="${config['pushover_priority']}" size="2">
                                     </div>
+                                    <div class="row">
+                                        <label>API Token (leave blank to use Headphones default):</label><input type="text" name="pushover_apitoken" value="${config['pushover_apitoken']}" size="50">
+                                    </div>
                                 </div>
                             </fieldset>
 
@@ -808,6 +811,18 @@
                                     <option value="ffmpeg" ${ffmpegselect}>ffmpeg</option>
                                     <option value="xld" ${xldselect}>xld</option>
                                 </select>
+                            </div>
+                            <div class="row">
+                                <div class="row">
+                                    <input type="checkbox" name="encoder_multicore" value="1" ${config['encoder_multicore']}/><label>Enable multi-core</label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="row">
+                                    <label>Multi-core count:</label>
+                                    <input type="text" name="encoder_multicore_count" value="${config['encoder_multicore_count']}" size="7">
+                                    <small>Set equal to the number of cores, or 0 for auto</small>
+                                </div>
                             </div>
                         </fieldset>
                         <fieldset>

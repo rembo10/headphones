@@ -538,6 +538,8 @@ class PUSHOVER:
         self.enabled = headphones.PUSHOVER_ENABLED
         self.keys = headphones.PUSHOVER_KEYS
         self.priority = headphones.PUSHOVER_PRIORITY   
+        if headphones.PUSHOVER_APITOKEN:
+            self.application_token = headphones.PUSHOVER_APITOKEN
         pass
 
     def conf(self, options):

@@ -178,7 +178,7 @@ REQUIRED_WORDS = None
 
 LASTFM_USERNAME = None
 
-LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a"]
+LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a", "asf", "wma"]
 LOSSLESS_MEDIA_FORMATS = ["flac"]
 MEDIA_FORMATS = LOSSY_MEDIA_FORMATS + LOSSLESS_MEDIA_FORMATS
 
@@ -218,6 +218,8 @@ ENCODEROUTPUTFORMAT = None
 ENCODERQUALITY = None
 ENCODERVBRCBR = None
 ENCODERLOSSLESS = False
+ENCODER_MULTICORE = False
+ENCODER_MULTICORE_COUNT = 0
 DELETE_LOSSLESS_FILES = False
 GROWL_ENABLED = True
 GROWL_HOST = None
@@ -252,6 +254,7 @@ PUSHOVER_ENABLED = True
 PUSHOVER_PRIORITY = 1
 PUSHOVER_KEYS = None
 PUSHOVER_ONSNATCH = True
+PUSHOVER_APITOKEN = None
 PUSHBULLET_ENABLED = True
 PUSHBULLET_APIKEY = None
 PUSHBULLET_DEVICEID = None
@@ -341,8 +344,8 @@ def initialize():
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, OMGWTFNZBS, OMGWTFNZBS_UID, OMGWTFNZBS_APIKEY, \
                 NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, LASTFM_USERNAME, \
                 INTERFACE, FOLDER_PERMISSIONS, FILE_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
-                MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, \
-                GROWL_ENABLED, GROWL_HOST, GROWL_PASSWORD, GROWL_ONSNATCH, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
+                MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, ENCODER_MULTICORE, ENCODER_MULTICORE_COUNT, DELETE_LOSSLESS_FILES, \
+                GROWL_ENABLED, GROWL_HOST, GROWL_PASSWORD, GROWL_ONSNATCH, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, PUSHOVER_APITOKEN, MIRRORLIST, \
                 TWITTER_ENABLED, TWITTER_ONSNATCH, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 PUSHBULLET_ENABLED, PUSHBULLET_APIKEY, PUSHBULLET_DEVICEID, PUSHBULLET_ONSNATCH, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
@@ -539,6 +542,8 @@ def initialize():
         ENCODERQUALITY = check_setting_int(CFG, 'General', 'encoderquality', 2)
         ENCODERVBRCBR = check_setting_str(CFG, 'General', 'encodervbrcbr', 'cbr')
         ENCODERLOSSLESS = bool(check_setting_int(CFG, 'General', 'encoderlossless', 1))
+        ENCODER_MULTICORE = bool(check_setting_int(CFG, 'General', 'encoder_multicore', 0))
+        ENCODER_MULTICORE_COUNT = max(0, check_setting_int(CFG, 'General', 'encoder_multicore_count', 0))
         DELETE_LOSSLESS_FILES = bool(check_setting_int(CFG, 'General', 'delete_lossless_files', 1))
 
         GROWL_ENABLED = bool(check_setting_int(CFG, 'Growl', 'growl_enabled', 0))
@@ -581,6 +586,7 @@ def initialize():
         PUSHOVER_KEYS = check_setting_str(CFG, 'Pushover', 'pushover_keys', '')
         PUSHOVER_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_onsnatch', 0))
         PUSHOVER_PRIORITY = check_setting_int(CFG, 'Pushover', 'pushover_priority', 0)
+        PUSHOVER_APITOKEN = check_setting_str(CFG, 'Pushover', 'pushover_apitoken', '')
 
         PUSHBULLET_ENABLED = bool(check_setting_int(CFG, 'PushBullet', 'pushbullet_enabled', 0))
         PUSHBULLET_APIKEY = check_setting_str(CFG, 'PushBullet', 'pushbullet_apikey', '')
@@ -983,6 +989,7 @@ def config_write():
     new_config['Pushover']['pushover_keys'] = PUSHOVER_KEYS
     new_config['Pushover']['pushover_onsnatch'] = int(PUSHOVER_ONSNATCH)
     new_config['Pushover']['pushover_priority'] = int(PUSHOVER_PRIORITY)
+    new_config['Pushover']['pushover_apitoken'] = PUSHOVER_APITOKEN
 
     new_config['PushBullet'] = {}
     new_config['PushBullet']['pushbullet_enabled'] = int(PUSHBULLET_ENABLED)
@@ -1022,6 +1029,8 @@ def config_write():
     new_config['General']['encoderquality'] = ENCODERQUALITY
     new_config['General']['encodervbrcbr'] = ENCODERVBRCBR
     new_config['General']['encoderlossless'] = int(ENCODERLOSSLESS)
+    new_config['General']['encoder_multicore'] = int(ENCODER_MULTICORE)
+    new_config['General']['encoder_multicore_count'] = int(ENCODER_MULTICORE_COUNT)
     new_config['General']['delete_lossless_files'] = int(DELETE_LOSSLESS_FILES)
 
     new_config['General']['mirror'] = MIRROR

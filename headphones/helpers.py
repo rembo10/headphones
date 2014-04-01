@@ -18,7 +18,15 @@ from operator import itemgetter
 import datetime
 import re, shutil
 
+from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
+
 import headphones
+
+# Modified from https://github.com/Verrus/beets-plugin-featInTitle
+RE_FEATURING = re.compile(r"[fF]t\.|[fF]eaturing|[fF]eat\.|\b[wW]ith\b|&|vs\.")
+
+RE_CD_ALBUM = re.compile(r"\(?((CD|disc)\s*[0-9]+)\)", re.I)
+RE_CD = re.compile(r"^(CD|dics)\s*[0-9]+$", re.I)
 
 def multikeysort(items, columns):
 
@@ -209,7 +217,100 @@ def extract_data(s):
         return (name, album, year)
     else:
         return (None, None, None)
-        
+
+def extract_metadata(f):
+    """
+    Scan all files in the given directory and decide on an artist, album and
+    year based on the metadata. A decision is based on the number of different
+    artists, albums and years found in the media files.
+    """
+
+    from headphones import logger
+
+    # Walk directory and scan all media files
+    results = []
+    count = 0
+
+    for root, dirs, files in os.walk(f):
+        for file in files:
+            # Count the number of potential media files
+            extension = os.path.splitext(file)[1].lower()[1:]
+
+            if extension in headphones.MEDIA_FORMATS:
+                count += 1
+
+            # Try to read the file info
+            try:
+                media_file = MediaFile(os.path.join(root, file))
+            except FileTypeError, UnreadableFileError:
+                # Probably not a media file
+                continue
+
+            # Append metadata to file
+            artist = media_file.albumartist or media_file.artist
+            album = media_file.album
+            year = media_file.year
+
+            if artist and album and year:
+                results.append((artist.lower(), album.lower(), year))
+
+    # Verify results
+    if len(results) == 0:
+        logger.info("No metadata in media files found, ignoring")
+        return (None, None, None)
+
+    # Require that some percentage of files have tags
+    count_ratio = 0.75
+
+    if count < (count_ratio * len(results)):
+        logger.info("Counted %d media files, but only %d have tags, ignoring" % (count, len(results)))
+        return (None, None, None)
+
+    # Count distinct values
+    artists = list(set([ x[0] for x in results ]))
+    albums = list(set([ x[1] for x in results ]))
+    years = list(set([ x[2] for x in results ]))
+
+    # Remove things such as CD2 from album names
+    if len(albums) > 1:
+        new_albums = list(albums)
+
+        # Replace occurences of e.g. CD1
+        for index, album in enumerate(new_albums):
+            if RE_CD_ALBUM.search(album):
+                new_albums[index] = RE_CD_ALBUM.sub("", album).strip()
+
+        # Remove duplicates
+        new_albums = list(set(new_albums))
+
+        # Safety check: if nothing has merged, then ignore the work. This can
+        # happen if only one CD of a multi part CD is processed.
+        if len(new_albums) < len(albums):
+            albums = new_albums
+
+    # All files have the same metadata, so it's trivial
+    if len(artists) == 1 and len(albums) == 1 and len(years) == 1:
+        return (artists[0], albums[0], years[0])
+
+    # (Lots of) different artists. Could be a featuring album, so test for this.
+    if len(artists) > 1 and len(albums) == 1 and len(years) == 1:
+        split_artists = [ RE_FEATURING.split(artist) for artist in artists ]
+        featurings = [ len(split_artist) - 1 for split_artist in split_artists ]
+        logger.info("Album seem to feature %d different artists" % sum(featurings))
+
+        if sum(featurings) > 0:
+            # Find the artist of which the least splits have been generated.
+            # Ideally, this should be 0, which should be the album artist
+            # itself.
+            artist = split_artists[featurings.index(min(featurings))][0]
+
+            # Done
+            return (artist, albums[0], years[0])
+
+    # Not sure what to do here.
+    logger.info("Found %d artists, %d albums and %d years in metadata, ignoring" % (len(artists), len(albums), len(years)))
+    return (None, None, None)
+
 def extract_logline(s):
     # Default log format
     pattern = re.compile(r'(?P<timestamp>.*?)\s\-\s(?P<level>.*?)\s*\:\:\s(?P<thread>.*?)\s\:\s(?P<message>.*)', re.VERBOSE)
