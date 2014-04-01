@@ -175,6 +175,7 @@ class WebInterface(object):
             myDB.action('DELETE from albums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
             myDB.action('DELETE from allalbums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
             myDB.action('DELETE from alltracks WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', album['AlbumID'])
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     removeExtras.exposed = True
 
@@ -203,8 +204,18 @@ class WebInterface(object):
         for name in namecheck:
             artistname=name['ArtistName']
         myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
+
+        rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM albums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+        for rgid in rgids:
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
         myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
         myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+
+        rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM allalbums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+        for rgid in rgids:
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
         myDB.action('DELETE from allalbums WHERE ArtistID=?', [ArtistID])
         myDB.action('DELETE from alltracks WHERE ArtistID=?', [ArtistID])
         myDB.action('UPDATE have SET Matched=NULL WHERE ArtistName=?', [artistname])
@@ -219,8 +230,18 @@ class WebInterface(object):
         for ArtistID in emptyArtistIDs:
             logger.info(u"Deleting all traces of artist: " + ArtistID)
             myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
+
+            rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM albums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+            for rgid in rgids:
+                myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
             myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
             myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+
+            rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM allalbums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+            for rgid in rgids:
+                myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
             myDB.action('DELETE from allalbums WHERE ArtistID=?', [ArtistID])
             myDB.action('DELETE from alltracks WHERE ArtistID=?', [ArtistID])
             myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
@@ -299,6 +320,7 @@ class WebInterface(object):
         myDB.action('DELETE from tracks WHERE AlbumID=?', [AlbumID])
         myDB.action('DELETE from allalbums WHERE AlbumID=?', [AlbumID])
         myDB.action('DELETE from alltracks WHERE AlbumID=?', [AlbumID])
+        myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [AlbumID])
         if ArtistID:
             raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
         else:
@@ -552,8 +574,18 @@ class WebInterface(object):
         for ArtistID in args:
             if action == 'delete':
                 myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
+
+                rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM albums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+                for rgid in rgids:
+                    myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
                 myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
                 myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+
+                rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM allalbums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+                for rgid in rgids:
+                    myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
                 myDB.action('DELETE from allalbums WHERE AlbumID=?', [AlbumID])
                 myDB.action('DELETE from alltracks WHERE AlbumID=?', [AlbumID])
                 myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
