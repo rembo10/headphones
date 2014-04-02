@@ -757,15 +757,15 @@ def correctMetadata(albumid, release, downloaded_track_list):
         except Exception, e:
             logger.error('Error getting recommendation: %s. Not writing metadata' % e)
             return
-        if rec == 'RECOMMEND_NONE':
+        if rec == 'recommendation.none':
             logger.warn('No accurate album match found for %s, %s -  not writing metadata' % (release['ArtistName'], release['AlbumTitle']))
             return
         
-        if candidates:
-            dist, info, mapping, extra_items, extra_tracks = candidates[0]
-        else:
-            logger.warn('No accurate album match found for %s, %s -  not writing metadata' % (release['ArtistName'], release['AlbumTitle']))
-            return
+        #if candidates:
+        dist, info, mapping, extra_items, extra_tracks = candidates[0]
+        #else:
+        #    logger.warn('No accurate album match found for %s, %s -  not writing metadata' % (release['ArtistName'], release['AlbumTitle']))
+        #    return
         
         logger.info('Beets recommendation for tagging items: %s' % rec)
         
