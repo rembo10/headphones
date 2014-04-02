@@ -204,13 +204,13 @@ def update():
         f.close()
 
         # Extract the tar to update folder
-        logger.info('Extracing file' + tar_download_path)
+        logger.info('Extracting file: ' + tar_download_path)
         tar = tarfile.open(tar_download_path)
         tar.extractall(update_dir)
         tar.close()
 
         # Delete the tar.gz
-        logger.info('Deleting file' + tar_download_path)
+        logger.info('Deleting file: ' + tar_download_path)
         os.remove(tar_download_path)
 
         # Find update dir name
