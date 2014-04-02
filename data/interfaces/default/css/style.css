@@ -1321,6 +1321,15 @@ div#artistheader h2 a {
 .clearfix:after {
   clear: both;
 }
+.override-float {
+  float: none !important;
+  margin-bottom: 0px !important;
+  clear: none !important;
+  display: inline !important;
+  font-size: 10px;
+  line-height: 10px;
+  height: 10px;
+}
 #album_table th#albumname,
 #upcoming_table th#artistname,
 #wanted_table th#artistname {
