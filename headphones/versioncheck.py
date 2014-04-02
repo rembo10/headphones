@@ -65,7 +65,7 @@ def getVersion():
         headphones.INSTALL_TYPE = 'win'
 
         # Don't have a way to update exe yet, but don't want to set VERSION to None
-        return 'Windows Install'
+        return 'Windows Install', 'master'
 
     elif os.path.isdir(os.path.join(headphones.PROG_DIR, '.git')):
 
@@ -112,7 +112,7 @@ def getVersion():
         fp.close()
 
         if current_version:
-            return current_version
+            return current_version, headphones.GIT_BRANCH
         else:
             return None
 
