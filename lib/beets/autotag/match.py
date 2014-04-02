@@ -20,7 +20,7 @@ from __future__ import division
 import datetime
 import logging
 import re
-from lib.munkres import Munkres
+from munkres import Munkres
 
 from beets import plugins
 from beets import config
