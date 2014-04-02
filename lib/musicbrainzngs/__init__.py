@@ -1,1 +1,1 @@
-from lib.musicbrainzngs.musicbrainz import *
+from musicbrainzngs.musicbrainz import *
