@@ -74,13 +74,13 @@ def getVersion():
 
         if not output:
             logger.error('Couldn\'t find latest installed version.')
-            return None
+            cur_commit_hash = None
 
         cur_commit_hash = output.strip()
 
         if not re.match('^[a-z0-9]+$', cur_commit_hash):
             logger.error('Output doesn\'t look like a hash, not using it')
-            return None
+            cur_commit_hash = None
 
         if headphones.DO_NOT_OVERRIDE_GIT_BRANCH and headphones.GIT_BRANCH:
             branch_name = headphones.GIT_BRANCH
@@ -105,7 +105,7 @@ def getVersion():
         version_file = os.path.join(headphones.PROG_DIR, 'version.txt')
 
         if not os.path.isfile(version_file):
-            return None
+            return None, 'master'
 
         fp = open(version_file, 'r')
         current_version = fp.read().strip(' \n\r')
@@ -114,7 +114,7 @@ def getVersion():
         if current_version:
             return current_version, headphones.GIT_BRANCH
         else:
-            return None
+            return None, 'master'
 
 def checkGithub():
 
