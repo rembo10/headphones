@@ -17,6 +17,7 @@ from __future__ import with_statement
 
 import time
 import threading
+import uuid
 
 import headphones
 from headphones import logger, db, helpers
@@ -51,8 +52,9 @@ def startmb():
         sleepytime = 0
     else:
         return False
-    
-    musicbrainzngs.set_useragent("headphones","0.0","https://github.com/rembo10/headphones")
+
+    INSTANCE_ID = str(uuid.uuid1())
+    musicbrainzngs.set_useragent("headphones",INSTANCE_ID)
     musicbrainzngs.set_hostname(mbhost + ":" + str(mbport))
     if sleepytime == 0:
         musicbrainzngs.set_rate_limit(False)
