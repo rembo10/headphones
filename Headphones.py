@@ -14,7 +14,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, sys, locale
+import os, sys
+
+# Ensure lib added to path, before any other imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib/'))
+
+import locale
 import time
 import signal
 
@@ -34,7 +39,6 @@ signal.signal(signal.SIGTERM, headphones.sig_handler)
 
 
 def main():
-
     # Fixed paths to Headphones
     if hasattr(sys, 'frozen'):
         headphones.FULL_PATH = os.path.abspath(sys.executable)

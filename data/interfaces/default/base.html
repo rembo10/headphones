@@ -89,6 +89,9 @@
 				%if version.HEADPHONES_VERSION != 'master':
 				(${version.HEADPHONES_VERSION})
 				%endif
+				%if headphones.GIT_BRANCH != 'master':
+				(${headphones.GIT_BRANCH})
+				%endif
 			</div>
 		</footer>
 		<a href="#main" id="toTop"><i class="fa fa-angle-double-up"></i> <span>Back to top</span></a>

@@ -175,6 +175,7 @@ class WebInterface(object):
             myDB.action('DELETE from albums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
             myDB.action('DELETE from allalbums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
             myDB.action('DELETE from alltracks WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', album['AlbumID'])
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     removeExtras.exposed = True
 
@@ -203,8 +204,18 @@ class WebInterface(object):
         for name in namecheck:
             artistname=name['ArtistName']
         myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
+
+        rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM albums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+        for rgid in rgids:
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
         myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
         myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+
+        rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM allalbums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+        for rgid in rgids:
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
         myDB.action('DELETE from allalbums WHERE ArtistID=?', [ArtistID])
         myDB.action('DELETE from alltracks WHERE ArtistID=?', [ArtistID])
         myDB.action('UPDATE have SET Matched=NULL WHERE ArtistName=?', [artistname])
@@ -219,8 +230,18 @@ class WebInterface(object):
         for ArtistID in emptyArtistIDs:
             logger.info(u"Deleting all traces of artist: " + ArtistID)
             myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
+
+            rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM albums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+            for rgid in rgids:
+                myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
             myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
             myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+
+            rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM allalbums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+            for rgid in rgids:
+                myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
             myDB.action('DELETE from allalbums WHERE ArtistID=?', [ArtistID])
             myDB.action('DELETE from alltracks WHERE ArtistID=?', [ArtistID])
             myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
@@ -299,6 +320,7 @@ class WebInterface(object):
         myDB.action('DELETE from tracks WHERE AlbumID=?', [AlbumID])
         myDB.action('DELETE from allalbums WHERE AlbumID=?', [AlbumID])
         myDB.action('DELETE from alltracks WHERE AlbumID=?', [AlbumID])
+        myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [AlbumID])
         if ArtistID:
             raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
         else:
@@ -552,8 +574,18 @@ class WebInterface(object):
         for ArtistID in args:
             if action == 'delete':
                 myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
+
+                rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM albums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+                for rgid in rgids:
+                    myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
                 myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
                 myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+
+                rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM allalbums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+                for rgid in rgids:
+                    myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
                 myDB.action('DELETE from allalbums WHERE AlbumID=?', [AlbumID])
                 myDB.action('DELETE from alltracks WHERE AlbumID=?', [AlbumID])
                 myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
@@ -930,7 +962,13 @@ class WebInterface(object):
                     "encodervbrcbr": headphones.ENCODERVBRCBR,
                     "encoderquality": headphones.ENCODERQUALITY,
                     "encoderlossless": checked(headphones.ENCODERLOSSLESS),
+                    "encoder_multicore": checked(headphones.ENCODER_MULTICORE),
+                    "encoder_multicore_count": int(headphones.ENCODER_MULTICORE_COUNT),
                     "delete_lossless_files": checked(headphones.DELETE_LOSSLESS_FILES),
+                    "growl_enabled": checked(headphones.GROWL_ENABLED),
+                    "growl_onsnatch": checked(headphones.GROWL_ONSNATCH),
+                    "growl_host": headphones.GROWL_HOST,
+                    "growl_password": headphones.GROWL_PASSWORD,
                     "prowl_enabled": checked(headphones.PROWL_ENABLED),
                     "prowl_onsnatch": checked(headphones.PROWL_ONSNATCH),
                     "prowl_keys": headphones.PROWL_KEYS,
@@ -959,6 +997,7 @@ class WebInterface(object):
                     "pushover_enabled": checked(headphones.PUSHOVER_ENABLED),
                     "pushover_onsnatch": checked(headphones.PUSHOVER_ONSNATCH),
                     "pushover_keys": headphones.PUSHOVER_KEYS,
+                    "pushover_apitoken": headphones.PUSHOVER_APITOKEN,
                     "pushover_priority": headphones.PUSHOVER_PRIORITY,
                     "pushbullet_enabled": checked(headphones.PUSHBULLET_ENABLED),
                     "pushbullet_onsnatch": checked(headphones.PUSHBULLET_ONSNATCH),
@@ -1010,12 +1049,12 @@ class WebInterface(object):
         destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, file_underscores=0, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0,
         remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
         bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
-        delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
+        delete_lossless_files=0, growl_enabled=0, growl_onsnatch=0, growl_host=None, growl_password=None, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, pushalot_enabled=False, pushalot_apikey=None, pushalot_onsnatch=0, synoindex_enabled=False,
-        pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, pushbullet_enabled=0, pushbullet_onsnatch=0, pushbullet_apikey=None, pushbullet_deviceid=None, twitter_enabled=0, twitter_onsnatch=0, mirror=None, customhost=None, customport=None,
+        pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, pushover_apitoken=None, pushbullet_enabled=0, pushbullet_onsnatch=0, pushbullet_apikey=None, pushbullet_deviceid=None, twitter_enabled=0, twitter_onsnatch=0, mirror=None, customhost=None, customport=None,
         customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
         enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None, plex_enabled=0, plex_server_host=None, plex_client_host=None, plex_username=None, 
-        plex_password=None, plex_update=0, plex_notify=0, songkick_enabled=0, songkick_apikey=None, songkick_location=None, songkick_filter_enabled=0, **kwargs):
+        plex_password=None, plex_update=0, plex_notify=0, songkick_enabled=0, songkick_apikey=None, songkick_location=None, songkick_filter_enabled=0, encoder_multicore=False, encoder_multicore_count=0, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -1123,7 +1162,13 @@ class WebInterface(object):
         headphones.ENCODERVBRCBR = encodervbrcbr
         headphones.ENCODERQUALITY = int(encoderquality)
         headphones.ENCODERLOSSLESS = int(encoderlossless)
+        headphones.ENCODER_MULTICORE = encoder_multicore
+        headphones.ENCODER_MULTICORE_COUNT = max(0, int(encoder_multicore_count))
         headphones.DELETE_LOSSLESS_FILES = int(delete_lossless_files)
+        headphones.GROWL_ENABLED = growl_enabled
+        headphones.GROWL_ONSNATCH = growl_onsnatch
+        headphones.GROWL_HOST = growl_host
+        headphones.GROWL_PASSWORD = growl_password
         headphones.PROWL_ENABLED = prowl_enabled
         headphones.PROWL_ONSNATCH = prowl_onsnatch
         headphones.PROWL_KEYS = prowl_keys
@@ -1153,6 +1198,7 @@ class WebInterface(object):
         headphones.PUSHOVER_ONSNATCH = pushover_onsnatch
         headphones.PUSHOVER_KEYS = pushover_keys
         headphones.PUSHOVER_PRIORITY = pushover_priority
+        headphones.PUSHOVER_APITOKEN = pushover_apitoken
         headphones.PUSHBULLET_ENABLED = pushbullet_enabled
         headphones.PUSHBULLET_ONSNATCH = pushbullet_onsnatch
         headphones.PUSHBULLET_APIKEY = pushbullet_apikey

@@ -22,9 +22,9 @@ import music_encoder
 import urllib, shutil, re
 import uuid
 from headphones import notifiers
-import lib.beets as beets
-from lib.beets import autotag
-from lib.beets.mediafile import MediaFile
+import beets
+from beets import autotag
+from beets.mediafile import MediaFile
 
 import headphones
 from headphones import db, albumart, librarysync, lyrics, logger, helpers
@@ -356,9 +356,9 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
        
         if not downloaded_track_list:
             return
-    
+
+    artwork = None
     album_art_path = albumart.getAlbumArt(albumid)
-    
     if headphones.EMBED_ALBUM_ART or headphones.ADD_ALBUM_ART:
         if album_art_path:
             artwork = urllib.urlopen(album_art_path).read()
@@ -400,13 +400,19 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Downloaded" WHERE AlbumID=?', [albumid])
     myDB.action('UPDATE snatched SET status = "Processed" WHERE AlbumID=?', [albumid])
-        
+
     # Update the have tracks for all created dirs:
     for albumpath in albumpaths:
         librarysync.libraryScan(dir=albumpath, append=True, ArtistID=release['ArtistID'], ArtistName=release['ArtistName'])
     
     logger.info(u'Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
     
+    if headphones.GROWL_ENABLED:
+        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
+        logger.info(u"Growl request")
+        growl = notifiers.GROWL()
+        growl.notify(pushmessage,"Download and Postprocessing completed")
+
     if headphones.PROWL_ENABLED:
         pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
         logger.info(u"Prowl request")
@@ -446,7 +452,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
         logger.info(u"Pushover request")
         pushover = notifiers.PUSHOVER()
-        pushover.notify(pushmessage,"Download and Postprocessing completed")
+        pushover.notify(pushmessage,"Headphones")
 
     if headphones.PUSHBULLET_ENABLED:
         pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
@@ -500,11 +506,11 @@ def addAlbumArt(artwork, albumpath, release):
     if album_art_name.startswith('.'):
         album_art_name = album_art_name.replace(0, '_')
 
-    prev = os.umask(headphones.UMASK)
+    #prev = os.umask(headphones.UMASK)
     file = open(os.path.join(albumpath, album_art_name), 'wb')
     file.write(artwork)
     file.close()
-    os.umask(prev)
+    #os.umask(prev)
     
 def cleanupFiles(albumpath):
     logger.info('Cleaning up files')
@@ -798,7 +804,11 @@ def embedLyrics(downloaded_track_list):
         if lyrics:
             logger.debug('Adding lyrics to: %s' % downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
             f.lyrics = metalyrics
-            f.save()
+            try:
+                f.save()
+            except:
+                logger.error('Cannot save lyrics to: %s. Skipping' % downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+                continue
 
 def renameFiles(albumpath, downloaded_track_list, release):
     logger.info('Renaming files')
@@ -918,12 +928,14 @@ def renameUnprocessedFolder(albumpath):
             os.rename(albumpath, new_folder_name)
             return
             
-def forcePostProcess():
+def forcePostProcess(dir=None):
 
     download_dirs = []
-    if headphones.DOWNLOAD_DIR:
+    if dir:
+        download_dirs.append(dir.encode(headphones.SYS_ENCODING, 'replace'))
+    if headphones.DOWNLOAD_DIR and not dir:
         download_dirs.append(headphones.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING, 'replace'))
-    if headphones.DOWNLOAD_TORRENT_DIR:
+    if headphones.DOWNLOAD_TORRENT_DIR and not dir:
         download_dirs.append(headphones.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
 
     # If DOWNLOAD_DIR and DOWNLOAD_TORRENT_DIR are the same, remove the duplicate to prevent us from trying to process the same folder twice.
@@ -950,15 +962,17 @@ def forcePostProcess():
     myDB = db.DBConnection()
     
     for folder in folders:
-
         folder_basename = os.path.basename(folder).decode(headphones.SYS_ENCODING, 'replace')
-
         logger.info('Processing: %s' % folder_basename)
-        
-        # First try to see if there's a match in the snatched table, then we'll try to parse the foldername
-        # TODO: Iterate through underscores -> spaces, spaces -> dots, underscores -> dots (this might be hit or miss since it assumes
-        # all spaces/underscores came from sab replacing values
+
+        # Attempt 1: First try to see if there's a match in the snatched table,
+        # then we'll try to parse the foldername.
+        # TODO: Iterate through underscores -> spaces, spaces -> dots,
+        # underscores -> dots (this might be hit or miss since it assumes all
+        # spaces/underscores came from sab replacing values
+        logger.debug('Attempting to find album in the snatched table')
         snatched = myDB.action('SELECT AlbumID, Title, Kind, Status from snatched WHERE FolderName LIKE ?', [folder_basename]).fetchone()
+
         if snatched:
             if headphones.KEEP_TORRENT_FILES and snatched['Kind'] == 'torrent' and snatched['Status'] == 'Processed':
                 logger.info(folder_basename + ' is a torrent folder being preserved for seeding and has already been processed. Skipping.')
@@ -967,16 +981,23 @@ def forcePostProcess():
                 logger.info('Found a match in the database: %s. Verifying to make sure it is the correct album' % snatched['Title'])
                 verify(snatched['AlbumID'], folder, snatched['Kind'])
                 continue
-        
-        # Try to parse the folder name into a valid format
-        # TODO: Add metadata lookup
+
+        # Attempt 2a: parse the folder name into a valid format
         try:
+            logger.debug('Attempting to extract name, album and year from folder name')
             name, album, year = helpers.extract_data(folder_basename)
-        except:
-            name = None
+        except Exception as e:
+            name = album = year = None
+
+        # Attempt 2b: deduce meta data into a valid format
+        if name is None:
+            try:
+                logger.debug('Attempting to extract name, album and year from metadata')
+                name, album, year = helpers.extract_metadata(folder)
+            except Exception as e:
+                name = album = year = None
 
         if name and album and year:
-            
             release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
             if release:
                 logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
@@ -988,30 +1009,30 @@ def forcePostProcess():
                     rgid = mb.findAlbumID(helpers.latinToAscii(name), helpers.latinToAscii(album))
                 except:
                     logger.error('Can not get release information for this album')
-                    continue
+                    rgid = None
+
                 if rgid:
                     verify(rgid, folder)
+                    continue
                 else:
                     logger.info('No match found on MusicBrainz for: %s - %s' % (name, album))
-                    continue
-                    
-        else:
-            try:
-                possible_rgid = folder_basename[-36:]
-                # re pattern match: [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12} 
-                rgid = uuid.UUID(possible_rgid)
-                    
-            except:
-                logger.info("Couldn't parse " + folder_basename + " into any valid format. If adding albums from another source, they must be in an 'Artist - Album [Year]' format, or end with the musicbrainz release group id")
-                continue
-            
-            
-            if rgid:
-                rgid = possible_rgid
-                release = myDB.action('SELECT ArtistName, AlbumTitle, AlbumID from albums WHERE AlbumID=?', [rgid]).fetchone()
-                if release:
-                    logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
-                    verify(release['AlbumID'], folder, forced=True)
-                else:
-                    logger.info('Found a (possibly) valid Musicbrainz identifier in album folder name - continuing post-processing')
-                    verify(rgid, folder, forced=True)
+
+        # Attempt 3: strip release group id from filename
+        try:
+            logger.debug('Attempting to extract release group from folder name')
+            possible_rgid = folder_basename[-36:]
+            # re pattern match: [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
+            rgid = uuid.UUID(possible_rgid)
+        except:
+            logger.info("Couldn't parse " + folder_basename + " into any valid format. If adding albums from another source, they must be in an 'Artist - Album [Year]' format, or end with the musicbrainz release group id")
+            rgid = possible_rgid = None
+
+        if rgid:
+            rgid = possible_rgid
+            release = myDB.action('SELECT ArtistName, AlbumTitle, AlbumID from albums WHERE AlbumID=?', [rgid]).fetchone()
+            if release:
+                logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
+                verify(release['AlbumID'], folder, forced=True)
+            else:
+                logger.info('Found a (possibly) valid Musicbrainz identifier in album folder name - continuing post-processing')
+                verify(rgid, folder, forced=True)

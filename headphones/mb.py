@@ -373,7 +373,7 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
                     logger.info("Removing all references to release %s to reflect MusicBrainz" % items['ReleaseID'])
                     force_repackage1 = 1
     else:
-        logger.info("Error pulling data from MusicBrainz:  Maintaining dB")
+        logger.info("There was either an error pulling data from MusicBrainz or there might not be any releases for this category")
 
     num_new_releases = 0
 

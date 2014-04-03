@@ -17,7 +17,7 @@ from lib.pyItunes import *
 import time
 import threading
 import os
-from lib.beets.mediafile import MediaFile
+from beets.mediafile import MediaFile
 
 import headphones
 from headphones import logger, helpers, db, mb, albumart, lastfm
@@ -207,10 +207,11 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                 myDB.action("DELETE FROM allalbums WHERE AlbumID=?", [items['AlbumID']])
                 myDB.action("DELETE FROM tracks WHERE AlbumID=?", [items['AlbumID']])
                 myDB.action("DELETE FROM alltracks WHERE AlbumID=?", [items['AlbumID']])
+                myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [items['AlbumID']])
                 logger.info("[%s] Removing all references to release group %s to reflect MusicBrainz" % (artist['artist_name'], items['AlbumID']))
                 force_repackage = 1
     else:
-        logger.info("[%s] Error pulling data from MusicBrainz:  Maintaining dB" % artist['artist_name'])
+        logger.info("[%s] There was either an error pulling data from MusicBrainz or there might not be any releases for this category" % artist['artist_name'])
     
     # Then search for releases within releasegroups, if releases don't exist, then remove from allalbums/alltracks
 
@@ -276,6 +277,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             myDB.action("DELETE from allalbums WHERE ReleaseID=?", [rg['id']])
             myDB.action("DELETE from tracks WHERE ReleaseID=?", [rg['id']])
             myDB.action("DELETE from alltracks WHERE ReleaseID=?", [rg['id']])
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rg['id']])
             # This will be used later to build a hybrid release     
             fullreleaselist = []
             #Search for releases within a release group

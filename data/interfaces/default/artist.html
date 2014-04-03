@@ -193,7 +193,7 @@
 
 		template = '<li><a target="_blank" href="URI"><span class="sk-name">NAME</span><span class="sk-location">LOC</span></a></li>';
 
-		$.getJSON("http://api.songkick.com/api/3.0/artists/mbid:${artist['ArtistID']}/calendar.json?apikey=${headphones.SONGKICK_APIKEY}&jsoncallback=?",
+		$.getJSON("https://api.songkick.com/api/3.0/artists/mbid:${artist['ArtistID']}/calendar.json?apikey=${headphones.SONGKICK_APIKEY}&jsoncallback=?",
 			function(data){
 				if (data['resultsPage'].totalEntries >= 1) {          
           
@@ -265,6 +265,7 @@
 			"aoColumnDefs": [
 			          { 'bSortable': false, 'aTargets': [ 0,1 ] }
 			],
+			"bStateSave": true,
 			"oLanguage": {
 				"sLengthMenu":"Show _MENU_ albums per page",
 				"sEmptyTable": "No album information available",

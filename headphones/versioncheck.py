@@ -65,7 +65,7 @@ def getVersion():
         headphones.INSTALL_TYPE = 'win'
 
         # Don't have a way to update exe yet, but don't want to set VERSION to None
-        return 'Windows Install'
+        return 'Windows Install', 'master'
 
     elif os.path.isdir(os.path.join(headphones.PROG_DIR, '.git')):
 
@@ -74,15 +74,29 @@ def getVersion():
 
         if not output:
             logger.error('Couldn\'t find latest installed version.')
-            return None
+            cur_commit_hash = None
 
         cur_commit_hash = output.strip()
 
         if not re.match('^[a-z0-9]+$', cur_commit_hash):
             logger.error('Output doesn\'t look like a hash, not using it')
-            return None
+            cur_commit_hash = None
 
-        return cur_commit_hash
+        if headphones.DO_NOT_OVERRIDE_GIT_BRANCH and headphones.GIT_BRANCH:
+            branch_name = headphones.GIT_BRANCH
+
+        else:
+            branch_name, err = runGit('rev-parse --abbrev-ref HEAD')
+            branch_name = branch_name.strip()
+
+            if not branch_name and headphones.GIT_BRANCH:
+                logger.error('Could not retrieve branch name from git. Falling back to %s' % headphones.GIT_BRANCH)
+                branch_name = headphones.GIT_BRANCH
+            if not branch_name:
+                logger.error('Could not retrieve branch name from git. Defaulting to master')
+                branch_name = 'master'
+
+        return cur_commit_hash, branch_name
 
     else:
 
@@ -91,16 +105,16 @@ def getVersion():
         version_file = os.path.join(headphones.PROG_DIR, 'version.txt')
 
         if not os.path.isfile(version_file):
-            return None
+            return None, 'master'
 
         fp = open(version_file, 'r')
         current_version = fp.read().strip(' \n\r')
         fp.close()
 
         if current_version:
-            return current_version
+            return current_version, headphones.GIT_BRANCH
         else:
-            return None
+            return None, 'master'
 
 def checkGithub():
 
@@ -153,7 +167,7 @@ def update():
 
     elif headphones.INSTALL_TYPE == 'git':
 
-        output, err = runGit('pull origin ' + version.HEADPHONES_VERSION)
+        output, err = runGit('pull origin ' + headphones.GIT_BRANCH)
 
         if not output:
             logger.error('Couldn\'t download latest version')
@@ -190,13 +204,13 @@ def update():
         f.close()
 
         # Extract the tar to update folder
-        logger.info('Extracing file' + tar_download_path)
+        logger.info('Extracting file: ' + tar_download_path)
         tar = tarfile.open(tar_download_path)
         tar.extractall(update_dir)
         tar.close()
 
         # Delete the tar.gz
-        logger.info('Deleting file' + tar_download_path)
+        logger.info('Deleting file: ' + tar_download_path)
         os.remove(tar_download_path)
 
         # Find update dir name
