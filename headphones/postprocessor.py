@@ -356,9 +356,9 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
        
         if not downloaded_track_list:
             return
-    
+
+    artwork = None
     album_art_path = albumart.getAlbumArt(albumid)
-    
     if headphones.EMBED_ALBUM_ART or headphones.ADD_ALBUM_ART:
         if album_art_path:
             artwork = urllib.urlopen(album_art_path).read()
@@ -928,12 +928,14 @@ def renameUnprocessedFolder(albumpath):
             os.rename(albumpath, new_folder_name)
             return
             
-def forcePostProcess():
+def forcePostProcess(dir=None):
 
     download_dirs = []
-    if headphones.DOWNLOAD_DIR:
+    if dir:
+        download_dirs.append(dir.encode(headphones.SYS_ENCODING, 'replace'))
+    if headphones.DOWNLOAD_DIR and not dir:
         download_dirs.append(headphones.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING, 'replace'))
-    if headphones.DOWNLOAD_TORRENT_DIR:
+    if headphones.DOWNLOAD_TORRENT_DIR and not dir:
         download_dirs.append(headphones.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
 
     # If DOWNLOAD_DIR and DOWNLOAD_TORRENT_DIR are the same, remove the duplicate to prevent us from trying to process the same folder twice.
@@ -985,7 +987,7 @@ def forcePostProcess():
             logger.debug('Attempting to extract name, album and year from folder name')
             name, album, year = helpers.extract_data(folder_basename)
         except Exception as e:
-            name = None
+            name = album = year = None
 
         # Attempt 2b: deduce meta data into a valid format
         if name is None:
@@ -993,7 +995,7 @@ def forcePostProcess():
                 logger.debug('Attempting to extract name, album and year from metadata')
                 name, album, year = helpers.extract_metadata(folder)
             except Exception as e:
-                name = None
+                name = album = year = None
 
         if name and album and year:
             release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
@@ -1007,6 +1009,8 @@ def forcePostProcess():
                     rgid = mb.findAlbumID(helpers.latinToAscii(name), helpers.latinToAscii(album))
                 except:
                     logger.error('Can not get release information for this album')
+                    rgid = None
+
                 if rgid:
                     verify(rgid, folder)
                     continue
@@ -1021,7 +1025,7 @@ def forcePostProcess():
             rgid = uuid.UUID(possible_rgid)
         except:
             logger.info("Couldn't parse " + folder_basename + " into any valid format. If adding albums from another source, they must be in an 'Artist - Album [Year]' format, or end with the musicbrainz release group id")
-            rgid = None
+            rgid = possible_rgid = None
 
         if rgid:
             rgid = possible_rgid
