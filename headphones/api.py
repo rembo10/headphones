@@ -306,7 +306,10 @@ class Api(object):
         searcher.searchforalbum()
     
     def _forceProcess(self, **kwargs):
-        postprocessor.forcePostProcess()    
+        self.dir = None
+        if 'dir' in kwargs:
+            self.dir = kwargs['dir']
+        postprocessor.forcePostProcess(self.dir)
         
     def _getVersion(self, **kwargs):
         self.data = { 
