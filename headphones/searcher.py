@@ -163,15 +163,28 @@ def do_sorted_search(album, new, losslessOnly):
 
     else:
 
+        nzb_results = None
+        torrent_results = None
+
         if NZB_PROVIDERS and NZB_DOWNLOADERS:
             nzb_results = searchNZB(album, new, losslessOnly)
 
         if TORRENT_PROVIDERS:
             torrent_results = searchTorrent(album, new, losslessOnly)
 
+        if not nzb_results:
+            nzb_results = []
+
+        if not torrent_results:
+            torrent_results = []
+
         results = nzb_results + torrent_results
  
     sorted_search_results = sort_search_results(results, album, new)
+    
+    if not sorted_search_results:
+        return
+
     logger.info(u"Making sure we can download the best result")
     (data, bestqual) = preprocess(sorted_search_results)
 
@@ -272,11 +285,11 @@ def sort_search_results(resultlist, album, new):
                 else:
                     break
             else:
-                logger.info('No more results found for %s' % term)
+                logger.info('No more results found for:  %s - %s' % (album['ArtistName'], album['AlbumTitle']))
                 return None
 
     if not len(finallist):
-        logger.info('No appropriate matches found for %s' % term)
+        logger.info('No appropriate matches found for %s - %s' % (album['ArtistName'], album['AlbumTitle']))
         return None
 
     return finallist
