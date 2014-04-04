@@ -608,18 +608,28 @@ def moveFiles(albumpath, release, tracks):
     if make_lossless_folder:
         # Only rename the folder if they use the album name, otherwise merge into existing folder
         if os.path.exists(lossless_destination_path) and 'album' in last_folder.lower():
-            
-            temp_folder = folder
-            
-            i = 1
-            while True:
-                newfolder = temp_folder + '[%i]' % i
-                lossless_destination_path = os.path.normpath(os.path.join(headphones.LOSSLESS_DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING, 'replace')
-                if os.path.exists(lossless_destination_path):
-                    i += 1
-                else:
-                    temp_folder = newfolder
-                    break
+
+            create_duplicate_folder = False
+
+            if headphones.REPLACE_EXISTING_FOLDERS:
+                try:
+                    shutil.rmtree(lossless_destination_path)
+                except Exception, e:
+                    logger.error("Error deleting existing folder: %s. Creating duplicate folder. Error: %s" % (lossless_destination_path.decode(headphones.SYS_ENCODING, 'replace'), str(e)))
+                    create_duplicate_folder = True
+
+            if not headphones.REPLACE_EXISTING_FOLDERS or create_duplicate_folder:
+                temp_folder = folder
+                
+                i = 1
+                while True:
+                    newfolder = temp_folder + '[%i]' % i
+                    lossless_destination_path = os.path.normpath(os.path.join(headphones.LOSSLESS_DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING, 'replace')
+                    if os.path.exists(lossless_destination_path):
+                        i += 1
+                    else:
+                        temp_folder = newfolder
+                        break
                     
         if not os.path.exists(lossless_destination_path):
             try:
@@ -631,18 +641,28 @@ def moveFiles(albumpath, release, tracks):
                 
     if make_lossy_folder:
         if os.path.exists(lossy_destination_path) and 'album' in last_folder.lower():
+
+            create_duplicate_folder = False
+
+            if headphones.REPLACE_EXISTING_FOLDERS:
+                try:
+                    shutil.rmtree(lossy_destination_path)
+                except Exception, e:
+                    logger.error("Error deleting existing folder: %s. Creating duplicate folder. Error: %s" % (lossy_destination_path.decode(headphones.SYS_ENCODING, 'replace'), str(e)))
+                    create_duplicate_folder = True
             
-            temp_folder = folder
+            if not headphones.REPLACE_EXISTING_FOLDERS or create_duplicate_folder:
+                temp_folder = folder
             
-            i = 1
-            while True:
-                newfolder = temp_folder + '[%i]' % i
-                lossy_destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING, 'replace')
-                if os.path.exists(lossy_destination_path):
-                    i += 1
-                else:
-                    temp_folder = newfolder
-                    break
+                i = 1
+                while True:
+                    newfolder = temp_folder + '[%i]' % i
+                    lossy_destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING, 'replace')
+                    if os.path.exists(lossy_destination_path):
+                        i += 1
+                    else:
+                        temp_folder = newfolder
+                        break
                     
         if not os.path.exists(lossy_destination_path):
             try:
