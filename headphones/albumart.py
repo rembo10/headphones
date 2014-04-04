@@ -44,7 +44,7 @@ def getCachedArt(albumid):
             artwork = urllib2.urlopen(artwork_path, timeout=20).read()
             return artwork
         except:
-            logger.warn("Unable to open url: " + artwork_path)
+            logger.warn("Unable to open url: %s", artwork_path)
             return None
     else:
         artwork = open(artwork_path, "r").read()
