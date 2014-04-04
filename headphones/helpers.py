@@ -25,7 +25,7 @@ import headphones
 # Modified from https://github.com/Verrus/beets-plugin-featInTitle
 RE_FEATURING = re.compile(r"[fF]t\.|[fF]eaturing|[fF]eat\.|\b[wW]ith\b|&|vs\.")
 
-RE_CD_ALBUM = re.compile(r"\(?((CD|disc)\s*[0-9]+)\)", re.I)
+RE_CD_ALBUM = re.compile(r"\(?((CD|disc)\s*[0-9]+)\)?", re.I)
 RE_CD = re.compile(r"^(CD|dics)\s*[0-9]+$", re.I)
 
 def multikeysort(items, columns):
@@ -375,7 +375,10 @@ def extract_metadata(f):
         # Replace occurences of e.g. CD1
         for index, album in enumerate(new_albums):
             if RE_CD_ALBUM.search(album):
+                old_album = new_albums[index]
                 new_albums[index] = RE_CD_ALBUM.sub("", album).strip()
+
+                logger.debug("Stripped albumd number identifier: %s -> %s" % (old_album, new_albums[index]))
 
         # Remove duplicates
         new_albums = list(set(new_albums))
@@ -405,7 +408,9 @@ def extract_metadata(f):
             return (artist, albums[0], years[0])
 
     # Not sure what to do here.
-    logger.info("Found %d artists, %d albums and %d years in metadata, ignoring" % (len(artists), len(albums), len(years)))
+    logger.info("Found %d artists, %d albums and %d years in metadata, so ignoring" % (len(artists), len(albums), len(years)))
+    logger.debug("Artists: %s, Albums: %s, Years: %s" % (artists, albums, years))
+
     return (None, None, None)
 
 def extract_logline(s):
