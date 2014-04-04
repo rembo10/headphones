@@ -130,7 +130,7 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False):
             do_sorted_search(album, new, losslessOnly)
             
     else:
-        logger.info("Got to zero")
+
         album = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
         logger.info('Searching for %s' % album['AlbumTitle'])
         do_sorted_search(album, new, losslessOnly)
@@ -672,27 +672,27 @@ def send_to_downloader(data, bestqual, album):
 
             nzb = classes.NZBDataSearchResult()
             nzb.extraInfo.append(data)
-            nzb.name = nzb_folder_name
+            nzb.name = folder_name
             nzbget.sendNZB(nzb)
 
         elif headphones.NZB_DOWNLOADER == 0:
 
             nzb = classes.NZBDataSearchResult()
             nzb.extraInfo.append(data)
-            nzb.name = nzb_folder_name
+            nzb.name = folder_name
             sab.sendNZB(nzb)
 
             # If we sent the file to sab, we can check how it was renamed and insert that into the snatched table
             (replace_spaces, replace_dots) = sab.checkConfig()
 
             if replace_dots:
-                nzb_folder_name = helpers.sab_replace_dots(nzb_folder_name)
+                folder_name = helpers.sab_replace_dots(folder_name)
             if replace_spaces:
-                nzb_folder_name = helpers.sab_replace_spaces(nzb_folder_name)
+                folder_name = helpers.sab_replace_spaces(folder_name)
 
         else:
 
-            nzb_name = nzb_folder_name + '.nzb'
+            nzb_name = folder_name + '.nzb'
             download_path = os.path.join(headphones.BLACKHOLE_DIR, nzb_name)
             try:
                 prev = os.umask(headphones.UMASK)
