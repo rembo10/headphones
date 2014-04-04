@@ -42,6 +42,8 @@ def runGit(args):
             logger.debug('Trying to execute: "' + cmd + '" with shell in ' + headphones.PROG_DIR)
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=headphones.PROG_DIR)
             output, err = p.communicate()
+            output = output.strip()
+
             logger.debug('Git output: ' + output)
         except OSError:
             logger.debug('Command ' + cmd + ' didn\'t work, couldn\'t find git')
@@ -76,7 +78,7 @@ def getVersion():
             logger.error('Couldn\'t find latest installed version.')
             cur_commit_hash = None
 
-        cur_commit_hash = output.strip()
+        cur_commit_hash = output
 
         if not re.match('^[a-z0-9]+$', cur_commit_hash):
             logger.error('Output doesn\'t look like a hash, not using it')
@@ -87,7 +89,7 @@ def getVersion():
 
         else:
             branch_name, err = runGit('rev-parse --abbrev-ref HEAD')
-            branch_name = branch_name.strip()
+            branch_name = branch_name
 
             if not branch_name and headphones.GIT_BRANCH:
                 logger.error('Could not retrieve branch name from git. Falling back to %s' % headphones.GIT_BRANCH)
@@ -117,56 +119,49 @@ def getVersion():
             return None, 'master'
 
 def checkGithub():
+    headphones.COMMITS_BEHIND = 0
 
     # Get the latest commit available from github
     url = 'https://api.github.com/repos/%s/headphones/commits/%s' % (headphones.GIT_USER, headphones.GIT_BRANCH)
-    logger.info('Retrieving latest version information from github')
+    logger.info('Retrieving latest version information from GitHub')
     try:
         result = urllib2.urlopen(url, timeout=20).read()
         git = simplejson.JSONDecoder().decode(result)
         headphones.LATEST_VERSION = git['sha']
     except:
-        logger.warn('Could not get the latest commit from github')
-        headphones.COMMITS_BEHIND = 0
+        logger.warn('Could not get the latest commit from GitHub')
         return headphones.CURRENT_VERSION
 
     # See how many commits behind we are
     if headphones.CURRENT_VERSION:
-        logger.info('Comparing currently installed version with latest github version')
+        logger.info('Comparing currently installed version with latest GitHub version')
         url = 'https://api.github.com/repos/%s/headphones/compare/%s...%s' % (headphones.GIT_USER, headphones.CURRENT_VERSION, headphones.LATEST_VERSION)
 
         try:
             result = urllib2.urlopen(url, timeout=20).read()
             git = simplejson.JSONDecoder().decode(result)
-            headphones.COMMITS_BEHIND = git['total_commits']
+            headphones.COMMITS_BEHIND = int(git['behind_by'])
+        except urllib2.HTTPError as e:
+            logger.warn('Could not get commits behind from GitHub. You are probably running a local development version.')
+            return headphones.CURRENT_VERSION
         except:
-            logger.warn('Could not get commits behind from github')
-            headphones.COMMITS_BEHIND = 0
+            logger.warn('Could not get commits behind from GitHub.')
             return headphones.CURRENT_VERSION
 
         if headphones.COMMITS_BEHIND >= 1:
             logger.info('New version is available. You are %s commits behind' % headphones.COMMITS_BEHIND)
         elif headphones.COMMITS_BEHIND == 0:
             logger.info('Headphones is up to date')
-        elif headphones.COMMITS_BEHIND == -1:
-            logger.info('You are running an unknown version of Headphones. Run the updater to identify your version')
-
     else:
         logger.info('You are running an unknown version of Headphones. Run the updater to identify your version')
 
     return headphones.LATEST_VERSION
 
 def update():
-
-
     if headphones.INSTALL_TYPE == 'win':
-
         logger.info('Windows .exe updating not supported yet.')
-        pass
-
 
     elif headphones.INSTALL_TYPE == 'git':
-
         output, err = runGit('pull origin ' + headphones.GIT_BRANCH)
 
         if not output:
