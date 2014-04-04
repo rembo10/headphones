@@ -17,15 +17,16 @@ import os
 import sys
 import logging
 import traceback
+import threading
 import headphones
 
 from logging import handlers
 from headphones import helpers
 
+# These settings are for file logging only
+FILENAME = 'headphones.log'
 MAX_SIZE = 1000000 # 1 MB
 MAX_FILES = 5
-
-FILENAME = 'headphones.log'
 
 # Headphones logger
 logger = logging.getLogger('headphones')
@@ -36,7 +37,10 @@ class LogListHandler(logging.Handler):
     """
 
     def emit(self, record):
-        headphones.LOG_LIST.insert(0, (helpers.now(), self.format(record), record.levelname, record.threadName))
+        message = self.format(record)
+        message = message.replace("\n", "<br />")
+
+        headphones.LOG_LIST.insert(0, (helpers.now(), message, record.levelname, record.threadName))
 
 def initLogger(verbose=1):
     """
@@ -81,23 +85,56 @@ def initLogger(verbose=1):
 
         logger.addHandler(console_handler)
 
-    # Any exceptions uncaught will pass through this handle
-    sys.excepthook = excepthook
+    # Install exception hooks
+    initHooks()
 
-def excepthook(*exception_info):
+def initHooks(global_exceptions=True, thread_exceptions=True, pass_original=True):
     """
-    Log uncaught exceptions via the logger.error() method. This is especially
-    useful for daemons.
+    This method installs exception catching mechanisms. Any exception caught
+    will pass through the exception hook, and will be logged to the logger as
+    an error. Additionally, a traceback is provided.
+
+    This is very useful for crashing threads and any other bugs, that may not
+    be exposed when running as daemon.
+
+    The default exception hook is still considered, if pass_original is True.
     """
 
-    # We should always catch this to prevent loops!
-    try:
-        logger.error("Uncaught excaption: %s", traceback.print_exception(*exception_info))
-    except:
-        pass
+    def excepthook(*exception_info):
+        # We should always catch this to prevent loops!
+        try:
+            message = "".join(traceback.format_exception(*exception_info))
+            logger.error("Uncaught excaption: %s", message)
+        except:
+            pass
 
-    # Original excepthook
-    sys.__excepthook__(*exception_info)
+        # Original excepthook
+        if pass_original:
+            sys.__excepthook__(*exception_info)
+
+    # Global exception hook
+    if global_exceptions:
+        sys.excepthook = excepthook
+
+    # Thread exception hook
+    if thread_exceptions:
+        old_init = threading.Thread.__init__
+
+        def new_init(self, *args, **kwargs):
+            old_init(self, *args, **kwargs)
+            old_run = self.run
+
+            def new_run(*args, **kwargs):
+                try:
+                    old_run(*args, **kwargs)
+                except (KeyboardInterrupt, SystemExit):
+                    raise
+                except:
+                    excepthook(*sys.exc_info())
+            self.run = new_run
+
+        # Monkey patch the run() by monkey patching the __init__ method
+        threading.Thread.__init__ = new_init
 
 # Expose logger methods
 info = logger.info
