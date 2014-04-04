@@ -287,7 +287,7 @@ def sort_search_results(resultlist, album, new):
                 return None
 
     if not len(finallist):
-        logger.info('No appropriate matches found for %s - %s', (album['ArtistName'], album['AlbumTitle'])
+        logger.info('No appropriate matches found for %s - %s', album['ArtistName'], album['AlbumTitle'])
         return None
 
     return finallist
