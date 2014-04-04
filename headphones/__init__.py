@@ -115,6 +115,7 @@ ADD_ALBUM_ART = False
 ALBUM_ART_FORMAT = None
 EMBED_ALBUM_ART = False
 EMBED_LYRICS = False
+REPLACE_EXISTING_FOLDERS = False
 NZB_DOWNLOADER = None    # 0: sabnzbd, 1: nzbget, 2: blackhole
 TORRENT_DOWNLOADER = None # 0: blackhole, 1: transmission, 2: utorrent
 DOWNLOAD_DIR = None
@@ -441,6 +442,7 @@ def initialize():
         ALBUM_ART_FORMAT = check_setting_str(CFG, 'General', 'album_art_format', 'folder')
         EMBED_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'embed_album_art', 0))
         EMBED_LYRICS = bool(check_setting_int(CFG, 'General', 'embed_lyrics', 0))
+        REPLACE_EXISTING_FOLDERS = bool(check_setting_int(CFG, 'General', 'replace_existing_folders', 0))
         NZB_DOWNLOADER = check_setting_int(CFG, 'General', 'nzb_downloader', 0)
         TORRENT_DOWNLOADER = check_setting_int(CFG, 'General', 'torrent_downloader', 0)
         DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'download_dir', '')
@@ -849,6 +851,7 @@ def config_write():
     new_config['General']['album_art_format'] = ALBUM_ART_FORMAT
     new_config['General']['embed_album_art'] = int(EMBED_ALBUM_ART)
     new_config['General']['embed_lyrics'] = int(EMBED_LYRICS)
+    new_config['General']['replace_existing_folders'] = int(REPLACE_EXISTING_FOLDERS)
     new_config['General']['nzb_downloader'] = NZB_DOWNLOADER
     new_config['General']['torrent_downloader'] = TORRENT_DOWNLOADER
     new_config['General']['download_dir'] = DOWNLOAD_DIR
