@@ -393,6 +393,9 @@ form .checkbox small {
   margin: 0 !important;
   width: auto;
 }
+form .indent input {
+  margin-left: 15px;
+}
 ul,
 ol {
   margin-left: 2em;
