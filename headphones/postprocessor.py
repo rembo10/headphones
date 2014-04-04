@@ -948,7 +948,7 @@ def renameUnprocessedFolder(albumpath):
             os.rename(albumpath, new_folder_name)
             return
             
-def forcePostProcess(dir=None):
+def forcePostProcess(dir=None, expand_subfolders=True):
 
     download_dirs = []
     if dir:
@@ -970,8 +970,14 @@ def forcePostProcess(dir=None):
             continue
         for folder in os.listdir(download_dir):
             path_to_folder = os.path.join(download_dir, folder)
+
             if os.path.isdir(path_to_folder):
-                folders.append(path_to_folder)
+                subfolders = helpers.expand_subfolders(path_to_folder)
+
+                if expand_subfolders and subfolders is not None:
+                    folders.extend(subfolders)
+                else:
+                    folders.append(path_to_folder)
 
     if len(folders):
         logger.info('Found %i folders to process' % len(folders))
@@ -1053,6 +1059,8 @@ def forcePostProcess(dir=None):
             if release:
                 logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
                 verify(release['AlbumID'], folder, forced=True)
+                continue
             else:
                 logger.info('Found a (possibly) valid Musicbrainz identifier in album folder name - continuing post-processing')
                 verify(rgid, folder, forced=True)
+                continue

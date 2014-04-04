@@ -194,7 +194,104 @@ def cleanTitle(title):
     title = title.title()
     
     return title
-    
+
+def split_path(f):
+    """
+    Split a path into components, starting with the drive letter (if any). Given
+    a path, os.path.join(*split_path(f)) should be path equal to f.
+    """
+
+    components = []
+    drive, path = os.path.splitdrive(f)
+
+    # Stip the folder from the path, iterate until nothing is left
+    while True:
+        path, folder = os.path.split(path)
+
+        if folder:
+            components.append(folder)
+        else:
+            if path:
+                components.append(path)
+
+            break
+
+    # Append the drive (if any)
+    if drive:
+        components.append(drive)
+
+    # Reverse components
+    components.reverse()
+
+    # Done
+    return components
+
+def expand_subfolders(f):
+    """
+    Try to expand a given folder and search for subfolders containing media
+    files. This should work for discographies indexed per album in the same
+    root, possibly with folders per CD (if any).
+
+    This algorithm will return nothing if the result is only one folder. In this
+    case, normal post processing will be better.
+    """
+
+    from headphones import logger
+
+    # Find all folders with media files in them
+    media_folders = []
+
+    for root, dirs, files in os.walk(f):
+        for file in files:
+            extension = os.path.splitext(file)[1].lower()[1:]
+
+            if extension in headphones.MEDIA_FORMATS:
+                if root not in media_folders:
+                    media_folders.append(root)
+
+    # Stop here if nothing found
+    if len(media_folders) == 0:
+        return
+
+    # Split into path components
+    media_folders = [ split_path(media_folder) for media_folder in media_folders ]
+
+    # Correct folder endings such as CD1 etc.
+    for index, media_folder in enumerate(media_folders):
+        if RE_CD.match(media_folder[-1]):
+            media_folders[index] = media_folders[index][:-1]
+
+    # Verify the result by computing path depth relative to root.
+    path_depths = [ len(media_folder) for media_folder in media_folders ]
+    difference = max(path_depths) - min(path_depths)
+
+    if difference > 0:
+        logger.info("Found %d media folders, but depth difference between lowest and deepest media folder is %d (expected zero). If this is a discography or a collection of albums, make sure albums are per folder" % (len(media_folders), difference))
+
+        # While already failed, advice the user what he could try. We assume the
+        # directory may contain separate CD's and maybe some extra's. The
+        # structure may look like X albums at same depth, and (one or more)
+        # extra folders with a higher depth.
+        extra_media_folders = [ media_folder[:min(path_depths)] for media_folder in media_folders if len(media_folder) > min(path_depths) ]
+        extra_media_folders = list(set([ os.path.join(*media_folder) for media_folder in extra_media_folders ]))
+
+        logger.info("Please look at the following folder(s), since they cause the depth difference: %s" % extra_media_folders)
+        return
+
+    # Convert back to paths and remove duplicates, which may be there after
+    # correcting the paths
+    media_folders = list(set([ os.path.join(*media_folder) for media_folder in media_folders ]))
+
+    # Don't return a result if the number of subfolders is one. In this case,
+    # this algorithm will not improve processing and will likely interfere
+    # with other attempts such as MusicBrainz release group IDs.
+    if len(media_folders) == 1:
+        logger.debug("Did not expand subfolder, as it resulted in one folder.")
+        return
+
+    logger.debug("Expanded subfolders in folder: " % media_folders)
+    return media_folders
+
 def extract_data(s):
 
     #headphones default format
