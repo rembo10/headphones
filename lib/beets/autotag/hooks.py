@@ -21,7 +21,7 @@ from beets import plugins
 from beets import config
 from beets.autotag import mb
 from beets.util import levenshtein
-from lib.unidecode import unidecode
+from unidecode import unidecode
 
 log = logging.getLogger('beets')
 
