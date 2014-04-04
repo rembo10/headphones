@@ -1022,6 +1022,7 @@ def forcePostProcess(dir=None):
             if release:
                 logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
                 verify(release['AlbumID'], folder)
+                continue
             else:
                 logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (name, album))
                 from headphones import mb
