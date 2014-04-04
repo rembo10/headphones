@@ -21,7 +21,7 @@ import logging
 import shlex
 import unicodedata
 import time
-from lib.unidecode import unidecode
+from unidecode import unidecode
 from beets.mediafile import MediaFile, MutagenError
 from beets import plugins
 from beets import util

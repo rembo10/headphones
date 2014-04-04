@@ -250,6 +250,12 @@
                                     <label>Keep Files for Seeding</label>
                                     <input type="checkbox" name="keep_torrent_files" value="1" ${config['keep_torrent_files']}>
                                 </div>
+                                <div class="row checkbox">
+                                    <label>Prefer</label>
+                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_0" value="0" ${config['prefer_torrents_0']}>NZBs 
+                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_1" value="1" ${config['prefer_torrents_1']}>Torrents 
+                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_2" value="2" ${config['prefer_torrents_2']}>No Preference
+                                    </div>
                             </fieldset>
                         </td>
                     </tr>
