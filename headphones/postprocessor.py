@@ -922,14 +922,14 @@ def renameFiles(albumpath, downloaded_track_list, release):
 def updateFilePermissions(albumpaths):
 
     for folder in albumpaths:
-        logger.info("Updating file permissions in " + folder.decode(headphones.SYS_ENCODING, 'replace'))
+        logger.info("Updating file permissions in %s", folder)
         for r,d,f in os.walk(folder):
             for files in f:
                 full_path = os.path.join(r, files)
                 try:
                     os.chmod(full_path, int(headphones.FILE_PERMISSIONS, 8))
                 except:
-                    logger.error("Could not change permissions for file: " + full_path.decode(headphones.SYS_ENCODING, 'replace'))
+                    logger.error("Could not change permissions for file: %s", full_path)
                     continue
 
 def renameUnprocessedFolder(albumpath):
@@ -949,7 +949,6 @@ def renameUnprocessedFolder(albumpath):
             return
             
 def forcePostProcess(dir=None):
-
     download_dirs = []
     if dir:
         download_dirs.append(dir.encode(headphones.SYS_ENCODING, 'replace'))
@@ -961,12 +960,12 @@ def forcePostProcess(dir=None):
     # If DOWNLOAD_DIR and DOWNLOAD_TORRENT_DIR are the same, remove the duplicate to prevent us from trying to process the same folder twice.
     download_dirs = list(set(download_dirs))
 
-    logger.info('Checking to see if there are any folders to process in download_dir(s): %s' % str(download_dirs).decode(headphones.SYS_ENCODING, 'replace'))
+    logger.info('Checking to see if there are any folders to process in download_dir(s): %s', download_dirs)
     # Get a list of folders in the download_dir
     folders = []
     for download_dir in download_dirs:
         if not os.path.isdir(download_dir):
-            logger.warn('Directory ' + download_dir.decode(headphones.SYS_ENCODING, 'replace') + ' does not exist. Skipping')
+            logger.warn('Directory %s does not exist. Skipping', download_dir)
             continue
         for folder in os.listdir(download_dir):
             path_to_folder = os.path.join(download_dir, folder)
@@ -974,16 +973,16 @@ def forcePostProcess(dir=None):
                 folders.append(path_to_folder)
 
     if len(folders):
-        logger.info('Found %i folders to process' % len(folders))
+        logger.info('Found %i folders to process', len(folders))
     else:
-        logger.info('Found no folders to process in: %s' % str(download_dirs).decode(headphones.SYS_ENCODING, 'replace'))
+        logger.info('Found no folders to process in: %s', download_dirs)
 
     # Parse the folder names to get artist album info
     myDB = db.DBConnection()
     
     for folder in folders:
         folder_basename = os.path.basename(folder).decode(headphones.SYS_ENCODING, 'replace')
-        logger.info('Processing: %s' % folder_basename)
+        logger.info('Processing: %s', folder_basename)
 
         # Attempt 1: First try to see if there's a match in the snatched table,
         # then we'll try to parse the foldername.
@@ -995,10 +994,10 @@ def forcePostProcess(dir=None):
 
         if snatched:
             if headphones.KEEP_TORRENT_FILES and snatched['Kind'] == 'torrent' and snatched['Status'] == 'Processed':
-                logger.info(folder_basename + ' is a torrent folder being preserved for seeding and has already been processed. Skipping.')
+                logger.info('%s is a torrent folder being preserved for seeding and has already been processed. Skipping.', folder_basename)
                 continue
             else:
-                logger.info('Found a match in the database: %s. Verifying to make sure it is the correct album' % snatched['Title'])
+                logger.info('Found a match in the database: %s. Verifying to make sure it is the correct album', snatched['Title'])
                 verify(snatched['AlbumID'], folder, snatched['Kind'])
                 continue
 
@@ -1020,10 +1019,10 @@ def forcePostProcess(dir=None):
         if name and album and year:
             release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
             if release:
-                logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
+                logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album', release['ArtistName'], release['AlbumTitle'])
                 verify(release['AlbumID'], folder)
             else:
-                logger.info('Querying MusicBrainz for the release group id for: %s - %s' % (name, album))
+                logger.info('Querying MusicBrainz for the release group id for: %s - %s', name, album)
                 from headphones import mb
                 try:
                     rgid = mb.findAlbumID(helpers.latinToAscii(name), helpers.latinToAscii(album))
@@ -1035,7 +1034,7 @@ def forcePostProcess(dir=None):
                     verify(rgid, folder)
                     continue
                 else:
-                    logger.info('No match found on MusicBrainz for: %s - %s' % (name, album))
+                    logger.info('No match found on MusicBrainz for: %s - %s', name, album)
 
         # Attempt 3: strip release group id from filename
         try:
@@ -1044,14 +1043,14 @@ def forcePostProcess(dir=None):
             # re pattern match: [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
             rgid = uuid.UUID(possible_rgid)
         except:
-            logger.info("Couldn't parse " + folder_basename + " into any valid format. If adding albums from another source, they must be in an 'Artist - Album [Year]' format, or end with the musicbrainz release group id")
+            logger.info("Couldn't parse '%s' into any valid format. If adding albums from another source, they must be in an 'Artist - Album [Year]' format, or end with the musicbrainz release group id", folder_basename)
             rgid = possible_rgid = None
 
         if rgid:
             rgid = possible_rgid
             release = myDB.action('SELECT ArtistName, AlbumTitle, AlbumID from albums WHERE AlbumID=?', [rgid]).fetchone()
             if release:
-                logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album' % (release['ArtistName'], release['AlbumTitle']))
+                logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album', release['ArtistName'], release['AlbumTitle'])
                 verify(release['AlbumID'], folder, forced=True)
             else:
                 logger.info('Found a (possibly) valid Musicbrainz identifier in album folder name - continuing post-processing')
