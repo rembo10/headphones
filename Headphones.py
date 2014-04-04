@@ -146,7 +146,7 @@ def main():
     # Force the http port if neccessary
     if args.port:
         http_port = args.port
-        logger.info('Using forced port: %i' % http_port)
+        logger.info('Using forced port: %i', http_port)
     else:
         http_port = int(headphones.HTTP_PORT)
 
@@ -176,7 +176,7 @@ def main():
             except KeyboardInterrupt:
                 headphones.SIGNAL = 'shutdown'
         else:
-            logger.info('Received signal: ' + headphones.SIGNAL)
+            logger.info('Received signal: %s', headphones.SIGNAL)
             if headphones.SIGNAL == 'shutdown':
                 headphones.shutdown()
             elif headphones.SIGNAL == 'restart':
