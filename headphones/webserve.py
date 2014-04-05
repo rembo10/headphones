@@ -304,6 +304,41 @@ class WebInterface(object):
             raise cherrypy.HTTPRedirect(redirect)
     queueAlbum.exposed = True
 
+    def choose_specific_download(self, AlbumID):
+        results = searcher.searchforalbum(AlbumID, choose_specific_download=True)
+        
+        results_as_dicts = []
+        
+        for result in results:
+
+            result_dict = {
+                'title':result[0],
+                'size':result[1],
+                'url':result[2],
+                'provider':result[3],
+                'kind':result[4]
+            }
+            results_as_dicts.append(result_dict)
+
+        s = simplejson.dumps(results_as_dicts)
+        cherrypy.response.headers['Content-type'] = 'application/json'
+        return s
+        
+    choose_specific_download.exposed = True
+
+    def download_specific_release(self, AlbumID, title, size, url, provider, kind):
+
+        result = [(title,int(size),url,provider,kind)]
+        logger.info(u"Making sure we can download the chosen result")
+        (data, bestqual) = searcher.preprocess(result)
+
+        if data and bestqual:
+          myDB = db.DBConnection()
+          album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
+          searcher.send_to_downloader(data, bestqual, album)
+
+    download_specific_release.exposed = True
+
     def unqueueAlbum(self, AlbumID, ArtistID):
         logger.info(u"Marking album: " + AlbumID + "as skipped...")
         myDB = db.DBConnection()
