@@ -108,7 +108,6 @@
 					<li>Duration: <span>${albumduration}</span></li>
 				</ul>
 			</div>
-			
 		</div>
 		<div id="track_wrapper">
 			<table class="display" id="track_table">
@@ -220,9 +219,13 @@
 	};
 
 	function getAvailableDownloads() {
+		ShowSpinner();
 		$.getJSON("choose_specific_download?AlbumID=${album['AlbumID']}", function(data) {
+			loader.remove();
+			feedback.fadeOut();
+			search_results = data
 			for( var i = 0, len = data.length; i < len; i++ ) {
-    			$('#downloads_table_body').append('<tr><td id="title"><a href="download_specific_release?AlbumID=${album['AlbumID']}&title='+data[i].title+'&size='+data[i].size+'&url='+data[i].url+'&provider='+data[i].provider+'&kind='+data[i].kind+'">'+data[i].title+'</a></td><td id="size"><span title='+data[i].size+'></span>'+(data[i].size / (1024*1024)).toFixed(2)+' MB</td><td id="provider">'+data[i].provider+'</td><td id="kind">'+data[i].kind+'</td></tr>');
+    			$('#downloads_table_body').append('<tr><td id="title"><a href="#" onclick="downloadSpecificRelease('+i+')">'+data[i].title+'</a></td><td id="size"><span title='+data[i].size+'></span>'+(data[i].size / (1024*1024)).toFixed(2)+' MB</td><td id="provider">'+data[i].provider+'</td><td id="kind">'+data[i].kind+'</td></tr>');
     		}
 			$('#downloads_table').dataTable({
 				"aoColumns": [
@@ -235,14 +238,43 @@
 				"bFilter": false,
 				"bInfo": false,
 				"bPaginate": false,
-				"bDestroy": true
 			});
     		$("#choose_specific_download_dialog").dialog({ width: "1000px" });
     		return false;
 		});
 	}
 
-	
+	function downloadSpecificRelease(i){
+
+		title = search_results[i].title
+		size = search_results[i].size
+		url = search_results[i].url
+		provider = search_results[i].provider
+		kind = search_results[i].kind
+
+		ShowSpinner();
+		$.getJSON("download_specific_release?AlbumID=${album['AlbumID']}&title="+title+"&size="+size+"&url="+url+"&provider="+provider+"&kind=" + kind, function(data) {
+			loader.remove();
+			feedback.fadeOut();
+			refreshSubmenu();
+			$("#choose_specific_download_dialog").dialog("close");
+		});
+	}
+
+	function ShowSpinner() {
+		feedback = $("#ajaxMsg");
+		update = $("#updatebar");
+		if ( update.is(":visible") ) {
+			var height = update.height() + 35;
+			feedback.css("bottom",height + "px");
+		} else {
+			feedback.removeAttr("style");
+		}
+		loader = $("<i class='fa fa-refresh fa-spin'></i>");
+		feedback.prepend(loader);
+		feedback.fadeIn();
+	}
+
 	$(document).ready(function()	{
 		getAlbumInfo();
 		initThisPage();

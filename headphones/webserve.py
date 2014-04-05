@@ -326,9 +326,18 @@ class WebInterface(object):
         
     choose_specific_download.exposed = True
 
-    def download_specific_release(self, AlbumID, title, size, url, provider, kind):
+    def download_specific_release(self, AlbumID, title, size, url, provider, kind, **kwargs):
 
-        result = [(title,int(size),url,provider,kind)]
+        # Handle situations where the torrent url contains arguments that are parsed
+        if kwargs:
+            import urllib, urllib2
+            url = urllib2.quote(url, safe=":?/=&") + '&' + urllib.urlencode(kwargs)
+
+        try:
+            result = [(title,int(size),url,provider,kind)]
+        except ValueError:
+            result = [(title,float(size),url,provider,kind)]
+
         logger.info(u"Making sure we can download the chosen result")
         (data, bestqual) = searcher.preprocess(result)
 

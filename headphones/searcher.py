@@ -145,7 +145,7 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False, choose_specific_
 
     logger.info('Search for Wanted albums complete')
 
-def do_sorted_search(album, new, losslessOnly, choose_specific_download):
+def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
 
     NZB_PROVIDERS = (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS or headphones.OMGWTFNZBS)
     NZB_DOWNLOADERS = (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST)
