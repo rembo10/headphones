@@ -5,8 +5,13 @@
 %>
 
 <%def name="headerIncludes()">
+
 	<div id="subhead_container">
+		<div id="back_to_previous_link">
+			<a href="artistPage?ArtistID=${album['ArtistID']}" class="back">&laquo; Back to ${album['ArtistName']}</a>
+		</div>
 		<div id="subhead_menu">
+
 			<a id="menu_link_delete" href="deleteAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}"><i class="fa fa-trash-o"></i> Delete Album</a>
 			%if album['Status'] == 'Skipped':
 			<a id="menu_link_wanted" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true)" data-success="'${album['AlbumTitle']}' added to queue"><i class="fa fa-heart"></i> Mark Album as Wanted</a>
@@ -59,9 +64,23 @@
 						<input type="button" value="Save changes" onclick="doAjaxCall('editSearchTerm',$(this),'tabs',true);return false;" data-success="Search term updated"/>
 					</form>
 				</div>	
+			<a class="menu_link_edit" id="choose_specific_download" href="#" onclick="getAvailableDownloads()"><i class="fa fa-search"></i> Choose Specific Download</a>
+				<div id="choose_specific_download_dialog" title="Choose a specific download for this album" style="display:none" class="configtable">
+						<table class="display" id="downloads_table">
+							<thead>
+								<tr>
+									<th id="title">Title</th>
+									<th id="size">Size</th>
+									<th id="provider">Provider</th>
+									<th id="kind">Kind</th>
+								</tr>
+							</thead>
+							<tbody id="downloads_table_body">
+							</tbody>
+						</table>
+				</div>	
 		</div>
 	</div>	
-	<a href="artistPage?ArtistID=${album['ArtistID']}" class="back">&laquo; Back to ${album['ArtistName']}</a>
 </%def>
 
 <%def name="body()">
@@ -197,8 +216,32 @@
 			"bInfo": false,
 			"bPaginate": false,
 			"bDestroy": true
-		});		
+		});
 	};
+
+	function getAvailableDownloads() {
+		$.getJSON("choose_specific_download?AlbumID=${album['AlbumID']}", function(data) {
+			for( var i = 0, len = data.length; i < len; i++ ) {
+    			$('#downloads_table_body').append('<tr><td id="title"><a href="download_specific_release?AlbumID=${album['AlbumID']}&title='+data[i].title+'&size='+data[i].size+'&url='+data[i].url+'&provider='+data[i].provider+'&kind='+data[i].kind+'">'+data[i].title+'</a></td><td id="size"><span title='+data[i].size+'></span>'+(data[i].size / (1024*1024)).toFixed(2)+' MB</td><td id="provider">'+data[i].provider+'</td><td id="kind">'+data[i].kind+'</td></tr>');
+    		}
+			$('#downloads_table').dataTable({
+				"aoColumns": [
+					null,
+					{ "sType": "title-numeric"},
+					null,
+					null
+				],
+				"aaSorting": [],
+				"bFilter": false,
+				"bInfo": false,
+				"bPaginate": false,
+				"bDestroy": true
+			});
+    		$("#choose_specific_download_dialog").dialog({ width: "1000px" });
+    		return false;
+		});
+	}
+
 	
 	$(document).ready(function()	{
 		getAlbumInfo();
