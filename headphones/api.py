@@ -24,7 +24,8 @@ import copy
 cmd_list = [ 'getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSimilar', 'getHistory', 'getLogs', 
             'findArtist', 'findAlbum', 'addArtist', 'delArtist', 'pauseArtist', 'resumeArtist', 'refreshArtist',
             'addAlbum', 'queueAlbum', 'unqueueAlbum', 'forceSearch', 'forceProcess', 'getVersion', 'checkGithub', 
-            'shutdown', 'restart', 'update', 'getArtistArt', 'getAlbumArt', 'getArtistInfo', 'getAlbumInfo', 'getArtistThumb', 'getAlbumThumb']
+            'shutdown', 'restart', 'update', 'getArtistArt', 'getAlbumArt', 'getArtistInfo', 'getAlbumInfo', 
+            'getArtistThumb', 'getAlbumThumb', 'choose_specific_download', 'download_specific_release']
 
 class Api(object):
 
@@ -392,3 +393,65 @@ class Api(object):
             self.id = kwargs['id']
             
         self.data = cache.getThumb(AlbumID=self.id)
+
+    def _choose_specific_download(self, **kwargs):
+
+        if 'id' not in kwargs:
+            self.data = 'Missing parameter: id'
+            return
+        else:
+            self.id = kwargs['id']
+
+        results = searcher.searchforalbum(self.id, choose_specific_download=True)
+        
+        results_as_dicts = []
+        
+        for result in results:
+
+            result_dict = {
+                'title':result[0],
+                'size':result[1],
+                'url':result[2],
+                'provider':result[3],
+                'kind':result[4]
+            }
+            results_as_dicts.append(result_dict)
+
+        self.data = results_as_dicts
+
+    def _download_specific_release(self, **kwargs):
+
+        expected_kwargs =['id', 'title','size','url','provider','kind']
+
+        for kwarg in expected_kwargs:
+            if kwarg not in kwargs:
+                self.data = 'Missing parameter: ' + kwarg
+                return self.data
+
+        title = kwargs['title']
+        size = kwargs['size']
+        url = kwargs['url']
+        provider = kwargs['provider']
+        kind = kwargs['kind']
+        id = kwargs['id']
+
+        for kwarg in expected_kwargs:
+            del kwargs[kwarg]
+
+        # Handle situations where the torrent url contains arguments that are parsed
+        if kwargs:
+            import urllib, urllib2
+            url = urllib2.quote(url, safe=":?/=&") + '&' + urllib.urlencode(kwargs)
+
+        try:
+            result = [(title,int(size),url,provider,kind)]
+        except ValueError:
+            result = [(title,float(size),url,provider,kind)]
+
+        logger.info(u"Making sure we can download the chosen result")
+        (data, bestqual) = searcher.preprocess(result)
+
+        if data and bestqual:
+          myDB = db.DBConnection()
+          album = myDB.action('SELECT * from albums WHERE AlbumID=?', [id]).fetchone()
+          searcher.send_to_downloader(data, bestqual, album)
