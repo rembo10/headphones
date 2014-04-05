@@ -691,7 +691,7 @@ footer {
 }
 #subhead #subhead_container #subhead_menu {
   float: right;
-  margin-top: 5px;
+  margin-top: 0px;
   position: relative;
   z-index: 99;
 }
@@ -715,6 +715,11 @@ footer {
   -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#599bdc, endColorstr=#3072b3) !important;
   color: #FFF;
   border-color: #518CC6 #518CC6 #2A65A0;
+}
+#subhead #subhead_container #back_to_previous_link {
+  margin-top: 20px;
+  position: relative;
+  z-index: 99;
 }
 div#searchbar {
   border-left: 1px solid #FAFAFA;
@@ -772,7 +777,7 @@ div#searchbar .mini-icon {
   _height: 302px;
   background-color: #FFF;
   clear: both;
-  margin: 30px auto 0;
+  margin: 60px auto 0;
   min-height: 100px;
   position: relative;
   width: 100%;
@@ -1053,6 +1058,22 @@ div#artistheader h2 a {
   line-height: normal;
   text-align: center;
   vertical-align: middle;
+}
+#downloads_table th#title {
+  text-align: center;
+  min-width: 500px;
+}
+#downloads_table th#size {
+  text-align: center;
+  min-width: 80px;
+}
+#downloads_table th#provider {
+  text-align: center;
+  min-width: 100px;
+}
+#downloads_table th#kind {
+  text-align: center;
+  min-width: 80px;
 }
 #history_table {
   background-color: #FFF;

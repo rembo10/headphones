@@ -108,7 +108,7 @@ def patch_http_response_read(func):
 httplib.HTTPResponse.read = patch_http_response_read(httplib.HTTPResponse.read)
 
 
-def searchforalbum(albumid=None, new=False, losslessOnly=False):
+def searchforalbum(albumid=None, new=False, losslessOnly=False, choose_specific_download=False):
 
     myDB = db.DBConnection()
     
@@ -127,17 +127,25 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False):
             if album['Status'] == "Wanted Lossless":
                 losslessOnly = True
 
+            logger.info('Searching for "%s - %s" since it is marked as wanted' % (album['ArtistName'], album['AlbumTitle']))
             do_sorted_search(album, new, losslessOnly)
             
+    elif albumid and choose_specific_download:
+
+        album = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
+        logger.info('Searching for "%s - %s"' % (album['ArtistName'], album['AlbumTitle']))
+        results = do_sorted_search(album, new, losslessOnly, choose_specific_download=True)
+        return results
+
     else:
 
         album = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
-        logger.info('Searching for %s' % album['AlbumTitle'])
+        logger.info('Searching for "%s - %s" since it was marked as wanted' % (album['ArtistName'], album['AlbumTitle']))
         do_sorted_search(album, new, losslessOnly)
 
     logger.info('Search for Wanted albums complete')
 
-def do_sorted_search(album, new, losslessOnly):
+def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
 
     NZB_PROVIDERS = (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS or headphones.OMGWTFNZBS)
     NZB_DOWNLOADERS = (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST)
@@ -179,6 +187,10 @@ def do_sorted_search(album, new, losslessOnly):
             torrent_results = []
 
         results = nzb_results + torrent_results
+
+
+    if choose_specific_download:
+        return results
  
     sorted_search_results = sort_search_results(results, album, new)
     
@@ -331,7 +343,7 @@ def searchNZB(album, new=False, losslessOnly=False):
     term = re.sub('[\.\-\/]', ' ', term).encode('utf-8')
     artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8')
 
-    logger.info("Searching for %s since it was marked as wanted" % term)
+    logger.debug("Using search term: %s" % term)
 
     resultlist = []
 
@@ -912,7 +924,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
     artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8', 'replace')
     albumterm  = re.sub('[\.\-\/]', ' ', cleanalbum).encode('utf-8', 'replace')
 
-    logger.info("Searching torrents for %s since it was marked as wanted" % term)
+    logger.debug("Using search term: %s" % term)
 
     resultlist = []
     pre_sorted_results = False
@@ -1408,6 +1420,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
 
 # THIS IS KIND OF A MESS AND PROBABLY NEEDS TO BE CLEANED UP
 def preprocess(resultlist):
+
     for result in resultlist:
 
         if result[4] == 'torrent':
