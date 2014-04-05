@@ -809,6 +809,13 @@ def verifyresult(title, artistterm, term, lossless):
 
     if headphones.REQUIRED_WORDS:
         for each_word in helpers.split_string(headphones.REQUIRED_WORDS):
+            if ' OR ' in each_word:
+                or_words = helpers.split_string(each_word, 'OR')
+                if any(word.lower() in title.lower() for word in or_words):
+                    continue
+                else:
+                    logger.info("Removed '%s' from results because it doesn't contain any of the required words in: '%s'", title, str(or_words))
+                    return False
             if each_word.lower() not in title.lower():
                 logger.info("Removed '%s' from results because it doesn't contain required word: '%s'", title, each_word)
                 return False

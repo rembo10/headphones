@@ -543,9 +543,9 @@ def sab_sanitize_foldername(name):
 
     return name
 
-def split_string(mystring):
+def split_string(mystring, splitvar=','):
     mylist = []
-    for each_word in mystring.split(','):
+    for each_word in mystring.split(splitvar):
         mylist.append(each_word.strip())
     return mylist
 
