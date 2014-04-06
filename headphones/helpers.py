@@ -24,8 +24,10 @@ import headphones
 
 from headphones import logger
 
+from xml.dom import minidom
 from operator import itemgetter
 from bs4 import BeautifulSoup
+
 from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 
 # Modified from https://github.com/Verrus/beets-plugin-featInTitle
@@ -595,17 +597,20 @@ def create_https_certificates(ssl_cert, ssl_key):
 
     return True
 
-def request_response(url, method="GET", auto_raise=True, status_pass=None, *args, **kwargs):
+def request_response(url, method="get", auto_raise=True, status_pass=None, **kwargs):
     """
     Convenient wrapper for `requests.get', which will capture the exceptions and
     log them. On success, the Response object is returned. In case of a
     exception, None is returned.
     """
 
+    if status_pass and type(status_pass) != list:
+        status_pass = [status_pass]
+
     try:
         # Request the URL
         logger.debug("Requesting URL via %s method: %s", method, url)
-        response = requests.request(method, url, *args, **kwargs)
+        response = requests.request(method, url, **kwargs)
 
         # If status code != OK, then raise exception, except if the status code
         # is white listed.
@@ -630,18 +635,29 @@ def request_response(url, method="GET", auto_raise=True, status_pass=None, *args
     except requests.RequestException, e:
         logger.error("Request raised exception: %s", e)
 
-def request_soup(*args, **kwargs):
+def request_soup(url, **kwargs):
     """
     Wrapper for `request_response', which will return a BeatifulSoup object if
     no exceptions are raised.
     """
 
-    response = request_response(*args, **kwargs)
+    response = request_response(url, **kwargs)
 
     if response is not None:
         return BeautifulSoup(response.content)
 
-def request_json(*args, **kwargs):
+def request_minidom(url, **kwargs):
+    """
+    Wrapper for `request_response', which will return a Minidom object if no
+    exceptions are raised.
+    """
+
+    response = request_response(url, **kwargs)
+
+    if response is not None:
+        return minidom.parseString(response.content)
+
+def request_json(url, **kwargs):
     """
     Wrapper for `request_response', which will decode the response as JSON
     object and return the result, if no exceptions are raised.
@@ -650,8 +666,8 @@ def request_json(*args, **kwargs):
     the result is valid.
     """
 
-    validator = kwargs.pop("validator")
-    response = request_response(*args, **kwargs)
+    validator = kwargs.pop("validator", None)
+    response = request_response(url, **kwargs)
 
     if response is not None:
         try:
@@ -664,22 +680,22 @@ def request_json(*args, **kwargs):
         except ValueError:
             logger.error("Response returned invalid JSON data")
 
-def request_content(*args, **kwargs):
+def request_content(url, **kwargs):
     """
     Wrapper for `request_response', which will return the raw content.
     """
 
-    response = request_response(*args, **kwargs)
+    response = request_response(url, **kwargs)
 
     if response is not None:
         return response.content
 
-def request_feed(*args, **kwargs):
+def request_feed(url, **kwargs):
     """
     Wrapper for `request_response', which will return a feed object.
     """
 
-    response = request_response(*args, **kwargs)
+    response = request_response(url, **kwargs)
 
     if response is not None:
         return feedparser.parse(response.content)
