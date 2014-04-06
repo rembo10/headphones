@@ -1020,7 +1020,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
         except Exception as e:
             name = album = year = None
 
-        if name and album and year:
+        if name and album:
             release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
             if release:
                 logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album', release['ArtistName'], release['AlbumTitle'])
@@ -1048,7 +1048,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
         except Exception as e:
             name = album = year = None
 
-        if name and album and year:
+        if name and album:
             release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
             if release:
                 logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album', release['ArtistName'], release['AlbumTitle'])
