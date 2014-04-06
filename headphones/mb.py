@@ -566,7 +566,10 @@ def findAlbumID(artist=None, album=None):
     results = None
     
     try:
-        term = '"'+album+'" AND artist:"'+artist+'"'
+        if album and artist:
+            term = '"'+album+'" AND artist:"'+artist+'"'
+        else:
+            term = album
         results = musicbrainzngs.search_release_groups(term,1).get('release-group-list')
     except WebServiceError, e:
         logger.warn('Attempt to query MusicBrainz for %s - %s failed (%s)' % (artist, album, str(e)))

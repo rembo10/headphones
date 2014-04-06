@@ -1090,3 +1090,26 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                 logger.info('Found a (possibly) valid Musicbrainz identifier in album folder name - continuing post-processing')
                 verify(rgid, folder, forced=True)
                 continue
+
+        # Attempt 4: Hail mary. Just assume the folder name is the album name if it doesn't have a separator in it
+        if '-' not in folder:
+            release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE AlbumTitle LIKE ?', [folder]).fetchone()
+            if release:
+                logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album', release['ArtistName'], release['AlbumTitle'])
+                verify(release['AlbumID'], folder)
+                continue
+            else:
+                logger.info('Querying MusicBrainz for the release group id for: %s', folder)
+                from headphones import mb
+                try:
+                    rgid = mb.findAlbumID(album=helpers.latinToAscii(folder))
+                except:
+                    logger.error('Can not get release information for this album')
+                    rgid = None
+
+                if rgid:
+                    verify(rgid, folder)
+                    continue
+                else:
+                    logger.info('No match found on MusicBrainz for: %s - %s', name, album)
+
