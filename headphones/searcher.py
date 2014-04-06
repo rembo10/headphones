@@ -1133,10 +1133,9 @@ def searchTorrent(album, new=False, losslessOnly=False):
             timeout=20
         )
 
-        # Process feed
+        # Process content
         if data:
-            table = data.find('table')
-            rows = table.findAll('tr')
+            rows = data.select('table tr')
 
             if not rows or len(rows) == '1':
                 logger.info(u"No results found from %s for %s" % (provider, term))
