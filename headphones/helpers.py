@@ -13,14 +13,20 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, time
-from operator import itemgetter
+import os
+import re
+import time
+import shutil
 import datetime
-import re, shutil
-
-from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
-
+import requests
+import feedparser
 import headphones
+
+from headphones import logger
+
+from operator import itemgetter
+from bs4 import BeautifulSoup
+from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 
 # Modified from https://github.com/Verrus/beets-plugin-featInTitle
 RE_FEATURING = re.compile(r"[fF]t\.|[fF]eaturing|[fF]eat\.|\b[wW]ith\b|&|vs\.")
@@ -29,9 +35,8 @@ RE_CD_ALBUM = re.compile(r"\(?((CD|disc)\s*[0-9]+)\)?", re.I)
 RE_CD = re.compile(r"^(CD|dics)\s*[0-9]+$", re.I)
 
 def multikeysort(items, columns):
-
     comparers = [ ((itemgetter(col[1:].strip()), -1) if col.startswith('-') else (itemgetter(col.strip()), 1)) for col in columns]
-    
+
     def comparer(left, right):
         for fn, mult in comparers:
             result = cmp(fn(left), fn(right))
@@ -39,22 +44,22 @@ def multikeysort(items, columns):
                 return mult * result
         else:
             return 0
-    
+
     return sorted(items, cmp=comparer)
-    
+
 def checked(variable):
     if variable:
         return 'Checked'
     else:
         return ''
-        
+
 def radio(variable, pos):
 
     if variable == pos:
         return 'Checked'
     else:
         return ''
-        
+
 def latinToAscii(unicrap):
     """
     From couch potato
@@ -95,7 +100,7 @@ def latinToAscii(unicrap):
         else:
             r += str(i)
     return r
-    
+
 def convert_milliseconds(ms):
 
     seconds = ms/1000
@@ -106,7 +111,7 @@ def convert_milliseconds(ms):
         minutes = time.strftime("%M:%S", gmtime)
 
     return minutes
-    
+
 def convert_seconds(s):
 
     gmtime = time.gmtime(s)
@@ -116,30 +121,30 @@ def convert_seconds(s):
         minutes = time.strftime("%M:%S", gmtime)
 
     return minutes
-    
+
 def today():
     today = datetime.date.today()
     yyyymmdd = datetime.date.isoformat(today)
     return yyyymmdd
-    
+
 def now():
     now = datetime.datetime.now()
     return now.strftime("%Y-%m-%d %H:%M:%S")
-    
+
 def get_age(date):
 
     try:
         split_date = date.split('-')
     except:
         return False
-    
+
     try:
         days_old = int(split_date[0])*365 + int(split_date[1])*30 + int(split_date[2])
     except IndexError:
         days_old = False
-        
+
     return days_old
-    
+
 def bytes_to_mb(bytes):
 
     mb = int(bytes)/1048576
@@ -150,7 +155,7 @@ def mb_to_bytes(mb_str):
     result = re.search('^(\d+(?:\.\d+)?)\s?(?:mb)?', mb_str, flags=re.I)
     if result:
         return int(float(result.group(1))*1048576)
-        
+
 def piratesize(size):
     split = size.split(" ")
     factor = float(split[0])
@@ -165,34 +170,34 @@ def piratesize(size):
         size = factor
     else:
         size = 0
-    
+
     return size
 
 def replace_all(text, dic):
-    
+
     if not text:
         return ''
-        
+
     for i, j in dic.iteritems():
         text = text.replace(i, j)
     return text
-    
+
 def cleanName(string):
 
     pass1 = latinToAscii(string).lower()
     out_string = re.sub('[\.\-\/\!\@\#\$\%\^\&\*\(\)\+\-\"\'\,\;\:\[\]\{\}\<\>\=\_]', '', pass1).encode('utf-8')
-    
+
     return out_string
-    
+
 def cleanTitle(title):
 
     title = re.sub('[\.\-\/\_]', ' ', title).lower()
-    
+
     # Strip out extra whitespace
     title = ' '.join(title.split())
-    
+
     title = title.title()
-    
+
     return title
 
 def split_path(f):
@@ -235,8 +240,6 @@ def expand_subfolders(f):
     This algorithm will return nothing if the result is only one folder. In this
     case, normal post processing will be better.
     """
-
-    from headphones import logger
 
     # Find all folders with media files in them
     media_folders = []
@@ -297,13 +300,13 @@ def extract_data(s):
     #headphones default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
     match = pattern.match(s)
-    
+
     if match:
         name = match.group("name")
         album = match.group("album")
         year = match.group("year")
         return (name, album, year)
-    
+
     #newzbin default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
     match = pattern.match(s)
@@ -312,7 +315,7 @@ def extract_data(s):
         album = match.group("album")
         year = match.group("year")
         return (name, album, year)
-    
+
     #Gonna take a guess on this one - might be enough to search on mb
     # TODO: add in a bunch of re pattern matches
     pat = re.compile(r"\s*(?P<name>[^:]+)\s*-(?P<album>.*?)\s*$")
@@ -332,8 +335,6 @@ def extract_metadata(f):
     year based on the metadata. A decision is based on the number of different
     artists, albums and years found in the media files.
     """
-
-    from headphones import logger
 
     # Walk directory and scan all media files
     results = []
@@ -436,18 +437,18 @@ def extract_logline(s):
         return (timestamp, level, thread, message)
     else:
         return None
-        
+
 def extract_song_data(s):
 
     #headphones default format
     music_dir = headphones.MUSIC_DIR
     folder_format = headphones.FOLDER_FORMAT
     file_format = headphones.FILE_FORMAT
-    
+
     full_format = os.path.join(headphones.MUSIC_DIR)
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
     match = pattern.match(s)
-    
+
     if match:
         name = match.group("name")
         album = match.group("album")
@@ -455,7 +456,7 @@ def extract_song_data(s):
         return (name, album, year)
     else:
         logger.info("Couldn't parse %s into a valid default format", s)
-    
+
     #newzbin default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
     match = pattern.match(s)
@@ -467,14 +468,14 @@ def extract_song_data(s):
     else:
         logger.info("Couldn't parse %s into a valid Newbin format", s)
         return (name, album, year)
-        
+
 def smartMove(src, dest, delete=True):
-    
+
     from headphones import logger
 
     source_dir = os.path.dirname(src)
     filename = os.path.basename(src)
-    
+
     if os.path.isfile(os.path.join(dest, filename)):
         logger.info('Destination file exists: %s', os.path.join(dest, filename).decode(headphones.SYS_ENCODING, 'replace'))
         title = os.path.splitext(filename)[0]
@@ -519,13 +520,13 @@ def sab_sanitize_foldername(name):
     """
     CH_ILLEGAL = r'\/<>?*|"'
     CH_LEGAL   = r'++{}!@#`'
-    
+
     FL_ILLEGAL = CH_ILLEGAL + ':\x92"'
     FL_LEGAL   = CH_LEGAL +   "-''"
-    
+
     uFL_ILLEGAL = FL_ILLEGAL.decode('latin-1')
     uFL_LEGAL   = FL_LEGAL.decode('latin-1')
-    
+
     if not name:
         return name
     if isinstance(name, unicode):
@@ -593,3 +594,92 @@ def create_https_certificates(ssl_cert, ssl_key):
         return False
 
     return True
+
+def request_response(url, method="GET", auto_raise=True, status_pass=None, *args, **kwargs):
+    """
+    Convenient wrapper for `requests.get', which will capture the exceptions and
+    log them. On success, the Response object is returned. In case of a
+    exception, None is returned.
+    """
+
+    try:
+        # Request the URL
+        logger.debug("Requesting URL via %s method: %s", method, url)
+        response = requests.request(method, url, *args, **kwargs)
+
+        # If status code != OK, then raise exception, except if the status code
+        # is white listed.
+        if status_pass and auto_raise:
+            if response.status_code not in status_pass:
+                response.raise_for_status()
+            else:
+                logger.debug("Response Status code %d is white listed, not raising exception", response.status_code)
+        elif auto_raise:
+            response.raise_for_status()
+
+        return response
+    except requests.ConnectionError:
+        logger.error("Unable to connect to remote host.")
+    except requests.Timeout:
+        logger.error("Request timed out.")
+    except requests.HTTPError, e:
+        if e.response is not None:
+            logger.error("Request raise HTTP error with status code: %d", e.response.status_code)
+        else:
+            logger.error("Request raised HTTP error.")
+    except requests.RequestException, e:
+        logger.error("Request raised exception: %s", e)
+
+def request_soup(*args, **kwargs):
+    """
+    Wrapper for `request_response', which will return a BeatifulSoup object if
+    no exceptions are raised.
+    """
+
+    response = request_response(*args, **kwargs)
+
+    if response is not None:
+        return BeautifulSoup(response.content)
+
+def request_json(*args, **kwargs):
+    """
+    Wrapper for `request_response', which will decode the response as JSON
+    object and return the result, if no exceptions are raised.
+
+    As an option, a validator callback can be given, which should return True if
+    the result is valid.
+    """
+
+    validator = kwargs.pop("validator")
+    response = request_response(*args, **kwargs)
+
+    if response is not None:
+        try:
+            result = response.json()
+
+            if validator and not validator(result):
+                logger.error("JSON validation result vailed")
+            else:
+                return result
+        except ValueError:
+            logger.error("Response returned invalid JSON data")
+
+def request_content(*args, **kwargs):
+    """
+    Wrapper for `request_response', which will return the raw content.
+    """
+
+    response = request_response(*args, **kwargs)
+
+    if response is not None:
+        return response.content
+
+def request_feed(*args, **kwargs):
+    """
+    Wrapper for `request_response', which will return a feed object.
+    """
+
+    response = request_response(*args, **kwargs)
+
+    if response is not None:
+        return feedparser.parse(response.content)
