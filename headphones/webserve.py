@@ -703,9 +703,9 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("home")
     forceSearch.exposed = True
 
-    def forcePostProcess(self):
+    def forcePostProcess(self, dir=None, album_dir=None):
         from headphones import postprocessor
-        threading.Thread(target=postprocessor.forcePostProcess).start()
+        threading.Thread(target=postprocessor.forcePostProcess, kwargs={'dir':dir,'album_dir':album_dir}).start()
         raise cherrypy.HTTPRedirect("home")
     forcePostProcess.exposed = True
 
