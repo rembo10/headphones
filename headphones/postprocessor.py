@@ -498,7 +498,7 @@ def addAlbumArt(artwork, albumpath, release):
     
     album_art_name = helpers.replace_all(headphones.ALBUM_ART_FORMAT.strip(), values).replace('/','_') + ".jpg"
 
-    album_art_name = album_art_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING, 'replace')
+    album_art_name = album_art_name.replace('?','_').replace(':', '_').replace('"','_').replace('*','_').encode(headphones.SYS_ENCODING, 'replace')
 
     if headphones.FILE_UNDERSCORES:
         album_art_name = album_art_name.replace(' ', '_')
@@ -564,7 +564,7 @@ def moveFiles(albumpath, release, tracks):
             }
             
     folder = helpers.replace_all(headphones.FOLDER_FORMAT.strip(), values)
-    folder = folder.replace('./', '_/').replace(':','_').replace('?','_').replace('/.','/_').replace('<','_').replace('>','_').replace('|','_')
+    folder = folder.replace('./', '_/').replace(':','_').replace('?','_').replace('/.','/_').replace('<','_').replace('>','_').replace('|','_').replace('"','_')
     
     if folder.endswith('.'):
         folder = folder[:-1] + '_'
@@ -897,8 +897,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
             new_file_name = helpers.replace_all(headphones.FILE_FORMAT.strip(), values).replace('/','_') + ext
         
         
-        new_file_name = new_file_name.replace('?','_').replace(':', '_').encode(headphones.SYS_ENCODING, 'replace')
-        new_file_name = new_file_name.replace('*','_')
+        new_file_name = new_file_name.replace('?','_').replace(':', '_').replace('"','_').replace('*','_').encode(headphones.SYS_ENCODING, 'replace')
 
         if headphones.FILE_UNDERSCORES:
             new_file_name = new_file_name.replace(' ', '_')
