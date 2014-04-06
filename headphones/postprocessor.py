@@ -948,42 +948,46 @@ def renameUnprocessedFolder(albumpath):
             os.rename(albumpath, new_folder_name)
             return
             
-def forcePostProcess(dir=None, expand_subfolders=True):
+def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
 
+    if album_dir:
+        folders = [album_dir]
 
-    download_dirs = []
-    if dir:
-        download_dirs.append(dir.encode(headphones.SYS_ENCODING, 'replace'))
-    if headphones.DOWNLOAD_DIR and not dir:
-        download_dirs.append(headphones.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING, 'replace'))
-    if headphones.DOWNLOAD_TORRENT_DIR and not dir:
-        download_dirs.append(headphones.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
-
-    # If DOWNLOAD_DIR and DOWNLOAD_TORRENT_DIR are the same, remove the duplicate to prevent us from trying to process the same folder twice.
-    download_dirs = list(set(download_dirs))
-
-    logger.info('Checking to see if there are any folders to process in download_dir(s): %s', download_dirs)
-    # Get a list of folders in the download_dir
-    folders = []
-    for download_dir in download_dirs:
-        if not os.path.isdir(download_dir):
-            logger.warn('Directory %s does not exist. Skipping', download_dir)
-            continue
-        for folder in os.listdir(download_dir):
-            path_to_folder = os.path.join(download_dir, folder)
-
-            if os.path.isdir(path_to_folder):
-                subfolders = helpers.expand_subfolders(path_to_folder)
-
-                if expand_subfolders and subfolders is not None:
-                    folders.extend(subfolders)
-                else:
-                    folders.append(path_to_folder)
-
-    if len(folders):
-        logger.info('Found %i folders to process', len(folders))
     else:
-        logger.info('Found no folders to process in: %s', download_dirs)
+        download_dirs = []
+        if dir:
+            download_dirs.append(dir.encode(headphones.SYS_ENCODING, 'replace'))
+        if headphones.DOWNLOAD_DIR and not dir:
+            download_dirs.append(headphones.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING, 'replace'))
+        if headphones.DOWNLOAD_TORRENT_DIR and not dir:
+            download_dirs.append(headphones.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
+
+        # If DOWNLOAD_DIR and DOWNLOAD_TORRENT_DIR are the same, remove the duplicate to prevent us from trying to process the same folder twice.
+        download_dirs = list(set(download_dirs))
+
+        logger.info('Checking to see if there are any folders to process in download_dir(s): %s', download_dirs)
+        # Get a list of folders in the download_dir
+        folders = []
+
+        for download_dir in download_dirs:
+            if not os.path.isdir(download_dir):
+                logger.warn('Directory %s does not exist. Skipping', download_dir)
+                continue
+            for folder in os.listdir(download_dir):
+                path_to_folder = os.path.join(download_dir, folder)
+
+                if os.path.isdir(path_to_folder):
+                    subfolders = helpers.expand_subfolders(path_to_folder)
+
+                    if expand_subfolders and subfolders is not None:
+                        folders.extend(subfolders)
+                    else:
+                        folders.append(path_to_folder)
+
+        if len(folders):
+            logger.info('Found %i folders to process', len(folders))
+        else:
+            logger.info('Found no folders to process in: %s', download_dirs)
 
     # Parse the folder names to get artist album info
     myDB = db.DBConnection()
@@ -1016,13 +1020,33 @@ def forcePostProcess(dir=None, expand_subfolders=True):
         except Exception as e:
             name = album = year = None
 
+        if name and album and year:
+            release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
+            if release:
+                logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album', release['ArtistName'], release['AlbumTitle'])
+                verify(release['AlbumID'], folder)
+                continue
+            else:
+                logger.info('Querying MusicBrainz for the release group id for: %s - %s', name, album)
+                from headphones import mb
+                try:
+                    rgid = mb.findAlbumID(helpers.latinToAscii(name), helpers.latinToAscii(album))
+                except:
+                    logger.error('Can not get release information for this album')
+                    rgid = None
+
+                if rgid:
+                    verify(rgid, folder)
+                    continue
+                else:
+                    logger.info('No match found on MusicBrainz for: %s - %s', name, album)
+
         # Attempt 2b: deduce meta data into a valid format
-        if name is None:
-            try:
-                logger.debug('Attempting to extract name, album and year from metadata')
-                name, album, year = helpers.extract_metadata(folder)
-            except Exception as e:
-                name = album = year = None
+        try:
+            logger.debug('Attempting to extract name, album and year from metadata')
+            name, album, year = helpers.extract_metadata(folder)
+        except Exception as e:
+            name = album = year = None
 
         if name and album and year:
             release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
