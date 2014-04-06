@@ -19,7 +19,7 @@ import glob, urllib
 import lib.simplejson as simplejson
 
 import headphones
-from headphones import db, helpers, logger
+from headphones import db, helpers, logger, lastfm
 
 lastfm_apikey = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
 
@@ -210,15 +210,7 @@ class Cache(object):
         if ArtistID:
 
             self.id_type = 'artist'
-
-            params = {  "method": "artist.getInfo",
-                        "api_key": lastfm_apikey,
-                        "mbid": ArtistID,
-                        "format": "json"
-                        }
-
-            url = "http://ws.audioscrobbler.com/2.0/"
-            data = helpers.request_json(url, params=params, timeout=20)
+            data = lastfm.request_lastfm("artist.getinfo", mbid=ArtistID, api_key=lastfm_apikey)
 
             if not data:
                 return
@@ -226,25 +218,17 @@ class Cache(object):
             try:
                 image_url = data['artist']['image'][-1]['#text']
             except Exception:
-                logger.debug('No artist image found on url: %s', url)
+                logger.debug('No artist image found')
                 image_url = None
 
             thumb_url = self._get_thumb_url(data)
             if not thumb_url:
-                logger.debug('No artist thumbnail image found on url: %s', url)
+                logger.debug('No artist thumbnail image found')
 
         else:
 
             self.id_type = 'album'
-
-            params = {  "method": "album.getInfo",
-                        "api_key": lastfm_apikey,
-                        "mbid": AlbumID,
-                        "format": "json"
-                        }
-
-            url = "http://ws.audioscrobbler.com/2.0/?" + urllib.urlencode(params)
-            data = helpers.request_json(url, params=params, timeout=20)
+            data = lastfm.request_lastfm("album.getinfo", mbid=AlbumID, api_key=lastfm_apikey)
 
             if not data:
                 return
@@ -252,13 +236,13 @@ class Cache(object):
             try:
                 image_url = data['artist']['image'][-1]['#text']
             except Exception:
-                logger.debug('No artist image found on url: %s', url)
+                logger.debug('No artist image found')
                 image_url = None
 
             thumb_url = self._get_thumb_url(data)
 
             if not thumb_url:
-                logger.debug('No artist thumbnail image found on url: %s', url)
+                logger.debug('No artist thumbnail image found')
 
         return {'artwork' : image_url, 'thumbnail' : thumb_url }
 
@@ -271,14 +255,7 @@ class Cache(object):
         # Since lastfm uses release ids rather than release group ids for albums, we have to do a artist + album search for albums
         if self.id_type == 'artist':
 
-            params = {  "method": "artist.getInfo",
-                        "api_key": lastfm_apikey,
-                        "mbid": self.id,
-                        "format": "json"
-                        }
-
-            url = "http://ws.audioscrobbler.com/2.0/"
-            data = helpers.request_json(url, timeout=20, params=params)
+            data = lastfm.request_lastfm("artist.getinfo", mbid=self.id, api_key=lastfm_apikey)
 
             if not data:
                 return
@@ -286,36 +263,27 @@ class Cache(object):
             try:
                 self.info_summary = data['artist']['bio']['summary']
             except Exception:
-                logger.debug('No artist bio summary found on url: %s', url)
+                logger.debug('No artist bio summary found')
                 self.info_summary = None
             try:
                 self.info_content = data['artist']['bio']['content']
             except Exception:
-                logger.debug('No artist bio found on url: %s', url)
+                logger.debug('No artist bio found')
                 self.info_content = None
             try:
                 image_url = data['artist']['image'][-1]['#text']
             except Exception:
-                logger.debug('No artist image found on url: %s', url)
+                logger.debug('No artist image found')
                 image_url = None
 
             thumb_url = self._get_thumb_url(data)
             if not thumb_url:
-                logger.debug('No artist thumbnail image found on url: %s', url)
+                logger.debug('No artist thumbnail image found')
 
         else:
 
             dbartist = myDB.action('SELECT ArtistName, AlbumTitle FROM albums WHERE AlbumID=?', [self.id]).fetchone()
-
-            params = {  "method": "album.getInfo",
-                        "api_key": lastfm_apikey,
-                        "artist": dbartist['ArtistName'].encode('utf-8'),
-                        "album": dbartist['AlbumTitle'].encode('utf-8'),
-                        "format": "json"
-                        }
-
-            url = "http://ws.audioscrobbler.com/2.0/"
-            data = helpers.request_json(url, timeout=20, params=params)
+            data = lastfm.request_lastfm("album.getinfo", artist=dbartist['ArtistName'], album=dbartist['AlbumTitle'], api_key=lastfm_apikey)
 
             if not data:
                 return
@@ -323,23 +291,23 @@ class Cache(object):
             try:
                 self.info_summary = data['album']['wiki']['summary']
             except Exception:
-                logger.debug('No album summary found from: %s', url)
+                logger.debug('No album summary found')
                 self.info_summary = None
             try:
                 self.info_content = data['album']['wiki']['content']
             except Exception:
-                logger.debug('No album infomation found from: %s', url)
+                logger.debug('No album infomation found')
                 self.info_content = None
             try:
                 image_url = data['album']['image'][-1]['#text']
             except Exception:
-                logger.debug('No album image link found on url: %s', url)
+                logger.debug('No album image link found')
                 image_url = None
 
             thumb_url = self._get_thumb_url(data)
 
             if not thumb_url:
-                logger.debug('No album thumbnail image found on url: %s', url)
+                logger.debug('No album thumbnail image found')
 
         #Save the content & summary to the database no matter what if we've opened up the url
         if self.id_type == 'artist':

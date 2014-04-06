@@ -646,10 +646,11 @@ def request_soup(url, **kwargs):
     no exceptions are raised.
     """
 
+    parser = kwargs.pop("parser", "html5lib")
     response = request_response(url, **kwargs)
 
     if response is not None:
-        return BeautifulSoup(response.content, "html5lib")
+        return BeautifulSoup(response.content, parser)
 
 def request_minidom(url, **kwargs):
     """
