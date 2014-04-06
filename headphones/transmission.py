@@ -13,30 +13,30 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import headphones
-from headphones import logger, notifiers
-
-import urllib2
-import lib.simplejson as json
-import base64
-import time
 import re
+import time
+import base64
+import headphones
+
+import simplejson as json
+
+from headphones import logger, notifiers, helpers
 
 # This is just a simple script to send torrents to transmission. The
 # intention is to turn this into a class where we can check the state
-# of the download, set the download dir, etc. 
+# of the download, set the download dir, etc.
 # TODO: Store the session id so we don't need to make 2 calls
 #       Store torrent id so we can check up on it
 
 def addTorrent(link):
     method = 'torrent-add'
-    arguments = {'filename': link, 'download-dir':headphones.DOWNLOAD_TORRENT_DIR}
-    
+    arguments = {'filename': link, 'download-dir': headphones.DOWNLOAD_TORRENT_DIR}
+
     response = torrentAction(method,arguments)
 
     if not response:
         return False
-        
+
     if response['result'] == 'success':
         if 'torrent-added' in response['arguments']:
             name = response['arguments']['torrent-added']['name']
@@ -75,38 +75,38 @@ def addTorrent(link):
             pushalot.notify(name,"Download started")
 
         return retid
-        
+
     else:
         logger.info('Transmission returned status %s' % response['result'])
         return False
-        
+
 def getTorrentFolder(torrentid):
     method = 'torrent-get'
     arguments = { 'ids': torrentid, 'fields': ['name','percentDone']}
-    
+
     response = torrentAction(method, arguments)
     percentdone = response['arguments']['torrents'][0]['percentDone']
     torrent_folder_name = response['arguments']['torrents'][0]['name']
-    
+
     tries = 1
-    
+
     while percentdone == 0  and tries <10:
         tries+=1
         time.sleep(5)
         response = torrentAction(method, arguments)
         percentdone = response['arguments']['torrents'][0]['percentDone']
-    
+
     torrent_folder_name = response['arguments']['torrents'][0]['name']
 
     return torrent_folder_name
-    
+
 def torrentAction(method, arguments):
-    
+
     host = headphones.TRANSMISSION_HOST
     username = headphones.TRANSMISSION_USERNAME
     password = headphones.TRANSMISSION_PASSWORD
     sessionid = None
-    
+
     if not host.startswith('http'):
         host = 'http://' + host
 
@@ -131,36 +131,32 @@ def torrentAction(method, arguments):
             logger.error('Transmission port missing')
             return
 
-    request = urllib2.Request(host)
+    # Retrieve session id
     if username and password:
-        base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
-        request.add_header("Authorization", "Basic %s" % base64string)
-    opener = urllib2.build_opener()
-    try:
-        data = opener.open(request).read()
-    except urllib2.HTTPError, e:
-        if e.code == 409:
-            sessionid = e.hdrs['x-transmission-session-id']
-        else:
-            logger.error('Could not connect to Transmission. Error: ' + str(e))
-    except Exception, e:
-        logger.error('Could not connect to Transmission. Error: ' + str(e))
-    
+        response = helpers.request_response(host, auth=(username, password), status_pass=409)
+    else:
+        response = helpers.request_response(host, status, status_pass=409)
+
+    if not response:
+        logger.error("Error gettings Transmission session ID")
+        return
+
+    # Parse session id
+    if response.status_code == 409:
+        sessionid = response.headers['x-transmission-session-id']
+
     if not sessionid:
         logger.error("Error getting Session ID from Transmission")
         return
-        
-    request.add_header('x-transmission-session-id', sessionid)
-        
-    postdata = json.dumps({ 'method': method, 
-                       'arguments': arguments })
-                                      
-    request.add_data(postdata)
-                                      
-    try:    
-        response = json.loads(opener.open(request).read())
-    except Exception, e:
-        logger.error("Error sending torrent to Transmission: " + str(e))
+
+    # Prepare next request
+    headers = { 'x-transmission-session-id': sessionid }
+    data = { 'method': method, 'arguments': arguments }
+
+    response = helpers.request_content(host, data=json.dumps(data), headers=headers)
+
+    if not response:
+        logger.error("Error sending torrent to Transmission")
         return
-        
+
     return response

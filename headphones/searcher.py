@@ -302,7 +302,7 @@ def searchNZB(album, new=False, losslessOnly=False):
         # Request results
         logger.info('Parsing results from Headphones Indexer')
 
-        headers = { 'User-Agent', USER_AGENT }
+        headers = { 'User-Agent': USER_AGENT }
         params = {
             "t": "search",
             "cat": categories,
@@ -368,7 +368,7 @@ def searchNZB(album, new=False, losslessOnly=False):
             # Request results
             logger.info('Parsing results from %s', newznab_host[0])
 
-            headers = { 'User-Agent', USER_AGENT }
+            headers = { 'User-Agent': USER_AGENT }
             params = {
                 "t": "search",
                 "apikey": newznab_host[1],
@@ -415,7 +415,7 @@ def searchNZB(album, new=False, losslessOnly=False):
         # Request results
         logger.info('Parsing results from nzbs.org')
 
-        headers = { 'User-Agent', USER_AGENT }
+        headers = { 'User-Agent': USER_AGENT }
         params = {
             "t": "search",
             "apikey": headphones.NZBSORG_HASH,
@@ -464,7 +464,7 @@ def searchNZB(album, new=False, losslessOnly=False):
         # Request results
         logger.info('Parsing results from NZBsRus')
 
-        headers = { 'User-Agent', USER_AGENT }
+        headers = { 'User-Agent': USER_AGENT }
         params = {
             "uid": headphones.NZBSRUS_UID,
             "key": headphones.NZBSRUS_APIKEY,
@@ -515,7 +515,7 @@ def searchNZB(album, new=False, losslessOnly=False):
         # Request results
         logger.info('Parsing results from omgwtfnzbs')
 
-        headers = { 'User-Agent', USER_AGENT }
+        headers = { 'User-Agent': USER_AGENT }
         params = {
             "user": headphones.OMGWTFNZBS_UID,
             "api": headphones.OMGWTFNZBS_APIKEY,
@@ -750,7 +750,7 @@ def getresultNZB(result):
             auth=(headphones.HPUSER, headphones.HPPASS),
             params={"username": headphones.NEWZBIN_UID, "password": headphones.NEWZBIN_PASSWORD, "reportid": result[2]},
             headers={'User-Agent': USER_AGENT},
-            status_pass=[400]
+            status_pass=400
         )
 
         if response.status_code == 400:
@@ -875,10 +875,10 @@ def searchTorrent(album, new=False, losslessOnly=False):
 
         # Process feed
         if data:
-            if not len(d.entries):
+            if not len(data.entries):
                 logger.info(u"No results found from %s for %s" % provider, term)
             else:
-                for item in d.entries:
+                for item in data.entries:
                     try:
                         rightformat = True
                         title = item['title']
@@ -948,11 +948,10 @@ def searchTorrent(album, new=False, losslessOnly=False):
 
         # Process feed
         if data:
-            if not len(d.entries):
+            if not len(data.entries):
                 logger.info(u"No results found from %s for %s" % (provider, term))
             else:
-                for item in d.entries:
-
+                for item in data.entries:
                     try:
                         title = item.title
                         desc_match = re.search(r"Size: (\d+)<", item.description)
@@ -1128,7 +1127,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
             "sort": "seeds"
         }
 
-        data = request_soup(
+        data = helpers.request_soup(
             url=providerurl + category,
             params=params,
             timeout=20
@@ -1184,7 +1183,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
         # Requesting content
         logger.info('Parsing results from ISOHunt')
 
-        headers = { 'User-Agent', USER_AGENT }
+        headers = { 'User-Agent': USER_AGENT }
         params = {
             "iht": "2",
             "sort": "seeds"
@@ -1257,10 +1256,10 @@ def searchTorrent(album, new=False, losslessOnly=False):
 
         # Process feed
         if data:
-            if not len(d.entries):
+            if not len(data.entries):
                 logger.info(u"No results found from %s for %s" % (provider, term))
             else:
-                for item in d.entries:
+                for item in data.entries:
                     try:
                         rightformat = True
                         title = item.title
@@ -1312,6 +1311,8 @@ def preprocess(resultlist):
                 headers = { 'Referer': 'http://kat.ph/' }
             elif result[3] == 'What.cd':
                 headers = { 'User-Agent': 'Headphones' }
+            else:
+                headers = {}
 
             return helpers.request_content(url=result[2], headers=headers), result
 
