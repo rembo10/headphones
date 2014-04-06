@@ -567,10 +567,10 @@ def moveFiles(albumpath, release, tracks):
     folder = folder.replace('./', '_/').replace(':','_').replace('?','_').replace('/.','/_').replace('<','_').replace('>','_').replace('|','_')
     
     if folder.endswith('.'):
-        folder = folder.replace(folder[len(folder)-1], '_')
+        folder = folder[:-1] + '_'
         
     if folder.startswith('.'):
-        folder = folder.replace(0, '_')
+        folder = '_' + folder[1:]
         
     # Grab our list of files early on so we can determine if we need to create
     # the lossy_dest_dir, lossless_dest_dir, or both
