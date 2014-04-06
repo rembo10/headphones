@@ -1307,9 +1307,9 @@ def preprocess(resultlist):
             return request.request_content(url=result[2], headers=headers), result
 
         else:
-            usenet_retention = headphones.USENET_RETENTION or 2000
-
+            usenet_retention = int(headphones.USENET_RETENTION or 2000)
             nzb = getresultNZB(result)
+
             if nzb:
                 try:
                     d = minidom.parseString(nzb)
@@ -1327,7 +1327,7 @@ def preprocess(resultlist):
                         #TODO: Do we want rar checking in here to try to keep unknowns out?
                         #or at least the option to do so?
                 except Exception, e:
-                    logger.error('Unable to parse the best result NZB. Error: %s. (Make sure your username/password/API is correct for provider: %s', e ,result[3])
+                    logger.exception('Unhandled exception. Unable to parse the best result NZB. Error: %s. (Make sure your username/password/API is correct for provider: %s', e ,result[3])
                     continue
 
                 return nzb, result
