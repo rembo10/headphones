@@ -16,24 +16,18 @@
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
 
 import urllib, urlparse
-import lib.feedparser as feedparser
-from bs4 import BeautifulSoup
 from lib.pygazelle import api as gazelleapi
 from lib.pygazelle import encoding as gazelleencoding
 from lib.pygazelle import format as gazelleformat
 from lib.pygazelle import media as gazellemedia
 from xml.dom import minidom
-from xml.parsers.expat import ExpatError
-import lib.simplejson as json
-from StringIO import StringIO
-import gzip, base64
 
 import os, re, time
 import string
 import shutil
 import requests
 
-import headphones, exceptions
+import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget
 from headphones import transmission
@@ -45,94 +39,6 @@ rutracker = rutrackersearch.Rutracker()
 
 # Persistent What.cd API object
 gazelle = None
-
-def request_response(url, method="GET", auto_raise=True, status_pass=None, *args, **kwargs):
-    """
-    Convenient wrapper for `requests.get', which will capture the exceptions and
-    log them. On success, the Response object is returned. In case of a
-    exception, None is returned.
-    """
-
-    try:
-        # Request the URL
-        logger.debug("Requesting URL via %s method: %s", method, url)
-        response = requests.request(method, url, *args, **kwargs)
-
-        # If status code != OK, then raise exception, except if the status code
-        # is white listed.
-        if status_pass and auto_raise:
-            if response.status_code not in status_pass:
-                response.raise_for_status()
-            else:
-                logger.debug("Response code %d is white listed, not raising exception", response.status_code)
-        elif auto_raise:
-            response.raise_for_status()
-
-        return response
-    except requests.ConnectionError:
-        logger.error("Unable to connect to remote host.")
-    except requests.Timeout:
-        logger.error("Request timed out.")
-    except requests.HTTPError, e:
-        if e.response:
-            logger.error("Request returned unexpected status code: %d", e.status_code)
-        else:
-            logger.error("Request raised an HTTP error.")
-    except requests.RequestException, e:
-        logger.error("Request raised exception: %s", e)
-
-def request_soup(*args, **kwargs):
-    """
-    Wrapper for `request_response', which will return a BeatifulSoup object if
-    no exceptions are raised.
-    """
-
-    response = request_response(*args, **kwargs)
-
-    if response:
-        return BeautifulSoup(response.content)
-
-def request_json(validator=None, *args, **kwargs):
-    """
-    Wrapper for `request_response', which will decode the response as JSON
-    object and return the result, if no exceptions are raised.
-
-    As an option, a validator callback can be given, which should return True if
-    the result is valid.
-    """
-
-    response = request_response(*args, **kwargs)
-
-    if response:
-        try:
-            result = response.json()
-
-            if validator and not validator(result):
-                logger.error("JSON validation result vailed")
-            else:
-                return result
-        except ValueError:
-            logger.error("Response returned invalid JSON data")
-
-def request_content(*args, **kwargs):
-    """
-    Wrapper for `request_response', which will return the raw content.
-    """
-
-    response = request_response(*args, **kwargs)
-
-    if response:
-        return response.content
-
-def request_feed(*args, **kwargs):
-    """
-    Wrapper for `request_response', which will return a feed object.
-    """
-
-    response = request_response(*args, **kwargs)
-
-    if response:
-        return feedparser.parse(response.content)
 
 def url_fix(s, charset='utf-8'):
     if isinstance(s, unicode):
@@ -146,7 +52,6 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False, choose_specific_
     myDB = db.DBConnection()
 
     if not albumid:
-
         results = myDB.select('SELECT * from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
 
         for album in results:
@@ -406,7 +311,7 @@ def searchNZB(album, new=False, losslessOnly=False):
             "q": term
         }
 
-        data = request_feed(
+        data = helpers.request_feed(
             url="http://headphones.codeshy.com/newznab/api",
             params=params, headers=headers,
             auth=(headphones.HPUSER, headphones.HPPASS)
@@ -472,7 +377,7 @@ def searchNZB(album, new=False, losslessOnly=False):
                 "q": term
             }
 
-            data = request_feed(
+            data = helpers.request_feed(
                 url=newznab_host[0] + '/api?',
                 params=params, headers=headers
             )
@@ -519,7 +424,7 @@ def searchNZB(album, new=False, losslessOnly=False):
             "q": term
         }
 
-        data = request_feed(
+        data = helpers.request_feed(
             url='http://beta.nzbs.org/api',
             params=params, headers=headers,
             timeout=20
@@ -569,7 +474,7 @@ def searchNZB(album, new=False, losslessOnly=False):
             "searchtext": term
         }
 
-        data = request_json(
+        data = helpers.request_json(
             url='https://www.nzbsrus.com/api.php',
             params=params, headers=headers,
             validator=lambda x: type(x) == dict
@@ -619,7 +524,7 @@ def searchNZB(album, new=False, losslessOnly=False):
             "search": term
         }
 
-        data = request_json(
+        data = helpers.request_json(
             url='http://api.omgwtfnzbs.org/json/',
             params=params, headers=headers,
             validator=lambda x: type(x) == dict
@@ -840,7 +745,7 @@ def getresultNZB(result):
     nzb = None
 
     if result[3] == 'newzbin':
-        response = request_response(
+        response = helpers.request_response(
             url='https://www.newzbin2.es/api/dnzb/',
             auth=(headphones.HPUSER, headphones.HPPASS),
             params={"username": headphones.NEWZBIN_UID, "password": headphones.NEWZBIN_PASSWORD, "reportid": result[2]},
@@ -865,13 +770,13 @@ def getresultNZB(result):
         else:
             nzb = response.content
     elif result[3] == 'headphones':
-        nzb = request_content(
+        nzb = helpers.request_content(
             url=result[2],
             auth=(headphones.HPUSER, headphones.HPPASS),
             headers={'User-Agent': USER_AGENT}
         )
     else:
-        nzb = request_content(
+        nzb = helpers.request_content(
             url=result[2],
             headers={'User-Agent': USER_AGENT}
         )
@@ -962,7 +867,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
             "rss": "1"
         }
 
-        data = request_feed(
+        data = helpers.request_feed(
             url=providerurl,
             params=params,
             timeout=20
@@ -981,7 +886,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
                         url = item['links'][1]['href']
                         size = int(item['links'][1]['length'])
                         if format == "2":
-                            torrent = request_content(url)
+                            torrent = helpers.request_content(url)
                             if not torrent or (int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1):
                                 rightformat = False
                         if rightformat == True and size < maxsize and minimumseeders < int(seeders):
@@ -1035,7 +940,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
             "q": " ".join(query_items)
         }
 
-        data = request_feed(
+        data = helpers.request_feed(
             url=providerurl,
             params=params, headers=headers,
             timeout=20
@@ -1285,7 +1190,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
             "sort": "seeds"
         }
 
-        data = request_feed(
+        data = helpers.request_feed(
             url=providerurl,
             params=params, headers=headers,
             auth=(headphones.HPUSER, headphones.HPPASS),
@@ -1310,7 +1215,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
                         url = item.links[1]['url']
                         size = int(item.links[1]['length'])
                         if format == "2":
-                            torrent = request_content(url)
+                            torrent = helpers.request_content(url)
 
                             if not torrent or (int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1):
                                 rightformat = False
@@ -1345,7 +1250,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
         # Requesting content
         logger.info('Parsing results from Mininova')
 
-        data = request_feed(
+        data = helpers.request_feed(
             url=providerurl,
             timeout=20
         )
@@ -1367,7 +1272,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
                         url = item.links[1]['url']
                         size = int(item.links[1]['length'])
                         if format == "2":
-                            torrent = request_content(url)
+                            torrent = helpers.request_content(url)
 
                             if not torrent or (int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1):
                                 rightformat = False
@@ -1408,7 +1313,7 @@ def preprocess(resultlist):
             elif result[3] == 'What.cd':
                 headers = { 'User-Agent': 'Headphones' }
 
-            return request_content(url=result[2], headers=headers), result
+            return helpers.request_content(url=result[2], headers=headers), result
 
         else:
             usenet_retention = headphones.USENET_RETENTION or 2000
