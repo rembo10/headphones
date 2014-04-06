@@ -20,7 +20,7 @@ import os
 from beets.mediafile import MediaFile
 
 import headphones
-from headphones import logger, helpers, db, mb, albumart, lastfm
+from headphones import logger, helpers, db, mb, lastfm
 
 blacklisted_special_artist_names = ['[anonymous]','[data]','[no artist]','[traditional]','[unknown]','Various Artists']
 blacklisted_special_artists = ['f731ccc4-e22a-43af-a747-64213329e088','33cf029c-63b0-41a0-9855-be2a3665fb3b',\
