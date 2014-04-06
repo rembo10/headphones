@@ -750,7 +750,7 @@ def getresultNZB(result):
             auth=(headphones.HPUSER, headphones.HPPASS),
             params={"username": headphones.NEWZBIN_UID, "password": headphones.NEWZBIN_PASSWORD, "reportid": result[2]},
             headers={'User-Agent': USER_AGENT},
-            status_pass=400
+            whitelist_status_code=400
         )
 
         if response.status_code == 400:
@@ -1307,12 +1307,12 @@ def preprocess(resultlist):
                 return True, result
 
             # Download the torrent file
+            headers = {}
+
             if result[3] == 'Kick Ass Torrent':
-                headers = { 'Referer': 'http://kat.ph/' }
+                headers['Referer'] = 'http://kat.ph/'
             elif result[3] == 'What.cd':
-                headers = { 'User-Agent': 'Headphones' }
-            else:
-                headers = {}
+                headers['User-Agent'] = 'Headphones'
 
             return helpers.request_content(url=result[2], headers=headers), result
 
