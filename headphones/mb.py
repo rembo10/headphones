@@ -67,7 +67,7 @@ def startmb():
         else:
             musicbrainzngs.hpauth(mbuser,mbpass)
     
-    logger.debug('Using the following server values:\nMBHost: %s ; MBPort: %i  ;  Sleep Interval: %i ' % (mbhost, mbport, sleepytime))
+    logger.debug('Using the following server values: MBHost: %s, MBPort: %i, Sleep Interval: %i', mbhost, mbport, sleepytime)
     
     return True
 
