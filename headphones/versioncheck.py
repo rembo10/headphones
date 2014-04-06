@@ -138,7 +138,7 @@ def checkGithub():
 
     logger.info('Comparing currently installed version with latest GitHub version')
     url = 'https://api.github.com/repos/%s/headphones/compare/%s...%s' % (headphones.GIT_USER, headphones.CURRENT_VERSION, headphones.LATEST_VERSION)
-    commits = helpers.request_json(url, timeout=20, status_pass=[404], validator=lambda x: type(x) == dict)
+    commits = helpers.request_json(url, timeout=20, whitelist_status_code=404, validator=lambda x: type(x) == dict)
 
     if not commits:
         logger.warn('Could not get commits behind from GitHub.')

@@ -597,25 +597,30 @@ def create_https_certificates(ssl_cert, ssl_key):
 
     return True
 
-def request_response(url, method="get", auto_raise=True, status_pass=None, **kwargs):
+def request_response(url, method="get", auto_raise=True, whitelist_status_code=None, **kwargs):
     """
     Convenient wrapper for `requests.get', which will capture the exceptions and
     log them. On success, the Response object is returned. In case of a
     exception, None is returned.
     """
 
-    if status_pass and type(status_pass) != list:
-        status_pass = [status_pass]
+    # Convert whitelist_status_code to a list if needed
+    if whitelist_status_code and type(whitelist_status_code) != list:
+        whitelist_status_code = [whitelist_status_code]
+
+    # Map method to the request.XXX method. This is a simple hack, but it allows
+    # requests to apply more magic per method. See it's source.
+    request_method = requests[method.lower()]
 
     try:
         # Request the URL
         logger.debug("Requesting URL via %s method: %s", method, url)
-        response = requests.request(method, url, **kwargs)
+        response = request_method(url, **kwargs)
 
         # If status code != OK, then raise exception, except if the status code
         # is white listed.
-        if status_pass and auto_raise:
-            if response.status_code not in status_pass:
+        if whitelist_status_code and auto_raise:
+            if response.status_code not in whitelist_status_code:
                 response.raise_for_status()
             else:
                 logger.debug("Response Status code %d is white listed, not raising exception", response.status_code)

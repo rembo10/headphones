@@ -133,9 +133,9 @@ def torrentAction(method, arguments):
 
     # Retrieve session id
     if username and password:
-        response = helpers.request_response(host, auth=(username, password), status_pass=409)
+        response = helpers.request_response(host, auth=(username, password), whitelist_status_code=409)
     else:
-        response = helpers.request_response(host, status, status_pass=409)
+        response = helpers.request_response(host, whitelist_status_code=409)
 
     if not response:
         logger.error("Error gettings Transmission session ID")
