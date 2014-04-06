@@ -21,6 +21,7 @@ import threading
 import headphones
 
 from logging import handlers
+
 from headphones import helpers
 
 # These settings are for file logging only

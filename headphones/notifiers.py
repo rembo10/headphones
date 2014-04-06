@@ -13,28 +13,30 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import logger, helpers, common
-from headphones.exceptions import ex
 import base64
 import cherrypy
 import urllib
 import urllib2
 import headphones
-from httplib import HTTPSConnection
-from urllib import urlencode
+import simplejson
 import os.path
 import subprocess
 import gntp.notifier
-import lib.simplejson as simplejson
-from xml.dom import minidom
 
-try:
-    from urlparse import parse_qsl #@UnusedImport
-except:
-    from cgi import parse_qsl #@Reimport
+from xml.dom import minidom
+from httplib import HTTPSConnection
+from urllib import urlencode
 
 import lib.oauth2 as oauth
 import lib.pythontwitter as twitter
+
+from headphones import logger, helpers, common, request
+from headphones.exceptions import ex
+
+try:
+    from urlparse import parse_qsl
+except:
+    from cgi import parse_qsl
 
 class GROWL:
 
@@ -169,66 +171,34 @@ class PROWL:
 class XBMC:
 
     def __init__(self):
-    
+
         self.hosts = headphones.XBMC_HOST
         self.username = headphones.XBMC_USERNAME
         self.password = headphones.XBMC_PASSWORD
 
     def _sendhttp(self, host, command):
-
-        username = self.username
-        password = self.password
-        
         url_command = urllib.urlencode(command)
-        
         url = host + '/xbmcCmds/xbmcHttp/?' + url_command
-            
-        req = urllib2.Request(url)
-            
-        if password:
-            base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
-            req.add_header("Authorization", "Basic %s" % base64string)
-                
-        logger.info('XBMC url: %s' % url)
-            
-        try:
-            handle = urllib2.urlopen(req)
-        except Exception, e:
-            logger.warn('Error opening XBMC url: %s' % e)
-            return
-    
-        response = handle.read().decode(headphones.SYS_ENCODING)
-            
-        return response
-    
+
+        if self.password:
+            return request.request_content(url, auth=(self.username, self.password))
+        else:
+            return request.request_content(url)
+
     def _sendjson(self, host, method, params={}):
         data = [{'id': 0, 'jsonrpc': '2.0', 'method': method, 'params': params}]
-        data = simplejson.JSONEncoder().encode(data)
+        headers = {'Content-Type': 'application/json'}
+        url = host + '/jsonrpc'
 
-        content = {'Content-Type': 'application/json', 'Content-Length': len(data)}
+        if self.password:
+            response = request.request_json(req, method="POST", data=simplejson.dumps(data), headers=headers, auth=(self.username, self.password))
+        else:
+            response = request.request_json(req, method="POST", data=simplejson.dumps(data), headers=headers)
 
-        req = urllib2.Request(host+'/jsonrpc', data, content)
-
-        if self.username and self.password:
-            base64string = base64.encodestring('%s:%s' % (self.username, self.password)).replace('\n', '')
-            req.add_header("Authorization", "Basic %s" % base64string)
-
-        try:
-            handle = urllib2.urlopen(req)
-        except Exception, e:
-            logger.warn('Error opening XBMC url: %s' % e)
-            return
-
-        response = simplejson.JSONDecoder().decode(handle.read())
-
-        try:
+        if response:
             return response[0]['result']
-        except:
-            logger.warn('XBMC returned error: %s' % response[0]['error'])
-            return
 
     def update(self):
-                    
         # From what I read you can't update the music library on a per directory or per path basis
         # so need to update the whole thing
 
@@ -364,21 +334,7 @@ class NMA:
         self.priority = headphones.NMA_PRIORITY
         
     def _send(self, data):
-        
-        url_data = urllib.urlencode(data)
-        url = 'https://www.notifymyandroid.com/publicapi/notify'
-        
-        req = urllib2.Request(url, url_data)
-
-        try:
-            handle = urllib2.urlopen(req)
-        except Exception, e:
-            logger.warn('Error opening NotifyMyAndroid url: ' % e)
-            return
-
-        response = handle.read().decode(headphones.SYS_ENCODING)
-        
-        return response     
+        return request.request_content('https://www.notifymyandroid.com/publicapi/notify', data=data)
         
     def notify(self, artist=None, album=None, snatched_nzb=None):
     
