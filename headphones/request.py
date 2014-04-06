@@ -30,9 +30,8 @@ def request_response(url, method="get", auto_raise=True, whitelist_status_code=N
         # is white listed.
         if whitelist_status_code and auto_raise:
             if response.status_code not in whitelist_status_code:
+                logger.debug("Response status code %d is not white listed, raising exception", response.status_code)
                 response.raise_for_status()
-            else:
-                logger.debug("Response Status code %d is white listed, not raising exception", response.status_code)
         elif auto_raise:
             response.raise_for_status()
 
