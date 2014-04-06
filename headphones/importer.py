@@ -469,14 +469,6 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             if skip_log == 0:
                 logger.info(u"[%s] No new releases, so no changes made to %s" % (artist['artist_name'], rg['title']))
 
-    # Start searching for newly added albums
-    if album_searches:
-        from headphones import searcher
-        logger.info("Start searching for %d albums.", len(album_searches))
-
-        for album_search in album_searches:
-            searcher.searchforalbum(albumid=album_search)
-
     latestalbum = myDB.action('SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [artistid]).fetchone()
     totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid]))
     #havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['artist_name']]))
@@ -510,6 +502,13 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
         myDB.action('DELETE FROM newartists WHERE ArtistName = ?', [artist['artist_name']])
         logger.info(u"Updating complete for: %s" % artist['artist_name'])
 
+    # Start searching for newly added albums
+    if album_searches:
+        from headphones import searcher
+        logger.info("Start searching for %d albums.", len(album_searches))
+
+        for album_search in album_searches:
+            searcher.searchforalbum(albumid=album_search)
 
 def addReleaseById(rid):
 
