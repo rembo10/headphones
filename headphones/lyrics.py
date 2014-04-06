@@ -16,7 +16,7 @@
 import re
 import htmlentitydefs
 
-from headphones import logger, helpers
+from headphones import logger, request
 
 def getLyrics(artist, song):
 
@@ -26,7 +26,7 @@ def getLyrics(artist, song):
                 }
 
     url = 'http://lyrics.wikia.com/api.php'
-    data = helpers.request_minidom(url, params)
+    data = request.request_minidom(url, params)
     
     if not data:
         return
@@ -39,7 +39,7 @@ def getLyrics(artist, song):
         logger.info('No lyrics found for %s - %s' % (artist, song))
         return
     
-    lyricspage = helpers.request_content(lyricsurl)
+    lyricspage = request.request_content(lyricsurl)
     
     if not lyricspage:
         logger.warn('Error fetching lyrics from: %s. Error: %s' % (lyricsurl, e))

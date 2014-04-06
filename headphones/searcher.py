@@ -29,7 +29,7 @@ import requests
 
 import headphones
 from headphones.common import USER_AGENT
-from headphones import logger, db, helpers, classes, sab, nzbget
+from headphones import logger, db, helpers, classes, sab, nzbget, request
 from headphones import transmission
 
 import lib.bencode as bencode
@@ -311,7 +311,7 @@ def searchNZB(album, new=False, losslessOnly=False):
             "q": term
         }
 
-        data = helpers.request_feed(
+        data = request.request_feed(
             url="http://headphones.codeshy.com/newznab/api",
             params=params, headers=headers,
             auth=(headphones.HPUSER, headphones.HPPASS)
@@ -377,7 +377,7 @@ def searchNZB(album, new=False, losslessOnly=False):
                 "q": term
             }
 
-            data = helpers.request_feed(
+            data = request.request_feed(
                 url=newznab_host[0] + '/api?',
                 params=params, headers=headers
             )
@@ -424,7 +424,7 @@ def searchNZB(album, new=False, losslessOnly=False):
             "q": term
         }
 
-        data = helpers.request_feed(
+        data = request.request_feed(
             url='http://beta.nzbs.org/api',
             params=params, headers=headers,
             timeout=20
@@ -474,7 +474,7 @@ def searchNZB(album, new=False, losslessOnly=False):
             "searchtext": term
         }
 
-        data = helpers.request_json(
+        data = request.request_json(
             url='https://www.nzbsrus.com/api.php',
             params=params, headers=headers,
             validator=lambda x: type(x) == dict
@@ -524,7 +524,7 @@ def searchNZB(album, new=False, losslessOnly=False):
             "search": term
         }
 
-        data = helpers.request_json(
+        data = request.request_json(
             url='http://api.omgwtfnzbs.org/json/',
             params=params, headers=headers,
             validator=lambda x: type(x) == dict
@@ -739,7 +739,7 @@ def getresultNZB(result):
     nzb = None
 
     if result[3] == 'newzbin':
-        response = helpers.request_response(
+        response = request.request_response(
             url='https://www.newzbin2.es/api/dnzb/',
             auth=(headphones.HPUSER, headphones.HPPASS),
             params={"username": headphones.NEWZBIN_UID, "password": headphones.NEWZBIN_PASSWORD, "reportid": result[2]},
@@ -747,30 +747,31 @@ def getresultNZB(result):
             whitelist_status_code=400
         )
 
-        if response.status_code == 400:
-            error_code = int(response.headers.header['X-DNZB-RCode'])
+        if response is not None:
+            if response.status_code == 400:
+                error_code = int(response.headers.header['X-DNZB-RCode'])
 
-            if error_code == 450:
-                result = re.search("wait (\d+) seconds", response.headers['X-DNZB-RText'])
-                seconds = int(result.group(1))
+                if error_code == 450:
+                    result = re.search("wait (\d+) seconds", response.headers['X-DNZB-RText'])
+                    seconds = int(result.group(1))
 
-                logger.info("Newzbin throttled our NZB downloading, pausing for %d seconds", seconds)
-                time.sleep(seconds)
+                    logger.info("Newzbin throttled our NZB downloading, pausing for %d seconds", seconds)
+                    time.sleep(seconds)
 
-                # Try again -- possibly forever :(
-                getresultNZB(result)
+                    # Try again -- possibly forever :(
+                    getresultNZB(result)
+                else:
+                    logger.info("Newzbin error code %d", error_code)
             else:
-                logger.info("Newzbin error code %d", error_code)
-        else:
-            nzb = response.content
+                nzb = response.content
     elif result[3] == 'headphones':
-        nzb = helpers.request_content(
+        nzb = request.request_content(
             url=result[2],
             auth=(headphones.HPUSER, headphones.HPPASS),
             headers={'User-Agent': USER_AGENT}
         )
     else:
-        nzb = helpers.request_content(
+        nzb = request.request_content(
             url=result[2],
             headers={'User-Agent': USER_AGENT}
         )
@@ -861,7 +862,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
             "rss": "1"
         }
 
-        data = helpers.request_feed(
+        data = request.request_feed(
             url=providerurl,
             params=params,
             timeout=20
@@ -880,7 +881,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
                         url = item['links'][1]['href']
                         size = int(item['links'][1]['length'])
                         if format == "2":
-                            torrent = helpers.request_content(url)
+                            torrent = request.request_content(url)
                             if not torrent or (int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1):
                                 rightformat = False
                         if rightformat == True and size < maxsize and minimumseeders < int(seeders):
@@ -934,7 +935,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
             "q": " ".join(query_items)
         }
 
-        data = helpers.request_feed(
+        data = request.request_feed(
             url=providerurl,
             params=params, headers=headers,
             timeout=20
@@ -1121,7 +1122,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
             "sort": "seeds"
         }
 
-        data = helpers.request_soup(
+        data = request.request_soup(
             url=providerurl + category,
             params=params,
             timeout=20
@@ -1182,7 +1183,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
             "sort": "seeds"
         }
 
-        data = helpers.request_feed(
+        data = request.request_feed(
             url=providerurl,
             params=params, headers=headers,
             auth=(headphones.HPUSER, headphones.HPPASS),
@@ -1207,7 +1208,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
                         url = item.links[1]['url']
                         size = int(item.links[1]['length'])
                         if format == "2":
-                            torrent = helpers.request_content(url)
+                            torrent = request.request_content(url)
 
                             if not torrent or (int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1):
                                 rightformat = False
@@ -1242,7 +1243,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
         # Requesting content
         logger.info('Parsing results from Mininova')
 
-        data = helpers.request_feed(
+        data = request.request_feed(
             url=providerurl,
             timeout=20
         )
@@ -1264,7 +1265,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
                         url = item.links[1]['url']
                         size = int(item.links[1]['length'])
                         if format == "2":
-                            torrent = helpers.request_content(url)
+                            torrent = request.request_content(url)
 
                             if not torrent or (int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1):
                                 rightformat = False
@@ -1303,7 +1304,7 @@ def preprocess(resultlist):
             elif result[3] == 'What.cd':
                 headers['User-Agent'] = 'Headphones'
 
-            return helpers.request_content(url=result[2], headers=headers), result
+            return request.request_content(url=result[2], headers=headers), result
 
         else:
             usenet_retention = headphones.USENET_RETENTION or 2000
