@@ -735,7 +735,7 @@ class WebInterface(object):
         if sSearch == "":
             filtered = headphones.LOG_LIST[::]
         else:
-            filtered = [row for row in headphones.LOG_LIST for column in row if sSearch in column]
+            filtered = [row for row in headphones.LOG_LIST for column in row if sSearch.lower() in column.lower()]
 
         sortcolumn = 0
         if iSortCol_0 == '1':
