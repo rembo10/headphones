@@ -214,10 +214,9 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
         logger.info("[%s] There was either an error pulling data from MusicBrainz or there might not be any releases for this category" % artist['artist_name'])
 
     # Then search for releases within releasegroups, if releases don't exist, then remove from allalbums/alltracks
-
+    album_searches = []
 
     for rg in artist['releasegroups']:
-
         al_title = rg['title']
         today = helpers.today()
         rgid = rg['id']
@@ -461,13 +460,22 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             logger.info(u"[%s] Seeing if we need album art for %s" % (artist['artist_name'], rg['title']))
             cache.getThumb(AlbumID=rg['id'])
 
-            #start a search for the album if it's new, hasn't been marked as downloaded and autowant_all is selected:
+            # Start a search for the album if it's new, hasn't been marked as
+            # downloaded and autowant_all is selected. This search is deferred,
+            # in case the search failes and the rest of the import will halt.
             if not rg_exists and not marked_as_downloaded and headphones.AUTOWANT_ALL:
-                from headphones import searcher
-                searcher.searchforalbum(albumid=rg['id'])
+                album_searches.append(rg['id'])
         else:
             if skip_log == 0:
                 logger.info(u"[%s] No new releases, so no changes made to %s" % (artist['artist_name'], rg['title']))
+
+    # Start searching for newly added albums
+    if album_searches:
+        from headphones import searcher
+        logger.info("Start searching for %d albums.", len(album_searches))
+
+        for album_search in album_searches:
+            searcher.searchforalbum(albumid=album_search)
 
     latestalbum = myDB.action('SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [artistid]).fetchone()
     totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid]))
