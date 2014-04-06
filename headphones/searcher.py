@@ -552,13 +552,7 @@ def searchNZB(album, new=False, losslessOnly=False):
     #
     # Also will filter flac & remix albums if not specifically looking for it
     # This code also checks the ignored words and required words
-
-    if len(resultlist):
-        resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
-
-    if len(resultlist):
-        return resultlist
-
+    return [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
 
 def send_to_downloader(data, bestqual, album):
 
@@ -1286,11 +1280,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
     #attempt to verify that this isn't a substring result
     #when looking for "Foo - Foo" we don't want "Foobar"
     #this should be less of an issue when it isn't a self-titled album so we'll only check vs artist
-    if len(resultlist):
-        resultlist[:] = [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
-    if len(resultlist):
-        return resultlist
-
+    return [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
 
 # THIS IS KIND OF A MESS AND PROBABLY NEEDS TO BE CLEANED UP
 def preprocess(resultlist):
