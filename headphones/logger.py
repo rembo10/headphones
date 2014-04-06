@@ -22,6 +22,8 @@ import headphones
 
 from logging import handlers
 
+from headphones import helpers
+
 # These settings are for file logging only
 FILENAME = 'headphones.log'
 MAX_SIZE = 1000000 # 1 MB
@@ -39,7 +41,7 @@ class LogListHandler(logging.Handler):
         message = self.format(record)
         message = message.replace("\n", "<br />")
 
-        headphones.LOG_LIST.insert(0, (record.created, message, record.levelname, record.threadName))
+        headphones.LOG_LIST.insert(0, (helpers.now(), message, record.levelname, record.threadName))
 
 def initLogger(verbose=1):
     """
