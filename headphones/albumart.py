@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import helpers, db
+from headphones import request, db
 
 def getAlbumArt(albumid):
     myDB = db.DBConnection()
@@ -32,7 +32,7 @@ def getCachedArt(albumid):
         return
 
     if artwork_path.startswith('http://'):
-        artwork = helpers.request_content(artwork_path, timeout=20)
+        artwork = request.request_content(artwork_path, timeout=20)
 
         if not artwork:
             logger.warn("Unable to open url: %s", artwork_path)

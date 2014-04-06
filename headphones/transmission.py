@@ -20,7 +20,7 @@ import headphones
 
 import simplejson as json
 
-from headphones import logger, notifiers, helpers
+from headphones import logger, notifiers, request
 
 # This is just a simple script to send torrents to transmission. The
 # intention is to turn this into a class where we can check the state
@@ -133,11 +133,11 @@ def torrentAction(method, arguments):
 
     # Retrieve session id
     if username and password:
-        response = helpers.request_response(host, auth=(username, password), whitelist_status_code=409)
+        response = request.request_response(host, auth=(username, password), whitelist_status_code=409)
     else:
-        response = helpers.request_response(host, whitelist_status_code=409)
+        response = request.request_response(host, whitelist_status_code=409)
 
-    if not response:
+    if response is None:
         logger.error("Error gettings Transmission session ID")
         return
 
@@ -153,7 +153,7 @@ def torrentAction(method, arguments):
     headers = { 'x-transmission-session-id': sessionid }
     data = { 'method': method, 'arguments': arguments }
 
-    response = helpers.request_content(host, data=json.dumps(data), headers=headers)
+    response = request.request_json(host, method="post", data=json.dumps(data), headers=headers)
 
     if not response:
         logger.error("Error sending torrent to Transmission")

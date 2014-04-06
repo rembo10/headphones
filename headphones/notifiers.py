@@ -13,28 +13,30 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import logger, helpers, common
-from headphones.exceptions import ex
 import base64
 import cherrypy
 import urllib
 import urllib2
 import headphones
-from httplib import HTTPSConnection
-from urllib import urlencode
+import simplejson
 import os.path
 import subprocess
 import gntp.notifier
-import lib.simplejson as simplejson
-from xml.dom import minidom
 
-try:
-    from urlparse import parse_qsl #@UnusedImport
-except:
-    from cgi import parse_qsl #@Reimport
+from xml.dom import minidom
+from httplib import HTTPSConnection
+from urllib import urlencode
 
 import lib.oauth2 as oauth
 import lib.pythontwitter as twitter
+
+from headphones import logger, helpers, common, request
+from headphones.exceptions import ex
+
+try:
+    from urlparse import parse_qsl
+except:
+    from cgi import parse_qsl
 
 class GROWL:
 
@@ -179,9 +181,9 @@ class XBMC:
         url = host + '/xbmcCmds/xbmcHttp/?' + url_command
 
         if self.password:
-            return helpers.request_content(url, auth=(self.username, self.password))
+            return request.request_content(url, auth=(self.username, self.password))
         else:
-            return helpers.request_content(url)
+            return request.request_content(url)
 
     def _sendjson(self, host, method, params={}):
         data = [{'id': 0, 'jsonrpc': '2.0', 'method': method, 'params': params}]
@@ -189,9 +191,9 @@ class XBMC:
         url = host + '/jsonrpc'
 
         if self.password:
-            response = helpers.request_json(req, method="POST", data=simplejson.dumps(data), headers=headers, auth=(self.username, self.password))
+            response = request.request_json(req, method="POST", data=simplejson.dumps(data), headers=headers, auth=(self.username, self.password))
         else:
-            response = helpers.request_json(req, method="POST", data=simplejson.dumps(data), headers=headers)
+            response = request.request_json(req, method="POST", data=simplejson.dumps(data), headers=headers)
 
         if response:
             return response[0]['result']
@@ -332,7 +334,7 @@ class NMA:
         self.priority = headphones.NMA_PRIORITY
         
     def _send(self, data):
-        return helpers.request_content('https://www.notifymyandroid.com/publicapi/notify', data=data)
+        return request.request_content('https://www.notifymyandroid.com/publicapi/notify', data=data)
         
     def notify(self, artist=None, album=None, snatched_nzb=None):
     

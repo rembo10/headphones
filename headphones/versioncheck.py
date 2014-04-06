@@ -16,7 +16,7 @@
 import platform, subprocess, re, os, tarfile
 
 import headphones
-from headphones import logger, version, helpers
+from headphones import logger, version, request
 from headphones.exceptions import ex
 
 import lib.simplejson as simplejson
@@ -122,9 +122,9 @@ def checkGithub():
     # Get the latest version available from github
     logger.info('Retrieving latest version information from GitHub')
     url = 'https://api.github.com/repos/%s/headphones/commits/%s' % (headphones.GIT_USER, headphones.GIT_BRANCH)
-    version = helpers.request_json(url, timeout=20, validator=lambda x: type(x) == dict)
+    version = request.request_json(url, timeout=20, validator=lambda x: type(x) == dict)
 
-    if not version:
+    if version is None:
         logger.warn('Could not get the latest version from GitHub. Are you running a local development version?')
         return headphones.CURRENT_VERSION
 
@@ -138,9 +138,9 @@ def checkGithub():
 
     logger.info('Comparing currently installed version with latest GitHub version')
     url = 'https://api.github.com/repos/%s/headphones/compare/%s...%s' % (headphones.GIT_USER, headphones.CURRENT_VERSION, headphones.LATEST_VERSION)
-    commits = helpers.request_json(url, timeout=20, whitelist_status_code=404, validator=lambda x: type(x) == dict)
+    commits = request.request_json(url, timeout=20, whitelist_status_code=404, validator=lambda x: type(x) == dict)
 
-    if not commits:
+    if commits is None:
         logger.warn('Could not get commits behind from GitHub.')
         return headphones.CURRENT_VERSION
 
@@ -179,7 +179,7 @@ def update():
         version_path = os.path.join(headphones.PROG_DIR, 'version.txt')
 
         logger.info('Downloading update from: '+tar_download_url)
-        data = helpers.request_content(tar_download_url)
+        data = request.request_content(tar_download_url)
 
         if not data:
             logger.error("Unable to retrieve new version from '%s', can't update", tar_download_url)

@@ -27,7 +27,7 @@ from beets import autotag
 from beets.mediafile import MediaFile
 
 import headphones
-from headphones import db, albumart, librarysync, lyrics, logger, helpers
+from headphones import db, albumart, librarysync, lyrics, logger, helpers, request
 from headphones.helpers import sab_replace_dots, sab_replace_spaces
 
 postprocessor_lock = threading.Lock()
@@ -360,7 +360,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     artwork = None
     album_art_path = albumart.getAlbumArt(albumid)
     if headphones.EMBED_ALBUM_ART or headphones.ADD_ALBUM_ART:
-        artwork = helpers.request_content(album_art_path)
+        artwork = request.request_content(album_art_path)
 
         if not album_art_path or not artwor or len(artwork) < 100:
             logger.info("No suitable album art found from Amazon. Checking Last.FM....")

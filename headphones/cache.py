@@ -14,12 +14,11 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import glob, urllib
-
-import lib.simplejson as simplejson
-
+import glob
+import urllib
 import headphones
-from headphones import db, helpers, logger, lastfm
+
+from headphones import db, helpers, logger, lastfm, request
 
 lastfm_apikey = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
 
@@ -337,7 +336,7 @@ class Cache(object):
 
         # Should we grab the artwork here if we're just grabbing thumbs or info?? Probably not since the files can be quite big
         if image_url and self.query_type == 'artwork':
-            artwork = helpers.request_content(image_url, timeout=20)
+            artwork = request.request_content(image_url, timeout=20)
 
             if artwork:
                 # Make sure the artwork dir exists:
@@ -370,7 +369,7 @@ class Cache(object):
 
         # Grab the thumbnail as well if we're getting the full artwork (as long as it's missing/outdated
         if thumb_url and self.query_type in ['thumb','artwork'] and not (self.thumb_files and self._is_current(self.thumb_files[0])):
-            artwork = helpers.request_content(thumb_url, timeout=20)
+            artwork = request.request_content(thumb_url, timeout=20)
 
             if artwork:
                 # Make sure the artwork dir exists:

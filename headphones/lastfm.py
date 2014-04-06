@@ -17,7 +17,7 @@ import random
 import time
 import headphones
 
-from headphones import db, logger, helpers
+from headphones import db, logger, request
 
 from collections import defaultdict
 
@@ -40,7 +40,7 @@ def request_lastfm(method, **kwargs):
 
     # Send request
     logger.debug("Calling Last.FM method: %s", method)
-    data = helpers.request_json(ENTRY_POINT, timeout=20, params=kwargs)
+    data = request.request_json(ENTRY_POINT, timeout=20, params=kwargs)
 
     # Parse response and check for errors.
     if not data:
