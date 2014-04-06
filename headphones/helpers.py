@@ -294,6 +294,8 @@ def expand_subfolders(f):
 
 def extract_data(s):
 
+    s = s.replace('_', ' ')
+
     #headphones default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
     match = pattern.match(s)
@@ -314,8 +316,8 @@ def extract_data(s):
         return (name, album, year)
     
     #Gonna take a guess on this one - might be enough to search on mb
-    # TODO: add in a bunch of re pattern matches
-    pat = re.compile(r"\s*(?P<name>[^:]+)\s*-(?P<album>.*?)\s*$")
+    pat = re.compile(r"(?P<name>.*?)\s*-\s*(?P<album>[^\[(-]*)")
+
     match = pat.match(s)
     if match:
         name = match.group("name")
