@@ -609,12 +609,12 @@ def request_response(url, method="get", auto_raise=True, whitelist_status_code=N
         whitelist_status_code = [whitelist_status_code]
 
     # Map method to the request.XXX method. This is a simple hack, but it allows
-    # requests to apply more magic per method. See it's source.
-    request_method = requests[method.lower()]
+    # requests to apply more magic per method. See lib/requests/api.py.
+    request_method = getattr(requests, method)
 
     try:
         # Request the URL
-        logger.debug("Requesting URL via %s method: %s", method, url)
+        logger.debug("Requesting URL via %s method: %s", method.upper(), url)
         response = request_method(url, **kwargs)
 
         # If status code != OK, then raise exception, except if the status code
@@ -649,7 +649,7 @@ def request_soup(url, **kwargs):
     response = request_response(url, **kwargs)
 
     if response is not None:
-        return BeautifulSoup(response.content)
+        return BeautifulSoup(response.content, "html5lib")
 
 def request_minidom(url, **kwargs):
     """
