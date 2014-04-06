@@ -312,6 +312,17 @@ def extract_data(s):
         album = match.group("album")
         year = match.group("year")
         return (name, album, year)
+    
+    #Gonna take a guess on this one - might be enough to search on mb
+    # TODO: add in a bunch of re pattern matches
+    pat = re.compile(r"\s*(?P<name>[^:]+)\s*-(?P<album>.*?)\s*$")
+    match = pat.match(s)
+    if match:
+        name = match.group("name")
+        album = match.group("album")
+        year = None
+        return (name, album, year)
+
     else:
         return (None, None, None)
 
