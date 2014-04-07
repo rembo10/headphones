@@ -329,7 +329,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, ArtistID])
 
     update_album_status()
-    lastfm.getSimilar()
+    if not append:
+        lastfm.getSimilar()
     logger.info('Library scan complete')
 
     #ADDED THIS SECTION TO MARK ALBUMS AS DOWNLOADED IF ARTISTS ARE ADDED EN MASSE BEFORE LIBRARY IS SCANNED
