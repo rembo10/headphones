@@ -937,7 +937,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
 
         data = request.request_feed(
             url=providerurl,
-            params=params, headers=headers,
+            params=params,
             timeout=20
         )
 
