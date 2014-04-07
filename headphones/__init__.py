@@ -722,6 +722,7 @@ def initialize():
             try:
                 LATEST_VERSION = versioncheck.checkGithub()
             except:
+                logger.exception("Unhandled exception")
                 LATEST_VERSION = CURRENT_VERSION
         else:
             LATEST_VERSION = CURRENT_VERSION
