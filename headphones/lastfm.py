@@ -62,13 +62,17 @@ def getSimilar():
 
     for result in results[:12]:
         data = request_lastfm("artist.getsimilar", mbid=result['ArtistId'])
+        time.sleep(10)
 
         if data and "similarartists" in data:
             artists = data["similarartists"]["artist"]
 
             for artist in artists:
-                artist_mbid = artist["mbid"]
-                artist_name = artist["name"]
+                try:
+                    artist_mbid = artist["mbid"]
+                    artist_name = artist["name"]
+                except TypeError:
+                    continue
 
                 if not any(artist_mbid in x for x in results):
                     artistlist.append((artist_name, artist_mbid))

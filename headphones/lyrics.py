@@ -26,7 +26,7 @@ def getLyrics(artist, song):
                 }
 
     url = 'http://lyrics.wikia.com/api.php'
-    data = request.request_minidom(url, params)
+    data = request.request_minidom(url, params=params)
     
     if not data:
         return
@@ -42,7 +42,7 @@ def getLyrics(artist, song):
     lyricspage = request.request_content(lyricsurl)
     
     if not lyricspage:
-        logger.warn('Error fetching lyrics from: %s. Error: %s' % (lyricsurl, e))
+        logger.warn('Error fetching lyrics from: %s' % lyricsurl)
         return
 
     m = re.compile('''<div class='lyricbox'><div class='rtMatcher'>.*?</div>(.*?)<!--''').search(lyricspage)
