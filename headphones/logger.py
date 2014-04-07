@@ -105,7 +105,7 @@ def initHooks(global_exceptions=True, thread_exceptions=True, pass_original=True
         # We should always catch this to prevent loops!
         try:
             message = "".join(traceback.format_exception(*exception_info))
-            logger.error("Uncaught excaption: %s", message)
+            logger.error("Uncaught exception: %s", message)
         except:
             pass
 
