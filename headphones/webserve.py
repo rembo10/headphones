@@ -134,7 +134,6 @@ class WebInterface(object):
 
     def addArtist(self, artistid):
         threading.Thread(target=importer.addArtisttoDB, args=[artistid]).start()
-        threading.Thread(target=lastfm.getSimilar).start()
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % artistid)
     addArtist.exposed = True
 

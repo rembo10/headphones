@@ -402,11 +402,11 @@ def extract_metadata(f):
             albums = new_albums
 
     # All files have the same metadata, so it's trivial
-    if len(artists) == 1 and len(albums) == 1 and len(years) == 1:
+    if len(artists) == 1 and len(albums) == 1:
         return (artists[0], albums[0], years[0])
 
     # (Lots of) different artists. Could be a featuring album, so test for this.
-    if len(artists) > 1 and len(albums) == 1 and len(years) == 1:
+    if len(artists) > 1 and len(albums) == 1:
         split_artists = [ RE_FEATURING.split(artist) for artist in artists ]
         featurings = [ len(split_artist) - 1 for split_artist in split_artists ]
         logger.info("Album seem to feature %d different artists" % sum(featurings))
