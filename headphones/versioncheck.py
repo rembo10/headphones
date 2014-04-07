@@ -144,7 +144,7 @@ def checkGithub():
         logger.warn('Could not get commits behind from GitHub.')
         return headphones.CURRENT_VERSION
 
-    headphones.COMMITS_BEHIND = int(git['behind_by'])
+    headphones.COMMITS_BEHIND = int(commits['behind_by'])
     logger.debug("In total, %d commits behind", headphones.COMMITS_BEHIND)
 
     if headphones.COMMITS_BEHIND > 0:
