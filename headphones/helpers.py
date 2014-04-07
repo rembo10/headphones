@@ -13,14 +13,15 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, time
-from operator import itemgetter
+import os
+import re
+import time
+import shutil
 import datetime
-import re, shutil
-
-from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
-
 import headphones
+
+from operator import itemgetter
+from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 
 # Modified from https://github.com/Verrus/beets-plugin-featInTitle
 RE_FEATURING = re.compile(r"[fF]t\.|[fF]eaturing|[fF]eat\.|\b[wW]ith\b|&|vs\.")
@@ -29,9 +30,8 @@ RE_CD_ALBUM = re.compile(r"\(?((CD|disc)\s*[0-9]+)\)?", re.I)
 RE_CD = re.compile(r"^(CD|dics)\s*[0-9]+$", re.I)
 
 def multikeysort(items, columns):
-
     comparers = [ ((itemgetter(col[1:].strip()), -1) if col.startswith('-') else (itemgetter(col.strip()), 1)) for col in columns]
-    
+
     def comparer(left, right):
         for fn, mult in comparers:
             result = cmp(fn(left), fn(right))
@@ -39,22 +39,22 @@ def multikeysort(items, columns):
                 return mult * result
         else:
             return 0
-    
+
     return sorted(items, cmp=comparer)
-    
+
 def checked(variable):
     if variable:
         return 'Checked'
     else:
         return ''
-        
+
 def radio(variable, pos):
 
     if variable == pos:
         return 'Checked'
     else:
         return ''
-        
+
 def latinToAscii(unicrap):
     """
     From couch potato
@@ -95,7 +95,7 @@ def latinToAscii(unicrap):
         else:
             r += str(i)
     return r
-    
+
 def convert_milliseconds(ms):
 
     seconds = ms/1000
@@ -106,7 +106,7 @@ def convert_milliseconds(ms):
         minutes = time.strftime("%M:%S", gmtime)
 
     return minutes
-    
+
 def convert_seconds(s):
 
     gmtime = time.gmtime(s)
@@ -116,30 +116,30 @@ def convert_seconds(s):
         minutes = time.strftime("%M:%S", gmtime)
 
     return minutes
-    
+
 def today():
     today = datetime.date.today()
     yyyymmdd = datetime.date.isoformat(today)
     return yyyymmdd
-    
+
 def now():
     now = datetime.datetime.now()
     return now.strftime("%Y-%m-%d %H:%M:%S")
-    
+
 def get_age(date):
 
     try:
         split_date = date.split('-')
     except:
         return False
-    
+
     try:
         days_old = int(split_date[0])*365 + int(split_date[1])*30 + int(split_date[2])
     except IndexError:
         days_old = False
-        
+
     return days_old
-    
+
 def bytes_to_mb(bytes):
 
     mb = int(bytes)/1048576
@@ -150,7 +150,7 @@ def mb_to_bytes(mb_str):
     result = re.search('^(\d+(?:\.\d+)?)\s?(?:mb)?', mb_str, flags=re.I)
     if result:
         return int(float(result.group(1))*1048576)
-        
+
 def piratesize(size):
     split = size.split(" ")
     factor = float(split[0])
@@ -165,34 +165,34 @@ def piratesize(size):
         size = factor
     else:
         size = 0
-    
+
     return size
 
 def replace_all(text, dic):
-    
+
     if not text:
         return ''
-        
+
     for i, j in dic.iteritems():
         text = text.replace(i, j)
     return text
-    
+
 def cleanName(string):
 
     pass1 = latinToAscii(string).lower()
     out_string = re.sub('[\.\-\/\!\@\#\$\%\^\&\*\(\)\+\-\"\'\,\;\:\[\]\{\}\<\>\=\_]', '', pass1).encode('utf-8')
-    
+
     return out_string
-    
+
 def cleanTitle(title):
 
     title = re.sub('[\.\-\/\_]', ' ', title).lower()
-    
+
     # Strip out extra whitespace
     title = ' '.join(title.split())
-    
+
     title = title.title()
-    
+
     return title
 
 def split_path(f):
@@ -299,13 +299,13 @@ def extract_data(s):
     #headphones default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
     match = pattern.match(s)
-    
+
     if match:
         name = match.group("name")
         album = match.group("album")
         year = match.group("year")
         return (name, album, year)
-    
+
     #newzbin default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
     match = pattern.match(s)
@@ -314,7 +314,7 @@ def extract_data(s):
         album = match.group("album")
         year = match.group("year")
         return (name, album, year)
-    
+
     #Gonna take a guess on this one - might be enough to search on mb
     pat = re.compile(r"(?P<name>.*?)\s*-\s*(?P<album>[^\[(-]*)")
 
@@ -438,18 +438,18 @@ def extract_logline(s):
         return (timestamp, level, thread, message)
     else:
         return None
-        
+
 def extract_song_data(s):
 
     #headphones default format
     music_dir = headphones.MUSIC_DIR
     folder_format = headphones.FOLDER_FORMAT
     file_format = headphones.FILE_FORMAT
-    
+
     full_format = os.path.join(headphones.MUSIC_DIR)
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
     match = pattern.match(s)
-    
+
     if match:
         name = match.group("name")
         album = match.group("album")
@@ -457,7 +457,7 @@ def extract_song_data(s):
         return (name, album, year)
     else:
         logger.info("Couldn't parse %s into a valid default format", s)
-    
+
     #newzbin default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
     match = pattern.match(s)
@@ -469,14 +469,14 @@ def extract_song_data(s):
     else:
         logger.info("Couldn't parse %s into a valid Newbin format", s)
         return (name, album, year)
-        
+
 def smartMove(src, dest, delete=True):
-    
+
     from headphones import logger
 
     source_dir = os.path.dirname(src)
     filename = os.path.basename(src)
-    
+
     if os.path.isfile(os.path.join(dest, filename)):
         logger.info('Destination file exists: %s', os.path.join(dest, filename).decode(headphones.SYS_ENCODING, 'replace'))
         title = os.path.splitext(filename)[0]
@@ -521,13 +521,13 @@ def sab_sanitize_foldername(name):
     """
     CH_ILLEGAL = r'\/<>?*|"'
     CH_LEGAL   = r'++{}!@#`'
-    
+
     FL_ILLEGAL = CH_ILLEGAL + ':\x92"'
     FL_LEGAL   = CH_LEGAL +   "-''"
-    
+
     uFL_ILLEGAL = FL_ILLEGAL.decode('latin-1')
     uFL_LEGAL   = FL_LEGAL.decode('latin-1')
-    
+
     if not name:
         return name
     if isinstance(name, unicode):

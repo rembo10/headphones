@@ -4,6 +4,7 @@
 pythoncompat
 """
 
+from .packages import chardet
 
 import sys
 
@@ -81,18 +82,15 @@ except ImportError:
 # Specifics
 # ---------
 
-
 if is_py2:
-    from urllib import quote, unquote, urlencode
-    from urlparse import urlparse, urlunparse, urljoin, urlsplit
+    from urllib import quote, unquote, quote_plus, unquote_plus, urlencode, getproxies, proxy_bypass
+    from urlparse import urlparse, urlunparse, urljoin, urlsplit, urldefrag
     from urllib2 import parse_http_list
     import cookielib
     from Cookie import Morsel
     from StringIO import StringIO
-    try:
-        import cchardet as chardet
-    except ImportError:
-        from .packages import chardet
+    from .packages.urllib3.packages.ordered_dict import OrderedDict
+    from httplib import IncompleteRead
 
     builtin_str = str
     bytes = str
@@ -101,17 +99,17 @@ if is_py2:
     numeric_types = (int, long, float)
 
 
-
 elif is_py3:
-    from urllib.parse import urlparse, urlunparse, urljoin, urlsplit, urlencode, quote, unquote
-    from urllib.request import parse_http_list
+    from urllib.parse import urlparse, urlunparse, urljoin, urlsplit, urlencode, quote, unquote, quote_plus, unquote_plus, urldefrag
+    from urllib.request import parse_http_list, getproxies, proxy_bypass
     from http import cookiejar as cookielib
     from http.cookies import Morsel
     from io import StringIO
-    from .packages import chardet2 as chardet
+    from collections import OrderedDict
+    from http.client import IncompleteRead
 
     builtin_str = str
     str = str
     bytes = bytes
-    basestring = (str,bytes)
+    basestring = (str, bytes)
     numeric_types = (int, float)

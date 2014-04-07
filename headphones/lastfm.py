@@ -13,241 +13,137 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib, urllib2
-from xml.dom import minidom
-from collections import defaultdict
 import random
 import time
-
 import headphones
-from headphones import db, logger
 
-api_key = '395e6ec6bb557382fc41fde867bce66f'
+from headphones import db, logger, request
 
-  
+from collections import defaultdict
+
+ENTRY_POINT = 'http://ws.audioscrobbler.com/2.0/'
+API_KEY = '395e6ec6bb557382fc41fde867bce66f'
+
+def request_lastfm(method, **kwargs):
+    """
+    Call a Last.FM API method. Automatically sets the method and API key. Method
+    will return the result if no error occured.
+
+    By default, this method will request the JSON format, since it is lighter
+    than XML.
+    """
+
+    # Prepare request
+    kwargs["method"] = method
+    kwargs.setdefault("api_key", API_KEY)
+    kwargs.setdefault("format", "json")
+
+    # Send request
+    logger.debug("Calling Last.FM method: %s", method)
+    data = request.request_json(ENTRY_POINT, timeout=20, params=kwargs)
+
+    # Parse response and check for errors.
+    if not data:
+        logger.error("Error calling Last.FM method: %s", method)
+        return
+
+    if "error" in data:
+        logger.debug("Last.FM returned an error: %s", data["message"])
+        return
+
+    return data
+
 def getSimilar():
-    
     myDB = db.DBConnection()
     results = myDB.select('SELECT ArtistID from artists ORDER BY HaveTracks DESC')
-    
+
+    logger.info("Fetching similar artists from Last.FM for tag cloud")
     artistlist = []
-    
+
     for result in results[:12]:
-        
-        url = 'http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&mbid=%s&api_key=%s' % (result['ArtistID'], api_key)
-        
-        try:
-            data = urllib2.urlopen(url, timeout=20).read()
-        except:
-            time.sleep(1)
-            continue
-            
-        if not data or len(data) < 200:
-            continue
-            
-        try:    
-            d = minidom.parseString(data)
-        except:
-            logger.debug("Could not parse similar artist data from last.fm")
-        
-        node = d.documentElement
-        artists = d.getElementsByTagName("artist")
-        
-        for artist in artists:
-            namenode = artist.getElementsByTagName("name")[0].childNodes
-            mbidnode = artist.getElementsByTagName("mbid")[0].childNodes
-            
-            for node in namenode:
-                artist_name = node.data
-            for node in mbidnode:
-                artist_mbid = node.data
-                
-            try:
+        data = request_lastfm("artist.getsimilar", mbid=result['ArtistId'])
+
+        if data and "similarartists" in data:
+            artists = data["similarartists"]["artist"]
+
+            for artist in artists:
+                artist_mbid = artist["mbid"]
+                artist_name = artist["name"]
+
                 if not any(artist_mbid in x for x in results):
                     artistlist.append((artist_name, artist_mbid))
-            except:
-                continue
-                
+
+    # Add new artists to tag cloud
+    logger.debug("Fetched %d artists from Last.FM", len(artistlist))
     count = defaultdict(int)
-    
+
     for artist, mbid in artistlist:
         count[artist, mbid] += 1
-        
-    items = count.items()
-    
-    top_list = sorted(items, key=lambda x: x[1], reverse=True)[:25]
-    
-    random.shuffle(top_list)
-    
-    myDB.action('''DELETE from lastfmcloud''')
-    for tuple in top_list:
-        artist_name, artist_mbid = tuple[0]
-        count = tuple[1]
-        myDB.action('INSERT INTO lastfmcloud VALUES( ?, ?, ?)', [artist_name, artist_mbid, count])
-        
-def getArtists():
 
+    items = count.items()
+    top_list = sorted(items, key=lambda x: x[1], reverse=True)[:25]
+
+    random.shuffle(top_list)
+
+    myDB.action("DELETE from lastfmcloud")
+    for item in top_list:
+        artist_name, artist_mbid = item[0]
+        count = item[1]
+
+        myDB.action('INSERT INTO lastfmcloud VALUES( ?, ?, ?)', [artist_name, artist_mbid, count])
+
+    logger.debug("Inserted %d artists into Last.FM tag cloud", len(top_list))
+
+def getArtists():
     myDB = db.DBConnection()
     results = myDB.select('SELECT ArtistID from artists')
 
     if not headphones.LASTFM_USERNAME:
+        logger.warn("Last.FM username not set, not importing artists.")
         return
-        
-    else:
-        username = headphones.LASTFM_USERNAME
 
-    logger.info("Starting Last.FM artists import with username '%s'", username)
+    logger.info("Fetching artists from Last.FM for username: %s", headphones.LASTFM_USERNAME)
+    data = request_lastfm("library.getartists", limit=10000, user=headphones.LASTFM_USERNAME)
 
-    url = 'http://ws.audioscrobbler.com/2.0/?method=library.getartists&limit=10000&api_key=%s&user=%s' % (api_key, username)
-    data = urllib2.urlopen(url, timeout=20).read()
-    
-    try:
-        d = minidom.parseString(data)
-    except:
-        logger.error("Could not parse artist list from last.fm data")
-        return
-    
-    artists = d.getElementsByTagName("artist")
-    logger.info("Fetched %d artists from Last.FM", len(artists))
-    
-    artistlist = []
-    
-    for artist in artists:
-        mbidnode = artist.getElementsByTagName("mbid")[0].childNodes
+    if data and "artists" in data:
+        artistlist = []
+        artists = data["artists"]["artist"]
+        logger.debug("Fetched %d artists from Last.FM", len(artists))
 
-        for node in mbidnode:
-            artist_mbid = node.data
-                
-        try:
+        for artist in artists:
+            artist_mbid = artist["mbid"]
+
             if not any(artist_mbid in x for x in results):
                 artistlist.append(artist_mbid)
-        except:
-            continue
-    
-    from headphones import importer
-    
-    for artistid in artistlist:
-        importer.addArtisttoDB(artistid)
 
-    logger.info("Imported %d new artists from Last.FM", len(artistid))
-    
+        from headphones import importer
+
+        for artistid in artistlist:
+            importer.addArtisttoDB(artistid)
+
+        logger.info("Imported %d new artists from Last.FM", len(artistlist))
+
 def getTagTopArtists(tag, limit=50):
     myDB = db.DBConnection()
     results = myDB.select('SELECT ArtistID from artists')
 
-    url = 'http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&limit=%s&tag=%s&api_key=%s' % (limit, tag, api_key)
-    data = urllib2.urlopen(url, timeout=20).read()
+    logger.info("Fetching top artists from Last.FM for tag: %s", tag)
+    data = request_lastfm("tag.gettopartists", limit=limit, tag=tag)
 
-    try:
-        d = minidom.parseString(data)
-    except:
-        logger.error("Could not parse artist list from Last.FM data")
-        return
+    if data and "topartists" in data:
+        artistlist = []
+        artists = data["topartists"]["artist"]
+        logger.debug("Fetched %d artists from Last.FM", len(artists))
 
-    artists = d.getElementsByTagName("artist")
+        for artist in artists:
+            artist_mbid = artist["mbid"]
 
-    artistlist = []
-
-    for artist in artists:
-        mbidnode = artist.getElementsByTagName("mbid")[0].childNodes
-
-        for node in mbidnode:
-            artist_mbid = node.data
-
-        try:
             if not any(artist_mbid in x for x in results):
                 artistlist.append(artist_mbid)
-        except:
-            continue
 
-    from headphones import importer
+        from headphones import importer
 
-    for artistid in artistlist:
-        importer.addArtisttoDB(artistid)
+        for artistid in artistlist:
+            importer.addArtisttoDB(artistid)
 
-
-def getAlbumDescription(rgid, artist, album):
-    
-    myDB = db.DBConnection()    
-    result = myDB.select('SELECT Summary from descriptions WHERE ReleaseGroupID=?', [rgid])
-    
-    if result:
-        return
-        
-    params = {  "method": 'album.getInfo',
-                "api_key": api_key,
-                "artist": artist.encode('utf-8'),
-                "album": album.encode('utf-8')
-            }
-
-    searchURL = 'http://ws.audioscrobbler.com/2.0/?' + urllib.urlencode(params)
-    data = urllib2.urlopen(searchURL, timeout=20).read()
-    
-    if data == '<?xml version="1.0" encoding="utf-8"?><lfm status="failed"><error code="6">Album not found</error></lfm>':
-        return
-        
-    try:
-        d = minidom.parseString(data)
-
-        albuminfo = d.getElementsByTagName("album")
-        
-        for item in albuminfo:
-            summarynode = item.getElementsByTagName("summary")[0].childNodes
-            contentnode = item.getElementsByTagName("content")[0].childNodes
-            for node in summarynode:
-                summary = node.data
-            for node in contentnode:
-                content = node.data
-                
-        controlValueDict = {'ReleaseGroupID': rgid}
-        newValueDict = {'Summary': summary,
-                        'Content': content}
-        myDB.upsert("descriptions", newValueDict, controlValueDict) 
-        
-    except:
-        logger.exception("Unhandled exception")
-        return
-
-def getAlbumDescriptionOld(rgid, releaselist):
-    """
-    This was a dumb way to do it - going to just use artist & album name but keeping this here
-    because I may use it to fetch and cache album art
-    """
-
-    myDB = db.DBConnection()
-    result = myDB.select('SELECT Summary from descriptions WHERE ReleaseGroupID=?', [rgid])
-    
-    if result:
-        return
-    
-    for release in releaselist:
-        
-        mbid = release['releaseid']
-        url = 'http://ws.audioscrobbler.com/2.0/?method=album.getInfo&mbid=%s&api_key=%s' % (mbid, api_key)
-        data = urllib.urlopen(url).read()
-        
-        if data == '<?xml version="1.0" encoding="utf-8"?><lfm status="failed"><error code="6">Album not found</error></lfm>':
-            continue
-        
-        try:
-            d = minidom.parseString(data)
-    
-            albuminfo = d.getElementsByTagName("album")
-            
-            for item in albuminfo:
-                summarynode = item.getElementsByTagName("summary")[0].childNodes
-                contentnode = item.getElementsByTagName("content")[0].childNodes
-                for node in summarynode:
-                    summary = node.data
-                for node in contentnode:
-                    content = node.data
-
-            controlValueDict = {'ReleaseGroupID': rgid}
-            newValueDict = {'ReleaseID': mbid,
-                            'Summary': summary,
-                            'Content': content}
-            myDB.upsert("descriptions", newValueDict, controlValueDict)
-            break
-        except:
-            logger.exception("Unhandled exception")
-            continue
+        logger.debug("Added %d new artists from Last.FM", len(artistlist))
