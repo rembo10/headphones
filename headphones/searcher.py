@@ -26,6 +26,7 @@ import os, re, time
 import string
 import shutil
 import requests
+import subprocess
 
 import headphones
 from headphones.common import USER_AGENT
@@ -606,36 +607,56 @@ def send_to_downloader(data, bestqual, album):
         # Blackhole
         if headphones.TORRENT_DOWNLOADER == 0:
 
-            if bestqual[2].startswith("magnet:"):
-                logger.error("Cannot save magnet files to blackhole. Please switch your torrent downloader to Transmission or uTorrent")
-                return
-
             # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
             torrent_name = helpers.replace_illegal_chars(folder_name) + '.torrent'
             download_path = os.path.join(headphones.TORRENTBLACKHOLE_DIR, torrent_name)
+            
+            if bestqual[2].startswith("magnet:"):
+                if headphones.OPEN_MAGNET_LINKS:
+                    try:
+                        if headphones.SYS_PLATFORM == 'win32':
+                            os.startfile(besqual[2])
+                        elif headphones.SYS_PLATFORM == 'darwin':
+                            subprocess.Popen(["open", bestqual[2]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        else:
+                            subprocess.Popen(["xdg-open", bestqual[2]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-            try:
-                if bestqual[3] == 'rutracker.org':
-                    download_path = rutracker.get_torrent(bestqual[2], headphones.TORRENTBLACKHOLE_DIR)
-                    if not download_path:
+                        # Gonna just take a guess at this..... Is there a better way to find this out?
+                        folder_name = bestqual[0]
+                    except Exception, e:
+                        logger.error("Error opening magnet link: %s" % str(e))
                         return
                 else:
-                    #Write the torrent file to a path derived from the TORRENTBLACKHOLE_DIR and file name.
-                    prev = os.umask(headphones.UMASK)
-                    with open(download_path, 'wb') as fp:
-                        fp.write(data)
-                    os.umask(prev)
+                    logger.error("Cannot save magnet files to blackhole. Please switch your torrent downloader to Transmission or uTorrent or allow Headphones to try to open magnet links")
+                    return
 
-                #Open the fresh torrent file again so we can extract the proper torrent name
-                #Used later in post-processing.
-                with open(download_path, 'rb') as fp:
-                    torrent_info = bencode.bdecode(fp.read())
+            else:
+                try:
 
-                torrent_folder_name = torrent_info['info'].get('name', '')
-                logger.info('Torrent folder name: %s' % torrent_folder_name)
-            except Exception, e:
-                logger.error('Couldn\'t get name from Torrent file: %s' % e)
-                return
+                    if bestqual[3] == 'rutracker.org':
+                        download_path = rutracker.get_torrent(bestqual[2], headphones.TORRENTBLACKHOLE_DIR)
+                        if not download_path:
+                            return
+                    else:
+                        #Write the torrent file to a path derived from the TORRENTBLACKHOLE_DIR and file name.
+                        with open(download_path, 'wb') as fp:
+                            fp.write(data)
+
+                        try:
+                            os.chmod(download_path, int(headphones.FILE_PERMISSIONS, 8))
+                        except:
+                            logger.error("Could not change permissions for file: %s", download_path)
+
+                    #Open the fresh torrent file again so we can extract the proper torrent name
+                    #Used later in post-processing.
+                    with open(download_path, 'rb') as fp:
+                        torrent_info = bencode.bdecode(fp.read())
+
+                    folder_name = torrent_info['info'].get('name', '')
+                    logger.info('Torrent folder name: %s' % folder_name)
+                except Exception, e:
+                    logger.error('Couldn\'t get name from Torrent file: %s. Defaulting to torrent title' % e)
+                    folder_name = bestqual[0]
 
         elif headphones.TORRENT_DOWNLOADER == 1:
             logger.info("Sending torrent to Transmission")
@@ -1142,13 +1163,17 @@ def searchTorrent(album, new=False, losslessOnly=False):
                         rightformat = True
                         title = ''.join(item.find("a", {"class" : "detLink"}))
                         seeds = int(''.join(item.find("td", {"align" : "right"})))
-                        url = item.findAll("a")[3]['href']
+                        url = None
                         if headphones.TORRENT_DOWNLOADER == 0:
-                            tor_hash = re.findall("urn:btih:(.*?)&", url)
-                            if len(tor_hash) > 0:
-                                url = "http://torrage.com/torrent/"+str(tor_hash[0]).upper()+".torrent"
-                            else:
-                                url = None
+                            try:
+                                url = item.find("a", {"title":"Download this torrent"})['href']
+                            except TypeError:
+                                if headphones.OPEN_MAGNET_LINKS:
+                                    url = item.findAll("a")[3]['href']
+                                else:
+                                    logger.info('"%s" only has a magnet link, skipping' % title)
+                        else:
+                            url = item.findAll("a")[3]['href']
                         formatted_size = re.search('Size (.*),', unicode(item)).group(1).replace(u'\xa0', ' ')
                         size = helpers.piratesize(formatted_size)
                         if size < maxsize and minimumseeders < seeds and url != None:
@@ -1297,6 +1322,9 @@ def preprocess(resultlist):
             # get outta here if rutracker or piratebay
             if result[3] == 'rutracker.org':
                 return True, result
+            # Get out of here if it's a magnet link
+            if result[2].startswith("magnet"):
+                return True, result
 
             # Download the torrent file
             headers = {}
@@ -1305,7 +1333,8 @@ def preprocess(resultlist):
                 headers['Referer'] = 'http://kat.ph/'
             elif result[3] == 'What.cd':
                 headers['User-Agent'] = 'Headphones'
-
+            elif result[3] == "The Pirate Bay":
+                headers['User-Agent'] = 'Mozilla/5.0 (Linux; Android 4.1.1; Nexus 7 Build/JRO03D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Safari/535.19'
             return request.request_content(url=result[2], headers=headers), result
 
         else:
