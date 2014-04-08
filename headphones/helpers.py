@@ -179,9 +179,9 @@ def replace_all(text, dic):
 
 def replace_illegal_chars(string, type="file"):
     if type == "file":
-        string = re.sub('[\?"*:|<>/]', string)
+        string = re.sub('[\?"*:|<>/]', '_', string)
     if type == "folder":
-        string = re.sub('[:?<>"|]', string)
+        string = re.sub('[:\?<>"|]', '_', string)
 
     return string
 
