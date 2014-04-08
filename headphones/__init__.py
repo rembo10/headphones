@@ -15,19 +15,16 @@
 
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
 
-from __future__ import with_statement
-
 import os, sys, subprocess
 
 import threading
 import webbrowser
 import sqlite3
 import itertools
+import cherrypy
 
 from lib.apscheduler.scheduler import Scheduler
 from lib.configobj import ConfigObj
-
-import cherrypy
 
 from headphones import versioncheck, logger, version
 from headphones.common import *
