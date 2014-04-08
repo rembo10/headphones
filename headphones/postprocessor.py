@@ -485,8 +485,13 @@ def embedAlbumArt(artwork, downloaded_track_list):
             continue
             
         logger.debug('Adding album art to: %s' % downloaded_track)
-        f.art = artwork
-        f.save()
+        
+        try:
+            f.art = artwork
+            f.save()
+        except Exception, e:
+            logger.error(u'Error ebedding album art to: %s. Error: %s' % (downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), str(e)))
+            continue
         
 def addAlbumArt(artwork, albumpath, release):
     logger.info('Adding album art to folder')
