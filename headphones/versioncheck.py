@@ -144,8 +144,12 @@ def checkGithub():
         logger.warn('Could not get commits behind from GitHub.')
         return headphones.CURRENT_VERSION
 
-    headphones.COMMITS_BEHIND = int(commits['behind_by'])
-    logger.debug("In total, %d commits behind", headphones.COMMITS_BEHIND)
+    try:
+        headphones.COMMITS_BEHIND = int(commits['behind_by'])
+        logger.debug("In total, %d commits behind", headphones.COMMITS_BEHIND)
+    except KeyError:
+        logger.info('Cannot compare versions. Are you running a local development version?')
+        headphones.COMMITS_BEHIND = 0
 
     if headphones.COMMITS_BEHIND > 0:
         logger.info('New version is available. You are %s commits behind' % headphones.COMMITS_BEHIND)
