@@ -360,7 +360,11 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     artwork = None
     album_art_path = albumart.getAlbumArt(albumid)
     if headphones.EMBED_ALBUM_ART or headphones.ADD_ALBUM_ART:
-        artwork = request.request_content(album_art_path)
+        
+        if album_art_path:
+            artwork = request.request_content(album_art_path)
+        else:
+            artwork = None
 
         if not album_art_path or not artwork or len(artwork) < 100:
             logger.info("No suitable album art found from Amazon. Checking Last.FM....")
