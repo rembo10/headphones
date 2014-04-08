@@ -181,7 +181,7 @@ def replace_illegal_chars(string, type="file"):
     if type == "file":
         string = re.sub('[\?"*:|<>/]', string)
     if type == "folder":
-        string = re.sub('[:?<>"|]')
+        string = re.sub('[:?<>"|]', string)
 
     return string
 
