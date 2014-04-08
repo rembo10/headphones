@@ -1117,6 +1117,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
         # Requesting content
         logger.info('Parsing results from The Pirate Bay')
 
+        headers = { 'User-Agent' : 'Mozilla/5.0 (Linux; Android 4.1.1; Nexus 7 Build/JRO03D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Safari/535.19' }
         params = {
             "iht": "2",
             "sort": "seeds"
@@ -1125,6 +1126,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
         data = request.request_soup(
             url=providerurl + category,
             params=params,
+            headers=headers,
             timeout=20
         )
 

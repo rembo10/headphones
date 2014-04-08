@@ -238,6 +238,8 @@ XBMC_USERNAME = None
 XBMC_PASSWORD = None
 XBMC_UPDATE = False
 XBMC_NOTIFY = False
+LMS_ENABLED = False
+LMS_HOST = None
 PLEX_ENABLED = False
 PLEX_SERVER_HOST = None
 PLEX_CLIENT_HOST = None
@@ -349,7 +351,7 @@ def initialize():
                 TWITTER_ENABLED, TWITTER_ONSNATCH, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 PUSHBULLET_ENABLED, PUSHBULLET_APIKEY, PUSHBULLET_DEVICEID, PUSHBULLET_ONSNATCH, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
-                XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
+                XBMC_NOTIFY, LMS_ENABLED, LMS_HOST, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
                 PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
                 PLEX_ENABLED, PLEX_SERVER_HOST, PLEX_CLIENT_HOST, PLEX_USERNAME, PLEX_PASSWORD, PLEX_UPDATE, PLEX_NOTIFY, PUSHALOT_ENABLED, PUSHALOT_APIKEY, \
                 PUSHALOT_ONSNATCH, SONGKICK_ENABLED, SONGKICK_APIKEY, SONGKICK_LOCATION, SONGKICK_FILTER_ENABLED
@@ -377,6 +379,7 @@ def initialize():
         CheckSection('Pushover')
         CheckSection('PushBullet')
         CheckSection('XBMC')
+        CheckSection('LMS')
         CheckSection('Plex')
         CheckSection('NMA')
         CheckSection('Pushalot')
@@ -565,6 +568,9 @@ def initialize():
         XBMC_PASSWORD = check_setting_str(CFG, 'XBMC', 'xbmc_password', '')
         XBMC_UPDATE = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update', 0))
         XBMC_NOTIFY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify', 0))
+
+        LMS_ENABLED = bool(check_setting_int(CFG, 'LMS', 'lms_enabled', 0))
+        LMS_HOST = check_setting_str(CFG, 'LMS', 'lms_host', '')
 
         PLEX_ENABLED = bool(check_setting_int(CFG, 'Plex', 'plex_enabled', 0))
         PLEX_SERVER_HOST = check_setting_str(CFG, 'Plex', 'plex_server_host', '')
@@ -971,6 +977,10 @@ def config_write():
     new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
     new_config['XBMC']['xbmc_update'] = int(XBMC_UPDATE)
     new_config['XBMC']['xbmc_notify'] = int(XBMC_NOTIFY)
+
+    new_config['LMS'] = {}
+    new_config['LMS']['lms_enabled'] = int(LMS_ENABLED)
+    new_config['LMS']['lms_host'] = LMS_HOST
 
     new_config['Plex'] = {}
     new_config['Plex']['plex_enabled'] = int(PLEX_ENABLED)

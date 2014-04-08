@@ -672,6 +672,19 @@
                                     </div>
                                 </div>
                             </fieldset>
+                            <fieldset>
+                                <h3>LMS</h3>
+                                <div class="checkbox row">
+                                    <input type="checkbox" name="lms_enabled" id="lms" value="1" ${config['lms_enabled']} /><label>Enable Squeezebox Updates</label>
+                                </div>
+                                <div id="lmsoptions">
+                                    <div class="row">
+                                        <label>LMS Host:Port</label>
+                                        <input type="text" name="lms_host" value="${config['lms_host']}" size="30">
+                                        <small>e.g. http://localhost:9000. Seperate hosts with commas</small>
+                                    </div>
+                                </div>
+                            </fieldset>
                             </td>
                             <td>
                             <fieldset>
@@ -1297,6 +1310,26 @@
                         else
                         {
                                 $("#xbmcoptions").slideUp();
+                        }
+                });
+
+                if ($("#lms").is(":checked"))
+                        {
+                                $("#lmsoptions").show();
+                        }
+                else
+                        {
+                                $("#lmsoptions").hide();
+                        }
+
+                $("#lms").click(function(){
+                        if ($("#lms").is(":checked"))
+                        {
+                                $("#lmsoptions").slideDown();
+                        }
+                        else
+                        {
+                                $("#lmsoptions").slideUp();
                         }
                 });
 

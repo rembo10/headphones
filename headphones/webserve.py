@@ -1026,6 +1026,8 @@ class WebInterface(object):
                     "xbmc_password": headphones.XBMC_PASSWORD,
                     "xbmc_update": checked(headphones.XBMC_UPDATE),
                     "xbmc_notify": checked(headphones.XBMC_NOTIFY),
+                    "lms_enabled": checked(headphones.LMS_ENABLED),
+                    "lms_host": headphones.LMS_HOST,
                     "plex_enabled": checked(headphones.PLEX_ENABLED),
                     "plex_server_host": headphones.PLEX_SERVER_HOST,
                     "plex_client_host": headphones.PLEX_CLIENT_HOST,
@@ -1097,7 +1099,7 @@ class WebInterface(object):
         remix=0, spokenword=0, audiobook=0, other=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, prefer_torrents=0, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
         bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
         delete_lossless_files=0, growl_enabled=0, growl_onsnatch=0, growl_host=None, growl_password=None, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
-        xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, pushalot_enabled=False, pushalot_apikey=None, pushalot_onsnatch=0, synoindex_enabled=False,
+        xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, pushalot_enabled=False, pushalot_apikey=None, pushalot_onsnatch=0, synoindex_enabled=False, lms_enabled=0, lms_host=None,
         pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, pushover_apitoken=None, pushbullet_enabled=0, pushbullet_onsnatch=0, pushbullet_apikey=None, pushbullet_deviceid=None, twitter_enabled=0, twitter_onsnatch=0, mirror=None, customhost=None, customport=None,
         customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
         enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None, plex_enabled=0, plex_server_host=None, plex_client_host=None, plex_username=None, 
@@ -1228,6 +1230,8 @@ class WebInterface(object):
         headphones.XBMC_PASSWORD = xbmc_password
         headphones.XBMC_UPDATE = xbmc_update
         headphones.XBMC_NOTIFY = xbmc_notify
+        headphones.LMS_ENABLED = lms_enabled
+        headphones.LMS_HOST = lms_host
         headphones.PLEX_ENABLED = plex_enabled
         headphones.PLEX_SERVER_HOST = plex_server_host
         headphones.PLEX_CLIENT_HOST = plex_client_host
