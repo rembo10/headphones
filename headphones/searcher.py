@@ -1147,7 +1147,8 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
 
         # Pirate Bay
         if headphones.PIRATEBAY:
-            provider = "The Pirate Bay"    
+            provider = "The Pirate Bay" 
+            headers = { 'User-Agent' : 'Mozilla/5.0 (Linux; Android 4.1.1; Nexus 7 Build/JRO03D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Safari/535.19' }
             if headphones.PIRATEBAY_PROXY_URL:
                 #Might need to clean up the user submitted url
                 pirate_proxy = headphones.PIRATEBAY_PROXY_URL
@@ -1175,7 +1176,8 @@ def searchTorrent(albumid=None, new=False, losslessOnly=False):
             searchURL = providerurl + category
             
             try:
-                data = urllib2.urlopen(searchURL, timeout=20).read()
+                tpbreq = urllib2.Request(searchURL, '', headers)
+                data = urllib2.urlopen(tpbreq, timeout=20).read()
             except urllib2.URLError, e:
                 logger.warn('Error fetching data from The Pirate Bay: %s' % e)
                 data = False
