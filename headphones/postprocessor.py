@@ -907,7 +907,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
             new_file_name = helpers.replace_all(headphones.FILE_FORMAT.strip(), values).replace('/','_') + ext
         
         
-        new_file_name = new_file_name.replace('?','_').replace(':', '_').replace('"','_').replace('*','_').encode(headphones.SYS_ENCODING, 'replace')
+        new_file_name = helpers.replace_illegal_chars(new_file_name).encode(headphones.SYS_ENCODING, 'replace')
 
         if headphones.FILE_UNDERSCORES:
             new_file_name = new_file_name.replace(' ', '_')
