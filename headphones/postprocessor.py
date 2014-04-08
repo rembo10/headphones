@@ -519,11 +519,13 @@ def addAlbumArt(artwork, albumpath, release):
     if album_art_name.startswith('.'):
         album_art_name = album_art_name.replace(0, '_')
 
-    #prev = os.umask(headphones.UMASK)
-    file = open(os.path.join(albumpath, album_art_name), 'wb')
-    file.write(artwork)
-    file.close()
-    #os.umask(prev)
+    try:
+        file = open(os.path.join(albumpath, album_art_name), 'wb')
+        file.write(artwork)
+        file.close()
+    except Exception, e:
+        logger.error('Error saving album art: %s' % str(e))
+        return
     
 def cleanupFiles(albumpath):
     logger.info('Cleaning up files')
