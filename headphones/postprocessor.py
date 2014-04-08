@@ -16,19 +16,19 @@
 from __future__ import with_statement
 
 import os
-import time
-import threading
-import music_encoder
-import shutil, re
+import re
+import shutil
 import uuid
-from headphones import notifiers
 import beets
+import threading
+import headphones
+
 from beets import autotag
 from beets.mediafile import MediaFile
 
-import headphones
-from headphones import db, albumart, librarysync, lyrics, logger, helpers, request
-from headphones.helpers import sab_replace_dots, sab_replace_spaces
+from headphones import notifiers
+from headphones import db, albumart, librarysync, lyrics
+from headphones import logger, helpers, request, mb, music_encoder
 
 postprocessor_lock = threading.Lock()
 
@@ -48,9 +48,9 @@ def checkFolder():
                     # iterations in just in case we can't read the config for some reason
 
                     nzb_album_possibilities = [ album['FolderName'],
-                                                sab_replace_dots(album['FolderName']),
-                                                sab_replace_spaces(album['FolderName']),
-                                                sab_replace_spaces(sab_replace_dots(album['FolderName']))
+                                                helpers.sab_replace_dots(album['FolderName']),
+                                                helpers.sab_replace_spaces(album['FolderName']),
+                                                helpers.sab_replace_spaces(sab_replace_dots(album['FolderName']))
                                         ]
                     
                     for nzb_folder_name in nzb_album_possibilities:
@@ -80,8 +80,6 @@ def verify(albumid, albumpath, Kind=None, forced=False):
         #from an RSS feed or etc
         #TODO: This should be a call to a class method.. copied it out of importer with only minor changes
         #TODO: odd things can happen when there are diacritic characters in the folder name, need to translate them?
-        import mb
-        
         release_list = None
         
         try:    
@@ -1044,7 +1042,6 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                 continue
             else:
                 logger.info('Querying MusicBrainz for the release group id for: %s - %s', name, album)
-                from headphones import mb
                 try:
                     rgid = mb.findAlbumID(helpers.latinToAscii(name), helpers.latinToAscii(album))
                 except:
@@ -1072,7 +1069,6 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                 continue
             else:
                 logger.info('Querying MusicBrainz for the release group id for: %s - %s', name, album)
-                from headphones import mb
                 try:
                     rgid = mb.findAlbumID(helpers.latinToAscii(name), helpers.latinToAscii(album))
                 except:
@@ -1116,7 +1112,6 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                 continue
             else:
                 logger.info('Querying MusicBrainz for the release group id for: %s', folder)
-                from headphones import mb
                 try:
                     rgid = mb.findAlbumID(album=helpers.latinToAscii(folder))
                 except:
@@ -1129,3 +1124,4 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                 else:
                     logger.info('No match found on MusicBrainz for: %s - %s', name, album)
 
+                                                                                                                          
