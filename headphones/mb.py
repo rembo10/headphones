@@ -223,7 +223,7 @@ def getArtist(artistid, extrasonly=False):
             
             # Need to convert extras string from something like '2,5.6' to ['ep','live','remix']
             extras = db_artist['Extras']
-            extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]
+            extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other"]
             includes = []
             
             i = 1
