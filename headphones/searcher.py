@@ -1172,6 +1172,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
                                     url = item.findAll("a")[3]['href']
                                 else:
                                     logger.info('"%s" only has a magnet link, skipping' % title)
+                                    continue
                         else:
                             url = item.findAll("a")[3]['href']
                         formatted_size = re.search('Size (.*),', unicode(item)).group(1).replace(u'\xa0', ' ')
