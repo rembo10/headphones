@@ -500,9 +500,9 @@ def addAlbumArt(artwork, albumpath, release):
                 '$year':        year
                 }
     
-    album_art_name = helpers.replace_all(headphones.ALBUM_ART_FORMAT.strip(), values).replace('/','_') + ".jpg"
+    album_art_name = helpers.replace_all(headphones.ALBUM_ART_FORMAT.strip(), values) + ".jpg"
 
-    album_art_name = album_art_name.replace('?','_').replace(':', '_').replace('"','_').replace('*','_').encode(headphones.SYS_ENCODING, 'replace')
+    album_art_name = helpers.replace_illegal_chars(album_art_name).encode(headphones.SYS_ENCODING, 'replace')
 
     if headphones.FILE_UNDERSCORES:
         album_art_name = album_art_name.replace(' ', '_')
@@ -568,7 +568,9 @@ def moveFiles(albumpath, release, tracks):
             }
             
     folder = helpers.replace_all(headphones.FOLDER_FORMAT.strip(), values)
-    folder = folder.replace('./', '_/').replace(':','_').replace('?','_').replace('/.','/_').replace('<','_').replace('>','_').replace('|','_').replace('"','_')
+
+    folder = helpers.replace_illegal_chars(folder, type="folder")
+    folder = folder.replace('./', '_/').replace('/.','/_')
     
     if folder.endswith('.'):
         folder = folder[:-1] + '_'

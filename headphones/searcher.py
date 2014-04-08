@@ -611,7 +611,7 @@ def send_to_downloader(data, bestqual, album):
                 return
 
             # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
-            torrent_name = folder_name + '.torrent'
+            torrent_name = helpers.replace_illegal_chars(folder_name) + '.torrent'
             download_path = os.path.join(headphones.TORRENTBLACKHOLE_DIR, torrent_name)
 
             try:

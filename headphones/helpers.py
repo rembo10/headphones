@@ -177,6 +177,14 @@ def replace_all(text, dic):
         text = text.replace(i, j)
     return text
 
+def replace_illegal_chars(string, type="file"):
+    if type == "file":
+        string = re.sub('[\?"*:|<>/]', string)
+    if type == "folder":
+        string = re.sub('[:?<>"|]')
+
+    return string
+
 def cleanName(string):
 
     pass1 = latinToAscii(string).lower()
