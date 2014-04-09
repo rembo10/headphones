@@ -843,14 +843,18 @@ class WebInterface(object):
         return json_albums
     getAlbumsByArtist_json.exposed=True
 
-    def clearhistory(self, type=None):
+    def clearhistory(self, type=None, date_added=None, title=None):
         myDB = db.DBConnection()
-        if type == 'all':
-            logger.info(u"Clearing all history")
-            myDB.action('DELETE from snatched')
+        if type:
+            if type == 'all':
+                logger.info(u"Clearing all history")
+                myDB.action('DELETE from snatched')
+            else:
+                logger.info(u"Clearing history where status is %s" % type)
+                myDB.action('DELETE from snatched WHERE Status=?', [type])
         else:
-            logger.info(u"Clearing history where status is %s" % type)
-            myDB.action('DELETE from snatched WHERE Status=?', [type])
+            logger.info(u"Deleting '%s' from history" % title)
+            myDB.action('DELETE from snatched WHERE Title=? AND DateAdded=?', [title, date_added])
         raise cherrypy.HTTPRedirect("history")
     clearhistory.exposed = True
 

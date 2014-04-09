@@ -26,6 +26,7 @@
 				<th id="size">Size</th>
 				<th id="status">Status</th>
 				<th id="action"></th>
+				<th id="delete"></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -54,6 +55,7 @@
 				<td id="size">${helpers.bytes_to_mb(item['Size'])}</td>
 				<td id="status">${item['Status']}</td>
 				<td id="action">[<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${item['AlbumID']}&redirect=history', $(this),'table')"  data-success="Retrying download of '${item['Title']}'">retry</a>][<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${item['AlbumID']}&new=True&redirect=history',$(this),'table')"  data-success="Looking for a new version of '${item['Title']}'">new</a>]</td>
+				<td id="delete"><a href="#" onclick="doAjaxCall('clearhistory?date_added=${item['DateAdded']}&title=${item['Title']}',$(this),'table')" data-success="${item['Title']} cleared from history"><img src="interfaces/default/images/trashcan.png" height="18" width="18" id="trashcan" title="Clear this item from the history"></a>
 			</tr>
 		%endfor
 		</tbody>
