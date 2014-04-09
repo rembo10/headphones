@@ -1090,7 +1090,7 @@ def start():
         started = True
 
 def sig_handler(signum=None, frame=None):
-    if type(signum) != type(None):
+    if signum is not None:
         logger.info("Signal %i caught, saving and exiting...", signum)
         shutdown()
 
