@@ -1236,6 +1236,7 @@ div#artistheader h2 a {
   position: relative;
   top: 7px;
 }
+#trashcan {margin-top:15px;}
 .cloudtag {
   font-size: 16px;
 }
