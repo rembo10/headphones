@@ -417,7 +417,7 @@ def extract_metadata(f):
     if len(artists) > 1 and len(albums) == 1:
         split_artists = [ RE_FEATURING.split(artist) for artist in artists ]
         featurings = [ len(split_artist) - 1 for split_artist in split_artists ]
-        logger.info("Album seem to feature %d different artists", sum(featurings)
+        logger.info("Album seem to feature %d different artists", sum(featurings))
 
         if sum(featurings) > 0:
             # Find the artist of which the least splits have been generated.
