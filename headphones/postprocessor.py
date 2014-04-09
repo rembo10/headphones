@@ -794,7 +794,7 @@ def correctMetadata(albumid, release, downloaded_track_list):
         except Exception, e:
             logger.error('Error getting recommendation: %s. Not writing metadata' % e)
             return
-        if rec == 'recommendation.none':
+        if str(rec) == 'recommendation.none':
             logger.warn('No accurate album match found for %s, %s -  not writing metadata' % (release['ArtistName'], release['AlbumTitle']))
             return
         
@@ -805,7 +805,7 @@ def correctMetadata(albumid, release, downloaded_track_list):
             return
         
         logger.info('Beets recommendation for tagging items: %s' % rec)
-        
+
         # TODO: Handle extra_items & extra_tracks
         
         autotag.apply_metadata(info, mapping)
@@ -967,7 +967,7 @@ def renameUnprocessedFolder(albumpath):
 def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
 
     if album_dir:
-        folders = [album_dir]
+        folders = [album_dir.encode(headphones.SYS_ENCODING, 'replace')]
 
     else:
         download_dirs = []
