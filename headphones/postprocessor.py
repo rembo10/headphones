@@ -742,13 +742,13 @@ def moveFiles(albumpath, release, tracks):
             try:
                 os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING, 'replace'), int(headphones.FOLDER_PERMISSIONS, 8))
             except Exception, e:
-                logger.error("Error trying to change permissions on folder: %s" % temp_f.decode(headphones.SYS_ENCODING, 'replace'))
+                logger.error("Error trying to change permissions on folder: %s. %s", temp_f, e)
             
     # If we failed to move all the files out of the directory, this will fail too
     try:
         shutil.rmtree(albumpath)
     except Exception, e:
-        logger.error('Could not remove directory: %s. %s' % (albumpath.decode(headphones.SYS_ENCODING, 'replace'), e))
+        logger.error('Could not remove directory: %s. %s', albumpath, e)
     
     destination_paths = []
     
