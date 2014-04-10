@@ -134,7 +134,7 @@ def checkGithub():
     # See how many commits behind we are
     if not headphones.CURRENT_VERSION:
         logger.info('You are running an unknown version of Headphones. Run the updater to identify your version')
-        return headphones.CURRENT_VERSION
+        return headphones.LATEST_VERSION
 
     logger.info('Comparing currently installed version with latest GitHub version')
     url = 'https://api.github.com/repos/%s/headphones/compare/%s...%s' % (headphones.GIT_USER, headphones.CURRENT_VERSION, headphones.LATEST_VERSION)
@@ -182,19 +182,19 @@ def update():
         update_dir = os.path.join(headphones.PROG_DIR, 'update')
         version_path = os.path.join(headphones.PROG_DIR, 'version.txt')
 
-        logger.info('Downloading update from: '+tar_download_url)
+        logger.info('Downloading update from: '+ tar_download_url)
         data = request.request_content(tar_download_url)
 
         if not data:
             logger.error("Unable to retrieve new version from '%s', can't update", tar_download_url)
             return
 
-        download_name = data.geturl().split('/')[-1]
+        download_name = headphones.GIT_BRANCH + '-github'
         tar_download_path = os.path.join(headphones.PROG_DIR, download_name)
 
         # Save tar to disk
         f = open(tar_download_path, 'wb')
-        f.write(data.read())
+        f.write(data)
         f.close()
 
         # Extract the tar to update folder
@@ -228,7 +228,7 @@ def update():
         # Update version.txt
         try:
             ver_file = open(version_path, 'w')
-            ver_file.write(headphones.LATEST_VERSION)
+            ver_file.write(str(headphones.LATEST_VERSION))
             ver_file.close()
         except IOError, e:
             logger.error("Unable to write current version to version.txt, update not complete: "+ex(e))
