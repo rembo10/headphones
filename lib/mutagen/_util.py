@@ -3,8 +3,6 @@
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
-#
-# $Id: _util.py 4218 2007-12-02 06:11:20Z piman $
 
 """Utility classes for Mutagen.
 
@@ -15,6 +13,7 @@ intended for internal use in Mutagen only.
 import struct
 
 from fnmatch import fnmatchcase
+
 
 class DictMixin(object):
     """Implement the dict API using keys() and __*item__ methods.
@@ -35,9 +34,12 @@ class DictMixin(object):
         return iter(self.keys())
 
     def has_key(self, key):
-        try: self[key]
-        except KeyError: return False
-        else: return True
+        try:
+            self[key]
+        except KeyError:
+            return False
+        else:
+            return True
     __contains__ = has_key
 
     iterkeys = lambda self: iter(self.keys())
@@ -56,10 +58,13 @@ class DictMixin(object):
     def pop(self, key, *args):
         if len(args) > 1:
             raise TypeError("pop takes at most two arguments")
-        try: value = self[key]
+        try:
+            value = self[key]
         except KeyError:
-            if args: return args[0]
-            else: raise
+            if args:
+                return args[0]
+            else:
+                raise
         del(self[key])
         return value
 
@@ -67,37 +72,47 @@ class DictMixin(object):
         try:
             key = self.keys()[0]
             return key, self.pop(key)
-        except IndexError: raise KeyError("dictionary is empty")
+        except IndexError:
+            raise KeyError("dictionary is empty")
 
     def update(self, other=None, **kwargs):
         if other is None:
             self.update(kwargs)
             other = {}
 
-        try: map(self.__setitem__, other.keys(), other.values())
+        try:
+            map(self.__setitem__, other.keys(), other.values())
         except AttributeError:
             for key, value in other:
                 self[key] = value
 
     def setdefault(self, key, default=None):
-        try: return self[key]
+        try:
+            return self[key]
         except KeyError:
             self[key] = default
             return default
 
     def get(self, key, default=None):
-        try: return self[key]
-        except KeyError: return default
+        try:
+            return self[key]
+        except KeyError:
+            return default
 
     def __repr__(self):
         return repr(dict(self.items()))
 
     def __cmp__(self, other):
-        if other is None: return 1
-        else: return cmp(dict(self.items()), other)
+        if other is None:
+            return 1
+        else:
+            return cmp(dict(self.items()), other)
+
+    __hash__ = object.__hash__
 
     def __len__(self):
         return len(self.keys())
+
 
 class DictProxy(DictMixin):
     def __init__(self, *args, **kwargs):
@@ -116,10 +131,12 @@ class DictProxy(DictMixin):
     def keys(self):
         return self.__dict.keys()
 
+
 class cdata(object):
     """C character buffer to Python numeric type conversions."""
 
     from struct import error
+    error = error
 
     short_le = staticmethod(lambda data: struct.unpack('<h', data)[0])
     ushort_le = staticmethod(lambda data: struct.unpack('<H', data)[0])
@@ -164,6 +181,7 @@ class cdata(object):
 
     test_bit = staticmethod(lambda value, n: bool((value >> n) & 1))
 
+
 def lock(fileobj):
     """Lock a file object 'safely'.
 
@@ -175,11 +193,14 @@ def lock(fileobj):
     raises an exception in more extreme circumstances (full
     lock table, invalid file).
     """
-    try: import fcntl
+
+    try:
+        import fcntl
     except ImportError:
         return False
     else:
-        try: fcntl.lockf(fileobj, fcntl.LOCK_EX)
+        try:
+            fcntl.lockf(fileobj, fcntl.LOCK_EX)
         except IOError:
             # FIXME: There's possibly a lot of complicated
             # logic that needs to go here in case the IOError
@@ -188,16 +209,19 @@ def lock(fileobj):
         else:
             return True
 
+
 def unlock(fileobj):
     """Unlock a file object.
 
     Don't call this on a file object unless a call to lock()
     returned true.
     """
+
     # If this fails there's a mismatched lock/unlock pair,
     # so we definitely don't want to ignore errors.
     import fcntl
     fcntl.lockf(fileobj, fcntl.LOCK_UN)
+
 
 def insert_bytes(fobj, size, offset, BUFFER_SIZE=2**16):
     """Insert size bytes of empty space starting at offset.
@@ -206,6 +230,7 @@ def insert_bytes(fobj, size, offset, BUFFER_SIZE=2**16):
     equivalent. Mutagen tries to use mmap to resize the file, but
     falls back to a significantly slower method if mmap fails.
     """
+
     assert 0 < size
     assert 0 <= offset
     locked = False
@@ -218,8 +243,10 @@ def insert_bytes(fobj, size, offset, BUFFER_SIZE=2**16):
         try:
             import mmap
             map = mmap.mmap(fobj.fileno(), filesize + size)
-            try: map.move(offset + size, offset, movesize)
-            finally: map.close()
+            try:
+                map.move(offset + size, offset, movesize)
+            finally:
+                map.close()
         except (ValueError, EnvironmentError, ImportError):
             # handle broken mmap scenarios
             locked = lock(fobj)
@@ -257,6 +284,7 @@ def insert_bytes(fobj, size, offset, BUFFER_SIZE=2**16):
         if locked:
             unlock(fobj)
 
+
 def delete_bytes(fobj, size, offset, BUFFER_SIZE=2**16):
     """Delete size bytes of empty space starting at offset.
 
@@ -264,6 +292,7 @@ def delete_bytes(fobj, size, offset, BUFFER_SIZE=2**16):
     equivalent. Mutagen tries to use mmap to resize the file, but
     falls back to a significantly slower method if mmap fails.
     """
+
     locked = False
     assert 0 < size
     assert 0 <= offset
@@ -277,8 +306,10 @@ def delete_bytes(fobj, size, offset, BUFFER_SIZE=2**16):
             try:
                 import mmap
                 map = mmap.mmap(fobj.fileno(), filesize)
-                try: map.move(offset, offset + size, movesize)
-                finally: map.close()
+                try:
+                    map.move(offset, offset + size, movesize)
+                finally:
+                    map.close()
             except (ValueError, EnvironmentError, ImportError):
                 # handle broken mmap scenarios
                 locked = lock(fobj)
@@ -296,13 +327,17 @@ def delete_bytes(fobj, size, offset, BUFFER_SIZE=2**16):
         if locked:
             unlock(fobj)
 
+
 def utf8(data):
     """Convert a basestring to a valid UTF-8 str."""
+
     if isinstance(data, str):
         return data.decode("utf-8", "replace").encode("utf-8")
     elif isinstance(data, unicode):
         return data.encode("utf-8")
-    else: raise TypeError("only unicode/str types can be converted to UTF-8")
+    else:
+        raise TypeError("only unicode/str types can be converted to UTF-8")
+
 
 def dict_match(d, key, default=None):
     try:

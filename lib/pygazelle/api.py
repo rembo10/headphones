@@ -97,7 +97,8 @@ class GazelleAPI(object):
 
         loginpage = 'https://what.cd/login.php'
         data = {'username': self.username,
-                'password': self.password}
+                'password': self.password,
+                'keeplogged': '1'}
         r = self.session.post(loginpage, data=data, timeout=self.default_timeout, headers=self.default_headers)
         self.past_request_timestamps.append(time.time())
         if r.status_code != 200:
@@ -155,6 +156,11 @@ class GazelleAPI(object):
             params['auth'] = self.authkey
         params.update(kwargs)
         r = self.session.get(url, params=params, allow_redirects=False, timeout=self.default_timeout)
+
+        if r.status_code == 302 and r.raw.headers['location'] == 'login.php':
+            self.logged_in_user = None
+            raise LoginException("User login expired")
+
         self.past_request_timestamps.append(time.time())
         return r.content
 

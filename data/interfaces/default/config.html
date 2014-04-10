@@ -200,6 +200,11 @@
                                     <input type="text" name="torrentblackhole_dir" value="${config['torrentblackhole_dir']}" size="50">
                                     <small>Folder your Download program watches for Torrents</small>
                                 </div>
+                                <div class="row checkbox">
+                                    <label>Open Magnet Links</label>
+                                    <input type="checkbox" name="open_magnet_links" value="1" ${config['open_magnet_links']}>
+                                    <small>Allow Headphones to open magnet links</small>
+                                </div>
                             </fieldset>
                             <fieldset id="transmission_options">
                                 <div class="row">
@@ -250,6 +255,12 @@
                                     <label>Keep Files for Seeding</label>
                                     <input type="checkbox" name="keep_torrent_files" value="1" ${config['keep_torrent_files']}>
                                 </div>
+                                <div class="row checkbox">
+                                    <label>Prefer</label>
+                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_0" value="0" ${config['prefer_torrents_0']}>NZBs 
+                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_1" value="1" ${config['prefer_torrents_1']}>Torrents 
+                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_2" value="2" ${config['prefer_torrents_2']}>No Preference
+                                    </div>
                             </fieldset>
                         </td>
                     </tr>
@@ -486,7 +497,7 @@
                                 <div class="row">
                                     <label>Required Words</label>
                                     <input type="text" name="required_words" value="${config['required_words']}" size="50">
-                                    <small>Results without these words in the title will be filtered out</small>
+                                    <small>Results without these words in the title will be filtered out. You can use OR: 'flac OR lossless OR alac, vinyl'</small>
                                 </div>
                             </fieldset>
                         </td>
@@ -494,7 +505,12 @@
                             <fieldset>
                                 <legend>Post-Processing</legend>
                                 <div class="row checkbox left clearfix">
-                                    <input type="checkbox" name="move_files" value="1" ${config['move_files']} /><label>Move downloads to Destination Folder</label>
+                                    <input type="checkbox" name="move_files" id="move_files" value="1" ${config['move_files']} /><label>Move downloads to Destination Folder</label>
+                                    <div id="move_files_options">
+                                        <div class="row indent">
+                                            <input type="checkbox" name="replace_existing_folders" value="1" ${config['replace_existing_folders']}><label>Replace existing folders?</label>
+                                         </div>
+                                    </div>
                                     <input type="checkbox" name="rename_files" value="1" ${config['rename_files']} /><label>Rename files</label>
                                     <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} /><label>Correct metadata</label>
                                     <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} /><label>Delete leftover files <small>(.m3u, .nfo, .sfv, .nzb, etc.)</small></label>
@@ -528,6 +544,23 @@
                 <table class="configtable" summary="Notifications">
                     <tr>
                         <td>
+                            <fieldset>
+                                <h3>Growl</h3>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="growl_enabled" id="growl" value="1" ${config['growl_enabled']} /><label>Enable Growl Notifications</label>
+                                </div>
+                                <div id="growloptions">
+                                    <div class="row">
+                                        <label>Growl Host:Port</label><input type="text" name="growl_host" value="${config['growl_host']}" size="30">
+                                    </div>
+                                    <div class="row">
+                                        <label>Growl Password</label><input type="password" name="growl_password" value="${config['growl_password']}" size="30">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="growl_onsnatch" value="1" ${config['growl_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                </div>
+                            </fieldset>
                             <fieldset>
                                 <h3>Prowl</h3>
                                 <div class="row checkbox">
@@ -644,6 +677,19 @@
                                     </div>
                                 </div>
                             </fieldset>
+                            <fieldset>
+                                <h3>LMS</h3>
+                                <div class="checkbox row">
+                                    <input type="checkbox" name="lms_enabled" id="lms" value="1" ${config['lms_enabled']} /><label>Enable Squeezebox Updates</label>
+                                </div>
+                                <div id="lmsoptions">
+                                    <div class="row">
+                                        <label>LMS Host:Port</label>
+                                        <input type="text" name="lms_host" value="${config['lms_host']}" size="30">
+                                        <small>e.g. http://localhost:9000. Seperate hosts with commas</small>
+                                    </div>
+                                </div>
+                            </fieldset>
                             </td>
                             <td>
                             <fieldset>
@@ -684,6 +730,9 @@
                                     <div class="row">
                                         <label>Priority (-1,0, or 1):</label>
                                         <input type="text" name="pushover_priority" value="${config['pushover_priority']}" size="2">
+                                    </div>
+                                    <div class="row">
+                                        <label>API Token (leave blank to use Headphones default):</label><input type="text" name="pushover_apitoken" value="${config['pushover_apitoken']}" size="50">
                                     </div>
                                 </div>
                             </fieldset>
@@ -791,6 +840,18 @@
                                     <option value="ffmpeg" ${ffmpegselect}>ffmpeg</option>
                                     <option value="xld" ${xldselect}>xld</option>
                                 </select>
+                            </div>
+                            <div class="row">
+                                <div class="row">
+                                    <input type="checkbox" name="encoder_multicore" value="1" ${config['encoder_multicore']}/><label>Enable multi-core</label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="row">
+                                    <label>Multi-core count:</label>
+                                    <input type="text" name="encoder_multicore_count" value="${config['encoder_multicore_count']}" size="7">
+                                    <small>Set equal to the number of cores, or 0 for auto</small>
+                                </div>
                             </div>
                         </fieldset>
                         <fieldset>
@@ -1177,6 +1238,46 @@
                         }
                 });
 
+                if ($("#move_files").is(":checked"))
+                        {
+                                $("#move_files_options").show();
+                        }
+                else
+                        {
+                                $("#move_files_options").hide();
+                        }
+
+                $("#move_files").click(function(){
+                        if ($("#move_files").is(":checked"))
+                        {
+                                $("#move_files_options").slideDown();
+                        }
+                        else
+                        {
+                                $("#move_files_options").slideUp();
+                        }
+                });
+
+                if ($("#growl").is(":checked"))
+                        {
+                                $("#growloptions").show();
+                        }
+                else
+                        {
+                                $("#growloptions").hide();
+                        }
+
+                $("#growl").click(function(){
+                        if ($("#growl").is(":checked"))
+                        {
+                                $("#growloptions").slideDown();
+                        }
+                        else
+                        {
+                                $("#growloptions").slideUp();
+                        }
+                });
+
                 if ($("#prowl").is(":checked"))
                         {
                                 $("#prowloptions").show();
@@ -1214,6 +1315,26 @@
                         else
                         {
                                 $("#xbmcoptions").slideUp();
+                        }
+                });
+
+                if ($("#lms").is(":checked"))
+                        {
+                                $("#lmsoptions").show();
+                        }
+                else
+                        {
+                                $("#lmsoptions").hide();
+                        }
+
+                $("#lms").click(function(){
+                        if ($("#lms").is(":checked"))
+                        {
+                                $("#lmsoptions").slideDown();
+                        }
+                        else
+                        {
+                                $("#lmsoptions").slideUp();
                         }
                 });
 

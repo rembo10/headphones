@@ -1,5 +1,5 @@
 # This file is part of beets.
-# Copyright 2011, Adrian Sampson.
+# Copyright 2013, Adrian Sampson.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -304,32 +304,18 @@ class Pipeline(object):
             raise ValueError('pipeline must have at least two stages')
         self.stages = []
         for stage in stages:
-            if isinstance(stage, types.GeneratorType):
+            if isinstance(stage, (list, tuple)):
+                self.stages.append(stage)
+            else:
                 # Default to one thread per stage.
                 self.stages.append((stage,))
-            else:
-                self.stages.append(stage)
 
     def run_sequential(self):
         """Run the pipeline sequentially in the current thread. The
         stages are run one after the other. Only the first coroutine
         in each stage is used.
         """
-        coros = [stage[0] for stage in self.stages]
-
-        # "Prime" the coroutines.
-        for coro in coros[1:]:
-            coro.next()
-
-        # Begin the pipeline.
-        for out in coros[0]:
-            msgs = _allmsgs(out)
-            for coro in coros[1:]:
-                next_msgs = []
-                for msg in msgs:
-                    out = coro.send(msg)
-                    next_msgs.extend(_allmsgs(out))
-                msgs = next_msgs
+        list(self.pull())
 
     def run_parallel(self, queue_size=DEFAULT_QUEUE_SIZE):
         """Run the pipeline in parallel using one thread per stage. The
@@ -386,6 +372,31 @@ class Pipeline(object):
                 # Make the exception appear as it was raised originally.
                 raise exc_info[0], exc_info[1], exc_info[2]
 
+    def pull(self):
+        """Yield elements from the end of the pipeline. Runs the stages
+        sequentially until the last yields some messages. Each of the messages
+        is then yielded by ``pulled.next()``. If the pipeline has a consumer,
+        that is the last stage does not yield any messages, then pull will not
+        yield any messages. Only the first coroutine in each stage is used
+        """
+        coros = [stage[0] for stage in self.stages]
+
+        # "Prime" the coroutines.
+        for coro in coros[1:]:
+            coro.next()
+
+        # Begin the pipeline.
+        for out in coros[0]:
+            msgs = _allmsgs(out)
+            for coro in coros[1:]:
+                next_msgs = []
+                for msg in msgs:
+                    out = coro.send(msg)
+                    next_msgs.extend(_allmsgs(out))
+                msgs = next_msgs
+            for msg in msgs:
+                yield msg
+
 # Smoke test.
 if __name__ == '__main__':
     import time
@@ -432,7 +443,7 @@ if __name__ == '__main__':
             print('processing %i' % num)
             time.sleep(3)
             if num == 3:
-               raise Exception()
+                raise Exception()
             num = yield num * 2
     def exc_consume():
         while True:

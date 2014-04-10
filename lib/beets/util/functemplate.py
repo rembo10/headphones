@@ -1,5 +1,5 @@
 # This file is part of beets.
-# Copyright 2011, Adrian Sampson.
+# Copyright 2013, Adrian Sampson.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -495,6 +495,9 @@ class Template(object):
         self.expr = _parse(template)
         self.original = template
         self.compiled = self.translate()
+
+    def __eq__(self, other):
+        return self.original == other.original
 
     def interpret(self, values={}, functions={}):
         """Like `substitute`, but forces the interpreter (rather than

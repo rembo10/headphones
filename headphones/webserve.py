@@ -85,7 +85,7 @@ class WebInterface(object):
             raise cherrypy.HTTPRedirect("home")
 
         # Serve the extras up as a dict to make things easier for new templates
-        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]
+        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other"]
         extras_dict = {}
 
         if not artist['Extras']:
@@ -134,7 +134,6 @@ class WebInterface(object):
 
     def addArtist(self, artistid):
         threading.Thread(target=importer.addArtisttoDB, args=[artistid]).start()
-        threading.Thread(target=lastfm.getSimilar).start()
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % artistid)
     addArtist.exposed = True
 
@@ -144,12 +143,12 @@ class WebInterface(object):
         #
         # If they are, we need to convert kwargs to string format
         if not newstyle:
-            extras = "1,2,3,4,5,6,7,8"
+            extras = "1,2,3,4,5,6,7,8,9"
         else:
             temp_extras_list = []
             # TODO: Put these extras as a global variable
             i = 1
-            for extra in ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]:
+            for extra in ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other"]:
                 if extra in kwargs:
                     temp_extras_list.append(i)
                 i += 1
@@ -175,6 +174,7 @@ class WebInterface(object):
             myDB.action('DELETE from albums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
             myDB.action('DELETE from allalbums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
             myDB.action('DELETE from alltracks WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', album['AlbumID'])
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     removeExtras.exposed = True
 
@@ -203,8 +203,18 @@ class WebInterface(object):
         for name in namecheck:
             artistname=name['ArtistName']
         myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
+
+        rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM albums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+        for rgid in rgids:
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
         myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
         myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+
+        rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM allalbums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+        for rgid in rgids:
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
         myDB.action('DELETE from allalbums WHERE ArtistID=?', [ArtistID])
         myDB.action('DELETE from alltracks WHERE ArtistID=?', [ArtistID])
         myDB.action('UPDATE have SET Matched=NULL WHERE ArtistName=?', [artistname])
@@ -219,8 +229,18 @@ class WebInterface(object):
         for ArtistID in emptyArtistIDs:
             logger.info(u"Deleting all traces of artist: " + ArtistID)
             myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
+
+            rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM albums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+            for rgid in rgids:
+                myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
             myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
             myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+
+            rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM allalbums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+            for rgid in rgids:
+                myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
             myDB.action('DELETE from allalbums WHERE ArtistID=?', [ArtistID])
             myDB.action('DELETE from alltracks WHERE ArtistID=?', [ArtistID])
             myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
@@ -283,6 +303,50 @@ class WebInterface(object):
             raise cherrypy.HTTPRedirect(redirect)
     queueAlbum.exposed = True
 
+    def choose_specific_download(self, AlbumID):
+        results = searcher.searchforalbum(AlbumID, choose_specific_download=True)
+        
+        results_as_dicts = []
+        
+        for result in results:
+
+            result_dict = {
+                'title':result[0],
+                'size':result[1],
+                'url':result[2],
+                'provider':result[3],
+                'kind':result[4]
+            }
+            results_as_dicts.append(result_dict)
+
+        s = simplejson.dumps(results_as_dicts)
+        cherrypy.response.headers['Content-type'] = 'application/json'
+        return s
+        
+    choose_specific_download.exposed = True
+
+    def download_specific_release(self, AlbumID, title, size, url, provider, kind, **kwargs):
+
+        # Handle situations where the torrent url contains arguments that are parsed
+        if kwargs:
+            import urllib, urllib2
+            url = urllib2.quote(url, safe=":?/=&") + '&' + urllib.urlencode(kwargs)
+
+        try:
+            result = [(title,int(size),url,provider,kind)]
+        except ValueError:
+            result = [(title,float(size),url,provider,kind)]
+
+        logger.info(u"Making sure we can download the chosen result")
+        (data, bestqual) = searcher.preprocess(result)
+
+        if data and bestqual:
+          myDB = db.DBConnection()
+          album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
+          searcher.send_to_downloader(data, bestqual, album)
+
+    download_specific_release.exposed = True
+
     def unqueueAlbum(self, AlbumID, ArtistID):
         logger.info(u"Marking album: " + AlbumID + "as skipped...")
         myDB = db.DBConnection()
@@ -299,6 +363,7 @@ class WebInterface(object):
         myDB.action('DELETE from tracks WHERE AlbumID=?', [AlbumID])
         myDB.action('DELETE from allalbums WHERE AlbumID=?', [AlbumID])
         myDB.action('DELETE from alltracks WHERE AlbumID=?', [AlbumID])
+        myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [AlbumID])
         if ArtistID:
             raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
         else:
@@ -552,8 +617,18 @@ class WebInterface(object):
         for ArtistID in args:
             if action == 'delete':
                 myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
+
+                rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM albums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+                for rgid in rgids:
+                    myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
                 myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
                 myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+
+                rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM allalbums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
+                for rgid in rgids:
+                    myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+
                 myDB.action('DELETE from allalbums WHERE AlbumID=?', [AlbumID])
                 myDB.action('DELETE from alltracks WHERE AlbumID=?', [AlbumID])
                 myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
@@ -627,9 +702,9 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("home")
     forceSearch.exposed = True
 
-    def forcePostProcess(self):
+    def forcePostProcess(self, dir=None, album_dir=None):
         from headphones import postprocessor
-        threading.Thread(target=postprocessor.forcePostProcess).start()
+        threading.Thread(target=postprocessor.forcePostProcess, kwargs={'dir':dir,'album_dir':album_dir}).start()
         raise cherrypy.HTTPRedirect("home")
     forcePostProcess.exposed = True
 
@@ -659,7 +734,7 @@ class WebInterface(object):
         if sSearch == "":
             filtered = headphones.LOG_LIST[::]
         else:
-            filtered = [row for row in headphones.LOG_LIST for column in row if sSearch in column]
+            filtered = [row for row in headphones.LOG_LIST for column in row if sSearch.lower() in column.lower()]
 
         sortcolumn = 0
         if iSortCol_0 == '1':
@@ -768,14 +843,18 @@ class WebInterface(object):
         return json_albums
     getAlbumsByArtist_json.exposed=True
 
-    def clearhistory(self, type=None):
+    def clearhistory(self, type=None, date_added=None, title=None):
         myDB = db.DBConnection()
-        if type == 'all':
-            logger.info(u"Clearing all history")
-            myDB.action('DELETE from snatched')
+        if type:
+            if type == 'all':
+                logger.info(u"Clearing all history")
+                myDB.action('DELETE from snatched')
+            else:
+                logger.info(u"Clearing history where status is %s" % type)
+                myDB.action('DELETE from snatched WHERE Status=?', [type])
         else:
-            logger.info(u"Clearing history where status is %s" % type)
-            myDB.action('DELETE from snatched WHERE Status=?', [type])
+            logger.info(u"Deleting '%s' from history" % title)
+            myDB.action('DELETE from snatched WHERE Title=? AND DateAdded=?', [title, date_added])
         raise cherrypy.HTTPRedirect("history")
     clearhistory.exposed = True
 
@@ -907,6 +986,7 @@ class WebInterface(object):
                     "album_art_format" : headphones.ALBUM_ART_FORMAT,
                     "embed_album_art" : checked(headphones.EMBED_ALBUM_ART),
                     "embed_lyrics" : checked(headphones.EMBED_LYRICS),
+                    "replace_existing_folders" : checked(headphones.REPLACE_EXISTING_FOLDERS),
                     "dest_dir" : headphones.DESTINATION_DIR,
                     "lossless_dest_dir" : headphones.LOSSLESS_DESTINATION_DIR,
                     "folder_format" : headphones.FOLDER_FORMAT,
@@ -916,6 +996,10 @@ class WebInterface(object):
                     "autowant_upcoming" : checked(headphones.AUTOWANT_UPCOMING),
                     "autowant_all" : checked(headphones.AUTOWANT_ALL),
                     "keep_torrent_files" : checked(headphones.KEEP_TORRENT_FILES),
+                    "prefer_torrents_0" : radio(headphones.PREFER_TORRENTS, 0),
+                    "prefer_torrents_1" : radio(headphones.PREFER_TORRENTS, 1),
+                    "prefer_torrents_2" : radio(headphones.PREFER_TORRENTS, 2),
+                    "open_magnet_links" : checked(headphones.OPEN_MAGNET_LINKS),
                     "log_dir" : headphones.LOG_DIR,
                     "cache_dir" : headphones.CACHE_DIR,
                     "interface_list" : interface_list,
@@ -930,7 +1014,13 @@ class WebInterface(object):
                     "encodervbrcbr": headphones.ENCODERVBRCBR,
                     "encoderquality": headphones.ENCODERQUALITY,
                     "encoderlossless": checked(headphones.ENCODERLOSSLESS),
+                    "encoder_multicore": checked(headphones.ENCODER_MULTICORE),
+                    "encoder_multicore_count": int(headphones.ENCODER_MULTICORE_COUNT),
                     "delete_lossless_files": checked(headphones.DELETE_LOSSLESS_FILES),
+                    "growl_enabled": checked(headphones.GROWL_ENABLED),
+                    "growl_onsnatch": checked(headphones.GROWL_ONSNATCH),
+                    "growl_host": headphones.GROWL_HOST,
+                    "growl_password": headphones.GROWL_PASSWORD,
                     "prowl_enabled": checked(headphones.PROWL_ENABLED),
                     "prowl_onsnatch": checked(headphones.PROWL_ONSNATCH),
                     "prowl_keys": headphones.PROWL_KEYS,
@@ -941,6 +1031,8 @@ class WebInterface(object):
                     "xbmc_password": headphones.XBMC_PASSWORD,
                     "xbmc_update": checked(headphones.XBMC_UPDATE),
                     "xbmc_notify": checked(headphones.XBMC_NOTIFY),
+                    "lms_enabled": checked(headphones.LMS_ENABLED),
+                    "lms_host": headphones.LMS_HOST,
                     "plex_enabled": checked(headphones.PLEX_ENABLED),
                     "plex_server_host": headphones.PLEX_SERVER_HOST,
                     "plex_client_host": headphones.PLEX_CLIENT_HOST,
@@ -959,6 +1051,7 @@ class WebInterface(object):
                     "pushover_enabled": checked(headphones.PUSHOVER_ENABLED),
                     "pushover_onsnatch": checked(headphones.PUSHOVER_ONSNATCH),
                     "pushover_keys": headphones.PUSHOVER_KEYS,
+                    "pushover_apitoken": headphones.PUSHOVER_APITOKEN,
                     "pushover_priority": headphones.PUSHOVER_PRIORITY,
                     "pushbullet_enabled": checked(headphones.PUSHBULLET_ENABLED),
                     "pushbullet_onsnatch": checked(headphones.PUSHBULLET_ONSNATCH),
@@ -983,7 +1076,7 @@ class WebInterface(object):
                 }
 
         # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8
-        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]
+        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other"]
         extras_dict = {}
 
         i = 1
@@ -1006,16 +1099,16 @@ class WebInterface(object):
         use_headphones_indexer=0, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, omgwtfnzbs=0, omgwtfnzbs_uid=None, omgwtfnzbs_apikey=None,
         preferred_words=None, required_words=None, ignored_words=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None,
         numberofseeders=None, use_piratebay=0, piratebay_proxy_url=None, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
-        rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0,
+        rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0, replace_existing_folders=False,
         destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, file_underscores=0, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0,
-        remix=0, spokenword=0, audiobook=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
+        remix=0, spokenword=0, audiobook=0, other=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, prefer_torrents=0, open_magnet_links=0, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
         bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
-        delete_lossless_files=0, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
-        xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, pushalot_enabled=False, pushalot_apikey=None, pushalot_onsnatch=0, synoindex_enabled=False,
-        pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, pushbullet_enabled=0, pushbullet_onsnatch=0, pushbullet_apikey=None, pushbullet_deviceid=None, twitter_enabled=0, twitter_onsnatch=0, mirror=None, customhost=None, customport=None,
+        delete_lossless_files=0, growl_enabled=0, growl_onsnatch=0, growl_host=None, growl_password=None, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
+        xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, pushalot_enabled=False, pushalot_apikey=None, pushalot_onsnatch=0, synoindex_enabled=False, lms_enabled=0, lms_host=None,
+        pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, pushover_apitoken=None, pushbullet_enabled=0, pushbullet_onsnatch=0, pushbullet_apikey=None, pushbullet_deviceid=None, twitter_enabled=0, twitter_onsnatch=0, mirror=None, customhost=None, customport=None,
         customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
         enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None, plex_enabled=0, plex_server_host=None, plex_client_host=None, plex_username=None, 
-        plex_password=None, plex_update=0, plex_notify=0, songkick_enabled=0, songkick_apikey=None, songkick_location=None, songkick_filter_enabled=0, **kwargs):
+        plex_password=None, plex_update=0, plex_notify=0, songkick_enabled=0, songkick_apikey=None, songkick_location=None, songkick_filter_enabled=0, encoder_multicore=False, encoder_multicore_count=0, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -1100,6 +1193,7 @@ class WebInterface(object):
         headphones.ALBUM_ART_FORMAT = album_art_format
         headphones.EMBED_ALBUM_ART = embed_album_art
         headphones.EMBED_LYRICS = embed_lyrics
+        headphones.REPLACE_EXISTING_FOLDERS = replace_existing_folders
         headphones.DESTINATION_DIR = destination_dir
         headphones.LOSSLESS_DESTINATION_DIR = lossless_destination_dir
         headphones.FOLDER_FORMAT = folder_format
@@ -1109,6 +1203,8 @@ class WebInterface(object):
         headphones.AUTOWANT_UPCOMING = autowant_upcoming
         headphones.AUTOWANT_ALL = autowant_all
         headphones.KEEP_TORRENT_FILES = keep_torrent_files
+        headphones.PREFER_TORRENTS = int(prefer_torrents)
+        headphones.OPEN_MAGNET_LINKS = open_magnet_links
         headphones.INTERFACE = interface
         headphones.LOG_DIR = log_dir
         headphones.CACHE_DIR = cache_dir
@@ -1123,7 +1219,13 @@ class WebInterface(object):
         headphones.ENCODERVBRCBR = encodervbrcbr
         headphones.ENCODERQUALITY = int(encoderquality)
         headphones.ENCODERLOSSLESS = int(encoderlossless)
+        headphones.ENCODER_MULTICORE = encoder_multicore
+        headphones.ENCODER_MULTICORE_COUNT = max(0, int(encoder_multicore_count))
         headphones.DELETE_LOSSLESS_FILES = int(delete_lossless_files)
+        headphones.GROWL_ENABLED = growl_enabled
+        headphones.GROWL_ONSNATCH = growl_onsnatch
+        headphones.GROWL_HOST = growl_host
+        headphones.GROWL_PASSWORD = growl_password
         headphones.PROWL_ENABLED = prowl_enabled
         headphones.PROWL_ONSNATCH = prowl_onsnatch
         headphones.PROWL_KEYS = prowl_keys
@@ -1134,6 +1236,8 @@ class WebInterface(object):
         headphones.XBMC_PASSWORD = xbmc_password
         headphones.XBMC_UPDATE = xbmc_update
         headphones.XBMC_NOTIFY = xbmc_notify
+        headphones.LMS_ENABLED = lms_enabled
+        headphones.LMS_HOST = lms_host
         headphones.PLEX_ENABLED = plex_enabled
         headphones.PLEX_SERVER_HOST = plex_server_host
         headphones.PLEX_CLIENT_HOST = plex_client_host
@@ -1153,6 +1257,7 @@ class WebInterface(object):
         headphones.PUSHOVER_ONSNATCH = pushover_onsnatch
         headphones.PUSHOVER_KEYS = pushover_keys
         headphones.PUSHOVER_PRIORITY = pushover_priority
+        headphones.PUSHOVER_APITOKEN = pushover_apitoken
         headphones.PUSHBULLET_ENABLED = pushbullet_enabled
         headphones.PUSHBULLET_ONSNATCH = pushbullet_onsnatch
         headphones.PUSHBULLET_APIKEY = pushbullet_apikey
@@ -1191,7 +1296,7 @@ class WebInterface(object):
 
         # Convert the extras to list then string. Coming in as 0 or 1
         temp_extras_list = []
-        extras_list = [single, ep, compilation, soundtrack, live, remix, spokenword, audiobook]
+        extras_list = [single, ep, compilation, soundtrack, live, remix, spokenword, audiobook, other]
 
         i = 1
         for extra in extras_list:

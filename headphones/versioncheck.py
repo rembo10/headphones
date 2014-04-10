@@ -13,10 +13,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import platform, subprocess, re, os, urllib2, tarfile
+import platform, subprocess, re, os, tarfile
 
 import headphones
-from headphones import logger, version
+from headphones import logger, version, request
 from headphones.exceptions import ex
 
 import lib.simplejson as simplejson
@@ -31,20 +31,20 @@ def runGit(args):
     if platform.system().lower() == 'darwin':
         git_locations.append('/usr/local/git/bin/git')
 
-
     output = err = None
 
     for cur_git in git_locations:
-
         cmd = cur_git+' '+args
 
         try:
             logger.debug('Trying to execute: "' + cmd + '" with shell in ' + headphones.PROG_DIR)
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=headphones.PROG_DIR)
             output, err = p.communicate()
+            output = output.strip()
+
             logger.debug('Git output: ' + output)
         except OSError:
-            logger.debug('Command ' + cmd + ' didn\'t work, couldn\'t find git')
+            logger.debug('Command failed: %s', cmd)
             continue
 
         if 'not found' in output or "not recognized as an internal or external command" in output:
@@ -65,7 +65,7 @@ def getVersion():
         headphones.INSTALL_TYPE = 'win'
 
         # Don't have a way to update exe yet, but don't want to set VERSION to None
-        return 'Windows Install'
+        return 'Windows Install', 'master'
 
     elif os.path.isdir(os.path.join(headphones.PROG_DIR, '.git')):
 
@@ -74,15 +74,29 @@ def getVersion():
 
         if not output:
             logger.error('Couldn\'t find latest installed version.')
-            return None
+            cur_commit_hash = None
 
-        cur_commit_hash = output.strip()
+        cur_commit_hash = output
 
         if not re.match('^[a-z0-9]+$', cur_commit_hash):
             logger.error('Output doesn\'t look like a hash, not using it')
-            return None
+            cur_commit_hash = None
 
-        return cur_commit_hash
+        if headphones.DO_NOT_OVERRIDE_GIT_BRANCH and headphones.GIT_BRANCH:
+            branch_name = headphones.GIT_BRANCH
+
+        else:
+            branch_name, err = runGit('rev-parse --abbrev-ref HEAD')
+            branch_name = branch_name
+
+            if not branch_name and headphones.GIT_BRANCH:
+                logger.error('Could not retrieve branch name from git. Falling back to %s' % headphones.GIT_BRANCH)
+                branch_name = headphones.GIT_BRANCH
+            if not branch_name:
+                logger.error('Could not retrieve branch name from git. Defaulting to master')
+                branch_name = 'master'
+
+        return cur_commit_hash, branch_name
 
     else:
 
@@ -91,69 +105,65 @@ def getVersion():
         version_file = os.path.join(headphones.PROG_DIR, 'version.txt')
 
         if not os.path.isfile(version_file):
-            return None
+            return None, 'master'
 
         fp = open(version_file, 'r')
         current_version = fp.read().strip(' \n\r')
         fp.close()
 
         if current_version:
-            return current_version
+            return current_version, headphones.GIT_BRANCH
         else:
-            return None
+            return None, 'master'
 
 def checkGithub():
+    headphones.COMMITS_BEHIND = 0
 
-    # Get the latest commit available from github
+    # Get the latest version available from github
+    logger.info('Retrieving latest version information from GitHub')
     url = 'https://api.github.com/repos/%s/headphones/commits/%s' % (headphones.GIT_USER, headphones.GIT_BRANCH)
-    logger.info('Retrieving latest version information from github')
-    try:
-        result = urllib2.urlopen(url, timeout=20).read()
-        git = simplejson.JSONDecoder().decode(result)
-        headphones.LATEST_VERSION = git['sha']
-    except:
-        logger.warn('Could not get the latest commit from github')
-        headphones.COMMITS_BEHIND = 0
+    version = request.request_json(url, timeout=20, validator=lambda x: type(x) == dict)
+
+    if version is None:
+        logger.warn('Could not get the latest version from GitHub. Are you running a local development version?')
         return headphones.CURRENT_VERSION
 
+    headphones.LATEST_VERSION = version['sha']
+    logger.debug("Latest version is %s", headphones.LATEST_VERSION)
+
     # See how many commits behind we are
-    if headphones.CURRENT_VERSION:
-        logger.info('Comparing currently installed version with latest github version')
-        url = 'https://api.github.com/repos/%s/headphones/compare/%s...%s' % (headphones.GIT_USER, headphones.CURRENT_VERSION, headphones.LATEST_VERSION)
-
-        try:
-            result = urllib2.urlopen(url, timeout=20).read()
-            git = simplejson.JSONDecoder().decode(result)
-            headphones.COMMITS_BEHIND = git['total_commits']
-        except:
-            logger.warn('Could not get commits behind from github')
-            headphones.COMMITS_BEHIND = 0
-            return headphones.CURRENT_VERSION
-
-        if headphones.COMMITS_BEHIND >= 1:
-            logger.info('New version is available. You are %s commits behind' % headphones.COMMITS_BEHIND)
-        elif headphones.COMMITS_BEHIND == 0:
-            logger.info('Headphones is up to date')
-        elif headphones.COMMITS_BEHIND == -1:
-            logger.info('You are running an unknown version of Headphones. Run the updater to identify your version')
-
-    else:
+    if not headphones.CURRENT_VERSION:
         logger.info('You are running an unknown version of Headphones. Run the updater to identify your version')
+        return headphones.CURRENT_VERSION
+
+    logger.info('Comparing currently installed version with latest GitHub version')
+    url = 'https://api.github.com/repos/%s/headphones/compare/%s...%s' % (headphones.GIT_USER, headphones.CURRENT_VERSION, headphones.LATEST_VERSION)
+    commits = request.request_json(url, timeout=20, whitelist_status_code=404, validator=lambda x: type(x) == dict)
+
+    if commits is None:
+        logger.warn('Could not get commits behind from GitHub.')
+        return headphones.CURRENT_VERSION
+
+    try:
+        headphones.COMMITS_BEHIND = int(commits['behind_by'])
+        logger.debug("In total, %d commits behind", headphones.COMMITS_BEHIND)
+    except KeyError:
+        logger.info('Cannot compare versions. Are you running a local development version?')
+        headphones.COMMITS_BEHIND = 0
+
+    if headphones.COMMITS_BEHIND > 0:
+        logger.info('New version is available. You are %s commits behind' % headphones.COMMITS_BEHIND)
+    elif headphones.COMMITS_BEHIND == 0:
+        logger.info('Headphones is up to date')
 
     return headphones.LATEST_VERSION
 
 def update():
-
-
     if headphones.INSTALL_TYPE == 'win':
-
         logger.info('Windows .exe updating not supported yet.')
-        pass
-
 
     elif headphones.INSTALL_TYPE == 'git':
-
-        output, err = runGit('pull origin ' + version.HEADPHONES_VERSION)
+        output, err = runGit('pull origin ' + headphones.GIT_BRANCH)
 
         if not output:
             logger.error('Couldn\'t download latest version')
@@ -168,20 +178,18 @@ def update():
                 logger.info('Output: ' + str(output))
 
     else:
-
         tar_download_url = 'https://github.com/%s/headphones/tarball/%s' % (headphones.GIT_USER, headphones.GIT_BRANCH)
         update_dir = os.path.join(headphones.PROG_DIR, 'update')
         version_path = os.path.join(headphones.PROG_DIR, 'version.txt')
 
-        try:
-            logger.info('Downloading update from: '+tar_download_url)
-            data = urllib2.urlopen(tar_download_url)
-        except (IOError, URLError):
-            logger.error("Unable to retrieve new version from "+tar_download_url+", can't update")
+        logger.info('Downloading update from: '+tar_download_url)
+        data = request.request_content(tar_download_url)
+
+        if not data:
+            logger.error("Unable to retrieve new version from '%s', can't update", tar_download_url)
             return
 
         download_name = data.geturl().split('/')[-1]
-
         tar_download_path = os.path.join(headphones.PROG_DIR, download_name)
 
         # Save tar to disk
@@ -190,13 +198,13 @@ def update():
         f.close()
 
         # Extract the tar to update folder
-        logger.info('Extracing file' + tar_download_path)
+        logger.info('Extracting file: ' + tar_download_path)
         tar = tarfile.open(tar_download_path)
         tar.extractall(update_dir)
         tar.close()
 
         # Delete the tar.gz
-        logger.info('Deleting file' + tar_download_path)
+        logger.info('Deleting file: ' + tar_download_path)
         os.remove(tar_download_path)
 
         # Find update dir name

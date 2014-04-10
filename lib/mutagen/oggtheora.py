@@ -5,8 +5,6 @@
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
-#
-# $Id: oggtheora.py 3976 2007-01-13 22:00:14Z piman $
 
 """Read and write Ogg Theora comments.
 
@@ -20,18 +18,26 @@ __all__ = ["OggTheora", "Open", "delete"]
 
 import struct
 
-from lib.mutagen._vorbis import VCommentDict
-from lib.mutagen.ogg import OggPage, OggFileType, error as OggError
+from mutagen._vorbis import VCommentDict
+from mutagen._util import cdata
+from mutagen.ogg import OggPage, OggFileType, error as OggError
 
-class error(OggError): pass
-class OggTheoraHeaderError(error): pass
+
+class error(OggError):
+    pass
+
+
+class OggTheoraHeaderError(error):
+    pass
+
 
 class OggTheoraInfo(object):
     """Ogg Theora stream information.
 
     Attributes:
-    length - file length in seconds, as a float
-    fps - video frames per second, as a float
+
+    * length - file length in seconds, as a float
+    * fps - video frames per second, as a float
     """
 
     length = 0
@@ -50,11 +56,20 @@ class OggTheoraInfo(object):
                 "found Theora version %d.%d != 3.2" % (vmaj, vmin))
         fps_num, fps_den = struct.unpack(">2I", data[22:30])
         self.fps = fps_num / float(fps_den)
-        self.bitrate = struct.unpack(">I", data[37:40] + "\x00")[0]
+        self.bitrate = cdata.uint_be("\x00" + data[37:40])
+        self.granule_shift = (cdata.ushort_be(data[40:42]) >> 5) & 0x1F
         self.serial = page.serial
+
+    def _post_tags(self, fileobj):
+        page = OggPage.find_last(fileobj, self.serial)
+        position = page.position
+        mask = (1 << self.granule_shift) - 1
+        frames = (position >> self.granule_shift) + (position & mask)
+        self.length = frames / float(self.fps)
 
     def pprint(self):
         return "Ogg Theora, %.2f seconds, %d bps" % (self.length, self.bitrate)
+
 
 class OggTheoraCommentDict(VCommentDict):
     """Theora comments embedded in an Ogg bitstream."""
@@ -91,6 +106,7 @@ class OggTheoraCommentDict(VCommentDict):
         new_pages = OggPage.from_packets(packets, old_pages[0].sequence)
         OggPage.replace(fileobj, old_pages, new_pages)
 
+
 class OggTheora(OggFileType):
     """An Ogg Theora file."""
 
@@ -99,13 +115,16 @@ class OggTheora(OggFileType):
     _Error = OggTheoraHeaderError
     _mimes = ["video/x-theora"]
 
+    @staticmethod
     def score(filename, fileobj, header):
         return (header.startswith("OggS") *
                 (("\x80theora" in header) + ("\x81theora" in header)))
-    score = staticmethod(score)
+
 
 Open = OggTheora
 
+
 def delete(filename):
     """Remove tags from a file."""
+
     OggTheora(filename).delete()

@@ -13,39 +13,30 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib2
-from headphones import db
+from headphones import request, db
 
 def getAlbumArt(albumid):
-
     myDB = db.DBConnection()
     asin = myDB.action('SELECT AlbumASIN from albums WHERE AlbumID=?', [albumid]).fetchone()[0]
-    
-    if not asin:
-        return None
-        
-    url = 'http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg' % asin
-    
-    return url
-    
+
+    if asin:
+        return 'http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg' % asin
+
 def getCachedArt(albumid):
-    
     from headphones import cache
-    
+
     c = cache.Cache()
-    
     artwork_path = c.get_artwork_from_cache(AlbumID=albumid)
-    
+
     if not artwork_path:
-        return None
-    
+        return
+
     if artwork_path.startswith('http://'):
-        try:
-            artwork = urllib2.urlopen(artwork_path, timeout=20).read()
-            return artwork
-        except:
-            logger.warn("Unable to open url: " + artwork_path)
-            return None
+        artwork = request.request_content(artwork_path, timeout=20)
+
+        if not artwork:
+            logger.warn("Unable to open url: %s", artwork_path)
+            return
     else:
-        artwork = open(artwork_path, "r").read()
-        return artwork
+        with open(artwork_path, "r") as fp:
+            return fp.read()
