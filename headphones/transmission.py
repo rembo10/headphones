@@ -132,17 +132,23 @@ def torrentAction(method, arguments):
             return
 
     # Retrieve session id
-    if username and password:
-        response = request.request_response(host, auth=(username, password), whitelist_status_code=409)
-    else:
-        response = request.request_response(host, whitelist_status_code=409)
+    auth = (username, password) if username and password else None
+
+    response = request.request_response(host, auth=auth, whitelist_status_code=[401, 409])
 
     if response is None:
         logger.error("Error gettings Transmission session ID")
         return
 
-    # Parse session id
-    if response.status_code == 409:
+    # Parse response
+    if response.status_code == 401:
+        if auth:
+            logger.error("Username and/or password not accepted by Transmission")
+        else:
+            logger.error("Transmission authorization required")
+
+        return
+    elif response.status_code == 409:
         sessionid = response.headers['x-transmission-session-id']
 
     if not sessionid:
@@ -153,7 +159,7 @@ def torrentAction(method, arguments):
     headers = { 'x-transmission-session-id': sessionid }
     data = { 'method': method, 'arguments': arguments }
 
-    response = request.request_json(host, method="post", data=json.dumps(data), headers=headers)
+    response = request.request_json(host, method="post", data=json.dumps(data), headers=headers, auth=auth)
 
     if not response:
         logger.error("Error sending torrent to Transmission")
