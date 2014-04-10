@@ -122,7 +122,6 @@
 			<div class="links">
 				<a href="#" onclick="doAjaxCall('forceSearch',$(this))" data-success="Checking for wanted albums successful" data-error="Error checking wanted albums"><i class="fa fa-search fa-fw"></i> Force Check for Wanted Albums</a>
 				<a href="#" onclick="doAjaxCall('forceUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><i class="fa fa-heart fa-fw"></i> Force Update Active Artists [Fast]</a>
-				<a href="#" onclick="doAjaxCall('forcePostProcess',$(this))" data-success="Post-Processor is being loaded" data-error="Error during Post-Processing"><i class="fa fa-wrench fa-fw"></i> Force Post-Process Albums in Download Folder</a>
 				<a href="#" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update successful" data-error="Error checking for update"><i class="fa fa-refresh fa-fw"></i> Check for Headphones Updates</a>
 				<a href="#" id="delete_empty_artists"><i class="fa fa-trash-o fa-fw"></i> Delete empty Artists</a>
 					<div id="emptyartistdialog" title="Confirm Artist Deletion" style="display:none" class="configtable">
@@ -137,8 +136,27 @@
 					        No empty artists found.
 					    %endif
 					</div>
+				<a href="#" onclick="doAjaxCall('forcePostProcess',$(this))" data-success="Post-Processor is being loaded" data-error="Error during Post-Processing"><i class="fa fa-wrench fa-fw"></i> Force Post-Process Albums in Download Folder</a>
 			</div>
 		</fieldset>
+		<form action="forcePostProcess" method="GET">
+		            <fieldset>
+		            <div class="row">
+		                <label>Force Post-Process Albums in Alternate Folder</label>
+					    <input type="text" value="" name="dir" id="dir" size="50" /><input type="submit" />
+		            </div>
+		            </fieldset>
+		      
+		</form>
+		<form action="forcePostProcess" method="GET">
+		            <fieldset>
+		            <div class="row">
+		                <label>Post-Process Single Folder</label>
+					    <input type="text" value="" name="album_dir" id="album_dir" size="50" /><input type="submit" />
+		            </div>
+		            </fieldset>
+		      
+		</form>
 		
 	</div>
 

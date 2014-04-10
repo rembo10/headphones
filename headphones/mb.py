@@ -67,7 +67,7 @@ def startmb():
         else:
             musicbrainzngs.hpauth(mbuser,mbpass)
     
-    logger.debug('Using the following server values:\nMBHost: %s ; MBPort: %i  ;  Sleep Interval: %i ' % (mbhost, mbport, sleepytime))
+    logger.debug('Using the following server values: MBHost: %s, MBPort: %i, Sleep Interval: %i', mbhost, mbport, sleepytime)
     
     return True
 
@@ -223,7 +223,7 @@ def getArtist(artistid, extrasonly=False):
             
             # Need to convert extras string from something like '2,5.6' to ['ep','live','remix']
             extras = db_artist['Extras']
-            extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook"]
+            extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other"]
             includes = []
             
             i = 1
@@ -373,7 +373,7 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
                     logger.info("Removing all references to release %s to reflect MusicBrainz" % items['ReleaseID'])
                     force_repackage1 = 1
     else:
-        logger.info("Error pulling data from MusicBrainz:  Maintaining dB")
+        logger.info("There was either an error pulling data from MusicBrainz or there might not be any releases for this category")
 
     num_new_releases = 0
 
@@ -566,7 +566,10 @@ def findAlbumID(artist=None, album=None):
     results = None
     
     try:
-        term = '"'+album+'" AND artist:"'+artist+'"'
+        if album and artist:
+            term = '"'+album+'" AND artist:"'+artist+'"'
+        else:
+            term = album
         results = musicbrainzngs.search_release_groups(term,1).get('release-group-list')
     except WebServiceError, e:
         logger.warn('Attempt to query MusicBrainz for %s - %s failed (%s)' % (artist, album, str(e)))

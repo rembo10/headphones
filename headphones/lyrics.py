@@ -14,11 +14,9 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import urllib, urllib2
-from xml.dom import minidom
 import htmlentitydefs
 
-from headphones import logger
+from headphones import logger, request
 
 def getLyrics(artist, song):
 
@@ -26,22 +24,14 @@ def getLyrics(artist, song):
                 "song": song.encode('utf-8'),
                 "fmt": 'xml'
                 }
-                
-    searchURL = 'http://lyrics.wikia.com/api.php?' + urllib.urlencode(params)
+
+    url = 'http://lyrics.wikia.com/api.php'
+    data = request.request_minidom(url, params=params)
     
-    try:
-        data = urllib2.urlopen(searchURL, timeout=20).read()
-    except Exception, e:
-        logger.warn('Error opening: %s. Error: %s' % (searchURL, e))
+    if not data:
         return
     
-    try:
-        parseddata = minidom.parseString(data)
-    except Exception, e:
-        logger.warn('Error parsing data from url: %s. Error: %s' % (searchURL, e))
-        return
-    
-    url = parseddata.getElementsByTagName("url")
+    url = data.getElementsByTagName("url")
     
     if url:
         lyricsurl = url[0].firstChild.nodeValue
@@ -49,12 +39,12 @@ def getLyrics(artist, song):
         logger.info('No lyrics found for %s - %s' % (artist, song))
         return
     
-    try:    
-        lyricspage = urllib.urlopen(lyricsurl).read()
-    except Exception, e:
-        logger.warn('Error fetching lyrics from: %s. Error: %s' % (lyricsurl, e))
+    lyricspage = request.request_content(lyricsurl)
+    
+    if not lyricspage:
+        logger.warn('Error fetching lyrics from: %s' % lyricsurl)
         return
-        
+
     m = re.compile('''<div class='lyricbox'><div class='rtMatcher'>.*?</div>(.*?)<!--''').search(lyricspage)
     
     if not m:

@@ -14,83 +14,133 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import threading
+import sys
 import logging
+import traceback
+import threading
+import headphones
+
 from logging import handlers
 
-import headphones
 from headphones import helpers
 
-MAX_SIZE = 1000000 # 1mb
+# These settings are for file logging only
+FILENAME = 'headphones.log'
+MAX_SIZE = 1000000 # 1 MB
 MAX_FILES = 5
 
+# Headphones logger
+logger = logging.getLogger('headphones')
 
-# Simple rotating log handler that uses RotatingFileHandler
-class RotatingLogger(object):
+class LogListHandler(logging.Handler):
+    """
+    Log handler for Web UI.
+    """
 
-    def __init__(self, filename, max_size, max_files):
-    
-        self.filename = filename
-        self.max_size = max_size
-        self.max_files = max_files
-        
-        
-    def initLogger(self, verbose=1):
-    
-        l = logging.getLogger('headphones')
-        l.setLevel(logging.DEBUG)
-        
-        self.filename = os.path.join(headphones.LOG_DIR, self.filename)
-        
-        filehandler = handlers.RotatingFileHandler(self.filename, maxBytes=self.max_size, backupCount=self.max_files)
-        filehandler.setLevel(logging.DEBUG)
-        
-        fileformatter = logging.Formatter('%(asctime)s - %(levelname)-7s :: %(message)s', '%d-%b-%Y %H:%M:%S')
-        
-        filehandler.setFormatter(fileformatter)
-        l.addHandler(filehandler)
-        
-        if verbose:
-            consolehandler = logging.StreamHandler()
-            if verbose == 1:
-                consolehandler.setLevel(logging.INFO)
-            if verbose == 2:
-                consolehandler.setLevel(logging.DEBUG)
-            consoleformatter = logging.Formatter('%(asctime)s - %(levelname)s :: %(message)s', '%d-%b-%Y %H:%M:%S')
-            consolehandler.setFormatter(consoleformatter)
-            l.addHandler(consolehandler)    
-        
-    def log(self, message, level):
+    def emit(self, record):
+        message = self.format(record)
+        message = message.replace("\n", "<br />")
 
-        logger = logging.getLogger('headphones')
-        
-        threadname = threading.currentThread().getName()
-        
-        if level != 'DEBUG':
-            headphones.LOG_LIST.insert(0, (helpers.now(), message, level, threadname))
-        
-        message = threadname + ' : ' + message
+        headphones.LOG_LIST.insert(0, (helpers.now(), message, record.levelname, record.threadName))
 
-        if level == 'DEBUG':
-            logger.debug(message)
-        elif level == 'INFO':
-            logger.info(message)
-        elif level == 'WARNING':
-            logger.warn(message)
-        else:
-            logger.error(message)
+def initLogger(verbose=1):
+    """
+    Setup logging for Headphones. It uses the logger instance with the name
+    'headphones'. Three log handlers are added:
 
-headphones_log = RotatingLogger('headphones.log', MAX_SIZE, MAX_FILES)
+    * RotatingFileHandler: for the file headphones.log
+    * LogListHandler: for Web UI
+    * StreamHandler: for console (if verbose > 0)
+    """
 
-def debug(message):
-    headphones_log.log(message, level='DEBUG')
+    # Configure the logger to accept all messages
+    logger.propagate = False
+    logger.setLevel(logging.DEBUG)
 
-def info(message):
-    headphones_log.log(message, level='INFO')
-    
-def warn(message):
-    headphones_log.log(message, level='WARNING')
-    
-def error(message):
-    headphones_log.log(message, level='ERROR')
-    
+    # Setup file logger
+    filename = os.path.join(headphones.LOG_DIR, FILENAME)
+
+    file_formatter = logging.Formatter('%(asctime)s - %(levelname)-7s :: %(threadName)s : %(message)s', '%d-%b-%Y %H:%M:%S')
+    file_handler = handlers.RotatingFileHandler(filename, maxBytes=MAX_SIZE, backupCount=MAX_FILES)
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(file_formatter)
+
+    logger.addHandler(file_handler)
+
+    # Add list logger
+    loglist_handler = LogListHandler()
+    loglist_handler.setLevel(logging.INFO)
+
+    logger.addHandler(loglist_handler)
+
+    # Setup console logger
+    if verbose:
+        console_formatter = logging.Formatter('%(asctime)s - %(levelname)s :: %(threadName)s : %(message)s', '%d-%b-%Y %H:%M:%S')
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(console_formatter)
+
+        if verbose == 1:
+            console_handler.setLevel(logging.INFO)
+        elif verbose == 2:
+            console_handler.setLevel(logging.DEBUG)
+
+        logger.addHandler(console_handler)
+
+    # Install exception hooks
+    initHooks()
+
+def initHooks(global_exceptions=True, thread_exceptions=True, pass_original=True):
+    """
+    This method installs exception catching mechanisms. Any exception caught
+    will pass through the exception hook, and will be logged to the logger as
+    an error. Additionally, a traceback is provided.
+
+    This is very useful for crashing threads and any other bugs, that may not
+    be exposed when running as daemon.
+
+    The default exception hook is still considered, if pass_original is True.
+    """
+
+    def excepthook(*exception_info):
+        # We should always catch this to prevent loops!
+        try:
+            message = "".join(traceback.format_exception(*exception_info))
+            logger.error("Uncaught exception: %s", message)
+        except:
+            pass
+
+        # Original excepthook
+        if pass_original:
+            sys.__excepthook__(*exception_info)
+
+    # Global exception hook
+    if global_exceptions:
+        sys.excepthook = excepthook
+
+    # Thread exception hook
+    if thread_exceptions:
+        old_init = threading.Thread.__init__
+
+        def new_init(self, *args, **kwargs):
+            old_init(self, *args, **kwargs)
+            old_run = self.run
+
+            def new_run(*args, **kwargs):
+                try:
+                    old_run(*args, **kwargs)
+                except (KeyboardInterrupt, SystemExit):
+                    raise
+                except:
+                    excepthook(*sys.exc_info())
+            self.run = new_run
+
+        # Monkey patch the run() by monkey patching the __init__ method
+        threading.Thread.__init__ = new_init
+
+# Expose logger methods
+info = logger.info
+warn = logger.warn
+error = logger.error
+debug = logger.debug
+warning = logger.warning
+exception = logger.exception

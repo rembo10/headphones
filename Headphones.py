@@ -14,7 +14,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, sys, locale
+import os, sys
+
+# Ensure lib added to path, before any other imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib/'))
+
+import locale
 import time
 import signal
 
@@ -34,7 +39,6 @@ signal.signal(signal.SIGTERM, headphones.sig_handler)
 
 
 def main():
-
     # Fixed paths to Headphones
     if hasattr(sys, 'frozen'):
         headphones.FULL_PATH = os.path.abspath(sys.executable)
@@ -142,7 +146,7 @@ def main():
     # Force the http port if neccessary
     if args.port:
         http_port = args.port
-        logger.info('Using forced port: %i' % http_port)
+        logger.info('Using forced port: %i', http_port)
     else:
         http_port = int(headphones.HTTP_PORT)
 
@@ -172,7 +176,7 @@ def main():
             except KeyboardInterrupt:
                 headphones.SIGNAL = 'shutdown'
         else:
-            logger.info('Received signal: ' + headphones.SIGNAL)
+            logger.info('Received signal: %s', headphones.SIGNAL)
             if headphones.SIGNAL == 'shutdown':
                 headphones.shutdown()
             elif headphones.SIGNAL == 'restart':

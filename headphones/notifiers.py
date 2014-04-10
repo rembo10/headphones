@@ -13,27 +13,106 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import logger, helpers, common
-from headphones.exceptions import ex
 import base64
 import cherrypy
 import urllib
 import urllib2
 import headphones
-from httplib import HTTPSConnection
-from urllib import urlencode
+import simplejson
 import os.path
 import subprocess
-import lib.simplejson as simplejson
-from xml.dom import minidom
+import gntp.notifier
 
-try:
-    from urlparse import parse_qsl #@UnusedImport
-except:
-    from cgi import parse_qsl #@Reimport
+from xml.dom import minidom
+from httplib import HTTPSConnection
+from urllib import urlencode
 
 import lib.oauth2 as oauth
 import lib.pythontwitter as twitter
+
+from headphones import logger, helpers, common, request
+from headphones.exceptions import ex
+
+try:
+    from urlparse import parse_qsl
+except:
+    from cgi import parse_qsl
+
+class GROWL:
+
+    def __init__(self):
+        self.enabled = headphones.GROWL_ENABLED
+        self.host = headphones.GROWL_HOST
+        self.password = headphones.GROWL_PASSWORD
+
+    def conf(self, options):
+        return cherrypy.config['config'].get('Growl', options)
+
+    def notify(self, message, event):
+        if not self.enabled:
+            return
+
+        # Split host and port
+        if self.host == "":
+            host, port = "localhost", 23053
+        if ":" in self.host:
+            host, port = self.host.split(':', 1)
+            port = int(port)
+        else:
+            host, port = self.host, 23053
+
+        # If password is empty, assume none
+        if self.password == "":
+            password = None
+        else:
+            password = self.password
+
+        # Register notification
+        growl = gntp.notifier.GrowlNotifier(
+            applicationName='Headphones',
+            notifications=['New Event'],
+            defaultNotifications=['New Event'],
+            hostname=host,
+            port=port,
+            password=password
+        )
+
+        try:
+            growl.register()
+        except gntp.notifier.errors.NetworkError:
+            logger.info(u'Growl notification failed: network error')
+            return
+        except gntp.notifier.errors.AuthError:
+            logger.info(u'Growl notification failed: authentication error')
+            return
+
+        # Send it, including an image
+        image_file = os.path.join(str(headphones.PROG_DIR), 'data/images/headphoneslogo.png')
+        image = open(image_file, 'rb').read()
+
+        try:
+            growl.notify(
+                noteType='New Event',
+                title=event,
+                description=message,
+                icon=image
+            )
+        except gntp.notifier.errors.NetworkError:
+            logger.info(u'Growl notification failed: network error')
+            return
+
+        logger.info(u"Growl notifications sent.")
+
+    def updateLibrary(self):
+        #For uniformity reasons not removed
+        return
+
+    def test(self, host, password):
+        self.enabled = True
+        self.host = host
+        self.password = password
+
+        self.notify('ZOMG Lazors Pewpewpew!', 'Test Message')
 
 class PROWL:
 
@@ -44,7 +123,6 @@ class PROWL:
         self.enabled = headphones.PROWL_ENABLED
         self.keys = headphones.PROWL_KEYS
         self.priority = headphones.PROWL_PRIORITY   
-        pass
 
     def conf(self, options):
         return cherrypy.config['config'].get('Prowl', options)
@@ -93,66 +171,34 @@ class PROWL:
 class XBMC:
 
     def __init__(self):
-    
+
         self.hosts = headphones.XBMC_HOST
         self.username = headphones.XBMC_USERNAME
         self.password = headphones.XBMC_PASSWORD
 
     def _sendhttp(self, host, command):
-
-        username = self.username
-        password = self.password
-        
         url_command = urllib.urlencode(command)
-        
         url = host + '/xbmcCmds/xbmcHttp/?' + url_command
-            
-        req = urllib2.Request(url)
-            
-        if password:
-            base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
-            req.add_header("Authorization", "Basic %s" % base64string)
-                
-        logger.info('XBMC url: %s' % url)
-            
-        try:
-            handle = urllib2.urlopen(req)
-        except Exception, e:
-            logger.warn('Error opening XBMC url: %s' % e)
-            return
-    
-        response = handle.read().decode(headphones.SYS_ENCODING)
-            
-        return response
-    
+
+        if self.password:
+            return request.request_content(url, auth=(self.username, self.password))
+        else:
+            return request.request_content(url)
+
     def _sendjson(self, host, method, params={}):
         data = [{'id': 0, 'jsonrpc': '2.0', 'method': method, 'params': params}]
-        data = simplejson.JSONEncoder().encode(data)
+        headers = {'Content-Type': 'application/json'}
+        url = host + '/jsonrpc'
 
-        content = {'Content-Type': 'application/json', 'Content-Length': len(data)}
+        if self.password:
+            response = request.request_json(req, method="POST", data=simplejson.dumps(data), headers=headers, auth=(self.username, self.password))
+        else:
+            response = request.request_json(req, method="POST", data=simplejson.dumps(data), headers=headers)
 
-        req = urllib2.Request(host+'/jsonrpc', data, content)
-
-        if self.username and self.password:
-            base64string = base64.encodestring('%s:%s' % (self.username, self.password)).replace('\n', '')
-            req.add_header("Authorization", "Basic %s" % base64string)
-
-        try:
-            handle = urllib2.urlopen(req)
-        except Exception, e:
-            logger.warn('Error opening XBMC url: %s' % e)
-            return
-
-        response = simplejson.JSONDecoder().decode(handle.read())
-
-        try:
+        if response:
             return response[0]['result']
-        except:
-            logger.warn('XBMC returned error: %s' % response[0]['error'])
-            return
 
     def update(self):
-                    
         # From what I read you can't update the music library on a per directory or per path basis
         # so need to update the whole thing
 
@@ -192,6 +238,51 @@ class XBMC:
 
             except:
                 logger.warn('Error sending notification request to XBMC')
+class LMS:
+
+#Class for updating a Logitech Media Server
+
+    def __init__(self):
+    
+        self.hosts = headphones.LMS_HOST
+    
+    def _sendjson(self, host):
+        data = {'id': 1, 'method': 'slim.request', 'params': ["",["rescan"]]} #Had a lot of trouble with simplejson, but this works.
+        data = simplejson.JSONEncoder().encode(data)
+
+        content = {'Content-Type': 'application/json', 'Content-Length': len(data)}
+
+        req = urllib2.Request(host+'/jsonrpc.js', data, content)
+
+        try:
+            handle = urllib2.urlopen(req)
+        except Exception, e:
+            logger.warn('Error opening LMS url: %s' % e)
+            return
+
+        response = simplejson.JSONDecoder().decode(handle.read())
+        server_result = simplejson.dumps(response)
+        
+        try:
+            return response[0]['result']
+        except:
+            logger.warn('LMS returned error: %s' % response[0]['error'])
+            return
+
+    def update(self):
+                    
+		#Send the ["rescan"] command to an LMS server.
+		#Note that the command must be prefixed with the 'player' that the command is aimed at,
+		#But with this being a request for the server to update its library, the player is blank, so ""
+
+        hosts = [x.strip() for x in self.hosts.split(',')]
+
+        for host in hosts:
+            logger.info('Sending library rescan command to LMS @ '+host)
+            request = self._sendjson(host)
+            
+            if not request:
+                logger.warn('Error sending rescan request to LMS')
 
 class Plex:
 
@@ -288,21 +379,7 @@ class NMA:
         self.priority = headphones.NMA_PRIORITY
         
     def _send(self, data):
-        
-        url_data = urllib.urlencode(data)
-        url = 'https://www.notifymyandroid.com/publicapi/notify'
-        
-        req = urllib2.Request(url, url_data)
-
-        try:
-            handle = urllib2.urlopen(req)
-        except Exception, e:
-            logger.warn('Error opening NotifyMyAndroid url: ' % e)
-            return
-
-        response = handle.read().decode(headphones.SYS_ENCODING)
-        
-        return response     
+        return request.request_content('https://www.notifymyandroid.com/publicapi/notify', data=data)
         
     def notify(self, artist=None, album=None, snatched_nzb=None):
     
@@ -462,6 +539,8 @@ class PUSHOVER:
         self.enabled = headphones.PUSHOVER_ENABLED
         self.keys = headphones.PUSHOVER_KEYS
         self.priority = headphones.PUSHOVER_PRIORITY   
+        if headphones.PUSHOVER_APITOKEN:
+            self.application_token = headphones.PUSHOVER_APITOKEN
         pass
 
     def conf(self, options):

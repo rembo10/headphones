@@ -16,10 +16,10 @@
 import os
 import glob
 
-from lib.beets.mediafile import MediaFile
+from beets.mediafile import MediaFile
 
 import headphones
-from headphones import db, logger, helpers, importer
+from headphones import db, logger, helpers, importer, lastfm
 
 # You can scan a single directory and append it to the current library by specifying append=True, ArtistID & ArtistName
 def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=False):
@@ -329,6 +329,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, ArtistID])
 
     update_album_status()
+    if not append:
+        lastfm.getSimilar()
     logger.info('Library scan complete')
 
     #ADDED THIS SECTION TO MARK ALBUMS AS DOWNLOADED IF ARTISTS ARE ADDED EN MASSE BEFORE LIBRARY IS SCANNED

@@ -82,7 +82,8 @@ API_KEY = None
 
 GIT_PATH = None
 GIT_USER = None
-GIT_BRANCH =None
+GIT_BRANCH = None
+DO_NOT_OVERRIDE_GIT_BRANCH = False
 INSTALL_TYPE = None
 CURRENT_VERSION = None
 LATEST_VERSION = None
@@ -114,6 +115,7 @@ ADD_ALBUM_ART = False
 ALBUM_ART_FORMAT = None
 EMBED_ALBUM_ART = False
 EMBED_LYRICS = False
+REPLACE_EXISTING_FOLDERS = False
 NZB_DOWNLOADER = None    # 0: sabnzbd, 1: nzbget, 2: blackhole
 TORRENT_DOWNLOADER = None # 0: blackhole, 1: transmission, 2: utorrent
 DOWNLOAD_DIR = None
@@ -125,6 +127,8 @@ EXTRAS = None
 AUTOWANT_UPCOMING = False
 AUTOWANT_ALL = False
 KEEP_TORRENT_FILES = False
+PREFER_TORRENTS = None # 0: nzbs, 1: torrents, 2: no preference
+OPEN_MAGNET_LINKS = False
 
 SEARCH_INTERVAL = 360
 LIBRARYSCAN = False
@@ -178,7 +182,7 @@ REQUIRED_WORDS = None
 
 LASTFM_USERNAME = None
 
-LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a"]
+LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a", "asf", "wma"]
 LOSSLESS_MEDIA_FORMATS = ["flac"]
 MEDIA_FORMATS = LOSSY_MEDIA_FORMATS + LOSSLESS_MEDIA_FORMATS
 
@@ -218,7 +222,13 @@ ENCODEROUTPUTFORMAT = None
 ENCODERQUALITY = None
 ENCODERVBRCBR = None
 ENCODERLOSSLESS = False
+ENCODER_MULTICORE = False
+ENCODER_MULTICORE_COUNT = 0
 DELETE_LOSSLESS_FILES = False
+GROWL_ENABLED = True
+GROWL_HOST = None
+GROWL_PASSWORD = None
+GROWL_ONSNATCH = True
 PROWL_ENABLED = True
 PROWL_PRIORITY = 1
 PROWL_KEYS = None
@@ -229,6 +239,8 @@ XBMC_USERNAME = None
 XBMC_PASSWORD = None
 XBMC_UPDATE = False
 XBMC_NOTIFY = False
+LMS_ENABLED = False
+LMS_HOST = None
 PLEX_ENABLED = False
 PLEX_SERVER_HOST = None
 PLEX_CLIENT_HOST = None
@@ -248,6 +260,7 @@ PUSHOVER_ENABLED = True
 PUSHOVER_PRIORITY = 1
 PUSHOVER_KEYS = None
 PUSHOVER_ONSNATCH = True
+PUSHOVER_APITOKEN = None
 PUSHBULLET_ENABLED = True
 PUSHBULLET_APIKEY = None
 PUSHBULLET_DEVICEID = None
@@ -296,7 +309,7 @@ def check_setting_int(config, cfg_name, item_name, def_val):
         except:
             config[cfg_name] = {}
             config[cfg_name][item_name] = my_val
-    logger.debug(item_name + " -> " + str(my_val))
+    logger.debug("%s -> %s", item_name, my_val)
     return my_val
 
 ################################################################################
@@ -313,10 +326,7 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
             config[cfg_name] = {}
             config[cfg_name][item_name] = my_val
 
-    if log:
-        logger.debug(item_name + " -> " + my_val)
-    else:
-        logger.debug(item_name + " -> ******")
+    logger.debug("%s -> %s", item_name, my_val if log else "******")
     return my_val
 
 def initialize():
@@ -324,11 +334,11 @@ def initialize():
     with INIT_LOCK:
 
         global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, SYS_PLATFORM, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
-                HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, GIT_USER, GIT_BRANCH, \
+                HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, GIT_USER, GIT_BRANCH, DO_NOT_OVERRIDE_GIT_BRANCH, \
                 CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
-                RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, FILE_UNDERSCORES, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, \
-                ADD_ALBUM_ART, ALBUM_ART_FORMAT, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
+                RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, FILE_UNDERSCORES, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, PREFER_TORRENTS, OPEN_MAGNET_LINKS, \
+                ADD_ALBUM_ART, ALBUM_ART_FORMAT, EMBED_ALBUM_ART, EMBED_LYRICS, REPLACE_EXISTING_FOLDERS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, PIRATEBAY, PIRATEBAY_PROXY_URL, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, UPDATE_DB_INTERVAL, MB_IGNORE_AGE, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
@@ -337,12 +347,12 @@ def initialize():
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, OMGWTFNZBS, OMGWTFNZBS_UID, OMGWTFNZBS_APIKEY, \
                 NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, LASTFM_USERNAME, \
                 INTERFACE, FOLDER_PERMISSIONS, FILE_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
-                MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, DELETE_LOSSLESS_FILES, \
-                PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, MIRRORLIST, \
+                MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, ENCODER_MULTICORE, ENCODER_MULTICORE_COUNT, DELETE_LOSSLESS_FILES, \
+                GROWL_ENABLED, GROWL_HOST, GROWL_PASSWORD, GROWL_ONSNATCH, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, PUSHOVER_APITOKEN, MIRRORLIST, \
                 TWITTER_ENABLED, TWITTER_ONSNATCH, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 PUSHBULLET_ENABLED, PUSHBULLET_APIKEY, PUSHBULLET_DEVICEID, PUSHBULLET_ONSNATCH, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
-                XBMC_NOTIFY, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
+                XBMC_NOTIFY, LMS_ENABLED, LMS_HOST, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
                 PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
                 PLEX_ENABLED, PLEX_SERVER_HOST, PLEX_CLIENT_HOST, PLEX_USERNAME, PLEX_PASSWORD, PLEX_UPDATE, PLEX_NOTIFY, PUSHALOT_ENABLED, PUSHALOT_APIKEY, \
                 PUSHALOT_ONSNATCH, SONGKICK_ENABLED, SONGKICK_APIKEY, SONGKICK_LOCATION, SONGKICK_FILTER_ENABLED
@@ -365,10 +375,12 @@ def initialize():
         CheckSection('Waffles')
         CheckSection('Rutracker')
         CheckSection('What.cd')
+        CheckSection('Growl')
         CheckSection('Prowl')
         CheckSection('Pushover')
         CheckSection('PushBullet')
         CheckSection('XBMC')
+        CheckSection('LMS')
         CheckSection('Plex')
         CheckSection('NMA')
         CheckSection('Pushalot')
@@ -402,6 +414,7 @@ def initialize():
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
         GIT_USER = check_setting_str(CFG, 'General', 'git_user', 'rembo10')
         GIT_BRANCH = check_setting_str(CFG, 'General', 'git_branch', 'master')
+        DO_NOT_OVERRIDE_GIT_BRANCH = check_setting_int(CFG, 'General', 'do_not_override_git_branch', 0)
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', '')
         CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', '')
 
@@ -430,6 +443,7 @@ def initialize():
         ALBUM_ART_FORMAT = check_setting_str(CFG, 'General', 'album_art_format', 'folder')
         EMBED_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'embed_album_art', 0))
         EMBED_LYRICS = bool(check_setting_int(CFG, 'General', 'embed_lyrics', 0))
+        REPLACE_EXISTING_FOLDERS = bool(check_setting_int(CFG, 'General', 'replace_existing_folders', 0))
         NZB_DOWNLOADER = check_setting_int(CFG, 'General', 'nzb_downloader', 0)
         TORRENT_DOWNLOADER = check_setting_int(CFG, 'General', 'torrent_downloader', 0)
         DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'download_dir', '')
@@ -441,6 +455,8 @@ def initialize():
         AUTOWANT_UPCOMING = bool(check_setting_int(CFG, 'General', 'autowant_upcoming', 1))
         AUTOWANT_ALL = bool(check_setting_int(CFG, 'General', 'autowant_all', 0))
         KEEP_TORRENT_FILES = bool(check_setting_int(CFG, 'General', 'keep_torrent_files', 0))
+        PREFER_TORRENTS = check_setting_int(CFG, 'General', 'prefer_torrents', 0)
+        OPEN_MAGNET_LINKS = bool(check_setting_int(CFG, 'General', 'open_magnet_links', 0))
 
         SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'search_interval', 1440)
         LIBRARYSCAN = bool(check_setting_int(CFG, 'General', 'libraryscan', 1))
@@ -534,7 +550,14 @@ def initialize():
         ENCODERQUALITY = check_setting_int(CFG, 'General', 'encoderquality', 2)
         ENCODERVBRCBR = check_setting_str(CFG, 'General', 'encodervbrcbr', 'cbr')
         ENCODERLOSSLESS = bool(check_setting_int(CFG, 'General', 'encoderlossless', 1))
+        ENCODER_MULTICORE = bool(check_setting_int(CFG, 'General', 'encoder_multicore', 0))
+        ENCODER_MULTICORE_COUNT = max(0, check_setting_int(CFG, 'General', 'encoder_multicore_count', 0))
         DELETE_LOSSLESS_FILES = bool(check_setting_int(CFG, 'General', 'delete_lossless_files', 1))
+
+        GROWL_ENABLED = bool(check_setting_int(CFG, 'Growl', 'growl_enabled', 0))
+        GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
+        GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
+        GROWL_ONSNATCH = bool(check_setting_int(CFG, 'Growl', 'growl_onsnatch', 0))
 
         PROWL_ENABLED = bool(check_setting_int(CFG, 'Prowl', 'prowl_enabled', 0))
         PROWL_KEYS = check_setting_str(CFG, 'Prowl', 'prowl_keys', '')
@@ -547,6 +570,9 @@ def initialize():
         XBMC_PASSWORD = check_setting_str(CFG, 'XBMC', 'xbmc_password', '')
         XBMC_UPDATE = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update', 0))
         XBMC_NOTIFY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify', 0))
+
+        LMS_ENABLED = bool(check_setting_int(CFG, 'LMS', 'lms_enabled', 0))
+        LMS_HOST = check_setting_str(CFG, 'LMS', 'lms_host', '')
 
         PLEX_ENABLED = bool(check_setting_int(CFG, 'Plex', 'plex_enabled', 0))
         PLEX_SERVER_HOST = check_setting_str(CFG, 'Plex', 'plex_server_host', '')
@@ -571,6 +597,7 @@ def initialize():
         PUSHOVER_KEYS = check_setting_str(CFG, 'Pushover', 'pushover_keys', '')
         PUSHOVER_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_onsnatch', 0))
         PUSHOVER_PRIORITY = check_setting_int(CFG, 'Pushover', 'pushover_priority', 0)
+        PUSHOVER_APITOKEN = check_setting_str(CFG, 'Pushover', 'pushover_apitoken', '')
 
         PUSHBULLET_ENABLED = bool(check_setting_int(CFG, 'PushBullet', 'pushbullet_enabled', 0))
         PUSHBULLET_APIKEY = check_setting_str(CFG, 'PushBullet', 'pushbullet_apikey', '')
@@ -668,10 +695,10 @@ def initialize():
                 os.makedirs(LOG_DIR)
             except OSError:
                 if VERBOSE:
-                    print 'Unable to create the log directory. Logging to screen only.'
+                    sys.stderr.write('Unable to create the log directory. Logging to screen only.\n')
 
         # Start the logger, silence console logging if we need to
-        logger.headphones_log.initLogger(verbose=VERBOSE)
+        logger.initLogger(verbose=VERBOSE)
 
         if not CACHE_DIR:
             # Put the cache dir in the data dir for now
@@ -680,7 +707,7 @@ def initialize():
             try:
                 os.makedirs(CACHE_DIR)
             except OSError:
-                logger.error('Could not create cache dir. Check permissions of datadir: ' + DATA_DIR)
+                logger.error('Could not create cache dir. Check permissions of datadir: %s', DATA_DIR)
 
         # Sanity check for search interval. Set it to at least 6 hours
         if SEARCH_INTERVAL < 360:
@@ -692,17 +719,18 @@ def initialize():
         try:
             dbcheck()
         except Exception, e:
-            logger.error("Can't connect to the database: %s" % e)
+            logger.error("Can't connect to the database: %s", e)
 
         # Get the currently installed version - returns None, 'win32' or the git hash
         # Also sets INSTALL_TYPE variable to 'win', 'git' or 'source'
-        CURRENT_VERSION = versioncheck.getVersion()
+        CURRENT_VERSION, GIT_BRANCH = versioncheck.getVersion()
 
         # Check for new versions
         if CHECK_GITHUB_ON_STARTUP:
             try:
                 LATEST_VERSION = versioncheck.checkGithub()
             except:
+                logger.exception("Unhandled exception")
                 LATEST_VERSION = CURRENT_VERSION
         else:
             LATEST_VERSION = CURRENT_VERSION
@@ -729,7 +757,7 @@ def daemonize():
         if pid != 0:
             sys.exit(0)
     except OSError, e:
-        raise RuntimeError("1st fork failed: %s [%d]" % (e.strerror, e.errno))
+        raise RuntimeError("1st fork failed: %s [%d]", e.strerror, e.errno)
 
     os.setsid()
 
@@ -743,7 +771,7 @@ def daemonize():
         if pid != 0:
             sys.exit(0)
     except OSError, e:
-        raise RuntimeError("2nd fork failed: %s [%d]" % (e.strerror, e.errno))
+        raise RuntimeError("2nd fork failed: %s [%d]", e.strerror, e.errno)
 
     dev_null = file('/dev/null', 'r')
     os.dup2(dev_null.fileno(), sys.stdin.fileno())
@@ -756,12 +784,13 @@ def daemonize():
     os.dup2(so.fileno(), sys.stdout.fileno())
     os.dup2(se.fileno(), sys.stderr.fileno())
 
-    pid = str(os.getpid())
-    logger.info('Daemonized to PID: %s' % pid)
+    pid = os.getpid()
+    logger.info('Daemonized to PID: %d', pid)
 
     if CREATEPID:
-        logger.info("Writing PID " + pid + " to " + str(PIDFILE))
-        file(PIDFILE, 'w').write("%s\n" % pid)
+        logger.info("Writing PID %d to %s", pid, PIDFILE)
+        with file(PIDFILE, 'w') as fp:
+            fp.write("%s\n" % pid)
 
 def launch_browser(host, port, root):
 
@@ -776,7 +805,7 @@ def launch_browser(host, port, root):
     try:
         webbrowser.open('%s://%s:%i%s' % (protocol, host, port, root))
     except Exception, e:
-        logger.error('Could not launch browser: %s' % e)
+        logger.error('Could not launch browser: %s', e)
 
 def config_write():
 
@@ -802,6 +831,7 @@ def config_write():
     new_config['General']['git_path'] = GIT_PATH
     new_config['General']['git_user'] = GIT_USER
     new_config['General']['git_branch'] = GIT_BRANCH
+    new_config['General']['do_not_override_git_branch'] = int(DO_NOT_OVERRIDE_GIT_BRANCH)
 
     new_config['General']['check_github'] = int(CHECK_GITHUB)
     new_config['General']['check_github_on_startup'] = int(CHECK_GITHUB_ON_STARTUP)
@@ -828,6 +858,7 @@ def config_write():
     new_config['General']['album_art_format'] = ALBUM_ART_FORMAT
     new_config['General']['embed_album_art'] = int(EMBED_ALBUM_ART)
     new_config['General']['embed_lyrics'] = int(EMBED_LYRICS)
+    new_config['General']['replace_existing_folders'] = int(REPLACE_EXISTING_FOLDERS)
     new_config['General']['nzb_downloader'] = NZB_DOWNLOADER
     new_config['General']['torrent_downloader'] = TORRENT_DOWNLOADER
     new_config['General']['download_dir'] = DOWNLOAD_DIR
@@ -838,6 +869,8 @@ def config_write():
     new_config['General']['autowant_upcoming'] = int(AUTOWANT_UPCOMING)
     new_config['General']['autowant_all'] = int(AUTOWANT_ALL)
     new_config['General']['keep_torrent_files'] = int(KEEP_TORRENT_FILES)
+    new_config['General']['prefer_torrents'] = PREFER_TORRENTS
+    new_config['General']['open_magnet_links'] = OPEN_MAGNET_LINKS
 
     new_config['General']['numberofseeders'] = NUMBEROFSEEDERS
     new_config['General']['torrentblackhole_dir'] = TORRENTBLACKHOLE_DIR
@@ -928,6 +961,12 @@ def config_write():
     new_config['General']['ignored_words'] = IGNORED_WORDS
     new_config['General']['required_words'] = REQUIRED_WORDS
 
+    new_config['Growl'] = {}
+    new_config['Growl']['growl_enabled'] = int(GROWL_ENABLED)
+    new_config['Growl']['growl_host'] = GROWL_HOST
+    new_config['Growl']['growl_password'] = GROWL_PASSWORD
+    new_config['Growl']['growl_onsnatch'] = int(GROWL_ONSNATCH)
+
     new_config['Prowl'] = {}
     new_config['Prowl']['prowl_enabled'] = int(PROWL_ENABLED)
     new_config['Prowl']['prowl_keys'] = PROWL_KEYS
@@ -941,6 +980,10 @@ def config_write():
     new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
     new_config['XBMC']['xbmc_update'] = int(XBMC_UPDATE)
     new_config['XBMC']['xbmc_notify'] = int(XBMC_NOTIFY)
+
+    new_config['LMS'] = {}
+    new_config['LMS']['lms_enabled'] = int(LMS_ENABLED)
+    new_config['LMS']['lms_host'] = LMS_HOST
 
     new_config['Plex'] = {}
     new_config['Plex']['plex_enabled'] = int(PLEX_ENABLED)
@@ -967,6 +1010,7 @@ def config_write():
     new_config['Pushover']['pushover_keys'] = PUSHOVER_KEYS
     new_config['Pushover']['pushover_onsnatch'] = int(PUSHOVER_ONSNATCH)
     new_config['Pushover']['pushover_priority'] = int(PUSHOVER_PRIORITY)
+    new_config['Pushover']['pushover_apitoken'] = PUSHOVER_APITOKEN
 
     new_config['PushBullet'] = {}
     new_config['PushBullet']['pushbullet_enabled'] = int(PUSHBULLET_ENABLED)
@@ -1006,6 +1050,8 @@ def config_write():
     new_config['General']['encoderquality'] = ENCODERQUALITY
     new_config['General']['encodervbrcbr'] = ENCODERVBRCBR
     new_config['General']['encoderlossless'] = int(ENCODERLOSSLESS)
+    new_config['General']['encoder_multicore'] = int(ENCODER_MULTICORE)
+    new_config['General']['encoder_multicore_count'] = int(ENCODER_MULTICORE_COUNT)
     new_config['General']['delete_lossless_files'] = int(DELETE_LOSSLESS_FILES)
 
     new_config['General']['mirror'] = MIRROR
@@ -1048,7 +1094,7 @@ def start():
 
 def sig_handler(signum=None, frame=None):
     if type(signum) != type(None):
-        logger.info("Signal %i caught, saving and exiting..." % int(signum))
+        logger.info("Signal %i caught, saving and exiting...", signum)
         shutdown()
 
 def dbcheck():
@@ -1267,10 +1313,10 @@ def shutdown(restart=False, update=False):
         try:
             versioncheck.update()
         except Exception, e:
-            logger.warn('Headphones failed to update: %s. Restarting.' % e)
+            logger.warn('Headphones failed to update: %s. Restarting.', e)
 
     if CREATEPID :
-        logger.info ('Removing pidfile %s' % PIDFILE)
+        logger.info ('Removing pidfile %s', PIDFILE)
         os.remove(PIDFILE)
 
     if restart:
@@ -1279,7 +1325,7 @@ def shutdown(restart=False, update=False):
         popen_list += ARGS
         if '--nolaunch' not in popen_list:
             popen_list += ['--nolaunch']
-        logger.info('Restarting Headphones with ' + str(popen_list))
+        logger.info('Restarting Headphones with %s', popen_list)
         subprocess.Popen(popen_list, cwd=os.getcwd())
 
     os._exit(0)
