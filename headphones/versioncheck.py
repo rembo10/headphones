@@ -182,14 +182,14 @@ def update():
         update_dir = os.path.join(headphones.PROG_DIR, 'update')
         version_path = os.path.join(headphones.PROG_DIR, 'version.txt')
 
-        logger.info('Downloading update from: '+tar_download_url)
+        logger.info('Downloading update from: '+ tar_download_url)
         data = request.request_content(tar_download_url)
 
         if not data:
             logger.error("Unable to retrieve new version from '%s', can't update", tar_download_url)
             return
 
-        download_name = data.geturl().split('/')[-1]
+        download_name = headphones.GIT_BRANCH + '-github'
         tar_download_path = os.path.join(headphones.PROG_DIR, download_name)
 
         # Save tar to disk
