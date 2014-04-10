@@ -142,7 +142,7 @@ def checkGithub():
 
     if commits is None:
         logger.warn('Could not get commits behind from GitHub.')
-        return headphones.CURRENT_VERSION
+        return headphones.LATEST_VERSION
 
     try:
         headphones.COMMITS_BEHIND = int(commits['behind_by'])
