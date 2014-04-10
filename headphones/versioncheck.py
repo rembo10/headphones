@@ -228,7 +228,7 @@ def update():
         # Update version.txt
         try:
             ver_file = open(version_path, 'w')
-            ver_file.write(headphones.LATEST_VERSION)
+            ver_file.write(str(headphones.LATEST_VERSION))
             ver_file.close()
         except IOError, e:
             logger.error("Unable to write current version to version.txt, update not complete: "+ex(e))
