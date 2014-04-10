@@ -194,7 +194,7 @@ def update():
 
         # Save tar to disk
         f = open(tar_download_path, 'wb')
-        f.write(data.read())
+        f.write(data)
         f.close()
 
         # Extract the tar to update folder
