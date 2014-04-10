@@ -134,7 +134,7 @@ def checkGithub():
     # See how many commits behind we are
     if not headphones.CURRENT_VERSION:
         logger.info('You are running an unknown version of Headphones. Run the updater to identify your version')
-        return headphones.CURRENT_VERSION
+        return headphones.LATEST_VERSION
 
     logger.info('Comparing currently installed version with latest GitHub version')
     url = 'https://api.github.com/repos/%s/headphones/compare/%s...%s' % (headphones.GIT_USER, headphones.CURRENT_VERSION, headphones.LATEST_VERSION)
