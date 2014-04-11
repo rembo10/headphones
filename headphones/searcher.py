@@ -339,6 +339,10 @@ def searchNZB(album, new=False, losslessOnly=False):
         provider = "newznab"
         newznab_hosts = []
 
+        if headphones.NEWZNAB_HOST and headphones.NEWZNAB_ENABLED:
+
+            newznab_hosts.append((headphones.NEWZNAB_HOST, headphones.NEWZNAB_APIKEY, headphones.NEWZNAB_ENABLED))
+
         for newznab_host in headphones.EXTRA_NEWZNABS:
             if newznab_host[2] == '1' or newznab_host[2] == 1:
                 newznab_hosts.append(newznab_host)
@@ -615,7 +619,7 @@ def send_to_downloader(data, bestqual, album):
                 if headphones.OPEN_MAGNET_LINKS:
                     try:
                         if headphones.SYS_PLATFORM == 'win32':
-                            os.startfile(besqual[2])
+                            os.startfile(bestqual[2])
                         elif headphones.SYS_PLATFORM == 'darwin':
                             subprocess.Popen(["open", bestqual[2]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         else:
