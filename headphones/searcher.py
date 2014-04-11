@@ -534,9 +534,9 @@ def searchNZB(album, new=False, losslessOnly=False):
         # Parse response
         if data:
             if 'notice' in data:
-                logger.info(u"No results returned from omgwtfnzbs: %s", d['notice'])
+                logger.info(u"No results returned from omgwtfnzbs: %s" % data['notice'])
             else:
-                for item in d:
+                for item in data:
                     try:
                         url = item['getnzb']
                         title = item['release']
