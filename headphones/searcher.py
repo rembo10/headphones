@@ -339,6 +339,10 @@ def searchNZB(album, new=False, losslessOnly=False):
         provider = "newznab"
         newznab_hosts = []
 
+        if headphones.NEWZNAB_HOST and headphones.NEWZNAB_ENABLED:
+
+            newznab_hosts.append((headphones.NEWZNAB_HOST, headphones.NEWZNAB_APIKEY, headphones.NEWZNAB_ENABLED))
+
         for newznab_host in headphones.EXTRA_NEWZNABS:
             if newznab_host[2] == '1' or newznab_host[2] == 1:
                 newznab_hosts.append(newznab_host)
