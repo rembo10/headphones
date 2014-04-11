@@ -619,7 +619,7 @@ def send_to_downloader(data, bestqual, album):
                 if headphones.OPEN_MAGNET_LINKS:
                     try:
                         if headphones.SYS_PLATFORM == 'win32':
-                            os.startfile(besqual[2])
+                            os.startfile(bestqual[2])
                         elif headphones.SYS_PLATFORM == 'darwin':
                             subprocess.Popen(["open", bestqual[2]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         else:
