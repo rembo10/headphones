@@ -1,10 +1,18 @@
-lossless<%inherit file="base.html"/>
+<%inherit file="base.html"/>
 <%!
 	from headphones import helpers
 %>
 
+<%def name="headerIncludes()">
+    <div id="subhead_container">
+        <div id="subhead_menu">
+            <a class="menu_link_edit" href="clearLogs"><i class="fa fa-trash-o"></i> Clear log</a>
+        </div>
+    </div>
+</%def>
+
 <%def name="body()">
-	<div class="title">
+	<div id="paddingheader">
 		<h1 class="clearfix"><i class="fa fa-flag"></i> Logs</h1>
 	</div>
 	<table class="display" id="log_table">
@@ -40,6 +48,8 @@ lossless<%inherit file="base.html"/>
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
 $(document).ready(function() {
+    initActions();
+
 	$('#log_table').dataTable( {
 		"bProcessing": true,
         "bServerSide": true,
@@ -49,7 +59,7 @@ $(document).ready(function() {
         "iDisplayLength": 25,
         "bStateSave": true,
         "oLanguage": {
-                    "sSearch":"",
+                    "sSearch":"Filter:",
 					"sLengthMenu":"Show _MENU_ lines per page",
 					"sEmptyTable": "No log information available",
 					"sInfo":"Showing _START_ to _END_ of _TOTAL_ lines",
@@ -68,8 +78,7 @@ $(document).ready(function() {
                                 {
                                     $('td', nRow).closest('tr').addClass("gradeZ");
                                 }
-                                
-                                
+
                                 return nRow;
                                 },
         "fnServerData": function ( sSource, aoData, fnCallback ) {
