@@ -56,9 +56,13 @@ $(document).ready(function() {
 					"sInfoEmpty":"Showing 0 to 0 of 0 lines",
 					"sInfoFiltered":"(filtered from _MAX_ total lines)"},
         "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
-                                if (aData[1] === "WARNING" || aData[1] === "ERROR")
+                                if (aData[1] === "ERROR")
                                 {
                                     $('td', nRow).closest('tr').addClass("gradeX");
+                                }
+                                else if (aData[1] === "WARNING")
+                                {
+                                    $('td', nRow).closest('tr').addClass("gradeW");
                                 }
                                 else
                                 {
