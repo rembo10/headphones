@@ -174,7 +174,7 @@ class WebInterface(object):
             myDB.action('DELETE from albums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
             myDB.action('DELETE from allalbums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
             myDB.action('DELETE from alltracks WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
-            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', album['AlbumID'])
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [album['AlbumID']])
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     removeExtras.exposed = True
 
