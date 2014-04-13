@@ -16,7 +16,7 @@
 				<a id="menu_link_pauze" href="#" onclick="doAjaxCall('pauseArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} paused"><i class="fa fa-pause"></i> Pause Artist</a>
 			%endif
 			%if artist['IncludeExtras']:
-				<a id="menu_link_removeextra" href="#" onclick="doAjaxCall('removeExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Extras removed for ${artist['ArtistName']}"><i class="fa fa-minus"></i> Remove Extras</a>
+				<a id="menu_link_removeextra" href="#" onclick="doAjaxCall('removeExtras?ArtistID=${artist['ArtistID']}&ArtistName=${artist['ArtistName']}',$(this),'submenu&table')" data-success="Extras removed for ${artist['ArtistName']}"><i class="fa fa-minus"></i> Remove Extras</a>
 				<a class="menu_link_edit" id="menu_link_modifyextra" href="#"><i class="fa fa-pencil"></i> Modify Extras</a>
 			%else:
 				<a id="menu_link_getextra" href="#"><i class="fa fa-plus"></i> Get Extras</a>
