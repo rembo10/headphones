@@ -742,13 +742,13 @@ def moveFiles(albumpath, release, tracks):
             try:
                 os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING, 'replace'), int(headphones.FOLDER_PERMISSIONS, 8))
             except Exception, e:
-                logger.error("Error trying to change permissions on folder: %s. %s", temp_f, e)
+                logger.error("Error trying to change permissions on folder: %s. %s", temp_f.decode(headphones.SYS_ENCODING, 'replace'), e)
             
     # If we failed to move all the files out of the directory, this will fail too
     try:
         shutil.rmtree(albumpath)
     except Exception, e:
-        logger.error('Could not remove directory: %s. %s', albumpath, e)
+        logger.error('Could not remove directory: %s. %s', albumpath.decode(headphones.SYS_ENCODING, 'replace'), e)
     
     destination_paths = []
     
@@ -775,10 +775,10 @@ def correctMetadata(albumid, release, downloaded_track_list):
             elif any(downloaded_track.lower().endswith('.' + x.lower()) for x in headphones.LOSSY_MEDIA_FORMATS):
                 lossy_items.append(beets.library.Item.from_path(downloaded_track))
             else:
-                logger.warn("Skipping: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + " because it is not a mutagen friendly file format")
+                logger.warn("Skipping: %s because it is not a mutagen friendly file format", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
         except Exception, e:
             
-            logger.error("Beets couldn't create an Item from: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + " - not a media file?" + str(e))
+            logger.error("Beets couldn't create an Item from: %s - not a media file? %s", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), str(e))
 
     for items in [lossy_items, lossless_items]:
         
@@ -788,16 +788,16 @@ def correctMetadata(albumid, release, downloaded_track_list):
         try:
             cur_artist, cur_album, candidates, rec = autotag.tag_album(items, search_artist=helpers.latinToAscii(release['ArtistName']), search_album=helpers.latinToAscii(release['AlbumTitle']))
         except Exception, e:
-            logger.error('Error getting recommendation: %s. Not writing metadata' % e)
+            logger.error('Error getting recommendation: %s. Not writing metadata', e)
             return
         if str(rec) == 'recommendation.none':
-            logger.warn('No accurate album match found for %s, %s -  not writing metadata' % (release['ArtistName'], release['AlbumTitle']))
+            logger.warn('No accurate album match found for %s, %s -  not writing metadata', release['ArtistName'], release['AlbumTitle'])
             return
         
         if candidates:
             dist, info, mapping, extra_items, extra_tracks = candidates[0]
         else:
-            logger.warn('No accurate album match found for %s, %s -  not writing metadata' % (release['ArtistName'], release['AlbumTitle']))
+            logger.warn('No accurate album match found for %s, %s -  not writing metadata', release['ArtistName'], release['AlbumTitle'])
             return
         
         logger.info('Beets recommendation for tagging items: %s' % rec)
@@ -809,9 +809,9 @@ def correctMetadata(albumid, release, downloaded_track_list):
         for item in items:
             try:
                 item.write()
-                logger.info("Successfully applied metadata to: " + item.path.decode(headphones.SYS_ENCODING, 'replace'))
+                logger.info("Successfully applied metadata to: %s", item.path.decode(headphones.SYS_ENCODING, 'replace'))
             except Exception, e:
-                logger.warn("Error writing metadata to " + item.path.decode(headphones.SYS_ENCODING, 'replace') + ": " + str(e))
+                logger.warn("Error writing metadata to '%s': %s", item.path.decode(headphones.SYS_ENCODING, 'replace'), str(e))
         
 def embedLyrics(downloaded_track_list):
     logger.info('Adding lyrics')
@@ -823,7 +823,7 @@ def embedLyrics(downloaded_track_list):
         try:
             f = MediaFile(downloaded_track)
         except:
-            logger.error('Could not read %s. Not checking lyrics' % downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+            logger.error('Could not read %s. Not checking lyrics', downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
             continue
             
         if f.albumartist and f.title:
@@ -831,16 +831,16 @@ def embedLyrics(downloaded_track_list):
         elif f.artist and f.title:
             metalyrics = lyrics.getLyrics(f.artist, f.title)
         else:
-            logger.info('No artist/track metadata found for track: %s. Not fetching lyrics' % downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+            logger.info('No artist/track metadata found for track: %s. Not fetching lyrics', downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
             metalyrics = None
             
         if lyrics:
-            logger.debug('Adding lyrics to: %s' % downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+            logger.debug('Adding lyrics to: %s', downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
             f.lyrics = metalyrics
             try:
                 f.save()
             except:
-                logger.error('Cannot save lyrics to: %s. Skipping' % downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+                logger.error('Cannot save lyrics to: %s. Skipping', downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
                 continue
 
 def renameFiles(albumpath, downloaded_track_list, release):
@@ -855,7 +855,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
         try:
             f = MediaFile(downloaded_track)
         except:
-            logger.info("MediaFile couldn't parse: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+            logger.info("MediaFile couldn't parse: %s", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
             continue
 
         if not f.disc:
@@ -924,11 +924,11 @@ def renameFiles(albumpath, downloaded_track_list, release):
             logger.debug("Renaming for: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + " is not neccessary")
             continue
 
-        logger.debug('Renaming %s ---> %s' % (downloaded_track.decode(headphones.SYS_ENCODING,'replace'), new_file_name.decode(headphones.SYS_ENCODING,'replace')))
+        logger.debug('Renaming %s ---> %s', downloaded_track.decode(headphones.SYS_ENCODING,'replace'), new_file_name.decode(headphones.SYS_ENCODING,'replace'))
         try:
             os.rename(downloaded_track, new_file)
         except Exception, e:
-            logger.error('Error renaming file: %s. Error: %s' % (downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), e))
+            logger.error('Error renaming file: %s. Error: %s', downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), e)
             continue
             
 def updateFilePermissions(albumpaths):
