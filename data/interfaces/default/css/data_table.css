@@ -254,6 +254,13 @@ table.display tr.even.gradeU {
 	background-color: #eee;
 }
 
+table.display tr.odd.gradeW {
+	background-color: #ffffaa;
+}
+
+table.display tr.even.gradeW {
+	background-color: #ffffaa;
+}
 
 table.display tr.odd.gradeZ {
 	background-color: #FAFAFA;

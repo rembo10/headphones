@@ -13,8 +13,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import with_statement
-
 import time
 import threading
 

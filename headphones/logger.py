@@ -55,7 +55,7 @@ def initLogger(verbose=1):
 
     # Configure the logger to accept all messages
     logger.propagate = False
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.DEBUG if verbose == 2 else logging.INFO)
 
     # Setup file logger
     filename = os.path.join(headphones.LOG_DIR, FILENAME)
@@ -69,7 +69,7 @@ def initLogger(verbose=1):
 
     # Add list logger
     loglist_handler = LogListHandler()
-    loglist_handler.setLevel(logging.INFO)
+    loglist_handler.setLevel(logging.DEBUG)
 
     logger.addHandler(loglist_handler)
 
@@ -78,11 +78,7 @@ def initLogger(verbose=1):
         console_formatter = logging.Formatter('%(asctime)s - %(levelname)s :: %(threadName)s : %(message)s', '%d-%b-%Y %H:%M:%S')
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(console_formatter)
-
-        if verbose == 1:
-            console_handler.setLevel(logging.INFO)
-        elif verbose == 2:
-            console_handler.setLevel(logging.DEBUG)
+        console_handler.setLevel(logging.DEBUG)
 
         logger.addHandler(console_handler)
 
