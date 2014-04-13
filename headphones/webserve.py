@@ -163,7 +163,7 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     getExtras.exposed = True
 
-    def removeExtras(self, ArtistID):
+    def removeExtras(self, ArtistID, ArtistName):
         myDB = db.DBConnection()
         controlValueDict = {'ArtistID': ArtistID}
         newValueDict = {'IncludeExtras': 0}
@@ -175,6 +175,7 @@ class WebInterface(object):
             myDB.action('DELETE from allalbums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
             myDB.action('DELETE from alltracks WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
             myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [album['AlbumID']])
+        importer.finalize_update(ArtistID, ArtistName)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     removeExtras.exposed = True
 
