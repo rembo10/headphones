@@ -22,7 +22,7 @@ import threading
 import headphones
 
 from beets import autotag
-from beets.mediafile import MediaFile
+from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 
 from headphones import notifiers
 from headphones import db, albumart, librarysync, lyrics
@@ -346,6 +346,27 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                     downloaded_track_list.append(os.path.join(r, files))    
                 elif files.lower().endswith('.cue'):
                     downloaded_cuecount += 1
+
+    # Check if files are valid media files and are writeable, before the steps
+    # below are executed. This simplifies errors and prevents unfinished steps.
+    for downloaded_track in downloaded_track_list:
+        try:
+            media_file = MediaFile(downloaded_track)
+        except (FileTypeError, UnreadableFileError):
+            logger.error("Track file is not a valid media file: %s. Not continuing.", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+            return
+
+        # Not sure if line(s) below are needed, since it is possible to not
+        # touch any files.
+        if headphones.EMBED_ALBUM_ART or headphones.CLEANUP_FILES or \
+           headphones.ADD_ALBUM_ART or headphones.CORRECT_METADATA or \
+           headphones.EMBED_LYRICS or headphones.RENAME_FILES or \
+           headphones.MOVE_FILES:
+
+            if not os.access(downloaded_track, os.W_OK):
+                logger.error("Track file is not writeable, which is equired for some post processing steps: %s", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+                return
+
     #start encoding
     if headphones.MUSIC_ENCODER:
         downloaded_track_list=music_encoder.encode(albumpath)
@@ -634,7 +655,7 @@ def moveFiles(albumpath, release, tracks):
                 try:
                     shutil.rmtree(lossless_destination_path)
                 except Exception, e:
-                    logger.error("Error deleting existing folder: %s. Creating duplicate folder. Error: %s" % (lossless_destination_path.decode(headphones.SYS_ENCODING, 'replace'), str(e)))
+                    logger.error("Error deleting existing folder: %s. Creating duplicate folder. Error: %s" % (lossless_destination_path.decode(headphones.SYS_ENCODING, 'replace'), e))
                     create_duplicate_folder = True
 
             if not headphones.REPLACE_EXISTING_FOLDERS or create_duplicate_folder:
@@ -667,7 +688,7 @@ def moveFiles(albumpath, release, tracks):
                 try:
                     shutil.rmtree(lossy_destination_path)
                 except Exception, e:
-                    logger.error("Error deleting existing folder: %s. Creating duplicate folder. Error: %s" % (lossy_destination_path.decode(headphones.SYS_ENCODING, 'replace'), str(e)))
+                    logger.error("Error deleting existing folder: %s. Creating duplicate folder. Error: %s" % (lossy_destination_path.decode(headphones.SYS_ENCODING, 'replace'), e))
                     create_duplicate_folder = True
             
             if not headphones.REPLACE_EXISTING_FOLDERS or create_duplicate_folder:
@@ -748,13 +769,13 @@ def moveFiles(albumpath, release, tracks):
             try:
                 os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING, 'replace'), int(headphones.FOLDER_PERMISSIONS, 8))
             except Exception, e:
-                logger.error("Error trying to change permissions on folder: %s. %s", temp_f.decode(headphones.SYS_ENCODING, 'replace'), e)
+                logger.error("Error trying to change permissions on folder: %s. %s", temp_f, e)
             
     # If we failed to move all the files out of the directory, this will fail too
     try:
         shutil.rmtree(albumpath)
     except Exception, e:
-        logger.error('Could not remove directory: %s. %s', albumpath.decode(headphones.SYS_ENCODING, 'replace'), e)
+        logger.error('Could not remove directory: %s. %s', albumpath, e)
     
     destination_paths = []
     
@@ -1108,16 +1129,18 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                 continue
 
         # Attempt 4: Hail mary. Just assume the folder name is the album name if it doesn't have a separator in it
-        if '-' not in folder:
-            release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE AlbumTitle LIKE ?', [folder]).fetchone()
+        logger.debug('Attempt to extract album name by assuming it is the folder name')
+
+        if '-' not in folder_basename:
+            release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE AlbumTitle LIKE ?', [folder_basename]).fetchone()
             if release:
                 logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album', release['ArtistName'], release['AlbumTitle'])
                 verify(release['AlbumID'], folder)
                 continue
             else:
-                logger.info('Querying MusicBrainz for the release group id for: %s', folder)
+                logger.info('Querying MusicBrainz for the release group id for: %s', folder_basename)
                 try:
-                    rgid = mb.findAlbumID(album=helpers.latinToAscii(folder))
+                    rgid = mb.findAlbumID(album=helpers.latinToAscii(folder_basename))
                 except:
                     logger.error('Can not get release information for this album')
                     rgid = None
@@ -1127,5 +1150,3 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                     continue
                 else:
                     logger.info('No match found on MusicBrainz for: %s - %s', name, album)
-
-                                                                                                                          
