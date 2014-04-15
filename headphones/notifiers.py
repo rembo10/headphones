@@ -22,6 +22,7 @@ import simplejson
 import os.path
 import subprocess
 import gntp.notifier
+import time
 
 from xml.dom import minidom
 from httplib import HTTPSConnection
@@ -694,3 +695,117 @@ class TwitterNotifier:
         return self._send_tweet(prefix+": "+message)
 
 notifier = TwitterNotifier
+
+API_URL = "https://boxcar.io/devices/providers/WqbewHpV8ZATnawpCsr4/notifications"
+
+class BOXCAR:
+
+    def test_notify(self, email, title="Test"):
+        return self._sendBoxcar("This is a test notification from Headphones", title, email)
+
+    def _sendBoxcar(self, msg, title, email, subscribe=False):
+        """
+	Sends a boxcar notification to the address provided
+
+	msg: The message to send (unicode)
+	title: The title of the message
+	email: The email address to send the message to (or to subscribe with)
+	subscribe: If true then instead of sending a message this function will send a subscription notificat$
+
+	returns: True if the message succeeded, False otherwise
+	"""
+
+        # build up the URL and parameters
+        msg = msg.strip()
+        curUrl = API_URL
+        # if this is a subscription notification then act accordingly
+        if subscribe:
+            data = urllib.urlencode({'email': email})
+            curUrl = curUrl + "/subscribe"
+        # for normal requests we need all these parameters
+        else:
+            data = urllib.urlencode({
+                'email': email,
+                'notification[from_screen_name]': title,
+                'notification[message]': msg.encode('utf-8'),
+                'notification[from_remote_service_id]': int(time.time())
+                })
+
+	logger.info(data)
+        # send the request to boxcar
+        try:
+            req = urllib2.Request(curUrl)
+            handle = urllib2.urlopen(req, data)
+            handle.close()
+
+        except urllib2.URLError, e:
+            # if we get an error back that doesn't have an error code then who knows what's really happening
+            if not hasattr(e, 'code'):
+                logger.error("Boxcar notification failed." + ex(e))
+                return False
+            else:
+                logger.error("Boxcar notification failed. Error code: " + str(e.code))
+
+            # HTTP status 404 if the provided email address isn't a Boxcar user.
+            if e.code == 404:
+                logger.error("Username is wrong/not a boxcar email. Boxcar will send an email to it")
+                return False
+
+            # For HTTP status code 401's, it is because you are passing in either an invalid token, or the user has not added$
+            elif e.code == 401:
+
+                # If the user has already added your service, we'll return an HTTP status code of 401.
+                if subscribe:
+                    logger.error("Already subscribed to service")
+                    # i dont know if this is true or false ... its neither but i also dont know how we got here in the first $
+                    return False
+
+                #HTTP status 401 if the user doesn't have the service added
+                else:
+                    subscribeNote = self._sendBoxcar(msg, title, email, True)
+                    if subscribeNote:
+                        logger.info("Subscription send")
+                        return True
+                    else:
+                        logger.info("Subscription could not be send")
+                        return False
+
+            # If you receive an HTTP status code of 400, it is because you failed to send the proper parameters
+            elif e.code == 400:
+                logger.info("Wrong data sent to boxcar")
+                logger.info('data:' + data)
+                return False
+
+        logger.fdebug("Boxcar notification successful.")
+        return True
+
+    def notify(self, artist=None, album=None, snatched_nzb=None, username=None, force=False):
+        """
+	Sends a boxcar notification based on the provided info or SB config
+
+	title: The title of the notification to send
+	message: The message string to send
+	username: The username to send the notification to (optional, defaults to the username in the config)
+	force: If True then the notification will be sent even if Boxcar is disabled in the config
+	"""
+        if not headphones.BOXCAR_ENABLED and not force:
+            logger.fdebug("Notification for Boxcar not enabled, skipping this notification")
+            return False
+
+        # if no username was given then use the one from the config
+        if not username:
+            username = headphones.BOXCAR_USERNAME
+
+        if snatched_nzb:
+            title = "Headphones. Sucessfully Snatched!"
+            message = u"Headphones has snatched: " + snatched_nzb + " and has sent it to SABnzbd+"
+        else:
+            title = "Headphones. Successfully Downloaded & Post-Processed!"
+            message = u"Headphones has downloaded and postprocessed: " + artist + ' [' + album + ']'
+
+        logger.info("Sending notification to Boxcar")
+
+        self._sendBoxcar(message, title, username)
+        return True
+
+

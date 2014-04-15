@@ -458,6 +458,12 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         pushover = notifiers.PUSHOVER()
         pushover.notify(pushmessage,"Headphones")
 
+    if headphones.BOXCAR_ENABLED:
+        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
+	logger.info(u"Boxcar request")
+        boxcar = notifiers.BOXCAR()
+        boxcar.notify(artist=release['ArtistName'], album=release['AlbumTitle'])
+
     if headphones.PUSHBULLET_ENABLED:
         pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
         logger.info(u"PushBullet request")
