@@ -14,6 +14,7 @@
 
 # This particular version has been slightly modified to work with headphones
 # https://github.com/rembo10/headphones
+import os
 
 __version__ = '1.3.4'
 __author__ = 'Adrian Sampson <adrian@radbox.org>'
