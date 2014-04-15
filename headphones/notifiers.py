@@ -696,7 +696,7 @@ class TwitterNotifier:
 
 notifier = TwitterNotifier
 
-API_URL = "https://boxcar.io/devices/providers/WqbewHpV8ZATnawpCsr4/notifications"
+API_URL = "https://boxcar.io/devices/providers/MH0S7xOFSwVLNvNhTpiC/notifications"
 
 class BOXCAR:
 
