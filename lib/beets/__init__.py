@@ -23,4 +23,4 @@ from beets.util import confit
 
 Library = beets.library.Library
 
-config = confit.LazyConfig('beets', __name__)
+config = confit.LazyConfig(os.path.dirname(__file__), __name__)
