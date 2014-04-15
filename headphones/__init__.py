@@ -261,6 +261,10 @@ PUSHOVER_PRIORITY = 1
 PUSHOVER_KEYS = None
 PUSHOVER_ONSNATCH = True
 PUSHOVER_APITOKEN = None
+BOXCAR_ENABLED = False
+BOXCAR_USERNAME = None
+BOXCAR_ONSNATCH = False
+
 PUSHBULLET_ENABLED = True
 PUSHBULLET_APIKEY = None
 PUSHBULLET_DEVICEID = None
@@ -350,6 +354,7 @@ def initialize():
                 MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, ENCODER_MULTICORE, ENCODER_MULTICORE_COUNT, DELETE_LOSSLESS_FILES, \
                 GROWL_ENABLED, GROWL_HOST, GROWL_PASSWORD, GROWL_ONSNATCH, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, PUSHOVER_APITOKEN, MIRRORLIST, \
                 TWITTER_ENABLED, TWITTER_ONSNATCH, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
+		BOXCAR_ENABLED, BOXCAR_USERNAME, BOXCAR_ONSNATCH, \
                 PUSHBULLET_ENABLED, PUSHBULLET_APIKEY, PUSHBULLET_DEVICEID, PUSHBULLET_ONSNATCH, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, LMS_ENABLED, LMS_HOST, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
@@ -598,6 +603,10 @@ def initialize():
         PUSHOVER_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_onsnatch', 0))
         PUSHOVER_PRIORITY = check_setting_int(CFG, 'Pushover', 'pushover_priority', 0)
         PUSHOVER_APITOKEN = check_setting_str(CFG, 'Pushover', 'pushover_apitoken', '')
+
+        BOXCAR_ENABLED = bool(check_setting_int(CFG, 'BOXCAR', 'boxcar_enabled', 0))
+        BOXCAR_USERNAME = check_setting_str(CFG, 'BOXCAR', 'boxcar_username', '')
+	BOXCAR_ONSNATCH = bool(check_setting_int(CFG, 'BOXCAR', 'boxcar_onsnatch', 0))
 
         PUSHBULLET_ENABLED = bool(check_setting_int(CFG, 'PushBullet', 'pushbullet_enabled', 0))
         PUSHBULLET_APIKEY = check_setting_str(CFG, 'PushBullet', 'pushbullet_apikey', '')
@@ -1011,6 +1020,11 @@ def config_write():
     new_config['Pushover']['pushover_onsnatch'] = int(PUSHOVER_ONSNATCH)
     new_config['Pushover']['pushover_priority'] = int(PUSHOVER_PRIORITY)
     new_config['Pushover']['pushover_apitoken'] = PUSHOVER_APITOKEN
+
+    new_config['BOXCAR'] = {}
+    new_config['BOXCAR']['boxcar_enabled'] = int(BOXCAR_ENABLED)
+    new_config['BOXCAR']['boxcar_username'] = BOXCAR_USERNAME
+    new_config['BOXCAR']['boxcar_onsnatch'] = int(BOXCAR_ONSNATCH)
 
     new_config['PushBullet'] = {}
     new_config['PushBullet']['pushbullet_enabled'] = int(PUSHBULLET_ENABLED)

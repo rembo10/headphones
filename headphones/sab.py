@@ -131,6 +131,10 @@ def sendNZB(nzb):
             logger.info(u"Sending Pushover notification")
             prowl = notifiers.PUSHOVER()
             prowl.notify(nzb.name,"Download started")
+	if headphones.BOXCAR_ENABLED and headphones.BOXCAR_ONSNATCH:
+	    logger.info(u"Sending Boxcar notification")
+	    boxcar = notifiers.BOXCAR()
+	    boxcar.notify(snatched_nzb=nzb.name)
         if headphones.PUSHBULLET_ENABLED and headphones.PUSHBULLET_ONSNATCH:
             logger.info(u"Sending PushBullet notification")
             pushbullet = notifiers.PUSHBULLET()
