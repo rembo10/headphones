@@ -725,6 +725,11 @@ class WebInterface(object):
         return serve_template(templatename="logs.html", title="Log", lineList=headphones.LOG_LIST)
     logs.exposed = True
 
+    def clearLogs(self):
+        headphones.LOG_LIST = []
+        logger.info("Web logs cleared")
+        raise cherrypy.HTTPRedirect("logs")
+    clearLogs.exposed = True
 
     def getLog(self,iDisplayStart=0,iDisplayLength=100,iSortCol_0=0,sSortDir_0="desc",sSearch="",**kwargs):
 

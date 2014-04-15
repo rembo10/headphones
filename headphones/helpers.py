@@ -274,7 +274,7 @@ def expand_subfolders(f):
     difference = max(path_depths) - min(path_depths)
 
     if difference > 0:
-        logger.info("Found %d media folders, but depth difference between lowest and deepest media folder is %d (expected zero). If this is a discography or a collection of albums, make sure albums are per folder" % (len(media_folders), difference))
+        logger.info("Found %d media folders, but depth difference between lowest and deepest media folder is %d (expected zero). If this is a discography or a collection of albums, make sure albums are per folder.", len(media_folders), difference)
 
         # While already failed, advice the user what he could try. We assume the
         # directory may contain separate CD's and maybe some extra's. The
@@ -283,7 +283,7 @@ def expand_subfolders(f):
         extra_media_folders = [ media_folder[:min(path_depths)] for media_folder in media_folders if len(media_folder) > min(path_depths) ]
         extra_media_folders = list(set([ os.path.join(*media_folder) for media_folder in extra_media_folders ]))
 
-        logger.info("Please look at the following folder(s), since they cause the depth difference: %s" % extra_media_folders)
+        logger.info("Please look at the following folder(s), since they cause the depth difference: %s", extra_media_folders)
         return
 
     # Convert back to paths and remove duplicates, which may be there after
@@ -297,7 +297,7 @@ def expand_subfolders(f):
         logger.debug("Did not expand subfolder, as it resulted in one folder.")
         return
 
-    logger.debug("Expanded subfolders in folder: " % media_folders)
+    logger.debug("Expanded subfolders in folder: %s", media_folders)
     return media_folders
 
 def extract_data(s):
@@ -374,14 +374,14 @@ def extract_metadata(f):
 
     # Verify results
     if len(results) == 0:
-        logger.info("No metadata in media files found, ignoring")
+        logger.info("No metadata in media files found, ignoring.")
         return (None, None, None)
 
     # Require that some percentage of files have tags
     count_ratio = 0.75
 
     if count < (count_ratio * len(results)):
-        logger.info("Counted %d media files, but only %d have tags, ignoring" % (count, len(results)))
+        logger.info("Counted %d media files, but only %d have tags, ignoring.", count, len(results))
         return (None, None, None)
 
     # Count distinct values
@@ -399,7 +399,7 @@ def extract_metadata(f):
                 old_album = new_albums[index]
                 new_albums[index] = RE_CD_ALBUM.sub("", album).strip()
 
-                logger.debug("Stripped albumd number identifier: %s -> %s" % (old_album, new_albums[index]))
+                logger.debug("Stripped albumd number identifier: %s -> %s", old_album, new_albums[index])
 
         # Remove duplicates
         new_albums = list(set(new_albums))
@@ -417,7 +417,7 @@ def extract_metadata(f):
     if len(artists) > 1 and len(albums) == 1:
         split_artists = [ RE_FEATURING.split(artist) for artist in artists ]
         featurings = [ len(split_artist) - 1 for split_artist in split_artists ]
-        logger.info("Album seem to feature %d different artists" % sum(featurings))
+        logger.info("Album seem to feature %d different artists", sum(featurings))
 
         if sum(featurings) > 0:
             # Find the artist of which the least splits have been generated.
@@ -429,8 +429,8 @@ def extract_metadata(f):
             return (artist, albums[0], years[0])
 
     # Not sure what to do here.
-    logger.info("Found %d artists, %d albums and %d years in metadata, so ignoring" % (len(artists), len(albums), len(years)))
-    logger.debug("Artists: %s, Albums: %s, Years: %s" % (artists, albums, years))
+    logger.info("Found %d artists, %d albums and %d years in metadata, so ignoring", len(artists), len(albums), len(years))
+    logger.debug("Artists: %s, Albums: %s, Years: %s", artists, albums, years)
 
     return (None, None, None)
 
@@ -486,7 +486,7 @@ def smartMove(src, dest, delete=True):
     filename = os.path.basename(src)
 
     if os.path.isfile(os.path.join(dest, filename)):
-        logger.info('Destination file exists: %s', os.path.join(dest, filename).decode(headphones.SYS_ENCODING, 'replace'))
+        logger.info('Destination file exists: %s', os.path.join(dest, filename))
         title = os.path.splitext(filename)[0]
         ext = os.path.splitext(filename)[1]
         i = 1
