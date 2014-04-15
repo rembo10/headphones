@@ -198,7 +198,7 @@ def getArtist(artistid, extrasonly=False):
         
         if not extrasonly:
             for rg in artist['release-group-list']:
-                if rg['type'] != 'Album': #only add releases without a secondary type
+                if "secondary-type-list" in rg.keys(): #only add releases without a secondary type
                     continue
                 releasegroups.append({
                             'title':      unicode(rg['title']),
