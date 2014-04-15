@@ -15,19 +15,16 @@
 
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
 
-from __future__ import with_statement
-
 import os, sys, subprocess
 
 import threading
 import webbrowser
 import sqlite3
 import itertools
+import cherrypy
 
 from lib.apscheduler.scheduler import Scheduler
 from lib.configobj import ConfigObj
-
-import cherrypy
 
 from headphones import versioncheck, logger, version
 from headphones.common import *
@@ -1093,7 +1090,7 @@ def start():
         started = True
 
 def sig_handler(signum=None, frame=None):
-    if type(signum) != type(None):
+    if signum is not None:
         logger.info("Signal %i caught, saving and exiting...", signum)
         shutdown()
 
