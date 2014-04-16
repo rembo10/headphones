@@ -269,7 +269,8 @@ class LMS:
             return
 
     def update(self):
-	hosts = [x.strip() for x in self.hosts.split(',')]
+
+        hosts = [x.strip() for x in self.hosts.split(',')]
 
         for host in hosts:
             logger.info('Sending library rescan command to LMS @ '+host)
