@@ -247,10 +247,10 @@ class LMS:
         self.hosts = headphones.LMS_HOST
     
     def _sendjson(self, host):
-        data = {'id': 1, 'method': 'slim.request', 'params': ["",["rescan"]]} #Had a lot of trouble with simplejson, but this works.
+    	data = {'id': 1, 'method': 'slim.request', 'params': ["",["rescan"]]}
         data = simplejson.JSONEncoder().encode(data)
 
-        content = {'Content-Type': 'application/json', 'Content-Length': len(data)}
+        content = {'Content-Type': 'application/json'}
 
         req = urllib2.Request(host+'/jsonrpc.js', data, content)
 
@@ -261,21 +261,15 @@ class LMS:
             return
 
         response = simplejson.JSONDecoder().decode(handle.read())
-        server_result = simplejson.dumps(response)
         
         try:
-            return response[0]['result']
+            return response['result']
         except:
-            logger.warn('LMS returned error: %s' % response[0]['error'])
+            logger.warn('LMS returned error: %s' % response['error'])
             return
 
     def update(self):
-                    
-		#Send the ["rescan"] command to an LMS server.
-		#Note that the command must be prefixed with the 'player' that the command is aimed at,
-		#But with this being a request for the server to update its library, the player is blank, so ""
-
-        hosts = [x.strip() for x in self.hosts.split(',')]
+	hosts = [x.strip() for x in self.hosts.split(',')]
 
         for host in hosts:
             logger.info('Sending library rescan command to LMS @ '+host)
