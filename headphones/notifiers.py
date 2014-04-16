@@ -132,7 +132,7 @@ class PROWL:
             return
 
         http_handler = HTTPSConnection("api.prowlapp.com")
-                                                
+
         data = {'apikey': headphones.PROWL_KEYS,
                 'application': 'Headphones',
                 'event': event,
@@ -167,7 +167,7 @@ class PROWL:
         self.priority = priority
 
         self.notify('ZOMG Lazors Pewpewpew!', 'Test Message')
-        
+
 class XBMC:
 
     def __init__(self):
@@ -207,10 +207,10 @@ class XBMC:
         for host in hosts:
             logger.info('Sending library update command to XBMC @ '+host)
             request = self._sendjson(host, 'AudioLibrary.Scan')
-            
+
             if not request:
                 logger.warn('Error sending update request to XBMC')
-            
+
     def notify(self, artist, album, albumartpath):
 
         hosts = [x.strip() for x in self.hosts.split(',')]
@@ -238,14 +238,15 @@ class XBMC:
 
             except:
                 logger.warn('Error sending notification request to XBMC')
+
 class LMS:
 
 #Class for updating a Logitech Media Server
 
     def __init__(self):
-    
+
         self.hosts = headphones.LMS_HOST
-    
+
     def _sendjson(self, host):
         data = {'id': 1, 'method': 'slim.request', 'params': ["",["rescan"]]} #Had a lot of trouble with simplejson, but this works.
         data = simplejson.JSONEncoder().encode(data)
@@ -262,7 +263,7 @@ class LMS:
 
         response = simplejson.JSONDecoder().decode(handle.read())
         server_result = simplejson.dumps(response)
-        
+
         try:
             return response[0]['result']
         except:
@@ -270,24 +271,24 @@ class LMS:
             return
 
     def update(self):
-                    
-		#Send the ["rescan"] command to an LMS server.
-		#Note that the command must be prefixed with the 'player' that the command is aimed at,
-		#But with this being a request for the server to update its library, the player is blank, so ""
+
+        #Send the ["rescan"] command to an LMS server.
+        #Note that the command must be prefixed with the 'player' that the command is aimed at,
+        #But with this being a request for the server to update its library, the player is blank, so ""
 
         hosts = [x.strip() for x in self.hosts.split(',')]
 
         for host in hosts:
             logger.info('Sending library rescan command to LMS @ '+host)
             request = self._sendjson(host)
-            
+
             if not request:
                 logger.warn('Error sending rescan request to LMS')
 
 class Plex:
 
     def __init__(self):
-    
+
         self.server_hosts = headphones.PLEX_SERVER_HOST
         self.client_hosts = headphones.PLEX_CLIENT_HOST
         self.username = headphones.PLEX_USERNAME
@@ -297,31 +298,31 @@ class Plex:
 
         username = self.username
         password = self.password
-        
+
         url_command = urllib.urlencode(command)
-        
+
         url = host + '/xbmcCmds/xbmcHttp/?' + url_command
-            
+
         req = urllib2.Request(url)
-            
+
         if password:
             base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
             req.add_header("Authorization", "Basic %s" % base64string)
-                
+
         logger.info('Plex url: %s' % url)
-            
+
         try:
             handle = urllib2.urlopen(req)
         except Exception, e:
             logger.warn('Error opening Plex url: %s' % e)
             return
-    
+
         response = handle.read().decode(headphones.SYS_ENCODING)
-            
+
         return response
-    
+
     def update(self):
-                    
+
         # From what I read you can't update the music library on a per directory or per path basis
         # so need to update the whole thing
 
@@ -349,7 +350,7 @@ class Plex:
                     except Exception, e:
                         logger.warn("Error updating library section for Plex Media Server: %s" % e)
                         return False
-            
+
     def notify(self, artist, album, albumartpath):
 
         hosts = [x.strip() for x in self.client_hosts.split(',')]
@@ -361,12 +362,12 @@ class Plex:
         for host in hosts:
             logger.info('Sending notification command to Plex Media Server @ '+host)
             try:
-		notification = header + "," + message + "," + time + "," + albumartpath
-		notifycommand = {'command': 'ExecBuiltIn', 'parameter': 'Notification('+notification+')'}
-		request = self._sendhttp(host, notifycommand)
+                notification = header + "," + message + "," + time + "," + albumartpath
+                notifycommand = {'command': 'ExecBuiltIn', 'parameter': 'Notification('+notification+')'}
+                request = self._sendhttp(host, notifycommand)
 
-		if not request:
-			raise Exception
+                if not request:
+                    raise Exception
 
             except:
                 logger.warn('Error sending notification request to Plex Media Server')
@@ -374,30 +375,30 @@ class Plex:
 class NMA:
 
     def __init__(self):
-    
+
         self.apikey = headphones.NMA_APIKEY
         self.priority = headphones.NMA_PRIORITY
-        
+
     def _send(self, data):
         return request.request_content('https://www.notifymyandroid.com/publicapi/notify', data=data)
-        
+
     def notify(self, artist=None, album=None, snatched_nzb=None):
-    
+
         apikey = self.apikey
         priority = self.priority
-        
+
         if snatched_nzb:
             event = snatched_nzb + " snatched!"
             description = "Headphones has snatched: " + snatched_nzb + " and has sent it to SABnzbd+"
         else:
             event = artist + ' - ' + album + ' complete!'
             description = "Headphones has downloaded and postprocessed: " + artist + ' [' + album + ']'
-    
+
         data = { 'apikey': apikey, 'application':'Headphones', 'event': event, 'description': description, 'priority': priority}
 
         logger.info('Sending notification request to NotifyMyAndroid')
         request = self._send(data)
-        
+
         if not request:
             logger.warn('Error sending notification request to NotifyMyAndroid')        
 
@@ -415,7 +416,7 @@ class PUSHBULLET:
             return
 
         http_handler = HTTPSConnection("api.pushbullet.com")
-                                                
+
         data = {'device_iden': headphones.PUSHBULLET_DEVICEID,
                 'type': "note",
                 'title': "Headphones",
@@ -454,21 +455,20 @@ class PUSHBULLET:
 
         self.notify('Main Screen Activate', 'Test Message')
 
-        
 class PUSHALOT:
 
     def notify(self, message, event):
         if not headphones.PUSHALOT_ENABLED:
             return
 
-	pushalot_authorizationtoken = headphones.PUSHALOT_APIKEY
+        pushalot_authorizationtoken = headphones.PUSHALOT_APIKEY
 
-	logger.debug(u"Pushalot event: " + event)
-	logger.debug(u"Pushalot message: " + message)
-	logger.debug(u"Pushalot api: " + pushalot_authorizationtoken)
+        logger.debug(u"Pushalot event: " + event)
+        logger.debug(u"Pushalot message: " + message)
+        logger.debug(u"Pushalot api: " + pushalot_authorizationtoken)
 
         http_handler = HTTPSConnection("pushalot.com")
-                                                
+
         data = {'AuthorizationToken': pushalot_authorizationtoken, 
                 'Title': event.encode('utf-8'),
                 'Body': message.encode("utf-8") }
@@ -529,6 +529,7 @@ class Synoindex:
         if isinstance(path_list, list):
             for path in path_list:
                 self.notify(path)
+
 class PUSHOVER:
 
     application_token = "LdPCoy0dqC21ktsbEyAVCcwvQiVlsz"
@@ -551,7 +552,7 @@ class PUSHOVER:
             return
 
         http_handler = HTTPSConnection("api.pushover.net")
-                                                
+
         data = {'token': self.application_token, 
                 'user': headphones.PUSHOVER_KEYS,
                 'title': event,
@@ -589,17 +590,17 @@ class PUSHOVER:
         self.priority = priority
 
         self.notify('Main Screen Activate', 'Test Message')
-        
+
 class TwitterNotifier:
 
     consumer_key = "oYKnp2ddX5gbARjqX8ZAAg"
     consumer_secret = "A4Xkw9i5SjHbTk7XT8zzOPqivhj9MmRDR9Qn95YA9sk"
-    
+
     REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
     ACCESS_TOKEN_URL  = 'https://api.twitter.com/oauth/access_token'
     AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authorize'
     SIGNIN_URL        = 'https://api.twitter.com/oauth/authenticate'
-    
+
     def notify_snatch(self, title):
         if headphones.TWITTER_ONSNATCH:
             self._notifyTwitter(common.notifyStrings[common.NOTIFY_SNATCH]+': '+title+' at '+helpers.now())
@@ -612,37 +613,37 @@ class TwitterNotifier:
         return self._notifyTwitter("This is a test notification from Headphones at "+helpers.now(), force=True)
 
     def _get_authorization(self):
-    
+
         signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1() #@UnusedVariable
         oauth_consumer             = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
         oauth_client               = oauth.Client(oauth_consumer)
-    
+
         logger.info('Requesting temp token from Twitter')
-    
+
         resp, content = oauth_client.request(self.REQUEST_TOKEN_URL, 'GET')
-    
+
         if resp['status'] != '200':
             logger.info('Invalid respond from Twitter requesting temp token: %s' % resp['status'])
         else:
             request_token = dict(parse_qsl(content))
-    
+
             headphones.TWITTER_USERNAME = request_token['oauth_token']
             headphones.TWITTER_PASSWORD = request_token['oauth_token_secret']
-    
+
             return self.AUTHORIZATION_URL+"?oauth_token="+ request_token['oauth_token']
-    
+
     def _get_credentials(self, key):
         request_token = {}
-    
+
         request_token['oauth_token'] = headphones.TWITTER_USERNAME
         request_token['oauth_token_secret'] = headphones.TWITTER_PASSWORD
         request_token['oauth_callback_confirmed'] = 'true'
-    
+
         token = oauth.Token(request_token['oauth_token'], request_token['oauth_token_secret'])
         token.set_verifier(key)
-    
+
         logger.info('Generating and signing request for an access token using key '+key)
-    
+
         signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1() #@UnusedVariable
         oauth_consumer             = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
         logger.info('oauth_consumer: '+str(oauth_consumer))
@@ -650,10 +651,10 @@ class TwitterNotifier:
         logger.info('oauth_client: '+str(oauth_client))
         resp, content = oauth_client.request(self.ACCESS_TOKEN_URL, method='POST', body='oauth_verifier=%s' % key)
         logger.info('resp, content: '+str(resp)+','+str(content))
-    
+
         access_token  = dict(parse_qsl(content))
         logger.info('access_token: '+str(access_token))
-    
+
         logger.info('resp[status] = '+str(resp['status']))
         if resp['status'] != '200':
             logger.info('The request for a token with did not succeed: '+str(resp['status']), logger.ERROR)
@@ -664,33 +665,115 @@ class TwitterNotifier:
             headphones.TWITTER_USERNAME = access_token['oauth_token']
             headphones.TWITTER_PASSWORD = access_token['oauth_token_secret']
             return True
-    
-    
+
+
     def _send_tweet(self, message=None):
-    
+
         username=self.consumer_key
         password=self.consumer_secret
         access_token_key=headphones.TWITTER_USERNAME
         access_token_secret=headphones.TWITTER_PASSWORD
-    
+
         logger.info(u"Sending tweet: "+message)
-    
+
         api = twitter.Api(username, password, access_token_key, access_token_secret)
-    
+
         try:
             api.PostUpdate(message)
         except Exception, e:
             logger.info(u"Error Sending Tweet: %s" % e)
             return False
-    
+
         return True
-    
+
     def _notifyTwitter(self, message='', force=False):
         prefix = headphones.TWITTER_PREFIX
-    
+
         if not headphones.TWITTER_ENABLED and not force:
             return False
-    
+
         return self._send_tweet(prefix+": "+message)
 
 notifier = TwitterNotifier
+
+class OSX_NOTIFY:
+
+    objc = None
+
+    def __init__(self):
+        try:
+            self.objc = __import__("objc")
+        except:
+            return False
+
+    def swizzle(self, cls, SEL, func):
+        old_IMP = cls.instanceMethodForSelector_(SEL)
+        def wrapper(self, *args, **kwargs):
+            return func(self, old_IMP, *args, **kwargs)
+        new_IMP = self.objc.selector(wrapper, selector=old_IMP.selector,
+            signature=old_IMP.signature)
+        self.objc.classAddMethod(cls, SEL, new_IMP)
+
+    def notify(self, title, subtitle=None, text=None, sound=True):
+
+        try:
+            self.swizzle(self.objc.lookUpClass('NSBundle'),
+                b'bundleIdentifier',
+                self.swizzled_bundleIdentifier)
+
+            NSUserNotification = self.objc.lookUpClass('NSUserNotification')
+            NSUserNotificationCenter = self.objc.lookUpClass('NSUserNotificationCenter')
+            NSAutoreleasePool = self.objc.lookUpClass('NSAutoreleasePool')
+
+            if not NSUserNotification or not NSUserNotificationCenter:
+                return False
+
+            pool = NSAutoreleasePool.alloc().init()
+
+            notification = NSUserNotification.alloc().init()
+            notification.setTitle_(title)
+            if subtitle:
+                notification.setSubtitle_(subtitle)
+            if text:
+                notification.setInformativeText_(text)
+            if sound:
+                notification.setSoundName_("NSUserNotificationDefaultSoundName")
+            notification.setHasActionButton_(False)
+
+            notification_center = NSUserNotificationCenter.defaultUserNotificationCenter()
+            notification_center.deliverNotification_(notification)
+
+            del pool
+            return True
+
+        except Exception, e:
+            logger.warn('Error sending OS X Notification: %s' % e)
+            return False
+
+    def swizzled_bundleIdentifier(self, original, swizzled):
+        return 'ade.headphones.osxnotify'
+
+class BOXCAR:
+
+    def __init__(self):
+
+        self.url = 'https://new.boxcar.io/api/notifications'
+
+    def notify(self, title, message):
+
+        try:
+            data = urllib.urlencode({
+                'user_credentials': headphones.BOXCAR_TOKEN,
+                'notification[title]': title.encode('utf-8'),
+                'notification[long_message]': message.encode('utf-8'),
+                'notification[sound]': "done"
+                })
+
+            req = urllib2.Request(self.url)
+            handle = urllib2.urlopen(req, data)
+            handle.close()
+            return True
+
+        except urllib2.URLError, e:
+            logger.warn('Error sending Boxcar2 Notification: %s' % e)
+            return False
