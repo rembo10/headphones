@@ -247,7 +247,7 @@ class LMS:
         self.hosts = headphones.LMS_HOST
     
     def _sendjson(self, host):
-    	data = {'id': 1, 'method': 'slim.request', 'params': ["",["rescan"]]}
+        data = {'id': 1, 'method': 'slim.request', 'params': ["",["rescan"]]}
         data = simplejson.JSONEncoder().encode(data)
 
         content = {'Content-Type': 'application/json'}
