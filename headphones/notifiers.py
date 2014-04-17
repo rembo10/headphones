@@ -759,9 +759,12 @@ class BOXCAR:
 
         self.url = 'https://new.boxcar.io/api/notifications'
 
-    def notify(self, title, message):
+    def notify(self, title, message, rgid=None):
 
         try:
+            if rgid:
+                message += '<br></br><a href="http://musicbrainz.org/release-group/%s">MusicBrainz</a>' % rgid
+
             data = urllib.urlencode({
                 'user_credentials': headphones.BOXCAR_TOKEN,
                 'notification[title]': title.encode('utf-8'),
