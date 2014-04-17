@@ -269,6 +269,7 @@ class WebInterface(object):
                 searcher.searchforalbum(mbid, new=True)
             if action == 'WantedLossless':
                 searcher.searchforalbum(mbid, lossless=True)
+            myDB.action('UPDATE artists SET TotalTracks=(SELECT COUNT(*) FROM tracks, artists WHERE tracks.ArtistName = artists.ArtistName AND AlbumTitle IN (SELECT AlbumTitle FROM albums WHERE Status != "Ignored")) WHERE ArtistID=(SELECT ArtistID FROM albums WHERE AlbumID=?)', [mbid])
         if ArtistID:
             raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
         else:
