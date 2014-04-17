@@ -1051,7 +1051,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
                     if re.search(bitrate, encoding_string, flags=re.I):
                         bitrate_string = encoding_string
                 if bitrate_string not in gazelleencoding.ALL_ENCODINGS:
-                    raise Exception("Preferred bitrate %s not recognized by %s" % (bitrate_string, provider))
+                    logger.info(u"Your preferred bitrate is not one of the available What.cd filters, so not using it as a search parameter.")
             maxsize = 10000000000
         elif headphones.PREFERRED_QUALITY == 1:  # Highest quality including lossless
             search_formats = [gazelleformat.FLAC, gazelleformat.MP3]
