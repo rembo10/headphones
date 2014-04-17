@@ -31,7 +31,7 @@ import subprocess
 import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
-from headphones import transmission
+from headphones import transmission, notifiers
 
 import lib.bencode as bencode
 
@@ -359,6 +359,9 @@ def searchNZB(album, new=False, losslessOnly=False):
             logger.info("Album type is audiobook/spokenword. Using audiobook category")
 
         for newznab_host in newznab_hosts:
+
+            provider = newznab_host[0]
+
             # Add a little mod for kere.ws
             if newznab_host[0] == "http://kere.ws":
                 if categories == "3040":
@@ -573,14 +576,16 @@ def send_to_downloader(data, bestqual, album):
             nzb = classes.NZBDataSearchResult()
             nzb.extraInfo.append(data)
             nzb.name = folder_name
-            nzbget.sendNZB(nzb)
+            if not nzbget.sendNZB(nzb):
+                return
 
         elif headphones.NZB_DOWNLOADER == 0:
 
             nzb = classes.NZBDataSearchResult()
             nzb.extraInfo.append(data)
             nzb.name = folder_name
-            sab.sendNZB(nzb)
+            if not sab.sendNZB(nzb):
+                return
 
             # If we sent the file to sab, we can check how it was renamed and insert that into the snatched table
             (replace_spaces, replace_dots) = sab.checkConfig()
@@ -694,6 +699,54 @@ def send_to_downloader(data, bestqual, album):
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [album['AlbumID']])
     myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)', [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], "Snatched", folder_name, kind])
+
+    # notify
+    artist = album[1]
+    albumname = album[2]
+    rgid = album[6]
+    title = artist + ' - ' + albumname
+    provider = bestqual[3]
+    if provider.startswith(("http://", "https://")):
+        provider = provider.split("//")[1]
+    name = folder_name if folder_name else None
+
+    if headphones.GROWL_ENABLED and headphones.GROWL_ONSNATCH:
+        logger.info(u"Sending Growl notification")
+        growl = notifiers.GROWL()
+        growl.notify(name,"Download started")
+    if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
+        logger.info(u"Sending Prowl notification")
+        prowl = notifiers.PROWL()
+        prowl.notify(name,"Download started")
+    if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
+        logger.info(u"Sending Pushover notification")
+        prowl = notifiers.PUSHOVER()
+        prowl.notify(name,"Download started")
+    if headphones.PUSHBULLET_ENABLED and headphones.PUSHBULLET_ONSNATCH:
+        logger.info(u"Sending PushBullet notification")
+        pushbullet = notifiers.PUSHBULLET()
+        pushbullet.notify(name + " has been snatched!", "Download started")
+    if headphones.TWITTER_ENABLED and headphones.TWITTER_ONSNATCH:
+        logger.info(u"Sending Twitter notification")
+        twitter = notifiers.TwitterNotifier()
+        twitter.notify_snatch(name)
+    if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
+        logger.info(u"Sending NMA notification")
+        nma = notifiers.NMA()
+        nma.notify(snatched_nzb=name)
+    if headphones.PUSHALOT_ENABLED and headphones.PUSHALOT_ONSNATCH:
+        logger.info(u"Sending Pushalot notification")
+        pushalot = notifiers.PUSHALOT()
+        pushalot.notify(name,"Download started")
+    if headphones.OSX_NOTIFY_ENABLED and headphones.OSX_NOTIFY_ONSNATCH:
+        logger.info(u"Sending OS X notification")
+        osx_notify = notifiers.OSX_NOTIFY()
+        osx_notify.notify(artist, albumname, 'Snatched: ' + provider + '. ' + name)
+    if headphones.BOXCAR_ENABLED and headphones.BOXCAR_ONSNATCH:
+        logger.info(u"Sending Boxcar2 notification")
+        b2msg = 'From ' + provider + '<br></br>' + name
+        boxcar = notifiers.BOXCAR()
+        boxcar.notify('Headphones snatched: ' + title, b2msg, rgid)
 
 def verifyresult(title, artistterm, term, lossless):
 
@@ -862,7 +915,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
     minimumseeders = int(headphones.NUMBEROFSEEDERS) - 1
 
     if headphones.KAT:
-        provider = "Kick Ass Torrent"
+        provider = "Kick Ass Torrents"
         providerurl = url_fix("http://kickass.to/usearch/" + term)
         if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
             categories = "7"        #music
@@ -1324,7 +1377,7 @@ def preprocess(resultlist):
             #Get out of here if we're using Transmission or uTorrent
             if headphones.TORRENT_DOWNLOADER != 0:
                 return True, result
-            # get outta here if rutracker or piratebay
+            # get outta here if rutracker
             if result[3] == 'rutracker.org':
                 return True, result
             # Get out of here if it's a magnet link
@@ -1334,7 +1387,7 @@ def preprocess(resultlist):
             # Download the torrent file
             headers = {}
 
-            if result[3] == 'Kick Ass Torrent':
+            if result[3] == 'Kick Ass Torrents':
                 headers['Referer'] = 'http://kat.ph/'
             elif result[3] == 'What.cd':
                 headers['User-Agent'] = 'Headphones'

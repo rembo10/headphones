@@ -410,7 +410,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         librarysync.libraryScan(dir=albumpath, append=True, ArtistID=release['ArtistID'], ArtistName=release['ArtistName'])
     
     logger.info(u'Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
-    
+
     if headphones.GROWL_ENABLED:
         pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
         logger.info(u"Growl request")
@@ -473,7 +473,18 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         logger.info(u"Sending Twitter notification")
         twitter = notifiers.TwitterNotifier()
         twitter.notify_download(pushmessage)
-        
+
+    if headphones.OSX_NOTIFY_ENABLED:
+        logger.info(u"Sending OS X notification")
+        osx_notify = notifiers.OSX_NOTIFY()
+        osx_notify.notify(release['ArtistName'], release['AlbumTitle'], "Download and Postprocessing completed")
+
+    if headphones.BOXCAR_ENABLED:
+        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
+        logger.info(u"Sending Boxcar2 notification")
+        boxcar = notifiers.BOXCAR()
+        boxcar.notify('Headphones processed: ' + pushmessage, "Download and Postprocessing completed", release['AlbumID'])
+
 def embedAlbumArt(artwork, downloaded_track_list):
     logger.info('Embedding album art')
     
