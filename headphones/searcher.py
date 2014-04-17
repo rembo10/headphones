@@ -702,13 +702,14 @@ def send_to_downloader(data, bestqual, album):
 
     # notify
     artist = album[1]
-    album = album[2]
-    title = artist + ' - ' + album
+    albumname = album[2]
+    rgid = album[6]
+    title = artist + ' - ' + albumname
     provider = bestqual[3]
     if provider.startswith(("http://", "https://")):
         provider = provider.split("//")[1]
-
     name = folder_name if folder_name else None
+
     if headphones.GROWL_ENABLED and headphones.GROWL_ONSNATCH:
         logger.info(u"Sending Growl notification")
         growl = notifiers.GROWL()
@@ -740,11 +741,12 @@ def send_to_downloader(data, bestqual, album):
     if headphones.OSX_NOTIFY_ENABLED and headphones.OSX_NOTIFY_ONSNATCH:
         logger.info(u"Sending OS X notification")
         osx_notify = notifiers.OSX_NOTIFY()
-        osx_notify.notify(artist, album, 'Snatched: ' + provider + '. ' + name)
+        osx_notify.notify(artist, albumname, 'Snatched: ' + provider + '. ' + name)
     if headphones.BOXCAR_ENABLED and headphones.BOXCAR_ONSNATCH:
         logger.info(u"Sending Boxcar2 notification")
+        b2msg = 'From ' + provider + '<br></br>' + name
         boxcar = notifiers.BOXCAR()
-        boxcar.notify('Headphones snatched: ' + title, 'From ' + provider + '. ' + name)
+        boxcar.notify('Headphones snatched: ' + title, b2msg, rgid)
 
 def verifyresult(title, artistterm, term, lossless):
 
