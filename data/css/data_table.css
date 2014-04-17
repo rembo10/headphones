@@ -172,6 +172,14 @@ table.display tr.even.gradeA {
 	background-color: #ddffdd;
 }
 
+table.display tr.odd.gradeI {
+	background-color: #bebebe;
+}
+
+table.display tr.even.gradeI {
+	background-color: #bebebe;
+}
+
 table.display tr.odd.gradeC {
 	background-color: #ddddff;
 }
