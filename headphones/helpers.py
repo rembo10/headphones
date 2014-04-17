@@ -360,7 +360,7 @@ def extract_metadata(f):
             # Try to read the file info
             try:
                 media_file = MediaFile(os.path.join(root, file))
-            except FileTypeError, UnreadableFileError:
+            except (FileTypeError, UnreadableFileError):
                 # Probably not a media file
                 continue
 

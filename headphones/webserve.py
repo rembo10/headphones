@@ -630,8 +630,8 @@ class WebInterface(object):
                 for rgid in rgids:
                     myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
 
-                myDB.action('DELETE from allalbums WHERE AlbumID=?', [AlbumID])
-                myDB.action('DELETE from alltracks WHERE AlbumID=?', [AlbumID])
+                myDB.action('DELETE from allalbums WHERE ArtistID=?', [ArtistID])
+                myDB.action('DELETE from alltracks WHERE ArtistID=?', [ArtistID])
                 myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
             elif action == 'pause':
                 controlValueDict = {'ArtistID': ArtistID}
