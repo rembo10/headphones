@@ -62,6 +62,7 @@
   			<option value="Wanted">Wanted</option>
   			<option value="WantedNew">Wanted (new only)</option>
   			<option value="Skipped">Skipped</option>
+			<option value="Ignored">Ignored</option>
   			<option value="Downloaded">Downloaded</option>
 		</select>
 		<input type="hidden" value="Go">
@@ -89,6 +90,8 @@
 					grade = 'X'
 				elif album['Status'] == 'Snatched':
 					grade = 'C'
+				elif album['Status'] == 'Ignored':
+					grade = 'I'
 				else:
 					grade = 'A'
 
@@ -128,7 +131,7 @@
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
 				<td id="status">${album['Status']}
-				%if album['Status'] == 'Skipped':
+				%if album['Status'] == 'Skipped' or album['Status'] == 'Ignored':
 					[<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' added to Wanted list">want</a>]
 				%elif (album['Status'] == 'Wanted' or album['Status'] == 'Wanted Lossless'):
 					[<a href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' skipped">skip</a>]
