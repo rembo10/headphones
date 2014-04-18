@@ -16,7 +16,7 @@
 				<a id="menu_link_pauze" href="#" onclick="doAjaxCall('pauseArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} paused"><i class="fa fa-pause"></i> Pause Artist</a>
 			%endif
 			%if artist['IncludeExtras']:
-				<a id="menu_link_removeextra" href="#" onclick="doAjaxCall('removeExtras?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="Extras removed for ${artist['ArtistName']}"><i class="fa fa-minus"></i> Remove Extras</a>
+				<a id="menu_link_removeextra" href="#" onclick="doAjaxCall('removeExtras?ArtistID=${artist['ArtistID']}&ArtistName=${artist['ArtistName']}',$(this),'submenu&table')" data-success="Extras removed for ${artist['ArtistName']}"><i class="fa fa-minus"></i> Remove Extras</a>
 				<a class="menu_link_edit" id="menu_link_modifyextra" href="#"><i class="fa fa-pencil"></i> Modify Extras</a>
 			%else:
 				<a id="menu_link_getextra" href="#"><i class="fa fa-plus"></i> Get Extras</a>
@@ -62,6 +62,7 @@
   			<option value="Wanted">Wanted</option>
   			<option value="WantedNew">Wanted (new only)</option>
   			<option value="Skipped">Skipped</option>
+			<option value="Ignored">Ignored</option>
   			<option value="Downloaded">Downloaded</option>
 		</select>
 		<input type="hidden" value="Go">
@@ -89,6 +90,8 @@
 					grade = 'X'
 				elif album['Status'] == 'Snatched':
 					grade = 'C'
+				elif album['Status'] == 'Ignored':
+					grade = 'I'
 				else:
 					grade = 'A'
 
@@ -123,12 +126,12 @@
 			%>
 			<tr class="grade${grade}">
 				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></td>
-				<td id="albumart"><img class="albumArt" id="${album['AlbumID']}" src="artwork/thumbs/album/${album['AlbumID']}" height="64" width="64"></td>
+				<td id="albumart"><img class="albumArtnostretch" id="${album['AlbumID']}" src="artwork/thumbs/album/${album['AlbumID']}" height="64" width="64"></td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
 				<td id="status">${album['Status']}
-				%if album['Status'] == 'Skipped':
+				%if album['Status'] == 'Skipped' or album['Status'] == 'Ignored':
 					[<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' added to Wanted list">want</a>]
 				%elif (album['Status'] == 'Wanted' or album['Status'] == 'Wanted Lossless'):
 					[<a href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' skipped">skip</a>]

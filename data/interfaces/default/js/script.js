@@ -316,6 +316,10 @@ function doAjaxCall(url,elem,reload,form) {
 	  			}
 	  			if ( reload == "tabs") 	refreshTab();
 	  			if ( reload == "page") 	location.reload();
+	  			if ( reload == "submenu&table") {
+	  				refreshSubmenu();
+	  				refreshTable();
+	  			}
 	  			if ( form ) {
 	  				// Change the option to 'choose...'
 	  				$(formID + " select").children('option[disabled=disabled]').attr('selected','selected');
