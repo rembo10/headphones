@@ -690,8 +690,7 @@
                                     </div>
                                 </div>
                             </fieldset>
-                            </td>
-                            <td>
+
                             <fieldset>
                                 <h3>Pushalot</h3>
                                 <div class="checkbox row">
@@ -708,6 +707,10 @@
                                     </div>
                                 </div>
                             </fieldset>
+
+                        </td>
+                            <td>
+
                             <fieldset>
                                 <h3>Synology NAS</h3>
                                 <div class="checkbox row">
@@ -792,7 +795,40 @@
                                     </div>
                                 </div>
                             </fieldset>
-                        </td>
+
+                            <fieldset>
+                                <h3>OS X</h3>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="osx_notify_enabled" id="osx_notify" value="1" ${config['osx_notify_enabled']} /><label>Enable OS X Notifications</label>
+                                </div>
+                                <div id="osx_notify_options">
+                                     <div class="row">
+                                        <small>Enter the path/application name to be registered with the Notification Center, default is /Applications/Headphones</small>
+                                        <input type="text" id="osx_notify_reg" name="osx_notify_app" value="${config['osx_notify_app']}" size="50"><label>Register Notify App</label>
+                                        <input type="button" value="Register" id="osxnotifyregister">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="osx_notify_onsnatch" value="1" ${config['osx_notify_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <h3>Boxcar2</h3>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="boxcar_enabled" id="boxcar" value="1" ${config['boxcar_enabled']} /><label>Enable Boxcar2 Notifications</label>
+                                </div>
+                                <div id="boxcar_options">
+                                    <div class="row">
+                                        <label>Access Token</label><input type="text" name="boxcar_token" value="${config['boxcar_token']}" size="35">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="boxcar_onsnatch" value="1" ${config['boxcar_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                  </div>
+                            </fieldset>
+
+                            </td>
                     </tr>
                 </table>
                 <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
@@ -1493,8 +1529,48 @@
                                 $("#twitteroptions").slideUp();
                         }
                 });
-                
-                 if ($("#songkick").is(":checked"))
+
+                if ($("#osx_notify").is(":checked"))
+                        {
+                                $("#osx_notify_options").show();
+                        }
+                else
+                        {
+                                $("#osx_notify_options").hide();
+                        }
+
+                $("#osx_notify").click(function(){
+                        if ($("#osx_notify").is(":checked"))
+                        {
+                                $("#osx_notify_options").slideDown();
+                        }
+                        else
+                        {
+                                $("#osx_notify_options").slideUp();
+                        }
+                });
+
+                if ($("#boxcar").is(":checked"))
+                        {
+                                $("#boxcar_options").show();
+                        }
+                else
+                        {
+                                $("#boxcar_options").hide();
+                        }
+
+                $("#boxcar").click(function(){
+                        if ($("#boxcar").is(":checked"))
+                        {
+                                $("#boxcar_options").slideDown();
+                        }
+                        else
+                        {
+                                $("#boxcar_options").slideUp();
+                        }
+                });
+
+                if ($("#songkick").is(":checked"))
                         {
                                 $("#songkickoptions").show();
                         }
@@ -1707,6 +1783,12 @@
                         function (data) { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>"); });
                     $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
                 });
+
+                $('#osxnotifyregister').click(function () {
+                    var osx_notify_app = $("#osx_notify_reg").val();
+                    $.get("/osxnotifyregister", {'app': osx_notify_app}, function (data) { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>"); });
+                    $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut()
+                })
         }
 
         $(document).ready(function() {

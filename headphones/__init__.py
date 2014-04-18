@@ -271,6 +271,12 @@ TWITTER_ONSNATCH = False
 TWITTER_USERNAME = None
 TWITTER_PASSWORD = None
 TWITTER_PREFIX = None
+OSX_NOTIFY_ENABLED = False
+OSX_NOTIFY_ONSNATCH = False
+OSX_NOTIFY_APP = None
+BOXCAR_ENABLED = False
+BOXCAR_ONSNATCH = False
+BOXCAR_TOKEN = None
 MIRRORLIST = ["musicbrainz.org","headphones","custom"]
 MIRROR = None
 CUSTOMHOST = None
@@ -350,8 +356,7 @@ def initialize():
                 INTERFACE, FOLDER_PERMISSIONS, FILE_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
                 MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, ENCODER_MULTICORE, ENCODER_MULTICORE_COUNT, DELETE_LOSSLESS_FILES, \
                 GROWL_ENABLED, GROWL_HOST, GROWL_PASSWORD, GROWL_ONSNATCH, PROWL_ENABLED, PROWL_PRIORITY, PROWL_KEYS, PROWL_ONSNATCH, PUSHOVER_ENABLED, PUSHOVER_PRIORITY, PUSHOVER_KEYS, PUSHOVER_ONSNATCH, PUSHOVER_APITOKEN, MIRRORLIST, \
-                TWITTER_ENABLED, TWITTER_ONSNATCH, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
-		BOXCAR_ENABLED, BOXCAR_USERNAME, BOXCAR_ONSNATCH, \
+                TWITTER_ENABLED, TWITTER_ONSNATCH, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, OSX_NOTIFY_ENABLED, OSX_NOTIFY_ONSNATCH, OSX_NOTIFY_APP, BOXCAR_ENABLED, BOXCAR_ONSNATCH, BOXCAR_TOKEN, \
                 PUSHBULLET_ENABLED, PUSHBULLET_APIKEY, PUSHBULLET_DEVICEID, PUSHBULLET_ONSNATCH, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, LMS_ENABLED, LMS_HOST, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
@@ -388,6 +393,8 @@ def initialize():
         CheckSection('Pushalot')
         CheckSection('Synoindex')
         CheckSection('Twitter')
+        CheckSection('OSX_Notify')
+        CheckSection('Boxcar')
         CheckSection('Songkick')
         CheckSection('Advanced')
 
@@ -615,7 +622,15 @@ def initialize():
         TWITTER_USERNAME = check_setting_str(CFG, 'Twitter', 'twitter_username', '')
         TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
         TWITTER_PREFIX = check_setting_str(CFG, 'Twitter', 'twitter_prefix', 'Headphones')
-        
+
+        OSX_NOTIFY_ENABLED = bool(check_setting_int(CFG, 'OSX_Notify', 'osx_notify_enabled', 0))
+        OSX_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'OSX_Notify', 'osx_notify_onsnatch', 0))
+        OSX_NOTIFY_APP = check_setting_str(CFG, 'OSX_Notify', 'osx_notify_app', '/Applications/Headphones')
+
+        BOXCAR_ENABLED = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_enabled', 0))
+        BOXCAR_ONSNATCH = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_onsnatch', 0))
+        BOXCAR_TOKEN = check_setting_str(CFG, 'Boxcar', 'boxcar_token', '')
+
         SONGKICK_ENABLED = bool(check_setting_int(CFG, 'Songkick', 'songkick_enabled', 1))
         SONGKICK_APIKEY = check_setting_str(CFG, 'Songkick', 'songkick_apikey', 'nd1We7dFW2RqxPw8')
         SONGKICK_LOCATION = check_setting_str(CFG, 'Songkick', 'songkick_location', '')
@@ -1035,6 +1050,16 @@ def config_write():
     new_config['Twitter']['twitter_username'] = TWITTER_USERNAME
     new_config['Twitter']['twitter_password'] = TWITTER_PASSWORD
     new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX
+
+    new_config['OSX_Notify'] = {}
+    new_config['OSX_Notify']['osx_notify_enabled'] = int(OSX_NOTIFY_ENABLED)
+    new_config['OSX_Notify']['osx_notify_onsnatch'] = int(OSX_NOTIFY_ONSNATCH)
+    new_config['OSX_Notify']['osx_notify_app'] = OSX_NOTIFY_APP
+
+    new_config['Boxcar'] = {}
+    new_config['Boxcar']['boxcar_enabled'] = int(BOXCAR_ENABLED)
+    new_config['Boxcar']['boxcar_onsnatch'] = int(BOXCAR_ONSNATCH)
+    new_config['Boxcar']['boxcar_token'] = BOXCAR_TOKEN
 
     new_config['Songkick'] = {}
     new_config['Songkick']['songkick_enabled'] = int(SONGKICK_ENABLED)
