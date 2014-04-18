@@ -1060,9 +1060,6 @@ class WebInterface(object):
                     "pushover_keys": headphones.PUSHOVER_KEYS,
                     "pushover_apitoken": headphones.PUSHOVER_APITOKEN,
                     "pushover_priority": headphones.PUSHOVER_PRIORITY,
-                    "boxcar_enabled": helpers.checked(headphones.BOXCAR_ENABLED),
-                    "boxcar_username": headphones.BOXCAR_USERNAME,
-		    "boxcar_onsnatch": helpers.checked(headphones.BOXCAR_ONSNATCH),
                     "pushbullet_enabled": checked(headphones.PUSHBULLET_ENABLED),
                     "pushbullet_onsnatch": checked(headphones.PUSHBULLET_ONSNATCH),
                     "pushbullet_apikey": headphones.PUSHBULLET_APIKEY,
@@ -1275,9 +1272,6 @@ class WebInterface(object):
         headphones.PUSHOVER_KEYS = pushover_keys
         headphones.PUSHOVER_PRIORITY = pushover_priority
         headphones.PUSHOVER_APITOKEN = pushover_apitoken
-        headphones.BOXCAR_ENABLED = boxcar_enabled
-	headphones.BOXCAR_USERNAME = boxcar_username
-	headphones.BOXCAR_ONSNATCH = boxcar_onsnatch
         headphones.PUSHBULLET_ENABLED = pushbullet_enabled
         headphones.PUSHBULLET_ONSNATCH = pushbullet_onsnatch
         headphones.PUSHBULLET_APIKEY = pushbullet_apikey
