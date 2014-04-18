@@ -854,6 +854,12 @@ class WebInterface(object):
         return json_albums
     getAlbumsByArtist_json.exposed=True
 
+    def getArtistStatus(self, ArtistID):
+        myDB = db.DBConnection()
+        artist = myDB.action('SELECT Status FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
+        return artist['Status']
+    getArtistStatus.exposed=True
+
     def clearhistory(self, type=None, date_added=None, title=None):
         myDB = db.DBConnection()
         if type:

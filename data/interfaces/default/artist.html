@@ -42,14 +42,8 @@
 		<div id="artistImg">
 			<img id="artistImage" class="albumArt" alt="" src="artwork/artist/${artist['ArtistID']}"/>
 		</div>
-		<h1>
-			%if artist['Status'] == 'Loading':
-				<i class="fa fa-refresh fa-spin"></i>
-			%endif
+		<h1 id="artistname">
 			<a href="http://musicbrainz.org/artist/${artist['ArtistID']}">${artist['ArtistName']}</a>
-			%if artist['Status'] == 'Loading':
-				<h3><i>(Album information for this artist is currently being loaded)</i></h3>
-			%endif
 		</h1>
 		<div id="artistBio"></div>
 	</div>
@@ -156,9 +150,6 @@
 
 <%def name="headIncludes()">
 	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
-	%if artist['Status'] == 'Loading':
-	<meta http-equiv="refresh" content="5">
-	%endif
 </%def>
 
 <%def name="javascriptIncludes()">
@@ -170,7 +161,6 @@
 		var elem = $("#artistBio");
 		getInfo(elem,id,'artist');
 	}
-
 
 	<%
     if headphones.SONGKICK_FILTER_ENABLED:
@@ -240,6 +230,41 @@
 		});
 	}
 
+	var loadingMessage = false;
+	var spinner_active = false;
+	var loadingtext_active = false;
+
+	function checkArtistStatus() {
+		$.ajax({
+		  url: "getArtistStatus?ArtistID=${artist['ArtistID']}",
+		  complete: function(result) {
+		    if (result.responseText == "Loading"){
+				refreshTable();
+				if (loadingMessage == false){
+					showMsg("Getting artist information",true);
+					loadingMessage = true;
+				}
+				if (spinner_active == false){
+					$('#artistname').prepend('<i class="fa fa-refresh fa-spin" id="artistnamespinner"></i>')
+					spinner_active = true;
+				}
+				if (loadingtext_active == false){
+					$('#artistname').append('<h3 id="loadingtext"><i>(Album information for this artist is currently being loaded)</i></h3>')
+					loadingtext_active = true;
+				}
+		    }
+		    else{
+		    	$('#artistnamespinner').remove()
+		    	$('#loadingtext').remove()
+		    	$('#ajaxMsg').remove()
+		    	spinner_active = false
+		    	loadingtext_active = false
+		    	loadingMessage = false
+		    }
+		  }
+		});
+	}
+
 	function initThisPage() {
 		$('#menu_link_getextra').click(function() {
 			$('#dialog').dialog();
@@ -248,10 +273,6 @@
 		$('#menu_link_modifyextra').click(function() {
 			$('#dialog').dialog();
 		});
-
-		%if artist['Status'] == 'Loading':
-			showMsg("Getting artist information",true);
-		%endif
 		$('#album_table').dataTable({
 			"bDestroy": true,
 			"aoColumns": [
@@ -291,8 +312,12 @@
 		initThisPage();
 		getArtistBio();
 		if( ${songkick_enabled} ){
-      getArtistsCalendar();
-    }
+      		getArtistsCalendar();
+    	}
+    	checkArtistStatus();
+    	setInterval(function(){ 
+    		checkArtistStatus();
+		}, 3000);
 	});
 
 	</script>
