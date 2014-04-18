@@ -258,10 +258,6 @@ PUSHOVER_PRIORITY = 1
 PUSHOVER_KEYS = None
 PUSHOVER_ONSNATCH = True
 PUSHOVER_APITOKEN = None
-BOXCAR_ENABLED = False
-BOXCAR_USERNAME = None
-BOXCAR_ONSNATCH = False
-
 PUSHBULLET_ENABLED = True
 PUSHBULLET_APIKEY = None
 PUSHBULLET_DEVICEID = None
@@ -607,10 +603,6 @@ def initialize():
         PUSHOVER_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_onsnatch', 0))
         PUSHOVER_PRIORITY = check_setting_int(CFG, 'Pushover', 'pushover_priority', 0)
         PUSHOVER_APITOKEN = check_setting_str(CFG, 'Pushover', 'pushover_apitoken', '')
-
-        BOXCAR_ENABLED = bool(check_setting_int(CFG, 'BOXCAR', 'boxcar_enabled', 0))
-        BOXCAR_USERNAME = check_setting_str(CFG, 'BOXCAR', 'boxcar_username', '')
-	BOXCAR_ONSNATCH = bool(check_setting_int(CFG, 'BOXCAR', 'boxcar_onsnatch', 0))
 
         PUSHBULLET_ENABLED = bool(check_setting_int(CFG, 'PushBullet', 'pushbullet_enabled', 0))
         PUSHBULLET_APIKEY = check_setting_str(CFG, 'PushBullet', 'pushbullet_apikey', '')
@@ -1032,11 +1024,6 @@ def config_write():
     new_config['Pushover']['pushover_onsnatch'] = int(PUSHOVER_ONSNATCH)
     new_config['Pushover']['pushover_priority'] = int(PUSHOVER_PRIORITY)
     new_config['Pushover']['pushover_apitoken'] = PUSHOVER_APITOKEN
-
-    new_config['BOXCAR'] = {}
-    new_config['BOXCAR']['boxcar_enabled'] = int(BOXCAR_ENABLED)
-    new_config['BOXCAR']['boxcar_username'] = BOXCAR_USERNAME
-    new_config['BOXCAR']['boxcar_onsnatch'] = int(BOXCAR_ONSNATCH)
 
     new_config['PushBullet'] = {}
     new_config['PushBullet']['pushbullet_enabled'] = int(PUSHBULLET_ENABLED)

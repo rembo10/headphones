@@ -740,22 +740,6 @@
                                 </div>
                             </fieldset>
 
-                     <fieldset>
-                        <h3>Boxcar.IO</h3>
-                        <div class="row checkbox">
-                           <input type="checkbox" name="boxcar_enabled" id="boxcar" value="1" ${config['boxcar_enabled']} /><label>Enable Boxcar.IO</label>
-                        </div>
-                        <div id="boxcaroptions">
-                            <div class="row">
-                                    <div class="row checkbox">
-                                            <input type="checkbox" name="boxcar_onsnatch" value="1" ${config['boxcar_onsnatch']} /><label>Notify on snatch?</label>
-                                    </div>
-                                    <label>Boxcar Username (email)</label>
-                                    <input type="text" name="boxcar_username" value="${config['boxcar_username']}" size="30">
-                            </div>
-                        </div>
-                     </fieldset>
-
                             <fieldset>
                                 <h3>Pushbullet</h3>
                                 <div class="row checkbox">
@@ -1479,25 +1463,6 @@
                                 $("#pushbulletoptions").hide();
                         }
 
-                if ($("#boxcar").is(":checked"))
-                        {
-                                $("#boxcaroptions").show();
-                        }
-                else
-                        {
-                                $("#boxcaroptions").hide();
-                        }
-
-                $("#boxcar").click(function(){
-                        if ($("#boxcar").is(":checked"))
-                        {
-                                $("#boxcaroptions").slideDown();
-                        }
-                        else
-                        {
-                                $("#boxcaroptions").slideUp();
-                        }
-                });
 
                 $("#pushbullet").click(function(){
                         if ($("#pushbullet").is(":checked"))
