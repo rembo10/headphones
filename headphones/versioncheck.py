@@ -136,6 +136,10 @@ def checkGithub():
         logger.info('You are running an unknown version of Headphones. Run the updater to identify your version')
         return headphones.LATEST_VERSION
 
+    if headphones.LATEST_VERSION == headphones.CURRENT_VERSION:
+        logger.info('Headphones is up to date')
+        return headphones.LATEST_VERSION
+
     logger.info('Comparing currently installed version with latest GitHub version')
     url = 'https://api.github.com/repos/%s/headphones/compare/%s...%s' % (headphones.GIT_USER, headphones.LATEST_VERSION, headphones.CURRENT_VERSION)
     commits = request.request_json(url, timeout=20, whitelist_status_code=404, validator=lambda x: type(x) == dict)
