@@ -119,39 +119,6 @@ def sendNZB(nzb):
 
     if sabText == "ok":
         logger.info(u"NZB sent to SAB successfully")
-        if headphones.GROWL_ENABLED and headphones.GROWL_ONSNATCH:
-            logger.info(u"Sending Growl notification")
-            growl = notifiers.GROWL()
-            growl.notify(nzb.name,"Download started")
-        if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
-            logger.info(u"Sending Prowl notification")
-            prowl = notifiers.PROWL()
-            prowl.notify(nzb.name,"Download started")
-        if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
-            logger.info(u"Sending Pushover notification")
-            prowl = notifiers.PUSHOVER()
-            prowl.notify(nzb.name,"Download started")
-	if headphones.BOXCAR_ENABLED and headphones.BOXCAR_ONSNATCH:
-	    logger.info(u"Sending Boxcar notification")
-	    boxcar = notifiers.BOXCAR()
-	    boxcar.notify(snatched_nzb=nzb.name)
-        if headphones.PUSHBULLET_ENABLED and headphones.PUSHBULLET_ONSNATCH:
-            logger.info(u"Sending PushBullet notification")
-            pushbullet = notifiers.PUSHBULLET()
-            pushbullet.notify(nzb.name + " has been snatched!", "Download started")
-        if headphones.TWITTER_ENABLED and headphones.TWITTER_ONSNATCH:
-            logger.info(u"Sending Twitter notification")
-            twitter = notifiers.TwitterNotifier()
-            twitter.notify_snatch(nzb.name)
-        if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
-            logger.debug(u"Sending NMA notification")
-            nma = notifiers.NMA()
-            nma.notify(snatched_nzb=nzb.name)
-        if headphones.PUSHALOT_ENABLED and headphones.PUSHALOT_ONSNATCH:
-            logger.info(u"Sending Pushalot notification")
-            pushalot = notifiers.PUSHALOT()
-            pushalot.notify(nzb.name,"Download started")
-
         return True
     elif sabText == "Missing authentication":
         logger.info(u"Incorrect username/password sent to SAB, NZB not sent")
