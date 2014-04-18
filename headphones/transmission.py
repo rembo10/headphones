@@ -49,31 +49,6 @@ def addTorrent(link):
             retid = False
 
         logger.info(u"Torrent sent to Transmission successfully")
-        if headphones.GROWL_ENABLED and headphones.GROWL_ONSNATCH:
-            logger.info(u"Sending Growl notification")
-            growl = notifiers.GROWL()
-            growl.notify(name,"Download started")
-        if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
-            logger.info(u"Sending Prowl notification")
-            prowl = notifiers.PROWL()
-            prowl.notify(name,"Download started")
-        if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
-            logger.info(u"Sending Pushover notification")
-            pushover = notifiers.PUSHOVER()
-            pushover.notify(name,"Download started")
-        if headphones.TWITTER_ENABLED and headphones.TWITTER_ONSNATCH:
-            logger.info(u"Sending Twitter notification")
-            twitter = notifiers.TwitterNotifier()
-            twitter.notify_snatch(nzb.name)
-        if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
-            logger.info(u"Sending NMA notification")
-            nma = notifiers.NMA()
-            nma.notify(snatched_nzb=name)
-        if headphones.PUSHALOT_ENABLED and headphones.PUSHALOT_ONSNATCH:
-            logger.info(u"Sending Pushalot notification")
-            pushalot = notifiers.PUSHALOT()
-            pushalot.notify(name,"Download started")
-
         return retid
 
     else:

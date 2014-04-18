@@ -163,7 +163,7 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     getExtras.exposed = True
 
-    def removeExtras(self, ArtistID):
+    def removeExtras(self, ArtistID, ArtistName):
         myDB = db.DBConnection()
         controlValueDict = {'ArtistID': ArtistID}
         newValueDict = {'IncludeExtras': 0}
@@ -174,7 +174,8 @@ class WebInterface(object):
             myDB.action('DELETE from albums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
             myDB.action('DELETE from allalbums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
             myDB.action('DELETE from alltracks WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
-            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', album['AlbumID'])
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [album['AlbumID']])
+        importer.finalize_update(ArtistID, ArtistName)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     removeExtras.exposed = True
 
@@ -268,6 +269,7 @@ class WebInterface(object):
                 searcher.searchforalbum(mbid, new=True)
             if action == 'WantedLossless':
                 searcher.searchforalbum(mbid, lossless=True)
+            myDB.action('UPDATE artists SET TotalTracks=(SELECT COUNT(*) FROM tracks, artists WHERE tracks.ArtistName = artists.ArtistName AND AlbumTitle IN (SELECT AlbumTitle FROM albums WHERE Status != "Ignored")) WHERE ArtistID=(SELECT ArtistID FROM albums WHERE AlbumID=?)', [mbid])
         if ArtistID:
             raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
         else:
@@ -629,8 +631,8 @@ class WebInterface(object):
                 for rgid in rgids:
                     myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
 
-                myDB.action('DELETE from allalbums WHERE AlbumID=?', [AlbumID])
-                myDB.action('DELETE from alltracks WHERE AlbumID=?', [AlbumID])
+                myDB.action('DELETE from allalbums WHERE ArtistID=?', [ArtistID])
+                myDB.action('DELETE from alltracks WHERE ArtistID=?', [ArtistID])
                 myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
             elif action == 'pause':
                 controlValueDict = {'ArtistID': ArtistID}
@@ -724,6 +726,11 @@ class WebInterface(object):
         return serve_template(templatename="logs.html", title="Log", lineList=headphones.LOG_LIST)
     logs.exposed = True
 
+    def clearLogs(self):
+        headphones.LOG_LIST = []
+        logger.info("Web logs cleared")
+        raise cherrypy.HTTPRedirect("logs")
+    clearLogs.exposed = True
 
     def getLog(self,iDisplayStart=0,iDisplayLength=100,iSortCol_0=0,sSortDir_0="desc",sSearch="",**kwargs):
 
@@ -1059,6 +1066,12 @@ class WebInterface(object):
                     "pushbullet_deviceid": headphones.PUSHBULLET_DEVICEID,
                     "twitter_enabled": checked(headphones.TWITTER_ENABLED),
                     "twitter_onsnatch": checked(headphones.TWITTER_ONSNATCH),
+                    "osx_notify_enabled": checked(headphones.OSX_NOTIFY_ENABLED),
+                    "osx_notify_onsnatch": checked(headphones.OSX_NOTIFY_ONSNATCH),
+                    "osx_notify_app": headphones.OSX_NOTIFY_APP,
+                    "boxcar_enabled": checked(headphones.BOXCAR_ENABLED),
+                    "boxcar_onsnatch": checked(headphones.BOXCAR_ONSNATCH),
+                    "boxcar_token": headphones.BOXCAR_TOKEN,
                     "mirror_list": headphones.MIRRORLIST,
                     "mirror": headphones.MIRROR,
                     "customhost": headphones.CUSTOMHOST,
@@ -1105,10 +1118,11 @@ class WebInterface(object):
         bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
         delete_lossless_files=0, growl_enabled=0, growl_onsnatch=0, growl_host=None, growl_password=None, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, pushalot_enabled=False, pushalot_apikey=None, pushalot_onsnatch=0, synoindex_enabled=False, lms_enabled=0, lms_host=None,
-        pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, pushover_apitoken=None, pushbullet_enabled=0, pushbullet_onsnatch=0, pushbullet_apikey=None, pushbullet_deviceid=None, twitter_enabled=0, twitter_onsnatch=0, mirror=None, customhost=None, customport=None,
-        customsleep=None, hpuser=None, hppass=None, preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, 
-        enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None, plex_enabled=0, plex_server_host=None, plex_client_host=None, plex_username=None, 
-        plex_password=None, plex_update=0, plex_notify=0, songkick_enabled=0, songkick_apikey=None, songkick_location=None, songkick_filter_enabled=0, encoder_multicore=False, encoder_multicore_count=0, **kwargs):
+        pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, pushover_apitoken=None, pushbullet_enabled=0, pushbullet_onsnatch=0, pushbullet_apikey=None, pushbullet_deviceid=None, twitter_enabled=0, twitter_onsnatch=0,
+        osx_notify_enabled=0, osx_notify_onsnatch=0, osx_notify_app=None, boxcar_enabled=0, boxcar_onsnatch=0, boxcar_token=None, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None,
+        preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None,
+        plex_enabled=0, plex_server_host=None, plex_client_host=None, plex_username=None, plex_password=None, plex_update=0, plex_notify=0,
+        songkick_enabled=0, songkick_apikey=None, songkick_location=None, songkick_filter_enabled=0, encoder_multicore=False, encoder_multicore_count=0, **kwargs):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -1268,6 +1282,15 @@ class WebInterface(object):
         headphones.SONGKICK_FILTER_ENABLED = songkick_filter_enabled
         headphones.TWITTER_ENABLED = twitter_enabled
         headphones.TWITTER_ONSNATCH = twitter_onsnatch
+
+        headphones.OSX_NOTIFY_ENABLED = osx_notify_enabled
+        headphones.OSX_NOTIFY_ONSNATCH = osx_notify_onsnatch
+        headphones.OSX_NOTIFY_APP = osx_notify_app
+
+        headphones.BOXCAR_ENABLED = boxcar_enabled
+        headphones.BOXCAR_ONSNATCH = boxcar_onsnatch
+        headphones.BOXCAR_TOKEN = boxcar_token
+
         headphones.MIRROR = mirror
         headphones.CUSTOMHOST = customhost
         headphones.CUSTOMPORT = customport
@@ -1434,6 +1457,19 @@ class WebInterface(object):
         else:
             return "Error sending tweet"
     testTwitter.exposed = True
+
+    def osxnotifyregister(self, app):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        from lib.osxnotify import registerapp as osxnotify
+        result, msg = osxnotify.registerapp(app)
+        if result:
+            osx_notify = notifiers.OSX_NOTIFY()
+            osx_notify.notify('Registered', result, 'Success :-)')
+            logger.info('Registered %s, to re-register a different app, delete this app first' % result)
+        else:
+            logger.warn(msg)
+        return msg
+    osxnotifyregister.exposed = True
 
 class Artwork(object):
     def index(self):

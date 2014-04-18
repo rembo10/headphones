@@ -163,6 +163,14 @@ img.albumArt {
   max-height: 300px;
   position: relative;
 }
+img.albumArt-nostretch {
+  float: left;
+  min-height: 64px;
+  min-width: 64px;
+  max-width: 250px;
+  max-height: 300px;
+  position: relative;
+}
 .title {
   margin-bottom: 20px;
   margin-top: 10px;

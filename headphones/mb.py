@@ -13,8 +13,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import with_statement
-
 import time
 import threading
 
@@ -200,7 +198,7 @@ def getArtist(artistid, extrasonly=False):
         
         if not extrasonly:
             for rg in artist['release-group-list']:
-                if rg['type'] != 'Album': #only add releases without a secondary type
+                if "secondary-type-list" in rg.keys(): #only add releases without a secondary type
                     continue
                 releasegroups.append({
                             'title':      unicode(rg['title']),
@@ -233,18 +231,20 @@ def getArtist(artistid, extrasonly=False):
                 i += 1
 
             for include in includes:
-                
-                artist = None
-                
+
+                mb_extras_list = []
+
                 try:
-                    artist = musicbrainzngs.get_artist_by_id(artistid,includes=["releases","release-groups"],release_status=['official'],release_type=include)['artist']
+                    limit = 200
+                    newRgs = None
+                    while newRgs == None or len(newRgs) >= limit:
+                        newRgs = musicbrainzngs.browse_release_groups(artistid,release_type=include,offset=len(mb_extras_list),limit=limit)['release-group-list'] 
+                        mb_extras_list += newRgs
                 except WebServiceError, e:
                     logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e)))
                     time.sleep(5)
-                        
-                if not artist:
-                    continue
-                for rg in artist['release-group-list']:
+
+                for rg in mb_extras_list:
                     releasegroups.append({
                             'title':        unicode(rg['title']),
                             'id':           unicode(rg['id']),

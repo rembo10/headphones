@@ -210,6 +210,9 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                 myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [items['AlbumID']])
                 logger.info("[%s] Removing all references to release group %s to reflect MusicBrainz" % (artist['artist_name'], items['AlbumID']))
                 force_repackage = 1
+    elif extrasonly:
+        # Not really sure what we're doing here but don't want to log the message below if we're fetching extras only
+        pass
     else:
         logger.info("[%s] There was either an error pulling data from MusicBrainz or there might not be any releases for this category" % artist['artist_name'])
 
@@ -469,10 +472,34 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             if skip_log == 0:
                 logger.info(u"[%s] No new releases, so no changes made to %s" % (artist['artist_name'], rg['title']))
 
+    finalize_update(artistid, artist['artist_name'], errors)
+
+    logger.info(u"Seeing if we need album art for: %s" % artist['artist_name'])
+    cache.getThumb(ArtistID=artistid)
+
+    if errors:
+        logger.info("[%s] Finished updating artist: %s but with errors, so not marking it as updated in the database" % (artist['artist_name'], artist['artist_name']))
+    else:
+        myDB.action('DELETE FROM newartists WHERE ArtistName = ?', [artist['artist_name']])
+        logger.info(u"Updating complete for: %s" % artist['artist_name'])
+
+    # Start searching for newly added albums
+    if album_searches:
+        from headphones import searcher
+        logger.info("Start searching for %d albums.", len(album_searches))
+
+        for album_search in album_searches:
+            searcher.searchforalbum(albumid=album_search)
+
+def finalize_update(artistid, artistname, errors=False):
+    # Moving this little bit to it's own function so we can update have tracks & latest album when deleting extras
+
+    myDB = db.DBConnection()
+
     latestalbum = myDB.action('SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [artistid]).fetchone()
     totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid]))
     #havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['artist_name']]))
-    havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"', [artist['artist_name']]))
+    havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"', [artistname]))
 
     controlValueDict = {"ArtistID":     artistid}
 
@@ -492,23 +519,6 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
         newValueDict['LastUpdated'] = helpers.now()
 
     myDB.upsert("artists", newValueDict, controlValueDict)
-
-    logger.info(u"Seeing if we need album art for: %s" % artist['artist_name'])
-    cache.getThumb(ArtistID=artistid)
-
-    if errors:
-        logger.info("[%s] Finished updating artist: %s but with errors, so not marking it as updated in the database" % (artist['artist_name'], artist['artist_name']))
-    else:
-        myDB.action('DELETE FROM newartists WHERE ArtistName = ?', [artist['artist_name']])
-        logger.info(u"Updating complete for: %s" % artist['artist_name'])
-
-    # Start searching for newly added albums
-    if album_searches:
-        from headphones import searcher
-        logger.info("Start searching for %d albums.", len(album_searches))
-
-        for album_search in album_searches:
-            searcher.searchforalbum(albumid=album_search)
 
 def addReleaseById(rid):
 
