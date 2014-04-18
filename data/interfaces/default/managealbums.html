@@ -25,6 +25,7 @@
   			<option value="WantedNew">Wanted (new only)</option>
             <option value="WantedLossless">Wanted (lossless)</option>
   			<option value="Skipped">Skipped</option>
+			<option value="Ignored">Ignored</option>
   			<option value="Downloaded">Downloaded</option>
 		</select>
 		<input type="hidden" value="Go">
@@ -50,6 +51,8 @@
 					grade = 'Z'
 				elif album['Status'] == 'Wanted':
 					grade = 'X'
+				elif album['Status'] == 'Ignored':
+					grade = 'I'
 				elif album['Status'] == 'Snatched':
 					grade = 'C'
 				else:
