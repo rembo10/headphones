@@ -273,7 +273,7 @@ class WebInterface(object):
                 ArtistIDT = ArtistID
             else:
                 ArtistIDT = myDB.action('SELECT ArtistID FROM albums WHERE AlbumID=?', [mbid]).fetchone()[0]
-            myDB.action('UPDATE artists SET TotalTracks=(SELECT COUNT(*) FROM tracks WHERE ArtistID = ? AND AlbumTitle IN (SELECT AlbumTitle FROM albums WHERE Status != "Ignored")) WHERE ArtistID=(SELECT ArtistID FROM albums WHERE AlbumID=?)', [ArtistIDT, mbid])
+            myDB.action('UPDATE artists SET TotalTracks=(SELECT COUNT(*) FROM tracks WHERE ArtistID = ? AND AlbumTitle IN (SELECT AlbumTitle FROM albums WHERE Status != "Ignored")) WHERE ArtistID = ?', [ArtistIDT, ArtistIDT])
         if ArtistID:
             raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
         else:
