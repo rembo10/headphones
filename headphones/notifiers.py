@@ -192,9 +192,9 @@ class XBMC:
         url = host + '/jsonrpc'
 
         if self.password:
-            response = request.request_json(url, method="POST", data=simplejson.dumps(data), headers=headers, auth=(self.username, self.password))
+            response = request.request_json(url, method="post", data=simplejson.dumps(data), headers=headers, auth=(self.username, self.password))
         else:
-            response = request.request_json(url, method="POST", data=simplejson.dumps(data), headers=headers)
+            response = request.request_json(url, method="post", data=simplejson.dumps(data), headers=headers)
 
         if response:
             return response[0]['result']
