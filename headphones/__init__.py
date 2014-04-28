@@ -1109,6 +1109,7 @@ def start():
             SCHED.add_interval_job(versioncheck.checkGithub, minutes=CHECK_GITHUB_INTERVAL)
 
         if DOWNLOAD_SCAN_INTERVAL > 0:
+            logger.info("download_scan_interval is non-zero - FORTESTING")
             SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
 
         SCHED.start()

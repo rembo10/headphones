@@ -32,15 +32,17 @@ postprocessor_lock = threading.Lock()
 
 def checkFolder():
     
+    logger.info("Checking download folder - FORTESTING")
     with postprocessor_lock:
 
         myDB = db.DBConnection()
         snatched = myDB.select('SELECT * from snatched WHERE Status="Snatched"')
-
+        logger.info("Checking snatched albums - FORTESTING")
         for album in snatched:
+            logger.info("Got an album to check for - FORTESTING")
         
             if album['FolderName']:
-                
+                logger.info("Album has a foldername: %s - FORTESTING" % album['FolderName'])
                 if album['Kind'] == 'nzb':
                     # We're now checking sab config options after sending to determine renaming - but we'll keep the
                     # iterations in just in case we can't read the config for some reason
@@ -56,7 +58,7 @@ def checkFolder():
                         nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING, 'replace')
     
                         if os.path.exists(nzb_album_path):
-                            logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
+                            logger.info('Found %s in NZB download folder. Verifying....' % album['FolderName'])
                             verify(album['AlbumID'], nzb_album_path, 'nzb')
                             
                 if album['Kind'] == 'torrent':
@@ -64,8 +66,11 @@ def checkFolder():
                     torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
     
                     if os.path.exists(torrent_album_path):
-                        logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
+                        logger.info('Found %s in torrent download folder. Verifying....' % album['FolderName'])
                         verify(album['AlbumID'], torrent_album_path, 'torrent')
+
+            else:
+                logger.info("No folder name found for " + album['Title'])
 
 def verify(albumid, albumpath, Kind=None, forced=False):
 
