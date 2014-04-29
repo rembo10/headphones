@@ -50,7 +50,7 @@ def checkFolder():
                 logger.info("Checking if %s exists" % album_path)
                 if os.path.exists(album_path):
                     logger.info('Found "' + album['FolderName'] + '" in ' + album['Kind'] + ' download folder. Verifying....')
-                    verify(album['AlbumID'], torrent_album_path, 'torrent')
+                    verify(album['AlbumID'], album_path, album['Kind'])
 
             else:
                 logger.info("No folder name found for " + album['Title'])
