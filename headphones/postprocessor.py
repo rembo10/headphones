@@ -52,9 +52,9 @@ def checkFolder():
                                                 helpers.sab_replace_spaces(album['FolderName']),
                                                 helpers.sab_replace_spaces(sab_replace_dots(album['FolderName']))
                                         ]
-                    
+                    logger.info("Made all the nzb possibilities - FORTESTING")
                     for nzb_folder_name in nzb_album_possibilities:
-                        
+                        logger.info("Trying to create bytestring path - FORTESTING")
                         nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING, 'replace')
                         logger.info("Checking if %s exists" % nzb_album_path)
                         if os.path.exists(nzb_album_path):
