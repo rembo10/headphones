@@ -1232,6 +1232,8 @@ def searchTorrent(album, new=False, losslessOnly=False):
                                     continue
                         else:
                             url = item.findAll("a")[3]['href']
+                        if url.lower().startswith("//"):
+                            url = "http:" + url
                         formatted_size = re.search('Size (.*),', unicode(item)).group(1).replace(u'\xa0', ' ')
                         size = helpers.piratesize(formatted_size)
                         if size < maxsize and minimumseeders < seeds and url != None:
