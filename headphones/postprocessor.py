@@ -31,43 +31,26 @@ from headphones import logger, helpers, request, mb, music_encoder
 postprocessor_lock = threading.Lock()
 
 def checkFolder():
-    
-    logger.info("Checking download folder - FORTESTING")
+
     with postprocessor_lock:
 
         myDB = db.DBConnection()
         snatched = myDB.select('SELECT * from snatched WHERE Status="Snatched"')
-        logger.info("Checking snatched albums - FORTESTING")
+
         for album in snatched:
-            logger.info("Got an album to check for - FORTESTING")
         
             if album['FolderName']:
-                logger.info("Album has a foldername: %s - FORTESTING" % album['FolderName'])
+                
                 if album['Kind'] == 'nzb':
-                    # We're now checking sab config options after sending to determine renaming - but we'll keep the
-                    # iterations in just in case we can't read the config for some reason
+                    download_dir = headphones.DOWNLOAD_DIR
+                else:
+                    download_dir = headphones.DOWNLOAD_TORRENT_DIR
 
-                    nzb_album_possibilities = [ album['FolderName'],
-                                                helpers.sab_replace_dots(album['FolderName']),
-                                                helpers.sab_replace_spaces(album['FolderName']),
-                                                helpers.sab_replace_spaces(sab_replace_dots(album['FolderName']))
-                                        ]
-                    logger.info("Made all the nzb possibilities - FORTESTING")
-                    for nzb_folder_name in nzb_album_possibilities:
-                        logger.info("Trying to create bytestring path - FORTESTING")
-                        nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING, 'replace')
-                        logger.info("Checking if %s exists" % nzb_album_path)
-                        if os.path.exists(nzb_album_path):
-                            logger.info('Found %s in NZB download folder. Verifying....' % album['FolderName'])
-                            verify(album['AlbumID'], nzb_album_path, 'nzb')
-                            
-                if album['Kind'] == 'torrent':
-
-                    torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
-                    logger.info("Checking if %s exists" % torrent_album_path)
-                    if os.path.exists(torrent_album_path):
-                        logger.info('Found %s in torrent download folder. Verifying....' % album['FolderName'])
-                        verify(album['AlbumID'], torrent_album_path, 'torrent')
+                album_path = os.path.join(download_dir, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
+                logger.info("Checking if %s exists" % album_path)
+                if os.path.exists(album_path):
+                    logger.info('Found "' + album['FolderName'] + '" in ' + album['Kind'] + ' download folder. Verifying....')
+                    verify(album['AlbumID'], torrent_album_path, 'torrent')
 
             else:
                 logger.info("No folder name found for " + album['Title'])
