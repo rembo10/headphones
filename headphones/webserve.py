@@ -1086,7 +1086,7 @@ class WebInterface(object):
                     "cache_sizemb": headphones.CACHE_SIZEMB,
                     "file_permissions": headphones.FILE_PERMISSIONS,
                     "folder_permissions": headphones.FOLDER_PERMISSIONS,
-					"mpc_enabled": checked(headphones.MPC_ENABLED)
+                    "mpc_enabled": checked(headphones.MPC_ENABLED)
                 }
 
         # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8
