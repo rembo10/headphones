@@ -502,6 +502,10 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         boxcar = notifiers.BOXCAR()
         boxcar.notify('Headphones processed: ' + pushmessage, "Download and Postprocessing completed", release['AlbumID'])
 
+    if headphones.MPC_ENABLED:
+        mpc = notifiers.MPC()
+        mpc.notify()
+
 def embedAlbumArt(artwork, downloaded_track_list):
     logger.info('Embedding album art')
     

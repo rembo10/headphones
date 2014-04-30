@@ -169,6 +169,17 @@ class PROWL:
 
         self.notify('ZOMG Lazors Pewpewpew!', 'Test Message')
 
+class MPC:
+
+    def __init__(self):
+
+        pass
+
+    def notify( self ):
+
+        subprocess.call( ["mpc", "update"] )
+
+
 class XBMC:
 
     def __init__(self):
