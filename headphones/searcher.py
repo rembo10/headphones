@@ -31,7 +31,7 @@ import subprocess
 import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
-from headphones import transmission, notifiers
+from headphones import utorrent, transmission, notifiers
 
 import lib.bencode as bencode
 

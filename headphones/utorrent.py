@@ -37,7 +37,7 @@ def addTorrent(link, title):
     password = headphones.UTORRENT_PASSWORD
     label = headphones.UTORRENT_LABEL
     token = ''
-    logger.info("2")
+
     if not host.startswith('http'):
         host = 'http://' + host
 
@@ -52,19 +52,16 @@ def addTorrent(link, title):
     # Retrieve session id
     auth = (username, password) if username and password else None
     token_request = request.request_response(host + 'token.html', auth=auth)
-    logger.info("3")
+
     token = re.findall('<div.*?>(.*?)</', token_request.content)[0]
     guid = token_request.cookies['GUID']
-    logger.info("4")
+
     cookies = dict(GUID = guid)
-    logger.info("5")
 
     if link.startswith("magnet") or link.startswith("http") or link.endswith(".torrent"):
-        logger.info("Adding link")
         params = {'action':'add-url', 's':link, 'token':token}
         response = request.request_json(host, params=params, auth=auth, cookies=cookies)
     else:    
-        logger.info("adding file")
         params = {'action':'add-file', 'token':token}
         files = {'torrent_file':{'music.torrent', link}}
         response = request.request_json(host, method="post", params=params, files=files, auth=auth, cookies=cookies)
@@ -72,18 +69,20 @@ def addTorrent(link, title):
         logger.error("Error sending torrent to uTorrent")
         return
 
-    # NOW WE WILL CHECK UTORRENT FOR THE FOLDER NAME & SET THE LABEL
-    params = {'list':'1', 'token':token}
-
-    response = request.request_json(host, params=params, auth=auth, cookies=cookies)
-    if not response:
-        logger.error("Error getting torrent information from uTorrent")
-        return
-
     # Not really sure how to ID these? Title seems safest)
     # Also, not sure when the torrent will pop up in the list, so we'll make sure it exists and is 1% downloaded
     tries = 0
     while tries < 10:
+
+        # NOW WE WILL CHECK UTORRENT FOR THE FOLDER NAME & SET THE LABEL
+        params = {'list':'1', 'token':token}
+
+        response = request.request_json(host, params=params, auth=auth, cookies=cookies)
+        if not response:
+            logger.error("Error getting torrent information from uTorrent")
+            time.sleep(5)
+            continue
+
         for torrent in response['torrents']:
             if torrent[2] == title and torrent[4] > 1:
                 folder = os.path.basename(torrent[26])
