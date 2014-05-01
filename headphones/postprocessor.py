@@ -352,7 +352,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
            headphones.MOVE_FILES:
 
             if not os.access(downloaded_track, os.W_OK):
-                logger.error("Track file is not writeable, which is equired for some post processing steps: %s", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+                logger.error("Track file is not writeable, which is required for some post processing steps: %s", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
                 return
 
     #start encoding
