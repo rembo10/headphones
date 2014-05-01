@@ -84,7 +84,7 @@ def addTorrent(link, title):
             if torrent[2] == title and torrent[4] > 1:
                 folder = os.path.basename(torrent[26])
                 tor_hash = torrent[0]
-                params = {'action':'setprops', 'hash':tor_hash,'s':'label', 'v':label, token':token}
+                params = {'action':'setprops', 'hash':tor_hash,'s':'label', 'v':label, 'token':token}
                 response = request.request_json(host, params=params, auth=auth, cookies=cookies)
                 break
             else:
