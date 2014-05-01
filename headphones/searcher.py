@@ -705,7 +705,7 @@ def send_to_downloader(data, bestqual, album):
             else:
                 file_or_url = bestqual[2]
 
-            folder_name = utorrent.addTorrent(file_or_url,bestqual[0])
+            folder_name = utorrent.addTorrent(file_or_url)
 
             if folder_name:
                 logger.info('Torrent folder name: %s' % folder_name)

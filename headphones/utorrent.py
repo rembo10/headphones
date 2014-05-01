@@ -30,7 +30,7 @@ from headphones import logger, notifiers, request
 #       Store torrent id so we can check up on it
 
 
-def addTorrent(link, title):
+def addTorrent(link):
 
     host = headphones.UTORRENT_HOST
     username = headphones.UTORRENT_USERNAME
@@ -72,27 +72,32 @@ def addTorrent(link, title):
     # Not really sure how to ID these? Title seems safest)
     # Also, not sure when the torrent will pop up in the list, so we'll make sure it exists and is 1% downloaded
     tries = 0
+    folder = None
     while tries < 10:
 
         # NOW WE WILL CHECK UTORRENT FOR THE FOLDER NAME & SET THE LABEL
         params = {'list':'1', 'token':token}
 
         response = request.request_json(host, params=params, auth=auth, cookies=cookies)
+
         if not response:
             logger.error("Error getting torrent information from uTorrent")
-            time.sleep(5)
-            continue
+            return
 
         for torrent in response['torrents']:
-            if torrent[2] == title and torrent[4] > 1:
+
+            if torrent[19] == link and torrent[4] > 1:
                 folder = os.path.basename(torrent[26])
                 tor_hash = torrent[0]
                 params = {'action':'setprops', 'hash':tor_hash,'s':'label', 'v':label, 'token':token}
                 response = request.request_json(host, params=params, auth=auth, cookies=cookies)
                 break
-            else:
-                time.sleep(5)
-                tries += 1
+
+        if folder:
+            break
+        else:
+            time.sleep(5)
+            tries += 1
 
     return folder
 
