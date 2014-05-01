@@ -696,6 +696,35 @@ def send_to_downloader(data, bestqual, album):
                 except Exception, e:
                     logger.exception("Unhandled exception")
 
+        else:
+            logger.info("Sending torrent to uTorrent")
+
+            # rutracker needs cookies to be set, pass the .torrent file instead of url
+            if bestqual[3] == 'rutracker.org':
+                file_or_url = rutracker.get_torrent(bestqual[2])
+            else:
+                file_or_url = bestqual[2]
+
+            torrentid = utorrent.addTorrent(file_or_url)
+
+            if not torrentid:
+                logger.error("Error sending torrent to uTorrent. Are you sure it's running?")
+                return
+
+            folder_name = utorrent.getTorrentFolder(torrentid)
+            if folder_name:
+                logger.info('Torrent folder name: %s' % folder_name)
+            else:
+                logger.error('Torrent folder name could not be determined')
+                return
+
+            # remove temp .torrent file created above
+            if bestqual[3] == 'rutracker.org':
+                try:
+                    shutil.rmtree(os.path.split(file_or_url)[0])
+                except Exception, e:
+                    logger.exception("Unhandled exception")
+
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [album['AlbumID']])
     myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)', [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], "Snatched", folder_name, kind])

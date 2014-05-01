@@ -29,14 +29,23 @@ from headphones import logger, notifiers, request
 #       Store torrent id so we can check up on it
 
 def addTorrent(link):
-    method = 'torrent-add'
-    arguments = {'filename': link, 'download-dir': headphones.DOWNLOAD_TORRENT_DIR}
 
-    response = torrentAction(method,arguments)
+    if link.startswith("magnet") or link.startswith("http") or link.endswith(".torrent"):
+        method = None
+        params = {'action':'add-url', 's':link}
+        files = None
+    else:
+        method = "post"
+        params = {'action':'add-file'}
+        files = {'torrent_file':{'music.torrent', link}}
+
+    response = torrentAction(method,params,files)
 
     if not response:
         return False
 
+    print response
+    
     if response['result'] == 'success':
         if 'torrent-added' in response['arguments']:
             name = response['arguments']['torrent-added']['name']
@@ -75,7 +84,7 @@ def getTorrentFolder(torrentid):
 
     return torrent_folder_name
 
-def torrentAction(method, arguments):
+def torrentAction(method=None, params=None, files=None):
 
     host = headphones.UTORRENT_HOST
     username = headphones.UTORRENT_USERNAME
@@ -98,12 +107,10 @@ def torrentAction(method, arguments):
     token_request = request.request_response(host + 'token.html')
     token = re.findall('<div.*?>(.*?)</', request.read())[0]
 
-    data = { 'method': method, 'arguments': arguments }
-
-    response = request.request_json(host, method="post", data=json.dumps(data), headers=headers, auth=auth)
+    response = request.request_json(host, method=method, params=params, files=files, auth=auth)
 
     if not response:
-        logger.error("Error sending torrent to Transmission")
+        logger.error("Error sending torrent to uTorrent")
         return
 
     return response
