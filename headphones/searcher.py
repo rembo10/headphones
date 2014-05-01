@@ -31,7 +31,7 @@ import subprocess
 import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
-from headphones import transmission, notifiers
+from headphones import utorrent, transmission, notifiers
 
 import lib.bencode as bencode
 
@@ -683,6 +683,30 @@ def send_to_downloader(data, bestqual, album):
                 return
 
             folder_name = transmission.getTorrentFolder(torrentid)
+            if folder_name:
+                logger.info('Torrent folder name: %s' % folder_name)
+            else:
+                logger.error('Torrent folder name could not be determined')
+                return
+
+            # remove temp .torrent file created above
+            if bestqual[3] == 'rutracker.org':
+                try:
+                    shutil.rmtree(os.path.split(file_or_url)[0])
+                except Exception, e:
+                    logger.exception("Unhandled exception")
+
+        else:
+            logger.info("Sending torrent to uTorrent")
+
+            # rutracker needs cookies to be set, pass the .torrent file instead of url
+            if bestqual[3] == 'rutracker.org':
+                file_or_url = rutracker.get_torrent(bestqual[2])
+            else:
+                file_or_url = bestqual[2]
+
+            folder_name = utorrent.addTorrent(file_or_url)
+
             if folder_name:
                 logger.info('Torrent folder name: %s' % folder_name)
             else:
