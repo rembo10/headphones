@@ -192,7 +192,7 @@
                         <td>
                             <fieldset>
                                 <legend>Torrents</legend>
-                                <input type="radio" name="torrent_downloader" id="torrent_downloader_blackhole" value="0" ${config['torrent_downloader_blackhole']}>Black Hole <input type="radio" name="torrent_downloader" id="torrent_downloader_transmission" value="1" ${config['torrent_downloader_transmission']}> Transmission <!--  <input type="radio" name="torrent_downloader" id="torrent_downloader_utorrent" value="2" ${config['torrent_downloader_utorrent']}> uTorrent -->
+                                <input type="radio" name="torrent_downloader" id="torrent_downloader_blackhole" value="0" ${config['torrent_downloader_blackhole']}>Black Hole <input type="radio" name="torrent_downloader" id="torrent_downloader_transmission" value="1" ${config['torrent_downloader_transmission']}>Transmission <input type="radio" name="torrent_downloader" id="torrent_downloader_utorrent" value="2" ${config['torrent_downloader_utorrent']}>uTorrent 
                             </fieldset>
                             <fieldset id="torrent_blackhole_options">
                                 <div class="row">
@@ -238,6 +238,10 @@
                                 <div class="row">
                                     <label>uTorrent Password:</label>
                                     <input type="text" name="utorrent_password" value="${config['utorrent_pass']}" size="30">
+                                </div>
+                                <div class="row">
+                                    <label>uTorrent Label:</label>
+                                    <input type="text" name="utorrent_label" value="${config['utorrent_label']}" size="30">
                                 </div>
                             </fieldset>
                             <fieldset id="general_torrent_options">
