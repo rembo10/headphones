@@ -14,6 +14,7 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+import os
 import time
 import base64
 import headphones
@@ -28,67 +29,13 @@ from headphones import logger, notifiers, request
 # TODO: Store the session id so we don't need to make 2 calls
 #       Store torrent id so we can check up on it
 
-def addTorrent(link):
 
-    if link.startswith("magnet") or link.startswith("http") or link.endswith(".torrent"):
-        method = None
-        params = {'action':'add-url', 's':link}
-        files = None
-    else:
-        method = "post"
-        params = {'action':'add-file'}
-        files = {'torrent_file':{'music.torrent', link}}
-
-    response = torrentAction(method,params,files)
-
-    if not response:
-        return False
-
-    print response
-
-    if response['result'] == 'success':
-        if 'torrent-added' in response['arguments']:
-            name = response['arguments']['torrent-added']['name']
-            retid = response['arguments']['torrent-added']['id']
-        elif 'torrent-duplicate' in response['arguments']:
-            name = response['arguments']['torrent-duplicate']['name']
-            retid = response['arguments']['torrent-duplicate']['id']
-        else:
-            name = link
-            retid = False
-
-        logger.info(u"Torrent sent to Transmission successfully")
-        return retid
-
-    else:
-        logger.info('Transmission returned status %s' % response['result'])
-        return False
-
-def getTorrentFolder(torrentid):
-    method = 'torrent-get'
-    arguments = { 'ids': torrentid, 'fields': ['name','percentDone']}
-
-    response = torrentAction(method, arguments)
-    percentdone = response['arguments']['torrents'][0]['percentDone']
-    torrent_folder_name = response['arguments']['torrents'][0]['name']
-
-    tries = 1
-
-    while percentdone == 0  and tries <10:
-        tries+=1
-        time.sleep(5)
-        response = torrentAction(method, arguments)
-        percentdone = response['arguments']['torrents'][0]['percentDone']
-
-    torrent_folder_name = response['arguments']['torrents'][0]['name']
-
-    return torrent_folder_name
-
-def torrentAction(method=None, params=None, files=None):
+def addTorrent(link, title):
 
     host = headphones.UTORRENT_HOST
     username = headphones.UTORRENT_USERNAME
     password = headphones.UTORRENT_PASSWORD
+    label = headphones.UTORRENT_LABEL
     token = ''
 
     if not host.startswith('http'):
@@ -106,11 +53,44 @@ def torrentAction(method=None, params=None, files=None):
     auth = (username, password) if username and password else None
     token_request = request.request_response(host + 'token.html', auth=auth)
     token = re.findall('<div.*?>(.*?)</', token_request.content)[0]
+    guid = token_request.cookies['GUID']
+    cookies = dict(GUID = guid)
 
-    response = request.request_json(host, method=method, params=params, files=files, auth=auth)
-
+    if link.startswith("magnet") or link.startswith("http") or link.endswith(".torrent"):
+        params = {'action':'add-url', 's':link, 'token':token}
+        response = request.request_json(host, params=params, auth=auth, cookies=cookies)
+    else:    
+        method = "post"
+        params = {'action':'add-file', 'token':token}
+        files = {'torrent_file':{'music.torrent', link}}
+        response = request.request_json(host, method=method, params=params, files=files, auth=auth, cookies=cookies)
     if not response:
         logger.error("Error sending torrent to uTorrent")
         return
 
-    return response
+    # NOW WE WILL CHECK UTORRENT FOR THE FOLDER NAME & SET THE LABEL
+    params = {'list':'1', 'token':token}
+
+    response = request.request_json(host, params=params, auth=auth, cookies=cookies)
+    if not response:
+        logger.error("Error getting torrent information from uTorrent")
+        return
+
+    # Not really sure how to ID these? Title seems safest)
+    # Also, not sure when the torrent will pop up in the list, so we'll make sure it exists and is 1% downloaded
+    tries = 0
+    while tries < 10:
+        for torrent in response['torrents']:
+            if torrent[2] == title and torrent[4] > 1:
+                folder = os.path.basename(torrent[26])
+                tor_hash = torrent[0]
+                params = {'action':'setprops', 'hash':tor_hash,'s':'label', 'v':label}
+                response = request.request_json(host, params=params, auth=auth, cookies=cookies)
+                break
+            else:
+                time.sleep(5)
+                tries += 1
+
+    return folder
+
+

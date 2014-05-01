@@ -705,13 +705,8 @@ def send_to_downloader(data, bestqual, album):
             else:
                 file_or_url = bestqual[2]
 
-            torrentid = utorrent.addTorrent(file_or_url)
-
-            if not torrentid:
-                logger.error("Error sending torrent to uTorrent. Are you sure it's running?")
-                return
-
-            folder_name = utorrent.getTorrentFolder(torrentid)
+            folder_name = utorrent.addTorrent(bestqual[2],bestqual[0])
+            
             if folder_name:
                 logger.info('Torrent folder name: %s' % folder_name)
             else:
