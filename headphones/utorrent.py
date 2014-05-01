@@ -45,7 +45,7 @@ def addTorrent(link):
         return False
 
     print response
-    
+
     if response['result'] == 'success':
         if 'torrent-added' in response['arguments']:
             name = response['arguments']['torrent-added']['name']
@@ -104,8 +104,8 @@ def torrentAction(method=None, params=None, files=None):
 
     # Retrieve session id
     auth = (username, password) if username and password else None
-    token_request = request.request_response(host + 'token.html')
-    token = re.findall('<div.*?>(.*?)</', request.read())[0]
+    token_request = request.request_response(host + 'token.html', auth=auth)
+    token = re.findall('<div.*?>(.*?)</', token_request.content)[0]
 
     response = request.request_json(host, method=method, params=params, files=files, auth=auth)
 
