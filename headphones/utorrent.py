@@ -69,36 +69,30 @@ def addTorrent(link):
         logger.error("Error sending torrent to uTorrent")
         return
 
-    # Not really sure how to ID these? Title seems safest)
-    # Also, not sure when the torrent will pop up in the list, so we'll make sure it exists and is 1% downloaded
-    tries = 0
-    folder = None
-    while tries < 10:
+    if link.startswith('magnet'):
+        tor_hash = re.findall('urn:btih:([\w]{32,40})', link)[0]
+        if len(tor_hash) == 32:
+            tor_hash = b16encode(b32decode(tor_hash)).lower()
+    else:
+        info = bdecode(link.content)["info"]
+        tor_hash = sha1(bencode(info)).hexdigest()
+	    
+    params = {'action':'setprops', 'hash':tor_hash,'s':'label', 'v':label, 'token':token}
+    response = request.request_json(host, params=params, auth=auth, cookies=cookies)
+    if not response:
+        logger.error("Error setting torrent label in uTorrent")
+        return
 
-        # NOW WE WILL CHECK UTORRENT FOR THE FOLDER NAME & SET THE LABEL
-        params = {'list':'1', 'token':token}
+	# folder info can probably be cleaned up with getprops
+	folder = None    
 
-        response = request.request_json(host, params=params, auth=auth, cookies=cookies)
-
-        if not response:
-            logger.error("Error getting torrent information from uTorrent")
-            return
+    params = {'list':'1', 'token':token}
+    response = request.request_json(host, params=params, auth=auth, cookies=cookies)
+    if not response:
+        logger.error("Error getting torrent information from uTorrent")
+        return
 
         for torrent in response['torrents']:
-
-            if torrent[19] == link and torrent[4] > 1:
-                folder = os.path.basename(torrent[26])
-                tor_hash = torrent[0]
-                params = {'action':'setprops', 'hash':tor_hash,'s':'label', 'v':label, 'token':token}
-                response = request.request_json(host, params=params, auth=auth, cookies=cookies)
-                break
-
-        if folder:
-            break
-        else:
-            time.sleep(5)
-            tries += 1
+			folder = os.path.basename(torrent[26])
 
     return folder
-
-
