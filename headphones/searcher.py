@@ -307,13 +307,13 @@ def searchNZB(album, new=False, losslessOnly=False):
         params = {
             "t": "search",
             "cat": categories,
-            "apikey": '89edf227c1de9b3de50383fff11466c6',
+            "apikey": '964d601959918a578a670984bdee9357',
             "maxage": headphones.USENET_RETENTION,
             "q": term
         }
 
         data = request.request_feed(
-            url="http://headphones.codeshy.com/newznab/api",
+            url="http://indexer.codeshy.com/api",
             params=params, headers=headers,
             auth=(headphones.HPUSER, headphones.HPPASS)
         )
