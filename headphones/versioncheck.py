@@ -76,7 +76,7 @@ def getVersion():
             logger.error('Couldn\'t find latest installed version.')
             cur_commit_hash = None
 
-        cur_commit_hash = output
+        cur_commit_hash = str(output)
 
         if not re.match('^[a-z0-9]+$', cur_commit_hash):
             logger.error('Output doesn\'t look like a hash, not using it')
