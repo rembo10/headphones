@@ -1090,7 +1090,8 @@ class WebInterface(object):
                     "songkick_filter_enabled": checked(headphones.SONGKICK_FILTER_ENABLED),
                     "cache_sizemb": headphones.CACHE_SIZEMB,
                     "file_permissions": headphones.FILE_PERMISSIONS,
-                    "folder_permissions": headphones.FOLDER_PERMISSIONS
+                    "folder_permissions": headphones.FOLDER_PERMISSIONS,
+                    "mpc_enabled": checked(headphones.MPC_ENABLED)
                 }
 
         # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8
@@ -1127,7 +1128,7 @@ class WebInterface(object):
         osx_notify_enabled=0, osx_notify_onsnatch=0, osx_notify_app=None, boxcar_enabled=0, boxcar_onsnatch=0, boxcar_token=None, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None,
         preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None,
         plex_enabled=0, plex_server_host=None, plex_client_host=None, plex_username=None, plex_password=None, plex_update=0, plex_notify=0,
-        songkick_enabled=0, songkick_apikey=None, songkick_location=None, songkick_filter_enabled=0, encoder_multicore=False, encoder_multicore_count=0, **kwargs):
+        songkick_enabled=0, songkick_apikey=None, songkick_location=None, songkick_filter_enabled=0, encoder_multicore=False, encoder_multicore_count=0, mpc_enabled=False, **kwargs ):
 
         headphones.HTTP_HOST = http_host
         headphones.HTTP_PORT = http_port
@@ -1296,6 +1297,8 @@ class WebInterface(object):
         headphones.BOXCAR_ENABLED = boxcar_enabled
         headphones.BOXCAR_ONSNATCH = boxcar_onsnatch
         headphones.BOXCAR_TOKEN = boxcar_token
+
+        headphones.MPC_ENABLED = mpc_enabled
 
         headphones.MIRROR = mirror
         headphones.CUSTOMHOST = customhost
