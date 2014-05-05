@@ -43,7 +43,7 @@
 			<img id="artistImage" class="albumArt" alt="" src="artwork/artist/${artist['ArtistID']}"/>
 		</div>
 		<h1 id="artistname">
-			<a href="http://musicbrainz.org/artist/${artist['ArtistID']}">${artist['ArtistName']}</a>
+			<a href="http://musicbrainz.org/artist/${artist['ArtistID']}" id="artistnamelink">${artist['ArtistName']}</a>
 		</h1>
 		<div id="artistBio"></div>
 	</div>
@@ -236,10 +236,12 @@
 
 	function checkArtistStatus() {
 		$.ajax({
-		  url: "getArtistStatus?ArtistID=${artist['ArtistID']}",
+		  url: "getArtistjson?ArtistID=${artist['ArtistID']}",
+		  dataType: "jsonp",
 		  complete: function(result) {
-		    if (result.responseText == "Loading"){
+		    if (result.Status == "Loading"){
 				refreshTable();
+				$('#artistnamelink').text(result.ArtistName);
 				if (loadingMessage == false){
 					showMsg("Getting artist information",true);
 					loadingMessage = true;
