@@ -238,7 +238,6 @@
 		$.getJSON("getArtistjson?ArtistID=${artist['ArtistID']}", function(data) {
 		    if (data['Status'] == "Loading"){
 				refreshTable();
-				showMsg("Getting artist information",true)
 				$('#artistnamelink').text(data["ArtistName"]);
 				if (loadingMessage == false){
 					showMsg("Getting artist information",true);
