@@ -230,7 +230,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
         rg_exists = myDB.action("SELECT * from albums WHERE AlbumID=?", [rg['id']]).fetchone()
 
         if not forcefull:
-            check_release_date = myDB.action("SELECT ReleaseDate from albums WHERE ArtistID=? AND AlbumTitle=?", (artistid, al_title)).fetchone()
+            check_release_date = rg_exists['ReleaseDate']
             if check_release_date:
                 if check_release_date[0] is None:
                     logger.info("[%s] Now updating: %s (No Release Date)" % (artist['artist_name'], rg['title']))
