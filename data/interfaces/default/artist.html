@@ -235,13 +235,11 @@
 	var loadingtext_active = false;
 
 	function checkArtistStatus() {
-		$.ajax({
-		  url: "getArtistjson?ArtistID=${artist['ArtistID']}",
-		  dataType: "jsonp",
-		  complete: function(result) {
-		    if (result.Status == "Loading"){
+		$.getJSON("getArtistjson?ArtistID=${artist['ArtistID']}", function(data) {
+		    if (data['Status'] == "Loading"){
 				refreshTable();
-				$('#artistnamelink').text(result.ArtistName);
+				showMsg("Getting artist information",true)
+				$('#artistnamelink').text(data["ArtistName"]);
 				if (loadingMessage == false){
 					showMsg("Getting artist information",true);
 					loadingMessage = true;
@@ -263,8 +261,7 @@
 		    	loadingtext_active = false
 		    	loadingMessage = false
 		    }
-		  }
-		});
+		  });
 	}
 
 	function initThisPage() {
