@@ -31,7 +31,7 @@ import subprocess
 import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
-from headphones import transmission, notifiers
+from headphones import utorrent, transmission, notifiers
 
 import lib.bencode as bencode
 
@@ -307,13 +307,13 @@ def searchNZB(album, new=False, losslessOnly=False):
         params = {
             "t": "search",
             "cat": categories,
-            "apikey": '89edf227c1de9b3de50383fff11466c6',
+            "apikey": '964d601959918a578a670984bdee9357',
             "maxage": headphones.USENET_RETENTION,
             "q": term
         }
 
         data = request.request_feed(
-            url="http://headphones.codeshy.com/newznab/api",
+            url="http://indexer.codeshy.com/api",
             params=params, headers=headers,
             auth=(headphones.HPUSER, headphones.HPPASS)
         )
@@ -683,6 +683,30 @@ def send_to_downloader(data, bestqual, album):
                 return
 
             folder_name = transmission.getTorrentFolder(torrentid)
+            if folder_name:
+                logger.info('Torrent folder name: %s' % folder_name)
+            else:
+                logger.error('Torrent folder name could not be determined')
+                return
+
+            # remove temp .torrent file created above
+            if bestqual[3] == 'rutracker.org':
+                try:
+                    shutil.rmtree(os.path.split(file_or_url)[0])
+                except Exception, e:
+                    logger.exception("Unhandled exception")
+
+        else:
+            logger.info("Sending torrent to uTorrent")
+
+            # rutracker needs cookies to be set, pass the .torrent file instead of url
+            if bestqual[3] == 'rutracker.org':
+                file_or_url = rutracker.get_torrent(bestqual[2])
+            else:
+                file_or_url = bestqual[2]
+
+            folder_name = utorrent.addTorrent(file_or_url)
+
             if folder_name:
                 logger.info('Torrent folder name: %s' % folder_name)
             else:
@@ -1232,6 +1256,8 @@ def searchTorrent(album, new=False, losslessOnly=False):
                                     continue
                         else:
                             url = item.findAll("a")[3]['href']
+                        if url.lower().startswith("//"):
+                            url = "http:" + url
                         formatted_size = re.search('Size (.*),', unicode(item)).group(1).replace(u'\xa0', ' ')
                         size = helpers.piratesize(formatted_size)
                         if size < maxsize and minimumseeders < seeds and url != None:
