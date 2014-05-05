@@ -31,7 +31,7 @@ from headphones import logger, helpers, request, mb, music_encoder
 postprocessor_lock = threading.Lock()
 
 def checkFolder():
-    
+
     with postprocessor_lock:
 
         myDB = db.DBConnection()
@@ -42,30 +42,18 @@ def checkFolder():
             if album['FolderName']:
                 
                 if album['Kind'] == 'nzb':
-                    # We're now checking sab config options after sending to determine renaming - but we'll keep the
-                    # iterations in just in case we can't read the config for some reason
+                    download_dir = headphones.DOWNLOAD_DIR
+                else:
+                    download_dir = headphones.DOWNLOAD_TORRENT_DIR
 
-                    nzb_album_possibilities = [ album['FolderName'],
-                                                helpers.sab_replace_dots(album['FolderName']),
-                                                helpers.sab_replace_spaces(album['FolderName']),
-                                                helpers.sab_replace_spaces(sab_replace_dots(album['FolderName']))
-                                        ]
-                    
-                    for nzb_folder_name in nzb_album_possibilities:
-                        
-                        nzb_album_path = os.path.join(headphones.DOWNLOAD_DIR, nzb_folder_name).encode(headphones.SYS_ENCODING, 'replace')
-    
-                        if os.path.exists(nzb_album_path):
-                            logger.debug('Found %s in NZB download folder. Verifying....' % album['FolderName'])
-                            verify(album['AlbumID'], nzb_album_path, 'nzb')
-                            
-                if album['Kind'] == 'torrent':
+                album_path = os.path.join(download_dir, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
+                logger.info("Checking if %s exists" % album_path)
+                if os.path.exists(album_path):
+                    logger.info('Found "' + album['FolderName'] + '" in ' + album['Kind'] + ' download folder. Verifying....')
+                    verify(album['AlbumID'], album_path, album['Kind'])
 
-                    torrent_album_path = os.path.join(headphones.DOWNLOAD_TORRENT_DIR, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
-    
-                    if os.path.exists(torrent_album_path):
-                        logger.debug('Found %s in torrent download folder. Verifying....' % album['FolderName'])
-                        verify(album['AlbumID'], torrent_album_path, 'torrent')
+            else:
+                logger.info("No folder name found for " + album['Title'])
 
 def verify(albumid, albumpath, Kind=None, forced=False):
 
@@ -364,7 +352,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
            headphones.MOVE_FILES:
 
             if not os.access(downloaded_track, os.W_OK):
-                logger.error("Track file is not writeable, which is equired for some post processing steps: %s", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+                logger.error("Track file is not writeable, which is required for some post processing steps: %s", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
                 return
 
     #start encoding
@@ -501,6 +489,10 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         logger.info(u"Sending Boxcar2 notification")
         boxcar = notifiers.BOXCAR()
         boxcar.notify('Headphones processed: ' + pushmessage, "Download and Postprocessing completed", release['AlbumID'])
+
+    if headphones.MPC_ENABLED:
+        mpc = notifiers.MPC()
+        mpc.notify()
 
 def embedAlbumArt(artwork, downloaded_track_list):
     logger.info('Embedding album art')
