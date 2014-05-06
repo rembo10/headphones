@@ -334,6 +334,10 @@ function doAjaxCall(url,elem,reload,form) {
 	});
 }
 
+function doSimpleAjaxCall(url) {
+	$.ajax(url);
+}
+
 function resetFilters(text){
 	if ( $(".dataTables_filter").length > 0 ) {
 		$(".dataTables_filter input").attr("placeholder","filter " + text + "");

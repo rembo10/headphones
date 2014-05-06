@@ -8,7 +8,7 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">
-			<a id="menu_link_refresh" onclick="doAjaxCall('refreshArtist?ArtistID=${artist['ArtistID']}', $(this)),'table'" href="#" data-success="'${artist['ArtistName']}' is being refreshed"><i class="fa fa-refresh"></i> Refresh Artist</a>
+			<a id="menu_link_refresh" onclick="doSimpleAjaxCall('refreshArtist?ArtistID=${artist['ArtistID']}')" href="#"><i class="fa fa-refresh"></i> Refresh Artist</a>
 			<a id="menu_link_delete" href="deleteArtist?ArtistID=${artist['ArtistID']}"><i class="fa fa-trash-o"></i> Delete Artist</a>
 			%if artist['Status'] == 'Paused':
 				<a id="menu_link_resume" href="#" onclick="doAjaxCall('resumeArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} resumed"><i class="fa fa-play"></i> Resume Artist</a>
@@ -255,7 +255,8 @@
 		    else{
 		    	$('#artistnamespinner').remove()
 		    	$('#loadingtext').remove()
-		    	$('#ajaxMsg').remove()
+		    	$('#ajaxMsg').empty()
+		    	$('#ajaxMsg').removeAttr('style')
 		    	spinner_active = false
 		    	loadingtext_active = false
 		    	loadingMessage = false
@@ -315,7 +316,7 @@
     	checkArtistStatus();
     	setInterval(function(){ 
     		checkArtistStatus();
-		}, 3000);
+		}, 1500);
 	});
 
 	</script>
