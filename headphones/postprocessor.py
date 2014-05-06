@@ -71,17 +71,21 @@ def verify(albumid, albumpath, Kind=None, forced=False):
         try:    
             release_list = mb.getReleaseGroup(albumid)
         except Exception, e:
-            logger.info('Unable to get release information for manual album with rgid: %s. Error: %s' % (albumid, e))
+            logger.error('Unable to get release information for manual album with rgid: %s. Error: %s' % (albumid, e))
             return
             
         if not release_list:
-            logger.info('Unable to get release information for manual album with rgid: %s' % albumid)
+            logger.error('Unable to get release information for manual album with rgid: %s' % albumid)
             return
 
         # Since we're just using this to create the bare minimum information to insert an artist/album combo, use the first release
         releaseid = release_list[0]['id']
 
         release_dict = mb.getRelease(releaseid)
+        
+        if not release_dict:
+            logger.error('Unable to get release information for manual album with rgid: %s. Cannot continue' % albumid)
+            return
 
         logger.info(u"Now adding/updating artist: " + release_dict['artist_name'])
         
