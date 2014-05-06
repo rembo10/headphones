@@ -231,22 +231,32 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
 
         if not forcefull:
         
+            new_release_group = False
+            
             try:
                 check_release_date = rg_exists['ReleaseDate']
             except TypeError:
                 check_release_date = None
+                new_release_group = True
                 
-            if check_release_date:
-                if check_release_date[0] is None:
+                
+            if new_release_group:
+            
+                logger.info("[%s] Now adding: %s (New Release Group)" % (artist['artist_name'], rg['title']))
+                new_releases = mb.get_new_releases(rgid,includeExtras)
+                
+            else:
+            
+                if check_release_date is None or check_release_date == u"None":
                     logger.info("[%s] Now updating: %s (No Release Date)" % (artist['artist_name'], rg['title']))
                     new_releases = mb.get_new_releases(rgid,includeExtras,True)
                 else:
-                    if len(check_release_date[0]) == 10:
-                        release_date = check_release_date[0]
-                    elif len(check_release_date[0]) == 7:
-                        release_date = check_release_date[0]+"-31"
-                    elif len(check_release_date[0]) == 4:
-                        release_date = check_release_date[0]+"-12-31"
+                    if len(check_release_date) == 10:
+                        release_date = check_release_date
+                    elif len(check_release_date) == 7:
+                        release_date = check_release_date+"-31"
+                    elif len(check_release_date) == 4:
+                        release_date = check_release_date+"-12-31"
                     else:
                         release_date = today
                     if helpers.get_age(today) - helpers.get_age(release_date) < pause_delta:
@@ -256,9 +266,6 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                         logger.info("[%s] Skipping: %s (Release Date >%s Days)" % (artist['artist_name'], rg['title'], pause_delta))
                         skip_log = 1
                         new_releases = 0
-            else:
-                logger.info("[%s] Now adding: %s (New Release Group)" % (artist['artist_name'], rg['title']))
-                new_releases = mb.get_new_releases(rgid,includeExtras)
 
             if force_repackage == 1:
                 new_releases = -1
