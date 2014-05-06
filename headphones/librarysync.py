@@ -328,12 +328,12 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [ArtistID])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"', [ArtistName]))
         myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, ArtistID])
 
-    update_album_status()
     if not append:
+        update_album_status()
         lastfm.getSimilar()
     logger.info('Library scan complete')
 
-    #ADDED THIS SECTION TO MARK ALBUMS AS DOWNLOADED IF ARTISTS ARE ADDED EN MASSE BEFORE LIBRARY IS SCANNED
+#ADDED THIS SECTION TO MARK ALBUMS AS DOWNLOADED IF ARTISTS ARE ADDED EN MASSE BEFORE LIBRARY IS SCANNED
 def update_album_status(AlbumID=None):
     myDB = db.DBConnection()
     logger.info('Counting matched tracks to mark albums as skipped/downloaded')
@@ -355,13 +355,21 @@ def update_album_status(AlbumID=None):
             album_completion = 0
             logger.info('Album %s does not have any tracks in database' % album['AlbumTitle'])
 
-        if album_completion >= headphones.ALBUM_COMPLETION_PCT:
+        if album_completion >= headphones.ALBUM_COMPLETION_PCT and album['Status'] == 'Skipped':
             new_album_status = "Downloaded"
+        
+        # I don't think we want to change Downloaded->Skipped.....
+        # I think we can only automatically change Skipped->Downloaded when updating
+        # There was a bug report where this was causing infinite downloads if the album was
+        # recent, but matched to less than 80%. It would go Downloaded->Skipped->Wanted->Downloaded->Skipped->Wanted->etc....
+        #else:
+        #    if album['Status'] == "Skipped" or album['Status'] == "Downloaded":
+        #        new_album_status = "Skipped"
+        #    else:
+        #        new_album_status = album['Status']
         else:
-            if album['Status'] == "Skipped" or album['Status'] == "Downloaded":
-                new_album_status = "Skipped"
-            else:
-                new_album_status = album['Status']
+            new_album_status = album['Status']
+            
         myDB.upsert("albums", {'Status'   : new_album_status}, {'AlbumID'   : album['AlbumID']})
         if new_album_status != album['Status']:
             logger.info('Album %s changed to %s' % (album['AlbumTitle'], new_album_status))
