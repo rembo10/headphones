@@ -63,7 +63,7 @@ def addTorrent(link):
         response = request.request_json(host, params=params, auth=auth, cookies=cookies)
     else:    
         params = {'action':'add-file', 'token':token}
-        files = {'torrent_file':{'music.torrent', link}}
+        files = {'torrent_file':{'music.torrent' : link}}
         response = request.request_json(host, method="post", params=params, files=files, auth=auth, cookies=cookies)
     if not response:
         logger.error("Error sending torrent to uTorrent")
