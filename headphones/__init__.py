@@ -248,7 +248,7 @@ PLEX_UPDATE = False
 PLEX_NOTIFY = False
 NMA_ENABLED = False
 NMA_APIKEY = None
-NMA_PRIORITY = None
+NMA_PRIORITY = 0
 NMA_ONSNATCH = None
 PUSHALOT_ENABLED = False
 PUSHALOT_APIKEY = None
@@ -1014,7 +1014,7 @@ def config_write():
     new_config['NMA'] = {}
     new_config['NMA']['nma_enabled'] = int(NMA_ENABLED)
     new_config['NMA']['nma_apikey'] = NMA_APIKEY
-    new_config['NMA']['nma_priority'] = NMA_PRIORITY
+    new_config['NMA']['nma_priority'] = int(NMA_PRIORITY)
     new_config['NMA']['nma_onsnatch'] = int(NMA_ONSNATCH)
 
     new_config['Pushalot'] = {}

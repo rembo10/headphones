@@ -21,6 +21,8 @@ from lib.pygazelle import encoding as gazelleencoding
 from lib.pygazelle import format as gazelleformat
 from lib.pygazelle import media as gazellemedia
 from xml.dom import minidom
+from base64 import b16encode, b32decode
+from hashlib import sha1
 
 import os, re, time
 import string
@@ -28,12 +30,13 @@ import shutil
 import requests
 import subprocess
 
+
 import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
 from headphones import utorrent, transmission, notifiers
 
-import lib.bencode as bencode
+from lib.bencode import bencode as bencode, bdecode
 
 import headphones.searcher_rutracker as rutrackersearch
 rutracker = rutrackersearch.Rutracker()
@@ -659,7 +662,7 @@ def send_to_downloader(data, bestqual, album):
                     #Open the fresh torrent file again so we can extract the proper torrent name
                     #Used later in post-processing.
                     with open(download_path, 'rb') as fp:
-                        torrent_info = bencode.bdecode(fp.read())
+                        torrent_info = bdecode(fp.read())
 
                     folder_name = torrent_info['info'].get('name', '')
                     logger.info('Torrent folder name: %s' % folder_name)
@@ -696,16 +699,44 @@ def send_to_downloader(data, bestqual, album):
                 except Exception, e:
                     logger.exception("Unhandled exception")
 
-        else:
+        elif headphones.TORRENT_DOWNLOADER == 2:
             logger.info("Sending torrent to uTorrent")
-
+ 
             # rutracker needs cookies to be set, pass the .torrent file instead of url
             if bestqual[3] == 'rutracker.org':
                 file_or_url = rutracker.get_torrent(bestqual[2])
             else:
                 file_or_url = bestqual[2]
 
-            folder_name = utorrent.addTorrent(file_or_url)
+            _hash = CalculateTorrentHash(file_or_url, data)
+
+            folder_name = utorrent.addTorrent(file_or_url, _hash)
+
+            if folder_name:
+                logger.info('Torrent folder name: %s' % folder_name)
+            else:
+                logger.error('Torrent folder name could not be determined')
+                return
+
+            # remove temp .torrent file created above
+            if bestqual[3] == 'rutracker.org':
+                try:
+                    shutil.rmtree(os.path.split(file_or_url)[0])
+                except Exception, e:
+                    logger.exception("Unhandled exception")
+
+        else:
+            logger.info("Sending torrent to DownloadStation")
+ 
+            # rutracker needs cookies to be set, pass the .torrent file instead of url
+            if bestqual[3] == 'rutracker.org':
+                file_or_url = rutracker.get_torrent(bestqual[2])
+            else:
+                file_or_url = bestqual[2]
+
+            _hash = CalculateTorrentHash(file_or_url, data)
+
+            folder_name = download_station.addTorrent(file_or_url)
 
             if folder_name:
                 logger.info('Torrent folder name: %s' % folder_name)
@@ -757,7 +788,7 @@ def send_to_downloader(data, bestqual, album):
     if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
         logger.info(u"Sending NMA notification")
         nma = notifiers.NMA()
-        nma.notify(snatched_nzb=name)
+        nma.notify(snatched=name)
     if headphones.PUSHALOT_ENABLED and headphones.PUSHALOT_ONSNATCH:
         logger.info(u"Sending Pushalot notification")
         pushalot = notifiers.PUSHALOT()
@@ -1401,7 +1432,7 @@ def preprocess(resultlist):
 
         if result[4] == 'torrent':
             #Get out of here if we're using Transmission or uTorrent
-            if headphones.TORRENT_DOWNLOADER != 0:
+            if headphones.TORRENT_DOWNLOADER == 1:  ## if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
                 return True, result
             # get outta here if rutracker
             if result[3] == 'rutracker.org':
@@ -1451,3 +1482,19 @@ def preprocess(resultlist):
                 continue
 
         return (None, None)
+
+
+
+def CalculateTorrentHash(link, data):
+    
+    if link.startswith('magnet'):
+        tor_hash = re.findall('urn:btih:([\w]{32,40})', link)[0]
+        if len(tor_hash) == 32:
+            tor_hash = b16encode(b32decode(tor_hash)).lower()
+    else:
+        info = bdecode(data)["info"]
+        tor_hash = sha1(bencode(info)).hexdigest()
+
+    logger.info('Torrent Hash: ' + str(tor_hash))
+
+    return tor_hash
