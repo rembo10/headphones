@@ -388,13 +388,13 @@ class NMA:
         logger.debug(u"NMA title: " + title)
         logger.debug(u"NMA API: " + api)
         logger.debug(u"NMA Priority: " + str(nma_priority))
+
         if snatched:
             event = snatched + " snatched!"
             message = "Headphones has snatched: " + snatched
         else:
             event = artist + ' - ' + album + ' complete!'
             message = "Headphones has downloaded and postprocessed: " + artist + ' [' + album + ']'
-
 
         logger.debug(u"NMA event: " + event)
         logger.debug(u"NMA message: " + message)

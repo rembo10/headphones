@@ -13,17 +13,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib
-import urllib2
-import urlparse
-import cookielib
-import json
-import re
-import os
-import time
+import urllib, urllib2, urlparse, cookielib
+import json, re, os, time
+
 import headphones
 
-from headphones import logger, notifiers
+from headphones import logger
 
 class utorrentclient(object):
     TOKEN_REGEX = "<div id='token' style='display:none;'>([^<>]+)</div>"
@@ -77,7 +72,7 @@ class utorrentclient(object):
         return self._action(params)
 
     def add_url(self, url):
-        #can recieve magnet or normal .torrent link
+        #can receive magnet or normal .torrent link
         params = [('action', 'add-url'), ('s', url)]
         return self._action(params)
 
@@ -146,8 +141,8 @@ def addTorrent(link, hash):
     label = headphones.UTORRENT_LABEL
     uTorrentClient = utorrentclient()
     uTorrentClient.add_url(link)
-    time.sleep(1) #need to ensure file is loaded uTorrent...
-    uTorrentClient.setprops(hash,'label', label)
+    time.sleep(1) #ensure file is loaded in uTorrent...
+    uTorrentClient.setprops(hash,'label',label)
     torrentList = uTorrentClient.list()
     for torrent in torrentList[1].get('torrents'):
         if (torrent[0].lower()==hash):
