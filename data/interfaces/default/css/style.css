@@ -545,7 +545,7 @@ footer {
   position: relative;
   top: 4px;
 }
-#ajaxMsg {
+.ajaxMsg {
   border: 1px solid #cccccc;
   background-image: -moz-linear-gradient(#ffffff, #eeeeee) !important;
   background-image: linear-gradient(#ffffff, #eeeeee) !important;
@@ -576,16 +576,16 @@ footer {
   -o-opacity: 0.8 !important;
   opacity: 0.8 !important;
 }
-#ajaxMsg .msg {
+.ajaxMsg .msg {
   font-family: "Trebuchet MS", Helvetica, Arial, sans-serif;
   line-height: normal;
   padding-left: 20px;
 }
-#ajaxMsg .loader {
+.ajaxMsg .loader {
   position: relative;
   top: 2px;
 }
-#ajaxMsg.success {
+.ajaxMsg .success {
   background-image: -moz-linear-gradient(#d3ffd7, #c2edc6) !important;
   background-image: linear-gradient(#d3ffd7, #c2edc6) !important;
   background-image: -webkit-linear-gradient(#d3ffd7, #c2edc6) !important;
@@ -595,7 +595,7 @@ footer {
   padding: 15px 10px;
   text-align: left;
 }
-#ajaxMsg.error {
+.ajaxMsg .error {
   background-image: -moz-linear-gradient(#ffd3d3, #edc4c4) !important;
   background-image: linear-gradient(#ffd3d3, #edc4c4) !important;
   background-image: -webkit-linear-gradient(#ffd3d3, #edc4c4) !important;
@@ -605,7 +605,7 @@ footer {
   padding: 15px 10px;
   text-align: left;
 }
-#ajaxMsg .ui-icon {
+.ajaxMsg .ui-icon {
   display: inline-block;
   margin-left: -20px;
   top: 2px;

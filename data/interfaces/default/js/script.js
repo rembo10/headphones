@@ -228,6 +228,21 @@ function showMsg(msg,loader,timeout,ms) {
 	} 
 }
 
+function showArtistMsg(msg) {
+	var feedback = $("#ajaxMsg2");
+	update = $("#updatebar");
+	if ( update.is(":visible") ) {
+		var height = update.height() + 35;
+		feedback.css("bottom",height + "px");
+	} else {
+		feedback.removeAttr("style");
+	}
+	feedback.fadeIn();
+	var message = $("<i class='fa fa-refresh fa-spin'></i> " + msg + "</div>");
+	feedback.css("padding","14px 10px")
+	$(feedback).prepend(message);
+}
+
 function doAjaxCall(url,elem,reload,form) {
 	// Set Message
 	feedback = $("#ajaxMsg");
