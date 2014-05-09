@@ -30,7 +30,14 @@ from headphones import logger, notifiers, request
 
 def addTorrent(link):
     method = 'torrent-add'
-    arguments = {'filename': link, 'download-dir': headphones.DOWNLOAD_TORRENT_DIR}
+
+    if link.endswith('.torrent'):
+        f = open(link,'rb')
+        metainfo = str(base64.b64encode(f.read()))
+        f.close()
+        arguments = {'metainfo': metainfo, 'download-dir':headphones.DOWNLOAD_TORRENT_DIR}
+    else:
+        arguments = {'filename': link, 'download-dir': headphones.DOWNLOAD_TORRENT_DIR}
 
     response = torrentAction(method,arguments)
 
