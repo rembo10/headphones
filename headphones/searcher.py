@@ -218,6 +218,34 @@ def sort_search_results(resultlist, album, new):
 
             finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
 
+    # lossless - ignore results if target size outside bitrate range
+    elif headphones.PREFERRED_QUALITY == 3 and (headphones.LOSSLESS_BITRATE_FROM or headphones.LOSSLESS_BITRATE_TO):
+
+        finallist = []
+        tracks = myDB.select('SELECT TrackDuration from tracks WHERE AlbumID=?', [album['AlbumID']])
+
+        if len(tracks):
+
+            albumlength = sum([pair[0] for pair in tracks])
+            mintargetsize = 0
+            maxtargetsize = 0
+            if headphones.LOSSLESS_BITRATE_FROM:
+                mintargetsize = albumlength/1000 * int(headphones.LOSSLESS_BITRATE_FROM) * 128
+            if headphones.LOSSLESS_BITRATE_TO:
+                maxtargetsize = albumlength/1000 * int(headphones.LOSSLESS_BITRATE_TO) * 128
+
+            if mintargetsize > 0 or maxtargetsize > 0:
+                for i, result in reversed(list(enumerate(resultlist))):
+                    if int(result[1]) < mintargetsize and mintargetsize > 0 or int(result[1]) > maxtargetsize and maxtargetsize > 0:
+                        if int(result[1]) < mintargetsize:
+                            logger.info("%s is too small for this album - not considering it. (Size: %s, Minsize: %s)", result[0], helpers.bytes_to_mb(result[1]), helpers.bytes_to_mb(mintargetsize))
+                        else:
+                            logger.info("%s is too large for this album - not considering it. (Size: %s, Maxsize: %s)", result[0], helpers.bytes_to_mb(result[1]), helpers.bytes_to_mb(maxtargetsize))
+                        del resultlist[i]
+
+        if len (resultlist):
+            finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
+
     else:
 
         finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
