@@ -21,6 +21,8 @@ from lib.pygazelle import encoding as gazelleencoding
 from lib.pygazelle import format as gazelleformat
 from lib.pygazelle import media as gazellemedia
 from xml.dom import minidom
+from base64 import b16encode, b32decode
+from hashlib import sha1
 
 import os, re, time
 import string
@@ -28,12 +30,13 @@ import shutil
 import requests
 import subprocess
 
+
 import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
 from headphones import utorrent, transmission, notifiers
 
-import lib.bencode as bencode
+from lib.bencode import bencode as bencode, bdecode
 
 import headphones.searcher_rutracker as rutrackersearch
 rutracker = rutrackersearch.Rutracker()
@@ -148,11 +151,20 @@ def sort_search_results(resultlist, album, new):
 
     # Add a priority if it has any of the preferred words
     temp_list = []
+    preferred_words = None
+    if headphones.PREFERRED_WORDS:
+        preferred_words = helpers.split_string(headphones.PREFERRED_WORDS)
     for result in resultlist:
-        if headphones.PREFERRED_WORDS and any(word.lower() in result[0].lower() for word in helpers.split_string(headphones.PREFERRED_WORDS)):
-            temp_list.append((result[0],result[1],result[2],result[3],result[4],1))
-        else:
-            temp_list.append((result[0],result[1],result[2],result[3],result[4],0))
+        priority = 0
+        if preferred_words:
+            if any(word.lower() in result[0].lower() for word in preferred_words):
+                priority = 1
+            # add a search provider priority (weighted based on position)
+            i = next((i for i, word in enumerate(preferred_words) if word in result[3].lower()), None)
+            if i != None:
+                priority += round((len(preferred_words) - i) / float(len(preferred_words)),2)
+
+        temp_list.append((result[0],result[1],result[2],result[3],result[4],priority))
 
     resultlist = temp_list
 
@@ -213,6 +225,34 @@ def sort_search_results(resultlist, album, new):
             logger.exception('Unhandled exception')
             logger.info('No track information for %s - %s. Defaulting to highest quality', (album['ArtistName'], album['AlbumTitle']))
 
+            finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
+
+    # lossless - ignore results if target size outside bitrate range
+    elif headphones.PREFERRED_QUALITY == 3 and (headphones.LOSSLESS_BITRATE_FROM or headphones.LOSSLESS_BITRATE_TO):
+
+        finallist = []
+        tracks = myDB.select('SELECT TrackDuration from tracks WHERE AlbumID=?', [album['AlbumID']])
+
+        if len(tracks):
+
+            albumlength = sum([pair[0] for pair in tracks])
+            mintargetsize = 0
+            maxtargetsize = 0
+            if headphones.LOSSLESS_BITRATE_FROM:
+                mintargetsize = albumlength/1000 * int(headphones.LOSSLESS_BITRATE_FROM) * 128
+            if headphones.LOSSLESS_BITRATE_TO:
+                maxtargetsize = albumlength/1000 * int(headphones.LOSSLESS_BITRATE_TO) * 128
+
+            if mintargetsize > 0 or maxtargetsize > 0:
+                for i, result in reversed(list(enumerate(resultlist))):
+                    if int(result[1]) < mintargetsize and mintargetsize > 0 or int(result[1]) > maxtargetsize and maxtargetsize > 0:
+                        if int(result[1]) < mintargetsize:
+                            logger.info("%s is too small for this album - not considering it. (Size: %s, Minsize: %s)", result[0], helpers.bytes_to_mb(result[1]), helpers.bytes_to_mb(mintargetsize))
+                        else:
+                            logger.info("%s is too large for this album - not considering it. (Size: %s, Maxsize: %s)", result[0], helpers.bytes_to_mb(result[1]), helpers.bytes_to_mb(maxtargetsize))
+                        del resultlist[i]
+
+        if len (resultlist):
             finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
 
     else:
@@ -659,7 +699,7 @@ def send_to_downloader(data, bestqual, album):
                     #Open the fresh torrent file again so we can extract the proper torrent name
                     #Used later in post-processing.
                     with open(download_path, 'rb') as fp:
-                        torrent_info = bencode.bdecode(fp.read())
+                        torrent_info = bdecode(fp.read())
 
                     folder_name = torrent_info['info'].get('name', '')
                     logger.info('Torrent folder name: %s' % folder_name)
@@ -698,14 +738,16 @@ def send_to_downloader(data, bestqual, album):
 
         else:
             logger.info("Sending torrent to uTorrent")
-
+ 
             # rutracker needs cookies to be set, pass the .torrent file instead of url
             if bestqual[3] == 'rutracker.org':
                 file_or_url = rutracker.get_torrent(bestqual[2])
             else:
                 file_or_url = bestqual[2]
 
-            folder_name = utorrent.addTorrent(file_or_url)
+            _hash = CalculateTorrentHash(file_or_url, data)
+
+            folder_name = utorrent.addTorrent(file_or_url, _hash)
 
             if folder_name:
                 logger.info('Torrent folder name: %s' % folder_name)
@@ -1401,7 +1443,7 @@ def preprocess(resultlist):
 
         if result[4] == 'torrent':
             #Get out of here if we're using Transmission or uTorrent
-            if headphones.TORRENT_DOWNLOADER != 0:
+            if headphones.TORRENT_DOWNLOADER == 1:  ## if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
                 return True, result
             # get outta here if rutracker
             if result[3] == 'rutracker.org':
@@ -1451,3 +1493,19 @@ def preprocess(resultlist):
                 continue
 
         return (None, None)
+
+
+
+def CalculateTorrentHash(link, data):
+    
+    if link.startswith('magnet'):
+        tor_hash = re.findall('urn:btih:([\w]{32,40})', link)[0]
+        if len(tor_hash) == 32:
+            tor_hash = b16encode(b32decode(tor_hash)).lower()
+    else:
+        info = bdecode(data)["info"]
+        tor_hash = sha1(bencode(info)).hexdigest()
+
+    logger.info('Torrent Hash: ' + str(tor_hash))
+
+    return tor_hash

@@ -240,7 +240,8 @@
 				refreshTable();
 				$('#artistnamelink').text(data["ArtistName"]);
 				if (loadingMessage == false){
-					showMsg("Getting artist information",true);
+				    $("#ajaxMsg").after( "<div id='ajaxMsg2' class='ajaxMsg'></div>" );
+					showArtistMsg("Getting artist information");
 					loadingMessage = true;
 				}
 				if (spinner_active == false){
@@ -255,8 +256,7 @@
 		    else{
 		    	$('#artistnamespinner').remove()
 		    	$('#loadingtext').remove()
-		    	$('#ajaxMsg').empty()
-		    	$('#ajaxMsg').removeAttr('style')
+		    	$('#ajaxMsg2').remove()
 		    	spinner_active = false
 		    	loadingtext_active = false
 		    	loadingMessage = false
@@ -303,7 +303,7 @@
 		resetFilters("albums");
 		setTimeout(function(){
 			initFancybox();
-		},1500)
+		},1500);
 	}
 
 	$(document).ready(function() {
