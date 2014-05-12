@@ -537,8 +537,7 @@ def searchNZB(album, new=False, losslessOnly=False):
 
         data = request.request_json(
             url='http://api.omgwtfnzbs.org/json/',
-            params=params, headers=headers,
-            validator=lambda x: type(x) == dict
+            params=params, headers=headers
         )
 
         # Parse response
