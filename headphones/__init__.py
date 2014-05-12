@@ -292,6 +292,8 @@ JOURNAL_MODE = None
 
 UMASK = None
 
+VERIFY_SSL_CERT = True
+
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
     try:
@@ -360,7 +362,7 @@ def initialize():
                 XBMC_NOTIFY, LMS_ENABLED, LMS_HOST, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
                 PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
                 PLEX_ENABLED, PLEX_SERVER_HOST, PLEX_CLIENT_HOST, PLEX_USERNAME, PLEX_PASSWORD, PLEX_UPDATE, PLEX_NOTIFY, PUSHALOT_ENABLED, PUSHALOT_APIKEY, \
-                PUSHALOT_ONSNATCH, SONGKICK_ENABLED, SONGKICK_APIKEY, SONGKICK_LOCATION, SONGKICK_FILTER_ENABLED
+                PUSHALOT_ONSNATCH, SONGKICK_ENABLED, SONGKICK_APIKEY, SONGKICK_LOCATION, SONGKICK_FILTER_ENABLED, VERIFY_SSL_CERT
 
 
         if __INITIALIZED__:
@@ -642,6 +644,8 @@ def initialize():
         JOURNAL_MODE = check_setting_int(CFG,'Advanced', 'journal_mode', 'wal')
 
         ALBUM_COMPLETION_PCT = check_setting_int(CFG, 'Advanced', 'album_completion_pct', 80)
+
+        VERIFY_SSL_CERT = bool(check_setting_int(CFG, 'Advanced', 'verify_ssl_cert', True))
 
         # update folder formats in the config & bump up config version
         if CONFIG_VERSION == '0':
@@ -1092,6 +1096,7 @@ def config_write():
     new_config['Advanced']['album_completion_pct'] = ALBUM_COMPLETION_PCT
     new_config['Advanced']['cache_sizemb'] = CACHE_SIZEMB
     new_config['Advanced']['journal_mode'] = JOURNAL_MODE
+    new_config['Advanced']['verify_ssl_cert'] = VERIFY_SSL_CERT
 
     new_config.write()
 
