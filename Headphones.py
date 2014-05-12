@@ -85,8 +85,8 @@ def main():
         if sys.platform == 'win32':
             print "Daemonize not supported under Windows, starting normally"
         else:
-            headphones.DAEMON=True
-            headphones.VERBOSE = False
+            headphones.DAEMON = True
+            headphones.QUIET = True
 
     if args.pidfile:
         headphones.PIDFILE = str(args.pidfile)
