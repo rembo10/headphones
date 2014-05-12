@@ -101,7 +101,7 @@ def main():
             try:
                 file(headphones.PIDFILE, 'w').write("pid\n")
             except IOError, e:
-                raise SystemExit("Unable to write PID file: %s [%d]" % (e.strerror, e.errno))
+                raise SystemExit("Unable to write PID file: %s [%d]", e.strerror, e.errno)
         else:
             logger.warn("Not running in daemon mode. PID file creation disabled.")
 

@@ -38,7 +38,7 @@ SIGNAL = None
 SYS_PLATFORM = None
 SYS_ENCODING = None
 
-QUIET = True
+QUIET = False
 VERBOSE = False
 DAEMON = False
 CREATEPID = False
@@ -720,6 +720,7 @@ def initialize():
 
         # Start the logger, disable console if needed
         logger.initLogger(console=not QUIET, verbose=VERBOSE)
+        logger.initLogger(console=not QUIET, verbose=False)
 
         if not CACHE_DIR:
             # Put the cache dir in the data dir for now
