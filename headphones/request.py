@@ -19,7 +19,7 @@ def request_response(url, method="get", auto_raise=True, whitelist_status_code=N
 
     # Map method to the request.XXX method. This is a simple hack, but it allows
     # requests to apply more magic per method. See lib/requests/api.py.
-    request_method = getattr(requests, method)
+    request_method = getattr(requests, method.lower())
 
     try:
         # Request the URL
