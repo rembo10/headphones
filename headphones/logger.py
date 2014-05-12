@@ -55,6 +55,17 @@ def initLogger(console=False, verbose=False):
     Console logging is only enabled if console is set to True.
     """
 
+    # Close and remove old handlers. This is required to reinit the loggers
+    # at runtime
+    for handler in logger.handlers[:]:
+        # Just make sure it is cleaned up.
+        if isinstance(handler, handlers.RotatingFileHandler):
+            handler.close()
+        elif isinstance(handler, logging.StreamHandler):
+            handler.flush()
+
+        logger.removeHandler(handler)
+
     # Configure the logger to accept all messages
     logger.propagate = False
     logger.setLevel(logging.DEBUG if verbose else logging.INFO)
