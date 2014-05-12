@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 
 import requests
 import feedparser
+import headphones
 
 def request_response(url, method="get", auto_raise=True, whitelist_status_code=None, **kwargs):
     """
@@ -17,9 +18,13 @@ def request_response(url, method="get", auto_raise=True, whitelist_status_code=N
     if whitelist_status_code and type(whitelist_status_code) != list:
         whitelist_status_code = [whitelist_status_code]
 
+    # Disable verification of SSL certificates if requested. Note: this could
+    # pose a security issue!
+    kwargs["verify"] = headphones.VERIFY_SSL_CERT
+
     # Map method to the request.XXX method. This is a simple hack, but it allows
     # requests to apply more magic per method. See lib/requests/api.py.
-    request_method = getattr(requests, method)
+    request_method = getattr(requests, method.lower())
 
     try:
         # Request the URL
@@ -45,7 +50,15 @@ def request_response(url, method="get", auto_raise=True, whitelist_status_code=N
         logger.error("Request timed out.")
     except requests.HTTPError, e:
         if e.response is not None:
-            logger.error("Request raise HTTP error with status code: %d", e.response.status_code)
+            if e.response.status_code >= 500:
+                cause = "remote server error"
+            elif e.response.status_code >= 400:
+                cause = "local request error"
+            else:
+                # I don't think we will end up here, but for completeness
+                cause = "unknown"
+
+            logger.error("Request raise HTTP error with status code %d (%s).", e.response.status_code, cause)
         else:
             logger.error("Request raised HTTP error.")
     except requests.RequestException, e:
