@@ -50,7 +50,15 @@ def request_response(url, method="get", auto_raise=True, whitelist_status_code=N
         logger.error("Request timed out.")
     except requests.HTTPError, e:
         if e.response is not None:
-            logger.error("Request raise HTTP error with status code: %d", e.response.status_code)
+            if e.response.status_code >= 500:
+                cause = "remote server error"
+            elif e.response.status_code >= 400:
+                cause = "local request error"
+            else:
+                # I don't think we will end up here, but for completeness
+                cause = "unknown"
+
+            logger.error("Request raise HTTP error with status code %d (%s).", e.response.status_code, cause)
         else:
             logger.error("Request raised HTTP error.")
     except requests.RequestException, e:
