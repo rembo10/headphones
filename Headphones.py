@@ -77,9 +77,9 @@ def main():
     args = parser.parse_args()
 
     if args.verbose:
-        headphones.VERBOSE = 2
-    elif args.quiet:
-        headphones.VERBOSE = 0
+        headphones.VERBOSE = True
+    if args.quiet:
+        headphones.QUIET = True
 
     if args.daemon:
         if sys.platform == 'win32':

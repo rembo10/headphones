@@ -38,7 +38,8 @@ SIGNAL = None
 SYS_PLATFORM = None
 SYS_ENCODING = None
 
-VERBOSE = 1
+QUIET = True
+VERBOSE = False
 DAEMON = False
 CREATEPID = False
 PIDFILE= None
@@ -340,7 +341,7 @@ def initialize():
 
     with INIT_LOCK:
 
-        global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, SYS_PLATFORM, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
+        global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, QUIET, DAEMON, SYS_PLATFORM, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, GIT_USER, GIT_BRANCH, DO_NOT_OVERRIDE_GIT_BRANCH, \
                 CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
@@ -717,8 +718,8 @@ def initialize():
                 if VERBOSE:
                     sys.stderr.write('Unable to create the log directory. Logging to screen only.\n')
 
-        # Start the logger, silence console logging if we need to
-        logger.initLogger(verbose=VERBOSE)
+        # Start the logger, disable console if needed
+        logger.initLogger(console=not QUIET, verbose=VERBOSE)
 
         if not CACHE_DIR:
             # Put the cache dir in the data dir for now
