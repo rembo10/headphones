@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 
 import requests
 import feedparser
+import headphones
 
 def request_response(url, method="get", auto_raise=True, whitelist_status_code=None, **kwargs):
     """
@@ -16,6 +17,10 @@ def request_response(url, method="get", auto_raise=True, whitelist_status_code=N
     # Convert whitelist_status_code to a list if needed
     if whitelist_status_code and type(whitelist_status_code) != list:
         whitelist_status_code = [whitelist_status_code]
+
+    # Disable verification of SSL certificates if requested. Note: this could
+    # pose a security issue!
+    kwargs["verify"] = headphones.VERIFY_SSL_CERT
 
     # Map method to the request.XXX method. This is a simple hack, but it allows
     # requests to apply more magic per method. See lib/requests/api.py.
