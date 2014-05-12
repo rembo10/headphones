@@ -646,7 +646,7 @@ def initialize():
 
         ALBUM_COMPLETION_PCT = check_setting_int(CFG, 'Advanced', 'album_completion_pct', 80)
 
-        VERIFY_SSL_CERT = bool(check_setting_int(CFG, 'Advanced', 'verify_ssl_cert', True))
+        VERIFY_SSL_CERT = bool(check_setting_int(CFG, 'Advanced', 'verify_ssl_cert', 1))
 
         # update folder formats in the config & bump up config version
         if CONFIG_VERSION == '0':
@@ -1098,7 +1098,7 @@ def config_write():
     new_config['Advanced']['album_completion_pct'] = ALBUM_COMPLETION_PCT
     new_config['Advanced']['cache_sizemb'] = CACHE_SIZEMB
     new_config['Advanced']['journal_mode'] = JOURNAL_MODE
-    new_config['Advanced']['verify_ssl_cert'] = VERIFY_SSL_CERT
+    new_config['Advanced']['verify_ssl_cert'] = int(VERIFY_SSL_CERT)
 
     new_config.write()
 
