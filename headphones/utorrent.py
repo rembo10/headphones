@@ -13,17 +13,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib
-import urllib2
-import urlparse
-import cookielib
-import json
-import re
-import os
-import time
+import urllib, urllib2, urlparse, cookielib
+import json, re, os, time
+
 import headphones
 
-from headphones import logger, notifiers
+from headphones import logger
 
 class utorrentclient(object):
     TOKEN_REGEX = "<div id='token' style='display:none;'>([^<>]+)</div>"
@@ -77,7 +72,7 @@ class utorrentclient(object):
         return self._action(params)
 
     def add_url(self, url):
-        #can recieve magnet or normal .torrent link
+        #can receive magnet or normal .torrent link
         params = [('action', 'add-url'), ('s', url)]
         return self._action(params)
 
@@ -141,16 +136,31 @@ class utorrentclient(object):
             logger.debug('URL: ' + str(url))
             logger.debug('uTorrent webUI raised the following error: ' + str(err))
 
-def addTorrent(link, hash):
 
+def labelTorrent(hash):
     label = headphones.UTORRENT_LABEL
     uTorrentClient = utorrentclient()
-    uTorrentClient.add_url(link)
-    time.sleep(1) #need to ensure file is loaded uTorrent...
-    uTorrentClient.setprops(hash,'label', label)
+    settinglabel = True
+    while settinglabel:
+        torrentList = uTorrentClient.list()
+        for torrent in torrentList[1].get('torrents'):
+            if (torrent[0].lower() == hash):
+                uTorrentClient.setprops(hash,'label',label)
+                settinglabel = False
+                return True
+
+
+def dirTorrent(hash):
+    uTorrentClient = utorrentclient()
     torrentList = uTorrentClient.list()
     for torrent in torrentList[1].get('torrents'):
-        if (torrent[0].lower()==hash):
+        if (torrent[0].lower() == hash):
             return torrent[26]
-
     return False
+
+
+def addTorrent(link, hash):
+    uTorrentClient = utorrentclient()
+    uTorrentClient.add_url(link)
+    labelTorrent(hash)
+    return dirTorrent(hash)
