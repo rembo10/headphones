@@ -77,16 +77,16 @@ def main():
     args = parser.parse_args()
 
     if args.verbose:
-        headphones.VERBOSE = 2
-    elif args.quiet:
-        headphones.VERBOSE = 0
+        headphones.VERBOSE = True
+    if args.quiet:
+        headphones.QUIET = True
 
     if args.daemon:
         if sys.platform == 'win32':
             print "Daemonize not supported under Windows, starting normally"
         else:
-            headphones.DAEMON=True
-            headphones.VERBOSE = False
+            headphones.DAEMON = True
+            headphones.QUIET = True
 
     if args.pidfile:
         headphones.PIDFILE = str(args.pidfile)
@@ -101,7 +101,7 @@ def main():
             try:
                 file(headphones.PIDFILE, 'w').write("pid\n")
             except IOError, e:
-                raise SystemExit("Unable to write PID file: %s [%d]" % (e.strerror, e.errno))
+                raise SystemExit("Unable to write PID file: %s [%d]", e.strerror, e.errno)
         else:
             logger.warn("Not running in daemon mode. PID file creation disabled.")
 

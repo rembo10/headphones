@@ -736,6 +736,14 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("logs")
     clearLogs.exposed = True
 
+    def toggleVerbose(self):
+        headphones.VERBOSE = not headphones.VERBOSE
+        logger.initLogger(not headphones.QUIET, headphones.VERBOSE)
+        logger.info("Verbose toggled, set to %s", headphones.VERBOSE)
+        logger.debug("If you read this message, debug logging is available")
+        raise cherrypy.HTTPRedirect("logs")
+    toggleVerbose.exposed = True
+
     def getLog(self,iDisplayStart=0,iDisplayLength=100,iSortCol_0=0,sSortDir_0="desc",sSearch="",**kwargs):
 
         iDisplayStart = int(iDisplayStart)
@@ -1000,6 +1008,8 @@ class WebInterface(object):
                     "pref_bitrate_low" : headphones.PREFERRED_BITRATE_LOW_BUFFER,
                     "pref_bitrate_allow_lossless" : checked(headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS),
                     "detect_bitrate" : checked(headphones.DETECT_BITRATE),
+                    "lossless_bitrate_from" : headphones.LOSSLESS_BITRATE_FROM,
+                    "lossless_bitrate_to" : headphones.LOSSLESS_BITRATE_TO,
                     "move_files" : checked(headphones.MOVE_FILES),
                     "rename_files" : checked(headphones.RENAME_FILES),
                     "correct_metadata" : checked(headphones.CORRECT_METADATA),
@@ -1136,8 +1146,8 @@ class WebInterface(object):
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, pushalot_enabled=False, pushalot_apikey=None, pushalot_onsnatch=0, synoindex_enabled=False, lms_enabled=0, lms_host=None,
         pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, pushover_apitoken=None, pushbullet_enabled=0, pushbullet_onsnatch=0, pushbullet_apikey=None, pushbullet_deviceid=None, twitter_enabled=0, twitter_onsnatch=0,
         osx_notify_enabled=0, osx_notify_onsnatch=0, osx_notify_app=None, boxcar_enabled=0, boxcar_onsnatch=0, boxcar_token=None, mirror=None, customhost=None, customport=None, customsleep=None, hpuser=None, hppass=None,
-        preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, cache_sizemb=None, enable_https=0, https_cert=None, https_key=None, file_permissions=None, folder_permissions=None,
-        plex_enabled=0, plex_server_host=None, plex_client_host=None, plex_username=None, plex_password=None, plex_update=0, plex_notify=0,
+        preferred_bitrate_high_buffer=None, preferred_bitrate_low_buffer=None, preferred_bitrate_allow_lossless=0, lossless_bitrate_from=None, lossless_bitrate_to=None, cache_sizemb=None, enable_https=0, https_cert=None, https_key=None,
+        file_permissions=None, folder_permissions=None, plex_enabled=0, plex_server_host=None, plex_client_host=None, plex_username=None, plex_password=None, plex_update=0, plex_notify=0,
         songkick_enabled=0, songkick_apikey=None, songkick_location=None, songkick_filter_enabled=0, encoder_multicore=False, encoder_multicore_count=0, mpc_enabled=False, **kwargs ):
 
         headphones.HTTP_HOST = http_host
@@ -1216,6 +1226,8 @@ class WebInterface(object):
         headphones.PREFERRED_BITRATE_LOW_BUFFER = preferred_bitrate_low_buffer
         headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS = preferred_bitrate_allow_lossless
         headphones.DETECT_BITRATE = detect_bitrate
+        headphones.LOSSLESS_BITRATE_FROM = lossless_bitrate_from
+        headphones.LOSSLESS_BITRATE_TO = lossless_bitrate_to
         headphones.MOVE_FILES = move_files
         headphones.CORRECT_METADATA = correct_metadata
         headphones.RENAME_FILES = rename_files

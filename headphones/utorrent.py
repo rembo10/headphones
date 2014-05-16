@@ -13,86 +13,154 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
-import os
-import time
-import base64
+import urllib, urllib2, urlparse, cookielib
+import json, re, os, time
+
 import headphones
 
-import simplejson as json
+from headphones import logger
 
-from headphones import logger, notifiers, request
+class utorrentclient(object):
+    TOKEN_REGEX = "<div id='token' style='display:none;'>([^<>]+)</div>"
 
-# This is just a simple script to send torrents to transmission. The
-# intention is to turn this into a class where we can check the state
-# of the download, set the download dir, etc.
-# TODO: Store the session id so we don't need to make 2 calls
-#       Store torrent id so we can check up on it
+    def __init__(self, base_url = None, username = None, password = None,): 
+                       
+        host = headphones.UTORRENT_HOST
+        if not host.startswith('http'):
+            host = 'http://' + host
+
+        if host.endswith('/'):
+            host = host[:-1]
+
+        if host.endswith('/gui'):
+            host = host[:-4]
+
+        self.base_url = host
+        self.username = headphones.UTORRENT_USERNAME
+        self.password = headphones.UTORRENT_PASSWORD
+        self.opener = self._make_opener('uTorrent', self.base_url, self.username, self.password)
+        self.token = self._get_token()
+        #TODO refresh token, when necessary
+
+    def _make_opener(self, realm, base_url, username, password):
+        """uTorrent API need HTTP Basic Auth and cookie support for token verify."""
+        auth = urllib2.HTTPBasicAuthHandler()
+        auth.add_password(realm=realm,uri=base_url,user=username,passwd=password)
+        opener = urllib2.build_opener(auth)
+        urllib2.install_opener(opener)
+
+        cookie_jar = cookielib.CookieJar()
+        cookie_handler = urllib2.HTTPCookieProcessor(cookie_jar)
+
+        handlers = [auth, cookie_handler]
+        opener = urllib2.build_opener(*handlers)
+        return opener
+
+    def _get_token(self):
+        url = urlparse.urljoin(self.base_url, 'gui/token.html')
+        try:
+            response = self.opener.open(url)
+        except urllib2.HTTPError as err:
+            logger.debug('URL: ' + str(url))
+            logger.debug('Error getting Token. uTorrent responded with error: ' + str(err))
+        match = re.search(utorrentclient.TOKEN_REGEX, response.read())
+        return match.group(1)
+
+    def list(self, **kwargs):
+        params = [('list', '1')]
+        params += kwargs.items()
+        return self._action(params)
+
+    def add_url(self, url):
+        #can receive magnet or normal .torrent link
+        params = [('action', 'add-url'), ('s', url)]
+        return self._action(params)
+
+    def start(self, *hashes):
+        params = [('action', 'start'), ]
+        for hash in hashes:
+            params.append(('hash', hash))
+        return self._action(params)
+
+    def stop(self, *hashes):
+        params = [('action', 'stop'), ]
+        for hash in hashes:
+            params.append(('hash', hash))
+        return self._action(params)
+
+    def pause(self, *hashes):
+        params = [('action', 'pause'), ]
+        for hash in hashes:
+            params.append(('hash', hash))
+        return self._action(params)
+
+    def forcestart(self, *hashes):
+        params = [('action', 'forcestart'), ]
+        for hash in hashes:
+            params.append(('hash', hash))
+        return self._action(params)
+
+    def getfiles(self, hash):
+        params = [('action', 'getfiles'), ('hash', hash)]
+        return self._action(params)
+
+    def getprops(self, hash):
+        params = [('action', 'getprops'), ('hash', hash)]
+        return self._action(params)
+
+    def setprops(self, hash, s, v):
+        params = [('action', 'setprops'), ('hash', hash), ("s", s), ("v", v)]
+        return self._action(params)
+
+    def setprio(self, hash, priority, *files):
+        params = [('action', 'setprio'), ('hash', hash), ('p', str(priority))]
+        for file_index in files:
+            params.append(('f', str(file_index)))
+
+        return self._action(params)
+
+    def _action(self, params, body=None, content_type=None):
+        url = self.base_url + '/gui/' + '?token=' + self.token + '&' + urllib.urlencode(params)
+        request = urllib2.Request(url)
+
+        if body:
+            request.add_data(body)
+            request.add_header('Content-length', len(body))
+        if content_type:
+            request.add_header('Content-type', content_type)
+
+        try:
+            response = self.opener.open(request)
+            return response.code, json.loads(response.read())
+        except urllib2.HTTPError as err:
+            logger.debug('URL: ' + str(url))
+            logger.debug('uTorrent webUI raised the following error: ' + str(err))
 
 
-def addTorrent(link):
-
-    host = headphones.UTORRENT_HOST
-    username = headphones.UTORRENT_USERNAME
-    password = headphones.UTORRENT_PASSWORD
+def labelTorrent(hash):
     label = headphones.UTORRENT_LABEL
-    token = ''
+    uTorrentClient = utorrentclient()
+    settinglabel = True
+    while settinglabel:
+        torrentList = uTorrentClient.list()
+        for torrent in torrentList[1].get('torrents'):
+            if (torrent[0].lower() == hash):
+                uTorrentClient.setprops(hash,'label',label)
+                settinglabel = False
+                return True
 
-    if not host.startswith('http'):
-        host = 'http://' + host
 
-    if host.endswith('/'):
-    	host = host[:-1]
+def dirTorrent(hash):
+    uTorrentClient = utorrentclient()
+    torrentList = uTorrentClient.list()
+    for torrent in torrentList[1].get('torrents'):
+        if (torrent[0].lower() == hash):
+            return torrent[26]
+    return False
 
-    if host.endswith('/gui'):
-    	host = host + '/'
-    else:
-    	host = host + '/gui/'
 
-    # Retrieve session id
-    auth = (username, password) if username and password else None
-    token_request = request.request_response(host + 'token.html', auth=auth)
-
-    token = re.findall('<div.*?>(.*?)</', token_request.content)[0]
-    guid = token_request.cookies['GUID']
-
-    cookies = dict(GUID = guid)
-
-    if link.startswith("magnet") or link.startswith("http") or link.endswith(".torrent"):
-        params = {'action':'add-url', 's':link, 'token':token}
-        response = request.request_json(host, params=params, auth=auth, cookies=cookies)
-    else:    
-        params = {'action':'add-file', 'token':token}
-        files = {'torrent_file':{'music.torrent' : link}}
-        response = request.request_json(host, method="post", params=params, files=files, auth=auth, cookies=cookies)
-    if not response:
-        logger.error("Error sending torrent to uTorrent")
-        return
-
-    if link.startswith('magnet'):
-        tor_hash = re.findall('urn:btih:([\w]{32,40})', link)[0]
-        if len(tor_hash) == 32:
-            tor_hash = b16encode(b32decode(tor_hash)).lower()
-    else:
-        info = bdecode(link.content)["info"]
-        tor_hash = sha1(bencode(info)).hexdigest()
-	    
-    params = {'action':'setprops', 'hash':tor_hash,'s':'label', 'v':label, 'token':token}
-    response = request.request_json(host, params=params, auth=auth, cookies=cookies)
-    if not response:
-        logger.error("Error setting torrent label in uTorrent")
-        return
-
-	# folder info can probably be cleaned up with getprops
-	folder = None    
-
-    params = {'list':'1', 'token':token}
-    response = request.request_json(host, params=params, auth=auth, cookies=cookies)
-    if not response:
-        logger.error("Error getting torrent information from uTorrent")
-        return
-
-        for torrent in response['torrents']:
-			folder = os.path.basename(torrent[26])
-
-    return folder
+def addTorrent(link, hash):
+    uTorrentClient = utorrentclient()
+    uTorrentClient.add_url(link)
+    labelTorrent(hash)
+    return dirTorrent(hash)

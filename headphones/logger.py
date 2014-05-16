@@ -43,19 +43,32 @@ class LogListHandler(logging.Handler):
 
         headphones.LOG_LIST.insert(0, (helpers.now(), message, record.levelname, record.threadName))
 
-def initLogger(verbose=1):
+def initLogger(console=False, verbose=False):
     """
     Setup logging for Headphones. It uses the logger instance with the name
     'headphones'. Three log handlers are added:
 
     * RotatingFileHandler: for the file headphones.log
     * LogListHandler: for Web UI
-    * StreamHandler: for console (if verbose > 0)
+    * StreamHandler: for console (if console)
+
+    Console logging is only enabled if console is set to True.
     """
+
+    # Close and remove old handlers. This is required to reinit the loggers
+    # at runtime
+    for handler in logger.handlers[:]:
+        # Just make sure it is cleaned up.
+        if isinstance(handler, handlers.RotatingFileHandler):
+            handler.close()
+        elif isinstance(handler, logging.StreamHandler):
+            handler.flush()
+
+        logger.removeHandler(handler)
 
     # Configure the logger to accept all messages
     logger.propagate = False
-    logger.setLevel(logging.DEBUG if verbose == 2 else logging.INFO)
+    logger.setLevel(logging.DEBUG if verbose else logging.INFO)
 
     # Setup file logger
     filename = os.path.join(headphones.LOG_DIR, FILENAME)
@@ -74,7 +87,7 @@ def initLogger(verbose=1):
     logger.addHandler(loglist_handler)
 
     # Setup console logger
-    if verbose:
+    if console:
         console_formatter = logging.Formatter('%(asctime)s - %(levelname)s :: %(threadName)s : %(message)s', '%d-%b-%Y %H:%M:%S')
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(console_formatter)
