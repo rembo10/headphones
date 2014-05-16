@@ -589,6 +589,7 @@ def addReleaseById(rid):
         controlValueDict = {"AlbumID":  rgid}
 
         newValueDict = {"ArtistID":         release_dict['artist_id'],
+                        "ReleaseID":        rgid,
                         "ArtistName":       release_dict['artist_name'],
                         "AlbumTitle":       release_dict['rg_title'],
                         "AlbumASIN":        release_dict['asin'],
