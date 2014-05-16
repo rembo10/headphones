@@ -151,11 +151,20 @@ def sort_search_results(resultlist, album, new):
 
     # Add a priority if it has any of the preferred words
     temp_list = []
+    preferred_words = None
+    if headphones.PREFERRED_WORDS:
+        preferred_words = helpers.split_string(headphones.PREFERRED_WORDS)
     for result in resultlist:
-        if headphones.PREFERRED_WORDS and any(word.lower() in result[0].lower() for word in helpers.split_string(headphones.PREFERRED_WORDS)):
-            temp_list.append((result[0],result[1],result[2],result[3],result[4],1))
-        else:
-            temp_list.append((result[0],result[1],result[2],result[3],result[4],0))
+        priority = 0
+        if preferred_words:
+            if any(word.lower() in result[0].lower() for word in preferred_words):
+                priority = 1
+            # add a search provider priority (weighted based on position)
+            i = next((i for i, word in enumerate(preferred_words) if word in result[3].lower()), None)
+            if i != None:
+                priority += round((len(preferred_words) - i) / float(len(preferred_words)),2)
+
+        temp_list.append((result[0],result[1],result[2],result[3],result[4],priority))
 
     resultlist = temp_list
 
@@ -216,6 +225,34 @@ def sort_search_results(resultlist, album, new):
             logger.exception('Unhandled exception')
             logger.info('No track information for %s - %s. Defaulting to highest quality', (album['ArtistName'], album['AlbumTitle']))
 
+            finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
+
+    # lossless - ignore results if target size outside bitrate range
+    elif headphones.PREFERRED_QUALITY == 3 and (headphones.LOSSLESS_BITRATE_FROM or headphones.LOSSLESS_BITRATE_TO):
+
+        finallist = []
+        tracks = myDB.select('SELECT TrackDuration from tracks WHERE AlbumID=?', [album['AlbumID']])
+
+        if len(tracks):
+
+            albumlength = sum([pair[0] for pair in tracks])
+            mintargetsize = 0
+            maxtargetsize = 0
+            if headphones.LOSSLESS_BITRATE_FROM:
+                mintargetsize = albumlength/1000 * int(headphones.LOSSLESS_BITRATE_FROM) * 128
+            if headphones.LOSSLESS_BITRATE_TO:
+                maxtargetsize = albumlength/1000 * int(headphones.LOSSLESS_BITRATE_TO) * 128
+
+            if mintargetsize > 0 or maxtargetsize > 0:
+                for i, result in reversed(list(enumerate(resultlist))):
+                    if int(result[1]) < mintargetsize and mintargetsize > 0 or int(result[1]) > maxtargetsize and maxtargetsize > 0:
+                        if int(result[1]) < mintargetsize:
+                            logger.info("%s is too small for this album - not considering it. (Size: %s, Minsize: %s)", result[0], helpers.bytes_to_mb(result[1]), helpers.bytes_to_mb(mintargetsize))
+                        else:
+                            logger.info("%s is too large for this album - not considering it. (Size: %s, Maxsize: %s)", result[0], helpers.bytes_to_mb(result[1]), helpers.bytes_to_mb(maxtargetsize))
+                        del resultlist[i]
+
+        if len (resultlist):
             finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
 
     else:
