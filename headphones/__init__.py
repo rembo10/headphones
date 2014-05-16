@@ -103,6 +103,8 @@ PREFERRED_BITRATE_HIGH_BUFFER = None
 PREFERRED_BITRATE_LOW_BUFFER = None
 PREFERRED_BITRATE_ALLOW_LOSSLESS = False
 DETECT_BITRATE = False
+LOSSLESS_BITRATE_FROM = None
+LOSSLESS_BITRATE_TO = None
 ADD_ARTISTS = False
 CORRECT_METADATA = False
 MOVE_FILES = False
@@ -358,7 +360,7 @@ def initialize():
                 PUSHBULLET_ENABLED, PUSHBULLET_APIKEY, PUSHBULLET_DEVICEID, PUSHBULLET_ONSNATCH, \
                 MIRROR, CUSTOMHOST, CUSTOMPORT, CUSTOMSLEEP, HPUSER, HPPASS, XBMC_ENABLED, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, XBMC_UPDATE, \
                 XBMC_NOTIFY, LMS_ENABLED, LMS_HOST, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
-                PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
+                PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, LOSSLESS_BITRATE_FROM, LOSSLESS_BITRATE_TO, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
                 PLEX_ENABLED, PLEX_SERVER_HOST, PLEX_CLIENT_HOST, PLEX_USERNAME, PLEX_PASSWORD, PLEX_UPDATE, PLEX_NOTIFY, PUSHALOT_ENABLED, PUSHALOT_APIKEY, \
                 PUSHALOT_ONSNATCH, SONGKICK_ENABLED, SONGKICK_APIKEY, SONGKICK_LOCATION, SONGKICK_FILTER_ENABLED
 
@@ -438,6 +440,8 @@ def initialize():
         PREFERRED_BITRATE_LOW_BUFFER = check_setting_int(CFG, 'General', 'preferred_bitrate_low_buffer', '')
         PREFERRED_BITRATE_ALLOW_LOSSLESS = bool(check_setting_int(CFG, 'General', 'preferred_bitrate_allow_lossless', 0))
         DETECT_BITRATE = bool(check_setting_int(CFG, 'General', 'detect_bitrate', 0))
+        LOSSLESS_BITRATE_FROM = check_setting_int(CFG, 'General', 'lossless_bitrate_from', '')
+        LOSSLESS_BITRATE_TO = check_setting_int(CFG, 'General', 'lossless_bitrate_to', '')
         ADD_ARTISTS = bool(check_setting_int(CFG, 'General', 'auto_add_artists', 1))
         CORRECT_METADATA = bool(check_setting_int(CFG, 'General', 'correct_metadata', 0))
         MOVE_FILES = bool(check_setting_int(CFG, 'General', 'move_files', 0))
@@ -862,6 +866,8 @@ def config_write():
     new_config['General']['preferred_bitrate_low_buffer'] = PREFERRED_BITRATE_LOW_BUFFER
     new_config['General']['preferred_bitrate_allow_lossless'] = int(PREFERRED_BITRATE_ALLOW_LOSSLESS)
     new_config['General']['detect_bitrate'] = int(DETECT_BITRATE)
+    new_config['General']['lossless_bitrate_from'] = LOSSLESS_BITRATE_FROM
+    new_config['General']['lossless_bitrate_to'] = LOSSLESS_BITRATE_TO
     new_config['General']['auto_add_artists'] = int(ADD_ARTISTS)
     new_config['General']['correct_metadata'] = int(CORRECT_METADATA)
     new_config['General']['move_files'] = int(MOVE_FILES)
