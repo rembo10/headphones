@@ -470,7 +470,14 @@
                                 <div class="row radio clearfix">
                                     <input type="radio" name="preferred_quality" id="preferred_quality0" value="0" ${config['pref_qual_0']}><label>Highest Quality excluding Lossless</label>
                                     <input type="radio" name="preferred_quality" id="preferred_quality1" value="1" ${config['pref_qual_1']}><label>Highest Quality including Lossless</label>
-                                    <input type="radio" name="preferred_quality" id="preferred_quality3" value="3" ${config['pref_qual_3']}><label>Lossless Only</label>
+                                    <input type="radio" name="preferred_quality" id="lossless_only" value="3" ${config['pref_qual_3']}><label>Lossless Only</label>
+                                    <div id="lossless_only_options">
+                                        <span style="padding-left: 20px">
+                                            Reject if target size is not in bitrate range: \
+                                            <input type="text" class="override-float" name="lossless_bitrate_from" value="${config['lossless_bitrate_from']}" size="4" title="e.g. if album length = 40 mins, from = 350 kbps, then min target size = 102.5 mb, anything less will be rejected">to\
+                                            <input type="text" class="override-float" name="lossless_bitrate_to" value="${config['lossless_bitrate_to']}" size="5" title="e.g. if album length = 40 mins, to = 2000 kbps, then max target size = 586 mb, anything greater will be rejected">kbps
+                                        </span>
+                                    </div>
                                     <input type="radio" id="preferred_bitrate" name="preferred_quality" value="2" ${config['pref_qual_2']}>Preferred Bitrate: <input type="text" class="override-float" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3">kbps<br>
                                     <div id="preferred_bitrate_options">
                                         Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['pref_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['pref_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br><br>
@@ -496,7 +503,7 @@
                                 <div class="row">
                                     <label>Preferred Words</label>
                                     <input type="text" name="preferred_words" value="${config['preferred_words']}" size="50">
-                                    <small>Results with these words in the title will be preferred over results without them</small>
+                                    <small>Results with these words in the title will be preferred over results without them (search provider names can also be entered)</small>
                                 </div>
                                 <div class="row">
                                     <label>Required Words</label>
@@ -1587,6 +1594,15 @@
                         }
                 });
 
+                if ($("#lossless_only").is(":checked"))
+                        {
+                                $("#lossless_only_options").show();
+                        }
+                else
+                        {
+                                $("#lossless_only_options").hide();
+                        }
+
                 if ($("#preferred_bitrate").is(":checked"))
                         {
                                 $("#preferred_bitrate_options").show();
@@ -1632,18 +1648,22 @@
                         if ($("#preferred_bitrate").is(":checked"))
                         {
                                 $("#preferred_bitrate_options").slideDown("fast");
+                                $("#lossless_only_options").slideUp("fast");
                         }
                         if ($("#preferred_quality0").is(":checked"))
                         {
                                 $("#preferred_bitrate_options").slideUp("fast");
+                                $("#lossless_only_options").slideUp("fast");
                         }
                         if ($("#preferred_quality1").is(":checked"))
                         {
                                 $("#preferred_bitrate_options").slideUp("fast");
+                                $("#lossless_only_options").slideUp("fast");
                         }
-                        if ($("#preferred_quality3").is(":checked"))
+                        if ($("#lossless_only").is(":checked"))
                         {
-                                $("#preferred_bitrate_options").slideUp("fast");
+                            $("#lossless_only_options").slideDown("fast");
+                            $("#preferred_bitrate_options").slideUp("fast");
                         }
                         if ($("#nzb_downloader_sabnzbd").is(":checked"))
                         {
