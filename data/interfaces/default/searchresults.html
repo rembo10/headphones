@@ -35,12 +35,12 @@
 				%if type == 'album':
 					<td id="albumname"><a href="${result['albumurl']}">${result['title']}</a></td>
 				%endif
-					<td id="artistname"><a href="${result['url']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
+					<td id="artistname"><a href="addArtist?artistid=${result['id']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
 					<td id="score"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></td>
-				%if type == 'album':	
+				%if type == 'album':
 					<td id="add"><a href="addReleaseById?rid=${result['albumid']}"><i class="fa fa-plus"></i> Add this album</a></td>
 				%else:
-					<td id="add"><a href="addArtist?artistid=${result['id']}"><i class="fa fa-plus"></i> Add this artist</a></td>
+					<td id="add"><a href="${result['url']}"></i> View on MusicBrainz</a></td>
 				%endif
 				</tr>
 				%endfor
@@ -57,10 +57,10 @@
 <%def name="javascriptIncludes()">
 
 	<script src="js/libs/jquery.dataTables.min.js"></script>
-	
+
 	<script>
 	function getArt() {
-		$("table#searchresults_table tr td#albumart img").each(function(){	
+		$("table#searchresults_table tr td#albumart img").each(function(){
 			var id = $(this).attr('title');
 			var image = $(this);
 			if ( !image.hasClass('done') ) {
@@ -76,7 +76,7 @@
 				"bDestroy": true,
 				"aoColumnDefs": [
 			          { 'bSortable': false, 'aTargets': [ 0,3 ] }
-				],	
+				],
 				"oLanguage": {
 					"sLengthMenu":"Show _MENU_ results per page",
 					"sEmptyTable": "No results",
@@ -91,7 +91,7 @@
 			resetFilters("album");
 	}
 	$(document).ready(function(){
-			initThisPage();		
+			initThisPage();
 	});
 	$(window).load(function(){
 		initFancybox();
