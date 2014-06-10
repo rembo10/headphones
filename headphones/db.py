@@ -59,29 +59,22 @@ class DBConnection:
             return
             
         sqlResult = None
-        attempt = 0
         
-        while attempt < 5:
-            try:
-                if args == None:
-                    #logger.debug(self.filename+": "+query)
-                    sqlResult = self.connection.execute(query)
-                else:
-                    #logger.debug(self.filename+": "+query+" with args "+str(args))
-                    sqlResult = self.connection.execute(query, args)
-                self.connection.commit()
-                break
-            except sqlite3.OperationalError, e:
-                if "unable to open database file" in e.message or "database is locked" in e.message:
-                    logger.warn('Database Error: %s', e)
-                    attempt += 1
-                    time.sleep(1)
-                else:
-                    logger.error('Database error: %s', e)
-                    raise
-            except sqlite3.DatabaseError, e:
-                logger.error('Fatal Error executing %s :: %s', query, e)
+        try:
+            if args == None:
+                sqlResult = self.connection.execute(query)
+            else:
+                sqlResult = self.connection.execute(query, args)
+            self.connection.commit()
+        except sqlite3.OperationalError, e:
+            if "unable to open database file" in e.message or "database is locked" in e.message:
+                logger.warn('Database Error: %s', e)
+            else:
+                logger.error('Database error: %s', e)
                 raise
+        except sqlite3.DatabaseError, e:
+            logger.error('Fatal Error executing %s :: %s', query, e)
+            raise
         
         return sqlResult
     
