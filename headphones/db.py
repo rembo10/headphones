@@ -89,7 +89,7 @@ class DBConnection:
     
         sqlResults = self.action(query, args).fetchall()
         
-        if sqlResults == None:
+        if sqlResults == None or sqlResults == [None]:
             return []
             
         return sqlResults
