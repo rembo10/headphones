@@ -61,11 +61,12 @@ class DBConnection:
         sqlResult = None
         
         try:
-            if args == None:
-                sqlResult = self.connection.execute(query)
-            else:
-                sqlResult = self.connection.execute(query, args)
-            self.connection.commit()
+            with self.connection as c:
+                if args == None:
+                    sqlResult = c.execute(query)
+                else:
+                    sqlResult = c.execute(query, args)
+                    
         except sqlite3.OperationalError, e:
             if "unable to open database file" in e.message or "database is locked" in e.message:
                 logger.warn('Database Error: %s', e)
