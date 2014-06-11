@@ -389,6 +389,8 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                 releaseid = rg['id']
             else:
                 releaseid = rg_exists['ReleaseID']
+                if not releaseid:
+                    releaseid = rg['id']
 
             album = myDB.action('SELECT * from allalbums WHERE ReleaseID=?', [releaseid]).fetchone()
 
