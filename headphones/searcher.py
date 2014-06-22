@@ -221,7 +221,7 @@ def sort_search_results(resultlist, album, new):
                 if not len(finallist) and len(flac_list) and headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                     logger.info("Since there were no appropriate lossy matches (and at least one lossless match, going to use lossless instead")
                     finallist = sorted(flac_list, key=lambda title: (title[5], int(title[1])), reverse=True)
-        except Exception, e:
+        except Exception as e:
             logger.exception('Unhandled exception')
             logger.info('No track information for %s - %s. Defaulting to highest quality', (album['ArtistName'], album['AlbumTitle']))
 
@@ -372,7 +372,7 @@ def searchNZB(album, new=False, losslessOnly=False):
                         resultlist.append((title, size, url, provider, 'nzb'))
                         logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
 
-                    except Exception, e:
+                    except Exception as e:
                         logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
 
     if headphones.NEWZNAB:
@@ -444,7 +444,7 @@ def searchNZB(album, new=False, losslessOnly=False):
                             resultlist.append((title, size, url, provider, 'nzb'))
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
 
-                        except Exception, e:
+                        except Exception as e:
                             logger.exception("An unknown error occurred trying to parse the feed: %s" % e)
 
     if headphones.NZBSORG:
@@ -491,7 +491,7 @@ def searchNZB(album, new=False, losslessOnly=False):
 
                         resultlist.append((title, size, url, provider, 'nzb'))
                         logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-                    except Exception, e:
+                    except Exception as e:
                         logger.exception("Unhandled exception while parsing feed")
 
     if headphones.NZBSRUS:
@@ -543,7 +543,7 @@ def searchNZB(album, new=False, losslessOnly=False):
                         resultlist.append((title, size, url, provider, 'nzb'))
                         logger.info('Found %s. Size: %s', title, helpers.bytes_to_mb(size))
 
-                    except Exception, e:
+                    except Exception as e:
                         logger.exception("Unhandled exception")
 
     if headphones.OMGWTFNZBS:
@@ -590,7 +590,7 @@ def searchNZB(album, new=False, losslessOnly=False):
 
                         resultlist.append((title, size, url, provider, 'nzb'))
                         logger.info('Found %s. Size: %s', title, helpers.bytes_to_mb(size))
-                    except Exception, e:
+                    except Exception as e:
                         logger.exception("Unhandled exception")
 
     # attempt to verify that this isn't a substring result
@@ -646,7 +646,7 @@ def send_to_downloader(data, bestqual, album):
 
                 os.umask(prev)
                 logger.info('File saved to: %s', nzb_name)
-            except Exception, e:
+            except Exception as e:
                 logger.error('Couldn\'t write NZB file: %s', e)
                 return
     else:
@@ -671,7 +671,7 @@ def send_to_downloader(data, bestqual, album):
 
                         # Gonna just take a guess at this..... Is there a better way to find this out?
                         folder_name = bestqual[0]
-                    except Exception, e:
+                    except Exception as e:
                         logger.error("Error opening magnet link: %s" % str(e))
                         return
                 else:
@@ -702,7 +702,7 @@ def send_to_downloader(data, bestqual, album):
 
                     folder_name = torrent_info['info'].get('name', '')
                     logger.info('Torrent folder name: %s' % folder_name)
-                except Exception, e:
+                except Exception as e:
                     logger.error('Couldn\'t get name from Torrent file: %s. Defaulting to torrent title' % e)
                     folder_name = bestqual[0]
 
@@ -732,7 +732,7 @@ def send_to_downloader(data, bestqual, album):
             if bestqual[3] == 'rutracker.org':
                 try:
                     shutil.rmtree(os.path.split(file_or_url)[0])
-                except Exception, e:
+                except Exception as e:
                     logger.exception("Unhandled exception")
 
         else:# if headphones.TORRENT_DOWNLOADER == 2:
@@ -758,7 +758,7 @@ def send_to_downloader(data, bestqual, album):
             if bestqual[3] == 'rutracker.org':
                 try:
                     shutil.rmtree(os.path.split(file_or_url)[0])
-                except Exception, e:
+                except Exception as e:
                     logger.exception("Unhandled exception")
 
     myDB = db.DBConnection()
@@ -1014,7 +1014,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
         # Process feed
         if data:
             if not len(data.entries):
-                logger.info(u"No results found from %s for %s" % provider, term)
+                logger.info(u"No results found from %s for %s", provider, term)
             else:
                 for item in data.entries:
                     try:
@@ -1031,8 +1031,8 @@ def searchTorrent(album, new=False, losslessOnly=False):
                             resultlist.append((title, size, url, provider, 'torrent'))
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                         else:
-                            logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeders), rightformat))
-                    except Exception, e:
+                            logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d, Format: %s)', title, size, seeders, rightformat)
+                    except Exception as e:
                         logger.exception("Unhandled exception in the KAT parser")
 
     if headphones.WAFFLES:
@@ -1063,7 +1063,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
                             '-seeders:0']) # cut out dead torrents
 
         if bitrate:
-            query_items.append('bitrate:"%s"' % bitrate)
+            query_items.append('bitrate:"%s"', bitrate)
 
         # Requesting content
         logger.info('Parsing results from Waffles')
@@ -1087,7 +1087,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
         # Process feed
         if data:
             if not len(data.entries):
-                logger.info(u"No results found from %s for %s" % (provider, term))
+                logger.info(u"No results found from %s for %s", provider, term))
             else:
                 for item in data.entries:
                     try:
@@ -1096,9 +1096,9 @@ def searchTorrent(album, new=False, losslessOnly=False):
                         size = int(desc_match.group(1))
                         url = item.link
                         resultlist.append((title, size, url, provider, 'torrent'))
-                        logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-                    except Exception, e:
-                        logger.error(u"An error occurred while trying to parse the response from Waffles.fm: %s" % e)
+                        logger.info('Found %s. Size: %s', title, helpers.bytes_to_mb(size))
+                    except Exception as e:
+                        logger.error(u"An error occurred while trying to parse the response from Waffles.fm: %s", e)
 
     # rutracker.org
 
@@ -1183,7 +1183,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
                 logger.info(u"Attempting to log in to What.cd...")
                 gazelle = gazelleapi.GazelleAPI(headphones.WHATCD_USERNAME, headphones.WHATCD_PASSWORD)
                 gazelle._login()
-            except Exception, e:
+            except Exception as e:
                 gazelle = None
                 logger.error(u"What.cd credentials incorrect or site is down. Error: %s %s" % (e.__class__.__name__, str(e)))
 
@@ -1307,7 +1307,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
                         else:
                             logger.info('%s is larger than the maxsize or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i)' % (title, size, int(seeds)))
 
-                    except Exception, e:
+                    except Exception as e:
                         logger.error(u"An unknown error occurred in the Pirate Bay parser: %s" % e)
 
     if headphones.ISOHUNT:
@@ -1427,7 +1427,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
                         else:
                             logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))
 
-                    except Exception, e:
+                    except Exception as e:
                         logger.exception("Unhandled exception in Mininova Parser")
 
     #attempt to verify that this isn't a substring result
@@ -1482,7 +1482,7 @@ def preprocess(resultlist):
 
                         #TODO: Do we want rar checking in here to try to keep unknowns out?
                         #or at least the option to do so?
-                except Exception, e:
+                except Exception as e:
                     logger.exception('Unhandled exception. Unable to parse the best result NZB. Error: %s. (Make sure your username/password/API is correct for provider: %s', e ,result[3])
                     continue
 
