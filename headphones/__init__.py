@@ -38,7 +38,8 @@ SIGNAL = None
 SYS_PLATFORM = None
 SYS_ENCODING = None
 
-VERBOSE = 1
+QUIET = False
+VERBOSE = False
 DAEMON = False
 CREATEPID = False
 PIDFILE= None
@@ -250,7 +251,7 @@ PLEX_UPDATE = False
 PLEX_NOTIFY = False
 NMA_ENABLED = False
 NMA_APIKEY = None
-NMA_PRIORITY = None
+NMA_PRIORITY = 0
 NMA_ONSNATCH = None
 PUSHALOT_ENABLED = False
 PUSHALOT_APIKEY = None
@@ -293,6 +294,8 @@ CACHE_SIZEMB = 32
 JOURNAL_MODE = None
 
 UMASK = None
+
+VERIFY_SSL_CERT = True
 
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
@@ -340,7 +343,7 @@ def initialize():
 
     with INIT_LOCK:
 
-        global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, SYS_PLATFORM, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
+        global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, QUIET, DAEMON, SYS_PLATFORM, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, GIT_USER, GIT_BRANCH, DO_NOT_OVERRIDE_GIT_BRANCH, \
                 CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
@@ -362,7 +365,7 @@ def initialize():
                 XBMC_NOTIFY, LMS_ENABLED, LMS_HOST, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
                 PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, LOSSLESS_BITRATE_FROM, LOSSLESS_BITRATE_TO, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
                 PLEX_ENABLED, PLEX_SERVER_HOST, PLEX_CLIENT_HOST, PLEX_USERNAME, PLEX_PASSWORD, PLEX_UPDATE, PLEX_NOTIFY, PUSHALOT_ENABLED, PUSHALOT_APIKEY, \
-                PUSHALOT_ONSNATCH, SONGKICK_ENABLED, SONGKICK_APIKEY, SONGKICK_LOCATION, SONGKICK_FILTER_ENABLED
+                PUSHALOT_ONSNATCH, SONGKICK_ENABLED, SONGKICK_APIKEY, SONGKICK_LOCATION, SONGKICK_FILTER_ENABLED, VERIFY_SSL_CERT
 
 
         if __INITIALIZED__:
@@ -647,6 +650,8 @@ def initialize():
 
         ALBUM_COMPLETION_PCT = check_setting_int(CFG, 'Advanced', 'album_completion_pct', 80)
 
+        VERIFY_SSL_CERT = bool(check_setting_int(CFG, 'Advanced', 'verify_ssl_cert', 1))
+
         # update folder formats in the config & bump up config version
         if CONFIG_VERSION == '0':
             from headphones.helpers import replace_all
@@ -717,8 +722,9 @@ def initialize():
                 if VERBOSE:
                     sys.stderr.write('Unable to create the log directory. Logging to screen only.\n')
 
-        # Start the logger, silence console logging if we need to
-        logger.initLogger(verbose=VERBOSE)
+        # Start the logger, disable console if needed
+        logger.initLogger(console=not QUIET, verbose=VERBOSE)
+        logger.initLogger(console=not QUIET, verbose=False)
 
         if not CACHE_DIR:
             # Put the cache dir in the data dir for now
@@ -1020,7 +1026,7 @@ def config_write():
     new_config['NMA'] = {}
     new_config['NMA']['nma_enabled'] = int(NMA_ENABLED)
     new_config['NMA']['nma_apikey'] = NMA_APIKEY
-    new_config['NMA']['nma_priority'] = NMA_PRIORITY
+    new_config['NMA']['nma_priority'] = int(NMA_PRIORITY)
     new_config['NMA']['nma_onsnatch'] = int(NMA_ONSNATCH)
 
     new_config['Pushalot'] = {}
@@ -1098,6 +1104,7 @@ def config_write():
     new_config['Advanced']['album_completion_pct'] = ALBUM_COMPLETION_PCT
     new_config['Advanced']['cache_sizemb'] = CACHE_SIZEMB
     new_config['Advanced']['journal_mode'] = JOURNAL_MODE
+    new_config['Advanced']['verify_ssl_cert'] = int(VERIFY_SSL_CERT)
 
     new_config.write()
 

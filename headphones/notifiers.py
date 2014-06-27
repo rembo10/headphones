@@ -27,7 +27,7 @@ import time
 from xml.dom import minidom
 from httplib import HTTPSConnection
 from urllib import urlencode
-
+from lib.pynma import pynma
 import lib.oauth2 as oauth
 import lib.pythontwitter as twitter
 
@@ -380,34 +380,40 @@ class Plex:
                 logger.warn('Error sending notification request to Plex Media Server')
 
 class NMA:
+    def notify(self, artist=None, album=None, snatched=None):
+        title = 'Headphones'
+        api = headphones.NMA_APIKEY
+        nma_priority = headphones.NMA_PRIORITY
 
-    def __init__(self):
+        logger.debug(u"NMA title: " + title)
+        logger.debug(u"NMA API: " + api)
+        logger.debug(u"NMA Priority: " + str(nma_priority))
 
-        self.apikey = headphones.NMA_APIKEY
-        self.priority = headphones.NMA_PRIORITY
-
-    def _send(self, data):
-        return request.request_content('https://www.notifymyandroid.com/publicapi/notify', data=data)
-
-    def notify(self, artist=None, album=None, snatched_nzb=None):
-
-        apikey = self.apikey
-        priority = self.priority
-
-        if snatched_nzb:
-            event = snatched_nzb + " snatched!"
-            description = "Headphones has snatched: " + snatched_nzb + " and has sent it to SABnzbd+"
+        if snatched:
+            event = snatched + " snatched!"
+            message = "Headphones has snatched: " + snatched
         else:
             event = artist + ' - ' + album + ' complete!'
-            description = "Headphones has downloaded and postprocessed: " + artist + ' [' + album + ']'
+            message = "Headphones has downloaded and postprocessed: " + artist + ' [' + album + ']'
 
-        data = { 'apikey': apikey, 'application':'Headphones', 'event': event, 'description': description, 'priority': priority}
+        logger.debug(u"NMA event: " + event)
+        logger.debug(u"NMA message: " + message)
 
-        logger.info('Sending notification request to NotifyMyAndroid')
-        request = self._send(data)
+        batch = False
 
-        if not request:
-            logger.warn('Error sending notification request to NotifyMyAndroid')        
+        p = pynma.PyNMA()
+        keys = api.split(',')
+        p.addkey(keys)
+
+        if len(keys) > 1: batch = True
+
+        response = p.push(title, event, message, priority=nma_priority, batch_mode=batch)
+
+        if not response[api][u'code'] == u'200':
+            logger.error(u'Could not send notification to NotifyMyAndroid')
+            return False
+        else:
+            return True     
 
 class PUSHBULLET:
 
