@@ -749,6 +749,14 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("logs")
     clearLogs.exposed = True
 
+    def toggleVerbose(self):
+        headphones.VERBOSE = not headphones.VERBOSE
+        logger.initLogger(not headphones.QUIET, headphones.VERBOSE)
+        logger.info("Verbose toggled, set to %s", headphones.VERBOSE)
+        logger.debug("If you read this message, debug logging is available")
+        raise cherrypy.HTTPRedirect("logs")
+    toggleVerbose.exposed = True
+
     def getLog(self,iDisplayStart=0,iDisplayLength=100,iSortCol_0=0,sSortDir_0="desc",sSearch="",**kwargs):
 
         iDisplayStart = int(iDisplayStart)

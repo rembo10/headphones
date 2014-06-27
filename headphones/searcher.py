@@ -570,8 +570,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
 
         data = request.request_json(
             url='http://api.omgwtfnzbs.org/json/',
-            params=params, headers=headers,
-            validator=lambda x: type(x) == dict
+            params=params, headers=headers
         )
 
         # Parse response
@@ -738,7 +737,7 @@ def send_to_downloader(data, bestqual, album):
                 except Exception, e:
                     logger.exception("Unhandled exception")
 
-        else:
+        else:# if headphones.TORRENT_DOWNLOADER == 2:
             logger.info("Sending torrent to uTorrent")
  
             # rutracker needs cookies to be set, pass the .torrent file instead of url
@@ -801,7 +800,7 @@ def send_to_downloader(data, bestqual, album):
     if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
         logger.info(u"Sending NMA notification")
         nma = notifiers.NMA()
-        nma.notify(snatched_nzb=name)
+        nma.notify(snatched=name)
     if headphones.PUSHALOT_ENABLED and headphones.PUSHALOT_ONSNATCH:
         logger.info(u"Sending Pushalot notification")
         pushalot = notifiers.PUSHALOT()
@@ -1447,7 +1446,7 @@ def preprocess(resultlist):
     for result in resultlist:
 
         if result[4] == 'torrent':
-            #Get out of here if we're using Transmission or uTorrent
+            #Get out of here if we're using Transmission
             if headphones.TORRENT_DOWNLOADER == 1:  ## if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
                 return True, result
             # get outta here if rutracker
@@ -1511,6 +1510,6 @@ def CalculateTorrentHash(link, data):
         info = bdecode(data)["info"]
         tor_hash = sha1(bencode(info)).hexdigest()
 
-    logger.info('Torrent Hash: ' + str(tor_hash))
+    logger.debug('Torrent Hash: ' + str(tor_hash))
 
     return tor_hash

@@ -505,7 +505,7 @@ def finalize_update(artistid, artistname, errors=False):
     myDB = db.DBConnection()
 
     latestalbum = myDB.action('SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [artistid]).fetchone()
-    totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid]))
+    totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND AlbumID IN (SELECT AlbumID FROM albums WHERE Status != "Ignored")', [artistid]))
     #havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['artist_name']]))
     havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"', [artistname]))
 
@@ -611,6 +611,7 @@ def addReleaseById(rid, rgid=None):
             status = 'Wanted'
 
         newValueDict = {"ArtistID":         release_dict['artist_id'],
+                        "ReleaseID":        rgid,
                         "ArtistName":       release_dict['artist_name'],
                         "AlbumTitle":       release_dict['rg_title'],
                         "AlbumASIN":        release_dict['asin'],
