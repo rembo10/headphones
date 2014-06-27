@@ -389,6 +389,8 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                 releaseid = rg['id']
             else:
                 releaseid = rg_exists['ReleaseID']
+                if not releaseid:
+                    releaseid = rg['id']
 
             album = myDB.action('SELECT * from allalbums WHERE ReleaseID=?', [releaseid]).fetchone()
 
@@ -526,9 +528,22 @@ def finalize_update(artistid, artistname, errors=False):
 
     myDB.upsert("artists", newValueDict, controlValueDict)
 
-def addReleaseById(rid):
+def addReleaseById(rid, rgid=None):
 
     myDB = db.DBConnection()
+
+    # Create minimum info upfront if added from searchresults
+    status = ''
+    if rgid:
+        dbalbum = myDB.select("SELECT * from albums WHERE AlbumID=?", [rgid])
+        if not dbalbum:
+            status = 'Loading'
+            controlValueDict = {"AlbumID":  rgid}
+            newValueDict = {"AlbumTitle":   rgid,
+                            "ArtistName":   status,
+                            "Status":       status}
+            myDB.upsert("albums", newValueDict, controlValueDict)
+            time.sleep(1)
 
     rgid = None
     artistid = None
@@ -545,9 +560,13 @@ def addReleaseById(rid):
             release_dict = mb.getRelease(rid)
         except Exception, e:
             logger.info('Unable to get release information for Release %s: %s', rid, e)
+            if status == 'Loading':
+                myDB.action("DELETE FROM albums WHERE AlbumID=?", [rgid])
             return
         if not release_dict:
             logger.info('Unable to get release information for Release %s: no dict', rid)
+            if status == 'Loading':
+                myDB.action("DELETE FROM albums WHERE AlbumID=?", [rgid])
             return
 
         rgid = release_dict['rgid']
@@ -565,7 +584,6 @@ def addReleaseById(rid):
         else:
             sortname = release_dict['artist_name']
 
-
         logger.info(u"Now manually adding: " + release_dict['artist_name'] + " - with status Paused")
         controlValueDict = {"ArtistID":     release_dict['artist_id']}
         newValueDict = {"ArtistName":       release_dict['artist_name'],
@@ -581,12 +599,16 @@ def addReleaseById(rid):
 
     elif not artist_exists and not release_dict:
         logger.error("Artist does not exist in the database and did not get a valid response from MB. Skipping release.")
+        if status == 'Loading':
+            myDB.action("DELETE FROM albums WHERE AlbumID=?", [rgid])
         return
 
-    if not rg_exists and release_dict:  #it should never be the case that we have an rg and not the artist
-                                        #but if it is this will fail
+    if not rg_exists and release_dict or status == 'Loading' and release_dict:  #it should never be the case that we have an rg and not the artist
+                                                                                #but if it is this will fail
         logger.info(u"Now adding-by-id album (" + release_dict['title'] + ") from id: " + rgid)
         controlValueDict = {"AlbumID":  rgid}
+        if status != 'Loading':
+            status = 'Wanted'
 
         newValueDict = {"ArtistID":         release_dict['artist_id'],
                         "ArtistName":       release_dict['artist_name'],
@@ -594,8 +616,9 @@ def addReleaseById(rid):
                         "AlbumASIN":        release_dict['asin'],
                         "ReleaseDate":      release_dict['date'],
                         "DateAdded":        helpers.today(),
-                        "Status":           'Wanted',
-                        "Type":             release_dict['rg_type']
+                        "Status":           status,
+                        "Type":             release_dict['rg_type'],
+                        "ReleaseID":        rid
                         }
 
         myDB.upsert("albums", newValueDict, controlValueDict)
@@ -635,11 +658,19 @@ def addReleaseById(rid):
 
             myDB.upsert("tracks", newValueDict, controlValueDict)
 
+        # Reset status
+        if status == 'Loading':
+            controlValueDict = {"AlbumID":  rgid}
+            newValueDict = {"Status":   "Wanted"}
+            myDB.upsert("albums", newValueDict, controlValueDict)
+
         #start a search for the album
         import searcher
         searcher.searchforalbum(rgid, False)
     elif not rg_exists and not release_dict:
         logger.error("ReleaseGroup does not exist in the database and did not get a valid response from MB. Skipping release.")
+        if status == 'Loading':
+            myDB.action("DELETE FROM albums WHERE AlbumID=?", [rgid])
         return
     else:
         logger.info('Release ' + str(rid) + " already exists in the database!")
