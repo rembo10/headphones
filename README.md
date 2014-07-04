@@ -2,12 +2,15 @@
 
 ###Installation and Notes
 
-This is a relatively early release of a third-party add-on for SABnzbd. It's been around for about a year, and while
-quite functional, there are still a lot of kinks to work out!
+[Read our Wiki](../../wiki) on how to install and use HeadPhones properly.
 
-To run it, just double-click the Headphones.py file (in Windows - you may need to right click and click 'Open With' -> Python) or launch a terminal, cd into the Headphones directory and run 'python headphones.py'.
+Issues can be reported on the GitHub issue tracker considering these two rules:
 
-For additional startup options, type 'python Headphones.py -h' or 'python Headphones.py --help'
+1. You read the wiki and searched the existing issues and this is not solving your problem
+2. You use [proper markdown syntax](https://help.github.com/articles/github-flavored-markdown) to report the issue, especially when posting `code blocks`.
+
+If you comply with #1 and #2 you can post your issue at http://github.com/rembo10/headphones/issues. 
+
 
 ###Screenshots
 
@@ -39,6 +42,5 @@ Album Page with track overview:
 
 ![preview thumb](http://i.imgur.com/kcjES.png)
 
-If you run into any issues, use the GitHub issue tracker at: http://github.com/rembo10/headphones/issues. 
 
 This is free software under the GPL v3 open source license - so feel free to do with it what you wish.
