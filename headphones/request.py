@@ -72,11 +72,12 @@ def request_response(url, method="get", auto_raise=True, whitelist_status_code=N
                 else:
                     message = e.response.content
 
-                # Truncate message if it is too long.
-                if len(message) > 100:
-                    message = message[:100] + "..."
+                if message:
+                    # Truncate message if it is too long.
+                    if len(message) > 100:
+                        message = message[:100] + "..."
 
-                logger.debug("Server responded with message: %s", message)
+                    logger.debug("Server responded with message: %s", message)
         else:
             logger.error("Request raised HTTP error.")
     except requests.RequestException as e:
