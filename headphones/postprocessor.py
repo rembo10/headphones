@@ -113,6 +113,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
         controlValueDict = {"AlbumID":  albumid}
         
         newValueDict = {"ArtistID":         release_dict['artist_id'],
+                        "ReleaseID":        albumid,
                         "ArtistName":       release_dict['artist_name'],
                         "AlbumTitle":       release_dict['title'],
                         "AlbumASIN":        release_dict['asin'],
