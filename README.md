@@ -4,12 +4,19 @@
 
 [Read our Wiki](../../wiki) on how to install and use HeadPhones properly.
 
-Issues can be reported on the GitHub issue tracker considering these two rules:
+**Issues** can be reported on the GitHub issue tracker considering these two rules:
 
-1. You read the wiki and searched the existing issues and this is not solving your problem
-2. You use [proper markdown syntax](https://help.github.com/articles/github-flavored-markdown) to report the issue, especially when posting `code blocks`.
+1. Analyze your log, you just might find the solution yourself!
+2. You read the wiki and searched existing issues, but this is not solving your problem.
+3. Post the issue with a clear title, description and the HP log and use [proper markdown syntax](https://help.github.com/articles/github-flavored-markdown) to structure your text (code/log in code blocks). 
+4. Close your issue when it's solved! If you found the solution yourself please comment so that others benefit from it.
 
-If you comply with #1 and #2 you can post your issue at http://github.com/rembo10/headphones/issues. 
+**Feature requests** can be reported on the GitHub issue tracker too:
+
+1. Search for similar existing 'issues', feature requests can be recognized by the label 'Request'.
+2. If a similar Request exists, post a comment (+1, or add a new idea to the existing request), otherwise you can create a new one.
+
+If you **comply with these rules** you can [post your issue](http://github.com/rembo10/headphones/issues).
 
 
 ###Screenshots
