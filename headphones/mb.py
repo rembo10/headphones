@@ -23,6 +23,8 @@ from headphones.helpers import multikeysort, replace_all
 import lib.musicbrainzngs as musicbrainzngs
 from lib.musicbrainzngs import WebServiceError
 
+from lib.simplejson import OrderedDict
+
 mb_lock = threading.Lock()
 
 
@@ -117,7 +119,7 @@ def findArtist(name, limit=1):
                         })
         return artistlist
         
-def findRelease(name, limit=1):
+def findRelease(name, limit=1, artist=None):
 
     with mb_lock:        
         releaselist = []
@@ -126,25 +128,62 @@ def findRelease(name, limit=1):
         chars = set('!?')
         if any((c in chars) for c in name):
             name = '"'+name+'"'
-            
+
+        # additional artist search
+        if not artist and ':' in name:
+            name, artist = name.rsplit(":",1)
+
         try:
-            releaseResults = musicbrainzngs.search_releases(query=name,limit=limit)['release-list']
+            releaseResults = musicbrainzngs.search_releases(query=name,limit=limit,artist=artist)['release-list']
         except WebServiceError, e: #need to update exceptions
             logger.warn('Attempt to query MusicBrainz for "%s" failed: %s' % (name, str(e)))
             time.sleep(5)
 
         if not releaseResults:
             return False
+
         for result in releaseResults:
-                        releaselist.append({
+
+            title = result['title']
+            if 'disambiguation' in result:
+                title += ' (' + result['disambiguation'] + ')'
+
+            # Get formats and track counts
+            format_dict = OrderedDict()
+            formats = ''
+            tracks = ''
+            for medium in result['medium-list']:
+                if 'format' in medium:
+                    format = medium['format']
+                    if format not in format_dict:
+                        format_dict[format] = 0
+                    format_dict[format] += 1
+                if 'track-count' in medium:
+                    if tracks:
+                        tracks += ' + '
+                    tracks += str(medium['track-count'])
+            for format, count in format_dict.items():
+                if formats:
+                    formats += ' + '
+                if count > 1:
+                    formats += str(count) + 'x'
+                formats += format
+
+            releaselist.append({
                         'uniquename':        unicode(result['artist-credit'][0]['artist']['name']),
-                        'title':             unicode(result['title']),
+                        'title':             unicode(title),
                         'id':                unicode(result['artist-credit'][0]['artist']['id']),
                         'albumid':           unicode(result['id']),
                         'url':               unicode("http://musicbrainz.org/artist/" + result['artist-credit'][0]['artist']['id']),#probably needs to be changed
                         'albumurl':          unicode("http://musicbrainz.org/release/" + result['id']),#probably needs to be changed
-                        'score':             int(result['ext:score'])
-                        })            
+                        'score':             int(result['ext:score']),
+                        'date':              unicode(result['date']) if 'date' in result else '',
+                        'country':           unicode(result['country']) if 'country' in result else '',
+                        'formats':           unicode(formats),
+                        'tracks':            unicode(tracks),
+                        'rgid':              unicode(result['release-group']['id']),
+                        'rgtype':            unicode(result['release-group']['type']) if 'type' in result['release-group'] else ''
+                        })
         return releaselist
 
 def getArtist(artistid, extrasonly=False):
