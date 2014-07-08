@@ -4,10 +4,10 @@
 ## Edit user configuation in /etc/default/headphones to change
 ##
 ## Make sure init script is executable
-## sudo chmod +x /opt/headphones/init.ubuntu
+## sudo chmod +x /path/to/init.ubuntu
 ##
 ## Install the init script
-## sudo ln -s /opt/headphones/init.ubuntu /etc/init.d/headphones
+## sudo ln -s /path/to/init.ubuntu /etc/init.d/headphones
 ##
 ## Create the headphones daemon user:
 ## sudo adduser --system --no-create-home headphones

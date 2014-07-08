@@ -38,7 +38,7 @@ status_cmd="${name}_status"
 stop_cmd="${name}_stop"
 
 command="/usr/sbin/daemon"
-command_args="-f -p ${headphones_pid} python ${headphones_dir}/Headphones.py ${headphones_flags} --quiet"
+command_args="-f -p ${headphones_pid} python ${headphones_dir}/Headphones.py ${headphones_flags} --quiet --nolaunch"
 
 # Ensure user is root when running this script.
 if [ `id -u` != "0" ]; then

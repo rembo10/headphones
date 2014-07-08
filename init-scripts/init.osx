@@ -1,17 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>  
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">  
-<plist version="1.0">  
-<dict>  
-  <key>Label</key>  
-  <string>com.headphones.headphones</string>  
-  <key>ProgramArguments</key>  
-  <array>  
-       <string>/usr/bin/python</string>  
-       <string>/Applications/Headphones/headphones.py</string>  
-       <string>-q</string>  
-       <string>-d</string>  
-  </array>  
-  <key>RunAtLoad</key>  
-  <true/>  
-</dict>  
-</plist> 
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.headphones.headphones</string>
+  <key>ProgramArguments</key>
+  <array>
+       <string>/usr/bin/python</string>
+       <string>/Applications/Headphones/headphones.py</string>
+       <string>--quiet</string>
+       <string>--daemon</string>
+       <string>--nolaunch</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>
