@@ -88,7 +88,7 @@ class Rutracker():
         
         return searchurl
     
-    def search(self, searchurl, maxsize, minseeders, albumid, bitrate):
+    def search(self, searchurl, maxsize, minseeders, albumid):
         """
         Parse the search results and return valid torrent list
         """
