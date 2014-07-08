@@ -110,6 +110,19 @@ class WebInterface(object):
         album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
         tracks = myDB.select('SELECT * from tracks WHERE AlbumID=? ORDER BY CAST(TrackNumber AS INTEGER)', [AlbumID])
         description = myDB.action('SELECT * from descriptions WHERE ReleaseGroupID=?', [AlbumID]).fetchone()
+
+        retry = 0
+        while retry < 5:
+            if not album:
+                time.sleep(1)
+                album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
+                retry += 1
+            else:
+                break
+
+        if not album:
+            raise cherrypy.HTTPRedirect("home")
+
         if not album['ArtistName']:
             title =  ' - '
         else:
@@ -872,6 +885,17 @@ class WebInterface(object):
         return artist_json
     getArtistjson.exposed=True
 
+    def getAlbumjson(self, AlbumID, **kwargs):
+        myDB = db.DBConnection()
+        album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
+        album_json = json.dumps({
+                                   'AlbumTitle': album['AlbumTitle'],
+                                   'ArtistName': album['ArtistName'],
+                                   'Status':     album['Status']
+        })
+        return album_json
+    getAlbumjson.exposed=True
+
     def clearhistory(self, type=None, date_added=None, title=None):
         myDB = db.DBConnection()
         if type:
@@ -1403,9 +1427,12 @@ class WebInterface(object):
         return page
     extras.exposed = True
 
-    def addReleaseById(self, rid):
-        threading.Thread(target=importer.addReleaseById, args=[rid]).start()
-        raise cherrypy.HTTPRedirect("home")
+    def addReleaseById(self, rid, rgid=None):
+        threading.Thread(target=importer.addReleaseById, args=[rid, rgid]).start()
+        if rgid:
+            raise cherrypy.HTTPRedirect("albumPage?AlbumID=%s" % rgid)
+        else:
+            raise cherrypy.HTTPRedirect("home")
     addReleaseById.exposed = True
 
     def updateCloud(self):
@@ -1457,6 +1484,17 @@ class WebInterface(object):
 
         from headphones import cache
         image_dict = cache.getImageLinks(ArtistID, AlbumID)
+
+        # Return the Cover Art Archive urls if not found on last.fm
+        if AlbumID and not image_dict:
+            image_url = "http://coverartarchive.org/release/%s/front-500.jpg" % AlbumID
+            thumb_url = "http://coverartarchive.org/release/%s/front-250.jpg" % AlbumID
+            image_dict = {'artwork' : image_url, 'thumbnail' : thumb_url}
+        elif AlbumID and (not image_dict['artwork'] or not image_dict['thumbnail']):
+            if not image_dict['artwork']:
+                image_dict['artwork'] = "http://coverartarchive.org/release/%s/front-500.jpg" % AlbumID
+            if not image_dict['thumbnail']:
+                image_dict['thumbnail'] = "http://coverartarchive.org/release/%s/front-250.jpg" % AlbumID
 
         return simplejson.dumps(image_dict)
 

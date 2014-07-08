@@ -233,15 +233,15 @@ class Cache(object):
                 return
 
             try:
-                image_url = data['artist']['image'][-1]['#text']
+                image_url = data['album']['image'][-1]['#text']
             except Exception:
-                logger.debug('No artist image found')
+                logger.debug('No album image found on last.fm')
                 image_url = None
 
             thumb_url = self._get_thumb_url(data)
 
             if not thumb_url:
-                logger.debug('No artist thumbnail image found')
+                logger.debug('No album thumbnail image found on last.fm')
 
         return {'artwork' : image_url, 'thumbnail' : thumb_url }
 
