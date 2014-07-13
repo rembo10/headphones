@@ -1014,7 +1014,7 @@ def searchTorrent(album, new=False, losslessOnly=False):
         # Process feed
         if data:
             if not len(data.entries):
-                logger.info(u"No results found from %s for %s" % provider, term)
+                logger.info(u"No results found from %s for %s" % (provider, term) )
             else:
                 for item in data.entries:
                     try:
