@@ -998,7 +998,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                             resultlist.append((title, size, url, provider, 'torrent'))
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                         else:
-                            logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d, Format: %s)', title, size, seeders, rightformat)
+                            logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d, Format: %s)', title, size, int(seeders), rightformat)
+
                     except Exception as e:
                         logger.exception("Unhandled exception in the KAT parser")
 
