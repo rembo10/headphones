@@ -1030,7 +1030,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                             '-seeders:0']) # cut out dead torrents
 
         if bitrate:
-            query_items.append('bitrate:"%s"', bitrate)
+            query_items.append('bitrate:"%s"' % bitrate)
 
         # Requesting content
         logger.info('Parsing results from Waffles')
