@@ -436,9 +436,11 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
                             url = item.link
                             title = item.title
                             size = int(item.links[1]['length'])
-
-                            resultlist.append((title, size, url, provider, 'nzb'))
-                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                            if all(word.lower() in title.lower() for word in term.split()):
+                                logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                                resultlist.append((title, size, url, provider, 'nzb'))
+                            else:
+                                logger.info('Skipping %s, not all search term words found' % title)
 
                         except Exception as e:
                             logger.exception("An unknown error occurred trying to parse the feed: %s" % e)
@@ -879,49 +881,6 @@ def verifyresult(title, artistterm, term, lossless):
                     return False
 
     return True
-
-def getresultNZB(result):
-    nzb = None
-
-    if result[3] == 'newzbin':
-        response = request.request_response(
-            url='https://www.newzbin2.es/api/dnzb/',
-            auth=(headphones.HPUSER, headphones.HPPASS),
-            params={"username": headphones.NEWZBIN_UID, "password": headphones.NEWZBIN_PASSWORD, "reportid": result[2]},
-            headers={'User-Agent': USER_AGENT},
-            whitelist_status_code=400
-        )
-
-        if response is not None:
-            if response.status_code == 400:
-                error_code = int(response.headers.header['X-DNZB-RCode'])
-
-                if error_code == 450:
-                    result = re.search("wait (\d+) seconds", response.headers['X-DNZB-RText'])
-                    seconds = int(result.group(1))
-
-                    logger.info("Newzbin throttled our NZB downloading, pausing for %d seconds", seconds)
-                    time.sleep(seconds)
-
-                    # Try again -- possibly forever :(
-                    getresultNZB(result)
-                else:
-                    logger.info("Newzbin error code %d", error_code)
-            else:
-                nzb = response.content
-    elif result[3] == 'headphones':
-        nzb = request.request_content(
-            url=result[2],
-            auth=(headphones.HPUSER, headphones.HPPASS),
-            headers={'User-Agent': USER_AGENT}
-        )
-    else:
-        nzb = request.request_content(
-            url=result[2],
-            headers={'User-Agent': USER_AGENT}
-        )
-
-    return nzb
 
 def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
     global gazelle  # persistent what.cd api object to reduce number of login attempts
@@ -1468,37 +1427,13 @@ def preprocess(resultlist):
             return request.request_content(url=result[2], headers=headers), result
 
         else:
-            usenet_retention = int(headphones.USENET_RETENTION or 2000)
-            nzb = getresultNZB(result)
 
-            if nzb:
-                try:
-                    d = minidom.parseString(nzb)
-                    node = d.documentElement
-                    nzbfiles = d.getElementsByTagName("file")
-                    skipping = False
-                    for nzbfile in nzbfiles:
-                        if int(nzbfile.getAttribute("date")) < (time.time() - usenet_retention * 86400):
-                            logger.info('NZB contains a file out of your retention. Skipping.')
-                            skipping = True
-                            break
-                    if skipping:
-                        continue
+            headers = {'User-Agent': USER_AGENT}
 
-                        #TODO: Do we want rar checking in here to try to keep unknowns out?
-                        #or at least the option to do so?
-                except Exception as e:
-                    logger.exception('Unhandled exception. Unable to parse the best result NZB. Error: %s. (Make sure your username/password/API is correct for provider: %s', e ,result[3])
-                    continue
-
-                return nzb, result
+            if result[3] == 'headphones':
+                return request.request_content(url=result[2], headers=headers, auth=(headphones.HPUSER, headphones.HPPASS)), result
             else:
-                logger.error("Couldn't retrieve the best nzb. Skipping.")
-                continue
-
-        return (None, None)
-
-
+                return request.request_content(url=result[2], headers=headers), result
 
 def CalculateTorrentHash(link, data):
     
