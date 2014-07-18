@@ -542,7 +542,7 @@ def addAlbumArt(artwork, albumpath, release):
         album_art_name = album_art_name.replace(' ', '_')
 
     if album_art_name.startswith('.'):
-        album_art_name = album_art_name.replace(0, '_')
+        album_art_name = album_art_name.replace(".", "_", 1)
 
     try:
         file = open(os.path.join(albumpath, album_art_name), 'wb')
