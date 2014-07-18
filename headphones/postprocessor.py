@@ -945,7 +945,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
             new_file_name = new_file_name.replace(' ', '_')
 
         if new_file_name.startswith('.'):
-            new_file_name = new_file_name.replace(0, '_')
+            new_file_name = new_file_name.replace(".", "_", 1)
         
         new_file = os.path.join(albumpath, new_file_name)
         
