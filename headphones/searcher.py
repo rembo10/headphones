@@ -715,7 +715,7 @@ def send_to_downloader(data, bestqual, album):
 
             # rutracker needs cookies to be set, pass the .torrent file instead of url
             if bestqual[3] == 'rutracker.org':
-                file_or_url = rutracker.get_torrent(bestqual[2])
+                file_or_url, _hash = rutracker.get_torrent(bestqual[2])
             else:
                 file_or_url = bestqual[2]
 
@@ -744,13 +744,14 @@ def send_to_downloader(data, bestqual, album):
  
             # rutracker needs cookies to be set, pass the .torrent file instead of url
             if bestqual[3] == 'rutracker.org':
-                file_or_url = rutracker.get_torrent(bestqual[2])
+                file_or_url, _hash = rutracker.get_torrent(bestqual[2])
+                folder_name, cacheid = utorrent.dirTorrent(_hash)
+                folder_name = os.path.basename(os.path.normpath(folder_name))
+                utorrent.labelTorrent(_hash)
             else:
                 file_or_url = bestqual[2]
-
-            _hash = CalculateTorrentHash(file_or_url, data)
-
-            folder_name = utorrent.addTorrent(file_or_url, _hash)
+                _hash = CalculateTorrentHash(file_or_url, data)
+                folder_name = utorrent.addTorrent(file_or_url, _hash)
 
             if folder_name:
                 logger.info('Torrent folder name: %s' % folder_name)
@@ -1437,7 +1438,7 @@ def preprocess(resultlist):
                 return request.request_content(url=result[2], headers=headers), result
 
 def CalculateTorrentHash(link, data):
-    
+
     if link.startswith('magnet'):
         tor_hash = re.findall('urn:btih:([\w]{32,40})', link)[0]
         if len(tor_hash) == 32:

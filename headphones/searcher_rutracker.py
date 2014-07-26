@@ -10,10 +10,13 @@ import cookielib
 from urlparse import urlparse
 from bs4 import BeautifulSoup
 import headphones
-from headphones import logger, db
-import lib.bencode as bencode
+from headphones import logger, db, utorrent
+from lib.bencode import bencode as bencode, bdecode
 import os
 from tempfile import mkdtemp
+from hashlib import sha1
+import requests
+import re
 
 class Rutracker():
 
@@ -189,7 +192,7 @@ class Rutracker():
                         page = self.opener.open(url)
                         torrent = page.read()
                         if torrent:
-                            decoded = bencode.bdecode(torrent)
+                            decoded = bdecode(torrent)
                             metainfo = decoded['info']
                         page.close ()
                     except Exception, e:
@@ -275,6 +278,9 @@ class Rutracker():
             prev = os.umask(headphones.UMASK)
             page = self.opener.open(downloadurl)
             torrent = page.read()
+            decoded = bdecode(torrent)
+            metainfo = decoded['info']
+            tor_hash = sha1(bencode(metainfo)).hexdigest()
             if savelocation:
                 download_path = os.path.join(savelocation, torrent_name)
             else:
@@ -284,8 +290,61 @@ class Rutracker():
             fp.write (torrent)
             fp.close ()
             os.umask(prev)
+
+            # Add file to utorrent
+            if headphones.TORRENT_DOWNLOADER == 2:
+                self.utorrent_add_file(download_path)
+
         except Exception, e:
             logger.error('Error getting torrent: %s' % e)
             return False
 
-        return download_path
+        return download_path, tor_hash
+
+    #TODO get this working in utorrent.py
+    def utorrent_add_file(self, filename):
+
+        host = headphones.UTORRENT_HOST
+        if not host.startswith('http'):
+            host = 'http://' + host
+        if host.endswith('/'):
+            host = host[:-1]
+        if host.endswith('/gui'):
+            host = host[:-4]
+
+        base_url = host
+        username = headphones.UTORRENT_USERNAME
+        password = headphones.UTORRENT_PASSWORD
+
+        session = requests.Session()
+        url = base_url + '/gui/'
+        session.auth = (username, password)
+
+        try:
+            r = session.get(url + 'token.html')
+        except:
+            logger.debug('Error getting token')
+            return
+        if r.status_code == '401':
+            logger.debug('Error reaching utorrent')
+            return
+
+        regex = re.search(r'.+>([^<]+)</div></html>', r.text)
+        if regex is None:
+            logger.debug('Error reading token')
+            return
+
+        session.params = {'token': regex.group(1)}
+
+        params = {'action': 'add-file'}
+        f = open(filename, 'rb')
+        files = {'torrent_file': f}
+
+        try:
+            session.post(url, params=params, files=files)
+        except:
+            logger.debug('Error adding file to utorrent')
+            return
+        finally:
+            f.close()
+

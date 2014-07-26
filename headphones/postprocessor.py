@@ -162,7 +162,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
             elif files.lower().endswith('.cue'):
                 downloaded_cuecount += 1
             # if any of the files end in *.part, we know the torrent isn't done yet. Process if forced, though
-            elif files.lower().endswith('.part') and not forced:
+            elif files.lower().endswith(('.part', '.utpart')) and not forced:
                 logger.info("Looks like " + os.path.basename(albumpath).decode(headphones.SYS_ENCODING, 'replace') + " isn't complete yet. Will try again on the next run")
                 return
 
