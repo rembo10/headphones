@@ -20,9 +20,6 @@ import headphones
 
 from headphones import logger
 from collections import namedtuple
-import requests
-import re
-
 
 class utorrentclient(object):
 
