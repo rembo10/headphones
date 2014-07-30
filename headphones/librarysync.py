@@ -61,7 +61,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         del_have_tracks = myDB.select('SELECT Location, Matched, ArtistName from have')
 
         for track in del_have_tracks:
-            encoded_track_string = track['Location'].encode(headphones.SYS_ENCODING)
+            encoded_track_string = track['Location'].encode(headphones.SYS_ENCODING, 'replace')
             if not os.path.isfile(encoded_track_string):
                 if track['ArtistName']:
                     #Make sure deleted files get accounted for when updating artist track counts
