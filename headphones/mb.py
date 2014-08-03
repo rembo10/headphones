@@ -608,12 +608,19 @@ def findArtistbyAlbum(name):
 def findAlbumID(artist=None, album=None):
 
     results = None
+    chars = set('!?*-')
 
     try:
         if album and artist:
+            if any((c in chars) for c in album):
+                album = '"'+album+'"'
+            if any((c in chars) for c in artist):
+                artist = '"'+artist+'"'
             criteria = {'release': album.lower()}
             criteria['artist'] = artist.lower()
         else:
+            if any((c in chars) for c in album):
+                album = '"'+album+'"'
             criteria = {'release': album.lower()}
 
         results = musicbrainzngs.search_release_groups(limit=1, **criteria).get('release-group-list')
