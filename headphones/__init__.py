@@ -169,10 +169,6 @@ NZBSORG = False
 NZBSORG_UID = None
 NZBSORG_HASH = None
 
-NZBSRUS = False
-NZBSRUS_UID = None
-NZBSRUS_APIKEY = None
-
 OMGWTFNZBS = False
 OMGWTFNZBS_UID = None
 OMGWTFNZBS_APIKEY = None
@@ -191,7 +187,6 @@ ALBUM_COMPLETION_PCT = None    # This is used in importer.py to determine how co
 
 TORRENTBLACKHOLE_DIR = None
 NUMBEROFSEEDERS = 10
-ISOHUNT = None
 KAT = None
 MININOVA = None
 PIRATEBAY = None
@@ -349,12 +344,12 @@ def initialize():
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
                 RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, FILE_UNDERSCORES, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, PREFER_TORRENTS, OPEN_MAGNET_LINKS, \
                 ADD_ALBUM_ART, ALBUM_ART_FORMAT, EMBED_ALBUM_ART, EMBED_LYRICS, REPLACE_EXISTING_FOLDERS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
-                TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, ISOHUNT, KAT, PIRATEBAY, PIRATEBAY_PROXY_URL, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
+                TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, KAT, PIRATEBAY, PIRATEBAY_PROXY_URL, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, UPDATE_DB_INTERVAL, MB_IGNORE_AGE, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, HEADPHONES_INDEXER, NZBMATRIX, TRANSMISSION_HOST, TRANSMISSION_USERNAME, TRANSMISSION_PASSWORD, \
                 UTORRENT_HOST, UTORRENT_USERNAME, UTORRENT_PASSWORD, UTORRENT_LABEL, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS, \
-                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NZBSRUS, NZBSRUS_UID, NZBSRUS_APIKEY, OMGWTFNZBS, OMGWTFNZBS_UID, OMGWTFNZBS_APIKEY, \
+                NZBSORG, NZBSORG_UID, NZBSORG_HASH, OMGWTFNZBS, OMGWTFNZBS_UID, OMGWTFNZBS_APIKEY, \
                 NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, LASTFM_USERNAME, \
                 INTERFACE, FOLDER_PERMISSIONS, FILE_PERMISSIONS, ENCODERFOLDER, ENCODER_PATH, ENCODER, XLDPROFILE, BITRATE, SAMPLINGFREQUENCY, \
                 MUSIC_ENCODER, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, ENCODERLOSSLESS, ENCODER_MULTICORE, ENCODER_MULTICORE_COUNT, DELETE_LOSSLESS_FILES, \
@@ -380,7 +375,6 @@ def initialize():
         CheckSection('Headphones')
         CheckSection('Newznab')
         CheckSection('NZBsorg')
-        CheckSection('NZBsRus')
         CheckSection('omgwtfnzbs')
         CheckSection('Waffles')
         CheckSection('Rutracker')
@@ -481,7 +475,6 @@ def initialize():
 
         TORRENTBLACKHOLE_DIR = check_setting_str(CFG, 'General', 'torrentblackhole_dir', '')
         NUMBEROFSEEDERS = check_setting_str(CFG, 'General', 'numberofseeders', '10')
-        ISOHUNT = bool(check_setting_int(CFG, 'General', 'isohunt', 0))
         KAT = bool(check_setting_int(CFG, 'General', 'kat', 0))
         PIRATEBAY = bool(check_setting_int(CFG, 'General', 'piratebay', 0))
         PIRATEBAY_PROXY_URL = check_setting_str(CFG, 'General', 'piratebay_proxy_url', '')
@@ -534,10 +527,6 @@ def initialize():
         NZBSORG = bool(check_setting_int(CFG, 'NZBsorg', 'nzbsorg', 0))
         NZBSORG_UID = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_uid', '')
         NZBSORG_HASH = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_hash', '')
-
-        NZBSRUS = bool(check_setting_int(CFG, 'NZBsRus', 'nzbsrus', 0))
-        NZBSRUS_UID = check_setting_str(CFG, 'NZBsRus', 'nzbsrus_uid', '')
-        NZBSRUS_APIKEY = check_setting_str(CFG, 'NZBsRus', 'nzbsrus_apikey', '')
 
         OMGWTFNZBS = bool(check_setting_int(CFG, 'omgwtfnzbs', 'omgwtfnzbs', 0))
         OMGWTFNZBS_UID = check_setting_str(CFG, 'omgwtfnzbs', 'omgwtfnzbs_uid', '')
@@ -901,7 +890,6 @@ def config_write():
 
     new_config['General']['numberofseeders'] = NUMBEROFSEEDERS
     new_config['General']['torrentblackhole_dir'] = TORRENTBLACKHOLE_DIR
-    new_config['General']['isohunt'] = int(ISOHUNT)
     new_config['General']['kat'] = int(KAT)
     new_config['General']['mininova'] = int(MININOVA)
     new_config['General']['piratebay'] = int(PIRATEBAY)
@@ -974,11 +962,6 @@ def config_write():
     new_config['NZBsorg']['nzbsorg'] = int(NZBSORG)
     new_config['NZBsorg']['nzbsorg_uid'] = NZBSORG_UID
     new_config['NZBsorg']['nzbsorg_hash'] = NZBSORG_HASH
-
-    new_config['NZBsRus'] = {}
-    new_config['NZBsRus']['nzbsrus'] = int(NZBSRUS)
-    new_config['NZBsRus']['nzbsrus_uid'] = NZBSRUS_UID
-    new_config['NZBsRus']['nzbsrus_apikey'] = NZBSRUS_APIKEY
 
     new_config['omgwtfnzbs'] = {}
     new_config['omgwtfnzbs']['omgwtfnzbs'] = int(OMGWTFNZBS)

@@ -89,9 +89,9 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False, choose_specific_
 
 def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
 
-    NZB_PROVIDERS = (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.NZBSRUS or headphones.OMGWTFNZBS)
+    NZB_PROVIDERS = (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.OMGWTFNZBS)
     NZB_DOWNLOADERS = (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST)
-    TORRENT_PROVIDERS = (headphones.KAT or headphones.PIRATEBAY or headphones.ISOHUNT or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD)
+    TORRENT_PROVIDERS = (headphones.KAT or headphones.PIRATEBAY or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD)
 
     results = []
     myDB = db.DBConnection()
@@ -491,58 +491,6 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
                         logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                     except Exception as e:
                         logger.exception("Unhandled exception while parsing feed")
-
-    if headphones.NZBSRUS:
-        provider = "nzbsrus"
-        categories = "54"
-
-        if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
-            sub = "16"
-        elif headphones.PREFERRED_QUALITY ==1 or allow_lossless:
-            sub = ""
-        else:
-            sub = "15"
-
-        if album['Type'] == 'Other':
-            sub = ""
-            logger.info("Album type is audiobook/spokenword. Searching all music categories")
-
-        # Request results
-        logger.info('Parsing results from NZBsRus')
-
-        headers = { 'User-Agent': USER_AGENT }
-        params = {
-            "uid": headphones.NZBSRUS_UID,
-            "key": headphones.NZBSRUS_APIKEY,
-            "cat": categories,
-            "sub": sub,
-            "age": headphones.USENET_RETENTION,
-            "searchtext": term
-        }
-
-        data = request.request_json(
-            url='https://www.nzbsrus.com/api.php',
-            params=params, headers=headers,
-            validator=lambda x: type(x) == dict
-        )
-
-        # Parse response
-        if data:
-            if data.get('matches', 0) == 0:
-                logger.info(u"No results found from NZBsRus for %s", term)
-                pass
-            else:
-                for item in data['results']:
-                    try:
-                        url = "http://www.nzbsrus.com/nzbdownload_rss.php/" + item['id'] + "/" + headphones.NZBSRUS_UID + "/" + item['key']
-                        title = item['name']
-                        size = int(item['size'])
-
-                        resultlist.append((title, size, url, provider, 'nzb'))
-                        logger.info('Found %s. Size: %s', title, helpers.bytes_to_mb(size))
-
-                    except Exception as e:
-                        logger.exception("Unhandled exception")
 
     if headphones.OMGWTFNZBS:
         provider = "omgwtfnzbs"
@@ -1269,71 +1217,6 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
 
                     except Exception as e:
                         logger.error(u"An unknown error occurred in the Pirate Bay parser: %s" % e)
-
-    if headphones.ISOHUNT:
-        provider = "isoHunt"
-        providerurl = url_fix("http://isohunt.com/js/rss/" + term)
-        if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
-            categories = "7"        #music
-            format = "2"             #flac
-            maxsize = 10000000000
-        elif headphones.PREFERRED_QUALITY == 1 or allow_lossless:
-            categories = "7"        #music
-            format = "10"            #mp3+flac
-            maxsize = 10000000000
-        else:
-            categories = "7"        #music
-            format = "8"            #mp3
-            maxsize = 300000000
-
-        # Requesting content
-        logger.info('Parsing results from ISOHunt')
-
-        headers = { 'User-Agent': USER_AGENT }
-        params = {
-            "iht": "2",
-            "sort": "seeds"
-        }
-
-        data = request.request_feed(
-            url=providerurl,
-            params=params, headers=headers,
-            auth=(headphones.HPUSER, headphones.HPPASS),
-            timeout=20
-        )
-
-        # Process feed
-        if data:
-            if not len(data.entries):
-                logger.info(u"No results found from %s for %s", provider, term)
-            else:
-                for item in data.entries:
-                    try:
-                        rightformat = True
-                        title = re.sub(r"(?<=  \[)(.+)(?=\])","",item.title)
-                        title = title.replace("[]","")
-                        sxstart = item.description.find("Seeds: ") + 7
-                        seeds = ""
-                        while item.description[sxstart:sxstart + 1] != " ":
-                            seeds = seeds + item.description[sxstart:sxstart + 1]
-                            sxstart = sxstart + 1
-                        url = item.links[1]['url']
-                        size = int(item.links[1]['length'])
-                        if format == "2":
-                            torrent = request.request_content(url)
-
-                            if not torrent or (int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1):
-                                rightformat = False
-                        for findterm in term.split(" "):
-                            if not findterm in title:
-                                rightformat = False
-                        if rightformat == True and size < maxsize and minimumseeders < seeds:
-                            resultlist.append((title, size, url, provider, 'torrent'))
-                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-                        else:
-                            logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))
-                    except Exception:
-                        logger.exception("Unhandled exception in isoHunt parser")
 
     if headphones.MININOVA:
         provider = "Mininova"
