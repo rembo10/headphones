@@ -77,12 +77,14 @@ def findArtist(name, limit=1):
         artistlist = []
         artistResults = None
         
-        chars = set('!?*')
+        chars = set('!?*-')
         if any((c in chars) for c in name):
             name = '"'+name+'"'
-            
+
+        criteria = {'artist': name.lower()}
+
         try:
-            artistResults = musicbrainzngs.search_artists(query='artist:'+name,limit=limit)['artist-list']
+            artistResults = musicbrainzngs.search_artists(limit=limit, **criteria)['artist-list']
         except WebServiceError, e:
             logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
             time.sleep(5)
@@ -124,14 +126,16 @@ def findRelease(name, limit=1, artist=None):
     with mb_lock:        
         releaselist = []
         releaseResults = None
-        
-        chars = set('!?')
-        if any((c in chars) for c in name):
-            name = '"'+name+'"'
 
         # additional artist search
         if not artist and ':' in name:
             name, artist = name.rsplit(":",1)
+
+        chars = set('!?*-')
+        if any((c in chars) for c in name):
+            name = '"'+name+'"'
+        if artist and any((c in chars) for c in artist):
+            artist = '"'+artist+'"'
 
         try:
             releaseResults = musicbrainzngs.search_releases(query=name,limit=limit,artist=artist)['release-list']
@@ -152,22 +156,23 @@ def findRelease(name, limit=1, artist=None):
             format_dict = OrderedDict()
             formats = ''
             tracks = ''
-            for medium in result['medium-list']:
-                if 'format' in medium:
-                    format = medium['format']
-                    if format not in format_dict:
-                        format_dict[format] = 0
-                    format_dict[format] += 1
-                if 'track-count' in medium:
-                    if tracks:
-                        tracks += ' + '
-                    tracks += str(medium['track-count'])
-            for format, count in format_dict.items():
-                if formats:
-                    formats += ' + '
-                if count > 1:
-                    formats += str(count) + 'x'
-                formats += format
+            if 'medium-list' in result:
+                for medium in result['medium-list']:
+                    if 'format' in medium:
+                        format = medium['format']
+                        if format not in format_dict:
+                            format_dict[format] = 0
+                        format_dict[format] += 1
+                    if 'track-count' in medium:
+                        if tracks:
+                            tracks += ' + '
+                        tracks += str(medium['track-count'])
+                for format, count in format_dict.items():
+                    if formats:
+                        formats += ' + '
+                    if count > 1:
+                        formats += str(count) + 'x'
+                    formats += format
 
             releaselist.append({
                         'uniquename':        unicode(result['artist-credit'][0]['artist']['name']),
@@ -603,13 +608,15 @@ def findArtistbyAlbum(name):
 def findAlbumID(artist=None, album=None):
 
     results = None
-    
+
     try:
         if album and artist:
-            term = '"'+album+'" AND artist:"'+artist+'"'
+            criteria = {'release': album.lower()}
+            criteria['artist'] = artist.lower()
         else:
-            term = album
-        results = musicbrainzngs.search_release_groups(term,1).get('release-group-list')
+            criteria = {'release': album.lower()}
+
+        results = musicbrainzngs.search_release_groups(limit=1, **criteria).get('release-group-list')
     except WebServiceError, e:
         logger.warn('Attempt to query MusicBrainz for %s - %s failed (%s)' % (artist, album, str(e)))
         time.sleep(5)

@@ -997,9 +997,6 @@ class WebInterface(object):
                     "use_nzbsorg" : checked(headphones.NZBSORG),
                     "nzbsorg_uid" : headphones.NZBSORG_UID,
                     "nzbsorg_hash" : headphones.NZBSORG_HASH,
-                    "use_nzbsrus" : checked(headphones.NZBSRUS),
-                    "nzbsrus_uid" : headphones.NZBSRUS_UID,
-                    "nzbsrus_apikey" : headphones.NZBSRUS_APIKEY,
                     "use_omgwtfnzbs" : checked(headphones.OMGWTFNZBS),
                     "omgwtfnzbs_uid" : headphones.OMGWTFNZBS_UID,
                     "omgwtfnzbs_apikey" : headphones.OMGWTFNZBS_APIKEY,
@@ -1009,7 +1006,6 @@ class WebInterface(object):
                     "torrentblackhole_dir" : headphones.TORRENTBLACKHOLE_DIR,
                     "download_torrent_dir" : headphones.DOWNLOAD_TORRENT_DIR,
                     "numberofseeders" : headphones.NUMBEROFSEEDERS,
-                    "use_isohunt" : checked(headphones.ISOHUNT),
                     "use_kat" : checked(headphones.KAT),
                     "use_piratebay" : checked(headphones.PIRATEBAY),
                     "piratebay_proxy_url" : headphones.PIRATEBAY_PROXY_URL,
@@ -1159,9 +1155,9 @@ class WebInterface(object):
         download_scan_interval=None, update_db_interval=None, mb_ignore_age=None, nzb_search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None,
         sab_category=None, nzbget_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, transmission_host=None, transmission_username=None, transmission_password=None,
         utorrent_host=None, utorrent_username=None, utorrent_password=None, utorrent_label=None,nzb_downloader=0, torrent_downloader=0, download_dir=None, blackhole_dir=None, usenet_retention=None,
-        use_headphones_indexer=0, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, omgwtfnzbs=0, omgwtfnzbs_uid=None, omgwtfnzbs_apikey=None,
+        use_headphones_indexer=0, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, omgwtfnzbs=0, omgwtfnzbs_uid=None, omgwtfnzbs_apikey=None,
         preferred_words=None, required_words=None, ignored_words=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None,
-        numberofseeders=None, use_piratebay=0, piratebay_proxy_url=None, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
+        numberofseeders=None, use_piratebay=0, piratebay_proxy_url=None, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
         rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0, replace_existing_folders=False,
         destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, file_underscores=0, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0,
         remix=0, spokenword=0, audiobook=0, other=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, prefer_torrents=0, open_magnet_links=0, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
@@ -1218,9 +1214,6 @@ class WebInterface(object):
         headphones.NZBSORG = nzbsorg
         headphones.NZBSORG_UID = nzbsorg_uid
         headphones.NZBSORG_HASH = nzbsorg_hash
-        headphones.NZBSRUS = nzbsrus
-        headphones.NZBSRUS_UID = nzbsrus_uid
-        headphones.NZBSRUS_APIKEY = nzbsrus_apikey
         headphones.OMGWTFNZBS = omgwtfnzbs
         headphones.OMGWTFNZBS_UID = omgwtfnzbs_uid
         headphones.OMGWTFNZBS_APIKEY = omgwtfnzbs_apikey
@@ -1230,7 +1223,6 @@ class WebInterface(object):
         headphones.TORRENTBLACKHOLE_DIR = torrentblackhole_dir
         headphones.NUMBEROFSEEDERS = numberofseeders
         headphones.DOWNLOAD_TORRENT_DIR = download_torrent_dir
-        headphones.ISOHUNT = use_isohunt
         headphones.KAT = use_kat
         headphones.PIRATEBAY = use_piratebay
         headphones.PIRATEBAY_PROXY_URL = piratebay_proxy_url
