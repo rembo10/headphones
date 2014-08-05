@@ -35,11 +35,19 @@ from headphones import logger
 def sendNZB(nzb):
 
     addToTop = False
-    nzbgetXMLrpc = "http://%(username)s:%(password)s@%(host)s/xmlrpc"
+    nzbgetXMLrpc = "%(username)s:%(password)s@%(host)s/xmlrpc"
 
     if headphones.NZBGET_HOST == None:
         logger.error(u"No NZBget host found in configuration. Please configure it.")
         return False
+
+    if headphones.NZBGET_HOST.startswith('https://'):
+        nzbgetXMLrpc = 'https://' + nzbgetXMLrpc
+        headphones.NZBGET_HOST.replace('https://','',1)
+    else
+        nzbgetXMLrpc = 'http://' + nzbgetXMLrpc
+        headphones.NZBGET_HOST.replace('http://','',1)
+
 
     url = nzbgetXMLrpc % {"host": headphones.NZBGET_HOST, "username": headphones.NZBGET_USERNAME, "password": headphones.NZBGET_PASSWORD}
 

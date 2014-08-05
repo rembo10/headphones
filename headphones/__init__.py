@@ -188,6 +188,7 @@ ALBUM_COMPLETION_PCT = None    # This is used in importer.py to determine how co
 TORRENTBLACKHOLE_DIR = None
 NUMBEROFSEEDERS = 10
 KAT = None
+KAT_PROXY_URL = None
 MININOVA = None
 PIRATEBAY = None
 PIRATEBAY_PROXY_URL = None
@@ -690,10 +691,10 @@ def initialize():
             CONFIG_VERSION = '3'
 
         if CONFIG_VERSION == '3':
-			#Update the BLACKHOLE option to the NZB_DOWNLOADER format
-			if BLACKHOLE:
-				NZB_DOWNLOADER = 2
-			CONFIG_VERSION = '4'
+            #Update the BLACKHOLE option to the NZB_DOWNLOADER format
+            if BLACKHOLE:
+                NZB_DOWNLOADER = 2
+            CONFIG_VERSION = '4'
 
         # Enable Headphones Indexer if they have a VIP account
         if CONFIG_VERSION == '4':

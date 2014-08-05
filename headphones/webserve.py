@@ -1007,6 +1007,7 @@ class WebInterface(object):
                     "download_torrent_dir" : headphones.DOWNLOAD_TORRENT_DIR,
                     "numberofseeders" : headphones.NUMBEROFSEEDERS,
                     "use_kat" : checked(headphones.KAT),
+                    "kat_proxy_url" : headphones.KAT_PROXY_URL,
                     "use_piratebay" : checked(headphones.PIRATEBAY),
                     "piratebay_proxy_url" : headphones.PIRATEBAY_PROXY_URL,
                     "use_mininova" : checked(headphones.MININOVA),
@@ -1224,6 +1225,7 @@ class WebInterface(object):
         headphones.NUMBEROFSEEDERS = numberofseeders
         headphones.DOWNLOAD_TORRENT_DIR = download_torrent_dir
         headphones.KAT = use_kat
+        headphones.KAT_PROXY_URL = kat_proxy_url
         headphones.PIRATEBAY = use_piratebay
         headphones.PIRATEBAY_PROXY_URL = piratebay_proxy_url
         headphones.MININOVA = use_mininova
