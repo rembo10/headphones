@@ -1393,25 +1393,23 @@ class WebInterface(object):
 
     configUpdate.exposed = True
 
+    def do_shutdown(self, signal, title, timer):
+        headphones.SIGNAL = signal
+        message = title + '...'
+        return serve_template(templatename="shutdown.html", title=title,
+                              message=message, timer=timer)
+
     def shutdown(self):
-        headphones.SIGNAL = 'shutdown'
-        message = 'Shutting Down...'
-        return serve_template(templatename="shutdown.html", title="Shutting Down", message=message, timer=15)
-        return page
+        return self.do_shutdown('shutdown', 'Shutting Down', 15)
 
     shutdown.exposed = True
 
     def restart(self):
-        headphones.SIGNAL = 'restart'
-        message = 'Restarting...'
-        return serve_template(templatename="shutdown.html", title="Restarting", message=message, timer=30)
+        return self.do_shutdown('restart', 'Restarting', 30)
     restart.exposed = True
 
     def update(self):
-        headphones.SIGNAL = 'update'
-        message = 'Updating...'
-        return serve_template(templatename="shutdown.html", title="Updating", message=message, timer=120)
-        return page
+        return self.do_shutdown('update', 'Updating', 120)
     update.exposed = True
 
     def extras(self):
