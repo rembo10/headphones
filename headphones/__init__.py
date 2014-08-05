@@ -691,10 +691,10 @@ def initialize():
             CONFIG_VERSION = '3'
 
         if CONFIG_VERSION == '3':
-			#Update the BLACKHOLE option to the NZB_DOWNLOADER format
-			if BLACKHOLE:
-				NZB_DOWNLOADER = 2
-			CONFIG_VERSION = '4'
+            #Update the BLACKHOLE option to the NZB_DOWNLOADER format
+            if BLACKHOLE:
+                NZB_DOWNLOADER = 2
+            CONFIG_VERSION = '4'
 
         # Enable Headphones Indexer if they have a VIP account
         if CONFIG_VERSION == '4':
