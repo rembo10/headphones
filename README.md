@@ -1,10 +1,17 @@
 #![preview thumb](https://github.com/rembo10/headphones/raw/master/data/images/headphoneslogo.png)Headphones
 
+###Support & Discuss
+
+You are free to join the HP support community on IRC where you can ask questions, hang around and discuss anything related to HP.
+
+1. Use any IRC client and connect to the Freenode server.
+2. Join #headphones
+
 ###Installation and Notes
 
 [Read our Wiki](../../wiki) on how to install and use HeadPhones properly.
 
-**Issues** can be reported on the GitHub issue tracker considering these two rules:
+**Issues** can be reported on the GitHub issue tracker considering these rules:
 
 1. Analyze your log, you just might find the solution yourself!
 2. You read the wiki and searched existing issues, but this is not solving your problem.
@@ -16,7 +23,10 @@
 1. Search for similar existing 'issues', feature requests can be recognized by the label 'Request'.
 2. If a similar Request exists, post a comment (+1, or add a new idea to the existing request), otherwise you can create a new one.
 
-If you **comply with these rules** you can [post your issue](http://github.com/rembo10/headphones/issues).
+If you **comply with these rules** you can [post your request/issue](http://github.com/rembo10/headphones/issues).
+
+**Support** the project by implementing new features, solving support tickets and provide bug fixes. 
+If you change something in the code always make a PR to the developer branch instead of the master branch.
 
 
 ###Screenshots
