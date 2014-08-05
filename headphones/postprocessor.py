@@ -848,11 +848,11 @@ def embedLyrics(downloaded_track_list):
     # TODO: If adding lyrics for flac & lossy, only fetch the lyrics once
     # and apply it to both files
     for downloaded_track in downloaded_track_list:
-        
+        track_title = downloaded_track.decode(headphones.SYS_ENCODING, 'replace')
         try:
             f = MediaFile(downloaded_track)
         except:
-            logger.error('Could not read %s. Not checking lyrics', downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+            logger.error('Could not read %s. Not checking lyrics', track_title)
             continue
             
         if f.albumartist and f.title:
@@ -860,17 +860,20 @@ def embedLyrics(downloaded_track_list):
         elif f.artist and f.title:
             metalyrics = lyrics.getLyrics(f.artist, f.title)
         else:
-            logger.info('No artist/track metadata found for track: %s. Not fetching lyrics', downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+            logger.info('No artist/track metadata found for track: %s. Not fetching lyrics', track_title)
             metalyrics = None
             
-        if lyrics:
-            logger.debug('Adding lyrics to: %s', downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+        if metalyrics:
+            logger.debug('Adding lyrics to: %s', track_title)
             f.lyrics = metalyrics
             try:
                 f.save()
             except:
-                logger.error('Cannot save lyrics to: %s. Skipping', downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+                logger.error('Cannot save lyrics to: %s. Skipping', track_title)
                 continue
+        else:
+            logger.debug('No lyrics found for track: %s', track_title)
+
 
 def renameFiles(albumpath, downloaded_track_list, release):
     logger.info('Renaming files')
