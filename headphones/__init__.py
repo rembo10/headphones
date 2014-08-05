@@ -188,6 +188,7 @@ ALBUM_COMPLETION_PCT = None    # This is used in importer.py to determine how co
 TORRENTBLACKHOLE_DIR = None
 NUMBEROFSEEDERS = 10
 KAT = None
+KAT_PROXY_URL = None
 MININOVA = None
 PIRATEBAY = None
 PIRATEBAY_PROXY_URL = None
