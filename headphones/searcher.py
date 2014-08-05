@@ -897,8 +897,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
 
     if headphones.KAT:
         provider = "Kick Ass Torrents"
-		
-		if headphones.KAT_PROXY_URL:
+        
+        if headphones.KAT_PROXY_URL:
             #Might need to clean up the user submitted url
             kat_proxy = headphones.KAT_PROXY_URL
 
@@ -911,7 +911,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
 
         else:
             providerurl = url_fix("http://kickass.to/usearch/" + term)
-		
+        
         if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
             categories = "7"        #music
             format = "2"             #flac
