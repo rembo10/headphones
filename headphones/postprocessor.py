@@ -863,7 +863,7 @@ def embedLyrics(downloaded_track_list):
             logger.info('No artist/track metadata found for track: %s. Not fetching lyrics', track_title)
             metalyrics = None
             
-        if lyrics:
+        if metalyrics:
             logger.debug('Adding lyrics to: %s', track_title)
             f.lyrics = metalyrics
             try:
@@ -871,6 +871,9 @@ def embedLyrics(downloaded_track_list):
             except:
                 logger.error('Cannot save lyrics to: %s. Skipping', track_title)
                 continue
+        else:
+            logger.debug('No lyrics found for track: %s', track_title)
+
 
 def renameFiles(albumpath, downloaded_track_list, release):
     logger.info('Renaming files')
