@@ -395,7 +395,7 @@
                                     <input type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /><label>Mininova</label>
                                 </div>
                                 <div class="row checkbox">
-                                    <input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Kick Ass Torrents</label>
+                                    <input id="usekat" type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Kick Ass Torrents</label>
                                 </div>
 								<div class="config">
                                     <div class="row">
@@ -1742,6 +1742,7 @@
                 initConfigCheckbox("#usenewznab");
                 initConfigCheckbox("#usenzbsorg");
                 initConfigCheckbox("#useomgwtfnzbs");
+				initConfigCheckbox("#usekat");
                 initConfigCheckbox("#usepiratebay");
                 initConfigCheckbox("#usewaffles");
                 initConfigCheckbox("#userutracker");
