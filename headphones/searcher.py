@@ -610,7 +610,6 @@ def send_to_downloader(data, bestqual, album):
             # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
             torrent_name = helpers.replace_illegal_chars(folder_name) + '.torrent'
             download_path = os.path.join(headphones.TORRENTBLACKHOLE_DIR, torrent_name)
-            
             if bestqual[2].startswith("magnet:"):
                 if headphones.OPEN_MAGNET_LINKS:
                     try:
@@ -689,7 +688,6 @@ def send_to_downloader(data, bestqual, album):
 
         else:# if headphones.TORRENT_DOWNLOADER == 2:
             logger.info("Sending torrent to uTorrent")
- 
             # rutracker needs cookies to be set, pass the .torrent file instead of url
             if bestqual[3] == 'rutracker.org':
                 file_or_url, _hash = rutracker.get_torrent(bestqual[2])
@@ -895,23 +893,24 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
     pre_sorted_results = False
     minimumseeders = int(headphones.NUMBEROFSEEDERS) - 1
 
+    def set_proxy(proxy_url):
+        if not proxy_url.startswith('http'):
+            proxy_url = 'http://' + proxy_url
+        if proxy_url.endswith('/'):
+            proxy_url = proxy_url[:-1]
+
+        return proxy_url
+
+
     if headphones.KAT:
         provider = "Kick Ass Torrents"
-        
+
         if headphones.KAT_PROXY_URL:
-            #Might need to clean up the user submitted url
-            kat_proxy = headphones.KAT_PROXY_URL
-
-            if not kat_proxy.startswith('http'):
-                kat_proxy = 'http://' + kat_proxy
-            if kat_proxy.endswith('/'):
-                kat_proxy = kat_proxy[:-1]
-
-            providerurl = url_fix(kat_proxy + "/usearch/" + term)
-
+            proxy_url = set_proxy(headphones.KAT_PROXY_URL)
+            providerurl = url_fix(proxy_url + "/usearch/" + term)
         else:
             providerurl = url_fix("http://kickass.to/usearch/" + term)
-        
+
         if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
             categories = "7"        #music
             format = "2"             #flac
@@ -1156,16 +1155,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
     if headphones.PIRATEBAY:
         provider = "The Pirate Bay"
         if headphones.PIRATEBAY_PROXY_URL:
-            #Might need to clean up the user submitted url
-            pirate_proxy = headphones.PIRATEBAY_PROXY_URL
-
-            if not pirate_proxy.startswith('http'):
-                pirate_proxy = 'http://' + pirate_proxy
-            if pirate_proxy.endswith('/'):
-                pirate_proxy = pirate_proxy[:-1]
-
-            providerurl = url_fix(pirate_proxy + "/search/" + term + "/0/99/")
-
+            proxy_url = set_proxy(headphones.PIRATEBAY_PROXY_URL)
+            providerurl = url_fix(proxy_url + "/search/" + term + "/0/99/")
         else:
             providerurl = url_fix("http://thepiratebay.se/search/" + term + "/0/99/")
 
