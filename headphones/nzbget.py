@@ -44,7 +44,7 @@ def sendNZB(nzb):
     if headphones.NZBGET_HOST.startswith('https://'):
         nzbgetXMLrpc = 'https://' + nzbgetXMLrpc
         headphones.NZBGET_HOST.replace('https://','',1)
-    else
+    else:
         nzbgetXMLrpc = 'http://' + nzbgetXMLrpc
         headphones.NZBGET_HOST.replace('http://','',1)
 
