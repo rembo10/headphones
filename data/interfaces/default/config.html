@@ -397,6 +397,12 @@
                                 <div class="row checkbox">
                                     <input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Kick Ass Torrents</label>
                                 </div>
+								<div class="config">
+                                    <div class="row">
+                                        <label>Proxy URL (Optional): </label>
+                                        <input type="text" name="kat_proxy_url" value="${config['kat_proxy_url']}" size="36">
+                                    </div>
+                                </div>
                                 <div class="row checkbox">
                                     <input id="usewaffles" type="checkbox" name="waffles" onclick="initConfigCheckbox($(this));" value="1" ${config['use_waffles']} /><label>Waffles.fm</label>
                                 </div>
