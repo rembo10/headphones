@@ -59,29 +59,23 @@ class DBConnection:
             return
             
         sqlResult = None
-        attempt = 0
         
-        while attempt < 5:
-            try:
+        try:
+            with self.connection as c:
                 if args == None:
-                    #logger.debug(self.filename+": "+query)
-                    sqlResult = self.connection.execute(query)
+                    sqlResult = c.execute(query)
                 else:
-                    #logger.debug(self.filename+": "+query+" with args "+str(args))
-                    sqlResult = self.connection.execute(query, args)
-                self.connection.commit()
-                break
-            except sqlite3.OperationalError, e:
-                if "unable to open database file" in e.message or "database is locked" in e.message:
-                    logger.warn('Database Error: %s', e)
-                    attempt += 1
-                    time.sleep(1)
-                else:
-                    logger.error('Database error: %s', e)
-                    raise
-            except sqlite3.DatabaseError, e:
-                logger.error('Fatal Error executing %s :: %s', query, e)
+                    sqlResult = c.execute(query, args)
+                    
+        except sqlite3.OperationalError, e:
+            if "unable to open database file" in e.message or "database is locked" in e.message:
+                logger.warn('Database Error: %s', e)
+            else:
+                logger.error('Database error: %s', e)
                 raise
+        except sqlite3.DatabaseError, e:
+            logger.error('Fatal Error executing %s :: %s', query, e)
+            raise
         
         return sqlResult
     
@@ -89,7 +83,7 @@ class DBConnection:
     
         sqlResults = self.action(query, args).fetchall()
         
-        if sqlResults == None:
+        if sqlResults == None or sqlResults == [None]:
             return []
             
         return sqlResults
