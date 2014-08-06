@@ -95,20 +95,20 @@ engine.listeners['before_request'] = set()
 engine.listeners['after_request'] = set()
 
 class _TimeoutMonitor(process.plugins.Monitor):
-    
+
     def __init__(self, bus):
         self.servings = []
         process.plugins.Monitor.__init__(self, bus, self.run)
-    
+
     def before_request(self):
         self.servings.append((serving.request, serving.response))
-    
+
     def after_request(self):
         try:
             self.servings.remove((serving.request, serving.response))
         except ValueError:
             pass
-    
+
     def run(self):
         """Check timeout on all responses. (Internal)"""
         for req, resp in self.servings:
@@ -132,7 +132,7 @@ server.subscribe()
 
 def quickstart(root=None, script_name="", config=None):
     """Mount the given root, start the builtin server (and engine), then block.
-    
+
     root: an instance of a "controller class" (a collection of page handler
         methods) which represents the root of the application.
     script_name: a string containing the "mount point" of the application.
@@ -140,7 +140,7 @@ def quickstart(root=None, script_name="", config=None):
         at which to mount the given root. For example, if root.index() will
         handle requests to "http://www.example.com:8080/dept/app1/", then
         the script_name argument would be "/dept/app1".
-        
+
         It MUST NOT end in a slash. If the script_name refers to the root
         of the URI, it MUST be an empty string (not "/").
     config: a file or dict containing application config. If this contains
@@ -149,14 +149,14 @@ def quickstart(root=None, script_name="", config=None):
     """
     if config:
         _global_conf_alias.update(config)
-    
+
     tree.mount(root, script_name, config)
-    
+
     if hasattr(engine, "signal_handler"):
         engine.signal_handler.subscribe()
     if hasattr(engine, "console_control_handler"):
         engine.console_control_handler.subscribe()
-    
+
     engine.start()
     engine.block()
 
@@ -165,7 +165,7 @@ from cherrypy._cpcompat import threadlocal as _local
 
 class _Serving(_local):
     """An interface for registering request and response objects.
-    
+
     Rather than have a separate "thread local" object for the request and
     the response, this class works as a single threadlocal container for
     both objects (and any others which developers wish to define). In this
@@ -173,22 +173,22 @@ class _Serving(_local):
     conversation, yet still refer to them as module-level globals in a
     thread-safe way.
     """
-    
+
     request = _cprequest.Request(_httputil.Host("127.0.0.1", 80),
                                  _httputil.Host("127.0.0.1", 1111))
     """
     The request object for the current thread. In the main thread,
     and any threads which are not receiving HTTP requests, this is None."""
-    
+
     response = _cprequest.Response()
     """
     The response object for the current thread. In the main thread,
     and any threads which are not receiving HTTP requests, this is None."""
-    
+
     def load(self, request, response):
         self.request = request
         self.response = response
-    
+
     def clear(self):
         """Remove all attributes of self."""
         self.__dict__.clear()
@@ -197,54 +197,54 @@ serving = _Serving()
 
 
 class _ThreadLocalProxy(object):
-    
+
     __slots__ = ['__attrname__', '__dict__']
-    
+
     def __init__(self, attrname):
         self.__attrname__ = attrname
-    
+
     def __getattr__(self, name):
         child = getattr(serving, self.__attrname__)
         return getattr(child, name)
-    
+
     def __setattr__(self, name, value):
         if name in ("__attrname__", ):
             object.__setattr__(self, name, value)
         else:
             child = getattr(serving, self.__attrname__)
             setattr(child, name, value)
-    
+
     def __delattr__(self, name):
         child = getattr(serving, self.__attrname__)
         delattr(child, name)
-    
+
     def _get_dict(self):
         child = getattr(serving, self.__attrname__)
         d = child.__class__.__dict__.copy()
         d.update(child.__dict__)
         return d
     __dict__ = property(_get_dict)
-    
+
     def __getitem__(self, key):
         child = getattr(serving, self.__attrname__)
         return child[key]
-    
+
     def __setitem__(self, key, value):
         child = getattr(serving, self.__attrname__)
         child[key] = value
-    
+
     def __delitem__(self, key):
         child = getattr(serving, self.__attrname__)
         del child[key]
-    
+
     def __contains__(self, key):
         child = getattr(serving, self.__attrname__)
         return key in child
-    
+
     def __len__(self):
         child = getattr(serving, self.__attrname__)
         return len(child)
-    
+
     def __nonzero__(self):
         child = getattr(serving, self.__attrname__)
         return bool(child)
@@ -285,14 +285,14 @@ from cherrypy import _cplogging
 
 class _GlobalLogManager(_cplogging.LogManager):
     """A site-wide LogManager; routes to app.log or global log as appropriate.
-    
+
     This :class:`LogManager<cherrypy._cplogging.LogManager>` implements
     cherrypy.log() and cherrypy.log.access(). If either
     function is called during a request, the message will be sent to the
     logger for the current Application. If they are called outside of a
     request, the message will be sent to the site-wide logger.
     """
-    
+
     def __call__(self, *args, **kwargs):
         """Log the given message to the app.log or global log as appropriate."""
         # Do NOT use try/except here. See http://www.cherrypy.org/ticket/945
@@ -301,7 +301,7 @@ class _GlobalLogManager(_cplogging.LogManager):
         else:
             log = self
         return log.error(*args, **kwargs)
-    
+
     def access(self):
         """Log an access message to the app.log or global log as appropriate."""
         try:
@@ -335,7 +335,7 @@ def expose(func=None, alias=None):
                 for a in alias:
                     parents[a.replace(".", "_")] = func
         return func
-    
+
     import sys, types
     if isinstance(func, (types.FunctionType, types.MethodType)):
         if alias is None:
@@ -364,23 +364,23 @@ def expose(func=None, alias=None):
         return expose_
 
 def popargs(*args, **kwargs):
-    """A decorator for _cp_dispatch 
+    """A decorator for _cp_dispatch
     (cherrypy.dispatch.Dispatcher.dispatch_method_name).
 
     Optional keyword argument: handler=(Object or Function)
-    
-    Provides a _cp_dispatch function that pops off path segments into 
+
+    Provides a _cp_dispatch function that pops off path segments into
     cherrypy.request.params under the names specified.  The dispatch
     is then forwarded on to the next vpath element.
-    
+
     Note that any existing (and exposed) member function of the class that
     popargs is applied to will override that value of the argument.  For
     instance, if you have a method named "list" on the class decorated with
     popargs, then accessing "/list" will call that function instead of popping
-    it off as the requested parameter.  This restriction applies to all 
+    it off as the requested parameter.  This restriction applies to all
     _cp_dispatch functions.  The only way around this restriction is to create
     a "blank class" whose only function is to provide _cp_dispatch.
-    
+
     If there are path elements after the arguments, or more arguments
     are requested than are available in the vpath, then the 'handler'
     keyword argument specifies the next object to handle the parameterized
@@ -389,9 +389,9 @@ def popargs(*args, **kwargs):
     will be called with the args specified and the return value from that
     function used as the next object INSTEAD of adding the parameters to
     cherrypy.request.args.
-    
+
     This decorator may be used in one of two ways:
-    
+
     As a class decorator:
     @cherrypy.popargs('year', 'month', 'day')
     class Blog:
@@ -399,47 +399,47 @@ def popargs(*args, **kwargs):
             #Process the parameters here; any url like
             #/, /2009, /2009/12, or /2009/12/31
             #will fill in the appropriate parameters.
-            
+
         def create(self):
             #This link will still be available at /create.  Defined functions
             #take precedence over arguments.
-            
+
     Or as a member of a class:
     class Blog:
         _cp_dispatch = cherrypy.popargs('year', 'month', 'day')
         #...
-        
+
     The handler argument may be used to mix arguments with built in functions.
     For instance, the following setup allows different activities at the
     day, month, and year level:
-    
+
     class DayHandler:
         def index(self, year, month, day):
             #Do something with this day; probably list entries
-            
+
         def delete(self, year, month, day):
             #Delete all entries for this day
-            
+
     @cherrypy.popargs('day', handler=DayHandler())
     class MonthHandler:
         def index(self, year, month):
             #Do something with this month; probably list entries
-            
+
         def delete(self, year, month):
             #Delete all entries for this month
-            
+
     @cherrypy.popargs('month', handler=MonthHandler())
     class YearHandler:
         def index(self, year):
             #Do something with this year
-            
+
         #...
-        
+
     @cherrypy.popargs('year', handler=YearHandler())
     class Root:
         def index(self):
             #...
-        
+
     """
 
     #Since keyword arg comes after *args, we have to process it ourselves
@@ -461,14 +461,14 @@ def popargs(*args, **kwargs):
     if handler is not None \
         and (hasattr(handler, '__call__') or inspect.isclass(handler)):
         handler_call = True
-    
+
     def decorated(cls_or_self=None, vpath=None):
         if inspect.isclass(cls_or_self):
             #cherrypy.popargs is a class decorator
             cls = cls_or_self
             setattr(cls, dispatch.Dispatcher.dispatch_method_name, decorated)
             return cls
-        
+
         #We're in the actual function
         self = cls_or_self
         parms = {}
@@ -476,16 +476,16 @@ def popargs(*args, **kwargs):
             if not vpath:
                 break
             parms[arg] = vpath.pop(0)
-                
+
         if handler is not None:
             if handler_call:
                 return handler(**parms)
             else:
                 request.params.update(parms)
                 return handler
-                
+
         request.params.update(parms)
-            
+
         #If we are the ultimate handler, then to prevent our _cp_dispatch
         #from being called again, we will resolve remaining elements through
         #getattr() directly.
@@ -493,28 +493,28 @@ def popargs(*args, **kwargs):
             return getattr(self, vpath.pop(0), None)
         else:
             return self
-        
+
     return decorated
 
 def url(path="", qs="", script_name=None, base=None, relative=None):
     """Create an absolute URL for the given path.
-    
+
     If 'path' starts with a slash ('/'), this will return
         (base + script_name + path + qs).
     If it does not start with a slash, this returns
         (base + script_name [+ request.path_info] + path + qs).
-    
+
     If script_name is None, cherrypy.request will be used
     to find a script_name, if available.
-    
+
     If base is None, cherrypy.request.base will be used (if available).
     Note that you can use cherrypy.tools.proxy to change this.
-    
+
     Finally, note that this function can be used to obtain an absolute URL
     for the current request path (minus the querystring) by passing no args.
     If you call url(qs=cherrypy.request.query_string), you should get the
     original browser URL (assuming no internal redirections).
-    
+
     If relative is None or not provided, request.app.relative_urls will
     be used (if available, else False). If False, the output will be an
     absolute URL (including the scheme, host, vhost, and script_name).
@@ -527,7 +527,7 @@ def url(path="", qs="", script_name=None, base=None, relative=None):
         qs = _urlencode(qs)
     if qs:
         qs = '?' + qs
-    
+
     if request.app:
         if not path.startswith("/"):
             # Append/remove trailing slash from path_info as needed
@@ -540,17 +540,17 @@ def url(path="", qs="", script_name=None, base=None, relative=None):
             elif request.is_index is False:
                 if pi.endswith('/') and pi != '/':
                     pi = pi[:-1]
-            
+
             if path == "":
                 path = pi
             else:
                 path = _urljoin(pi, path)
-        
+
         if script_name is None:
             script_name = request.script_name
         if base is None:
             base = request.base
-        
+
         newurl = base + script_name + path + qs
     else:
         # No request.app (we're being called outside a request).
@@ -559,10 +559,10 @@ def url(path="", qs="", script_name=None, base=None, relative=None):
         # if you're using vhosts or tools.proxy.
         if base is None:
             base = server.base()
-        
+
         path = (script_name or "") + path
         newurl = base + path + qs
-    
+
     if './' in newurl:
         # Normalize the URL by removing ./ and ../
         atoms = []
@@ -574,12 +574,12 @@ def url(path="", qs="", script_name=None, base=None, relative=None):
             else:
                 atoms.append(atom)
         newurl = '/'.join(atoms)
-    
+
     # At this point, we should have a fully-qualified absolute URL.
-    
+
     if relative is None:
         relative = getattr(request.app, "relative_urls", False)
-    
+
     # See http://www.ietf.org/rfc/rfc2396.txt
     if relative == 'server':
         # "A relative reference beginning with a single slash character is
@@ -599,7 +599,7 @@ def url(path="", qs="", script_name=None, base=None, relative=None):
             new.pop(0)
         new = (['..'] * len(old)) + new
         newurl = '/'.join(new)
-    
+
     return newurl
 
 

@@ -23,10 +23,10 @@ def dbUpdate(forcefull=False):
 
     activeartists = myDB.select('SELECT ArtistID, ArtistName from artists WHERE Status="Active" or Status="Loading" order by LastUpdated ASC')
     logger.info('Starting update for %i active artists' % len(activeartists))
-    
+
     for artist in activeartists:
-    
+
         artistid = artist[0]
         importer.addArtisttoDB(artistid=artistid, extrasonly=False, forcefull=forcefull)
-        
+
     logger.info('Active artist update complete')

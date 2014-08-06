@@ -226,27 +226,27 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
         skip_log = 0
         #Make a user configurable variable to skip update of albums with release dates older than this date (in days)
         pause_delta = headphones.MB_IGNORE_AGE
-        
+
         rg_exists = myDB.action("SELECT * from albums WHERE AlbumID=?", [rg['id']]).fetchone()
 
         if not forcefull:
-        
+
             new_release_group = False
-            
+
             try:
                 check_release_date = rg_exists['ReleaseDate']
             except TypeError:
                 check_release_date = None
                 new_release_group = True
-                
-                
+
+
             if new_release_group:
-            
+
                 logger.info("[%s] Now adding: %s (New Release Group)" % (artist['artist_name'], rg['title']))
                 new_releases = mb.get_new_releases(rgid,includeExtras)
-                
+
             else:
-            
+
                 if check_release_date is None or check_release_date == u"None":
                     logger.info("[%s] Now updating: %s (No Release Date)" % (artist['artist_name'], rg['title']))
                     new_releases = mb.get_new_releases(rgid,includeExtras,True)
@@ -384,7 +384,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             # If there's no release in the main albums tables, add the default (hybrid)
             # If there is a release, check the ReleaseID against the AlbumID to see if they differ (user updated)
             # check if the album already exists
-            
+
             if not rg_exists:
                 releaseid = rg['id']
             else:
@@ -410,7 +410,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             if rg_exists:
                 newValueDict['DateAdded'] = rg_exists['DateAdded']
                 newValueDict['Status']    = rg_exists['Status']
-            
+
             else:
                 today = helpers.today()
 

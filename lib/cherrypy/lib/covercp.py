@@ -1,7 +1,7 @@
 """Code-coverage tools for CherryPy.
 
 To use this module, or the coverage tools in the test suite,
-you need to download 'coverage.py', either Gareth Rees' `original 
+you need to download 'coverage.py', either Gareth Rees' `original
 implementation <http://www.garethrees.org/2001/12/04/python-coverage/>`_
 or Ned Batchelder's `enhanced version:
 <http://www.nedbatchelder.com/code/modules/coverage.html>`_
@@ -37,10 +37,10 @@ except ImportError:
     # Setting the_coverage to None will raise errors
     # that need to be trapped downstream.
     the_coverage = None
-    
+
     import warnings
     warnings.warn("No code coverage will be performed; coverage.py could not be imported.")
-    
+
     def start():
         pass
 start.priority = 20
@@ -69,7 +69,7 @@ TEMPLATE_MENU = """<html>
             font-size: small;
             font-weight: bold;
             font-style: italic;
-            margin-top: 5px; 
+            margin-top: 5px;
             }
         input { border: 1px solid #ccc; padding: 2px; }
         .directory {
@@ -126,7 +126,7 @@ TEMPLATE_FORM = """
 
     <input type='submit' value='Change view' id="submit"/>
 </form>
-</div>""" 
+</div>"""
 
 TEMPLATE_FRAMESET = """<html>
 <head><title>CherryPy coverage data</title></head>
@@ -184,22 +184,22 @@ def _percent(statements, missing):
 
 def _show_branch(root, base, path, pct=0, showpct=False, exclude="",
                  coverage=the_coverage):
-    
+
     # Show the directory name and any of our children
     dirs = [k for k, v in root.items() if v]
     dirs.sort()
     for name in dirs:
         newpath = os.path.join(path, name)
-        
+
         if newpath.lower().startswith(base):
             relpath = newpath[len(base):]
             yield "| " * relpath.count(os.sep)
             yield "<a class='directory' href='menu?base=%s&exclude=%s'>%s</a>\n" % \
                    (newpath, quote_plus(exclude), name)
-        
+
         for chunk in _show_branch(root[name], base, newpath, pct, showpct, exclude, coverage=coverage):
             yield chunk
-    
+
     # Now list the files
     if path.lower().startswith(base):
         relpath = path[len(base):]
@@ -207,7 +207,7 @@ def _show_branch(root, base, path, pct=0, showpct=False, exclude="",
         files.sort()
         for name in files:
             newpath = os.path.join(path, name)
-            
+
             pc_str = ""
             if showpct:
                 try:
@@ -222,7 +222,7 @@ def _show_branch(root, base, path, pct=0, showpct=False, exclude="",
                         pc_str = "<span class='fail'>%s</span>" % pc_str
                     else:
                         pc_str = "<span class='pass'>%s</span>" % pc_str
-            
+
             yield TEMPLATE_ITEM % ("| " * (relpath.count(os.sep) + 1),
                                    pc_str, newpath, name)
 
@@ -232,7 +232,7 @@ def _skip_file(path, exclude):
 
 def _graft(path, tree):
     d = tree
-    
+
     p = path
     atoms = []
     while True:
@@ -243,7 +243,7 @@ def _graft(path, tree):
     atoms.append(p)
     if p != "/":
         atoms.append("/")
-    
+
     atoms.reverse()
     for node in atoms:
         if node:
@@ -259,7 +259,7 @@ def get_tree(base, exclude, coverage=the_coverage):
     return tree
 
 class CoverStats(object):
-    
+
     def __init__(self, coverage, root=None):
         self.coverage = coverage
         if root is None:
@@ -268,20 +268,20 @@ class CoverStats(object):
             import cherrypy
             root = os.path.dirname(cherrypy.__file__)
         self.root = root
-    
+
     def index(self):
         return TEMPLATE_FRAMESET % self.root.lower()
     index.exposed = True
-    
+
     def menu(self, base="/", pct="50", showpct="",
              exclude=r'python\d\.\d|test|tut\d|tutorial'):
-        
+
         # The coverage module uses all-lower-case names.
         base = base.lower().rstrip(os.sep)
-        
+
         yield TEMPLATE_MENU
         yield TEMPLATE_FORM % locals()
-        
+
         # Start by showing links for parent paths
         yield "<div id='crumbs'>"
         path = ""
@@ -292,9 +292,9 @@ class CoverStats(object):
             yield ("<a href='menu?base=%s&exclude=%s'>%s</a> %s"
                    % (path, quote_plus(exclude), atom, os.sep))
         yield "</div>"
-        
+
         yield "<div id='tree'>"
-        
+
         # Then display the tree
         tree = get_tree(base, exclude, self.coverage)
         if not tree:
@@ -303,11 +303,11 @@ class CoverStats(object):
             for chunk in _show_branch(tree, base, "/", pct,
                                       showpct=='checked', exclude, coverage=self.coverage):
                 yield chunk
-        
+
         yield "</div>"
         yield "</body></html>"
     menu.exposed = True
-    
+
     def annotated_file(self, filename, statements, excluded, missing):
         source = open(filename, 'r')
         buffer = []
@@ -329,7 +329,7 @@ class CoverStats(object):
                     yield template % (lno, cgi.escape(pastline))
                 buffer = []
                 yield template % (lineno, cgi.escape(line))
-    
+
     def report(self, name):
         filename, statements, excluded, missing, _ = self.coverage.analysis2(name)
         pc = _percent(statements, missing)
@@ -352,7 +352,7 @@ def serve(path=localFile, port=8080, root=None):
     from coverage import coverage
     cov = coverage(data_file = path)
     cov.load()
-    
+
     import cherrypy
     cherrypy.config.update({'server.socket_port': int(port),
                             'server.thread_pool': 10,
