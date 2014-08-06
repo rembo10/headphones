@@ -18,7 +18,7 @@ from cherrypy.lib import httputil
 def downgrade_wsgi_ux_to_1x(environ):
     """Return a new environ dict for WSGI 1.x from the given WSGI u.x environ."""
     env1x = {}
-    
+
     url_encoding = environ[ntou('wsgi.url_encoding')]
     for k, v in list(environ.items()):
         if k in [ntou('PATH_INFO'), ntou('SCRIPT_NAME'), ntou('QUERY_STRING')]:
@@ -26,36 +26,36 @@ def downgrade_wsgi_ux_to_1x(environ):
         elif isinstance(v, unicodestr):
             v = v.encode('ISO-8859-1')
         env1x[k.encode('ISO-8859-1')] = v
-    
+
     return env1x
 
 
 class VirtualHost(object):
     """Select a different WSGI application based on the Host header.
-    
+
     This can be useful when running multiple sites within one CP server.
     It allows several domains to point to different applications. For example::
-    
+
         root = Root()
         RootApp = cherrypy.Application(root)
         Domain2App = cherrypy.Application(root)
         SecureApp = cherrypy.Application(Secure())
-        
+
         vhost = cherrypy._cpwsgi.VirtualHost(RootApp,
             domains={'www.domain2.example': Domain2App,
                      'www.domain2.example:443': SecureApp,
                      })
-        
+
         cherrypy.tree.graft(vhost)
     """
     default = None
     """Required. The default WSGI application."""
-    
+
     use_x_forwarded_host = True
     """If True (the default), any "X-Forwarded-Host"
     request header will be used instead of the "Host" header. This
     is commonly added by HTTP servers (such as Apache) when proxying."""
-    
+
     domains = {}
     """A dict of {host header value: application} pairs.
     The incoming "Host" request header is looked up in this dict,
@@ -64,17 +64,17 @@ class VirtualHost(object):
     separate entries for "example.com" and "www.example.com".
     In addition, "Host" headers may contain the port number.
     """
-    
+
     def __init__(self, default, domains=None, use_x_forwarded_host=True):
         self.default = default
         self.domains = domains or {}
         self.use_x_forwarded_host = use_x_forwarded_host
-    
+
     def __call__(self, environ, start_response):
         domain = environ.get('HTTP_HOST', '')
         if self.use_x_forwarded_host:
             domain = environ.get("HTTP_X_FORWARDED_HOST", domain)
-        
+
         nextapp = self.domains.get(domain)
         if nextapp is None:
             nextapp = self.default
@@ -83,11 +83,11 @@ class VirtualHost(object):
 
 class InternalRedirector(object):
     """WSGI middleware that handles raised cherrypy.InternalRedirect."""
-    
+
     def __init__(self, nextapp, recursive=False):
         self.nextapp = nextapp
         self.recursive = recursive
-    
+
     def __call__(self, environ, start_response):
         redirections = []
         while True:
@@ -99,13 +99,13 @@ class InternalRedirector(object):
                 sn = environ.get('SCRIPT_NAME', '')
                 path = environ.get('PATH_INFO', '')
                 qs = environ.get('QUERY_STRING', '')
-                
+
                 # Add the *previous* path_info + qs to redirections.
                 old_uri = sn + path
                 if qs:
                     old_uri += "?" + qs
                 redirections.append(old_uri)
-                
+
                 if not self.recursive:
                     # Check to see if the new URI has been redirected to already
                     new_uri = sn + ir.path
@@ -115,7 +115,7 @@ class InternalRedirector(object):
                         ir.request.close()
                         raise RuntimeError("InternalRedirector visited the "
                                            "same URL twice: %r" % new_uri)
-                
+
                 # Munge the environment and try again.
                 environ['REQUEST_METHOD'] = "GET"
                 environ['PATH_INFO'] = ir.path
@@ -127,19 +127,19 @@ class InternalRedirector(object):
 
 class ExceptionTrapper(object):
     """WSGI middleware that traps exceptions."""
-    
+
     def __init__(self, nextapp, throws=(KeyboardInterrupt, SystemExit)):
         self.nextapp = nextapp
         self.throws = throws
-    
+
     def __call__(self, environ, start_response):
         return _TrappedResponse(self.nextapp, environ, start_response, self.throws)
 
 
 class _TrappedResponse(object):
-    
+
     response = iter([])
-    
+
     def __init__(self, nextapp, environ, start_response, throws):
         self.nextapp = nextapp
         self.environ = environ
@@ -148,22 +148,22 @@ class _TrappedResponse(object):
         self.started_response = False
         self.response = self.trap(self.nextapp, self.environ, self.start_response)
         self.iter_response = iter(self.response)
-    
+
     def __iter__(self):
         self.started_response = True
         return self
-    
+
     if py3k:
         def __next__(self):
             return self.trap(next, self.iter_response)
     else:
         def next(self):
             return self.trap(self.iter_response.next)
-    
+
     def close(self):
         if hasattr(self.response, 'close'):
             self.response.close()
-    
+
     def trap(self, func, *args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -188,7 +188,7 @@ class _TrappedResponse(object):
                 self.iter_response = iter([])
             else:
                 self.iter_response = iter(b)
-            
+
             try:
                 self.start_response(s, h, _sys.exc_info())
             except:
@@ -199,7 +199,7 @@ class _TrappedResponse(object):
                 # But we still log and call close() to clean up ourselves.
                 _cherrypy.log(traceback=True, severity=40)
                 raise
-            
+
             if self.started_response:
                 return ntob("").join(b)
             else:
@@ -211,7 +211,7 @@ class _TrappedResponse(object):
 
 class AppResponse(object):
     """WSGI response iterable for CherryPy applications."""
-    
+
     def __init__(self, environ, start_response, cpapp):
         self.cpapp = cpapp
         try:
@@ -226,7 +226,7 @@ class AppResponse(object):
             outstatus = r.output_status
             if not isinstance(outstatus, bytestr):
                 raise TypeError("response.output_status is not a byte string.")
-            
+
             outheaders = []
             for k, v in r.header_list:
                 if not isinstance(k, bytestr):
@@ -234,7 +234,7 @@ class AppResponse(object):
                 if not isinstance(v, bytestr):
                     raise TypeError("response.header_list value %r is not a byte string." % v)
                 outheaders.append((k, v))
-            
+
             if py3k:
                 # According to PEP 3333, when using Python 3, the response status
                 # and headers must be bytes masquerading as unicode; that is, they
@@ -249,25 +249,25 @@ class AppResponse(object):
         except:
             self.close()
             raise
-    
+
     def __iter__(self):
         return self
-    
+
     if py3k:
         def __next__(self):
             return next(self.iter_response)
     else:
         def next(self):
             return self.iter_response.next()
-    
+
     def close(self):
         """Close and de-reference the current request and response. (Core)"""
         self.cpapp.release_serving()
-    
+
     def run(self):
         """Create a Request object using environ."""
         env = self.environ.get
-        
+
         local = httputil.Host('', int(env('SERVER_PORT', 80)),
                            env('SERVER_NAME', ''))
         remote = httputil.Host(env('REMOTE_ADDR', ''),
@@ -276,7 +276,7 @@ class AppResponse(object):
         scheme = env('wsgi.url_scheme')
         sproto = env('ACTUAL_SERVER_PROTOCOL', "HTTP/1.1")
         request, resp = self.cpapp.get_serving(local, remote, scheme, sproto)
-        
+
         # LOGON_USER is served by IIS, and is the name of the
         # user after having been mapped to a local account.
         # Both IIS and Apache set REMOTE_USER, when possible.
@@ -285,9 +285,9 @@ class AppResponse(object):
         request.multiprocess = self.environ['wsgi.multiprocess']
         request.wsgi_environ = self.environ
         request.prev = env('cherrypy.previous_request', None)
-        
+
         meth = self.environ['REQUEST_METHOD']
-        
+
         path = httputil.urljoin(self.environ.get('SCRIPT_NAME', ''),
                                 self.environ.get('PATH_INFO', ''))
         qs = self.environ.get('QUERY_STRING', '')
@@ -313,19 +313,19 @@ class AppResponse(object):
                     # Only set transcoded values if they both succeed.
                     path = u_path
                     qs = u_qs
-        
+
         rproto = self.environ.get('SERVER_PROTOCOL')
         headers = self.translate_headers(self.environ)
         rfile = self.environ['wsgi.input']
         request.run(meth, path, qs, rproto, headers, rfile)
-    
+
     headerNames = {'HTTP_CGI_AUTHORIZATION': 'Authorization',
                    'CONTENT_LENGTH': 'Content-Length',
                    'CONTENT_TYPE': 'Content-Type',
                    'REMOTE_HOST': 'Remote-Host',
                    'REMOTE_ADDR': 'Remote-Addr',
                    }
-    
+
     def translate_headers(self, environ):
         """Translate CGI-environ header names to HTTP header names."""
         for cgiName in environ:
@@ -340,7 +340,7 @@ class AppResponse(object):
 
 class CPWSGIApp(object):
     """A WSGI application object for a CherryPy Application."""
-    
+
     pipeline = [('ExceptionTrapper', ExceptionTrapper),
                 ('InternalRedirector', InternalRedirector),
                 ]
@@ -349,35 +349,35 @@ class CPWSGIApp(object):
     plus optional keyword arguments, and returns a WSGI application
     (that takes environ and start_response arguments). The 'name' can
     be any you choose, and will correspond to keys in self.config."""
-    
+
     head = None
     """Rather than nest all apps in the pipeline on each call, it's only
     done the first time, and the result is memoized into self.head. Set
     this to None again if you change self.pipeline after calling self."""
-    
+
     config = {}
     """A dict whose keys match names listed in the pipeline. Each
     value is a further dict which will be passed to the corresponding
     named WSGI callable (from the pipeline) as keyword arguments."""
-    
+
     response_class = AppResponse
     """The class to instantiate and return as the next app in the WSGI chain."""
-    
+
     def __init__(self, cpapp, pipeline=None):
         self.cpapp = cpapp
         self.pipeline = self.pipeline[:]
         if pipeline:
             self.pipeline.extend(pipeline)
         self.config = self.config.copy()
-    
+
     def tail(self, environ, start_response):
         """WSGI application callable for the actual CherryPy application.
-        
+
         You probably shouldn't call this; call self.__call__ instead,
         so that any WSGI middleware in self.pipeline can run first.
         """
         return self.response_class(environ, start_response, self.cpapp)
-    
+
     def __call__(self, environ, start_response):
         head = self.head
         if head is None:
@@ -389,7 +389,7 @@ class CPWSGIApp(object):
                 head = callable(head, **conf)
             self.head = head
         return head(environ, start_response)
-    
+
     def namespace_handler(self, k, v):
         """Config handler for the 'wsgi' namespace."""
         if k == "pipeline":

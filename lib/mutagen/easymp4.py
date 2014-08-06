@@ -22,7 +22,7 @@ class EasyMP4Tags(DictMixin, Metadata):
     strings, and values are a list of Unicode strings (and these lists
     are always of length 0 or 1).
 
-    If you need access to the full MP4 metadata feature set, you should use 
+    If you need access to the full MP4 metadata feature set, you should use
     MP4, not EasyMP4.
     """
 

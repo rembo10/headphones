@@ -42,5 +42,5 @@ class Song:
 	album_rating = None
 	play_count = None
 	location = None
-	
+
 	#title = property(getTitle,setTitle)

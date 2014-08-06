@@ -123,7 +123,7 @@ class PROWL:
     def __init__(self):
         self.enabled = headphones.PROWL_ENABLED
         self.keys = headphones.PROWL_KEYS
-        self.priority = headphones.PROWL_PRIORITY   
+        self.priority = headphones.PROWL_PRIORITY
 
     def conf(self, options):
         return cherrypy.config['config'].get('Prowl', options)
@@ -150,7 +150,7 @@ class PROWL:
         if request_status == 200:
                 logger.info(u"Prowl notifications sent.")
                 return True
-        elif request_status == 401: 
+        elif request_status == 401:
                 logger.info(u"Prowl auth failed: %s" % response.reason)
                 return False
         else:
@@ -413,7 +413,7 @@ class NMA:
             logger.error(u'Could not send notification to NotifyMyAndroid')
             return False
         else:
-            return True     
+            return True
 
 class PUSHBULLET:
 
@@ -449,7 +449,7 @@ class PUSHBULLET:
         if request_status == 200:
                 logger.info(u"PushBullet notifications sent.")
                 return True
-        elif request_status >= 400 and request_status < 500: 
+        elif request_status >= 400 and request_status < 500:
                 logger.info(u"PushBullet request failed: %s" % response.reason)
                 return False
         else:
@@ -482,7 +482,7 @@ class PUSHALOT:
 
         http_handler = HTTPSConnection("pushalot.com")
 
-        data = {'AuthorizationToken': pushalot_authorizationtoken, 
+        data = {'AuthorizationToken': pushalot_authorizationtoken,
                 'Title': event.encode('utf-8'),
                 'Body': message.encode("utf-8") }
 
@@ -500,7 +500,7 @@ class PUSHALOT:
         if request_status == 200:
                 logger.info(u"Pushalot notifications sent.")
                 return True
-        elif request_status == 410: 
+        elif request_status == 410:
                 logger.info(u"Pushalot auth failed: %s" % response.reason)
                 return False
         else:
@@ -552,7 +552,7 @@ class PUSHOVER:
     def __init__(self):
         self.enabled = headphones.PUSHOVER_ENABLED
         self.keys = headphones.PUSHOVER_KEYS
-        self.priority = headphones.PUSHOVER_PRIORITY   
+        self.priority = headphones.PUSHOVER_PRIORITY
         if headphones.PUSHOVER_APITOKEN:
             self.application_token = headphones.PUSHOVER_APITOKEN
         pass
@@ -566,7 +566,7 @@ class PUSHOVER:
 
         http_handler = HTTPSConnection("api.pushover.net")
 
-        data = {'token': self.application_token, 
+        data = {'token': self.application_token,
                 'user': headphones.PUSHOVER_KEYS,
                 'title': event,
                 'message': message.encode("utf-8"),
@@ -585,7 +585,7 @@ class PUSHOVER:
         if request_status == 200:
                 logger.info(u"Pushover notifications sent.")
                 return True
-        elif request_status >= 400 and request_status < 500: 
+        elif request_status >= 400 and request_status < 500:
                 logger.info(u"Pushover request failed: %s" % response.reason)
                 return False
         else:
