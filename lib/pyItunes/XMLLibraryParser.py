@@ -5,7 +5,7 @@ class XMLLibraryParser:
 		s = f.read()
 		lines = s.split("\n")
 		self.dictionary = self.parser(lines)
-		
+
 	def getValue(self,restOfLine):
 		value = re.sub("<.*?>","",restOfLine)
 		u = unicode(value,"utf-8")

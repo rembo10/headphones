@@ -39,7 +39,7 @@ def unidecode(string):
         if codepoint < 0x80: # Basic ASCII
             retval.append(str(char))
             continue
-        
+
         if codepoint > 0xeffff:
             continue # Characters in Private Use Area and above are ignored
 

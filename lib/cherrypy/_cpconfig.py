@@ -50,14 +50,14 @@ attribute. For example::
 
     class Demo:
         _cp_config = {'tools.gzip.on': True}
-        
+
         def index(self):
             return "Hello world"
         index.exposed = True
         index._cp_config = {'request.show_tracebacks': False}
 
 .. note::
-    
+
     This behavior is only guaranteed for the default dispatcher.
     Other dispatchers may have different restrictions on where
     you can attach _cp_config attributes.
@@ -127,13 +127,13 @@ NamespaceSet = reprconf.NamespaceSet
 
 def merge(base, other):
     """Merge one app config (from a dict, file, or filename) into another.
-    
+
     If the given config is a filename, it will be appended to
     the list of files to monitor for "autoreload" changes.
     """
     if isinstance(other, basestring):
         cherrypy.engine.autoreload.files.add(other)
-    
+
     # Load other into base
     for section, value_map in reprconf.as_dict(other).items():
         if not isinstance(value_map, dict):
@@ -164,7 +164,7 @@ class Config(reprconf.Config):
         if 'tools.staticdir.dir' in config:
             config['tools.staticdir.section'] = "global"
         reprconf.Config._apply(self, config)
-    
+
     def __call__(self, *args, **kwargs):
         """Decorator for page handlers to set _cp_config."""
         if args:
@@ -226,14 +226,14 @@ def _server_namespace_handler(k, v):
         # to configure additional HTTP servers.
         if not hasattr(cherrypy, "servers"):
             cherrypy.servers = {}
-        
+
         servername, k = atoms
         if servername not in cherrypy.servers:
             from cherrypy import _cpserver
             cherrypy.servers[servername] = _cpserver.Server()
             # On by default, but 'on = False' can unsubscribe it (see below).
             cherrypy.servers[servername].subscribe()
-        
+
         if k == 'on':
             if v:
                 cherrypy.servers[servername].subscribe()
