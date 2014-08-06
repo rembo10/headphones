@@ -48,7 +48,7 @@ def autohandler(template, context, name='autohandler'):
         if len(tokens) == 1:
             break
         tokens[-2:] = [name]
- 
+
     if not lookup.filesystem_checks:
         return lookup._uri_cache.setdefault(
                             (autohandler, _template_uri, name), None)
@@ -62,4 +62,4 @@ def _file_exists(lookup, path):
             return True
     else:
         return False
- 
+

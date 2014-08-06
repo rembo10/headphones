@@ -56,7 +56,7 @@ class HumanReadableException(Exception):
         gerund = self.verb[:-1] if self.verb.endswith('e') else self.verb
         gerund += 'ing'
         return gerund
-    
+
     def _reasonstr(self):
         """Get the reason as a string."""
         if isinstance(self.reason, unicode):

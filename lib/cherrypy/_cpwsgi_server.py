@@ -9,22 +9,22 @@ from cherrypy import wsgiserver
 
 class CPWSGIServer(wsgiserver.CherryPyWSGIServer):
     """Wrapper for wsgiserver.CherryPyWSGIServer.
-    
+
     wsgiserver has been designed to not reference CherryPy in any way,
     so that it can be used in other frameworks and applications. Therefore,
     we wrap it here, so we can set our own mount points from cherrypy.tree
     and apply some attributes from config -> cherrypy.server -> wsgiserver.
     """
-    
+
     def __init__(self, server_adapter=cherrypy.server):
         self.server_adapter = server_adapter
         self.max_request_header_size = self.server_adapter.max_request_header_size or 0
         self.max_request_body_size = self.server_adapter.max_request_body_size or 0
-        
+
         server_name = (self.server_adapter.socket_host or
                        self.server_adapter.socket_file or
                        None)
-        
+
         self.wsgi_version = self.server_adapter.wsgi_version
         s = wsgiserver.CherryPyWSGIServer
         s.__init__(self, server_adapter.bind_addr, cherrypy.tree,
@@ -55,7 +55,7 @@ class CPWSGIServer(wsgiserver.CherryPyWSGIServer):
                 self.server_adapter.ssl_certificate,
                 self.server_adapter.ssl_private_key,
                 self.server_adapter.ssl_certificate_chain)
-        
+
         self.stats['Enabled'] = getattr(self.server_adapter, 'statistics', False)
 
     def error_log(self, msg="", level=20, traceback=False):

@@ -610,7 +610,7 @@ def send_to_downloader(data, bestqual, album):
             # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
             torrent_name = helpers.replace_illegal_chars(folder_name) + '.torrent'
             download_path = os.path.join(headphones.TORRENTBLACKHOLE_DIR, torrent_name)
-            
+
             if bestqual[2].startswith("magnet:"):
                 if headphones.OPEN_MAGNET_LINKS:
                     try:
@@ -689,7 +689,7 @@ def send_to_downloader(data, bestqual, album):
 
         else:# if headphones.TORRENT_DOWNLOADER == 2:
             logger.info("Sending torrent to uTorrent")
- 
+
             # rutracker needs cookies to be set, pass the .torrent file instead of url
             if bestqual[3] == 'rutracker.org':
                 file_or_url, _hash = rutracker.get_torrent(bestqual[2])
