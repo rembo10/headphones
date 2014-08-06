@@ -23,12 +23,12 @@ from cherrypy._cpcompat import set
 
 class PageHandler(object):
     """Callable which sets response.body."""
-    
+
     def __init__(self, callable, *args, **kwargs):
         self.callable = callable
         self.args = args
         self.kwargs = kwargs
-    
+
     def __call__(self):
         try:
             return self.callable(*self.args, **self.kwargs)
@@ -70,7 +70,7 @@ def test_callable_spec(callable, callable_args, callable_kwargs):
         if isinstance(callable, object) and hasattr(callable, '__call__'):
             (args, varargs, varkw, defaults) = inspect.getargspec(callable.__call__)
         else:
-            # If it wasn't one of our own types, re-raise 
+            # If it wasn't one of our own types, re-raise
             # the original error
             raise
 
@@ -117,10 +117,10 @@ def test_callable_spec(callable, callable_args, callable_kwargs):
         # 2. not enough body parameters -> 400
         # 3. not enough path parts (partial matches) -> 404
         #
-        # We can't actually tell which case it is, 
+        # We can't actually tell which case it is,
         # so I'm raising a 404 because that covers 2/3 of the
         # possibilities
-        # 
+        #
         # In the case where the method does not allow body
         # arguments it's definitely a 404.
         message = None
@@ -187,16 +187,16 @@ class LateParamPageHandler(PageHandler):
     takes that into account, and allows request.params to be 'bound late'
     (it's more complicated than that, but that's the effect).
     """
-    
+
     def _get_kwargs(self):
         kwargs = cherrypy.serving.request.params.copy()
         if self._kwargs:
             kwargs.update(self._kwargs)
         return kwargs
-    
+
     def _set_kwargs(self, kwargs):
         self._kwargs = kwargs
-    
+
     kwargs = property(_get_kwargs, _set_kwargs,
                       doc='page handler kwargs (with '
                       'cherrypy.request.params copied in)')
@@ -217,7 +217,7 @@ else:
 
 class Dispatcher(object):
     """CherryPy Dispatcher which walks a tree of objects to find a handler.
-    
+
     The tree is rooted at cherrypy.request.app.root, and each hierarchical
     component in the path_info argument is matched to a corresponding nested
     attribute of the root object. Matching handlers must have an 'exposed'
@@ -225,16 +225,16 @@ class Dispatcher(object):
     matches a URI which ends in a slash ("/"). The special method name
     "default" may match a portion of the path_info (but only when no longer
     substring of the path_info matches some other object).
-    
+
     This is the default, built-in dispatcher for CherryPy.
     """
-    
+
     dispatch_method_name = '_cp_dispatch'
     """
     The name of the dispatch method that nodes may optionally implement
     to provide their own dynamic dispatch algorithm.
     """
-    
+
     def __init__(self, dispatch_method_name=None,
                  translate=punctuation_to_underscores):
         validate_translator(translate)
@@ -246,27 +246,27 @@ class Dispatcher(object):
         """Set handler and config for the current request."""
         request = cherrypy.serving.request
         func, vpath = self.find_handler(path_info)
-        
+
         if func:
             # Decode any leftover %2F in the virtual_path atoms.
             vpath = [x.replace("%2F", "/") for x in vpath]
             request.handler = LateParamPageHandler(func, *vpath)
         else:
             request.handler = cherrypy.NotFound()
-    
+
     def find_handler(self, path):
         """Return the appropriate page handler, plus any virtual path.
-        
+
         This will return two objects. The first will be a callable,
         which can be used to generate page output. Any parameters from
         the query string or request body will be sent to that callable
         as keyword arguments.
-        
+
         The callable is found by traversing the application's tree,
         starting from cherrypy.request.app.root, and matching path
         components to successive objects in the tree. For example, the
         URL "/path/to/handler" might return root.path.to.handler.
-        
+
         The second object returned will be a list of names which are
         'virtual path' components: parts of the URL which are dynamic,
         and were not used when looking up the handler.
@@ -277,7 +277,7 @@ class Dispatcher(object):
         app = request.app
         root = app.root
         dispatch_name = self.dispatch_method_name
-        
+
         # Get config for the root object/path.
         fullpath = [x for x in path.strip('/').split('/') if x] + ['index']
         fullpath_len = len(fullpath)
@@ -288,14 +288,14 @@ class Dispatcher(object):
         if "/" in app.config:
             nodeconf.update(app.config["/"])
         object_trail = [['root', root, nodeconf, segleft]]
-        
+
         node = root
         iternames = fullpath[:]
         while iternames:
             name = iternames[0]
             # map to legal Python identifiers (e.g. replace '.' with '_')
             objname = name.translate(self.translate)
-            
+
             nodeconf = {}
             subnode = getattr(node, objname, None)
             pre_len = len(iternames)
@@ -327,7 +327,7 @@ class Dispatcher(object):
                     )
             elif segleft == pre_len:
                 #Assume that the handler used the current path segment, but
-                #did not pop it.  This allows things like 
+                #did not pop it.  This allows things like
                 #return getattr(self, vpath[0], None)
                 iternames.pop(0)
                 segleft -= 1
@@ -337,7 +337,7 @@ class Dispatcher(object):
                 # Get _cp_config attached to this node.
                 if hasattr(node, "_cp_config"):
                     nodeconf.update(node._cp_config)
-            
+
             # Mix in values from app.config for this path.
             existing_len = fullpath_len - pre_len
             if existing_len != 0:
@@ -349,9 +349,9 @@ class Dispatcher(object):
                 curpath += '/' + seg
                 if curpath in app.config:
                     nodeconf.update(app.config[curpath])
-            
+
             object_trail.append([name, node, nodeconf, segleft])
-            
+
         def set_conf():
             """Collapse all object_trail config into cherrypy.request.config."""
             base = cherrypy.config.copy()
@@ -362,15 +362,15 @@ class Dispatcher(object):
                 if 'tools.staticdir.dir' in conf:
                     base['tools.staticdir.section'] = '/' + '/'.join(fullpath[0:fullpath_len - segleft])
             return base
-        
+
         # Try successive objects (reverse order)
         num_candidates = len(object_trail) - 1
         for i in range(num_candidates, -1, -1):
-            
+
             name, candidate, nodeconf, segleft = object_trail[i]
             if candidate is None:
                 continue
-            
+
             # Try a "default" method on the current leaf.
             if hasattr(candidate, "default"):
                 defhandler = candidate.default
@@ -382,10 +382,10 @@ class Dispatcher(object):
                     # See http://www.cherrypy.org/ticket/613
                     request.is_index = path.endswith("/")
                     return defhandler, fullpath[fullpath_len - segleft:-1]
-            
+
             # Uncomment the next line to restrict positional params to "default".
             # if i < num_candidates - 2: continue
-            
+
             # Try the current leaf.
             if getattr(candidate, 'exposed', False):
                 request.config = set_conf()
@@ -400,7 +400,7 @@ class Dispatcher(object):
                     # positional parameters (virtual paths).
                     request.is_index = False
                 return candidate, fullpath[fullpath_len - segleft:-1]
-        
+
         # We didn't find anything
         request.config = set_conf()
         return None, []
@@ -408,20 +408,20 @@ class Dispatcher(object):
 
 class MethodDispatcher(Dispatcher):
     """Additional dispatch based on cherrypy.request.method.upper().
-    
+
     Methods named GET, POST, etc will be called on an exposed class.
     The method names must be all caps; the appropriate Allow header
     will be output showing all capitalized method names as allowable
     HTTP verbs.
-    
+
     Note that the containing class must be exposed, not the methods.
     """
-    
+
     def __call__(self, path_info):
         """Set handler and config for the current request."""
         request = cherrypy.serving.request
         resource, vpath = self.find_handler(path_info)
-        
+
         if resource:
             # Set Allow header
             avail = [m for m in dir(resource) if m.isupper()]
@@ -429,7 +429,7 @@ class MethodDispatcher(Dispatcher):
                 avail.append("HEAD")
             avail.sort()
             cherrypy.serving.response.headers['Allow'] = ", ".join(avail)
-            
+
             # Find the subhandler
             meth = request.method.upper()
             func = getattr(resource, meth, None)
@@ -439,7 +439,7 @@ class MethodDispatcher(Dispatcher):
                 # Grab any _cp_config on the subhandler.
                 if hasattr(func, "_cp_config"):
                     request.config.update(func._cp_config)
-                
+
                 # Decode any leftover %2F in the virtual_path atoms.
                 vpath = [x.replace("%2F", "/") for x in vpath]
                 request.handler = LateParamPageHandler(func, *vpath)
@@ -451,7 +451,7 @@ class MethodDispatcher(Dispatcher):
 
 class RoutesDispatcher(object):
     """A Routes based dispatcher for CherryPy."""
-    
+
     def __init__(self, full_result=False):
         """
         Routes dispatcher
@@ -465,14 +465,14 @@ class RoutesDispatcher(object):
         self.controllers = {}
         self.mapper = routes.Mapper()
         self.mapper.controller_scan = self.controllers.keys
-        
+
     def connect(self, name, route, controller, **kwargs):
         self.controllers[name] = controller
         self.mapper.connect(name, route, controller=name, **kwargs)
-    
+
     def redirect(self, url):
         raise cherrypy.HTTPRedirect(url)
-    
+
     def __call__(self, path_info):
         """Set handler and config for the current request."""
         func = self.find_handler(path_info)
@@ -480,13 +480,13 @@ class RoutesDispatcher(object):
             cherrypy.serving.request.handler = LateParamPageHandler(func)
         else:
             cherrypy.serving.request.handler = cherrypy.NotFound()
-    
+
     def find_handler(self, path_info):
         """Find the right page handler, and set request.config."""
         import routes
-        
+
         request = cherrypy.serving.request
-        
+
         config = routes.request_config()
         config.mapper = self.mapper
         if hasattr(request, 'wsgi_environ'):
@@ -494,9 +494,9 @@ class RoutesDispatcher(object):
         config.host = request.headers.get('Host', None)
         config.protocol = request.scheme
         config.redirect = self.redirect
-        
+
         result = self.mapper.match(path_info)
-        
+
         config.mapper_dict = result
         params = {}
         if result:
@@ -505,23 +505,23 @@ class RoutesDispatcher(object):
             params.pop('controller', None)
             params.pop('action', None)
         request.params.update(params)
-        
+
         # Get config for the root object/path.
         request.config = base = cherrypy.config.copy()
         curpath = ""
-        
+
         def merge(nodeconf):
             if 'tools.staticdir.dir' in nodeconf:
                 nodeconf['tools.staticdir.section'] = curpath or "/"
             base.update(nodeconf)
-        
+
         app = request.app
         root = app.root
         if hasattr(root, "_cp_config"):
             merge(root._cp_config)
         if "/" in app.config:
             merge(app.config["/"])
-        
+
         # Mix in values from app.config.
         atoms = [x for x in path_info.split("/") if x]
         if atoms:
@@ -532,7 +532,7 @@ class RoutesDispatcher(object):
             curpath = "/".join((curpath, atom))
             if curpath in app.config:
                 merge(app.config[curpath])
-        
+
         handler = None
         if result:
             controller = result.get('controller')
@@ -543,23 +543,23 @@ class RoutesDispatcher(object):
                 # Get config from the controller.
                 if hasattr(controller, "_cp_config"):
                     merge(controller._cp_config)
-            
+
             action = result.get('action')
             if action is not None:
                 handler = getattr(controller, action, None)
-                # Get config from the handler 
-                if hasattr(handler, "_cp_config"): 
+                # Get config from the handler
+                if hasattr(handler, "_cp_config"):
                     merge(handler._cp_config)
             else:
                 handler = controller
-        
+
         # Do the last path atom here so it can
         # override the controller's _cp_config.
         if last:
             curpath = "/".join((curpath, last))
             if curpath in app.config:
                 merge(app.config[curpath])
-        
+
         return handler
 
 
@@ -574,33 +574,33 @@ def XMLRPCDispatcher(next_dispatcher=Dispatcher()):
 def VirtualHost(next_dispatcher=Dispatcher(), use_x_forwarded_host=True, **domains):
     """
     Select a different handler based on the Host header.
-    
+
     This can be useful when running multiple sites within one CP server.
     It allows several domains to point to different parts of a single
     website structure. For example::
-    
+
         http://www.domain.example  ->  root
         http://www.domain2.example  ->  root/domain2/
         http://www.domain2.example:443  ->  root/secure
-    
+
     can be accomplished via the following config::
-    
+
         [/]
         request.dispatch = cherrypy.dispatch.VirtualHost(
             **{'www.domain2.example': '/domain2',
                'www.domain2.example:443': '/secure',
               })
-    
+
     next_dispatcher
         The next dispatcher object in the dispatch chain.
         The VirtualHost dispatcher adds a prefix to the URL and calls
         another dispatcher. Defaults to cherrypy.dispatch.Dispatcher().
-    
+
     use_x_forwarded_host
         If True (the default), any "X-Forwarded-Host"
         request header will be used instead of the "Host" header. This
         is commonly added by HTTP servers (such as Apache) when proxying.
-    
+
     ``**domains``
         A dict of {host header value: virtual prefix} pairs.
         The incoming "Host" request header is looked up in this dict,
@@ -614,23 +614,23 @@ def VirtualHost(next_dispatcher=Dispatcher(), use_x_forwarded_host=True, **domai
     def vhost_dispatch(path_info):
         request = cherrypy.serving.request
         header = request.headers.get
-        
+
         domain = header('Host', '')
         if use_x_forwarded_host:
             domain = header("X-Forwarded-Host", domain)
-        
+
         prefix = domains.get(domain, "")
         if prefix:
             path_info = httputil.urljoin(prefix, path_info)
-        
+
         result = next_dispatcher(path_info)
-        
+
         # Touch up staticdir config. See http://www.cherrypy.org/ticket/614.
         section = request.config.get('tools.staticdir.section')
         if section:
             section = section[len(prefix):]
             request.config['tools.staticdir.section'] = section
-        
+
         return result
     return vhost_dispatch
 

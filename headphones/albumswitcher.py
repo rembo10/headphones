@@ -39,11 +39,11 @@ def switch(AlbumID, ReleaseID):
                     "ReleaseCountry":   newalbumdata['ReleaseCountry'],
                     "ReleaseFormat":    newalbumdata['ReleaseFormat']
                 }
-                
+
     myDB.upsert("albums", newValueDict, controlValueDict)
-    
+
     for track in newtrackdata:
-        
+
         controlValueDict = {"TrackID":  track['TrackID'],
                             "AlbumID":  AlbumID}
 
@@ -60,23 +60,23 @@ def switch(AlbumID, ReleaseID):
                     "Format":           track['Format'],
                     "BitRate":          track['BitRate']
                     }
-                    
+
         myDB.upsert("tracks", newValueDict, controlValueDict)
-    
+
     # Mark albums as downloaded if they have at least 80% (by default, configurable) of the album
     total_track_count = len(newtrackdata)
     have_track_count = len(myDB.select('SELECT * from tracks WHERE AlbumID=? AND Location IS NOT NULL', [AlbumID]))
-        
+
     if oldalbumdata['Status'] == 'Skipped' and ((have_track_count/float(total_track_count)) >= (headphones.ALBUM_COMPLETION_PCT/100.0)):
         myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', AlbumID])
-    
+
     # Update have track counts on index
     totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND AlbumID IN (SELECT AlbumID FROM albums WHERE Status != "Ignored")', [newalbumdata['ArtistID']]))
     havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [newalbumdata['ArtistID']]))
 
     controlValueDict = {"ArtistID":     newalbumdata['ArtistID']}
-    
+
     newValueDict = {    "TotalTracks":      totaltracks,
                         "HaveTracks":       havetracks}
-    
+
     myDB.upsert("artists", newValueDict, controlValueDict)

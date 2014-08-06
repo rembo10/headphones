@@ -324,9 +324,9 @@ class WebInterface(object):
 
     def choose_specific_download(self, AlbumID):
         results = searcher.searchforalbum(AlbumID, choose_specific_download=True)
-        
+
         results_as_dicts = []
-        
+
         for result in results:
 
             result_dict = {
@@ -341,7 +341,7 @@ class WebInterface(object):
         s = simplejson.dumps(results_as_dicts)
         cherrypy.response.headers['Content-type'] = 'application/json'
         return s
-        
+
     choose_specific_download.exposed = True
 
     def download_specific_release(self, AlbumID, title, size, url, provider, kind, **kwargs):
@@ -878,9 +878,9 @@ class WebInterface(object):
     def getArtistjson(self, ArtistID, **kwargs):
         myDB = db.DBConnection()
         artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
-        artist_json = json.dumps({      
+        artist_json = json.dumps({
                                     'ArtistName': artist['ArtistName'],
-                                    'Status':     artist['Status']                        
+                                    'Status':     artist['Status']
                                  })
         return artist_json
     getArtistjson.exposed=True
@@ -1393,25 +1393,22 @@ class WebInterface(object):
 
     configUpdate.exposed = True
 
-    def shutdown(self):
-        headphones.SIGNAL = 'shutdown'
-        message = 'Shutting Down...'
-        return serve_template(templatename="shutdown.html", title="Shutting Down", message=message, timer=15)
-        return page
+    def do_state_change(self, signal, title, timer):
+        headphones.SIGNAL = signal
+        message = title + '...'
+        return serve_template(templatename="shutdown.html", title=title,
+                              message=message, timer=timer)
 
+    def shutdown(self):
+        return self.do_state_change('shutdown', 'Shutting Down', 15)
     shutdown.exposed = True
 
     def restart(self):
-        headphones.SIGNAL = 'restart'
-        message = 'Restarting...'
-        return serve_template(templatename="shutdown.html", title="Restarting", message=message, timer=30)
+        return self.do_state_change('restart', 'Restarting', 30)
     restart.exposed = True
 
     def update(self):
-        headphones.SIGNAL = 'update'
-        message = 'Updating...'
-        return serve_template(templatename="shutdown.html", title="Updating", message=message, timer=120)
-        return page
+        return self.do_state_change('update', 'Updating', 120)
     update.exposed = True
 
     def extras(self):

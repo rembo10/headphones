@@ -70,7 +70,7 @@ class _GNTPBase(object):
 			'SHA1': hashlib.sha1,
 			'SHA256': hashlib.sha256,
 			'SHA512': hashlib.sha512,
-		}	
+		}
 		self.headers = {}
 		self.resources = {}
 

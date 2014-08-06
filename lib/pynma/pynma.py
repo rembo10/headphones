@@ -99,7 +99,7 @@ class PyNMA(object):
                 res = self.callapi('POST', ADD_PATH, datas)
                 results[datas['apikey']] = res
         return results
-        
+
     def callapi(self, method, path, args):
         headers = { 'User-Agent': USER_AGENT }
         if method == "POST":
@@ -116,7 +116,7 @@ class PyNMA(object):
                    'message': str(e)
                    }
             pass
-        
+
         return res
 
     def _parse_reponse(self, response):
@@ -133,5 +133,5 @@ class PyNMA(object):
                 res['message'] = elem.firstChild.nodeValue
                 res['type']    = elem.tagName
                 return res
-                                        
-    
+
+

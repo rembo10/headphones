@@ -29,7 +29,7 @@ import string
 import shutil
 import requests
 import subprocess
-
+import unicodedata
 
 import headphones
 from headphones.common import USER_AGENT
@@ -147,6 +147,11 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
     if data and bestqual:
         send_to_downloader(data, bestqual, album)
 
+def removeDisallowedFilenameChars(filename):
+    validFilenameChars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+    cleanedFilename = unicodedata.normalize('NFKD', filename).encode('ASCII', 'ignore').lower()
+    return ''.join(c for c in cleanedFilename if c in validFilenameChars)
+
 def more_filtering(results, album, albumlength, new):
 
     low_size_limit = None
@@ -174,33 +179,39 @@ def more_filtering(results, album, albumlength, new):
                 if headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                     allow_lossless = True
 
-    if low_size_limit or high_size_limit or new:
+    newlist = []
 
-        newlist = []
+    for result in results:
 
-        for result in results:
+        normalizedAlbumArtist = removeDisallowedFilenameChars(album['ArtistName'])
+        normalizedAlbumTitle = removeDisallowedFilenameChars(album['AlbumTitle'])
+        normalizedResultTitle = removeDisallowedFilenameChars(result[0]);
+        artistTitleCount = normalizedResultTitle.count(normalizedAlbumArtist)
 
-            if low_size_limit and (int(result[1]) < low_size_limit):
-                logger.info("%s from %s is too small for this album - not considering it. (Size: %s, Minsize: %s)", result[0], result[3], helpers.bytes_to_mb(result[1]), helpers.bytes_to_mb(low_size_limit))
+        if normalizedAlbumArtist in normalizedAlbumTitle and artistTitleCount < 2:
+            continue
+
+        if low_size_limit and (int(result[1]) < low_size_limit):
+            logger.info("%s from %s is too small for this album - not considering it. (Size: %s, Minsize: %s)", result[0], result[3], helpers.bytes_to_mb(result[1]), helpers.bytes_to_mb(low_size_limit))
+            continue
+
+        if high_size_limit and (int(result[1]) > high_size_limit):
+            logger.info("%s from %s is too large for this album - not considering it. (Size: %s, Maxsize: %s)", result[0], result[3], helpers.bytes_to_mb(result[1]), helpers.bytes_to_mb(high_size_limit))
+
+            # Keep lossless results if there are no good lossy matches
+            if not (allow_lossless and 'flac' in result[0].lower()):
                 continue
 
-            if high_size_limit and (int(result[1]) > high_size_limit):
-                logger.info("%s from %s is too large for this album - not considering it. (Size: %s, Maxsize: %s)", result[0], result[3], helpers.bytes_to_mb(result[1]), helpers.bytes_to_mb(high_size_limit))
+        if new:
+            alreadydownloaded = myDB.select('SELECT * from snatched WHERE URL=?', [result[2]])
 
-                # Keep lossless results if there are no good lossy matches
-                if not (allow_lossless and 'flac' in result[0].lower()):
-                    continue
+            if len(alreadydownloaded):
+                logger.info('%s has already been downloaded from %s. Skipping.' % (result[0], result[3]))
+                continue
 
-            if new:
-                alreadydownloaded = myDB.select('SELECT * from snatched WHERE URL=?', [result[2]])
+        newlist.append(result)
 
-                if len(alreadydownloaded):
-                    logger.info('%s has already been downloaded from %s. Skipping.' % (result[0], result[3]))
-                    continue
-
-            newlist.append(result)
-
-        results = newlist
+    results = newlist
 
     return results
 
@@ -610,7 +621,7 @@ def send_to_downloader(data, bestqual, album):
             # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
             torrent_name = helpers.replace_illegal_chars(folder_name) + '.torrent'
             download_path = os.path.join(headphones.TORRENTBLACKHOLE_DIR, torrent_name)
-            
+
             if bestqual[2].startswith("magnet:"):
                 if headphones.OPEN_MAGNET_LINKS:
                     try:
@@ -689,7 +700,7 @@ def send_to_downloader(data, bestqual, album):
 
         else:# if headphones.TORRENT_DOWNLOADER == 2:
             logger.info("Sending torrent to uTorrent")
- 
+
             # rutracker needs cookies to be set, pass the .torrent file instead of url
             if bestqual[3] == 'rutracker.org':
                 file_or_url, _hash = rutracker.get_torrent(bestqual[2])

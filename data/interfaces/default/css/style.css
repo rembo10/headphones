@@ -503,7 +503,7 @@ header .wrapper {
   margin: 0 auto;
   overflow: hidden;
   position: relative;
-  width: 960px;
+  width: 990px;
 }
 header #logo {
   float: left;
@@ -758,7 +758,7 @@ div#searchbar input[type=text] {
   line-height: normal;
   margin-right: 5px;
   padding: 4px 5px 4px 25px;
-  width: 200px;
+  width: 185px;
 }
 div#searchbar .mini-icon {
   color: #999;
