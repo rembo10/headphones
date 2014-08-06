@@ -8,7 +8,7 @@ from headphones import logger
 def getXldProfile(xldProfile):
     xldProfileNotFound = xldProfile
     expandedPath = os.path.expanduser('~/Library/Preferences/jp.tmkk.XLD.plist')
-    try:	
+    try:
         preferences = plistlib.Plist.fromFile(expandedPath)
     except (expat.ExpatError):
         os.system("/usr/bin/plutil -convert xml1 %s" % expandedPath )
@@ -61,7 +61,7 @@ def getXldProfile(xldProfile):
                 elif 'TVBR' in ShortDesc:
                     XLDAacOutput2_VBRQuality = int(profile.get('XLDAacOutput2_VBRQuality'))
                     if XLDAacOutput2_VBRQuality > 122:
-                        xldBitrate = 320   
+                        xldBitrate = 320
                     elif XLDAacOutput2_VBRQuality > 113 and XLDAacOutput2_VBRQuality <= 122:
                         xldBitrate = 285
                     elif XLDAacOutput2_VBRQuality > 104 and XLDAacOutput2_VBRQuality <= 113:

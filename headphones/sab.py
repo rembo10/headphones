@@ -69,7 +69,7 @@ def sendNZB(nzb):
 
     if headphones.SAB_HOST.endswith('/'):
         headphones.SAB_HOST = headphones.SAB_HOST[0:len(headphones.SAB_HOST)-1]
-    
+
     url = headphones.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
 
     try:

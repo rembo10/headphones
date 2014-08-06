@@ -19,12 +19,15 @@ import json, re, os, time
 import headphones
 
 from headphones import logger
+from collections import namedtuple
 
 class utorrentclient(object):
-    TOKEN_REGEX = "<div id='token' style='display:none;'>([^<>]+)</div>"
 
-    def __init__(self, base_url = None, username = None, password = None,): 
-                       
+    TOKEN_REGEX = "<div id='token' style='display:none;'>([^<>]+)</div>"
+    UTSetting = namedtuple("UTSetting", ["name", "int", "str", "access"])
+
+    def __init__(self, base_url = None, username = None, password = None,):
+
         host = headphones.UTORRENT_HOST
         if not host.startswith('http'):
             host = 'http://' + host
@@ -119,6 +122,16 @@ class utorrentclient(object):
 
         return self._action(params)
 
+    def get_settings(self, key=None):
+        params = [('action', 'getsettings'), ]
+        status, value = self._action(params)
+        settings = {}
+        for args in value['settings']:
+            settings[args[0]] = self.UTSetting(*args)
+        if key:
+            return settings[key]
+        return settings
+
     def _action(self, params, body=None, content_type=None):
         url = self.base_url + '/gui/' + '?token=' + self.token + '&' + urllib.urlencode(params)
         request = urllib2.Request(url)
@@ -136,31 +149,63 @@ class utorrentclient(object):
             logger.debug('URL: ' + str(url))
             logger.debug('uTorrent webUI raised the following error: ' + str(err))
 
-
 def labelTorrent(hash):
     label = headphones.UTORRENT_LABEL
     uTorrentClient = utorrentclient()
-    settinglabel = True
-    while settinglabel:
-        torrentList = uTorrentClient.list()
-        for torrent in torrentList[1].get('torrents'):
-            if (torrent[0].lower() == hash):
-                uTorrentClient.setprops(hash,'label',label)
-                settinglabel = False
-                return True
+    if label:
+        uTorrentClient.setprops(hash,'label',label)
 
+def dirTorrent(hash, cacheid=None):
 
-def dirTorrent(hash):
     uTorrentClient = utorrentclient()
-    torrentList = uTorrentClient.list()
-    for torrent in torrentList[1].get('torrents'):
-        if (torrent[0].lower() == hash):
-            return torrent[26]
-    return False
 
+    if not cacheid:
+        status, torrentList = uTorrentClient.list()
+    else:
+        params = [('list', '1'), ('cid', cacheid)]
+        status, torrentList = uTorrentClient._action(params)
+
+    if 'torrentp' in torrentList:
+        torrents = torrentList['torrentp']
+    else:
+        torrents = torrentList['torrents']
+
+    cacheid = torrentList['torrentc']
+
+    for torrent in torrents:
+        if (torrent[0].lower() == hash):
+            return torrent[26], cacheid
+
+    return None, None
 
 def addTorrent(link, hash):
     uTorrentClient = utorrentclient()
+
+    # Get Active Directory from settings
+    active_dir, completed_dir = getSettingsDirectories()
+
     uTorrentClient.add_url(link)
-    labelTorrent(hash)
-    return dirTorrent(hash)
+
+    # Get Torrent Folder Name
+    torrent_folder, cacheid = dirTorrent(hash)
+
+    # If there's no folder yet then it's probably a magnet, try until folder is populated
+    if torrent_folder == active_dir or not torrent_folder:
+        tries = 1
+        while (torrent_folder == active_dir or torrent_folder == None) and tries <= 10:
+            tries += 1
+            time.sleep(6)
+            torrent_folder, cacheid = dirTorrent(hash, cacheid)
+
+    if torrent_folder == active_dir:
+        return None
+    else:
+        labelTorrent(hash)
+        return os.path.basename(os.path.normpath(torrent_folder))
+
+def getSettingsDirectories():
+    uTorrentClient = utorrentclient()
+    settings = uTorrentClient.get_settings()
+    active = settings['dir_active_download'][2]
+    completed = settings['dir_completed_download'][2]
+    return active, completed

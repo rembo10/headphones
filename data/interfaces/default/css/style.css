@@ -503,7 +503,7 @@ header .wrapper {
   margin: 0 auto;
   overflow: hidden;
   position: relative;
-  width: 960px;
+  width: 990px;
 }
 header #logo {
   float: left;
@@ -758,7 +758,7 @@ div#searchbar input[type=text] {
   line-height: normal;
   margin-right: 5px;
   padding: 4px 5px 4px 25px;
-  width: 150px;
+  width: 185px;
 }
 div#searchbar .mini-icon {
   color: #999;
@@ -1126,12 +1126,33 @@ div#artistheader h2 a {
   padding: 2px 10px;
 }
 #searchresults_table th#albumname {
-  min-width: 225px;
+  min-width: 250px;
   text-align: left;
+  font-size: 14px;
 }
 #searchresults_table th#artistname {
   min-width: 325px;
   text-align: left;
+}
+#searchresults_table th#artistnamesmall {
+    min-width: 125px;
+    text-align: left;
+    font-size: 14px;
+}
+#searchresults_table th#reldate {
+    min-width: 80px;
+    text-align: center;
+    font-size: 14px;
+}
+#searchresults_table th#format {
+    min-width: 50px;
+    text-align: left;
+    font-size: 14px;
+}
+#searchresults_table th#tracks {
+    min-width: 50px;
+    text-align: left;
+    font-size: 14px;
 }
 #searchresults_table #artistImg {
   background: url("../images/loader_black.gif") no-repeat scroll center center #ffffff;
@@ -1144,14 +1165,39 @@ div#artistheader h2 a {
   width: 50px;
 }
 #searchresults_table td#albumname {
-  min-width: 200px;
+  min-width: 250px;
   text-align: left;
   vertical-align: middle;
+  font-size: 14px;
 }
 #searchresults_table td#artistname {
   min-width: 300px;
   text-align: left;
   vertical-align: middle;
+}
+#searchresults_table td#artistnamesmall {
+    min-width: 100px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 14px;
+}
+#searchresults_table td#reldate {
+    min-width: 80px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+}
+#searchresults_table td#format {
+    min-width: 50px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 14px;
+}
+#searchresults_table td#tracks {
+    min-width: 50px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 14px;
 }
 #searchresults_table td#add {
   vertical-align: middle;
@@ -1415,6 +1461,11 @@ div#artistheader h3 span {
 #searchresults_table th#score {
   min-width: 75px;
   text-align: center;
+}
+#searchresults_table th#scoresmall {
+    min-width: 50px;
+    text-align: center;
+    font-size: 14px;
 }
 #track_table td#bitrate,
 #track_table td#format {

@@ -69,21 +69,21 @@ and uses a RotatingFileHandler instead:
 
     #python
     log = app.log
-    
+
     # Remove the default FileHandlers if present.
     log.error_file = ""
     log.access_file = ""
-    
+
     maxBytes = getattr(log, "rot_maxBytes", 10000000)
     backupCount = getattr(log, "rot_backupCount", 1000)
-    
+
     # Make a new RotatingFileHandler for the error log.
     fname = getattr(log, "rot_error_file", "error.log")
     h = handlers.RotatingFileHandler(fname, 'a', maxBytes, backupCount)
     h.setLevel(DEBUG)
     h.setFormatter(_cplogging.logfmt)
     log.error_log.addHandler(h)
-    
+
     # Make a new RotatingFileHandler for the access log.
     fname = getattr(log, "rot_access_file", "access.log")
     h = handlers.RotatingFileHandler(fname, 'a', maxBytes, backupCount)
@@ -127,38 +127,38 @@ class NullHandler(logging.Handler):
 
 class LogManager(object):
     """An object to assist both simple and advanced logging.
-    
+
     ``cherrypy.log`` is an instance of this class.
     """
-    
+
     appid = None
     """The id() of the Application object which owns this log manager. If this
     is a global log manager, appid is None."""
-   
+
     error_log = None
     """The actual :class:`logging.Logger` instance for error messages."""
-    
+
     access_log = None
     """The actual :class:`logging.Logger` instance for access messages."""
-    
+
     if py3k:
         access_log_format = \
             '{h} {l} {u} {t} "{r}" {s} {b} "{f}" "{a}"'
     else:
         access_log_format = \
             '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
-    
+
     logger_root = None
     """The "top-level" logger name.
-    
+
     This string will be used as the first segment in the Logger names.
     The default is "cherrypy", for example, in which case the Logger names
     will be of the form::
-    
+
         cherrypy.error.<appid>
         cherrypy.access.<appid>
     """
-    
+
     def __init__(self, appid=None, logger_root="cherrypy"):
         self.logger_root = logger_root
         self.appid = appid
@@ -186,34 +186,34 @@ class LogManager(object):
                     h.stream.close()
                     h.stream = open(h.baseFilename, h.mode)
                     h.release()
-    
+
     def error(self, msg='', context='', severity=logging.INFO, traceback=False):
         """Write the given ``msg`` to the error log.
-        
+
         This is not just for errors! Applications may call this at any time
         to log application-specific information.
-        
+
         If ``traceback`` is True, the traceback of the current exception
         (if any) will be appended to ``msg``.
         """
         if traceback:
             msg += _cperror.format_exc()
         self.error_log.log(severity, ' '.join((self.time(), context, msg)))
-    
+
     def __call__(self, *args, **kwargs):
         """An alias for ``error``."""
         return self.error(*args, **kwargs)
-    
+
     def access(self):
         """Write to the access log (in Apache/NCSA Combined Log format).
-        
+
         See http://httpd.apache.org/docs/2.0/logs.html#combined for format
         details.
-        
+
         CherryPy calls this automatically for you. Note there are no arguments;
         it collects the data itself from
         :class:`cherrypy.request<cherrypy._cprequest.Request>`.
-        
+
         Like Apache started doing in 2.0.46, non-printable and other special
         characters in %r (and we expand that to all parts) are escaped using
         \\xhh sequences, where hh stands for the hexadecimal representation
@@ -232,7 +232,7 @@ class LogManager(object):
             status = response.output_status.split(ntob(" "), 1)[0]
             if py3k:
                 status = status.decode('ISO-8859-1')
-        
+
         atoms = {'h': remote.name or remote.ip,
                  'l': '-',
                  'u': getattr(request, "login", None) or "-",
@@ -251,15 +251,15 @@ class LogManager(object):
                 # Fortunately, repr(str) escapes unprintable chars, \n, \t, etc
                 # and backslash for us. All we have to do is strip the quotes.
                 v = repr(v)[2:-1]
-                
-                # in python 3.0 the repr of bytes (as returned by encode) 
+
+                # in python 3.0 the repr of bytes (as returned by encode)
                 # uses double \'s.  But then the logger escapes them yet, again
                 # resulting in quadruple slashes.  Remove the extra one here.
                 v = v.replace('\\\\', '\\')
-                
+
                 # Escape double-quote.
                 atoms[k] = v
-            
+
             try:
                 self.access_log.log(logging.INFO, self.access_log_format.format(**atoms))
             except:
@@ -275,12 +275,12 @@ class LogManager(object):
                 v = repr(v)[1:-1]
                 # Escape double-quote.
                 atoms[k] = v.replace('"', '\\"')
-            
+
             try:
                 self.access_log.log(logging.INFO, self.access_log_format % atoms)
             except:
                 self(traceback=True)
-    
+
     def time(self):
         """Return now() in Apache Common Log Format (no timezone)."""
         now = datetime.datetime.now()
@@ -289,15 +289,15 @@ class LogManager(object):
         month = monthnames[now.month - 1].capitalize()
         return ('[%02d/%s/%04d:%02d:%02d:%02d]' %
                 (now.day, month, now.year, now.hour, now.minute, now.second))
-    
+
     def _get_builtin_handler(self, log, key):
         for h in log.handlers:
             if getattr(h, "_cpbuiltin", None) == key:
                 return h
-    
-    
+
+
     # ------------------------- Screen handlers ------------------------- #
-    
+
     def _set_screen_handler(self, log, enable, stream=None):
         h = self._get_builtin_handler(log, "screen")
         if enable:
@@ -310,30 +310,30 @@ class LogManager(object):
                 log.addHandler(h)
         elif h:
             log.handlers.remove(h)
-    
+
     def _get_screen(self):
         h = self._get_builtin_handler
         has_h = h(self.error_log, "screen") or h(self.access_log, "screen")
         return bool(has_h)
-    
+
     def _set_screen(self, newvalue):
         self._set_screen_handler(self.error_log, newvalue, stream=sys.stderr)
         self._set_screen_handler(self.access_log, newvalue, stream=sys.stdout)
     screen = property(_get_screen, _set_screen,
         doc="""Turn stderr/stdout logging on or off.
-        
+
         If you set this to True, it'll add the appropriate StreamHandler for
         you. If you set it to False, it will remove the handler.
         """)
-    
+
     # -------------------------- File handlers -------------------------- #
-    
+
     def _add_builtin_file_handler(self, log, fname):
         h = logging.FileHandler(fname)
         h.setFormatter(logfmt)
         h._cpbuiltin = "file"
         log.addHandler(h)
-    
+
     def _set_file_handler(self, log, filename):
         h = self._get_builtin_handler(log, "file")
         if filename:
@@ -348,7 +348,7 @@ class LogManager(object):
             if h:
                 h.close()
                 log.handlers.remove(h)
-    
+
     def _get_error_file(self):
         h = self._get_builtin_handler(self.error_log, "file")
         if h:
@@ -358,11 +358,11 @@ class LogManager(object):
         self._set_file_handler(self.error_log, newvalue)
     error_file = property(_get_error_file, _set_error_file,
         doc="""The filename for self.error_log.
-        
+
         If you set this to a string, it'll add the appropriate FileHandler for
         you. If you set it to ``None`` or ``''``, it will remove the handler.
         """)
-    
+
     def _get_access_file(self):
         h = self._get_builtin_handler(self.access_log, "file")
         if h:
@@ -372,13 +372,13 @@ class LogManager(object):
         self._set_file_handler(self.access_log, newvalue)
     access_file = property(_get_access_file, _set_access_file,
         doc="""The filename for self.access_log.
-        
+
         If you set this to a string, it'll add the appropriate FileHandler for
         you. If you set it to ``None`` or ``''``, it will remove the handler.
         """)
-    
+
     # ------------------------- WSGI handlers ------------------------- #
-    
+
     def _set_wsgi_handler(self, log, enable):
         h = self._get_builtin_handler(log, "wsgi")
         if enable:
@@ -389,15 +389,15 @@ class LogManager(object):
                 log.addHandler(h)
         elif h:
             log.handlers.remove(h)
-    
+
     def _get_wsgi(self):
         return bool(self._get_builtin_handler(self.error_log, "wsgi"))
-    
+
     def _set_wsgi(self, newvalue):
         self._set_wsgi_handler(self.error_log, newvalue)
     wsgi = property(_get_wsgi, _set_wsgi,
         doc="""Write errors to wsgi.errors.
-        
+
         If you set this to True, it'll add the appropriate
         :class:`WSGIErrorHandler<cherrypy._cplogging.WSGIErrorHandler>` for you
         (which writes errors to ``wsgi.errors``).
@@ -407,7 +407,7 @@ class LogManager(object):
 
 class WSGIErrorHandler(logging.Handler):
     "A handler class which writes logging records to environ['wsgi.errors']."
-    
+
     def flush(self):
         """Flushes the stream."""
         try:
@@ -416,7 +416,7 @@ class WSGIErrorHandler(logging.Handler):
             pass
         else:
             stream.flush()
-    
+
     def emit(self, record):
         """Emit a record."""
         try:

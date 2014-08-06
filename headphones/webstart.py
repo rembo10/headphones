@@ -43,7 +43,7 @@ def initialize(options={}):
             logger.warn(u"Disabled HTTPS because of missing CERT and KEY files")
             headphones.ENABLE_HTTPS = False
             enable_https = False
-        
+
     options_dict = {
                 'log.screen':           False,
                 'server.thread_pool':   10,
@@ -54,14 +54,14 @@ def initialize(options={}):
                 'tools.encode.encoding' : 'utf-8',
                 'tools.decode.on' : True,
         }
-        
+
     if enable_https:
         options_dict['server.ssl_certificate'] = https_cert
         options_dict['server.ssl_private_key'] = https_key
         protocol = "https"
     else:
         protocol = "http"
-    
+
     logger.info("Starting Headphones on %s://%s:%d/", protocol, options['http_host'], options['http_port'])
     cherrypy.config.update(options_dict)
 
@@ -95,7 +95,7 @@ def initialize(options={}):
             'tools.staticdir.dir': headphones.CACHE_DIR
         }
     }
-    
+
     if options['http_password'] != "":
         conf['/'].update({
             'tools.auth_basic.on': True,
@@ -104,20 +104,20 @@ def initialize(options={}):
                     {options['http_username']:options['http_password']})
         })
         conf['/api'] = { 'tools.auth_basic.on': False }
-        
+
 
     # Prevent time-outs
     cherrypy.engine.timeout_monitor.unsubscribe()
-    
+
     cherrypy.tree.mount(WebInterface(), options['http_root'], config = conf)
-    
+
     try:
         cherrypy.process.servers.check_port(options['http_host'], options['http_port'])
         cherrypy.server.start()
     except IOError:
         print 'Failed to start on port: %i. Is something else running?' % (options['http_port'])
         sys.exit(0)
-    
+
     cherrypy.server.wait()
-    
-    
+
+
