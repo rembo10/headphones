@@ -85,7 +85,7 @@ class WebInterface(object):
             raise cherrypy.HTTPRedirect("home")
 
         # Serve the extras up as a dict to make things easier for new templates
-        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other"]
+        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "djmix", "mixtape_street", "spokenword", "audiobook", "broadcast", "interview", "other"]
         extras_dict = {}
 
         if not artist['Extras']:
@@ -110,6 +110,19 @@ class WebInterface(object):
         album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
         tracks = myDB.select('SELECT * from tracks WHERE AlbumID=? ORDER BY CAST(TrackNumber AS INTEGER)', [AlbumID])
         description = myDB.action('SELECT * from descriptions WHERE ReleaseGroupID=?', [AlbumID]).fetchone()
+
+        retry = 0
+        while retry < 5:
+            if not album:
+                time.sleep(1)
+                album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
+                retry += 1
+            else:
+                break
+
+        if not album:
+            raise cherrypy.HTTPRedirect("home")
+
         if not album['ArtistName']:
             title =  ' - '
         else:
@@ -143,12 +156,12 @@ class WebInterface(object):
         #
         # If they are, we need to convert kwargs to string format
         if not newstyle:
-            extras = "1,2,3,4,5,6,7,8,9"
+            extras = "1,2,3,4,5,6,7,8,9,10,11,12,13"
         else:
             temp_extras_list = []
             # TODO: Put these extras as a global variable
             i = 1
-            for extra in ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other"]:
+            for extra in ["single", "ep", "compilation", "soundtrack", "live", "remix", "djmix", "mixtape_street", "spokenword", "audiobook", "broadcast", "interview", "other"]:
                 if extra in kwargs:
                     temp_extras_list.append(i)
                 i += 1
@@ -311,9 +324,9 @@ class WebInterface(object):
 
     def choose_specific_download(self, AlbumID):
         results = searcher.searchforalbum(AlbumID, choose_specific_download=True)
-        
+
         results_as_dicts = []
-        
+
         for result in results:
 
             result_dict = {
@@ -328,7 +341,7 @@ class WebInterface(object):
         s = simplejson.dumps(results_as_dicts)
         cherrypy.response.headers['Content-type'] = 'application/json'
         return s
-        
+
     choose_specific_download.exposed = True
 
     def download_specific_release(self, AlbumID, title, size, url, provider, kind, **kwargs):
@@ -865,12 +878,23 @@ class WebInterface(object):
     def getArtistjson(self, ArtistID, **kwargs):
         myDB = db.DBConnection()
         artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
-        artist_json = json.dumps({      
+        artist_json = json.dumps({
                                     'ArtistName': artist['ArtistName'],
-                                    'Status':     artist['Status']                        
+                                    'Status':     artist['Status']
                                  })
         return artist_json
     getArtistjson.exposed=True
+
+    def getAlbumjson(self, AlbumID, **kwargs):
+        myDB = db.DBConnection()
+        album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
+        album_json = json.dumps({
+                                   'AlbumTitle': album['AlbumTitle'],
+                                   'ArtistName': album['ArtistName'],
+                                   'Status':     album['Status']
+        })
+        return album_json
+    getAlbumjson.exposed=True
 
     def clearhistory(self, type=None, date_added=None, title=None):
         myDB = db.DBConnection()
@@ -973,9 +997,6 @@ class WebInterface(object):
                     "use_nzbsorg" : checked(headphones.NZBSORG),
                     "nzbsorg_uid" : headphones.NZBSORG_UID,
                     "nzbsorg_hash" : headphones.NZBSORG_HASH,
-                    "use_nzbsrus" : checked(headphones.NZBSRUS),
-                    "nzbsrus_uid" : headphones.NZBSRUS_UID,
-                    "nzbsrus_apikey" : headphones.NZBSRUS_APIKEY,
                     "use_omgwtfnzbs" : checked(headphones.OMGWTFNZBS),
                     "omgwtfnzbs_uid" : headphones.OMGWTFNZBS_UID,
                     "omgwtfnzbs_apikey" : headphones.OMGWTFNZBS_APIKEY,
@@ -985,8 +1006,8 @@ class WebInterface(object):
                     "torrentblackhole_dir" : headphones.TORRENTBLACKHOLE_DIR,
                     "download_torrent_dir" : headphones.DOWNLOAD_TORRENT_DIR,
                     "numberofseeders" : headphones.NUMBEROFSEEDERS,
-                    "use_isohunt" : checked(headphones.ISOHUNT),
                     "use_kat" : checked(headphones.KAT),
+                    "kat_proxy_url" : headphones.KAT_PROXY_URL,
                     "use_piratebay" : checked(headphones.PIRATEBAY),
                     "piratebay_proxy_url" : headphones.PIRATEBAY_PROXY_URL,
                     "use_mininova" : checked(headphones.MININOVA),
@@ -1116,7 +1137,7 @@ class WebInterface(object):
                 }
 
         # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8
-        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other"]
+        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "dj-mix", "mixtape/street", "spokenword", "audiobook", "broadcast", "interview", "other"]
         extras_dict = {}
 
         i = 1
@@ -1136,12 +1157,12 @@ class WebInterface(object):
         download_scan_interval=None, update_db_interval=None, mb_ignore_age=None, nzb_search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None,
         sab_category=None, nzbget_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, transmission_host=None, transmission_username=None, transmission_password=None,
         utorrent_host=None, utorrent_username=None, utorrent_password=None, utorrent_label=None,nzb_downloader=0, torrent_downloader=0, download_dir=None, blackhole_dir=None, usenet_retention=None,
-        use_headphones_indexer=0, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, nzbsrus=0, nzbsrus_uid=None, nzbsrus_apikey=None, omgwtfnzbs=0, omgwtfnzbs_uid=None, omgwtfnzbs_apikey=None,
+        use_headphones_indexer=0, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, omgwtfnzbs=0, omgwtfnzbs_uid=None, omgwtfnzbs_apikey=None,
         preferred_words=None, required_words=None, ignored_words=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None,
-        numberofseeders=None, use_piratebay=0, piratebay_proxy_url=None, use_isohunt=0, use_kat=0, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
+        numberofseeders=None, use_piratebay=0, piratebay_proxy_url=None, use_kat=0, kat_proxy_url=None, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
         rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, keep_nfo=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0, replace_existing_folders=False,
         destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, file_underscores=0, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0,
-        remix=0, spokenword=0, audiobook=0, other=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, prefer_torrents=0, open_magnet_links=0, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
+        remix=0, djmix=0, mixtape_street=0, broadcast=0, interview=0, spokenword=0, audiobook=0, other=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, prefer_torrents=0, open_magnet_links=0, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
         bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
         delete_lossless_files=0, growl_enabled=0, growl_onsnatch=0, growl_host=None, growl_password=None, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, pushalot_enabled=False, pushalot_apikey=None, pushalot_onsnatch=0, synoindex_enabled=False, lms_enabled=0, lms_host=None,
@@ -1195,9 +1216,6 @@ class WebInterface(object):
         headphones.NZBSORG = nzbsorg
         headphones.NZBSORG_UID = nzbsorg_uid
         headphones.NZBSORG_HASH = nzbsorg_hash
-        headphones.NZBSRUS = nzbsrus
-        headphones.NZBSRUS_UID = nzbsrus_uid
-        headphones.NZBSRUS_APIKEY = nzbsrus_apikey
         headphones.OMGWTFNZBS = omgwtfnzbs
         headphones.OMGWTFNZBS_UID = omgwtfnzbs_uid
         headphones.OMGWTFNZBS_APIKEY = omgwtfnzbs_apikey
@@ -1207,8 +1225,8 @@ class WebInterface(object):
         headphones.TORRENTBLACKHOLE_DIR = torrentblackhole_dir
         headphones.NUMBEROFSEEDERS = numberofseeders
         headphones.DOWNLOAD_TORRENT_DIR = download_torrent_dir
-        headphones.ISOHUNT = use_isohunt
         headphones.KAT = use_kat
+        headphones.KAT_PROXY_URL = kat_proxy_url
         headphones.PIRATEBAY = use_piratebay
         headphones.PIRATEBAY_PROXY_URL = piratebay_proxy_url
         headphones.MININOVA = use_mininova
@@ -1352,7 +1370,7 @@ class WebInterface(object):
 
         # Convert the extras to list then string. Coming in as 0 or 1
         temp_extras_list = []
-        extras_list = [single, ep, compilation, soundtrack, live, remix, spokenword, audiobook, other]
+        extras_list = [single, ep, compilation, soundtrack, live, remix, djmix, mixtape_street, spokenword, audiobook, broadcast, interview, other]
 
         i = 1
         for extra in extras_list:
@@ -1377,25 +1395,22 @@ class WebInterface(object):
 
     configUpdate.exposed = True
 
-    def shutdown(self):
-        headphones.SIGNAL = 'shutdown'
-        message = 'Shutting Down...'
-        return serve_template(templatename="shutdown.html", title="Shutting Down", message=message, timer=15)
-        return page
+    def do_state_change(self, signal, title, timer):
+        headphones.SIGNAL = signal
+        message = title + '...'
+        return serve_template(templatename="shutdown.html", title=title,
+                              message=message, timer=timer)
 
+    def shutdown(self):
+        return self.do_state_change('shutdown', 'Shutting Down', 15)
     shutdown.exposed = True
 
     def restart(self):
-        headphones.SIGNAL = 'restart'
-        message = 'Restarting...'
-        return serve_template(templatename="shutdown.html", title="Restarting", message=message, timer=30)
+        return self.do_state_change('restart', 'Restarting', 30)
     restart.exposed = True
 
     def update(self):
-        headphones.SIGNAL = 'update'
-        message = 'Updating...'
-        return serve_template(templatename="shutdown.html", title="Updating", message=message, timer=120)
-        return page
+        return self.do_state_change('update', 'Updating', 120)
     update.exposed = True
 
     def extras(self):
@@ -1405,9 +1420,12 @@ class WebInterface(object):
         return page
     extras.exposed = True
 
-    def addReleaseById(self, rid):
-        threading.Thread(target=importer.addReleaseById, args=[rid]).start()
-        raise cherrypy.HTTPRedirect("home")
+    def addReleaseById(self, rid, rgid=None):
+        threading.Thread(target=importer.addReleaseById, args=[rid, rgid]).start()
+        if rgid:
+            raise cherrypy.HTTPRedirect("albumPage?AlbumID=%s" % rgid)
+        else:
+            raise cherrypy.HTTPRedirect("home")
     addReleaseById.exposed = True
 
     def updateCloud(self):
@@ -1459,6 +1477,17 @@ class WebInterface(object):
 
         from headphones import cache
         image_dict = cache.getImageLinks(ArtistID, AlbumID)
+
+        # Return the Cover Art Archive urls if not found on last.fm
+        if AlbumID and not image_dict:
+            image_url = "http://coverartarchive.org/release/%s/front-500.jpg" % AlbumID
+            thumb_url = "http://coverartarchive.org/release/%s/front-250.jpg" % AlbumID
+            image_dict = {'artwork' : image_url, 'thumbnail' : thumb_url}
+        elif AlbumID and (not image_dict['artwork'] or not image_dict['thumbnail']):
+            if not image_dict['artwork']:
+                image_dict['artwork'] = "http://coverartarchive.org/release/%s/front-500.jpg" % AlbumID
+            if not image_dict['thumbnail']:
+                image_dict['thumbnail'] = "http://coverartarchive.org/release/%s/front-250.jpg" % AlbumID
 
         return simplejson.dumps(image_dict)
 

@@ -135,7 +135,7 @@ def rword(length=5):
 def rsentence(length=4):
     "Generate a random sentence-like string."
     return " ".join(rword(random.randint(4,9)) for i in range(length))
-        
+
 def rdoc(num_elements=1000):
     """Randomly generate an invalid HTML document."""
     tag_names = ['p', 'div', 'span', 'i', 'b', 'script', 'table']
@@ -159,7 +159,7 @@ def benchmark_parsers(num_elements=100000):
     print "Comparative parser benchmark on Beautiful Soup %s" % __version__
     data = rdoc(num_elements)
     print "Generated a large invalid HTML document (%d bytes)." % len(data)
-    
+
     for parser in ["lxml", ["lxml", "html"], "html5lib", "html.parser"]:
         success = False
         try:

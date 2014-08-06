@@ -3,7 +3,7 @@ import inspect
 import os
 import sys
 import time
- 
+
 try:
     import objgraph
 except ImportError:
@@ -103,13 +103,13 @@ def get_instances(cls):
 
 
 class RequestCounter(SimplePlugin):
-    
+
     def start(self):
         self.count = 0
-    
+
     def before_request(self):
         self.count += 1
-    
+
     def after_request(self):
         self.count -=1
 request_counter = RequestCounter(cherrypy.engine)
@@ -145,14 +145,14 @@ class GCRoot(object):
 
     def stats(self):
         output = ["Statistics:"]
-        
+
         for trial in range(10):
             if request_counter.count > 0:
                 break
             time.sleep(0.5)
         else:
             output.append("\nNot all requests closed properly.")
-        
+
         # gc_collect isn't perfectly synchronous, because it may
         # break reference cycles that then take time to fully
         # finalize. Call it thrice and hope for the best.
@@ -208,7 +208,7 @@ class GCRoot(object):
                     t = ReferrerTree(ignore=[objs], maxdepth=3)
                     tree = t.ascend(obj)
                     output.extend(t.format(tree))
-        
+
         return "\n".join(output)
     stats.exposed = True
 

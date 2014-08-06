@@ -10,10 +10,13 @@ import cookielib
 from urlparse import urlparse
 from bs4 import BeautifulSoup
 import headphones
-from headphones import logger, db
-import lib.bencode as bencode
+from headphones import logger, db, utorrent
+from lib.bencode import bencode as bencode, bdecode
 import os
 from tempfile import mkdtemp
+from hashlib import sha1
+import requests
+import re
 
 class Rutracker():
 
@@ -21,7 +24,7 @@ class Rutracker():
 
     # Stores a number of login attempts to prevent recursion.
     #login_counter = 0
-    
+
     def __init__(self):
 
         self.cookiejar = cookielib.CookieJar()
@@ -37,11 +40,11 @@ class Rutracker():
             return False
 
         #self.login_counter += 1
-        
+
         # No recursion wanted.
         #if self.login_counter > 1:
         #    return False
-        
+
         params = urllib.urlencode({"login_username" : login,
                                    "login_password" : password,
                                    "login" : "Вход"})
@@ -50,19 +53,19 @@ class Rutracker():
             self.opener.open("http://login.rutracker.org/forum/login.php", params)
         except :
             pass
-            
+
         # Check if we're logged in
         for cookie in self.cookiejar:
             if cookie.name == 'bb_data':
                 self.logged_in = True
-        
+
         return self.logged_in
 
     def searchurl(self, artist, album, year, format):
         """
         Return the search url
         """
-         
+
         # Build search url
         searchterm = ''
         if artist != 'Various Artists':
@@ -71,69 +74,69 @@ class Rutracker():
         searchterm = searchterm + album
         searchterm = searchterm + ' '
         searchterm = searchterm + year
-        
+
         providerurl = "http://rutracker.org/forum/tracker.php"
-        
+
         if format == 'lossless':
             format = '+lossless'
         elif format == 'lossless+mp3':
             format = '+lossless||mp3||aac'
         else:
             format = '+mp3||aac'
-            
+
         # sort by size, descending.
         sort = '&o=7&s=2'
-        
+
         searchurl = "%s?nm=%s%s%s" % (providerurl, urllib.quote(searchterm), format, sort)
-        
+
         return searchurl
-    
-    def search(self, searchurl, maxsize, minseeders, albumid, bitrate):
+
+    def search(self, searchurl, maxsize, minseeders, albumid):
         """
         Parse the search results and return valid torrent list
         """
-        
+
         titles = []
         urls = []
         seeders = []
         sizes = []
-        torrentlist = [] 
+        torrentlist = []
         rulist = []
-        
+
         try:
-            
+
             page = self.opener.open(searchurl, timeout=60)
             soup = BeautifulSoup(page.read())
-            
+
             # Debug
-            #logger.debug (soup.prettify()) 
-            
+            #logger.debug (soup.prettify())
+
             # Title
-            for link in soup.find_all('a', attrs={'class' : 'med tLink hl-tags bold'}): 
+            for link in soup.find_all('a', attrs={'class' : 'med tLink hl-tags bold'}):
                 title = link.get_text()
                 titles.append(title)
-            
+
             # Download URL
             for link in soup.find_all('a', attrs={'class' : 'small tr-dl dl-stub'}):
                 url = link.get('href')
                 urls.append(url)
-                
+
             # Seeders
             for link in soup.find_all('b', attrs={'class' : 'seedmed'}):
                 seeder = link.get_text()
                 seeders.append(seeder)
-            
+
             # Size
-            for link in soup.find_all('td', attrs={'class' : 'row4 small nowrap tor-size'}): 
+            for link in soup.find_all('td', attrs={'class' : 'row4 small nowrap tor-size'}):
                 size = link.u.string
                 sizes.append(size)
-                
+
         except :
             pass
-            
+
         # Combine lists
         torrentlist = zip(titles, urls, seeders, sizes)
-        
+
         # return if nothing found
         if not torrentlist:
             return False
@@ -148,20 +151,20 @@ class Rutracker():
             myDB = db.DBConnection()
             tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
             hptrackcount = len(tracks)
-        
+
             if not hptrackcount:
                 logger.info('headphones track info not found, cannot compare to torrent')
                 return False
-        
+
             # Return all valid entries, ignored, required words now checked in searcher.py
-        
+
             #unwantedlist = ['promo', 'vinyl', '[lp]', 'songbook', 'tvrip', 'hdtv', 'dvd']
 
             formatlist = ['ape', 'flac', 'ogg', 'm4a', 'aac', 'mp3', 'wav', 'aif']
             deluxelist = ['deluxe', 'edition', 'japanese', 'exclusive']
-       
+
         for torrent in torrentlist:
-            
+
             returntitle = torrent[0].encode('utf-8')
             url = torrent[1]
             seeders = torrent[2]
@@ -180,26 +183,26 @@ class Rutracker():
 
                     # Check torrent info
                     self.cookiejar.set_cookie(cookielib.Cookie(version=0, name='bb_dl', value=torrent_id, port=None, port_specified=False, domain='.rutracker.org', domain_specified=False, domain_initial_dot=False, path='/', path_specified=True, secure=False, expires=None, discard=True, comment=None, comment_url=None, rest={'HttpOnly': None}, rfc2109=False))
-                                          
+
                     # Debug
                     #for cookie in self.cookiejar:
                     #    logger.debug ('Cookie: %s' % cookie)
-                     
+
                     try:
                         page = self.opener.open(url)
                         torrent = page.read()
                         if torrent:
-                            decoded = bencode.bdecode(torrent)
+                            decoded = bdecode(torrent)
                             metainfo = decoded['info']
                         page.close ()
                     except Exception, e:
                         logger.error('Error getting torrent: %s' % e)
                         return False
-                
+
                     # get torrent track count and check for cue
                     trackcount = 0
                     cuecount = 0
-                
+
                     if 'files' in metainfo: # multi
                         for pathfile in metainfo['files']:
                             path = pathfile['path']
@@ -237,22 +240,22 @@ class Rutracker():
                                     else:
                                         break
                             totallogcount = totallogcount + logcount
-                            
+
                     if totallogcount > 0:
                         trackcount = totallogcount
                         logger.debug ('rutracker logtrackcount: %s' % totallogcount)
-                
+
                     # If torrent track count = hp track count then return torrent,
                     # if greater, check for deluxe/special/foreign editions
                     # if less, then allow if it's a single track with a cue
                     valid = False
-                
+
                     if trackcount == hptrackcount:
                         valid = True
                     elif trackcount > hptrackcount:
                         if any(deluxe in title for deluxe in deluxelist):
                             valid = True
-                        
+
                 # Add to list
                 if valid:
                     rulist.append((returntitle, size, topicurl))
@@ -275,6 +278,9 @@ class Rutracker():
             prev = os.umask(headphones.UMASK)
             page = self.opener.open(downloadurl)
             torrent = page.read()
+            decoded = bdecode(torrent)
+            metainfo = decoded['info']
+            tor_hash = sha1(bencode(metainfo)).hexdigest()
             if savelocation:
                 download_path = os.path.join(savelocation, torrent_name)
             else:
@@ -284,8 +290,61 @@ class Rutracker():
             fp.write (torrent)
             fp.close ()
             os.umask(prev)
+
+            # Add file to utorrent
+            if headphones.TORRENT_DOWNLOADER == 2:
+                self.utorrent_add_file(download_path)
+
         except Exception, e:
             logger.error('Error getting torrent: %s' % e)
             return False
 
-        return download_path
+        return download_path, tor_hash
+
+    #TODO get this working in utorrent.py
+    def utorrent_add_file(self, filename):
+
+        host = headphones.UTORRENT_HOST
+        if not host.startswith('http'):
+            host = 'http://' + host
+        if host.endswith('/'):
+            host = host[:-1]
+        if host.endswith('/gui'):
+            host = host[:-4]
+
+        base_url = host
+        username = headphones.UTORRENT_USERNAME
+        password = headphones.UTORRENT_PASSWORD
+
+        session = requests.Session()
+        url = base_url + '/gui/'
+        session.auth = (username, password)
+
+        try:
+            r = session.get(url + 'token.html')
+        except:
+            logger.debug('Error getting token')
+            return
+        if r.status_code == '401':
+            logger.debug('Error reaching utorrent')
+            return
+
+        regex = re.search(r'.+>([^<]+)</div></html>', r.text)
+        if regex is None:
+            logger.debug('Error reading token')
+            return
+
+        session.params = {'token': regex.group(1)}
+
+        params = {'action': 'add-file'}
+        f = open(filename, 'rb')
+        files = {'torrent_file': f}
+
+        try:
+            session.post(url, params=params, files=files)
+        except:
+            logger.debug('Error adding file to utorrent')
+            return
+        finally:
+            f.close()
+

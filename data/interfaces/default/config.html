@@ -363,22 +363,6 @@
                                 </div>
                             </fieldset>
                             <fieldset>
-                                <legend>NZBsRus</legend>
-                                <div class="row checkbox">
-                                    <input id="usenzbsrus" type="checkbox" name="nzbsrus" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbsrus']} /><label>Use NZBsRus</label>
-                                </div>
-                                <div class="config">
-                                    <div class="row">
-                                        <label>NZBsRus UID</label>
-                                        <input type="text" name="nzbsrus_uid" value="${config['nzbsrus_uid']}" size="10">
-                                    </div>
-                                    <div class="row">
-                                        <label>NZBsRus API Key</label>
-                                        <input type="text" name="nzbsrus_apikey" value="${config['nzbsrus_apikey']}" size="10">
-                                    </div>
-                                </div>
-                            </fieldset>
-                            <fieldset>
                                 <legend>omgwtfnzbs</legend>
                                 <div class="row checkbox">
                                     <input id="useomgwtfnzbs" type="checkbox" name="omgwtfnzbs" onclick="initConfigCheckbox($(this));" value="1" ${config['use_omgwtfnzbs']} /><label>Use omgwtfnzbs</label>
@@ -390,7 +374,7 @@
                                     </div>
                                     <div class="row">
                                         <label>omgwtfnzbs API Key</label>
-                                        <input type="text" name="omgwtfnzbs_apikey" value="${config['omgwtfnzbs_apikey']}" size="10">
+                                        <input type="text" name="omgwtfnzbs_apikey" value="${config['omgwtfnzbs_apikey']}" size="30">
                                     </div>
                                 </div>
                             </fieldset>
@@ -407,14 +391,17 @@
                                         <input type="text" name="piratebay_proxy_url" value="${config['piratebay_proxy_url']}" size="36">
                                     </div>
                                 </div>
-                                <div class="row checkbox">
-                                    <input type="checkbox" name="use_isohunt" value="1" ${config['use_isohunt']} /><label>Isohunt</label>
-                                </div>
-                                <div class="row checkbox">
+                                 <div class="row checkbox">
                                     <input type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /><label>Mininova</label>
                                 </div>
                                 <div class="row checkbox">
-                                    <input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Kick Ass Torrents</label>
+                                    <input id="usekat" type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Kick Ass Torrents</label>
+                                </div>
+								<div class="config">
+                                    <div class="row">
+                                        <label>Proxy URL (Optional): </label>
+                                        <input type="text" name="kat_proxy_url" value="${config['kat_proxy_url']}" size="36">
+                                    </div>
                                 </div>
                                 <div class="row checkbox">
                                     <input id="usewaffles" type="checkbox" name="waffles" onclick="initConfigCheckbox($(this));" value="1" ${config['use_waffles']} /><label>Waffles.fm</label>
@@ -480,12 +467,14 @@
                                     </div>
                                     <input type="radio" id="preferred_bitrate" name="preferred_quality" value="2" ${config['pref_qual_2']}>Preferred Bitrate: <input type="text" class="override-float" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3">kbps<br>
                                     <div id="preferred_bitrate_options">
-                                        Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['pref_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['pref_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br><br>
-                                        <div class="row checkbox left">
+                                        <span style="padding-left: 20px">
+                                            Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['pref_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['pref_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br>
+                                        </span>
+                                        <div class="row checkbox left" style="padding-left: 20px">
                                             <input type="checkbox" name="preferred_bitrate_allow_lossless" value="1" ${config['pref_bitrate_allow_lossless']}>
                                             <label>Allow lossless if no good lossy match found</label>
                                         </div>
-                                        <div class="row checkbox left">
+                                        <div class="row checkbox left" style="padding-left: 20px">
                                             <input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />
                                             <label>Auto-Detect Preferred Bitrate</label>
                                         </div>
@@ -1752,9 +1741,9 @@
                 initActions();
                 initConfigCheckbox("#use_headphones_indexer");
                 initConfigCheckbox("#usenewznab");
-                initConfigCheckbox("#usenzbsrus");
                 initConfigCheckbox("#usenzbsorg");
                 initConfigCheckbox("#useomgwtfnzbs");
+				initConfigCheckbox("#usekat");
                 initConfigCheckbox("#usepiratebay");
                 initConfigCheckbox("#usewaffles");
                 initConfigCheckbox("#userutracker");

@@ -20,10 +20,10 @@ local_dir = os.path.join(os.getcwd(), os.path.dirname(__file__))
 
 
 class Root:
-    
+
     _cp_config = {'tools.log_tracebacks.on': True,
                   }
-    
+
     def index(self):
         return """<html>
 <body>Try some <a href='%s?a=7'>other</a> path,
@@ -33,11 +33,11 @@ Or, just look at the pretty picture:<br />
 </body></html>""" % (url("other"), url("else"),
                      url("files/made_with_cherrypy_small.png"))
     index.exposed = True
-    
+
     def default(self, *args, **kwargs):
         return "args: %s kwargs: %s" % (args, kwargs)
     default.exposed = True
-    
+
     def other(self, a=2, b='bananas', c=None):
         cherrypy.response.headers['Content-Type'] = 'text/plain'
         if c is None:
@@ -45,7 +45,7 @@ Or, just look at the pretty picture:<br />
         else:
             return "Have %d %s, %s." % (int(a), b, c)
     other.exposed = True
-    
+
     files = cherrypy.tools.staticdir.handler(
                 section="/files",
                 dir=os.path.join(local_dir, "static"),
