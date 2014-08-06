@@ -6,17 +6,17 @@ CherryPy users
 You can profile any of your pages as follows::
 
     from cherrypy.lib import profiler
-    
+
     class Root:
         p = profile.Profiler("/path/to/profile/dir")
-        
+
         def index(self):
             self.p.run(self._index)
         index.exposed = True
-        
+
         def _index(self):
             return "Hello, world!"
-    
+
     cherrypy.tree.mount(Root())
 
 You can also turn on profiling for all requests
@@ -58,14 +58,14 @@ from cherrypy._cpcompat import BytesIO
 _count = 0
 
 class Profiler(object):
-    
+
     def __init__(self, path=None):
         if not path:
             path = os.path.join(os.path.dirname(__file__), "profile")
         self.path = path
         if not os.path.exists(path):
             os.makedirs(path)
-    
+
     def run(self, func, *args, **params):
         """Dump profile data into self.path."""
         global _count
@@ -75,13 +75,13 @@ class Profiler(object):
         result = prof.runcall(func, *args, **params)
         prof.dump_stats(path)
         return result
-    
+
     def statfiles(self):
         """:rtype: list of available profiles.
         """
         return [f for f in os.listdir(self.path)
                 if f.startswith("cp_") and f.endswith(".prof")]
-    
+
     def stats(self, filename, sortby='cumulative'):
         """:rtype stats(index): output of print_stats() for the given profile.
         """
@@ -106,7 +106,7 @@ class Profiler(object):
         response = sio.getvalue()
         sio.close()
         return response
-    
+
     def index(self):
         return """<html>
         <head><title>CherryPy profile data</title></head>
@@ -117,7 +117,7 @@ class Profiler(object):
         </html>
         """
     index.exposed = True
-    
+
     def menu(self):
         yield "<h2>Profiling runs</h2>"
         yield "<p>Click on one of the runs below to see profiling data.</p>"
@@ -126,7 +126,7 @@ class Profiler(object):
         for i in runs:
             yield "<a href='report?filename=%s' target='main'>%s</a><br />" % (i, i)
     menu.exposed = True
-    
+
     def report(self, filename):
         import cherrypy
         cherrypy.response.headers['Content-Type'] = 'text/plain'
@@ -135,13 +135,13 @@ class Profiler(object):
 
 
 class ProfileAggregator(Profiler):
-    
+
     def __init__(self, path=None):
         Profiler.__init__(self, path)
         global _count
         self.count = _count = _count + 1
         self.profiler = profile.Profile()
-    
+
     def run(self, func, *args):
         path = os.path.join(self.path, "cp_%04d.prof" % self.count)
         result = self.profiler.runcall(func, *args)
@@ -152,33 +152,33 @@ class ProfileAggregator(Profiler):
 class make_app:
     def __init__(self, nextapp, path=None, aggregate=False):
         """Make a WSGI middleware app which wraps 'nextapp' with profiling.
-        
+
         nextapp
             the WSGI application to wrap, usually an instance of
             cherrypy.Application.
-            
+
         path
             where to dump the profiling output.
-            
+
         aggregate
             if True, profile data for all HTTP requests will go in
             a single file. If False (the default), each HTTP request will
             dump its profile data into a separate file.
-        
+
         """
         if profile is None or pstats is None:
             msg = ("Your installation of Python does not have a profile module. "
                    "If you're on Debian, try `sudo apt-get install python-profiler`. "
                    "See http://www.cherrypy.org/wiki/ProfilingOnDebian for details.")
             warnings.warn(msg)
-        
+
         self.nextapp = nextapp
         self.aggregate = aggregate
         if aggregate:
             self.profiler = ProfileAggregator(path)
         else:
             self.profiler = Profiler(path)
-    
+
     def __call__(self, environ, start_response):
         def gather():
             result = []
@@ -194,7 +194,7 @@ def serve(path=None, port=8080):
                "If you're on Debian, try `sudo apt-get install python-profiler`. "
                "See http://www.cherrypy.org/wiki/ProfilingOnDebian for details.")
         warnings.warn(msg)
-    
+
     import cherrypy
     cherrypy.config.update({'server.socket_port': int(port),
                             'server.thread_pool': 10,

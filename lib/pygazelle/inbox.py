@@ -58,9 +58,9 @@ class Mailbox(object):
     """
     This class represents the logged in user's inbox/sentbox
     """
-    def __init__(self, parent_api, boxtype='inbox', page='1', sort='unread'): 
+    def __init__(self, parent_api, boxtype='inbox', page='1', sort='unread'):
         self.parent_api = parent_api
-        self.boxtype = boxtype 
+        self.boxtype = boxtype
         self.current_page = page
         self.total_pages = None
         self.sort = sort

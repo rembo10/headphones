@@ -147,7 +147,7 @@ def transform_value(value):
         return float(value)
     except ValueError:
         pass
-    
+
     return value
 
 def transform_data(data):
@@ -209,7 +209,7 @@ def transform_data(data):
                 if section == 'importfeeds':
                     if key.startswith(IMPORTFEEDS_PREFIX):
                         key = key[len(IMPORTFEEDS_PREFIX):]
-                
+
                 sec_out[key] = transform_value(value)
 
     return out
@@ -313,7 +313,7 @@ def migrate_db(replace=False):
         # Old DB does not exist or we're configured to point to the same
         # database. Do nothing.
         return
-    
+
     if os.path.exists(destfn):
         if replace:
             log.debug(u'moving old database aside: {0}'.format(

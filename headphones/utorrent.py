@@ -27,7 +27,7 @@ class utorrentclient(object):
     UTSetting = namedtuple("UTSetting", ["name", "int", "str", "access"])
 
     def __init__(self, base_url = None, username = None, password = None,):
-                       
+
         host = headphones.UTORRENT_HOST
         if not host.startswith('http'):
             host = 'http://' + host

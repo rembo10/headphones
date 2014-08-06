@@ -31,7 +31,7 @@ from headphones import logger
 def dbFilename(filename="headphones.db"):
 
     return os.path.join(headphones.DATA_DIR, filename)
-    
+
 def getCacheSize():
     #this will protect against typecasting problems produced by empty string and None settings
     if not headphones.CACHE_SIZEMB:
@@ -42,25 +42,25 @@ def getCacheSize():
 class DBConnection:
 
     def __init__(self, filename="headphones.db"):
-    
+
         self.filename = filename
         self.connection = sqlite3.connect(dbFilename(filename), timeout=20)
         #don't wait for the disk to finish writing
         self.connection.execute("PRAGMA synchronous = OFF")
         #journal disabled since we never do rollbacks
-        self.connection.execute("PRAGMA journal_mode = %s" % headphones.JOURNAL_MODE)        
+        self.connection.execute("PRAGMA journal_mode = %s" % headphones.JOURNAL_MODE)
         #64mb of cache memory,probably need to make it user configurable
         self.connection.execute("PRAGMA cache_size=-%s" % (getCacheSize()*1024))
         self.connection.row_factory = sqlite3.Row
-        
+
     def action(self, query, args=None):
 
         if query == None:
             return
-            
+
         sqlResult = None
         attempt = 0
-        
+
         while attempt < 5:
             try:
                 if args == None:
@@ -82,28 +82,28 @@ class DBConnection:
             except sqlite3.DatabaseError, e:
                 logger.error('Fatal Error executing %s :: %s', query, e)
                 raise
-        
+
         return sqlResult
-    
+
     def select(self, query, args=None):
-    
+
         sqlResults = self.action(query, args).fetchall()
-        
+
         if sqlResults == None:
             return []
-            
+
         return sqlResults
-                    
+
     def upsert(self, tableName, valueDict, keyDict):
-    
+
         changesBefore = self.connection.total_changes
-        
+
         genParams = lambda myDict : [x + " = ?" for x in myDict.keys()]
-        
+
         query = "UPDATE "+tableName+" SET " + ", ".join(genParams(valueDict)) + " WHERE " + " AND ".join(genParams(keyDict))
-        
+
         self.action(query, valueDict.values() + keyDict.values())
-        
+
         if self.connection.total_changes == changesBefore:
             query = "INSERT INTO "+tableName+" (" + ", ".join(valueDict.keys() + keyDict.keys()) + ")" + \
                         " VALUES (" + ", ".join(["?"] * len(valueDict.keys() + keyDict.keys())) + ")"
