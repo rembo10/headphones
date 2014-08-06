@@ -421,24 +421,27 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
 
     logger.info(u'Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
 
+    pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
+    statusmessage = "Download and Postprocessing completed"
+
     if headphones.GROWL_ENABLED:
-        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
         logger.info(u"Growl request")
         growl = notifiers.GROWL()
-        growl.notify(pushmessage,"Download and Postprocessing completed")
+        growl.notify(pushmessage, statusmessage)
 
     if headphones.PROWL_ENABLED:
-        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
         logger.info(u"Prowl request")
         prowl = notifiers.PROWL()
-        prowl.notify(pushmessage,"Download and Postprocessing completed")
+        prowl.notify(pushmessage, statusmessage)
 
     if headphones.XBMC_ENABLED:
         xbmc = notifiers.XBMC()
         if headphones.XBMC_UPDATE:
             xbmc.update()
         if headphones.XBMC_NOTIFY:
-            xbmc.notify(release['ArtistName'], release['AlbumTitle'], album_art_path)
+            xbmc.notify(release['ArtistName'],
+                        release['AlbumTitle'],
+                        album_art_path)
 
     if headphones.LMS_ENABLED:
         lms = notifiers.LMS()
@@ -449,17 +452,18 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         if headphones.PLEX_UPDATE:
             plex.update()
         if headphones.PLEX_NOTIFY:
-            plex.notify(release['ArtistName'], release['AlbumTitle'], album_art_path)
+            plex.notify(release['ArtistName'],
+                        release['AlbumTitle'],
+                        album_art_path)
 
     if headphones.NMA_ENABLED:
         nma = notifiers.NMA()
         nma.notify(release['ArtistName'], release['AlbumTitle'])
 
     if headphones.PUSHALOT_ENABLED:
-        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
         logger.info(u"Pushalot request")
         pushalot = notifiers.PUSHALOT()
-        pushalot.notify(pushmessage,"Download and Postprocessing completed")
+        pushalot.notify(pushmessage, statusmessage)
 
     if headphones.SYNOINDEX_ENABLED:
         syno = notifiers.Synoindex()
@@ -467,19 +471,16 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
             syno.notify(albumpath)
 
     if headphones.PUSHOVER_ENABLED:
-        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
         logger.info(u"Pushover request")
         pushover = notifiers.PUSHOVER()
-        pushover.notify(pushmessage,"Headphones")
+        pushover.notify(pushmessage, "Headphones")
 
     if headphones.PUSHBULLET_ENABLED:
-        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
         logger.info(u"PushBullet request")
         pushbullet = notifiers.PUSHBULLET()
         pushbullet.notify(pushmessage, "Download and Postprocessing completed")
 
     if headphones.TWITTER_ENABLED:
-        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
         logger.info(u"Sending Twitter notification")
         twitter = notifiers.TwitterNotifier()
         twitter.notify_download(pushmessage)
@@ -487,13 +488,15 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     if headphones.OSX_NOTIFY_ENABLED:
         logger.info(u"Sending OS X notification")
         osx_notify = notifiers.OSX_NOTIFY()
-        osx_notify.notify(release['ArtistName'], release['AlbumTitle'], "Download and Postprocessing completed")
+        osx_notify.notify(release['ArtistName'],
+                          release['AlbumTitle'],
+                          statusmessage)
 
     if headphones.BOXCAR_ENABLED:
-        pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
         logger.info(u"Sending Boxcar2 notification")
         boxcar = notifiers.BOXCAR()
-        boxcar.notify('Headphones processed: ' + pushmessage, "Download and Postprocessing completed", release['AlbumID'])
+        boxcar.notify('Headphones processed: ' + pushmessage,
+                      statusmessage, release['AlbumID'])
 
     if headphones.MPC_ENABLED:
         mpc = notifiers.MPC()
