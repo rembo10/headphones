@@ -11,6 +11,8 @@ You are free to join the HP support community on IRC where you can ask questions
 
 [Read our Wiki](../../wiki) on how to install and use HeadPhones properly.
 
+[**Troubleshooting** page](../../wiki/TroubleShooting) in the wiki can help you with comon problems.
+
 **Issues** can be reported on the GitHub issue tracker considering these rules:
 
 1. Analyze your log, you just might find the solution yourself!
