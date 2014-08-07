@@ -7,7 +7,8 @@ from headphones import logger
 
 def getXldProfile(xldProfile):
     xldProfileNotFound = xldProfile
-    expandedPath = os.path.expanduser('~/Library/Preferences/jp.tmkk.XLD.plist')
+    expandedPath = os.path.expanduser(
+        '~/Library/Preferences/jp.tmkk.XLD.plist')
     try:
         preferences = plistlib.Plist.fromFile(expandedPath)
     except (expat.ExpatError):
@@ -16,10 +17,12 @@ def getXldProfile(xldProfile):
             preferences = plistlib.Plist.fromFile(expandedPath)
         except (ImportError):
             os.system("/usr/bin/plutil -convert binary1 %s" % expandedPath )
-            logger.info('The plist at "%s" has a date in it, and therefore is not useable.' % expandedPath)
+            logger.info(
+                'The plist at "%s" has a date in it, and therefore is not useable.' % expandedPath)
             return(xldProfileNotFound, None, None)
     except (ImportError):
-        logger.info('The plist at "%s" has a date in it, and therefore is not useable.' % expandedPath)
+        logger.info(
+            'The plist at "%s" has a date in it, and therefore is not useable.' % expandedPath)
     except:
         logger.info('Unexpected error:', sys.exc_info()[0])
         return(xldProfileNotFound, None, None)
@@ -59,7 +62,8 @@ def getXldProfile(xldProfile):
                 if 'CBR' in ShortDesc or 'ABR' in ShortDesc or 'CVBR' in ShortDesc:
                     xldBitrate = int(profile.get('XLDAacOutput2_Bitrate'))
                 elif 'TVBR' in ShortDesc:
-                    XLDAacOutput2_VBRQuality = int(profile.get('XLDAacOutput2_VBRQuality'))
+                    XLDAacOutput2_VBRQuality = int(
+                        profile.get('XLDAacOutput2_VBRQuality'))
                     if XLDAacOutput2_VBRQuality > 122:
                         xldBitrate = 320
                     elif XLDAacOutput2_VBRQuality > 113 and XLDAacOutput2_VBRQuality <= 122:
@@ -139,7 +143,8 @@ def getXldProfile(xldProfile):
 
             elif OutputFormatName == 'Ogg Vorbis':
                 xldFormat = 'ogg'
-                XLDVorbisOutput_Quality = float(profile.get('XLDVorbisOutput_Quality'))
+                XLDVorbisOutput_Quality = float(
+                    profile.get('XLDVorbisOutput_Quality'))
                 if XLDVorbisOutput_Quality <= -2:
                     xldBitrate = 32
                 elif XLDVorbisOutput_Quality > -2 and XLDVorbisOutput_Quality <= -1:

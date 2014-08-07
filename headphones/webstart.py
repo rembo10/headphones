@@ -26,21 +26,24 @@ from headphones.helpers import create_https_certificates
 
 def initialize(options={}):
 
-    #HTTPS stuff stolen from sickbeard
+    # HTTPS stuff stolen from sickbeard
     enable_https = options['enable_https']
     https_cert = options['https_cert']
     https_key = options['https_key']
 
     if enable_https:
-        # If either the HTTPS certificate or key do not exist, make some self-signed ones.
+        # If either the HTTPS certificate or key do not exist, make some
+        # self-signed ones.
         if not (https_cert and os.path.exists(https_cert)) or not (https_key and os.path.exists(https_key)):
             if not create_https_certificates(https_cert, https_key):
-                logger.warn(u"Unable to create cert/key files, disabling HTTPS")
+                logger.warn(
+                    u"Unable to create cert/key files, disabling HTTPS")
                 headphones.ENABLE_HTTPS = False
                 enable_https = False
 
         if not (os.path.exists(https_cert) and os.path.exists(https_key)):
-            logger.warn(u"Disabled HTTPS because of missing CERT and KEY files")
+            logger.warn(
+                u"Disabled HTTPS because of missing CERT and KEY files")
             headphones.ENABLE_HTTPS = False
             enable_https = False
 
@@ -50,9 +53,9 @@ def initialize(options={}):
                 'server.socket_port':   options['http_port'],
                 'server.socket_host':   options['http_host'],
                 'engine.autoreload_on': False,
-                'tools.encode.on' : True,
-                'tools.encode.encoding' : 'utf-8',
-                'tools.decode.on' : True,
+                'tools.encode.on': True,
+                'tools.encode.encoding': 'utf-8',
+                'tools.decode.on': True,
         }
 
     if enable_https:
@@ -62,35 +65,37 @@ def initialize(options={}):
     else:
         protocol = "http"
 
-    logger.info("Starting Headphones on %s://%s:%d/", protocol, options['http_host'], options['http_port'])
+    logger.info("Starting Headphones on %s://%s:%d/", protocol,
+                options['http_host'], options['http_port'])
     cherrypy.config.update(options_dict)
 
     conf = {
         '/': {
             'tools.staticdir.root': os.path.join(headphones.PROG_DIR, 'data'),
-            'tools.proxy.on': options['http_proxy']  # pay attention to X-Forwarded-Proto header
+            # pay attention to X-Forwarded-Proto header
+            'tools.proxy.on': options['http_proxy']
         },
-        '/interfaces':{
+        '/interfaces': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': "interfaces"
         },
-        '/images':{
+        '/images': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': "images"
         },
-        '/css':{
+        '/css': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': "css"
         },
-        '/js':{
+        '/js': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': "js"
         },
-        '/favicon.ico':{
+        '/favicon.ico': {
             'tools.staticfile.on': True,
-            'tools.staticfile.filename': os.path.join(os.path.abspath(os.curdir),"images" + os.sep + "favicon.ico")
+            'tools.staticfile.filename': os.path.join(os.path.abspath(os.curdir), "images" + os.sep + "favicon.ico")
         },
-        '/cache':{
+        '/cache': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': headphones.CACHE_DIR
         }
@@ -101,7 +106,7 @@ def initialize(options={}):
             'tools.auth_basic.on': True,
             'tools.auth_basic.realm': 'Headphones',
             'tools.auth_basic.checkpassword':  cherrypy.lib.auth_basic.checkpassword_dict(
-                    {options['http_username']:options['http_password']})
+                    {options['http_username']: options['http_password']})
         })
         conf['/api'] = { 'tools.auth_basic.on': False }
 
@@ -112,7 +117,8 @@ def initialize(options={}):
     cherrypy.tree.mount(WebInterface(), options['http_root'], config = conf)
 
     try:
-        cherrypy.process.servers.check_port(options['http_host'], options['http_port'])
+        cherrypy.process.servers.check_port(
+            options['http_host'], options['http_port'])
         cherrypy.server.start()
     except IOError:
         print 'Failed to start on port: %i. Is something else running?' % (options['http_port'])

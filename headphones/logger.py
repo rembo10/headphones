@@ -41,7 +41,8 @@ class LogListHandler(logging.Handler):
         message = self.format(record)
         message = message.replace("\n", "<br />")
 
-        headphones.LOG_LIST.insert(0, (helpers.now(), message, record.levelname, record.threadName))
+        headphones.LOG_LIST.insert(
+            0, (helpers.now(), message, record.levelname, record.threadName))
 
 def initLogger(console=False, verbose=False):
     """
@@ -73,8 +74,10 @@ def initLogger(console=False, verbose=False):
     # Setup file logger
     filename = os.path.join(headphones.LOG_DIR, FILENAME)
 
-    file_formatter = logging.Formatter('%(asctime)s - %(levelname)-7s :: %(threadName)s : %(message)s', '%d-%b-%Y %H:%M:%S')
-    file_handler = handlers.RotatingFileHandler(filename, maxBytes=MAX_SIZE, backupCount=MAX_FILES)
+    file_formatter = logging.Formatter(
+        '%(asctime)s - %(levelname)-7s :: %(threadName)s : %(message)s', '%d-%b-%Y %H:%M:%S')
+    file_handler = handlers.RotatingFileHandler(
+        filename, maxBytes=MAX_SIZE, backupCount=MAX_FILES)
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(file_formatter)
 
@@ -88,7 +91,8 @@ def initLogger(console=False, verbose=False):
 
     # Setup console logger
     if console:
-        console_formatter = logging.Formatter('%(asctime)s - %(levelname)s :: %(threadName)s : %(message)s', '%d-%b-%Y %H:%M:%S')
+        console_formatter = logging.Formatter(
+            '%(asctime)s - %(levelname)s :: %(threadName)s : %(message)s', '%d-%b-%Y %H:%M:%S')
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(console_formatter)
         console_handler.setLevel(logging.DEBUG)

@@ -33,9 +33,10 @@ def dbFilename(filename="headphones.db"):
     return os.path.join(headphones.DATA_DIR, filename)
 
 def getCacheSize():
-    #this will protect against typecasting problems produced by empty string and None settings
+    # this will protect against typecasting problems produced by empty string
+    # and None settings
     if not headphones.CACHE_SIZEMB:
-        #sqlite will work with this (very slowly)
+        # sqlite will work with this (very slowly)
         return 0
     return int(headphones.CACHE_SIZEMB)
 
@@ -45,12 +46,14 @@ class DBConnection:
 
         self.filename = filename
         self.connection = sqlite3.connect(dbFilename(filename), timeout=20)
-        #don't wait for the disk to finish writing
+        # don't wait for the disk to finish writing
         self.connection.execute("PRAGMA synchronous = OFF")
-        #journal disabled since we never do rollbacks
-        self.connection.execute("PRAGMA journal_mode = %s" % headphones.JOURNAL_MODE)
-        #64mb of cache memory,probably need to make it user configurable
-        self.connection.execute("PRAGMA cache_size=-%s" % (getCacheSize()*1024))
+        # journal disabled since we never do rollbacks
+        self.connection.execute(
+            "PRAGMA journal_mode = %s" % headphones.JOURNAL_MODE)
+        # 64mb of cache memory,probably need to make it user configurable
+        self.connection.execute(
+            "PRAGMA cache_size=-%s" % (getCacheSize()*1024))
         self.connection.row_factory = sqlite3.Row
 
     def action(self, query, args=None):
@@ -100,11 +103,14 @@ class DBConnection:
 
         genParams = lambda myDict : [x + " = ?" for x in myDict.keys()]
 
-        query = "UPDATE "+tableName+" SET " + ", ".join(genParams(valueDict)) + " WHERE " + " AND ".join(genParams(keyDict))
+        query = "UPDATE "+tableName+" SET " + \
+            ", ".join(genParams(valueDict)) + " WHERE " + \
+                      " AND ".join(genParams(keyDict))
 
         self.action(query, valueDict.values() + keyDict.values())
 
         if self.connection.total_changes == changesBefore:
             query = "INSERT INTO "+tableName+" (" + ", ".join(valueDict.keys() + keyDict.keys()) + ")" + \
-                        " VALUES (" + ", ".join(["?"] * len(valueDict.keys() + keyDict.keys())) + ")"
+                        " VALUES (" + ", ".join(["?"] * \
+                                  len(valueDict.keys() + keyDict.keys())) + ")"
             self.action(query, valueDict.values() + keyDict.values())

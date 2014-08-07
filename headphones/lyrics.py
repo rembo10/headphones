@@ -45,10 +45,12 @@ def getLyrics(artist, song):
         logger.warn('Error fetching lyrics from: %s' % lyricsurl)
         return
 
-    m = re.compile('''<div class='lyricbox'><div class='rtMatcher'>.*?</div>(.*?)<!--''').search(lyricspage)
+    m = re.compile(
+        '''<div class='lyricbox'><div class='rtMatcher'>.*?</div>(.*?)<!--''').search(lyricspage)
 
     if not m:
-        m = re.compile('''<div class='lyricbox'><span style="padding:1em"><a href="/Category:Instrumental" title="Instrumental">''').search(lyricspage)
+        m = re.compile(
+            '''<div class='lyricbox'><span style="padding:1em"><a href="/Category:Instrumental" title="Instrumental">''').search(lyricspage)
         if m:
             return u'(Instrumental)'
         else:

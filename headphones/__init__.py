@@ -13,7 +13,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-# NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
+# NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian
+# - XBMC on the Raspberry Pi
 
 import os, sys, subprocess
 
@@ -184,7 +185,9 @@ LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a", "asf", "wma"]
 LOSSLESS_MEDIA_FORMATS = ["flac"]
 MEDIA_FORMATS = LOSSY_MEDIA_FORMATS + LOSSLESS_MEDIA_FORMATS
 
-ALBUM_COMPLETION_PCT = None    # This is used in importer.py to determine how complete an album needs to be - to be considered "downloaded". Percentage from 0-100
+# This is used in importer.py to determine how complete an album needs to
+# be - to be considered "downloaded". Percentage from 0-100
+ALBUM_COMPLETION_PCT = None
 
 TORRENTBLACKHOLE_DIR = None
 NUMBEROFSEEDERS = 10
@@ -274,7 +277,7 @@ OSX_NOTIFY_APP = None
 BOXCAR_ENABLED = False
 BOXCAR_ONSNATCH = False
 BOXCAR_TOKEN = None
-MIRRORLIST = ["musicbrainz.org","headphones","custom"]
+MIRRORLIST = ["musicbrainz.org", "headphones", "custom"]
 MIRROR = None
 CUSTOMHOST = None
 CUSTOMPORT = None
@@ -303,9 +306,9 @@ def CheckSection(sec):
         CFG[sec] = {}
         return False
 
-################################################################################
+##########################################################################
 # Check_setting_int                                                            #
-################################################################################
+##########################################################################
 def check_setting_int(config, cfg_name, item_name, def_val):
     try:
         my_val = int(config[cfg_name][item_name])
@@ -319,9 +322,9 @@ def check_setting_int(config, cfg_name, item_name, def_val):
     logger.debug("%s -> %s", item_name, my_val)
     return my_val
 
-################################################################################
+##########################################################################
 # Check_setting_str                                                            #
-################################################################################
+##########################################################################
 def check_setting_str(config, cfg_name, item_name, def_val, log=True):
     try:
         my_val = config[cfg_name][item_name]
@@ -344,7 +347,7 @@ def initialize():
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, GIT_USER, GIT_BRANCH, DO_NOT_OVERRIDE_GIT_BRANCH, \
                 CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
-                RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, FILE_UNDERSCORES, CLEANUP_FILES, KEEP_NFO, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, PREFER_TORRENTS, OPEN_MAGNET_LINKS, \
+                RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, FILE_UNDERSCORES, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, PREFER_TORRENTS, OPEN_MAGNET_LINKS, \
                 ADD_ALBUM_ART, ALBUM_ART_FORMAT, EMBED_ALBUM_ART, EMBED_LYRICS, REPLACE_EXISTING_FOLDERS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, KAT, KAT_PROXY_URL, PIRATEBAY, PIRATEBAY_PROXY_URL, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
@@ -398,7 +401,8 @@ def initialize():
         CheckSection('Advanced')
 
         # Set global variables based on config file or use defaults
-        CONFIG_VERSION = check_setting_str(CFG, 'General', 'config_version', '0')
+        CONFIG_VERSION = check_setting_str(
+            CFG, 'General', 'config_version', '0')
 
         try:
             HTTP_PORT = check_setting_int(CFG, 'General', 'http_port', 8181)
@@ -413,36 +417,56 @@ def initialize():
         HTTP_PASSWORD = check_setting_str(CFG, 'General', 'http_password', '')
         HTTP_ROOT = check_setting_str(CFG, 'General', 'http_root', '/')
         HTTP_PROXY = bool(check_setting_int(CFG, 'General', 'http_proxy', 0))
-        ENABLE_HTTPS = bool(check_setting_int(CFG, 'General', 'enable_https', 0))
-        HTTPS_CERT = check_setting_str(CFG, 'General', 'https_cert', os.path.join(DATA_DIR, 'server.crt'))
-        HTTPS_KEY = check_setting_str(CFG, 'General', 'https_key', os.path.join(DATA_DIR, 'server.key'))
-        LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
+        ENABLE_HTTPS = bool(
+            check_setting_int(CFG, 'General', 'enable_https', 0))
+        HTTPS_CERT = check_setting_str(
+            CFG, 'General', 'https_cert', os.path.join(DATA_DIR, 'server.crt'))
+        HTTPS_KEY = check_setting_str(
+            CFG, 'General', 'https_key', os.path.join(DATA_DIR, 'server.key'))
+        LAUNCH_BROWSER = bool(
+            check_setting_int(CFG, 'General', 'launch_browser', 1))
         API_ENABLED = bool(check_setting_int(CFG, 'General', 'api_enabled', 0))
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
         GIT_USER = check_setting_str(CFG, 'General', 'git_user', 'rembo10')
         GIT_BRANCH = check_setting_str(CFG, 'General', 'git_branch', 'master')
-        DO_NOT_OVERRIDE_GIT_BRANCH = check_setting_int(CFG, 'General', 'do_not_override_git_branch', 0)
+        DO_NOT_OVERRIDE_GIT_BRANCH = check_setting_int(
+            CFG, 'General', 'do_not_override_git_branch', 0)
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', '')
         CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', '')
 
-        CHECK_GITHUB = bool(check_setting_int(CFG, 'General', 'check_github', 1))
-        CHECK_GITHUB_ON_STARTUP = bool(check_setting_int(CFG, 'General', 'check_github_on_startup', 1))
-        CHECK_GITHUB_INTERVAL = check_setting_int(CFG, 'General', 'check_github_interval', 360)
+        CHECK_GITHUB = bool(
+            check_setting_int(CFG, 'General', 'check_github', 1))
+        CHECK_GITHUB_ON_STARTUP = bool(
+            check_setting_int(CFG, 'General', 'check_github_on_startup', 1))
+        CHECK_GITHUB_INTERVAL = check_setting_int(
+            CFG, 'General', 'check_github_interval', 360)
 
         MUSIC_DIR = check_setting_str(CFG, 'General', 'music_dir', '')
-        DESTINATION_DIR = check_setting_str(CFG, 'General', 'destination_dir', '')
-        LOSSLESS_DESTINATION_DIR = check_setting_str(CFG, 'General', 'lossless_destination_dir', '')
-        PREFERRED_QUALITY = check_setting_int(CFG, 'General', 'preferred_quality', 0)
-        PREFERRED_BITRATE = check_setting_str(CFG, 'General', 'preferred_bitrate', '')
-        PREFERRED_BITRATE_HIGH_BUFFER = check_setting_int(CFG, 'General', 'preferred_bitrate_high_buffer', '')
-        PREFERRED_BITRATE_LOW_BUFFER = check_setting_int(CFG, 'General', 'preferred_bitrate_low_buffer', '')
-        PREFERRED_BITRATE_ALLOW_LOSSLESS = bool(check_setting_int(CFG, 'General', 'preferred_bitrate_allow_lossless', 0))
-        DETECT_BITRATE = bool(check_setting_int(CFG, 'General', 'detect_bitrate', 0))
-        LOSSLESS_BITRATE_FROM = check_setting_int(CFG, 'General', 'lossless_bitrate_from', '')
-        LOSSLESS_BITRATE_TO = check_setting_int(CFG, 'General', 'lossless_bitrate_to', '')
-        ADD_ARTISTS = bool(check_setting_int(CFG, 'General', 'auto_add_artists', 1))
-        CORRECT_METADATA = bool(check_setting_int(CFG, 'General', 'correct_metadata', 0))
+        DESTINATION_DIR = check_setting_str(
+            CFG, 'General', 'destination_dir', '')
+        LOSSLESS_DESTINATION_DIR = check_setting_str(
+            CFG, 'General', 'lossless_destination_dir', '')
+        PREFERRED_QUALITY = check_setting_int(
+            CFG, 'General', 'preferred_quality', 0)
+        PREFERRED_BITRATE = check_setting_str(
+            CFG, 'General', 'preferred_bitrate', '')
+        PREFERRED_BITRATE_HIGH_BUFFER = check_setting_int(
+            CFG, 'General', 'preferred_bitrate_high_buffer', '')
+        PREFERRED_BITRATE_LOW_BUFFER = check_setting_int(
+            CFG, 'General', 'preferred_bitrate_low_buffer', '')
+        PREFERRED_BITRATE_ALLOW_LOSSLESS = bool(
+            check_setting_int(CFG, 'General', 'preferred_bitrate_allow_lossless', 0))
+        DETECT_BITRATE = bool(
+            check_setting_int(CFG, 'General', 'detect_bitrate', 0))
+        LOSSLESS_BITRATE_FROM = check_setting_int(
+            CFG, 'General', 'lossless_bitrate_from', '')
+        LOSSLESS_BITRATE_TO = check_setting_int(
+            CFG, 'General', 'lossless_bitrate_to', '')
+        ADD_ARTISTS = bool(
+            check_setting_int(CFG, 'General', 'auto_add_artists', 1))
+        CORRECT_METADATA = bool(
+            check_setting_int(CFG, 'General', 'correct_metadata', 0))
         MOVE_FILES = bool(check_setting_int(CFG, 'General', 'move_files', 0))
         RENAME_FILES = bool(check_setting_int(CFG, 'General', 'rename_files', 0))
         FOLDER_FORMAT = check_setting_str(CFG, 'General', 'folder_format', 'Artist/Album [Year]')
@@ -456,46 +480,67 @@ def initialize():
         EMBED_LYRICS = bool(check_setting_int(CFG, 'General', 'embed_lyrics', 0))
         REPLACE_EXISTING_FOLDERS = bool(check_setting_int(CFG, 'General', 'replace_existing_folders', 0))
         NZB_DOWNLOADER = check_setting_int(CFG, 'General', 'nzb_downloader', 0)
-        TORRENT_DOWNLOADER = check_setting_int(CFG, 'General', 'torrent_downloader', 0)
+        TORRENT_DOWNLOADER = check_setting_int(
+            CFG, 'General', 'torrent_downloader', 0)
         DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'download_dir', '')
         BLACKHOLE = bool(check_setting_int(CFG, 'General', 'blackhole', 0))
         BLACKHOLE_DIR = check_setting_str(CFG, 'General', 'blackhole_dir', '')
-        USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', '1500')
-        INCLUDE_EXTRAS = bool(check_setting_int(CFG, 'General', 'include_extras', 0))
+        USENET_RETENTION = check_setting_int(
+            CFG, 'General', 'usenet_retention', '1500')
+        INCLUDE_EXTRAS = bool(
+            check_setting_int(CFG, 'General', 'include_extras', 0))
         EXTRAS = check_setting_str(CFG, 'General', 'extras', '')
-        AUTOWANT_UPCOMING = bool(check_setting_int(CFG, 'General', 'autowant_upcoming', 1))
-        AUTOWANT_ALL = bool(check_setting_int(CFG, 'General', 'autowant_all', 0))
-        KEEP_TORRENT_FILES = bool(check_setting_int(CFG, 'General', 'keep_torrent_files', 0))
-        PREFER_TORRENTS = check_setting_int(CFG, 'General', 'prefer_torrents', 0)
-        OPEN_MAGNET_LINKS = bool(check_setting_int(CFG, 'General', 'open_magnet_links', 0))
+        AUTOWANT_UPCOMING = bool(
+            check_setting_int(CFG, 'General', 'autowant_upcoming', 1))
+        AUTOWANT_ALL = bool(
+            check_setting_int(CFG, 'General', 'autowant_all', 0))
+        KEEP_TORRENT_FILES = bool(
+            check_setting_int(CFG, 'General', 'keep_torrent_files', 0))
+        PREFER_TORRENTS = check_setting_int(
+            CFG, 'General', 'prefer_torrents', 0)
+        OPEN_MAGNET_LINKS = bool(
+            check_setting_int(CFG, 'General', 'open_magnet_links', 0))
 
-        SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'search_interval', 1440)
+        SEARCH_INTERVAL = check_setting_int(
+            CFG, 'General', 'search_interval', 1440)
         LIBRARYSCAN = bool(check_setting_int(CFG, 'General', 'libraryscan', 1))
-        LIBRARYSCAN_INTERVAL = check_setting_int(CFG, 'General', 'libraryscan_interval', 300)
-        DOWNLOAD_SCAN_INTERVAL = check_setting_int(CFG, 'General', 'download_scan_interval', 5)
-        UPDATE_DB_INTERVAL = check_setting_int(CFG, 'General', 'update_db_interval', 24)
+        LIBRARYSCAN_INTERVAL = check_setting_int(
+            CFG, 'General', 'libraryscan_interval', 300)
+        DOWNLOAD_SCAN_INTERVAL = check_setting_int(
+            CFG, 'General', 'download_scan_interval', 5)
+        UPDATE_DB_INTERVAL = check_setting_int(
+            CFG, 'General', 'update_db_interval', 24)
         MB_IGNORE_AGE = check_setting_int(CFG, 'General', 'mb_ignore_age', 365)
 
-        TORRENTBLACKHOLE_DIR = check_setting_str(CFG, 'General', 'torrentblackhole_dir', '')
-        NUMBEROFSEEDERS = check_setting_str(CFG, 'General', 'numberofseeders', '10')
+        TORRENTBLACKHOLE_DIR = check_setting_str(
+            CFG, 'General', 'torrentblackhole_dir', '')
+        NUMBEROFSEEDERS = check_setting_str(
+            CFG, 'General', 'numberofseeders', '10')
         KAT = bool(check_setting_int(CFG, 'General', 'kat', 0))
         KAT_PROXY_URL = check_setting_str(CFG, 'General', 'kat_proxy_url', '')
         PIRATEBAY = bool(check_setting_int(CFG, 'General', 'piratebay', 0))
-        PIRATEBAY_PROXY_URL = check_setting_str(CFG, 'General', 'piratebay_proxy_url', '')
+        PIRATEBAY_PROXY_URL = check_setting_str(
+            CFG, 'General', 'piratebay_proxy_url', '')
         MININOVA = bool(check_setting_int(CFG, 'General', 'mininova', 0))
-        DOWNLOAD_TORRENT_DIR = check_setting_str(CFG, 'General', 'download_torrent_dir', '')
+        DOWNLOAD_TORRENT_DIR = check_setting_str(
+            CFG, 'General', 'download_torrent_dir', '')
 
         WAFFLES = bool(check_setting_int(CFG, 'Waffles', 'waffles', 0))
         WAFFLES_UID = check_setting_str(CFG, 'Waffles', 'waffles_uid', '')
-        WAFFLES_PASSKEY = check_setting_str(CFG, 'Waffles', 'waffles_passkey', '')
+        WAFFLES_PASSKEY = check_setting_str(
+            CFG, 'Waffles', 'waffles_passkey', '')
 
         RUTRACKER = bool(check_setting_int(CFG, 'Rutracker', 'rutracker', 0))
-        RUTRACKER_USER = check_setting_str(CFG, 'Rutracker', 'rutracker_user', '')
-        RUTRACKER_PASSWORD = check_setting_str(CFG, 'Rutracker', 'rutracker_password', '')
+        RUTRACKER_USER = check_setting_str(
+            CFG, 'Rutracker', 'rutracker_user', '')
+        RUTRACKER_PASSWORD = check_setting_str(
+            CFG, 'Rutracker', 'rutracker_password', '')
 
         WHATCD = bool(check_setting_int(CFG, 'What.cd', 'whatcd', 0))
-        WHATCD_USERNAME = check_setting_str(CFG, 'What.cd', 'whatcd_username', '')
-        WHATCD_PASSWORD = check_setting_str(CFG, 'What.cd', 'whatcd_password', '')
+        WHATCD_USERNAME = check_setting_str(
+            CFG, 'What.cd', 'whatcd_username', '')
+        WHATCD_PASSWORD = check_setting_str(
+            CFG, 'What.cd', 'whatcd_password', '')
 
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
@@ -503,73 +548,108 @@ def initialize():
         SAB_APIKEY = check_setting_str(CFG, 'SABnzbd', 'sab_apikey', '')
         SAB_CATEGORY = check_setting_str(CFG, 'SABnzbd', 'sab_category', '')
 
-        NZBGET_USERNAME = check_setting_str(CFG, 'NZBget', 'nzbget_username', 'nzbget')
-        NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', '')
-        NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', '')
+        NZBGET_USERNAME = check_setting_str(
+            CFG, 'NZBget', 'nzbget_username', 'nzbget')
+        NZBGET_PASSWORD = check_setting_str(
+            CFG, 'NZBget', 'nzbget_password', '')
+        NZBGET_CATEGORY = check_setting_str(
+            CFG, 'NZBget', 'nzbget_category', '')
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
 
-        HEADPHONES_INDEXER = bool(check_setting_int(CFG, 'Headphones', 'headphones_indexer', 0))
+        HEADPHONES_INDEXER = bool(
+            check_setting_int(CFG, 'Headphones', 'headphones_indexer', 0))
 
-        TRANSMISSION_HOST = check_setting_str(CFG, 'Transmission', 'transmission_host', '')
-        TRANSMISSION_USERNAME = check_setting_str(CFG, 'Transmission', 'transmission_username', '')
-        TRANSMISSION_PASSWORD = check_setting_str(CFG, 'Transmission', 'transmission_password', '')
+        TRANSMISSION_HOST = check_setting_str(
+            CFG, 'Transmission', 'transmission_host', '')
+        TRANSMISSION_USERNAME = check_setting_str(
+            CFG, 'Transmission', 'transmission_username', '')
+        TRANSMISSION_PASSWORD = check_setting_str(
+            CFG, 'Transmission', 'transmission_password', '')
 
         UTORRENT_HOST = check_setting_str(CFG, 'uTorrent', 'utorrent_host', '')
-        UTORRENT_USERNAME = check_setting_str(CFG, 'uTorrent', 'utorrent_username', '')
-        UTORRENT_PASSWORD = check_setting_str(CFG, 'uTorrent', 'utorrent_password', '')
-        UTORRENT_LABEL = check_setting_str(CFG, 'uTorrent', 'utorrent_label', '')
+        UTORRENT_USERNAME = check_setting_str(
+            CFG, 'uTorrent', 'utorrent_username', '')
+        UTORRENT_PASSWORD = check_setting_str(
+            CFG, 'uTorrent', 'utorrent_password', '')
+        UTORRENT_LABEL = check_setting_str(
+            CFG, 'uTorrent', 'utorrent_label', '')
 
         NEWZNAB = bool(check_setting_int(CFG, 'Newznab', 'newznab', 0))
         NEWZNAB_HOST = check_setting_str(CFG, 'Newznab', 'newznab_host', '')
-        NEWZNAB_APIKEY = check_setting_str(CFG, 'Newznab', 'newznab_apikey', '')
-        NEWZNAB_ENABLED = bool(check_setting_int(CFG, 'Newznab', 'newznab_enabled', 1))
+        NEWZNAB_APIKEY = check_setting_str(
+            CFG, 'Newznab', 'newznab_apikey', '')
+        NEWZNAB_ENABLED = bool(
+            check_setting_int(CFG, 'Newznab', 'newznab_enabled', 1))
 
         # Need to pack the extra newznabs back into a list of tuples
-        flattened_newznabs = check_setting_str(CFG, 'Newznab', 'extra_newznabs', [], log=False)
-        EXTRA_NEWZNABS = list(itertools.izip(*[itertools.islice(flattened_newznabs, i, None, 3) for i in range(3)]))
+        flattened_newznabs = check_setting_str(
+            CFG, 'Newznab', 'extra_newznabs', [], log=False)
+        EXTRA_NEWZNABS = list(itertools.izip(
+            *[itertools.islice(flattened_newznabs, i, None, 3) for i in range(3)]))
 
         NZBSORG = bool(check_setting_int(CFG, 'NZBsorg', 'nzbsorg', 0))
         NZBSORG_UID = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_uid', '')
         NZBSORG_HASH = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_hash', '')
 
-        OMGWTFNZBS = bool(check_setting_int(CFG, 'omgwtfnzbs', 'omgwtfnzbs', 0))
-        OMGWTFNZBS_UID = check_setting_str(CFG, 'omgwtfnzbs', 'omgwtfnzbs_uid', '')
-        OMGWTFNZBS_APIKEY = check_setting_str(CFG, 'omgwtfnzbs', 'omgwtfnzbs_apikey', '')
+        OMGWTFNZBS = bool(
+            check_setting_int(CFG, 'omgwtfnzbs', 'omgwtfnzbs', 0))
+        OMGWTFNZBS_UID = check_setting_str(
+            CFG, 'omgwtfnzbs', 'omgwtfnzbs_uid', '')
+        OMGWTFNZBS_APIKEY = check_setting_str(
+            CFG, 'omgwtfnzbs', 'omgwtfnzbs_apikey', '')
 
-        PREFERRED_WORDS = check_setting_str(CFG, 'General', 'preferred_words', '')
+        PREFERRED_WORDS = check_setting_str(
+            CFG, 'General', 'preferred_words', '')
         IGNORED_WORDS = check_setting_str(CFG, 'General', 'ignored_words', '')
-        REQUIRED_WORDS = check_setting_str(CFG, 'General', 'required_words', '')
+        REQUIRED_WORDS = check_setting_str(
+            CFG, 'General', 'required_words', '')
 
-        LASTFM_USERNAME = check_setting_str(CFG, 'General', 'lastfm_username', '')
+        LASTFM_USERNAME = check_setting_str(
+            CFG, 'General', 'lastfm_username', '')
 
         INTERFACE = check_setting_str(CFG, 'General', 'interface', 'default')
-        FOLDER_PERMISSIONS = check_setting_str(CFG, 'General', 'folder_permissions', '0755')
-        FILE_PERMISSIONS = check_setting_str(CFG, 'General', 'file_permissions', '0644')
+        FOLDER_PERMISSIONS = check_setting_str(
+            CFG, 'General', 'folder_permissions', '0755')
+        FILE_PERMISSIONS = check_setting_str(
+            CFG, 'General', 'file_permissions', '0644')
 
         ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')
         ENCODER_PATH = check_setting_str(CFG, 'General', 'encoder_path', '')
         ENCODER = check_setting_str(CFG, 'General', 'encoder', 'ffmpeg')
         XLDPROFILE = check_setting_str(CFG, 'General', 'xldprofile', '')
         BITRATE = check_setting_int(CFG, 'General', 'bitrate', 192)
-        SAMPLINGFREQUENCY= check_setting_int(CFG, 'General', 'samplingfrequency', 44100)
-        MUSIC_ENCODER = bool(check_setting_int(CFG, 'General', 'music_encoder', 0))
-        ADVANCEDENCODER = check_setting_str(CFG, 'General', 'advancedencoder', '')
-        ENCODEROUTPUTFORMAT = check_setting_str(CFG, 'General', 'encoderoutputformat', 'mp3')
+        SAMPLINGFREQUENCY= check_setting_int(
+            CFG, 'General', 'samplingfrequency', 44100)
+        MUSIC_ENCODER = bool(
+            check_setting_int(CFG, 'General', 'music_encoder', 0))
+        ADVANCEDENCODER = check_setting_str(
+            CFG, 'General', 'advancedencoder', '')
+        ENCODEROUTPUTFORMAT = check_setting_str(
+            CFG, 'General', 'encoderoutputformat', 'mp3')
         ENCODERQUALITY = check_setting_int(CFG, 'General', 'encoderquality', 2)
-        ENCODERVBRCBR = check_setting_str(CFG, 'General', 'encodervbrcbr', 'cbr')
-        ENCODERLOSSLESS = bool(check_setting_int(CFG, 'General', 'encoderlossless', 1))
-        ENCODER_MULTICORE = bool(check_setting_int(CFG, 'General', 'encoder_multicore', 0))
-        ENCODER_MULTICORE_COUNT = max(0, check_setting_int(CFG, 'General', 'encoder_multicore_count', 0))
-        DELETE_LOSSLESS_FILES = bool(check_setting_int(CFG, 'General', 'delete_lossless_files', 1))
+        ENCODERVBRCBR = check_setting_str(
+            CFG, 'General', 'encodervbrcbr', 'cbr')
+        ENCODERLOSSLESS = bool(
+            check_setting_int(CFG, 'General', 'encoderlossless', 1))
+        ENCODER_MULTICORE = bool(
+            check_setting_int(CFG, 'General', 'encoder_multicore', 0))
+        ENCODER_MULTICORE_COUNT = max(
+            0, check_setting_int(CFG, 'General', 'encoder_multicore_count', 0))
+        DELETE_LOSSLESS_FILES = bool(
+            check_setting_int(CFG, 'General', 'delete_lossless_files', 1))
 
-        GROWL_ENABLED = bool(check_setting_int(CFG, 'Growl', 'growl_enabled', 0))
+        GROWL_ENABLED = bool(
+            check_setting_int(CFG, 'Growl', 'growl_enabled', 0))
         GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
         GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
-        GROWL_ONSNATCH = bool(check_setting_int(CFG, 'Growl', 'growl_onsnatch', 0))
+        GROWL_ONSNATCH = bool(
+            check_setting_int(CFG, 'Growl', 'growl_onsnatch', 0))
 
-        PROWL_ENABLED = bool(check_setting_int(CFG, 'Prowl', 'prowl_enabled', 0))
+        PROWL_ENABLED = bool(
+            check_setting_int(CFG, 'Prowl', 'prowl_enabled', 0))
         PROWL_KEYS = check_setting_str(CFG, 'Prowl', 'prowl_keys', '')
-        PROWL_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_onsnatch', 0))
+        PROWL_ONSNATCH = bool(
+            check_setting_int(CFG, 'Prowl', 'prowl_onsnatch', 0))
         PROWL_PRIORITY = check_setting_int(CFG, 'Prowl', 'prowl_priority', 0)
 
         XBMC_ENABLED = bool(check_setting_int(CFG, 'XBMC', 'xbmc_enabled', 0))
@@ -583,8 +663,10 @@ def initialize():
         LMS_HOST = check_setting_str(CFG, 'LMS', 'lms_host', '')
 
         PLEX_ENABLED = bool(check_setting_int(CFG, 'Plex', 'plex_enabled', 0))
-        PLEX_SERVER_HOST = check_setting_str(CFG, 'Plex', 'plex_server_host', '')
-        PLEX_CLIENT_HOST = check_setting_str(CFG, 'Plex', 'plex_client_host', '')
+        PLEX_SERVER_HOST = check_setting_str(
+            CFG, 'Plex', 'plex_server_host', '')
+        PLEX_CLIENT_HOST = check_setting_str(
+            CFG, 'Plex', 'plex_client_host', '')
         PLEX_USERNAME = check_setting_str(CFG, 'Plex', 'plex_username', '')
         PLEX_PASSWORD = check_setting_str(CFG, 'Plex', 'plex_password', '')
         PLEX_UPDATE = bool(check_setting_int(CFG, 'Plex', 'plex_update', 0))
@@ -595,61 +677,93 @@ def initialize():
         NMA_PRIORITY = check_setting_int(CFG, 'NMA', 'nma_priority', 0)
         NMA_ONSNATCH = bool(check_setting_int(CFG, 'NMA', 'nma_onsnatch', 0))
 
-        PUSHALOT_ENABLED = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_enabled', 0))
-        PUSHALOT_APIKEY = check_setting_str(CFG, 'Pushalot', 'pushalot_apikey', '')
-        PUSHALOT_ONSNATCH = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_onsnatch', 0))
+        PUSHALOT_ENABLED = bool(
+            check_setting_int(CFG, 'Pushalot', 'pushalot_enabled', 0))
+        PUSHALOT_APIKEY = check_setting_str(
+            CFG, 'Pushalot', 'pushalot_apikey', '')
+        PUSHALOT_ONSNATCH = bool(
+            check_setting_int(CFG, 'Pushalot', 'pushalot_onsnatch', 0))
 
-        SYNOINDEX_ENABLED = bool(check_setting_int(CFG, 'Synoindex', 'synoindex_enabled', 0))
+        SYNOINDEX_ENABLED = bool(
+            check_setting_int(CFG, 'Synoindex', 'synoindex_enabled', 0))
 
-        PUSHOVER_ENABLED = bool(check_setting_int(CFG, 'Pushover', 'pushover_enabled', 0))
+        PUSHOVER_ENABLED = bool(
+            check_setting_int(CFG, 'Pushover', 'pushover_enabled', 0))
         PUSHOVER_KEYS = check_setting_str(CFG, 'Pushover', 'pushover_keys', '')
-        PUSHOVER_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_onsnatch', 0))
-        PUSHOVER_PRIORITY = check_setting_int(CFG, 'Pushover', 'pushover_priority', 0)
-        PUSHOVER_APITOKEN = check_setting_str(CFG, 'Pushover', 'pushover_apitoken', '')
+        PUSHOVER_ONSNATCH = bool(
+            check_setting_int(CFG, 'Pushover', 'pushover_onsnatch', 0))
+        PUSHOVER_PRIORITY = check_setting_int(
+            CFG, 'Pushover', 'pushover_priority', 0)
+        PUSHOVER_APITOKEN = check_setting_str(
+            CFG, 'Pushover', 'pushover_apitoken', '')
 
-        PUSHBULLET_ENABLED = bool(check_setting_int(CFG, 'PushBullet', 'pushbullet_enabled', 0))
-        PUSHBULLET_APIKEY = check_setting_str(CFG, 'PushBullet', 'pushbullet_apikey', '')
-        PUSHBULLET_DEVICEID = check_setting_str(CFG, 'PushBullet', 'pushbullet_deviceid', '')
-        PUSHBULLET_ONSNATCH = bool(check_setting_int(CFG, 'PushBullet', 'pushbullet_onsnatch', 0))
+        PUSHBULLET_ENABLED = bool(
+            check_setting_int(CFG, 'PushBullet', 'pushbullet_enabled', 0))
+        PUSHBULLET_APIKEY = check_setting_str(
+            CFG, 'PushBullet', 'pushbullet_apikey', '')
+        PUSHBULLET_DEVICEID = check_setting_str(
+            CFG, 'PushBullet', 'pushbullet_deviceid', '')
+        PUSHBULLET_ONSNATCH = bool(
+            check_setting_int(CFG, 'PushBullet', 'pushbullet_onsnatch', 0))
 
-        TWITTER_ENABLED = bool(check_setting_int(CFG, 'Twitter', 'twitter_enabled', 0))
-        TWITTER_ONSNATCH = bool(check_setting_int(CFG, 'Twitter', 'twitter_onsnatch', 0))
-        TWITTER_USERNAME = check_setting_str(CFG, 'Twitter', 'twitter_username', '')
-        TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
-        TWITTER_PREFIX = check_setting_str(CFG, 'Twitter', 'twitter_prefix', 'Headphones')
+        TWITTER_ENABLED = bool(
+            check_setting_int(CFG, 'Twitter', 'twitter_enabled', 0))
+        TWITTER_ONSNATCH = bool(
+            check_setting_int(CFG, 'Twitter', 'twitter_onsnatch', 0))
+        TWITTER_USERNAME = check_setting_str(
+            CFG, 'Twitter', 'twitter_username', '')
+        TWITTER_PASSWORD = check_setting_str(
+            CFG, 'Twitter', 'twitter_password', '')
+        TWITTER_PREFIX = check_setting_str(
+            CFG, 'Twitter', 'twitter_prefix', 'Headphones')
 
-        OSX_NOTIFY_ENABLED = bool(check_setting_int(CFG, 'OSX_Notify', 'osx_notify_enabled', 0))
-        OSX_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'OSX_Notify', 'osx_notify_onsnatch', 0))
-        OSX_NOTIFY_APP = check_setting_str(CFG, 'OSX_Notify', 'osx_notify_app', '/Applications/Headphones')
+        OSX_NOTIFY_ENABLED = bool(
+            check_setting_int(CFG, 'OSX_Notify', 'osx_notify_enabled', 0))
+        OSX_NOTIFY_ONSNATCH = bool(
+            check_setting_int(CFG, 'OSX_Notify', 'osx_notify_onsnatch', 0))
+        OSX_NOTIFY_APP = check_setting_str(
+            CFG, 'OSX_Notify', 'osx_notify_app', '/Applications/Headphones')
 
-        BOXCAR_ENABLED = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_enabled', 0))
-        BOXCAR_ONSNATCH = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_onsnatch', 0))
+        BOXCAR_ENABLED = bool(
+            check_setting_int(CFG, 'Boxcar', 'boxcar_enabled', 0))
+        BOXCAR_ONSNATCH = bool(
+            check_setting_int(CFG, 'Boxcar', 'boxcar_onsnatch', 0))
         BOXCAR_TOKEN = check_setting_str(CFG, 'Boxcar', 'boxcar_token', '')
 
-        SONGKICK_ENABLED = bool(check_setting_int(CFG, 'Songkick', 'songkick_enabled', 1))
-        SONGKICK_APIKEY = check_setting_str(CFG, 'Songkick', 'songkick_apikey', 'nd1We7dFW2RqxPw8')
-        SONGKICK_LOCATION = check_setting_str(CFG, 'Songkick', 'songkick_location', '')
-        SONGKICK_FILTER_ENABLED = bool(check_setting_int(CFG, 'Songkick', 'songkick_filter_enabled', 0))
+        SONGKICK_ENABLED = bool(
+            check_setting_int(CFG, 'Songkick', 'songkick_enabled', 1))
+        SONGKICK_APIKEY = check_setting_str(
+            CFG, 'Songkick', 'songkick_apikey', 'nd1We7dFW2RqxPw8')
+        SONGKICK_LOCATION = check_setting_str(
+            CFG, 'Songkick', 'songkick_location', '')
+        SONGKICK_FILTER_ENABLED = bool(
+            check_setting_int(CFG, 'Songkick', 'songkick_filter_enabled', 0))
 
         MIRROR = check_setting_str(CFG, 'General', 'mirror', 'musicbrainz.org')
-        CUSTOMHOST = check_setting_str(CFG, 'General', 'customhost', 'localhost')
+        CUSTOMHOST = check_setting_str(
+            CFG, 'General', 'customhost', 'localhost')
         CUSTOMPORT = check_setting_int(CFG, 'General', 'customport', 5000)
         CUSTOMSLEEP = check_setting_int(CFG, 'General', 'customsleep', 1)
         HPUSER = check_setting_str(CFG, 'General', 'hpuser', '')
         HPPASS = check_setting_str(CFG, 'General', 'hppass', '')
 
-        CACHE_SIZEMB = check_setting_int(CFG,'Advanced','cache_sizemb',32)
-        JOURNAL_MODE = check_setting_int(CFG,'Advanced', 'journal_mode', 'wal')
+        CACHE_SIZEMB = check_setting_int(CFG, 'Advanced', 'cache_sizemb', 32)
+        JOURNAL_MODE = check_setting_int(
+            CFG, 'Advanced', 'journal_mode', 'wal')
 
-        ALBUM_COMPLETION_PCT = check_setting_int(CFG, 'Advanced', 'album_completion_pct', 80)
+        ALBUM_COMPLETION_PCT = check_setting_int(
+            CFG, 'Advanced', 'album_completion_pct', 80)
 
-        VERIFY_SSL_CERT = bool(check_setting_int(CFG, 'Advanced', 'verify_ssl_cert', 1))
+        VERIFY_SSL_CERT = bool(
+            check_setting_int(CFG, 'Advanced', 'verify_ssl_cert', 1))
 
         # update folder formats in the config & bump up config version
         if CONFIG_VERSION == '0':
             from headphones.helpers import replace_all
-            file_values = { 'tracknumber':  'Track', 'title': 'Title','artist' : 'Artist', 'album' : 'Album', 'year' : 'Year' }
-            folder_values = { 'artist' : 'Artist', 'album':'Album', 'year' : 'Year', 'releasetype' : 'Type', 'first' : 'First', 'lowerfirst' : 'first' }
+            file_values = { 'tracknumber':  'Track', 'title': 'Title',
+                'artist' : 'Artist', 'album' : 'Album', 'year' : 'Year' }
+            folder_values = { 'artist' : 'Artist', 'album': 'Album', 'year' : 'Year',
+                'releasetype' : 'Type', 'first' : 'First', 'lowerfirst' : 'first' }
             FILE_FORMAT = replace_all(FILE_FORMAT, file_values)
             FOLDER_FORMAT = replace_all(FOLDER_FORMAT, folder_values)
 
@@ -688,13 +802,14 @@ def initialize():
 
         if CONFIG_VERSION == '2':
 
-            # Update the config to use direct path to the encoder rather than the encoder folder
+            # Update the config to use direct path to the encoder rather than
+            # the encoder folder
             if ENCODERFOLDER:
                 ENCODER_PATH = os.path.join(ENCODERFOLDER, ENCODER)
             CONFIG_VERSION = '3'
 
         if CONFIG_VERSION == '3':
-            #Update the BLACKHOLE option to the NZB_DOWNLOADER format
+            # Update the BLACKHOLE option to the NZB_DOWNLOADER format
             if BLACKHOLE:
                 NZB_DOWNLOADER = 2
             CONFIG_VERSION = '4'
@@ -713,7 +828,8 @@ def initialize():
                 os.makedirs(LOG_DIR)
             except OSError:
                 if VERBOSE:
-                    sys.stderr.write('Unable to create the log directory. Logging to screen only.\n')
+                    sys.stderr.write(
+                        'Unable to create the log directory. Logging to screen only.\n')
 
         # Start the logger, disable console if needed
         logger.initLogger(console=not QUIET, verbose=VERBOSE)
@@ -725,7 +841,8 @@ def initialize():
             try:
                 os.makedirs(CACHE_DIR)
             except OSError:
-                logger.error('Could not create cache dir. Check permissions of datadir: %s', DATA_DIR)
+                logger.error(
+                    'Could not create cache dir. Check permissions of datadir: %s', DATA_DIR)
 
         # Sanity check for search interval. Set it to at least 6 hours
         if SEARCH_INTERVAL < 360:
@@ -849,20 +966,26 @@ def config_write():
     new_config['General']['git_path'] = GIT_PATH
     new_config['General']['git_user'] = GIT_USER
     new_config['General']['git_branch'] = GIT_BRANCH
-    new_config['General']['do_not_override_git_branch'] = int(DO_NOT_OVERRIDE_GIT_BRANCH)
+    new_config['General']['do_not_override_git_branch'] = int(
+        DO_NOT_OVERRIDE_GIT_BRANCH)
 
     new_config['General']['check_github'] = int(CHECK_GITHUB)
-    new_config['General']['check_github_on_startup'] = int(CHECK_GITHUB_ON_STARTUP)
+    new_config['General']['check_github_on_startup'] = int(
+        CHECK_GITHUB_ON_STARTUP)
     new_config['General']['check_github_interval'] = CHECK_GITHUB_INTERVAL
 
     new_config['General']['music_dir'] = MUSIC_DIR
     new_config['General']['destination_dir'] = DESTINATION_DIR
-    new_config['General']['lossless_destination_dir'] = LOSSLESS_DESTINATION_DIR
+    new_config['General'][
+        'lossless_destination_dir'] = LOSSLESS_DESTINATION_DIR
     new_config['General']['preferred_quality'] = PREFERRED_QUALITY
     new_config['General']['preferred_bitrate'] = PREFERRED_BITRATE
-    new_config['General']['preferred_bitrate_high_buffer'] = PREFERRED_BITRATE_HIGH_BUFFER
-    new_config['General']['preferred_bitrate_low_buffer'] = PREFERRED_BITRATE_LOW_BUFFER
-    new_config['General']['preferred_bitrate_allow_lossless'] = int(PREFERRED_BITRATE_ALLOW_LOSSLESS)
+    new_config['General'][
+        'preferred_bitrate_high_buffer'] = PREFERRED_BITRATE_HIGH_BUFFER
+    new_config['General'][
+        'preferred_bitrate_low_buffer'] = PREFERRED_BITRATE_LOW_BUFFER
+    new_config['General']['preferred_bitrate_allow_lossless'] = int(
+        PREFERRED_BITRATE_ALLOW_LOSSLESS)
     new_config['General']['detect_bitrate'] = int(DETECT_BITRATE)
     new_config['General']['lossless_bitrate_from'] = LOSSLESS_BITRATE_FROM
     new_config['General']['lossless_bitrate_to'] = LOSSLESS_BITRATE_TO
@@ -879,7 +1002,8 @@ def config_write():
     new_config['General']['album_art_format'] = ALBUM_ART_FORMAT
     new_config['General']['embed_album_art'] = int(EMBED_ALBUM_ART)
     new_config['General']['embed_lyrics'] = int(EMBED_LYRICS)
-    new_config['General']['replace_existing_folders'] = int(REPLACE_EXISTING_FOLDERS)
+    new_config['General']['replace_existing_folders'] = int(
+        REPLACE_EXISTING_FOLDERS)
     new_config['General']['nzb_downloader'] = NZB_DOWNLOADER
     new_config['General']['torrent_downloader'] = TORRENT_DOWNLOADER
     new_config['General']['download_dir'] = DOWNLOAD_DIR
@@ -1056,7 +1180,8 @@ def config_write():
     new_config['Songkick']['songkick_enabled'] = int(SONGKICK_ENABLED)
     new_config['Songkick']['songkick_apikey'] = SONGKICK_APIKEY
     new_config['Songkick']['songkick_location'] = SONGKICK_LOCATION
-    new_config['Songkick']['songkick_filter_enabled'] = int(SONGKICK_FILTER_ENABLED)
+    new_config['Songkick']['songkick_filter_enabled'] = int(
+        SONGKICK_FILTER_ENABLED)
 
     new_config['Synoindex'] = {}
     new_config['Synoindex']['synoindex_enabled'] = int(SYNOINDEX_ENABLED)
@@ -1078,7 +1203,8 @@ def config_write():
     new_config['General']['encodervbrcbr'] = ENCODERVBRCBR
     new_config['General']['encoderlossless'] = int(ENCODERLOSSLESS)
     new_config['General']['encoder_multicore'] = int(ENCODER_MULTICORE)
-    new_config['General']['encoder_multicore_count'] = int(ENCODER_MULTICORE_COUNT)
+    new_config['General']['encoder_multicore_count'] = int(
+        ENCODER_MULTICORE_COUNT)
     new_config['General']['delete_lossless_files'] = int(DELETE_LOSSLESS_FILES)
 
     new_config['General']['mirror'] = MIRROR
@@ -1107,14 +1233,18 @@ def start():
         from headphones import updater, searcher, librarysync, postprocessor
 
         SCHED.add_interval_job(updater.dbUpdate, hours=UPDATE_DB_INTERVAL)
-        SCHED.add_interval_job(searcher.searchforalbum, minutes=SEARCH_INTERVAL)
-        SCHED.add_interval_job(librarysync.libraryScan, hours=LIBRARYSCAN_INTERVAL, kwargs={'cron':True})
+        SCHED.add_interval_job(
+            searcher.searchforalbum, minutes=SEARCH_INTERVAL)
+        SCHED.add_interval_job(
+            librarysync.libraryScan, hours=LIBRARYSCAN_INTERVAL, kwargs={'cron': True})
 
         if CHECK_GITHUB:
-            SCHED.add_interval_job(versioncheck.checkGithub, minutes=CHECK_GITHUB_INTERVAL)
+            SCHED.add_interval_job(
+                versioncheck.checkGithub, minutes=CHECK_GITHUB_INTERVAL)
 
         if DOWNLOAD_SCAN_INTERVAL > 0:
-            SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
+            SCHED.add_interval_job(
+                postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
 
         SCHED.start()
 
@@ -1129,38 +1259,67 @@ def dbcheck():
 
     conn=sqlite3.connect(DB_FILE)
     c=conn.cursor()
-    c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT, IncludeExtras INTEGER, LatestAlbum TEXT, ReleaseDate TEXT, AlbumID TEXT, HaveTracks INTEGER, TotalTracks INTEGER, LastUpdated TEXT, ArtworkURL TEXT, ThumbURL TEXT, Extras TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT, Type TEXT, ArtworkURL TEXT, ThumbURL TEXT, ReleaseID TEXT, ReleaseCountry TEXT, ReleaseFormat TEXT, SearchTerm TEXT)')   # ReleaseFormat here means CD,Digital,Vinyl, etc. If using the default Headphones hybrid release, ReleaseID will equal AlbumID (AlbumID is releasegroup id)
-    c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT, Format TEXT, ReleaseID TEXT)')    # Format here means mp3, flac, etc.
-    c.execute('CREATE TABLE IF NOT EXISTS allalbums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, AlbumID TEXT, Type TEXT, ReleaseID TEXT, ReleaseCountry TEXT, ReleaseFormat TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS alltracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT, Format TEXT, ReleaseID TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT, FolderName TEXT, Kind TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS have (ArtistName TEXT, AlbumTitle TEXT, TrackNumber TEXT, TrackTitle TEXT, TrackLength TEXT, BitRate TEXT, Genre TEXT, Date TEXT, TrackID TEXT, Location TEXT, CleanName TEXT, Format TEXT, Matched TEXT)') # Matched is a temporary value used to see if there was a match found in alltracks
-    c.execute('CREATE TABLE IF NOT EXISTS lastfmcloud (ArtistName TEXT, ArtistID TEXT, Count INTEGER)')
-    c.execute('CREATE TABLE IF NOT EXISTS descriptions (ArtistID TEXT, ReleaseGroupID TEXT, ReleaseID TEXT, Summary TEXT, Content TEXT, LastUpdated TEXT)')
+    c.execute(
+        'CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT, IncludeExtras INTEGER, LatestAlbum TEXT, ReleaseDate TEXT, AlbumID TEXT, HaveTracks INTEGER, TotalTracks INTEGER, LastUpdated TEXT, ArtworkURL TEXT, ThumbURL TEXT, Extras TEXT)')
+    # ReleaseFormat here means CD,Digital,Vinyl, etc. If using the default
+    # Headphones hybrid release, ReleaseID will equal AlbumID (AlbumID is
+    # releasegroup id)
+    c.execute(
+        'CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT, Type TEXT, ArtworkURL TEXT, ThumbURL TEXT, ReleaseID TEXT, ReleaseCountry TEXT, ReleaseFormat TEXT, SearchTerm TEXT)')
+    # Format here means mp3, flac, etc.
+    c.execute(
+        'CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT, Format TEXT, ReleaseID TEXT)')
+    c.execute(
+        'CREATE TABLE IF NOT EXISTS allalbums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, AlbumID TEXT, Type TEXT, ReleaseID TEXT, ReleaseCountry TEXT, ReleaseFormat TEXT)')
+    c.execute(
+        'CREATE TABLE IF NOT EXISTS alltracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT, Format TEXT, ReleaseID TEXT)')
+    c.execute(
+        'CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT, FolderName TEXT, Kind TEXT)')
+    # Matched is a temporary value used to see if there was a match found in
+    # alltracks
+    c.execute(
+        'CREATE TABLE IF NOT EXISTS have (ArtistName TEXT, AlbumTitle TEXT, TrackNumber TEXT, TrackTitle TEXT, TrackLength TEXT, BitRate TEXT, Genre TEXT, Date TEXT, TrackID TEXT, Location TEXT, CleanName TEXT, Format TEXT, Matched TEXT)')
+    c.execute(
+        'CREATE TABLE IF NOT EXISTS lastfmcloud (ArtistName TEXT, ArtistID TEXT, Count INTEGER)')
+    c.execute(
+        'CREATE TABLE IF NOT EXISTS descriptions (ArtistID TEXT, ReleaseGroupID TEXT, ReleaseID TEXT, Summary TEXT, Content TEXT, LastUpdated TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS blacklist (ArtistID TEXT UNIQUE)')
     c.execute('CREATE TABLE IF NOT EXISTS newartists (ArtistName TEXT UNIQUE)')
-    c.execute('CREATE TABLE IF NOT EXISTS releases (ReleaseID TEXT, ReleaseGroupID TEXT, UNIQUE(ReleaseID, ReleaseGroupID))')
-    c.execute('CREATE INDEX IF NOT EXISTS tracks_albumid ON tracks(AlbumID ASC)')
-    c.execute('CREATE INDEX IF NOT EXISTS album_artistid_reldate ON albums(ArtistID ASC, ReleaseDate DESC)')
-    #Below creates indices to speed up Active Artist updating
-    c.execute('CREATE INDEX IF NOT EXISTS alltracks_relid ON alltracks(ReleaseID ASC, TrackID ASC)')
-    c.execute('CREATE INDEX IF NOT EXISTS allalbums_relid ON allalbums(ReleaseID ASC)')
+    c.execute(
+        'CREATE TABLE IF NOT EXISTS releases (ReleaseID TEXT, ReleaseGroupID TEXT, UNIQUE(ReleaseID, ReleaseGroupID))')
+    c.execute(
+        'CREATE INDEX IF NOT EXISTS tracks_albumid ON tracks(AlbumID ASC)')
+    c.execute(
+        'CREATE INDEX IF NOT EXISTS album_artistid_reldate ON albums(ArtistID ASC, ReleaseDate DESC)')
+    # Below creates indices to speed up Active Artist updating
+    c.execute(
+        'CREATE INDEX IF NOT EXISTS alltracks_relid ON alltracks(ReleaseID ASC, TrackID ASC)')
+    c.execute(
+        'CREATE INDEX IF NOT EXISTS allalbums_relid ON allalbums(ReleaseID ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS have_location ON have(Location ASC)')
-    #Below creates indices to speed up library scanning & matching
-    c.execute('CREATE INDEX IF NOT EXISTS have_Metadata ON have(ArtistName ASC, AlbumTitle ASC, TrackTitle ASC)')
-    c.execute('CREATE INDEX IF NOT EXISTS have_CleanName ON have(CleanName ASC)')
-    c.execute('CREATE INDEX IF NOT EXISTS tracks_Metadata ON tracks(ArtistName ASC, AlbumTitle ASC, TrackTitle ASC)')
-    c.execute('CREATE INDEX IF NOT EXISTS tracks_CleanName ON tracks(CleanName ASC)')
-    c.execute('CREATE INDEX IF NOT EXISTS alltracks_Metadata ON alltracks(ArtistName ASC, AlbumTitle ASC, TrackTitle ASC)')
-    c.execute('CREATE INDEX IF NOT EXISTS alltracks_CleanName ON alltracks(CleanName ASC)')
-    c.execute('CREATE INDEX IF NOT EXISTS tracks_Location ON tracks(Location ASC)')
-    c.execute('CREATE INDEX IF NOT EXISTS alltracks_Location ON alltracks(Location ASC)')
+    # Below creates indices to speed up library scanning & matching
+    c.execute(
+        'CREATE INDEX IF NOT EXISTS have_Metadata ON have(ArtistName ASC, AlbumTitle ASC, TrackTitle ASC)')
+    c.execute(
+        'CREATE INDEX IF NOT EXISTS have_CleanName ON have(CleanName ASC)')
+    c.execute(
+        'CREATE INDEX IF NOT EXISTS tracks_Metadata ON tracks(ArtistName ASC, AlbumTitle ASC, TrackTitle ASC)')
+    c.execute(
+        'CREATE INDEX IF NOT EXISTS tracks_CleanName ON tracks(CleanName ASC)')
+    c.execute(
+        'CREATE INDEX IF NOT EXISTS alltracks_Metadata ON alltracks(ArtistName ASC, AlbumTitle ASC, TrackTitle ASC)')
+    c.execute(
+        'CREATE INDEX IF NOT EXISTS alltracks_CleanName ON alltracks(CleanName ASC)')
+    c.execute(
+        'CREATE INDEX IF NOT EXISTS tracks_Location ON tracks(Location ASC)')
+    c.execute(
+        'CREATE INDEX IF NOT EXISTS alltracks_Location ON alltracks(Location ASC)')
 
     try:
         c.execute('SELECT IncludeExtras from artists')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE artists ADD COLUMN IncludeExtras INTEGER DEFAULT 0')
+        c.execute(
+            'ALTER TABLE artists ADD COLUMN IncludeExtras INTEGER DEFAULT 0')
 
     try:
         c.execute('SELECT LatestAlbum from artists')
@@ -1180,12 +1339,14 @@ def dbcheck():
     try:
         c.execute('SELECT HaveTracks from artists')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE artists ADD COLUMN HaveTracks INTEGER DEFAULT 0')
+        c.execute(
+            'ALTER TABLE artists ADD COLUMN HaveTracks INTEGER DEFAULT 0')
 
     try:
         c.execute('SELECT TotalTracks from artists')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE artists ADD COLUMN TotalTracks INTEGER DEFAULT 0')
+        c.execute(
+            'ALTER TABLE artists ADD COLUMN TotalTracks INTEGER DEFAULT 0')
 
     try:
         c.execute('SELECT Type from albums')
@@ -1241,12 +1402,14 @@ def dbcheck():
     try:
         c.execute('SELECT LastUpdated from artists')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE artists ADD COLUMN LastUpdated TEXT DEFAULT NULL')
+        c.execute(
+            'ALTER TABLE artists ADD COLUMN LastUpdated TEXT DEFAULT NULL')
 
     try:
         c.execute('SELECT ArtworkURL from artists')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE artists ADD COLUMN ArtworkURL TEXT DEFAULT NULL')
+        c.execute(
+            'ALTER TABLE artists ADD COLUMN ArtworkURL TEXT DEFAULT NULL')
 
     try:
         c.execute('SELECT ArtworkURL from albums')
@@ -1266,12 +1429,14 @@ def dbcheck():
     try:
         c.execute('SELECT ArtistID from descriptions')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE descriptions ADD COLUMN ArtistID TEXT DEFAULT NULL')
+        c.execute(
+            'ALTER TABLE descriptions ADD COLUMN ArtistID TEXT DEFAULT NULL')
 
     try:
         c.execute('SELECT LastUpdated from descriptions')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE descriptions ADD COLUMN LastUpdated TEXT DEFAULT NULL')
+        c.execute(
+            'ALTER TABLE descriptions ADD COLUMN LastUpdated TEXT DEFAULT NULL')
 
     try:
         c.execute('SELECT ReleaseID from albums')
@@ -1281,12 +1446,14 @@ def dbcheck():
     try:
         c.execute('SELECT ReleaseFormat from albums')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE albums ADD COLUMN ReleaseFormat TEXT DEFAULT NULL')
+        c.execute(
+            'ALTER TABLE albums ADD COLUMN ReleaseFormat TEXT DEFAULT NULL')
 
     try:
         c.execute('SELECT ReleaseCountry from albums')
     except sqlite3.OperationalError:
-        c.execute('ALTER TABLE albums ADD COLUMN ReleaseCountry TEXT DEFAULT NULL')
+        c.execute(
+            'ALTER TABLE albums ADD COLUMN ReleaseCountry TEXT DEFAULT NULL')
 
     try:
         c.execute('SELECT ReleaseID from tracks')
@@ -1302,14 +1469,17 @@ def dbcheck():
         c.execute('SELECT Extras from artists')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE artists ADD COLUMN Extras TEXT DEFAULT NULL')
-        # Need to update some stuff when people are upgrading and have 'include extras' set globally/for an artist
+        # Need to update some stuff when people are upgrading and have 'include
+        # extras' set globally/for an artist
         if INCLUDE_EXTRAS:
             EXTRAS = "1,2,3,4,5,6,7,8"
         logger.info("Copying over current artist IncludeExtras information")
-        artists = c.execute('SELECT ArtistID, IncludeExtras from artists').fetchall()
+        artists = c.execute(
+            'SELECT ArtistID, IncludeExtras from artists').fetchall()
         for artist in artists:
             if artist[1]:
-                c.execute('UPDATE artists SET Extras=? WHERE ArtistID=?', ("1,2,3,4,5,6,7,8", artist[0]))
+                c.execute(
+                    'UPDATE artists SET Extras=? WHERE ArtistID=?', ("1,2,3,4,5,6,7,8", artist[0]))
 
     try:
         c.execute('SELECT Kind from snatched')
