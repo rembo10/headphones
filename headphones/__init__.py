@@ -692,7 +692,7 @@ def initialize():
             CONFIG_VERSION = '3'
 
         if CONFIG_VERSION == '3':
-            #Update the BLACKHOLE option to the NZB_DOWNLOADER format
+            # Update the BLACKHOLE option to the NZB_DOWNLOADER format
             if BLACKHOLE:
                 NZB_DOWNLOADER = 2
             CONFIG_VERSION = '4'
@@ -1140,11 +1140,11 @@ def dbcheck():
     c.execute('CREATE TABLE IF NOT EXISTS releases (ReleaseID TEXT, ReleaseGroupID TEXT, UNIQUE(ReleaseID, ReleaseGroupID))')
     c.execute('CREATE INDEX IF NOT EXISTS tracks_albumid ON tracks(AlbumID ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS album_artistid_reldate ON albums(ArtistID ASC, ReleaseDate DESC)')
-    #Below creates indices to speed up Active Artist updating
+    # Below creates indices to speed up Active Artist updating
     c.execute('CREATE INDEX IF NOT EXISTS alltracks_relid ON alltracks(ReleaseID ASC, TrackID ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS allalbums_relid ON allalbums(ReleaseID ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS have_location ON have(Location ASC)')
-    #Below creates indices to speed up library scanning & matching
+    # Below creates indices to speed up library scanning & matching
     c.execute('CREATE INDEX IF NOT EXISTS have_Metadata ON have(ArtistName ASC, AlbumTitle ASC, TrackTitle ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS have_CleanName ON have(CleanName ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS tracks_Metadata ON tracks(ArtistName ASC, AlbumTitle ASC, TrackTitle ASC)')

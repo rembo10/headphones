@@ -450,7 +450,7 @@ class WebInterface(object):
         unmatched_albums = []
         have_albums = myDB.select('SELECT ArtistName, AlbumTitle, TrackTitle, CleanName from have WHERE Matched = "Failed" GROUP BY AlbumTitle ORDER BY ArtistName')
         for albums in have_albums:
-            #Have to skip over manually matched tracks
+            # Have to skip over manually matched tracks
             if albums['ArtistName'] and albums['AlbumTitle'] and albums['TrackTitle']:
                 original_clean = helpers.cleanName(albums['ArtistName']+" "+albums['AlbumTitle']+" "+albums['TrackTitle'])
             # else:
@@ -499,7 +499,7 @@ class WebInterface(object):
                                         "BitRate" : entry['BitRate'],
                                         "Format" : entry['Format']
                                         }
-                        #Attempt to match tracks with new CleanName
+                        # Attempt to match tracks with new CleanName
                         match_alltracks = myDB.action('SELECT CleanName from alltracks WHERE CleanName=?', [new_clean_filename]).fetchone()
                         if match_alltracks:
                             myDB.upsert("alltracks", newValueDict, controlValueDict)
@@ -508,8 +508,8 @@ class WebInterface(object):
                             myDB.upsert("tracks", newValueDict, controlValueDict)
                             myDB.action('UPDATE have SET Matched="Manual" WHERE CleanName=?', [new_clean_filename])
                             update_count+=1
-                    #This was throwing errors and I don't know why, but it seems to be working fine.
-                    #else:
+                    # This was throwing errors and I don't know why, but it seems to be working fine.
+                    # else:
                         #logger.info("There was an error modifying Artist %s. This should not have happened" % existing_artist)
                 logger.info("Manual matching yielded %s new matches for Artist: %s" % (update_count, new_artist))
                 if update_count > 0:
@@ -537,7 +537,7 @@ class WebInterface(object):
                                         "BitRate" : entry['BitRate'],
                                         "Format" : entry['Format']
                                         }
-                        #Attempt to match tracks with new CleanName
+                        # Attempt to match tracks with new CleanName
                         match_alltracks = myDB.action('SELECT CleanName from alltracks WHERE CleanName=?', [new_clean_filename]).fetchone()
                         if match_alltracks:
                             myDB.upsert("alltracks", newValueDict, controlValueDict)
@@ -547,8 +547,8 @@ class WebInterface(object):
                             myDB.action('UPDATE have SET Matched="Manual" WHERE CleanName=?', [new_clean_filename])
                             album_id = match_tracks['AlbumID']
                             update_count+=1
-                    #This was throwing errors and I don't know why, but it seems to be working fine.
-                    #else:
+                    # This was throwing errors and I don't know why, but it seems to be working fine.
+                    # else:
                         #logger.info("There was an error modifying Artist %s / Album %s with clean name %s" % (existing_artist, existing_album, existing_clean_string))
                 logger.info("Manual matching yielded %s new matches for Artist: %s / Album: %s" % (update_count, new_artist, new_album))
                 if update_count > 0:
@@ -815,8 +815,8 @@ class WebInterface(object):
         if sortbyhavepercent:
             filtered.sort(key=lambda x: (float(x['HaveTracks'])/x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0, x['HaveTracks'] if x['HaveTracks'] else 0.0), reverse=sSortDir_0 == "asc")
 
-        #can't figure out how to change the datatables default sorting order when its using an ajax datasource so ill
-        #just reverse it here and the first click on the "Latest Album" header will sort by descending release date
+        # can't figure out how to change the datatables default sorting order when its using an ajax datasource so ill
+        # just reverse it here and the first click on the "Latest Album" header will sort by descending release date
         if sortcolumn == 'ReleaseDate':
             filtered.reverse()
 
@@ -924,7 +924,7 @@ class WebInterface(object):
     def forceScan(self, keepmatched=None):
         myDB = db.DBConnection()
         #########################################
-        #NEED TO MOVE THIS INTO A SEPARATE FUNCTION BEFORE RELEASE
+        # NEED TO MOVE THIS INTO A SEPARATE FUNCTION BEFORE RELEASE
         myDB.select('DELETE from Have')
         logger.info('Removed all entries in local library database')
         myDB.select('UPDATE alltracks SET Location=NULL, BitRate=NULL, Format=NULL')
@@ -1386,7 +1386,7 @@ class WebInterface(object):
         # Write the config
         headphones.config_write()
 
-        #reconfigure musicbrainz database connection with the new values
+        # reconfigure musicbrainz database connection with the new values
         mb.startmb()
 
         raise cherrypy.HTTPRedirect("config")

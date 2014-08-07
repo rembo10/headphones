@@ -64,7 +64,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
             encoded_track_string = track['Location'].encode(headphones.SYS_ENCODING, 'replace')
             if not os.path.isfile(encoded_track_string):
                 if track['ArtistName']:
-                    #Make sure deleted files get accounted for when updating artist track counts
+                    # Make sure deleted files get accounted for when updating artist track counts
                     new_artists.append(track['ArtistName'])
                 myDB.action('DELETE FROM have WHERE Location=?', [track['Location']])
                 logger.info('File %s removed from Headphones, as it is no longer on disk' % encoded_track_string.decode(headphones.SYS_ENCODING, 'replace'))
@@ -79,8 +79,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
     latest_subdirectory = []
 
     for r, d, f in os.walk(dir):
-        #need to abuse slicing to get a copy of the list, doing it directly will skip the element after a deleted one
-        #using a list comprehension will not work correctly for nested subdirectories (os.walk keeps its original list)
+        # need to abuse slicing to get a copy of the list, doing it directly will skip the element after a deleted one
+        # using a list comprehension will not work correctly for nested subdirectories (os.walk keeps its original list)
         for directory in d[:]:
             if directory.startswith("."):
                 d.remove(directory)
@@ -145,18 +145,18 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                               'CleanName'  : CleanName
                               }
 
-                #song_list.append(song_dict)
+                # song_list.append(song_dict)
                 check_exist_song = myDB.action("SELECT * FROM have WHERE Location=?", [unicode_song_path]).fetchone()
-                #Only attempt to match songs that are new, haven't yet been matched, or metadata has changed.
+                # Only attempt to match songs that are new, haven't yet been matched, or metadata has changed.
                 if not check_exist_song:
-                    #This is a new track
+                    # This is a new track
                     if f_artist:
                         new_artists.append(f_artist)
                     myDB.upsert("have", newValueDict, controlValueDict)
                     new_song_count+=1
                 else:
                     if check_exist_song['ArtistName'] != f_artist or check_exist_song['AlbumTitle'] != f.album or check_exist_song['TrackTitle'] != f.title:
-                        #Important track metadata has been modified, need to run matcher again
+                        # Important track metadata has been modified, need to run matcher again
                         if f_artist and f_artist != check_exist_song['ArtistName']:
                             new_artists.append(f_artist)
                         elif f_artist and f_artist == check_exist_song['ArtistName'] and check_exist_song['Matched'] != "Ignored":
@@ -170,7 +170,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                         myDB.action('UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE Location=?', [None, None, None, unicode_song_path])
                         new_song_count+=1
                     else:
-                        #This track information hasn't changed
+                        # This track information hasn't changed
                         if f_artist and check_exist_song['Matched'] != "Ignored":
                             new_artists.append(f_artist)
 
@@ -201,16 +201,16 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         elif latest_artist[song_count] != latest_artist[song_count-1] and song_count !=0:
             logger.info("Now matching songs by %s" % song['ArtistName'])
 
-        #print song['ArtistName']+' - '+song['AlbumTitle']+' - '+song['TrackTitle']
+        # print song['ArtistName']+' - '+song['AlbumTitle']+' - '+song['TrackTitle']
         song_count += 1
         completion_percentage = float(song_count)/total_number_of_songs * 100
 
         if completion_percentage%10 == 0:
             logger.info("Track matching is " + str(completion_percentage) + "% complete")
 
-        #THE "MORE-SPECIFIC" CLAUSES HERE HAVE ALL BEEN REMOVED.  WHEN RUNNING A LIBRARY SCAN, THE ONLY CLAUSES THAT
-        #EVER GOT HIT WERE [ARTIST/ALBUM/TRACK] OR CLEANNAME.  ARTISTID & RELEASEID ARE NEVER PASSED TO THIS FUNCTION,
-        #ARE NEVER FOUND, AND THE OTHER CLAUSES WERE NEVER HIT.  FURTHERMORE, OTHER MATCHING FUNCTIONS IN THIS PROGRAM
+        # THE "MORE-SPECIFIC" CLAUSES HERE HAVE ALL BEEN REMOVED.  WHEN RUNNING A LIBRARY SCAN, THE ONLY CLAUSES THAT
+        # EVER GOT HIT WERE [ARTIST/ALBUM/TRACK] OR CLEANNAME.  ARTISTID & RELEASEID ARE NEVER PASSED TO THIS FUNCTION,
+        # ARE NEVER FOUND, AND THE OTHER CLAUSES WERE NEVER HIT.  FURTHERMORE, OTHER MATCHING FUNCTIONS IN THIS PROGRAM
         #(IMPORTER.PY, MB.PY) SIMPLY DO A [ARTIST/ALBUM/TRACK] OR CLEANNAME MATCH, SO IT'S ALL CONSISTENT.
 
         if song['ArtistName'] and song['AlbumTitle'] and song['TrackTitle']:
@@ -292,7 +292,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         unique_artists = {}.fromkeys(new_artists).keys()
         current_artists = myDB.select('SELECT ArtistName, ArtistID from artists')
 
-        #There was a bug where artists with special characters (-,') would show up in new artists.
+        # There was a bug where artists with special characters (-,') would show up in new artists.
         artist_list = [f for f in unique_artists if helpers.cleanName(f).lower() not in [helpers.cleanName(x[0]).lower() for x in current_artists]]
         artists_checked = [f for f in unique_artists if helpers.cleanName(f).lower() in [helpers.cleanName(x[0]).lower() for x in current_artists]]
 
@@ -302,7 +302,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
             # Have tracks are selected from tracks table and not all tracks because of duplicates
             # We update the track count upon an album switch to compliment this
             havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistName like ? AND Location IS NOT NULL', [artist])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"', [artist]))
-            #Note, some people complain about having "artist have tracks" > # of tracks total in artist official releases
+            # Note, some people complain about having "artist have tracks" > # of tracks total in artist official releases
             # (can fix by getting rid of second len statement)
             myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistName=?', [havetracks, artist])
 
@@ -333,7 +333,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         lastfm.getSimilar()
     logger.info('Library scan complete')
 
-#ADDED THIS SECTION TO MARK ALBUMS AS DOWNLOADED IF ARTISTS ARE ADDED EN MASSE BEFORE LIBRARY IS SCANNED
+# ADDED THIS SECTION TO MARK ALBUMS AS DOWNLOADED IF ARTISTS ARE ADDED EN MASSE BEFORE LIBRARY IS SCANNED
 def update_album_status(AlbumID=None):
     myDB = db.DBConnection()
     logger.info('Counting matched tracks to mark albums as skipped/downloaded')
@@ -362,7 +362,7 @@ def update_album_status(AlbumID=None):
         # I think we can only automatically change Skipped->Downloaded when updating
         # There was a bug report where this was causing infinite downloads if the album was
         # recent, but matched to less than 80%. It would go Downloaded->Skipped->Wanted->Downloaded->Skipped->Wanted->etc....
-        #else:
+        # else:
         #    if album['Status'] == "Skipped" or album['Status'] == "Downloaded":
         #        new_album_status = "Skipped"
         #    else:

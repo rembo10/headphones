@@ -87,7 +87,7 @@ def encode(albumPath):
             encoder = os.path.join('/Applications', 'xld')
         elif headphones.ENCODER =='lame':
             if headphones.SYS_PLATFORM == "win32":
-                ## NEED THE DEFAULT LAME INSTALL ON WIN!
+                # NEED THE DEFAULT LAME INSTALL ON WIN!
                 encoder = "C:/Program Files/lame/lame.exe"
             else:
                 encoder="lame"

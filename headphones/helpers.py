@@ -304,7 +304,7 @@ def extract_data(s):
 
     s = s.replace('_', ' ')
 
-    #headphones default format
+    # headphones default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
     match = pattern.match(s)
 
@@ -314,7 +314,7 @@ def extract_data(s):
         year = match.group("year")
         return (name, album, year)
 
-    #newzbin default format
+    # newzbin default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
     match = pattern.match(s)
     if match:
@@ -323,7 +323,7 @@ def extract_data(s):
         year = match.group("year")
         return (name, album, year)
 
-    #Gonna take a guess on this one - might be enough to search on mb
+    # Gonna take a guess on this one - might be enough to search on mb
     pat = re.compile(r"(?P<name>.*?)\s*-\s*(?P<album>[^\[(-]*)")
 
     match = pat.match(s)
@@ -449,7 +449,7 @@ def extract_logline(s):
 
 def extract_song_data(s):
 
-    #headphones default format
+    # headphones default format
     music_dir = headphones.MUSIC_DIR
     folder_format = headphones.FOLDER_FORMAT
     file_format = headphones.FILE_FORMAT
@@ -466,7 +466,7 @@ def extract_song_data(s):
     else:
         logger.info("Couldn't parse %s into a valid default format", s)
 
-    #newzbin default format
+    # newzbin default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
     match = pattern.match(s)
     if match:
@@ -559,7 +559,7 @@ def sab_sanitize_foldername(name):
         name = 'unknown'
 
     #maxlen = cfg.folder_max_length()
-    #if len(name) > maxlen:
+    # if len(name) > maxlen:
     #    name = name[:maxlen]
 
     return name

@@ -105,7 +105,7 @@ class GROWL:
         logger.info(u"Growl notifications sent.")
 
     def updateLibrary(self):
-        #For uniformity reasons not removed
+        # For uniformity reasons not removed
         return
 
     def test(self, host, password):
@@ -158,7 +158,7 @@ class PROWL:
                 return False
 
     def updateLibrary(self):
-        #For uniformity reasons not removed
+        # For uniformity reasons not removed
         return
 
     def test(self, keys, priority):
@@ -253,7 +253,7 @@ class XBMC:
 
 class LMS:
 
-#Class for updating a Logitech Media Server
+# Class for updating a Logitech Media Server
 
     def __init__(self):
 
@@ -457,7 +457,7 @@ class PUSHBULLET:
                 return False
 
     def updateLibrary(self):
-        #For uniformity reasons not removed
+        # For uniformity reasons not removed
         return
 
     def test(self, apikey, deviceid):
@@ -534,7 +534,7 @@ class Synoindex:
         try:
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=headphones.PROG_DIR)
             out, error = p.communicate()
-            #synoindex never returns any codes other than '0', highly irritating
+            # synoindex never returns any codes other than '0', highly irritating
         except OSError, e:
             logger.warn("Error sending notification: %s" % str(e))
 
@@ -593,7 +593,7 @@ class PUSHOVER:
                 return False
 
     def updateLibrary(self):
-        #For uniformity reasons not removed
+        # For uniformity reasons not removed
         return
 
     def test(self, keys, priority):

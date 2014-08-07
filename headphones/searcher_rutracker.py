@@ -42,7 +42,7 @@ class Rutracker():
         #self.login_counter += 1
 
         # No recursion wanted.
-        #if self.login_counter > 1:
+        # if self.login_counter > 1:
         #    return False
 
         params = urllib.urlencode({"login_username" : login,
@@ -172,7 +172,7 @@ class Rutracker():
 
             if int(size) <= maxsize and int(seeders) >= minseeders:
 
-                #Torrent topic page
+                # Torrent topic page
                 torrent_id = dict([part.split('=') for part in urlparse(url)[4].split('&')])['t']
                 topicurl = 'http://rutracker.org/forum/viewtopic.php?t=' + torrent_id
 
@@ -185,7 +185,7 @@ class Rutracker():
                     self.cookiejar.set_cookie(cookielib.Cookie(version=0, name='bb_dl', value=torrent_id, port=None, port_specified=False, domain='.rutracker.org', domain_specified=False, domain_initial_dot=False, path='/', path_specified=True, secure=False, expires=None, discard=True, comment=None, comment_url=None, rest={'HttpOnly': None}, rfc2109=False))
 
                     # Debug
-                    #for cookie in self.cookiejar:
+                    # for cookie in self.cookiejar:
                     #    logger.debug ('Cookie: %s' % cookie)
 
                     try:
@@ -301,7 +301,7 @@ class Rutracker():
 
         return download_path, tor_hash
 
-    #TODO get this working in utorrent.py
+    # TODO get this working in utorrent.py
     def utorrent_add_file(self, filename):
 
         host = headphones.UTORRENT_HOST

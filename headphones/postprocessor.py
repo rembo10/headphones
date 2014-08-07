@@ -62,10 +62,10 @@ def verify(albumid, albumpath, Kind=None, forced=False):
     tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
 
     if not release or not tracks:
-        #the result of a manual post-process on an album that hasn't been inserted
-        #from an RSS feed or etc
-        #TODO: This should be a call to a class method.. copied it out of importer with only minor changes
-        #TODO: odd things can happen when there are diacritic characters in the folder name, need to translate them?
+        # the result of a manual post-process on an album that hasn't been inserted
+        # from an RSS feed or etc
+        # TODO: This should be a call to a class method.. copied it out of importer with only minor changes
+        # TODO: odd things can happen when there are diacritic characters in the folder name, need to translate them?
         release_list = None
 
         try:
@@ -219,7 +219,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
                 for downloaded_track in downloaded_track_list:
                     os.rename(downloaded_track, downloaded_track + '.original')
 
-                #reload
+                # reload
 
                 downloaded_track_list = []
                 for r, d, f in os.walk(albumpath):
@@ -360,7 +360,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                 logger.error("Track file is not writeable, which is required for some post processing steps: %s", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
                 return
 
-    #start encoding
+    # start encoding
     if headphones.MUSIC_ENCODER:
         downloaded_track_list=music_encoder.encode(albumpath)
 

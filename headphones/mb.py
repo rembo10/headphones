@@ -57,7 +57,7 @@ def startmb():
     if sleepytime == 0:
         musicbrainzngs.set_rate_limit(False)
     else:
-        #calling it with an it ends up blocking all requests after the first
+        # calling it with an it ends up blocking all requests after the first
         musicbrainzngs.set_rate_limit(limit_or_interval=float(sleepytime))
 
     # Add headphones credentials
@@ -106,7 +106,7 @@ def findArtist(name, limit=1):
                     #    'name':             unicode(result['sort-name']),
                     #    'uniquename':        uniquename,
                         'id':                unicode(result['id']),
-                    #    'url':                 unicode("http://musicbrainz.org/artist/" + result['id']),#probably needs to be changed
+                    # 'url':                 unicode("http://musicbrainz.org/artist/" + result['id']),#probably needs to be changed
                     #    'score':            int(result['ext:score'])
                         })
                 else:
@@ -215,9 +215,9 @@ def getArtist(artistid, extrasonly=False):
         if not artist:
             return False
 
-        #if 'disambiguation' in artist:
+        # if 'disambiguation' in artist:
         #    uniquename = unicode(artist['sort-name'] + " (" + artist['disambiguation'] + ")")
-        #else:
+        # else:
         #    uniquename = unicode(artist['sort-name'])
 
         artist_dict['artist_name'] = unicode(artist['name'])
@@ -231,7 +231,7 @@ def getArtist(artistid, extrasonly=False):
 
         #artist_dict['artist_begindate'] = None
         #artist_dict['artist_enddate'] = None
-        #if 'life-span' in artist:
+        # if 'life-span' in artist:
         #    if 'begin' in artist['life-span']:
         #        artist_dict['artist_begindate'] = unicode(artist['life-span']['begin'])
         #    if 'end' in artist['life-span']:
@@ -398,7 +398,7 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
     if not results or len(results) == 0:
         return False
 
-    #Clean all references to releases in dB that are no longer referenced in musicbrainz
+    # Clean all references to releases in dB that are no longer referenced in musicbrainz
     release_list = []
     force_repackage1 = 0
     if len(results) != 0:
@@ -422,8 +422,8 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
     num_new_releases = 0
 
     for releasedata in results:
-        #releasedata.get will return None if it doesn't have a status
-        #all official releases should have the Official status included
+        # releasedata.get will return None if it doesn't have a status
+        # all official releases should have the Official status included
         if not includeExtras and releasedata.get('status') != 'Official':
             continue
 
@@ -433,7 +433,7 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
 
         album_checker = myDB.action('SELECT * from allalbums WHERE ReleaseID=?', [rel_id_check]).fetchone()
         if not album_checker or forcefull:
-            #DELETE all references to this release since we're updating it anyway.
+            # DELETE all references to this release since we're updating it anyway.
             myDB.action('DELETE from allalbums WHERE ReleaseID=?', [rel_id_check])
             myDB.action('DELETE from alltracks WHERE ReleaseID=?', [rel_id_check])
             release['AlbumTitle'] = unicode(releasedata['title'])
@@ -446,7 +446,7 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
             release['Type'] = unicode(releasedata['release-group']['type'])
 
 
-            #making the assumption that the most important artist will be first in the list
+            # making the assumption that the most important artist will be first in the list
             if 'artist-credit' in releasedata:
                 release['ArtistID'] = unicode(releasedata['artist-credit'][0]['artist']['id'])
                 release['ArtistName'] = unicode(releasedata['artist-credit-phrase'])
@@ -456,7 +456,7 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
 
 
             release['ReleaseCountry'] = unicode(releasedata['country']) if 'country' in releasedata else u'Unknown'
-            #assuming that the list will contain media and that the format will be consistent
+            # assuming that the list will contain media and that the format will be consistent
             try:
                 additional_medium=''
                 for position in releasedata['medium-list']:
@@ -515,7 +515,7 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
 
                 if not match:
                     match = myDB.action('SELECT Location, BitRate, Format from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [release['ArtistName'], release['AlbumTitle'], track['title']]).fetchone()
-                #if not match:
+                # if not match:
                     #match = myDB.action('SELECT Location, BitRate, Format from have WHERE TrackID=?', [track['id']]).fetchone()
                 if match:
                     newValueDict['Location'] = match['Location']
@@ -526,8 +526,8 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
 
                 myDB.upsert("alltracks", newValueDict, controlValueDict)
             num_new_releases = num_new_releases + 1
-            #print releasedata['title']
-            #print num_new_releases
+            # print releasedata['title']
+            # print num_new_releases
             if album_checker:
                 logger.info('[%s] Existing release %s (%s) updated' % (release['ArtistName'], release['AlbumTitle'], rel_id_check))
             else:
@@ -591,9 +591,9 @@ def findArtistbyAlbum(name):
     for releaseGroup in results:
         newArtist = releaseGroup['artist-credit'][0]['artist']
         # Only need the artist ID if we're doing an artist+album lookup
-        #if 'disambiguation' in newArtist:
+        # if 'disambiguation' in newArtist:
         #    uniquename = unicode(newArtist['sort-name'] + " (" + newArtist['disambiguation'] + ")")
-        #else:
+        # else:
         #    uniquename = unicode(newArtist['sort-name'])
         #artist_dict['name'] = unicode(newArtist['sort-name'])
         #artist_dict['uniquename'] = uniquename

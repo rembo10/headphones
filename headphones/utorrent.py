@@ -43,7 +43,7 @@ class utorrentclient(object):
         self.password = headphones.UTORRENT_PASSWORD
         self.opener = self._make_opener('uTorrent', self.base_url, self.username, self.password)
         self.token = self._get_token()
-        #TODO refresh token, when necessary
+        # TODO refresh token, when necessary
 
     def _make_opener(self, realm, base_url, username, password):
         """uTorrent API need HTTP Basic Auth and cookie support for token verify."""
@@ -75,7 +75,7 @@ class utorrentclient(object):
         return self._action(params)
 
     def add_url(self, url):
-        #can receive magnet or normal .torrent link
+        # can receive magnet or normal .torrent link
         params = [('action', 'add-url'), ('s', url)]
         return self._action(params)
 

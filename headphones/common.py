@@ -22,10 +22,10 @@ import platform, operator, os, re
 
 from headphones import version
 
-#Identify Our Application
+# Identify Our Application
 USER_AGENT = 'Headphones/-'+version.HEADPHONES_VERSION+' ('+platform.system()+' '+platform.release()+')'
 
-### Notification Types
+# Notification Types
 NOTIFY_SNATCH = 1
 NOTIFY_DOWNLOAD = 2
 
@@ -33,7 +33,7 @@ notifyStrings = {}
 notifyStrings[NOTIFY_SNATCH] = "Started Download"
 notifyStrings[NOTIFY_DOWNLOAD] = "Download Finished"
 
-### Release statuses
+# Release statuses
 UNKNOWN = -1 # should never happen
 UNAIRED = 1 # releases that haven't dropped yet
 SNATCHED = 2 # qualified with quality
@@ -113,7 +113,7 @@ class Quality:
 
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
 
-        #TODO: fix quality checking here
+        # TODO: fix quality checking here
         if checkName(["mp3", "192"], any) and not checkName(["flac"], all):
             return Quality.B192
         elif checkName(["mp3", "256"], any) and not checkName(["flac"], all):

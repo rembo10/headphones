@@ -26,7 +26,7 @@ from headphones.helpers import create_https_certificates
 
 def initialize(options={}):
 
-    #HTTPS stuff stolen from sickbeard
+    # HTTPS stuff stolen from sickbeard
     enable_https = options['enable_https']
     https_cert = options['https_cert']
     https_key = options['https_key']

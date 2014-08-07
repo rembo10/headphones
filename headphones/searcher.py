@@ -649,7 +649,7 @@ def send_to_downloader(data, bestqual, album):
                         if not download_path:
                             return
                     else:
-                        #Write the torrent file to a path derived from the TORRENTBLACKHOLE_DIR and file name.
+                        # Write the torrent file to a path derived from the TORRENTBLACKHOLE_DIR and file name.
                         with open(download_path, 'wb') as fp:
                             fp.write(data)
 
@@ -658,8 +658,8 @@ def send_to_downloader(data, bestqual, album):
                         except:
                             logger.error("Could not change permissions for file: %s", download_path)
 
-                    #Open the fresh torrent file again so we can extract the proper torrent name
-                    #Used later in post-processing.
+                    # Open the fresh torrent file again so we can extract the proper torrent name
+                    # Used later in post-processing.
                     with open(download_path, 'rb') as fp:
                         torrent_info = bdecode(fp.read())
 
@@ -781,11 +781,11 @@ def verifyresult(title, artistterm, term, lossless):
 
     title = re.sub('[\.\-\/\_]', ' ', title)
 
-    #if artistterm != 'Various Artists':
+    # if artistterm != 'Various Artists':
     #
     #    if not re.search('^' + re.escape(artistterm), title, re.IGNORECASE):
-    #        #logger.info("Removed from results: " + title + " (artist not at string start).")
-    #        #return False
+    # logger.info("Removed from results: " + title + " (artist not at string start).")
+    # return False
     #    elif re.search(re.escape(artistterm) + '\w', title, re.IGNORECASE | re.UNICODE):
     #        logger.info("Removed from results: " + title + " (post substring result).")
     #        return False
@@ -793,7 +793,7 @@ def verifyresult(title, artistterm, term, lossless):
     #        logger.info("Removed from results: " + title + " (pre substring result).")
     #        return False
 
-    #another attempt to weed out substrings. We don't want "Vol III" when we were looking for "Vol II"
+    # another attempt to weed out substrings. We don't want "Vol III" when we were looking for "Vol II"
 
     # Filter out remix search results (if we're not looking for it)
     if 'remix' not in term.lower() and 'remix' in title.lower():
@@ -1291,9 +1291,9 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                     except Exception as e:
                         logger.exception("Unhandled exception in Mininova Parser")
 
-    #attempt to verify that this isn't a substring result
-    #when looking for "Foo - Foo" we don't want "Foobar"
-    #this should be less of an issue when it isn't a self-titled album so we'll only check vs artist
+    # attempt to verify that this isn't a substring result
+    # when looking for "Foo - Foo" we don't want "Foobar"
+    # this should be less of an issue when it isn't a self-titled album so we'll only check vs artist
     results = [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
 
     # Additional filtering for size etc
@@ -1308,7 +1308,7 @@ def preprocess(resultlist):
     for result in resultlist:
 
         if result[4] == 'torrent':
-            #Get out of here if we're using Transmission
+            # Get out of here if we're using Transmission
             if headphones.TORRENT_DOWNLOADER == 1:  ## if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
                 return True, result
             # get outta here if rutracker

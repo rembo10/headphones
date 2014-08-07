@@ -308,7 +308,7 @@ class Cache(object):
             if not thumb_url:
                 logger.debug('No album thumbnail image found')
 
-        #Save the content & summary to the database no matter what if we've opened up the url
+        # Save the content & summary to the database no matter what if we've opened up the url
         if self.id_type == 'artist':
             controlValueDict = {"ArtistID":     self.id}
         else:
@@ -348,7 +348,7 @@ class Cache(object):
                         self.artwork_errors = True
                         self.artwork_url = image_url
 
-                #Delete the old stuff
+                # Delete the old stuff
                 for artwork_file in self.artwork_files:
                     try:
                         os.remove(artwork_file)
@@ -381,7 +381,7 @@ class Cache(object):
                         self.thumb_errors = True
                         self.thumb_url = thumb_url
 
-                #Delete the old stuff
+                # Delete the old stuff
                 for thumb_file in self.thumb_files:
                     try:
                         os.remove(thumb_file)
