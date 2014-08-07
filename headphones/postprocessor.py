@@ -46,7 +46,7 @@ def checkFolder():
                 else:
                     download_dir = headphones.DOWNLOAD_TORRENT_DIR
 
-                album_path = os.path.join(download_dir, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
+                album_path = os.path.join(download_dir, album['FolderName']).encode(headphones.SYS_ENCODING, 'replace')
                 logger.info("Checking if %s exists" % album_path)
                 if os.path.exists(album_path):
                     logger.info('Found "' + album['FolderName'] + '" in ' + album['Kind'] + ' download folder. Verifying....')
@@ -155,7 +155,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
     downloaded_track_list = []
     downloaded_cuecount = 0
 
-    for r,d,f in os.walk(albumpath):
+    for r, d, f in os.walk(albumpath):
         for files in f:
             if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
                 downloaded_track_list.append(os.path.join(r, files))
@@ -180,9 +180,9 @@ def verify(albumid, albumpath, Kind=None, forced=False):
             if headphones.ENCODERFOLDER:
                 xldencoder = os.path.join(headphones.ENCODERFOLDER, 'xld')
             else:
-                xldencoder = os.path.join('/Applications','xld')
+                xldencoder = os.path.join('/Applications', 'xld')
 
-            for r,d,f in os.walk(albumpath):
+            for r, d, f in os.walk(albumpath):
                 xldfolder = r
                 xldfile = ''
                 xldcue = ''
@@ -208,7 +208,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
             # count files, should now be more than original if xld successfully split
 
             new_downloaded_track_list_count = 0
-            for r,d,f in os.walk(albumpath):
+            for r, d, f in os.walk(albumpath):
                 for file in f:
                     if any(file.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
                         new_downloaded_track_list_count += 1
@@ -222,7 +222,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
                 #reload
 
                 downloaded_track_list = []
-                for r,d,f in os.walk(albumpath):
+                for r, d, f in os.walk(albumpath):
                     for file in f:
                         if any(file.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
                             downloaded_track_list.append(os.path.join(r, file))
@@ -333,7 +333,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         downloaded_track_list = []
         downloaded_cuecount = 0
 
-        for r,d,f in os.walk(albumpath):
+        for r, d, f in os.walk(albumpath):
             for files in f:
                 if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
                     downloaded_track_list.append(os.path.join(r, files))
@@ -557,7 +557,7 @@ def addAlbumArt(artwork, albumpath, release):
 
 def cleanupFiles(albumpath):
     logger.info('Cleaning up files')
-    for r,d,f in os.walk(albumpath):
+    for r, d, f in os.walk(albumpath):
         for files in f:
             if not any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
                 logger.debug('Removing: %s' % files)
@@ -609,7 +609,7 @@ def moveFiles(albumpath, release, tracks):
     folder = helpers.replace_all(headphones.FOLDER_FORMAT.strip(), values)
 
     folder = helpers.replace_illegal_chars(folder, type="folder")
-    folder = folder.replace('./', '_/').replace('/.','/_')
+    folder = folder.replace('./', '_/').replace('/.', '/_')
 
     if folder.endswith('.'):
         folder = folder[:-1] + '_'
@@ -623,7 +623,7 @@ def moveFiles(albumpath, release, tracks):
     lossy_media = False
     lossless_media = False
 
-    for r,d,f in os.walk(albumpath):
+    for r, d, f in os.walk(albumpath):
         for files in f:
             files_to_move.append(os.path.join(r, files))
             if any(files.lower().endswith('.' + x.lower()) for x in headphones.LOSSY_MEDIA_FORMATS):
@@ -942,7 +942,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
 
             ext = os.path.splitext(downloaded_track)[1]
 
-            new_file_name = helpers.replace_all(headphones.FILE_FORMAT.strip(), values).replace('/','_') + ext
+            new_file_name = helpers.replace_all(headphones.FILE_FORMAT.strip(), values).replace('/', '_') + ext
 
 
         new_file_name = helpers.replace_illegal_chars(new_file_name).encode(headphones.SYS_ENCODING, 'replace')
@@ -959,7 +959,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
             logger.debug("Renaming for: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + " is not neccessary")
             continue
 
-        logger.debug('Renaming %s ---> %s', downloaded_track.decode(headphones.SYS_ENCODING,'replace'), new_file_name.decode(headphones.SYS_ENCODING,'replace'))
+        logger.debug('Renaming %s ---> %s', downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), new_file_name.decode(headphones.SYS_ENCODING, 'replace'))
         try:
             os.rename(downloaded_track, new_file)
         except Exception, e:
@@ -970,7 +970,7 @@ def updateFilePermissions(albumpaths):
 
     for folder in albumpaths:
         logger.info("Updating file permissions in %s", folder)
-        for r,d,f in os.walk(folder):
+        for r, d, f in os.walk(folder):
             for files in f:
                 full_path = os.path.join(r, files)
                 try:

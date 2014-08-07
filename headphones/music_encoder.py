@@ -40,7 +40,7 @@ def encode(albumPath):
             logger.error('Details for xld profile \'%s\' not found, files will not be re-encoded', xldProfile)
             return None
 
-    tempDirEncode=os.path.join(albumPath,"temp")
+    tempDirEncode=os.path.join(albumPath, "temp")
     musicFiles=[]
     musicFinalFiles=[]
     musicTempFiles=[]
@@ -57,7 +57,7 @@ def encode(albumPath):
         logger.exception("Unable to create temporary directory")
         return None
 
-    for r,d,f in os.walk(albumPath):
+    for r, d, f in os.walk(albumPath):
         for music in f:
             if any(music.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
                 if not XLD:
@@ -208,7 +208,7 @@ def encode(albumPath):
         return None
 
     time.sleep(1)
-    for r,d,f in os.walk(albumPath):
+    for r, d, f in os.walk(albumPath):
         for music in f:
             if any(music.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
                 musicFinalFiles.append(os.path.join(r, music))
@@ -229,7 +229,7 @@ def command_map(args):
         logger.exception("Encoder exception, will return failed")
         return False
 
-def command(encoder, musicSource ,musicDest, albumPath):
+def command(encoder, musicSource, musicDest, albumPath):
     cmd=[]
     startMusicTime=time.time()
 

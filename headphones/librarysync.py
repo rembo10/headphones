@@ -78,7 +78,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
 
     latest_subdirectory = []
 
-    for r,d,f in os.walk(dir):
+    for r, d, f in os.walk(dir):
         #need to abuse slicing to get a copy of the list, doing it directly will skip the element after a deleted one
         #using a list comprehension will not work correctly for nested subdirectories (os.walk keeps its original list)
         for directory in d[:]:
@@ -89,9 +89,9 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
             # MEDIA_FORMATS = music file extensions, e.g. mp3, flac, etc
             if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
 
-                subdirectory = r.replace(dir,'')
+                subdirectory = r.replace(dir, '')
                 latest_subdirectory.append(subdirectory)
-                if file_count == 0 and r.replace(dir,'') !='':
+                if file_count == 0 and r.replace(dir, '') !='':
                     logger.info("[%s] Now scanning subdirectory %s" % (dir.decode(headphones.SYS_ENCODING, 'replace'), subdirectory.decode(headphones.SYS_ENCODING, 'replace')))
                 elif latest_subdirectory[file_count] != latest_subdirectory[file_count-1] and file_count !=0:
                     logger.info("[%s] Now scanning subdirectory %s" % (dir.decode(headphones.SYS_ENCODING, 'replace'), subdirectory.decode(headphones.SYS_ENCODING, 'replace')))

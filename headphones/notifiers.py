@@ -242,7 +242,7 @@ class XBMC:
                     request = self._sendhttp(host, notifycommand)
 
                 else: #Frodo
-                    params = {'title':header, 'message': message, 'displaytime': int(time), 'image': albumartpath}
+                    params = {'title': header, 'message': message, 'displaytime': int(time), 'image': albumartpath}
                     request = self._sendjson(host, 'GUI.ShowNotification', params)
 
                 if not request:
@@ -260,7 +260,7 @@ class LMS:
         self.hosts = headphones.LMS_HOST
 
     def _sendjson(self, host):
-        data = {'id': 1, 'method': 'slim.request', 'params': ["",["rescan"]]}
+        data = {'id': 1, 'method': 'slim.request', 'params': ["", ["rescan"]]}
         data = simplejson.JSONEncoder().encode(data)
 
         content = {'Content-Type': 'application/json'}

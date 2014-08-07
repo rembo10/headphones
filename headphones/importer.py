@@ -22,10 +22,10 @@ from beets.mediafile import MediaFile
 import headphones
 from headphones import logger, helpers, db, mb, lastfm
 
-blacklisted_special_artist_names = ['[anonymous]','[data]','[no artist]','[traditional]','[unknown]','Various Artists']
-blacklisted_special_artists = ['f731ccc4-e22a-43af-a747-64213329e088','33cf029c-63b0-41a0-9855-be2a3665fb3b',\
-                                '314e1c25-dde7-4e4d-b2f4-0a7b9f7c56dc','eec63d3c-3b81-4ad4-b1e4-7c147d4d2b61',\
-                                '9be7f096-97ec-4615-8957-8d40b5dcbc41','125ec42a-7229-4250-afc5-e057484327fe',\
+blacklisted_special_artist_names = ['[anonymous]', '[data]', '[no artist]', '[traditional]', '[unknown]', 'Various Artists']
+blacklisted_special_artists = ['f731ccc4-e22a-43af-a747-64213329e088', '33cf029c-63b0-41a0-9855-be2a3665fb3b',\
+                                '314e1c25-dde7-4e4d-b2f4-0a7b9f7c56dc', 'eec63d3c-3b81-4ad4-b1e4-7c147d4d2b61',\
+                                '9be7f096-97ec-4615-8957-8d40b5dcbc41', '125ec42a-7229-4250-afc5-e057484327fe',\
                                 '89ad4ac3-39f7-470e-963a-56509c546377']
 
 
@@ -243,13 +243,13 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             if new_release_group:
 
                 logger.info("[%s] Now adding: %s (New Release Group)" % (artist['artist_name'], rg['title']))
-                new_releases = mb.get_new_releases(rgid,includeExtras)
+                new_releases = mb.get_new_releases(rgid, includeExtras)
 
             else:
 
                 if check_release_date is None or check_release_date == u"None":
                     logger.info("[%s] Now updating: %s (No Release Date)" % (artist['artist_name'], rg['title']))
-                    new_releases = mb.get_new_releases(rgid,includeExtras,True)
+                    new_releases = mb.get_new_releases(rgid, includeExtras, True)
                 else:
                     if len(check_release_date) == 10:
                         release_date = check_release_date
@@ -261,7 +261,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                         release_date = today
                     if helpers.get_age(today) - helpers.get_age(release_date) < pause_delta:
                         logger.info("[%s] Now updating: %s (Release Date <%s Days) " % (artist['artist_name'], rg['title'], pause_delta))
-                        new_releases = mb.get_new_releases(rgid,includeExtras,True)
+                        new_releases = mb.get_new_releases(rgid, includeExtras, True)
                     else:
                         logger.info("[%s] Skipping: %s (Release Date >%s Days)" % (artist['artist_name'], rg['title'], pause_delta))
                         skip_log = 1
@@ -274,7 +274,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                 new_releases = new_releases
         else:
             logger.info("[%s] Now adding/updating: %s (Comprehensive Force)" % (artist['artist_name'], rg['title']))
-            new_releases = mb.get_new_releases(rgid,includeExtras,forcefull)
+            new_releases = mb.get_new_releases(rgid, includeExtras, forcefull)
 
         if new_releases != 0:
             #Dump existing hybrid release since we're repackaging/replacing it
@@ -326,7 +326,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                 logger.info('[%s] Packaging %s releases into hybrid title' % (artist['artist_name'], rg['title']))
             except Exception, e:
                 errors = True
-                logger.warn('[%s] Unable to get hybrid release information for %s: %s' % (artist['artist_name'],rg['title'],e))
+                logger.warn('[%s] Unable to get hybrid release information for %s: %s' % (artist['artist_name'], rg['title'], e))
                 continue
 
             # Use the ReleaseGroupID as the ReleaseID for the hybrid release to differentiate it
@@ -765,7 +765,7 @@ def getHybridRelease(fullreleaselist):
         else:
             return releaseDate + '13-32'
 
-    sortable_release_list.sort(key=lambda x:getSortableReleaseDate(x['releasedate']))
+    sortable_release_list.sort(key=lambda x: getSortableReleaseDate(x['releasedate']))
 
     average_tracks = sum(x['trackscount'] for x in sortable_release_list) / float(len(sortable_release_list))
     for item in sortable_release_list:

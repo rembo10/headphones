@@ -48,7 +48,7 @@ class utorrentclient(object):
     def _make_opener(self, realm, base_url, username, password):
         """uTorrent API need HTTP Basic Auth and cookie support for token verify."""
         auth = urllib2.HTTPBasicAuthHandler()
-        auth.add_password(realm=realm,uri=base_url,user=username,passwd=password)
+        auth.add_password(realm=realm, uri=base_url, user=username, passwd=password)
         opener = urllib2.build_opener(auth)
         urllib2.install_opener(opener)
 
@@ -153,7 +153,7 @@ def labelTorrent(hash):
     label = headphones.UTORRENT_LABEL
     uTorrentClient = utorrentclient()
     if label:
-        uTorrentClient.setprops(hash,'label',label)
+        uTorrentClient.setprops(hash, 'label', label)
 
 def dirTorrent(hash, cacheid=None):
 

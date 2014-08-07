@@ -52,7 +52,7 @@ def startmb():
     else:
         return False
 
-    musicbrainzngs.set_useragent("headphones","0.0","https://github.com/rembo10/headphones")
+    musicbrainzngs.set_useragent("headphones", "0.0", "https://github.com/rembo10/headphones")
     musicbrainzngs.set_hostname(mbhost + ":" + str(mbport))
     if sleepytime == 0:
         musicbrainzngs.set_rate_limit(False)
@@ -65,7 +65,7 @@ def startmb():
         if not mbuser and mbpass:
             logger.warn("No username or password set for VIP server")
         else:
-            musicbrainzngs.hpauth(mbuser,mbpass)
+            musicbrainzngs.hpauth(mbuser, mbpass)
 
     logger.debug('Using the following server values: MBHost: %s, MBPort: %i, Sleep Interval: %i', mbhost, mbport, sleepytime)
 
@@ -129,7 +129,7 @@ def findRelease(name, limit=1, artist=None):
 
         # additional artist search
         if not artist and ':' in name:
-            name, artist = name.rsplit(":",1)
+            name, artist = name.rsplit(":", 1)
 
         chars = set('!?*-')
         if any((c in chars) for c in name):
@@ -138,7 +138,7 @@ def findRelease(name, limit=1, artist=None):
             artist = '"'+artist+'"'
 
         try:
-            releaseResults = musicbrainzngs.search_releases(query=name,limit=limit,artist=artist)['release-list']
+            releaseResults = musicbrainzngs.search_releases(query=name, limit=limit, artist=artist)['release-list']
         except WebServiceError, e: #need to update exceptions
             logger.warn('Attempt to query MusicBrainz for "%s" failed: %s' % (name, str(e)))
             time.sleep(5)
@@ -204,12 +204,12 @@ def getArtist(artistid, extrasonly=False):
             newRgs = None
             artist['release-group-list'] = []
             while newRgs == None or len(newRgs) >= limit:
-                newRgs = musicbrainzngs.browse_release_groups(artistid,release_type="album",offset=len(artist['release-group-list']),limit=limit)['release-group-list']
+                newRgs = musicbrainzngs.browse_release_groups(artistid, release_type="album", offset=len(artist['release-group-list']), limit=limit)['release-group-list']
                 artist['release-group-list'] += newRgs
         except WebServiceError, e:
             logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e)))
             time.sleep(5)
-        except Exception,e:
+        except Exception, e:
             pass
 
         if not artist:
@@ -282,7 +282,7 @@ def getArtist(artistid, extrasonly=False):
                     limit = 200
                     newRgs = None
                     while newRgs == None or len(newRgs) >= limit:
-                        newRgs = musicbrainzngs.browse_release_groups(artistid,release_type=include,offset=len(mb_extras_list),limit=limit)['release-group-list']
+                        newRgs = musicbrainzngs.browse_release_groups(artistid, release_type=include, offset=len(mb_extras_list), limit=limit)['release-group-list']
                         mb_extras_list += newRgs
                 except WebServiceError, e:
                     logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e)))
@@ -311,7 +311,7 @@ def getReleaseGroup(rgid):
         releaseGroup = None
 
         try:
-            releaseGroup = musicbrainzngs.get_release_group_by_id(rgid,["artists","releases","media","discids",])['release-group']
+            releaseGroup = musicbrainzngs.get_release_group_by_id(rgid, ["artists", "releases", "media", "discids", ])['release-group']
         except WebServiceError, e:
             logger.warn('Attempt to retrieve information from MusicBrainz for release group "%s" failed (%s)' % (rgid, str(e)))
             time.sleep(5)
@@ -332,9 +332,9 @@ def getRelease(releaseid, include_artist_info=True):
 
         try:
             if include_artist_info:
-                results = musicbrainzngs.get_release_by_id(releaseid,["artists","release-groups","media","recordings"]).get('release')
+                results = musicbrainzngs.get_release_by_id(releaseid, ["artists", "release-groups", "media", "recordings"]).get('release')
             else:
-                results = musicbrainzngs.get_release_by_id(releaseid,["media","recordings"]).get('release')
+                results = musicbrainzngs.get_release_by_id(releaseid, ["media", "recordings"]).get('release')
         except WebServiceError, e:
             logger.warn('Attempt to retrieve information from MusicBrainz for release "%s" failed (%s)' % (releaseid, str(e)))
             time.sleep(5)
@@ -376,7 +376,7 @@ def getRelease(releaseid, include_artist_info=True):
 
         return release
 
-def get_new_releases(rgid,includeExtras=False,forcefull=False):
+def get_new_releases(rgid, includeExtras=False, forcefull=False):
 
     myDB = db.DBConnection()
     results = []
@@ -384,7 +384,7 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
         limit = 100
         newResults = None
         while newResults == None or len(newResults) >= limit:
-            newResults = musicbrainzngs.browse_releases(release_group=rgid,includes=['artist-credits','labels','recordings','release-groups','media'],limit=limit,offset=len(results))
+            newResults = musicbrainzngs.browse_releases(release_group=rgid, includes=['artist-credits', 'labels', 'recordings', 'release-groups', 'media'], limit=limit, offset=len(results))
             if 'release-list' not in newResults:
                 break #may want to raise an exception here instead ?
             newResults = newResults['release-list']

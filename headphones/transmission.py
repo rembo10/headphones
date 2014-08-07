@@ -32,14 +32,14 @@ def addTorrent(link):
     method = 'torrent-add'
 
     if link.endswith('.torrent'):
-        f = open(link,'rb')
+        f = open(link, 'rb')
         metainfo = str(base64.b64encode(f.read()))
         f.close()
-        arguments = {'metainfo': metainfo, 'download-dir':headphones.DOWNLOAD_TORRENT_DIR}
+        arguments = {'metainfo': metainfo, 'download-dir': headphones.DOWNLOAD_TORRENT_DIR}
     else:
         arguments = {'filename': link, 'download-dir': headphones.DOWNLOAD_TORRENT_DIR}
 
-    response = torrentAction(method,arguments)
+    response = torrentAction(method, arguments)
 
     if not response:
         return False
@@ -64,7 +64,7 @@ def addTorrent(link):
 
 def getTorrentFolder(torrentid):
     method = 'torrent-get'
-    arguments = { 'ids': torrentid, 'fields': ['name','percentDone']}
+    arguments = { 'ids': torrentid, 'fields': ['name', 'percentDone']}
 
     response = torrentAction(method, arguments)
     percentdone = response['arguments']['torrents'][0]['percentDone']

@@ -42,7 +42,7 @@ class Api(object):
         self.callback = None
 
 
-    def checkParams(self,*args,**kwargs):
+    def checkParams(self, *args, **kwargs):
 
         if not headphones.API_ENABLED:
             self.data = 'API not enabled'
@@ -96,7 +96,7 @@ class Api(object):
         else:
             return self.data
 
-    def _dic_from_query(self,query):
+    def _dic_from_query(self, query):
 
         myDB = db.DBConnection()
         rows = myDB.select(query)
@@ -314,11 +314,11 @@ class Api(object):
 
     def _getVersion(self, **kwargs):
         self.data = {
-            'git_path' : headphones.GIT_PATH,
-            'install_type' : headphones.INSTALL_TYPE,
-            'current_version' : headphones.CURRENT_VERSION,
-            'latest_version' : headphones.LATEST_VERSION,
-            'commits_behind' : headphones.COMMITS_BEHIND,
+            'git_path': headphones.GIT_PATH,
+            'install_type': headphones.INSTALL_TYPE,
+            'current_version': headphones.CURRENT_VERSION,
+            'latest_version': headphones.LATEST_VERSION,
+            'commits_behind': headphones.COMMITS_BEHIND,
         }
 
     def _checkGithub(self, **kwargs):
@@ -409,11 +409,11 @@ class Api(object):
         for result in results:
 
             result_dict = {
-                'title':result[0],
-                'size':result[1],
-                'url':result[2],
-                'provider':result[3],
-                'kind':result[4]
+                'title': result[0],
+                'size': result[1],
+                'url': result[2],
+                'provider': result[3],
+                'kind': result[4]
             }
             results_as_dicts.append(result_dict)
 
@@ -421,7 +421,7 @@ class Api(object):
 
     def _download_specific_release(self, **kwargs):
 
-        expected_kwargs =['id', 'title','size','url','provider','kind']
+        expected_kwargs =['id', 'title', 'size', 'url', 'provider', 'kind']
 
         for kwarg in expected_kwargs:
             if kwarg not in kwargs:
@@ -444,9 +444,9 @@ class Api(object):
             url = urllib2.quote(url, safe=":?/=&") + '&' + urllib.urlencode(kwargs)
 
         try:
-            result = [(title,int(size),url,provider,kind)]
+            result = [(title, int(size), url, provider, kind)]
         except ValueError:
-            result = [(title,float(size),url,provider,kind)]
+            result = [(title, float(size), url, provider, kind)]
 
         logger.info(u"Making sure we can download the chosen result")
         (data, bestqual) = searcher.preprocess(result)

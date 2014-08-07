@@ -234,9 +234,9 @@ def sort_search_results(resultlist, album, new, albumlength):
             # add a search provider priority (weighted based on position)
             i = next((i for i, word in enumerate(preferred_words) if word in result[3].lower()), None)
             if i != None:
-                priority += round((len(preferred_words) - i) / float(len(preferred_words)),2)
+                priority += round((len(preferred_words) - i) / float(len(preferred_words)), 2)
 
-        temp_list.append((result[0],result[1],result[2],result[3],result[4],priority))
+        temp_list.append((result[0], result[1], result[2], result[3], result[4], priority))
 
     resultlist = temp_list
 
@@ -299,7 +299,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
     reldate = album['ReleaseDate']
     year = get_year_from_release_date(reldate)
 
-    dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':'', '*':'', '.':'', ':':''}
+    dic = {'...': '', ' & ': ' ', ' = ': ' ', '?': '', '$': 's', ' + ': ' ', '"': '', ',': '', '*': '', '.': '', ':': ''}
 
     cleanalbum = helpers.latinToAscii(helpers.replace_all(album['AlbumTitle'], dic)).strip()
     cleanartist = helpers.latinToAscii(helpers.replace_all(album['ArtistName'], dic)).strip()
@@ -742,15 +742,15 @@ def send_to_downloader(data, bestqual, album):
     if headphones.GROWL_ENABLED and headphones.GROWL_ONSNATCH:
         logger.info(u"Sending Growl notification")
         growl = notifiers.GROWL()
-        growl.notify(name,"Download started")
+        growl.notify(name, "Download started")
     if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
         logger.info(u"Sending Prowl notification")
         prowl = notifiers.PROWL()
-        prowl.notify(name,"Download started")
+        prowl.notify(name, "Download started")
     if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
         logger.info(u"Sending Pushover notification")
         prowl = notifiers.PUSHOVER()
-        prowl.notify(name,"Download started")
+        prowl.notify(name, "Download started")
     if headphones.PUSHBULLET_ENABLED and headphones.PUSHBULLET_ONSNATCH:
         logger.info(u"Sending PushBullet notification")
         pushbullet = notifiers.PUSHBULLET()
@@ -766,7 +766,7 @@ def send_to_downloader(data, bestqual, album):
     if headphones.PUSHALOT_ENABLED and headphones.PUSHALOT_ONSNATCH:
         logger.info(u"Sending Pushalot notification")
         pushalot = notifiers.PUSHALOT()
-        pushalot.notify(name,"Download started")
+        pushalot.notify(name, "Download started")
     if headphones.OSX_NOTIFY_ENABLED and headphones.OSX_NOTIFY_ONSNATCH:
         logger.info(u"Sending OS X notification")
         osx_notify = notifiers.OSX_NOTIFY()
@@ -834,7 +834,7 @@ def verifyresult(title, artistterm, term, lossless):
         if not re.search('(?:\W|^)+' + token + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
             cleantoken = ''.join(c for c in token if c not in string.punctuation)
             if not not re.search('(?:\W|^)+' + cleantoken + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
-                dic = {'!':'i', '$':'s'}
+                dic = {'!': 'i', '$': 's'}
                 dumbtoken = helpers.replace_all(token, dic)
                 if not not re.search('(?:\W|^)+' + dumbtoken + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
                     logger.info("Removed from results: %s (missing tokens: %s and %s)", title, token, cleantoken)
@@ -858,7 +858,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
     year = get_year_from_release_date(reldate)
 
     # MERGE THIS WITH THE TERM CLEANUP FROM searchNZB
-    dic = {'...':'', ' & ':' ', ' = ': ' ', '?':'', '$':'s', ' + ':' ', '"':'', ',':' ', '*':''}
+    dic = {'...': '', ' & ': ' ', ' = ': ' ', '?': '', '$': 's', ' + ': ' ', '"': '', ',': ' ', '*': ''}
 
     semi_cleanalbum = helpers.replace_all(album['AlbumTitle'], dic)
     cleanalbum = helpers.latinToAscii(semi_cleanalbum)
@@ -1214,7 +1214,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                         url = None
                         if headphones.TORRENT_DOWNLOADER == 0:
                             try:
-                                url = item.find("a", {"title":"Download this torrent"})['href']
+                                url = item.find("a", {"title": "Download this torrent"})['href']
                             except TypeError:
                                 if headphones.OPEN_MAGNET_LINKS:
                                     url = item.findAll("a")[3]['href']
