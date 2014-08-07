@@ -35,9 +35,11 @@ def addTorrent(link):
         f = open(link, 'rb')
         metainfo = str(base64.b64encode(f.read()))
         f.close()
-        arguments = {'metainfo': metainfo, 'download-dir': headphones.DOWNLOAD_TORRENT_DIR}
+        arguments = {
+            'metainfo': metainfo, 'download-dir': headphones.DOWNLOAD_TORRENT_DIR}
     else:
-        arguments = {'filename': link, 'download-dir': headphones.DOWNLOAD_TORRENT_DIR}
+        arguments = {
+            'filename': link, 'download-dir': headphones.DOWNLOAD_TORRENT_DIR}
 
     response = torrentAction(method, arguments)
 
@@ -116,7 +118,8 @@ def torrentAction(method, arguments):
     # Retrieve session id
     auth = (username, password) if username and password else None
 
-    response = request.request_response(host, auth=auth, whitelist_status_code=[401, 409])
+    response = request.request_response(
+        host, auth=auth, whitelist_status_code=[401, 409])
 
     if response is None:
         logger.error("Error gettings Transmission session ID")
@@ -125,7 +128,8 @@ def torrentAction(method, arguments):
     # Parse response
     if response.status_code == 401:
         if auth:
-            logger.error("Username and/or password not accepted by Transmission")
+            logger.error(
+                "Username and/or password not accepted by Transmission")
         else:
             logger.error("Transmission authorization required")
 
@@ -141,7 +145,8 @@ def torrentAction(method, arguments):
     headers = { 'x-transmission-session-id': sessionid }
     data = { 'method': method, 'arguments': arguments }
 
-    response = request.request_json(host, method="post", data=json.dumps(data), headers=headers, auth=auth)
+    response = request.request_json(
+        host, method="post", data=json.dumps(data), headers=headers, auth=auth)
 
     if not response:
         logger.error("Error sending torrent to Transmission")

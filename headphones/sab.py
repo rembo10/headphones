@@ -49,7 +49,8 @@ def sendNZB(nzb):
         if nzb.provider.getID() == 'newzbin':
             id = nzb.provider.getIDFromURL(nzb.url)
             if not id:
-                logger.info("Unable to send NZB to sab, can't find ID in URL "+str(nzb.url))
+                logger.info(
+                    "Unable to send NZB to sab, can't find ID in URL "+str(nzb.url))
                 return False
             params['mode'] = 'addid'
             params['name'] = id
@@ -59,7 +60,8 @@ def sendNZB(nzb):
 
     # if we get a raw data result we want to upload it to SAB
     elif nzb.resultType == "nzbdata":
-        # Sanitize the file a bit, since we can only use ascii chars with MultiPartPostHandler
+        # Sanitize the file a bit, since we can only use ascii chars with
+        # MultiPartPostHandler
         nzbdata = helpers.latinToAscii(nzb.extraInfo[0])
         params['mode'] = 'addfile'
         multiPartParams = {"nzbfile": (nzb.name+".nzb", nzbdata)}
@@ -92,7 +94,8 @@ def sendNZB(nzb):
         return False
 
     except httplib.InvalidURL, e:
-        logger.error(u"Invalid SAB host, check your config. Current host: %s" % headphones.SAB_HOST)
+        logger.error(
+            u"Invalid SAB host, check your config. Current host: %s" % headphones.SAB_HOST)
         return False
         
     except Exception, e:
@@ -124,7 +127,8 @@ def sendNZB(nzb):
         logger.info(u"Incorrect username/password sent to SAB, NZB not sent")
         return False
     else:
-        logger.info(u"Unknown failure sending NZB to sab. Return text is: " + sabText)
+        logger.info(
+            u"Unknown failure sending NZB to sab. Return text is: " + sabText)
         return False
         
 def checkConfig():
@@ -151,7 +155,8 @@ def checkConfig():
     try:
         f = urllib.urlopen(url).read()
     except Exception, e:
-        logger.warn("Unable to read SABnzbd config file - cannot determine renaming options (might affect auto & forced post processing)")
+        logger.warn(
+            "Unable to read SABnzbd config file - cannot determine renaming options (might affect auto & forced post processing)")
         return (0, 0)
         
     config_options = ast.literal_eval(f)

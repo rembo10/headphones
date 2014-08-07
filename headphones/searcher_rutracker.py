@@ -28,7 +28,8 @@ class Rutracker():
     def __init__(self):
 
         self.cookiejar = cookielib.CookieJar()
-        self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+        self.opener = urllib2.build_opener(
+            urllib2.HTTPCookieProcessor(self.cookiejar))
         urllib2.install_opener(self.opener)
 
     def login(self, login, password):
@@ -50,7 +51,8 @@ class Rutracker():
                                    "login" : "Вход"})
 
         try:
-            self.opener.open("http://login.rutracker.org/forum/login.php", params)
+            self.opener.open(
+                "http://login.rutracker.org/forum/login.php", params)
         except :
             pass
 
@@ -87,7 +89,8 @@ class Rutracker():
         # sort by size, descending.
         sort = '&o=7&s=2'
 
-        searchurl = "%s?nm=%s%s%s" % (providerurl, urllib.quote(searchterm), format, sort)
+        searchurl = "%s?nm=%s%s%s" % (
+            providerurl, urllib.quote(searchterm), format, sort)
 
         return searchurl
 
@@ -149,18 +152,22 @@ class Rutracker():
 
             # get headphones track count for album, return if not found
             myDB = db.DBConnection()
-            tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
+            tracks = myDB.select(
+                'SELECT * from tracks WHERE AlbumID=?', [albumid])
             hptrackcount = len(tracks)
 
             if not hptrackcount:
-                logger.info('headphones track info not found, cannot compare to torrent')
+                logger.info(
+                    'headphones track info not found, cannot compare to torrent')
                 return False
 
-            # Return all valid entries, ignored, required words now checked in searcher.py
+            # Return all valid entries, ignored, required words now checked in
+            # searcher.py
 
             #unwantedlist = ['promo', 'vinyl', '[lp]', 'songbook', 'tvrip', 'hdtv', 'dvd']
 
-            formatlist = ['ape', 'flac', 'ogg', 'm4a', 'aac', 'mp3', 'wav', 'aif']
+            formatlist = [
+                'ape', 'flac', 'ogg', 'm4a', 'aac', 'mp3', 'wav', 'aif']
             deluxelist = ['deluxe', 'edition', 'japanese', 'exclusive']
 
         for torrent in torrentlist:
@@ -173,8 +180,10 @@ class Rutracker():
             if int(size) <= maxsize and int(seeders) >= minseeders:
 
                 # Torrent topic page
-                torrent_id = dict([part.split('=') for part in urlparse(url)[4].split('&')])['t']
-                topicurl = 'http://rutracker.org/forum/viewtopic.php?t=' + torrent_id
+                torrent_id = dict([part.split('=')
+                                  for part in urlparse(url)[4].split('&')])['t']
+                topicurl = 'http://rutracker.org/forum/viewtopic.php?t=' + \
+                    torrent_id
 
                 # add to list
                 if not check_track_count:
@@ -182,7 +191,8 @@ class Rutracker():
                 else:
 
                     # Check torrent info
-                    self.cookiejar.set_cookie(cookielib.Cookie(version=0, name='bb_dl', value=torrent_id, port=None, port_specified=False, domain='.rutracker.org', domain_specified=False, domain_initial_dot=False, path='/', path_specified=True, secure=False, expires=None, discard=True, comment=None, comment_url=None, rest={'HttpOnly': None}, rfc2109=False))
+                    self.cookiejar.set_cookie(cookielib.Cookie(version=0, name='bb_dl', value=torrent_id, port=None, port_specified=False, domain='.rutracker.org', domain_specified=False,
+                                              domain_initial_dot=False, path='/', path_specified=True, secure=False, expires=None, discard=True, comment=None, comment_url=None, rest={'HttpOnly': None}, rfc2109=False))
 
                     # Debug
                     # for cookie in self.cookiejar:
@@ -243,7 +253,8 @@ class Rutracker():
 
                     if totallogcount > 0:
                         trackcount = totallogcount
-                        logger.debug ('rutracker logtrackcount: %s' % totallogcount)
+                        logger.debug (
+                            'rutracker logtrackcount: %s' % totallogcount)
 
                     # If torrent track count = hp track count then return torrent,
                     # if greater, check for deluxe/special/foreign editions
@@ -261,16 +272,20 @@ class Rutracker():
                     rulist.append((returntitle, size, topicurl))
                 else:
                     if topicurl:
-                        logger.info(u'<a href="%s">Torrent</a> found with %s tracks but the selected headphones release has %s tracks, skipping for rutracker.org' % (topicurl, trackcount, hptrackcount))
+                        logger.info(u'<a href="%s">Torrent</a> found with %s tracks but the selected headphones release has %s tracks, skipping for rutracker.org' % (
+                            topicurl, trackcount, hptrackcount))
             else:
-                logger.info('%s is larger than the maxsize or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i)' % (returntitle, int(size), int(seeders)))
+                logger.info('%s is larger than the maxsize or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i)' % (
+                    returntitle, int(size), int(seeders)))
 
         return rulist
 
     def get_torrent(self, url, savelocation=None):
 
-        torrent_id = dict([part.split('=') for part in urlparse(url)[4].split('&')])['t']
-        self.cookiejar.set_cookie(cookielib.Cookie(version=0, name='bb_dl', value=torrent_id, port=None, port_specified=False, domain='.rutracker.org', domain_specified=False, domain_initial_dot=False, path='/', path_specified=True, secure=False, expires=None, discard=True, comment=None, comment_url=None, rest={'HttpOnly': None}, rfc2109=False))
+        torrent_id = dict([part.split('=')
+                          for part in urlparse(url)[4].split('&')])['t']
+        self.cookiejar.set_cookie(cookielib.Cookie(version=0, name='bb_dl', value=torrent_id, port=None, port_specified=False, domain='.rutracker.org', domain_specified=False,
+                                  domain_initial_dot=False, path='/', path_specified=True, secure=False, expires=None, discard=True, comment=None, comment_url=None, rest={'HttpOnly': None}, rfc2109=False))
         downloadurl = 'http://dl.rutracker.org/forum/dl.php?t=' + torrent_id
         torrent_name = torrent_id + '.torrent'
 

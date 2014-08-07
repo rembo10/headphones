@@ -24,7 +24,8 @@ def ex(e):
 
     e_message = e.args[0]
     
-    # if fixStupidEncodings doesn't fix it then maybe it's not a string, in which case we'll try printing it anyway
+    # if fixStupidEncodings doesn't fix it then maybe it's not a string, in
+    # which case we'll try printing it anyway
     if not e_message:
         try:
             e_message = str(e.args[0])

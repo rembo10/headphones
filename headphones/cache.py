@@ -43,7 +43,8 @@ class Cache(object):
     path_to_art_cache = os.path.join(headphones.CACHE_DIR, 'artwork')
 
     id = None
-    id_type = None # 'artist' or 'album' - set automatically depending on whether ArtistID or AlbumID is passed
+    # 'artist' or 'album' - set automatically depending on whether ArtistID or AlbumID is passed
+    id_type = None
     query_type = None # 'artwork','thumb' or 'info' - set automatically
 
     artwork_files = []
@@ -75,14 +76,16 @@ class Cache(object):
         self.thumb_files = []
 
         if type == 'artwork':
-            self.artwork_files = self._findfilesstartingwith(self.id, self.path_to_art_cache)
+            self.artwork_files = self._findfilesstartingwith(
+                self.id, self.path_to_art_cache)
             if self.artwork_files:
                 return True
             else:
                 return False
 
         elif type == 'thumb':
-            self.thumb_files = self._findfilesstartingwith("T_" + self.id, self.path_to_art_cache)
+            self.thumb_files = self._findfilesstartingwith(
+                "T_" + self.id, self.path_to_art_cache)
             if self.thumb_files:
                 return True
             else:
@@ -91,7 +94,8 @@ class Cache(object):
     def _get_age(self, date):
         # There's probably a better way to do this
         split_date = date.split('-')
-        days_old = int(split_date[0])*365 + int(split_date[1])*30 + int(split_date[2])
+        days_old = int(split_date[0])*365 + \
+                       int(split_date[1])*30 + int(split_date[2])
 
         return days_old
 
@@ -143,7 +147,8 @@ class Cache(object):
             return self.artwork_files[0]
         else:
             self._update_cache()
-            # If we failed to get artwork, either return the url or the older file
+            # If we failed to get artwork, either return the url or the older
+            # file
             if self.artwork_errors and self.artwork_url:
                 return self.artwork_url
             elif self._exists('artwork'):
@@ -169,7 +174,8 @@ class Cache(object):
             return self.thumb_files[0]
         else:
             self._update_cache()
-            # If we failed to get artwork, either return the url or the older file
+            # If we failed to get artwork, either return the url or the older
+            # file
             if self.thumb_errors and self.thumb_url:
                 return self.thumb_url
             elif self._exists('thumb'):
@@ -185,20 +191,24 @@ class Cache(object):
         if ArtistID:
             self.id = ArtistID
             self.id_type = 'artist'
-            db_info = myDB.action('SELECT Summary, Content, LastUpdated FROM descriptions WHERE ArtistID=?', [self.id]).fetchone()
+            db_info = myDB.action(
+                'SELECT Summary, Content, LastUpdated FROM descriptions WHERE ArtistID=?', [self.id]).fetchone()
         else:
             self.id = AlbumID
             self.id_type = 'album'
-            db_info = myDB.action('SELECT Summary, Content, LastUpdated FROM descriptions WHERE ReleaseGroupID=?', [self.id]).fetchone()
+            db_info = myDB.action(
+                'SELECT Summary, Content, LastUpdated FROM descriptions WHERE ReleaseGroupID=?', [self.id]).fetchone()
 
         if not db_info or not db_info['LastUpdated'] or not self._is_current(date=db_info['LastUpdated']):
 
             self._update_cache()
-            info_dict = { 'Summary' : self.info_summary, 'Content' : self.info_content }
+            info_dict = {
+                'Summary' : self.info_summary, 'Content' : self.info_content }
             return info_dict
 
         else:
-            info_dict = { 'Summary' : db_info['Summary'], 'Content' : db_info['Content'] }
+            info_dict = {
+                'Summary' : db_info['Summary'], 'Content' : db_info['Content'] }
             return info_dict
 
     def get_image_links(self, ArtistID=None, AlbumID=None):
@@ -209,7 +219,8 @@ class Cache(object):
         if ArtistID:
 
             self.id_type = 'artist'
-            data = lastfm.request_lastfm("artist.getinfo", mbid=ArtistID, api_key=lastfm_apikey)
+            data = lastfm.request_lastfm(
+                "artist.getinfo", mbid=ArtistID, api_key=lastfm_apikey)
 
             if not data:
                 return
@@ -227,7 +238,8 @@ class Cache(object):
         else:
 
             self.id_type = 'album'
-            data = lastfm.request_lastfm("album.getinfo", mbid=AlbumID, api_key=lastfm_apikey)
+            data = lastfm.request_lastfm(
+                "album.getinfo", mbid=AlbumID, api_key=lastfm_apikey)
 
             if not data:
                 return
@@ -251,10 +263,12 @@ class Cache(object):
         '''
         myDB = db.DBConnection()
 
-        # Since lastfm uses release ids rather than release group ids for albums, we have to do a artist + album search for albums
+        # Since lastfm uses release ids rather than release group ids for
+        # albums, we have to do a artist + album search for albums
         if self.id_type == 'artist':
 
-            data = lastfm.request_lastfm("artist.getinfo", mbid=self.id, api_key=lastfm_apikey)
+            data = lastfm.request_lastfm(
+                "artist.getinfo", mbid=self.id, api_key=lastfm_apikey)
 
             if not data:
                 return
@@ -281,8 +295,10 @@ class Cache(object):
 
         else:
 
-            dbartist = myDB.action('SELECT ArtistName, AlbumTitle FROM albums WHERE AlbumID=?', [self.id]).fetchone()
-            data = lastfm.request_lastfm("album.getinfo", artist=dbartist['ArtistName'], album=dbartist['AlbumTitle'], api_key=lastfm_apikey)
+            dbartist = myDB.action(
+                'SELECT ArtistName, AlbumTitle FROM albums WHERE AlbumID=?', [self.id]).fetchone()
+            data = lastfm.request_lastfm("album.getinfo", artist=dbartist[
+                                         'ArtistName'], album=dbartist['AlbumTitle'], api_key=lastfm_apikey)
 
             if not data:
                 return
@@ -308,7 +324,8 @@ class Cache(object):
             if not thumb_url:
                 logger.debug('No album thumbnail image found')
 
-        # Save the content & summary to the database no matter what if we've opened up the url
+        # Save the content & summary to the database no matter what if we've
+        # opened up the url
         if self.id_type == 'artist':
             controlValueDict = {"ArtistID":     self.id}
         else:
@@ -323,18 +340,23 @@ class Cache(object):
         # Save the image URL to the database
         if image_url:
             if self.id_type == 'artist':
-                myDB.action('UPDATE artists SET ArtworkURL=? WHERE ArtistID=?', [image_url, self.id])
+                myDB.action(
+                    'UPDATE artists SET ArtworkURL=? WHERE ArtistID=?', [image_url, self.id])
             else:
-                myDB.action('UPDATE albums SET ArtworkURL=? WHERE AlbumID=?', [image_url, self.id])
+                myDB.action(
+                    'UPDATE albums SET ArtworkURL=? WHERE AlbumID=?', [image_url, self.id])
 
         # Save the thumb URL to the database
         if thumb_url:
             if self.id_type == 'artist':
-                myDB.action('UPDATE artists SET ThumbURL=? WHERE ArtistID=?', [thumb_url, self.id])
+                myDB.action(
+                    'UPDATE artists SET ThumbURL=? WHERE ArtistID=?', [thumb_url, self.id])
             else:
-                myDB.action('UPDATE albums SET ThumbURL=? WHERE AlbumID=?', [thumb_url, self.id])
+                myDB.action(
+                    'UPDATE albums SET ThumbURL=? WHERE AlbumID=?', [thumb_url, self.id])
 
-        # Should we grab the artwork here if we're just grabbing thumbs or info?? Probably not since the files can be quite big
+        # Should we grab the artwork here if we're just grabbing thumbs or
+        # info?? Probably not since the files can be quite big
         if image_url and self.query_type == 'artwork':
             artwork = request.request_content(image_url, timeout=20)
 
@@ -344,7 +366,8 @@ class Cache(object):
                     try:
                         os.makedirs(self.path_to_art_cache)
                     except Exception, e:
-                        logger.error('Unable to create artwork cache dir. Error: %s', e)
+                        logger.error(
+                            'Unable to create artwork cache dir. Error: %s', e)
                         self.artwork_errors = True
                         self.artwork_url = image_url
 
@@ -353,11 +376,13 @@ class Cache(object):
                     try:
                         os.remove(artwork_file)
                     except:
-                        logger.error('Error deleting file from the cache: %s', artwork_file)
+                        logger.error(
+                            'Error deleting file from the cache: %s', artwork_file)
 
                 ext = os.path.splitext(image_url)[1]
 
-                artwork_path = os.path.join(self.path_to_art_cache, self.id + '.' + helpers.today() + ext)
+                artwork_path = os.path.join(
+                    self.path_to_art_cache, self.id + '.' + helpers.today() + ext)
                 try:
                     f = open(artwork_path, 'wb')
                     f.write(artwork)
@@ -367,7 +392,8 @@ class Cache(object):
                     self.artwork_errors = True
                     self.artwork_url = image_url
 
-        # Grab the thumbnail as well if we're getting the full artwork (as long as it's missing/outdated
+        # Grab the thumbnail as well if we're getting the full artwork (as long
+        # as it's missing/outdated
         if thumb_url and self.query_type in ['thumb', 'artwork'] and not (self.thumb_files and self._is_current(self.thumb_files[0])):
             artwork = request.request_content(thumb_url, timeout=20)
 
@@ -377,7 +403,8 @@ class Cache(object):
                     try:
                         os.makedirs(self.path_to_art_cache)
                     except Exception, e:
-                        logger.error('Unable to create artwork cache dir. Error: %s' + e)
+                        logger.error(
+                            'Unable to create artwork cache dir. Error: %s' + e)
                         self.thumb_errors = True
                         self.thumb_url = thumb_url
 
@@ -386,11 +413,13 @@ class Cache(object):
                     try:
                         os.remove(thumb_file)
                     except:
-                        logger.error('Error deleting file from the cache: %s', thumb_file)
+                        logger.error(
+                            'Error deleting file from the cache: %s', thumb_file)
 
                 ext = os.path.splitext(image_url)[1]
 
-                thumb_path = os.path.join(self.path_to_art_cache, 'T_' + self.id + '.' + helpers.today() + ext)
+                thumb_path = os.path.join(
+                    self.path_to_art_cache, 'T_' + self.id + '.' + helpers.today() + ext)
                 try:
                     f = open(thumb_path, 'wb')
                     f.write(artwork)

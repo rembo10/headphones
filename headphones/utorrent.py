@@ -41,14 +41,16 @@ class utorrentclient(object):
         self.base_url = host
         self.username = headphones.UTORRENT_USERNAME
         self.password = headphones.UTORRENT_PASSWORD
-        self.opener = self._make_opener('uTorrent', self.base_url, self.username, self.password)
+        self.opener = self._make_opener(
+            'uTorrent', self.base_url, self.username, self.password)
         self.token = self._get_token()
         # TODO refresh token, when necessary
 
     def _make_opener(self, realm, base_url, username, password):
         """uTorrent API need HTTP Basic Auth and cookie support for token verify."""
         auth = urllib2.HTTPBasicAuthHandler()
-        auth.add_password(realm=realm, uri=base_url, user=username, passwd=password)
+        auth.add_password(
+            realm=realm, uri=base_url, user=username, passwd=password)
         opener = urllib2.build_opener(auth)
         urllib2.install_opener(opener)
 
@@ -65,7 +67,8 @@ class utorrentclient(object):
             response = self.opener.open(url)
         except urllib2.HTTPError as err:
             logger.debug('URL: ' + str(url))
-            logger.debug('Error getting Token. uTorrent responded with error: ' + str(err))
+            logger.debug(
+                'Error getting Token. uTorrent responded with error: ' + str(err))
         match = re.search(utorrentclient.TOKEN_REGEX, response.read())
         return match.group(1)
 
@@ -133,7 +136,8 @@ class utorrentclient(object):
         return settings
 
     def _action(self, params, body=None, content_type=None):
-        url = self.base_url + '/gui/' + '?token=' + self.token + '&' + urllib.urlencode(params)
+        url = self.base_url + '/gui/' + '?token=' + \
+            self.token + '&' + urllib.urlencode(params)
         request = urllib2.Request(url)
 
         if body:
@@ -147,7 +151,8 @@ class utorrentclient(object):
             return response.code, json.loads(response.read())
         except urllib2.HTTPError as err:
             logger.debug('URL: ' + str(url))
-            logger.debug('uTorrent webUI raised the following error: ' + str(err))
+            logger.debug(
+                'uTorrent webUI raised the following error: ' + str(err))
 
 def labelTorrent(hash):
     label = headphones.UTORRENT_LABEL
@@ -189,7 +194,8 @@ def addTorrent(link, hash):
     # Get Torrent Folder Name
     torrent_folder, cacheid = dirTorrent(hash)
 
-    # If there's no folder yet then it's probably a magnet, try until folder is populated
+    # If there's no folder yet then it's probably a magnet, try until folder
+    # is populated
     if torrent_folder == active_dir or not torrent_folder:
         tries = 1
         while (torrent_folder == active_dir or torrent_folder == None) and tries <= 10:

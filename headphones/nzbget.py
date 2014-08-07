@@ -1,4 +1,5 @@
-# This file is modified to work with headphones by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
+# This file is modified to work with headphones by CurlyMo
+# <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
 
 # Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
@@ -38,7 +39,8 @@ def sendNZB(nzb):
     nzbgetXMLrpc = "%(username)s:%(password)s@%(host)s/xmlrpc"
 
     if headphones.NZBGET_HOST == None:
-        logger.error(u"No NZBget host found in configuration. Please configure it.")
+        logger.error(
+            u"No NZBget host found in configuration. Please configure it.")
         return False
 
     if headphones.NZBGET_HOST.startswith('https://'):
@@ -49,17 +51,20 @@ def sendNZB(nzb):
         headphones.NZBGET_HOST.replace('http://', '', 1)
 
 
-    url = nzbgetXMLrpc % {"host": headphones.NZBGET_HOST, "username": headphones.NZBGET_USERNAME, "password": headphones.NZBGET_PASSWORD}
+    url = nzbgetXMLrpc % {"host": headphones.NZBGET_HOST, "username":
+        headphones.NZBGET_USERNAME, "password": headphones.NZBGET_PASSWORD}
 
     nzbGetRPC = xmlrpclib.ServerProxy(url)
     try:
         if nzbGetRPC.writelog("INFO", "headphones connected to drop of %s any moment now." % (nzb.name + ".nzb")):
             logger.debug(u"Successfully connected to NZBget")
         else:
-            logger.info(u"Successfully connected to NZBget, but unable to send a message" % (nzb.name + ".nzb"))
+            logger.info(u"Successfully connected to NZBget, but unable to send a message" % (
+                nzb.name + ".nzb"))
 
     except httplib.socket.error:
-        logger.error(u"Please check your NZBget host and port (if it is running). NZBget is not responding to this combination")
+        logger.error(
+            u"Please check your NZBget host and port (if it is running). NZBget is not responding to this combination")
         return False
 
     except xmlrpclib.ProtocolError, e:
@@ -89,5 +94,6 @@ def sendNZB(nzb):
         logger.debug(u"NZB sent to NZBget successfully")
         return True
     else:
-        logger.error(u"NZBget could not add %s to the queue" % (nzb.name + ".nzb"))
+        logger.error(u"NZBget could not add %s to the queue" %
+                     (nzb.name + ".nzb"))
         return False

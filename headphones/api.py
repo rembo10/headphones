@@ -111,7 +111,8 @@ class Api(object):
 
     def _getIndex(self, **kwargs):
 
-        self.data = self._dic_from_query('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
+        self.data = self._dic_from_query(
+            'SELECT * from artists order by ArtistSortName COLLATE NOCASE')
         return
 
     def _getArtist(self, **kwargs):
@@ -122,11 +123,15 @@ class Api(object):
         else:
             self.id = kwargs['id']
 
-        artist = self._dic_from_query('SELECT * from artists WHERE ArtistID="' + self.id + '"')
-        albums = self._dic_from_query('SELECT * from albums WHERE ArtistID="' + self.id + '" order by ReleaseDate DESC')
-        description = self._dic_from_query('SELECT * from descriptions WHERE ArtistID="' + self.id + '"')
+        artist = self._dic_from_query(
+            'SELECT * from artists WHERE ArtistID="' + self.id + '"')
+        albums = self._dic_from_query(
+            'SELECT * from albums WHERE ArtistID="' + self.id + '" order by ReleaseDate DESC')
+        description = self._dic_from_query(
+            'SELECT * from descriptions WHERE ArtistID="' + self.id + '"')
 
-        self.data = { 'artist': artist, 'albums': albums, 'description' : description }
+        self.data = {
+            'artist': artist, 'albums': albums, 'description' : description }
         return
 
     def _getAlbum(self, **kwargs):
@@ -137,23 +142,30 @@ class Api(object):
         else:
             self.id = kwargs['id']
 
-        album = self._dic_from_query('SELECT * from albums WHERE AlbumID="' + self.id + '"')
-        tracks = self._dic_from_query('SELECT * from tracks WHERE AlbumID="' + self.id + '"')
-        description = self._dic_from_query('SELECT * from descriptions WHERE ReleaseGroupID="' + self.id + '"')
+        album = self._dic_from_query(
+            'SELECT * from albums WHERE AlbumID="' + self.id + '"')
+        tracks = self._dic_from_query(
+            'SELECT * from tracks WHERE AlbumID="' + self.id + '"')
+        description = self._dic_from_query(
+            'SELECT * from descriptions WHERE ReleaseGroupID="' + self.id + '"')
 
-        self.data = { 'album' : album, 'tracks' : tracks, 'description' : description }
+        self.data = {
+            'album' : album, 'tracks' : tracks, 'description' : description }
         return
 
     def _getHistory(self, **kwargs):
-        self.data = self._dic_from_query('SELECT * from snatched order by DateAdded DESC')
+        self.data = self._dic_from_query(
+            'SELECT * from snatched order by DateAdded DESC')
         return
 
     def _getUpcoming(self, **kwargs):
-        self.data = self._dic_from_query("SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC")
+        self.data = self._dic_from_query(
+            "SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC")
         return
 
     def _getWanted(self, **kwargs):
-        self.data = self._dic_from_query("SELECT * from albums WHERE Status='Wanted'")
+        self.data = self._dic_from_query(
+            "SELECT * from albums WHERE Status='Wanted'")
         return
 
     def _getSimilar(self, **kwargs):
@@ -402,7 +414,8 @@ class Api(object):
         else:
             self.id = kwargs['id']
 
-        results = searcher.searchforalbum(self.id, choose_specific_download=True)
+        results = searcher.searchforalbum(
+            self.id, choose_specific_download=True)
 
         results_as_dicts = []
 
@@ -438,10 +451,12 @@ class Api(object):
         for kwarg in expected_kwargs:
             del kwargs[kwarg]
 
-        # Handle situations where the torrent url contains arguments that are parsed
+        # Handle situations where the torrent url contains arguments that are
+        # parsed
         if kwargs:
             import urllib, urllib2
-            url = urllib2.quote(url, safe=":?/=&") + '&' + urllib.urlencode(kwargs)
+            url = urllib2.quote(
+                url, safe=":?/=&") + '&' + urllib.urlencode(kwargs)
 
         try:
             result = [(title, int(size), url, provider, kind)]
@@ -453,5 +468,6 @@ class Api(object):
 
         if data and bestqual:
           myDB = db.DBConnection()
-          album = myDB.action('SELECT * from albums WHERE AlbumID=?', [id]).fetchone()
+          album = myDB.action(
+              'SELECT * from albums WHERE AlbumID=?', [id]).fetchone()
           searcher.send_to_downloader(data, bestqual, album)

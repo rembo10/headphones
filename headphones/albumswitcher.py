@@ -22,9 +22,12 @@ def switch(AlbumID, ReleaseID):
     the albums & tracks table.
     '''
     myDB = db.DBConnection()
-    oldalbumdata = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
-    newalbumdata = myDB.action('SELECT * from allalbums WHERE ReleaseID=?', [ReleaseID]).fetchone()
-    newtrackdata = myDB.action('SELECT * from alltracks WHERE ReleaseID=?', [ReleaseID]).fetchall()
+    oldalbumdata = myDB.action(
+        'SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
+    newalbumdata = myDB.action(
+        'SELECT * from allalbums WHERE ReleaseID=?', [ReleaseID]).fetchone()
+    newtrackdata = myDB.action(
+        'SELECT * from alltracks WHERE ReleaseID=?', [ReleaseID]).fetchall()
     myDB.action('DELETE from tracks WHERE AlbumID=?', [AlbumID])
 
     controlValueDict = {"AlbumID":  AlbumID}
@@ -63,16 +66,21 @@ def switch(AlbumID, ReleaseID):
 
         myDB.upsert("tracks", newValueDict, controlValueDict)
 
-    # Mark albums as downloaded if they have at least 80% (by default, configurable) of the album
+    # Mark albums as downloaded if they have at least 80% (by default,
+    # configurable) of the album
     total_track_count = len(newtrackdata)
-    have_track_count = len(myDB.select('SELECT * from tracks WHERE AlbumID=? AND Location IS NOT NULL', [AlbumID]))
+    have_track_count = len(myDB.select(
+        'SELECT * from tracks WHERE AlbumID=? AND Location IS NOT NULL', [AlbumID]))
 
     if oldalbumdata['Status'] == 'Skipped' and ((have_track_count/float(total_track_count)) >= (headphones.ALBUM_COMPLETION_PCT/100.0)):
-        myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', AlbumID])
+        myDB.action(
+            'UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', AlbumID])
 
     # Update have track counts on index
-    totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND AlbumID IN (SELECT AlbumID FROM albums WHERE Status != "Ignored")', [newalbumdata['ArtistID']]))
-    havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [newalbumdata['ArtistID']]))
+    totaltracks = len(myDB.select(
+        'SELECT TrackTitle from tracks WHERE ArtistID=? AND AlbumID IN (SELECT AlbumID FROM albums WHERE Status != "Ignored")', [newalbumdata['ArtistID']]))
+    havetracks = len(myDB.select(
+        'SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [newalbumdata['ArtistID']]))
 
     controlValueDict = {"ArtistID":     newalbumdata['ArtistID']}
 

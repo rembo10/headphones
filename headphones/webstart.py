@@ -32,15 +32,18 @@ def initialize(options={}):
     https_key = options['https_key']
 
     if enable_https:
-        # If either the HTTPS certificate or key do not exist, make some self-signed ones.
+        # If either the HTTPS certificate or key do not exist, make some
+        # self-signed ones.
         if not (https_cert and os.path.exists(https_cert)) or not (https_key and os.path.exists(https_key)):
             if not create_https_certificates(https_cert, https_key):
-                logger.warn(u"Unable to create cert/key files, disabling HTTPS")
+                logger.warn(
+                    u"Unable to create cert/key files, disabling HTTPS")
                 headphones.ENABLE_HTTPS = False
                 enable_https = False
 
         if not (os.path.exists(https_cert) and os.path.exists(https_key)):
-            logger.warn(u"Disabled HTTPS because of missing CERT and KEY files")
+            logger.warn(
+                u"Disabled HTTPS because of missing CERT and KEY files")
             headphones.ENABLE_HTTPS = False
             enable_https = False
 
@@ -62,13 +65,15 @@ def initialize(options={}):
     else:
         protocol = "http"
 
-    logger.info("Starting Headphones on %s://%s:%d/", protocol, options['http_host'], options['http_port'])
+    logger.info("Starting Headphones on %s://%s:%d/", protocol,
+                options['http_host'], options['http_port'])
     cherrypy.config.update(options_dict)
 
     conf = {
         '/': {
             'tools.staticdir.root': os.path.join(headphones.PROG_DIR, 'data'),
-            'tools.proxy.on': options['http_proxy']  # pay attention to X-Forwarded-Proto header
+            # pay attention to X-Forwarded-Proto header
+            'tools.proxy.on': options['http_proxy']
         },
         '/interfaces': {
             'tools.staticdir.on': True,
@@ -112,7 +117,8 @@ def initialize(options={}):
     cherrypy.tree.mount(WebInterface(), options['http_root'], config = conf)
 
     try:
-        cherrypy.process.servers.check_port(options['http_host'], options['http_port'])
+        cherrypy.process.servers.check_port(
+            options['http_host'], options['http_port'])
         cherrypy.server.start()
     except IOError:
         print 'Failed to start on port: %i. Is something else running?' % (options['http_port'])

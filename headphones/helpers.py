@@ -30,7 +30,8 @@ RE_CD_ALBUM = re.compile(r"\(?((CD|disc)\s*[0-9]+)\)?", re.I)
 RE_CD = re.compile(r"^(CD|dics)\s*[0-9]+$", re.I)
 
 def multikeysort(items, columns):
-    comparers = [ ((itemgetter(col[1:].strip()), -1) if col.startswith('-') else (itemgetter(col.strip()), 1)) for col in columns]
+    comparers = [ ((itemgetter(col[1:].strip()), -1) if col.startswith('-')
+                   else (itemgetter(col.strip()), 1)) for col in columns]
 
     def comparer(left, right):
         for fn, mult in comparers:
@@ -134,7 +135,8 @@ def get_age(date):
         return False
 
     try:
-        days_old = int(split_date[0])*365 + int(split_date[1])*30 + int(split_date[2])
+        days_old = int(split_date[0])*365 + \
+                       int(split_date[1])*30 + int(split_date[2])
     except IndexError:
         days_old = False
 
@@ -188,7 +190,8 @@ def replace_illegal_chars(string, type="file"):
 def cleanName(string):
 
     pass1 = latinToAscii(string).lower()
-    out_string = re.sub('[\.\-\/\!\@\#\$\%\^\&\*\(\)\+\-\"\'\,\;\:\[\]\{\}\<\>\=\_]', '', pass1).encode('utf-8')
+    out_string = re.sub(
+        '[\.\-\/\!\@\#\$\%\^\&\*\(\)\+\-\"\'\,\;\:\[\]\{\}\<\>\=\_]', '', pass1).encode('utf-8')
 
     return out_string
 
@@ -262,7 +265,8 @@ def expand_subfolders(f):
         return
 
     # Split into path components
-    media_folders = [ split_path(media_folder) for media_folder in media_folders ]
+    media_folders = [ split_path(media_folder)
+                                 for media_folder in media_folders ]
 
     # Correct folder endings such as CD1 etc.
     for index, media_folder in enumerate(media_folders):
@@ -274,21 +278,26 @@ def expand_subfolders(f):
     difference = max(path_depths) - min(path_depths)
 
     if difference > 0:
-        logger.info("Found %d media folders, but depth difference between lowest and deepest media folder is %d (expected zero). If this is a discography or a collection of albums, make sure albums are per folder.", len(media_folders), difference)
+        logger.info("Found %d media folders, but depth difference between lowest and deepest media folder is %d (expected zero). If this is a discography or a collection of albums, make sure albums are per folder.", len(
+            media_folders), difference)
 
         # While already failed, advice the user what he could try. We assume the
         # directory may contain separate CD's and maybe some extra's. The
         # structure may look like X albums at same depth, and (one or more)
         # extra folders with a higher depth.
-        extra_media_folders = [ media_folder[:min(path_depths)] for media_folder in media_folders if len(media_folder) > min(path_depths) ]
-        extra_media_folders = list(set([ os.path.join(*media_folder) for media_folder in extra_media_folders ]))
+        extra_media_folders = [ media_folder[:min(
+            path_depths)] for media_folder in media_folders if len(media_folder) > min(path_depths) ]
+        extra_media_folders = list(
+            set([ os.path.join(*media_folder) for media_folder in extra_media_folders ]))
 
-        logger.info("Please look at the following folder(s), since they cause the depth difference: %s", extra_media_folders)
+        logger.info(
+            "Please look at the following folder(s), since they cause the depth difference: %s", extra_media_folders)
         return
 
     # Convert back to paths and remove duplicates, which may be there after
     # correcting the paths
-    media_folders = list(set([ os.path.join(*media_folder) for media_folder in media_folders ]))
+    media_folders = list(
+        set([ os.path.join(*media_folder) for media_folder in media_folders ]))
 
     # Don't return a result if the number of subfolders is one. In this case,
     # this algorithm will not improve processing and will likely interfere
@@ -305,7 +314,8 @@ def extract_data(s):
     s = s.replace('_', ' ')
 
     # headphones default format
-    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
+    pattern = re.compile(
+        r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
     match = pattern.match(s)
 
     if match:
@@ -315,7 +325,8 @@ def extract_data(s):
         return (name, album, year)
 
     # newzbin default format
-    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
+    pattern = re.compile(
+        r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
     match = pattern.match(s)
     if match:
         name = match.group("name")
@@ -381,7 +392,8 @@ def extract_metadata(f):
     count_ratio = 0.75
 
     if count < (count_ratio * len(results)):
-        logger.info("Counted %d media files, but only %d have tags, ignoring.", count, len(results))
+        logger.info(
+            "Counted %d media files, but only %d have tags, ignoring.", count, len(results))
         return (None, None, None)
 
     # Count distinct values
@@ -399,7 +411,8 @@ def extract_metadata(f):
                 old_album = new_albums[index]
                 new_albums[index] = RE_CD_ALBUM.sub("", album).strip()
 
-                logger.debug("Stripped albumd number identifier: %s -> %s", old_album, new_albums[index])
+                logger.debug(
+                    "Stripped albumd number identifier: %s -> %s", old_album, new_albums[index])
 
         # Remove duplicates
         new_albums = list(set(new_albums))
@@ -416,8 +429,10 @@ def extract_metadata(f):
     # (Lots of) different artists. Could be a featuring album, so test for this.
     if len(artists) > 1 and len(albums) == 1:
         split_artists = [ RE_FEATURING.split(artist) for artist in artists ]
-        featurings = [ len(split_artist) - 1 for split_artist in split_artists ]
-        logger.info("Album seem to feature %d different artists", sum(featurings))
+        featurings = [
+            len(split_artist) - 1 for split_artist in split_artists ]
+        logger.info(
+            "Album seem to feature %d different artists", sum(featurings))
 
         if sum(featurings) > 0:
             # Find the artist of which the least splits have been generated.
@@ -429,14 +444,16 @@ def extract_metadata(f):
             return (artist, albums[0], years[0])
 
     # Not sure what to do here.
-    logger.info("Found %d artists, %d albums and %d years in metadata, so ignoring", len(artists), len(albums), len(years))
+    logger.info("Found %d artists, %d albums and %d years in metadata, so ignoring", len(
+        artists), len(albums), len(years))
     logger.debug("Artists: %s, Albums: %s, Years: %s", artists, albums, years)
 
     return (None, None, None)
 
 def extract_logline(s):
     # Default log format
-    pattern = re.compile(r'(?P<timestamp>.*?)\s\-\s(?P<level>.*?)\s*\:\:\s(?P<thread>.*?)\s\:\s(?P<message>.*)', re.VERBOSE)
+    pattern = re.compile(
+        r'(?P<timestamp>.*?)\s\-\s(?P<level>.*?)\s*\:\:\s(?P<thread>.*?)\s\:\s(?P<message>.*)', re.VERBOSE)
     match = pattern.match(s)
     if match:
         timestamp = match.group("timestamp")
@@ -455,7 +472,8 @@ def extract_song_data(s):
     file_format = headphones.FILE_FORMAT
 
     full_format = os.path.join(headphones.MUSIC_DIR)
-    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
+    pattern = re.compile(
+        r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
     match = pattern.match(s)
 
     if match:
@@ -467,7 +485,8 @@ def extract_song_data(s):
         logger.info("Couldn't parse %s into a valid default format", s)
 
     # newzbin default format
-    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
+    pattern = re.compile(
+        r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
     match = pattern.match(s)
     if match:
         name = match.group("name")
@@ -486,7 +505,8 @@ def smartMove(src, dest, delete=True):
     filename = os.path.basename(src)
 
     if os.path.isfile(os.path.join(dest, filename)):
-        logger.info('Destination file exists: %s', os.path.join(dest, filename))
+        logger.info(
+            'Destination file exists: %s', os.path.join(dest, filename))
         title = os.path.splitext(filename)[0]
         ext = os.path.splitext(filename)[1]
         i = 1
@@ -500,23 +520,28 @@ def smartMove(src, dest, delete=True):
                     os.rename(src, os.path.join(source_dir, newfile))
                     filename = newfile
                 except Exception, e:
-                    logger.warn('Error renaming %s: %s', src.decode(headphones.SYS_ENCODING, 'replace'), e)
+                    logger.warn('Error renaming %s: %s', src.decode(
+                        headphones.SYS_ENCODING, 'replace'), e)
                 break
 
     try:
         if delete:
-            shutil.move(os.path.join(source_dir, filename), os.path.join(dest, filename))
+            shutil.move(
+                os.path.join(source_dir, filename), os.path.join(dest, filename))
         else:
-            shutil.copy(os.path.join(source_dir, filename), os.path.join(dest, filename))
+            shutil.copy(
+                os.path.join(source_dir, filename), os.path.join(dest, filename))
             return True
     except Exception, e:
-        logger.warn('Error moving file %s: %s', filename.decode(headphones.SYS_ENCODING, 'replace'), e)
+        logger.warn('Error moving file %s: %s', filename.decode(
+            headphones.SYS_ENCODING, 'replace'), e)
 
 #########################
 #Sab renaming functions #
 #########################
 
-# TODO: Grab config values from sab to know when these options are checked. For now we'll just iterate through all combinations
+# TODO: Grab config values from sab to know when these options are
+# checked. For now we'll just iterate through all combinations
 
 def sab_replace_dots(name):
     return name.replace('.', ' ')
@@ -587,17 +612,21 @@ def create_https_certificates(ssl_cert, ssl_key):
     # Create the CA Certificate
     cakey = createKeyPair(TYPE_RSA, 1024)
     careq = createCertRequest(cakey, CN='Certificate Authority')
-    cacert = createCertificate(careq, (careq, cakey), serial, (0, 60*60*24*365*10)) # ten years
+    cacert = createCertificate(
+        careq, (careq, cakey), serial, (0, 60*60*24*365*10)) # ten years
 
     cname = 'Headphones'
     pkey = createKeyPair(TYPE_RSA, 1024)
     req = createCertRequest(pkey, CN=cname)
-    cert = createCertificate(req, (cacert, cakey), serial, (0, 60*60*24*365*10)) # ten years
+    cert = createCertificate(
+        req, (cacert, cakey), serial, (0, 60*60*24*365*10)) # ten years
 
     # Save the key and certificate to disk
     try:
-        open(ssl_key, 'w').write(crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey))
-        open(ssl_cert, 'w').write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+        open(ssl_key, 'w').write(
+            crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey))
+        open(ssl_cert, 'w').write(
+            crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
     except Exception, e:
         logger.error("Error creating SSL key and certificate: %s", e)
         return False

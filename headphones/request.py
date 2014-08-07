@@ -38,16 +38,19 @@ def request_response(url, method="get", auto_raise=True, whitelist_status_code=N
                 try:
                     response.raise_for_status()
                 except:
-                    logger.debug("Response status code %d is not white listed, raised exception", response.status_code)
+                    logger.debug(
+                        "Response status code %d is not white listed, raised exception", response.status_code)
                     raise
         elif auto_raise:
             response.raise_for_status()
 
         return response
     except requests.ConnectionError:
-        logger.error("Unable to connect to remote host. Check if the remote host is up and running.")
+        logger.error(
+            "Unable to connect to remote host. Check if the remote host is up and running.")
     except requests.Timeout:
-        logger.error("Request timed out. The remote host did not respeond timely.")
+        logger.error(
+            "Request timed out. The remote host did not respeond timely.")
     except requests.HTTPError as e:
         if e.response is not None:
             if e.response.status_code >= 500:
@@ -58,11 +61,13 @@ def request_response(url, method="get", auto_raise=True, whitelist_status_code=N
                 # I don't think we will end up here, but for completeness
                 cause = "unknown"
 
-            logger.error("Request raise HTTP error with status code %d (%s).", e.response.status_code, cause)
+            logger.error(
+                "Request raise HTTP error with status code %d (%s).", e.response.status_code, cause)
 
             # Some servers return extra information in the result. Try to parse
             # it for debugging purpose. Messages are limited to 100 characters,
-            # since it may return the whole page in case of normal web page URLs
+            # since it may return the whole page in case of normal web page
+            # URLs
             if headphones.VERBOSE:
                 if e.response.headers.get('content-type') == 'text/html':
                     soup = BeautifulSoup(e.response.content, "html5lib")
