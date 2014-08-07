@@ -112,6 +112,7 @@ CORRECT_METADATA = False
 MOVE_FILES = False
 RENAME_FILES = False
 CLEANUP_FILES = False
+KEEP_NFO = False
 ADD_ALBUM_ART = False
 ALBUM_ART_FORMAT = None
 EMBED_ALBUM_ART = False
@@ -467,26 +468,17 @@ def initialize():
         CORRECT_METADATA = bool(
             check_setting_int(CFG, 'General', 'correct_metadata', 0))
         MOVE_FILES = bool(check_setting_int(CFG, 'General', 'move_files', 0))
-        RENAME_FILES = bool(
-            check_setting_int(CFG, 'General', 'rename_files', 0))
-        FOLDER_FORMAT = check_setting_str(
-            CFG, 'General', 'folder_format', 'Artist/Album [Year]')
-        FILE_FORMAT = check_setting_str(
-            CFG, 'General', 'file_format', 'Track Artist - Album [Year] - Title')
-        FILE_UNDERSCORES = bool(
-            check_setting_int(CFG, 'General', 'file_underscores', 0))
-        CLEANUP_FILES = bool(
-            check_setting_int(CFG, 'General', 'cleanup_files', 0))
-        ADD_ALBUM_ART = bool(
-            check_setting_int(CFG, 'General', 'add_album_art', 0))
-        ALBUM_ART_FORMAT = check_setting_str(
-            CFG, 'General', 'album_art_format', 'folder')
-        EMBED_ALBUM_ART = bool(
-            check_setting_int(CFG, 'General', 'embed_album_art', 0))
-        EMBED_LYRICS = bool(
-            check_setting_int(CFG, 'General', 'embed_lyrics', 0))
-        REPLACE_EXISTING_FOLDERS = bool(
-            check_setting_int(CFG, 'General', 'replace_existing_folders', 0))
+        RENAME_FILES = bool(check_setting_int(CFG, 'General', 'rename_files', 0))
+        FOLDER_FORMAT = check_setting_str(CFG, 'General', 'folder_format', 'Artist/Album [Year]')
+        FILE_FORMAT = check_setting_str(CFG, 'General', 'file_format', 'Track Artist - Album [Year] - Title')
+        FILE_UNDERSCORES = bool(check_setting_int(CFG, 'General', 'file_underscores', 0))
+        CLEANUP_FILES = bool(check_setting_int(CFG, 'General', 'cleanup_files', 0))
+        KEEP_NFO = bool(check_setting_int(CFG, 'General', 'keep_nfo', 0))
+        ADD_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'add_album_art', 0))
+        ALBUM_ART_FORMAT = check_setting_str(CFG, 'General', 'album_art_format', 'folder')
+        EMBED_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'embed_album_art', 0))
+        EMBED_LYRICS = bool(check_setting_int(CFG, 'General', 'embed_lyrics', 0))
+        REPLACE_EXISTING_FOLDERS = bool(check_setting_int(CFG, 'General', 'replace_existing_folders', 0))
         NZB_DOWNLOADER = check_setting_int(CFG, 'General', 'nzb_downloader', 0)
         TORRENT_DOWNLOADER = check_setting_int(
             CFG, 'General', 'torrent_downloader', 0)
@@ -1005,6 +997,7 @@ def config_write():
     new_config['General']['file_format'] = FILE_FORMAT
     new_config['General']['file_underscores'] = int(FILE_UNDERSCORES)
     new_config['General']['cleanup_files'] = int(CLEANUP_FILES)
+    new_config['General']['keep_nfo'] = int(KEEP_NFO)
     new_config['General']['add_album_art'] = int(ADD_ALBUM_ART)
     new_config['General']['album_art_format'] = ALBUM_ART_FORMAT
     new_config['General']['embed_album_art'] = int(EMBED_ALBUM_ART)
