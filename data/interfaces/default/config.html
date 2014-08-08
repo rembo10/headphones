@@ -382,66 +382,117 @@
                         <td>
                             <fieldset>
                                 <legend>Torrents</legend>
-                                <div class="row checkbox">
-                                    <input id="usepiratebay" type="checkbox" name="use_piratebay" value="1" ${config['use_piratebay']} /><label>The Pirate Bay</label>
-                                </div>
-                                <div class="config">
-                                    <div class="row">
-                                        <label>Proxy URL (Optional): </label>
-                                        <input type="text" name="piratebay_proxy_url" value="${config['piratebay_proxy_url']}" size="36">
+
+                                <fieldset>
+                                    <legend>The Pirate Bay</legend>
+                                    <div class="row checkbox">
+                                        <input id="usepiratebay" type="checkbox" name="use_piratebay" value="1" ${config['use_piratebay']} /><label>Use The Pirate Bay</label>
                                     </div>
-                                </div>
-                                 <div class="row checkbox">
-                                    <input type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /><label>Mininova</label>
-                                </div>
-                                <div class="row checkbox">
-                                    <input id="usekat" type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Kick Ass Torrents</label>
-                                </div>
-								<div class="config">
-                                    <div class="row">
-                                        <label>Proxy URL (Optional): </label>
-                                        <input type="text" name="kat_proxy_url" value="${config['kat_proxy_url']}" size="36">
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>Proxy URL (Optional): </label>
+                                            <input type="text" name="piratebay_proxy_url" value="${config['piratebay_proxy_url']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Seed Ratio: </label>
+                                            <input type="text" class="override-float" name="piratebay_ratio" value="${config['piratebay_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited">
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="row checkbox">
-                                    <input id="usewaffles" type="checkbox" name="waffles" onclick="initConfigCheckbox($(this));" value="1" ${config['use_waffles']} /><label>Waffles.fm</label>
-                                </div>
-                                <div class="config">
-                                    <div class="row">
-                                        <label>Waffles UID Number: </label>
-                                        <input type="text" name="waffles_uid" value="${config['waffles_uid']}" size="36">
+                                </fieldset>
+
+                                <fieldset>
+                                    <legend>Kick Ass Torrents</legend>
+                                    <div class="row checkbox">
+                                        <input id="usekat" type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Use Kick Ass Torrents</label>
                                     </div>
-                                    <div class="row">
-                                        <label>Waffles Passkey: </label>
-                                        <input type="password" name="waffles_passkey" value="${config['waffles_passkey']}" size="36">
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>Proxy URL (Optional): </label>
+                                            <input type="text" name="kat_proxy_url" value="${config['kat_proxy_url']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Seed Ratio: </label>
+                                            <input type="text" class="override-float" name="kat_ratio" value="${config['kat_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited">
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="row checkbox">
-                                    <input id="userutracker" type="checkbox" name="rutracker" onclick="initConfigCheckbox($(this));" value="1" ${config['use_rutracker']} /><label>rutracker.org</label>
-                                </div>
-                                <div class="config">
-                                    <div class="row">
-                                        <label>rutracker User Name: </label>
-                                        <input type="text" name="rutracker_user" value="${config['rutracker_user']}" size="36">
+                                </fieldset>
+
+                                <fieldset>
+                                    <legend>Waffles.fm</legend>
+                                    <div class="row checkbox">
+                                        <input id="usewaffles" type="checkbox" name="waffles" onclick="initConfigCheckbox($(this));" value="1" ${config['use_waffles']} /><label>Use Waffles.fm</label>
                                     </div>
-                                    <div class="row">
-                                        <label>rutracker Password: </label>
-                                        <input type="password" name="rutracker_password" value="${config['rutracker_password']}" size="36">
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>UID Number: </label>
+                                            <input type="text" name="waffles_uid" value="${config['waffles_uid']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Passkey: </label>
+                                            <input type="password" name="waffles_passkey" value="${config['waffles_passkey']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Seed Ratio: </label>
+                                            <input type="text" class="override-float" name="waffles_ratio" value="${config['waffles_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited">
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="row checkbox">
-                                    <input id="usewhatcd" type="checkbox" name="whatcd" onclick="initConfigCheckbox($(this));" value="1" ${config['use_whatcd']} /><label>What.cd</label>
-                                </div>
-                                <div class="config">
-                                    <div class="row">
-                                        <label>What.cd Username: </label>
-                                        <input type="text" name="whatcd_username" value="${config['whatcd_username']}" size="36">
+                                </fieldset>
+
+                                <fieldset>
+                                    <legend>rutracker.org</legend>
+                                    <div class="row checkbox">
+                                        <input id="userutracker" type="checkbox" name="rutracker" onclick="initConfigCheckbox($(this));" value="1" ${config['use_rutracker']} /><label>Use rutracker.org</label>
                                     </div>
-                                    <div class="row">
-                                        <label>What.cd Password: </label>
-                                        <input type="password" name="whatcd_password" value="${config['whatcd_password']}" size="36">
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>User Name: </label>
+                                            <input type="text" name="rutracker_user" value="${config['rutracker_user']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Password: </label>
+                                            <input type="password" name="rutracker_password" value="${config['rutracker_password']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Seed Ratio: </label>
+                                            <input type="text" class="override-float" name="rutracker_ratio" value="${config['rutracker_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited">
+                                        </div>
                                     </div>
-                                </div>
+                                </fieldset>
+
+                                <fieldset>
+                                    <legend>What.cd</legend>
+                                    <div class="row checkbox">
+                                        <input id="usewhatcd" type="checkbox" name="whatcd" onclick="initConfigCheckbox($(this));" value="1" ${config['use_whatcd']} /><label>Use What.cd</label>
+                                    </div>
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>Username: </label>
+                                            <input type="text" name="whatcd_username" value="${config['whatcd_username']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Password: </label>
+                                            <input type="password" name="whatcd_password" value="${config['whatcd_password']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Seed Ratio: </label>
+                                            <input type="text" class="override-float" name="whatcd_ratio" value="${config['whatcd_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited">
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset>
+                                    <legend>Mininova</legend>
+                                     <div class="row checkbox">
+                                        <input id="usemininova" type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /><label>Use Mininova</label>
+                                    </div>
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>Seed Ratio: </label>
+                                            <input type="text" class="override-float" name="mininova_ratio" value="${config['mininova_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited">
+                                        </div>
+                                    </div>
+                                </fieldset>
+
                             </fieldset>
                         </td>
                     </tr>
@@ -1745,6 +1796,7 @@
                 initConfigCheckbox("#useomgwtfnzbs");
 				initConfigCheckbox("#usekat");
                 initConfigCheckbox("#usepiratebay");
+                initConfigCheckbox("#usemininova");
                 initConfigCheckbox("#usewaffles");
                 initConfigCheckbox("#userutracker");
                 initConfigCheckbox("#usewhatcd");

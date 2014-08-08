@@ -82,6 +82,17 @@ def getTorrentFolder(torrentid):
 
     return torrent_folder_name
 
+def setSeedRatio(torrentid, ratio):
+    method = 'torrent-set'
+    if ratio != 0:
+        arguments = {'seedRatioLimit': ratio, 'seedRatioMode': 1, 'ids': torrentid}
+    else:
+        arguments = {'seedRatioMode': 2, 'ids': torrentid}
+
+    response = torrentAction(method, arguments)
+    if not response:
+        return False
+
 def torrentAction(method, arguments):
 
     host = headphones.TRANSMISSION_HOST
