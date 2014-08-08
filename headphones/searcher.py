@@ -698,6 +698,11 @@ def send_to_downloader(data, bestqual, album):
                 except Exception as e:
                     logger.exception("Unhandled exception")
 
+            # Set Seed Ratio
+            seed_ratio = getSeedRatio(bestqual[3])
+            if seed_ratio != None:
+                transmission.setSeedRatio(torrentid, seed_ratio)
+
         else:# if headphones.TORRENT_DOWNLOADER == 2:
             logger.info("Sending torrent to uTorrent")
 
@@ -724,6 +729,11 @@ def send_to_downloader(data, bestqual, album):
                     shutil.rmtree(os.path.split(file_or_url)[0])
                 except Exception as e:
                     logger.exception("Unhandled exception")
+
+            # Set Seed Ratio
+            seed_ratio = getSeedRatio(bestqual[3])
+            if seed_ratio != None:
+                utorrent.setSeedRatio(_hash, seed_ratio)
 
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [album['AlbumID']])
@@ -1351,3 +1361,27 @@ def CalculateTorrentHash(link, data):
     logger.debug('Torrent Hash: ' + str(tor_hash))
 
     return tor_hash
+
+def getSeedRatio(provider):
+    seed_ratio = ''
+    if provider == 'rutracker.org':
+        seed_ratio = headphones.RUTRACKER_RATIO
+    elif provider == 'Kick Ass Torrents':
+        seed_ratio = headphones.KAT_RATIO
+    elif provider == 'What.cd':
+        seed_ratio = headphones.WHATCD_RATIO
+    elif provider == 'The Pirate Bay':
+        seed_ratio = headphones.PIRATEBAY_RATIO
+    elif provider == 'Waffles.fm':
+        seed_ratio = headphones.WAFFLES_RATIO
+    elif provider == 'Mininova':
+        seed_ratio = headphones.MININOVA_RATIO
+    if seed_ratio != '':
+        try:
+            seed_ratio_float = float(seed_ratio)
+        except:
+            seed_ratio_float = None
+            logger.warn('Could not get Seed Ratio for %s' % provider)
+        return seed_ratio_float
+    else:
+        return None

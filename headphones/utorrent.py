@@ -155,7 +155,16 @@ def labelTorrent(hash):
     if label:
         uTorrentClient.setprops(hash,'label',label)
 
-def dirTorrent(hash, cacheid=None):
+def setSeedRatio(hash, ratio):
+    uTorrentClient = utorrentclient()
+    uTorrentClient.setprops(hash, 'seed_override', '1')
+    if ratio != 0:
+        uTorrentClient.setprops(hash,'seed_ratio', ratio * 10)
+    else:
+        # TODO passing -1 should be unlimited
+        uTorrentClient.setprops(hash,'seed_ratio', -1.00)
+
+def dirTorrent(hash, cacheid=None, return_name=None):
 
     uTorrentClient = utorrentclient()
 
@@ -174,7 +183,10 @@ def dirTorrent(hash, cacheid=None):
 
     for torrent in torrents:
         if (torrent[0].lower() == hash):
-            return torrent[26], cacheid
+            if not return_name:
+                return torrent[26], cacheid
+            else:
+                return torrent[2], cacheid
 
     return None, None
 
@@ -183,6 +195,10 @@ def addTorrent(link, hash):
 
     # Get Active Directory from settings
     active_dir, completed_dir = getSettingsDirectories()
+
+    if not active_dir or not completed_dir:
+        logger.error('Could not get "Put new downloads in:" or "Move completed downloads to:" directories from uTorrent settings, please ensure they are set')
+        return None
 
     uTorrentClient.add_url(link)
 
@@ -197,8 +213,9 @@ def addTorrent(link, hash):
             time.sleep(6)
             torrent_folder, cacheid = dirTorrent(hash, cacheid)
 
-    if torrent_folder == active_dir:
-        return None
+    if torrent_folder == active_dir or not torrent_folder:
+        torrent_folder, cacheid = dirTorrent(hash, cacheid, return_name=True)
+        return torrent_folder
     else:
         labelTorrent(hash)
         return os.path.basename(os.path.normpath(torrent_folder))
@@ -206,6 +223,11 @@ def addTorrent(link, hash):
 def getSettingsDirectories():
     uTorrentClient = utorrentclient()
     settings = uTorrentClient.get_settings()
-    active = settings['dir_active_download'][2]
-    completed = settings['dir_completed_download'][2]
+    active = None
+    completed = None
+    if 'dir_active_download' in settings:
+        active = settings['dir_active_download'][2]
+    if 'dir_completed_download' in settings:
+        completed = settings['dir_completed_download'][2]
     return active, completed
+
