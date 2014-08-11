@@ -622,20 +622,27 @@ def moveFiles(albumpath, release, tracks):
         firstchar = '0-9'
     else:
         firstchar = sortname[0]
-
+    
+    for r,d,f in os.walk(albumpath):
+            try:
+                origfolder = os.path.basename(os.path.normpath(r))
+            except:
+                origfolder = ''   
 
     values = {  '$Artist':  artist,
                 '$SortArtist': sortname,
                 '$Album':   album,
                 '$Year':        year,
                 '$Type':  releasetype,
+                '$OriginalFolder': origfolder,
                 '$First':   firstchar.upper(),
                 '$artist':  artist.lower(),
                 '$sortartist': sortname.lower(),
                 '$album':   album.lower(),
                 '$year':        year,
                 '$type':  releasetype.lower(),
-                '$first':   firstchar.lower()
+                '$first':   firstchar.lower(),
+                '$originalfolder': origfolder.lower()
             }
 
     folder = helpers.replace_all(headphones.FOLDER_FORMAT.strip(), values)
