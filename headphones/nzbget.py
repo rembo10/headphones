@@ -69,25 +69,60 @@ def sendNZB(nzb):
             logger.error(u"Protocol Error: " + e.errmsg)
         return False
 
-    # if it's a normal result need to download the NZB content
-    if nzb.resultType == "nzb":
-        genProvider = GenericProvider("")
-        data = genProvider.getURL(nzb.url)
-        if (data == None):
-            return False
-
-    # if we get a raw data result thats even better
-    elif nzb.resultType == "nzbdata":
+    nzbcontent64 = None
+    if nzb.resultType == "nzbdata":
         data = nzb.extraInfo[0]
-
-    nzbcontent64 = standard_b64encode(data)
+        nzbcontent64 = standard_b64encode(data)
 
     logger.info(u"Sending NZB to NZBget")
     logger.debug(u"URL: " + url)
 
-    if nzbGetRPC.append(nzb.name + ".nzb", headphones.NZBGET_CATEGORY, addToTop, nzbcontent64):
-        logger.debug(u"NZB sent to NZBget successfully")
-        return True
-    else:
-        logger.error(u"NZBget could not add %s to the queue" % (nzb.name + ".nzb"))
+    dupekey = ""
+    dupescore = 0
+
+    try:
+        # Find out if nzbget supports priority (Version 9.0+), old versions beginning with a 0.x will use the old command
+        nzbget_version_str = nzbGetRPC.version()
+        nzbget_version = int(nzbget_version_str[:nzbget_version_str.find(".")])
+        if nzbget_version == 0:
+            if nzbcontent64 is not None:
+                nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.NZBGET_CATEGORY, addToTop, nzbcontent64)
+            else:
+                if nzb.resultType == "nzb":
+                    genProvider = GenericProvider("")
+                    data = genProvider.getURL(nzb.url)
+                    if (data == None):
+                        return False
+                    nzbcontent64 = standard_b64encode(data)
+                nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.NZBGET_CATEGORY, addToTop, nzbcontent64)
+        elif nzbget_version == 12:
+            if nzbcontent64 is not None:
+                nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.NZBGET_CATEGORY, headphones.NZBGET_PRIORITY, False,
+                                                 nzbcontent64, False, dupekey, dupescore, "score")
+            else:
+                nzbget_result = nzbGetRPC.appendurl(nzb.name + ".nzb", headphones.NZBGET_CATEGORY, headphones.NZBGET_PRIORITY, False,
+                                                    nzb.url, False, dupekey, dupescore, "score")
+        # v13+ has a new combined append method that accepts both (url and content)
+        # also the return value has changed from boolean to integer
+        # (Positive number representing NZBID of the queue item. 0 and negative numbers represent error codes.)
+        elif nzbget_version >= 13:
+            nzbget_result = True if nzbGetRPC.append(nzb.name + ".nzb", nzbcontent64 if nzbcontent64 is not None else nzb.url,
+                                                     headphones.NZBGET_CATEGORY, headphones.NZBGET_PRIORITY, False, False, dupekey, dupescore,
+                                                     "score") > 0 else False
+        else:
+            if nzbcontent64 is not None:
+                nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.NZBGET_CATEGORY, headphones.NZBGET_PRIORITY, False,
+                                                 nzbcontent64)
+            else:
+                nzbget_result = nzbGetRPC.appendurl(nzb.name + ".nzb", headphones.NZBGET_CATEGORY, headphones.NZBGET_PRIORITY, False,
+                                                    nzb.url)
+
+        if nzbget_result:
+            logger.debug(u"NZB sent to NZBget successfully")
+            return True
+        else:
+            logger.error(u"NZBget could not add %s to the queue" % (nzb.name + ".nzb"))
+            return False
+    except:
+        logger.error(u"Connect Error to NZBget: could not add %s to the queue" % (nzb.name + ".nzb"))
         return False
