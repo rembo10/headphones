@@ -6,35 +6,38 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">
-			<a class="menu_link_edit" id="manage_albums" href="#">Manage Albums</a>
+			<a class="menu_link_edit" id="manage_albums" href="#"><i class="fa fa-pencil"></i> Manage Albums</a>
 				<div id="dialog" title="Choose Album Filter" style="display:none" class="configtable">
 					<div class="links">
-						<a href="manageAlbums?Status=Downloaded"><span class="ui-icon ui-icon-check"></span>Manage Downloaded Albums</a><br>
-						<a href="manageAlbums?Status=Skipped"><span class="ui-icon ui-icon-flag"></span>Manage Skipped Albums</a><br>
-						<a href="manageAlbums?Status=Snatched"><span class="ui-icon ui-icon-arrowthickstop-1-s"></span>Manage Snatched Albums</a><br>
-						<a href="manageAlbums?Status=Upcoming"><span class="ui-icon ui-icon-calendar"></span>Manage Upcoming Albums</a><br>
-						<a href="manageAlbums?Status=Wanted"><span class="ui-icon ui-icon-heart"></span>Manage Wanted Albums</a><br>
+						<a href="manageAlbums?Status=Downloaded"><i class="fa fa-check fa-fw"></i> Manage Downloaded Albums</a><br>
+						<a href="manageAlbums?Status=Skipped"><i class="fa fa-flag fa-fw"></i> Manage Skipped Albums</a><br>
+						<a href="manageAlbums?Status=Snatched"><i class="fa fa-cloud-download fa-fw"></i> </span>Manage Snatched Albums</a><br>
+						<a href="manageAlbums?Status=Upcoming"><i class="fa fa-calendar fa-fw"></i> Manage Upcoming Albums</a><br>
+						<a href="manageAlbums?Status=Wanted"><i class="fa fa-heart fa-fw"></i> </span>Manage Wanted Albums</a><br>
+						<a href="manageAlbums?Status=Ignored"><i class="fa fa-meh-o fa-fw"></i> </span>Manage Ignored Albums</a><br>
 						<br><br>
 						<a href="manageAlbums">Manage All Albums</a>
 					</div>
 				</div>
-			<a class="menu_link_edit" href="manageArtists">Manage Artists</a>
+			<a class="menu_link_edit" href="manageArtists"><i class="fa fa-pencil"></i> Manage Artists</a>
 			%if not headphones.ADD_ARTISTS:
-			<a class="menu_link_edit" href="manageNew">Manage New Artists</a>
+			<a class="menu_link_edit" href="manageNew"><i class="fa fa-pencil"></i> Manage New Artists</a>
 			%endif
+			<a class="menu_link_edit" href="manageUnmatched"><i class="fa fa-pencil"></i> Manage Unmatched</a>
 		</div>
 	</div>	
 </%def>
 
 <%def name="body()">
 	<div id="paddingheader">
-		<h1 class="clearfix"><img src="interfaces/default/images/icon_manage.png" alt="manage"/>Manage</h1>
+		<h1 class="clearfix"><i class="fa fa-music"></i> Manage</h1>
 	</div>
 	<div id="tabs">
 		<ul>
 			<li><a href="#tabs-1">Scan Music Library</a></li>
 			<li><a href="#tabs-2">Imports</a></li>
 			<li><a href="#tabs-3">Force Actions</a></li>
+			<li><a href="#tabs-4">Force Legacy</a></li>
 		</ul>
 		<div id="tabs-1" class="configtable">
 			<fieldset>
@@ -87,7 +90,7 @@
 				%>
 				<input type="text" value="${lastfmvalue}" placeholder="Last.fm username" onfocus="if
 				(this.value==this.defaultValue) this.value='';" name="username" id="username" size="18" />
-				<a href="#" onclick="doAjaxCall('importLastFM?username=',$(this),'tabs');return false;" data-success="Last.fm username has been reset"><span class="ui-icon ui-icon-arrowreturnthick-1-w"></span>Reset username</a>
+				<a href="#" onclick="doAjaxCall('importLastFM?username=',$(this),'tabs');return false;" data-success="Last.fm username has been reset"><i class="fa fa-reply"></i> Reset username</a>
 			</div>
 			</fieldset>
 			<input type="button" value="Save changes" onclick="doAjaxCall('importLastFM',$(this),'tabs',true);return false;" data-success="Last.fm artists will be imported" data-error="Fill in a last.fm username"/>
@@ -118,11 +121,10 @@
 		<fieldset>
 			<legend>Force Search</legend>
 			<div class="links">
-				<a href="#" onclick="doAjaxCall('forceSearch',$(this))" data-success="Checking for wanted albums successful" data-error="Error checking wanted albums"><span class="ui-icon ui-icon-search"></span>Force Check for Wanted Albums</a>
-				<a href="#" onclick="doAjaxCall('forceUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><span class="ui-icon ui-icon-heart"></span>Force Update Active Artists</a>
-				<a href="#" onclick="doAjaxCall('forcePostProcess',$(this))" data-success="Post-Processor is being loaded" data-error="Error during Post-Processing"><span class="ui-icon ui-icon-wrench"></span>Force Post-Process Albums in Download Folder</a>
-				<a href="#" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update successful" data-error="Error checking for update"><span class="ui-icon ui-icon-refresh"></span>Check for Headphones Updates</a>
-				<a href="#" id="delete_empty_artists"><span class="ui-icon ui-icon-trash"></span>Delete empty Artists</a>
+				<a href="#" onclick="doAjaxCall('forceSearch',$(this))" data-success="Checking for wanted albums successful" data-error="Error checking wanted albums"><i class="fa fa-search fa-fw"></i> Force Check for Wanted Albums</a>
+				<a href="#" onclick="doAjaxCall('forceUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><i class="fa fa-heart fa-fw"></i> Force Update Active Artists [Fast]</a>
+				<a href="#" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update successful" data-error="Error checking for update"><i class="fa fa-refresh fa-fw"></i> Check for Headphones Updates</a>
+				<a href="#" id="delete_empty_artists"><i class="fa fa-trash-o fa-fw"></i> Delete empty Artists</a>
 					<div id="emptyartistdialog" title="Confirm Artist Deletion" style="display:none" class="configtable">
 					    %if emptyArtists:
 						<h3>The following artists will be deleted:</h3>
@@ -135,10 +137,49 @@
 					        No empty artists found.
 					    %endif
 					</div>
+				<a href="#" onclick="doAjaxCall('forcePostProcess',$(this))" data-success="Post-Processor is being loaded" data-error="Error during Post-Processing"><i class="fa fa-wrench fa-fw"></i> Force Post-Process Albums in Download Folder</a>
 			</div>
+		</fieldset>
+		<form action="forcePostProcess" method="GET">
+		            <fieldset>
+		            <div class="row">
+		                <label>Force Post-Process Albums in Alternate Folder</label>
+					    <input type="text" value="" name="dir" id="dir" size="50" /><input type="submit" />
+		            </div>
+		            </fieldset>
+		      
+		</form>
+		<form action="forcePostProcess" method="GET">
+		            <fieldset>
+		            <div class="row">
+		                <label>Post-Process Single Folder</label>
+					    <input type="text" value="" name="album_dir" id="album_dir" size="50" /><input type="submit" />
+		            </div>
+		            </fieldset>
+		      
+		</form>
+		
+	</div>
+
+
+	<div id="tabs-4" class="configtable">
+		<fieldset>
+			<legend>Force Legacy</legend>
+				<p>Please note that these functions will take a significant amount of time to complete.</p>
+			<div class="links">
+				<a href="#" onclick="doAjaxCall('forceFullUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><i class="fa fa-heart fa-fw"></i> Force Update Active Artists [Comprehensive]</a>
+				<BR>
+				<a href="#" onclick="doAjaxCall('forceScan',$(this))" data-success="Library scan successful" data-error="Error forcing library scan"><i class="fa fa-refresh fa-fw"></i> Force Re-scan Library [Comprehensive]</a>
+				<BR>
+				<small>*Warning: If you choose [Force Re-scan Library], any manually ignored/matched artists/albums will be reset to "unmatched".</small>
+
+		</div>
 		</fieldset>
 		
 	</div>
+
+
+
 </div>
 </%def>
 <%def name="javascriptIncludes()">

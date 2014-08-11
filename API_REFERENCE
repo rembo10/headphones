@@ -65,3 +65,7 @@ getAlbumInfo&id=$albumid (See above, returns Summary and Content)
 
 getArtistThumb&id=$artistid (Returns either a relative path to the cached thumbnail artist image, or an http:// address if the cache dir can't be written to)
 getAlbumThumb&id=$albumid (see above)
+
+choose_specific_download&id=$albumid (Gives you a list of results from searcher.searchforalbum(). Basically runs a normal search, but rather than sorting them and downloading the best result, it dumps the data, which you can then pass on to download_specific_release(). Returns a list of dictionaries with params: title, size, url, provider & kind - all of these values must be passed back to download_specific_release)
+
+download_specific_release&id=albumid&title=$title&size=$size&url=$url&provider=$provider&kind=$kind (Allows you to manually pass a choose_specific_download release back to searcher.send_to_downloader())

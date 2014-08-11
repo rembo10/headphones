@@ -23,7 +23,9 @@ import cookielib
 from urlparse import urlparse
 from bs4 import BeautifulSoup
 from headphones import logger, db
-import lib.bencode as bencode
+from lib.bencode import bencode as bencode, bdecode
+from tempfile import mkdtemp
+from hashlib import sha1
 import os
 import headphones
 import re
@@ -106,24 +108,31 @@ class T411():
                 
         return results
     
-    def get_torrent(self, url, savelocation,torrent_name):
+    def get_torrent(self, url, torrent_name, savelocation=None):
     
                           
-        torrent_name = torrent_name + '.torrent'
-        download_path = os.path.join(savelocation, torrent_name)
-        
+        torrent_name = torrent_name
+        if savelocation:
+            download_path = os.path.join(savelocation, torrent_name)
+        else:
+            tempdir = mkdtemp(suffix='_t411_torrents')
+            download_path = os.path.join(tempdir, torrent_name)
         try:
+            prev = os.umask(headphones.UMASK)
             page = self.opener.open(url)
             torrent = page.read()
+            decoded = bdecode(torrent)
+            metainfo = decoded['info']
+            tor_hash = sha1(bencode(metainfo)).hexdigest()
             fp = open (download_path, 'wb')
             fp.write (torrent)
             fp.close ()                        
-            os.chmod(download_path, 0777)
+            os.umask(prev)
         except Exception, e:
             logger.error('Error getting torrent: %s' % e)  
             return False      
         
-        return download_path
+        return download_path, tor_hash
     
     def getResult(self, episodes):
         """

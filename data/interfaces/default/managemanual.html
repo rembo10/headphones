@@ -1,0 +1,121 @@
+<%inherit file="base.html" />
+<%!
+	import headphones
+	from headphones import db, helpers
+	myDB = db.DBConnection()
+%>
+
+<%def name="headerIncludes()">
+	<div id="subhead_container">
+		<div id="subhead_menu">
+		</div>		
+	</div>	
+	<a href="manageUnmatched" class="back">&laquo; Back to Unmatched Albums</a>
+</%def>
+
+
+<%def name="body()">
+	<div class="table_wrapper">
+	<div id="manageheader" class="title">
+		<h1 class="clearfix"><i class="fa fa-music"></i> Manage Manually Changed Albums</h1>
+	</div>
+
+	<table class="display" id="artist_table">
+		<thead>
+			<tr>
+				<th id="artist">Local Artist</th>
+				<th id="album">Local Album</th>
+				<th id="status">Previous Action</th>
+			</tr>
+		</thead>
+		<tbody>
+		<% count_albums=0 %>
+		%for album in manualalbums:
+			<tr class="gradeZ">
+			<%
+				old_artist_clean = album['ArtistName'].replace('&','%26').replace('+', '%2B').replace("'","%27")
+				old_album_clean = album['AlbumTitle'].replace('&','%26').replace('+', '%2B').replace("'","%27")
+			%>
+			<td id="artist">${album['ArtistName']}<BR>
+				<button id="restore_artist${count_albums}" onClick="restore_Artist(this.id)">(<-) Restore Artist</button>
+				<div id="restore_artist_dialog${count_albums}" title="Restore Artist" style="display:none">
+					<table>
+					<tr><td>Are you sure you want to restore Local Artist: ${album['ArtistName']} to unmatched?</td></tr>
+					<tr><td align="right"><BR>
+					%if album['AlbumStatus'] == "Ignored":
+						<button href="#" onclick="doAjaxCall('markManual?action=unignoreArtist&existing_artist=${old_artist_clean}', $(this), 'page');" data-success="Successfully restored ${album['ArtistName']} to unmatched">Restore Artist</button>
+					%elif album['AlbumStatus'] == "Matched":
+						<button href="#" onclick="doAjaxCall('markManual?action=unmatchArtist&existing_artist=${old_artist_clean}', $(this), 'page');" data-success="Successfully restored ${album['ArtistName']} to unmatched">Restore Artist</button>
+					%endif
+					</td></tr>
+					</table>
+				</div>
+			</td>
+			<td id="album">${album['AlbumTitle']}<BR>
+				<button id="restore_album${count_albums}" onClick="restore_Album(this.id)">(<-) Restore Album</button>
+				<div id="restore_album_dialog${count_albums}" title="Restore Album" style="display:none">
+					<table>
+					<tr><td>Are you sure you want to restore Local Album: ${album['AlbumTitle']} to unmatched?</td></tr>
+					<tr><td align="right"><BR>
+					%if album['AlbumStatus'] == "Ignored":
+						<button href="#" onclick="doAjaxCall('markManual?action=unignoreAlbum&existing_artist=${old_artist_clean}&existing_album=${old_album_clean}', $(this), 'page');" data-success="Successfully restored ${album['AlbumTitle']} to unmatched">Restore Album</button>
+					%elif album['AlbumStatus'] == "Matched":
+						<button href="#" onclick="doAjaxCall('markManual?action=unmatchAlbum&existing_artist=${old_artist_clean}&existing_album=${old_album_clean}', $(this), 'page');" data-success="Successfully restored ${album['AlbumTitle']} to unmatched">Restore Album</button>
+					%endif
+					</td></tr>
+					</table>
+				</div>
+
+			</td>
+			<td id="status">${album['AlbumStatus']}
+
+			</td>
+			</tr>
+		<% count_albums+=1 %>
+		%endfor
+		</tbody>
+	</table>
+	</div>
+</%def>
+
+<%def name="headIncludes()">
+	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
+</%def>
+
+<%def name="javascriptIncludes()">
+	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script>
+	$(document).ready(function()
+	{
+		$('#artist_table').dataTable(
+			{
+				"bStateSave": true,
+				"bPaginate": true,
+				"oLanguage": {
+					"sSearch": "",
+	                "sLengthMenu":"Show _MENU_ albums per page",
+						"sInfo":"Showing _START_ to _END_ of _TOTAL_ albums",
+						"sInfoEmpty":"Showing 0 to 0 of 0 albums",
+						"sInfoFiltered":"(filtered from _MAX_ total albums)",
+						"sEmptyTable": " ",
+	                    },
+	            "sPaginationType": "full_numbers",
+	         });
+
+initActions();
+	});
+
+	function restore_Artist(clicked_id) {
+		n=clicked_id.replace("restore_artist","");
+		$("#restore_artist_dialog"+n).dialog();
+		return false;
+	}
+
+	function restore_Album(clicked_id) {
+		n=clicked_id.replace("restore_album","");
+		$("#restore_album_dialog"+n).dialog();
+		return false;
+	}
+
+	</script>
+</%def>

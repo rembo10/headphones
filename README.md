@@ -1,13 +1,35 @@
 #![preview thumb](https://github.com/rembo10/headphones/raw/master/data/images/headphoneslogo.png)Headphones
 
+###Support & Discuss
+
+You are free to join the HP support community on IRC where you can ask questions, hang around and discuss anything related to HP.
+
+1. Use any IRC client and connect to the Freenode server.
+2. Join #headphones
+
 ###Installation and Notes
 
-This is a relatively early release of a third-party add-on for SABnzbd. It's been around for about a year, and while
-quite functional, there are still a lot of kinks to work out!
+[Read our Wiki](../../wiki) on how to install and use HeadPhones properly.
 
-To run it, just double-click the Headphones.py file (in Windows - you may need to right click and click 'Open With' -> Python) or launch a terminal, cd into the Headphones directory and run 'python headphones.py'.
+[**Troubleshooting** page](../../wiki/TroubleShooting) in the wiki can help you with comon problems.
 
-For additional startup options, type 'python Headphones.py -h' or 'python Headphones.py --help'
+**Issues** can be reported on the GitHub issue tracker considering these rules:
+
+1. Analyze your log, you just might find the solution yourself!
+2. You read the wiki and searched existing issues, but this is not solving your problem.
+3. Post the issue with a clear title, description and the HP log and use [proper markdown syntax](https://help.github.com/articles/github-flavored-markdown) to structure your text (code/log in code blocks). 
+4. Close your issue when it's solved! If you found the solution yourself please comment so that others benefit from it.
+
+**Feature requests** can be reported on the GitHub issue tracker too:
+
+1. Search for similar existing 'issues', feature requests can be recognized by the label 'Request'.
+2. If a similar Request exists, post a comment (+1, or add a new idea to the existing request), otherwise you can create a new one.
+
+If you **comply with these rules** you can [post your request/issue](http://github.com/rembo10/headphones/issues).
+
+**Support** the project by implementing new features, solving support tickets and provide bug fixes. 
+If you change something in the code always make a PR to the developer branch instead of the master branch.
+
 
 ###Screenshots
 
@@ -39,6 +61,5 @@ Album Page with track overview:
 
 ![preview thumb](http://i.imgur.com/kcjES.png)
 
-If you run into any issues, use the GitHub issue tracker at: http://github.com/rembo10/headphones/issues. 
 
 This is free software under the GPL v3 open source license - so feel free to do with it what you wish.

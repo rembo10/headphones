@@ -5,23 +5,28 @@
 %>
 
 <%def name="headerIncludes()">
+
 	<div id="subhead_container">
+		<div id="back_to_previous_link">
+			<a href="artistPage?ArtistID=${album['ArtistID']}" class="back">&laquo; Back to ${album['ArtistName']}</a>
+		</div>
 		<div id="subhead_menu">
-			<a id="menu_link_delete" href="deleteAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">Delete Album</a>
-			%if album['Status'] == 'Skipped':
-			<a id="menu_link_wanted" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true)" data-success="'${album['AlbumTitle']}' added to queue">Mark Album as Wanted</a>
+
+			<a id="menu_link_delete" href="deleteAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}"><i class="fa fa-trash-o"></i> Delete Album</a>
+			%if album['Status'] == 'Skipped' or album['Status'] == 'Ignored':
+			<a id="menu_link_wanted" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true)" data-success="'${album['AlbumTitle']}' added to queue"><i class="fa fa-heart"></i> Mark Album as Wanted</a>
 			%elif album['Status'] == 'Wanted':
-			<a id="menu_link_check" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this));" data-success="Forced checking successful">Force Check</a>
-			<a id="menu_link_skipped" href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),true);" data-success="'${album['AlbumTitle']}' marked as Skipped">Mark Album as Skipped</a>
+			<a id="menu_link_check" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this));" data-success="Forced checking successful"><i class="fa fa-search"></i> Force Check</a>
+			<a id="menu_link_skipped" href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),true);" data-success="'${album['AlbumTitle']}' marked as Skipped"><i class="fa fa-step-forward"></i> Mark Album as Skipped</a>
 			%else:
-			<a id="menu_link_retry" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true);" data-success="Retrying the same version of '${album['AlbumTitle']}'">Retry Download</a>
-			<a id="menu_link_new" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),true);" data-success="Looking for a new version of '${album['AlbumTitle']}'">Try New Version</a>
+			<a id="menu_link_retry" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true);" data-success="Retrying the same version of '${album['AlbumTitle']}'"><i class="fa fa-refresh"></i> Retry Download</a>
+			<a id="menu_link_new" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),true);" data-success="Looking for a new version of '${album['AlbumTitle']}'"><i class="fa fa-download"></i> Try New Version</a>
 			%endif		
-			<a class="menu_link_edit" id="album_chooser" href="#">Choose Alternate Release</a>
+			<a class="menu_link_edit" id="album_chooser" href="#"><i class="fa fa-pencil"></i> Choose Alternate Release</a>
 				<div id="dialog" title="Choose an Alternate Release" style="display:none" class="configtable">
 					<div class="links">
 						<%
-							alternate_albums = myDB.select("SELECT * from allalbums WHERE AlbumID=?", [album['AlbumID']])
+							alternate_albums = myDB.select("SELECT * from allalbums WHERE AlbumID=? ORDER BY ReleaseDate ASC", [album['AlbumID']])
 						%>
 						%if not alternate_albums:
 							<p>No alternate releases found. Try refreshing the artist (if the artist is being refreshed, please wait until it's finished)</p>
@@ -32,9 +37,9 @@
 									track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=?", [alternate_album['ReleaseID']]))
 									have_track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=? AND Location IS NOT NULL", [alternate_album['ReleaseID']]))
 									if alternate_album['AlbumID'] == alternate_album['ReleaseID']:
-										alternate_album_name = "Headphones Default Release [" + str(have_track_count) + "/" + str(track_count) + " tracks]"
+										alternate_album_name = "Headphones Default Release (" + str(alternate_album['ReleaseDate']) + ") [" + str(have_track_count) + "/" + str(track_count) + " tracks]"
 									else:
-										alternate_album_name = alternate_album['AlbumTitle'] + " (" + alternate_album['ReleaseCountry'] + ", " + alternate_album['ReleaseFormat'] + ") [" + str(have_track_count) + "/" + str(track_count) + " tracks]"
+										alternate_album_name = alternate_album['AlbumTitle'] + " (" + alternate_album['ReleaseCountry'] + ", " + str(alternate_album['ReleaseDate']) + ", " + alternate_album['ReleaseFormat'] + ") [" + str(have_track_count) + "/" + str(track_count) + " tracks]"
 									
 								%>
 								<a href="#" onclick="doAjaxCall('switchAlbum?AlbumID=${album['AlbumID']}&ReleaseID=${alternate_album['ReleaseID']}', $(this), 'table');" data-success="Switched release to: ${alternate_album_name}">${alternate_album_name}</a><br>
@@ -42,7 +47,7 @@
 						%endif
 					</div>
 				</div>
-			<a class="menu_link_edit" id="edit_search_term" href="#">Edit Search Term</a>
+			<a class="menu_link_edit" id="edit_search_term" href="#"><i class="fa fa-pencil"></i> Edit Search Term</a>
 				<div id="dialog2" title="Enter your own search term for this album" style="display:none" class="configtable">
 					<form action="editSearchTerm" method="GET" id="editSearchTerm">
 						<input type="hidden" name="AlbumID" value="${album['AlbumID']}">
@@ -59,9 +64,23 @@
 						<input type="button" value="Save changes" onclick="doAjaxCall('editSearchTerm',$(this),'tabs',true);return false;" data-success="Search term updated"/>
 					</form>
 				</div>	
+			<a class="menu_link_edit" id="choose_specific_download" href="#" onclick="getAvailableDownloads()"><i class="fa fa-search"></i> Choose Specific Download</a>
+				<div id="choose_specific_download_dialog" title="Choose a specific download for this album" style="display:none" class="configtable">
+						<table class="display" id="downloads_table">
+							<thead>
+								<tr>
+									<th id="title">Title</th>
+									<th id="size">Size</th>
+									<th id="provider">Provider</th>
+									<th id="kind">Kind</th>
+								</tr>
+							</thead>
+							<tbody id="downloads_table_body">
+							</tbody>
+						</table>
+				</div>	
 		</div>
 	</div>	
-	<a href="artistPage?ArtistID=${album['ArtistID']}" class="back">&laquo; Back to ${album['ArtistName']}</a>
 </%def>
 
 <%def name="body()">
@@ -70,9 +89,15 @@
 			<div id="albumImg">
 				<img height="200" alt="" class="albumArt" src="artwork/album/${album['AlbumID']}">
 			</div>
-			
-			<h1><a href="http://musicbrainz.org/release-group/${album['AlbumID']}">${album['AlbumTitle']}</a></h1>
-			<h2><a href="http://musicbrainz.org/artist/${album['ArtistID']}">${album['ArtistName']}</a></h2>
+
+            <h1 id="albumname">
+                <a href="http://musicbrainz.org/release-group/${album['AlbumID']}" id="albumnamelink">${album['AlbumTitle']}</a>
+            </h1>
+
+            <h2 id="artistname">
+                <a href="http://musicbrainz.org/artist/${album['ArtistID']}" id="artistnamelink">${album['ArtistName']}</a>
+            </h2>
+
 			<%
 				totalduration = myDB.action("SELECT SUM(TrackDuration) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
 				totaltracks = len(myDB.select("SELECT TrackTitle from tracks WHERE AlbumID=?", [album['AlbumID']]))
@@ -89,7 +114,6 @@
 					<li>Duration: <span>${albumduration}</span></li>
 				</ul>
 			</div>
-			
 		</div>
 		<div id="track_wrapper">
 			<table class="display" id="track_table">
@@ -138,7 +162,7 @@
 					</tr>
 				%endfor
 				<%
-				unmatched = myDB.select('SELECT * from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ?', [album['ArtistName'], album['AlbumTitle']])			
+				unmatched = myDB.select('SELECT * from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND Matched = "Failed" ORDER BY CAST(TrackNumber AS INTEGER)', [album['ArtistName'], album['AlbumTitle']])
 				%>
 				%if unmatched:
 					 %for track in unmatched:
@@ -197,12 +221,118 @@
 			"bInfo": false,
 			"bPaginate": false,
 			"bDestroy": true
-		});		
+		});
 	};
-	
+
+	function getAvailableDownloads() {
+		ShowSpinner();
+		$.getJSON("choose_specific_download?AlbumID=${album['AlbumID']}", function(data) {
+			loader.remove();
+			feedback.fadeOut();
+			search_results = data
+			for( var i = 0, len = data.length; i < len; i++ ) {
+    			$('#downloads_table_body').append('<tr><td id="title"><a href="#" onclick="downloadSpecificRelease('+i+')">'+data[i].title+'</a></td><td id="size"><span title='+data[i].size+'></span>'+(data[i].size / (1024*1024)).toFixed(2)+' MB</td><td id="provider">'+data[i].provider+'</td><td id="kind">'+data[i].kind+'</td></tr>');
+    		}
+			$('#downloads_table').dataTable({
+				"aoColumns": [
+					null,
+					{ "sType": "title-numeric"},
+					null,
+					null
+				],
+				"aaSorting": [],
+				"bFilter": false,
+				"bInfo": false,
+				"bPaginate": false,
+			});
+    		$("#choose_specific_download_dialog").dialog({ width: "1000px" });
+    		return false;
+		});
+	}
+
+	function downloadSpecificRelease(i){
+
+		title = search_results[i].title
+		size = search_results[i].size
+		url = search_results[i].url
+		provider = search_results[i].provider
+		kind = search_results[i].kind
+
+		ShowSpinner();
+		$.getJSON("download_specific_release?AlbumID=${album['AlbumID']}&title="+title+"&size="+size+"&url="+url+"&provider="+provider+"&kind=" + kind, function(data) {
+			loader.remove();
+			feedback.fadeOut();
+			refreshSubmenu();
+			$("#choose_specific_download_dialog").dialog("close");
+		});
+	}
+
+	function ShowSpinner() {
+		feedback = $("#ajaxMsg");
+		update = $("#updatebar");
+		if ( update.is(":visible") ) {
+			var height = update.height() + 35;
+			feedback.css("bottom",height + "px");
+		} else {
+			feedback.removeAttr("style");
+		}
+		loader = $("<i class='fa fa-refresh fa-spin'></i>");
+		feedback.prepend(loader);
+		feedback.fadeIn();
+	}
+
+    var loadingMessage = false;
+    var spinner_active = false;
+    var loadingtext_active = false;
+    var refreshInterval;
+    var wasLoading = false;
+    var x = 0;
+
+    function checkAlbumStatus() {
+        $.getJSON("getAlbumjson?AlbumID=${album['AlbumID']}", function(data) {
+            if (data['Status'] == "Loading"){
+                wasLoading = true;
+                $('#albumnamelink').text(data["AlbumTitle"]);
+                $('#artistnamelink').text(data["ArtistName"]);
+                if (loadingMessage == false){
+                    $("#ajaxMsg").after( "<div id='ajaxMsg2' class='ajaxMsg'></div>" );
+                    showArtistMsg("Getting album information");
+                    loadingMessage = true;
+                }
+                if (spinner_active == false){
+                    $('#albumname').prepend('<i class="fa fa-refresh fa-spin" id="albumnamespinner"></i>')
+                    spinner_active = true;
+                }
+                if (loadingtext_active == false){
+                    $('#albumname').append('<h3 id="loadingtext"><i>(Album information is currently being loaded)</i></h3>')
+                    loadingtext_active = true;
+                }
+            }
+            else{
+                if (++x === 10) {
+                    clearInterval(refreshInterval);
+                }
+                var sts = $("#artistname").text();
+                if (wasLoading == true || sts == "Loading"){
+                    location.reload();
+                $('#albumnamespinner').remove()
+                $('#loadingtext').remove()
+                $('#ajaxMsg2').remove()
+                spinner_active = false
+                loadingtext_active = false
+                loadingMessage = false
+                }
+            }
+        });
+    }
+
 	$(document).ready(function()	{
 		getAlbumInfo();
 		initThisPage();
+        checkAlbumStatus();
+        refreshInterval = setInterval(function(){
+            checkAlbumStatus();
+        }, 3000);
 	});
 
 	</script>

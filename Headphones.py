@@ -14,7 +14,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, sys, locale
+import os, sys
+
+# Ensure lib added to path, before any other imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib/'))
+
+import locale
 import time
 import signal
 
@@ -34,7 +39,6 @@ signal.signal(signal.SIGTERM, headphones.sig_handler)
 
 
 def main():
-
     # Fixed paths to Headphones
     if hasattr(sys, 'frozen'):
         headphones.FULL_PATH = os.path.abspath(sys.executable)
@@ -73,16 +77,16 @@ def main():
     args = parser.parse_args()
 
     if args.verbose:
-        headphones.VERBOSE = 2
-    elif args.quiet:
-        headphones.VERBOSE = 0
+        headphones.VERBOSE = True
+    if args.quiet:
+        headphones.QUIET = True
 
     if args.daemon:
         if sys.platform == 'win32':
             print "Daemonize not supported under Windows, starting normally"
         else:
-            headphones.DAEMON=True
-            headphones.VERBOSE = False
+            headphones.DAEMON = True
+            headphones.QUIET = True
 
     if args.pidfile:
         headphones.PIDFILE = str(args.pidfile)
@@ -97,7 +101,7 @@ def main():
             try:
                 file(headphones.PIDFILE, 'w').write("pid\n")
             except IOError, e:
-                raise SystemExit("Unable to write PID file: %s [%d]" % (e.strerror, e.errno))
+                raise SystemExit("Unable to write PID file: %s [%d]", e.strerror, e.errno)
         else:
             logger.warn("Not running in daemon mode. PID file creation disabled.")
 
@@ -142,7 +146,7 @@ def main():
     # Force the http port if neccessary
     if args.port:
         http_port = args.port
-        logger.info('Starting Headphones on forced port: %i' % http_port)
+        logger.info('Using forced port: %i', http_port)
     else:
         http_port = int(headphones.HTTP_PORT)
 
@@ -152,11 +156,12 @@ def main():
                     'http_host':        headphones.HTTP_HOST,
                     'http_root':        headphones.HTTP_ROOT,
                     'http_proxy':       headphones.HTTP_PROXY,
+                    'enable_https':     headphones.ENABLE_HTTPS,
+                    'https_cert':       headphones.HTTPS_CERT,
+                    'https_key':        headphones.HTTPS_KEY,
                     'http_username':    headphones.HTTP_USERNAME,
                     'http_password':    headphones.HTTP_PASSWORD,
             })
-
-    logger.info('Starting Headphones on port: %i' % http_port)
 
     if headphones.LAUNCH_BROWSER and not args.nolaunch:
         headphones.launch_browser(headphones.HTTP_HOST, http_port, headphones.HTTP_ROOT)
@@ -171,7 +176,7 @@ def main():
             except KeyboardInterrupt:
                 headphones.SIGNAL = 'shutdown'
         else:
-            logger.info('Received signal: ' + headphones.SIGNAL)
+            logger.info('Received signal: %s', headphones.SIGNAL)
             if headphones.SIGNAL == 'shutdown':
                 headphones.shutdown()
             elif headphones.SIGNAL == 'restart':

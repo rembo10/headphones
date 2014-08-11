@@ -8,27 +8,27 @@ from headphones import logger
 def getXldProfile(xldProfile):
     xldProfileNotFound = xldProfile
     expandedPath = os.path.expanduser('~/Library/Preferences/jp.tmkk.XLD.plist')
-    try:	
-	    preferences = plistlib.Plist.fromFile(expandedPath)
+    try:
+        preferences = plistlib.Plist.fromFile(expandedPath)
     except (expat.ExpatError):
-	    os.system("/usr/bin/plutil -convert xml1 %s" % expandedPath )
-	    try:
-		    preferences = plistlib.Plist.fromFile(expandedPath)
-	    except (ImportError):
-		    os.system("/usr/bin/plutil -convert binary1 %s" % expandedPath )
-		    logger.info('The plist at "%s" has a date in it, and therefore is not useable.' % expandedPath)
-		    return(xldProfileNotFound, None, None)
+        os.system("/usr/bin/plutil -convert xml1 %s" % expandedPath )
+        try:
+            preferences = plistlib.Plist.fromFile(expandedPath)
+        except (ImportError):
+            os.system("/usr/bin/plutil -convert binary1 %s" % expandedPath )
+            logger.info('The plist at "%s" has a date in it, and therefore is not useable.' % expandedPath)
+            return(xldProfileNotFound, None, None)
     except (ImportError):
-    	logger.info('The plist at "%s" has a date in it, and therefore is not useable.' % expandedPath)
+        logger.info('The plist at "%s" has a date in it, and therefore is not useable.' % expandedPath)
     except:
-	    logger.info('Unexpected error:', sys.exc_info()[0])
-	    return(xldProfileNotFound, None, None)
+        logger.info('Unexpected error:', sys.exc_info()[0])
+        return(xldProfileNotFound, None, None)
 
     xldProfile = xldProfile.lower()
     profiles = preferences.get('Profiles')
-    
+
     for profile in profiles:
-        
+
         profilename = profile.get('XLDProfileManager_ProfileName')
         xldProfileForCmd = profilename
         profilename = profilename.lower()
@@ -36,24 +36,24 @@ def getXldProfile(xldProfile):
         xldBitrate = None
 
         if profilename == xldProfile:
-        
+
             OutputFormatName = profile.get('OutputFormatName')
             ShortDesc = profile.get('ShortDesc')
-            
+
             # Determine format and bitrate
-            
+
             if OutputFormatName == 'WAV':
                 xldFormat = 'wav'
-            
+
             elif OutputFormatName == 'AIFF':
                 xldFormat = 'aiff'
-                
+
             elif 'PCM' in OutputFormatName:
                 xldFormat = 'pcm'
-                
+
             elif OutputFormatName == 'Wave64':
                 xldFormat = 'w64'
-                
+
             elif OutputFormatName == 'MPEG-4 AAC':
                 xldFormat = 'm4a'
                 if 'CBR' in ShortDesc or 'ABR' in ShortDesc or 'CVBR' in ShortDesc:
@@ -61,7 +61,7 @@ def getXldProfile(xldProfile):
                 elif 'TVBR' in ShortDesc:
                     XLDAacOutput2_VBRQuality = int(profile.get('XLDAacOutput2_VBRQuality'))
                     if XLDAacOutput2_VBRQuality > 122:
-                        xldBitrate = 320   
+                        xldBitrate = 320
                     elif XLDAacOutput2_VBRQuality > 113 and XLDAacOutput2_VBRQuality <= 122:
                         xldBitrate = 285
                     elif XLDAacOutput2_VBRQuality > 104 and XLDAacOutput2_VBRQuality <= 113:
@@ -165,7 +165,7 @@ def getXldProfile(xldProfile):
                 elif XLDVorbisOutput_Quality > 8 and XLDVorbisOutput_Quality <= 9:
                     xldBitrate = 320
                 elif XLDVorbisOutput_Quality > 9:
-                    xldBitrate = 500
+                    xldBitrate = 400
 
             elif OutputFormatName == 'WavPack':
                 xldFormat = 'wv'
@@ -174,8 +174,8 @@ def getXldProfile(xldProfile):
 
             # Lossless
             if xldFormat and not xldBitrate:
-                xldBitrate = 500
-            
+                xldBitrate = 400
+
             return(xldProfileForCmd, xldFormat, xldBitrate)
-            
+
     return(xldProfileNotFound, None, None)

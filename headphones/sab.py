@@ -69,7 +69,7 @@ def sendNZB(nzb):
 
     if headphones.SAB_HOST.endswith('/'):
         headphones.SAB_HOST = headphones.SAB_HOST[0:len(headphones.SAB_HOST)-1]
-    
+
     url = headphones.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
 
     try:
@@ -119,23 +119,6 @@ def sendNZB(nzb):
 
     if sabText == "ok":
         logger.info(u"NZB sent to SAB successfully")
-        if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
-            logger.info(u"Sending Prowl notification")
-            prowl = notifiers.PROWL()
-            prowl.notify(nzb.name,"Download started")
-        if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
-            logger.info(u"Sending Pushover notification")
-            prowl = notifiers.PUSHOVER()
-            prowl.notify(nzb.name,"Download started")
-        if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
-            logger.debug(u"Sending NMA notification")
-            nma = notifiers.NMA()
-            nma.notify(snatched_nzb=nzb.name)
-        if headphones.PUSHALOT_ENABLED and headphones.PUSHALOT_ONSNATCH:
-            logger.debug(u"Sending Pushalot notification")
-            pushalot = notifiers.PUSHALOT()
-            pushalot.notify(snatched_nzb=nzb.name)
-
         return True
     elif sabText == "Missing authentication":
         logger.info(u"Incorrect username/password sent to SAB, NZB not sent")

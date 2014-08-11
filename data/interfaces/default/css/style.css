@@ -1,4 +1,5 @@
-/* Variables *//* Mixins */
+/* Variables */
+/* Mixins */
 html,
 body,
 div,
@@ -158,7 +159,15 @@ img.albumArt {
   float: left;
   min-height: 100%;
   min-width: 100%;
-  max-width: 300px;
+  max-width: 250px;
+  max-height: 300px;
+  position: relative;
+}
+img.albumArt-nostretch {
+  float: left;
+  min-height: 64px;
+  min-width: 64px;
+  max-width: 250px;
   max-height: 300px;
   position: relative;
 }
@@ -179,8 +188,8 @@ table th {
   background-image: linear-gradient(#fafafa, #eaeaea) !important;
   background-image: -webkit-linear-gradient(#fafafa, #eaeaea) !important;
   background-image: -o-linear-gradient(#fafafa, #eaeaea) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
   border-left: 1px solid #E0E0E0;
   -moz-box-shadow: 1px 0 0 #fafafa;
   -webkit-box-shadow: 1px 0 0 #fafafa;
@@ -204,8 +213,8 @@ table th.sorting_asc {
   background-image: linear-gradient(#fafbfd, #dce6ef) !important;
   background-image: -webkit-linear-gradient(#fafbfd, #dce6ef) !important;
   background-image: -o-linear-gradient(#fafbfd, #dce6ef) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#fafbfd, endColorstr=#dce6ef) !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#fafbfd, endColorstr=#dce6ef) !important;
   color: #4183c4;
 }
 table td {
@@ -296,23 +305,6 @@ input[type=button] {
   text-decoration: none;
   text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
 }
-.configsubmit {
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  border-radius: 5px;
-  background: #222222 url("../images/button.png") repeat-x;
-  border: 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-  color: #fff;
-  cursor: pointer;
-  margin-left: 75%;
-  margin-top: 5px;
-  text-align: center;
-  width: 200px;
-  padding: 4px 10px;
-  text-decoration: none;
-  text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
-}
 form legend,
 form h2 {
   font-size: 16px;
@@ -393,10 +385,6 @@ form .radio label {
   padding-top: 1px;
   width: auto;
 }
-.override-float {
-  float: none !important;
-  margin-bottom: 0px !important;
-}
 form .radio input {
   float: left;
   margin-bottom: 10px;
@@ -412,6 +400,9 @@ form .checkbox small {
   line-height: normal !important;
   margin: 0 !important;
   width: auto;
+}
+form .indent input {
+  margin-left: 15px;
 }
 ul,
 ol {
@@ -459,8 +450,8 @@ ul#nav li a:hover {
   background-image: linear-gradient(#f1f1f1, #e0e0e0) !important;
   background-image: -webkit-linear-gradient(#f1f1f1, #e0e0e0) !important;
   background-image: -o-linear-gradient(#f1f1f1, #e0e0e0) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#f1f1f1, endColorstr=#e0e0e0) !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#f1f1f1, endColorstr=#e0e0e0) !important;
   border: 1px solid #DDDDDD;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -482,10 +473,10 @@ ul#nav li a.config {
   height: 28px;
   width: 10px;
 }
-ul#nav li a.config img {
+ul#nav li a.config i {
   position: relative;
-  top: -7px;
-  left: -7px;
+  top: 0px;
+  left: -6px;
 }
 ul#nav li a.log {
   font-size: 13px;
@@ -496,8 +487,8 @@ header {
   background-image: linear-gradient(#fafafa, #eaeaea) !important;
   background-image: -webkit-linear-gradient(#fafafa, #eaeaea) !important;
   background-image: -o-linear-gradient(#fafafa, #eaeaea) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
   border-bottom: 1px solid #CACACA;
   -moz-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -512,7 +503,7 @@ header .wrapper {
   margin: 0 auto;
   overflow: hidden;
   position: relative;
-  width: 960px;
+  width: 990px;
 }
 header #logo {
   float: left;
@@ -523,7 +514,7 @@ header #logo {
 }
 footer {
   display: table;
-  margin: 40px auto 50px auto;
+  margin: 60px auto 50px auto;
   width: 960px;
   padding-top: 10px;
   border-top: 1px solid #EEE;
@@ -542,8 +533,8 @@ footer {
   background-image: linear-gradient(#fcf5c2, #fff6a9) !important;
   background-image: -webkit-linear-gradient(#fcf5c2, #fff6a9) !important;
   background-image: -o-linear-gradient(#fcf5c2, #fff6a9) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#fcf5c2, endColorstr=#fff6a9) !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#fcf5c2, endColorstr=#fff6a9) !important;
   display: inline-block;
   padding: 5px 10px;
   margin-top: 10px;
@@ -554,37 +545,14 @@ footer {
   position: relative;
   top: 4px;
 }
-.configmessage {
-  -moz-border-radius: 10px;
-  -webkit-border-radius: 10px;
-  border-radius: 10px;
-  background-image: -moz-linear-gradient(#fcf5c2, #fff6a9) !important;
-  background-image: linear-gradient(#fcf5c2, #fff6a9) !important;
-  background-image: -webkit-linear-gradient(#fcf5c2, #fff6a9) !important;
-  background-image: -o-linear-gradient(#fcf5c2, #fff6a9) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  text-align: center;
-  padding: 3px 5px;
-  width: 400px;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 5px;
-}
-.configmessage .ui-icon {
-  float: left;
-  margin-right: 5px;
-  position: relative;
-  top: 4px;
-}
-#ajaxMsg {
+.ajaxMsg {
   border: 1px solid #cccccc;
   background-image: -moz-linear-gradient(#ffffff, #eeeeee) !important;
   background-image: linear-gradient(#ffffff, #eeeeee) !important;
   background-image: -webkit-linear-gradient(#ffffff, #eeeeee) !important;
   background-image: -o-linear-gradient(#ffffff, #eeeeee) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#ffffff, endColorstr=#eeeeee) !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#ffffff, endColorstr=#eeeeee) !important;
   -moz-border-radius: 7px;
   -webkit-border-radius: 7px;
   border-radius: 7px;
@@ -608,36 +576,36 @@ footer {
   -o-opacity: 0.8 !important;
   opacity: 0.8 !important;
 }
-#ajaxMsg .msg {
+.ajaxMsg .msg {
   font-family: "Trebuchet MS", Helvetica, Arial, sans-serif;
   line-height: normal;
   padding-left: 20px;
 }
-#ajaxMsg .loader {
+.ajaxMsg .loader {
   position: relative;
   top: 2px;
 }
-#ajaxMsg.success {
+.ajaxMsg .success {
   background-image: -moz-linear-gradient(#d3ffd7, #c2edc6) !important;
   background-image: linear-gradient(#d3ffd7, #c2edc6) !important;
   background-image: -webkit-linear-gradient(#d3ffd7, #c2edc6) !important;
   background-image: -o-linear-gradient(#d3ffd7, #c2edc6) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#d3ffd7, endColorstr=#c2edc6) !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#d3ffd7, endColorstr=#c2edc6) !important;
   padding: 15px 10px;
   text-align: left;
 }
-#ajaxMsg.error {
+.ajaxMsg .error {
   background-image: -moz-linear-gradient(#ffd3d3, #edc4c4) !important;
   background-image: linear-gradient(#ffd3d3, #edc4c4) !important;
   background-image: -webkit-linear-gradient(#ffd3d3, #edc4c4) !important;
   background-image: -o-linear-gradient(#ffd3d3, #edc4c4) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#ffd3d3, endColorstr=#edc4c4) !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#ffd3d3, endColorstr=#edc4c4) !important;
   padding: 15px 10px;
   text-align: left;
 }
-#ajaxMsg .ui-icon {
+.ajaxMsg .ui-icon {
   display: inline-block;
   margin-left: -20px;
   top: 2px;
@@ -650,8 +618,8 @@ footer {
   background-image: linear-gradient(#ffffff, #eeeeee) !important;
   background-image: -webkit-linear-gradient(#ffffff, #eeeeee) !important;
   background-image: -o-linear-gradient(#ffffff, #eeeeee) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#ffffff, endColorstr=#eeeeee) !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#ffffff, endColorstr=#eeeeee) !important;
   -moz-border-radius: 7px;
   -webkit-border-radius: 7px;
   border-radius: 7px;
@@ -679,8 +647,8 @@ footer {
   background-image: linear-gradient(#fcf5c2, #fff6a9) !important;
   background-image: -webkit-linear-gradient(#fcf5c2, #fff6a9) !important;
   background-image: -o-linear-gradient(#fcf5c2, #fff6a9) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#fcf5c2, endColorstr=#fff6a9) !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#fcf5c2, endColorstr=#fff6a9) !important;
 }
 #updatebar .msg {
   font-family: "Trebuchet MS", Helvetica, Arial, sans-serif;
@@ -696,8 +664,8 @@ footer {
   background-image: linear-gradient(#d3ffd7, #c2edc6) !important;
   background-image: -webkit-linear-gradient(#d3ffd7, #c2edc6) !important;
   background-image: -o-linear-gradient(#d3ffd7, #c2edc6) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#d3ffd7, endColorstr=#c2edc6) !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#d3ffd7, endColorstr=#c2edc6) !important;
   padding: 15px 10px;
   text-align: left;
 }
@@ -706,8 +674,8 @@ footer {
   background-image: linear-gradient(#ffd3d3, #edc4c4) !important;
   background-image: -webkit-linear-gradient(#ffd3d3, #edc4c4) !important;
   background-image: -o-linear-gradient(#ffd3d3, #edc4c4) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#ffd3d3, endColorstr=#edc4c4) !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#ffd3d3, endColorstr=#edc4c4) !important;
   padding: 15px 10px;
   text-align: left;
 }
@@ -717,13 +685,6 @@ footer {
   top: 2px;
   position: relative;
   margin-right: 3px;
-}
-#dialog {
-  padding: 40px;
-}
-#dialog input#submit {
-  margin-left: 50px;
-  margin-right: auto;
 }
 #subhead .back {
   float: left;
@@ -738,7 +699,7 @@ footer {
 }
 #subhead #subhead_container #subhead_menu {
   float: right;
-  margin-top: 5px;
+  margin-top: 0px;
   position: relative;
   z-index: 99;
 }
@@ -747,8 +708,8 @@ footer {
   background-image: linear-gradient(#f4f4f4, #e7e7e7) !important;
   background-image: -webkit-linear-gradient(#f4f4f4, #e7e7e7) !important;
   background-image: -o-linear-gradient(#f4f4f4, #e7e7e7) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#f4f4f4, endColorstr=#e7e7e7) !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#f4f4f4, endColorstr=#e7e7e7) !important;
   font-family: "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif;
   font-size: 12px;
   font-weight: normal;
@@ -758,10 +719,15 @@ footer {
   background-image: linear-gradient(#599bdc, #3072b3) !important;
   background-image: -webkit-linear-gradient(#599bdc, #3072b3) !important;
   background-image: -o-linear-gradient(#599bdc, #3072b3) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#599bdc, endColorstr=#3072b3) !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#599bdc, endColorstr=#3072b3) !important;
   color: #FFF;
   border-color: #518CC6 #518CC6 #2A65A0;
+}
+#subhead #subhead_container #back_to_previous_link {
+  margin-top: 20px;
+  position: relative;
+  z-index: 99;
 }
 div#searchbar {
   border-left: 1px solid #FAFAFA;
@@ -792,16 +758,14 @@ div#searchbar input[type=text] {
   line-height: normal;
   margin-right: 5px;
   padding: 4px 5px 4px 25px;
-  width: 150px;
+  width: 185px;
 }
 div#searchbar .mini-icon {
-  height: 20px;
-  width: 20px;
-  background: url("../images/icon_search.gif") left top no-repeat;
+  color: #999;
   position: absolute;
   display: block;
-  margin-left: 6px;
-  margin-top: 6px;
+  margin-left: 9px;
+  margin-top: 7px;
 }
 .configtable legend {
   font-size: 16px;
@@ -821,7 +785,7 @@ div#searchbar .mini-icon {
   _height: 302px;
   background-color: #FFF;
   clear: both;
-  margin: 30px auto 0;
+  margin: 60px auto 0;
   min-height: 100px;
   position: relative;
   width: 100%;
@@ -871,6 +835,18 @@ div#artistheader #artistImg {
   overflow: hidden;
   text-indent: -3000px;
   width: 200px;
+  position: relative;
+}
+div#artistheader #artistImg.on-tour:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -2px;
+  width: 100px;
+  height: 100px;
+  z-index: 2;
+  background-image: url('../images/songkick_ribon.png');
+  background-repeat: no-repeat;
 }
 div#artistheader #artistBio {
   font-size: 16px;
@@ -886,6 +862,22 @@ div#artistheader h2 a {
   font-style: italic;
   font-weight: bold;
   font-family: "Trebuchet MS", Helvetica, Arial, sans-serif;
+}
+#artistCalendar {
+  list-style-type: none;
+  margin: 0px;
+  display: block;
+  background: #FEF2EB;
+  padding: 10px;
+  font-size: 16px;
+}
+#artistCalendar .sk-location {
+  display: inline-block;
+  padding-left: 6px;
+}
+#artistCalendar .sk-logo {
+  width: 100px;
+  padding-top: 16px;
 }
 #artist_table {
   background-color: #FFF;
@@ -911,24 +903,16 @@ div#artistheader h2 a {
 #artist_table th#name {
   min-width: 200px;
   text-align: left;
-  width:200px;
 }
 #artist_table th#album {
   min-width: 300px;
   text-align: left;
 }
-#artist_table th#albumart,
-#artist_table th#status{
-    width:50px;
-}
-
 #artist_table th#status,
-#artist_table th#albumart,
-#artist_table th#lastupdated {
+#artist_table th#albumart {
   min-width: 50px;
   text-align: left;
 }
-
 #artist_table th#have {
   text-align: center;
 }
@@ -937,13 +921,11 @@ div#artistheader h2 a {
   text-align: left;
   vertical-align: middle;
 }
-#artist_table td#status,
-#artist_table td#lastupdated {
+#artist_table td#status {
   min-width: 50px;
   text-align: left;
   vertical-align: middle;
 }
-
 #artist_table td#album {
   min-width: 300px;
   text-align: left;
@@ -1085,6 +1067,22 @@ div#artistheader h2 a {
   text-align: center;
   vertical-align: middle;
 }
+#downloads_table th#title {
+  text-align: center;
+  min-width: 500px;
+}
+#downloads_table th#size {
+  text-align: center;
+  min-width: 80px;
+}
+#downloads_table th#provider {
+  text-align: center;
+  min-width: 100px;
+}
+#downloads_table th#kind {
+  text-align: center;
+  min-width: 80px;
+}
 #history_table {
   background-color: #FFF;
   font-size: 13px;
@@ -1128,12 +1126,33 @@ div#artistheader h2 a {
   padding: 2px 10px;
 }
 #searchresults_table th#albumname {
-  min-width: 225px;
+  min-width: 250px;
   text-align: left;
+  font-size: 14px;
 }
 #searchresults_table th#artistname {
   min-width: 325px;
   text-align: left;
+}
+#searchresults_table th#artistnamesmall {
+    min-width: 125px;
+    text-align: left;
+    font-size: 14px;
+}
+#searchresults_table th#reldate {
+    min-width: 80px;
+    text-align: center;
+    font-size: 14px;
+}
+#searchresults_table th#format {
+    min-width: 50px;
+    text-align: left;
+    font-size: 14px;
+}
+#searchresults_table th#tracks {
+    min-width: 50px;
+    text-align: left;
+    font-size: 14px;
 }
 #searchresults_table #artistImg {
   background: url("../images/loader_black.gif") no-repeat scroll center center #ffffff;
@@ -1146,14 +1165,39 @@ div#artistheader h2 a {
   width: 50px;
 }
 #searchresults_table td#albumname {
-  min-width: 200px;
+  min-width: 250px;
   text-align: left;
   vertical-align: middle;
+  font-size: 14px;
 }
 #searchresults_table td#artistname {
   min-width: 300px;
   text-align: left;
   vertical-align: middle;
+}
+#searchresults_table td#artistnamesmall {
+    min-width: 100px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 14px;
+}
+#searchresults_table td#reldate {
+    min-width: 80px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+}
+#searchresults_table td#format {
+    min-width: 50px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 14px;
+}
+#searchresults_table td#tracks {
+    min-width: 50px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 14px;
 }
 #searchresults_table td#add {
   vertical-align: middle;
@@ -1176,8 +1220,8 @@ div#artistheader h2 a {
   background-image: linear-gradient(#a3e532, #90cc2a) !important;
   background-image: -webkit-linear-gradient(#a3e532, #90cc2a) !important;
   background-image: -o-linear-gradient(#a3e532, #90cc2a) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#a3e532, endColorstr=#90cc2a) !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#a3e532, endColorstr=#90cc2a) !important;
 }
 .progress-container {
   background: #FFF;
@@ -1188,13 +1232,13 @@ div#artistheader h2 a {
   padding: 1px;
   width: 100px;
 }
-.progress-container  > div {
+.progress-container > div {
   background-image: -moz-linear-gradient(#a3e532, #90cc2a) !important;
   background-image: linear-gradient(#a3e532, #90cc2a) !important;
   background-image: -webkit-linear-gradient(#a3e532, #90cc2a) !important;
   background-image: -o-linear-gradient(#a3e532, #90cc2a) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fafafa, endColorstr=#eaeaea) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#a3e532, endColorstr=#90cc2a) !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#a3e532, endColorstr=#90cc2a) !important;
   height: 14px;
 }
 .havetracks {
@@ -1230,11 +1274,11 @@ div#artistheader h2 a {
   background-image: url("../images/ui-icons_70b2e1_256x240.png");
 }
 #toTop {
-  background: url("../images/toTop.gif") no-repeat scroll 10px center #f7f7f7;
+  background: #f7f7f7;
   border-radius: 5px 0 0 0;
   bottom: 0;
   display: none;
-  padding: 10px 10px 10px 40px;
+  padding: 10px 10px 10px 10px;
   position: fixed;
   right: 0;
 }
@@ -1246,6 +1290,7 @@ div#artistheader h2 a {
   position: relative;
   top: 7px;
 }
+#trashcan {margin-top:15px;}
 .cloudtag {
   font-size: 16px;
 }
@@ -1355,8 +1400,16 @@ div#artistheader h2 a {
 .clearfix:after {
   clear: both;
 }
+.override-float {
+  float: none !important;
+  margin-bottom: 0px !important;
+  clear: none !important;
+  display: inline !important;
+  font-size: 10px;
+  line-height: 10px;
+  height: 10px;
+}
 #album_table th#albumname,
-#album_table th#artistname,
 #upcoming_table th#artistname,
 #wanted_table th#artistname {
   min-width: 150px;
@@ -1379,7 +1432,6 @@ div#artistheader h2 a {
   vertical-align: middle;
 }
 #album_table td#albumname,
-#album_table td#artistname,
 #album_table td#reldate,
 #album_table td#type,
 #track_table td#duration,
@@ -1409,6 +1461,11 @@ div#artistheader h3 span {
 #searchresults_table th#score {
   min-width: 75px;
   text-align: center;
+}
+#searchresults_table th#scoresmall {
+    min-width: 50px;
+    text-align: center;
+    font-size: 14px;
 }
 #track_table td#bitrate,
 #track_table td#format {

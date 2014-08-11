@@ -1,4 +1,4 @@
-from torrent import Torrent
+from .torrent import Torrent
 
 class InvalidTorrentGroupException(Exception):
     pass
@@ -62,13 +62,17 @@ class TorrentGroup(object):
         self.music_info['with'] = [ self.parent_api.get_artist(artist['id'], artist['name'])
                                        for artist in self.music_info['with'] ]
 
-        self.torrents = []
-        for torrent_dict in torrent_group_json_response['torrents']:
-            torrent_dict['groupId'] = self.id
-            torrent = self.parent_api.get_torrent(torrent_dict['id'])
-            torrent.set_torrent_group_data(torrent_dict)
+        if 'torrents' in torrent_group_json_response:
+            self.torrents = []
+            for torrent_dict in torrent_group_json_response['torrents']:
+                torrent_dict['groupId'] = self.id
+                torrent = self.parent_api.get_torrent(torrent_dict['id'])
+                torrent.set_torrent_group_data(torrent_dict)
+                self.torrents.append(torrent)
+            self.has_complete_torrent_list = True
+        elif 'torrent' in torrent_group_json_response:
+            torrent = self.parent_api.get_torrent(torrent_group_json_response['torrent']['id'])
             self.torrents.append(torrent)
-        self.has_complete_torrent_list = True
 
     def set_artist_group_data(self, artist_group_json_response):
         """

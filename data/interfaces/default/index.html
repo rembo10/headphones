@@ -43,7 +43,7 @@
                    "mDataProp":"ArtistSortName",
                    "mRender":function (data,type,full) {
                         
-                        return '<span title="' + full['ArtistID'] + '"></span><a href="artistPage?ArtistID=' + full['ArtistID'] + '">' + data + '</a>'
+                        return '<span title="' + full['ArtistID'] + '"></span><a href="artistPage?ArtistID=' + full['ArtistID'] + '">' + full['ArtistName'] + '</a>'
                         }
                    },
                    {"aTargets":[2],"mDataProp":"Status"},
@@ -68,10 +68,6 @@
                             albumdisplay = '<i>None</i>';
                         }
                         if (artist['ReleaseInFuture'] === 'True')
-                        {
-                            grade = 'gradeC';
-                        }
-                        else if(full['HaveTracks']==full['TotalTracks'])
                         {
                             grade = 'gradeA';
                         }
@@ -113,10 +109,11 @@
                 "sLengthMenu":"Show _MENU_ artists per page",
 					"sInfo":"Showing _START_ to _END_ of _TOTAL_ artists",
 					"sInfoEmpty":"Showing 0 to 0 of 0 artists",
-					"sInfoFiltered":"(filtered from _MAX_ total artists)"
+					"sInfoFiltered":"(filtered from _MAX_ total artists)",
+					"sEmptyTable": " ",
                     },
 			"bStateSave": true,
-			"iDisplayLength": 200,
+			"iDisplayLength": 50,
 			"sPaginationType": "full_numbers",
             "bProcessing": true,
             "bServerSide": true,
