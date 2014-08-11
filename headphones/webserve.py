@@ -735,7 +735,7 @@ class WebInterface(object):
 
     def history(self):
         myDB = db.DBConnection()
-        history = myDB.select('''SELECT * from snatched order by DateAdded DESC''')
+        history = myDB.select('''SELECT * from snatched WHERE Status NOT LIKE "Seed%" order by DateAdded DESC''')
         return serve_template(templatename="history.html", title="History", history=history)
     history.exposed = True
 
@@ -901,13 +901,13 @@ class WebInterface(object):
         if type:
             if type == 'all':
                 logger.info(u"Clearing all history")
-                myDB.action('DELETE from snatched')
+                myDB.action('DELETE from snatched WHERE Status NOT LIKE "Seed%"')
             else:
                 logger.info(u"Clearing history where status is %s" % type)
                 myDB.action('DELETE from snatched WHERE Status=?', [type])
         else:
             logger.info(u"Deleting '%s' from history" % title)
-            myDB.action('DELETE from snatched WHERE Title=? AND DateAdded=?', [title, date_added])
+            myDB.action('DELETE from snatched WHERE Status NOT LIKE "Seed%" AND Title=? AND DateAdded=?', [title, date_added])
         raise cherrypy.HTTPRedirect("history")
     clearhistory.exposed = True
 

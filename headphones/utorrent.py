@@ -132,6 +132,13 @@ class utorrentclient(object):
             return settings[key]
         return settings
 
+    def remove(self, hash, remove_data = False):
+        if remove_data:
+            params = [('action', 'removedata'), ('hash', hash)]
+        else:
+            params = [('action', 'remove'), ('hash', hash)]
+        return self._action(params)
+
     def _action(self, params, body=None, content_type=None):
         url = self.base_url + '/gui/' + '?token=' + self.token + '&' + urllib.urlencode(params)
         request = urllib2.Request(url)
@@ -154,6 +161,17 @@ def labelTorrent(hash):
     uTorrentClient = utorrentclient()
     if label:
         uTorrentClient.setprops(hash,'label',label)
+
+def removeTorrent(hash):
+    uTorrentClient = utorrentclient()
+    status, torrentList = uTorrentClient.list()
+    torrents = torrentList['torrents']
+    for torrent in torrents:
+        if torrent[0].lower() == hash and torrent[21] == 'Finished':
+            logger.info('%s has finished seeding, removing torrent and data' % torrent[2])
+            uTorrentClient.remove(hash, True)
+            return True
+    return False
 
 def setSeedRatio(hash, ratio):
     uTorrentClient = utorrentclient()
@@ -215,6 +233,7 @@ def addTorrent(link, hash):
 
     if torrent_folder == active_dir or not torrent_folder:
         torrent_folder, cacheid = dirTorrent(hash, cacheid, return_name=True)
+        labelTorrent(hash)
         return torrent_folder
     else:
         labelTorrent(hash)

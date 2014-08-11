@@ -24,7 +24,7 @@ import headphones
 from beets import autotag
 from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 
-from headphones import notifiers
+from headphones import notifiers, utorrent, transmission
 from headphones import db, albumart, librarysync, lyrics
 from headphones import logger, helpers, request, mb, music_encoder
 
@@ -305,7 +305,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
                 return
 
     logger.warn(u'Could not identify album: %s. It may not be the intended album.' % albumpath.decode(headphones.SYS_ENCODING, 'replace'))
-    myDB.action('UPDATE snatched SET status = "Unprocessed" WHERE AlbumID=?', [albumid])
+    myDB.action('UPDATE snatched SET status = "Unprocessed" WHERE status NOT LIKE "Seed%" and AlbumID=?', [albumid])
     processed = re.search(r' \(Unprocessed\)(?:\[\d+\])?', albumpath)
     if not processed:
         renameUnprocessedFolder(albumpath)
@@ -416,7 +416,24 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
 
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Downloaded" WHERE AlbumID=?', [albumid])
-    myDB.action('UPDATE snatched SET status = "Processed" WHERE AlbumID=?', [albumid])
+    myDB.action('UPDATE snatched SET status = "Processed" WHERE Status NOT LIKE "Seed%" and AlbumID=?', [albumid])
+
+    # Check if torrent has finished seeding
+    if headphones.TORRENT_DOWNLOADER == (1 or 2):
+        seed_snatched = myDB.action('SELECT * from snatched WHERE Status="Seed_Snatched" and AlbumID=?', [albumid]).fetchone()
+        if seed_snatched:
+            hash = seed_snatched['FolderName']
+            torrent_removed = False
+            if headphones.TORRENT_DOWNLOADER == 1:
+                torrent_removed = transmission.removeTorrent(hash, True)
+            else:
+                torrent_removed = utorrent.removeTorrent(hash, True)
+
+            # Torrent removed, delete the snatched record, else update Status for scheduled job to check
+            if torrent_removed:
+                myDB.action('DELETE from snatched WHERE status = "Seed_Snatched" and AlbumID=?', [albumid])
+            else:
+                myDB.action('UPDATE snatched SET status = "Seed_Processed" WHERE status = "Seed_Snatched" and AlbumID=?', [albumid])
 
     # Update the have tracks for all created dirs:
     for albumpath in albumpaths:

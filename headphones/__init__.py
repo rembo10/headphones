@@ -514,7 +514,6 @@ def initialize():
         WHATCD_USERNAME = check_setting_str(CFG, 'What.cd', 'whatcd_username', '')
         WHATCD_PASSWORD = check_setting_str(CFG, 'What.cd', 'whatcd_password', '')
         WHATCD_RATIO = check_setting_str(CFG, 'What.cd', 'whatcd_ratio', '')
-        WHATCD_PASSWORD = check_setting_str(CFG, 'What.cd', 'whatcd_password', '')
 
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
@@ -1135,7 +1134,7 @@ def start():
     if __INITIALIZED__:
 
         # Start our scheduled background tasks
-        from headphones import updater, searcher, librarysync, postprocessor
+        from headphones import updater, searcher, librarysync, postprocessor, torrentfinished
 
         SCHED.add_interval_job(updater.dbUpdate, hours=UPDATE_DB_INTERVAL)
         SCHED.add_interval_job(searcher.searchforalbum, minutes=SEARCH_INTERVAL)
@@ -1146,6 +1145,9 @@ def start():
 
         if DOWNLOAD_SCAN_INTERVAL > 0:
             SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
+
+        # Remove Torrent + data if Post Processed and finished Seeding
+        SCHED.add_interval_job(torrentfinished.checkTorrentFinished, hours=12)
 
         SCHED.start()
 
