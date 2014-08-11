@@ -569,6 +569,8 @@ def send_to_downloader(data, bestqual, album):
     logger.info(u'Found best result from %s: <a href="%s">%s</a> - %s', bestqual[3], bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1]))
     # Get rid of any dodgy chars here so we can prevent sab from renaming our downloads
     kind = bestqual[4]
+    seed_ratio = None
+    torrentid = None
 
     if kind == 'nzb':
         folder_name = helpers.sab_sanitize_foldername(bestqual[0])
@@ -674,7 +676,7 @@ def send_to_downloader(data, bestqual, album):
 
             # rutracker needs cookies to be set, pass the .torrent file instead of url
             if bestqual[3] == 'rutracker.org':
-                file_or_url, _hash = rutracker.get_torrent(bestqual[2])
+                file_or_url, torrentid = rutracker.get_torrent(bestqual[2])
             else:
                 file_or_url = bestqual[2]
 
@@ -708,14 +710,14 @@ def send_to_downloader(data, bestqual, album):
 
             # rutracker needs cookies to be set, pass the .torrent file instead of url
             if bestqual[3] == 'rutracker.org':
-                file_or_url, _hash = rutracker.get_torrent(bestqual[2])
-                folder_name, cacheid = utorrent.dirTorrent(_hash)
+                file_or_url, torrentid = rutracker.get_torrent(bestqual[2])
+                folder_name, cacheid = utorrent.dirTorrent(torrentid)
                 folder_name = os.path.basename(os.path.normpath(folder_name))
-                utorrent.labelTorrent(_hash)
+                utorrent.labelTorrent(torrentid)
             else:
                 file_or_url = bestqual[2]
-                _hash = CalculateTorrentHash(file_or_url, data)
-                folder_name = utorrent.addTorrent(file_or_url, _hash)
+                torrentid = CalculateTorrentHash(file_or_url, data)
+                folder_name = utorrent.addTorrent(file_or_url, torrentid)
 
             if folder_name:
                 logger.info('Torrent folder name: %s' % folder_name)
@@ -733,11 +735,15 @@ def send_to_downloader(data, bestqual, album):
             # Set Seed Ratio
             seed_ratio = getSeedRatio(bestqual[3])
             if seed_ratio != None:
-                utorrent.setSeedRatio(_hash, seed_ratio)
+                utorrent.setSeedRatio(torrentid, seed_ratio)
 
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [album['AlbumID']])
     myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)', [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], "Snatched", folder_name, kind])
+
+    # Store the torrent id so we can check later if it's finished seeding and can be removed
+    if seed_ratio != None and seed_ratio != 0 and torrentid:
+        myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)', [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], "Seed_Snatched", torrentid, kind])
 
     # notify
     artist = album[1]
