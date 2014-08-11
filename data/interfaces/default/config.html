@@ -168,6 +168,68 @@
                                     <label>NZBget Category:</label>
                                     <input type="text" name="nzbget_category" value="${config['nzbget_cat']}" size="20">
                                 </div>
+                                <%
+                                    if config['nzbget_priority'] == -100:
+                                        prio_verylow = 'selected="selected"'
+                                        prio_low = ''
+                                        prio_normal = ''
+                                        prio_high = ''
+                                        prio_veryhigh = ''
+                                        prio_force = ''
+                                    elif config['nzbget_priority'] == -50:
+                                        prio_verylow = ''
+                                        prio_low = 'selected="selected"'
+                                        prio_normal = ''
+                                        prio_high = ''
+                                        prio_veryhigh = ''
+                                        prio_force = ''
+                                    elif config['nzbget_priority'] == 0:
+                                        prio_verylow = ''
+                                        prio_low = ''
+                                        prio_normal = 'selected="selected"'
+                                        prio_high = ''
+                                        prio_veryhigh = ''
+                                        prio_force = ''
+                                    elif config['nzbget_priority'] == 50:
+                                        prio_verylow = ''
+                                        prio_low = ''
+                                        prio_normal = ''
+                                        prio_high = 'selected="selected"'
+                                        prio_veryhigh = ''
+                                        prio_force = ''
+                                    elif config['nzbget_priority'] == 100:
+                                        prio_verylow = ''
+                                        prio_low = ''
+                                        prio_normal = ''
+                                        prio_high = ''
+                                        prio_veryhigh = 'selected="selected"'
+                                        prio_force = ''
+                                    elif config['nzbget_priority'] == 900:
+                                        prio_verylow = ''
+                                        prio_low = ''
+                                        prio_normal = ''
+                                        prio_high = ''
+                                        prio_veryhigh = ''
+                                        prio_force = 'selected="selected"'
+                                    else:
+                                        prio_verylow = ''
+                                        prio_low = ''
+                                        prio_normal = 'selected="selected"'
+                                        prio_high = ''
+                                        prio_veryhigh = ''
+                                        prio_force = ''
+                                %>
+                                <div class="row">
+                                    <label>NZBget Priority:</label>
+                                    <select name="nzbget_priority" id="nzbget_priority">
+                                        <option value="-100" ${prio_verylow}>Very Low</option>
+                                        <option value="-50" ${prio_low}>Low</option>
+                                        <option value="0" ${prio_normal}>Normal</option>
+                                        <option value="50" ${prio_high}>High</option>
+                                        <option value="100" ${prio_veryhigh}>Very High</option>
+                                        <option value="900" ${prio_force}>Force</option>
+                                    </select>
+                                </div>
                             </fieldset>
 
                             <fieldset id="blackhole_options">
