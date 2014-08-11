@@ -36,6 +36,7 @@ def request_lastfm(method, **kwargs):
     # Prepare request
     kwargs["method"] = method
     kwargs.setdefault("api_key", API_KEY)
+    kwargs.setdefault("lang", 'fr')
     kwargs.setdefault("format", "json")
 
     # Send request

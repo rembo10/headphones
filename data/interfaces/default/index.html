@@ -69,7 +69,11 @@
                         }
                         if (artist['ReleaseInFuture'] === 'True')
                         {
-                            grade = 'gradeA';
+                            grade = 'gradeC';
+                        }
+                        else if(full['HaveTracks']==full['TotalTracks'])
+                        {
+                        	grade = 'gradeA';
                         }
                         else
                         {
