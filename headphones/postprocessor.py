@@ -419,7 +419,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     myDB.action('UPDATE snatched SET status = "Processed" WHERE Status NOT LIKE "Seed%" and AlbumID=?', [albumid])
 
     # Check if torrent has finished seeding
-    if headphones.TORRENT_DOWNLOADER == (1 or 2):
+    if headphones.TORRENT_DOWNLOADER == 1 or headphones.TORRENT_DOWNLOADER == 2:
         seed_snatched = myDB.action('SELECT * from snatched WHERE Status="Seed_Snatched" and AlbumID=?', [albumid]).fetchone()
         if seed_snatched:
             hash = seed_snatched['FolderName']

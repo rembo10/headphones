@@ -162,14 +162,14 @@ def labelTorrent(hash):
     if label:
         uTorrentClient.setprops(hash,'label',label)
 
-def removeTorrent(hash):
+def removeTorrent(hash, remove_data = False):
     uTorrentClient = utorrentclient()
     status, torrentList = uTorrentClient.list()
     torrents = torrentList['torrents']
     for torrent in torrents:
         if torrent[0].lower() == hash and torrent[21] == 'Finished':
             logger.info('%s has finished seeding, removing torrent and data' % torrent[2])
-            uTorrentClient.remove(hash, True)
+            uTorrentClient.remove(hash, remove_data)
             return True
     return False
 
