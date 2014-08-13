@@ -98,9 +98,10 @@ def artistlist_to_mbids(artistlist, forced=False):
 
     # Update the similar artist tag cloud:
     logger.info('Updating artist information from Last.fm')
+
     try:
         lastfm.getSimilar()
-    except Exception, e:
+    except Exception as e:
         logger.warn('Failed to update arist information from Last.fm: %s' % e)
 
 def addArtistIDListToDB(artistidlist):
