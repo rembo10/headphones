@@ -98,9 +98,10 @@ def artistlist_to_mbids(artistlist, forced=False):
 
     # Update the similar artist tag cloud:
     logger.info('Updating artist information from Last.fm')
+
     try:
         lastfm.getSimilar()
-    except Exception, e:
+    except Exception as e:
         logger.warn('Failed to update arist information from Last.fm: %s' % e)
 
 def addArtistIDListToDB(artistidlist):
@@ -431,8 +432,15 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
 
             tracks = myDB.action('SELECT * from alltracks WHERE ReleaseID=?', [releaseid]).fetchall()
 
-            # This is used to see how many tracks you have from an album - to mark it as downloaded. Default is 80%, can be set in config as ALBUM_COMPLETION_PCT
+            # This is used to see how many tracks you have from an album - to
+            # mark it as downloaded. Default is 80%, can be set in config as
+            # ALBUM_COMPLETION_PCT
             total_track_count = len(tracks)
+
+            if total_track_count == 0:
+                logger.warning("Total track count is zero for Release ID " +
+                    "'%s', skipping.", releaseid)
+                continue
 
             for track in tracks:
 

@@ -47,10 +47,10 @@ def addTorrent(link):
     if response['result'] == 'success':
         if 'torrent-added' in response['arguments']:
             name = response['arguments']['torrent-added']['name']
-            retid = response['arguments']['torrent-added']['id']
+            retid = response['arguments']['torrent-added']['hashString']
         elif 'torrent-duplicate' in response['arguments']:
             name = response['arguments']['torrent-duplicate']['name']
-            retid = response['arguments']['torrent-duplicate']['id']
+            retid = response['arguments']['torrent-duplicate']['hashString']
         else:
             name = link
             retid = False
@@ -81,6 +81,39 @@ def getTorrentFolder(torrentid):
     torrent_folder_name = response['arguments']['torrents'][0]['name']
 
     return torrent_folder_name
+
+def setSeedRatio(torrentid, ratio):
+    method = 'torrent-set'
+    if ratio != 0:
+        arguments = {'seedRatioLimit': ratio, 'seedRatioMode': 1, 'ids': torrentid}
+    else:
+        arguments = {'seedRatioMode': 2, 'ids': torrentid}
+
+    response = torrentAction(method, arguments)
+    if not response:
+        return False
+
+def removeTorrent(torrentid, remove_data = False):
+
+    method = 'torrent-get'
+    arguments = { 'ids': torrentid, 'fields': ['isFinished', 'name']}
+
+    response = torrentAction(method, arguments)
+
+    finished = response['arguments']['torrents'][0]['isFinished']
+    name = response['arguments']['torrents'][0]['name']
+
+    if finished:
+        logger.info('%s has finished seeding, removing torrent and data' % name)
+        method = 'torrent-remove'
+        if remove_data:
+            arguments = {'delete-local-data': True, 'ids': torrentid}
+        else:
+            arguments = {'ids': torrentid}
+        response = torrentAction(method, arguments)
+        return True
+
+    return False
 
 def torrentAction(method, arguments):
 

@@ -24,7 +24,7 @@ import headphones
 from beets import autotag
 from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 
-from headphones import notifiers
+from headphones import notifiers, utorrent, transmission
 from headphones import db, albumart, librarysync, lyrics
 from headphones import logger, helpers, request, mb, music_encoder
 
@@ -305,7 +305,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
                 return
 
     logger.warn(u'Could not identify album: %s. It may not be the intended album.' % albumpath.decode(headphones.SYS_ENCODING, 'replace'))
-    myDB.action('UPDATE snatched SET status = "Unprocessed" WHERE AlbumID=?', [albumid])
+    myDB.action('UPDATE snatched SET status = "Unprocessed" WHERE status NOT LIKE "Seed%" and AlbumID=?', [albumid])
     processed = re.search(r' \(Unprocessed\)(?:\[\d+\])?', albumpath)
     if not processed:
         renameUnprocessedFolder(albumpath)
@@ -389,6 +389,9 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     if headphones.CLEANUP_FILES:
         cleanupFiles(albumpath)
 
+    if headphones.KEEP_NFO:
+        renameNFO(albumpath)
+        
     if headphones.ADD_ALBUM_ART and artwork:
         addAlbumArt(artwork, albumpath, release)
 
@@ -413,7 +416,24 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
 
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Downloaded" WHERE AlbumID=?', [albumid])
-    myDB.action('UPDATE snatched SET status = "Processed" WHERE AlbumID=?', [albumid])
+    myDB.action('UPDATE snatched SET status = "Processed" WHERE Status NOT LIKE "Seed%" and AlbumID=?', [albumid])
+
+    # Check if torrent has finished seeding
+    if headphones.TORRENT_DOWNLOADER == 1 or headphones.TORRENT_DOWNLOADER == 2:
+        seed_snatched = myDB.action('SELECT * from snatched WHERE Status="Seed_Snatched" and AlbumID=?', [albumid]).fetchone()
+        if seed_snatched:
+            hash = seed_snatched['FolderName']
+            torrent_removed = False
+            if headphones.TORRENT_DOWNLOADER == 1:
+                torrent_removed = transmission.removeTorrent(hash, True)
+            else:
+                torrent_removed = utorrent.removeTorrent(hash, True)
+
+            # Torrent removed, delete the snatched record, else update Status for scheduled job to check
+            if torrent_removed:
+                myDB.action('DELETE from snatched WHERE status = "Seed_Snatched" and AlbumID=?', [albumid])
+            else:
+                myDB.action('UPDATE snatched SET status = "Seed_Processed" WHERE status = "Seed_Snatched" and AlbumID=?', [albumid])
 
     # Update the have tracks for all created dirs:
     for albumpath in albumpaths:
@@ -560,11 +580,23 @@ def cleanupFiles(albumpath):
     for r,d,f in os.walk(albumpath):
         for files in f:
             if not any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
-                logger.debug('Removing: %s' % files)
-                try:
-                    os.remove(os.path.join(r, files))
+                if not (headphones.KEEP_NFO and files.lower().endswith('.nfo')):
+                    logger.debug('Removing: %s' % files)
+                    try:
+                        os.remove(os.path.join(r, files))
+                    except Exception, e:
+                        logger.error(u'Could not remove file: %s. Error: %s' % (files.decode(headphones.SYS_ENCODING, 'replace'), e))
+
+def renameNFO(albumpath):
+    for r,d,f in os.walk(albumpath):
+        for file in f:
+            if file.lower().endswith('.nfo'):
+                logger.debug('Renaming: "%s" to "%s"' % (file.decode(headphones.SYS_ENCODING, 'replace'), file.decode(headphones.SYS_ENCODING, 'replace') + '-orig'))
+                try:          
+                    new_file_name = os.path.join(r, file)[:-3] + 'orig.nfo'
+                    os.rename(os.path.join(r, file), new_file_name)
                 except Exception, e:
-                    logger.error(u'Could not remove file: %s. Error: %s' % (files.decode(headphones.SYS_ENCODING, 'replace'), e))
+                    logger.error(u'Could not rename file: %s. Error: %s' % (os.path.join(r, file).decode(headphones.SYS_ENCODING, 'replace'), e))
 
 def moveFiles(albumpath, release, tracks):
 
@@ -590,20 +622,27 @@ def moveFiles(albumpath, release, tracks):
         firstchar = '0-9'
     else:
         firstchar = sortname[0]
-
+    
+    for r,d,f in os.walk(albumpath):
+            try:
+                origfolder = os.path.basename(os.path.normpath(r))
+            except:
+                origfolder = ''   
 
     values = {  '$Artist':  artist,
                 '$SortArtist': sortname,
                 '$Album':   album,
                 '$Year':        year,
                 '$Type':  releasetype,
+                '$OriginalFolder': origfolder,
                 '$First':   firstchar.upper(),
                 '$artist':  artist.lower(),
                 '$sortartist': sortname.lower(),
                 '$album':   album.lower(),
                 '$year':        year,
                 '$type':  releasetype.lower(),
-                '$first':   firstchar.lower()
+                '$first':   firstchar.lower(),
+                '$originalfolder': origfolder.lower()
             }
 
     folder = helpers.replace_all(headphones.FOLDER_FORMAT.strip(), values)

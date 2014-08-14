@@ -145,7 +145,7 @@ class Api(object):
         return
 
     def _getHistory(self, **kwargs):
-        self.data = self._dic_from_query('SELECT * from snatched order by DateAdded DESC')
+        self.data = self._dic_from_query('SELECT * from snatched WHERE status NOT LIKE "Seed%" order by DateAdded DESC')
         return
 
     def _getUpcoming(self, **kwargs):
