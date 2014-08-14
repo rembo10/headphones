@@ -735,7 +735,7 @@ class WebInterface(object):
 
     def history(self):
         myDB = db.DBConnection()
-        history = myDB.select('''SELECT * from snatched order by DateAdded DESC''')
+        history = myDB.select('''SELECT * from snatched WHERE Status NOT LIKE "Seed%" order by DateAdded DESC''')
         return serve_template(templatename="history.html", title="History", history=history)
     history.exposed = True
 
@@ -901,13 +901,13 @@ class WebInterface(object):
         if type:
             if type == 'all':
                 logger.info(u"Clearing all history")
-                myDB.action('DELETE from snatched')
+                myDB.action('DELETE from snatched WHERE Status NOT LIKE "Seed%"')
             else:
                 logger.info(u"Clearing history where status is %s" % type)
                 myDB.action('DELETE from snatched WHERE Status=?', [type])
         else:
             logger.info(u"Deleting '%s' from history" % title)
-            myDB.action('DELETE from snatched WHERE Title=? AND DateAdded=?', [title, date_added])
+            myDB.action('DELETE from snatched WHERE Status NOT LIKE "Seed%" AND Title=? AND DateAdded=?', [title, date_added])
         raise cherrypy.HTTPRedirect("history")
     clearhistory.exposed = True
 
@@ -971,6 +971,7 @@ class WebInterface(object):
                     "nzbget_user" : headphones.NZBGET_USERNAME,
                     "nzbget_pass" : headphones.NZBGET_PASSWORD,
                     "nzbget_cat" : headphones.NZBGET_CATEGORY,
+                    "nzbget_priority" : headphones.NZBGET_PRIORITY,
                     "transmission_host" : headphones.TRANSMISSION_HOST,
                     "transmission_user" : headphones.TRANSMISSION_USERNAME,
                     "transmission_pass" : headphones.TRANSMISSION_PASSWORD,
@@ -1008,18 +1009,24 @@ class WebInterface(object):
                     "numberofseeders" : headphones.NUMBEROFSEEDERS,
                     "use_kat" : checked(headphones.KAT),
                     "kat_proxy_url" : headphones.KAT_PROXY_URL,
+                    "kat_ratio": headphones.KAT_RATIO,
                     "use_piratebay" : checked(headphones.PIRATEBAY),
                     "piratebay_proxy_url" : headphones.PIRATEBAY_PROXY_URL,
+                    "piratebay_ratio": headphones.PIRATEBAY_RATIO,
                     "use_mininova" : checked(headphones.MININOVA),
+                    "mininova_ratio": headphones.MININOVA_RATIO,
                     "use_waffles" : checked(headphones.WAFFLES),
                     "waffles_uid" : headphones.WAFFLES_UID,
                     "waffles_passkey": headphones.WAFFLES_PASSKEY,
+                    "waffles_ratio": headphones.WAFFLES_RATIO,
                     "use_rutracker" : checked(headphones.RUTRACKER),
                     "rutracker_user" : headphones.RUTRACKER_USER,
                     "rutracker_password": headphones.RUTRACKER_PASSWORD,
+                    "rutracker_ratio": headphones.RUTRACKER_RATIO,
                     "use_whatcd" : checked(headphones.WHATCD),
                     "whatcd_username" : headphones.WHATCD_USERNAME,
                     "whatcd_password": headphones.WHATCD_PASSWORD,
+                    "whatcd_ratio": headphones.WHATCD_RATIO,
                     "pref_qual_0" : radio(headphones.PREFERRED_QUALITY, 0),
                     "pref_qual_1" : radio(headphones.PREFERRED_QUALITY, 1),
                     "pref_qual_3" : radio(headphones.PREFERRED_QUALITY, 3),
@@ -1035,6 +1042,7 @@ class WebInterface(object):
                     "rename_files" : checked(headphones.RENAME_FILES),
                     "correct_metadata" : checked(headphones.CORRECT_METADATA),
                     "cleanup_files" : checked(headphones.CLEANUP_FILES),
+                    "keep_nfo" : checked(headphones.KEEP_NFO),
                     "add_album_art" : checked(headphones.ADD_ALBUM_ART),
                     "album_art_format" : headphones.ALBUM_ART_FORMAT,
                     "embed_album_art" : checked(headphones.EMBED_ALBUM_ART),
@@ -1154,12 +1162,12 @@ class WebInterface(object):
 
     def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None,
         download_scan_interval=None, update_db_interval=None, mb_ignore_age=None, nzb_search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None,
-        sab_category=None, nzbget_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, transmission_host=None, transmission_username=None, transmission_password=None,
+        sab_category=None, nzbget_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, nzbget_priority=0, transmission_host=None, transmission_username=None, transmission_password=None,
         utorrent_host=None, utorrent_username=None, utorrent_password=None, utorrent_label=None,nzb_downloader=0, torrent_downloader=0, download_dir=None, blackhole_dir=None, usenet_retention=None,
         use_headphones_indexer=0, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, omgwtfnzbs=0, omgwtfnzbs_uid=None, omgwtfnzbs_apikey=None,
         preferred_words=None, required_words=None, ignored_words=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None,
-        numberofseeders=None, use_piratebay=0, piratebay_proxy_url=None, use_kat=0, kat_proxy_url=None, use_mininova=0, waffles=0, waffles_uid=None, waffles_passkey=None, whatcd=0, whatcd_username=None, whatcd_password=None,
-        rutracker=0, rutracker_user=None, rutracker_password=None, rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0, replace_existing_folders=False,
+        numberofseeders=None, use_piratebay=0, piratebay_proxy_url=None, piratebay_ratio=None, use_kat=0, kat_proxy_url=None, kat_ratio=None, use_mininova=0, mininova_ratio=None, waffles=0, waffles_uid=None, waffles_passkey=None, waffles_ratio=None, whatcd=0, whatcd_username=None, whatcd_password=None, whatcd_ratio=None,
+        rutracker=0, rutracker_user=None, rutracker_password=None, rutracker_ratio=None, rename_files=0, correct_metadata=0, cleanup_files=0, keep_nfo=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0, replace_existing_folders=False,
         destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, file_underscores=0, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0,
         remix=0, djmix=0, mixtape_street=0, broadcast=0, interview=0, spokenword=0, audiobook=0, other=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, prefer_torrents=0, open_magnet_links=0, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
         bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
@@ -1195,6 +1203,7 @@ class WebInterface(object):
         headphones.NZBGET_USERNAME = nzbget_username
         headphones.NZBGET_PASSWORD = nzbget_password
         headphones.NZBGET_CATEGORY = nzbget_category
+        headphones.NZBGET_PRIORITY = int(nzbget_priority)
         headphones.TRANSMISSION_HOST = transmission_host
         headphones.TRANSMISSION_USERNAME = transmission_username
         headphones.TRANSMISSION_PASSWORD = transmission_password
@@ -1226,18 +1235,24 @@ class WebInterface(object):
         headphones.DOWNLOAD_TORRENT_DIR = download_torrent_dir
         headphones.KAT = use_kat
         headphones.KAT_PROXY_URL = kat_proxy_url
+        headphones.KAT_RATIO = kat_ratio
         headphones.PIRATEBAY = use_piratebay
         headphones.PIRATEBAY_PROXY_URL = piratebay_proxy_url
+        headphones.PIRATEBAY_RATIO = piratebay_ratio
         headphones.MININOVA = use_mininova
+        headphones.MININOVA_RATIO = mininova_ratio
         headphones.WAFFLES = waffles
         headphones.WAFFLES_UID = waffles_uid
         headphones.WAFFLES_PASSKEY = waffles_passkey
+        headphones.WAFFLES_RATIO = waffles_ratio
         headphones.RUTRACKER = rutracker
         headphones.RUTRACKER_USER = rutracker_user
         headphones.RUTRACKER_PASSWORD = rutracker_password
+        headphones.RUTRACKER_RATIO = rutracker_ratio
         headphones.WHATCD = whatcd
         headphones.WHATCD_USERNAME = whatcd_username
         headphones.WHATCD_PASSWORD = whatcd_password
+        headphones.WHATCD_RATIO = whatcd_ratio
         headphones.PREFERRED_QUALITY = int(preferred_quality)
         headphones.PREFERRED_BITRATE = preferred_bitrate
         headphones.PREFERRED_BITRATE_HIGH_BUFFER = preferred_bitrate_high_buffer
@@ -1250,6 +1265,7 @@ class WebInterface(object):
         headphones.CORRECT_METADATA = correct_metadata
         headphones.RENAME_FILES = rename_files
         headphones.CLEANUP_FILES = cleanup_files
+        headphones.KEEP_NFO = keep_nfo
         headphones.ADD_ALBUM_ART = add_album_art
         headphones.ALBUM_ART_FORMAT = album_art_format
         headphones.EMBED_ALBUM_ART = embed_album_art

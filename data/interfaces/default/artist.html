@@ -128,7 +128,7 @@
 				%if album['Status'] == 'Skipped' or album['Status'] == 'Ignored':
 					[<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' added to Wanted list">want</a>]
 				%elif (album['Status'] == 'Wanted' or album['Status'] == 'Wanted Lossless'):
-					[<a href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' skipped">skip</a>]
+                    [<a href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' skipped">skip</a>] [<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),'table')" data-success="Trying to download'${album['AlbumTitle']}'" title="Search if available for download">search</a>]
 				%else:
 					[<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),'table')" data-success="Retrying the same version of '${album['AlbumTitle']}'" title="Retry the same download again">retry</a>][<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),'table')" title="Try a new download, skipping all previously tried nzbs"  data-success="Downloading new version for '${album['AlbumTitle']}'" data-success="Looking for a new version of '${album['AlbumTitle']}'">new</a>]
 				%endif

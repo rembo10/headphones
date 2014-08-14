@@ -111,6 +111,7 @@ CORRECT_METADATA = False
 MOVE_FILES = False
 RENAME_FILES = False
 CLEANUP_FILES = False
+KEEP_NFO = False
 ADD_ALBUM_ART = False
 ALBUM_ART_FORMAT = None
 EMBED_ALBUM_ART = False
@@ -147,6 +148,7 @@ NZBGET_USERNAME = None
 NZBGET_PASSWORD = None
 NZBGET_CATEGORY = None
 NZBGET_HOST = None
+NZBGET_PRIORITY = 0
 
 HEADPHONES_INDEXER = False
 
@@ -189,18 +191,24 @@ TORRENTBLACKHOLE_DIR = None
 NUMBEROFSEEDERS = 10
 KAT = None
 KAT_PROXY_URL = None
+KAT_RATIO = None
 MININOVA = None
+MININOVA_RATIO = None
 PIRATEBAY = None
 PIRATEBAY_PROXY_URL = None
+PIRATEBAY_RATIO = None
 WAFFLES = None
 WAFFLES_UID = None
 WAFFLES_PASSKEY = None
+WAFFLES_RATIO = None
 RUTRACKER = None
 RUTRACKER_USER = None
 RUTRACKER_PASSWORD = None
+RUTRACKER_RATIO = None
 WHATCD = None
 WHATCD_USERNAME = None
 WHATCD_PASSWORD = None
+WHATCD_RATIO = None
 DOWNLOAD_TORRENT_DIR = None
 
 INTERFACE = None
@@ -343,12 +351,12 @@ def initialize():
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, GIT_USER, GIT_BRANCH, DO_NOT_OVERRIDE_GIT_BRANCH, \
                 CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
-                RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, FILE_UNDERSCORES, CLEANUP_FILES, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, PREFER_TORRENTS, OPEN_MAGNET_LINKS, \
+                RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, FILE_UNDERSCORES, CLEANUP_FILES, KEEP_NFO, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, PREFER_TORRENTS, OPEN_MAGNET_LINKS, \
                 ADD_ALBUM_ART, ALBUM_ART_FORMAT, EMBED_ALBUM_ART, EMBED_LYRICS, REPLACE_EXISTING_FOLDERS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
-                TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, KAT, KAT_PROXY_URL, PIRATEBAY, PIRATEBAY_PROXY_URL, MININOVA, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, \
-                RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, DOWNLOAD_TORRENT_DIR, \
+                TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, KAT, KAT_PROXY_URL, KAT_RATIO, PIRATEBAY, PIRATEBAY_PROXY_URL, PIRATEBAY_RATIO, MININOVA, MININOVA_RATIO, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, WAFFLES_RATIO, \
+                RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, RUTRACKER_RATIO, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, WHATCD_RATIO, DOWNLOAD_TORRENT_DIR, \
                 LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, UPDATE_DB_INTERVAL, MB_IGNORE_AGE, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
-                NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, HEADPHONES_INDEXER, NZBMATRIX, TRANSMISSION_HOST, TRANSMISSION_USERNAME, TRANSMISSION_PASSWORD, \
+                NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_PRIORITY, NZBGET_HOST, HEADPHONES_INDEXER, NZBMATRIX, TRANSMISSION_HOST, TRANSMISSION_USERNAME, TRANSMISSION_PASSWORD, \
                 UTORRENT_HOST, UTORRENT_USERNAME, UTORRENT_PASSWORD, UTORRENT_LABEL, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, OMGWTFNZBS, OMGWTFNZBS_UID, OMGWTFNZBS_APIKEY, \
                 NZB_DOWNLOADER, TORRENT_DOWNLOADER, PREFERRED_WORDS, REQUIRED_WORDS, IGNORED_WORDS, LASTFM_USERNAME, \
@@ -377,6 +385,9 @@ def initialize():
         CheckSection('Newznab')
         CheckSection('NZBsorg')
         CheckSection('omgwtfnzbs')
+        CheckSection('Piratebay')
+        CheckSection('Kat')
+        CheckSection('Mininova')
         CheckSection('Waffles')
         CheckSection('Rutracker')
         CheckSection('What.cd')
@@ -448,6 +459,7 @@ def initialize():
         FILE_FORMAT = check_setting_str(CFG, 'General', 'file_format', 'Track Artist - Album [Year] - Title')
         FILE_UNDERSCORES = bool(check_setting_int(CFG, 'General', 'file_underscores', 0))
         CLEANUP_FILES = bool(check_setting_int(CFG, 'General', 'cleanup_files', 0))
+        KEEP_NFO = bool(check_setting_int(CFG, 'General', 'keep_nfo', 0))
         ADD_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'add_album_art', 0))
         ALBUM_ART_FORMAT = check_setting_str(CFG, 'General', 'album_art_format', 'folder')
         EMBED_ALBUM_ART = bool(check_setting_int(CFG, 'General', 'embed_album_art', 0))
@@ -476,24 +488,33 @@ def initialize():
 
         TORRENTBLACKHOLE_DIR = check_setting_str(CFG, 'General', 'torrentblackhole_dir', '')
         NUMBEROFSEEDERS = check_setting_str(CFG, 'General', 'numberofseeders', '10')
-        KAT = bool(check_setting_int(CFG, 'General', 'kat', 0))
-        KAT_PROXY_URL = check_setting_str(CFG, 'General', 'kat_proxy_url', '')
-        PIRATEBAY = bool(check_setting_int(CFG, 'General', 'piratebay', 0))
-        PIRATEBAY_PROXY_URL = check_setting_str(CFG, 'General', 'piratebay_proxy_url', '')
-        MININOVA = bool(check_setting_int(CFG, 'General', 'mininova', 0))
         DOWNLOAD_TORRENT_DIR = check_setting_str(CFG, 'General', 'download_torrent_dir', '')
+
+        KAT = bool(check_setting_int(CFG, 'Kat', 'kat', 0))
+        KAT_PROXY_URL = check_setting_str(CFG, 'Kat', 'kat_proxy_url', '')
+        KAT_RATIO = check_setting_str(CFG, 'Kat', 'kat_ratio', '')
+
+        PIRATEBAY = bool(check_setting_int(CFG, 'Piratebay', 'piratebay', 0))
+        PIRATEBAY_PROXY_URL = check_setting_str(CFG, 'Piratebay', 'piratebay_proxy_url', '')
+        PIRATEBAY_RATIO = check_setting_str(CFG, 'Piratebay', 'piratebay_ratio', '')
+
+        MININOVA = bool(check_setting_int(CFG, 'Mininova', 'mininova', 0))
+        MININOVA_RATIO = check_setting_str(CFG, 'Mininova', 'mininova_ratio', '')
 
         WAFFLES = bool(check_setting_int(CFG, 'Waffles', 'waffles', 0))
         WAFFLES_UID = check_setting_str(CFG, 'Waffles', 'waffles_uid', '')
         WAFFLES_PASSKEY = check_setting_str(CFG, 'Waffles', 'waffles_passkey', '')
+        WAFFLES_RATIO = check_setting_str(CFG, 'Waffles', 'waffles_ratio', '')
 
         RUTRACKER = bool(check_setting_int(CFG, 'Rutracker', 'rutracker', 0))
         RUTRACKER_USER = check_setting_str(CFG, 'Rutracker', 'rutracker_user', '')
         RUTRACKER_PASSWORD = check_setting_str(CFG, 'Rutracker', 'rutracker_password', '')
+        RUTRACKER_RATIO = check_setting_str(CFG, 'Rutracker', 'rutracker_ratio', '')
 
         WHATCD = bool(check_setting_int(CFG, 'What.cd', 'whatcd', 0))
         WHATCD_USERNAME = check_setting_str(CFG, 'What.cd', 'whatcd_username', '')
         WHATCD_PASSWORD = check_setting_str(CFG, 'What.cd', 'whatcd_password', '')
+        WHATCD_RATIO = check_setting_str(CFG, 'What.cd', 'whatcd_ratio', '')
 
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
@@ -505,6 +526,7 @@ def initialize():
         NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', '')
         NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', '')
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
+        NZBGET_PRIORITY = check_setting_int(CFG, 'NZBget', 'nzbget_priority', 0)
 
         HEADPHONES_INDEXER = bool(check_setting_int(CFG, 'Headphones', 'headphones_indexer', 0))
 
@@ -872,6 +894,7 @@ def config_write():
     new_config['General']['file_format'] = FILE_FORMAT
     new_config['General']['file_underscores'] = int(FILE_UNDERSCORES)
     new_config['General']['cleanup_files'] = int(CLEANUP_FILES)
+    new_config['General']['keep_nfo'] = int(KEEP_NFO)
     new_config['General']['add_album_art'] = int(ADD_ALBUM_ART)
     new_config['General']['album_art_format'] = ALBUM_ART_FORMAT
     new_config['General']['embed_album_art'] = int(EMBED_ALBUM_ART)
@@ -892,27 +915,39 @@ def config_write():
 
     new_config['General']['numberofseeders'] = NUMBEROFSEEDERS
     new_config['General']['torrentblackhole_dir'] = TORRENTBLACKHOLE_DIR
-    new_config['General']['kat'] = int(KAT)
-    new_config['General']['kat_proxy_url'] = KAT_PROXY_URL
-    new_config['General']['mininova'] = int(MININOVA)
-    new_config['General']['piratebay'] = int(PIRATEBAY)
-    new_config['General']['piratebay_proxy_url'] = PIRATEBAY_PROXY_URL
     new_config['General']['download_torrent_dir'] = DOWNLOAD_TORRENT_DIR
+
+    new_config['Kat'] = {}
+    new_config['Kat']['kat'] = int(KAT)
+    new_config['Kat']['kat_proxy_url'] = KAT_PROXY_URL
+    new_config['Kat']['kat_ratio'] = KAT_RATIO
+
+    new_config['Mininova'] = {}
+    new_config['Mininova']['mininova'] = int(MININOVA)
+    new_config['Mininova']['mininova_ratio'] = MININOVA_RATIO
+
+    new_config['Piratebay'] = {}
+    new_config['Piratebay']['piratebay'] = int(PIRATEBAY)
+    new_config['Piratebay']['piratebay_proxy_url'] = PIRATEBAY_PROXY_URL
+    new_config['Piratebay']['piratebay_ratio'] = PIRATEBAY_RATIO
 
     new_config['Waffles'] = {}
     new_config['Waffles']['waffles'] = int(WAFFLES)
     new_config['Waffles']['waffles_uid'] = WAFFLES_UID
     new_config['Waffles']['waffles_passkey'] = WAFFLES_PASSKEY
+    new_config['Waffles']['waffles_ratio'] = WAFFLES_RATIO
 
     new_config['Rutracker'] = {}
     new_config['Rutracker']['rutracker'] = int(RUTRACKER)
     new_config['Rutracker']['rutracker_user'] = RUTRACKER_USER
     new_config['Rutracker']['rutracker_password'] = RUTRACKER_PASSWORD
+    new_config['Rutracker']['rutracker_ratio'] = RUTRACKER_RATIO
 
     new_config['What.cd'] = {}
     new_config['What.cd']['whatcd'] = int(WHATCD)
     new_config['What.cd']['whatcd_username'] = WHATCD_USERNAME
     new_config['What.cd']['whatcd_password'] = WHATCD_PASSWORD
+    new_config['What.cd']['whatcd_ratio'] = WHATCD_RATIO
 
     new_config['General']['search_interval'] = SEARCH_INTERVAL
     new_config['General']['libraryscan'] = int(LIBRARYSCAN)
@@ -933,6 +968,7 @@ def config_write():
     new_config['NZBget']['nzbget_password'] = NZBGET_PASSWORD
     new_config['NZBget']['nzbget_category'] = NZBGET_CATEGORY
     new_config['NZBget']['nzbget_host'] = NZBGET_HOST
+    new_config['NZBget']['nzbget_priority'] = NZBGET_PRIORITY
 
     new_config['Headphones'] = {}
     new_config['Headphones']['headphones_indexer'] = int(HEADPHONES_INDEXER)
@@ -1101,7 +1137,7 @@ def start():
     if __INITIALIZED__:
 
         # Start our scheduled background tasks
-        from headphones import updater, searcher, librarysync, postprocessor
+        from headphones import updater, searcher, librarysync, postprocessor, torrentfinished
 
         SCHED.add_interval_job(updater.dbUpdate, hours=UPDATE_DB_INTERVAL)
         SCHED.add_interval_job(searcher.searchforalbum, minutes=SEARCH_INTERVAL)
@@ -1112,6 +1148,9 @@ def start():
 
         if DOWNLOAD_SCAN_INTERVAL > 0:
             SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
+
+        # Remove Torrent + data if Post Processed and finished Seeding
+        SCHED.add_interval_job(torrentfinished.checkTorrentFinished, hours=12)
 
         SCHED.start()
 

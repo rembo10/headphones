@@ -569,6 +569,8 @@ def send_to_downloader(data, bestqual, album):
     logger.info(u'Found best result from %s: <a href="%s">%s</a> - %s', bestqual[3], bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1]))
     # Get rid of any dodgy chars here so we can prevent sab from renaming our downloads
     kind = bestqual[4]
+    seed_ratio = None
+    torrentid = None
 
     if kind == 'nzb':
         folder_name = helpers.sab_sanitize_foldername(bestqual[0])
@@ -674,7 +676,7 @@ def send_to_downloader(data, bestqual, album):
 
             # rutracker needs cookies to be set, pass the .torrent file instead of url
             if bestqual[3] == 'rutracker.org':
-                file_or_url, _hash = rutracker.get_torrent(bestqual[2])
+                file_or_url, torrentid = rutracker.get_torrent(bestqual[2])
             else:
                 file_or_url = bestqual[2]
 
@@ -698,19 +700,24 @@ def send_to_downloader(data, bestqual, album):
                 except Exception as e:
                     logger.exception("Unhandled exception")
 
+            # Set Seed Ratio
+            seed_ratio = getSeedRatio(bestqual[3])
+            if seed_ratio != None:
+                transmission.setSeedRatio(torrentid, seed_ratio)
+
         else:# if headphones.TORRENT_DOWNLOADER == 2:
             logger.info("Sending torrent to uTorrent")
 
             # rutracker needs cookies to be set, pass the .torrent file instead of url
             if bestqual[3] == 'rutracker.org':
-                file_or_url, _hash = rutracker.get_torrent(bestqual[2])
-                folder_name, cacheid = utorrent.dirTorrent(_hash)
+                file_or_url, torrentid = rutracker.get_torrent(bestqual[2])
+                folder_name, cacheid = utorrent.dirTorrent(torrentid)
                 folder_name = os.path.basename(os.path.normpath(folder_name))
-                utorrent.labelTorrent(_hash)
+                utorrent.labelTorrent(torrentid)
             else:
                 file_or_url = bestqual[2]
-                _hash = CalculateTorrentHash(file_or_url, data)
-                folder_name = utorrent.addTorrent(file_or_url, _hash)
+                torrentid = CalculateTorrentHash(file_or_url, data)
+                folder_name = utorrent.addTorrent(file_or_url, torrentid)
 
             if folder_name:
                 logger.info('Torrent folder name: %s' % folder_name)
@@ -725,9 +732,18 @@ def send_to_downloader(data, bestqual, album):
                 except Exception as e:
                     logger.exception("Unhandled exception")
 
+            # Set Seed Ratio
+            seed_ratio = getSeedRatio(bestqual[3])
+            if seed_ratio != None:
+                utorrent.setSeedRatio(torrentid, seed_ratio)
+
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [album['AlbumID']])
     myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)', [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], "Snatched", folder_name, kind])
+
+    # Store the torrent id so we can check later if it's finished seeding and can be removed
+    if seed_ratio != None and seed_ratio != 0 and torrentid:
+        myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)', [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], "Seed_Snatched", torrentid, kind])
 
     # notify
     artist = album[1]
@@ -1351,3 +1367,27 @@ def CalculateTorrentHash(link, data):
     logger.debug('Torrent Hash: ' + str(tor_hash))
 
     return tor_hash
+
+def getSeedRatio(provider):
+    seed_ratio = ''
+    if provider == 'rutracker.org':
+        seed_ratio = headphones.RUTRACKER_RATIO
+    elif provider == 'Kick Ass Torrents':
+        seed_ratio = headphones.KAT_RATIO
+    elif provider == 'What.cd':
+        seed_ratio = headphones.WHATCD_RATIO
+    elif provider == 'The Pirate Bay':
+        seed_ratio = headphones.PIRATEBAY_RATIO
+    elif provider == 'Waffles.fm':
+        seed_ratio = headphones.WAFFLES_RATIO
+    elif provider == 'Mininova':
+        seed_ratio = headphones.MININOVA_RATIO
+    if seed_ratio != '':
+        try:
+            seed_ratio_float = float(seed_ratio)
+        except:
+            seed_ratio_float = None
+            logger.warn('Could not get Seed Ratio for %s' % provider)
+        return seed_ratio_float
+    else:
+        return None
