@@ -20,7 +20,7 @@ import headphones
 
 from headphones import db, helpers, logger, lastfm, request
 
-lastfm_apikey = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
+LASTFM_API_KEY = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
 
 class Cache(object):
     """
@@ -59,7 +59,6 @@ class Cache(object):
     info_content = None
 
     def __init__(self):
-
         pass
 
     def _findfilesstartingwith(self,pattern,folder):
@@ -209,7 +208,7 @@ class Cache(object):
         if ArtistID:
 
             self.id_type = 'artist'
-            data = lastfm.request_lastfm("artist.getinfo", mbid=ArtistID, api_key=lastfm_apikey)
+            data = lastfm.request_lastfm("artist.getinfo", mbid=ArtistID, api_key=LASTFM_API_KEY)
 
             if not data:
                 return
@@ -227,7 +226,7 @@ class Cache(object):
         else:
 
             self.id_type = 'album'
-            data = lastfm.request_lastfm("album.getinfo", mbid=AlbumID, api_key=lastfm_apikey)
+            data = lastfm.request_lastfm("album.getinfo", mbid=AlbumID, api_key=LASTFM_API_KEY)
 
             if not data:
                 return
@@ -254,7 +253,7 @@ class Cache(object):
         # Since lastfm uses release ids rather than release group ids for albums, we have to do a artist + album search for albums
         if self.id_type == 'artist':
 
-            data = lastfm.request_lastfm("artist.getinfo", mbid=self.id, api_key=lastfm_apikey)
+            data = lastfm.request_lastfm("artist.getinfo", mbid=self.id, api_key=LASTFM_API_KEY)
 
             if not data:
                 return
@@ -282,7 +281,7 @@ class Cache(object):
         else:
 
             dbartist = myDB.action('SELECT ArtistName, AlbumTitle FROM albums WHERE AlbumID=?', [self.id]).fetchone()
-            data = lastfm.request_lastfm("album.getinfo", artist=dbartist['ArtistName'], album=dbartist['AlbumTitle'], api_key=lastfm_apikey)
+            data = lastfm.request_lastfm("album.getinfo", artist=dbartist['ArtistName'], album=dbartist['AlbumTitle'], api_key=LASTFM_API_KEY)
 
             if not data:
                 return

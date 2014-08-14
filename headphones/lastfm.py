@@ -21,8 +21,9 @@ from headphones import db, logger, request
 
 from collections import defaultdict
 
-ENTRY_POINT = 'http://ws.audioscrobbler.com/2.0/'
-API_KEY = '395e6ec6bb557382fc41fde867bce66f'
+TIMEOUT = 60 # seconds
+ENTRY_POINT = "http://ws.audioscrobbler.com/2.0/"
+API_KEY = "395e6ec6bb557382fc41fde867bce66f"
 
 def request_lastfm(method, **kwargs):
     """
@@ -40,7 +41,7 @@ def request_lastfm(method, **kwargs):
 
     # Send request
     logger.debug("Calling Last.FM method: %s", method)
-    data = request.request_json(ENTRY_POINT, timeout=20, params=kwargs)
+    data = request.request_json(ENTRY_POINT, timeout=TIMEOUT, params=kwargs)
 
     # Parse response and check for errors.
     if not data:
@@ -55,13 +56,13 @@ def request_lastfm(method, **kwargs):
 
 def getSimilar():
     myDB = db.DBConnection()
-    results = myDB.select('SELECT ArtistID from artists ORDER BY HaveTracks DESC')
+    results = myDB.select("SELECT ArtistID from artists ORDER BY HaveTracks DESC")
 
     logger.info("Fetching similar artists from Last.FM for tag cloud")
     artistlist = []
 
     for result in results[:12]:
-        data = request_lastfm("artist.getsimilar", mbid=result['ArtistId'])
+        data = request_lastfm("artist.getsimilar", mbid=result["ArtistId"])
         time.sleep(10)
 
         if data and "similarartists" in data:
@@ -94,13 +95,13 @@ def getSimilar():
         artist_name, artist_mbid = item[0]
         count = item[1]
 
-        myDB.action('INSERT INTO lastfmcloud VALUES( ?, ?, ?)', [artist_name, artist_mbid, count])
+        myDB.action("INSERT INTO lastfmcloud VALUES( ?, ?, ?)", [artist_name, artist_mbid, count])
 
     logger.debug("Inserted %d artists into Last.FM tag cloud", len(top_list))
 
 def getArtists():
     myDB = db.DBConnection()
-    results = myDB.select('SELECT ArtistID from artists')
+    results = myDB.select("SELECT ArtistID from artists")
 
     if not headphones.LASTFM_USERNAME:
         logger.warn("Last.FM username not set, not importing artists.")
@@ -129,7 +130,7 @@ def getArtists():
 
 def getTagTopArtists(tag, limit=50):
     myDB = db.DBConnection()
-    results = myDB.select('SELECT ArtistID from artists')
+    results = myDB.select("SELECT ArtistID from artists")
 
     logger.info("Fetching top artists from Last.FM for tag: %s", tag)
     data = request_lastfm("tag.gettopartists", limit=limit, tag=tag)
