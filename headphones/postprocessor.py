@@ -620,15 +620,16 @@ def cleanupFiles(albumpath):
                                                                     e))
 
 def renameNFO(albumpath):
-    for r,d,f in os.walk(albumpath):
-        for file in f:
-            if file.lower().endswith('.nfo'):
-                logger.debug('Renaming: "%s" to "%s"' % (file.decode(headphones.SYS_ENCODING, 'replace'), file.decode(headphones.SYS_ENCODING, 'replace') + '-orig'))
-                try:          
-                    new_file_name = os.path.join(r, file)[:-3] + 'orig.nfo'
-                    os.rename(os.path.join(r, file), new_file_name)
-                except Exception, e:
-                    logger.error(u'Could not rename file: %s. Error: %s' % (os.path.join(r, file).decode(headphones.SYS_ENCODING, 'replace'), e))
+    files = find_in_path(albumpath, extra_formats="nfo", use_MF=False)
+    for _f in files:
+        _f_decoded = _f.decode(headphones.SYS_ENCODING, 'replace')
+        logger.debug('Renaming: "%s" to "%s"' % (_f_decoded, _f_decoded + '-orig'))
+        try:
+            new_file_name = _f[:-3] + 'orig.nfo'
+            os.rename(_f, new_file_name)
+        except Exception, e:
+            logger.error(u'Could not rename file: %s. Error: %s' % (_f_decoded,
+                                                                    e))
 
 def moveFiles(albumpath, release, tracks):
 
