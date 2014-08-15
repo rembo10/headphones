@@ -695,13 +695,14 @@ def moveFiles(albumpath, release, tracks):
     lossy_media = False
     lossless_media = False
 
-    for r,d,f in os.walk(albumpath):
-        for files in f:
-            files_to_move.append(os.path.join(r, files))
-            if any(files.lower().endswith('.' + x.lower()) for x in headphones.LOSSY_MEDIA_FORMATS):
-                lossy_media = True
-            if any(files.lower().endswith('.' + x.lower()) for x in headphones.LOSSLESS_MEDIA_FORMATS):
-                lossless_media = True
+    if find_in_path(albumpath,
+                    extra_formats=headphones.LOSSY_MEDIA_FORMATS,
+                    use_MF=False):
+        lossy_media = True
+    if find_in_path(albumpath,
+                    extra_formats=headphones.LOSSLESS_MEDIA_FORMATS,
+                    use_MF=False):
+        lossless_media = True
 
     # Do some sanity checking to see what directories we need to create:
     make_lossy_folder = False
