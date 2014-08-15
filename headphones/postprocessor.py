@@ -50,9 +50,9 @@ def find_in_path(albumpath, extra_formats=None, use_MF=True):
             return False
         mf = headphones.MEDIA_FORMATS
     for r, d, f in os.walk(albumpath):
-        for file in f:
-            if any(file.lower().endswith('.' + x.lower()) for x in mf):
-                found_tracks.append(os.path.join(r, file))
+        for _file in f:
+            if any(_file.lower().endswith('.' + x.lower()) for x in mf):
+                found_tracks.append(os.path.join(r, _file))
     return found_tracks
 
 
@@ -420,7 +420,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
 
     if headphones.KEEP_NFO:
         renameNFO(albumpath)
-        
+
     if headphones.ADD_ALBUM_ART and artwork:
         addAlbumArt(artwork, albumpath, release)
 
@@ -655,12 +655,12 @@ def moveFiles(albumpath, release, tracks):
         firstchar = '0-9'
     else:
         firstchar = sortname[0]
-    
+
     for r,d,f in os.walk(albumpath):
             try:
                 origfolder = os.path.basename(os.path.normpath(r))
             except:
-                origfolder = ''   
+                origfolder = ''
 
     values = {  '$Artist':  artist,
                 '$SortArtist': sortname,
