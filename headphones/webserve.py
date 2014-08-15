@@ -460,8 +460,9 @@ class WebInterface(object):
                     have_album_dictionary.append(have_dict)
         headphones_albums = myDB.select('SELECT ArtistName, AlbumTitle from albums ORDER BY ArtistName')
         for albums in headphones_albums:
-            headphones_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'] }
-            headphones_album_dictionary.append(headphones_dict)
+            if albums['ArtistName'] and albums['AlbumTitle']:
+                headphones_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'] }
+                headphones_album_dictionary.append(headphones_dict)
         #unmatchedalbums = [f for f in have_album_dictionary if f not in [x for x in headphones_album_dictionary]]
 
         check = set([(cleanName(d['ArtistName']).lower(), cleanName(d['AlbumTitle']).lower()) for d in headphones_album_dictionary])
