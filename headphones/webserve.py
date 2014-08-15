@@ -299,8 +299,8 @@ class WebInterface(object):
         if action == "ignore":
             myDB = db.DBConnection()
             for artist in args:
-                myDB.action('DELETE FROM newartists WHERE ArtistName=?', [artist])
-                myDB.action('UPDATE have SET Matched="Ignored" WHERE ArtistName=?', [artist])
+                myDB.action('DELETE FROM newartists WHERE ArtistName=?', [artist.decode(headphones.SYS_ENCODING, 'replace')])
+                myDB.action('UPDATE have SET Matched="Ignored" WHERE ArtistName=?', [artist.decode(headphones.SYS_ENCODING, 'replace')])
                 logger.info("Artist %s removed from new artist list and set to ignored" % artist)
         raise cherrypy.HTTPRedirect("home")
     addArtists.exposed = True
