@@ -30,6 +30,47 @@ from headphones import logger, helpers, request, mb, music_encoder
 
 postprocessor_lock = threading.Lock()
 
+
+def find_in_path(albumpath, extra_formats=None, use_MF=True):
+    """ Takes a path and optionally extra formats.
+        Finds files matching the MEDIA_FORMATS and returns them as a list.
+        If use_MF is disabled MEDIA_FORMATS will be ignored.
+    """
+    found_tracks = []
+    if extra_formats:
+        if type(extra_formats) is not list:
+            extra_formats = [extra_formats]
+        if not use_MF:
+            mf = extra_formats
+        else:
+            mf = headphones.MEDIA_FORMATS + extra_formats
+    else:
+        if not use_MF:
+            # if not using MF then extra_formats must be set
+            return False
+        mf = headphones.MEDIA_FORMATS
+    for r, d, f in os.walk(albumpath):
+        for file in f:
+            if any(file.lower().endswith('.' + x.lower()) for x in mf):
+                found_tracks.append(os.path.join(r, file))
+    return found_tracks
+
+
+def count_matches(track_list, match, inverted=False):
+    """ Takes a list of tracks and a pattern to match.
+        Returns the number of matched items and a list of the matches.
+        If inverted is set to True the returned list will be inverted and only
+        contain the NON-matches.
+    """
+    if not track_list or not match:
+        return False, False
+    new_list = [x for x in track_list if x.lower().endswith(match)]
+    nr_of_matches = len(new_list)
+    if inverted:
+        new_list = [x for x in track_list if not x.lower().endswith(match)]
+    return nr_of_matches, new_list
+
+
 def checkFolder():
 
     with postprocessor_lock:
