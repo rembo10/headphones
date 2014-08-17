@@ -36,6 +36,8 @@ def find_in_path(albumpath, extra_formats=None, use_MF=True):
         Finds files matching the MEDIA_FORMATS and returns them as a list.
         If use_MF is disabled MEDIA_FORMATS will be ignored.
     """
+    if not os.path.isdir(albumpath):
+        return False
     found_tracks = []
     if extra_formats:
         if type(extra_formats) is not list:
