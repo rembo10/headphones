@@ -378,6 +378,14 @@ class WebInterface(object):
     def deleteAlbum(self, AlbumID, ArtistID=None):
         logger.info(u"Deleting all traces of album: " + AlbumID)
         myDB = db.DBConnection()
+
+        namecheck = myDB.select('SELECT ArtistName, AlbumTitle from albums where AlbumID=?', [AlbumID])
+        for name in namecheck:
+            artist = name['ArtistName']
+            album = name['AlbumTitle']
+
+        myDB.action('UPDATE have SET Matched=NULL WHERE ArtistName=? AND AlbumTitle=?', (artist, album))
+
         myDB.action('DELETE from albums WHERE AlbumID=?', [AlbumID])
         myDB.action('DELETE from tracks WHERE AlbumID=?', [AlbumID])
         myDB.action('DELETE from allalbums WHERE AlbumID=?', [AlbumID])

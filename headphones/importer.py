@@ -488,6 +488,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             if skip_log == 0:
                 logger.info(u"[%s] No new releases, so no changes made to %s" % (artist['artist_name'], rg['title']))
 
+    time.sleep(3)
     finalize_update(artistid, artist['artist_name'], errors)
 
     logger.info(u"Seeing if we need album art for: %s" % artist['artist_name'])
@@ -666,6 +667,7 @@ def addReleaseById(rid, rgid=None):
                 #myDB.action('DELETE from have WHERE Location=?', [match['Location']])
 
             myDB.upsert("tracks", newValueDict, controlValueDict)
+            myDB.upsert("alltracks", newValueDict, controlValueDict)
 
         # Reset status
         if status == 'Loading':
