@@ -15,7 +15,7 @@
 
 import threading
 import headphones
-from headphones import db, utorrent, transmission, logger
+from headphones import db, utorrent, transmission
 
 postprocessor_lock = threading.Lock()
 
