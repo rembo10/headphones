@@ -667,7 +667,6 @@ def addReleaseById(rid, rgid=None):
                 #myDB.action('DELETE from have WHERE Location=?', [match['Location']])
 
             myDB.upsert("tracks", newValueDict, controlValueDict)
-            myDB.upsert("alltracks", newValueDict, controlValueDict)
 
         # Reset status
         if status == 'Loading':
