@@ -50,7 +50,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
 
     if not append:
         # Clean up bad filepaths
-        tracks = myDB.select('SELECT Location, TrackID from alltracks WHERE Location IS NOT NULL')
+        tracks = myDB.select('SELECT Location from alltracks WHERE Location IS NOT NULL UNION SELECT Location from tracks WHERE Location IS NOT NULL')
 
         for track in tracks:
             encoded_track_string = track['Location'].encode(headphones.SYS_ENCODING)
@@ -216,6 +216,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         if song['ArtistName'] and song['AlbumTitle'] and song['TrackTitle']:
 
             track = myDB.action('SELECT ArtistName, AlbumTitle, TrackTitle, AlbumID from tracks WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [song['ArtistName'], song['AlbumTitle'], song['TrackTitle']]).fetchone()
+            have_updated = False
             if track:
                 controlValueDict = { 'ArtistName' : track['ArtistName'],
                                      'AlbumTitle' : track['AlbumTitle'],
@@ -228,6 +229,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                 controlValueDict2 = { 'Location' : song['Location']}
                 newValueDict2 = { 'Matched' : track['AlbumID']}
                 myDB.upsert("have", newValueDict2, controlValueDict2)
+                have_updated = True
             else:
                 track = myDB.action('SELECT CleanName, AlbumID from tracks WHERE CleanName LIKE ?', [song['CleanName']]).fetchone()
                 if track:
@@ -240,11 +242,12 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                     controlValueDict2 = { 'Location' : song['Location']}
                     newValueDict2 = { 'Matched' : track['AlbumID']}
                     myDB.upsert("have", newValueDict2, controlValueDict2)
+                    have_updated = True
                 else:
                     controlValueDict2 = { 'Location' : song['Location']}
                     newValueDict2 = { 'Matched' : "Failed"}
                     myDB.upsert("have", newValueDict2, controlValueDict2)
-
+                    have_updated = True
 
             alltrack = myDB.action('SELECT ArtistName, AlbumTitle, TrackTitle, AlbumID from alltracks WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [song['ArtistName'], song['AlbumTitle'], song['TrackTitle']]).fetchone()
             if alltrack:
@@ -272,9 +275,12 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                     newValueDict2 = { 'Matched' : alltrack['AlbumID']}
                     myDB.upsert("have", newValueDict2, controlValueDict2)
                 else:
-                    controlValueDict2 = { 'Location' : song['Location']}
-                    newValueDict2 = { 'Matched' : "Failed"}
-                    myDB.upsert("have", newValueDict2, controlValueDict2)
+                    # alltracks may not exist if adding album manually, have should only be set to failed if not already updated in tracks
+                    if not have_updated:
+                        controlValueDict2 = { 'Location' : song['Location']}
+                        newValueDict2 = { 'Matched' : "Failed"}
+                        myDB.upsert("have", newValueDict2, controlValueDict2)
+
         else:
             controlValueDict2 = { 'Location' : song['Location']}
             newValueDict2 = { 'Matched' : "Failed"}
