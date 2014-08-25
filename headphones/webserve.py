@@ -34,6 +34,7 @@ from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, 
 from headphones.helpers import checked, radio,today, cleanName
 
 import lib.simplejson as simplejson
+from lib.simplejson import OrderedDict
 
 import sys
 
@@ -84,9 +85,10 @@ class WebInterface(object):
         if not artist:
             raise cherrypy.HTTPRedirect("home")
 
-        # Serve the extras up as a dict to make things easier for new templates
-        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "djmix", "mixtape_street", "spokenword", "audiobook", "broadcast", "interview", "other"]
-        extras_dict = {}
+        # Serve the extras up as a dict to make things easier for new templates (append new extras to the end)
+        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other", "djmix", "mixtape_street", "broadcast", "interview"]
+
+        extras_dict = OrderedDict()
 
         if not artist['Extras']:
             artist_extras = ""
@@ -161,7 +163,7 @@ class WebInterface(object):
             temp_extras_list = []
             # TODO: Put these extras as a global variable
             i = 1
-            for extra in ["single", "ep", "compilation", "soundtrack", "live", "remix", "djmix", "mixtape_street", "spokenword", "audiobook", "broadcast", "interview", "other"]:
+            for extra in ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other", "djmix", "mixtape_street", "broadcast", "interview"]:
                 if extra in kwargs:
                     temp_extras_list.append(i)
                 i += 1
@@ -1150,9 +1152,10 @@ class WebInterface(object):
                     "mpc_enabled": checked(headphones.MPC_ENABLED)
                 }
 
-        # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8
-        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "dj-mix", "mixtape/street", "spokenword", "audiobook", "broadcast", "interview", "other"]
-        extras_dict = {}
+        # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8 (append new extras to the end)
+        extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other", "djmix", "mixtape_street", "broadcast", "interview"]
+
+        extras_dict = OrderedDict()
 
         i = 1
         for extra in extras_list:
@@ -1175,8 +1178,8 @@ class WebInterface(object):
         preferred_words=None, required_words=None, ignored_words=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None,
         numberofseeders=None, use_piratebay=0, piratebay_proxy_url=None, piratebay_ratio=None, use_kat=0, kat_proxy_url=None, kat_ratio=None, use_mininova=0, mininova_ratio=None, waffles=0, waffles_uid=None, waffles_passkey=None, waffles_ratio=None, whatcd=0, whatcd_username=None, whatcd_password=None, whatcd_ratio=None,
         rutracker=0, rutracker_user=None, rutracker_password=None, rutracker_ratio=None, rename_files=0, correct_metadata=0, cleanup_files=0, keep_nfo=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0, replace_existing_folders=False,
-        destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, file_underscores=0, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0,
-        remix=0, djmix=0, mixtape_street=0, broadcast=0, interview=0, spokenword=0, audiobook=0, other=0, autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, prefer_torrents=0, open_magnet_links=0, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
+        destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, file_underscores=0, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0, remix=0, spokenword=0, audiobook=0, other=0, djmix=0, mixtape_street=0, broadcast=0, interview=0,
+        autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, prefer_torrents=0, open_magnet_links=0, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
         bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
         delete_lossless_files=0, growl_enabled=0, growl_onsnatch=0, growl_host=None, growl_password=None, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, pushalot_enabled=False, pushalot_apikey=None, pushalot_onsnatch=0, synoindex_enabled=False, lms_enabled=0, lms_host=None,
@@ -1389,9 +1392,9 @@ class WebInterface(object):
 
                 headphones.EXTRA_NEWZNABS.append((newznab_host, newznab_api, newznab_enabled))
 
-        # Convert the extras to list then string. Coming in as 0 or 1
+        # Convert the extras to list then string. Coming in as 0 or 1 (append new extras to the end)
         temp_extras_list = []
-        extras_list = [single, ep, compilation, soundtrack, live, remix, djmix, mixtape_street, spokenword, audiobook, broadcast, interview, other]
+        extras_list = [single, ep, compilation, soundtrack, live, remix, spokenword, audiobook, other, djmix, mixtape_street, broadcast, interview]
 
         i = 1
         for extra in extras_list:
