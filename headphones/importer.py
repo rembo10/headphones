@@ -200,7 +200,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
     if len(artist['releasegroups']) != 0 and not extrasonly:
         for groups in artist['releasegroups']:
             group_list.append(groups['id'])
-        remove_missing_groups_from_albums = myDB.action("SELECT AlbumID FROM albums WHERE ArtistID=?", [artistid])
+        remove_missing_groups_from_albums = myDB.select("SELECT AlbumID FROM albums WHERE ArtistID=?", [artistid])
         for items in remove_missing_groups_from_albums:
             if items['AlbumID'] not in group_list:
                 # Remove all from albums/tracks that aren't in release groups
