@@ -376,36 +376,14 @@ def initialize():
             return False
 
         # Make sure all the config sections exist
-        CheckSection('General')
-        CheckSection('SABnzbd')
-        CheckSection('NZBget')
-        CheckSection('Transmission')
-        CheckSection('uTorrent')
-        CheckSection('Headphones')
-        CheckSection('Newznab')
-        CheckSection('NZBsorg')
-        CheckSection('omgwtfnzbs')
-        CheckSection('Piratebay')
-        CheckSection('Kat')
-        CheckSection('Mininova')
-        CheckSection('Waffles')
-        CheckSection('Rutracker')
-        CheckSection('What.cd')
-        CheckSection('Growl')
-        CheckSection('Prowl')
-        CheckSection('Pushover')
-        CheckSection('PushBullet')
-        CheckSection('XBMC')
-        CheckSection('LMS')
-        CheckSection('Plex')
-        CheckSection('NMA')
-        CheckSection('Pushalot')
-        CheckSection('Synoindex')
-        CheckSection('Twitter')
-        CheckSection('OSX_Notify')
-        CheckSection('Boxcar')
-        CheckSection('Songkick')
-        CheckSection('Advanced')
+        for section in ('General', 'SABnzbd', 'NZBget', 'Transmission',
+                        'uTorrent', 'Headphones', 'Newznab', 'NZBsorg',
+                        'omgwtfnzbs', 'Piratebay', 'Kat', 'Mininova', 'Waffles',
+                        'Rutracker', 'What.cd', 'Growl', 'Prowl', 'Pushover',
+                        'PushBullet', 'XBMC', 'LMS', 'Plex', 'NMA', 'Pushalot',
+                        'Synoindex', 'Twitter', 'OSX_Notify', 'Boxcar',
+                        'Songkick', 'Advanced'):
+            CheckSection(section)
 
         # Set global variables based on config file or use defaults
         CONFIG_VERSION = check_setting_str(CFG, 'General', 'config_version', '0')
