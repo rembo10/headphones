@@ -87,17 +87,16 @@ class WebInterface(object):
 
         # Serve the extras up as a dict to make things easier for new templates (append new extras to the end)
         extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other", "djmix", "mixtape_street", "broadcast", "interview"]
+        if artist['Extras']:
+            artist_extras = map(int, artist['Extras'].split(','))
+        else:
+            artist_extras = []
 
         extras_dict = OrderedDict()
 
-        if not artist['Extras']:
-            artist_extras = ""
-        else:
-            artist_extras = artist['Extras']
-
         i = 1
         for extra in extras_list:
-            if str(i) in artist_extras:
+            if i in artist_extras:
                 extras_dict[extra] = "checked"
             else:
                 extras_dict[extra] = ""
@@ -1154,12 +1153,16 @@ class WebInterface(object):
 
         # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8 (append new extras to the end)
         extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other", "djmix", "mixtape_street", "broadcast", "interview"]
+        if headphones.EXTRAS:
+            extras = map(int, headphones.EXTRAS.split(','))
+        else:
+            extras = []
 
         extras_dict = OrderedDict()
 
         i = 1
         for extra in extras_list:
-            if str(i) in headphones.EXTRAS:
+            if i in extras:
                 extras_dict[extra] = "checked"
             else:
                 extras_dict[extra] = ""
