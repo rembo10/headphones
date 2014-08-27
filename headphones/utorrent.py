@@ -180,7 +180,7 @@ def setSeedRatio(hash, ratio):
         uTorrentClient.setprops(hash,'seed_ratio', ratio * 10)
     else:
         # TODO passing -1 should be unlimited
-        uTorrentClient.setprops(hash,'seed_ratio', -1.00)
+        uTorrentClient.setprops(hash,'seed_ratio', -10)
 
 def dirTorrent(hash, cacheid=None, return_name=None):
 
@@ -214,8 +214,8 @@ def addTorrent(link, hash):
     # Get Active Directory from settings
     active_dir, completed_dir = getSettingsDirectories()
 
-    if not active_dir or not completed_dir:
-        logger.error('Could not get "Put new downloads in:" or "Move completed downloads to:" directories from uTorrent settings, please ensure they are set')
+    if not active_dir:
+        logger.error('Could not get "Put new downloads in:" directory from uTorrent settings, please ensure it is set')
         return None
 
     uTorrentClient.add_url(link)

@@ -174,6 +174,14 @@ def findRelease(name, limit=1, artist=None):
                         formats += str(count) + 'x'
                     formats += format
 
+            rg_type = ''
+            if 'type' in result['release-group']:
+                rg_type = result['release-group']['type']
+                if rg_type == 'Album' and 'secondary-type-list' in result['release-group']:
+                    secondary_type = result['release-group']['secondary-type-list'][0]
+                    if secondary_type != rg_type:
+                        rg_type = secondary_type
+
             releaselist.append({
                         'uniquename':        unicode(result['artist-credit'][0]['artist']['name']),
                         'title':             unicode(title),
@@ -187,7 +195,7 @@ def findRelease(name, limit=1, artist=None):
                         'formats':           unicode(formats),
                         'tracks':            unicode(tracks),
                         'rgid':              unicode(result['release-group']['id']),
-                        'rgtype':            unicode(result['release-group']['type']) if 'type' in result['release-group'] else ''
+                        'rgtype':            unicode(rg_type)
                         })
         return releaselist
 
@@ -263,14 +271,18 @@ def getArtist(artistid, extrasonly=False):
 
         if includeExtras:
 
-            # Need to convert extras string from something like '2,5.6' to ['ep','live','remix']
-            extras = db_artist['Extras']
-            extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "dj-mix", "mixtape/street", "spokenword", "audiobook", "broadcast", "interview", "other"]
+            # Need to convert extras string from something like '2,5.6' to ['ep','live','remix'] (append new extras to end)
+            if db_artist['Extras']:
+                extras = map(int, db_artist['Extras'].split(','))
+            else:
+                extras = []
+            extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other", "dj-mix", "mixtape/street", "broadcast", "interview"]
+
             includes = []
 
             i = 1
             for extra in extras_list:
-                if str(i) in extras:
+                if i in extras:
                     includes.append(extra)
                 i += 1
 
@@ -289,11 +301,18 @@ def getArtist(artistid, extrasonly=False):
                     time.sleep(5)
 
                 for rg in mb_extras_list:
+
+                    rg_type = rg['type']
+                    if rg_type == 'Album' and 'secondary-type-list' in rg:
+                        secondary_type = rg['secondary-type-list'][0]
+                        if secondary_type != rg_type:
+                            rg_type = secondary_type
+
                     releasegroups.append({
                             'title':        unicode(rg['title']),
                             'id':           unicode(rg['id']),
                             'url':          u"http://musicbrainz.org/release-group/" + rg['id'],
-                            'type':         unicode(rg['type'])
+                            'type':         unicode(rg_type)
                         })
 
         artist_dict['releasegroups'] = releasegroups
@@ -364,8 +383,15 @@ def getRelease(releaseid, include_artist_info=True):
                 release['rg_title'] = unicode(results['release-group']['title'])
                 try:
                     release['rg_type'] = unicode(results['release-group']['type'])
+
+                    if release['rg_type'] == 'Album' and 'secondary-type-list' in results['release-group']:
+                        secondary_type = unicode(results['release-group']['secondary-type-list'][0])
+                        if secondary_type != release['rg_type']:
+                            release['rg_type'] = secondary_type
+
                 except KeyError:
                     release['rg_type'] = u'Unknown'
+
             else:
                 logger.warn("Release " + releaseid + "had no ReleaseGroup associated")
 
@@ -445,6 +471,10 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
                 raise Exception('No release group associated with release id ' + releasedata['id'] + ' album id' + rgid)
             release['Type'] = unicode(releasedata['release-group']['type'])
 
+            if release['Type'] == 'Album' and 'secondary-type-list' in releasedata['release-group']:
+                secondary_type = unicode(releasedata['release-group']['secondary-type-list'][0])
+                if secondary_type != release['Type']:
+                    release['Type'] = secondary_type
 
             #making the assumption that the most important artist will be first in the list
             if 'artist-credit' in releasedata:
