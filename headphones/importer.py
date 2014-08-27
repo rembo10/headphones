@@ -193,14 +193,17 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
     except IndexError:
         includeExtras = False
 
-    #Clean all references to release group in dB that are no longer referenced in musicbrainz
+    #Clean all references to release group in dB that are no longer referenced from the musicbrainz refresh
     group_list = []
     force_repackage = 0
     #Don't nuke the database if there's a MusicBrainz error
-    if len(artist['releasegroups']) != 0 and not extrasonly:
+    if len(artist['releasegroups']) != 0:
         for groups in artist['releasegroups']:
             group_list.append(groups['id'])
-        remove_missing_groups_from_albums = myDB.action("SELECT AlbumID FROM albums WHERE ArtistID=?", [artistid])
+        if not extrasonly:
+            remove_missing_groups_from_albums = myDB.select("SELECT AlbumID FROM albums WHERE ArtistID=?", [artistid])
+        else:
+            remove_missing_groups_from_albums = myDB.select('SELECT AlbumID FROM albums WHERE ArtistID=? AND Status="Skipped" AND Type!="Album"', [artistid])
         for items in remove_missing_groups_from_albums:
             if items['AlbumID'] not in group_list:
                 # Remove all from albums/tracks that aren't in release groups
@@ -209,13 +212,12 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                 myDB.action("DELETE FROM tracks WHERE AlbumID=?", [items['AlbumID']])
                 myDB.action("DELETE FROM alltracks WHERE AlbumID=?", [items['AlbumID']])
                 myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [items['AlbumID']])
-                logger.info("[%s] Removing all references to release group %s to reflect MusicBrainz" % (artist['artist_name'], items['AlbumID']))
-                force_repackage = 1
-    elif extrasonly:
-        # Not really sure what we're doing here but don't want to log the message below if we're fetching extras only
-        pass
+                logger.info("[%s] Removing all references to release group %s to reflect MusicBrainz refresh" % (artist['artist_name'], items['AlbumID']))
+                if not extrasonly:
+                    force_repackage = 1
     else:
-        logger.info("[%s] There was either an error pulling data from MusicBrainz or there might not be any releases for this category" % artist['artist_name'])
+        if not extrasonly:
+            logger.info("[%s] There was either an error pulling data from MusicBrainz or there might not be any releases for this category" % artist['artist_name'])
 
     # Then search for releases within releasegroups, if releases don't exist, then remove from allalbums/alltracks
     album_searches = []
@@ -488,6 +490,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             if skip_log == 0:
                 logger.info(u"[%s] No new releases, so no changes made to %s" % (artist['artist_name'], rg['title']))
 
+    time.sleep(3)
     finalize_update(artistid, artist['artist_name'], errors)
 
     logger.info(u"Seeing if we need album art for: %s" % artist['artist_name'])
