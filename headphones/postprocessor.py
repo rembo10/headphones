@@ -609,9 +609,9 @@ def addAlbumArt(artwork, albumpath, release):
 def cleanupFiles(albumpath):
     logger.info('Cleaning up files')
     if headphones.KEEP_NFO:
-        files = find_in_path(albumpath, extra_formats="nfo", inverted=True)
+        files = find_in_path(albumpath, extra_formats="nfo")
     else:
-        files = find_in_path(albumpath, inverted=True)
+        files = find_in_path(albumpath)
     for _f in files:
         logger.debug('Removing: %s' % _f)
         try:
