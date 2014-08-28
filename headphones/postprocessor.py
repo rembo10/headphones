@@ -30,52 +30,6 @@ from headphones import logger, helpers, request, mb, music_encoder
 
 postprocessor_lock = threading.Lock()
 
-<<<<<<< HEAD
-
-def find_in_path(albumpath, extra_formats=None, use_MF=True):
-    """ Takes a path and optionally extra formats.
-        Finds files matching the MEDIA_FORMATS and returns them as a list.
-        If use_MF is disabled MEDIA_FORMATS will be ignored.
-    """
-    if not os.path.isdir(albumpath):
-        return False
-    found_tracks = []
-    if extra_formats:
-        if type(extra_formats) is not list:
-            extra_formats = [extra_formats]
-        if not use_MF:
-            mf = extra_formats
-        else:
-            mf = headphones.MEDIA_FORMATS + extra_formats
-    else:
-        if not use_MF:
-            # if not using MF then extra_formats must be set
-            return False
-        mf = headphones.MEDIA_FORMATS
-    for r, d, f in os.walk(albumpath):
-        for _file in f:
-            if any(_file.lower().endswith('.' + x.lower()) for x in mf):
-                found_tracks.append(os.path.join(r, _file))
-    return found_tracks
-
-
-def count_matches(track_list, match, inverted=False):
-    """ Takes a list of tracks and a pattern to match.
-        Returns the number of matched items and a list of the matches.
-        If inverted is set to True the returned list will be inverted and only
-        contain the NON-matches.
-    """
-    if not track_list or not match:
-        return False, False
-    new_list = [x for x in track_list if x.lower().endswith(match)]
-    nr_of_matches = len(new_list)
-    if inverted:
-        new_list = [x for x in track_list if not x.lower().endswith(match)]
-    return nr_of_matches, new_list
-
-
-=======
->>>>>>> parent of 59b4cef... Creating two functions from duplicated code
 def checkFolder():
 
     with postprocessor_lock:
@@ -198,19 +152,20 @@ def verify(albumid, albumpath, Kind=None, forced=False):
         release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
         tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
 
-    all_matched = find_in_path(albumpath, ["cue", "part", "upart"])
-    incomplete_matches, remaining_matches = count_matches(all_matched,
-                                                          (".part", ".upart"),
-                                                          inverted = True)
-    if incomplete_matches and not forced:
-        _a = os.path.basename(albumpath).decode(headphones.SYS_ENCODING,
-                                                'replace')
-        logger.info("Looks like " + _a + " isn't complete yet. Will try again on the next run")
-        return
+    downloaded_track_list = []
+    downloaded_cuecount = 0
 
-    downloaded_cuecount, downloaded_track_list = count_matches(remaining_matches,
-                                                               ".cue",
-                                                               inverted = True)
+    for r,d,f in os.walk(albumpath):
+        for files in f:
+            if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
+                downloaded_track_list.append(os.path.join(r, files))
+            elif files.lower().endswith('.cue'):
+                downloaded_cuecount += 1
+            # if any of the files end in *.part, we know the torrent isn't done yet. Process if forced, though
+            elif files.lower().endswith(('.part', '.utpart')) and not forced:
+                logger.info("Looks like " + os.path.basename(albumpath).decode(headphones.SYS_ENCODING, 'replace') + " isn't complete yet. Will try again on the next run")
+                return
+
 
     # use xld to split cue
 
@@ -252,7 +207,11 @@ def verify(albumid, albumpath, Kind=None, forced=False):
 
             # count files, should now be more than original if xld successfully split
 
-            new_downloaded_track_list_count = len(find_in_path(albumpath))
+            new_downloaded_track_list_count = 0
+            for r,d,f in os.walk(albumpath):
+                for file in f:
+                    if any(file.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
+                        new_downloaded_track_list_count += 1
 
             if new_downloaded_track_list_count > len(downloaded_track_list):
 
@@ -261,8 +220,12 @@ def verify(albumid, albumpath, Kind=None, forced=False):
                     os.rename(downloaded_track, downloaded_track + '.original')
 
                 #reload
-                downloaded_track_list = find_in_path(albumpath)
 
+                downloaded_track_list = []
+                for r,d,f in os.walk(albumpath):
+                    for file in f:
+                        if any(file.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
+                            downloaded_track_list.append(os.path.join(r, file))
 
     # test #1: metadata - usually works
     logger.debug('Verifying metadata...')
@@ -367,12 +330,15 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         # Need to update the downloaded track list with the new location.
         # Could probably just throw in the "headphones-modified" folder,
         # but this is good to make sure we're not counting files that may have failed to move
+        downloaded_track_list = []
+        downloaded_cuecount = 0
 
-        all_matches = find_in_path(albumpath, "cue")
-        downloaded_cuecount, downloaded_track_list = count_matches(all_matches,
-                                                                   ".cue",
-                                                                   True)
-
+        for r,d,f in os.walk(albumpath):
+            for files in f:
+                if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
+                    downloaded_track_list.append(os.path.join(r, files))
+                elif files.lower().endswith('.cue'):
+                    downloaded_cuecount += 1
 
     # Check if files are valid media files and are writeable, before the steps
     # below are executed. This simplifies errors and prevents unfinished steps.
@@ -611,30 +577,25 @@ def addAlbumArt(artwork, albumpath, release):
 
 def cleanupFiles(albumpath):
     logger.info('Cleaning up files')
-    if headphones.KEEP_NFO:
-        files = find_in_path(albumpath, extra_formats="nfo", inverted=True)
-    else:
-        files = find_in_path(albumpath, inverted=True)
-    for _f in files:
-        logger.debug('Removing: %s' % _f)
-        try:
-            os.remove(_f)
-        except Exception, e:
-            _f_decoded = _f.decode(headphones.SYS_ENCODING, 'replace')
-            logger.error(u'Could not remove file: %s. Error: %s' % (_f_decoded,
-                                                                    e))
+    for r,d,f in os.walk(albumpath):
+        for files in f:
+            if not any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
+                logger.debug('Removing: %s' % files)
+                try:
+                    os.remove(os.path.join(r, files))
+                except Exception, e:
+                    logger.error(u'Could not remove file: %s. Error: %s' % (files.decode(headphones.SYS_ENCODING, 'replace'), e))
 
 def renameNFO(albumpath):
-    files = find_in_path(albumpath, extra_formats="nfo", use_MF=False)
-    for _f in files:
-        _f_decoded = _f.decode(headphones.SYS_ENCODING, 'replace')
-        logger.debug('Renaming: "%s" to "%s"' % (_f_decoded, _f_decoded + '-orig'))
-        try:
-            new_file_name = _f[:-3] + 'orig.nfo'
-            os.rename(_f, new_file_name)
-        except Exception, e:
-            logger.error(u'Could not rename file: %s. Error: %s' % (_f_decoded,
-                                                                    e))
+    for r,d,f in os.walk(albumpath):
+        for file in f:
+            if file.lower().endswith('.nfo'):
+                logger.debug('Renaming: "%s" to "%s"' % (file.decode(headphones.SYS_ENCODING, 'replace'), file.decode(headphones.SYS_ENCODING, 'replace') + '-orig'))
+                try:
+                    new_file_name = os.path.join(r, file)[:-3] + 'orig.nfo'
+                    os.rename(os.path.join(r, file), new_file_name)
+                except Exception, e:
+                    logger.error(u'Could not rename file: %s. Error: %s' % (os.path.join(r, file).decode(headphones.SYS_ENCODING, 'replace'), e))
 
 def moveFiles(albumpath, release, tracks):
 
@@ -662,10 +623,10 @@ def moveFiles(albumpath, release, tracks):
         firstchar = sortname[0]
 
     for r,d,f in os.walk(albumpath):
-            try:
-                origfolder = os.path.basename(os.path.normpath(r))
-            except:
-                origfolder = ''
+        try:
+            origfolder = os.path.basename(os.path.normpath(r))
+        except:
+            origfolder = ''
 
     values = {  '$Artist':  artist,
                 '$SortArtist': sortname,
@@ -700,14 +661,13 @@ def moveFiles(albumpath, release, tracks):
     lossy_media = False
     lossless_media = False
 
-    if find_in_path(albumpath,
-                    extra_formats=headphones.LOSSY_MEDIA_FORMATS,
-                    use_MF=False):
-        lossy_media = True
-    if find_in_path(albumpath,
-                    extra_formats=headphones.LOSSLESS_MEDIA_FORMATS,
-                    use_MF=False):
-        lossless_media = True
+    for r,d,f in os.walk(albumpath):
+        for files in f:
+            files_to_move.append(os.path.join(r, files))
+            if any(files.lower().endswith('.' + x.lower()) for x in headphones.LOSSY_MEDIA_FORMATS):
+                lossy_media = True
+            if any(files.lower().endswith('.' + x.lower()) for x in headphones.LOSSLESS_MEDIA_FORMATS):
+                lossless_media = True
 
     # Do some sanity checking to see what directories we need to create:
     make_lossy_folder = False
