@@ -30,6 +30,7 @@ from headphones import logger, helpers, request, mb, music_encoder
 
 postprocessor_lock = threading.Lock()
 
+<<<<<<< HEAD
 
 def find_in_path(albumpath, extra_formats=None, use_MF=True):
     """ Takes a path and optionally extra formats.
@@ -73,6 +74,8 @@ def count_matches(track_list, match, inverted=False):
     return nr_of_matches, new_list
 
 
+=======
+>>>>>>> parent of 59b4cef... Creating two functions from duplicated code
 def checkFolder():
 
     with postprocessor_lock:
