@@ -276,7 +276,7 @@ def getArtist(artistid, extrasonly=False):
                 extras = map(int, db_artist['Extras'].split(','))
             else:
                 extras = []
-            extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other", "dj-mix", "mixtape/street", "broadcast", "interview"]
+            extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other", "dj-mix", "mixtape/street", "broadcast", "interview", "demo"]
 
             includes = []
 

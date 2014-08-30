@@ -167,7 +167,7 @@
         songkick_filter_enabled = "true"
     else:
         songkick_filter_enabled = "false"
-    
+
     if not headphones.SONGKICK_LOCATION:
     	songkick_location = "none"
     else:
@@ -190,11 +190,11 @@
 			function(data){
 				if (data['resultsPage'].totalEntries >= 1) {          
           
-          if( ${songkick_filter_enabled} ) {
-            data.resultsPage.results.event = $.grep(data.resultsPage.results.event, function(element,index){
-              return element.venue.metroArea.id == ${songkick_location};
-            });
-          }
+                    if( ${songkick_filter_enabled} ) {
+                        data.resultsPage.results.event = $.grep(data.resultsPage.results.event, function(element,index){
+                        return element.venue.metroArea.id == ${songkick_location};
+                    });
+                    }
           
 					var tourDate;
 

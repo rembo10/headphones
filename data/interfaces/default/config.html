@@ -1193,12 +1193,13 @@
                                       <input type="text" name="songkick_apikey" value="${config['songkick_apikey']}" size="50">
                                   </div>
                                   <div class="row checkbox">
-                                      <input type="checkbox" name="songkick_filter_enabled" id="songkick_filter" value="1" ${config['songkick_filter_enabled']} /><label>Enable Songkick filter per area</label>
+                                      <input type="checkbox" name="songkick_filter_enabled" id="songkick_filter" value="1" ${config['songkick_filter_enabled']} /><label>Filter by Metro Area</label>
                                   </div>
                                   <div id="songkick_filteroptions">
                                     <div class="row">
-                                      <label>Location:</label>
-                                      <input type="text" name="songkick_location" value="${config['songkick_location']}" size="50">
+                                      <label>Metro Area ID:</label>
+                                      <input type="text" name="songkick_location" value="${config['songkick_location']}" size="10" title="Enter the Metro Area ID, e.g. the ID for London is 24426, this can be found by clicking the link and searching/selecting the city, e.g. London should find http://www.songkick.com/metro_areas/24426-uk-london">
+                                        <a target="_blank" href="http://www.songkick.com/developer/location-search">Find Area ID</a>
                                     </div>
                                   </div>
                                 </div>
