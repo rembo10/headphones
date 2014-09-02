@@ -33,7 +33,7 @@ def initialize(options=None):
 
     if enable_https:
         # If either the HTTPS certificate or key do not exist, make some self-signed ones.
-        if not (https_cert and os.path.exists(https_cert)) or not https_key and os.path.exists(https_key)):
+        if not (https_cert and os.path.exists(https_cert)) or not (https_key and os.path.exists(https_key)):
             if not create_https_certificates(https_cert, https_key):
                 logger.warn(u"Unable to create cert/key files, disabling HTTPS")
                 headphones.ENABLE_HTTPS = False
