@@ -13,20 +13,22 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
-import threading
 
-import headphones
 from headphones import logger, db, helpers
 from headphones.helpers import multikeysort, replace_all
 
-import lib.musicbrainzngs as musicbrainzngs
-from lib.musicbrainzngs import WebServiceError
+import time
+import threading
+import headphones
+import musicbrainzngs
 
-from lib.simplejson import OrderedDict
+try:
+    from collections import OrderedDict
+except ImportError:
+    # Python 2.6.x fallback, from libs
+    import OrderedDict
 
 mb_lock = threading.Lock()
-
 
 # Quick fix to add mirror switching on the fly. Need to probably return the mbhost & mbport that's
 # being used, so we can send those values to the log
@@ -214,7 +216,7 @@ def getArtist(artistid, extrasonly=False):
             while newRgs == None or len(newRgs) >= limit:
                 newRgs = musicbrainzngs.browse_release_groups(artistid,release_type="album",offset=len(artist['release-group-list']),limit=limit)['release-group-list']
                 artist['release-group-list'] += newRgs
-        except WebServiceError, e:
+        except musicbrainzngs.WebServiceError as e:
             logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e)))
             time.sleep(5)
         except Exception,e:
@@ -296,7 +298,7 @@ def getArtist(artistid, extrasonly=False):
                     while newRgs == None or len(newRgs) >= limit:
                         newRgs = musicbrainzngs.browse_release_groups(artistid,release_type=include,offset=len(mb_extras_list),limit=limit)['release-group-list']
                         mb_extras_list += newRgs
-                except WebServiceError, e:
+                except musicbrainzngs.WebServiceError as e:
                     logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e)))
                     time.sleep(5)
 
@@ -331,7 +333,7 @@ def getReleaseGroup(rgid):
 
         try:
             releaseGroup = musicbrainzngs.get_release_group_by_id(rgid,["artists","releases","media","discids",])['release-group']
-        except WebServiceError, e:
+        except musicbrainzngs.WebServiceError as e:
             logger.warn('Attempt to retrieve information from MusicBrainz for release group "%s" failed (%s)' % (rgid, str(e)))
             time.sleep(5)
 
@@ -354,7 +356,7 @@ def getRelease(releaseid, include_artist_info=True):
                 results = musicbrainzngs.get_release_by_id(releaseid,["artists","release-groups","media","recordings"]).get('release')
             else:
                 results = musicbrainzngs.get_release_by_id(releaseid,["media","recordings"]).get('release')
-        except WebServiceError, e:
+        except musicbrainzngs.WebServiceError as e:
             logger.warn('Attempt to retrieve information from MusicBrainz for release "%s" failed (%s)' % (releaseid, str(e)))
             time.sleep(5)
 
@@ -416,7 +418,7 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
             newResults = newResults['release-list']
             results += newResults
 
-    except WebServiceError, e:
+    except musicbrainzngs.WebServiceError as e:
         logger.warn('Attempt to retrieve information from MusicBrainz for release group "%s" failed (%s)' % (rgid, str(e)))
         time.sleep(5)
         return False
@@ -609,7 +611,7 @@ def findArtistbyAlbum(name):
 
     try:
         results = musicbrainzngs.search_release_groups(term).get('release-group-list')
-    except WebServiceError, e:
+    except musicbrainzngs.WebServiceError as e:
         logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
         time.sleep(5)
 
@@ -654,7 +656,7 @@ def findAlbumID(artist=None, album=None):
             criteria = {'release': album.lower()}
 
         results = musicbrainzngs.search_release_groups(limit=1, **criteria).get('release-group-list')
-    except WebServiceError, e:
+    except musicbrainzngs.WebServiceError as e:
         logger.warn('Attempt to query MusicBrainz for %s - %s failed (%s)' % (artist, album, str(e)))
         time.sleep(5)
 
