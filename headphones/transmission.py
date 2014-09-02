@@ -13,14 +13,13 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
+from headphones import logger, notifiers, request
+
 import re
 import time
+import json
 import base64
 import headphones
-
-import simplejson as json
-
-from headphones import logger, notifiers, request
 
 # This is just a simple script to send torrents to transmission. The
 # intention is to turn this into a class where we can check the state

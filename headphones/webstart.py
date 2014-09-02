@@ -100,8 +100,9 @@ def initialize(options={}):
         conf['/'].update({
             'tools.auth_basic.on': True,
             'tools.auth_basic.realm': 'Headphones',
-            'tools.auth_basic.checkpassword':  cherrypy.lib.auth_basic.checkpassword_dict(
-                    {options['http_username']:options['http_password']})
+            'tools.auth_basic.checkpassword':  cherrypy.lib.auth_basic.checkpassword_dict({
+                options['http_username']: options['http_password']
+            })
         })
         conf['/api'] = { 'tools.auth_basic.on': False }
 

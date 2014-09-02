@@ -13,13 +13,13 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import headphones
-
 from headphones import db, mb, importer, searcher, cache, postprocessor, versioncheck, logger
 
-import lib.simplejson as simplejson
 from xml.dom.minidom import Document
+
+import headphones
 import copy
+import json
 
 cmd_list = [ 'getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSimilar', 'getHistory', 'getLogs',
             'findArtist', 'findAlbum', 'addArtist', 'delArtist', 'pauseArtist', 'resumeArtist', 'refreshArtist',
@@ -87,10 +87,10 @@ class Api(object):
                 if type(self.data) == type(''):
                     return self.data
                 else:
-                    return simplejson.dumps(self.data)
+                    return json.dumps(self.data)
             else:
                 self.callback = self.kwargs['callback']
-                self.data = simplejson.dumps(self.data)
+                self.data = json.dumps(self.data)
                 self.data = self.callback + '(' + self.data + ');'
                 return self.data
         else:
