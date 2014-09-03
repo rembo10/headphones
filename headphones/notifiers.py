@@ -13,30 +13,31 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import base64
-import cherrypy
-import urllib
-import urllib2
-import headphones
-import simplejson
-import os.path
-import subprocess
-import gntp.notifier
-import time
+from headphones import logger, helpers, common, request
+from headphones.exceptions import ex
 
 from xml.dom import minidom
 from httplib import HTTPSConnection
 from urllib import urlencode
 from lib.pynma import pynma
-import lib.oauth2 as oauth
-import lib.pythontwitter as twitter
 
-from headphones import logger, helpers, common, request
-from headphones.exceptions import ex
+import base64
+import cherrypy
+import urllib
+import urllib2
+import headphones
+import os.path
+import subprocess
+import gntp.notifier
+import time
+import json
+
+import oauth2 as oauth
+import pythontwitter as twitter
 
 try:
     from urlparse import parse_qsl
-except:
+except ImportError:
     from cgi import parse_qsl
 
 class GROWL:
@@ -203,9 +204,9 @@ class XBMC:
         url = host + '/jsonrpc'
 
         if self.password:
-            response = request.request_json(url, method="post", data=simplejson.dumps(data), headers=headers, auth=(self.username, self.password))
+            response = request.request_json(url, method="post", data=json.dumps(data), headers=headers, auth=(self.username, self.password))
         else:
-            response = request.request_json(url, method="post", data=simplejson.dumps(data), headers=headers)
+            response = request.request_json(url, method="post", data=json.dumps(data), headers=headers)
 
         if response:
             return response[0]['result']
@@ -261,7 +262,7 @@ class LMS:
 
     def _sendjson(self, host):
         data = {'id': 1, 'method': 'slim.request', 'params': ["",["rescan"]]}
-        data = simplejson.JSONEncoder().encode(data)
+        data = json.JSONEncoder().encode(data)
 
         content = {'Content-Type': 'application/json'}
 
@@ -273,7 +274,7 @@ class LMS:
             logger.warn('Error opening LMS url: %s' % e)
             return
 
-        response = simplejson.JSONDecoder().decode(handle.read())
+        response = json.JSONDecoder().decode(handle.read())
 
         try:
             return response['result']
