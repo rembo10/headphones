@@ -13,13 +13,15 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import platform, subprocess, re, os, tarfile
-
+import re
+import os
+import tarfile
+import platform
 import headphones
+import subprocess
+
 from headphones import logger, version, request
 from headphones.exceptions import ex
-
-import lib.simplejson as simplejson
 
 def runGit(args):
 

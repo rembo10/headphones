@@ -15,30 +15,29 @@
 
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
 
-import os
-import cherrypy
+from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers, notifiers
+from headphones.helpers import checked, radio,today, cleanName
 
 from mako.template import Template
 from mako.lookup import TemplateLookup
 from mako import exceptions
 
-import time
-import threading
-import string
-import json
 from operator import itemgetter
 
+import os
+import sys
+import json
+import time
+import string
+import cherrypy
+import threading
 import headphones
 
-from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers, notifiers
-from headphones.helpers import checked, radio,today, cleanName
-
-import lib.simplejson as simplejson
-from lib.simplejson import OrderedDict
-
-import sys
-
-
+try:
+    from collections import OrderedDict
+except ImportError:
+    # Python 2.6.x fallback, from libs
+    import OrderedDict
 
 def serve_template(templatename, **kwargs):
 
@@ -339,7 +338,7 @@ class WebInterface(object):
             }
             results_as_dicts.append(result_dict)
 
-        s = simplejson.dumps(results_as_dicts)
+        s = json.dumps(results_as_dicts)
         cherrypy.response.headers['Content-type'] = 'application/json'
         return s
 
@@ -786,12 +785,11 @@ class WebInterface(object):
         rows = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
         rows = [[row[0],row[2],row[1]] for row in rows]
 
-        dict = {'iTotalDisplayRecords':len(filtered),
-                'iTotalRecords':len(headphones.LOG_LIST),
-                'aaData':rows,
-                }
-        s = simplejson.dumps(dict)
-        return s
+        return json.dumps({
+            'iTotalDisplayRecords':len(filtered),
+            'iTotalRecords':len(headphones.LOG_LIST),
+            'aaData':rows,
+        })
     getLog.exposed = True
 
     def getArtists_json(self,iDisplayStart=0,iDisplayLength=100,sSearch="",iSortCol_0='0',sSortDir_0='asc',**kwargs):
@@ -864,7 +862,7 @@ class WebInterface(object):
                 'iTotalRecords':totalcount,
                 'aaData':rows,
                 }
-        s = simplejson.dumps(dict)
+        s = json.dumps(dict)
         cherrypy.response.headers['Content-type'] = 'application/json'
         return s
     getArtists_json.exposed=True
@@ -1481,7 +1479,7 @@ class WebInterface(object):
         from headphones import cache
         info_dict = cache.getInfo(ArtistID, AlbumID)
 
-        return simplejson.dumps(info_dict)
+        return json.dumps(info_dict)
 
     getInfo.exposed = True
 
@@ -1516,7 +1514,7 @@ class WebInterface(object):
             if not image_dict['thumbnail']:
                 image_dict['thumbnail'] = "http://coverartarchive.org/release/%s/front-250.jpg" % AlbumID
 
-        return simplejson.dumps(image_dict)
+        return json.dumps(image_dict)
 
     getImageLinks.exposed = True
 
