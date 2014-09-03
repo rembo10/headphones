@@ -624,9 +624,9 @@ def moveFiles(albumpath, release, tracks):
 
     for r,d,f in os.walk(albumpath):
         try:
-            origfolder = os.path.basename(os.path.normpath(r))
+            origfolder = os.path.basename(os.path.normpath(r).decode(headphones.SYS_ENCODING, 'replace'))
         except:
-            origfolder = ''
+            origfolder = u''
 
     values = {  '$Artist':  artist,
                 '$SortArtist': sortname,
@@ -644,7 +644,7 @@ def moveFiles(albumpath, release, tracks):
                 '$originalfolder': origfolder.lower()
             }
 
-    folder = helpers.replace_all(headphones.FOLDER_FORMAT.strip(), values)
+    folder = helpers.replace_all(headphones.FOLDER_FORMAT.strip(), values, normalize=True)
 
     folder = helpers.replace_illegal_chars(folder, type="folder")
     folder = folder.replace('./', '_/').replace('/.','/_')
