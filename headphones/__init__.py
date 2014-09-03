@@ -15,16 +15,17 @@
 
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
 
-import os, sys, subprocess
-
+import os
+import sys
+import subprocess
 import threading
 import webbrowser
 import sqlite3
 import itertools
 import cherrypy
 
-from lib.apscheduler.scheduler import Scheduler
-from lib.configobj import ConfigObj
+from apscheduler.scheduler import Scheduler
+from configobj import ConfigObj
 
 from headphones import versioncheck, logger, version
 from headphones.common import *
@@ -820,10 +821,14 @@ def launch_browser(host, port, root):
 
     try:
         webbrowser.open('%s://%s:%i%s' % (protocol, host, port, root))
-    except Exception, e:
+    except Exception as e:
         logger.error('Could not launch browser: %s', e)
 
 def config_write():
+    """
+    Write configuration to file. If an IOError occures during a write, it will
+    be caught.
+    """
 
     new_config = ConfigObj(encoding="UTF-8")
     new_config.filename = CONFIG_FILE
@@ -1105,8 +1110,13 @@ def config_write():
     new_config['Advanced']['journal_mode'] = JOURNAL_MODE
     new_config['Advanced']['verify_ssl_cert'] = int(VERIFY_SSL_CERT)
 
-    new_config.write()
+    # Write it to file
+    logger.info("Writing configuration to file")
 
+    try:
+        new_config.write()
+    except IOError as e:
+        logger.error("Error writing configuration file: %s", e)
 
 def start():
 
