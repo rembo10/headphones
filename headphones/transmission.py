@@ -98,19 +98,26 @@ def removeTorrent(torrentid, remove_data = False):
     arguments = { 'ids': torrentid, 'fields': ['isFinished', 'name']}
 
     response = torrentAction(method, arguments)
+    if not response:
+        return False
 
-    finished = response['arguments']['torrents'][0]['isFinished']
-    name = response['arguments']['torrents'][0]['name']
+    try:
+        finished = response['arguments']['torrents'][0]['isFinished']
+        name = response['arguments']['torrents'][0]['name']
 
-    if finished:
-        logger.info('%s has finished seeding, removing torrent and data' % name)
-        method = 'torrent-remove'
-        if remove_data:
-            arguments = {'delete-local-data': True, 'ids': torrentid}
+        if finished:
+            logger.info('%s has finished seeding, removing torrent and data' % name)
+            method = 'torrent-remove'
+            if remove_data:
+                arguments = {'delete-local-data': True, 'ids': torrentid}
+            else:
+                arguments = {'ids': torrentid}
+            response = torrentAction(method, arguments)
+            return True
         else:
-            arguments = {'ids': torrentid}
-        response = torrentAction(method, arguments)
-        return True
+            logger.info('%s has not finished seeding yet, torrent will not be removed, will try again on next run' % name)
+    except:
+        return False
 
     return False
 

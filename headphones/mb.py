@@ -87,7 +87,7 @@ def findArtist(name, limit=1):
 
         try:
             artistResults = musicbrainzngs.search_artists(limit=limit, **criteria)['artist-list']
-        except WebServiceError, e:
+        except musicbrainzngs.WebServiceError as e:
             logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
             time.sleep(5)
 
@@ -141,7 +141,7 @@ def findRelease(name, limit=1, artist=None):
 
         try:
             releaseResults = musicbrainzngs.search_releases(query=name,limit=limit,artist=artist)['release-list']
-        except WebServiceError, e: #need to update exceptions
+        except musicbrainzngs.WebServiceError as e: #need to update exceptions
             logger.warn('Attempt to query MusicBrainz for "%s" failed: %s' % (name, str(e)))
             time.sleep(5)
 

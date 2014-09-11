@@ -15,12 +15,14 @@
 
 import threading
 import headphones
-from headphones import db, utorrent, transmission
+from headphones import db, utorrent, transmission, logger
 
 postprocessor_lock = threading.Lock()
 
 # Remove Torrent + data if Post Processed and finished Seeding
 def checkTorrentFinished():
+
+    logger.info("Checking if any torrents have finished seeding and can be removed")
 
     with postprocessor_lock:
 

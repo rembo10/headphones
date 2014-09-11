@@ -424,6 +424,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         if seed_snatched:
             hash = seed_snatched['FolderName']
             torrent_removed = False
+            logger.info(u'%s - %s. Checking if torrent has finished seeding and can be removed' % (release['ArtistName'], release['AlbumTitle']))
             if headphones.TORRENT_DOWNLOADER == 1:
                 torrent_removed = transmission.removeTorrent(hash, True)
             else:
