@@ -1202,7 +1202,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
         # Requesting content
         logger.info('Parsing results from The Pirate Bay')
 
-        headers = { 'User-Agent' : 'Mozilla/5.0 (Linux; Android 4.1.1; Nexus 7 Build/JRO03D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Safari/535.19' }
+        headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
         params = {
             "iht": "2",
             "sort": "seeds"
@@ -1342,7 +1342,7 @@ def preprocess(resultlist):
             elif result[3] == 'What.cd':
                 headers['User-Agent'] = 'Headphones'
             elif result[3] == "The Pirate Bay":
-                headers['User-Agent'] = 'Mozilla/5.0 (Linux; Android 4.1.1; Nexus 7 Build/JRO03D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Safari/535.19'
+                headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'
             return request.request_content(url=result[2], headers=headers), result
 
         else:

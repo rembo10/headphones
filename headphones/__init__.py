@@ -138,6 +138,7 @@ LIBRARYSCAN_INTERVAL = 300
 DOWNLOAD_SCAN_INTERVAL = 5
 UPDATE_DB_INTERVAL = 24
 MB_IGNORE_AGE = 365
+TORRENT_REMOVAL_INTERVAL = 720
 
 SAB_HOST = None
 SAB_USERNAME = None
@@ -356,7 +357,7 @@ def initialize():
                 ADD_ALBUM_ART, ALBUM_ART_FORMAT, EMBED_ALBUM_ART, EMBED_LYRICS, REPLACE_EXISTING_FOLDERS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, KAT, KAT_PROXY_URL, KAT_RATIO, PIRATEBAY, PIRATEBAY_PROXY_URL, PIRATEBAY_RATIO, MININOVA, MININOVA_RATIO, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, WAFFLES_RATIO, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, RUTRACKER_RATIO, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, WHATCD_RATIO, DOWNLOAD_TORRENT_DIR, \
-                LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, UPDATE_DB_INTERVAL, MB_IGNORE_AGE, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
+                LIBRARYSCAN, LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, UPDATE_DB_INTERVAL, MB_IGNORE_AGE, TORRENT_REMOVAL_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_PRIORITY, NZBGET_HOST, HEADPHONES_INDEXER, NZBMATRIX, TRANSMISSION_HOST, TRANSMISSION_USERNAME, TRANSMISSION_PASSWORD, \
                 UTORRENT_HOST, UTORRENT_USERNAME, UTORRENT_PASSWORD, UTORRENT_LABEL, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, NEWZNAB_ENABLED, EXTRA_NEWZNABS, \
                 NZBSORG, NZBSORG_UID, NZBSORG_HASH, OMGWTFNZBS, OMGWTFNZBS_UID, OMGWTFNZBS_APIKEY, \
@@ -464,6 +465,7 @@ def initialize():
         DOWNLOAD_SCAN_INTERVAL = check_setting_int(CFG, 'General', 'download_scan_interval', 5)
         UPDATE_DB_INTERVAL = check_setting_int(CFG, 'General', 'update_db_interval', 24)
         MB_IGNORE_AGE = check_setting_int(CFG, 'General', 'mb_ignore_age', 365)
+        TORRENT_REMOVAL_INTERVAL = check_setting_int(CFG, 'General', 'torrent_removal_interval', 720)
 
         TORRENTBLACKHOLE_DIR = check_setting_str(CFG, 'General', 'torrentblackhole_dir', '')
         NUMBEROFSEEDERS = check_setting_str(CFG, 'General', 'numberofseeders', '10')
@@ -938,6 +940,7 @@ def config_write():
     new_config['General']['download_scan_interval'] = DOWNLOAD_SCAN_INTERVAL
     new_config['General']['update_db_interval'] = UPDATE_DB_INTERVAL
     new_config['General']['mb_ignore_age'] = MB_IGNORE_AGE
+    new_config['General']['torrent_removal_interval'] = TORRENT_REMOVAL_INTERVAL
 
     new_config['SABnzbd'] = {}
     new_config['SABnzbd']['sab_host'] = SAB_HOST
@@ -1138,7 +1141,8 @@ def start():
             SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
 
         # Remove Torrent + data if Post Processed and finished Seeding
-        SCHED.add_interval_job(torrentfinished.checkTorrentFinished, hours=12)
+        if TORRENT_REMOVAL_INTERVAL > 0:
+            SCHED.add_interval_job(torrentfinished.checkTorrentFinished, minutes=TORRENT_REMOVAL_INTERVAL)
 
         SCHED.start()
 
