@@ -167,10 +167,14 @@ def removeTorrent(hash, remove_data = False):
     status, torrentList = uTorrentClient.list()
     torrents = torrentList['torrents']
     for torrent in torrents:
-        if torrent[0].lower() == hash and torrent[21] == 'Finished':
-            logger.info('%s has finished seeding, removing torrent and data' % torrent[2])
-            uTorrentClient.remove(hash, remove_data)
-            return True
+        if torrent[0].lower() == hash:
+            if torrent[21] == 'Finished':
+                logger.info('%s has finished seeding, removing torrent and data' % torrent[2])
+                uTorrentClient.remove(hash, remove_data)
+                return True
+            else:
+                logger.info('%s has not finished seeding yet, torrent will not be removed, will try again on next run' % torrent[2])
+                return False
     return False
 
 def setSeedRatio(hash, ratio):
