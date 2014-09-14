@@ -12,13 +12,12 @@
         </div>
     </div>
 </%def>
-<%def name="body()">
 
+<%def name="body()">
     <div id="paddingheader">
         <h1 class="clearfix"><i class="fa fa-gear"></i> Settings</h1>
     </div>
     <form action="configUpdate" method="post" class="form" id="configUpdate">
-
         <div id="tabs">
             <ul>
                 <li><a href="#tabs-1">Web Interface</a></li>
@@ -29,7 +28,6 @@
                 <li><a href="#tabs-6">Advanced Settings</a></li>
             </ul>
             <div id="tabs-1">
-
                 <table class="configtable" summary="Web Interface">
                     <tr>
                         <td>
@@ -1204,7 +1202,7 @@
                                   </div>
                                 </div>
                             </fieldset>
-                            
+
                             <fieldset>
                                 <legend>Musicbrainz</legend>
                                 <div class="row">
@@ -1254,7 +1252,7 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-        <script>
+    <script>
 
         hideServerDivs = function () {
                 $("#customoptions").slideUp();
@@ -1267,32 +1265,30 @@
         };
 
         handleNewServerSelection = function () {
-
                 hideServerDivs();
 
                 switch ($(this).val()) {
                         case 'custom':
-                                $("#customoptions").slideDown();
+                            $("#customoptions").slideDown();
                         break;
                         case 'headphones':
-                                $("#hpserveroptions").slideDown();
+                            $("#hpserveroptions").slideDown();
                         break;
                 }
         };
 
         handleNewEncoderSelection = function () {
-
                 hideEncoderDivs();
 
                 switch ($(this).val()) {
                         case 'xld':
-                                $("#xldproperties").slideDown();
+                            $("#xldproperties").slideDown();
                         break;
                         case 'ffmpeg':
-                                $("#lameffmpegproperties").slideDown();
+                            $("#lameffmpegproperties").slideDown();
                         break;
                         case 'lame':
-                                $("#lameffmpegproperties").slideDown();
+                            $("#lameffmpegproperties").slideDown();
                         break;
                 }
         };
@@ -1305,25 +1301,24 @@
         };
 
         function initThisPage()
-
         {
                 if ($("#api_enabled").is(":checked"))
                         {
-                                $("#apioptions").show();
+                            $("#apioptions").show();
                         }
                 else
                         {
-                                $("#apioptions").hide();
+                            $("#apioptions").hide();
                         }
 
                 $("#api_enabled").click(function(){
                         if ($("#api_enabled").is(":checked"))
                         {
-                                $("#apioptions").slideDown();
+                            $("#apioptions").slideDown();
                         }
                         else
                         {
-                                $("#apioptions").slideUp();
+                            $("#apioptions").slideUp();
                         }
                 });
 
@@ -1340,429 +1335,429 @@
         });
                 if ($("#enable_https").is(":checked"))
                         {
-                                $("#https_options").show();
+                            $("#https_options").show();
                         }
                 else
                         {
-                                $("#https_options").hide();
+                            $("#https_options").hide();
                         }
 
                 $("#enable_https").click(function(){
                         if ($("#enable_https").is(":checked"))
                         {
-                                $("#https_options").slideDown();
+                            $("#https_options").slideDown();
                         }
                         else
                         {
-                                $("#https_options").slideUp();
+                            $("#https_options").slideUp();
                         }
                 });
                 if ($("#music_encoder").is(":checked"))
                         {
-                                $("#encoderoptions").show();
+                            $("#encoderoptions").show();
                         }
                 else
                         {
-                                $("#encoderoptions").hide();
+                            $("#encoderoptions").hide();
                         }
 
                 $("#music_encoder").click(function(){
                         if ($("#music_encoder").is(":checked"))
                         {
-                                $("#encoderoptions").slideDown();
+                            $("#encoderoptions").slideDown();
                         }
                         else
                         {
-                                $("#encoderoptions").slideUp();
+                            $("#encoderoptions").slideUp();
                         }
                 });
 
                 if ($("#add_album_art").is(":checked"))
                         {
-                                $("#album_art_options").show();
+                            $("#album_art_options").show();
                         }
                 else
                         {
-                                $("#album_art_options").hide();
+                            $("#album_art_options").hide();
                         }
 
                 $("#add_album_art").click(function(){
                         if ($("#add_album_art").is(":checked"))
                         {
-                                $("#album_art_options").slideDown();
+                            $("#album_art_options").slideDown();
                         }
                         else
                         {
-                                $("#album_art_options").slideUp();
+                            $("#album_art_options").slideUp();
                         }
                 });
 
                 if ($("#move_files").is(":checked"))
                         {
-                                $("#move_files_options").show();
+                            $("#move_files_options").show();
                         }
                 else
                         {
-                                $("#move_files_options").hide();
+                            $("#move_files_options").hide();
                         }
 
                 $("#move_files").click(function(){
                         if ($("#move_files").is(":checked"))
                         {
-                                $("#move_files_options").slideDown();
+                            $("#move_files_options").slideDown();
                         }
                         else
                         {
-                                $("#move_files_options").slideUp();
+                            $("#move_files_options").slideUp();
                         }
                 });
 
                 if ($("#growl").is(":checked"))
                         {
-                                $("#growloptions").show();
+                            $("#growloptions").show();
                         }
                 else
                         {
-                                $("#growloptions").hide();
+                            $("#growloptions").hide();
                         }
 
                 $("#growl").click(function(){
                         if ($("#growl").is(":checked"))
                         {
-                                $("#growloptions").slideDown();
+                            $("#growloptions").slideDown();
                         }
                         else
                         {
-                                $("#growloptions").slideUp();
+                            $("#growloptions").slideUp();
                         }
                 });
 
                 if ($("#prowl").is(":checked"))
                         {
-                                $("#prowloptions").show();
+                            $("#prowloptions").show();
                         }
                 else
                         {
-                                $("#prowloptions").hide();
+                            $("#prowloptions").hide();
                         }
 
                 $("#prowl").click(function(){
                         if ($("#prowl").is(":checked"))
                         {
-                                $("#prowloptions").slideDown();
+                            $("#prowloptions").slideDown();
                         }
                         else
                         {
-                                $("#prowloptions").slideUp();
+                            $("#prowloptions").slideUp();
                         }
                 });
 
                 if ($("#xbmc").is(":checked"))
                         {
-                                $("#xbmcoptions").show();
+                            $("#xbmcoptions").show();
                         }
                 else
                         {
-                                $("#xbmcoptions").hide();
+                            $("#xbmcoptions").hide();
                         }
 
                 $("#xbmc").click(function(){
                         if ($("#xbmc").is(":checked"))
                         {
-                                $("#xbmcoptions").slideDown();
+                            $("#xbmcoptions").slideDown();
                         }
                         else
                         {
-                                $("#xbmcoptions").slideUp();
+                            $("#xbmcoptions").slideUp();
                         }
                 });
 
                 if ($("#lms").is(":checked"))
                         {
-                                $("#lmsoptions").show();
+                            $("#lmsoptions").show();
                         }
                 else
                         {
-                                $("#lmsoptions").hide();
+                            $("#lmsoptions").hide();
                         }
 
                 $("#lms").click(function(){
                         if ($("#lms").is(":checked"))
                         {
-                                $("#lmsoptions").slideDown();
+                            $("#lmsoptions").slideDown();
                         }
                         else
                         {
-                                $("#lmsoptions").slideUp();
+                            $("#lmsoptions").slideUp();
                         }
                 });
 
                 if ($("#plex").is(":checked"))
                         {
-                                $("#plexoptions").show();
+                            $("#plexoptions").show();
                         }
                 else
                         {
-                                $("#plexoptions").hide();
+                            $("#plexoptions").hide();
                         }
 
                 $("#plex").click(function(){
                         if ($("#plex").is(":checked"))
                         {
-                                $("#plexoptions").slideDown();
+                            $("#plexoptions").slideDown();
                         }
                         else
                         {
-                                $("#plexoptions").slideUp();
+                            $("#plexoptions").slideUp();
                         }
                 });
 
                 if ($("#nma").is(":checked"))
                         {
-                                $("#nmaoptions").show();
+                            $("#nmaoptions").show();
                         }
                 else
                         {
-                                $("#nmaoptions").hide();
+                            $("#nmaoptions").hide();
                         }
 
                 $("#nma").click(function(){
                         if ($("#nma").is(":checked"))
                         {
-                                $("#nmaoptions").slideDown();
+                            $("#nmaoptions").slideDown();
                         }
                         else
                         {
-                                $("#nmaoptions").slideUp();
+                            $("#nmaoptions").slideUp();
                         }
                 });
 
                 if ($("#pushalot").is(":checked"))
                         {
-                                $("#pushalotoptions").show();
+                            $("#pushalotoptions").show();
                         }
                 else
                         {
-                                $("#pushalotoptions").hide();
+                            $("#pushalotoptions").hide();
                         }
 
                 $("#pushalot").click(function(){
                         if ($("#pushalot").is(":checked"))
                         {
-                                $("#pushalotoptions").slideDown();
+                            $("#pushalotoptions").slideDown();
                         }
                         else
                         {
-                                $("#pushalotoptions").slideUp();
+                            $("#pushalotoptions").slideUp();
                         }
                 });
 
                 if ($("#pushover").is(":checked"))
                         {
-                                $("#pushoveroptions").show();
+                            $("#pushoveroptions").show();
                         }
                 else
                         {
-                                $("#pushoveroptions").hide();
+                            $("#pushoveroptions").hide();
                         }
 
                 $("#pushover").click(function(){
                         if ($("#pushover").is(":checked"))
                         {
-                                $("#pushoveroptions").slideDown();
+                            $("#pushoveroptions").slideDown();
                         }
                         else
                         {
-                                $("#pushoveroptions").slideUp();
+                            $("#pushoveroptions").slideUp();
                         }
                 });
 
                 if ($("#pushbullet").is(":checked"))
                         {
-                                $("#pushbulletoptions").show();
+                            $("#pushbulletoptions").show();
                         }
                 else
                         {
-                                $("#pushbulletoptions").hide();
+                            $("#pushbulletoptions").hide();
                         }
 
 
                 $("#pushbullet").click(function(){
                         if ($("#pushbullet").is(":checked"))
                         {
-                                $("#pushbulletoptions").slideDown();
+                            $("#pushbulletoptions").slideDown();
                         }
                         else
                         {
-                                $("#pushbulletoptions").slideUp();
+                            $("#pushbulletoptions").slideUp();
                         }
                 });
 
                 if ($("#twitter").is(":checked"))
                         {
-                                $("#twitteroptions").show();
+                            $("#twitteroptions").show();
                         }
                 else
                         {
-                                $("#twitteroptions").hide();
+                            $("#twitteroptions").hide();
                         }
 
                 $("#twitter").click(function(){
                         if ($("#twitter").is(":checked"))
                         {
-                                $("#twitteroptions").slideDown();
+                            $("#twitteroptions").slideDown();
                         }
                         else
                         {
-                                $("#twitteroptions").slideUp();
+                            $("#twitteroptions").slideUp();
                         }
                 });
 
                 if ($("#osx_notify").is(":checked"))
                         {
-                                $("#osx_notify_options").show();
+                            $("#osx_notify_options").show();
                         }
                 else
                         {
-                                $("#osx_notify_options").hide();
+                            $("#osx_notify_options").hide();
                         }
 
                 $("#osx_notify").click(function(){
                         if ($("#osx_notify").is(":checked"))
                         {
-                                $("#osx_notify_options").slideDown();
+                            $("#osx_notify_options").slideDown();
                         }
                         else
                         {
-                                $("#osx_notify_options").slideUp();
+                            $("#osx_notify_options").slideUp();
                         }
                 });
 
                 if ($("#boxcar").is(":checked"))
                         {
-                                $("#boxcar_options").show();
+                            $("#boxcar_options").show();
                         }
                 else
                         {
-                                $("#boxcar_options").hide();
+                            $("#boxcar_options").hide();
                         }
 
                 $("#boxcar").click(function(){
                         if ($("#boxcar").is(":checked"))
                         {
-                                $("#boxcar_options").slideDown();
+                            $("#boxcar_options").slideDown();
                         }
                         else
                         {
-                                $("#boxcar_options").slideUp();
+                            $("#boxcar_options").slideUp();
                         }
                 });
 
                 if ($("#songkick").is(":checked"))
                         {
-                                $("#songkickoptions").show();
+                            $("#songkickoptions").show();
                         }
                 else
                         {
-                                $("#songkickoptions").hide();
+                            $("#songkickoptions").hide();
                         }
 
                 $("#songkick").click(function(){
                         if ($("#songkick").is(":checked"))
                         {
-                                $("#songkickoptions").slideDown();
+                            $("#songkickoptions").slideDown();
                         }
                         else
                         {
-                                $("#songkickoptions").slideUp();
+                            $("#songkickoptions").slideUp();
                         }
                 });
-                
+
                 if ($("#songkick_filter").is(":checked"))
                         {
-                                $("#songkick_filteroptions").show();
+                            $("#songkick_filteroptions").show();
                         }
                 else
                         {
-                                $("#songkick_filteroptions").hide();
+                            $("#songkick_filteroptions").hide();
                         }
 
                 $("#songkick_filter").click(function(){
                         if ($("#songkick_filter").is(":checked"))
                         {
-                                $("#songkick_filteroptions").slideDown();
+                            $("#songkick_filteroptions").slideDown();
                         }
                         else
                         {
-                                $("#songkick_filteroptions").slideUp();
+                            $("#songkick_filteroptions").slideUp();
                         }
                 });
 
                 if ($("#lossless_only").is(":checked"))
                         {
-                                $("#lossless_only_options").show();
+                            $("#lossless_only_options").show();
                         }
                 else
                         {
-                                $("#lossless_only_options").hide();
+                            $("#lossless_only_options").hide();
                         }
 
                 if ($("#preferred_bitrate").is(":checked"))
                         {
-                                $("#preferred_bitrate_options").show();
+                            $("#preferred_bitrate_options").show();
                         }
                 else
                         {
-                                $("#preferred_bitrate_options").hide();
+                            $("#preferred_bitrate_options").hide();
                         }
 
                 if ($("#nzb_downloader_sabnzbd").is(":checked"))
                         {
-                                $("#sabnzbd_options").show();
-                                $("#nzbget_options,#blackhole_options").hide();
+                            $("#sabnzbd_options").show();
+                            $("#nzbget_options,#blackhole_options").hide();
                         }
                 if ($("#nzb_downloader_nzbget").is(":checked"))
                         {
-                                $("#sabnzbd_options,#blackhole_options").hide();
-                                $("#nzbget_options").show();
+                            $("#sabnzbd_options,#blackhole_options").hide();
+                            $("#nzbget_options").show();
                         }
                 if ($("#nzb_downloader_blackhole").is(":checked"))
                         {
-                                $("#sabnzbd_options,#nzbget_options").hide();
-                                $("#blackhole_options").show();
+                            $("#sabnzbd_options,#nzbget_options").hide();
+                            $("#blackhole_options").show();
                         }
 
                 if ($("#torrent_downloader_blackhole").is(":checked"))
                         {
-                                $("#transmission_options,#utorrent_options").hide();
-                                $("#torrent_blackhole_options").show();
+                            $("#transmission_options,#utorrent_options").hide();
+                            $("#torrent_blackhole_options").show();
                         }
                 if ($("#torrent_downloader_transmission").is(":checked"))
                         {
-                                $("#torrent_blackhole_options,#utorrent_options").hide();
-                                $("#transmission_options").show();
+                            $("#torrent_blackhole_options,#utorrent_options").hide();
+                            $("#transmission_options").show();
                         }
                 if ($("#torrent_downloader_utorrent").is(":checked"))
                         {
-                                $("#torrent_blackhole_options,#transmission_options").hide();
-                                $("#utorrent_options").show();
+                            $("#torrent_blackhole_options,#transmission_options").hide();
+                            $("#utorrent_options").show();
                         }
 
                 $('input[type=radio]').change(function(){
                         if ($("#preferred_bitrate").is(":checked"))
                         {
-                                $("#preferred_bitrate_options").slideDown("fast");
-                                $("#lossless_only_options").slideUp("fast");
+                            $("#preferred_bitrate_options").slideDown("fast");
+                            $("#lossless_only_options").slideUp("fast");
                         }
                         if ($("#preferred_quality0").is(":checked"))
                         {
-                                $("#preferred_bitrate_options").slideUp("fast");
-                                $("#lossless_only_options").slideUp("fast");
+                            $("#preferred_bitrate_options").slideUp("fast");
+                            $("#lossless_only_options").slideUp("fast");
                         }
                         if ($("#preferred_quality1").is(":checked"))
                         {
-                                $("#preferred_bitrate_options").slideUp("fast");
-                                $("#lossless_only_options").slideUp("fast");
+                            $("#preferred_bitrate_options").slideUp("fast");
+                            $("#lossless_only_options").slideUp("fast");
                         }
                         if ($("#lossless_only").is(":checked"))
                         {
@@ -1771,27 +1766,27 @@
                         }
                         if ($("#nzb_downloader_sabnzbd").is(":checked"))
                         {
-                                $("#nzbget_options,#blackhole_options").fadeOut("fast", function() { $("#sabnzbd_options").fadeIn() });
+                            $("#nzbget_options,#blackhole_options").fadeOut("fast", function() { $("#sabnzbd_options").fadeIn() });
                         }
                         if ($("#nzb_downloader_nzbget").is(":checked"))
                         {
-                                $("#sabnzbd_options,#blackhole_options").fadeOut("fast", function() { $("#nzbget_options").fadeIn() });
+                            $("#sabnzbd_options,#blackhole_options").fadeOut("fast", function() { $("#nzbget_options").fadeIn() });
                         }
                         if ($("#nzb_downloader_blackhole").is(":checked"))
                         {
-                                $("#sabnzbd_options,#nzbget_options").fadeOut("fast", function() { $("#blackhole_options").fadeIn() });
+                            $("#sabnzbd_options,#nzbget_options").fadeOut("fast", function() { $("#blackhole_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_blackhole").is(":checked"))
                         {
-                                $("#transmission_options,#utorrent_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
+                            $("#transmission_options,#utorrent_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_transmission").is(":checked"))
                         {
-                                $("#torrent_blackhole_options,#utorrent_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
+                            $("#torrent_blackhole_options,#utorrent_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_utorrent").is(":checked"))
                         {
-                                $("#torrent_blackhole_options,#transmission_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
+                            $("#torrent_blackhole_options,#transmission_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
                         }
                 });
 
@@ -1850,7 +1845,7 @@
                 });
 
                 $(function() {
-                        $( "#tabs" ).tabs();
+                    $( "#tabs" ).tabs();
                 });
                 initActions();
                 initConfigCheckbox("#use_headphones_indexer");
@@ -1865,7 +1860,6 @@
                 initConfigCheckbox("#usewhatcd");
                 initConfigCheckbox("#useapi");
                 initConfigCheckbox("#enable_https");
-        
 
 
                 $('#twitterStep1').click(function () {
@@ -1897,5 +1891,5 @@
             initThisPage();
         });
 
-        </script>
+    </script>
 </%def>
