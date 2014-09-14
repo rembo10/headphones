@@ -14,7 +14,6 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 from headphones import logger, helpers, common, request
-from headphones.exceptions import ex
 
 from xml.dom import minidom
 from httplib import HTTPSConnection
@@ -90,7 +89,9 @@ class GROWL:
 
         # Send it, including an image
         image_file = os.path.join(str(headphones.PROG_DIR), 'data/images/headphoneslogo.png')
-        image = open(image_file, 'rb').read()
+
+        with open(image_file, 'rb') as f:
+            image = f.read()
 
         try:
             growl.notify(
@@ -249,8 +250,8 @@ class XBMC:
                 if not request:
                     raise Exception
 
-            except:
-                logger.warn('Error sending notification request to XBMC')
+            except Exception:
+                logger.error('Error sending notification request to XBMC')
 
 class LMS:
 
