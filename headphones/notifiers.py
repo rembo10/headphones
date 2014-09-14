@@ -39,7 +39,10 @@ try:
 except ImportError:
     from cgi import parse_qsl
 
-class GROWL:
+class GROWL(object):
+    """
+    Growl notifications, for OS X
+    """
 
     def __init__(self):
         self.enabled = headphones.GROWL_ENABLED
@@ -117,10 +120,10 @@ class GROWL:
 
         self.notify('ZOMG Lazors Pewpewpew!', 'Test Message')
 
-class PROWL:
-
-    keys = []
-    priority = []
+class PROWL(object):
+    """
+    Prowl notifications.
+    """
 
     def __init__(self):
         self.enabled = headphones.PROWL_ENABLED
@@ -164,25 +167,29 @@ class PROWL:
         return
 
     def test(self, keys, priority):
-
         self.enabled = True
         self.keys = keys
         self.priority = priority
 
         self.notify('ZOMG Lazors Pewpewpew!', 'Test Message')
 
-class MPC:
+class MPC(object):
+    """
+    MPC library update
+    """
 
     def __init__(self):
 
         pass
 
     def notify( self ):
-
         subprocess.call( ["mpc", "update"] )
 
 
-class XBMC:
+class XBMC(object):
+    """
+    XBMC notifications
+    """
 
     def __init__(self):
 
@@ -253,12 +260,12 @@ class XBMC:
             except Exception:
                 logger.error('Error sending notification request to XBMC')
 
-class LMS:
-
-#Class for updating a Logitech Media Server
+class LMS(object):
+    """
+    Class for updating a Logitech Media Server
+    """
 
     def __init__(self):
-
         self.hosts = headphones.LMS_HOST
 
     def _sendjson(self, host):
@@ -294,8 +301,7 @@ class LMS:
             if not request:
                 logger.warn('Error sending rescan request to LMS')
 
-class Plex:
-
+class Plex(object):
     def __init__(self):
 
         self.server_hosts = headphones.PLEX_SERVER_HOST
@@ -381,7 +387,7 @@ class Plex:
             except:
                 logger.warn('Error sending notification request to Plex Media Server')
 
-class NMA:
+class NMA(object):
     def notify(self, artist=None, album=None, snatched=None):
         title = 'Headphones'
         api = headphones.NMA_APIKEY
@@ -417,7 +423,7 @@ class NMA:
         else:
             return True
 
-class PUSHBULLET:
+class PUSHBULLET(object):
 
     def __init__(self):
         self.apikey = headphones.PUSHBULLET_APIKEY
@@ -470,7 +476,7 @@ class PUSHBULLET:
 
         self.notify('Main Screen Activate', 'Test Message')
 
-class PUSHALOT:
+class PUSHALOT(object):
 
     def notify(self, message, event):
         if not headphones.PUSHALOT_ENABLED:
@@ -509,7 +515,7 @@ class PUSHALOT:
                 logger.info(u"Pushalot notification failed.")
                 return False
 
-class Synoindex:
+class Synoindex(object):
     def __init__(self, util_loc='/usr/syno/bin/synoindex'):
         self.util_loc = util_loc
 
@@ -545,19 +551,17 @@ class Synoindex:
             for path in path_list:
                 self.notify(path)
 
-class PUSHOVER:
-
-    application_token = "LdPCoy0dqC21ktsbEyAVCcwvQiVlsz"
-    keys = []
-    priority = []
+class PUSHOVER(object):
 
     def __init__(self):
         self.enabled = headphones.PUSHOVER_ENABLED
         self.keys = headphones.PUSHOVER_KEYS
         self.priority = headphones.PUSHOVER_PRIORITY
+
         if headphones.PUSHOVER_APITOKEN:
             self.application_token = headphones.PUSHOVER_APITOKEN
-        pass
+        else:
+            self.application_token = "LdPCoy0dqC21ktsbEyAVCcwvQiVlsz"
 
     def conf(self, options):
         return cherrypy.config['config'].get('Pushover', options)
@@ -599,22 +603,22 @@ class PUSHOVER:
         return
 
     def test(self, keys, priority):
-
         self.enabled = True
         self.keys = keys
         self.priority = priority
 
         self.notify('Main Screen Activate', 'Test Message')
 
-class TwitterNotifier:
-
-    consumer_key = "oYKnp2ddX5gbARjqX8ZAAg"
-    consumer_secret = "A4Xkw9i5SjHbTk7XT8zzOPqivhj9MmRDR9Qn95YA9sk"
+class TwitterNotifier(object):
 
     REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
     ACCESS_TOKEN_URL  = 'https://api.twitter.com/oauth/access_token'
     AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authorize'
     SIGNIN_URL        = 'https://api.twitter.com/oauth/authenticate'
+
+    def __init__(self):
+        self.consumer_key = "oYKnp2ddX5gbARjqX8ZAAg"
+        self.consumer_secret = "A4Xkw9i5SjHbTk7XT8zzOPqivhj9MmRDR9Qn95YA9sk"
 
     def notify_snatch(self, title):
         if headphones.TWITTER_ONSNATCH:
@@ -709,11 +713,7 @@ class TwitterNotifier:
 
         return self._send_tweet(prefix+": "+message)
 
-notifier = TwitterNotifier
-
-class OSX_NOTIFY:
-
-    objc = None
+class OSX_NOTIFY(object):
 
     def __init__(self):
         try:
@@ -768,14 +768,12 @@ class OSX_NOTIFY:
     def swizzled_bundleIdentifier(self, original, swizzled):
         return 'ade.headphones.osxnotify'
 
-class BOXCAR:
+class BOXCAR(object):
 
     def __init__(self):
-
         self.url = 'https://new.boxcar.io/api/notifications'
 
     def notify(self, title, message, rgid=None):
-
         try:
             if rgid:
                 message += '<br></br><a href="http://musicbrainz.org/release-group/%s">MusicBrainz</a>' % rgid
@@ -792,6 +790,6 @@ class BOXCAR:
             handle.close()
             return True
 
-        except urllib2.URLError, e:
+        except urllib2.URLError as e:
             logger.warn('Error sending Boxcar2 Notification: %s' % e)
             return False
