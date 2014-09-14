@@ -54,7 +54,7 @@ def request_response(url, method="get", auto_raise=True,
                 try:
                     response.raise_for_status()
                 except:
-                    logger.debug("Response status code %d is not white " +
+                    logger.debug("Response status code %d is not white " \
                          "listed, raised exception", response.status_code)
                     raise
         elif auto_raise:
@@ -62,17 +62,17 @@ def request_response(url, method="get", auto_raise=True,
 
         return response
     except requests.ConnectionError:
-        logger.error("Unable to connect to remote host. Check if the remote " +
+        logger.error("Unable to connect to remote host. Check if the remote " \
             "host is up and running.")
     except requests.Timeout:
-        logger.error("Request timed out. The remote host did not respeond " +
+        logger.error("Request timed out. The remote host did not respeond " \
             "timely.")
     except requests.HTTPError as e:
         if e.response is not None:
             if e.response.status_code >= 500:
                 cause = "remote server error"
             elif e.response.status_code >= 400:
-                cause = "local request error"
+                cause = "local client error"
             else:
                 # I don't think we will end up here, but for completeness
                 cause = "unknown"
