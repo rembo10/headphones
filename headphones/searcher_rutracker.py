@@ -51,7 +51,7 @@ class Rutracker():
 
         try:
             self.opener.open("http://login.rutracker.org/forum/login.php", params)
-        except :
+        except Exception:
             pass
 
         # Check if we're logged in
@@ -286,17 +286,17 @@ class Rutracker():
             else:
                 tempdir = mkdtemp(suffix='_rutracker_torrents')
                 download_path = os.path.join(tempdir, torrent_name)
-            fp = open (download_path, 'wb')
-            fp.write (torrent)
-            fp.close ()
+
+            with open(download_path, 'wb') as f:
+                f.write(torrent)
             os.umask(prev)
 
             # Add file to utorrent
             if headphones.TORRENT_DOWNLOADER == 2:
                 self.utorrent_add_file(download_path)
 
-        except Exception, e:
-            logger.error('Error getting torrent: %s' % e)
+        except Exception as e:
+            logger.error('Error getting torrent: %s', e)
             return False
 
         return download_path, tor_hash
@@ -322,9 +322,10 @@ class Rutracker():
 
         try:
             r = session.get(url + 'token.html')
-        except:
-            logger.debug('Error getting token')
+        except Exception:
+            logger.exception('Error getting token')
             return
+
         if r.status_code == '401':
             logger.debug('Error reaching utorrent')
             return
@@ -336,15 +337,11 @@ class Rutracker():
 
         session.params = {'token': regex.group(1)}
 
-        params = {'action': 'add-file'}
-        f = open(filename, 'rb')
-        files = {'torrent_file': f}
-
-        try:
-            session.post(url, params=params, files=files)
-        except:
-            logger.debug('Error adding file to utorrent')
-            return
-        finally:
-            f.close()
+        with open(filename, 'rb') as f:
+            try:
+                session.post(url, params={'action': 'add-file'},
+                    files={'torrent_file': f})
+            except Exception:
+                logger.exception('Error adding file to utorrent')
+                return
 

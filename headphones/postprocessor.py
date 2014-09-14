@@ -569,25 +569,27 @@ def addAlbumArt(artwork, albumpath, release):
         album_art_name = album_art_name.replace(".", "_", 1)
 
     try:
-        file = open(os.path.join(albumpath, album_art_name), 'wb')
-        file.write(artwork)
-        file.close()
-    except Exception, e:
-        logger.error('Error saving album art: %s' % str(e))
+        with open(os.path.join(albumpath, album_art_name), 'wb') as f:
+            f.write(artwork)
+    except IOError as e:
+        logger.error('Error saving album art: %s', e)
         return
 
 def cleanupFiles(albumpath):
     logger.info('Cleaning up files')
+
     for r,d,f in os.walk(albumpath):
         for files in f:
             if not any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
                 logger.debug('Removing: %s' % files)
                 try:
                     os.remove(os.path.join(r, files))
-                except Exception, e:
+                except Exception as e:
                     logger.error(u'Could not remove file: %s. Error: %s' % (files.decode(headphones.SYS_ENCODING, 'replace'), e))
 
 def renameNFO(albumpath):
+    logger.info('Renaming NFO')
+
     for r,d,f in os.walk(albumpath):
         for file in f:
             if file.lower().endswith('.nfo'):
@@ -595,11 +597,10 @@ def renameNFO(albumpath):
                 try:
                     new_file_name = os.path.join(r, file)[:-3] + 'orig.nfo'
                     os.rename(os.path.join(r, file), new_file_name)
-                except Exception, e:
+                except Exception as e:
                     logger.error(u'Could not rename file: %s. Error: %s' % (os.path.join(r, file).decode(headphones.SYS_ENCODING, 'replace'), e))
 
 def moveFiles(albumpath, release, tracks):
-
     try:
         year = release['ReleaseDate'][:4]
     except TypeError:
