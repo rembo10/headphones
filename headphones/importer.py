@@ -190,10 +190,12 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
     except IndexError:
         includeExtras = False
 
-    #Clean all references to release group in dB that are no longer referenced from the musicbrainz refresh
+    # Clean all references to release group in dB that are no longer referenced
+    # from the musicbrainz refresh
     group_list = []
     force_repackage = 0
-    #Don't nuke the database if there's a MusicBrainz error
+
+    # Don't nuke the database if there's a MusicBrainz error
     if len(artist['releasegroups']) != 0:
         for groups in artist['releasegroups']:
             group_list.append(groups['id'])
