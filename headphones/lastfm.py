@@ -30,8 +30,8 @@ def request_lastfm(method, **kwargs):
     Call a Last.FM API method. Automatically sets the method and API key. Method
     will return the result if no error occured.
 
-    By default, this method will request the JSON format, since it is lighter
-    than XML.
+    By default, this method will request the JSON format, since it is more
+    lightweight than XML.
     """
 
     # Prepare request
@@ -41,6 +41,8 @@ def request_lastfm(method, **kwargs):
 
     # Send request
     logger.debug("Calling Last.FM method: %s", method)
+    logger.debug("Last.FM call parameters: %s", kwargs)
+
     data = request.request_json(ENTRY_POINT, timeout=TIMEOUT, params=kwargs)
 
     # Parse response and check for errors.
@@ -49,7 +51,7 @@ def request_lastfm(method, **kwargs):
         return
 
     if "error" in data:
-        logger.debug("Last.FM returned an error: %s", data["message"])
+        logger.error("Last.FM returned an error: %s", data["message"])
         return
 
     return data
