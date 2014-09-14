@@ -80,25 +80,9 @@ def request_response(url, method="get", auto_raise=True,
             logger.error("Request raise HTTP error with status code %d (%s).",
                 e.response.status_code, cause)
 
-            # Some servers return extra information in the result. Try to parse
-            # it for debugging purpose. Messages are limited to 150 characters,
-            # since it may return the whole page in case of normal web page URLs
+            # Debug response
             if headphones.VERBOSE:
-                if e.response.headers.get("content-type") == "text/html":
-                    soup = BeautifulSoup(e.response.content, "html5lib")
-
-                    message = soup.find("body")
-                    message = message.text if message else soup.text
-                    message = message.strip()
-                else:
-                    message = e.response.content.strip()
-
-                if message:
-                    # Truncate message if it is too long.
-                    if len(message) > 150:
-                        message = message[:150] + "..."
-
-                    logger.debug("Server responded with message: %s", message)
+                server_message(e.response)
         else:
             logger.error("Request raised HTTP error.")
     except requests.RequestException as e:
@@ -144,11 +128,15 @@ def request_json(url, **kwargs):
             result = response.json()
 
             if validator and not validator(result):
-                logger.error("JSON validation result vailed")
+                logger.error("JSON validation result failed")
             else:
                 return result
         except ValueError:
             logger.error("Response returned invalid JSON data")
+
+            # Debug response
+            if headphones.VERBOSE:
+                server_message(response)
 
 def request_content(url, **kwargs):
     """
@@ -169,3 +157,36 @@ def request_feed(url, **kwargs):
 
     if response is not None:
         return feedparser.parse(response.content)
+
+def server_message(response):
+    """
+    Extract server message from response and log in to logger with DEBUG level.
+
+    Some servers return extra information in the result. Try to parse it for
+    debugging purpose. Messages are limited to 150 characters, since it may
+    return the whole page in case of normal web page URLs
+    """
+
+    message = None
+
+    # First attempt is to 'read' the response as HTML
+    if response.headers.get("content-type") == "text/html":
+        try:
+            soup = BeautifulSoup(response.content, "html5lib")
+        except Exception:
+            pass
+
+        message = soup.find("body")
+        message = message.text if message else soup.text
+        message = message.strip()
+
+    # Second attempt is to just take the response
+    if message is None:
+        message = response.content.strip()
+
+    if message:
+        # Truncate message if it is too long.
+        if len(message) > 150:
+            message = message[:150] + "..."
+
+        logger.debug("Server responded with message: %s", message)
