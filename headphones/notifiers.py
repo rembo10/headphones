@@ -793,3 +793,22 @@ class BOXCAR(object):
         except urllib2.URLError as e:
             logger.warn('Error sending Boxcar2 Notification: %s' % e)
             return False
+
+class SubSonicNotifier(object):
+
+    def __init__(self):
+        self.host = headphones.SUBSONIC_HOST
+        self.username = headphones.SUBSONIC_USERNAME
+        self.password = headphones.SUBSONIC_PASSWORD
+
+    def notify(self, albumpaths):
+        # Correct URL
+        if not self.host.lower().startswith("http"):
+            self.host = "http://" + self.host
+
+        if not self.host.lower().endswith("/"):
+            self.host = self.host + "/"
+
+        # Invoke request
+        request.request_response(self.host + "musicFolderSettings.view?scanNow",
+            auth=(self.username, self.password))
