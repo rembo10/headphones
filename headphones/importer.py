@@ -184,8 +184,6 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
 
     # See if we need to grab extras. Artist specific extras take precedence
     # over global option. Global options are set when adding a new artist
-    myDB = db.DBConnection()
-
     try:
         db_artist = myDB.action('SELECT IncludeExtras, Extras from artists WHERE ArtistID=?', [artistid]).fetchone()
         includeExtras = db_artist['IncludeExtras']
