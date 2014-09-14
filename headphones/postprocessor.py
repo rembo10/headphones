@@ -519,6 +519,11 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         boxcar.notify('Headphones processed: ' + pushmessage,
                       statusmessage, release['AlbumID'])
 
+    if headphones.SUBSONIC_ENABLED:
+        logger.info(u"Sending Subsonic update")
+        subsonic = notifiers.SubSonicNotifier()
+        subsonic.notify(albumpaths)
+
     if headphones.MPC_ENABLED:
         mpc = notifiers.MPC()
         mpc.notify()

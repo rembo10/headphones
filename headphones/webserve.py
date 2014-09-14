@@ -1124,6 +1124,10 @@ class WebInterface(object):
                     "pushbullet_onsnatch": checked(headphones.PUSHBULLET_ONSNATCH),
                     "pushbullet_apikey": headphones.PUSHBULLET_APIKEY,
                     "pushbullet_deviceid": headphones.PUSHBULLET_DEVICEID,
+                    "subsonic_enabled": checked(headphones.SUBSONIC_ENABLED),
+                    "subsonic_host": headphones.SUBSONIC_HOST,
+                    "subsonic_username": headphones.SUBSONIC_USERNAME,
+                    "subsonic_password": headphones.SUBSONIC_PASSWORD,
                     "twitter_enabled": checked(headphones.TWITTER_ENABLED),
                     "twitter_onsnatch": checked(headphones.TWITTER_ONSNATCH),
                     "osx_notify_enabled": checked(headphones.OSX_NOTIFY_ENABLED),
@@ -1181,7 +1185,7 @@ class WebInterface(object):
         rutracker=0, rutracker_user=None, rutracker_password=None, rutracker_ratio=None, rename_files=0, correct_metadata=0, cleanup_files=0, keep_nfo=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0, replace_existing_folders=False,
         destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, file_underscores=0, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0, remix=0, spokenword=0, audiobook=0, other=0, djmix=0, mixtape_street=0, broadcast=0, interview=0, demo=0,
         autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, prefer_torrents=0, open_magnet_links=0, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
-        bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0,
+        bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0, subsonic_enabled=False, subsonic_host=None, subsonic_username=None, subsonic_password=None,
         delete_lossless_files=0, growl_enabled=0, growl_onsnatch=0, growl_host=None, growl_password=None, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, pushalot_enabled=False, pushalot_apikey=None, pushalot_onsnatch=0, synoindex_enabled=False, lms_enabled=0, lms_host=None,
         pushover_enabled=0, pushover_onsnatch=0, pushover_keys=None, pushover_priority=0, pushover_apitoken=None, pushbullet_enabled=0, pushbullet_onsnatch=0, pushbullet_apikey=None, pushbullet_deviceid=None, twitter_enabled=0, twitter_onsnatch=0,
@@ -1350,6 +1354,10 @@ class WebInterface(object):
         headphones.PUSHBULLET_ONSNATCH = pushbullet_onsnatch
         headphones.PUSHBULLET_APIKEY = pushbullet_apikey
         headphones.PUSHBULLET_DEVICEID = pushbullet_deviceid
+        headphones.SUBSONIC_ENABLED = subsonic_enabled
+        headphones.SUBSONIC_HOST = subsonic_host
+        headphones.SUBSONIC_USERNAME = subsonic_username
+        headphones.SUBSONIC_PASSWORD = subsonic_password
         headphones.SONGKICK_ENABLED = songkick_enabled
         headphones.SONGKICK_APIKEY = songkick_apikey
         headphones.SONGKICK_LOCATION = songkick_location
