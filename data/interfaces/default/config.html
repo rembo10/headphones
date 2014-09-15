@@ -1,7 +1,7 @@
 <%inherit file="base.html"/>
 <%!
-        import headphones
-        import string
+    import headphones
+    import string
 %>
 
 <%def name="headerIncludes()">
@@ -12,13 +12,12 @@
         </div>
     </div>
 </%def>
-<%def name="body()">
 
+<%def name="body()">
     <div id="paddingheader">
         <h1 class="clearfix"><i class="fa fa-gear"></i> Settings</h1>
     </div>
     <form action="configUpdate" method="post" class="form" id="configUpdate">
-
         <div id="tabs">
             <ul>
                 <li><a href="#tabs-1">Web Interface</a></li>
@@ -29,34 +28,47 @@
                 <li><a href="#tabs-6">Advanced Settings</a></li>
             </ul>
             <div id="tabs-1">
-
                 <table class="configtable" summary="Web Interface">
                     <tr>
                         <td>
                             <fieldset>
                                 <legend>Basic</legend>
                                 <div class="row">
-                                    <label>HTTP Host</label>
+                                    <label title="Host to bind web server to">
+                                        HTTP Host
+                                    </label>
                                     <input type="text" name="http_host" value="${config['http_host']}" size="30">
-                                    <small>e.g. localhost or 0.0.0.0</small>
+                                    <small>e.g. localhost or an IP, such as 0.0.0.0</small>
                                 </div>
                                 <div class="row">
-                                    <label>HTTP Port</label>
+                                    <label title="Port to bind web server to. Note that ports below 1024 may require root.">
+                                        HTTP Port
+                                    </label>
                                     <input type="text" name="http_port" value="${config['http_port']}" size="10">
                                 </div>
                                 <div class="row">
-                                    <label>HTTP Username</label>
+                                    <label title="Username for web server authentication. Leave empty to disable.">
+                                        HTTP Username
+                                    </label>
                                     <input type="text" name="http_username" value="${config['http_user']}" size="30">
                                 </div>
                                 <div class="row">
-                                    <label>HTTP Password</label>
+                                    <label title="Password for web server authentication. Leave empty to disable.">
+                                        HTTP Password
+                                    </label>
                                     <input type="password" name="http_password" value="${config['http_pass']}" size="30">
                                 </div>
                                 <div class="row checkbox">
-                                    <input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} /> <label>Launch Browser on Startup</label>
+                                    <input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} />
+                                    <label title="Launch browser pointed to Headphones, on startup.">
+                                        Launch Browser on Startup
+                                    </label>
                                 </div>
                                 <div class="row checkbox">
-                                    <input type="checkbox" name="enable_https" id="enable_https" value="1" ${config['enable_https']} /> <label>Enable HTTPS</label>
+                                    <input type="checkbox" name="enable_https" id="enable_https" value="1" ${config['enable_https']} />
+                                    <label title="Enable HTTPS for web server for encrypted communication">
+                                        Enable HTTPS
+                                    </label>
                                 </div>
                                 <div id="https_options">
                                     <div class="row">
@@ -74,7 +86,10 @@
                             <fieldset>
                                 <legend>API</legend>
                                 <div class="row checkbox">
-                                    <input type="checkbox" id="useapi" name="api_enabled" id="api_enabled" value="1" ${config['api_enabled']} /><label>Enable API</label>
+                                    <input type="checkbox" id="useapi" name="api_enabled" id="api_enabled" value="1" ${config['api_enabled']} />
+                                    <label title="Allow remote applications to interface with Headphones">
+                                        Enable API
+                                    </label>
                                 </div>
                                 <div id="apioptions" class="row">
                                     <label>API key</label>
@@ -87,23 +102,34 @@
                             <fieldset>
                                 <legend>Interval</legend>
                                 <div class="row">
-                                    <label>NZB Search Interval</label>
-                                    <input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="4">mins
+                                    <label title="Time between two searches for new downloads.">
+                                        Search Interval
+                                    </label>
+                                    <input type="text" name="search_interval" value="${config['search_interval']}" size="4">mins
+                                    <small>minimum is 360 minutes</small>
                                 </div>
                                 <div class="row">
-                                    <label>Download Scan Interval</label>
+                                    <label title="Time between scans for downloaded files.">
+                                        Download Scan Interval
+                                    </label>
                                     <input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="4">mins
                                 </div>
                                 <div class="row">
-                                    <label>Library Scan Interval</label>
+                                    <label title="Time between two library update scans.">
+                                        Library Scan Interval
+                                    </label>
                                     <input type="text" name="libraryscan_interval" value="${config['libraryscan_interval']}" size="4">hours
                                 </div>
                                 <div class="row">
-                                    <label>MusicBrainz Update Interval</label>
+                                    <label title="Time between two MusicBrainz updates.">
+                                        MusicBrainz Update Interval
+                                    </label>
                                     <input type="text" name="update_db_interval" value="${config['update_db_interval']}" size="4">hours
                                 </div>
                                 <div class="row">
-                                    <label>Ignore Album Updates</label>
+                                    <label title="Ignore MusicBrainz album updates older then certain number of days.">
+                                        Ignore Album Updates
+                                    </label>
                                     <input type="text" name="mb_ignore_age" value="${config['mb_ignore_age']}" size="4">days
                                 </div>
                             </fieldset>
@@ -122,50 +148,70 @@
                 <table class="configtable" summary="Download Settings">
                     <tr>
                         <td>
-                            <fieldset>
+                            <fieldset title="Method for downloading usenet files.">
                                 <legend>Usenet</legend>
-                                <input type="radio" name="nzb_downloader" id="nzb_downloader_sabnzbd" value="0" ${config['nzb_downloader_sabnzbd']}> Sabnzbd <input type="radio" name="nzb_downloader" id="nzb_downloader_nzbget" value="1" ${config['nzb_downloader_nzbget']}> NZBget <input type="radio" name="nzb_downloader" id="nzb_downloader_blackhole" value="2" ${config['nzb_downloader_blackhole']}> Black Hole
+                                <input type="radio" name="nzb_downloader" id="nzb_downloader_sabnzbd" value="0" ${config['nzb_downloader_sabnzbd']}> Sabnzbd
+                                <input type="radio" name="nzb_downloader" id="nzb_downloader_nzbget" value="1" ${config['nzb_downloader_nzbget']}> NZBget
+                                <input type="radio" name="nzb_downloader" id="nzb_downloader_blackhole" value="2" ${config['nzb_downloader_blackhole']}> Black Hole
                             </fieldset>
                             <fieldset id="sabnzbd_options">
                                 <div class="row">
-                                    <label>SABnzbd Host:</label>
+                                    <label title="SABnzbd host and port.">
+                                        SABnzbd Host
+                                    </label>
                                     <input type="text" name="sab_host" value="${config['sab_host']}" size="30">
                                     <small>usually http://localhost:8080</small>
                                 </div>
                                 <div class="row">
-                                    <label>SABnzbd Username</label>
+                                    <label title="SABnzbd username. Leave empty if not applicable.">
+                                        SABnzbd Username
+                                    </label>
                                     <input type="text" name="sab_username" value="${config['sab_user']}" size="20">
                                 </div>
                                 <div class="row">
-                                    <label>SABnzbd Password:</label>
+                                    <label title="SABnzbd password. Leave empty if not applicable.">
+                                        SABnzbd Password
+                                    </label>
                                     <input type="password" name="sab_password" value="${config['sab_pass']}" size="20">
                                 </div>
                                 <div class="row">
-                                    <label>SABnzbd API:</label>
+                                    <label title="SABnzbd API key. Can be found in SABnzbd settings.">
+                                        SABnzbd API key
+                                    </label>
                                     <input type="text" name="sab_apikey" value="${config['sab_api']}" size="36">
                                 </div>
                                 <div class="row">
-                                    <label>SABnzbd Category:</label>
+                                    <label title="Name of SABnzbd category to add downloads to.">
+                                        SABnzbd Category
+                                    </label>
                                     <input type="text" name="sab_category" value="${config['sab_cat']}" size="20">
                                 </div>
                             </fieldset>
 
                             <fieldset id="nzbget_options">
                                 <div class="row">
-                                    <label>NZBget Host:</label>
+                                    <label title="NZBget host and port.">
+                                        NZBget Host
+                                    </label>
                                     <input type="text" name="nzbget_host" value="${config['nzbget_host']}" size="30">
                                     <small>usually http://localhost:6789</small>
                                 </div>
                                 <div class="row">
-                                    <label>NZBget Username</label>
+                                    <label title="NZBGet username. Leave empty if not applicable">
+                                        NZBget Username
+                                    </label>
                                     <input type="text" name="nzbget_username" value="${config['nzbget_user']}" size="20">
                                 </div>
                                 <div class="row">
-                                    <label>NZBget Password:</label>
+                                    <label title="NZBGet password. Leave empty if not applicable">
+                                        NZBget Password
+                                    </label>
                                     <input type="password" name="nzbget_password" value="${config['nzbget_pass']}" size="20">
                                 </div>
                                 <div class="row">
-                                    <label>NZBget Category:</label>
+                                    <label title="Name of NZBget category to add downloads to.">
+                                        NZBget Category
+                                    </label>
                                     <input type="text" name="nzbget_category" value="${config['nzbget_cat']}" size="20">
                                 </div>
                                 <%
@@ -234,7 +280,9 @@
 
                             <fieldset id="blackhole_options">
                                 <div class="row">
-                                    <label>Black Hole Directory</label>
+                                    <label title="Path to folder to put NZB files in, for downloading.">
+                                        Black Hole Directory
+                                    </label>
                                     <input type="text" name="blackhole_dir" value="${config['blackhole_dir']}" size="50">
                                     <small>Folder your Download program watches for NZBs</small>
                                 </div>
@@ -242,19 +290,26 @@
 
                             <fieldset id="general_nzb_options">
                                 <div class="row">
-                                    <label>Music Download Directory:</label>
+                                    <label title="Path to folder where Headphones can find the downloads.">
+                                        Music Download Directory:
+                                    </label>
                                     <input type="text" name="download_dir" value="${config['download_dir']}" size="50">
                                     <small>Full path where SAB or NZBget downloads your music. e.g. /Users/name/Downloads/music</small>
                                 </div>
                                 <div class="row">
-                                    <input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5"><label>Usenet Retention</label>
+                                    <label title="Number of days of retention your usenet provider provides.">
+                                        Usenet Retention
+                                    </label>
+                                    <input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5">
                                 </div>
                             </fieldset>
                         </td>
                         <td>
-                            <fieldset>
+                            <fieldset title="Method for downloading torrent files.">
                                 <legend>Torrents</legend>
-                                <input type="radio" name="torrent_downloader" id="torrent_downloader_blackhole" value="0" ${config['torrent_downloader_blackhole']}> Black Hole <input type="radio" name="torrent_downloader" id="torrent_downloader_transmission" value="1" ${config['torrent_downloader_transmission']}> Transmission <input type="radio" name="torrent_downloader" id="torrent_downloader_utorrent" value="2" ${config['torrent_downloader_utorrent']}> uTorrent (Beta)
+                                <input type="radio" name="torrent_downloader" id="torrent_downloader_blackhole" value="0" ${config['torrent_downloader_blackhole']}> Black Hole
+                                <input type="radio" name="torrent_downloader" id="torrent_downloader_transmission" value="1" ${config['torrent_downloader_transmission']}> Transmission
+                                <input type="radio" name="torrent_downloader" id="torrent_downloader_utorrent" value="2" ${config['torrent_downloader_utorrent']}> uTorrent (Beta)
                             </fieldset>
                             <fieldset id="torrent_blackhole_options">
                                 <div class="row">
@@ -270,16 +325,16 @@
                             </fieldset>
                             <fieldset id="transmission_options">
                                 <div class="row">
-                                    <label>Transmission Host:</label>
+                                    <label>Transmission Host</label>
                                     <input type="text" name="transmission_host" value="${config['transmission_host']}" size="30">
                                     <small>usually http://localhost:9091</small>
                                 </div>
                                 <div class="row">
-                                    <label>Transmission Username:</label>
+                                    <label>Transmission Username</label>
                                     <input type="text" name="transmission_username" value="${config['transmission_user']}" size="30">
                                 </div>
                                 <div class="row">
-                                    <label>Transmission Password:</label>
+                                    <label>Transmission Password</label>
                                     <input type="password" name="transmission_password" value="${config['transmission_pass']}" size="30">
                                 </div>
                                 <div class="row">
@@ -288,21 +343,22 @@
                                 </div>
                             </fieldset>
                             <fieldset id="utorrent_options">
+                                <small class="heading"><i class="fa fa-info-circle"></i> Note: uTorrent may keep files read only when completed. Check 'Preferences -> Advanced -> bt.read_only_on_complete' in case of problems.</small>
                                 <div class="row">
-                                    <label>uTorrent Host:</label>
+                                    <label>uTorrent Host</label>
                                     <input type="text" name="utorrent_host" value="${config['utorrent_host']}" size="30">
                                     <small>usually http://localhost:9091</small>
                                 </div>
                                 <div class="row">
-                                    <label>uTorrent Username:</label>
+                                    <label>uTorrent Username</label>
                                     <input type="text" name="utorrent_username" value="${config['utorrent_user']}" size="30">
                                 </div>
                                 <div class="row">
-                                    <label>uTorrent Password:</label>
+                                    <label>uTorrent Password</label>
                                     <input type="password" name="utorrent_password" value="${config['utorrent_pass']}" size="30">
                                 </div>
                                 <div class="row">
-                                    <label>uTorrent Label:</label>
+                                    <label>uTorrent Label</label>
                                     <input type="text" name="utorrent_label" value="${config['utorrent_label']}" size="30">
                                 </div>
                             </fieldset>
@@ -315,7 +371,7 @@
                                 <div class="row">
                                     <label>Music Download Directory</label>
                                     <input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="50">
-                                    <small>Full path where your torrent client downloads your music e.g. /Users/name/Downloads/music</small>
+                                    <small>Full path where your torrent client downloads your music e.g. '/Users/name/Downloads/music'</small>
                                 </div>
                                 <div class="row checkbox">
                                     <label>Keep Files for Seeding</label>
@@ -323,8 +379,8 @@
                                 </div>
                                 <div class="row checkbox">
                                     <label>Prefer</label>
-                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_0" value="0" ${config['prefer_torrents_0']}>NZBs 
-                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_1" value="1" ${config['prefer_torrents_1']}>Torrents 
+                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_0" value="0" ${config['prefer_torrents_0']}>NZBs
+                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_1" value="1" ${config['prefer_torrents_1']}>Torrents
                                     <input type="radio" name="prefer_torrents" id="prefer_torrents_2" value="2" ${config['prefer_torrents_2']}>No Preference
                                     </div>
                             </fieldset>
@@ -347,7 +403,7 @@
                                     <div class="row">
                                         <label>Username</label>
                                         <input class="hpuser" type="text" value="${config['hpuser']}" size="20">
-                                        <small>Headphones VIP Server username & password</small>
+                                        <small>Headphones VIP Server username &amp; password</small>
                                     </div>
                                     <div class="row">
                                         <label>Password</label>
@@ -528,15 +584,15 @@
                                     </div>
                                     <div class="config">
                                         <div class="row">
-                                            <label>Username: </label>
+                                            <label>Username</label>
                                             <input type="text" name="whatcd_username" value="${config['whatcd_username']}" size="36">
                                         </div>
                                         <div class="row">
-                                            <label>Password: </label>
+                                            <label>Password</label>
                                             <input type="password" name="whatcd_password" value="${config['whatcd_password']}" size="36">
                                         </div>
                                         <div class="row">
-                                            <label>Seed Ratio: </label>
+                                            <label>Seed Ratio</label>
                                             <input type="text" class="override-float" name="whatcd_ratio" value="${config['whatcd_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
                                         </div>
                                     </div>
@@ -549,7 +605,7 @@
                                     </div>
                                     <div class="config">
                                         <div class="row">
-                                            <label>Seed Ratio: </label>
+                                            <label>Seed Ratio</label>
                                             <input type="text" class="override-float" name="mininova_ratio" value="${config['mininova_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
                                         </div>
                                     </div>
@@ -562,27 +618,45 @@
                 <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
             </div>
             <div id="tabs-4">
-                <table class="configtable" summary="Quality & Post Processing">
+                <table class="configtable" summary="Quality &amp; Post Processing">
                     <tr>
                         <td>
                             <fieldset>
                                 <legend>Quality</legend>
                                 <div class="row radio clearfix">
-                                    <input type="radio" name="preferred_quality" id="preferred_quality0" value="0" ${config['pref_qual_0']}><label>Highest Quality excluding Lossless</label>
-                                    <input type="radio" name="preferred_quality" id="preferred_quality1" value="1" ${config['pref_qual_1']}><label>Highest Quality including Lossless</label>
-                                    <input type="radio" name="preferred_quality" id="lossless_only" value="3" ${config['pref_qual_3']}><label>Lossless Only</label>
+                                    <label title="Snatch the highest quality available, excluding lossless.">
+                                        <input type="radio" name="preferred_quality" id="preferred_quality0" value="0" ${config['pref_qual_0']}>
+                                        Highest Quality excluding Lossless
+                                    </label>
+                                    <label title="Snatch the highest quality available, including lossless.">
+                                        <input type="radio" name="preferred_quality" id="preferred_quality1" value="1" ${config['pref_qual_1']}>
+                                        Highest Quality including Lossless
+                                    </label>
+                                    <label title="Snatch only lossless quality.">
+                                        <input type="radio" name="preferred_quality" id="lossless_only" value="3" ${config['pref_qual_3']}>
+                                        Lossless Only
+                                    </label>
                                     <div id="lossless_only_options">
                                         <span style="padding-left: 20px">
-                                            Reject if target size is not in bitrate range: \
+                                            Reject if target size is not in bitrate range:
                                             <input type="text" class="override-float" name="lossless_bitrate_from" value="${config['lossless_bitrate_from']}" size="4" title="e.g. if album length = 40 mins, from = 350 kbps, then min target size = 102.5 mb, anything less will be rejected">to\
                                             <input type="text" class="override-float" name="lossless_bitrate_to" value="${config['lossless_bitrate_to']}" size="5" title="e.g. if album length = 40 mins, to = 2000 kbps, then max target size = 586 mb, anything greater will be rejected">kbps
                                         </span>
                                     </div>
-                                    <input type="radio" id="preferred_bitrate" name="preferred_quality" value="2" ${config['pref_qual_2']}>Preferred Bitrate: <input type="text" class="override-float" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3">kbps<br>
+                                    <label title="Prefer certain bitrate range, including lossless fallback. Use this option if you have a lot of wrong snatches.">
+                                        <input type="radio" id="preferred_bitrate" name="preferred_quality" value="2" ${config['pref_qual_2']}>
+                                        Preferred Bitrate
+                                    <label>
                                     <div id="preferred_bitrate_options">
-                                        <span style="padding-left: 20px">
-                                            Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['pref_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['pref_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br>
-                                        </span>
+                                        <div class="row">
+                                            Target bitrate
+                                            <input type="text" class="override-float" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3">kbps<br>
+                                        </div>
+                                        <div class="row">
+                                            <span style="padding-left: 20px">
+                                                Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['pref_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['pref_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br>
+                                            </span>
+                                        </div>
                                         <div class="row checkbox left" style="padding-left: 20px">
                                             <input type="checkbox" name="preferred_bitrate_allow_lossless" value="1" ${config['pref_bitrate_allow_lossless']}>
                                             <label>Allow lossless if no good lossy match found</label>
@@ -629,7 +703,7 @@
                                     <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} /><label>Delete leftover files <small>(.m3u, .nfo, .sfv, .nzb, etc.)</small></label>
                                     <input type="checkbox" name="keep_nfo" value="1" ${config['keep_nfo']} /><label>Keep original nfo <small>(extension changed to .orig.nfo)</small></label>
                                     <input type="checkbox" name="add_album_art" id="add_album_art" value="1" ${config['add_album_art']}><label>Add album art jpeg to album folder</label>
-                                    <div id="album_art_options">
+                                    <div id="album_art_options" style="padding-left: 20px">
                                         <div class="row">
                                             as <input type="text" class="override-float" name="album_art_format" value="${config['album_art_format']}" size="10">.jpg
                                         </div>
@@ -1092,8 +1166,9 @@
                                 <fieldset>
                                     <legend>Advanced Encoding Options</legend>
                                     <div class="row">
-                                        <label>(ignores audio properties)</label>
+                                        <label>Arguments</label>
                                         <input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43">
+                                        <small>Ignores all of the above options</small>
                                     </div>
                                 </fieldset>
                             </div>
@@ -1113,7 +1188,7 @@
                             <fieldset>
                                 <legend>Miscellaneous</legend>
                                 <div class="checkbox left row">
-                                    <input type="checkbox" name="include_extras" id="include_extras" value="1" ${config['include_extras']} /><label>Automatically Include Extras When Adding an Artist <br>
+                                    <input type="checkbox" name="include_extras" id="include_extras" value="1" ${config['include_extras']} /><label>Automatically include extras when adding an artist <br>
                                     <%
                                         which_extras_selected = ""
                                         for extra in config['extras']:
@@ -1138,10 +1213,10 @@
                                     </div>
                                 </div>
                                 <div class="row left checkbox">
-                                    <input type="checkbox" name="autowant_upcoming" value="1" ${config['autowant_upcoming']} /><label>Automatically Mark Upcoming Albums as Wanted</label>
+                                    <input type="checkbox" name="autowant_upcoming" value="1" ${config['autowant_upcoming']} /><label>Automatically mark upcoming albums as wanted</label>
                                 </div>
                                 <div class="row left checkbox">
-                                    <input type="checkbox" name="autowant_all" value="1" ${config['autowant_all']} /><label>Automatically Mark All Albums as Wanted</label>
+                                    <input type="checkbox" name="autowant_all" value="1" ${config['autowant_all']} /><label>Automatically mark all albums as wanted</label>
                                 </div>
                                 <div class="row">
                                     <label>Folder Permissions:</label>
@@ -1158,7 +1233,7 @@
                             </fieldset>
                             <fieldset>
                                 <legend>Interface</legend>
-                                <div class="row">
+                                <div class="row" style="display: none">
                                     <label>Interface</label>
                                     <select name="interface"><h3>
                                     %for interface in config['interface_list']:
@@ -1204,7 +1279,7 @@
                                   </div>
                                 </div>
                             </fieldset>
-                            
+
                             <fieldset>
                                 <legend>Musicbrainz</legend>
                                 <div class="row">
@@ -1235,10 +1310,10 @@
 
                                 <div id="hpserveroptions">
                                     <div class="row">
-                                        <label>Username:</label><input type="text" class="hpuser" name="hpuser" value="${config['hpuser']}" size="20">
+                                        <label>Username</label><input type="text" class="hpuser" name="hpuser" value="${config['hpuser']}" size="20">
                                     </div>
                                     <div class="row">
-                                        <label>Password:</label><input type="password" class="hppass" name="hppass" value="${config['hppass']}" size="15"><br>
+                                        <label>Password</label><input type="password" class="hppass" name="hppass" value="${config['hppass']}" size="15"><br>
                                         <a href="http://headphones.codeshy.com/vip" id="vipserver" target="_blank">Get an Account!</a>
                                     </div>
                                 </div>
@@ -1254,7 +1329,7 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-        <script>
+    <script>
 
         hideServerDivs = function () {
                 $("#customoptions").slideUp();
@@ -1267,32 +1342,30 @@
         };
 
         handleNewServerSelection = function () {
-
                 hideServerDivs();
 
                 switch ($(this).val()) {
                         case 'custom':
-                                $("#customoptions").slideDown();
+                            $("#customoptions").slideDown();
                         break;
                         case 'headphones':
-                                $("#hpserveroptions").slideDown();
+                            $("#hpserveroptions").slideDown();
                         break;
                 }
         };
 
         handleNewEncoderSelection = function () {
-
                 hideEncoderDivs();
 
                 switch ($(this).val()) {
                         case 'xld':
-                                $("#xldproperties").slideDown();
+                            $("#xldproperties").slideDown();
                         break;
                         case 'ffmpeg':
-                                $("#lameffmpegproperties").slideDown();
+                            $("#lameffmpegproperties").slideDown();
                         break;
                         case 'lame':
-                                $("#lameffmpegproperties").slideDown();
+                            $("#lameffmpegproperties").slideDown();
                         break;
                 }
         };
@@ -1305,25 +1378,24 @@
         };
 
         function initThisPage()
-
         {
                 if ($("#api_enabled").is(":checked"))
                         {
-                                $("#apioptions").show();
+                            $("#apioptions").show();
                         }
                 else
                         {
-                                $("#apioptions").hide();
+                            $("#apioptions").hide();
                         }
 
                 $("#api_enabled").click(function(){
                         if ($("#api_enabled").is(":checked"))
                         {
-                                $("#apioptions").slideDown();
+                            $("#apioptions").slideDown();
                         }
                         else
                         {
-                                $("#apioptions").slideUp();
+                            $("#apioptions").slideUp();
                         }
                 });
 
@@ -1340,429 +1412,429 @@
         });
                 if ($("#enable_https").is(":checked"))
                         {
-                                $("#https_options").show();
+                            $("#https_options").show();
                         }
                 else
                         {
-                                $("#https_options").hide();
+                            $("#https_options").hide();
                         }
 
                 $("#enable_https").click(function(){
                         if ($("#enable_https").is(":checked"))
                         {
-                                $("#https_options").slideDown();
+                            $("#https_options").slideDown();
                         }
                         else
                         {
-                                $("#https_options").slideUp();
+                            $("#https_options").slideUp();
                         }
                 });
                 if ($("#music_encoder").is(":checked"))
                         {
-                                $("#encoderoptions").show();
+                            $("#encoderoptions").show();
                         }
                 else
                         {
-                                $("#encoderoptions").hide();
+                            $("#encoderoptions").hide();
                         }
 
                 $("#music_encoder").click(function(){
                         if ($("#music_encoder").is(":checked"))
                         {
-                                $("#encoderoptions").slideDown();
+                            $("#encoderoptions").slideDown();
                         }
                         else
                         {
-                                $("#encoderoptions").slideUp();
+                            $("#encoderoptions").slideUp();
                         }
                 });
 
                 if ($("#add_album_art").is(":checked"))
                         {
-                                $("#album_art_options").show();
+                            $("#album_art_options").show();
                         }
                 else
                         {
-                                $("#album_art_options").hide();
+                            $("#album_art_options").hide();
                         }
 
                 $("#add_album_art").click(function(){
                         if ($("#add_album_art").is(":checked"))
                         {
-                                $("#album_art_options").slideDown();
+                            $("#album_art_options").slideDown();
                         }
                         else
                         {
-                                $("#album_art_options").slideUp();
+                            $("#album_art_options").slideUp();
                         }
                 });
 
                 if ($("#move_files").is(":checked"))
                         {
-                                $("#move_files_options").show();
+                            $("#move_files_options").show();
                         }
                 else
                         {
-                                $("#move_files_options").hide();
+                            $("#move_files_options").hide();
                         }
 
                 $("#move_files").click(function(){
                         if ($("#move_files").is(":checked"))
                         {
-                                $("#move_files_options").slideDown();
+                            $("#move_files_options").slideDown();
                         }
                         else
                         {
-                                $("#move_files_options").slideUp();
+                            $("#move_files_options").slideUp();
                         }
                 });
 
                 if ($("#growl").is(":checked"))
                         {
-                                $("#growloptions").show();
+                            $("#growloptions").show();
                         }
                 else
                         {
-                                $("#growloptions").hide();
+                            $("#growloptions").hide();
                         }
 
                 $("#growl").click(function(){
                         if ($("#growl").is(":checked"))
                         {
-                                $("#growloptions").slideDown();
+                            $("#growloptions").slideDown();
                         }
                         else
                         {
-                                $("#growloptions").slideUp();
+                            $("#growloptions").slideUp();
                         }
                 });
 
                 if ($("#prowl").is(":checked"))
                         {
-                                $("#prowloptions").show();
+                            $("#prowloptions").show();
                         }
                 else
                         {
-                                $("#prowloptions").hide();
+                            $("#prowloptions").hide();
                         }
 
                 $("#prowl").click(function(){
                         if ($("#prowl").is(":checked"))
                         {
-                                $("#prowloptions").slideDown();
+                            $("#prowloptions").slideDown();
                         }
                         else
                         {
-                                $("#prowloptions").slideUp();
+                            $("#prowloptions").slideUp();
                         }
                 });
 
                 if ($("#xbmc").is(":checked"))
                         {
-                                $("#xbmcoptions").show();
+                            $("#xbmcoptions").show();
                         }
                 else
                         {
-                                $("#xbmcoptions").hide();
+                            $("#xbmcoptions").hide();
                         }
 
                 $("#xbmc").click(function(){
                         if ($("#xbmc").is(":checked"))
                         {
-                                $("#xbmcoptions").slideDown();
+                            $("#xbmcoptions").slideDown();
                         }
                         else
                         {
-                                $("#xbmcoptions").slideUp();
+                            $("#xbmcoptions").slideUp();
                         }
                 });
 
                 if ($("#lms").is(":checked"))
                         {
-                                $("#lmsoptions").show();
+                            $("#lmsoptions").show();
                         }
                 else
                         {
-                                $("#lmsoptions").hide();
+                            $("#lmsoptions").hide();
                         }
 
                 $("#lms").click(function(){
                         if ($("#lms").is(":checked"))
                         {
-                                $("#lmsoptions").slideDown();
+                            $("#lmsoptions").slideDown();
                         }
                         else
                         {
-                                $("#lmsoptions").slideUp();
+                            $("#lmsoptions").slideUp();
                         }
                 });
 
                 if ($("#plex").is(":checked"))
                         {
-                                $("#plexoptions").show();
+                            $("#plexoptions").show();
                         }
                 else
                         {
-                                $("#plexoptions").hide();
+                            $("#plexoptions").hide();
                         }
 
                 $("#plex").click(function(){
                         if ($("#plex").is(":checked"))
                         {
-                                $("#plexoptions").slideDown();
+                            $("#plexoptions").slideDown();
                         }
                         else
                         {
-                                $("#plexoptions").slideUp();
+                            $("#plexoptions").slideUp();
                         }
                 });
 
                 if ($("#nma").is(":checked"))
                         {
-                                $("#nmaoptions").show();
+                            $("#nmaoptions").show();
                         }
                 else
                         {
-                                $("#nmaoptions").hide();
+                            $("#nmaoptions").hide();
                         }
 
                 $("#nma").click(function(){
                         if ($("#nma").is(":checked"))
                         {
-                                $("#nmaoptions").slideDown();
+                            $("#nmaoptions").slideDown();
                         }
                         else
                         {
-                                $("#nmaoptions").slideUp();
+                            $("#nmaoptions").slideUp();
                         }
                 });
 
                 if ($("#pushalot").is(":checked"))
                         {
-                                $("#pushalotoptions").show();
+                            $("#pushalotoptions").show();
                         }
                 else
                         {
-                                $("#pushalotoptions").hide();
+                            $("#pushalotoptions").hide();
                         }
 
                 $("#pushalot").click(function(){
                         if ($("#pushalot").is(":checked"))
                         {
-                                $("#pushalotoptions").slideDown();
+                            $("#pushalotoptions").slideDown();
                         }
                         else
                         {
-                                $("#pushalotoptions").slideUp();
+                            $("#pushalotoptions").slideUp();
                         }
                 });
 
                 if ($("#pushover").is(":checked"))
                         {
-                                $("#pushoveroptions").show();
+                            $("#pushoveroptions").show();
                         }
                 else
                         {
-                                $("#pushoveroptions").hide();
+                            $("#pushoveroptions").hide();
                         }
 
                 $("#pushover").click(function(){
                         if ($("#pushover").is(":checked"))
                         {
-                                $("#pushoveroptions").slideDown();
+                            $("#pushoveroptions").slideDown();
                         }
                         else
                         {
-                                $("#pushoveroptions").slideUp();
+                            $("#pushoveroptions").slideUp();
                         }
                 });
 
                 if ($("#pushbullet").is(":checked"))
                         {
-                                $("#pushbulletoptions").show();
+                            $("#pushbulletoptions").show();
                         }
                 else
                         {
-                                $("#pushbulletoptions").hide();
+                            $("#pushbulletoptions").hide();
                         }
 
 
                 $("#pushbullet").click(function(){
                         if ($("#pushbullet").is(":checked"))
                         {
-                                $("#pushbulletoptions").slideDown();
+                            $("#pushbulletoptions").slideDown();
                         }
                         else
                         {
-                                $("#pushbulletoptions").slideUp();
+                            $("#pushbulletoptions").slideUp();
                         }
                 });
 
                 if ($("#twitter").is(":checked"))
                         {
-                                $("#twitteroptions").show();
+                            $("#twitteroptions").show();
                         }
                 else
                         {
-                                $("#twitteroptions").hide();
+                            $("#twitteroptions").hide();
                         }
 
                 $("#twitter").click(function(){
                         if ($("#twitter").is(":checked"))
                         {
-                                $("#twitteroptions").slideDown();
+                            $("#twitteroptions").slideDown();
                         }
                         else
                         {
-                                $("#twitteroptions").slideUp();
+                            $("#twitteroptions").slideUp();
                         }
                 });
 
                 if ($("#osx_notify").is(":checked"))
                         {
-                                $("#osx_notify_options").show();
+                            $("#osx_notify_options").show();
                         }
                 else
                         {
-                                $("#osx_notify_options").hide();
+                            $("#osx_notify_options").hide();
                         }
 
                 $("#osx_notify").click(function(){
                         if ($("#osx_notify").is(":checked"))
                         {
-                                $("#osx_notify_options").slideDown();
+                            $("#osx_notify_options").slideDown();
                         }
                         else
                         {
-                                $("#osx_notify_options").slideUp();
+                            $("#osx_notify_options").slideUp();
                         }
                 });
 
                 if ($("#boxcar").is(":checked"))
                         {
-                                $("#boxcar_options").show();
+                            $("#boxcar_options").show();
                         }
                 else
                         {
-                                $("#boxcar_options").hide();
+                            $("#boxcar_options").hide();
                         }
 
                 $("#boxcar").click(function(){
                         if ($("#boxcar").is(":checked"))
                         {
-                                $("#boxcar_options").slideDown();
+                            $("#boxcar_options").slideDown();
                         }
                         else
                         {
-                                $("#boxcar_options").slideUp();
+                            $("#boxcar_options").slideUp();
                         }
                 });
 
                 if ($("#songkick").is(":checked"))
                         {
-                                $("#songkickoptions").show();
+                            $("#songkickoptions").show();
                         }
                 else
                         {
-                                $("#songkickoptions").hide();
+                            $("#songkickoptions").hide();
                         }
 
                 $("#songkick").click(function(){
                         if ($("#songkick").is(":checked"))
                         {
-                                $("#songkickoptions").slideDown();
+                            $("#songkickoptions").slideDown();
                         }
                         else
                         {
-                                $("#songkickoptions").slideUp();
+                            $("#songkickoptions").slideUp();
                         }
                 });
-                
+
                 if ($("#songkick_filter").is(":checked"))
                         {
-                                $("#songkick_filteroptions").show();
+                            $("#songkick_filteroptions").show();
                         }
                 else
                         {
-                                $("#songkick_filteroptions").hide();
+                            $("#songkick_filteroptions").hide();
                         }
 
                 $("#songkick_filter").click(function(){
                         if ($("#songkick_filter").is(":checked"))
                         {
-                                $("#songkick_filteroptions").slideDown();
+                            $("#songkick_filteroptions").slideDown();
                         }
                         else
                         {
-                                $("#songkick_filteroptions").slideUp();
+                            $("#songkick_filteroptions").slideUp();
                         }
                 });
 
                 if ($("#lossless_only").is(":checked"))
                         {
-                                $("#lossless_only_options").show();
+                            $("#lossless_only_options").show();
                         }
                 else
                         {
-                                $("#lossless_only_options").hide();
+                            $("#lossless_only_options").hide();
                         }
 
                 if ($("#preferred_bitrate").is(":checked"))
                         {
-                                $("#preferred_bitrate_options").show();
+                            $("#preferred_bitrate_options").show();
                         }
                 else
                         {
-                                $("#preferred_bitrate_options").hide();
+                            $("#preferred_bitrate_options").hide();
                         }
 
                 if ($("#nzb_downloader_sabnzbd").is(":checked"))
                         {
-                                $("#sabnzbd_options").show();
-                                $("#nzbget_options,#blackhole_options").hide();
+                            $("#sabnzbd_options").show();
+                            $("#nzbget_options,#blackhole_options").hide();
                         }
                 if ($("#nzb_downloader_nzbget").is(":checked"))
                         {
-                                $("#sabnzbd_options,#blackhole_options").hide();
-                                $("#nzbget_options").show();
+                            $("#sabnzbd_options,#blackhole_options").hide();
+                            $("#nzbget_options").show();
                         }
                 if ($("#nzb_downloader_blackhole").is(":checked"))
                         {
-                                $("#sabnzbd_options,#nzbget_options").hide();
-                                $("#blackhole_options").show();
+                            $("#sabnzbd_options,#nzbget_options").hide();
+                            $("#blackhole_options").show();
                         }
 
                 if ($("#torrent_downloader_blackhole").is(":checked"))
                         {
-                                $("#transmission_options,#utorrent_options").hide();
-                                $("#torrent_blackhole_options").show();
+                            $("#transmission_options,#utorrent_options").hide();
+                            $("#torrent_blackhole_options").show();
                         }
                 if ($("#torrent_downloader_transmission").is(":checked"))
                         {
-                                $("#torrent_blackhole_options,#utorrent_options").hide();
-                                $("#transmission_options").show();
+                            $("#torrent_blackhole_options,#utorrent_options").hide();
+                            $("#transmission_options").show();
                         }
                 if ($("#torrent_downloader_utorrent").is(":checked"))
                         {
-                                $("#torrent_blackhole_options,#transmission_options").hide();
-                                $("#utorrent_options").show();
+                            $("#torrent_blackhole_options,#transmission_options").hide();
+                            $("#utorrent_options").show();
                         }
 
                 $('input[type=radio]').change(function(){
                         if ($("#preferred_bitrate").is(":checked"))
                         {
-                                $("#preferred_bitrate_options").slideDown("fast");
-                                $("#lossless_only_options").slideUp("fast");
+                            $("#preferred_bitrate_options").slideDown("fast");
+                            $("#lossless_only_options").slideUp("fast");
                         }
                         if ($("#preferred_quality0").is(":checked"))
                         {
-                                $("#preferred_bitrate_options").slideUp("fast");
-                                $("#lossless_only_options").slideUp("fast");
+                            $("#preferred_bitrate_options").slideUp("fast");
+                            $("#lossless_only_options").slideUp("fast");
                         }
                         if ($("#preferred_quality1").is(":checked"))
                         {
-                                $("#preferred_bitrate_options").slideUp("fast");
-                                $("#lossless_only_options").slideUp("fast");
+                            $("#preferred_bitrate_options").slideUp("fast");
+                            $("#lossless_only_options").slideUp("fast");
                         }
                         if ($("#lossless_only").is(":checked"))
                         {
@@ -1771,27 +1843,27 @@
                         }
                         if ($("#nzb_downloader_sabnzbd").is(":checked"))
                         {
-                                $("#nzbget_options,#blackhole_options").fadeOut("fast", function() { $("#sabnzbd_options").fadeIn() });
+                            $("#nzbget_options,#blackhole_options").fadeOut("fast", function() { $("#sabnzbd_options").fadeIn() });
                         }
                         if ($("#nzb_downloader_nzbget").is(":checked"))
                         {
-                                $("#sabnzbd_options,#blackhole_options").fadeOut("fast", function() { $("#nzbget_options").fadeIn() });
+                            $("#sabnzbd_options,#blackhole_options").fadeOut("fast", function() { $("#nzbget_options").fadeIn() });
                         }
                         if ($("#nzb_downloader_blackhole").is(":checked"))
                         {
-                                $("#sabnzbd_options,#nzbget_options").fadeOut("fast", function() { $("#blackhole_options").fadeIn() });
+                            $("#sabnzbd_options,#nzbget_options").fadeOut("fast", function() { $("#blackhole_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_blackhole").is(":checked"))
                         {
-                                $("#transmission_options,#utorrent_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
+                            $("#transmission_options,#utorrent_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_transmission").is(":checked"))
                         {
-                                $("#torrent_blackhole_options,#utorrent_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
+                            $("#torrent_blackhole_options,#utorrent_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_utorrent").is(":checked"))
                         {
-                                $("#torrent_blackhole_options,#transmission_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
+                            $("#torrent_blackhole_options,#transmission_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
                         }
                 });
 
@@ -1850,7 +1922,7 @@
                 });
 
                 $(function() {
-                        $( "#tabs" ).tabs();
+                    $( "#tabs" ).tabs();
                 });
                 initActions();
                 initConfigCheckbox("#use_headphones_indexer");
@@ -1865,7 +1937,6 @@
                 initConfigCheckbox("#usewhatcd");
                 initConfigCheckbox("#useapi");
                 initConfigCheckbox("#enable_https");
-        
 
 
                 $('#twitterStep1').click(function () {
@@ -1897,5 +1968,5 @@
             initThisPage();
         });
 
-        </script>
+    </script>
 </%def>
