@@ -13,24 +13,26 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from lib.pyItunes import *
-import time
-import threading
-import os
-from beets.mediafile import MediaFile
-
-import headphones
 from headphones import logger, helpers, db, mb, lastfm
 
-blacklisted_special_artist_names = ['[anonymous]','[data]','[no artist]','[traditional]','[unknown]','Various Artists']
-blacklisted_special_artists = ['f731ccc4-e22a-43af-a747-64213329e088','33cf029c-63b0-41a0-9855-be2a3665fb3b',\
-                                '314e1c25-dde7-4e4d-b2f4-0a7b9f7c56dc','eec63d3c-3b81-4ad4-b1e4-7c147d4d2b61',\
-                                '9be7f096-97ec-4615-8957-8d40b5dcbc41','125ec42a-7229-4250-afc5-e057484327fe',\
-                                '89ad4ac3-39f7-470e-963a-56509c546377']
+from beets.mediafile import MediaFile
 
+import os
+import time
+import threading
+import headphones
+
+blacklisted_special_artist_names = ['[anonymous]', '[data]', '[no artist]',
+    '[traditional]','[unknown]','Various Artists']
+blacklisted_special_artists = ['f731ccc4-e22a-43af-a747-64213329e088',
+    '33cf029c-63b0-41a0-9855-be2a3665fb3b',
+    '314e1c25-dde7-4e4d-b2f4-0a7b9f7c56dc',
+    'eec63d3c-3b81-4ad4-b1e4-7c147d4d2b61',
+    '9be7f096-97ec-4615-8957-8d40b5dcbc41',
+    '125ec42a-7229-4250-afc5-e057484327fe',
+    '89ad4ac3-39f7-470e-963a-56509c546377']
 
 def is_exists(artistid):
-
     myDB = db.DBConnection()
 
     # See if the artist is already in the database
@@ -56,7 +58,7 @@ def artistlist_to_mbids(artistlist, forced=False):
         if not isinstance(artist, unicode):
             try:
                 artist = artist.decode('utf-8', 'replace')
-            except:
+            except Exception:
                 logger.warn("Unable to convert artist to unicode so cannot do a database lookup")
                 continue
 
@@ -68,7 +70,6 @@ def artistlist_to_mbids(artistlist, forced=False):
 
         try:
             artistid = results[0]['id']
-
         except IndexError:
             logger.info('MusicBrainz query turned up no matches for: %s' % artist)
             continue
@@ -130,11 +131,9 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
 
     # We need the current minimal info in the database instantly
     # so we don't throw a 500 error when we redirect to the artistPage
-
     controlValueDict = {"ArtistID":     artistid}
 
     # Don't replace a known artist name with an "Artist ID" placeholder
-
     dbartist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [artistid]).fetchone()
 
     # Only modify the Include Extras stuff if it's a new artist. We need it early so we know what to fetch
@@ -183,20 +182,20 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
 
     myDB.upsert("artists", newValueDict, controlValueDict)
 
-    # See if we need to grab extras. Artist specific extras take precedence over global option
-    # Global options are set when adding a new artist
-    myDB = db.DBConnection()
-
+    # See if we need to grab extras. Artist specific extras take precedence
+    # over global option. Global options are set when adding a new artist
     try:
         db_artist = myDB.action('SELECT IncludeExtras, Extras from artists WHERE ArtistID=?', [artistid]).fetchone()
         includeExtras = db_artist['IncludeExtras']
     except IndexError:
         includeExtras = False
 
-    #Clean all references to release group in dB that are no longer referenced from the musicbrainz refresh
+    # Clean all references to release group in dB that are no longer referenced
+    # from the musicbrainz refresh
     group_list = []
     force_repackage = 0
-    #Don't nuke the database if there's a MusicBrainz error
+
+    # Don't nuke the database if there's a MusicBrainz error
     if len(artist['releasegroups']) != 0:
         for groups in artist['releasegroups']:
             group_list.append(groups['id'])
@@ -233,7 +232,6 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
         rg_exists = myDB.action("SELECT * from albums WHERE AlbumID=?", [rg['id']]).fetchone()
 
         if not forcefull:
-
             new_release_group = False
 
             try:
@@ -244,12 +242,10 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
 
 
             if new_release_group:
-
                 logger.info("[%s] Now adding: %s (New Release Group)" % (artist['artist_name'], rg['title']))
                 new_releases = mb.get_new_releases(rgid,includeExtras)
 
             else:
-
                 if check_release_date is None or check_release_date == u"None":
                     logger.info("[%s] Now updating: %s (No Release Date)" % (artist['artist_name'], rg['title']))
                     new_releases = mb.get_new_releases(rgid,includeExtras,True)
@@ -263,33 +259,35 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                     else:
                         release_date = today
                     if helpers.get_age(today) - helpers.get_age(release_date) < pause_delta:
-                        logger.info("[%s] Now updating: %s (Release Date <%s Days) " % (artist['artist_name'], rg['title'], pause_delta))
+                        logger.info("[%s] Now updating: %s (Release Date <%s Days)", artist['artist_name'], rg['title'], pause_delta)
                         new_releases = mb.get_new_releases(rgid,includeExtras,True)
                     else:
-                        logger.info("[%s] Skipping: %s (Release Date >%s Days)" % (artist['artist_name'], rg['title'], pause_delta))
+                        logger.info("[%s] Skipping: %s (Release Date >%s Days)", artist['artist_name'], rg['title'], pause_delta)
                         skip_log = 1
                         new_releases = 0
 
             if force_repackage == 1:
                 new_releases = -1
-                logger.info('[%s] Forcing repackage of %s (Release Group Removed)' % (artist['artist_name'], al_title))
+                logger.info('[%s] Forcing repackage of %s (Release Group Removed)', artist['artist_name'], al_title)
             else:
                 new_releases = new_releases
         else:
-            logger.info("[%s] Now adding/updating: %s (Comprehensive Force)" % (artist['artist_name'], rg['title']))
+            logger.info("[%s] Now adding/updating: %s (Comprehensive Force)", artist['artist_name'], rg['title'])
             new_releases = mb.get_new_releases(rgid,includeExtras,forcefull)
 
         if new_releases != 0:
-            #Dump existing hybrid release since we're repackaging/replacing it
+            # Dump existing hybrid release since we're repackaging/replacing it
             myDB.action("DELETE from albums WHERE ReleaseID=?", [rg['id']])
             myDB.action("DELETE from allalbums WHERE ReleaseID=?", [rg['id']])
             myDB.action("DELETE from tracks WHERE ReleaseID=?", [rg['id']])
             myDB.action("DELETE from alltracks WHERE ReleaseID=?", [rg['id']])
             myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rg['id']])
+
             # This will be used later to build a hybrid release
             fullreleaselist = []
-            #Search for releases within a release group
+            # Search for releases within a release group
             find_hybrid_releases = myDB.action("SELECT * from allalbums WHERE AlbumID=?", [rg['id']])
+
             # Build the dictionary for the fullreleaselist
             for items in find_hybrid_releases:
                 if items['ReleaseID'] != rg['id']: #don't include hybrid information, since that's what we're replacing
@@ -320,14 +318,12 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                     newValueDict['Tracks'] = hybrid_track_array
                     fullreleaselist.append(newValueDict)
 
-                #print fullreleaselist
-
             # Basically just do the same thing again for the hybrid release
             # This may end up being called with an empty fullreleaselist
             try:
                 hybridrelease = getHybridRelease(fullreleaselist)
                 logger.info('[%s] Packaging %s releases into hybrid title' % (artist['artist_name'], rg['title']))
-            except Exception, e:
+            except Exception as e:
                 errors = True
                 logger.warn('[%s] Unable to get hybrid release information for %s: %s' % (artist['artist_name'],rg['title'],e))
                 continue
@@ -387,7 +383,6 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             # If there's no release in the main albums tables, add the default (hybrid)
             # If there is a release, check the ReleaseID against the AlbumID to see if they differ (user updated)
             # check if the album already exists
-
             if not rg_exists:
                 releaseid = rg['id']
             else:
@@ -445,7 +440,6 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                 continue
 
             for track in tracks:
-
                 controlValueDict = {"TrackID":  track['TrackID'],
                                     "AlbumID":  rg['id']}
 
@@ -569,7 +563,7 @@ def addReleaseById(rid, rgid=None):
         logger.debug("Didn't find releaseID " + rid + " in the cache. Looking up its ReleaseGroupID")
         try:
             release_dict = mb.getRelease(rid)
-        except Exception, e:
+        except Exception as e:
             logger.info('Unable to get release information for Release %s: %s', rid, e)
             if status == 'Loading':
                 myDB.action("DELETE FROM albums WHERE AlbumID=?", [rgid])
@@ -639,7 +633,6 @@ def addReleaseById(rid, rgid=None):
         myDB.action('INSERT INTO releases VALUES( ?, ?)', [rid, release_dict['rgid']])
 
         for track in release_dict['tracks']:
-
             cleanname = helpers.cleanName(release_dict['artist_name'] + ' ' + release_dict['rg_title'] + ' ' + track['title'])
 
             controlValueDict = {"TrackID":  track['id'],
@@ -676,7 +669,7 @@ def addReleaseById(rid, rgid=None):
             newValueDict = {"Status":   "Wanted"}
             myDB.upsert("albums", newValueDict, controlValueDict)
 
-        #start a search for the album
+        # Start a search for the album
         import searcher
         searcher.searchforalbum(rgid, False)
     elif not rg_exists and not release_dict:
@@ -718,39 +711,43 @@ def updateFormat():
 
 def getHybridRelease(fullreleaselist):
     """
-    Returns a dictionary of best group of tracks from the list of releases & earliest release date
+    Returns a dictionary of best group of tracks from the list of releases and
+    earliest release date
     """
+
     if len(fullreleaselist) == 0:
-        raise Exception("getHybridRelease was called with an empty fullreleaselist")
+        raise ValueError("Empty fullreleaselist")
+
     sortable_release_list = []
 
+    formats = {
+        '2xVinyl':          '2',
+        'Vinyl':            '2',
+        'CD':               '0',
+        'Cassette':         '3',
+        '2xCD':             '1',
+        'Digital Media':    '0'
+    }
+
+    countries = {
+        'US':    '0',
+        'GB':    '1',
+        'JP':    '2',
+    }
+
     for release in fullreleaselist:
-
-        formats = {
-            '2xVinyl':          '2',
-            'Vinyl':            '2',
-            'CD':               '0',
-            'Cassette':         '3',
-            '2xCD':             '1',
-            'Digital Media':    '0'
-            }
-
-        countries = {
-            'US':    '0',
-            'GB':    '1',
-            'JP':    '2',
-            }
-
+        # Find values for format and country
         try:
             format = int(formats[release['Format']])
-        except:
+        except (ValueError, KeyError):
             format = 3
 
         try:
             country = int(countries[release['Country']])
-        except:
+        except (ValueError, KeyError):
             country = 3
 
+        # Create record
         release_dict = {
             'hasasin':        bool(release['AlbumASIN']),
             'asin':           release['AlbumASIN'],
@@ -760,15 +757,19 @@ def getHybridRelease(fullreleaselist):
             'format':         format,
             'country':        country,
             'tracks':         release['Tracks']
-            }
+        }
 
         sortable_release_list.append(release_dict)
 
-    #necessary to make dates that miss the month and/or day show up after full dates
+    # Necessary to make dates that miss the month and/or day show up after full
+    # dates
     def getSortableReleaseDate(releaseDate):
+        # Change this value to change the sorting behaviour of none, returning
+        # 'None' will put it at the top which was normal behaviour for pre-ngs
+        # versions
         if releaseDate == None:
-            return 'None';#change this value to change the sorting behaviour of none, returning 'None' will put it at the top
-                      #which was normal behaviour for pre-ngs versions
+            return 'None';
+
         if releaseDate.count('-') == 2:
             return releaseDate
         elif releaseDate.count('-') == 1:

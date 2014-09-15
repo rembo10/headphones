@@ -21,7 +21,6 @@ import headphones
 import subprocess
 
 from headphones import logger, version, request
-from headphones.exceptions import ex
 
 def runGit(args):
 
@@ -63,7 +62,6 @@ def runGit(args):
 def getVersion():
 
     if version.HEADPHONES_VERSION.startswith('win32build'):
-
         headphones.INSTALL_TYPE = 'win'
 
         # Don't have a way to update exe yet, but don't want to set VERSION to None
@@ -109,9 +107,8 @@ def getVersion():
         if not os.path.isfile(version_file):
             return None, 'master'
 
-        fp = open(version_file, 'r')
-        current_version = fp.read().strip(' \n\r')
-        fp.close()
+        with open(version_file, 'r') as f:
+            current_version = f.read().strip(' \n\r')
 
         if current_version:
             return current_version, headphones.GIT_BRANCH
@@ -199,9 +196,8 @@ def update():
         tar_download_path = os.path.join(headphones.PROG_DIR, download_name)
 
         # Save tar to disk
-        f = open(tar_download_path, 'wb')
-        f.write(data)
-        f.close()
+        with open(tar_download_path, 'wb') as f:
+            f.write(data)
 
         # Extract the tar to update folder
         logger.info('Extracting file: ' + tar_download_path)
@@ -233,9 +229,9 @@ def update():
 
         # Update version.txt
         try:
-            ver_file = open(version_path, 'w')
-            ver_file.write(str(headphones.LATEST_VERSION))
-            ver_file.close()
-        except IOError, e:
-            logger.error("Unable to write current version to version.txt, update not complete: "+ex(e))
+            with open(version_path, 'w') as f:
+                f.write(str(headphones.LATEST_VERSION))
+        except IOError as e:
+            logger.error("Unable to write current version to version.txt, " \
+                "update not complete: ", e)
             return

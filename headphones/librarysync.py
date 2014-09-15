@@ -15,10 +15,10 @@
 
 import os
 import glob
-
-from beets.mediafile import MediaFile
-
 import headphones
+
+from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
+
 from headphones import db, logger, helpers, importer, lastfm
 
 # You can scan a single directory and append it to the current library by specifying append=True, ArtistID & ArtistName
@@ -84,8 +84,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         for directory in d[:]:
             if directory.startswith("."):
                 d.remove(directory)
-        for files in f:
 
+        for files in f:
             # MEDIA_FORMATS = music file extensions, e.g. mp3, flac, etc
             if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
 
@@ -104,9 +104,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                 # Try to read the metadata
                 try:
                     f = MediaFile(song)
-
-                except:
-                    logger.error('Cannot read file: ' + unicode_song_path)
+                except (FileTypeError, UnreadableFileError):
+                    logger.error("Cannot read file media file '%s'. It may be corrupted or not a media file.", unicode_song_path)
                     continue
 
                 # Grab the bitrates for the auto detect bit rate option
