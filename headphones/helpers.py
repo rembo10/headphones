@@ -603,9 +603,11 @@ def create_https_certificates(ssl_cert, ssl_key):
 
     # Save the key and certificate to disk
     try:
-        open(ssl_key, 'w').write(crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey))
-        open(ssl_cert, 'w').write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
-    except Exception, e:
+        with open(ssl_key, 'w') as f:
+            f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey))
+        with open(ssl_cert, 'w') as f:
+            f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+    except IOError as e:
         logger.error("Error creating SSL key and certificate: %s", e)
         return False
 

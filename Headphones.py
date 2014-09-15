@@ -63,7 +63,7 @@ def main():
         headphones.SYS_ENCODING = 'UTF-8'
 
     # Set up and gather command line arguments
-    parser = argparse.ArgumentParser(description='Music add-on for SABnzbd+')
+    parser = argparse.ArgumentParser(description='Music add-on for SABnzbd+, Transmission and more.')
 
     parser.add_argument('-v', '--verbose', action='store_true', help='Increase console logging verbosity')
     parser.add_argument('-q', '--quiet', action='store_true', help='Turn off console logging')

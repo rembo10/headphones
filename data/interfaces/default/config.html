@@ -896,8 +896,26 @@
                                 </div>
                             </fieldset>
 
+                            <fieldset>
+                                <h3>Subsonic</h3>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="subsonic_enabled" id="subsonic" value="1" ${config['subsonic_enabled']} /><label>Enable Subsonic Updates</label>
+                                </div>
+                                <div id="subsonicoptions">
+                                    <div class="row">
+                                        <label>Subsonic URL</label><input type="text" name="subsonic_host" value="${config['subsonic_host']}" size="30">
+                                    </div>
+                                    <div class="row">
+                                        <label>Subsonic Username</label><input type="text" name="subsonic_username" value="${config['subsonic_username']}" size="30">
+                                    </div>
+                                    <div class="row">
+                                        <label>Subsonic Password</label><input type="password" name="subsonic_password" value="${config['subsonic_password']}" size="30">
+                                    </div>
+                                </div>
+                            </fieldset>
+
                         </td>
-                            <td>
+                        <td>
 
                             <fieldset>
                                 <h3>Synology NAS</h3>
@@ -1727,6 +1745,26 @@
                         else
                         {
                             $("#boxcar_options").slideUp();
+                        }
+                });
+
+                if ($("#subsonic").is(":checked"))
+                        {
+                            $("#subsonicoptions").show();
+                        }
+                else
+                        {
+                            $("#subsonicoptions").hide();
+                        }
+
+                $("#subsonic").click(function(){
+                        if ($("#subsonic").is(":checked"))
+                        {
+                            $("#subsonicoptions").slideDown();
+                        }
+                        else
+                        {
+                            $("#subsonicoptions").slideUp();
                         }
                 });
 

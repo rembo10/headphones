@@ -42,24 +42,22 @@ class Cache(object):
 
     path_to_art_cache = os.path.join(headphones.CACHE_DIR, 'artwork')
 
-    id = None
-    id_type = None # 'artist' or 'album' - set automatically depending on whether ArtistID or AlbumID is passed
-    query_type = None # 'artwork','thumb' or 'info' - set automatically
-
-    artwork_files = []
-    thumb_files = []
-
-    artwork_errors = False
-    artwork_url = None
-
-    thumb_errors = False
-    thumb_url = None
-
-    info_summary = None
-    info_content = None
-
     def __init__(self):
-        pass
+        self.id = None
+        self.id_type = None # 'artist' or 'album' - set automatically depending on whether ArtistID or AlbumID is passed
+        self.query_type = None # 'artwork','thumb' or 'info' - set automatically
+
+        self.artwork_files = []
+        self.thumb_files = []
+
+        self.artwork_errors = False
+        self.artwork_url = None
+
+        self.thumb_errors = False
+        self.thumb_url = None
+
+        self.info_summary = None
+        self.info_content = None
 
     def _findfilesstartingwith(self,pattern,folder):
         files = []
@@ -125,9 +123,9 @@ class Cache(object):
         return thumb_url
 
     def get_artwork_from_cache(self, ArtistID=None, AlbumID=None):
-        '''
+        """
         Pass a musicbrainz id to this function (either ArtistID or AlbumID)
-        '''
+        """
 
         self.query_type = 'artwork'
 
@@ -151,9 +149,9 @@ class Cache(object):
                 return None
 
     def get_thumb_from_cache(self, ArtistID=None, AlbumID=None):
-        '''
+        """
         Pass a musicbrainz id to this function (either ArtistID or AlbumID)
-        '''
+        """
 
         self.query_type = 'thumb'
 
@@ -215,7 +213,7 @@ class Cache(object):
 
             try:
                 image_url = data['artist']['image'][-1]['#text']
-            except Exception:
+            except (KeyError, IndexError):
                 logger.debug('No artist image found')
                 image_url = None
 
@@ -233,7 +231,7 @@ class Cache(object):
 
             try:
                 image_url = data['album']['image'][-1]['#text']
-            except Exception:
+            except (KeyError, IndexError):
                 logger.debug('No album image found on last.fm')
                 image_url = None
 
@@ -260,17 +258,17 @@ class Cache(object):
 
             try:
                 self.info_summary = data['artist']['bio']['summary']
-            except Exception:
+            except KeyError:
                 logger.debug('No artist bio summary found')
                 self.info_summary = None
             try:
                 self.info_content = data['artist']['bio']['content']
-            except Exception:
+            except KeyError:
                 logger.debug('No artist bio found')
                 self.info_content = None
             try:
                 image_url = data['artist']['image'][-1]['#text']
-            except Exception:
+            except KeyError:
                 logger.debug('No artist image found')
                 image_url = None
 
@@ -288,17 +286,17 @@ class Cache(object):
 
             try:
                 self.info_summary = data['album']['wiki']['summary']
-            except Exception:
+            except KeyError:
                 logger.debug('No album summary found')
                 self.info_summary = None
             try:
                 self.info_content = data['album']['wiki']['content']
-            except Exception:
+            except KeyError:
                 logger.debug('No album infomation found')
                 self.info_content = None
             try:
                 image_url = data['album']['image'][-1]['#text']
-            except Exception:
+            except KeyError:
                 logger.debug('No album image link found')
                 image_url = None
 
@@ -358,10 +356,9 @@ class Cache(object):
 
                 artwork_path = os.path.join(self.path_to_art_cache, self.id + '.' + helpers.today() + ext)
                 try:
-                    f = open(artwork_path, 'wb')
-                    f.write(artwork)
-                    f.close()
-                except Exception, e:
+                    with open(artwork_path, 'wb') as f:
+                        f.write(artwork)
+                except IOError as e:
                     logger.error('Unable to write to the cache dir: %s', e)
                     self.artwork_errors = True
                     self.artwork_url = image_url
@@ -375,7 +372,7 @@ class Cache(object):
                 if not os.path.isdir(self.path_to_art_cache):
                     try:
                         os.makedirs(self.path_to_art_cache)
-                    except Exception, e:
+                    except Exception as e:
                         logger.error('Unable to create artwork cache dir. Error: %s' + e)
                         self.thumb_errors = True
                         self.thumb_url = thumb_url
@@ -384,17 +381,16 @@ class Cache(object):
                 for thumb_file in self.thumb_files:
                     try:
                         os.remove(thumb_file)
-                    except:
+                    except Exception as e:
                         logger.error('Error deleting file from the cache: %s', thumb_file)
 
                 ext = os.path.splitext(image_url)[1]
 
                 thumb_path = os.path.join(self.path_to_art_cache, 'T_' + self.id + '.' + helpers.today() + ext)
                 try:
-                    f = open(thumb_path, 'wb')
-                    f.write(artwork)
-                    f.close()
-                except Exception, e:
+                    with open(thumb_path, 'wb') as f:
+                        f.write(artwork)
+                except IOError as e:
                     logger.error('Unable to write to the cache dir: %s', e)
                     self.thumb_errors = True
                     self.thumb_url = image_url

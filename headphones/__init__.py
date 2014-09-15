@@ -283,6 +283,10 @@ OSX_NOTIFY_APP = None
 BOXCAR_ENABLED = False
 BOXCAR_ONSNATCH = False
 BOXCAR_TOKEN = None
+SUBSONIC_ENABLED = False
+SUBSONIC_HOST = None
+SUBSONIC_USERNAME = None
+SUBSONIC_PASSWORD = None
 MIRRORLIST = ["musicbrainz.org","headphones","custom"]
 MIRROR = None
 CUSTOMHOST = None
@@ -371,7 +375,7 @@ def initialize():
                 XBMC_NOTIFY, LMS_ENABLED, LMS_HOST, NMA_ENABLED, NMA_APIKEY, NMA_PRIORITY, NMA_ONSNATCH, SYNOINDEX_ENABLED, ALBUM_COMPLETION_PCT, PREFERRED_BITRATE_HIGH_BUFFER, \
                 PREFERRED_BITRATE_LOW_BUFFER, PREFERRED_BITRATE_ALLOW_LOSSLESS, LOSSLESS_BITRATE_FROM, LOSSLESS_BITRATE_TO, CACHE_SIZEMB, JOURNAL_MODE, UMASK, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
                 PLEX_ENABLED, PLEX_SERVER_HOST, PLEX_CLIENT_HOST, PLEX_USERNAME, PLEX_PASSWORD, PLEX_UPDATE, PLEX_NOTIFY, PUSHALOT_ENABLED, PUSHALOT_APIKEY, \
-                PUSHALOT_ONSNATCH, SONGKICK_ENABLED, SONGKICK_APIKEY, SONGKICK_LOCATION, SONGKICK_FILTER_ENABLED, VERIFY_SSL_CERT
+                PUSHALOT_ONSNATCH, SONGKICK_ENABLED, SONGKICK_APIKEY, SONGKICK_LOCATION, SONGKICK_FILTER_ENABLED, SUBSONIC_ENABLED, SUBSONIC_HOST, SUBSONIC_USERNAME, SUBSONIC_PASSWORD, VERIFY_SSL_CERT
 
 
         if __INITIALIZED__:
@@ -626,6 +630,11 @@ def initialize():
         BOXCAR_ENABLED = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_enabled', 0))
         BOXCAR_ONSNATCH = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_onsnatch', 0))
         BOXCAR_TOKEN = check_setting_str(CFG, 'Boxcar', 'boxcar_token', '')
+
+        SUBSONIC_ENABLED = bool(check_setting_int(CFG, 'Subsonic', 'subsonic_enabled', 0))
+        SUBSONIC_HOST = check_setting_str(CFG, 'Subsonic', 'subsonic_host', '')
+        SUBSONIC_USERNAME = check_setting_str(CFG, 'Subsonic', 'subsonic_username', '')
+        SUBSONIC_PASSWORD = check_setting_str(CFG, 'Subsonic', 'subsonic_password', '')
 
         SONGKICK_ENABLED = bool(check_setting_int(CFG, 'Songkick', 'songkick_enabled', 1))
         SONGKICK_APIKEY = check_setting_str(CFG, 'Songkick', 'songkick_apikey', 'nd1We7dFW2RqxPw8')
@@ -1070,6 +1079,12 @@ def config_write():
     new_config['Boxcar']['boxcar_enabled'] = int(BOXCAR_ENABLED)
     new_config['Boxcar']['boxcar_onsnatch'] = int(BOXCAR_ONSNATCH)
     new_config['Boxcar']['boxcar_token'] = BOXCAR_TOKEN
+
+    new_config['Subsonic'] = {}
+    new_config['Subsonic']['subsonic_enabled'] = int(SUBSONIC_ENABLED)
+    new_config['Subsonic']['subsonic_host'] = SUBSONIC_HOST
+    new_config['Subsonic']['subsonic_username'] = SUBSONIC_USERNAME
+    new_config['Subsonic']['subsonic_password'] = SUBSONIC_PASSWORD
 
     new_config['Songkick'] = {}
     new_config['Songkick']['songkick_enabled'] = int(SONGKICK_ENABLED)
