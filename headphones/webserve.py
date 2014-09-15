@@ -966,7 +966,7 @@ class WebInterface(object):
                     "download_scan_interval" : headphones.DOWNLOAD_SCAN_INTERVAL,
                     "update_db_interval" : headphones.UPDATE_DB_INTERVAL,
                     "mb_ignore_age" : headphones.MB_IGNORE_AGE,
-                    "nzb_search_interval" : headphones.SEARCH_INTERVAL,
+                    "search_interval" : headphones.SEARCH_INTERVAL,
                     "libraryscan_interval" : headphones.LIBRARYSCAN_INTERVAL,
                     "sab_host" : headphones.SAB_HOST,
                     "sab_user" : headphones.SAB_USERNAME,
@@ -1172,7 +1172,7 @@ class WebInterface(object):
     config.exposed = True
 
     def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0, api_enabled=0, api_key=None,
-        download_scan_interval=None, update_db_interval=None, mb_ignore_age=None, nzb_search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None,
+        download_scan_interval=None, update_db_interval=None, mb_ignore_age=None, search_interval=None, libraryscan_interval=None, sab_host=None, sab_username=None, sab_apikey=None, sab_password=None,
         sab_category=None, nzbget_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, nzbget_priority=0, transmission_host=None, transmission_username=None, transmission_password=None,
         utorrent_host=None, utorrent_username=None, utorrent_password=None, utorrent_label=None,nzb_downloader=0, torrent_downloader=0, download_dir=None, blackhole_dir=None, usenet_retention=None,
         use_headphones_indexer=0, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, omgwtfnzbs=0, omgwtfnzbs_uid=None, omgwtfnzbs_apikey=None,
@@ -1203,7 +1203,7 @@ class WebInterface(object):
         headphones.DOWNLOAD_SCAN_INTERVAL = download_scan_interval
         headphones.UPDATE_DB_INTERVAL = update_db_interval
         headphones.MB_IGNORE_AGE = mb_ignore_age
-        headphones.SEARCH_INTERVAL = nzb_search_interval
+        headphones.SEARCH_INTERVAL = search_interval
         headphones.LIBRARYSCAN_INTERVAL = libraryscan_interval
         headphones.SAB_HOST = sab_host
         headphones.SAB_USERNAME = sab_username
