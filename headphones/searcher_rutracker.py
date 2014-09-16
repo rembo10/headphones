@@ -4,19 +4,21 @@
 # Headphones rutracker.org search
 # Functions called from searcher.py
 
-import urllib
-import urllib2
-import cookielib
+from headphones import logger, db, utorrent
+
+from bencode import bencode as bencode, bdecode
 from urlparse import urlparse
 from bs4 import BeautifulSoup
-import headphones
-from headphones import logger, db, utorrent
-from lib.bencode import bencode as bencode, bdecode
-import os
 from tempfile import mkdtemp
 from hashlib import sha1
+
+import headphones
 import requests
+import cookielib
+import urllib2
+import urllib
 import re
+import os
 
 class Rutracker():
 
