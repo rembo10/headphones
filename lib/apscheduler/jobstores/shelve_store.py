@@ -7,9 +7,9 @@ import pickle
 import random
 import logging
 
-from lib.apscheduler.jobstores.base import JobStore
-from lib.apscheduler.job import Job
-from lib.apscheduler.util import itervalues
+from apscheduler.jobstores.base import JobStore
+from apscheduler.job import Job
+from apscheduler.util import itervalues
 
 logger = logging.getLogger(__name__)
 

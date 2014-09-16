@@ -16,10 +16,10 @@
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
 
 import urllib, urlparse
-from lib.pygazelle import api as gazelleapi
-from lib.pygazelle import encoding as gazelleencoding
-from lib.pygazelle import format as gazelleformat
-from lib.pygazelle import media as gazellemedia
+from pygazelle import api as gazelleapi
+from pygazelle import encoding as gazelleencoding
+from pygazelle import format as gazelleformat
+from pygazelle import media as gazellemedia
 from xml.dom import minidom
 from base64 import b16encode, b32decode
 from hashlib import sha1
@@ -36,7 +36,7 @@ from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
 from headphones import utorrent, transmission, notifiers
 
-from lib.bencode import bencode as bencode, bdecode
+from bencode import bencode, bdecode
 
 import headphones.searcher_rutracker as rutrackersearch
 rutracker = rutrackersearch.Rutracker()

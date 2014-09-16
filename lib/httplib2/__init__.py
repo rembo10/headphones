@@ -56,7 +56,7 @@ import socket
 
 # Try using local version, followed by system, and none if neither are found
 try:
-    import lib.socks as socks
+    import socks as socks
 except ImportError:
     try:
         import socks as socks

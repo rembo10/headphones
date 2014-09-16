@@ -5,7 +5,7 @@ Jobs represent scheduled tasks.
 from threading import Lock
 from datetime import timedelta
 
-from lib.apscheduler.util import to_unicode, ref_to_obj, get_callable_name,\
+from apscheduler.util import to_unicode, ref_to_obj, get_callable_name,\
     obj_to_ref
 
 
