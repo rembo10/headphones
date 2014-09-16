@@ -170,13 +170,22 @@ def server_message(response):
     message = None
 
     # First attempt is to 'read' the response as HTML
-    if response.headers.get("content-type") == "text/html":
+    if "text/html" in response.headers.get("content-type"):
         try:
             soup = BeautifulSoup(response.content, "html5lib")
         except Exception:
             pass
 
+        # Find body and cleanup common tags to grab content, which probably
+        # contains the message.
         message = soup.find("body")
+
+        for element in ["header", "script", "footer", "nav", "input",
+            "textarea"]:
+
+            for tag in soup.find_all(element):
+                tag.replaceWith("")
+
         message = message.text if message else soup.text
         message = message.strip()
 
