@@ -21,17 +21,17 @@
 			%else:
 				<a id="menu_link_getextra" href="#"><i class="fa fa-plus"></i> Get Extras</a>
 			%endif
-					<div id="dialog" title="Choose Which Extras to Fetch" style="display:none" class="configtable">
-						<form action="getExtras" method="get" class="form">
-							<input type="hidden" name="ArtistID" value="${artist['ArtistID']}">
-							<input type="hidden" name="newstyle" value="true">
-							%for extra in extras:
-								<input type="checkbox" id="${extra}" name="${extra}" value="1" ${extras[extra]} />${string.capwords(extra)}<br>
-							%endfor
-							<br>
-							<input id="submit" type="submit" value="Fetch Extras">
-						</form>
-					</div>
+				<div id="dialog" title="Choose Which Extras to Fetch" style="display:none" class="configtable">
+					<form action="getExtras" method="get" class="form">
+						<input type="hidden" name="ArtistID" value="${artist['ArtistID']}">
+						<input type="hidden" name="newstyle" value="true">
+						%for extra in extras:
+							<input type="checkbox" id="${extra}" name="${extra}" value="1" ${extras[extra]} />${string.capwords(extra)}<br>
+						%endfor
+						<br>
+						<input id="submit" type="submit" value="Fetch Extras">
+					</form>
+				</div>
 		</div>
 	</div>
 	<a href="home" class="back">&laquo; Back to overview</a>
@@ -265,12 +265,13 @@
 	}
 
 	function initThisPage() {
-		$('#menu_link_getextra').click(function() {
+		$('#menu_link_getextra').click(function(event) {
 			$('#dialog').dialog();
-			return false;
+			event.preventDefault();
 		});
 		$('#menu_link_modifyextra').click(function() {
 			$('#dialog').dialog();
+			event.preventDefault();
 		});
 		$('#album_table').dataTable({
 			"bDestroy": true,
@@ -314,7 +315,7 @@
       		getArtistsCalendar();
     	}
     	checkArtistStatus();
-    	setInterval(function(){ 
+    	setInterval(function(){
     		checkArtistStatus();
 		}, 1500);
 	});
