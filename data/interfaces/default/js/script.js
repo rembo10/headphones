@@ -67,14 +67,14 @@ function getInfo(elem,id,type) {
 	});
 }
 
-function getImageLinks(elem,id,type) {
+function getImageLinks(elem,id,type,unveil) {
 	if ( type == 'artist' ) {
 		var infoURL = "getImageLinks?ArtistID=" + id;
 	} else {
 		var infoURL = "getImageLinks?AlbumID=" + id;
 	}
 
-	// Get Data from the cache by ID 	
+	// Get Data from the cache by ID
 	$.ajax({
 		url: infoURL,
 		cache: true,
@@ -97,12 +97,19 @@ function getImageLinks(elem,id,type) {
 			else {
 				var artwork = data.artwork;
 			}
-			$(elem).attr("src", thumbnail);
+
+			if (unveil) {
+				$(elem).attr("data-src", thumbnail);
+				$(elem).unveil();
+			}
+			else {
+				$(elem).attr("src", thumbnail);
+			}
 		}
 	});
 }
 
-function initHeader() {		
+function initHeader() {
 	//settings
 	var header = $("#container header");
 	var fadeSpeed = 100, fadeTo = 0.5, topDistance = 20;

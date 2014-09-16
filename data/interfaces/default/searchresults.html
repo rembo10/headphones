@@ -68,24 +68,24 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-
+    <script src="js/libs/jquery.unveil.min.js"></script>
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 
-	<script>
-	function getArt() {
-		$("table#searchresults_table tr td#albumart img").each(function(){
-			var id = $(this).attr('title');
-			var image = $(this);
-			if ( !image.hasClass('done') ) {
-				image.addClass('done');
-				getImageLinks(image,id,"${type}");
-			}
-		});
-	}
-	function initThisPage() {
-		getArt();
-		$('#searchresults_table').dataTable(
-			{
+	<script type="text/javascript">
+    	function getArt() {
+    		$("table#searchresults_table tr td#albumart img").each(function(){
+    			var id = $(this).attr('title');
+    			var image = $(this);
+
+    			if ( !image.hasClass('done') ) {
+    				image.addClass('done');
+    				getImageLinks(image, id, "${type}", true);
+    			}
+    		});
+    	}
+    	function initThisPage() {
+            getArt();
+    		$('#searchresults_table').dataTable({
 				"bDestroy": true,
 				"aoColumnDefs": [
 			          { 'bSortable': false, 'aTargets': [ 0 ] }
@@ -101,13 +101,14 @@
 				"sPaginationType": "full_numbers",
 				"aaSorting": []
 			});
+            $('#searchresults_table').on("draw.dt", function () {
+                $("img").unveil();
+            });
 			resetFilters("album");
-	}
-	$(document).ready(function(){
-			initThisPage();
-	});
-	$(window).load(function(){
-		initFancybox();
-	});
+    	}
+    	$(document).ready(function(){
+    		initFancybox();
+            initThisPage();
+    	});
 	</script>
 </%def>
