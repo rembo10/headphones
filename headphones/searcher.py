@@ -307,9 +307,8 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
     # Use the provided search term if available, otherwise build a search term
     if album['SearchTerm']:
         term = album['SearchTerm']
-
     else:
-        # FLAC usually doesn't have a year for some reason so I'll leave it out
+        # FLAC usually doesn't have a year for some reason so leave it out.
         # Various Artist albums might be listed as VA, so I'll leave that out too
         # Only use the year if the term could return a bunch of different albums, i.e. self-titled albums
         if album['ArtistName'] in album['AlbumTitle'] or len(album['ArtistName']) < 4 or len(album['AlbumTitle']) < 4:
@@ -344,8 +343,8 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
             categories = "3010"
 
         if album['Type'] == 'Other':
-            categories = "3030"
             logger.info("Album type is audiobook/spokenword. Using audiobook category")
+            categories = "3030"
 
         # Request results
         logger.info('Parsing results from Headphones Indexer')
@@ -483,8 +482,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
 
         data = request.request_feed(
             url='http://beta.nzbs.org/api',
-            params=params, headers=headers,
-            timeout=20
+            params=params, headers=headers
         )
 
         # Process feed
@@ -660,8 +658,8 @@ def send_to_downloader(data, bestqual, album):
                         except:
                             logger.error("Could not change permissions for file: %s", download_path)
 
-                    #Open the fresh torrent file again so we can extract the proper torrent name
-                    #Used later in post-processing.
+                    # Open the fresh torrent file again so we can extract the
+                    # proper torrent name Used later in post-processing.
                     with open(download_path, 'rb') as fp:
                         torrent_info = bdecode(fp.read())
 
@@ -933,28 +931,33 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
 
     if headphones.KAT:
         provider = "Kick Ass Torrents"
+        ka_term = term.replace("!", "")
 
+        # Use proxy if specified
         if headphones.KAT_PROXY_URL:
-            proxy_url = set_proxy(headphones.KAT_PROXY_URL)
-            providerurl = url_fix(proxy_url + "/usearch/" + term)
+            providerurl = url_fix(set_proxy(proxy_url))
         else:
-            providerurl = url_fix("http://kickass.to/usearch/" + term)
+            providerurl = url_fix("https://kickass.to")
 
+        # Build URL
+        providerurl = providerurl + "/usearch/" + ka_term
+
+        # Pick category for torrents
         if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
-            categories = "7"        #music
-            format = "2"             #flac
+            categories = "7" # Music
+            format = "2" # FLAC
             maxsize = 10000000000
         elif headphones.PREFERRED_QUALITY == 1 or allow_lossless:
-            categories = "7"        #music
-            format = "10"            #mp3+flac
+            categories = "7" # Music
+            format = "10" # MP3 and FLAC
             maxsize = 10000000000
         else:
-            categories = "7"        #music
-            format = "8"            #mp3
+            categories = "7" # Music
+            format = "8" # MP3 only
             maxsize = 300000000
 
         # Requesting content
-        logger.info('Parsing results from KAT')
+        logger.info("Searching KAT using term: %s", ka_term)
 
         params = {
             "categories[0]": "music",
@@ -962,17 +965,12 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
             "sorder": "desc",
             "rss": "1"
         }
-
-        data = request.request_feed(
-            url=providerurl,
-            params=params,
-            timeout=20
-        )
+        data = request.request_feed(url=providerurl, params=params)
 
         # Process feed
         if data:
             if not len(data.entries):
-                logger.info(u"No results found from %s for %s", provider, term)
+                logger.info("No results found")
             else:
                 for item in data.entries:
                     try:
@@ -981,16 +979,17 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                         seeders = item['torrent_seeds']
                         url = item['links'][1]['href']
                         size = int(item['links'][1]['length'])
+
                         if format == "2":
                             torrent = request.request_content(url)
                             if not torrent or (int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1):
                                 rightformat = False
+
                         if rightformat == True and size < maxsize and minimumseeders < int(seeders):
                             resultlist.append((title, size, url, provider, 'torrent'))
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                         else:
                             logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d, Format: %s)', title, size, int(seeders), rightformat)
-
                     except Exception as e:
                         logger.exception("Unhandled exception in the KAT parser")
 
@@ -1183,51 +1182,48 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
     # Pirate Bay
     if headphones.PIRATEBAY:
         provider = "The Pirate Bay"
-        if headphones.PIRATEBAY_PROXY_URL:
-            proxy_url = set_proxy(headphones.PIRATEBAY_PROXY_URL)
-            providerurl = url_fix(proxy_url + "/search/" + term + "/0/99/")
-        else:
-            providerurl = url_fix("http://thepiratebay.se/search/" + term + "/0/99/")
+        tpb_term = term.replace("!", "")
 
+        # Use proxy if specified
+        if headphones.PIRATEBAY_PROXY_URL:
+            providerurl = url_fix(set_proxy(headphones.PIRATEBAY_PROXY_URL))
+        else:
+            providerurl = url_fix("https://thepiratebay.se")
+
+        # Build URL
+        providerurl = providerurl + "/search/" + tpb_term + "/0/7/" # 7 is sort by seeders
+
+        # Pick category for torrents
         if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
-            category = '104'          #flac
+            category = '104' # FLAC
             maxsize = 10000000000
         elif headphones.PREFERRED_QUALITY == 1 or allow_lossless:
-            category = '100'          #audio cat
+            category = '100' # General audio category
             maxsize = 10000000000
         else:
-            category = '101'          #mp3
+            category = '101' # MP3 only
             maxsize = 300000000
 
-        # Requesting content
-        logger.info('Parsing results from The Pirate Bay')
+        # Request content
+        logger.info("Searching The Pirate Bay using term: %s", tpb_term)
 
         headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
-        params = {
-            "iht": "2",
-            "sort": "seeds"
-        }
-
-        data = request.request_soup(
-            url=providerurl + category,
-            params=params,
-            headers=headers,
-            timeout=20
-        )
+        data = request.request_soup(url=providerurl + category, headers=headers)
 
         # Process content
         if data:
-            rows = data.select('table tr')
+            rows = data.select('table tbody tr')
 
-            if not rows or len(rows) == '1':
-                logger.info(u"No results found from %s for %s" % (provider, term))
+            if not rows:
+                logger.info("No results found")
             else:
-                for item in rows[1:]:
+                for item in rows:
                     try:
+                        url = None
                         rightformat = True
                         title = ''.join(item.find("a", {"class" : "detLink"}))
                         seeds = int(''.join(item.find("td", {"align" : "right"})))
-                        url = None
+
                         if headphones.TORRENT_DOWNLOADER == 0:
                             try:
                                 url = item.find("a", {"title":"Download this torrent"})['href']
@@ -1238,17 +1234,19 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                                     logger.info('"%s" only has a magnet link, skipping' % title)
                                     continue
                         else:
-                            url = item.findAll("a")[3]['href']
+                            url = item.findAll("a")[3]["href"]
+
                         if url.lower().startswith("//"):
                             url = "http:" + url
+
                         formatted_size = re.search('Size (.*),', unicode(item)).group(1).replace(u'\xa0', ' ')
                         size = helpers.piratesize(formatted_size)
-                        if size < maxsize and minimumseeders < seeds and url != None:
-                            resultlist.append((title, size, url, provider, 'torrent'))
+
+                        if size < maxsize and minimumseeders < seeds and url is not None:
+                            resultlist.append((title, size, url, provider, "torrent"))
                             logger.info('Found %s. Size: %s' % (title, formatted_size))
                         else:
                             logger.info('%s is larger than the maxsize or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i)' % (title, size, int(seeds)))
-
                     except Exception as e:
                         logger.error(u"An unknown error occurred in the Pirate Bay parser: %s" % e)
 
