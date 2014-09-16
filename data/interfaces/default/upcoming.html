@@ -5,18 +5,17 @@
 		<div id="subhead_menu">
 			<a href="#" id="menu_link_scan" onclick="doAjaxCall('forceSearch',$(this))" data-success="Checking for wanted albums successful" data-error="Error checking wanted albums"><i class="fa fa-search"></i> Force Check</a>
 		</div>
-	</div>	
+	</div>
 </%def>
 
 
 <%def name="body()">
-	
-	<div class="title">
+	<div id="paddingheader">
 		<h1 class="clearfix"><i class="fa fa-heart"></i> Wanted Albums</h1>
 	</div>
 	<form action="markAlbums" method="get" id="markAlbums">
 	<div id="markalbum" style="top:0;">
-		Mark selected albums as 
+		Mark selected albums as
 		<select name="action" onChange="doAjaxCall('markAlbums',$(this),'table',true);" data-error="You didn't select any albums">
 				<option disabled="disabled" selected="selected">Choose...</option>
 				<option value="Skipped">Skipped</option>
@@ -50,7 +49,7 @@
 		%endfor
 		</tbody>
 	</table>
-	
+
 	</form>
 	</div>
 	<div class="title">
@@ -91,22 +90,21 @@
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-	function initThisPage() {
-		
-		$('#wanted_table').dataTable({
-			"oLanguage": {
-				"sEmptyTable": " "
-			},
-			"bDestroy":true,
-			"bFilter": false,
-			"bInfo": false,
-			"bPaginate": false
+		function initThisPage() {
+			$('#wanted_table').dataTable({
+				"oLanguage": {
+					"sEmptyTable": " "
+				},
+				"bDestroy":true,
+				"bFilter": false,
+				"bInfo": false,
+				"bPaginate": false
+			});
+			resetFilters("artists");
+			initActions();
+		}
+		$(document).ready(function() {
+			initThisPage();
 		});
-		resetFilters("artists");
-		initActions();
-	}
-	$(document).ready(function() {
-		initThisPage();		
-	});
 	</script>
 </%def>
