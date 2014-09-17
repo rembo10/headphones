@@ -10,7 +10,7 @@ from HTMLParser import HTMLParser
 import sys
 import json
 import time
-import lib.requests as requests
+import requests as requests
 
 from .user import User
 from .artist import Artist

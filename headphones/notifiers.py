@@ -18,7 +18,7 @@ from headphones import logger, helpers, common, request
 from xml.dom import minidom
 from httplib import HTTPSConnection
 from urllib import urlencode
-from lib.pynma import pynma
+from pynma import pynma
 
 import base64
 import cherrypy
