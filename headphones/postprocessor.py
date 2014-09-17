@@ -62,30 +62,40 @@ def verify(albumid, albumpath, Kind=None, forced=False):
     tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
 
     if not release or not tracks:
-        #the result of a manual post-process on an album that hasn't been inserted
-        #from an RSS feed or etc
-        #TODO: This should be a call to a class method.. copied it out of importer with only minor changes
-        #TODO: odd things can happen when there are diacritic characters in the folder name, need to translate them?
         release_list = None
 
+        # Fetch album information from MusicBrainz
         try:
             release_list = mb.getReleaseGroup(albumid)
         except Exception, e:
-            logger.error('Unable to get release information for manual album with rgid: %s. Error: %s' % (albumid, e))
+            logger.error('Unable to get release information for manual album with rgid: %s. Error: %s', albumid, e)
             return
 
         if not release_list:
-            logger.error('Unable to get release information for manual album with rgid: %s' % albumid)
+            logger.error('Unable to get release information for manual album with rgid: %s', albumid)
             return
 
-        # Since we're just using this to create the bare minimum information to insert an artist/album combo, use the first release
+        # Since we're just using this to create the bare minimum information to
+        # insert an artist/album combo, use the first release
         releaseid = release_list[0]['id']
-
         release_dict = mb.getRelease(releaseid)
 
         if not release_dict:
-            logger.error('Unable to get release information for manual album with rgid: %s. Cannot continue' % albumid)
+            logger.error('Unable to get release information for manual album with rgid: %s. Cannot continue', albumid)
             return
+
+        # Check if the artist is added to the database. In case the database is
+        # frozen during post processing, new artists will not be processed. This
+        # prevents new artists from appearing suddenly. In case forced is True,
+        # this check is skipped, since it is assumed the user wants this.
+        if headphones.FREEZE_DB and not forced:
+            artist = myDB.select("SELECT ArtistName, ArtistID FROM artists WHERE ArtistId=? OR ArtistName=?", [release_dict['artist_id'], release_dict['artist_name']])
+
+            if not artist:
+                logger.warn("Continuing would add new artist '%s', but " \
+                    "database is frozen. Will skip album with rgid: %s",
+                    release_dict['artist_name'], albumid)
+                return
 
         logger.info(u"Now adding/updating artist: " + release_dict['artist_name'])
 
@@ -93,7 +103,6 @@ def verify(albumid, albumpath, Kind=None, forced=False):
             sortname = release_dict['artist_name'][4:]
         else:
             sortname = release_dict['artist_name']
-
 
         controlValueDict = {"ArtistID":     release_dict['artist_id']}
         newValueDict = {"ArtistName":       release_dict['artist_name'],
