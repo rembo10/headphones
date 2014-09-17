@@ -67,37 +67,49 @@ function getInfo(elem,id,type) {
 	});
 }
 
-function getImageLinks(elem,id,type) {
-	
+function getImageLinks(elem,id,type,unveil) {
 	if ( type == 'artist' ) {
 		var infoURL = "getImageLinks?ArtistID=" + id;
 	} else {
 		var infoURL = "getImageLinks?AlbumID=" + id;
 	}
-	// Get Data from the cache by ID 	
+
+	// Get Data from the cache by ID
 	$.ajax({
 		url: infoURL,
 		cache: true,
 		dataType: "json",
 		success: function(data){
-			if ( data.thumbnail == "" || data.thumbnail == undefined ) {
+			if (!data) {
+				// Invalid response
+				return;
+			}
+
+			if (!data.thumbnail) {
 				var thumbnail = "interfaces/default/images/no-cover-artist.png";
 			}
 			else {
 				var thumbnail = data.thumbnail;
 			}
-			if ( data.artwork == "" || data.artwork == undefined ) {
+			if (!data.artwork) {
 				var artwork = "interfaces/default/images/no-cover-artist.png";
 			}
 			else {
 				var artwork = data.artwork;
 			}
-			$(elem).attr("src", thumbnail);
+
+			if (unveil) {
+				$(elem).attr("data-src", thumbnail);
+				$(elem).unveil();
+			}
+			else {
+				$(elem).attr("src", thumbnail);
+			}
 		}
 	});
 }
 
-function initHeader() {		
+function initHeader() {
 	//settings
 	var header = $("#container header");
 	var fadeSpeed = 100, fadeTo = 0.5, topDistance = 20;
@@ -359,12 +371,6 @@ function resetFilters(text){
 	}
 }
 
-function preventDefault(){
-	$("a[href='#']").live('click', function(){
-		return false;
-	});
-}
-
 function initFancybox() {
 	if ( $("a[rel=dialog]").length > 0 ) {
 		$.getScript('interfaces/default/js/fancybox/jquery.fancybox-1.3.4.js', function() {
@@ -374,11 +380,6 @@ function initFancybox() {
 	 }
 }
 
-function init() {
-	initHeader();
-	preventDefault();
-}
-
 $(document).ready(function(){
-	init();
+	initHeader();
 });

@@ -17,13 +17,13 @@
 ## Stolen from Sick-Beard's sab.py ##
 #####################################
 
-import urllib, httplib
-import datetime
-
+import MultipartPostHandler
 import headphones
-
-from lib import MultipartPostHandler
-import urllib2, cookielib
+import datetime
+import cookielib
+import urllib2
+import httplib
+import urllib
 import ast
 
 from headphones.common import USER_AGENT

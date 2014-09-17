@@ -984,7 +984,7 @@ default_commands.append(update_cmd)
 # remove: Remove items from library, delete files.
 
 def remove_items(lib, query, album, delete):
-    """Remove items matching query from lib. If album, then match and
+    """Remove items matching query from  If album, then match and
     remove whole albums. If delete, also remove files from disk.
     """
     # Get the matching items.

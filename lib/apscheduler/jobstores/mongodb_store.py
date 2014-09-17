@@ -3,8 +3,8 @@ Stores jobs in a MongoDB database.
 """
 import logging
 
-from lib.apscheduler.jobstores.base import JobStore
-from lib.apscheduler.job import Job
+from apscheduler.jobstores.base import JobStore
+from apscheduler.job import Job
 
 try:
     import cPickle as pickle

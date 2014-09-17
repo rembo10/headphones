@@ -4,8 +4,8 @@ Stores jobs in a database table using SQLAlchemy.
 import pickle
 import logging
 
-from lib.apscheduler.jobstores.base import JobStore
-from lib.apscheduler.job import Job
+from apscheduler.jobstores.base import JobStore
+from apscheduler.job import Job
 
 try:
     from sqlalchemy import *

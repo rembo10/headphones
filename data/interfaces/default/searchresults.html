@@ -38,7 +38,7 @@
                 %>
 				<tr class="grade${grade}">
 				%if type == 'album':
-					<td id="albumart" style=" text-align: center; vertical-align: middle;"><div id="artistImg"><img title="${result['albumid']}" class="albumArt" height="50" width="50" onerror="this.src='${caa_group_url}'"></div></td>
+					<td id="albumart" style=" text-align: center; vertical-align: middle;"><div id="artistImg"><img title="${result['albumid']}" class="albumArt" height="50" width="50" onerror="tryCCA('${caa_group_url}')"></div></td>
 				%else:
 					<td id="albumart"><div id="artistImg"><img title="${result['id']}" class="albumArt" height="50" width="50"></div></td>
 				%endif
@@ -68,24 +68,34 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-
+    <script src="js/libs/jquery.unveil.min.js"></script>
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 
-	<script>
-	function getArt() {
-		$("table#searchresults_table tr td#albumart img").each(function(){
-			var id = $(this).attr('title');
-			var image = $(this);
-			if ( !image.hasClass('done') ) {
-				image.addClass('done');
-				getImageLinks(image,id,"${type}");
-			}
-		});
-	}
-	function initThisPage() {
-		getArt();
-		$('#searchresults_table').dataTable(
-			{
+	<script type="text/javascript">
+        function tryCCA(url) {
+            var image = $(this);
+
+            if (!image.hasClass('done')) {
+                image.addClass('done');
+                image.onerror = null;
+                this.src = url;
+            }
+        }
+
+    	function getArt() {
+    		$("table#searchresults_table tr td#albumart img").each(function(){
+    			var id = $(this).attr('title');
+    			var image = $(this);
+
+    			if (!image.hasClass('done')) {
+    				image.addClass('done');
+    				getImageLinks(image, id, "${type}", true);
+    			}
+    		});
+    	}
+    	function initThisPage() {
+            getArt();
+    		$('#searchresults_table').dataTable({
 				"bDestroy": true,
 				"aoColumnDefs": [
 			          { 'bSortable': false, 'aTargets': [ 0 ] }
@@ -101,13 +111,14 @@
 				"sPaginationType": "full_numbers",
 				"aaSorting": []
 			});
+            $('#searchresults_table').on("draw.dt", function () {
+                $("img").unveil();
+            });
 			resetFilters("album");
-	}
-	$(document).ready(function(){
-			initThisPage();
-	});
-	$(window).load(function(){
-		initFancybox();
-	});
+    	}
+    	$(document).ready(function(){
+    		initFancybox();
+            initThisPage();
+    	});
 	</script>
 </%def>
