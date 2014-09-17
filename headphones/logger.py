@@ -13,24 +13,30 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import sys
-import logging
-import traceback
-import threading
-import headphones
-
-from logging import handlers
-
 from headphones import helpers
 
+from logutils.queue import QueueHandler, QueueListener
+from logging import handlers
+
+import multiprocessing
+import contextlib
+import headphones
+import threading
+import traceback
+import logging
+import sys
+import os
+
 # These settings are for file logging only
-FILENAME = 'headphones.log'
+FILENAME = "headphones.log"
 MAX_SIZE = 1000000 # 1 MB
 MAX_FILES = 5
 
 # Headphones logger
-logger = logging.getLogger('headphones')
+logger = logging.getLogger("headphones")
+
+# Global queue of multiprocessing logging
+queue = multiprocessing.Queue()
 
 class LogListHandler(logging.Handler):
     """
@@ -42,6 +48,39 @@ class LogListHandler(logging.Handler):
         message = message.replace("\n", "<br />")
 
         headphones.LOG_LIST.insert(0, (helpers.now(), message, record.levelname, record.threadName))
+
+@contextlib.contextmanager
+def listener():
+    """
+    Wrapper that create a QueueListener, starts it and automatically stops it.
+    To be used in a with statement in the main process, for multiprocessing.
+    """
+
+    queue_listener = QueueListener(queue, *logger.handlers)
+
+    try:
+        queue_listener.start()
+        yield
+    finally:
+        queue_listener.stop()
+
+def initMultiprocessing():
+    """
+    Remove all handlers and add QueueHandler on top. This should only be called
+    inside a multiprocessing worker process, since it changes the logger
+    completely.
+    """
+
+    for handler in logger.handlers[:]:
+        logger.removeHandler(handler)
+
+    queue_handler = QueueHandler(queue)
+    queue_handler.setLevel(logging.DEBUG)
+
+    logger.addHandler(queue_handler)
+
+    # Change current thread name for log record
+    threading.current_thread().name = multiprocessing.current_process().name
 
 def initLogger(console=False, verbose=False):
     """

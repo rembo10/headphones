@@ -53,7 +53,7 @@ def encode(albumPath):
             time.sleep(1)
 
         os.mkdir(tempDirEncode)
-    except Exception, e:
+    except Exception as e:
         logger.exception("Unable to create temporary directory")
         return None
 
@@ -96,13 +96,18 @@ def encode(albumPath):
                 encoder = "C:/Program Files/ffmpeg/bin/ffmpeg.exe"
             else:
                 encoder="ffmpeg"
+        elif headphones.ENCODER == 'libav':
+            if headphones.SYS_PLATFORM == "win32":
+                encoder = "C:/Program Files/libav/bin/avconv.exe"
+            else:
+                encoder="avconv"
 
     i=0
     encoder_failed = False
     jobs = []
 
     for music in musicFiles:
-        infoMusic=MediaFile(music)
+        infoMusic = MediaFile(music)
         encode = False
 
         if XLD:
@@ -141,29 +146,32 @@ def encode(albumPath):
 
     # Encode music files
     if len(jobs) > 0:
+        processes = 1
+
+        # Use multicore if enabled
         if headphones.ENCODER_MULTICORE:
             if headphones.ENCODER_MULTICORE_COUNT == 0:
                 processes = multiprocessing.cpu_count()
             else:
                 processes = headphones.ENCODER_MULTICORE_COUNT
 
-            logger.debug("Multi-core encoding enabled, %d processes", processes)
-        else:
-            processes = 1
+            logger.debug("Multi-core encoding enabled, spawning %d processes",
+                processes)
 
         # Use multiprocessing only if it's worth the overhead. and if it is
         # enabled. If not, then use the old fashioned way.
         if processes > 1:
-            pool = multiprocessing.Pool(processes=processes)
-            results = pool.map_async(command_map, jobs)
+            with logger.listener():
+                pool = multiprocessing.Pool(processes=processes)
+                results = pool.map_async(command_map, jobs)
 
-            # No new processes will be created, so close it and wait for all
-            # processes to finish
-            pool.close()
-            pool.join()
+                # No new processes will be created, so close it and wait for all
+                # processes to finish
+                pool.close()
+                pool.join()
 
-            # Retrieve the results
-            results = results.get()
+                # Retrieve the results
+                results = results.get()
         else:
             results = map(command_map, jobs)
 
@@ -178,7 +186,7 @@ def encode(albumPath):
         for dest in musicTempFiles:
             if not os.path.exists(dest):
                 encoder_failed = True
-                logger.error('Encoded file \'%s\' does not exist in the destination temp directory', dest)
+                logger.error("Encoded file '%s' does not exist in the destination temp directory", dest)
 
     # No errors, move from temp to parent
     if not encoder_failed and musicTempFiles:
@@ -204,7 +212,7 @@ def encode(albumPath):
 
     # Return with error if any encoding errors
     if encoder_failed:
-        logger.error('One or more files failed to encode, check debuglog and ensure you have the latest version of %s installed', headphones.ENCODER)
+        logger.error("One or more files failed to encode. Ensure you have the latest version of %s installed.", headphones.ENCODER)
         return None
 
     time.sleep(1)
@@ -223,16 +231,21 @@ def command_map(args):
     This method is used for the multiprocessing.map() method as a wrapper.
     """
 
+    # Reinitialize logger for multiprocessing
+    logger.initMultiprocessing()
+
+    # Start encoding
     try:
         return command(*args)
-    except Exception, e:
-        logger.exception("Encoder exception, will return failed")
+    except Exception as e:
+        logger.exception("Encoder raised an exception.")
         return False
 
-def command(encoder, musicSource ,musicDest, albumPath):
+def command(encoder, musicSource, musicDest, albumPath):
     cmd=[]
     startMusicTime=time.time()
 
+    # XLD
     if XLD:
         xldDestDir = os.path.split(musicDest)[0]
         cmd = [encoder]
@@ -242,6 +255,7 @@ def command(encoder, musicSource ,musicDest, albumPath):
         cmd.extend(['-o'])
         cmd.extend([xldDestDir])
 
+    # Lame
     elif headphones.ENCODER == 'lame':
         cmd = [encoder]
         opts = []
@@ -259,6 +273,7 @@ def command(encoder, musicSource ,musicDest, albumPath):
         opts.extend([musicDest])
         cmd.extend(opts)
 
+    # FFmpeg
     elif headphones.ENCODER == 'ffmpeg':
         cmd = [encoder, '-i', musicSource]
         opts = []
@@ -279,8 +294,11 @@ def command(encoder, musicSource ,musicDest, albumPath):
         opts.extend([musicDest])
         cmd.extend(opts)
 
-    # Encode
+    # Libav
+    elif headphones.ENCODER == "libav":
+        pass
 
+    # Encode
     logger.info('Encoding %s...' % (musicSource.decode(headphones.SYS_ENCODING, 'replace')))
     logger.debug(subprocess.list2cmdline(cmd))
 
@@ -320,4 +338,3 @@ def getTimeEncode(start):
     minutes = seconds / 60
     seconds -= 60*minutes
     return "%02d:%02d:%02d" % (hours, minutes, seconds)
-
