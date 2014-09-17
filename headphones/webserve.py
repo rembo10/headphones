@@ -1044,6 +1044,7 @@ class WebInterface(object):
                     "detect_bitrate" : checked(headphones.DETECT_BITRATE),
                     "lossless_bitrate_from" : headphones.LOSSLESS_BITRATE_FROM,
                     "lossless_bitrate_to" : headphones.LOSSLESS_BITRATE_TO,
+                    "freeze_db" : checked(headphones.FREEZE_DB),
                     "move_files" : checked(headphones.MOVE_FILES),
                     "rename_files" : checked(headphones.RENAME_FILES),
                     "correct_metadata" : checked(headphones.CORRECT_METADATA),
@@ -1180,7 +1181,7 @@ class WebInterface(object):
         sab_category=None, nzbget_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, nzbget_priority=0, transmission_host=None, transmission_username=None, transmission_password=None,
         utorrent_host=None, utorrent_username=None, utorrent_password=None, utorrent_label=None,nzb_downloader=0, torrent_downloader=0, download_dir=None, blackhole_dir=None, usenet_retention=None,
         use_headphones_indexer=0, newznab=0, newznab_host=None, newznab_apikey=None, newznab_enabled=0, nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, omgwtfnzbs=0, omgwtfnzbs_uid=None, omgwtfnzbs_apikey=None,
-        preferred_words=None, required_words=None, ignored_words=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None,
+        preferred_words=None, required_words=None, ignored_words=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, freeze_db=0, move_files=0, torrentblackhole_dir=None, download_torrent_dir=None,
         numberofseeders=None, use_piratebay=0, piratebay_proxy_url=None, piratebay_ratio=None, use_kat=0, kat_proxy_url=None, kat_ratio=None, use_mininova=0, mininova_ratio=None, waffles=0, waffles_uid=None, waffles_passkey=None, waffles_ratio=None, whatcd=0, whatcd_username=None, whatcd_password=None, whatcd_ratio=None,
         rutracker=0, rutracker_user=None, rutracker_password=None, rutracker_ratio=None, rename_files=0, correct_metadata=0, cleanup_files=0, keep_nfo=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0, replace_existing_folders=False,
         destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, file_underscores=0, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0, remix=0, spokenword=0, audiobook=0, other=0, djmix=0, mixtape_street=0, broadcast=0, interview=0, demo=0,
@@ -1276,6 +1277,7 @@ class WebInterface(object):
         headphones.DETECT_BITRATE = detect_bitrate
         headphones.LOSSLESS_BITRATE_FROM = lossless_bitrate_from
         headphones.LOSSLESS_BITRATE_TO = lossless_bitrate_to
+        headphones.FREEZE_DB = freeze_db
         headphones.MOVE_FILES = move_files
         headphones.CORRECT_METADATA = correct_metadata
         headphones.RENAME_FILES = rename_files
