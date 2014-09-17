@@ -109,6 +109,7 @@ LOSSLESS_BITRATE_FROM = None
 LOSSLESS_BITRATE_TO = None
 ADD_ARTISTS = False
 CORRECT_METADATA = False
+FREEZE_DB = False
 MOVE_FILES = False
 RENAME_FILES = False
 CLEANUP_FILES = False
@@ -356,7 +357,7 @@ def initialize():
         global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, QUIET, DAEMON, SYS_PLATFORM, DATA_DIR, CONFIG_FILE, CFG, CONFIG_VERSION, LOG_DIR, CACHE_DIR, \
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, GIT_USER, GIT_BRANCH, DO_NOT_OVERRIDE_GIT_BRANCH, \
                 CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
-                LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, \
+                LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, FREEZE_DB, MOVE_FILES, \
                 RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, FILE_UNDERSCORES, CLEANUP_FILES, KEEP_NFO, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, KEEP_TORRENT_FILES, PREFER_TORRENTS, OPEN_MAGNET_LINKS, \
                 ADD_ALBUM_ART, ALBUM_ART_FORMAT, EMBED_ALBUM_ART, EMBED_LYRICS, REPLACE_EXISTING_FOLDERS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, KAT, KAT_PROXY_URL, KAT_RATIO, PIRATEBAY, PIRATEBAY_PROXY_URL, PIRATEBAY_RATIO, MININOVA, MININOVA_RATIO, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, WAFFLES_RATIO, \
@@ -437,6 +438,7 @@ def initialize():
         LOSSLESS_BITRATE_TO = check_setting_int(CFG, 'General', 'lossless_bitrate_to', '')
         ADD_ARTISTS = bool(check_setting_int(CFG, 'General', 'auto_add_artists', 1))
         CORRECT_METADATA = bool(check_setting_int(CFG, 'General', 'correct_metadata', 0))
+        FREEZE_DB = bool(check_setting_int(CFG, 'General', 'freeze_db', 0))
         MOVE_FILES = bool(check_setting_int(CFG, 'General', 'move_files', 0))
         RENAME_FILES = bool(check_setting_int(CFG, 'General', 'rename_files', 0))
         FOLDER_FORMAT = check_setting_str(CFG, 'General', 'folder_format', 'Artist/Album [Year]')
@@ -882,6 +884,7 @@ def config_write():
     new_config['General']['lossless_bitrate_to'] = LOSSLESS_BITRATE_TO
     new_config['General']['auto_add_artists'] = int(ADD_ARTISTS)
     new_config['General']['correct_metadata'] = int(CORRECT_METADATA)
+    new_config['General']['freeze_db'] = int(FREEZE_DB)
     new_config['General']['move_files'] = int(MOVE_FILES)
     new_config['General']['rename_files'] = int(RENAME_FILES)
     new_config['General']['folder_format'] = FOLDER_FORMAT
