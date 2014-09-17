@@ -692,25 +692,56 @@
                             <fieldset>
                                 <legend>Post-Processing</legend>
                                 <div class="row checkbox left clearfix">
-                                    <input type="checkbox" name="move_files" id="move_files" value="1" ${config['move_files']} /><label>Move downloads to Destination Folder</label>
+                                    <label title="Freeze the database, so new artists won't be added automatically. Use this if Headphones adds artists because due to wrong snatches. This check is skipped when the folder name is appended with release group ID.">
+                                        Freeze database for adding new artist
+                                        <input type="checkbox" name="freeze_db" id="freeze_db" value="1" ${config['freeze_db']} />
+                                    </label>
+                                    <label>
+                                        Move downloads to Destination Folder
+                                        <input type="checkbox" name="move_files" id="move_files" value="1" ${config['move_files']} />
+                                    </label>
                                     <div id="move_files_options">
                                         <div class="row indent">
-                                            <input type="checkbox" name="replace_existing_folders" value="1" ${config['replace_existing_folders']}><label>Replace existing folders?</label>
+                                            <label>
+                                                Replace existing folders?
+                                                <input type="checkbox" name="replace_existing_folders" value="1" ${config['replace_existing_folders']}>
+                                            </label>
                                          </div>
                                     </div>
-                                    <input type="checkbox" name="rename_files" value="1" ${config['rename_files']} /><label>Rename files</label>
-                                    <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} /><label>Correct metadata</label>
-                                    <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} /><label>Delete leftover files <small>(.m3u, .nfo, .sfv, .nzb, etc.)</small></label>
-                                    <input type="checkbox" name="keep_nfo" value="1" ${config['keep_nfo']} /><label>Keep original nfo <small>(extension changed to .orig.nfo)</small></label>
-                                    <input type="checkbox" name="add_album_art" id="add_album_art" value="1" ${config['add_album_art']}><label>Add album art jpeg to album folder</label>
+                                    <label>
+                                        Rename files
+                                        <input type="checkbox" name="rename_files" value="1" ${config['rename_files']} />
+                                    </label>
+                                    <label>
+                                        Correct metadata
+                                        <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} />
+                                    </label>
+                                    <label>
+                                        Delete leftover files <small>(.m3u, .nfo, .sfv, .nzb, etc.)</small>
+                                        <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} />
+                                    </label>
+                                    <label>
+                                        Keep original nfo <small>(extension changed to .orig.nfo)</small>
+                                        <input type="checkbox" name="keep_nfo" value="1" ${config['keep_nfo']} />
+                                    </label>
+                                    <label>
+                                        Add album art jpeg to album folder
+                                        <input type="checkbox" name="add_album_art" id="add_album_art" value="1" ${config['add_album_art']}>
+                                    </label>
                                     <div id="album_art_options" style="padding-left: 20px">
                                         <div class="row">
                                             as <input type="text" class="override-float" name="album_art_format" value="${config['album_art_format']}" size="10">.jpg
                                         </div>
                                         <small>Use $Artist/$artist, $Album/$album, $Year/$year</small>
                                     </div>
-                                    <input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}><label>Embed album art in each file</label>
-                                    <input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}><label>Embed lyrics</label>
+                                    <label>
+                                        Embed album art in each file
+                                        <input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}>
+                                    </label>
+                                    <label>
+                                        Embed lyrics
+                                        <input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}>
+                                    </label>
                                 </div>
                                 <div class="row">
                                     <label>Path to Destination Folder</label>
