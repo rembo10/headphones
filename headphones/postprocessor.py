@@ -92,9 +92,10 @@ def verify(albumid, albumpath, Kind=None, forced=False):
             artist = myDB.select("SELECT ArtistName, ArtistID FROM artists WHERE ArtistId=? OR ArtistName=?", [release_dict['artist_id'], release_dict['artist_name']])
 
             if not artist:
-                logger.warn("Continuing would add new artist '%s', but " \
-                    "database is frozen. Will skip album with rgid: %s",
-                    release_dict['artist_name'], albumid)
+                logger.warn("Continuing would add new artist '%s' (ID %s), " \
+                    "but database is frozen. Will skip postprocessing for " \
+                    "album with rgid: %s", release_dict['artist_name'],
+                    release_dict['artist_id'], albumid)
                 return
 
         logger.info(u"Now adding/updating artist: " + release_dict['artist_name'])
