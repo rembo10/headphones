@@ -228,11 +228,13 @@ def encode(albumPath):
 
 def command_map(args):
     """
-    This method is used for the multiprocessing.map() method as a wrapper.
+    Wrapper for the '[multiprocessing.]map()' method, to unpack the arguments
+    and wrap exceptions.
     """
 
-    # Reinitialize logger for multiprocessing
-    logger.initMultiprocessing()
+    # Initialize multiprocessing logger
+    if multiprocessing.current_process().name != "MainProcess":
+        logger.initMultiprocessing()
 
     # Start encoding
     try:
@@ -242,8 +244,13 @@ def command_map(args):
         return False
 
 def command(encoder, musicSource, musicDest, albumPath):
-    cmd=[]
-    startMusicTime=time.time()
+    """
+    Encode a given music file with a certain encoder. Returns True on success,
+    or False otherwise.
+    """
+
+    startMusicTime = time.time()
+    cmd = []
 
     # XLD
     if XLD:
