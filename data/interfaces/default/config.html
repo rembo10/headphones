@@ -1101,24 +1101,35 @@
                                 </div>
                             </div>
                             <%
-                                    if config['encoder'] == 'lame':
-                                        lameselect = 'selected="selected"'
-                                        ffmpegselect = ''
-                                        xldselect = ''
-                                    elif config['encoder'] == 'ffmpeg':
-                                        lameselect = ''
-                                        ffmpegselect = 'selected="selected"'
-                                        xldselect = ''
-                                    else:
-                                        lameselect = ''
-                                        ffmpegselect = ''
-                                        xldselect = 'selected="selected"'
+                                if config['encoder'] == 'lame':
+                                    lameselect = 'selected="selected"'
+                                    ffmpegselect = ''
+                                    xldselect = ''
+                                    libavselect = ''
+                                elif config['encoder'] == 'ffmpeg':
+                                    lameselect = ''
+                                    ffmpegselect = 'selected="selected"'
+                                    xldselect = ''
+                                    libavselect = ''
+                                elif config['encoder'] == 'libav':
+                                    lameselect = ''
+                                    ffmpegselect = ''
+                                    xldselect = ''
+                                    libavselect = 'selected="selected"'
+                                else:
+                                    lameselect = ''
+                                    ffmpegselect = ''
+                                    xldselect = 'selected="selected"'
+                                    libavselect = ''
                             %>
                             <div class="row">
-                                <label>Encoder</label>
+                                <label title="Name of encoder to use. Lame, FFmpeg and libav are available for most Linux distributions. On Ubuntu, libav replaces FFmpeg. xld is OS X-only.">
+                                    Encoder
+                                </label>
                                 <select name="encoder" id="encoder">
                                     <option value="lame" ${lameselect}>lame</option>
                                     <option value="ffmpeg" ${ffmpegselect}>ffmpeg</option>
+                                    <option value="libav" ${libavselect}>libav</option>
                                     <option value="xld" ${xldselect}>xld</option>
                                 </select>
                             </div>
@@ -1409,13 +1420,16 @@
                 switch ($(this).val()) {
                         case 'xld':
                             $("#xldproperties").slideDown();
-                        break;
+                            break;
                         case 'ffmpeg':
                             $("#lameffmpegproperties").slideDown();
-                        break;
+                            break;
+                        case 'libav':
+                            $("#lameffmpegproperties").slideDown();
+                            break;
                         case 'lame':
                             $("#lameffmpegproperties").slideDown();
-                        break;
+                            break;
                 }
         };
 

@@ -266,7 +266,7 @@ def command(encoder, musicSource, musicDest, albumPath):
     elif headphones.ENCODER == 'lame':
         cmd = [encoder]
         opts = []
-        if headphones.ADVANCEDENCODER =='':
+        if not headphones.ADVANCEDENCODER:
             opts.extend(['-h'])
             if headphones.ENCODERVBRCBR=='cbr':
                 opts.extend(['--resample', str(headphones.SAMPLINGFREQUENCY), '-b', str(headphones.BITRATE)])
@@ -284,7 +284,7 @@ def command(encoder, musicSource, musicDest, albumPath):
     elif headphones.ENCODER == 'ffmpeg':
         cmd = [encoder, '-i', musicSource]
         opts = []
-        if headphones.ADVANCEDENCODER =='':
+        if not headphones.ADVANCEDENCODER:
             if headphones.ENCODEROUTPUTFORMAT=='ogg':
                 opts.extend(['-acodec', 'libvorbis'])
             if headphones.ENCODEROUTPUTFORMAT=='m4a':
@@ -303,14 +303,28 @@ def command(encoder, musicSource, musicDest, albumPath):
 
     # Libav
     elif headphones.ENCODER == "libav":
-        pass
+        cmd = [encoder, '-i', musicSource]
+        opts = []
+        if not headphones.ADVANCEDENCODER:
+            if headphones.ENCODEROUTPUTFORMAT=='ogg':
+                opts.extend(['-acodec', 'libvorbis'])
+            if headphones.ENCODEROUTPUTFORMAT=='m4a':
+                opts.extend(['-strict', 'experimental'])
+            if headphones.ENCODERVBRCBR=='cbr':
+                opts.extend(['-ar', str(headphones.SAMPLINGFREQUENCY), '-ab', str(headphones.BITRATE) + 'k'])
+            elif headphones.ENCODERVBRCBR=='vbr':
+                opts.extend(['-aq', str(headphones.ENCODERQUALITY)])
+            opts.extend(['-y', '-ac', '2', '-vn'])
+        else:
+            advanced = (headphones.ADVANCEDENCODER.split())
+            for tok in advanced:
+                opts.extend([tok.encode(headphones.SYS_ENCODING)])
+        opts.extend([musicDest])
+        cmd.extend(opts)
 
-    # Encode
-    logger.info('Encoding %s...' % (musicSource.decode(headphones.SYS_ENCODING, 'replace')))
-    logger.debug(subprocess.list2cmdline(cmd))
-
-    # stop windows opening the cmd
+    # Prevent Windows from opening a terminal window
     startupinfo = None
+
     if headphones.SYS_PLATFORM == "win32":
         startupinfo = subprocess.STARTUPINFO()
         try:
@@ -318,12 +332,17 @@ def command(encoder, musicSource, musicDest, albumPath):
         except AttributeError:
             startupinfo.dwFlags |= subprocess._subprocess.STARTF_USESHOWWINDOW
 
-    p = subprocess.Popen(cmd, startupinfo=startupinfo, stdin=open(os.devnull, 'rb'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # Encode
+    logger.info('Encoding %s...' % (musicSource.decode(headphones.SYS_ENCODING, 'replace')))
+    logger.debug(subprocess.list2cmdline(cmd))
 
-    stdout, stderr = p.communicate(headphones.ENCODER)
+    process = subprocess.Popen(cmd, startupinfo=startupinfo,
+        stdin=open(os.devnull, 'rb'), stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
+    stdout, stderr = process.communicate(headphones.ENCODER)
 
-    # error if return code not zero
-    if p.returncode:
+    # Error if return code not zero
+    if process.returncode:
         logger.error('Encoding failed for %s' % (musicSource.decode(headphones.SYS_ENCODING, 'replace')))
         out = stdout if stdout else stderr
         out = out.decode(headphones.SYS_ENCODING, 'replace')
