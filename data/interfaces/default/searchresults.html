@@ -38,8 +38,8 @@
                 %>
 				<tr class="grade${grade}">
 				%if type == 'album':
-					<td id="albumart" style=" text-align: center; vertical-align: middle;"><div id="artistImg"><img title="${result['albumid']}" class="albumArt" height="50" width="50" onerror="tryCCA('${caa_group_url}')"></div></td>
-				%else:
+					<td id="albumart" style=" text-align: center; vertical-align: middle;"><div id="artistImg"><img title="${result['albumid']}" class="albumArt" height="50" width="50" onerror="this.onerror=null;this.src='${caa_group_url}'"></div></td>
+               %else:
 					<td id="albumart"><div id="artistImg"><img title="${result['id']}" class="albumArt" height="50" width="50"></div></td>
 				%endif
 				%if type == 'album':
@@ -72,15 +72,6 @@
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 
 	<script type="text/javascript">
-        function tryCCA(url) {
-            var image = $(this);
-
-            if (!image.hasClass('done')) {
-                image.addClass('done');
-                image.onerror = null;
-                this.src = url;
-            }
-        }
 
     	function getArt() {
     		$("table#searchresults_table tr td#albumart img").each(function(){
