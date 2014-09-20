@@ -119,7 +119,7 @@
 	    $(document).ready(function() {
 	        $('form:first *:input[type!=hidden]:first').focus();
 	        try{
-	            var type = window.localStorage.getItem('search_type');
+	            var type = window.localStorage.getItem('search_type') || "artist";
 	            $("#search_type").val(type);
 	        } catch(e) {
 	        }
