@@ -935,7 +935,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
 
         # Use proxy if specified
         if headphones.KAT_PROXY_URL:
-            providerurl = url_fix(set_proxy(proxy_url))
+            providerurl = url_fix(set_proxy(headphones.KAT_PROXY_URL))
         else:
             providerurl = url_fix("https://kickass.to")
 
