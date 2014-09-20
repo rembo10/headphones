@@ -63,7 +63,7 @@ def listener():
     if queue is None:
         try:
             queue = multiprocessing.Queue()
-        except IOError as e:
+        except OSError as e:
             queue = False
 
             # Some machines don't have access to /dev/shm. See
