@@ -13,17 +13,22 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import random
 import time
+import random
+import threading
 import headphones
 
 from headphones import db, logger, request
 
 from collections import defaultdict
 
-TIMEOUT = 60 # seconds
+TIMEOUT = 60.0 # seconds
+REQUEST_LIMIT = 1.0 # seconds
 ENTRY_POINT = "http://ws.audioscrobbler.com/2.0/"
 API_KEY = "395e6ec6bb557382fc41fde867bce66f"
+
+# Required for API request limit
+lock = threading.Lock()
 
 def request_lastfm(method, **kwargs):
     """
@@ -43,7 +48,8 @@ def request_lastfm(method, **kwargs):
     logger.debug("Calling Last.FM method: %s", method)
     logger.debug("Last.FM call parameters: %s", kwargs)
 
-    data = request.request_json(ENTRY_POINT, timeout=TIMEOUT, params=kwargs)
+    data = request.request_json(ENTRY_POINT, timeout=TIMEOUT, params=kwargs,
+        rate_limit=(lock, REQUEST_LIMIT))
 
     # Parse response and check for errors.
     if not data:
