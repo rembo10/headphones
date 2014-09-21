@@ -53,33 +53,36 @@ def request_response(url, method="get", auto_raise=True,
     # requests to apply more magic per method. See lib/requests/api.py.
     request_method = getattr(requests, method.lower())
 
+    # Enfore request rate limit if applicable. This uses the lock so there
+    # is synchronized access to the API. When N threads enter this method, the
+    # first will pass trough, since there there was no last request recorded.
+    # The last request time will be set. Then, the second thread will unlock,
+    # and see that the last request was X seconds ago. It will sleep
+    # (request_limit - X) seconds, and then continue. Then the third one will
+    # unblock, and so on. After all threads finished, the total time will at
+    # least be (N * request_limit) seconds. If some request takes longer than
+    # request_limit seconds, the next unblocked thread will wait less.
+    if rate_limit:
+        lock, request_limit = rate_limit
+
+        with lock:
+            delta = time.time() - last_requests[lock]
+            limit = int(1.0 / request_limit)
+
+            if delta < request_limit:
+                logger.debug("Sleeping %.2f seconds for request, limit " \
+                    "is %d req/sec.", request_limit - delta, limit)
+
+                # Sleep the remaining time
+                time.sleep(request_limit - delta)
+
+            # Update last request time.
+            last_requests[lock] = time.time()
+
     try:
-        # Enfore request rate limit if applicable. This uses the lock so there
-        # is synchronized access to the API. If no limit is enforced, just do
-        # it as usual.
+        # Request URL and wait for response
         logger.debug("Requesting URL via %s method: %s", method.upper(), url)
-
-        if rate_limit:
-            lock, request_limit = rate_limit
-
-            with lock:
-                delta = time.time() - last_requests[lock]
-                limit = int(1.0 / request_limit)
-
-                if delta < request_limit:
-                    logger.debug("Sleeping %.2f seconds for request, limit " \
-                        "is %d req/sec.", request_limit - delta, limit)
-
-                    # Sleep the remaining time
-                    time.sleep(request_limit - delta)
-
-                # Update last request time and start with request. Basically, if
-                # the request takes N seconds, next request will sleep N seconds
-                # less.
-                last_requests[lock] = time.time()
-                response = request_method(url, **kwargs)
-        else:
-            response = request_method(url, **kwargs)
+        response = request_method(url, **kwargs)
 
         # If status code != OK, then raise exception, except if the status code
         # is white listed.
