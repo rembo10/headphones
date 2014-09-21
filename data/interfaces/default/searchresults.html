@@ -38,7 +38,7 @@
                 %>
 				<tr class="grade${grade}">
 				%if type == 'album':
-					<td id="albumart" style=" text-align: center; vertical-align: middle;"><div id="artistImg"><img title="${result['albumid']}" class="albumArt" height="50" width="50" onerror="this.onerror=null;this.src='${caa_group_url}'"></div></td>
+					<td id="albumart" style=" text-align: center; vertical-align: middle;"><div id="artistImg"><img title="${result['albumid']}" class="albumArt" height="50" width="50" onerror="tryCCA(this, '${caa_group_url}')"></div></td>
                 %else:
 					<td id="albumart"><div id="artistImg"><img title="${result['id']}" class="albumArt" height="50" width="50"></div></td>
 				%endif
@@ -72,7 +72,13 @@
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 
 	<script type="text/javascript">
-
+        function tryCCA(element, url) {
+            element.onerror = function() {
+                element.onerror = null;
+                element.src = "interfaces/default/images/no-cover-art.png";
+            };
+            element.src = url;
+        }
     	function getArt() {
     		$("table#searchresults_table tr td#albumart img").each(function(){
     			var id = $(this).attr('title');
@@ -85,7 +91,6 @@
     		});
     	}
     	function initThisPage() {
-            getArt();
     		$('#searchresults_table').dataTable({
 				"bDestroy": true,
 				"aoColumnDefs": [
@@ -103,8 +108,10 @@
 				"aaSorting": []
 			});
             $('#searchresults_table').on("draw.dt", function () {
+                getArt();
                 $("img").unveil();
             });
+            getArt();
 			resetFilters("album");
     	}
     	$(document).ready(function(){

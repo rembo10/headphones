@@ -18,16 +18,27 @@ from headphones import logger
 from xml.dom import minidom
 from bs4 import BeautifulSoup
 
+import time
 import requests
 import feedparser
 import headphones
+import collections
+
+# Dictionary with last request times, for rate limiting.
+last_requests = collections.defaultdict(int)
 
 def request_response(url, method="get", auto_raise=True,
-    whitelist_status_code=None, **kwargs):
+    whitelist_status_code=None, rate_limit=None, **kwargs):
     """
     Convenient wrapper for `requests.get', which will capture the exceptions and
     log them. On success, the Response object is returned. In case of a
     exception, None is returned.
+
+    Additionally, there is support for rate limiting. To use this feature,
+    supply a tuple of (lock, request_limit). The lock is used to make sure no
+    other request with the same lock is executed. The request limit is the
+    minimal time between two requests (and so 1/request_limit is the number of
+    requests per seconds).
     """
 
     # Convert whitelist_status_code to a list if needed
@@ -43,9 +54,32 @@ def request_response(url, method="get", auto_raise=True,
     request_method = getattr(requests, method.lower())
 
     try:
-        # Request the URL
+        # Enfore request rate limit if applicable. This uses the lock so there
+        # is synchronized access to the API. If no limit is enforced, just do
+        # it as usual.
         logger.debug("Requesting URL via %s method: %s", method.upper(), url)
-        response = request_method(url, **kwargs)
+
+        if rate_limit:
+            lock, request_limit = rate_limit
+
+            with lock:
+                delta = time.time() - last_requests[lock]
+                limit = int(1.0 / request_limit)
+
+                if delta < request_limit:
+                    logger.debug("Sleeping %.2f seconds for request, limit " \
+                        "is %d req/sec.", request_limit - delta, limit)
+
+                    # Sleep the remaining time
+                    time.sleep(request_limit - delta)
+
+                # Update last request time and start with request. Basically, if
+                # the request takes N seconds, next request will sleep N seconds
+                # less.
+                last_requests[lock] = time.time()
+                response = request_method(url, **kwargs)
+        else:
+            response = request_method(url, **kwargs)
 
         # If status code != OK, then raise exception, except if the status code
         # is white listed.
