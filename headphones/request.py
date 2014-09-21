@@ -66,16 +66,18 @@ def request_response(url, method="get", auto_raise=True,
                     "req/sec.", request_limit - delta,
                     int(1.0 / request_limit))
 
-                # Sleep the remaining time and update time
+                # Sleep the remaining time
                 time.sleep(request_limit - delta)
-
-            # Set last access time
-            last_requests[lock] = time.time()
 
     try:
         # Request the URL
         logger.debug("Requesting URL via %s method: %s", method.upper(), url)
         response = request_method(url, **kwargs)
+
+        # Update rate limit last access time here, because a request will also
+        # take time.
+        if rate_limit:
+            last_requests[lock] = time.time()
 
         # If status code != OK, then raise exception, except if the status code
         # is white listed.
