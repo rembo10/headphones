@@ -23,9 +23,11 @@ import headphones
 
 from beets import autotag
 from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
+from beets import plugins
+from beetsplug import lyrics as beetslyrics
 
 from headphones import notifiers, utorrent, transmission
-from headphones import db, albumart, librarysync, lyrics
+from headphones import db, albumart, librarysync
 from headphones import logger, helpers, request, mb, music_encoder
 
 postprocessor_lock = threading.Lock()
@@ -864,7 +866,6 @@ def correctMetadata(albumid, release, downloaded_track_list):
             else:
                 logger.warn("Skipping: %s because it is not a mutagen friendly file format", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
         except Exception, e:
-
             logger.error("Beets couldn't create an Item from: %s - not a media file? %s", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), str(e))
 
     for items in [lossy_items, lossless_items]:
@@ -903,35 +904,49 @@ def correctMetadata(albumid, release, downloaded_track_list):
 def embedLyrics(downloaded_track_list):
     logger.info('Adding lyrics')
 
-    # TODO: If adding lyrics for flac & lossy, only fetch the lyrics once
-    # and apply it to both files
+    # TODO: If adding lyrics for flac & lossy, only fetch the lyrics once and apply it to both files
+    # TODO: Get beets to add automatically by enabling the plugin
+
+    lossy_items = []
+    lossless_items = []
+    lp = beetslyrics.LyricsPlugin()
+
     for downloaded_track in downloaded_track_list:
-        track_title = downloaded_track.decode(headphones.SYS_ENCODING, 'replace')
+
         try:
-            f = MediaFile(downloaded_track)
-        except:
-            logger.error('Could not read %s. Not checking lyrics', track_title)
+            if any(downloaded_track.lower().endswith('.' + x.lower()) for x in headphones.LOSSLESS_MEDIA_FORMATS):
+                lossless_items.append(beets.library.Item.from_path(downloaded_track))
+            elif any(downloaded_track.lower().endswith('.' + x.lower()) for x in headphones.LOSSY_MEDIA_FORMATS):
+                lossy_items.append(beets.library.Item.from_path(downloaded_track))
+            else:
+                logger.warn("Skipping: %s because it is not a mutagen friendly file format", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+        except Exception, e:
+            logger.error("Beets couldn't create an Item from: %s - not a media file? %s", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), str(e))
+
+    for items in [lossy_items, lossless_items]:
+
+        if not items:
             continue
 
-        if f.albumartist and f.title:
-            metalyrics = lyrics.getLyrics(f.albumartist, f.title)
-        elif f.artist and f.title:
-            metalyrics = lyrics.getLyrics(f.artist, f.title)
-        else:
-            logger.info('No artist/track metadata found for track: %s. Not fetching lyrics', track_title)
-            metalyrics = None
+        for item in items:
 
-        if metalyrics:
-            logger.debug('Adding lyrics to: %s', track_title)
-            f.lyrics = metalyrics
-            try:
-                f.save()
-            except:
-                logger.error('Cannot save lyrics to: %s. Skipping', track_title)
-                continue
-        else:
-            logger.debug('No lyrics found for track: %s', track_title)
+            lyrics = None
+            for artist, titles in beetslyrics.search_pairs(item):
+                lyrics = [lp.get_lyrics(artist, title) for title in titles]
+                if any(lyrics):
+                    break
 
+            lyrics = u"\n\n---\n\n".join([l for l in lyrics if l])
+
+            if lyrics:
+                logger.debug('Adding lyrics to: %s', item.title)
+                item.lyrics = lyrics
+                try:
+                    item.write()
+                except Exception, e:
+                    logger.error('Cannot save lyrics to: %s. Skipping', item.title)
+            else:
+                logger.debug('No lyrics found for track: %s', item.title)
 
 def renameFiles(albumpath, downloaded_track_list, release):
     logger.info('Renaming files')
