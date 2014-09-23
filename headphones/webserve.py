@@ -37,7 +37,7 @@ try:
     from collections import OrderedDict
 except ImportError:
     # Python 2.6.x fallback, from libs
-    import OrderedDict
+    from ordereddict import OrderedDict
 
 def serve_template(templatename, **kwargs):
 
