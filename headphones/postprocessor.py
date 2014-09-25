@@ -358,18 +358,29 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         try:
             media_file = MediaFile(downloaded_track)
         except (FileTypeError, UnreadableFileError):
-            logger.error("Track file is not a valid media file: %s. Not continuing.", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+            logger.error("Track file is not a valid media file: %s. Not " \
+                "continuing.", downloaded_track.decode(
+                    headphones.SYS_ENCODING, "replace"))
+            return
+        except IOError:
+            logger.error("Unable to find media file: %s. Not continuing.")
             return
 
-        # Not sure if line(s) below are needed, since it is possible to not
-        # touch any files.
+        # If one of the options below is set, it will access/touch/modify the
+        # files, which requires write permissions. This step just check this, so
+        # it will not try and fail lateron, with strange exceptions.
         if headphones.EMBED_ALBUM_ART or headphones.CLEANUP_FILES or \
            headphones.ADD_ALBUM_ART or headphones.CORRECT_METADATA or \
            headphones.EMBED_LYRICS or headphones.RENAME_FILES or \
            headphones.MOVE_FILES:
 
-            if not os.access(downloaded_track, os.W_OK):
-                logger.error("Track file is not writeable, which is required for some post processing steps: %s", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
+            try:
+                with open(downloaded_track, "a+b"):
+                    pass
+            except IOError as e:
+                logger.error("Track file is not writeable. This is required " \
+                    "for some post processing steps: %s. Not continuing.",
+                    downloaded_track.decode(headphones.SYS_ENCODING, "replace"))
                 return
 
     #start encoding
