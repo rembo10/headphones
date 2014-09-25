@@ -637,7 +637,7 @@ def moveFiles(albumpath, release, tracks):
         sortname = release['ArtistName']
 
     if sortname[0].isdigit():
-        firstchar = '0-9'
+        firstchar = u'0-9'
     else:
         firstchar = sortname[0]
 
