@@ -41,7 +41,7 @@ except ImportError:
 
 class GROWL(object):
     """
-    Growl notifications, for OS X
+    Growl notifications, for OS X.
     """
 
     def __init__(self):
@@ -84,14 +84,18 @@ class GROWL(object):
         try:
             growl.register()
         except gntp.notifier.errors.NetworkError:
-            logger.info(u'Growl notification failed: network error')
+            logger.warning(u'Growl notification failed: network error')
             return
         except gntp.notifier.errors.AuthError:
-            logger.info(u'Growl notification failed: authentication error')
+            logger.warning(u'Growl notification failed: authentication error')
             return
 
+        # Fix message
+        message = message.encode(headphones.SYS_ENCODING, "replace")
+
         # Send it, including an image
-        image_file = os.path.join(str(headphones.PROG_DIR), 'data/images/headphoneslogo.png')
+        image_file = os.path.join(str(headphones.PROG_DIR),
+            "data/images/headphoneslogo.png")
 
         with open(image_file, 'rb') as f:
             image = f.read()
@@ -104,7 +108,7 @@ class GROWL(object):
                 icon=image
             )
         except gntp.notifier.errors.NetworkError:
-            logger.info(u'Growl notification failed: network error')
+            logger.warning(u'Growl notification failed: network error')
             return
 
         logger.info(u"Growl notifications sent.")
