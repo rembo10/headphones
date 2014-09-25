@@ -105,7 +105,10 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                 try:
                     f = MediaFile(song)
                 except (FileTypeError, UnreadableFileError):
-                    logger.error("Cannot read file media file '%s'. It may be corrupted or not a media file.", unicode_song_path)
+                    logger.warning("Cannot read media file '%s', skipping. It may be corrupted or not a media file.", unicode_song_path)
+                    continue
+                except IOError as e:
+                    logger.warning("Cannnot read media file '%s', skipping. Does the file exists?", unicode_song_path)
                     continue
 
                 # Grab the bitrates for the auto detect bit rate option
