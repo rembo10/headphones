@@ -664,14 +664,21 @@ def addReleaseById(rid, rgid=None):
             myDB.upsert("tracks", newValueDict, controlValueDict)
 
         # Reset status
+        wanted = True
         if status == 'Loading':
             controlValueDict = {"AlbumID":  rgid}
-            newValueDict = {"Status":   "Wanted"}
+            if artistid not in blacklisted_special_artists:
+                newValueDict = {"Status":   "Wanted"}
+            else:
+                newValueDict = {"Status":   "Skipped"}
+                wanted = False
             myDB.upsert("albums", newValueDict, controlValueDict)
 
         # Start a search for the album
-        import searcher
-        searcher.searchforalbum(rgid, False)
+        if wanted:
+            import searcher
+            searcher.searchforalbum(rgid, False)
+
     elif not rg_exists and not release_dict:
         logger.error("ReleaseGroup does not exist in the database and did not get a valid response from MB. Skipping release.")
         if status == 'Loading':

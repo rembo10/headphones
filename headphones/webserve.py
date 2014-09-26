@@ -221,6 +221,7 @@ class WebInterface(object):
         rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM albums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
         for rgid in rgids:
             myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+            myDB.action('DELETE from have WHERE Matched=?', [rgid['ReleaseGroupID']])
 
         myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
         myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
@@ -228,10 +229,11 @@ class WebInterface(object):
         rgids = myDB.select('SELECT DISTINCT ReleaseGroupID FROM allalbums JOIN releases ON AlbumID = ReleaseGroupID WHERE ArtistID=?', [ArtistID])
         for rgid in rgids:
             myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [rgid['ReleaseGroupID']])
+            myDB.action('DELETE from have WHERE Matched=?', [rgid['ReleaseGroupID']])
 
         myDB.action('DELETE from allalbums WHERE ArtistID=?', [ArtistID])
         myDB.action('DELETE from alltracks WHERE ArtistID=?', [ArtistID])
-        myDB.action('UPDATE have SET Matched=NULL WHERE ArtistName=?', [artistname])
+        myDB.action('DELETE from have WHERE ArtistName=?', [artistname])
         myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
         raise cherrypy.HTTPRedirect("home")
     deleteArtist.exposed = True
