@@ -1065,6 +1065,7 @@ class WebInterface(object):
                     "include_extras" : checked(headphones.INCLUDE_EXTRAS),
                     "autowant_upcoming" : checked(headphones.AUTOWANT_UPCOMING),
                     "autowant_all" : checked(headphones.AUTOWANT_ALL),
+                    "autowant_manually_added" : checked(headphones.AUTOWANT_MANUALLY_ADDED),
                     "keep_torrent_files" : checked(headphones.KEEP_TORRENT_FILES),
                     "prefer_torrents_0" : radio(headphones.PREFER_TORRENTS, 0),
                     "prefer_torrents_1" : radio(headphones.PREFER_TORRENTS, 1),
@@ -1187,7 +1188,7 @@ class WebInterface(object):
         numberofseeders=None, use_piratebay=0, piratebay_proxy_url=None, piratebay_ratio=None, use_kat=0, kat_proxy_url=None, kat_ratio=None, use_mininova=0, mininova_ratio=None, waffles=0, waffles_uid=None, waffles_passkey=None, waffles_ratio=None, whatcd=0, whatcd_username=None, whatcd_password=None, whatcd_ratio=None,
         rutracker=0, rutracker_user=None, rutracker_password=None, rutracker_ratio=None, rename_files=0, correct_metadata=0, cleanup_files=0, keep_nfo=0, add_album_art=0, album_art_format=None, embed_album_art=0, embed_lyrics=0, replace_existing_folders=False,
         destination_dir=None, lossless_destination_dir=None, folder_format=None, file_format=None, file_underscores=0, include_extras=0, single=0, ep=0, compilation=0, soundtrack=0, live=0, remix=0, spokenword=0, audiobook=0, other=0, djmix=0, mixtape_street=0, broadcast=0, interview=0, demo=0,
-        autowant_upcoming=False, autowant_all=False, keep_torrent_files=False, prefer_torrents=0, open_magnet_links=0, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
+        autowant_upcoming=False, autowant_all=False, autowant_manually_added=False, keep_torrent_files=False, prefer_torrents=0, open_magnet_links=0, interface=None, log_dir=None, cache_dir=None, music_encoder=0, encoder=None, xldprofile=None,
         bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0, subsonic_enabled=False, subsonic_host=None, subsonic_username=None, subsonic_password=None,
         delete_lossless_files=0, growl_enabled=0, growl_onsnatch=0, growl_host=None, growl_password=None, prowl_enabled=0, prowl_onsnatch=0, prowl_keys=None, prowl_priority=0, xbmc_enabled=0, xbmc_host=None, xbmc_username=None, xbmc_password=None,
         xbmc_update=0, xbmc_notify=0, nma_enabled=False, nma_apikey=None, nma_priority=0, nma_onsnatch=0, pushalot_enabled=False, pushalot_apikey=None, pushalot_onsnatch=0, synoindex_enabled=False, lms_enabled=0, lms_host=None,
@@ -1298,6 +1299,7 @@ class WebInterface(object):
         headphones.INCLUDE_EXTRAS = include_extras
         headphones.AUTOWANT_UPCOMING = autowant_upcoming
         headphones.AUTOWANT_ALL = autowant_all
+        headphones.AUTOWANT_MANUALLY_ADDED = autowant_manually_added
         headphones.KEEP_TORRENT_FILES = keep_torrent_files
         headphones.PREFER_TORRENTS = int(prefer_torrents)
         headphones.OPEN_MAGNET_LINKS = open_magnet_links

@@ -664,18 +664,16 @@ def addReleaseById(rid, rgid=None):
             myDB.upsert("tracks", newValueDict, controlValueDict)
 
         # Reset status
-        wanted = True
         if status == 'Loading':
             controlValueDict = {"AlbumID":  rgid}
-            if artistid not in blacklisted_special_artists:
+            if headphones.AUTOWANT_MANUALLY_ADDED:
                 newValueDict = {"Status":   "Wanted"}
             else:
                 newValueDict = {"Status":   "Skipped"}
-                wanted = False
             myDB.upsert("albums", newValueDict, controlValueDict)
 
         # Start a search for the album
-        if wanted:
+        if headphones.AUTOWANT_MANUALLY_ADDED:
             import searcher
             searcher.searchforalbum(rgid, False)
 
