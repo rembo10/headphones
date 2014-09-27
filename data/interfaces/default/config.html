@@ -1278,6 +1278,11 @@
                                 <div class="row left checkbox">
                                     <input type="checkbox" name="autowant_all" value="1" ${config['autowant_all']} /><label>Automatically mark all albums as wanted</label>
                                 </div>
+                                <div class="row left checkbox">
+                                    <input type="checkbox" title="Automatically mark manually added albums from search results as wanted"
+                                           name="autowant_manually_added" value="1" ${config['autowant_manually_added']} />
+                                    <label>Automatically mark manually added albums as wanted</label>
+                                </div>
                                 <div class="row">
                                     <label>Folder Permissions:</label>
                                     <input type="text" name="folder_permissions" value="${config['folder_permissions']}" size="7">
