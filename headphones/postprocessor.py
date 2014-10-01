@@ -629,10 +629,11 @@ def renameNFO(albumpath):
                     logger.error(u'Could not rename file: %s. Error: %s' % (os.path.join(r, file).decode(headphones.SYS_ENCODING, 'replace'), e))
 
 def moveFiles(albumpath, release, tracks):
+    logger.info("Moving files: %s" % albumpath)
     try:
         year = release['ReleaseDate'][:4]
     except TypeError:
-        year = ''
+        year = u''
 
     artist = release['ArtistName'].replace('/', '_')
     album = release['AlbumTitle'].replace('/', '_')
