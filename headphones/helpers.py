@@ -177,10 +177,13 @@ def replace_all(text, dic, normalize=False):
 
     for i, j in dic.iteritems():
         if normalize:
-            if sys.platform == 'darwin':
-                j = unicodedata.normalize('NFD', j)
-            else:
-                j = unicodedata.normalize('NFC', j)
+            try:
+                if sys.platform == 'darwin':
+                    j = unicodedata.normalize('NFD', j)
+                else:
+                    j = unicodedata.normalize('NFC', j)
+            except TypeError:
+                j = unicodedata.normalize('NFC', j.decode(headphones.SYS_ENCODING, 'replace'))
         text = text.replace(i, j)
     return text
 
