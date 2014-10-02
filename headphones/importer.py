@@ -647,10 +647,10 @@ def addReleaseById(rid, rgid=None):
                         "CleanName":        cleanname
                         }
 
-            match = myDB.action('SELECT Location, BitRate, Format from have WHERE CleanName=?', [cleanname]).fetchone()
+            match = myDB.action('SELECT Location, BitRate, Format, Matched from have WHERE CleanName=?', [cleanname]).fetchone()
 
             if not match:
-                match = myDB.action('SELECT Location, BitRate, Format from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [release_dict['artist_name'], release_dict['rg_title'], track['title']]).fetchone()
+                match = myDB.action('SELECT Location, BitRate, Format, Matched from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [release_dict['artist_name'], release_dict['rg_title'], track['title']]).fetchone()
 
             #if not match:
                 #match = myDB.action('SELECT Location, BitRate, Format from have WHERE TrackID=?', [track['id']]).fetchone()
@@ -660,6 +660,10 @@ def addReleaseById(rid, rgid=None):
                 newValueDict['BitRate'] = match['BitRate']
                 newValueDict['Format'] = match['Format']
                 #myDB.action('DELETE from have WHERE Location=?', [match['Location']])
+
+                # If the album has been scanned before adding the release it will be unmatched, update to matched
+                if match['Matched'] == 'Failed':
+                    myDB.action('UPDATE have SET Matched=? WHERE Location=?', (release_dict['rgid'], match['Location']))
 
             myDB.upsert("tracks", newValueDict, controlValueDict)
 
