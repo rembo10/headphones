@@ -37,19 +37,19 @@ def sendNZB(nzb):
     addToTop = False
     nzbgetXMLrpc = "%(username)s:%(password)s@%(host)s/xmlrpc"
 
-    if headphones.NZBGET_HOST == None:
+    if headphones.CFG.NZBGET_HOST == None:
         logger.error(u"No NZBget host found in configuration. Please configure it.")
         return False
 
-    if headphones.NZBGET_HOST.startswith('https://'):
+    if headphones.CFG.NZBGET_HOST.startswith('https://'):
         nzbgetXMLrpc = 'https://' + nzbgetXMLrpc
-        headphones.NZBGET_HOST.replace('https://','',1)
+        headphones.CFG.NZBGET_HOST.replace('https://','',1)
     else:
         nzbgetXMLrpc = 'http://' + nzbgetXMLrpc
-        headphones.NZBGET_HOST.replace('http://','',1)
+        headphones.CFG.NZBGET_HOST.replace('http://','',1)
 
 
-    url = nzbgetXMLrpc % {"host": headphones.NZBGET_HOST, "username": headphones.NZBGET_USERNAME, "password": headphones.NZBGET_PASSWORD}
+    url = nzbgetXMLrpc % {"host": headphones.CFG.NZBGET_HOST, "username": headphones.CFG.NZBGET_USERNAME, "password": headphones.CFG.NZBGET_PASSWORD}
 
     nzbGetRPC = xmlrpclib.ServerProxy(url)
     try:
@@ -86,7 +86,7 @@ def sendNZB(nzb):
         nzbget_version = int(nzbget_version_str[:nzbget_version_str.find(".")])
         if nzbget_version == 0:
             if nzbcontent64 is not None:
-                nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.NZBGET_CATEGORY, addToTop, nzbcontent64)
+                nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.CFG.NZBGET_CATEGORY, addToTop, nzbcontent64)
             else:
                 if nzb.resultType == "nzb":
                     genProvider = GenericProvider("")
@@ -94,27 +94,27 @@ def sendNZB(nzb):
                     if (data == None):
                         return False
                     nzbcontent64 = standard_b64encode(data)
-                nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.NZBGET_CATEGORY, addToTop, nzbcontent64)
+                nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.CFG.NZBGET_CATEGORY, addToTop, nzbcontent64)
         elif nzbget_version == 12:
             if nzbcontent64 is not None:
-                nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.NZBGET_CATEGORY, headphones.NZBGET_PRIORITY, False,
+                nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.CFG.NZBGET_CATEGORY, headphones.CFG.NZBGET_PRIORITY, False,
                                                  nzbcontent64, False, dupekey, dupescore, "score")
             else:
-                nzbget_result = nzbGetRPC.appendurl(nzb.name + ".nzb", headphones.NZBGET_CATEGORY, headphones.NZBGET_PRIORITY, False,
+                nzbget_result = nzbGetRPC.appendurl(nzb.name + ".nzb", headphones.CFG.NZBGET_CATEGORY, headphones.CFG.NZBGET_PRIORITY, False,
                                                     nzb.url, False, dupekey, dupescore, "score")
         # v13+ has a new combined append method that accepts both (url and content)
         # also the return value has changed from boolean to integer
         # (Positive number representing NZBID of the queue item. 0 and negative numbers represent error codes.)
         elif nzbget_version >= 13:
             nzbget_result = True if nzbGetRPC.append(nzb.name + ".nzb", nzbcontent64 if nzbcontent64 is not None else nzb.url,
-                                                     headphones.NZBGET_CATEGORY, headphones.NZBGET_PRIORITY, False, False, dupekey, dupescore,
+                                                     headphones.CFG.NZBGET_CATEGORY, headphones.CFG.NZBGET_PRIORITY, False, False, dupekey, dupescore,
                                                      "score") > 0 else False
         else:
             if nzbcontent64 is not None:
-                nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.NZBGET_CATEGORY, headphones.NZBGET_PRIORITY, False,
+                nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.CFG.NZBGET_CATEGORY, headphones.CFG.NZBGET_PRIORITY, False,
                                                  nzbcontent64)
             else:
-                nzbget_result = nzbGetRPC.appendurl(nzb.name + ".nzb", headphones.NZBGET_CATEGORY, headphones.NZBGET_PRIORITY, False,
+                nzbget_result = nzbGetRPC.appendurl(nzb.name + ".nzb", headphones.CFG.NZBGET_CATEGORY, headphones.CFG.NZBGET_PRIORITY, False,
                                                     nzb.url)
 
         if nzbget_result:

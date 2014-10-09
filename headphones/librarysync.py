@@ -25,14 +25,14 @@ from headphones import db, logger, helpers, importer, lastfm
 def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=False):
 
 
-    if cron and not headphones.LIBRARYSCAN:
+    if cron and not headphones.CFG.LIBRARYSCAN:
         return
 
     if not dir:
-        if not headphones.MUSIC_DIR:
+        if not headphones.CFG.MUSIC_DIR:
             return
         else:
-            dir = headphones.MUSIC_DIR
+            dir = headphones.CFG.MUSIC_DIR
 
     # If we're appending a dir, it's coming from the post processor which is
     # already bytestring
@@ -203,7 +203,6 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         elif latest_artist[song_count] != latest_artist[song_count-1] and song_count !=0:
             logger.info("Now matching songs by %s" % song['ArtistName'])
 
-        #print song['ArtistName']+' - '+song['AlbumTitle']+' - '+song['TrackTitle']
         song_count += 1
         completion_percentage = float(song_count)/total_number_of_songs * 100
 
@@ -317,7 +316,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         logger.info('Found %i new artists' % len(artist_list))
 
         if len(artist_list):
-            if headphones.ADD_ARTISTS:
+            if headphones.CFG.AUTO_ADD_ARTISTS:
                 logger.info('Importing %i new artists' % len(artist_list))
                 importer.artistlist_to_mbids(artist_list)
             else:
@@ -326,8 +325,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                 for artist in artist_list:
                     myDB.action('INSERT OR IGNORE INTO newartists VALUES (?)', [artist])
 
-        if headphones.DETECT_BITRATE:
-            headphones.PREFERRED_BITRATE = sum(bitrates)/len(bitrates)/1000
+        if headphones.CFG.DETECT_BITRATE:
+            headphones.CFG.PREFERRED_BITRATE = sum(bitrates)/len(bitrates)/1000
 
     else:
         # If we're appending a new album to the database, update the artists total track counts
@@ -363,7 +362,7 @@ def update_album_status(AlbumID=None):
             album_completion = 0
             logger.info('Album %s does not have any tracks in database' % album['AlbumTitle'])
 
-        if album_completion >= headphones.ALBUM_COMPLETION_PCT and album['Status'] == 'Skipped':
+        if album_completion >= headphones.CFG.ALBUM_COMPLETION_PCT and album['Status'] == 'Skipped':
             new_album_status = "Downloaded"
 
         # I don't think we want to change Downloaded->Skipped.....

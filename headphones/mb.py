@@ -37,19 +37,19 @@ def startmb():
     mbuser = None
     mbpass = None
 
-    if headphones.MIRROR == "musicbrainz.org":
+    if headphones.CFG.MIRROR == "musicbrainz.org":
         mbhost = "musicbrainz.org"
         mbport = 80
         sleepytime = 1
-    elif headphones.MIRROR == "custom":
-        mbhost = headphones.CUSTOMHOST
-        mbport = int(headphones.CUSTOMPORT)
-        sleepytime = int(headphones.CUSTOMSLEEP)
-    elif headphones.MIRROR == "headphones":
+    elif headphones.CFG.MIRROR == "custom":
+        mbhost = headphones.CFG.CUSTOMHOST
+        mbport = int(headphones.CFG.CUSTOMPORT)
+        sleepytime = int(headphones.CFG.CUSTOMSLEEP)
+    elif headphones.CFG.MIRROR == "headphones":
         mbhost = "144.76.94.239"
         mbport = 8181
-        mbuser = headphones.HPUSER
-        mbpass = headphones.HPPASS
+        mbuser = headphones.CFG.HPUSER
+        mbpass = headphones.CFG.HPPASS
         sleepytime = 0
     else:
         return False
@@ -63,7 +63,7 @@ def startmb():
         musicbrainzngs.set_rate_limit(limit_or_interval=float(sleepytime))
 
     # Add headphones credentials
-    if headphones.MIRROR == "headphones":
+    if headphones.CFG.MIRROR == "headphones":
         if not mbuser and mbpass:
             logger.warn("No username or password set for VIP server")
         else:
@@ -278,7 +278,7 @@ def getArtist(artistid, extrasonly=False):
                 extras = map(int, db_artist['Extras'].split(','))
             else:
                 extras = []
-            extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other", "dj-mix", "mixtape/street", "broadcast", "interview", "demo"]
+            extras_list = headphones.POSSIBLE_EXTRAS
 
             includes = []
 
@@ -558,8 +558,6 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
 
                 myDB.upsert("alltracks", newValueDict, controlValueDict)
             num_new_releases = num_new_releases + 1
-            #print releasedata['title']
-            #print num_new_releases
             if album_checker:
                 logger.info('[%s] Existing release %s (%s) updated' % (release['ArtistName'], release['AlbumTitle'], rel_id_check))
             else:

@@ -44,9 +44,9 @@ def checkFolder():
             if album['FolderName']:
 
                 if album['Kind'] == 'nzb':
-                    download_dir = headphones.DOWNLOAD_DIR
+                    download_dir = headphones.CFG.DOWNLOAD_DIR
                 else:
-                    download_dir = headphones.DOWNLOAD_TORRENT_DIR
+                    download_dir = headphones.CFG.DOWNLOAD_TORRENT_DIR
 
                 album_path = os.path.join(download_dir, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
                 logger.info("Checking if %s exists" % album_path)
@@ -90,7 +90,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
         # frozen during post processing, new artists will not be processed. This
         # prevents new artists from appearing suddenly. In case forced is True,
         # this check is skipped, since it is assumed the user wants this.
-        if headphones.FREEZE_DB and not forced:
+        if headphones.CFG.FREEZE_DB and not forced:
             artist = myDB.select("SELECT ArtistName, ArtistID FROM artists WHERE ArtistId=? OR ArtistName=?", [release_dict['artist_id'], release_dict['artist_name']])
 
             if not artist:
@@ -115,9 +115,9 @@ def verify(albumid, albumpath, Kind=None, forced=False):
 
         logger.info("ArtistID: " + release_dict['artist_id'] + " , ArtistName: " + release_dict['artist_name'])
 
-        if headphones.INCLUDE_EXTRAS:
+        if headphones.CFG.INCLUDE_EXTRAS:
             newValueDict['IncludeExtras'] = 1
-            newValueDict['Extras'] = headphones.EXTRAS
+            newValueDict['Extras'] = headphones.CFG.EXTRAS
 
         myDB.upsert("artists", newValueDict, controlValueDict)
 
@@ -181,16 +181,16 @@ def verify(albumid, albumpath, Kind=None, forced=False):
 
     # use xld to split cue
 
-    if headphones.ENCODER == 'xld' and headphones.MUSIC_ENCODER and downloaded_cuecount and downloaded_cuecount >= len(downloaded_track_list):
+    if headphones.CFG.ENCODER == 'xld' and headphones.CFG.MUSIC_ENCODER and downloaded_cuecount and downloaded_cuecount >= len(downloaded_track_list):
 
         import getXldProfile
 
-        (xldProfile, xldFormat, xldBitrate) = getXldProfile.getXldProfile(headphones.XLDPROFILE)
+        (xldProfile, xldFormat, xldBitrate) = getXldProfile.getXldProfile(headphones.CFG.XLDPROFILE)
         if not xldFormat:
             logger.info(u'Details for xld profile "%s" not found, cannot split cue' % (xldProfile))
         else:
-            if headphones.ENCODERFOLDER:
-                xldencoder = os.path.join(headphones.ENCODERFOLDER, 'xld')
+            if headphones.CFG.ENCODERFOLDER:
+                xldencoder = os.path.join(headphones.CFG.ENCODERFOLDER, 'xld')
             else:
                 xldencoder = os.path.join('/Applications','xld')
 
@@ -328,7 +328,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
 
     logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
     # Check to see if we're preserving the torrent dir
-    if headphones.KEEP_TORRENT_FILES and Kind=="torrent":
+    if headphones.CFG.KEEP_TORRENT_FILES and Kind=="torrent":
         new_folder = os.path.join(albumpath, 'headphones-modified'.encode(headphones.SYS_ENCODING, 'replace'))
         logger.info("Copying files to 'headphones-modified' subfolder to preserve downloaded files for seeding")
         try:
@@ -369,10 +369,10 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         # If one of the options below is set, it will access/touch/modify the
         # files, which requires write permissions. This step just check this, so
         # it will not try and fail lateron, with strange exceptions.
-        if headphones.EMBED_ALBUM_ART or headphones.CLEANUP_FILES or \
-           headphones.ADD_ALBUM_ART or headphones.CORRECT_METADATA or \
-           headphones.EMBED_LYRICS or headphones.RENAME_FILES or \
-           headphones.MOVE_FILES:
+        if headphones.CFG.EMBED_ALBUM_ART or headphones.CFG.CLEANUP_FILES or \
+           headphones.CFG.ADD_ALBUM_ART or headphones.CFG.CORRECT_METADATA or \
+           headphones.CFG.EMBED_LYRICS or headphones.CFG.RENAME_FILES or \
+           headphones.CFG.MOVE_FILES:
 
             try:
                 with open(downloaded_track, "a+b"):
@@ -384,7 +384,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                 return
 
     #start encoding
-    if headphones.MUSIC_ENCODER:
+    if headphones.CFG.MUSIC_ENCODER:
         downloaded_track_list=music_encoder.encode(albumpath)
 
         if not downloaded_track_list:
@@ -392,7 +392,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
 
     artwork = None
     album_art_path = albumart.getAlbumArt(albumid)
-    if headphones.EMBED_ALBUM_ART or headphones.ADD_ALBUM_ART:
+    if headphones.CFG.EMBED_ALBUM_ART or headphones.CFG.ADD_ALBUM_ART:
 
         if album_art_path:
             artwork = request.request_content(album_art_path)
@@ -406,31 +406,31 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                 artwork = False
                 logger.info("No suitable album art found from Last.FM. Not adding album art")
 
-    if headphones.EMBED_ALBUM_ART and artwork:
+    if headphones.CFG.EMBED_ALBUM_ART and artwork:
         embedAlbumArt(artwork, downloaded_track_list)
 
-    if headphones.CLEANUP_FILES:
+    if headphones.CFG.CLEANUP_FILES:
         cleanupFiles(albumpath)
 
-    if headphones.KEEP_NFO:
+    if headphones.CFG.KEEP_NFO:
         renameNFO(albumpath)
 
-    if headphones.ADD_ALBUM_ART and artwork:
+    if headphones.CFG.ADD_ALBUM_ART and artwork:
         addAlbumArt(artwork, albumpath, release)
 
-    if headphones.CORRECT_METADATA:
+    if headphones.CFG.CORRECT_METADATA:
         correctMetadata(albumid, release, downloaded_track_list)
 
-    if headphones.EMBED_LYRICS:
+    if headphones.CFG.EMBED_LYRICS:
         embedLyrics(downloaded_track_list)
 
-    if headphones.RENAME_FILES:
+    if headphones.CFG.RENAME_FILES:
         renameFiles(albumpath, downloaded_track_list, release)
 
-    if headphones.MOVE_FILES and not headphones.DESTINATION_DIR:
+    if headphones.CFG.MOVE_FILES and not headphones.CFG.DESTINATION_DIR:
         logger.error('No DESTINATION_DIR has been set. Set "Destination Directory" to the parent directory you want to move the files to')
         albumpaths = [albumpath]
-    elif headphones.MOVE_FILES and headphones.DESTINATION_DIR:
+    elif headphones.CFG.MOVE_FILES and headphones.CFG.DESTINATION_DIR:
         albumpaths = moveFiles(albumpath, release, tracks)
     else:
         albumpaths = [albumpath]
@@ -442,13 +442,13 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     myDB.action('UPDATE snatched SET status = "Processed" WHERE Status NOT LIKE "Seed%" and AlbumID=?', [albumid])
 
     # Check if torrent has finished seeding
-    if headphones.TORRENT_DOWNLOADER == 1 or headphones.TORRENT_DOWNLOADER == 2:
+    if headphones.CFG.TORRENT_DOWNLOADER == 1 or headphones.CFG.TORRENT_DOWNLOADER == 2:
         seed_snatched = myDB.action('SELECT * from snatched WHERE Status="Seed_Snatched" and AlbumID=?', [albumid]).fetchone()
         if seed_snatched:
             hash = seed_snatched['FolderName']
             torrent_removed = False
             logger.info(u'%s - %s. Checking if torrent has finished seeding and can be removed' % (release['ArtistName'], release['AlbumTitle']))
-            if headphones.TORRENT_DOWNLOADER == 1:
+            if headphones.CFG.TORRENT_DOWNLOADER == 1:
                 torrent_removed = transmission.removeTorrent(hash, True)
             else:
                 torrent_removed = utorrent.removeTorrent(hash, True)
@@ -468,86 +468,86 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
     statusmessage = "Download and Postprocessing completed"
 
-    if headphones.GROWL_ENABLED:
+    if headphones.CFG.GROWL_ENABLED:
         logger.info(u"Growl request")
         growl = notifiers.GROWL()
         growl.notify(pushmessage, statusmessage)
 
-    if headphones.PROWL_ENABLED:
+    if headphones.CFG.PROWL_ENABLED:
         logger.info(u"Prowl request")
         prowl = notifiers.PROWL()
         prowl.notify(pushmessage, statusmessage)
 
-    if headphones.XBMC_ENABLED:
+    if headphones.CFG.XBMC_ENABLED:
         xbmc = notifiers.XBMC()
-        if headphones.XBMC_UPDATE:
+        if headphones.CFG.XBMC_UPDATE:
             xbmc.update()
-        if headphones.XBMC_NOTIFY:
+        if headphones.CFG.XBMC_NOTIFY:
             xbmc.notify(release['ArtistName'],
                         release['AlbumTitle'],
                         album_art_path)
 
-    if headphones.LMS_ENABLED:
+    if headphones.CFG.LMS_ENABLED:
         lms = notifiers.LMS()
         lms.update()
 
-    if headphones.PLEX_ENABLED:
+    if headphones.CFG.PLEX_ENABLED:
         plex = notifiers.Plex()
-        if headphones.PLEX_UPDATE:
+        if headphones.CFG.PLEX_UPDATE:
             plex.update()
-        if headphones.PLEX_NOTIFY:
+        if headphones.CFG.PLEX_NOTIFY:
             plex.notify(release['ArtistName'],
                         release['AlbumTitle'],
                         album_art_path)
 
-    if headphones.NMA_ENABLED:
+    if headphones.CFG.NMA_ENABLED:
         nma = notifiers.NMA()
         nma.notify(release['ArtistName'], release['AlbumTitle'])
 
-    if headphones.PUSHALOT_ENABLED:
+    if headphones.CFG.PUSHALOT_ENABLED:
         logger.info(u"Pushalot request")
         pushalot = notifiers.PUSHALOT()
         pushalot.notify(pushmessage, statusmessage)
 
-    if headphones.SYNOINDEX_ENABLED:
+    if headphones.CFG.SYNOINDEX_ENABLED:
         syno = notifiers.Synoindex()
         for albumpath in albumpaths:
             syno.notify(albumpath)
 
-    if headphones.PUSHOVER_ENABLED:
+    if headphones.CFG.PUSHOVER_ENABLED:
         logger.info(u"Pushover request")
         pushover = notifiers.PUSHOVER()
         pushover.notify(pushmessage, "Headphones")
 
-    if headphones.PUSHBULLET_ENABLED:
+    if headphones.CFG.PUSHBULLET_ENABLED:
         logger.info(u"PushBullet request")
         pushbullet = notifiers.PUSHBULLET()
         pushbullet.notify(pushmessage, "Download and Postprocessing completed")
 
-    if headphones.TWITTER_ENABLED:
+    if headphones.CFG.TWITTER_ENABLED:
         logger.info(u"Sending Twitter notification")
         twitter = notifiers.TwitterNotifier()
         twitter.notify_download(pushmessage)
 
-    if headphones.OSX_NOTIFY_ENABLED:
+    if headphones.CFG.OSX_NOTIFY_ENABLED:
         logger.info(u"Sending OS X notification")
         osx_notify = notifiers.OSX_NOTIFY()
         osx_notify.notify(release['ArtistName'],
                           release['AlbumTitle'],
                           statusmessage)
 
-    if headphones.BOXCAR_ENABLED:
+    if headphones.CFG.BOXCAR_ENABLED:
         logger.info(u"Sending Boxcar2 notification")
         boxcar = notifiers.BOXCAR()
         boxcar.notify('Headphones processed: ' + pushmessage,
                       statusmessage, release['AlbumID'])
 
-    if headphones.SUBSONIC_ENABLED:
+    if headphones.CFG.SUBSONIC_ENABLED:
         logger.info(u"Sending Subsonic update")
         subsonic = notifiers.SubSonicNotifier()
         subsonic.notify(albumpaths)
 
-    if headphones.MPC_ENABLED:
+    if headphones.CFG.MPC_ENABLED:
         mpc = notifiers.MPC()
         mpc.notify()
 
@@ -586,11 +586,11 @@ def addAlbumArt(artwork, albumpath, release):
                 '$year':        year
                 }
 
-    album_art_name = helpers.replace_all(headphones.ALBUM_ART_FORMAT.strip(), values) + ".jpg"
+    album_art_name = helpers.replace_all(headphones.CFG.ALBUM_ART_FORMAT.strip(), values) + ".jpg"
 
     album_art_name = helpers.replace_illegal_chars(album_art_name).encode(headphones.SYS_ENCODING, 'replace')
 
-    if headphones.FILE_UNDERSCORES:
+    if headphones.CFG.FILE_UNDERSCORES:
         album_art_name = album_art_name.replace(' ', '_')
 
     if album_art_name.startswith('.'):
@@ -637,7 +637,7 @@ def moveFiles(albumpath, release, tracks):
 
     artist = release['ArtistName'].replace('/', '_')
     album = release['AlbumTitle'].replace('/', '_')
-    if headphones.FILE_UNDERSCORES:
+    if headphones.CFG.FILE_UNDERSCORES:
         artist = artist.replace(' ', '_')
         album = album.replace(' ', '_')
 
@@ -675,7 +675,7 @@ def moveFiles(albumpath, release, tracks):
                 '$originalfolder': origfolder.lower()
             }
 
-    folder = helpers.replace_all(headphones.FOLDER_FORMAT.strip(), values, normalize=True)
+    folder = helpers.replace_all(headphones.CFG.FOLDER_FORMAT.strip(), values, normalize=True)
 
     folder = helpers.replace_illegal_chars(folder, type="folder")
     folder = folder.replace('./', '_/').replace('/.','/_')
@@ -704,11 +704,11 @@ def moveFiles(albumpath, release, tracks):
     make_lossy_folder = False
     make_lossless_folder = False
 
-    lossy_destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING, 'replace')
-    lossless_destination_path = os.path.normpath(os.path.join(headphones.LOSSLESS_DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING, 'replace')
+    lossy_destination_path = os.path.normpath(os.path.join(headphones.CFG.DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING, 'replace')
+    lossless_destination_path = os.path.normpath(os.path.join(headphones.CFG.LOSSLESS_DESTINATION_DIR, folder)).encode(headphones.SYS_ENCODING, 'replace')
 
     # If they set a destination dir for lossless media, only create the lossy folder if there is lossy media
-    if headphones.LOSSLESS_DESTINATION_DIR:
+    if headphones.CFG.LOSSLESS_DESTINATION_DIR:
         if lossy_media:
             make_lossy_folder = True
         if lossless_media:
@@ -717,7 +717,7 @@ def moveFiles(albumpath, release, tracks):
     else:
         make_lossy_folder = True
 
-    last_folder = headphones.FOLDER_FORMAT.strip().split('/')[-1]
+    last_folder = headphones.CFG.FOLDER_FORMAT.strip().split('/')[-1]
 
     if make_lossless_folder:
         # Only rename the folder if they use the album name, otherwise merge into existing folder
@@ -725,20 +725,20 @@ def moveFiles(albumpath, release, tracks):
 
             create_duplicate_folder = False
 
-            if headphones.REPLACE_EXISTING_FOLDERS:
+            if headphones.CFG.REPLACE_EXISTING_FOLDERS:
                 try:
                     shutil.rmtree(lossless_destination_path)
                 except Exception, e:
                     logger.error("Error deleting existing folder: %s. Creating duplicate folder. Error: %s" % (lossless_destination_path.decode(headphones.SYS_ENCODING, 'replace'), e))
                     create_duplicate_folder = True
 
-            if not headphones.REPLACE_EXISTING_FOLDERS or create_duplicate_folder:
+            if not headphones.CFG.REPLACE_EXISTING_FOLDERS or create_duplicate_folder:
                 temp_folder = folder
 
                 i = 1
                 while True:
                     newfolder = temp_folder + '[%i]' % i
-                    lossless_destination_path = os.path.normpath(os.path.join(headphones.LOSSLESS_DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING, 'replace')
+                    lossless_destination_path = os.path.normpath(os.path.join(headphones.CFG.LOSSLESS_DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING, 'replace')
                     if os.path.exists(lossless_destination_path):
                         i += 1
                     else:
@@ -758,20 +758,20 @@ def moveFiles(albumpath, release, tracks):
 
             create_duplicate_folder = False
 
-            if headphones.REPLACE_EXISTING_FOLDERS:
+            if headphones.CFG.REPLACE_EXISTING_FOLDERS:
                 try:
                     shutil.rmtree(lossy_destination_path)
                 except Exception, e:
                     logger.error("Error deleting existing folder: %s. Creating duplicate folder. Error: %s" % (lossy_destination_path.decode(headphones.SYS_ENCODING, 'replace'), e))
                     create_duplicate_folder = True
 
-            if not headphones.REPLACE_EXISTING_FOLDERS or create_duplicate_folder:
+            if not headphones.CFG.REPLACE_EXISTING_FOLDERS or create_duplicate_folder:
                 temp_folder = folder
 
                 i = 1
                 while True:
                     newfolder = temp_folder + '[%i]' % i
-                    lossy_destination_path = os.path.normpath(os.path.join(headphones.DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING, 'replace')
+                    lossy_destination_path = os.path.normpath(os.path.join(headphones.CFG.DESTINATION_DIR, newfolder)).encode(headphones.SYS_ENCODING, 'replace')
                     if os.path.exists(lossy_destination_path):
                         i += 1
                     else:
@@ -829,10 +829,10 @@ def moveFiles(albumpath, release, tracks):
     temp_fs = []
 
     if make_lossless_folder:
-        temp_fs.append(headphones.LOSSLESS_DESTINATION_DIR)
+        temp_fs.append(headphones.CFG.LOSSLESS_DESTINATION_DIR)
 
     if make_lossy_folder:
-        temp_fs.append(headphones.DESTINATION_DIR)
+        temp_fs.append(headphones.CFG.DESTINATION_DIR)
 
     for temp_f in temp_fs:
 
@@ -841,7 +841,7 @@ def moveFiles(albumpath, release, tracks):
             temp_f = os.path.join(temp_f, f)
 
             try:
-                os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING, 'replace'), int(headphones.FOLDER_PERMISSIONS, 8))
+                os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING, 'replace'), int(headphones.CFG.FOLDER_PERMISSIONS, 8))
             except Exception, e:
                 logger.error("Error trying to change permissions on folder: %s. %s", temp_f, e)
 
@@ -1024,12 +1024,12 @@ def renameFiles(albumpath, downloaded_track_list, release):
 
             ext = os.path.splitext(downloaded_track)[1]
 
-            new_file_name = helpers.replace_all(headphones.FILE_FORMAT.strip(), values).replace('/','_') + ext
+            new_file_name = helpers.replace_all(headphones.CFG.FILE_FORMAT.strip(), values).replace('/','_') + ext
 
 
         new_file_name = helpers.replace_illegal_chars(new_file_name).encode(headphones.SYS_ENCODING, 'replace')
 
-        if headphones.FILE_UNDERSCORES:
+        if headphones.CFG.FILE_UNDERSCORES:
             new_file_name = new_file_name.replace(' ', '_')
 
         if new_file_name.startswith('.'):
@@ -1056,7 +1056,7 @@ def updateFilePermissions(albumpaths):
             for files in f:
                 full_path = os.path.join(r, files)
                 try:
-                    os.chmod(full_path, int(headphones.FILE_PERMISSIONS, 8))
+                    os.chmod(full_path, int(headphones.CFG.FILE_PERMISSIONS, 8))
                 except:
                     logger.error("Could not change permissions for file: %s", full_path)
                     continue
@@ -1086,10 +1086,10 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
         download_dirs = []
         if dir:
             download_dirs.append(dir.encode(headphones.SYS_ENCODING, 'replace'))
-        if headphones.DOWNLOAD_DIR and not dir:
-            download_dirs.append(headphones.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING, 'replace'))
-        if headphones.DOWNLOAD_TORRENT_DIR and not dir:
-            download_dirs.append(headphones.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
+        if headphones.CFG.DOWNLOAD_DIR and not dir:
+            download_dirs.append(headphones.CFG.DOWNLOAD_DIR.encode(headphones.SYS_ENCODING, 'replace'))
+        if headphones.CFG.DOWNLOAD_TORRENT_DIR and not dir:
+            download_dirs.append(headphones.CFG.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
 
         # If DOWNLOAD_DIR and DOWNLOAD_TORRENT_DIR are the same, remove the duplicate to prevent us from trying to process the same folder twice.
         download_dirs = list(set(download_dirs))
@@ -1134,7 +1134,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
         snatched = myDB.action('SELECT AlbumID, Title, Kind, Status from snatched WHERE FolderName LIKE ?', [folder_basename]).fetchone()
 
         if snatched:
-            if headphones.KEEP_TORRENT_FILES and snatched['Kind'] == 'torrent' and snatched['Status'] == 'Processed':
+            if headphones.CFG.KEEP_TORRENT_FILES and snatched['Kind'] == 'torrent' and snatched['Status'] == 'Processed':
                 logger.info('%s is a torrent folder being preserved for seeding and has already been processed. Skipping.', folder_basename)
                 continue
             else:
