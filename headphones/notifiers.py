@@ -45,9 +45,9 @@ class GROWL(object):
     """
 
     def __init__(self):
-        self.enabled = headphones.GROWL_ENABLED
-        self.host = headphones.GROWL_HOST
-        self.password = headphones.GROWL_PASSWORD
+        self.enabled = headphones.CFG.GROWL_ENABLED
+        self.host = headphones.CFG.GROWL_HOST
+        self.password = headphones.CFG.GROWL_PASSWORD
 
     def conf(self, options):
         return cherrypy.config['config'].get('Growl', options)
@@ -130,24 +130,24 @@ class PROWL(object):
     """
 
     def __init__(self):
-        self.enabled = headphones.PROWL_ENABLED
-        self.keys = headphones.PROWL_KEYS
-        self.priority = headphones.PROWL_PRIORITY
+        self.enabled = headphones.CFG.PROWL_ENABLED
+        self.keys = headphones.CFG.PROWL_KEYS
+        self.priority = headphones.CFG.PROWL_PRIORITY
 
     def conf(self, options):
         return cherrypy.config['config'].get('Prowl', options)
 
     def notify(self, message, event):
-        if not headphones.PROWL_ENABLED:
+        if not headphones.CFG.PROWL_ENABLED:
             return
 
         http_handler = HTTPSConnection("api.prowlapp.com")
 
-        data = {'apikey': headphones.PROWL_KEYS,
+        data = {'apikey': headphones.CFG.PROWL_KEYS,
                 'application': 'Headphones',
                 'event': event,
                 'description': message.encode("utf-8"),
-                'priority': headphones.PROWL_PRIORITY }
+                'priority': headphones.CFG.PROWL_PRIORITY }
 
         http_handler.request("POST",
                                 "/publicapi/add",
@@ -197,9 +197,9 @@ class XBMC(object):
 
     def __init__(self):
 
-        self.hosts = headphones.XBMC_HOST
-        self.username = headphones.XBMC_USERNAME
-        self.password = headphones.XBMC_PASSWORD
+        self.hosts = headphones.CFG.XBMC_HOST
+        self.username = headphones.CFG.XBMC_USERNAME
+        self.password = headphones.CFG.XBMC_PASSWORD
 
     def _sendhttp(self, host, command):
         url_command = urllib.urlencode(command)
@@ -270,7 +270,7 @@ class LMS(object):
     """
 
     def __init__(self):
-        self.hosts = headphones.LMS_HOST
+        self.hosts = headphones.CFG.LMS_HOST
 
     def _sendjson(self, host):
         data = {'id': 1, 'method': 'slim.request', 'params': ["",["rescan"]]}
@@ -308,10 +308,10 @@ class LMS(object):
 class Plex(object):
     def __init__(self):
 
-        self.server_hosts = headphones.PLEX_SERVER_HOST
-        self.client_hosts = headphones.PLEX_CLIENT_HOST
-        self.username = headphones.PLEX_USERNAME
-        self.password = headphones.PLEX_PASSWORD
+        self.server_hosts = headphones.CFG.PLEX_SERVER_HOST
+        self.client_hosts = headphones.CFG.PLEX_CLIENT_HOST
+        self.username = headphones.CFG.PLEX_USERNAME
+        self.password = headphones.CFG.PLEX_PASSWORD
 
     def _sendhttp(self, host, command):
 
@@ -394,8 +394,8 @@ class Plex(object):
 class NMA(object):
     def notify(self, artist=None, album=None, snatched=None):
         title = 'Headphones'
-        api = headphones.NMA_APIKEY
-        nma_priority = headphones.NMA_PRIORITY
+        api = headphones.CFG.NMA_APIKEY
+        nma_priority = headphones.CFG.NMA_PRIORITY
 
         logger.debug(u"NMA title: " + title)
         logger.debug(u"NMA API: " + api)
@@ -430,19 +430,19 @@ class NMA(object):
 class PUSHBULLET(object):
 
     def __init__(self):
-        self.apikey = headphones.PUSHBULLET_APIKEY
-        self.deviceid = headphones.PUSHBULLET_DEVICEID
+        self.apikey = headphones.CFG.PUSHBULLET_APIKEY
+        self.deviceid = headphones.CFG.PUSHBULLET_DEVICEID
 
     def conf(self, options):
         return cherrypy.config['config'].get('PUSHBULLET', options)
 
     def notify(self, message, event):
-        if not headphones.PUSHBULLET_ENABLED:
+        if not headphones.CFG.PUSHBULLET_ENABLED:
             return
 
         http_handler = HTTPSConnection("api.pushbullet.com")
 
-        data = {'device_iden': headphones.PUSHBULLET_DEVICEID,
+        data = {'device_iden': headphones.CFG.PUSHBULLET_DEVICEID,
                 'type': "note",
                 'title': "Headphones",
                 'body': message.encode("utf-8") }
@@ -450,7 +450,7 @@ class PUSHBULLET(object):
         http_handler.request("POST",
                                 "/api/pushes",
                                 headers = {'Content-type': "application/x-www-form-urlencoded",
-                                            'Authorization' : 'Basic %s' % base64.b64encode(headphones.PUSHBULLET_APIKEY + ":") },
+                                            'Authorization' : 'Basic %s' % base64.b64encode(headphones.CFG.PUSHBULLET_APIKEY + ":") },
                                 body = urlencode(data))
         response = http_handler.getresponse()
         request_status = response.status
@@ -483,10 +483,10 @@ class PUSHBULLET(object):
 class PUSHALOT(object):
 
     def notify(self, message, event):
-        if not headphones.PUSHALOT_ENABLED:
+        if not headphones.CFG.PUSHALOT_ENABLED:
             return
 
-        pushalot_authorizationtoken = headphones.PUSHALOT_APIKEY
+        pushalot_authorizationtoken = headphones.CFG.PUSHALOT_APIKEY
 
         logger.debug(u"Pushalot event: " + event)
         logger.debug(u"Pushalot message: " + message)
@@ -558,12 +558,12 @@ class Synoindex(object):
 class PUSHOVER(object):
 
     def __init__(self):
-        self.enabled = headphones.PUSHOVER_ENABLED
-        self.keys = headphones.PUSHOVER_KEYS
-        self.priority = headphones.PUSHOVER_PRIORITY
+        self.enabled = headphones.CFG.PUSHOVER_ENABLED
+        self.keys = headphones.CFG.PUSHOVER_KEYS
+        self.priority = headphones.CFG.PUSHOVER_PRIORITY
 
-        if headphones.PUSHOVER_APITOKEN:
-            self.application_token = headphones.PUSHOVER_APITOKEN
+        if headphones.CFG.PUSHOVER_APITOKEN:
+            self.application_token = headphones.CFG.PUSHOVER_APITOKEN
         else:
             self.application_token = "LdPCoy0dqC21ktsbEyAVCcwvQiVlsz"
 
@@ -571,16 +571,16 @@ class PUSHOVER(object):
         return cherrypy.config['config'].get('Pushover', options)
 
     def notify(self, message, event):
-        if not headphones.PUSHOVER_ENABLED:
+        if not headphones.CFG.PUSHOVER_ENABLED:
             return
 
         http_handler = HTTPSConnection("api.pushover.net")
 
         data = {'token': self.application_token,
-                'user': headphones.PUSHOVER_KEYS,
+                'user': headphones.CFG.PUSHOVER_KEYS,
                 'title': event,
                 'message': message.encode("utf-8"),
-                'priority': headphones.PUSHOVER_PRIORITY }
+                'priority': headphones.CFG.PUSHOVER_PRIORITY }
 
         http_handler.request("POST",
                                 "/1/messages.json",
@@ -625,11 +625,11 @@ class TwitterNotifier(object):
         self.consumer_secret = "A4Xkw9i5SjHbTk7XT8zzOPqivhj9MmRDR9Qn95YA9sk"
 
     def notify_snatch(self, title):
-        if headphones.TWITTER_ONSNATCH:
+        if headphones.CFG.TWITTER_ONSNATCH:
             self._notifyTwitter(common.notifyStrings[common.NOTIFY_SNATCH]+': '+title+' at '+helpers.now())
 
     def notify_download(self, title):
-        if headphones.TWITTER_ENABLED:
+        if headphones.CFG.TWITTER_ENABLED:
             self._notifyTwitter(common.notifyStrings[common.NOTIFY_DOWNLOAD]+': '+title+' at '+helpers.now())
 
     def test_notify(self):
@@ -650,16 +650,16 @@ class TwitterNotifier(object):
         else:
             request_token = dict(parse_qsl(content))
 
-            headphones.TWITTER_USERNAME = request_token['oauth_token']
-            headphones.TWITTER_PASSWORD = request_token['oauth_token_secret']
+            headphones.CFG.TWITTER_USERNAME = request_token['oauth_token']
+            headphones.CFG.TWITTER_PASSWORD = request_token['oauth_token_secret']
 
             return self.AUTHORIZATION_URL+"?oauth_token="+ request_token['oauth_token']
 
     def _get_credentials(self, key):
         request_token = {}
 
-        request_token['oauth_token'] = headphones.TWITTER_USERNAME
-        request_token['oauth_token_secret'] = headphones.TWITTER_PASSWORD
+        request_token['oauth_token'] = headphones.CFG.TWITTER_USERNAME
+        request_token['oauth_token_secret'] = headphones.CFG.TWITTER_PASSWORD
         request_token['oauth_callback_confirmed'] = 'true'
 
         token = oauth.Token(request_token['oauth_token'], request_token['oauth_token_secret'])
@@ -685,8 +685,8 @@ class TwitterNotifier(object):
         else:
             logger.info('Your Twitter Access Token key: %s' % access_token['oauth_token'])
             logger.info('Access Token secret: %s' % access_token['oauth_token_secret'])
-            headphones.TWITTER_USERNAME = access_token['oauth_token']
-            headphones.TWITTER_PASSWORD = access_token['oauth_token_secret']
+            headphones.CFG.TWITTER_USERNAME = access_token['oauth_token']
+            headphones.CFG.TWITTER_PASSWORD = access_token['oauth_token_secret']
             return True
 
 
@@ -694,8 +694,8 @@ class TwitterNotifier(object):
 
         username=self.consumer_key
         password=self.consumer_secret
-        access_token_key=headphones.TWITTER_USERNAME
-        access_token_secret=headphones.TWITTER_PASSWORD
+        access_token_key=headphones.CFG.TWITTER_USERNAME
+        access_token_secret=headphones.CFG.TWITTER_PASSWORD
 
         logger.info(u"Sending tweet: "+message)
 
@@ -710,9 +710,9 @@ class TwitterNotifier(object):
         return True
 
     def _notifyTwitter(self, message='', force=False):
-        prefix = headphones.TWITTER_PREFIX
+        prefix = headphones.CFG.TWITTER_PREFIX
 
-        if not headphones.TWITTER_ENABLED and not force:
+        if not headphones.CFG.TWITTER_ENABLED and not force:
             return False
 
         return self._send_tweet(prefix+": "+message)
@@ -783,7 +783,7 @@ class BOXCAR(object):
                 message += '<br></br><a href="http://musicbrainz.org/release-group/%s">MusicBrainz</a>' % rgid
 
             data = urllib.urlencode({
-                'user_credentials': headphones.BOXCAR_TOKEN,
+                'user_credentials': headphones.CFG.BOXCAR_TOKEN,
                 'notification[title]': title.encode('utf-8'),
                 'notification[long_message]': message.encode('utf-8'),
                 'notification[sound]': "done"
@@ -801,9 +801,9 @@ class BOXCAR(object):
 class SubSonicNotifier(object):
 
     def __init__(self):
-        self.host = headphones.SUBSONIC_HOST
-        self.username = headphones.SUBSONIC_USERNAME
-        self.password = headphones.SUBSONIC_PASSWORD
+        self.host = headphones.CFG.SUBSONIC_HOST
+        self.username = headphones.CFG.SUBSONIC_USERNAME
+        self.password = headphones.CFG.SUBSONIC_PASSWORD
 
     def notify(self, albumpaths):
         # Correct URL

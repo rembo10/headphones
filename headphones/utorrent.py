@@ -28,7 +28,7 @@ class utorrentclient(object):
 
     def __init__(self, base_url = None, username = None, password = None,):
 
-        host = headphones.UTORRENT_HOST
+        host = headphones.CFG.UTORRENT_HOST
         if not host.startswith('http'):
             host = 'http://' + host
 
@@ -39,8 +39,8 @@ class utorrentclient(object):
             host = host[:-4]
 
         self.base_url = host
-        self.username = headphones.UTORRENT_USERNAME
-        self.password = headphones.UTORRENT_PASSWORD
+        self.username = headphones.CFG.UTORRENT_USERNAME
+        self.password = headphones.CFG.UTORRENT_PASSWORD
         self.opener = self._make_opener('uTorrent', self.base_url, self.username, self.password)
         self.token = self._get_token()
         #TODO refresh token, when necessary
@@ -157,7 +157,7 @@ class utorrentclient(object):
             logger.debug('uTorrent webUI raised the following error: ' + str(err))
 
 def labelTorrent(hash):
-    label = headphones.UTORRENT_LABEL
+    label = headphones.CFG.UTORRENT_LABEL
     uTorrentClient = utorrentclient()
     if label:
         uTorrentClient.setprops(hash,'label',label)

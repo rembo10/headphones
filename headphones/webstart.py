@@ -36,12 +36,12 @@ def initialize(options=None):
         if not (https_cert and os.path.exists(https_cert)) or not (https_key and os.path.exists(https_key)):
             if not create_https_certificates(https_cert, https_key):
                 logger.warn(u"Unable to create cert/key files, disabling HTTPS")
-                headphones.ENABLE_HTTPS = False
+                headphones.CFG.ENABLE_HTTPS = False
                 enable_https = False
 
         if not (os.path.exists(https_cert) and os.path.exists(https_key)):
             logger.warn(u"Disabled HTTPS because of missing CERT and KEY files")
-            headphones.ENABLE_HTTPS = False
+            headphones.CFG.ENABLE_HTTPS = False
             enable_https = False
 
     options_dict = {
@@ -94,7 +94,7 @@ def initialize(options=None):
         },
         '/cache':{
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': headphones.CACHE_DIR
+            'tools.staticdir.dir': headphones.CFG.CACHE_DIR
         }
     }
 
