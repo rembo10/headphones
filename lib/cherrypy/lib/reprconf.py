@@ -44,6 +44,7 @@ except ImportError:
 import operator as _operator
 import sys
 
+
 def as_dict(config):
     """Return a dict from 'config' whether it is a dict, file, or filename."""
     if isinstance(config, basestring):
@@ -54,6 +55,7 @@ def as_dict(config):
 
 
 class NamespaceSet(dict):
+
     """A dict of config namespace names and handlers.
 
     Each config entry should begin with a namespace name; the corresponding
@@ -129,6 +131,7 @@ class NamespaceSet(dict):
 
 
 class Config(dict):
+
     """A dict-like set of configuration data, with defaults and namespaces.
 
     May take a file, filename, or dict.
@@ -180,6 +183,7 @@ class Config(dict):
 
 
 class Parser(ConfigParser):
+
     """Sub-class of ConfigParser that keeps the case of options and that
     raises an exception if the file cannot be read.
     """
@@ -260,12 +264,30 @@ class _Builder2:
         return expr[subs]
 
     def build_CallFunc(self, o):
-        children = map(self.build, o.getChildren())
-        callee = children.pop(0)
-        kwargs = children.pop() or {}
-        starargs = children.pop() or ()
-        args = tuple(children) + tuple(starargs)
+        children = o.getChildren()
+        # Build callee from first child
+        callee = self.build(children[0])
+        # Build args and kwargs from remaining children
+        args = []
+        kwargs = {}
+        for child in children[1:]:
+            class_name = child.__class__.__name__
+            # None is ignored
+            if class_name == 'NoneType':
+                continue
+            # Keywords become kwargs
+            if class_name == 'Keyword':
+                kwargs.update(self.build(child))
+            # Everything else becomes args
+            else :
+                args.append(self.build(child))
         return callee(*args, **kwargs)
+
+    def build_Keyword(self, o):
+        key, value_obj = o.getChildren()
+        value = self.build(value_obj)
+        kw_dict = {key: value}
+        return kw_dict 
 
     def build_List(self, o):
         return map(self.build, o.getChildren())
@@ -415,6 +437,9 @@ class _Builder3:
 
         raise TypeError("unrepr could not resolve the name %s" % repr(name))
 
+    def build_NameConstant(self, o):
+        return o.value
+
     def build_UnaryOp(self, o):
         op, operand = map(self.build, [o.op, o.operand])
         return op(operand)
@@ -454,14 +479,9 @@ def unrepr(s):
 
 def modules(modulePath):
     """Load a module and retrieve a reference to that module."""
-    try:
-        mod = sys.modules[modulePath]
-        if mod is None:
-            raise KeyError()
-    except KeyError:
-        # The last [''] is important.
-        mod = __import__(modulePath, globals(), locals(), [''])
-    return mod
+    __import__(modulePath)
+    return sys.modules[modulePath]
+
 
 def attributes(full_attribute_name):
     """Load a module and retrieve an attribute of that module."""
@@ -481,5 +501,3 @@ def attributes(full_attribute_name):
 
     # Return a reference to the attribute.
     return attr
-
-

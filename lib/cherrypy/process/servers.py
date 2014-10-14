@@ -13,7 +13,9 @@ protocols, etc.), you can manually register each one and then start them all
 with engine.start::
 
     s1 = ServerAdapter(cherrypy.engine, MyWSGIServer(host='0.0.0.0', port=80))
-    s2 = ServerAdapter(cherrypy.engine, another.HTTPServer(host='127.0.0.1', SSL=True))
+    s2 = ServerAdapter(cherrypy.engine,
+                       another.HTTPServer(host='127.0.0.1',
+                       SSL=True))
     s1.subscribe()
     s2.subscribe()
     cherrypy.engine.start()
@@ -63,7 +65,7 @@ hello.py::
 
     cherrypy.tree.mount(HelloWorld())
     # CherryPy autoreload must be disabled for the flup server to work
-    cherrypy.config.update({'engine.autoreload_on':False})
+    cherrypy.config.update({'engine.autoreload.on':False})
 
 Then run :doc:`/deployguide/cherryd` with the '-f' arg::
 
@@ -107,15 +109,17 @@ directive, configure your fastcgi script like the following::
     } # end of $HTTP["url"] =~ "^/"
 
 Please see `Lighttpd FastCGI Docs
-<http://redmine.lighttpd.net/wiki/lighttpd/Docs:ModFastCGI>`_ for an explanation
-of the possible configuration options.
+<http://redmine.lighttpd.net/wiki/lighttpd/Docs:ModFastCGI>`_ for
+an explanation of the possible configuration options.
 """
 
 import sys
 import time
+import warnings
 
 
 class ServerAdapter(object):
+
     """Adapter for an HTTP server.
 
     If you need to start more than one HTTP server (to serve on multiple
@@ -149,8 +153,7 @@ class ServerAdapter(object):
         if self.bind_addr is None:
             on_what = "unknown interface (dynamic?)"
         elif isinstance(self.bind_addr, tuple):
-            host, port = self.bind_addr
-            on_what = "%s:%s" % (host, port)
+            on_what = self._get_base()
         else:
             on_what = "socket file: %s" % self.bind_addr
 
@@ -175,6 +178,21 @@ class ServerAdapter(object):
         self.running = True
         self.bus.log("Serving on %s" % on_what)
     start.priority = 75
+
+    def _get_base(self):
+        if not self.httpserver:
+            return ''
+        host, port = self.bind_addr
+        if getattr(self.httpserver, 'ssl_certificate', None):
+            scheme = "https"
+            if port != 443:
+                host += ":%s" % port
+        else:
+            scheme = "http"
+            if port != 80:
+                host += ":%s" % port
+
+        return "%s://%s" % (scheme, host)
 
     def _start_http_thread(self):
         """HTTP servers MUST be running in new threads, so that the
@@ -234,6 +252,7 @@ class ServerAdapter(object):
 
 
 class FlupCGIServer(object):
+
     """Adapter for a flup.server.cgi.WSGIServer."""
 
     def __init__(self, *args, **kwargs):
@@ -257,6 +276,7 @@ class FlupCGIServer(object):
 
 
 class FlupFCGIServer(object):
+
     """Adapter for a flup.server.fcgi.WSGIServer."""
 
     def __init__(self, *args, **kwargs):
@@ -296,11 +316,13 @@ class FlupFCGIServer(object):
         # Forcibly stop the fcgi server main event loop.
         self.fcgiserver._keepGoing = False
         # Force all worker threads to die off.
-        self.fcgiserver._threadPool.maxSpare = self.fcgiserver._threadPool._idleCount
+        self.fcgiserver._threadPool.maxSpare = (
+            self.fcgiserver._threadPool._idleCount)
         self.ready = False
 
 
 class FlupSCGIServer(object):
+
     """Adapter for a flup.server.scgi.WSGIServer."""
 
     def __init__(self, *args, **kwargs):
@@ -344,9 +366,11 @@ def client_host(server_host):
         return '127.0.0.1'
     if server_host in ('::', '::0', '::0.0.0.0'):
         # :: is IN6ADDR_ANY, which should answer on localhost.
-        # ::0 and ::0.0.0.0 are non-canonical but common ways to write IN6ADDR_ANY.
+        # ::0 and ::0.0.0.0 are non-canonical but common
+        # ways to write IN6ADDR_ANY.
         return '::1'
     return server_host
+
 
 def check_port(host, port, timeout=1.0):
     """Raise an error if the given port is not free on the given host."""
@@ -364,7 +388,9 @@ def check_port(host, port, timeout=1.0):
                                   socket.SOCK_STREAM)
     except socket.gaierror:
         if ':' in host:
-            info = [(socket.AF_INET6, socket.SOCK_STREAM, 0, "", (host, port, 0, 0))]
+            info = [(
+                socket.AF_INET6, socket.SOCK_STREAM, 0, "", (host, port, 0, 0)
+            )]
         else:
             info = [(socket.AF_INET, socket.SOCK_STREAM, 0, "", (host, port))]
 
@@ -378,17 +404,19 @@ def check_port(host, port, timeout=1.0):
             s.settimeout(timeout)
             s.connect((host, port))
             s.close()
-            raise IOError("Port %s is in use on %s; perhaps the previous "
-                          "httpserver did not shut down properly." %
-                          (repr(port), repr(host)))
         except socket.error:
             if s:
                 s.close()
+        else:
+            raise IOError("Port %s is in use on %s; perhaps the previous "
+                          "httpserver did not shut down properly." %
+                          (repr(port), repr(host)))
 
 
 # Feel free to increase these defaults on slow systems:
 free_port_timeout = 0.1
 occupied_port_timeout = 1.0
+
 
 def wait_for_free_port(host, port, timeout=None):
     """Wait for the specified port to become free (drop requests)."""
@@ -409,6 +437,7 @@ def wait_for_free_port(host, port, timeout=None):
 
     raise IOError("Port %r not free on %r" % (port, host))
 
+
 def wait_for_occupied_port(host, port, timeout=None):
     """Wait for the specified port to become active (receive requests)."""
     if not host:
@@ -420,8 +449,17 @@ def wait_for_occupied_port(host, port, timeout=None):
         try:
             check_port(host, port, timeout=timeout)
         except IOError:
+            # port is occupied
             return
         else:
             time.sleep(timeout)
 
-    raise IOError("Port %r not bound on %r" % (port, host))
+    if host == client_host(host):
+        raise IOError("Port %r not bound on %r" % (port, host))
+
+    # On systems where a loopback interface is not available and the
+    #  server is bound to all interfaces, it's difficult to determine
+    #  whether the server is in fact occupying the port. In this case,
+    # just issue a warning and move on. See issue #1100.
+    msg = "Unable to verify that the server is bound on %r" % port
+    warnings.warn(msg)

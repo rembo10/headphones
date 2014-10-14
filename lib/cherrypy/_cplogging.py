@@ -34,10 +34,11 @@ and another set of rules specific to each application. The global log
 manager is found at :func:`cherrypy.log`, and the log manager for each
 application is found at :attr:`app.log<cherrypy._cptree.Application.log>`.
 If you're inside a request, the latter is reachable from
-``cherrypy.request.app.log``; if you're outside a request, you'll have to obtain
-a reference to the ``app``: either the return value of
+``cherrypy.request.app.log``; if you're outside a request, you'll have to
+obtain a reference to the ``app``: either the return value of
 :func:`tree.mount()<cherrypy._cptree.Tree.mount>` or, if you used
-:func:`quickstart()<cherrypy.quickstart>` instead, via ``cherrypy.tree.apps['/']``.
+:func:`quickstart()<cherrypy.quickstart>` instead, via
+``cherrypy.tree.apps['/']``.
 
 By default, the global logs are named "cherrypy.error" and "cherrypy.access",
 and the application logs are named "cherrypy.error.2378745" and
@@ -55,6 +56,13 @@ errors! The format of access messages is highly formalized, but the error log
 isn't--it receives messages from a variety of sources (including full error
 tracebacks, if enabled).
 
+If you are logging the access log and error log to the same source, then there
+is a possibility that a specially crafted error message may replicate an access
+log message as described in CWE-117.  In this case it is the application
+developer's responsibility to manually escape data before using CherryPy's log()
+functionality, or they may create an application that is vulnerable to CWE-117.
+This would be achieved by using a custom handler escape any special characters,
+and attached as described below.
 
 Custom Handlers
 ===============
@@ -113,6 +121,7 @@ from cherrypy._cpcompat import ntob, py3k
 
 
 class NullHandler(logging.Handler):
+
     """A no-op logging handler to silence the logging.lastResort handler."""
 
     def handle(self, record):
@@ -126,6 +135,7 @@ class NullHandler(logging.Handler):
 
 
 class LogManager(object):
+
     """An object to assist both simple and advanced logging.
 
     ``cherrypy.log`` is an instance of this class.
@@ -166,8 +176,10 @@ class LogManager(object):
             self.error_log = logging.getLogger("%s.error" % logger_root)
             self.access_log = logging.getLogger("%s.access" % logger_root)
         else:
-            self.error_log = logging.getLogger("%s.error.%s" % (logger_root, appid))
-            self.access_log = logging.getLogger("%s.access.%s" % (logger_root, appid))
+            self.error_log = logging.getLogger(
+                "%s.error.%s" % (logger_root, appid))
+            self.access_log = logging.getLogger(
+                "%s.access.%s" % (logger_root, appid))
         self.error_log.setLevel(logging.INFO)
         self.access_log.setLevel(logging.INFO)
 
@@ -187,7 +199,8 @@ class LogManager(object):
                     h.stream = open(h.baseFilename, h.mode)
                     h.release()
 
-    def error(self, msg='', context='', severity=logging.INFO, traceback=False):
+    def error(self, msg='', context='', severity=logging.INFO,
+              traceback=False):
         """Write the given ``msg`` to the error log.
 
         This is not just for errors! Applications may call this at any time
@@ -207,8 +220,9 @@ class LogManager(object):
     def access(self):
         """Write to the access log (in Apache/NCSA Combined Log format).
 
-        See http://httpd.apache.org/docs/2.0/logs.html#combined for format
-        details.
+        See the
+        `apache documentation <http://httpd.apache.org/docs/current/logs.html#combined>`_
+        for format details.
 
         CherryPy calls this automatically for you. Note there are no arguments;
         it collects the data itself from
@@ -242,6 +256,7 @@ class LogManager(object):
                  'b': dict.get(outheaders, 'Content-Length', '') or "-",
                  'f': dict.get(inheaders, 'Referer', ''),
                  'a': dict.get(inheaders, 'User-Agent', ''),
+                 'o': dict.get(inheaders, 'Host', '-'),
                  }
         if py3k:
             for k, v in atoms.items():
@@ -261,7 +276,8 @@ class LogManager(object):
                 atoms[k] = v
 
             try:
-                self.access_log.log(logging.INFO, self.access_log_format.format(**atoms))
+                self.access_log.log(
+                    logging.INFO, self.access_log_format.format(**atoms))
             except:
                 self(traceback=True)
         else:
@@ -277,7 +293,8 @@ class LogManager(object):
                 atoms[k] = v.replace('"', '\\"')
 
             try:
-                self.access_log.log(logging.INFO, self.access_log_format % atoms)
+                self.access_log.log(
+                    logging.INFO, self.access_log_format % atoms)
             except:
                 self(traceback=True)
 
@@ -295,15 +312,13 @@ class LogManager(object):
             if getattr(h, "_cpbuiltin", None) == key:
                 return h
 
-
     # ------------------------- Screen handlers ------------------------- #
-
     def _set_screen_handler(self, log, enable, stream=None):
         h = self._get_builtin_handler(log, "screen")
         if enable:
             if not h:
                 if stream is None:
-                    stream=sys.stderr
+                    stream = sys.stderr
                 h = logging.StreamHandler(stream)
                 h.setFormatter(logfmt)
                 h._cpbuiltin = "screen"
@@ -320,7 +335,7 @@ class LogManager(object):
         self._set_screen_handler(self.error_log, newvalue, stream=sys.stderr)
         self._set_screen_handler(self.access_log, newvalue, stream=sys.stdout)
     screen = property(_get_screen, _set_screen,
-        doc="""Turn stderr/stdout logging on or off.
+                      doc="""Turn stderr/stdout logging on or off.
 
         If you set this to True, it'll add the appropriate StreamHandler for
         you. If you set it to False, it will remove the handler.
@@ -354,10 +369,11 @@ class LogManager(object):
         if h:
             return h.baseFilename
         return ''
+
     def _set_error_file(self, newvalue):
         self._set_file_handler(self.error_log, newvalue)
     error_file = property(_get_error_file, _set_error_file,
-        doc="""The filename for self.error_log.
+                          doc="""The filename for self.error_log.
 
         If you set this to a string, it'll add the appropriate FileHandler for
         you. If you set it to ``None`` or ``''``, it will remove the handler.
@@ -368,10 +384,11 @@ class LogManager(object):
         if h:
             return h.baseFilename
         return ''
+
     def _set_access_file(self, newvalue):
         self._set_file_handler(self.access_log, newvalue)
     access_file = property(_get_access_file, _set_access_file,
-        doc="""The filename for self.access_log.
+                           doc="""The filename for self.access_log.
 
         If you set this to a string, it'll add the appropriate FileHandler for
         you. If you set it to ``None`` or ``''``, it will remove the handler.
@@ -396,7 +413,7 @@ class LogManager(object):
     def _set_wsgi(self, newvalue):
         self._set_wsgi_handler(self.error_log, newvalue)
     wsgi = property(_get_wsgi, _set_wsgi,
-        doc="""Write errors to wsgi.errors.
+                    doc="""Write errors to wsgi.errors.
 
         If you set this to True, it'll add the appropriate
         :class:`WSGIErrorHandler<cherrypy._cplogging.WSGIErrorHandler>` for you
@@ -406,6 +423,7 @@ class LogManager(object):
 
 
 class WSGIErrorHandler(logging.Handler):
+
     "A handler class which writes logging records to environ['wsgi.errors']."
 
     def flush(self):
@@ -428,7 +446,8 @@ class WSGIErrorHandler(logging.Handler):
                 msg = self.format(record)
                 fs = "%s\n"
                 import types
-                if not hasattr(types, "UnicodeType"): #if no unicode support...
+                # if no unicode support...
+                if not hasattr(types, "UnicodeType"):
                     stream.write(fs % msg)
                 else:
                     try:

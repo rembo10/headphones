@@ -1,6 +1,6 @@
-import sys
 import cherrypy
-from cherrypy._cpcompat import basestring, ntou, json, json_encode, json_decode
+from cherrypy._cpcompat import basestring, ntou, json_encode, json_decode
+
 
 def json_processor(entity):
     """Read application/json data into request.json."""
@@ -13,8 +13,9 @@ def json_processor(entity):
     except ValueError:
         raise cherrypy.HTTPError(400, 'Invalid JSON document')
 
+
 def json_in(content_type=[ntou('application/json'), ntou('text/javascript')],
-            force=True, debug=False, processor = json_processor):
+            force=True, debug=False, processor=json_processor):
     """Add a processor to parse JSON request entities:
     The default processor places the parsed data into request.json.
 
@@ -57,11 +58,14 @@ def json_in(content_type=[ntou('application/json'), ntou('text/javascript')],
             cherrypy.log('Adding body processor for %s' % ct, 'TOOLS.JSON_IN')
         request.body.processors[ct] = processor
 
+
 def json_handler(*args, **kwargs):
     value = cherrypy.serving.request._json_inner_handler(*args, **kwargs)
     return json_encode(value)
 
-def json_out(content_type='application/json', debug=False, handler=json_handler):
+
+def json_out(content_type='application/json', debug=False,
+             handler=json_handler):
     """Wrap request.handler to serialize its output to JSON. Sets Content-Type.
 
     If the given content_type is None, the Content-Type response header
@@ -75,6 +79,11 @@ def json_out(content_type='application/json', debug=False, handler=json_handler)
     package importable; otherwise, ValueError is raised during processing.
     """
     request = cherrypy.serving.request
+    # request.handler may be set to None by e.g. the caching tool
+    # to signal to all components that a response body has already
+    # been attached, in which case we don't need to wrap anything.
+    if request.handler is None:
+        return
     if debug:
         cherrypy.log('Replacing %s with JSON handler' % request.handler,
                      'TOOLS.JSON_OUT')
@@ -82,6 +91,6 @@ def json_out(content_type='application/json', debug=False, handler=json_handler)
     request.handler = handler
     if content_type is not None:
         if debug:
-            cherrypy.log('Setting Content-Type to %s' % content_type, 'TOOLS.JSON_OUT')
+            cherrypy.log('Setting Content-Type to %s' %
+                         content_type, 'TOOLS.JSON_OUT')
         cherrypy.serving.response.headers['Content-Type'] = content_type
-
