@@ -21,33 +21,37 @@ to collect stats to import a third-party module. Therefore, we choose to
 re-use the `logging` module by adding a `statistics` object to it.
 
 That `logging.statistics` object is a nested dict. It is not a custom class,
-because that would 1) require libraries and applications to import a third-
-party module in order to participate, 2) inhibit innovation in extrapolation
-approaches and in reporting tools, and 3) be slow. There are, however, some
-specifications regarding the structure of the dict.
+because that would:
 
-    {
-   +----"SQLAlchemy": {
-   |        "Inserts": 4389745,
-   |        "Inserts per Second":
-   |            lambda s: s["Inserts"] / (time() - s["Start"]),
-   |  C +---"Table Statistics": {
-   |  o |        "widgets": {-----------+
- N |  l |            "Rows": 1.3M,      | Record
- a |  l |            "Inserts": 400,    |
- m |  e |        },---------------------+
- e |  c |        "froobles": {
- s |  t |            "Rows": 7845,
- p |  i |            "Inserts": 0,
- a |  o |        },
- c |  n +---},
- e |        "Slow Queries":
-   |            [{"Query": "SELECT * FROM widgets;",
-   |              "Processing Time": 47.840923343,
-   |              },
-   |             ],
-   +----},
-    }
+ 1. require libraries and applications to import a third-party module in
+    order to participate
+ 2. inhibit innovation in extrapolation approaches and in reporting tools, and
+ 3. be slow.
+
+There are, however, some specifications regarding the structure of the dict.::
+
+   {
+     +----"SQLAlchemy": {
+     |        "Inserts": 4389745,
+     |        "Inserts per Second":
+     |            lambda s: s["Inserts"] / (time() - s["Start"]),
+     |  C +---"Table Statistics": {
+     |  o |        "widgets": {-----------+
+   N |  l |            "Rows": 1.3M,      | Record
+   a |  l |            "Inserts": 400,    |
+   m |  e |        },---------------------+
+   e |  c |        "froobles": {
+   s |  t |            "Rows": 7845,
+   p |  i |            "Inserts": 0,
+   a |  o |        },
+   c |  n +---},
+   e |        "Slow Queries":
+     |            [{"Query": "SELECT * FROM widgets;",
+     |              "Processing Time": 47.840923343,
+     |              },
+     |             ],
+     +----},
+   }
 
 The `logging.statistics` dict has four levels. The topmost level is nothing
 more than a set of names to introduce modularity, usually along the lines of
@@ -65,13 +69,13 @@ Each namespace, then, is a dict of named statistical values, such as
 good on a report: spaces and capitalization are just fine.
 
 In addition to scalars, values in a namespace MAY be a (third-layer)
-dict, or a list, called a "collection". For example, the CherryPy StatsTool
-keeps track of what each request is doing (or has most recently done)
-in a 'Requests' collection, where each key is a thread ID; each
+dict, or a list, called a "collection". For example, the CherryPy
+:class:`StatsTool` keeps track of what each request is doing (or has most
+recently done) in a 'Requests' collection, where each key is a thread ID; each
 value in the subdict MUST be a fourth dict (whew!) of statistical data about
 each thread. We call each subdict in the collection a "record". Similarly,
-the StatsTool also keeps a list of slow queries, where each record contains
-data about each slow query, in order.
+the :class:`StatsTool` also keeps a list of slow queries, where each record
+contains data about each slow query, in order.
 
 Values in a namespace or record may also be functions, which brings us to:
 
@@ -86,17 +90,17 @@ scalar values you already have on hand.
 
 When it comes time to report on the gathered data, however, we usually have
 much more freedom in what we can calculate. Therefore, whenever reporting
-tools (like the provided StatsPage CherryPy class) fetch the contents of
-`logging.statistics` for reporting, they first call `extrapolate_statistics`
-(passing the whole `statistics` dict as the only argument). This makes a
-deep copy of the statistics dict so that the reporting tool can both iterate
-over it and even change it without harming the original. But it also expands
-any functions in the dict by calling them. For example, you might have a
-'Current Time' entry in the namespace with the value "lambda scope: time.time()".
-The "scope" parameter is the current namespace dict (or record, if we're
-currently expanding one of those instead), allowing you access to existing
-static entries. If you're truly evil, you can even modify more than one entry
-at a time.
+tools (like the provided :class:`StatsPage` CherryPy class) fetch the contents
+of `logging.statistics` for reporting, they first call
+`extrapolate_statistics` (passing the whole `statistics` dict as the only
+argument). This makes a deep copy of the statistics dict so that the
+reporting tool can both iterate over it and even change it without harming
+the original. But it also expands any functions in the dict by calling them.
+For example, you might have a 'Current Time' entry in the namespace with the
+value "lambda scope: time.time()". The "scope" parameter is the current
+namespace dict (or record, if we're currently expanding one of those
+instead), allowing you access to existing static entries. If you're truly
+evil, you can even modify more than one entry at a time.
 
 However, don't try to calculate an entry and then use its value in further
 extrapolations; the order in which the functions are called is not guaranteed.
@@ -108,19 +112,20 @@ After the whole thing has been extrapolated, it's time for:
 Reporting
 ---------
 
-The StatsPage class grabs the `logging.statistics` dict, extrapolates it all,
-and then transforms it to HTML for easy viewing. Each namespace gets its own
-header and attribute table, plus an extra table for each collection. This is
-NOT part of the statistics specification; other tools can format how they like.
+The :class:`StatsPage` class grabs the `logging.statistics` dict, extrapolates
+it all, and then transforms it to HTML for easy viewing. Each namespace gets
+its own header and attribute table, plus an extra table for each collection.
+This is NOT part of the statistics specification; other tools can format how
+they like.
 
 You can control which columns are output and how they are formatted by updating
 StatsPage.formatting, which is a dict that mirrors the keys and nesting of
 `logging.statistics`. The difference is that, instead of data values, it has
 formatting values. Use None for a given key to indicate to the StatsPage that a
-given column should not be output. Use a string with formatting (such as '%.3f')
-to interpolate the value(s), or use a callable (such as lambda v: v.isoformat())
-for more advanced formatting. Any entry which is not mentioned in the formatting
-dict is output unchanged.
+given column should not be output. Use a string with formatting
+(such as '%.3f') to interpolate the value(s), or use a callable (such as
+lambda v: v.isoformat()) for more advanced formatting. Any entry which is not
+mentioned in the formatting dict is output unchanged.
 
 Monitoring
 ----------
@@ -145,12 +150,12 @@ entries to False or True, if present.
 Usage
 =====
 
-To collect statistics on CherryPy applications:
+To collect statistics on CherryPy applications::
 
     from cherrypy.lib import cpstats
     appconfig['/']['tools.cpstats.on'] = True
 
-To collect statistics on your own code:
+To collect statistics on your own code::
 
     import logging
     # Initialize the repository
@@ -172,20 +177,22 @@ To collect statistics on your own code:
         if mystats.get('Enabled', False):
             mystats['Important Events'] += 1
 
-To report statistics:
+To report statistics::
 
     root.cpstats = cpstats.StatsPage()
 
-To format statistics reports:
+To format statistics reports::
 
     See 'Reporting', above.
 
 """
 
-# -------------------------------- Statistics -------------------------------- #
+# ------------------------------- Statistics -------------------------------- #
 
 import logging
-if not hasattr(logging, 'statistics'): logging.statistics = {}
+if not hasattr(logging, 'statistics'):
+    logging.statistics = {}
+
 
 def extrapolate_statistics(scope):
     """Return an extrapolated copy of the given scope."""
@@ -201,7 +208,7 @@ def extrapolate_statistics(scope):
     return c
 
 
-# --------------------- CherryPy Applications Statistics --------------------- #
+# -------------------- CherryPy Applications Statistics --------------------- #
 
 import threading
 import time
@@ -211,12 +218,20 @@ import cherrypy
 appstats = logging.statistics.setdefault('CherryPy Applications', {})
 appstats.update({
     'Enabled': True,
-    'Bytes Read/Request': lambda s: (s['Total Requests'] and
-        (s['Total Bytes Read'] / float(s['Total Requests'])) or 0.0),
+    'Bytes Read/Request': lambda s: (
+        s['Total Requests'] and
+        (s['Total Bytes Read'] / float(s['Total Requests'])) or
+        0.0
+    ),
     'Bytes Read/Second': lambda s: s['Total Bytes Read'] / s['Uptime'](s),
-    'Bytes Written/Request': lambda s: (s['Total Requests'] and
-        (s['Total Bytes Written'] / float(s['Total Requests'])) or 0.0),
-    'Bytes Written/Second': lambda s: s['Total Bytes Written'] / s['Uptime'](s),
+    'Bytes Written/Request': lambda s: (
+        s['Total Requests'] and
+        (s['Total Bytes Written'] / float(s['Total Requests'])) or
+        0.0
+    ),
+    'Bytes Written/Second': lambda s: (
+        s['Total Bytes Written'] / s['Uptime'](s)
+    ),
     'Current Time': lambda s: time.time(),
     'Current Requests': 0,
     'Requests/Second': lambda s: float(s['Total Requests']) / s['Uptime'](s),
@@ -228,12 +243,13 @@ appstats.update({
     'Total Time': 0,
     'Uptime': lambda s: time.time() - s['Start Time'],
     'Requests': {},
-    })
+})
 
 proc_time = lambda s: time.time() - s['Start Time']
 
 
 class ByteCountWrapper(object):
+
     """Wraps a file-like object, counting the number of bytes read."""
 
     def __init__(self, rfile):
@@ -279,6 +295,7 @@ average_uriset_time = lambda s: s['Count'] and (s['Sum'] / s['Count']) or 0
 
 
 class StatsTool(cherrypy.Tool):
+
     """Record various information about the current request."""
 
     def __init__(self):
@@ -315,10 +332,11 @@ class StatsTool(cherrypy.Tool):
             'Request-Line': request.request_line,
             'Response Status': None,
             'Start Time': time.time(),
-            }
+        }
 
-    def record_stop(self, uriset=None, slow_queries=1.0, slow_queries_count=100,
-                    debug=False, **kwargs):
+    def record_stop(
+            self, uriset=None, slow_queries=1.0, slow_queries_count=100,
+            debug=False, **kwargs):
         """Record the end of a request."""
         resp = cherrypy.serving.response
         w = appstats['Requests'][threading._get_ident()]
@@ -334,7 +352,8 @@ class StatsTool(cherrypy.Tool):
             w['Bytes Written'] = cl
             appstats['Total Bytes Written'] += cl
 
-        w['Response Status'] = getattr(resp, 'output_status', None) or resp.status
+        w['Response Status'] = getattr(
+            resp, 'output_status', None) or resp.status
 
         w['End Time'] = time.time()
         p = w['End Time'] - w['Start Time']
@@ -388,6 +407,7 @@ missing = object()
 locale_date = lambda v: time.strftime('%c', time.gmtime(v))
 iso_format = lambda v: time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(v))
 
+
 def pause_resume(ns):
     def _pause_resume(enabled):
         pause_disabled = ''
@@ -427,20 +447,20 @@ class StatsPage(object):
                 'End Time': None,
                 'Processing Time': '%.3f',
                 'Start Time': iso_format,
-                },
+            },
             'URI Set Tracking': {
                 'Avg': '%.3f',
                 'Max': '%.3f',
                 'Min': '%.3f',
                 'Sum': '%.3f',
-                },
+            },
             'Requests': {
                 'Bytes Read': '%s',
                 'Bytes Written': '%s',
                 'End Time': None,
                 'Processing Time': '%.3f',
                 'Start Time': None,
-                },
+            },
         },
         'CherryPy WSGIServer': {
             'Enabled': pause_resume('CherryPy WSGIServer'),
@@ -448,7 +468,6 @@ class StatsPage(object):
             'Start time': iso_format,
         },
     }
-
 
     def index(self):
         # Transform the raw data into pretty output for HTML
@@ -500,18 +519,25 @@ table.stats2 th {
 """ % title
             for i, (key, value) in enumerate(scalars):
                 colnum = i % 3
-                if colnum == 0: yield """
+                if colnum == 0:
+                    yield """
         <tr>"""
-                yield """
-            <th>%(key)s</th><td id='%(title)s-%(key)s'>%(value)s</td>""" % vars()
-                if colnum == 2: yield """
+                yield (
+                    """
+            <th>%(key)s</th><td id='%(title)s-%(key)s'>%(value)s</td>""" %
+                    vars()
+                )
+                if colnum == 2:
+                    yield """
         </tr>"""
 
-            if colnum == 0: yield """
+            if colnum == 0:
+                yield """
             <th></th><td></td>
             <th></th><td></td>
         </tr>"""
-            elif colnum == 1: yield """
+            elif colnum == 1:
+                yield """
             <th></th><td></td>
         </tr>"""
             yield """
@@ -659,4 +685,3 @@ table.stats2 th {
     resume.exposed = True
     resume.cp_config = {'tools.allow.on': True,
                         'tools.allow.methods': ['POST']}
-
