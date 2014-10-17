@@ -8,10 +8,11 @@ You need to edit your config file to use sessions. Here's an example::
     tools.sessions.storage_path = "/home/site/sessions"
     tools.sessions.timeout = 60
 
-This sets the session to be stored in files in the directory /home/site/sessions,
-and the session timeout to 60 minutes. If you omit ``storage_type`` the sessions
-will be saved in RAM.  ``tools.sessions.on`` is the only required line for
-working sessions, the rest are optional.
+This sets the session to be stored in files in the directory
+/home/site/sessions, and the session timeout to 60 minutes. If you omit
+``storage_type`` the sessions will be saved in RAM.
+``tools.sessions.on`` is the only required line for working sessions,
+the rest are optional.
 
 By default, the session ID is passed in a cookie, so the client's browser must
 have cookies enabled for your site.
@@ -25,9 +26,14 @@ Locking sessions
 ================
 
 By default, the ``'locking'`` mode of sessions is ``'implicit'``, which means
-the session is locked early and unlocked late. If you want to control when the
-session data is locked and unlocked, set ``tools.sessions.locking = 'explicit'``.
-Then call ``cherrypy.session.acquire_lock()`` and ``cherrypy.session.release_lock()``.
+the session is locked early and unlocked late. Be mindful of this default mode
+for any requests that take a long time to process (streaming responses,
+expensive calculations, database lookups, API calls, etc), as other concurrent
+requests that also utilize sessions will hang until the session is unlocked.
+
+If you want to control when the session data is locked and unlocked,
+set ``tools.sessions.locking = 'explicit'``. Then call
+``cherrypy.session.acquire_lock()`` and ``cherrypy.session.release_lock()``.
 Regardless of which mode you use, the session is guaranteed to be unlocked when
 the request is complete.
 
@@ -83,23 +89,25 @@ On the other extreme, some users report Firefox sending cookies after their
 expiration date, although this was on a system with an inaccurate system time.
 Maybe FF doesn't trust system time.
 """
-
+import sys
 import datetime
 import os
-import random
 import time
 import threading
 import types
-from warnings import warn
 
 import cherrypy
 from cherrypy._cpcompat import copyitems, pickle, random20, unicodestr
 from cherrypy.lib import httputil
-
+from cherrypy.lib import lockfile
+from cherrypy.lib import locking
+from cherrypy.lib import is_iterator
 
 missing = object()
 
+
 class Session(object):
+
     """A CherryPy dict-like Session object (one per request)."""
 
     _id = None
@@ -109,6 +117,7 @@ class Session(object):
 
     def _get_id(self):
         return self._id
+
     def _set_id(self, value):
         self._id = value
         for o in self.id_observers:
@@ -145,7 +154,10 @@ class Session(object):
     True if the application called session.regenerate(). This is not set by
     internal calls to regenerate the session id."""
 
-    debug=False
+    debug = False
+    "If True, log debug information."
+
+    # --------------------- Session management methods --------------------- #
 
     def __init__(self, id=None, **kwargs):
         self.id_observers = []
@@ -162,12 +174,15 @@ class Session(object):
             self._regenerate()
         else:
             self.id = id
-            if not self._exists():
+            if self._exists():
+                if self.debug:
+                    cherrypy.log('Set id to %s.' % id, 'TOOLS.SESSIONS')
+            else:
                 if self.debug:
                     cherrypy.log('Expired or malicious session %r; '
                                  'making a new one' % id, 'TOOLS.SESSIONS')
                 # Expired or malicious session. Make a new one.
-                # See http://www.cherrypy.org/ticket/709.
+                # See https://bitbucket.org/cherrypy/cherrypy/issue/709.
                 self.id = None
                 self.missing = True
                 self._regenerate()
@@ -187,11 +202,18 @@ class Session(object):
 
     def _regenerate(self):
         if self.id is not None:
+            if self.debug:
+                cherrypy.log(
+                    'Deleting the existing session %r before '
+                    'regeneration.' % self.id,
+                    'TOOLS.SESSIONS')
             self.delete()
 
         old_session_was_locked = self.locked
         if old_session_was_locked:
             self.release_lock()
+            if self.debug:
+                cherrypy.log('Old lock released.', 'TOOLS.SESSIONS')
 
         self.id = None
         while self.id is None:
@@ -199,9 +221,14 @@ class Session(object):
             # Assert that the generated id is not already stored.
             if self._exists():
                 self.id = None
+        if self.debug:
+            cherrypy.log('Set id to generated %s.' % self.id,
+                         'TOOLS.SESSIONS')
 
         if old_session_was_locked:
             self.acquire_lock()
+            if self.debug:
+                cherrypy.log('Regenerated lock acquired.', 'TOOLS.SESSIONS')
 
     def clean_up(self):
         """Clean up expired sessions."""
@@ -217,17 +244,24 @@ class Session(object):
             # If session data has never been loaded then it's never been
             #   accessed: no need to save it
             if self.loaded:
-                t = datetime.timedelta(seconds = self.timeout * 60)
+                t = datetime.timedelta(seconds=self.timeout * 60)
                 expiration_time = self.now() + t
                 if self.debug:
-                    cherrypy.log('Saving with expiry %s' % expiration_time,
+                    cherrypy.log('Saving session %r with expiry %s' %
+                                 (self.id, expiration_time),
                                  'TOOLS.SESSIONS')
                 self._save(expiration_time)
-
+            else:
+                if self.debug:
+                    cherrypy.log(
+                        'Skipping save of session %r (no session loaded).' %
+                        self.id, 'TOOLS.SESSIONS')
         finally:
             if self.locked:
                 # Always release the lock if the user didn't release it
                 self.release_lock()
+                if self.debug:
+                    cherrypy.log('Lock released after save.', 'TOOLS.SESSIONS')
 
     def load(self):
         """Copy stored session data into this session instance."""
@@ -235,9 +269,13 @@ class Session(object):
         # data is either None or a tuple (session_data, expiration_time)
         if data is None or data[1] < self.now():
             if self.debug:
-                cherrypy.log('Expired session, flushing data', 'TOOLS.SESSIONS')
+                cherrypy.log('Expired session %r, flushing data.' % self.id,
+                             'TOOLS.SESSIONS')
             self._data = {}
         else:
+            if self.debug:
+                cherrypy.log('Data loaded for session %r.' % self.id,
+                             'TOOLS.SESSIONS')
             self._data = data[0]
         self.loaded = True
 
@@ -245,7 +283,7 @@ class Session(object):
         # The instances are created and destroyed per-request.
         cls = self.__class__
         if self.clean_freq and not cls.clean_thread:
-            # clean_up is in instancemethod and not a classmethod,
+            # clean_up is an instancemethod and not a classmethod,
             # so that tool config can be accessed inside the method.
             t = cherrypy.process.plugins.Monitor(
                 cherrypy.engine, self.clean_up, self.clean_freq * 60,
@@ -253,21 +291,31 @@ class Session(object):
             t.subscribe()
             cls.clean_thread = t
             t.start()
+            if self.debug:
+                cherrypy.log('Started cleanup thread.', 'TOOLS.SESSIONS')
 
     def delete(self):
         """Delete stored session data."""
         self._delete()
+        if self.debug:
+            cherrypy.log('Deleted session %s.' % self.id,
+                         'TOOLS.SESSIONS')
+
+    # -------------------- Application accessor methods -------------------- #
 
     def __getitem__(self, key):
-        if not self.loaded: self.load()
+        if not self.loaded:
+            self.load()
         return self._data[key]
 
     def __setitem__(self, key, value):
-        if not self.loaded: self.load()
+        if not self.loaded:
+            self.load()
         self._data[key] = value
 
     def __delitem__(self, key):
-        if not self.loaded: self.load()
+        if not self.loaded:
+            self.load()
         del self._data[key]
 
     def pop(self, key, default=missing):
@@ -275,55 +323,65 @@ class Session(object):
         If key is not found, default is returned if given,
         otherwise KeyError is raised.
         """
-        if not self.loaded: self.load()
+        if not self.loaded:
+            self.load()
         if default is missing:
             return self._data.pop(key)
         else:
             return self._data.pop(key, default)
 
     def __contains__(self, key):
-        if not self.loaded: self.load()
+        if not self.loaded:
+            self.load()
         return key in self._data
 
     if hasattr({}, 'has_key'):
         def has_key(self, key):
             """D.has_key(k) -> True if D has a key k, else False."""
-            if not self.loaded: self.load()
+            if not self.loaded:
+                self.load()
             return key in self._data
 
     def get(self, key, default=None):
         """D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None."""
-        if not self.loaded: self.load()
+        if not self.loaded:
+            self.load()
         return self._data.get(key, default)
 
     def update(self, d):
         """D.update(E) -> None.  Update D from E: for k in E: D[k] = E[k]."""
-        if not self.loaded: self.load()
+        if not self.loaded:
+            self.load()
         self._data.update(d)
 
     def setdefault(self, key, default=None):
         """D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D."""
-        if not self.loaded: self.load()
+        if not self.loaded:
+            self.load()
         return self._data.setdefault(key, default)
 
     def clear(self):
         """D.clear() -> None.  Remove all items from D."""
-        if not self.loaded: self.load()
+        if not self.loaded:
+            self.load()
         self._data.clear()
 
     def keys(self):
         """D.keys() -> list of D's keys."""
-        if not self.loaded: self.load()
+        if not self.loaded:
+            self.load()
         return self._data.keys()
 
     def items(self):
         """D.items() -> list of D's (key, value) pairs, as 2-tuples."""
-        if not self.loaded: self.load()
+        if not self.loaded:
+            self.load()
         return self._data.items()
 
     def values(self):
         """D.values() -> list of D's values."""
-        if not self.loaded: self.load()
+        if not self.loaded:
+            self.load()
         return self._data.values()
 
 
@@ -335,22 +393,26 @@ class RamSession(Session):
 
     def clean_up(self):
         """Clean up expired sessions."""
+
         now = self.now()
-        for id, (data, expiration_time) in copyitems(self.cache):
+        for _id, (data, expiration_time) in copyitems(self.cache):
             if expiration_time <= now:
                 try:
-                    del self.cache[id]
+                    del self.cache[_id]
                 except KeyError:
                     pass
                 try:
-                    del self.locks[id]
+                    if self.locks[_id].acquire(blocking=False):
+                        lock = self.locks.pop(_id)
+                        lock.release()
                 except KeyError:
                     pass
 
         # added to remove obsolete lock objects
-        for id in list(self.locks):
-            if id not in self.cache:
-                self.locks.pop(id, None)
+        for _id in list(self.locks):
+            if _id not in self.cache and self.locks[_id].acquire(blocking=False):
+                lock = self.locks.pop(_id)
+                lock.release()
 
     def _exists(self):
         return self.id in self.cache
@@ -380,6 +442,7 @@ class RamSession(Session):
 
 
 class FileSession(Session):
+
     """Implementation of the File backend for sessions
 
     storage_path
@@ -387,6 +450,10 @@ class FileSession(Session):
         will be saved as pickle.dump(data, expiration_time) in its own file;
         the filename will be self.SESSION_PREFIX + self.id.
 
+    lock_timeout
+        A timedelta or numeric seconds indicating how long
+        to block acquiring a lock. If None (default), acquiring a lock
+        will block indefinitely.
     """
 
     SESSION_PREFIX = 'session-'
@@ -396,7 +463,16 @@ class FileSession(Session):
     def __init__(self, id=None, **kwargs):
         # The 'storage_path' arg is required for file-based sessions.
         kwargs['storage_path'] = os.path.abspath(kwargs['storage_path'])
+        kwargs.setdefault('lock_timeout', None)
+
         Session.__init__(self, id=id, **kwargs)
+
+        # validate self.lock_timeout
+        if isinstance(self.lock_timeout, (int, float)):
+            self.lock_timeout = datetime.timedelta(seconds=self.lock_timeout)
+        if not isinstance(self.lock_timeout, (datetime.timedelta, type(None))):
+            raise ValueError("Lock timeout must be numeric seconds or "
+                "a timedelta instance.")
 
     def setup(cls, **kwargs):
         """Set up the storage system for file-based sessions.
@@ -409,17 +485,6 @@ class FileSession(Session):
 
         for k, v in kwargs.items():
             setattr(cls, k, v)
-
-        # Warn if any lock files exist at startup.
-        lockfiles = [fname for fname in os.listdir(cls.storage_path)
-                     if (fname.startswith(cls.SESSION_PREFIX)
-                         and fname.endswith(cls.LOCK_SUFFIX))]
-        if lockfiles:
-            plural = ('', 's')[len(lockfiles) > 1]
-            warn("%s session lockfile%s found at startup. If you are "
-                 "only running one process, then you may need to "
-                 "manually delete the lockfiles found at %r."
-                 % (len(lockfiles), plural, cls.storage_path))
     setup = classmethod(setup)
 
     def _get_file_path(self):
@@ -433,6 +498,8 @@ class FileSession(Session):
         return os.path.exists(path)
 
     def _load(self, path=None):
+        assert self.locked, ("The session load without being locked.  "
+                             "Check your tools' priority levels.")
         if path is None:
             path = self._get_file_path()
         try:
@@ -442,9 +509,15 @@ class FileSession(Session):
             finally:
                 f.close()
         except (IOError, EOFError):
+            e = sys.exc_info()[1]
+            if self.debug:
+                cherrypy.log("Error loading the session pickle: %s" %
+                             e, 'TOOLS.SESSIONS')
             return None
 
     def _save(self, expiration_time):
+        assert self.locked, ("The session was saved without being locked.  "
+                             "Check your tools' priority levels.")
         f = open(self._get_file_path(), "wb")
         try:
             pickle.dump((self._data, expiration_time), f, self.pickle_protocol)
@@ -452,6 +525,8 @@ class FileSession(Session):
             f.close()
 
     def _delete(self):
+        assert self.locked, ("The session deletion without being locked.  "
+                             "Check your tools' priority levels.")
         try:
             os.unlink(self._get_file_path())
         except OSError:
@@ -462,21 +537,22 @@ class FileSession(Session):
         if path is None:
             path = self._get_file_path()
         path += self.LOCK_SUFFIX
-        while True:
+        checker = locking.LockChecker(self.id, self.lock_timeout)
+        while not checker.expired():
             try:
-                lockfd = os.open(path, os.O_CREAT|os.O_WRONLY|os.O_EXCL)
-            except OSError:
+                self.lock = lockfile.LockFile(path)
+            except lockfile.LockError:
                 time.sleep(0.1)
             else:
-                os.close(lockfd)
                 break
         self.locked = True
+        if self.debug:
+            cherrypy.log('Lock acquired.', 'TOOLS.SESSIONS')
 
     def release_lock(self, path=None):
         """Release the lock on the currently-loaded session data."""
-        if path is None:
-            path = self._get_file_path()
-        os.unlink(path + self.LOCK_SUFFIX)
+        self.lock.release()
+        self.lock.remove()
         self.locked = False
 
     def clean_up(self):
@@ -485,11 +561,18 @@ class FileSession(Session):
         # Iterate over all session files in self.storage_path
         for fname in os.listdir(self.storage_path):
             if (fname.startswith(self.SESSION_PREFIX)
-                and not fname.endswith(self.LOCK_SUFFIX)):
+                    and not fname.endswith(self.LOCK_SUFFIX)):
                 # We have a session file: lock and load it and check
                 #   if it's expired. If it fails, nevermind.
                 path = os.path.join(self.storage_path, fname)
                 self.acquire_lock(path)
+                if self.debug:
+                    # This is a bit of a hack, since we're calling clean_up
+                    # on the first instance rather than the entire class,
+                    # so depending on whether you have "debug" set on the
+                    # path of the first session called, this may not run.
+                    cherrypy.log('Cleanup lock acquired.', 'TOOLS.SESSIONS')
+
                 try:
                     contents = self._load(path)
                     # _load returns None on IOError
@@ -509,6 +592,7 @@ class FileSession(Session):
 
 
 class PostgresqlSession(Session):
+
     """ Implementation of the PostgreSQL backend for sessions. It assumes
         a table like this::
 
@@ -578,6 +662,8 @@ class PostgresqlSession(Session):
         self.locked = True
         self.cursor.execute('select id from session where id=%s for update',
                             (self.id,))
+        if self.debug:
+            cherrypy.log('Lock acquired.', 'TOOLS.SESSIONS')
 
     def release_lock(self):
         """Release the lock on the currently-loaded session data."""
@@ -618,6 +704,7 @@ class MemcachedSession(Session):
 
     def _get_id(self):
         return self._id
+
     def _set_id(self, value):
         # This encode() call is where we differ from the superclass.
         # Memcache keys MUST be byte strings, not unicode.
@@ -649,7 +736,8 @@ class MemcachedSession(Session):
         self.mc_lock.acquire()
         try:
             if not self.cache.set(self.id, (self._data, expiration_time), td):
-                raise AssertionError("Session data for id %r not set." % self.id)
+                raise AssertionError(
+                    "Session data for id %r not set." % self.id)
         finally:
             self.mc_lock.release()
 
@@ -660,6 +748,8 @@ class MemcachedSession(Session):
         """Acquire an exclusive lock on the currently-loaded session data."""
         self.locked = True
         self.locks.setdefault(self.id, threading.RLock()).acquire()
+        if self.debug:
+            cherrypy.log('Lock acquired.', 'TOOLS.SESSIONS')
 
     def release_lock(self):
         """Release the lock on the currently-loaded session data."""
@@ -693,10 +783,11 @@ def save():
     else:
         # If the body is not being streamed, we save the data now
         # (so we can release the lock).
-        if isinstance(response.body, types.GeneratorType):
+        if is_iterator(response.body):
             response.collapse_body()
         cherrypy.session.save()
 save.failsafe = True
+
 
 def close():
     """Close the session object for this request."""
@@ -704,6 +795,8 @@ def close():
     if getattr(sess, "locked", False):
         # If the session is still locked we release the lock
         sess.release_lock()
+        if sess.debug:
+            cherrypy.log('Lock released on close.', 'TOOLS.SESSIONS')
 close.failsafe = True
 close.priority = 90
 
@@ -787,6 +880,7 @@ def init(storage_type='ram', path=None, path_header=None, name='session_id',
     kwargs['clean_freq'] = clean_freq
     cherrypy.serving.session = sess = storage_class(id, **kwargs)
     sess.debug = debug
+
     def update_cookie(id):
         """Update the cookie every time the session id changes."""
         cherrypy.serving.response.cookie[name] = id
@@ -841,8 +935,11 @@ def set_response_cookie(path=None, path_header=None, name='session_id',
     # Set response cookie
     cookie = cherrypy.serving.response.cookie
     cookie[name] = cherrypy.serving.session.id
-    cookie[name]['path'] = (path or cherrypy.serving.request.headers.get(path_header)
-                            or '/')
+    cookie[name]['path'] = (
+        path or
+        cherrypy.serving.request.headers.get(path_header) or
+        '/'
+    )
 
     # We'd like to use the "max-age" param as indicated in
     # http://www.faqs.org/rfcs/rfc2109.html but IE doesn't
@@ -861,11 +958,11 @@ def set_response_cookie(path=None, path_header=None, name='session_id',
             raise ValueError("The httponly cookie token is not supported.")
         cookie[name]['httponly'] = 1
 
+
 def expire():
     """Expire the current session cookie."""
-    name = cherrypy.serving.request.config.get('tools.sessions.name', 'session_id')
+    name = cherrypy.serving.request.config.get(
+        'tools.sessions.name', 'session_id')
     one_year = 60 * 60 * 24 * 365
     e = time.time() - one_year
     cherrypy.serving.response.cookie[name]['expires'] = httputil.HTTPDate(e)
-
-

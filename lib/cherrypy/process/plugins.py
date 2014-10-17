@@ -7,7 +7,8 @@ import sys
 import time
 import threading
 
-from cherrypy._cpcompat import basestring, get_daemon, get_thread_ident, ntob, set
+from cherrypy._cpcompat import basestring, get_daemon, get_thread_ident
+from cherrypy._cpcompat import ntob, set, Timer, SetDaemonProperty
 
 # _module__file__base is used by Autoreload to make
 # absolute any filenames retrieved from sys.modules which are not
@@ -19,8 +20,8 @@ from cherrypy._cpcompat import basestring, get_daemon, get_thread_ident, ntob, s
 # changes the current directory by executing os.chdir(), then the next time
 # Autoreload runs, it will not be able to find any filenames which are
 # not absolute paths, because the current directory is not the same as when the
-# module was first imported.  Autoreload will then wrongly conclude the file has
-# "changed", and initiate the shutdown/re-exec sequence.
+# module was first imported.  Autoreload will then wrongly conclude the file
+# has "changed", and initiate the shutdown/re-exec sequence.
 # See ticket #917.
 # For this workaround to have a decent probability of success, this module
 # needs to be imported as early as possible, before the app has much chance
@@ -29,10 +30,12 @@ _module__file__base = os.getcwd()
 
 
 class SimplePlugin(object):
+
     """Plugin base class which auto-subscribes methods for known channels."""
 
     bus = None
-    """A :class:`Bus <cherrypy.process.wspbus.Bus>`, usually cherrypy.engine."""
+    """A :class:`Bus <cherrypy.process.wspbus.Bus>`, usually cherrypy.engine.
+    """
 
     def __init__(self, bus):
         self.bus = bus
@@ -54,8 +57,8 @@ class SimplePlugin(object):
                 self.bus.unsubscribe(channel, method)
 
 
-
 class SignalHandler(object):
+
     """Register bus channels (and listeners) for system signals.
 
     You can modify what signals your application listens for, and what it does
@@ -74,9 +77,9 @@ class SignalHandler(object):
     if the process is attached to a TTY. This is because Unix window
     managers tend to send SIGHUP to terminal windows when the user closes them.
 
-    Feel free to add signals which are not available on every platform. The
-    :class:`SignalHandler` will ignore errors raised from attempting to register
-    handlers for unknown signals.
+    Feel free to add signals which are not available on every platform.
+    The :class:`SignalHandler` will ignore errors raised from attempting
+    to register handlers for unknown signals.
     """
 
     handlers = {}
@@ -187,15 +190,17 @@ class SignalHandler(object):
 
 
 try:
-    import pwd, grp
+    import pwd
+    import grp
 except ImportError:
     pwd, grp = None, None
 
 
 class DropPrivileges(SimplePlugin):
+
     """Drop privileges. uid/gid arguments not available on Windows.
 
-    Special thanks to Gavin Baker: http://antonym.org/node/100.
+    Special thanks to `Gavin Baker <http://antonym.org/2005/12/dropping-privileges-in-python.html>`_ 
     """
 
     def __init__(self, bus, umask=None, uid=None, gid=None):
@@ -207,6 +212,7 @@ class DropPrivileges(SimplePlugin):
 
     def _get_uid(self):
         return self._uid
+
     def _set_uid(self, val):
         if val is not None:
             if pwd is None:
@@ -217,10 +223,11 @@ class DropPrivileges(SimplePlugin):
                 val = pwd.getpwnam(val)[2]
         self._uid = val
     uid = property(_get_uid, _set_uid,
-        doc="The uid under which to run. Availability: Unix.")
+                   doc="The uid under which to run. Availability: Unix.")
 
     def _get_gid(self):
         return self._gid
+
     def _set_gid(self, val):
         if val is not None:
             if grp is None:
@@ -231,10 +238,11 @@ class DropPrivileges(SimplePlugin):
                 val = grp.getgrnam(val)[2]
         self._gid = val
     gid = property(_get_gid, _set_gid,
-        doc="The gid under which to run. Availability: Unix.")
+                   doc="The gid under which to run. Availability: Unix.")
 
     def _get_umask(self):
         return self._umask
+
     def _set_umask(self, val):
         if val is not None:
             try:
@@ -244,8 +252,11 @@ class DropPrivileges(SimplePlugin):
                              level=30)
                 val = None
         self._umask = val
-    umask = property(_get_umask, _set_umask,
-        doc="""The default permission mode for newly created files and directories.
+    umask = property(
+        _get_umask,
+        _set_umask,
+        doc="""The default permission mode for newly created files and
+        directories.
 
         Usually expressed in octal format, for example, ``0644``.
         Availability: Unix, Windows.
@@ -299,6 +310,7 @@ class DropPrivileges(SimplePlugin):
 
 
 class Daemonizer(SimplePlugin):
+
     """Daemonize the running script.
 
     Use this with a Web Site Process Bus via::
@@ -368,7 +380,7 @@ class Daemonizer(SimplePlugin):
             pid = os.fork()
             if pid > 0:
                 self.bus.log('Forking twice.')
-                os._exit(0) # Exit second parent
+                os._exit(0)  # Exit second parent
         except OSError:
             exc = sys.exc_info()[1]
             sys.exit("%s: fork #2 failed: (%d) %s\n"
@@ -394,6 +406,7 @@ class Daemonizer(SimplePlugin):
 
 
 class PIDFile(SimplePlugin):
+
     """Maintain a PID file via a WSPBus."""
 
     def __init__(self, bus, pidfile):
@@ -406,7 +419,7 @@ class PIDFile(SimplePlugin):
         if self.finalized:
             self.bus.log('PID %r already written to %r.' % (pid, self.pidfile))
         else:
-            open(self.pidfile, "wb").write(ntob("%s" % pid, 'utf8'))
+            open(self.pidfile, "wb").write(ntob("%s\n" % pid, 'utf8'))
             self.bus.log('PID %r written to %r.' % (pid, self.pidfile))
             self.finalized = True
     start.priority = 70
@@ -421,13 +434,19 @@ class PIDFile(SimplePlugin):
             pass
 
 
-class PerpetualTimer(threading._Timer):
-    """A responsive subclass of threading._Timer whose run() method repeats.
+class PerpetualTimer(Timer):
+
+    """A responsive subclass of threading.Timer whose run() method repeats.
 
     Use this timer only when you really need a very interruptible timer;
     this checks its 'finished' condition up to 20 times a second, which can
     results in pretty high CPU usage
     """
+
+    def __init__(self, *args, **kwargs):
+        "Override parent constructor to allow 'bus' to be provided."
+        self.bus = kwargs.pop('bus', None)
+        super(PerpetualTimer, self).__init__(*args, **kwargs)
 
     def run(self):
         while True:
@@ -437,13 +456,16 @@ class PerpetualTimer(threading._Timer):
             try:
                 self.function(*self.args, **self.kwargs)
             except Exception:
-                self.bus.log("Error in perpetual timer thread function %r." %
-                             self.function, level=40, traceback=True)
+                if self.bus:
+                    self.bus.log(
+                        "Error in perpetual timer thread function %r." %
+                        self.function, level=40, traceback=True)
                 # Quit on first error to avoid massive logs.
                 raise
 
 
-class BackgroundTask(threading.Thread):
+class BackgroundTask(SetDaemonProperty, threading.Thread):
+
     """A subclass of threading.Thread whose run() method repeats.
 
     Use this class for most repeating tasks. It uses time.sleep() to wait
@@ -461,6 +483,9 @@ class BackgroundTask(threading.Thread):
         self.kwargs = kwargs
         self.running = False
         self.bus = bus
+
+        # default to daemonic
+        self.daemon = True
 
     def cancel(self):
         self.running = False
@@ -480,11 +505,9 @@ class BackgroundTask(threading.Thread):
                 # Quit on first error to avoid massive logs.
                 raise
 
-    def _set_daemon(self):
-        return True
-
 
 class Monitor(SimplePlugin):
+
     """WSPBus listener to periodically run a callback in its own thread."""
 
     callback = None
@@ -494,7 +517,9 @@ class Monitor(SimplePlugin):
     """The time in seconds between callback runs."""
 
     thread = None
-    """A :class:`BackgroundTask<cherrypy.process.plugins.BackgroundTask>` thread."""
+    """A :class:`BackgroundTask<cherrypy.process.plugins.BackgroundTask>`
+    thread.
+    """
 
     def __init__(self, bus, callback, frequency=60, name=None):
         SimplePlugin.__init__(self, bus)
@@ -509,7 +534,7 @@ class Monitor(SimplePlugin):
             threadname = self.name or self.__class__.__name__
             if self.thread is None:
                 self.thread = BackgroundTask(self.frequency, self.callback,
-                                             bus = self.bus)
+                                             bus=self.bus)
                 self.thread.setName(threadname)
                 self.thread.start()
                 self.bus.log("Started monitor thread %r." % threadname)
@@ -520,7 +545,8 @@ class Monitor(SimplePlugin):
     def stop(self):
         """Stop our callback's background task thread."""
         if self.thread is None:
-            self.bus.log("No thread running for %s." % self.name or self.__class__.__name__)
+            self.bus.log("No thread running for %s." %
+                         self.name or self.__class__.__name__)
         else:
             if self.thread is not threading.currentThread():
                 name = self.thread.getName()
@@ -538,6 +564,7 @@ class Monitor(SimplePlugin):
 
 
 class Autoreloader(Monitor):
+
     """Monitor which re-executes the process when files change.
 
     This :ref:`plugin<plugins>` restarts the process (via :func:`os.execv`)
@@ -547,9 +574,9 @@ class Autoreloader(Monitor):
 
         cherrypy.engine.autoreload.files.add(myFile)
 
-    If there are imported files you do *not* wish to monitor, you can adjust the
-    ``match`` attribute, a regular expression. For example, to stop monitoring
-    cherrypy itself::
+    If there are imported files you do *not* wish to monitor, you can
+    adjust the ``match`` attribute, a regular expression. For example,
+    to stop monitoring cherrypy itself::
 
         cherrypy.engine.autoreload.match = r'^(?!cherrypy).+'
 
@@ -583,15 +610,20 @@ class Autoreloader(Monitor):
     def sysfiles(self):
         """Return a Set of sys.modules filenames to monitor."""
         files = set()
-        for k, m in sys.modules.items():
+        for k, m in list(sys.modules.items()):
             if re.match(self.match, k):
-                if hasattr(m, '__loader__') and hasattr(m.__loader__, 'archive'):
+                if (
+                    hasattr(m, '__loader__') and
+                    hasattr(m.__loader__, 'archive')
+                ):
                     f = m.__loader__.archive
                 else:
                     f = getattr(m, '__file__', None)
                     if f is not None and not os.path.isabs(f):
-                        # ensure absolute paths so a os.chdir() in the app doesn't break me
-                        f = os.path.normpath(os.path.join(_module__file__base, f))
+                        # ensure absolute paths so a os.chdir() in the app
+                        # doesn't break me
+                        f = os.path.normpath(
+                            os.path.join(_module__file__base, f))
                 files.add(f)
         return files
 
@@ -619,14 +651,17 @@ class Autoreloader(Monitor):
                 else:
                     if mtime is None or mtime > oldtime:
                         # The file has been deleted or modified.
-                        self.bus.log("Restarting because %s changed." % filename)
+                        self.bus.log("Restarting because %s changed." %
+                                     filename)
                         self.thread.cancel()
-                        self.bus.log("Stopped thread %r." % self.thread.getName())
+                        self.bus.log("Stopped thread %r." %
+                                     self.thread.getName())
                         self.bus.restart()
                         return
 
 
 class ThreadManager(SimplePlugin):
+
     """Manager for HTTP request threads.
 
     If you have control over thread creation and destruction, publish to
@@ -680,4 +715,3 @@ class ThreadManager(SimplePlugin):
             self.bus.publish('stop_thread', i)
         self.threads.clear()
     graceful = stop
-

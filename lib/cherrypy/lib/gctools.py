@@ -15,6 +15,7 @@ from cherrypy.process.plugins import SimplePlugin
 
 
 class ReferrerTree(object):
+
     """An object which gathers all referrers of an object to a given depth."""
 
     peek_length = 40
@@ -89,6 +90,7 @@ class ReferrerTree(object):
     def format(self, tree):
         """Return a list of string reprs from a nested list of referrers."""
         output = []
+
         def ascend(branch, depth=1):
             for parent, grandparents in branch:
                 output.append(("    " * depth) + self._format(parent))
@@ -111,7 +113,7 @@ class RequestCounter(SimplePlugin):
         self.count += 1
 
     def after_request(self):
-        self.count -=1
+        self.count -= 1
 request_counter = RequestCounter(cherrypy.engine)
 request_counter.subscribe()
 
@@ -129,15 +131,17 @@ def get_context(obj):
 
 
 class GCRoot(object):
+
     """A CherryPy page handler for testing reference leaks."""
 
-    classes = [(_cprequest.Request, 2, 2,
-                "Should be 1 in this request thread and 1 in the main thread."),
-               (_cprequest.Response, 2, 2,
-                "Should be 1 in this request thread and 1 in the main thread."),
-               (_cpwsgi.AppResponse, 1, 1,
-                "Should be 1 in this request thread only."),
-               ]
+    classes = [
+        (_cprequest.Request, 2, 2,
+         "Should be 1 in this request thread and 1 in the main thread."),
+        (_cprequest.Response, 2, 2,
+         "Should be 1 in this request thread and 1 in the main thread."),
+        (_cpwsgi.AppResponse, 1, 1,
+         "Should be 1 in this request thread only."),
+    ]
 
     def index(self):
         return "Hello, world!"
@@ -211,4 +215,3 @@ class GCRoot(object):
 
         return "\n".join(output)
     stats.exposed = True
-

@@ -25,6 +25,7 @@ from cherrypy import wsgiserver
 
 
 class BuiltinSSLAdapter(wsgiserver.SSLAdapter):
+
     """A wrapper for integrating Python's builtin ssl module with CherryPy."""
 
     certificate = None
@@ -48,8 +49,9 @@ class BuiltinSSLAdapter(wsgiserver.SSLAdapter):
         """Wrap and return the given socket, plus WSGI environ entries."""
         try:
             s = ssl.wrap_socket(sock, do_handshake_on_connect=True,
-                    server_side=True, certfile=self.certificate,
-                    keyfile=self.private_key, ssl_version=ssl.PROTOCOL_SSLv23)
+                                server_side=True, certfile=self.certificate,
+                                keyfile=self.private_key,
+                                ssl_version=ssl.PROTOCOL_SSLv23)
         except ssl.SSLError:
             e = sys.exc_info()[1]
             if e.errno == ssl.SSL_ERROR_EOF:
@@ -77,9 +79,9 @@ class BuiltinSSLAdapter(wsgiserver.SSLAdapter):
             "HTTPS": "on",
             'SSL_PROTOCOL': cipher[1],
             'SSL_CIPHER': cipher[0]
-##            SSL_VERSION_INTERFACE 	string 	The mod_ssl program version
-##            SSL_VERSION_LIBRARY 	string 	The OpenSSL program version
-            }
+            # SSL_VERSION_INTERFACE 	string 	The mod_ssl program version
+            # SSL_VERSION_LIBRARY 	string 	The OpenSSL program version
+        }
         return ssl_environ
 
     if sys.version_info >= (3, 0):
@@ -88,4 +90,3 @@ class BuiltinSSLAdapter(wsgiserver.SSLAdapter):
     else:
         def makefile(self, sock, mode='r', bufsize=DEFAULT_BUFFER_SIZE):
             return wsgiserver.CP_fileobject(sock, mode, bufsize)
-
