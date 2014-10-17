@@ -86,19 +86,34 @@ import re
 import rfc822
 import socket
 import sys
-if 'win' in sys.platform and not hasattr(socket, 'IPPROTO_IPV6'):
-    socket.IPPROTO_IPV6 = 41
+if 'win' in sys.platform and hasattr(socket, "AF_INET6"):
+    if not hasattr(socket, 'IPPROTO_IPV6'):
+        socket.IPPROTO_IPV6 = 41
+    if not hasattr(socket, 'IPV6_V6ONLY'):
+        socket.IPV6_V6ONLY = 27
 try:
     import cStringIO as StringIO
 except ImportError:
     import StringIO
 DEFAULT_BUFFER_SIZE = -1
 
-_fileobject_uses_str_type = isinstance(socket._fileobject(None)._rbuf, basestring)
+
+class FauxSocket(object):
+
+    """Faux socket with the minimal interface required by pypy"""
+
+    def _reuse(self):
+        pass
+
+_fileobject_uses_str_type = isinstance(
+    socket._fileobject(FauxSocket())._rbuf, basestring)
+del FauxSocket  # this class is not longer required for anything.
 
 import threading
 import time
 import traceback
+
+
 def format_exc(limit=None):
     """Like print_exc() but return a string. Backport for Python 2.3."""
     try:
@@ -107,25 +122,31 @@ def format_exc(limit=None):
     finally:
         etype = value = tb = None
 
+import operator
 
 from urllib import unquote
-from urlparse import urlparse
 import warnings
 
 if sys.version_info >= (3, 0):
     bytestr = bytes
     unicodestr = str
     basestring = (bytes, str)
+
     def ntob(n, encoding='ISO-8859-1'):
-        """Return the given native string as a byte string in the given encoding."""
+        """Return the given native string as a byte string in the given
+        encoding.
+        """
         # In Python 3, the native string type is unicode
         return n.encode(encoding)
 else:
     bytestr = str
     unicodestr = unicode
     basestring = basestring
+
     def ntob(n, encoding='ISO-8859-1'):
-        """Return the given native string as a byte string in the given encoding."""
+        """Return the given native string as a byte string in the given
+        encoding.
+        """
         # In Python 2, the native string type is bytes. Assume it's already
         # in the given encoding, which for ISO-8859-1 is almost always what
         # was intended.
@@ -145,6 +166,7 @@ FORWARD_SLASH = ntob('/')
 quoted_slash = re.compile(ntob("(?i)%2F"))
 
 import errno
+
 
 def plat_specific_errors(*errnames):
     """Return error numbers for all errors in errnames on this platform.
@@ -170,24 +192,27 @@ socket_errors_to_ignore = plat_specific_errors(
     "ECONNABORTED", "WSAECONNABORTED",
     "ENETRESET", "WSAENETRESET",
     "EHOSTDOWN", "EHOSTUNREACH",
-    )
+)
 socket_errors_to_ignore.append("timed out")
 socket_errors_to_ignore.append("The read operation timed out")
 
 socket_errors_nonblocking = plat_specific_errors(
     'EAGAIN', 'EWOULDBLOCK', 'WSAEWOULDBLOCK')
 
-comma_separated_headers = [ntob(h) for h in
+comma_separated_headers = [
+    ntob(h) for h in
     ['Accept', 'Accept-Charset', 'Accept-Encoding',
      'Accept-Language', 'Accept-Ranges', 'Allow', 'Cache-Control',
      'Connection', 'Content-Encoding', 'Content-Language', 'Expect',
      'If-Match', 'If-None-Match', 'Pragma', 'Proxy-Authenticate', 'TE',
      'Trailer', 'Transfer-Encoding', 'Upgrade', 'Vary', 'Via', 'Warning',
-     'WWW-Authenticate']]
+     'WWW-Authenticate']
+]
 
 
 import logging
-if not hasattr(logging, 'statistics'): logging.statistics = {}
+if not hasattr(logging, 'statistics'):
+    logging.statistics = {}
 
 
 def read_headers(rfile, hdict=None):
@@ -242,7 +267,9 @@ def read_headers(rfile, hdict=None):
 class MaxSizeExceeded(Exception):
     pass
 
+
 class SizeCheckWrapper(object):
+
     """Wraps a file-like object, raising MaxSizeExceeded if too large."""
 
     def __init__(self, rfile, maxlen):
@@ -275,8 +302,8 @@ class SizeCheckWrapper(object):
             self.bytes_read += len(data)
             self._check_length()
             res.append(data)
-            # See http://www.cherrypy.org/ticket/421
-            if len(data) < 256 or data[-1:] == "\n":
+            # See https://bitbucket.org/cherrypy/cherrypy/issue/421
+            if len(data) < 256 or data[-1:] == LF:
                 return EMPTY.join(res)
 
     def readlines(self, sizehint=0):
@@ -312,6 +339,7 @@ class SizeCheckWrapper(object):
 
 
 class KnownLengthRFile(object):
+
     """Wraps a file-like object, returning an empty string when exhausted."""
 
     def __init__(self, rfile, content_length):
@@ -368,6 +396,7 @@ class KnownLengthRFile(object):
 
 
 class ChunkedRFile(object):
+
     """Wraps a file-like object, returning an empty string when exhausted.
 
     This class is intended to provide a conforming wsgi.input value for
@@ -417,8 +446,8 @@ class ChunkedRFile(object):
         crlf = self.rfile.read(2)
         if crlf != CRLF:
             raise ValueError(
-                 "Bad chunked transfer coding (expected '\\r\\n', "
-                 "got " + repr(crlf) + ")")
+                "Bad chunked transfer coding (expected '\\r\\n', "
+                "got " + repr(crlf) + ")")
 
     def read(self, size=None):
         data = EMPTY
@@ -520,6 +549,7 @@ class ChunkedRFile(object):
 
 
 class HTTPRequest(object):
+
     """An HTTP Request (and response).
 
     A single HTTP connection may consist of multiple request/response pairs.
@@ -553,7 +583,7 @@ class HTTPRequest(object):
     This value is set automatically inside send_headers."""
 
     def __init__(self, server, conn):
-        self.server= server
+        self.server = server
         self.conn = conn
 
         self.ready = False
@@ -579,7 +609,8 @@ class HTTPRequest(object):
         try:
             success = self.read_request_line()
         except MaxSizeExceeded:
-            self.simple_response("414 Request-URI Too Long",
+            self.simple_response(
+                "414 Request-URI Too Long",
                 "The Request-URI sent with the request exceeds the maximum "
                 "allowed bytes.")
             return
@@ -590,7 +621,8 @@ class HTTPRequest(object):
         try:
             success = self.read_request_headers()
         except MaxSizeExceeded:
-            self.simple_response("413 Request Entity Too Large",
+            self.simple_response(
+                "413 Request Entity Too Large",
                 "The headers sent with the request exceed the maximum "
                 "allowed bytes.")
             return
@@ -626,7 +658,8 @@ class HTTPRequest(object):
                 return False
 
         if not request_line.endswith(CRLF):
-            self.simple_response("400 Bad Request", "HTTP requires CRLF terminators")
+            self.simple_response(
+                "400 Bad Request", "HTTP requires CRLF terminators")
             return False
 
         try:
@@ -709,7 +742,8 @@ class HTTPRequest(object):
 
         mrbs = self.server.max_request_body_size
         if mrbs and int(self.inheaders.get("Content-Length", 0)) > mrbs:
-            self.simple_response("413 Request Entity Too Large",
+            self.simple_response(
+                "413 Request Entity Too Large",
                 "The entity sent with the request exceeds the maximum "
                 "allowed bytes.")
             return False
@@ -763,7 +797,8 @@ class HTTPRequest(object):
         # but it seems like it would be a big slowdown for such a rare case.
         if self.inheaders.get("Expect", "") == "100-continue":
             # Don't use simple_response here, because it emits headers
-            # we don't want. See http://www.cherrypy.org/ticket/951
+            # we don't want. See
+            # https://bitbucket.org/cherrypy/cherrypy/issue/951
             msg = self.server.protocol + " 100 Continue\r\n\r\n"
             try:
                 self.conn.wfile.sendall(msg)
@@ -800,7 +835,8 @@ class HTTPRequest(object):
         if i > 0 and QUESTION_MARK not in uri[:i]:
             # An absoluteURI.
             # If there's a scheme (and it must be http or https), then:
-            # http_URL = "http:" "//" host [ ":" port ] [ abs_path [ "?" query ]]
+            # http_URL = "http:" "//" host [ ":" port ] [ abs_path [ "?" query
+            # ]]
             scheme, remainder = uri[:i].lower(), uri[i + 3:]
             authority, path = remainder.split(FORWARD_SLASH, 1)
             path = FORWARD_SLASH + path
@@ -822,7 +858,8 @@ class HTTPRequest(object):
             cl = int(self.inheaders.get("Content-Length", 0))
             if mrbs and mrbs < cl:
                 if not self.sent_headers:
-                    self.simple_response("413 Request Entity Too Large",
+                    self.simple_response(
+                        "413 Request Entity Too Large",
                         "The entity sent with the request exceeds the maximum "
                         "allowed bytes.")
                 return
@@ -897,7 +934,7 @@ class HTTPRequest(object):
                 pass
             else:
                 if (self.response_protocol == 'HTTP/1.1'
-                    and self.method != 'HEAD'):
+                        and self.method != 'HEAD'):
                     # Use the chunked transfer-coding
                     self.chunked_write = True
                     self.outheaders.append(("Transfer-Encoding", "chunked"))
@@ -946,16 +983,19 @@ class HTTPRequest(object):
 
 
 class NoSSLError(Exception):
+
     """Exception raised when a client speaks HTTP to an HTTPS socket."""
     pass
 
 
 class FatalSSLAlert(Exception):
+
     """Exception raised when the SSL implementation signals a fatal alert."""
     pass
 
 
 class CP_fileobject(socket._fileobject):
+
     """Faux file object attached to a socket object."""
 
     def __init__(self, *args, **kwargs):
@@ -992,23 +1032,26 @@ class CP_fileobject(socket._fileobject):
                 return data
             except socket.error, e:
                 if (e.args[0] not in socket_errors_nonblocking
-                    and e.args[0] not in socket_error_eintr):
+                        and e.args[0] not in socket_error_eintr):
                     raise
 
     if not _fileobject_uses_str_type:
         def read(self, size=-1):
-            # Use max, disallow tiny reads in a loop as they are very inefficient.
-            # We never leave read() with any leftover data from a new recv() call
-            # in our internal buffer.
+            # Use max, disallow tiny reads in a loop as they are very
+            # inefficient.
+            # We never leave read() with any leftover data from a new recv()
+            # call in our internal buffer.
             rbufsize = max(self._rbufsize, self.default_bufsize)
-            # Our use of StringIO rather than lists of string objects returned by
-            # recv() minimizes memory usage and fragmentation that occurs when
-            # rbufsize is large compared to the typical return value of recv().
+            # Our use of StringIO rather than lists of string objects returned
+            # by recv() minimizes memory usage and fragmentation that occurs
+            # when rbufsize is large compared to the typical return value of
+            # recv().
             buf = self._rbuf
             buf.seek(0, 2)  # seek end
             if size < 0:
                 # Read until EOF
-                self._rbuf = StringIO.StringIO()  # reset _rbuf.  we consume it via buf.
+                # reset _rbuf.  we consume it via buf.
+                self._rbuf = StringIO.StringIO()
                 while True:
                     data = self.recv(rbufsize)
                     if not data:
@@ -1019,14 +1062,16 @@ class CP_fileobject(socket._fileobject):
                 # Read until size bytes or EOF seen, whichever comes first
                 buf_len = buf.tell()
                 if buf_len >= size:
-                    # Already have size bytes in our buffer?  Extract and return.
+                    # Already have size bytes in our buffer?  Extract and
+                    # return.
                     buf.seek(0)
                     rv = buf.read(size)
                     self._rbuf = StringIO.StringIO()
                     self._rbuf.write(buf.read())
                     return rv
 
-                self._rbuf = StringIO.StringIO()  # reset _rbuf.  we consume it via buf.
+                # reset _rbuf.  we consume it via buf.
+                self._rbuf = StringIO.StringIO()
                 while True:
                     left = size - buf_len
                     # recv() will malloc the amount of memory given as its
@@ -1074,7 +1119,8 @@ class CP_fileobject(socket._fileobject):
                     # Speed up unbuffered case
                     buf.seek(0)
                     buffers = [buf.read()]
-                    self._rbuf = StringIO.StringIO()  # reset _rbuf.  we consume it via buf.
+                    # reset _rbuf.  we consume it via buf.
+                    self._rbuf = StringIO.StringIO()
                     data = None
                     recv = self.recv
                     while data != "\n":
@@ -1085,7 +1131,8 @@ class CP_fileobject(socket._fileobject):
                     return "".join(buffers)
 
                 buf.seek(0, 2)  # seek end
-                self._rbuf = StringIO.StringIO()  # reset _rbuf.  we consume it via buf.
+                # reset _rbuf.  we consume it via buf.
+                self._rbuf = StringIO.StringIO()
                 while True:
                     data = self.recv(self._rbufsize)
                     if not data:
@@ -1100,7 +1147,8 @@ class CP_fileobject(socket._fileobject):
                     buf.write(data)
                 return buf.getvalue()
             else:
-                # Read until size bytes or \n or EOF seen, whichever comes first
+                # Read until size bytes or \n or EOF seen, whichever comes
+                # first
                 buf.seek(0, 2)  # seek end
                 buf_len = buf.tell()
                 if buf_len >= size:
@@ -1109,7 +1157,8 @@ class CP_fileobject(socket._fileobject):
                     self._rbuf = StringIO.StringIO()
                     self._rbuf.write(buf.read())
                     return rv
-                self._rbuf = StringIO.StringIO()  # reset _rbuf.  we consume it via buf.
+                # reset _rbuf.  we consume it via buf.
+                self._rbuf = StringIO.StringIO()
                 while True:
                     data = self.recv(self._rbufsize)
                     if not data:
@@ -1125,8 +1174,8 @@ class CP_fileobject(socket._fileobject):
                             buf.write(data[:nl])
                             break
                         else:
-                            # Shortcut.  Avoid data copy through buf when returning
-                            # a substring of our first recv().
+                            # Shortcut.  Avoid data copy through buf when
+                            # returning a substring of our first recv().
                             return data[:nl]
                     n = len(data)
                     if n == size and not buf_len:
@@ -1220,7 +1269,8 @@ class CP_fileobject(socket._fileobject):
                         break
                 return "".join(buffers)
             else:
-                # Read until size bytes or \n or EOF seen, whichever comes first
+                # Read until size bytes or \n or EOF seen, whichever comes
+                # first
                 nl = data.find('\n', 0, size)
                 if nl >= 0:
                     nl += 1
@@ -1256,6 +1306,7 @@ class CP_fileobject(socket._fileobject):
 
 
 class HTTPConnection(object):
+
     """An HTTP connection (active socket).
 
     server: the Server object which received this connection.
@@ -1273,8 +1324,8 @@ class HTTPConnection(object):
     def __init__(self, server, sock, makefile=CP_fileobject):
         self.server = server
         self.socket = sock
-        self.rfile = makefile(sock, "rb", self.rbufsize)
-        self.wfile = makefile(sock, "wb", self.wbufsize)
+        self.rfile = makefile(sock._sock, "rb", self.rbufsize)
+        self.wfile = makefile(sock._sock, "wb", self.wbufsize)
         self.requests_seen = 0
 
     def communicate(self):
@@ -1306,11 +1357,14 @@ class HTTPConnection(object):
             e = sys.exc_info()[1]
             errnum = e.args[0]
             # sadly SSL sockets return a different (longer) time out string
-            if errnum == 'timed out' or errnum == 'The read operation timed out':
+            if (
+                errnum == 'timed out' or
+                errnum == 'The read operation timed out'
+            ):
                 # Don't error if we're between requests; only error
                 # if 1) no request has been started at all, or 2) we're
                 # in the middle of a request.
-                # See http://www.cherrypy.org/ticket/853
+                # See https://bitbucket.org/cherrypy/cherrypy/issue/853
                 if (not request_seen) or (req and req.started_request):
                     # Don't bother writing the 408 if the response
                     # has already started being written.
@@ -1338,8 +1392,10 @@ class HTTPConnection(object):
         except NoSSLError:
             if req and not req.sent_headers:
                 # Unwrap our wfile
-                self.wfile = CP_fileobject(self.socket._sock, "wb", self.wbufsize)
-                req.simple_response("400 Bad Request",
+                self.wfile = CP_fileobject(
+                    self.socket._sock, "wb", self.wbufsize)
+                req.simple_response(
+                    "400 Bad Request",
                     "The client sent a plain HTTP request, but "
                     "this server only speaks HTTPS on this port.")
                 self.linger = True
@@ -1360,11 +1416,12 @@ class HTTPConnection(object):
         self.rfile.close()
 
         if not self.linger:
-            # Python's socket module does NOT call close on the kernel socket
-            # when you call socket.close(). We do so manually here because we
-            # want this server to send a FIN TCP segment immediately. Note this
-            # must be called *before* calling socket.close(), because the latter
-            # drops its reference to the kernel socket.
+            # Python's socket module does NOT call close on the kernel
+            # socket when you call socket.close(). We do so manually here
+            # because we want this server to send a FIN TCP segment
+            # immediately. Note this must be called *before* calling
+            # socket.close(), because the latter drops its reference to
+            # the kernel socket.
             if hasattr(self.socket, '_sock'):
                 self.socket._sock.close()
             self.socket.close()
@@ -1379,9 +1436,13 @@ class HTTPConnection(object):
 
 
 class TrueyZero(object):
-    """An object which equals and does math like the integer '0' but evals True."""
+
+    """An object which equals and does math like the integer 0 but evals True.
+    """
+
     def __add__(self, other):
         return other
+
     def __radd__(self, other):
         return other
 trueyzero = TrueyZero()
@@ -1389,7 +1450,9 @@ trueyzero = TrueyZero()
 
 _SHUTDOWNREQUEST = None
 
+
 class WorkerThread(threading.Thread):
+
     """Thread which continuously polls a Queue for Connection objects.
 
     Due to the timing issues of polling a Queue, a WorkerThread does not
@@ -1409,7 +1472,6 @@ class WorkerThread(threading.Thread):
     """A simple flag for the calling server to know when this thread
     has begun polling the Queue."""
 
-
     def __init__(self, server):
         self.ready = False
         self.server = server
@@ -1420,12 +1482,30 @@ class WorkerThread(threading.Thread):
         self.start_time = None
         self.work_time = 0
         self.stats = {
-            'Requests': lambda s: self.requests_seen + ((self.start_time is None) and trueyzero or self.conn.requests_seen),
-            'Bytes Read': lambda s: self.bytes_read + ((self.start_time is None) and trueyzero or self.conn.rfile.bytes_read),
-            'Bytes Written': lambda s: self.bytes_written + ((self.start_time is None) and trueyzero or self.conn.wfile.bytes_written),
-            'Work Time': lambda s: self.work_time + ((self.start_time is None) and trueyzero or time.time() - self.start_time),
-            'Read Throughput': lambda s: s['Bytes Read'](s) / (s['Work Time'](s) or 1e-6),
-            'Write Throughput': lambda s: s['Bytes Written'](s) / (s['Work Time'](s) or 1e-6),
+            'Requests': lambda s: self.requests_seen + (
+                (self.start_time is None) and
+                trueyzero or
+                self.conn.requests_seen
+            ),
+            'Bytes Read': lambda s: self.bytes_read + (
+                (self.start_time is None) and
+                trueyzero or
+                self.conn.rfile.bytes_read
+            ),
+            'Bytes Written': lambda s: self.bytes_written + (
+                (self.start_time is None) and
+                trueyzero or
+                self.conn.wfile.bytes_written
+            ),
+            'Work Time': lambda s: self.work_time + (
+                (self.start_time is None) and
+                trueyzero or
+                time.time() - self.start_time
+            ),
+            'Read Throughput': lambda s: s['Bytes Read'](s) / (
+                s['Work Time'](s) or 1e-6),
+            'Write Throughput': lambda s: s['Bytes Written'](s) / (
+                s['Work Time'](s) or 1e-6),
         }
         threading.Thread.__init__(self)
 
@@ -1458,18 +1538,21 @@ class WorkerThread(threading.Thread):
 
 
 class ThreadPool(object):
+
     """A Request Queue for an HTTPServer which pools threads.
 
     ThreadPool objects must provide min, get(), put(obj), start()
     and stop(timeout) attributes.
     """
 
-    def __init__(self, server, min=10, max=-1):
+    def __init__(self, server, min=10, max=-1,
+        accepted_queue_size=-1, accepted_queue_timeout=10):
         self.server = server
         self.min = min
         self.max = max
         self._threads = []
-        self._queue = queue.Queue()
+        self._queue = queue.Queue(maxsize=accepted_queue_size)
+        self._queue_put_timeout = accepted_queue_timeout
         self.get = self._queue.get
 
     def start(self):
@@ -1489,19 +1572,35 @@ class ThreadPool(object):
     idle = property(_get_idle, doc=_get_idle.__doc__)
 
     def put(self, obj):
-        self._queue.put(obj)
+        self._queue.put(obj, block=True, timeout=self._queue_put_timeout)
         if obj is _SHUTDOWNREQUEST:
             return
 
     def grow(self, amount):
         """Spawn new worker threads (not above self.max)."""
-        for i in range(amount):
-            if self.max > 0 and len(self._threads) >= self.max:
-                break
-            worker = WorkerThread(self.server)
-            worker.setName("CP Server " + worker.getName())
-            self._threads.append(worker)
-            worker.start()
+        if self.max > 0:
+            budget = max(self.max - len(self._threads), 0)
+        else:
+            # self.max <= 0 indicates no maximum
+            budget = float('inf')
+
+        n_new = min(amount, budget)
+
+        workers = [self._spawn_worker() for i in range(n_new)]
+        while not self._all(operator.attrgetter('ready'), workers):
+            time.sleep(.1)
+        self._threads.extend(workers)
+
+    def _spawn_worker(self):
+        worker = WorkerThread(self.server)
+        worker.setName("CP Server " + worker.getName())
+        worker.start()
+        return worker
+
+    def _all(func, items):
+        results = [func(item) for item in items]
+        return reduce(operator.and_, results, True)
+    _all = staticmethod(_all)
 
     def shrink(self, amount):
         """Kill off worker threads (not below self.min)."""
@@ -1512,13 +1611,17 @@ class ThreadPool(object):
                 self._threads.remove(t)
                 amount -= 1
 
-        if amount > 0:
-            for i in range(min(amount, len(self._threads) - self.min)):
-                # Put a number of shutdown requests on the queue equal
-                # to 'amount'. Once each of those is processed by a worker,
-                # that worker will terminate and be culled from our list
-                # in self.put.
-                self._queue.put(_SHUTDOWNREQUEST)
+        # calculate the number of threads above the minimum
+        n_extra = max(len(self._threads) - self.min, 0)
+
+        # don't remove more than amount
+        n_to_remove = min(amount, n_extra)
+
+        # put shutdown requests on the queue equal to the number of threads
+        # to remove. As each request is processed by a worker, that worker
+        # will terminate and be culled from the list.
+        for n in range(n_to_remove):
+            self._queue.put(_SHUTDOWNREQUEST)
 
     def stop(self, timeout=5):
         # Must shut down threads here so the code that calls
@@ -1553,7 +1656,8 @@ class ThreadPool(object):
                             worker.join()
                 except (AssertionError,
                         # Ignore repeated Ctrl-C.
-                        # See http://www.cherrypy.org/ticket/691.
+                        # See
+                        # https://bitbucket.org/cherrypy/cherrypy/issue/691.
                         KeyboardInterrupt):
                     pass
 
@@ -1562,12 +1666,19 @@ class ThreadPool(object):
     qsize = property(_get_qsize)
 
 
-
 try:
     import fcntl
 except ImportError:
     try:
         from ctypes import windll, WinError
+        import ctypes.wintypes
+        _SetHandleInformation = windll.kernel32.SetHandleInformation
+        _SetHandleInformation.argtypes = [
+            ctypes.wintypes.HANDLE,
+            ctypes.wintypes.DWORD,
+            ctypes.wintypes.DWORD,
+        ]
+        _SetHandleInformation.restype = ctypes.wintypes.BOOL
     except ImportError:
         def prevent_socket_inheritance(sock):
             """Dummy function, since neither fcntl nor ctypes are available."""
@@ -1575,7 +1686,7 @@ except ImportError:
     else:
         def prevent_socket_inheritance(sock):
             """Mark the given socket fd as non-inheritable (Windows)."""
-            if not windll.kernel32.SetHandleInformation(sock.fileno(), 1, 0):
+            if not _SetHandleInformation(sock.fileno(), 1, 0):
                 raise WinError()
 else:
     def prevent_socket_inheritance(sock):
@@ -1586,12 +1697,14 @@ else:
 
 
 class SSLAdapter(object):
+
     """Base class for SSL driver library adapters.
 
     Required methods:
 
         * ``wrap(sock) -> (wrapped socket, ssl environ dict)``
-        * ``makefile(sock, mode='r', bufsize=DEFAULT_BUFFER_SIZE) -> socket file object``
+        * ``makefile(sock, mode='r', bufsize=DEFAULT_BUFFER_SIZE) ->
+          socket file object``
     """
 
     def __init__(self, certificate, private_key, certificate_chain=None):
@@ -1607,6 +1720,7 @@ class SSLAdapter(object):
 
 
 class HTTPServer(object):
+
     """An HTTP server."""
 
     _bind_addr = "127.0.0.1"
@@ -1619,7 +1733,8 @@ class HTTPServer(object):
     """The minimum number of worker threads to create (default 10)."""
 
     maxthreads = None
-    """The maximum number of worker threads to create (default -1 = no limit)."""
+    """The maximum number of worker threads to create (default -1 = no limit).
+    """
 
     server_name = None
     """The name of the server; defaults to socket.gethostname()."""
@@ -1631,15 +1746,18 @@ class HTTPServer(object):
     features used in the response."""
 
     request_queue_size = 5
-    """The 'backlog' arg to socket.listen(); max queued connections (default 5)."""
+    """The 'backlog' arg to socket.listen(); max queued connections
+    (default 5).
+    """
 
     shutdown_timeout = 5
-    """The total time, in seconds, to wait for worker threads to cleanly exit."""
+    """The total time, in seconds, to wait for worker threads to cleanly exit.
+    """
 
     timeout = 10
     """The timeout in seconds for accepted connections (default 10)."""
 
-    version = "CherryPy/3.2.2"
+    version = "CherryPy/3.6.0"
     """A version string for the HTTPServer."""
 
     software = None
@@ -1648,7 +1766,8 @@ class HTTPServer(object):
     If None, this defaults to ``'%s Server' % self.version``."""
 
     ready = False
-    """An internal flag which marks whether the socket is accepting connections."""
+    """An internal flag which marks whether the socket is accepting connections
+    """
 
     max_request_header_size = 0
     """The maximum size, in bytes, for request headers, or 0 for no limit."""
@@ -1692,14 +1811,15 @@ class HTTPServer(object):
             'Threads': lambda s: len(getattr(self.requests, "_threads", [])),
             'Threads Idle': lambda s: getattr(self.requests, "idle", None),
             'Socket Errors': 0,
-            'Requests': lambda s: (not s['Enabled']) and -1 or sum([w['Requests'](w) for w
-                                       in s['Worker Threads'].values()], 0),
-            'Bytes Read': lambda s: (not s['Enabled']) and -1 or sum([w['Bytes Read'](w) for w
-                                         in s['Worker Threads'].values()], 0),
-            'Bytes Written': lambda s: (not s['Enabled']) and -1 or sum([w['Bytes Written'](w) for w
-                                            in s['Worker Threads'].values()], 0),
-            'Work Time': lambda s: (not s['Enabled']) and -1 or sum([w['Work Time'](w) for w
-                                         in s['Worker Threads'].values()], 0),
+            'Requests': lambda s: (not s['Enabled']) and -1 or sum(
+                [w['Requests'](w) for w in s['Worker Threads'].values()], 0),
+            'Bytes Read': lambda s: (not s['Enabled']) and -1 or sum(
+                [w['Bytes Read'](w) for w in s['Worker Threads'].values()], 0),
+            'Bytes Written': lambda s: (not s['Enabled']) and -1 or sum(
+                [w['Bytes Written'](w) for w in s['Worker Threads'].values()],
+                0),
+            'Work Time': lambda s: (not s['Enabled']) and -1 or sum(
+                [w['Work Time'](w) for w in s['Worker Threads'].values()], 0),
             'Read Throughput': lambda s: (not s['Enabled']) and -1 or sum(
                 [w['Bytes Read'](w) / (w['Work Time'](w) or 1e-6)
                  for w in s['Worker Threads'].values()], 0),
@@ -1707,7 +1827,7 @@ class HTTPServer(object):
                 [w['Bytes Written'](w) / (w['Work Time'](w) or 1e-6)
                  for w in s['Worker Threads'].values()], 0),
             'Worker Threads': {},
-            }
+        }
         logging.statistics["CherryPy HTTPServer %d" % id(self)] = self.stats
 
     def runtime(self):
@@ -1722,6 +1842,7 @@ class HTTPServer(object):
 
     def _get_bind_addr(self):
         return self._bind_addr
+
     def _set_bind_addr(self, value):
         if isinstance(value, tuple) and value[0] in ('', None):
             # Despite the socket module docs, using '' does not
@@ -1738,7 +1859,9 @@ class HTTPServer(object):
                              "Use '0.0.0.0' (IPv4) or '::' (IPv6) instead "
                              "to listen on all active interfaces.")
         self._bind_addr = value
-    bind_addr = property(_get_bind_addr, _set_bind_addr,
+    bind_addr = property(
+        _get_bind_addr,
+        _set_bind_addr,
         doc="""The interface on which to listen for connections.
 
         For TCP sockets, a (host, port) tuple. Host values may be any IPv4
@@ -1763,14 +1886,14 @@ class HTTPServer(object):
 
         # SSL backward compatibility
         if (self.ssl_adapter is None and
-            getattr(self, 'ssl_certificate', None) and
-            getattr(self, 'ssl_private_key', None)):
+                getattr(self, 'ssl_certificate', None) and
+                getattr(self, 'ssl_private_key', None)):
             warnings.warn(
-                    "SSL attributes are deprecated in CherryPy 3.2, and will "
-                    "be removed in CherryPy 3.3. Use an ssl_adapter attribute "
-                    "instead.",
-                    DeprecationWarning
-                )
+                "SSL attributes are deprecated in CherryPy 3.2, and will "
+                "be removed in CherryPy 3.3. Use an ssl_adapter attribute "
+                "instead.",
+                DeprecationWarning
+            )
             try:
                 from cherrypy.wsgiserver.ssl_pyopenssl import pyOpenSSLAdapter
             except ImportError:
@@ -1785,21 +1908,28 @@ class HTTPServer(object):
             # AF_UNIX socket
 
             # So we can reuse the socket...
-            try: os.unlink(self.bind_addr)
-            except: pass
+            try:
+                os.unlink(self.bind_addr)
+            except:
+                pass
 
             # So everyone can access the socket...
-            try: os.chmod(self.bind_addr, 511) # 0777
-            except: pass
+            try:
+                os.chmod(self.bind_addr, 511)  # 0777
+            except:
+                pass
 
-            info = [(socket.AF_UNIX, socket.SOCK_STREAM, 0, "", self.bind_addr)]
+            info = [
+                (socket.AF_UNIX, socket.SOCK_STREAM, 0, "", self.bind_addr)]
         else:
             # AF_INET or AF_INET6 socket
-            # Get the correct address family for our host (allows IPv6 addresses)
+            # Get the correct address family for our host (allows IPv6
+            # addresses)
             host, port = self.bind_addr
             try:
-                info = socket.getaddrinfo(host, port, socket.AF_UNSPEC,
-                                          socket.SOCK_STREAM, 0, socket.AI_PASSIVE)
+                info = socket.getaddrinfo(
+                    host, port, socket.AF_UNSPEC,
+                    socket.SOCK_STREAM, 0, socket.AI_PASSIVE)
             except socket.gaierror:
                 if ':' in self.bind_addr[0]:
                     info = [(socket.AF_INET6, socket.SOCK_STREAM,
@@ -1814,7 +1944,8 @@ class HTTPServer(object):
             af, socktype, proto, canonname, sa = res
             try:
                 self.bind(af, socktype, proto)
-            except socket.error:
+            except socket.error, serr:
+                msg = "%s -- (%s: %s)" % (msg, sa, serr)
                 if self.socket:
                     self.socket.close()
                 self.socket = None
@@ -1869,11 +2000,13 @@ class HTTPServer(object):
             self.socket = self.ssl_adapter.bind(self.socket)
 
         # If listening on the IPV6 any address ('::' = IN6ADDR_ANY),
-        # activate dual-stack. See http://www.cherrypy.org/ticket/871.
+        # activate dual-stack. See
+        # https://bitbucket.org/cherrypy/cherrypy/issue/871.
         if (hasattr(socket, 'AF_INET6') and family == socket.AF_INET6
-            and self.bind_addr[0] in ('::', '::0', '::0.0.0.0')):
+                and self.bind_addr[0] in ('::', '::0', '::0.0.0.0')):
             try:
-                self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+                self.socket.setsockopt(
+                    socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
             except (AttributeError, socket.error):
                 # Apparently, the socket option is not available in
                 # this machine's TCP stack
@@ -1908,7 +2041,7 @@ class HTTPServer(object):
                            "Content-Type: text/plain\r\n\r\n",
                            msg]
 
-                    wfile = makefile(s, "wb", DEFAULT_BUFFER_SIZE)
+                    wfile = makefile(s._sock, "wb", DEFAULT_BUFFER_SIZE)
                     try:
                         wfile.sendall("".join(buf))
                     except socket.error:
@@ -1928,7 +2061,7 @@ class HTTPServer(object):
             if not isinstance(self.bind_addr, basestring):
                 # optional values
                 # Until we do DNS lookups, omit REMOTE_HOST
-                if addr is None: # sometimes this can happen
+                if addr is None:  # sometimes this can happen
                     # figure out if AF_INET or AF_INET6.
                     if len(s.getsockname()) == 2:
                         # AF_INET
@@ -1941,7 +2074,12 @@ class HTTPServer(object):
 
             conn.ssl_env = ssl_env
 
-            self.requests.put(conn)
+            try:
+                self.requests.put(conn)
+            except queue.Full:
+                # Just drop the conn. TODO: write 503 back?
+                conn.close()
+                return
         except socket.timeout:
             # The only reason for the timeout in start() is so we can
             # notice keyboard interrupts on Win32, which don't interrupt
@@ -1956,19 +2094,22 @@ class HTTPServer(object):
                 # is received during the accept() call; all docs say retry
                 # the call, and I *think* I'm reading it right that Python
                 # will then go ahead and poll for and handle the signal
-                # elsewhere. See http://www.cherrypy.org/ticket/707.
+                # elsewhere. See
+                # https://bitbucket.org/cherrypy/cherrypy/issue/707.
                 return
             if x.args[0] in socket_errors_nonblocking:
-                # Just try again. See http://www.cherrypy.org/ticket/479.
+                # Just try again. See
+                # https://bitbucket.org/cherrypy/cherrypy/issue/479.
                 return
             if x.args[0] in socket_errors_to_ignore:
                 # Our socket was closed.
-                # See http://www.cherrypy.org/ticket/686.
+                # See https://bitbucket.org/cherrypy/cherrypy/issue/686.
                 return
             raise
 
     def _get_interrupt(self):
         return self._interrupt
+
     def _set_interrupt(self, interrupt):
         self._interrupt = True
         self.stop()
@@ -1994,7 +2135,8 @@ class HTTPServer(object):
                     x = sys.exc_info()[1]
                     if x.args[0] not in socket_errors_to_ignore:
                         # Changed to use error code and not message
-                        # See http://www.cherrypy.org/ticket/860.
+                        # See
+                        # https://bitbucket.org/cherrypy/cherrypy/issue/860.
                         raise
                 else:
                     # Note that we're explicitly NOT using AI_PASSIVE,
@@ -2007,8 +2149,9 @@ class HTTPServer(object):
                         s = None
                         try:
                             s = socket.socket(af, socktype, proto)
-                            # See http://groups.google.com/group/cherrypy-users/
-                            #        browse_frm/thread/bbfe5eb39c904fe0
+                            # See
+                            # http://groups.google.com/group/cherrypy-users/
+                            #    browse_frm/thread/bbfe5eb39c904fe0
                             s.settimeout(1.0)
                             s.connect((host, port))
                             s.close()
@@ -2023,7 +2166,9 @@ class HTTPServer(object):
 
 
 class Gateway(object):
-    """A base class to interface HTTPServer with other systems, such as WSGI."""
+
+    """A base class to interface HTTPServer with other systems, such as WSGI.
+    """
 
     def __init__(self, req):
         self.req = req
@@ -2038,7 +2183,8 @@ class Gateway(object):
 ssl_adapters = {
     'builtin': 'cherrypy.wsgiserver.ssl_builtin.BuiltinSSLAdapter',
     'pyopenssl': 'cherrypy.wsgiserver.ssl_pyopenssl.pyOpenSSLAdapter',
-    }
+}
+
 
 def get_ssl_adapter_class(name='pyopenssl'):
     """Return an SSL adapter class for the given name."""
@@ -2065,18 +2211,22 @@ def get_ssl_adapter_class(name='pyopenssl'):
 
     return adapter
 
-# -------------------------------- WSGI Stuff -------------------------------- #
+# ------------------------------- WSGI Stuff -------------------------------- #
 
 
 class CherryPyWSGIServer(HTTPServer):
+
     """A subclass of HTTPServer which calls a WSGI application."""
 
     wsgi_version = (1, 0)
     """The version of WSGI to produce."""
 
     def __init__(self, bind_addr, wsgi_app, numthreads=10, server_name=None,
-                 max=-1, request_queue_size=5, timeout=10, shutdown_timeout=5):
-        self.requests = ThreadPool(self, min=numthreads or 1, max=max)
+                 max=-1, request_queue_size=5, timeout=10, shutdown_timeout=5,
+                 accepted_queue_size=-1, accepted_queue_timeout=10):
+        self.requests = ThreadPool(self, min=numthreads or 1, max=max,
+            accepted_queue_size=accepted_queue_size,
+            accepted_queue_timeout=accepted_queue_timeout)
         self.wsgi_app = wsgi_app
         self.gateway = wsgi_gateways[self.wsgi_version]
 
@@ -2092,12 +2242,14 @@ class CherryPyWSGIServer(HTTPServer):
 
     def _get_numthreads(self):
         return self.requests.min
+
     def _set_numthreads(self, value):
         self.requests.min = value
     numthreads = property(_get_numthreads, _set_numthreads)
 
 
 class WSGIGateway(Gateway):
+
     """A base class to interface HTTPServer with WSGI."""
 
     def __init__(self, req):
@@ -2129,7 +2281,7 @@ class WSGIGateway(Gateway):
             if hasattr(response, "close"):
                 response.close()
 
-    def start_response(self, status, headers, exc_info = None):
+    def start_response(self, status, headers, exc_info=None):
         """WSGI callable to begin the HTTP response."""
         # "The application may call start_response more than once,
         # if and only if the exc_info argument is provided."
@@ -2150,9 +2302,11 @@ class WSGIGateway(Gateway):
         self.req.status = status
         for k, v in headers:
             if not isinstance(k, str):
-                raise TypeError("WSGI response header key %r is not of type str." % k)
+                raise TypeError(
+                    "WSGI response header key %r is not of type str." % k)
             if not isinstance(v, str):
-                raise TypeError("WSGI response header value %r is not of type str." % v)
+                raise TypeError(
+                    "WSGI response header value %r is not of type str." % v)
             if k.lower() == 'content-length':
                 self.remaining_bytes_out = int(v)
         self.req.outheaders.extend(headers)
@@ -2173,7 +2327,8 @@ class WSGIGateway(Gateway):
         if rbo is not None and chunklen > rbo:
             if not self.req.sent_headers:
                 # Whew. We can send a 500 to the client.
-                self.req.simple_response("500 Internal Server Error",
+                self.req.simple_response(
+                    "500 Internal Server Error",
                     "The requested resource returned more bytes than the "
                     "declared Content-Length.")
             else:
@@ -2195,6 +2350,7 @@ class WSGIGateway(Gateway):
 
 
 class WSGIGateway_10(WSGIGateway):
+
     """A Gateway class to interface HTTPServer with WSGI 1.0.x."""
 
     def get_environ(self):
@@ -2223,7 +2379,7 @@ class WSGIGateway_10(WSGIGateway):
             'wsgi.run_once': False,
             'wsgi.url_scheme': req.scheme,
             'wsgi.version': (1, 0),
-            }
+        }
 
         if isinstance(req.server.bind_addr, basestring):
             # AF_UNIX. This isn't really allowed by WSGI, which doesn't
@@ -2251,17 +2407,19 @@ class WSGIGateway_10(WSGIGateway):
 
 
 class WSGIGateway_u0(WSGIGateway_10):
+
     """A Gateway class to interface HTTPServer with WSGI u.0.
 
-    WSGI u.0 is an experimental protocol, which uses unicode for keys and values
-    in both Python 2 and Python 3.
+    WSGI u.0 is an experimental protocol, which uses unicode for keys and
+    values in both Python 2 and Python 3.
     """
 
     def get_environ(self):
         """Return a new environ dict targeting the given wsgi.version"""
         req = self.req
         env_10 = WSGIGateway_10.get_environ(self)
-        env = dict([(k.decode('ISO-8859-1'), v) for k, v in env_10.iteritems()])
+        env = dict([(k.decode('ISO-8859-1'), v)
+                   for k, v in env_10.iteritems()])
         env[u'wsgi.version'] = ('u', 0)
 
         # Request-URI
@@ -2286,7 +2444,9 @@ wsgi_gateways = {
     ('u', 0): WSGIGateway_u0,
 }
 
+
 class WSGIPathInfoDispatcher(object):
+
     """A WSGI dispatcher for dispatch based on the PATH_INFO.
 
     apps: a dict or list of (path_prefix, app) pairs.
@@ -2299,7 +2459,7 @@ class WSGIPathInfoDispatcher(object):
             pass
 
         # Sort the apps by len(path), descending
-        apps.sort(cmp=lambda x,y: cmp(len(x[0]), len(y[0])))
+        apps.sort(cmp=lambda x, y: cmp(len(x[0]), len(y[0])))
         apps.reverse()
 
         # The path_prefix strings must start, but not end, with a slash.
@@ -2319,4 +2479,3 @@ class WSGIPathInfoDispatcher(object):
         start_response('404 Not Found', [('Content-Type', 'text/plain'),
                                          ('Content-Length', '0')])
         return ['']
-

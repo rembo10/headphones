@@ -43,10 +43,14 @@ def _getargs(func):
     return co.co_varnames[:co.co_argcount]
 
 
-_attr_error = ("CherryPy Tools cannot be turned on directly. Instead, turn them "
-               "on via config, or use them as decorators on your page handlers.")
+_attr_error = (
+    "CherryPy Tools cannot be turned on directly. Instead, turn them "
+    "on via config, or use them as decorators on your page handlers."
+)
+
 
 class Tool(object):
+
     """A registered function for use with CherryPy request-processing hooks.
 
     help(tool.callable) should give you more information about this Tool.
@@ -64,6 +68,7 @@ class Tool(object):
 
     def _get_on(self):
         raise AttributeError(_attr_error)
+
     def _set_on(self, value):
         raise AttributeError(_attr_error)
     on = property(_get_on, _set_on)
@@ -117,6 +122,7 @@ class Tool(object):
             raise TypeError("The %r Tool does not accept positional "
                             "arguments; you must use keyword arguments."
                             % self._name)
+
         def tool_decorator(f):
             if not hasattr(f, "_cp_config"):
                 f._cp_config = {}
@@ -142,6 +148,7 @@ class Tool(object):
 
 
 class HandlerTool(Tool):
+
     """Tool which is called 'before main', that may skip normal handlers.
 
     If the tool successfully handles the request (by setting response.body),
@@ -191,6 +198,7 @@ class HandlerTool(Tool):
 
 
 class HandlerWrapperTool(Tool):
+
     """Tool which wraps request.handler in a provided wrapper function.
 
     The 'newhandler' arg must be a handler wrapper function that takes a
@@ -209,20 +217,23 @@ class HandlerWrapperTool(Tool):
         cherrypy.tools.jinja = HandlerWrapperTool(interpolator)
     """
 
-    def __init__(self, newhandler, point='before_handler', name=None, priority=50):
+    def __init__(self, newhandler, point='before_handler', name=None,
+                 priority=50):
         self.newhandler = newhandler
         self._point = point
         self._name = name
         self._priority = priority
 
-    def callable(self, debug=False):
+    def callable(self, *args, **kwargs):
         innerfunc = cherrypy.serving.request.handler
+
         def wrap(*args, **kwargs):
             return self.newhandler(innerfunc, *args, **kwargs)
         cherrypy.serving.request.handler = wrap
 
 
 class ErrorTool(Tool):
+
     """Tool which is used to replace the default request.error_response."""
 
     def __init__(self, callable, name=None):
@@ -249,6 +260,7 @@ from cherrypy.lib import auth_basic, auth_digest
 
 
 class SessionTool(Tool):
+
     """Session Tool for CherryPy.
 
     sessions.locking
@@ -258,7 +270,8 @@ class SessionTool(Tool):
         When 'early', the session will be locked before reading the request
         body. This is off by default for safety reasons; for example,
         a large upload would block the session, denying an AJAX
-        progress meter (see http://www.cherrypy.org/ticket/630).
+        progress meter
+        (`issue <https://bitbucket.org/cherrypy/cherrypy/issue/630>`_).
 
         When 'explicit' (or any other value), you need to call
         cherrypy.session.acquire_lock() yourself before using
@@ -314,9 +327,8 @@ class SessionTool(Tool):
         _sessions.set_response_cookie(**conf)
 
 
-
-
 class XMLRPCController(object):
+
     """A Controller (page handler collection) for XML-RPC.
 
     To use it, have your controllers subclass this base class (it will
@@ -364,7 +376,7 @@ class XMLRPCController(object):
             body = subhandler(*(vpath + rpcparams), **params)
 
         else:
-            # http://www.cherrypy.org/ticket/533
+            # https://bitbucket.org/cherrypy/cherrypy/issue/533
             # if a method is not found, an xmlrpclib.Fault should be returned
             # raising an exception here will do that; see
             # cherrypy.lib.xmlrpcutil.on_error
@@ -387,6 +399,7 @@ class SessionAuthTool(HandlerTool):
 
 
 class CachingTool(Tool):
+
     """Caching Tool for CherryPy."""
 
     def _wrapper(self, **kwargs):
@@ -397,7 +410,7 @@ class CachingTool(Tool):
             if request.cacheable:
                 # Note the devious technique here of adding hooks on the fly
                 request.hooks.attach('before_finalize', _caching.tee_output,
-                                     priority = 90)
+                                     priority=90)
     _wrapper.priority = 20
 
     def _setup(self):
@@ -409,8 +422,8 @@ class CachingTool(Tool):
                                               priority=p, **conf)
 
 
-
 class Toolbox(object):
+
     """A collection of Tools.
 
     This object also functions as a config namespace handler for itself.
@@ -431,6 +444,7 @@ class Toolbox(object):
     def __enter__(self):
         """Populate request.toolmaps from tools specified in config."""
         cherrypy.serving.request.toolmaps[self.namespace] = map = {}
+
         def populate(k, v):
             toolname, arg = k.split(".", 1)
             bucket = map.setdefault(toolname, {})
@@ -459,6 +473,7 @@ class DeprecatedTool(Tool):
 
     def __call__(self, *args, **kwargs):
         warnings.warn(self.warnmsg)
+
         def tool_decorator(f):
             return f
         return tool_decorator
@@ -487,12 +502,16 @@ _d.sessions = SessionTool()
 _d.xmlrpc = ErrorTool(_xmlrpc.on_error)
 _d.caching = CachingTool('before_handler', _caching.get, 'caching')
 _d.expires = Tool('before_finalize', _caching.expires)
-_d.tidy = DeprecatedTool('before_finalize',
-    "The tidy tool has been removed from the standard distribution of CherryPy. "
-    "The most recent version can be found at http://tools.cherrypy.org/browser.")
-_d.nsgmls = DeprecatedTool('before_finalize',
-    "The nsgmls tool has been removed from the standard distribution of CherryPy. "
-    "The most recent version can be found at http://tools.cherrypy.org/browser.")
+_d.tidy = DeprecatedTool(
+    'before_finalize',
+    "The tidy tool has been removed from the standard distribution of "
+    "CherryPy. The most recent version can be found at "
+    "http://tools.cherrypy.org/browser.")
+_d.nsgmls = DeprecatedTool(
+    'before_finalize',
+    "The nsgmls tool has been removed from the standard distribution of "
+    "CherryPy. The most recent version can be found at "
+    "http://tools.cherrypy.org/browser.")
 _d.ignore_headers = Tool('before_request_body', cptools.ignore_headers)
 _d.referer = Tool('before_request_body', cptools.referer)
 _d.basic_auth = Tool('on_start_resource', auth.basic_auth)

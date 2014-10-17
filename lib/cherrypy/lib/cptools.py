@@ -4,8 +4,9 @@ import logging
 import re
 
 import cherrypy
-from cherrypy._cpcompat import basestring, ntob, md5, set
+from cherrypy._cpcompat import basestring, md5, set, unicodestr
 from cherrypy.lib import httputil as _httputil
+from cherrypy.lib import is_iterator
 
 
 #                     Conditional HTTP request support                     #
@@ -79,12 +80,14 @@ def validate_etags(autotags=False, debug=False):
                          'TOOLS.ETAGS')
         if conditions == ["*"] or etag in conditions:
             if debug:
-                cherrypy.log('request.method: %s' % request.method, 'TOOLS.ETAGS')
+                cherrypy.log('request.method: %s' %
+                             request.method, 'TOOLS.ETAGS')
             if request.method in ("GET", "HEAD"):
                 raise cherrypy.HTTPRedirect([], 304)
             else:
                 raise cherrypy.HTTPError(412, "If-None-Match failed: ETag %r "
                                          "matched %r" % (etag, conditions))
+
 
 def validate_since():
     """Validate the current Last-Modified against If-Modified-Since headers.
@@ -207,8 +210,8 @@ def proxy(base=None, local='X-Forwarded-Host', remote='X-Forwarded-For',
             cherrypy.log('Testing remote %r:%r' % (remote, xff), 'TOOLS.PROXY')
         if xff:
             if remote == 'X-Forwarded-For':
-                # See http://bob.pythonmac.org/archives/2005/09/23/apache-x-forwarded-for-caveat/
-                xff = xff.split(',')[-1].strip()
+                #Bug #1268
+                xff = xff.split(',')[0].strip()
             request.remote.ip = xff
 
 
@@ -277,6 +280,7 @@ def referer(pattern, accept=True, accept_missing=False, error=403,
 
 
 class SessionAuth(object):
+
     """Assert that the user is logged in."""
 
     session_key = "username"
@@ -298,17 +302,20 @@ class SessionAuth(object):
     def on_check(self, username):
         pass
 
-    def login_screen(self, from_page='..', username='', error_msg='', **kwargs):
-        return ntob("""<html><body>
+    def login_screen(self, from_page='..', username='', error_msg='',
+                     **kwargs):
+        return (unicodestr("""<html><body>
 Message: %(error_msg)s
 <form method="post" action="do_login">
-    Login: <input type="text" name="username" value="%(username)s" size="10" /><br />
-    Password: <input type="password" name="password" size="10" /><br />
-    <input type="hidden" name="from_page" value="%(from_page)s" /><br />
+    Login: <input type="text" name="username" value="%(username)s" size="10" />
+    <br />
+    Password: <input type="password" name="password" size="10" />
+    <br />
+    <input type="hidden" name="from_page" value="%(from_page)s" />
+    <br />
     <input type="submit" />
 </form>
-</body></html>""" % {'from_page': from_page, 'username': username,
-                     'error_msg': error_msg}, "utf-8")
+</body></html>""") % vars()).encode("utf-8")
 
     def do_login(self, username, password, from_page='..', **kwargs):
         """Login. May raise redirect, or return True if request handled."""
@@ -338,7 +345,8 @@ Message: %(error_msg)s
         raise cherrypy.HTTPRedirect(from_page)
 
     def do_check(self):
-        """Assert username. May raise redirect, or return True if request handled."""
+        """Assert username. Raise redirect, or return True if request handled.
+        """
         sess = cherrypy.session
         request = cherrypy.serving.request
         response = cherrypy.serving.response
@@ -346,22 +354,26 @@ Message: %(error_msg)s
         username = sess.get(self.session_key)
         if not username:
             sess[self.session_key] = username = self.anonymous()
-            if self.debug:
-                cherrypy.log('No session[username], trying anonymous', 'TOOLS.SESSAUTH')
+            self._debug_message('No session[username], trying anonymous')
         if not username:
             url = cherrypy.url(qs=request.query_string)
-            if self.debug:
-                cherrypy.log('No username, routing to login_screen with '
-                             'from_page %r' % url, 'TOOLS.SESSAUTH')
+            self._debug_message(
+                'No username, routing to login_screen with from_page %(url)r',
+                locals(),
+            )
             response.body = self.login_screen(url)
             if "Content-Length" in response.headers:
                 # Delete Content-Length header so finalize() recalcs it.
                 del response.headers["Content-Length"]
             return True
-        if self.debug:
-            cherrypy.log('Setting request.login to %r' % username, 'TOOLS.SESSAUTH')
+        self._debug_message('Setting request.login to %(username)r', locals())
         request.login = username
         self.on_check(username)
+
+    def _debug_message(self, template, context={}):
+        if not self.debug:
+            return
+        cherrypy.log(template % context, 'TOOLS.SESSAUTH')
 
     def run(self):
         request = cherrypy.serving.request
@@ -369,28 +381,24 @@ Message: %(error_msg)s
 
         path = request.path_info
         if path.endswith('login_screen'):
-            if self.debug:
-                cherrypy.log('routing %r to login_screen' % path, 'TOOLS.SESSAUTH')
-            return self.login_screen(**request.params)
+            self._debug_message('routing %(path)r to login_screen', locals())
+            response.body = self.login_screen()
+            return True
         elif path.endswith('do_login'):
             if request.method != 'POST':
                 response.headers['Allow'] = "POST"
-                if self.debug:
-                    cherrypy.log('do_login requires POST', 'TOOLS.SESSAUTH')
+                self._debug_message('do_login requires POST')
                 raise cherrypy.HTTPError(405)
-            if self.debug:
-                cherrypy.log('routing %r to do_login' % path, 'TOOLS.SESSAUTH')
+            self._debug_message('routing %(path)r to do_login', locals())
             return self.do_login(**request.params)
         elif path.endswith('do_logout'):
             if request.method != 'POST':
                 response.headers['Allow'] = "POST"
                 raise cherrypy.HTTPError(405)
-            if self.debug:
-                cherrypy.log('routing %r to do_logout' % path, 'TOOLS.SESSAUTH')
+            self._debug_message('routing %(path)r to do_logout', locals())
             return self.do_logout(**request.params)
         else:
-            if self.debug:
-                cherrypy.log('No special path, running do_check', 'TOOLS.SESSAUTH')
+            self._debug_message('No special path, running do_check')
             return self.do_check()
 
 
@@ -412,10 +420,12 @@ def log_traceback(severity=logging.ERROR, debug=False):
     """Write the last error's traceback to the cherrypy error log."""
     cherrypy.log("", "HTTP", severity=severity, traceback=True)
 
+
 def log_request_headers(debug=False):
     """Write request headers to the cherrypy error log."""
     h = ["  %s: %s" % (k, v) for k, v in cherrypy.serving.request.header_list]
     cherrypy.log('\nRequest Headers:\n' + '\n'.join(h), "HTTP")
+
 
 def log_hooks(debug=False):
     """Write request.hooks to the cherrypy error log."""
@@ -438,6 +448,7 @@ def log_hooks(debug=False):
     cherrypy.log('\nRequest Hooks for ' + cherrypy.url() +
                  ':\n' + '\n'.join(msg), "HTTP")
 
+
 def redirect(url='', internal=True, debug=False):
     """Raise InternalRedirect or HTTPRedirect to the given url."""
     if debug:
@@ -448,6 +459,7 @@ def redirect(url='', internal=True, debug=False):
         raise cherrypy.InternalRedirect(url)
     else:
         raise cherrypy.HTTPRedirect(url)
+
 
 def trailing_slash(missing=True, extra=False, status=None, debug=False):
     """Redirect if path_info has (missing|extra) trailing slash."""
@@ -470,17 +482,17 @@ def trailing_slash(missing=True, extra=False, status=None, debug=False):
                 new_url = cherrypy.url(pi[:-1], request.query_string)
                 raise cherrypy.HTTPRedirect(new_url, status=status or 301)
 
+
 def flatten(debug=False):
     """Wrap response.body in a generator that recursively iterates over body.
 
     This allows cherrypy.response.body to consist of 'nested generators';
     that is, a set of generators that yield generators.
     """
-    import types
     def flattener(input):
         numchunks = 0
         for x in input:
-            if not isinstance(x, types.GeneratorType):
+            if not is_iterator(x):
                 numchunks += 1
                 yield x
             else:
@@ -593,7 +605,8 @@ class MonitoredHeaderMap(_httputil.HeaderMap):
 
 
 def autovary(ignore=None, debug=False):
-    """Auto-populate the Vary response header based on request.header access."""
+    """Auto-populate the Vary response header based on request.header access.
+    """
     request = cherrypy.serving.request
 
     req_h = request.headers
@@ -606,12 +619,12 @@ def autovary(ignore=None, debug=False):
         resp_h = cherrypy.serving.response.headers
         v = set([e.value for e in resp_h.elements('Vary')])
         if debug:
-            cherrypy.log('Accessed headers: %s' % request.headers.accessed_headers,
-                         'TOOLS.AUTOVARY')
+            cherrypy.log(
+                'Accessed headers: %s' % request.headers.accessed_headers,
+                'TOOLS.AUTOVARY')
         v = v.union(request.headers.accessed_headers)
         v = v.difference(ignore)
         v = list(v)
         v.sort()
         resp_h['Vary'] = ', '.join(v)
     request.hooks.attach('before_finalize', set_response_header, 95)
-

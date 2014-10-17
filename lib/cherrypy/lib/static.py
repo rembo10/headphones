@@ -1,26 +1,27 @@
+import os
+import re
+import stat
+import mimetypes
+
 try:
     from io import UnsupportedOperation
 except ImportError:
     UnsupportedOperation = object()
-import logging
-import mimetypes
-mimetypes.init()
-mimetypes.types_map['.dwg']='image/x-dwg'
-mimetypes.types_map['.ico']='image/x-icon'
-mimetypes.types_map['.bz2']='application/x-bzip2'
-mimetypes.types_map['.gz']='application/x-gzip'
-
-import os
-import re
-import stat
-import time
 
 import cherrypy
 from cherrypy._cpcompat import ntob, unquote
 from cherrypy.lib import cptools, httputil, file_generator_limited
 
 
-def serve_file(path, content_type=None, disposition=None, name=None, debug=False):
+mimetypes.init()
+mimetypes.types_map['.dwg'] = 'image/x-dwg'
+mimetypes.types_map['.ico'] = 'image/x-icon'
+mimetypes.types_map['.bz2'] = 'application/x-bzip2'
+mimetypes.types_map['.gz'] = 'application/x-gzip'
+
+
+def serve_file(path, content_type=None, disposition=None, name=None,
+               debug=False):
     """Set status, headers, and body in order to serve the given path.
 
     The Content-Type header will be set to the content_type arg, if provided.
@@ -92,6 +93,7 @@ def serve_file(path, content_type=None, disposition=None, name=None, debug=False
     fileobj = open(path, 'rb')
     return _serve_fileobj(fileobj, content_type, content_length, debug=debug)
 
+
 def serve_fileobj(fileobj, content_type=None, disposition=None, name=None,
                   debug=False):
     """Set status, headers, and body in order to serve the given file object.
@@ -145,6 +147,7 @@ def serve_fileobj(fileobj, content_type=None, disposition=None, name=None,
 
     return _serve_fileobj(fileobj, content_type, content_length, debug=debug)
 
+
 def _serve_fileobj(fileobj, content_type, content_length, debug=False):
     """Internal. Set response.body to the given file object, perhaps ranged."""
     response = cherrypy.serving.response
@@ -156,7 +159,8 @@ def _serve_fileobj(fileobj, content_type, content_length, debug=False):
         r = httputil.get_ranges(request.headers.get('Range'), content_length)
         if r == []:
             response.headers['Content-Range'] = "bytes */%s" % content_length
-            message = "Invalid Range (first-byte-pos greater than Content-Length)"
+            message = ("Invalid Range (first-byte-pos greater than "
+                       "Content-Length)")
             if debug:
                 cherrypy.log(message, 'TOOLS.STATIC')
             raise cherrypy.HTTPError(416, message)
@@ -169,8 +173,9 @@ def _serve_fileobj(fileobj, content_type, content_length, debug=False):
                     stop = content_length
                 r_len = stop - start
                 if debug:
-                    cherrypy.log('Single part; start: %r, stop: %r' % (start, stop),
-                                 'TOOLS.STATIC')
+                    cherrypy.log(
+                        'Single part; start: %r, stop: %r' % (start, stop),
+                        'TOOLS.STATIC')
                 response.status = "206 Partial Content"
                 response.headers['Content-Range'] = (
                     "bytes %s-%s/%s" % (start, stop - 1, content_length))
@@ -182,11 +187,11 @@ def _serve_fileobj(fileobj, content_type, content_length, debug=False):
                 response.status = "206 Partial Content"
                 try:
                     # Python 3
-                    from email.generator import _make_boundary as choose_boundary
+                    from email.generator import _make_boundary as make_boundary
                 except ImportError:
                     # Python 2
-                    from mimetools import choose_boundary
-                boundary = choose_boundary()
+                    from mimetools import choose_boundary as make_boundary
+                boundary = make_boundary()
                 ct = "multipart/byteranges; boundary=%s" % boundary
                 response.headers['Content-Type'] = ct
                 if "Content-Length" in response.headers:
@@ -199,14 +204,20 @@ def _serve_fileobj(fileobj, content_type, content_length, debug=False):
 
                     for start, stop in r:
                         if debug:
-                            cherrypy.log('Multipart; start: %r, stop: %r' % (start, stop),
-                                         'TOOLS.STATIC')
+                            cherrypy.log(
+                                'Multipart; start: %r, stop: %r' % (
+                                    start, stop),
+                                'TOOLS.STATIC')
                         yield ntob("--" + boundary, 'ascii')
-                        yield ntob("\r\nContent-type: %s" % content_type, 'ascii')
-                        yield ntob("\r\nContent-range: bytes %s-%s/%s\r\n\r\n"
-                                   % (start, stop - 1, content_length), 'ascii')
+                        yield ntob("\r\nContent-type: %s" % content_type,
+                                   'ascii')
+                        yield ntob(
+                            "\r\nContent-range: bytes %s-%s/%s\r\n\r\n" % (
+                                start, stop - 1, content_length),
+                            'ascii')
                         fileobj.seek(start)
-                        for chunk in file_generator_limited(fileobj, stop-start):
+                        gen = file_generator_limited(fileobj, stop - start)
+                        for chunk in gen:
                             yield chunk
                         yield ntob("\r\n")
                     # Final boundary
@@ -225,6 +236,7 @@ def _serve_fileobj(fileobj, content_type, content_length, debug=False):
     response.headers['Content-Length'] = content_length
     response.body = fileobj
     return response.body
+
 
 def serve_download(path, name=None):
     """Serve 'path' as an application/x-download attachment."""
@@ -251,6 +263,7 @@ def _attempt(filename, content_types, debug=False):
         if debug:
             cherrypy.log('NotFound', 'TOOLS.STATICFILE')
         return False
+
 
 def staticdir(section, dir, root="", match="", content_types=None, index="",
               debug=False):
@@ -314,7 +327,7 @@ def staticdir(section, dir, root="", match="", content_types=None, index="",
     # have ".." or similar uplevel attacks in it. Check that the final
     # filename is a child of dir.
     if not os.path.normpath(filename).startswith(os.path.normpath(dir)):
-        raise cherrypy.HTTPError(403) # Forbidden
+        raise cherrypy.HTTPError(403)  # Forbidden
 
     handled = _attempt(filename, content_types)
     if not handled:
@@ -324,6 +337,7 @@ def staticdir(section, dir, root="", match="", content_types=None, index="",
             if handled:
                 request.is_index = filename[-1] in (r"\/")
     return handled
+
 
 def staticfile(filename, root=None, match="", content_types=None, debug=False):
     """Serve a static resource from the given (root +) filename.
@@ -354,7 +368,8 @@ def staticfile(filename, root=None, match="", content_types=None, debug=False):
     # If filename is relative, make absolute using "root".
     if not os.path.isabs(filename):
         if not root:
-            msg = "Static tool requires an absolute filename (got '%s')." % filename
+            msg = "Static tool requires an absolute filename (got '%s')." % (
+                filename,)
             if debug:
                 cherrypy.log(msg, 'TOOLS.STATICFILE')
             raise ValueError(msg)
