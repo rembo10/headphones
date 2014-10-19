@@ -41,7 +41,7 @@ POSSIBLE_EXTRAS = [
     "spokenword",
     "audiobook",
     "other",
-    "djmix",
+    "dj-mix",
     "mixtape_street",
     "broadcast",
     "interview",
