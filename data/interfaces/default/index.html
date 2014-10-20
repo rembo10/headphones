@@ -131,6 +131,10 @@
                     },
                 "fnInitComplete": function(oSettings, json)
                 {
+                },
+                "fnDrawCallback": function (o) {
+                    // Jump to top of page
+                    $('html,body').scrollTop(0);
                 }
             });
             $('#artist_table').on("draw.dt", function () {
