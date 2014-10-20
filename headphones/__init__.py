@@ -42,7 +42,7 @@ POSSIBLE_EXTRAS = [
     "audiobook",
     "other",
     "dj-mix",
-    "mixtape_street",
+    "mixtape/street",
     "broadcast",
     "interview",
     "demo"
