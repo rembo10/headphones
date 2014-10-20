@@ -3,7 +3,8 @@
 # vim:ts=4:sw=4:expandtab:fileencoding=utf-8
 
 __doc__ = """This module provides a CherryPy 3.x tool which implements
-the server-side of HTTP Basic Access Authentication, as described in :rfc:`2617`.
+the server-side of HTTP Basic Access Authentication, as described in
+:rfc:`2617`.
 
 Example usage, using the built-in checkpassword_dict function which uses a dict
 as the credentials store::
@@ -77,11 +78,13 @@ def basic_auth(realm, checkpassword, debug=False):
                     if debug:
                         cherrypy.log('Auth succeeded', 'TOOLS.AUTH_BASIC')
                     request.login = username
-                    return # successful authentication
-        except (ValueError, binascii.Error): # split() error, base64.decodestring() error
+                    return  # successful authentication
+        # split() error, base64.decodestring() error
+        except (ValueError, binascii.Error):
             raise cherrypy.HTTPError(400, 'Bad Request')
 
     # Respond with 401 status and a WWW-Authenticate header
-    cherrypy.serving.response.headers['www-authenticate'] = 'Basic realm="%s"' % realm
-    raise cherrypy.HTTPError(401, "You are not authorized to access that resource")
-
+    cherrypy.serving.response.headers[
+        'www-authenticate'] = 'Basic realm="%s"' % realm
+    raise cherrypy.HTTPError(
+        401, "You are not authorized to access that resource")

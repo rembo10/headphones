@@ -137,6 +137,7 @@ affects what we see:
 
 # Threading import is at end
 
+
 class _localbase(object):
     __slots__ = '_local__key', '_local__args', '_local__lock'
 
@@ -158,6 +159,7 @@ class _localbase(object):
 
         return self
 
+
 def _patch(self):
     key = object.__getattribute__(self, '_local__key')
     d = currentThread().__dict__.get(key)
@@ -174,6 +176,7 @@ def _patch(self):
             cls.__init__(self, *args, **kw)
     else:
         object.__setattr__(self, '__dict__', d)
+
 
 class local(_localbase):
 
@@ -204,7 +207,6 @@ class local(_localbase):
         finally:
             lock.release()
 
-
     def __del__():
         threading_enumerate = enumerate
         __getattribute__ = object.__getattribute__
@@ -231,7 +233,7 @@ class local(_localbase):
                     try:
                         del __dict__[key]
                     except KeyError:
-                        pass # didn't have anything in this thread
+                        pass  # didn't have anything in this thread
 
         return __del__
     __del__ = __del__()

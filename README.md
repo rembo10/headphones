@@ -1,17 +1,17 @@
 #![preview thumb](https://github.com/rembo10/headphones/raw/master/data/images/headphoneslogo.png)Headphones
 
-###Support & Discuss
+## Support & Discuss
 
 You are free to join the HP support community on IRC where you can ask questions, hang around and discuss anything related to HP.
 
 1. Use any IRC client and connect to the Freenode server.
 2. Join #headphones
 
-###Installation and Notes
+## Installation and Notes
 
-[Read our Wiki](../../wiki) on how to install and use HeadPhones properly.
+[Read our Wiki](../../wiki) on how to install and configure HeadPhones properly.
 
-[**Troubleshooting** page](../../wiki/TroubleShooting) in the wiki can help you with comon problems.
+[**Troubleshooting** page](../../wiki/TroubleShooting) in the wiki can help you with common problems.
 
 **Issues** can be reported on the GitHub issue tracker considering these rules:
 
@@ -30,8 +30,7 @@ If you **comply with these rules** you can [post your request/issue](http://gith
 **Support** the project by implementing new features, solving support tickets and provide bug fixes. 
 If you change something in the code always make a PR to the developer branch instead of the master branch.
 
-
-###Screenshots
+## Screenshots
 
 Homepage (Artist Overview)
 
@@ -62,4 +61,4 @@ Album Page with track overview:
 ![preview thumb](http://i.imgur.com/kcjES.png)
 
 
-This is free software under the GPL v3 open source license - so feel free to do with it what you wish.
+This is free software under the GPL v3 open source license - so feel free to do with it what you wish. A copy of the license is included.
