@@ -1,7 +1,6 @@
 """CherryPy Application and Tree objects."""
 
 import os
-import sys
 
 import cherrypy
 from cherrypy._cpcompat import ntou, py3k
@@ -10,6 +9,7 @@ from cherrypy.lib import httputil
 
 
 class Application(object):
+
     """A CherryPy Application.
 
     Servers and gateways should not instantiate Request objects directly.
@@ -62,10 +62,10 @@ class Application(object):
         return "%s.%s(%r, %r)" % (self.__module__, self.__class__.__name__,
                                   self.root, self.script_name)
 
-    script_name_doc = """The URI "mount point" for this app. A mount point is that portion of
-    the URI which is constant for all URIs that are serviced by this
-    application; it does not include scheme, host, or proxy ("virtual host")
-    portions of the URI.
+    script_name_doc = """The URI "mount point" for this app. A mount point
+    is that portion of the URI which is constant for all URIs that are
+    serviced by this application; it does not include scheme, host, or proxy
+    ("virtual host") portions of the URI.
 
     For example, if script_name is "/my/cool/app", then the URL
     "http://www.example.com/my/cool/app/page1" might be handled by a
@@ -77,11 +77,15 @@ class Application(object):
     If script_name is explicitly set to None, then the script_name will be
     provided for each call from request.wsgi_environ['SCRIPT_NAME'].
     """
+
     def _get_script_name(self):
-        if self._script_name is None:
-            # None signals that the script name should be pulled from WSGI environ.
-            return cherrypy.serving.request.wsgi_environ['SCRIPT_NAME'].rstrip("/")
-        return self._script_name
+        if self._script_name is not None:
+            return self._script_name
+
+        # A `_script_name` with a value of None signals that the script name
+        # should be pulled from WSGI environ.
+        return cherrypy.serving.request.wsgi_environ['SCRIPT_NAME'].rstrip("/")
+
     def _set_script_name(self, value):
         if value:
             value = value.rstrip("/")
@@ -148,6 +152,7 @@ class Application(object):
 
 
 class Tree(object):
+
     """A registry of CherryPy applications, mounted at diverse points.
 
     An instance of this class may also be used as a WSGI callable
@@ -201,8 +206,9 @@ class Tree(object):
         if isinstance(root, Application):
             app = root
             if script_name != "" and script_name != app.script_name:
-                raise ValueError("Cannot specify a different script name and "
-                                 "pass an Application instance to cherrypy.mount")
+                raise ValueError(
+                    "Cannot specify a different script name and pass an "
+                    "Application instance to cherrypy.mount")
             script_name = app.script_name
         else:
             app = Application(root, script_name)
@@ -273,7 +279,8 @@ class Tree(object):
                 # Python 2/WSGI u.0: all strings MUST be of type unicode
                 enc = environ[ntou('wsgi.url_encoding')]
                 environ[ntou('SCRIPT_NAME')] = sn.decode(enc)
-                environ[ntou('PATH_INFO')] = path[len(sn.rstrip("/")):].decode(enc)
+                environ[ntou('PATH_INFO')] = path[
+                    len(sn.rstrip("/")):].decode(enc)
             else:
                 # Python 2/WSGI 1.x: all strings MUST be of type str
                 environ['SCRIPT_NAME'] = sn
@@ -285,6 +292,8 @@ class Tree(object):
                 environ['PATH_INFO'] = path[len(sn.rstrip("/")):]
             else:
                 # Python 3/WSGI 1.x: all strings MUST be ISO-8859-1 str
-                environ['SCRIPT_NAME'] = sn.encode('utf-8').decode('ISO-8859-1')
-                environ['PATH_INFO'] = path[len(sn.rstrip("/")):].encode('utf-8').decode('ISO-8859-1')
+                environ['SCRIPT_NAME'] = sn.encode(
+                    'utf-8').decode('ISO-8859-1')
+                environ['PATH_INFO'] = path[
+                    len(sn.rstrip("/")):].encode('utf-8').decode('ISO-8859-1')
         return app(environ, start_response)

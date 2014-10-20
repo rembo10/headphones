@@ -47,11 +47,11 @@ Or, just look at the pretty picture:<br />
     other.exposed = True
 
     files = cherrypy.tools.staticdir.handler(
-                section="/files",
-                dir=os.path.join(local_dir, "static"),
-                # Ignore .php files, etc.
+        section="/files",
+        dir=os.path.join(local_dir, "static"),
+        # Ignore .php files, etc.
                 match=r'\.(css|gif|html?|ico|jpe?g|js|png|swf|xml)$',
-                )
+    )
 
 
 root = Root()
