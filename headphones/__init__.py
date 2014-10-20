@@ -24,7 +24,9 @@ import sqlite3
 import itertools
 import cherrypy
 
-from apscheduler.scheduler import Scheduler
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+
 from configobj import ConfigObj
 
 from headphones import versioncheck, logger, version
@@ -45,7 +47,7 @@ DAEMON = False
 CREATEPID = False
 PIDFILE= None
 
-SCHED = Scheduler()
+SCHED = BackgroundScheduler()
 
 INIT_LOCK = threading.Lock()
 __INITIALIZED__ = False
@@ -1151,19 +1153,19 @@ def start():
         # Start our scheduled background tasks
         from headphones import updater, searcher, librarysync, postprocessor, torrentfinished
 
-        SCHED.add_interval_job(updater.dbUpdate, hours=UPDATE_DB_INTERVAL)
-        SCHED.add_interval_job(searcher.searchforalbum, minutes=SEARCH_INTERVAL)
-        SCHED.add_interval_job(librarysync.libraryScan, hours=LIBRARYSCAN_INTERVAL, kwargs={'cron':True})
+        SCHED.add_job(updater.dbUpdate, trigger=IntervalTrigger(hours=UPDATE_DB_INTERVAL))
+        SCHED.add_job(searcher.searchforalbum, trigger=IntervalTrigger(minutes=SEARCH_INTERVAL))
+        SCHED.add_job(librarysync.libraryScan, trigger=IntervalTrigger(hours=LIBRARYSCAN_INTERVAL))
 
         if CHECK_GITHUB:
-            SCHED.add_interval_job(versioncheck.checkGithub, minutes=CHECK_GITHUB_INTERVAL)
+            SCHED.add_job(versioncheck.checkGithub, trigger=IntervalTrigger(minutes=CHECK_GITHUB_INTERVAL))
 
         if DOWNLOAD_SCAN_INTERVAL > 0:
-            SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
+            SCHED.add_job(postprocessor.checkFolder, trigger=IntervalTrigger(minutes=DOWNLOAD_SCAN_INTERVAL))
 
         # Remove Torrent + data if Post Processed and finished Seeding
         if TORRENT_REMOVAL_INTERVAL > 0:
-            SCHED.add_interval_job(torrentfinished.checkTorrentFinished, minutes=TORRENT_REMOVAL_INTERVAL)
+            SCHED.add_job(torrentfinished.checkTorrentFinished, trigger=IntervalTrigger(minutes=TORRENT_REMOVAL_INTERVAL))
 
         SCHED.start()
 
