@@ -86,31 +86,31 @@
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-	function initThisPage() {
-		$('#artist_table').dataTable({	
-			"bDestroy":true,		
-			"aoColumns": [
-				null,
-				null,
-				{ "sType": "title-string"},
-				null,
-				{ "sType": "title-string"},
-				null
-			],
-			"oLanguage": {
-				"sSearch" : "",
-				"sEmptyTable": " "
-			},
-			"bStateSave": true,
-			"bPaginate": false
+		function initThisPage() {
+			$('#artist_table').dataTable({
+				"bDestroy": true,
+				"aoColumns": [
+					null,
+					null,
+					{ "sType": "title-string"},
+					null,
+					{ "sType": "title-string"},
+					null
+				],
+				"oLanguage": {
+					"sSearch" : "",
+					"sEmptyTable": " "
+				},
+				"bStateSave": true,
+				"bPaginate": false
+			});
+			resetFilters("artists");
+		}
+		$(document).ready(function() {
+			initThisPage();
 		});
-		resetFilters("artists");
-	}
-	$(document).ready(function() {
-		initThisPage();
-	});
-	$(window).load(function(){
-		initFancybox();
-	});
+		$(window).load(function(){
+			initFancybox();
+		});
 	</script>
 </%def>

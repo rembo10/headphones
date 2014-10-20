@@ -107,7 +107,11 @@
 					"sSearch" : ""},
 				"iDisplayLength": 25,
 				"sPaginationType": "full_numbers",
-				"aaSorting": []
+				"aaSorting": [],
+                "fnDrawCallback": function (o) {
+                    // Jump to top of page
+                    $('html,body').scrollTop(0);
+                }
 			});
             $('#searchresults_table').on("draw.dt", function () {
                 getArt();
