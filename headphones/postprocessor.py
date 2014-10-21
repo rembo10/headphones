@@ -1093,8 +1093,8 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
 
         # If DOWNLOAD_DIR and DOWNLOAD_TORRENT_DIR are the same, remove the duplicate to prevent us from trying to process the same folder twice.
         download_dirs = list(set(download_dirs))
+        logger.debug('Post processing folders: %s', download_dirs)
 
-        logger.info('Checking to see if there are any folders to process in download_dir(s): %s', download_dirs)
         # Get a list of folders in the download_dir
         folders = []
 
@@ -1113,10 +1113,13 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                     else:
                         folders.append(path_to_folder)
 
-        if len(folders):
-            logger.info('Found %i folders to process', len(folders))
-        else:
-            logger.info('Found no folders to process in: %s', download_dirs)
+    # Log number of folders
+    if folders:
+        logger.info('Found %i folders to process.', len(folders))
+        logger.debug('Expanded post processing folders: %s', folders)
+    else:
+        logger.info('Found no folders to process. Aborting.')
+        return
 
     # Parse the folder names to get artist album info
     myDB = db.DBConnection()
