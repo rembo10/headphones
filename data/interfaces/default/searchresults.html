@@ -125,4 +125,18 @@
             initThisPage();
     	});
 	</script>
+
+    <script type="text/javascript">
+        <%!
+            # Abuse JSON module for escaping JavaScript
+            import json
+        %>
+        $(document).ready(function() {
+            // Search parameter
+            $("#searchbar input[name=name]").val(${name | json.dumps});
+
+            // Album or artist
+            $("#searchbar select[name=type]").val(${type | json.dumps});
+        });
+    </script>
 </%def>

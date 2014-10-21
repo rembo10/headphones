@@ -142,7 +142,7 @@ class WebInterface(object):
             searchresults = mb.findArtist(name, limit=100)
         else:
             searchresults = mb.findRelease(name, limit=100)
-        return serve_template(templatename="searchresults.html", title='Search Results for: "' + name + '"', searchresults=searchresults, type=type)
+        return serve_template(templatename="searchresults.html", title='Search Results for: "' + name + '"', searchresults=searchresults, name=name, type=type)
     search.exposed = True
 
     def addArtist(self, artistid):
