@@ -317,10 +317,27 @@
                                     <input type="text" name="torrentblackhole_dir" value="${config['torrentblackhole_dir']}" size="50">
                                     <small>Folder your Download program watches for Torrents</small>
                                 </div>
-                                <div class="row checkbox">
-                                    <label>Open Magnet Links</label>
-                                    <input type="checkbox" name="open_magnet_links" value="1" ${config['open_magnet_links']}>
-                                    <small>Allow Headphones to open magnet links</small>
+
+                                <div class="row">
+                                    <label>Magnet links</label>
+
+                                    <label class="inline" title="Invoke shell command to open magnet URL.">
+                                        <input type="radio" name="magnet_links" id="magnet_links_0" value="0" ${config['magnet_links_0']}>
+                                        Ignore
+                                    </label>
+
+                                    <label class="inline" title="Use external service to convert magnet links into torrents.">
+                                        <input type="radio" name="magnet_links" id="magnet_links_1" value="1" ${config['magnet_links_1']}>
+                                        Open
+                                    </label>
+
+                                    <label class="inline">
+                                        <input type="radio" name="magnet_links" id="magnet_links_2" value="2" ${config['magnet_links_2']}>
+                                        Convert
+                                    </label>
+                                    <div style="clear: both"></div>
+
+                                    <small>Note: opening magnet URL's is not suitable for headless/console/terminal servers.</small>
                                 </div>
                             </fieldset>
                             <fieldset id="transmission_options">
@@ -382,7 +399,7 @@
                                     <input type="radio" name="prefer_torrents" id="prefer_torrents_0" value="0" ${config['prefer_torrents_0']}>NZBs
                                     <input type="radio" name="prefer_torrents" id="prefer_torrents_1" value="1" ${config['prefer_torrents_1']}>Torrents
                                     <input type="radio" name="prefer_torrents" id="prefer_torrents_2" value="2" ${config['prefer_torrents_2']}>No Preference
-                                    </div>
+                                </div>
                             </fieldset>
                         </td>
                     </tr>

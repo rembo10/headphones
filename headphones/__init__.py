@@ -134,7 +134,7 @@ AUTOWANT_ALL = False
 AUTOWANT_MANUALLY_ADDED = True
 KEEP_TORRENT_FILES = False
 PREFER_TORRENTS = None # 0: nzbs, 1: torrents, 2: no preference
-OPEN_MAGNET_LINKS = False
+MAGNET_LINKS = None # 0: Ignore, 1: Open, 2: Convert
 
 SEARCH_INTERVAL = 360
 LIBRARYSCAN = False
@@ -361,7 +361,7 @@ def initialize():
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, HTTP_PROXY, LAUNCH_BROWSER, API_ENABLED, API_KEY, GIT_PATH, GIT_USER, GIT_BRANCH, DO_NOT_OVERRIDE_GIT_BRANCH, \
                 CURRENT_VERSION, LATEST_VERSION, CHECK_GITHUB, CHECK_GITHUB_ON_STARTUP, CHECK_GITHUB_INTERVAL, MUSIC_DIR, DESTINATION_DIR, \
                 LOSSLESS_DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, ADD_ARTISTS, CORRECT_METADATA, FREEZE_DB, MOVE_FILES, \
-                RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, FILE_UNDERSCORES, CLEANUP_FILES, KEEP_NFO, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, AUTOWANT_MANUALLY_ADDED, KEEP_TORRENT_FILES, PREFER_TORRENTS, OPEN_MAGNET_LINKS, \
+                RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, FILE_UNDERSCORES, CLEANUP_FILES, KEEP_NFO, INCLUDE_EXTRAS, EXTRAS, AUTOWANT_UPCOMING, AUTOWANT_ALL, AUTOWANT_MANUALLY_ADDED, KEEP_TORRENT_FILES, PREFER_TORRENTS, MAGNET_LINKS, \
                 ADD_ALBUM_ART, ALBUM_ART_FORMAT, EMBED_ALBUM_ART, EMBED_LYRICS, REPLACE_EXISTING_FOLDERS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, SEARCH_INTERVAL, \
                 TORRENTBLACKHOLE_DIR, NUMBEROFSEEDERS, KAT, KAT_PROXY_URL, KAT_RATIO, PIRATEBAY, PIRATEBAY_PROXY_URL, PIRATEBAY_RATIO, MININOVA, MININOVA_RATIO, WAFFLES, WAFFLES_UID, WAFFLES_PASSKEY, WAFFLES_RATIO, \
                 RUTRACKER, RUTRACKER_USER, RUTRACKER_PASSWORD, RUTRACKER_RATIO, WHATCD, WHATCD_USERNAME, WHATCD_PASSWORD, WHATCD_RATIO, DOWNLOAD_TORRENT_DIR, \
@@ -467,7 +467,7 @@ def initialize():
         AUTOWANT_MANUALLY_ADDED  = bool(check_setting_int(CFG, 'General', 'autowant_manually_added', 1))
         KEEP_TORRENT_FILES = bool(check_setting_int(CFG, 'General', 'keep_torrent_files', 0))
         PREFER_TORRENTS = check_setting_int(CFG, 'General', 'prefer_torrents', 0)
-        OPEN_MAGNET_LINKS = bool(check_setting_int(CFG, 'General', 'open_magnet_links', 0))
+        MAGNET_LINKS = int(check_setting_int(CFG, 'General', 'magnet_links', 0))
 
         SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'search_interval', 1440)
         LIBRARYSCAN = bool(check_setting_int(CFG, 'General', 'libraryscan', 1))
@@ -913,7 +913,7 @@ def config_write():
     new_config['General']['autowant_manually_added'] = int(AUTOWANT_MANUALLY_ADDED)
     new_config['General']['keep_torrent_files'] = int(KEEP_TORRENT_FILES)
     new_config['General']['prefer_torrents'] = PREFER_TORRENTS
-    new_config['General']['open_magnet_links'] = OPEN_MAGNET_LINKS
+    new_config['General']['magnet_links'] = int(MAGNET_LINKS)
 
     new_config['General']['numberofseeders'] = NUMBEROFSEEDERS
     new_config['General']['torrentblackhole_dir'] = TORRENTBLACKHOLE_DIR
