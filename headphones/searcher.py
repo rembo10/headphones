@@ -20,18 +20,19 @@ from pygazelle import api as gazelleapi
 from pygazelle import encoding as gazelleencoding
 from pygazelle import format as gazelleformat
 from pygazelle import media as gazellemedia
-from xml.dom import minidom
 from base64 import b16encode, b32decode
 from hashlib import sha1
 
-import os, re, time
+import os
+import re
+import time
 import string
 import shutil
-import requests
+import random
+import headphones
 import subprocess
 import unicodedata
 
-import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
 from headphones import utorrent, transmission, notifiers
@@ -39,18 +40,135 @@ from headphones import utorrent, transmission, notifiers
 from bencode import bencode, bdecode
 
 import headphones.searcher_rutracker as rutrackersearch
-rutracker = rutrackersearch.Rutracker()
+
+# Magnet to torrent services, for Black hole. Stolen from CouchPotato.
+TORRENT_TO_MAGNET_SERVICES = [
+    'https://zoink.it/torrent/%s.torrent',
+    'http://torrage.com/torrent/%s.torrent',
+    'https://torcache.net/torrent/%s.torrent',
+]
 
 # Persistent What.cd API object
 gazelle = None
 
-def url_fix(s, charset='utf-8'):
+# RUtracker search object
+rutracker = rutrackersearch.Rutracker()
+
+def fix_url(s, charset="utf-8"):
+    """
+    Fix the URL so it is proper formatted and encoded.
+    """
+
     if isinstance(s, unicode):
         s = s.encode(charset, 'ignore')
+
     scheme, netloc, path, qs, anchor = urlparse.urlsplit(s)
     path = urllib.quote(path, '/%')
     qs = urllib.quote_plus(qs, ':&=')
+
     return urlparse.urlunsplit((scheme, netloc, path, qs, anchor))
+
+def torrent_to_file(target_file, data):
+    """
+    Write torrent data to file, and change permissions accordingly. Will return
+    None in case of a write error. If changing permissions fails, it will
+    continue anyway.
+    """
+
+    # Write data to file
+    try:
+        with open(target_file, "wb") as fp:
+            fp.write(data)
+    except IOError as e:
+        logger.error("Could not write torrent file '%s': %s. Skipping.",
+            target_file, e.message)
+        return
+
+    # Try to change permissions
+    try:
+        os.chmod(target_file, int(headphones.FILE_PERMISSIONS, 8))
+    except OSError as e:
+        logger.warn("Could not change permissions for file '%s': %s. " \
+            "Continuing.", target_file, e.message)
+
+    # Done
+    return True
+
+def read_torrent_name(torrent_file, default_name=None):
+    """
+    Read the torrent file and return the torrent name. If the torrent name
+    cannot be determined, it will return the `default_name`.
+    """
+
+    # Open file
+    try:
+        with open(torrent_file, "rb") as fp:
+            torrent_info = bdecode(fp.read())
+    except IOError as e:
+        logger.error("Unable to open torrent file: %s", torrent_file)
+        return
+
+    # Read dictionary
+    if torrent_info:
+        try:
+            return torrent_info["info"]["name"]
+        except KeyError:
+            if default_name:
+                logger.warning("Couldn't get name from torrent file: %s. " \
+                    "Defaulting to '%s'", e, default_name)
+            else:
+                logger.warning("Couldn't get name from torrent file: %s. No " \
+                    "default given", e)
+
+    # Return default
+    return default_name
+
+def calculate_torrent_hash(link, data=None):
+    """
+    Calculate the torrent hash from a magnet link or data.
+    """
+
+    if link.startswith("magnet:"):
+        torrent_hash = re.findall("urn:btih:([\w]{32,40})", link)[0]
+        if len(torrent_hash) == 32:
+            torrent_hash = b16encode(b32decode(torrent_hash)).lower()
+    elif data:
+        info = bdecode(data)["info"]
+        torrent_hash = sha1(bencode(info)).hexdigest()
+    else:
+        raise ValueError("Cannot calculate torrent hash without magnet link " \
+            "or data")
+
+    return torrent_hash
+
+def get_seed_ratio(provider):
+    """
+    Return the seed ratio for the specified provider, if applicable. Defaults to
+    None in case of an error.
+    """
+
+    if provider == 'rutracker.org':
+        seed_ratio = headphones.RUTRACKER_RATIO
+    elif provider == 'Kick Ass Torrents':
+        seed_ratio = headphones.KAT_RATIO
+    elif provider == 'What.cd':
+        seed_ratio = headphones.WHATCD_RATIO
+    elif provider == 'The Pirate Bay':
+        seed_ratio = headphones.PIRATEBAY_RATIO
+    elif provider == 'Waffles.fm':
+        seed_ratio = headphones.WAFFLES_RATIO
+    elif provider == 'Mininova':
+        seed_ratio = headphones.MININOVA_RATIO
+    else:
+        seed_ratio = None
+
+    if seed_ratio is not None:
+        try:
+            seed_ratio = float(seed_ratio)
+        except ValueError:
+            logger.warn("Could not get seed ratio for %s" % provider)
+
+    return seed_ratio
 
 def searchforalbum(albumid=None, new=False, losslessOnly=False, choose_specific_download=False):
     myDB = db.DBConnection()
@@ -80,7 +198,6 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False, choose_specific_
         return results
 
     else:
-
         album = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
         logger.info('Searching for "%s - %s" since it was marked as wanted' % (album['ArtistName'], album['AlbumTitle']))
         do_sorted_search(album, new, losslessOnly)
@@ -233,7 +350,7 @@ def sort_search_results(resultlist, album, new, albumlength):
                 priority = 1
             # add a search provider priority (weighted based on position)
             i = next((i for i, word in enumerate(preferred_words) if word in result[3].lower()), None)
-            if i != None:
+            if i is not None:
                 priority += round((len(preferred_words) - i) / float(len(preferred_words)),2)
 
         temp_list.append((result[0],result[1],result[2],result[3],result[4],priority))
@@ -621,8 +738,8 @@ def send_to_downloader(data, bestqual, album):
             torrent_name = helpers.replace_illegal_chars(folder_name) + '.torrent'
             download_path = os.path.join(headphones.CFG.TORRENTBLACKHOLE_DIR, torrent_name)
 
-            if bestqual[2].startswith("magnet:"):
-                if headphones.CFG.OPEN_MAGNET_LINKS:
+            if bestqual[2].lower().startswith("magnet:"):
+                if headphones.CFG.MAGNET_LINKS == 1:
                     try:
                         if headphones.SYS_PLATFORM == 'win32':
                             os.startfile(bestqual[2])
@@ -636,37 +753,50 @@ def send_to_downloader(data, bestqual, album):
                     except Exception as e:
                         logger.error("Error opening magnet link: %s" % str(e))
                         return
-                else:
-                    logger.error("Cannot save magnet files to blackhole. Please switch your torrent downloader to Transmission or uTorrent or allow Headphones to try to open magnet links")
-                    return
+                elif headphones.MAGNET_LINKS == 2:
+                    # Procedure adapted from CouchPotato
+                    torrent_hash = calculate_torrent_hash(bestqual[2])
 
-            else:
-                try:
+                    # Randomize list of services
+                    services = TORRENT_TO_MAGNET_SERVICES[:]
+                    random.shuffle(services)
 
-                    if bestqual[3] == 'rutracker.org':
-                        download_path = rutracker.get_torrent(bestqual[2], headphones.CFG.TORRENTBLACKHOLE_DIR)
-                        if not download_path:
-                            return
+                    for service in services:
+                        data = request.request_content(service % torrent_hash)
+
+                        if data and "torcache" in data:
+                            if not torrent_to_file(download_path, data):
+                                return
+                            # Extract folder name from torrent
+                            folder_name = read_torrent_name(download_path,
+                                bestqual[0])
+
+                            # Break for loop
+                            break
                     else:
-                        #Write the torrent file to a path derived from the TORRENTBLACKHOLE_DIR and file name.
-                        with open(download_path, 'wb') as fp:
-                            fp.write(data)
+                        # No service succeeded
+                        logger.warning("Unable to convert magnet with hash " \
+                            "'%s' into a torrent file.", torrent_hash)
+                        return
+                else:
+                    logger.error("Cannot save magnet link in blackhole. " \
+                        "Please switch your torrent downloader to " \
+                        "Transmission or uTorrent, or allow Headphones " \
+                        "to open or convert magnet links")
+                    return
+            else:
+                if bestqual[3] == "rutracker.org":
+                    download_path = rutracker.get_torrent(bestqual[2],
+                        headphones.TORRENTBLACKHOLE_DIR)
 
-                        try:
-                            os.chmod(download_path, int(headphones.CFG.FILE_PERMISSIONS, 8))
-                        except:
-                            logger.error("Could not change permissions for file: %s", download_path)
+                    if not download_path:
+                        return
+                else:
+                    if not torrent_to_file(download_path, data):
+                        return
 
-                    # Open the fresh torrent file again so we can extract the
-                    # proper torrent name Used later in post-processing.
-                    with open(download_path, 'rb') as fp:
-                        torrent_info = bdecode(fp.read())
-
-                    folder_name = torrent_info['info'].get('name', '')
-                    logger.info('Torrent folder name: %s' % folder_name)
-                except Exception as e:
-                    logger.error('Couldn\'t get name from Torrent file: %s. Defaulting to torrent title' % e)
-                    folder_name = bestqual[0]
+                # Extract folder name from torrent
+                folder_name = read_torrent_name(download_path, bestqual[0])
 
         elif headphones.CFG.TORRENT_DOWNLOADER == 1:
             logger.info("Sending torrent to Transmission")
@@ -698,8 +828,8 @@ def send_to_downloader(data, bestqual, album):
                     logger.exception("Unhandled exception")
 
             # Set Seed Ratio
-            seed_ratio = getSeedRatio(bestqual[3])
-            if seed_ratio != None:
+            seed_ratio = get_seed_ratio(bestqual[3])
+            if seed_ratio is not None:
                 transmission.setSeedRatio(torrentid, seed_ratio)
 
         else:# if headphones.CFG.TORRENT_DOWNLOADER == 2:
@@ -713,7 +843,7 @@ def send_to_downloader(data, bestqual, album):
                 utorrent.labelTorrent(torrentid)
             else:
                 file_or_url = bestqual[2]
-                torrentid = CalculateTorrentHash(file_or_url, data)
+                torrentid = calculate_torrent_hash(file_or_url, data)
                 folder_name = utorrent.addTorrent(file_or_url, torrentid)
 
             if folder_name:
@@ -730,8 +860,8 @@ def send_to_downloader(data, bestqual, album):
                     logger.exception("Unhandled exception")
 
             # Set Seed Ratio
-            seed_ratio = getSeedRatio(bestqual[3])
-            if seed_ratio != None:
+            seed_ratio = get_seed_ratio(bestqual[3])
+            if seed_ratio is not None:
                 utorrent.setSeedRatio(torrentid, seed_ratio)
 
     myDB = db.DBConnection()
@@ -739,7 +869,7 @@ def send_to_downloader(data, bestqual, album):
     myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)', [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], "Snatched", folder_name, kind])
 
     # Store the torrent id so we can check later if it's finished seeding and can be removed
-    if seed_ratio != None and seed_ratio != 0 and torrentid:
+    if seed_ratio is not None and seed_ratio != 0 and torrentid:
         myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)', [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], "Seed_Snatched", torrentid, kind])
 
     # notify
@@ -934,9 +1064,9 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
 
         # Use proxy if specified
         if headphones.CFG.KAT_PROXY_URL:
-            providerurl = url_fix(set_proxy(headphones.CFG.KAT_PROXY_URL))
+            providerurl = fix_url(set_proxy(headphones.CFG.KAT_PROXY_URL))
         else:
-            providerurl = url_fix("https://kickass.to")
+            providerurl = fix_url("https://kickass.to")
 
         # Build URL
         providerurl = providerurl + "/usearch/" + ka_term
@@ -994,7 +1124,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
 
     if headphones.CFG.WAFFLES:
         provider = "Waffles.fm"
-        providerurl = url_fix("https://www.waffles.fm/browse.php")
+        providerurl = fix_url("https://www.waffles.fm/browse.php")
 
         bitrate = None
         if headphones.CFG.PREFERRED_QUALITY == 3 or losslessOnly:
@@ -1185,9 +1315,9 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
 
         # Use proxy if specified
         if headphones.CFG.PIRATEBAY_PROXY_URL:
-            providerurl = url_fix(set_proxy(headphones.CFG.PIRATEBAY_PROXY_URL))
+            providerurl = fix_url(set_proxy(headphones.CFG.PIRATEBAY_PROXY_URL))
         else:
-            providerurl = url_fix("https://thepiratebay.se")
+            providerurl = fix_url("https://thepiratebay.se")
 
         # Build URL
         providerurl = providerurl + "/search/" + tpb_term + "/0/7/" # 7 is sort by seeders
@@ -1227,7 +1357,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                             try:
                                 url = item.find("a", {"title":"Download this torrent"})['href']
                             except TypeError:
-                                if headphones.CFG.OPEN_MAGNET_LINKS:
+                                if headphones.MAGNET_LINKS != 0:
                                     url = item.findAll("a")[3]['href']
                                 else:
                                     logger.info('"%s" only has a magnet link, skipping' % title)
@@ -1251,7 +1381,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
 
     if headphones.CFG.MININOVA:
         provider = "Mininova"
-        providerurl = url_fix("http://www.mininova.org/rss/" + term + "/5")
+        providerurl = fix_url("http://www.mininova.org/rss/" + term + "/5")
 
         if headphones.CFG.PREFERRED_QUALITY == 3 or losslessOnly:
             categories = "7"        #music
@@ -1319,7 +1449,6 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
 def preprocess(resultlist):
 
     for result in resultlist:
-
         if result[4] == 'torrent':
             #Get out of here if we're using Transmission
             if headphones.CFG.TORRENT_DOWNLOADER == 1:  ## if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
@@ -1328,7 +1457,7 @@ def preprocess(resultlist):
             if result[3] == 'rutracker.org':
                 return True, result
             # Get out of here if it's a magnet link
-            if result[2].startswith("magnet"):
+            if result[2].lower().startswith("magnet:"):
                 return True, result
 
             # Download the torrent file
@@ -1343,48 +1472,9 @@ def preprocess(resultlist):
             return request.request_content(url=result[2], headers=headers), result
 
         else:
-
             headers = {'User-Agent': USER_AGENT}
 
             if result[3] == 'headphones':
                 return request.request_content(url=result[2], headers=headers, auth=(headphones.CFG.HPUSER, headphones.CFG.HPPASS)), result
             else:
                 return request.request_content(url=result[2], headers=headers), result
-
-def CalculateTorrentHash(link, data):
-
-    if link.startswith('magnet'):
-        tor_hash = re.findall('urn:btih:([\w]{32,40})', link)[0]
-        if len(tor_hash) == 32:
-            tor_hash = b16encode(b32decode(tor_hash)).lower()
-    else:
-        info = bdecode(data)["info"]
-        tor_hash = sha1(bencode(info)).hexdigest()
-
-    logger.debug('Torrent Hash: ' + str(tor_hash))
-
-    return tor_hash
-
-def getSeedRatio(provider):
-    seed_ratio = ''
-    if provider == 'rutracker.org':
-        seed_ratio = headphones.CFG.RUTRACKER_RATIO
-    elif provider == 'Kick Ass Torrents':
-        seed_ratio = headphones.CFG.KAT_RATIO
-    elif provider == 'What.cd':
-        seed_ratio = headphones.CFG.WHATCD_RATIO
-    elif provider == 'The Pirate Bay':
-        seed_ratio = headphones.CFG.PIRATEBAY_RATIO
-    elif provider == 'Waffles.fm':
-        seed_ratio = headphones.CFG.WAFFLES_RATIO
-    elif provider == 'Mininova':
-        seed_ratio = headphones.CFG.MININOVA_RATIO
-    if seed_ratio != '':
-        try:
-            seed_ratio_float = float(seed_ratio)
-        except:
-            seed_ratio_float = None
-            logger.warn('Could not get Seed Ratio for %s' % provider)
-        return seed_ratio_float
-    else:
-        return None

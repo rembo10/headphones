@@ -18,7 +18,6 @@
 from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers, notifiers
 from headphones.helpers import checked, radio,today, cleanName
 
-from mako.template import Template
 from mako.lookup import TemplateLookup
 from mako import exceptions
 
@@ -28,7 +27,6 @@ import os
 import sys
 import json
 import time
-import string
 import cherrypy
 import threading
 import headphones
@@ -142,7 +140,7 @@ class WebInterface(object):
             searchresults = mb.findArtist(name, limit=100)
         else:
             searchresults = mb.findRelease(name, limit=100)
-        return serve_template(templatename="searchresults.html", title='Search Results for: "' + name + '"', searchresults=searchresults, type=type)
+        return serve_template(templatename="searchresults.html", title='Search Results for: "' + name + '"', searchresults=searchresults, name=name, type=type)
     search.exposed = True
 
     def addArtist(self, artistid):
@@ -1069,7 +1067,7 @@ class WebInterface(object):
             "prefer_torrents_0" : radio(headphones.CFG.PREFER_TORRENTS, 0),
             "prefer_torrents_1" : radio(headphones.CFG.PREFER_TORRENTS, 1),
             "prefer_torrents_2" : radio(headphones.CFG.PREFER_TORRENTS, 2),
-            "open_magnet_links" : checked(headphones.CFG.OPEN_MAGNET_LINKS),
+            "magnet_links" : checked(headphones.CFG.MAGNET_LINKS),
             "log_dir" : headphones.CFG.LOG_DIR,
             "cache_dir" : headphones.CFG.CACHE_DIR,
             "interface_list" : interface_list,

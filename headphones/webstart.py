@@ -52,7 +52,7 @@ def initialize(options=None):
         'tools.encode.encoding': 'utf-8',
         'tools.decode.on': True,
         'log.screen': False,
-        'engine.autoreload_on': False,
+        'engine.autoreload.on': False,
     }
 
     if enable_https:
