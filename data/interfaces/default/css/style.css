@@ -336,6 +336,10 @@ form .row label {
   padding-top: 7px;
   width: 175px;
 }
+form .row label.inline {
+  margin-right: 5px;
+  width: auto;
+}
 form .row input {
   margin-right: 5px;
 }

@@ -107,7 +107,11 @@
 					"sSearch" : ""},
 				"iDisplayLength": 25,
 				"sPaginationType": "full_numbers",
-				"aaSorting": []
+				"aaSorting": [],
+                "fnDrawCallback": function (o) {
+                    // Jump to top of page
+                    $('html,body').scrollTop(0);
+                }
 			});
             $('#searchresults_table').on("draw.dt", function () {
                 getArt();
@@ -121,4 +125,18 @@
             initThisPage();
     	});
 	</script>
+
+    <script type="text/javascript">
+        <%!
+            # Abuse JSON module for escaping JavaScript
+            import json
+        %>
+        $(document).ready(function() {
+            // Search parameter
+            $("#searchbar input[name=name]").val(${name | json.dumps});
+
+            // Album or artist
+            $("#searchbar select[name=type]").val(${type | json.dumps});
+        });
+    </script>
 </%def>

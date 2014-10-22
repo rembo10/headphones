@@ -24,7 +24,10 @@ import sqlite3
 import itertools
 import cherrypy
 
-from apscheduler.scheduler import Scheduler
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+
+from configobj import ConfigObj
 
 from headphones import versioncheck, logger, version
 import headphones.config
@@ -62,7 +65,7 @@ DAEMON = False
 CREATEPID = False
 PIDFILE= None
 
-SCHED = Scheduler()
+SCHED = BackgroundScheduler()
 
 INIT_LOCK = threading.Lock()
 __INITIALIZED__ = False
@@ -244,19 +247,19 @@ def start():
 
         # Start our scheduled background tasks
         from headphones import updater, searcher, librarysync, postprocessor, torrentfinished
-        SCHED.add_interval_job(updater.dbUpdate, hours=CFG.UPDATE_DB_INTERVAL)
-        SCHED.add_interval_job(searcher.searchforalbum, minutes=CFG.SEARCH_INTERVAL)
-        SCHED.add_interval_job(librarysync.libraryScan, hours=CFG.LIBRARYSCAN_INTERVAL, kwargs={'cron':True})
+        SCHED.add_job(updater.dbUpdate, trigger=IntervalTrigger(hours=CFG.UPDATE_DB_INTERVAL))
+        SCHED.add_job(searcher.searchforalbum, trigger=IntervalTrigger(minutes=CFG.SEARCH_INTERVAL))
+        SCHED.add_job(librarysync.libraryScan, trigger=IntervalTrigger(hours=CFG.LIBRARYSCAN_INTERVAL))
 
         if CFG.CHECK_GITHUB:
-            SCHED.add_interval_job(versioncheck.checkGithub, minutes=CFG.CHECK_GITHUB_INTERVAL)
+            SCHED.add_job(versioncheck.checkGithub, trigger=IntervalTrigger(minutes=CFG.CHECK_GITHUB_INTERVAL))
 
         if CFG.DOWNLOAD_SCAN_INTERVAL > 0:
-            SCHED.add_interval_job(postprocessor.checkFolder, minutes=CFG.DOWNLOAD_SCAN_INTERVAL)
+            SCHED.add_job(postprocessor.checkFolder, trigger=IntervalTrigger(minutes=CFG.DOWNLOAD_SCAN_INTERVAL))
 
         # Remove Torrent + data if Post Processed and finished Seeding
         if CFG.TORRENT_REMOVAL_INTERVAL > 0:
-            SCHED.add_interval_job(torrentfinished.checkTorrentFinished, minutes=CFG.TORRENT_REMOVAL_INTERVAL)
+            SCHED.add_job(torrentfinished.checkTorrentFinished, trigger=IntervalTrigger(minutes=CFG.TORRENT_REMOVAL_INTERVAL))
 
         SCHED.start()
 

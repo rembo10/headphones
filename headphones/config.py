@@ -125,7 +125,8 @@ _config_definitions = {
     'OMGWTFNZBS': (int, 'omgwtfnzbs', 0),
     'OMGWTFNZBS_APIKEY': (str, 'omgwtfnzbs', ''),
     'OMGWTFNZBS_UID': (str, 'omgwtfnzbs', ''),
-    'OPEN_MAGNET_LINKS': (int, 'General', 0),
+    'OPEN_MAGNET_LINKS': (int, 'General', 0),  # 0: Ignore, 1: Open, 2: Convert
+    'MAGNET_LINKS': (int, 'General', 0),
     'OSX_NOTIFY_APP': (str, 'OSX_Notify', '/Applications/Headphones'),
     'OSX_NOTIFY_ENABLED': (int, 'OSX_Notify', 0),
     'OSX_NOTIFY_ONSNATCH': (int, 'OSX_Notify', 0),
@@ -399,4 +400,9 @@ class Config(object):
         if self.CONFIG_VERSION == '4':
             if self.HPUSER and self.HPPASS:
                 self.HEADPHONES_INDEXER = True
+            self.CONFIG_VERSION = '5'
+
+        if self.CONFIG_VERSION == '5':
+            if self.OPEN_MAGNET_LINKS:
+                self.MAGNET_LINKS = 2
             self.CONFIG_VERSION = '5'
