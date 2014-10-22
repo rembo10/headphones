@@ -85,24 +85,26 @@
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-	$(document).ready(function()
-	{
-		$('#artist_table').dataTable(
-			{
-				"bStateSave": true,
-				"bPaginate": true,
-				"oLanguage": {
-					"sSearch": "",
-	                "sLengthMenu":"Show _MENU_ albums per page",
-						"sInfo":"Showing _START_ to _END_ of _TOTAL_ albums",
-						"sInfoEmpty":"Showing 0 to 0 of 0 albums",
-						"sInfoFiltered":"(filtered from _MAX_ total albums)",
-						"sEmptyTable": " ",
-	                    },
-	            "sPaginationType": "full_numbers",
-	         });
+	$(document).ready(function() {
+		$('#artist_table').dataTable({
+			"bStateSave": true,
+			"bPaginate": true,
+			"oLanguage": {
+				"sSearch": "",
+                "sLengthMenu":"Show _MENU_ albums per page",
+					"sInfo":"Showing _START_ to _END_ of _TOTAL_ albums",
+					"sInfoEmpty":"Showing 0 to 0 of 0 albums",
+					"sInfoFiltered":"(filtered from _MAX_ total albums)",
+					"sEmptyTable": " ",
+                    },
+            "sPaginationType": "full_numbers",
+            "fnDrawCallback": function (o) {
+                // Jump to top of page
+                $('html,body').scrollTop(0);
+            }
+         });
 
-initActions();
+		initActions();
 	});
 
 	function restore_Artist(clicked_id) {

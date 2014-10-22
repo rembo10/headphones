@@ -81,8 +81,11 @@
 				"sInfoFiltered":"(filtered from _MAX_ total items)"},
 			"iDisplayLength": 25,
 			"sPaginationType": "full_numbers",
-			"aaSorting": []
-
+			"aaSorting": [],
+			"fnDrawCallback": function (o) {
+                // Jump to top of page
+                $('html,body').scrollTop(0);
+            }
 		});
 		resetFilters("history");
 	}
