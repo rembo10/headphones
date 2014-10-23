@@ -78,9 +78,11 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
 
     latest_subdirectory = []
 
-    for r,d,f in os.walk(dir):
-        #need to abuse slicing to get a copy of the list, doing it directly will skip the element after a deleted one
-        #using a list comprehension will not work correctly for nested subdirectories (os.walk keeps its original list)
+    for r,d,f in os.walk(dir, followlinks=True):
+        # Need to abuse slicing to get a copy of the list, doing it directly
+        # will skip the element after a deleted one using a list comprehension
+        # will not work correctly for nested subdirectories (os.walk keeps its
+        # original list)
         for directory in d[:]:
             if directory.startswith("."):
                 d.remove(directory)
