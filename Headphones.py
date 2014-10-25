@@ -144,25 +144,25 @@ def main():
         http_port = args.port
         logger.info('Using forced web server port: %i', http_port)
     else:
-        http_port = int(headphones.CFG.HTTP_PORT)
+        http_port = int(headphones.CONFIG.HTTP_PORT)
 
     # Try to start the server. Will exit here is address is already in use.
     web_config = {
         'http_port': http_port,
-        'http_host': headphones.CFG.HTTP_HOST,
-        'http_root': headphones.CFG.HTTP_ROOT,
-        'http_proxy': headphones.CFG.HTTP_PROXY,
-        'enable_https': headphones.CFG.ENABLE_HTTPS,
-        'https_cert': headphones.CFG.HTTPS_CERT,
-        'https_key': headphones.CFG.HTTPS_KEY,
-        'http_username': headphones.CFG.HTTP_USERNAME,
-        'http_password': headphones.CFG.HTTP_PASSWORD,
+        'http_host': headphones.CONFIG.HTTP_HOST,
+        'http_root': headphones.CONFIG.HTTP_ROOT,
+        'http_proxy': headphones.CONFIG.HTTP_PROXY,
+        'enable_https': headphones.CONFIG.ENABLE_HTTPS,
+        'https_cert': headphones.CONFIG.HTTPS_CERT,
+        'https_key': headphones.CONFIG.HTTPS_KEY,
+        'http_username': headphones.CONFIG.HTTP_USERNAME,
+        'http_password': headphones.CONFIG.HTTP_PASSWORD,
     }
     webstart.initialize(web_config)
 
-    if headphones.CFG.LAUNCH_BROWSER and not args.nolaunch:
-        headphones.launch_browser(headphones.CFG.HTTP_HOST, http_port,
-            headphones.CFG.HTTP_ROOT)
+    if headphones.CONFIG.LAUNCH_BROWSER and not args.nolaunch:
+        headphones.launch_browser(headphones.CONFIG.HTTP_HOST, http_port,
+            headphones.CONFIG.HTTP_ROOT)
 
     # Start the background threads
     headphones.start()

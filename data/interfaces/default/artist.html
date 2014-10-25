@@ -163,17 +163,17 @@
 	}
 
 	<%
-    if headphones.CFG.SONGKICK_FILTER_ENABLED:
+    if headphones.CONFIG.SONGKICK_FILTER_ENABLED:
         songkick_filter_enabled = "true"
     else:
         songkick_filter_enabled = "false"
 
-    if not headphones.CFG.SONGKICK_LOCATION:
+    if not headphones.CONFIG.SONGKICK_LOCATION:
     	songkick_location = "none"
     else:
-        songkick_location = headphones.CFG.SONGKICK_LOCATION
+        songkick_location = headphones.CONFIG.SONGKICK_LOCATION
 
-    if headphones.CFG.SONGKICK_ENABLED:
+    if headphones.CONFIG.SONGKICK_ENABLED:
         songkick_enabled = "true"
     else:
         songkick_enabled = "false"
@@ -186,7 +186,7 @@
 
 		template = '<li><a target="_blank" href="URI"><span class="sk-name">NAME</span><span class="sk-location">LOC</span></a></li>';
 
-		$.getJSON("https://api.songkick.com/api/3.0/artists/mbid:${artist['ArtistID']}/calendar.json?apikey=${headphones.CFG.SONGKICK_APIKEY}&jsoncallback=?",
+		$.getJSON("https://api.songkick.com/api/3.0/artists/mbid:${artist['ArtistID']}/calendar.json?apikey=${headphones.CONFIG.SONGKICK_APIKEY}&jsoncallback=?",
 			function(data){
 				if (data['resultsPage'].totalEntries >= 1) {
 

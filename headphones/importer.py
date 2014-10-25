@@ -140,8 +140,8 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
     if not dbartist:
         newValueDict = {"ArtistName":   "Artist ID: %s" % (artistid),
                         "Status":       "Loading",
-                        "IncludeExtras": headphones.CFG.INCLUDE_EXTRAS,
-                        "Extras":        headphones.CFG.EXTRAS }
+                        "IncludeExtras": headphones.CONFIG.INCLUDE_EXTRAS,
+                        "Extras":        headphones.CONFIG.EXTRAS }
     else:
         newValueDict = {"Status":   "Loading"}
 
@@ -227,7 +227,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
         rgid = rg['id']
         skip_log = 0
         #Make a user configurable variable to skip update of albums with release dates older than this date (in days)
-        pause_delta = headphones.CFG.MB_IGNORE_AGE
+        pause_delta = headphones.CONFIG.MB_IGNORE_AGE
 
         rg_exists = myDB.action("SELECT * from albums WHERE AlbumID=?", [rg['id']]).fetchone()
 
@@ -414,13 +414,13 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
 
                 newValueDict['DateAdded'] = today
 
-                if headphones.CFG.AUTOWANT_ALL:
+                if headphones.CONFIG.AUTOWANT_ALL:
                     newValueDict['Status'] = "Wanted"
-                elif album['ReleaseDate'] > today and headphones.CFG.AUTOWANT_UPCOMING:
+                elif album['ReleaseDate'] > today and headphones.CONFIG.AUTOWANT_UPCOMING:
                     newValueDict['Status'] = "Wanted"
                 # Sometimes "new" albums are added to musicbrainz after their release date, so let's try to catch these
                 # The first test just makes sure we have year-month-day
-                elif helpers.get_age(album['ReleaseDate']) and helpers.get_age(today) - helpers.get_age(album['ReleaseDate']) < 21 and headphones.CFG.AUTOWANT_UPCOMING:
+                elif helpers.get_age(album['ReleaseDate']) and helpers.get_age(today) - helpers.get_age(album['ReleaseDate']) < 21 and headphones.CONFIG.AUTOWANT_UPCOMING:
                     newValueDict['Status'] = "Wanted"
                 else:
                     newValueDict['Status'] = "Skipped"
@@ -464,11 +464,11 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             marked_as_downloaded = False
 
             if rg_exists:
-                if rg_exists['Status'] == 'Skipped' and ((have_track_count/float(total_track_count)) >= (headphones.CFG.ALBUM_COMPLETION_PCT/100.0)):
+                if rg_exists['Status'] == 'Skipped' and ((have_track_count/float(total_track_count)) >= (headphones.CONFIG.ALBUM_COMPLETION_PCT/100.0)):
                     myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', rg['id']])
                     marked_as_downloaded = True
             else:
-                if ((have_track_count/float(total_track_count)) >= (headphones.CFG.ALBUM_COMPLETION_PCT/100.0)):
+                if ((have_track_count/float(total_track_count)) >= (headphones.CONFIG.ALBUM_COMPLETION_PCT/100.0)):
                     myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', rg['id']])
                     marked_as_downloaded = True
 
@@ -478,7 +478,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             # Start a search for the album if it's new, hasn't been marked as
             # downloaded and autowant_all is selected. This search is deferred,
             # in case the search failes and the rest of the import will halt.
-            if not rg_exists and not marked_as_downloaded and headphones.CFG.AUTOWANT_ALL:
+            if not rg_exists and not marked_as_downloaded and headphones.CONFIG.AUTOWANT_ALL:
                 album_searches.append(rg['id'])
         else:
             if skip_log == 0:
@@ -596,9 +596,9 @@ def addReleaseById(rid, rgid=None):
                         "DateAdded":        helpers.today(),
                         "Status":           "Paused"}
 
-        if headphones.CFG.INCLUDE_EXTRAS:
+        if headphones.CONFIG.INCLUDE_EXTRAS:
             newValueDict['IncludeExtras'] = 1
-            newValueDict['Extras'] = headphones.CFG.EXTRAS
+            newValueDict['Extras'] = headphones.CONFIG.EXTRAS
 
         myDB.upsert("artists", newValueDict, controlValueDict)
 
@@ -670,14 +670,14 @@ def addReleaseById(rid, rgid=None):
         # Reset status
         if status == 'Loading':
             controlValueDict = {"AlbumID":  rgid}
-            if headphones.CFG.AUTOWANT_MANUALLY_ADDED:
+            if headphones.CONFIG.AUTOWANT_MANUALLY_ADDED:
                 newValueDict = {"Status":   "Wanted"}
             else:
                 newValueDict = {"Status":   "Skipped"}
             myDB.upsert("albums", newValueDict, controlValueDict)
 
         # Start a search for the album
-        if headphones.CFG.AUTOWANT_MANUALLY_ADDED:
+        if headphones.CONFIG.AUTOWANT_MANUALLY_ADDED:
             import searcher
             searcher.searchforalbum(rgid, False)
 

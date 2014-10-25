@@ -34,10 +34,10 @@ def dbFilename(filename="headphones.db"):
 
 def getCacheSize():
     #this will protect against typecasting problems produced by empty string and None settings
-    if not headphones.CFG.CACHE_SIZEMB:
+    if not headphones.CONFIG.CACHE_SIZEMB:
         #sqlite will work with this (very slowly)
         return 0
-    return int(headphones.CFG.CACHE_SIZEMB)
+    return int(headphones.CONFIG.CACHE_SIZEMB)
 
 class DBConnection:
 
@@ -48,7 +48,7 @@ class DBConnection:
         #don't wait for the disk to finish writing
         self.connection.execute("PRAGMA synchronous = OFF")
         #journal disabled since we never do rollbacks
-        self.connection.execute("PRAGMA journal_mode = %s" % headphones.CFG.JOURNAL_MODE)
+        self.connection.execute("PRAGMA journal_mode = %s" % headphones.CONFIG.JOURNAL_MODE)
         #64mb of cache memory,probably need to make it user configurable
         self.connection.execute("PRAGMA cache_size=-%s" % (getCacheSize()*1024))
         self.connection.row_factory = sqlite3.Row

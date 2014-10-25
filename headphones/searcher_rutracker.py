@@ -294,7 +294,7 @@ class Rutracker():
             os.umask(prev)
 
             # Add file to utorrent
-            if headphones.CFG.TORRENT_DOWNLOADER == 2:
+            if headphones.CONFIG.TORRENT_DOWNLOADER == 2:
                 self.utorrent_add_file(download_path)
 
         except Exception as e:
@@ -306,7 +306,7 @@ class Rutracker():
     #TODO get this working in utorrent.py
     def utorrent_add_file(self, filename):
 
-        host = headphones.CFG.UTORRENT_HOST
+        host = headphones.CONFIG.UTORRENT_HOST
         if not host.startswith('http'):
             host = 'http://' + host
         if host.endswith('/'):
@@ -315,8 +315,8 @@ class Rutracker():
             host = host[:-4]
 
         base_url = host
-        username = headphones.CFG.UTORRENT_USERNAME
-        password = headphones.CFG.UTORRENT_PASSWORD
+        username = headphones.CONFIG.UTORRENT_USERNAME
+        password = headphones.CONFIG.UTORRENT_PASSWORD
 
         session = requests.Session()
         url = base_url + '/gui/'

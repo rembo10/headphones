@@ -1320,7 +1320,7 @@
                                     <select name="interface"><h3>
                                     %for interface in config['interface_list']:
                                     <%
-                                        if interface == headphones.CFG.INTERFACE:
+                                        if interface == headphones.CONFIG.INTERFACE:
                                             selected = 'selected="selected"'
                                         else:
                                             selected = ''
@@ -1369,7 +1369,7 @@
                                     <select name="mirror" id="mirror">
                                     %for mirror in config['mirror_list']:
                                         <%
-                                            if mirror == headphones.CFG.MIRROR:
+                                            if mirror == headphones.CONFIG.MIRROR:
                                                 selected = 'selected="selected"'
                                             else:
                                                 selected = ''

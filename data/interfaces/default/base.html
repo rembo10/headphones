@@ -38,7 +38,7 @@
 			</div>
 		% elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.COMMITS_BEHIND > 0 and headphones.INSTALL_TYPE != 'win':
 			<div id="updatebar">
-				A <a href="https://github.com/${headphones.CFG.GIT_USER}/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}"> newer version</a> is available. You're ${headphones.COMMITS_BEHIND} commits behind. <a href="update">Update</a> or <a href="#" onclick="$('#updatebar').slideUp('slow');">Close</a>
+				A <a href="https://github.com/${headphones.CONFIG.GIT_USER}/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}"> newer version</a> is available. You're ${headphones.COMMITS_BEHIND} commits behind. <a href="update">Update</a> or <a href="#" onclick="$('#updatebar').slideUp('slow');">Close</a>
 			</div>
 		% endif
 
@@ -96,8 +96,8 @@
 				%if version.HEADPHONES_VERSION != 'master':
 				(${version.HEADPHONES_VERSION})
 				%endif
-				%if headphones.CFG.GIT_BRANCH != 'master':
-				(${headphones.CFG.GIT_BRANCH})
+				%if headphones.CONFIG.GIT_BRANCH != 'master':
+				(${headphones.CONFIG.GIT_BRANCH})
 				%endif
 			</div>
 		</footer>

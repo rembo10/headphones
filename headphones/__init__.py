@@ -27,8 +27,6 @@ import cherrypy
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
-from configobj import ConfigObj
-
 from headphones import versioncheck, logger, version
 import headphones.config
 from headphones.common import *
@@ -73,7 +71,7 @@ started = False
 
 DATA_DIR = None
 
-CFG = None
+CONFIG = None
 
 DB_FILE = None
 
@@ -96,33 +94,33 @@ def initialize(config_file):
 
     with INIT_LOCK:
 
-        global CFG
+        global CONFIG
         global __INITIALIZED__
         global EXTRA_NEWZNABS
         global LATEST_VERSION
 
-        CFG = headphones.config.Config(config_file)
+        CONFIG = headphones.config.Config(config_file)
 
-        assert CFG is not None
+        assert CONFIG is not None
 
         if __INITIALIZED__:
             return False
 
-        if CFG.HTTP_PORT < 21 or CFG.HTTP_PORT > 65535:
-            headphones.logger.warn('HTTP_PORT out of bounds: 21 < %s < 65535', CFG.HTTP_PORT)
-            CFG.HTTP_PORT = 8181
+        if CONFIG.HTTP_PORT < 21 or CONFIG.HTTP_PORT > 65535:
+            headphones.logger.warn('HTTP_PORT out of bounds: 21 < %s < 65535', CONFIG.HTTP_PORT)
+            CONFIG.HTTP_PORT = 8181
 
-        if CFG.HTTPS_CERT == '':
-            CFG.HTTPS_CERT = os.path.join(DATA_DIR, 'server.crt')
-        if CFG.HTTPS_KEY == '':
-            CFG.HTTPS_KEY = os.path.join(DATA_DIR, 'server.key')
+        if CONFIG.HTTPS_CERT == '':
+            CONFIG.HTTPS_CERT = os.path.join(DATA_DIR, 'server.crt')
+        if CONFIG.HTTPS_KEY == '':
+            CONFIG.HTTPS_KEY = os.path.join(DATA_DIR, 'server.key')
 
-        if not CFG.LOG_DIR:
-            CFG.LOG_DIR = os.path.join(DATA_DIR, 'logs')
+        if not CONFIG.LOG_DIR:
+            CONFIG.LOG_DIR = os.path.join(DATA_DIR, 'logs')
 
-        if not os.path.exists(CFG.LOG_DIR):
+        if not os.path.exists(CONFIG.LOG_DIR):
             try:
-                os.makedirs(CFG.LOG_DIR)
+                os.makedirs(CONFIG.LOG_DIR)
             except OSError:
                 if VERBOSE:
                     sys.stderr.write('Unable to create the log directory. Logging to screen only.\n')
@@ -130,19 +128,19 @@ def initialize(config_file):
         # Start the logger, disable console if needed
         logger.initLogger(console=not QUIET, verbose=VERBOSE)
 
-        if not CFG.CACHE_DIR:
+        if not CONFIG.CACHE_DIR:
             # Put the cache dir in the data dir for now
-            CFG.CACHE_DIR = os.path.join(DATA_DIR, 'cache')
-        if not os.path.exists(CFG.CACHE_DIR):
+            CONFIG.CACHE_DIR = os.path.join(DATA_DIR, 'cache')
+        if not os.path.exists(CONFIG.CACHE_DIR):
             try:
-                os.makedirs(CFG.CACHE_DIR)
+                os.makedirs(CONFIG.CACHE_DIR)
             except OSError:
                 logger.error('Could not create cache dir. Check permissions of datadir: %s', DATA_DIR)
 
         # Sanity check for search interval. Set it to at least 6 hours
-        if CFG.SEARCH_INTERVAL < 360:
+        if CONFIG.SEARCH_INTERVAL < 360:
             logger.info("Search interval too low. Resetting to 6 hour minimum")
-            CFG.SEARCH_INTERVAL = 360
+            CONFIG.SEARCH_INTERVAL = 360
 
         # Initialize the database
         logger.info('Checking to see if the database has all tables....')
@@ -153,10 +151,10 @@ def initialize(config_file):
 
         # Get the currently installed version - returns None, 'win32' or the git hash
         # Also sets INSTALL_TYPE variable to 'win', 'git' or 'source'
-        CURRENT_VERSION, CFG.GIT_BRANCH = versioncheck.getVersion()
+        CURRENT_VERSION, CONFIG.GIT_BRANCH = versioncheck.getVersion()
 
         # Check for new versions
-        if CFG.CHECK_GITHUB_ON_STARTUP:
+        if CONFIG.CHECK_GITHUB_ON_STARTUP:
             try:
                 LATEST_VERSION = versioncheck.checkGithub()
             except:
@@ -228,7 +226,7 @@ def launch_browser(host, port, root):
     if host == '0.0.0.0':
         host = 'localhost'
 
-    if CFG.ENABLE_HTTPS:
+    if CONFIG.ENABLE_HTTPS:
         protocol = 'https'
     else:
         protocol = 'http'
@@ -247,19 +245,19 @@ def start():
 
         # Start our scheduled background tasks
         from headphones import updater, searcher, librarysync, postprocessor, torrentfinished
-        SCHED.add_job(updater.dbUpdate, trigger=IntervalTrigger(hours=CFG.UPDATE_DB_INTERVAL))
-        SCHED.add_job(searcher.searchforalbum, trigger=IntervalTrigger(minutes=CFG.SEARCH_INTERVAL))
-        SCHED.add_job(librarysync.libraryScan, trigger=IntervalTrigger(hours=CFG.LIBRARYSCAN_INTERVAL))
+        SCHED.add_job(updater.dbUpdate, trigger=IntervalTrigger(hours=CONFIG.UPDATE_DB_INTERVAL))
+        SCHED.add_job(searcher.searchforalbum, trigger=IntervalTrigger(minutes=CONFIG.SEARCH_INTERVAL))
+        SCHED.add_job(librarysync.libraryScan, trigger=IntervalTrigger(hours=CONFIG.LIBRARYSCAN_INTERVAL))
 
-        if CFG.CHECK_GITHUB:
-            SCHED.add_job(versioncheck.checkGithub, trigger=IntervalTrigger(minutes=CFG.CHECK_GITHUB_INTERVAL))
+        if CONFIG.CHECK_GITHUB:
+            SCHED.add_job(versioncheck.checkGithub, trigger=IntervalTrigger(minutes=CONFIG.CHECK_GITHUB_INTERVAL))
 
-        if CFG.DOWNLOAD_SCAN_INTERVAL > 0:
-            SCHED.add_job(postprocessor.checkFolder, trigger=IntervalTrigger(minutes=CFG.DOWNLOAD_SCAN_INTERVAL))
+        if CONFIG.DOWNLOAD_SCAN_INTERVAL > 0:
+            SCHED.add_job(postprocessor.checkFolder, trigger=IntervalTrigger(minutes=CONFIG.DOWNLOAD_SCAN_INTERVAL))
 
         # Remove Torrent + data if Post Processed and finished Seeding
-        if CFG.TORRENT_REMOVAL_INTERVAL > 0:
-            SCHED.add_job(torrentfinished.checkTorrentFinished, trigger=IntervalTrigger(minutes=CFG.TORRENT_REMOVAL_INTERVAL))
+        if CONFIG.TORRENT_REMOVAL_INTERVAL > 0:
+            SCHED.add_job(torrentfinished.checkTorrentFinished, trigger=IntervalTrigger(minutes=CONFIG.TORRENT_REMOVAL_INTERVAL))
 
         SCHED.start()
 
@@ -476,7 +474,7 @@ def shutdown(restart=False, update=False):
     cherrypy.engine.exit()
     SCHED.shutdown(wait=False)
 
-    CFG.write()
+    CONFIG.write()
 
     if not restart and not update:
         logger.info('Headphones is shutting down...')
