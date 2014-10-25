@@ -16,7 +16,7 @@
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
 
 from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers, notifiers
-from headphones.helpers import checked, radio,today, cleanName
+from headphones.helpers import checked, radio, today, cleanName
 
 from mako.lookup import TemplateLookup
 from mako import exceptions
@@ -1034,8 +1034,8 @@ class WebInterface(object):
             "whatcd_ratio": headphones.CFG.WHATCD_RATIO,
             "pref_qual_0" : radio(headphones.CFG.PREFERRED_QUALITY, 0),
             "pref_qual_1" : radio(headphones.CFG.PREFERRED_QUALITY, 1),
-            "pref_qual_3" : radio(headphones.CFG.PREFERRED_QUALITY, 3),
             "pref_qual_2" : radio(headphones.CFG.PREFERRED_QUALITY, 2),
+            "pref_qual_3" : radio(headphones.CFG.PREFERRED_QUALITY, 3),
             "pref_bitrate" : headphones.CFG.PREFERRED_BITRATE,
             "pref_bitrate_high" : headphones.CFG.PREFERRED_BITRATE_HIGH_BUFFER,
             "pref_bitrate_low" : headphones.CFG.PREFERRED_BITRATE_LOW_BUFFER,
@@ -1067,7 +1067,9 @@ class WebInterface(object):
             "prefer_torrents_0" : radio(headphones.CFG.PREFER_TORRENTS, 0),
             "prefer_torrents_1" : radio(headphones.CFG.PREFER_TORRENTS, 1),
             "prefer_torrents_2" : radio(headphones.CFG.PREFER_TORRENTS, 2),
-            "magnet_links" : checked(headphones.CFG.MAGNET_LINKS),
+            "magnet_links_0" : radio(headphones.CFG.MAGNET_LINKS, 0),
+            "magnet_links_1" : radio(headphones.CFG.MAGNET_LINKS, 1),
+            "magnet_links_2" : radio(headphones.CFG.MAGNET_LINKS, 2),
             "log_dir" : headphones.CFG.LOG_DIR,
             "cache_dir" : headphones.CFG.CACHE_DIR,
             "interface_list" : interface_list,
@@ -1155,7 +1157,12 @@ class WebInterface(object):
         }
 
         # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8 (append new extras to the end)
-        extras_list = headphones.POSSIBLE_EXTRAS
+        extra_munges = {
+            "dj-mix": "dj_mix",
+            "mixtape/street": "mixtape_street"
+        }
+
+        extras_list = [extra_munges.get(x, x) for x in headphones.POSSIBLE_EXTRAS]
         if headphones.CFG.EXTRAS:
             extras = map(int, headphones.CFG.EXTRAS.split(','))
         else:
@@ -1193,7 +1200,13 @@ class WebInterface(object):
 
         # Convert the extras to list then string. Coming in as 0 or 1 (append new extras to the end)
         temp_extras_list = []
-        expected_extras = headphones.POSSIBLE_EXTRAS
+
+        extra_munges = {
+            "dj-mix": "dj_mix",
+            "mixtape/street": "mixtape_street"
+        }
+
+        expected_extras = [extra_munges.get(x, x) for x in headphones.POSSIBLE_EXTRAS]
         extras_list = [kwargs.get(x, 0) for x in expected_extras]
 
         i = 1

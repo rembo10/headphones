@@ -172,12 +172,12 @@
     	songkick_location = "none"
     else:
         songkick_location = headphones.CFG.SONGKICK_LOCATION
-    	
+
     if headphones.CFG.SONGKICK_ENABLED:
         songkick_enabled = "true"
     else:
         songkick_enabled = "false"
-	
+
 	%>
 	function getArtistsCalendar() {
 		var template, calendarDomNode;
@@ -188,14 +188,14 @@
 
 		$.getJSON("https://api.songkick.com/api/3.0/artists/mbid:${artist['ArtistID']}/calendar.json?apikey=${headphones.CFG.SONGKICK_APIKEY}&jsoncallback=?",
 			function(data){
-				if (data['resultsPage'].totalEntries >= 1) {          
-          
+				if (data['resultsPage'].totalEntries >= 1) {
+
                     if( ${songkick_filter_enabled} ) {
                         data.resultsPage.results.event = $.grep(data.resultsPage.results.event, function(element,index){
                         return element.venue.metroArea.id == ${songkick_location};
                     });
                     }
-          
+
 					var tourDate;
 
 					calendarDomNode.show();
@@ -211,7 +211,7 @@
 					});
 
 					calendarDomNode.append('<li><img src="interfaces/default/images/songkick.png" alt="concerts by songkick" class="sk-logo" /></li>');
-					
+
 				$(function() {
 				  $("#artistCalendar").each(function() {
 					$("li:gt(4)", this).hide(); /* :gt() is zero-indexed */
@@ -269,7 +269,7 @@
 			$('#dialog').dialog();
 			event.preventDefault();
 		});
-		$('#menu_link_modifyextra').click(function() {
+		$('#menu_link_modifyextra').click(function(event) {
 			$('#dialog').dialog();
 			event.preventDefault();
 		});

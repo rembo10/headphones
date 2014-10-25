@@ -4,6 +4,15 @@ import os
 import re
 from configobj import ConfigObj
 
+def bool_int(value):
+    """
+    Casts a config value into a 0 or 1
+    """
+    if isinstance(value, basestring):
+        if value.lower() in ('', '0', 'false', 'f', 'no', 'n', 'off'):
+            value = 0
+    return int(bool(value))
+
 _config_definitions = {
     'ADD_ALBUM_ART': (int, 'General', 0),
     'ADVANCEDENCODER': (str, 'General', ''),
@@ -66,7 +75,7 @@ _config_definitions = {
     'GROWL_HOST': (str, 'Growl', ''),
     'GROWL_ONSNATCH': (int, 'Growl', 0),
     'GROWL_PASSWORD': (str, 'Growl', ''),
-    'HEADPHONES_INDEXER': (bool, 'General', False),
+    'HEADPHONES_INDEXER': (bool_int, 'General', False),
     'HPPASS': (str, 'General', ''),
     'HPUSER': (str, 'General', ''),
     'HTTPS_CERT': (str, 'General', ''),
@@ -101,7 +110,7 @@ _config_definitions = {
     'MININOVA_RATIO': (str, 'Mininova', ''),
     'MIRROR': (str, 'General', 'musicbrainz.org'),
     'MOVE_FILES': (int, 'General', 0),
-    'MPC_ENABLED': (bool, 'MPC', False),
+    'MPC_ENABLED': (bool_int, 'MPC', False),
     'MUSIC_DIR': (str, 'General', ''),
     'MUSIC_ENCODER': (int, 'General', 0),
     'NEWZNAB': (int, 'Newznab', 0),
@@ -203,7 +212,7 @@ _config_definitions = {
     'UTORRENT_LABEL': (str, 'uTorrent', ''),
     'UTORRENT_PASSWORD': (str, 'uTorrent', ''),
     'UTORRENT_USERNAME': (str, 'uTorrent', ''),
-    'VERIFY_SSL_CERT': (bool, 'Advanced', 1),
+    'VERIFY_SSL_CERT': (bool_int, 'Advanced', 1),
     'WAFFLES': (int, 'Waffles', 0),
     'WAFFLES_PASSKEY': (str, 'Waffles', ''),
     'WAFFLES_RATIO': (str, 'Waffles', ''),
