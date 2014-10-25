@@ -14,7 +14,7 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import headphones
-from headphones import db, logger
+from headphones import db, logger, cache
 
 def switch(AlbumID, ReleaseID):
     '''
@@ -41,6 +41,11 @@ def switch(AlbumID, ReleaseID):
                 }
 
     myDB.upsert("albums", newValueDict, controlValueDict)
+
+    # Update cache
+    c = cache.Cache()
+    c.remove_from_cache(AlbumID=AlbumID)
+    c.get_artwork_from_cache(AlbumID=AlbumID)
 
     for track in newtrackdata:
 

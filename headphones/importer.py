@@ -618,7 +618,7 @@ def addReleaseById(rid, rgid=None):
         newValueDict = {"ArtistID":         release_dict['artist_id'],
                         "ReleaseID":        rgid,
                         "ArtistName":       release_dict['artist_name'],
-                        "AlbumTitle":       release_dict['rg_title'],
+                        "AlbumTitle":       release_dict['title'] if 'title' in release_dict else release_dict['rg_title'],
                         "AlbumASIN":        release_dict['asin'],
                         "ReleaseDate":      release_dict['date'],
                         "DateAdded":        helpers.today(),
