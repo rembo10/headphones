@@ -242,6 +242,36 @@ class Cache(object):
 
         return {'artwork' : image_url, 'thumbnail' : thumb_url }
 
+    def remove_from_cache(self, ArtistID=None, AlbumID=None):
+        """
+        Pass a musicbrainz id to this function (either ArtistID or AlbumID)
+        """
+
+        if ArtistID:
+            self.id = ArtistID
+            self.id_type = 'artist'
+        else:
+            self.id = AlbumID
+            self.id_type = 'album'
+
+        self.query_type = 'artwork'
+
+        if self._exists('artwork'):
+            for artwork_file in self.artwork_files:
+                try:
+                    os.remove(artwork_file)
+                except:
+                    logger.warn('Error deleting file from the cache: %s', artwork_file)
+
+        self.query_type = 'thumb'
+
+        if self._exists('thumb'):
+            for thumb_file in self.thumb_files:
+                try:
+                    os.remove(thumb_file)
+                except Exception as e:
+                    logger.warn('Error deleting file from the cache: %s', thumb_file)
+
     def _update_cache(self):
         '''
         Since we call the same url for both info and artwork, we'll update both at the same time
@@ -249,6 +279,7 @@ class Cache(object):
         myDB = db.DBConnection()
 
         # Since lastfm uses release ids rather than release group ids for albums, we have to do a artist + album search for albums
+        # Exception is when adding albums manually, then we should use release id
         if self.id_type == 'artist':
 
             data = lastfm.request_lastfm("artist.getinfo", mbid=self.id, api_key=LASTFM_API_KEY)
@@ -278,8 +309,13 @@ class Cache(object):
 
         else:
 
-            dbartist = myDB.action('SELECT ArtistName, AlbumTitle FROM albums WHERE AlbumID=?', [self.id]).fetchone()
-            data = lastfm.request_lastfm("album.getinfo", artist=dbartist['ArtistName'], album=dbartist['AlbumTitle'], api_key=LASTFM_API_KEY)
+            dbalbum = myDB.action('SELECT ArtistName, AlbumTitle, ReleaseID FROM albums WHERE AlbumID=?', [self.id]).fetchone()
+            if dbalbum['ReleaseID'] != self.id:
+                data = lastfm.request_lastfm("album.getinfo", mbid=dbalbum['ReleaseID'], api_key=LASTFM_API_KEY)
+                if not data:
+                    data = lastfm.request_lastfm("album.getinfo", artist=dbalbum['ArtistName'], album=dbalbum['AlbumTitle'], api_key=LASTFM_API_KEY)
+            else:
+                data = lastfm.request_lastfm("album.getinfo", artist=dbalbum['ArtistName'], album=dbalbum['AlbumTitle'], api_key=LASTFM_API_KEY)
 
             if not data:
                 return

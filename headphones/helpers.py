@@ -222,7 +222,7 @@ def split_path(f):
     components = []
     drive, path = os.path.splitdrive(f)
 
-    # Stip the folder from the path, iterate until nothing is left
+    # Strip the folder from the path, iterate until nothing is left
     while True:
         path, folder = os.path.split(path)
 
@@ -315,18 +315,9 @@ def extract_data(s):
     s = s.replace('_', ' ')
 
     #headphones default format
-    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
+    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s[\[\(](?P<year>.*?)[\]\)]', re.VERBOSE)
     match = pattern.match(s)
 
-    if match:
-        name = match.group("name")
-        album = match.group("album")
-        year = match.group("year")
-        return (name, album, year)
-
-    #newzbin default format
-    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
-    match = pattern.match(s)
     if match:
         name = match.group("name")
         album = match.group("album")
@@ -443,6 +434,75 @@ def extract_metadata(f):
     logger.debug("Artists: %s, Albums: %s, Years: %s", artists, albums, years)
 
     return (None, None, None)
+
+def get_downloaded_track_list(albumpath):
+    """
+     Return a list of audio files for the given directory.
+     """
+    downloaded_track_list = []
+
+    for root, dirs, files in os.walk(albumpath):
+        for _file in files:
+            extension = os.path.splitext(_file)[1].lower()[1:]
+            if extension in headphones.MEDIA_FORMATS:
+                downloaded_track_list.append(os.path.join(root, _file))
+
+    return downloaded_track_list
+
+def preserve_torrent_direcory(albumpath):
+    """
+     Copy torrent directory to headphones-modified to keep files for seeding.
+     """
+    from headphones import logger
+    new_folder = os.path.join(albumpath, 'headphones-modified'.encode(headphones.SYS_ENCODING, 'replace'))
+    logger.info("Copying files to 'headphones-modified' subfolder to preserve downloaded files for seeding")
+    try:
+        shutil.copytree(albumpath, new_folder)
+        return new_folder
+    except Exception, e:
+        logger.warn("Cannot copy/move files to temp folder: " + \
+                    new_folder.decode(headphones.SYS_ENCODING, 'replace') + \
+                    ". Not continuing. Error: " + str(e))
+        return None
+
+def cue_split(albumpath):
+    """
+     Attempts to check and split audio files by a cue for the given directory.
+     """
+    # Walk directory and scan all media files
+    count = 0
+    cue_count = 0
+    cue_dirs = []
+
+    for root, dirs, files in os.walk(albumpath):
+        for _file in files:
+            extension = os.path.splitext(_file)[1].lower()[1:]
+            if extension in headphones.MEDIA_FORMATS:
+                count += 1
+            elif extension == 'cue':
+                cue_count += 1
+                if root not in cue_dirs:
+                    cue_dirs.append(root)
+
+    # Split cue
+    if cue_count and cue_count >= count and cue_dirs:
+
+        from headphones import logger, cuesplit
+        logger.info("Attempting to split audio files by cue")
+
+        cwd = os.getcwd()
+        for cue_dir in cue_dirs:
+            try:
+                cuesplit.split(cue_dir)
+            except Exception, e:
+                os.chdir(cwd)
+                logger.warn("Cue not split: " + str(e))
+                return False
+
+        os.chdir(cwd)
+        return True
+
+    return False
 
 def extract_logline(s):
     # Default log format
