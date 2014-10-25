@@ -40,7 +40,7 @@ except ImportError:
 def serve_template(templatename, **kwargs):
 
     interface_dir = os.path.join(str(headphones.PROG_DIR), 'data/interfaces/')
-    template_dir = os.path.join(str(interface_dir), headphones.CFG.INTERFACE)
+    template_dir = os.path.join(str(interface_dir), headphones.CONFIG.INTERFACE)
 
     _hplookup = TemplateLookup(directories=[template_dir])
 
@@ -674,7 +674,7 @@ class WebInterface(object):
     markArtists.exposed = True
 
     def importLastFM(self, username):
-        headphones.CFG.LASTFM_USERNAME = username
+        headphones.CONFIG.LASTFM_USERNAME = username
         headphones.config_write()
         threading.Thread(target=lastfm.getArtists).start()
         raise cherrypy.HTTPRedirect("home")
@@ -686,7 +686,7 @@ class WebInterface(object):
     importLastFMTag.exposed = True
 
     def importItunes(self, path):
-        headphones.CFG.PATH_TO_XML = path
+        headphones.CONFIG.PATH_TO_XML = path
         headphones.config_write()
         threading.Thread(target=importer.itunesImport, args=[path]).start()
         time.sleep(10)
@@ -694,9 +694,9 @@ class WebInterface(object):
     importItunes.exposed = True
 
     def musicScan(self, path, scan=0, redirect=None, autoadd=0, libraryscan=0):
-        headphones.CFG.LIBRARYSCAN = libraryscan
-        headphones.CFG.AUTO_ADD_ARTISTS = autoadd
-        headphones.CFG.MUSIC_DIR = path
+        headphones.CONFIG.LIBRARYSCAN = libraryscan
+        headphones.CONFIG.AUTO_ADD_ARTISTS = autoadd
+        headphones.CONFIG.MUSIC_DIR = path
         headphones.config_write()
         if scan:
             try:
@@ -952,208 +952,208 @@ class WebInterface(object):
         interface_list = [ name for name in os.listdir(interface_dir) if os.path.isdir(os.path.join(interface_dir, name)) ]
 
         config = {
-            "http_host" : headphones.CFG.HTTP_HOST,
-            "http_user" : headphones.CFG.HTTP_USERNAME,
-            "http_port" : headphones.CFG.HTTP_PORT,
-            "http_pass" : headphones.CFG.HTTP_PASSWORD,
-            "launch_browser" : checked(headphones.CFG.LAUNCH_BROWSER),
-            "enable_https" : checked(headphones.CFG.ENABLE_HTTPS),
-            "https_cert" : headphones.CFG.HTTPS_CERT,
-            "https_key" : headphones.CFG.HTTPS_KEY,
-            "api_enabled" : checked(headphones.CFG.API_ENABLED),
-            "api_key" : headphones.CFG.API_KEY,
-            "download_scan_interval" : headphones.CFG.DOWNLOAD_SCAN_INTERVAL,
-            "update_db_interval" : headphones.CFG.UPDATE_DB_INTERVAL,
-            "mb_ignore_age" : headphones.CFG.MB_IGNORE_AGE,
-            "search_interval" : headphones.CFG.SEARCH_INTERVAL,
-            "libraryscan_interval" : headphones.CFG.LIBRARYSCAN_INTERVAL,
-            "sab_host" : headphones.CFG.SAB_HOST,
-            "sab_user" : headphones.CFG.SAB_USERNAME,
-            "sab_api" : headphones.CFG.SAB_APIKEY,
-            "sab_pass" : headphones.CFG.SAB_PASSWORD,
-            "sab_cat" : headphones.CFG.SAB_CATEGORY,
-            "nzbget_host" : headphones.CFG.NZBGET_HOST,
-            "nzbget_user" : headphones.CFG.NZBGET_USERNAME,
-            "nzbget_pass" : headphones.CFG.NZBGET_PASSWORD,
-            "nzbget_cat" : headphones.CFG.NZBGET_CATEGORY,
-            "nzbget_priority" : headphones.CFG.NZBGET_PRIORITY,
-            "transmission_host" : headphones.CFG.TRANSMISSION_HOST,
-            "transmission_user" : headphones.CFG.TRANSMISSION_USERNAME,
-            "transmission_pass" : headphones.CFG.TRANSMISSION_PASSWORD,
-            "utorrent_host" : headphones.CFG.UTORRENT_HOST,
-            "utorrent_user" : headphones.CFG.UTORRENT_USERNAME,
-            "utorrent_pass" : headphones.CFG.UTORRENT_PASSWORD,
-            "utorrent_label" : headphones.CFG.UTORRENT_LABEL,
-            "nzb_downloader_sabnzbd" : radio(headphones.CFG.NZB_DOWNLOADER, 0),
-            "nzb_downloader_nzbget" : radio(headphones.CFG.NZB_DOWNLOADER, 1),
-            "nzb_downloader_blackhole" : radio(headphones.CFG.NZB_DOWNLOADER, 2),
-            "torrent_downloader_blackhole" : radio(headphones.CFG.TORRENT_DOWNLOADER, 0),
-            "torrent_downloader_transmission" : radio(headphones.CFG.TORRENT_DOWNLOADER, 1),
-            "torrent_downloader_utorrent" : radio(headphones.CFG.TORRENT_DOWNLOADER, 2),
-            "download_dir" : headphones.CFG.DOWNLOAD_DIR,
-            "use_blackhole" : checked(headphones.CFG.BLACKHOLE),
-            "blackhole_dir" : headphones.CFG.BLACKHOLE_DIR,
-            "usenet_retention" : headphones.CFG.USENET_RETENTION,
-            "headphones_indexer" : checked(headphones.CFG.HEADPHONES_INDEXER),
-            "use_newznab" : checked(headphones.CFG.NEWZNAB),
-            "newznab_host" : headphones.CFG.NEWZNAB_HOST,
-            "newznab_api" : headphones.CFG.NEWZNAB_APIKEY,
-            "newznab_enabled" : checked(headphones.CFG.NEWZNAB_ENABLED),
-            "extra_newznabs" : headphones.CFG.get_extra_newznabs(),
-            "use_nzbsorg" : checked(headphones.CFG.NZBSORG),
-            "nzbsorg_uid" : headphones.CFG.NZBSORG_UID,
-            "nzbsorg_hash" : headphones.CFG.NZBSORG_HASH,
-            "use_omgwtfnzbs" : checked(headphones.CFG.OMGWTFNZBS),
-            "omgwtfnzbs_uid" : headphones.CFG.OMGWTFNZBS_UID,
-            "omgwtfnzbs_apikey" : headphones.CFG.OMGWTFNZBS_APIKEY,
-            "preferred_words" : headphones.CFG.PREFERRED_WORDS,
-            "ignored_words" : headphones.CFG.IGNORED_WORDS,
-            "required_words" : headphones.CFG.REQUIRED_WORDS,
-            "torrentblackhole_dir" : headphones.CFG.TORRENTBLACKHOLE_DIR,
-            "download_torrent_dir" : headphones.CFG.DOWNLOAD_TORRENT_DIR,
-            "numberofseeders" : headphones.CFG.NUMBEROFSEEDERS,
-            "use_kat" : checked(headphones.CFG.KAT),
-            "kat_proxy_url" : headphones.CFG.KAT_PROXY_URL,
-            "kat_ratio": headphones.CFG.KAT_RATIO,
-            "use_piratebay" : checked(headphones.CFG.PIRATEBAY),
-            "piratebay_proxy_url" : headphones.CFG.PIRATEBAY_PROXY_URL,
-            "piratebay_ratio": headphones.CFG.PIRATEBAY_RATIO,
-            "use_mininova" : checked(headphones.CFG.MININOVA),
-            "mininova_ratio": headphones.CFG.MININOVA_RATIO,
-            "use_waffles" : checked(headphones.CFG.WAFFLES),
-            "waffles_uid" : headphones.CFG.WAFFLES_UID,
-            "waffles_passkey": headphones.CFG.WAFFLES_PASSKEY,
-            "waffles_ratio": headphones.CFG.WAFFLES_RATIO,
-            "use_rutracker" : checked(headphones.CFG.RUTRACKER),
-            "rutracker_user" : headphones.CFG.RUTRACKER_USER,
-            "rutracker_password": headphones.CFG.RUTRACKER_PASSWORD,
-            "rutracker_ratio": headphones.CFG.RUTRACKER_RATIO,
-            "use_whatcd" : checked(headphones.CFG.WHATCD),
-            "whatcd_username" : headphones.CFG.WHATCD_USERNAME,
-            "whatcd_password": headphones.CFG.WHATCD_PASSWORD,
-            "whatcd_ratio": headphones.CFG.WHATCD_RATIO,
-            "pref_qual_0" : radio(headphones.CFG.PREFERRED_QUALITY, 0),
-            "pref_qual_1" : radio(headphones.CFG.PREFERRED_QUALITY, 1),
-            "pref_qual_2" : radio(headphones.CFG.PREFERRED_QUALITY, 2),
-            "pref_qual_3" : radio(headphones.CFG.PREFERRED_QUALITY, 3),
-            "pref_bitrate" : headphones.CFG.PREFERRED_BITRATE,
-            "pref_bitrate_high" : headphones.CFG.PREFERRED_BITRATE_HIGH_BUFFER,
-            "pref_bitrate_low" : headphones.CFG.PREFERRED_BITRATE_LOW_BUFFER,
-            "pref_bitrate_allow_lossless" : checked(headphones.CFG.PREFERRED_BITRATE_ALLOW_LOSSLESS),
-            "detect_bitrate" : checked(headphones.CFG.DETECT_BITRATE),
-            "lossless_bitrate_from" : headphones.CFG.LOSSLESS_BITRATE_FROM,
-            "lossless_bitrate_to" : headphones.CFG.LOSSLESS_BITRATE_TO,
-            "freeze_db" : checked(headphones.CFG.FREEZE_DB),
-            "move_files" : checked(headphones.CFG.MOVE_FILES),
-            "rename_files" : checked(headphones.CFG.RENAME_FILES),
-            "correct_metadata" : checked(headphones.CFG.CORRECT_METADATA),
-            "cleanup_files" : checked(headphones.CFG.CLEANUP_FILES),
-            "keep_nfo" : checked(headphones.CFG.KEEP_NFO),
-            "add_album_art" : checked(headphones.CFG.ADD_ALBUM_ART),
-            "album_art_format" : headphones.CFG.ALBUM_ART_FORMAT,
-            "embed_album_art" : checked(headphones.CFG.EMBED_ALBUM_ART),
-            "embed_lyrics" : checked(headphones.CFG.EMBED_LYRICS),
-            "replace_existing_folders" : checked(headphones.CFG.REPLACE_EXISTING_FOLDERS),
-            "dest_dir" : headphones.CFG.DESTINATION_DIR,
-            "lossless_dest_dir" : headphones.CFG.LOSSLESS_DESTINATION_DIR,
-            "folder_format" : headphones.CFG.FOLDER_FORMAT,
-            "file_format" : headphones.CFG.FILE_FORMAT,
-            "file_underscores" : checked(headphones.CFG.FILE_UNDERSCORES),
-            "include_extras" : checked(headphones.CFG.INCLUDE_EXTRAS),
-            "autowant_upcoming" : checked(headphones.CFG.AUTOWANT_UPCOMING),
-            "autowant_all" : checked(headphones.CFG.AUTOWANT_ALL),
-            "autowant_manually_added" : checked(headphones.CFG.AUTOWANT_MANUALLY_ADDED),
-            "keep_torrent_files" : checked(headphones.CFG.KEEP_TORRENT_FILES),
-            "prefer_torrents_0" : radio(headphones.CFG.PREFER_TORRENTS, 0),
-            "prefer_torrents_1" : radio(headphones.CFG.PREFER_TORRENTS, 1),
-            "prefer_torrents_2" : radio(headphones.CFG.PREFER_TORRENTS, 2),
-            "magnet_links_0" : radio(headphones.CFG.MAGNET_LINKS, 0),
-            "magnet_links_1" : radio(headphones.CFG.MAGNET_LINKS, 1),
-            "magnet_links_2" : radio(headphones.CFG.MAGNET_LINKS, 2),
-            "log_dir" : headphones.CFG.LOG_DIR,
-            "cache_dir" : headphones.CFG.CACHE_DIR,
+            "http_host" : headphones.CONFIG.HTTP_HOST,
+            "http_user" : headphones.CONFIG.HTTP_USERNAME,
+            "http_port" : headphones.CONFIG.HTTP_PORT,
+            "http_pass" : headphones.CONFIG.HTTP_PASSWORD,
+            "launch_browser" : checked(headphones.CONFIG.LAUNCH_BROWSER),
+            "enable_https" : checked(headphones.CONFIG.ENABLE_HTTPS),
+            "https_cert" : headphones.CONFIG.HTTPS_CERT,
+            "https_key" : headphones.CONFIG.HTTPS_KEY,
+            "api_enabled" : checked(headphones.CONFIG.API_ENABLED),
+            "api_key" : headphones.CONFIG.API_KEY,
+            "download_scan_interval" : headphones.CONFIG.DOWNLOAD_SCAN_INTERVAL,
+            "update_db_interval" : headphones.CONFIG.UPDATE_DB_INTERVAL,
+            "mb_ignore_age" : headphones.CONFIG.MB_IGNORE_AGE,
+            "search_interval" : headphones.CONFIG.SEARCH_INTERVAL,
+            "libraryscan_interval" : headphones.CONFIG.LIBRARYSCAN_INTERVAL,
+            "sab_host" : headphones.CONFIG.SAB_HOST,
+            "sab_user" : headphones.CONFIG.SAB_USERNAME,
+            "sab_api" : headphones.CONFIG.SAB_APIKEY,
+            "sab_pass" : headphones.CONFIG.SAB_PASSWORD,
+            "sab_cat" : headphones.CONFIG.SAB_CATEGORY,
+            "nzbget_host" : headphones.CONFIG.NZBGET_HOST,
+            "nzbget_user" : headphones.CONFIG.NZBGET_USERNAME,
+            "nzbget_pass" : headphones.CONFIG.NZBGET_PASSWORD,
+            "nzbget_cat" : headphones.CONFIG.NZBGET_CATEGORY,
+            "nzbget_priority" : headphones.CONFIG.NZBGET_PRIORITY,
+            "transmission_host" : headphones.CONFIG.TRANSMISSION_HOST,
+            "transmission_user" : headphones.CONFIG.TRANSMISSION_USERNAME,
+            "transmission_pass" : headphones.CONFIG.TRANSMISSION_PASSWORD,
+            "utorrent_host" : headphones.CONFIG.UTORRENT_HOST,
+            "utorrent_user" : headphones.CONFIG.UTORRENT_USERNAME,
+            "utorrent_pass" : headphones.CONFIG.UTORRENT_PASSWORD,
+            "utorrent_label" : headphones.CONFIG.UTORRENT_LABEL,
+            "nzb_downloader_sabnzbd" : radio(headphones.CONFIG.NZB_DOWNLOADER, 0),
+            "nzb_downloader_nzbget" : radio(headphones.CONFIG.NZB_DOWNLOADER, 1),
+            "nzb_downloader_blackhole" : radio(headphones.CONFIG.NZB_DOWNLOADER, 2),
+            "torrent_downloader_blackhole" : radio(headphones.CONFIG.TORRENT_DOWNLOADER, 0),
+            "torrent_downloader_transmission" : radio(headphones.CONFIG.TORRENT_DOWNLOADER, 1),
+            "torrent_downloader_utorrent" : radio(headphones.CONFIG.TORRENT_DOWNLOADER, 2),
+            "download_dir" : headphones.CONFIG.DOWNLOAD_DIR,
+            "use_blackhole" : checked(headphones.CONFIG.BLACKHOLE),
+            "blackhole_dir" : headphones.CONFIG.BLACKHOLE_DIR,
+            "usenet_retention" : headphones.CONFIG.USENET_RETENTION,
+            "headphones_indexer" : checked(headphones.CONFIG.HEADPHONES_INDEXER),
+            "use_newznab" : checked(headphones.CONFIG.NEWZNAB),
+            "newznab_host" : headphones.CONFIG.NEWZNAB_HOST,
+            "newznab_api" : headphones.CONFIG.NEWZNAB_APIKEY,
+            "newznab_enabled" : checked(headphones.CONFIG.NEWZNAB_ENABLED),
+            "extra_newznabs" : headphones.CONFIG.get_extra_newznabs(),
+            "use_nzbsorg" : checked(headphones.CONFIG.NZBSORG),
+            "nzbsorg_uid" : headphones.CONFIG.NZBSORG_UID,
+            "nzbsorg_hash" : headphones.CONFIG.NZBSORG_HASH,
+            "use_omgwtfnzbs" : checked(headphones.CONFIG.OMGWTFNZBS),
+            "omgwtfnzbs_uid" : headphones.CONFIG.OMGWTFNZBS_UID,
+            "omgwtfnzbs_apikey" : headphones.CONFIG.OMGWTFNZBS_APIKEY,
+            "preferred_words" : headphones.CONFIG.PREFERRED_WORDS,
+            "ignored_words" : headphones.CONFIG.IGNORED_WORDS,
+            "required_words" : headphones.CONFIG.REQUIRED_WORDS,
+            "torrentblackhole_dir" : headphones.CONFIG.TORRENTBLACKHOLE_DIR,
+            "download_torrent_dir" : headphones.CONFIG.DOWNLOAD_TORRENT_DIR,
+            "numberofseeders" : headphones.CONFIG.NUMBEROFSEEDERS,
+            "use_kat" : checked(headphones.CONFIG.KAT),
+            "kat_proxy_url" : headphones.CONFIG.KAT_PROXY_URL,
+            "kat_ratio": headphones.CONFIG.KAT_RATIO,
+            "use_piratebay" : checked(headphones.CONFIG.PIRATEBAY),
+            "piratebay_proxy_url" : headphones.CONFIG.PIRATEBAY_PROXY_URL,
+            "piratebay_ratio": headphones.CONFIG.PIRATEBAY_RATIO,
+            "use_mininova" : checked(headphones.CONFIG.MININOVA),
+            "mininova_ratio": headphones.CONFIG.MININOVA_RATIO,
+            "use_waffles" : checked(headphones.CONFIG.WAFFLES),
+            "waffles_uid" : headphones.CONFIG.WAFFLES_UID,
+            "waffles_passkey": headphones.CONFIG.WAFFLES_PASSKEY,
+            "waffles_ratio": headphones.CONFIG.WAFFLES_RATIO,
+            "use_rutracker" : checked(headphones.CONFIG.RUTRACKER),
+            "rutracker_user" : headphones.CONFIG.RUTRACKER_USER,
+            "rutracker_password": headphones.CONFIG.RUTRACKER_PASSWORD,
+            "rutracker_ratio": headphones.CONFIG.RUTRACKER_RATIO,
+            "use_whatcd" : checked(headphones.CONFIG.WHATCD),
+            "whatcd_username" : headphones.CONFIG.WHATCD_USERNAME,
+            "whatcd_password": headphones.CONFIG.WHATCD_PASSWORD,
+            "whatcd_ratio": headphones.CONFIG.WHATCD_RATIO,
+            "pref_qual_0" : radio(headphones.CONFIG.PREFERRED_QUALITY, 0),
+            "pref_qual_1" : radio(headphones.CONFIG.PREFERRED_QUALITY, 1),
+            "pref_qual_2" : radio(headphones.CONFIG.PREFERRED_QUALITY, 2),
+            "pref_qual_3" : radio(headphones.CONFIG.PREFERRED_QUALITY, 3),
+            "pref_bitrate" : headphones.CONFIG.PREFERRED_BITRATE,
+            "pref_bitrate_high" : headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER,
+            "pref_bitrate_low" : headphones.CONFIG.PREFERRED_BITRATE_LOW_BUFFER,
+            "pref_bitrate_allow_lossless" : checked(headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS),
+            "detect_bitrate" : checked(headphones.CONFIG.DETECT_BITRATE),
+            "lossless_bitrate_from" : headphones.CONFIG.LOSSLESS_BITRATE_FROM,
+            "lossless_bitrate_to" : headphones.CONFIG.LOSSLESS_BITRATE_TO,
+            "freeze_db" : checked(headphones.CONFIG.FREEZE_DB),
+            "move_files" : checked(headphones.CONFIG.MOVE_FILES),
+            "rename_files" : checked(headphones.CONFIG.RENAME_FILES),
+            "correct_metadata" : checked(headphones.CONFIG.CORRECT_METADATA),
+            "cleanup_files" : checked(headphones.CONFIG.CLEANUP_FILES),
+            "keep_nfo" : checked(headphones.CONFIG.KEEP_NFO),
+            "add_album_art" : checked(headphones.CONFIG.ADD_ALBUM_ART),
+            "album_art_format" : headphones.CONFIG.ALBUM_ART_FORMAT,
+            "embed_album_art" : checked(headphones.CONFIG.EMBED_ALBUM_ART),
+            "embed_lyrics" : checked(headphones.CONFIG.EMBED_LYRICS),
+            "replace_existing_folders" : checked(headphones.CONFIG.REPLACE_EXISTING_FOLDERS),
+            "dest_dir" : headphones.CONFIG.DESTINATION_DIR,
+            "lossless_dest_dir" : headphones.CONFIG.LOSSLESS_DESTINATION_DIR,
+            "folder_format" : headphones.CONFIG.FOLDER_FORMAT,
+            "file_format" : headphones.CONFIG.FILE_FORMAT,
+            "file_underscores" : checked(headphones.CONFIG.FILE_UNDERSCORES),
+            "include_extras" : checked(headphones.CONFIG.INCLUDE_EXTRAS),
+            "autowant_upcoming" : checked(headphones.CONFIG.AUTOWANT_UPCOMING),
+            "autowant_all" : checked(headphones.CONFIG.AUTOWANT_ALL),
+            "autowant_manually_added" : checked(headphones.CONFIG.AUTOWANT_MANUALLY_ADDED),
+            "keep_torrent_files" : checked(headphones.CONFIG.KEEP_TORRENT_FILES),
+            "prefer_torrents_0" : radio(headphones.CONFIG.PREFER_TORRENTS, 0),
+            "prefer_torrents_1" : radio(headphones.CONFIG.PREFER_TORRENTS, 1),
+            "prefer_torrents_2" : radio(headphones.CONFIG.PREFER_TORRENTS, 2),
+            "magnet_links_0" : radio(headphones.CONFIG.MAGNET_LINKS, 0),
+            "magnet_links_1" : radio(headphones.CONFIG.MAGNET_LINKS, 1),
+            "magnet_links_2" : radio(headphones.CONFIG.MAGNET_LINKS, 2),
+            "log_dir" : headphones.CONFIG.LOG_DIR,
+            "cache_dir" : headphones.CONFIG.CACHE_DIR,
             "interface_list" : interface_list,
-            "music_encoder":        checked(headphones.CFG.MUSIC_ENCODER),
-            "encoder":      headphones.CFG.ENCODER,
-            "xldprofile":   headphones.CFG.XLDPROFILE,
-            "bitrate":      int(headphones.CFG.BITRATE),
-            "encoderfolder":    headphones.CFG.ENCODER_PATH,
-            "advancedencoder":  headphones.CFG.ADVANCEDENCODER,
-            "encoderoutputformat": headphones.CFG.ENCODEROUTPUTFORMAT,
-            "samplingfrequency": headphones.CFG.SAMPLINGFREQUENCY,
-            "encodervbrcbr": headphones.CFG.ENCODERVBRCBR,
-            "encoderquality": headphones.CFG.ENCODERQUALITY,
-            "encoderlossless": checked(headphones.CFG.ENCODERLOSSLESS),
-            "encoder_multicore": checked(headphones.CFG.ENCODER_MULTICORE),
-            "encoder_multicore_count": int(headphones.CFG.ENCODER_MULTICORE_COUNT),
-            "delete_lossless_files": checked(headphones.CFG.DELETE_LOSSLESS_FILES),
-            "growl_enabled": checked(headphones.CFG.GROWL_ENABLED),
-            "growl_onsnatch": checked(headphones.CFG.GROWL_ONSNATCH),
-            "growl_host": headphones.CFG.GROWL_HOST,
-            "growl_password": headphones.CFG.GROWL_PASSWORD,
-            "prowl_enabled": checked(headphones.CFG.PROWL_ENABLED),
-            "prowl_onsnatch": checked(headphones.CFG.PROWL_ONSNATCH),
-            "prowl_keys": headphones.CFG.PROWL_KEYS,
-            "prowl_priority": headphones.CFG.PROWL_PRIORITY,
-            "xbmc_enabled": checked(headphones.CFG.XBMC_ENABLED),
-            "xbmc_host": headphones.CFG.XBMC_HOST,
-            "xbmc_username": headphones.CFG.XBMC_USERNAME,
-            "xbmc_password": headphones.CFG.XBMC_PASSWORD,
-            "xbmc_update": checked(headphones.CFG.XBMC_UPDATE),
-            "xbmc_notify": checked(headphones.CFG.XBMC_NOTIFY),
-            "lms_enabled": checked(headphones.CFG.LMS_ENABLED),
-            "lms_host": headphones.CFG.LMS_HOST,
-            "plex_enabled": checked(headphones.CFG.PLEX_ENABLED),
-            "plex_server_host": headphones.CFG.PLEX_SERVER_HOST,
-            "plex_client_host": headphones.CFG.PLEX_CLIENT_HOST,
-            "plex_username": headphones.CFG.PLEX_USERNAME,
-            "plex_password": headphones.CFG.PLEX_PASSWORD,
-            "plex_update": checked(headphones.CFG.PLEX_UPDATE),
-            "plex_notify": checked(headphones.CFG.PLEX_NOTIFY),
-            "nma_enabled": checked(headphones.CFG.NMA_ENABLED),
-            "nma_apikey": headphones.CFG.NMA_APIKEY,
-            "nma_priority": int(headphones.CFG.NMA_PRIORITY),
-            "nma_onsnatch": checked(headphones.CFG.NMA_ONSNATCH),
-            "pushalot_enabled": checked(headphones.CFG.PUSHALOT_ENABLED),
-            "pushalot_apikey": headphones.CFG.PUSHALOT_APIKEY,
-            "pushalot_onsnatch": checked(headphones.CFG.PUSHALOT_ONSNATCH),
-            "synoindex_enabled": checked(headphones.CFG.SYNOINDEX_ENABLED),
-            "pushover_enabled": checked(headphones.CFG.PUSHOVER_ENABLED),
-            "pushover_onsnatch": checked(headphones.CFG.PUSHOVER_ONSNATCH),
-            "pushover_keys": headphones.CFG.PUSHOVER_KEYS,
-            "pushover_apitoken": headphones.CFG.PUSHOVER_APITOKEN,
-            "pushover_priority": headphones.CFG.PUSHOVER_PRIORITY,
-            "pushbullet_enabled": checked(headphones.CFG.PUSHBULLET_ENABLED),
-            "pushbullet_onsnatch": checked(headphones.CFG.PUSHBULLET_ONSNATCH),
-            "pushbullet_apikey": headphones.CFG.PUSHBULLET_APIKEY,
-            "pushbullet_deviceid": headphones.CFG.PUSHBULLET_DEVICEID,
-            "subsonic_enabled": checked(headphones.CFG.SUBSONIC_ENABLED),
-            "subsonic_host": headphones.CFG.SUBSONIC_HOST,
-            "subsonic_username": headphones.CFG.SUBSONIC_USERNAME,
-            "subsonic_password": headphones.CFG.SUBSONIC_PASSWORD,
-            "twitter_enabled": checked(headphones.CFG.TWITTER_ENABLED),
-            "twitter_onsnatch": checked(headphones.CFG.TWITTER_ONSNATCH),
-            "osx_notify_enabled": checked(headphones.CFG.OSX_NOTIFY_ENABLED),
-            "osx_notify_onsnatch": checked(headphones.CFG.OSX_NOTIFY_ONSNATCH),
-            "osx_notify_app": headphones.CFG.OSX_NOTIFY_APP,
-            "boxcar_enabled": checked(headphones.CFG.BOXCAR_ENABLED),
-            "boxcar_onsnatch": checked(headphones.CFG.BOXCAR_ONSNATCH),
-            "boxcar_token": headphones.CFG.BOXCAR_TOKEN,
+            "music_encoder":        checked(headphones.CONFIG.MUSIC_ENCODER),
+            "encoder":      headphones.CONFIG.ENCODER,
+            "xldprofile":   headphones.CONFIG.XLDPROFILE,
+            "bitrate":      int(headphones.CONFIG.BITRATE),
+            "encoderfolder":    headphones.CONFIG.ENCODER_PATH,
+            "advancedencoder":  headphones.CONFIG.ADVANCEDENCODER,
+            "encoderoutputformat": headphones.CONFIG.ENCODEROUTPUTFORMAT,
+            "samplingfrequency": headphones.CONFIG.SAMPLINGFREQUENCY,
+            "encodervbrcbr": headphones.CONFIG.ENCODERVBRCBR,
+            "encoderquality": headphones.CONFIG.ENCODERQUALITY,
+            "encoderlossless": checked(headphones.CONFIG.ENCODERLOSSLESS),
+            "encoder_multicore": checked(headphones.CONFIG.ENCODER_MULTICORE),
+            "encoder_multicore_count": int(headphones.CONFIG.ENCODER_MULTICORE_COUNT),
+            "delete_lossless_files": checked(headphones.CONFIG.DELETE_LOSSLESS_FILES),
+            "growl_enabled": checked(headphones.CONFIG.GROWL_ENABLED),
+            "growl_onsnatch": checked(headphones.CONFIG.GROWL_ONSNATCH),
+            "growl_host": headphones.CONFIG.GROWL_HOST,
+            "growl_password": headphones.CONFIG.GROWL_PASSWORD,
+            "prowl_enabled": checked(headphones.CONFIG.PROWL_ENABLED),
+            "prowl_onsnatch": checked(headphones.CONFIG.PROWL_ONSNATCH),
+            "prowl_keys": headphones.CONFIG.PROWL_KEYS,
+            "prowl_priority": headphones.CONFIG.PROWL_PRIORITY,
+            "xbmc_enabled": checked(headphones.CONFIG.XBMC_ENABLED),
+            "xbmc_host": headphones.CONFIG.XBMC_HOST,
+            "xbmc_username": headphones.CONFIG.XBMC_USERNAME,
+            "xbmc_password": headphones.CONFIG.XBMC_PASSWORD,
+            "xbmc_update": checked(headphones.CONFIG.XBMC_UPDATE),
+            "xbmc_notify": checked(headphones.CONFIG.XBMC_NOTIFY),
+            "lms_enabled": checked(headphones.CONFIG.LMS_ENABLED),
+            "lms_host": headphones.CONFIG.LMS_HOST,
+            "plex_enabled": checked(headphones.CONFIG.PLEX_ENABLED),
+            "plex_server_host": headphones.CONFIG.PLEX_SERVER_HOST,
+            "plex_client_host": headphones.CONFIG.PLEX_CLIENT_HOST,
+            "plex_username": headphones.CONFIG.PLEX_USERNAME,
+            "plex_password": headphones.CONFIG.PLEX_PASSWORD,
+            "plex_update": checked(headphones.CONFIG.PLEX_UPDATE),
+            "plex_notify": checked(headphones.CONFIG.PLEX_NOTIFY),
+            "nma_enabled": checked(headphones.CONFIG.NMA_ENABLED),
+            "nma_apikey": headphones.CONFIG.NMA_APIKEY,
+            "nma_priority": int(headphones.CONFIG.NMA_PRIORITY),
+            "nma_onsnatch": checked(headphones.CONFIG.NMA_ONSNATCH),
+            "pushalot_enabled": checked(headphones.CONFIG.PUSHALOT_ENABLED),
+            "pushalot_apikey": headphones.CONFIG.PUSHALOT_APIKEY,
+            "pushalot_onsnatch": checked(headphones.CONFIG.PUSHALOT_ONSNATCH),
+            "synoindex_enabled": checked(headphones.CONFIG.SYNOINDEX_ENABLED),
+            "pushover_enabled": checked(headphones.CONFIG.PUSHOVER_ENABLED),
+            "pushover_onsnatch": checked(headphones.CONFIG.PUSHOVER_ONSNATCH),
+            "pushover_keys": headphones.CONFIG.PUSHOVER_KEYS,
+            "pushover_apitoken": headphones.CONFIG.PUSHOVER_APITOKEN,
+            "pushover_priority": headphones.CONFIG.PUSHOVER_PRIORITY,
+            "pushbullet_enabled": checked(headphones.CONFIG.PUSHBULLET_ENABLED),
+            "pushbullet_onsnatch": checked(headphones.CONFIG.PUSHBULLET_ONSNATCH),
+            "pushbullet_apikey": headphones.CONFIG.PUSHBULLET_APIKEY,
+            "pushbullet_deviceid": headphones.CONFIG.PUSHBULLET_DEVICEID,
+            "subsonic_enabled": checked(headphones.CONFIG.SUBSONIC_ENABLED),
+            "subsonic_host": headphones.CONFIG.SUBSONIC_HOST,
+            "subsonic_username": headphones.CONFIG.SUBSONIC_USERNAME,
+            "subsonic_password": headphones.CONFIG.SUBSONIC_PASSWORD,
+            "twitter_enabled": checked(headphones.CONFIG.TWITTER_ENABLED),
+            "twitter_onsnatch": checked(headphones.CONFIG.TWITTER_ONSNATCH),
+            "osx_notify_enabled": checked(headphones.CONFIG.OSX_NOTIFY_ENABLED),
+            "osx_notify_onsnatch": checked(headphones.CONFIG.OSX_NOTIFY_ONSNATCH),
+            "osx_notify_app": headphones.CONFIG.OSX_NOTIFY_APP,
+            "boxcar_enabled": checked(headphones.CONFIG.BOXCAR_ENABLED),
+            "boxcar_onsnatch": checked(headphones.CONFIG.BOXCAR_ONSNATCH),
+            "boxcar_token": headphones.CONFIG.BOXCAR_TOKEN,
             "mirror_list": headphones.MIRRORLIST,
-            "mirror": headphones.CFG.MIRROR,
-            "customhost": headphones.CFG.CUSTOMHOST,
-            "customport": headphones.CFG.CUSTOMPORT,
-            "customsleep": headphones.CFG.CUSTOMSLEEP,
-            "hpuser": headphones.CFG.HPUSER,
-            "hppass": headphones.CFG.HPPASS,
-            "songkick_enabled": checked(headphones.CFG.SONGKICK_ENABLED),
-            "songkick_apikey": headphones.CFG.SONGKICK_APIKEY,
-            "songkick_location": headphones.CFG.SONGKICK_LOCATION,
-            "songkick_filter_enabled": checked(headphones.CFG.SONGKICK_FILTER_ENABLED),
-            "cache_sizemb": headphones.CFG.CACHE_SIZEMB,
-            "file_permissions": headphones.CFG.FILE_PERMISSIONS,
-            "folder_permissions": headphones.CFG.FOLDER_PERMISSIONS,
-            "mpc_enabled": checked(headphones.CFG.MPC_ENABLED)
+            "mirror": headphones.CONFIG.MIRROR,
+            "customhost": headphones.CONFIG.CUSTOMHOST,
+            "customport": headphones.CONFIG.CUSTOMPORT,
+            "customsleep": headphones.CONFIG.CUSTOMSLEEP,
+            "hpuser": headphones.CONFIG.HPUSER,
+            "hppass": headphones.CONFIG.HPPASS,
+            "songkick_enabled": checked(headphones.CONFIG.SONGKICK_ENABLED),
+            "songkick_apikey": headphones.CONFIG.SONGKICK_APIKEY,
+            "songkick_location": headphones.CONFIG.SONGKICK_LOCATION,
+            "songkick_filter_enabled": checked(headphones.CONFIG.SONGKICK_FILTER_ENABLED),
+            "cache_sizemb": headphones.CONFIG.CACHE_SIZEMB,
+            "file_permissions": headphones.CONFIG.FILE_PERMISSIONS,
+            "folder_permissions": headphones.CONFIG.FOLDER_PERMISSIONS,
+            "mpc_enabled": checked(headphones.CONFIG.MPC_ENABLED)
         }
 
         # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8 (append new extras to the end)
@@ -1163,8 +1163,8 @@ class WebInterface(object):
         }
 
         extras_list = [extra_munges.get(x, x) for x in headphones.POSSIBLE_EXTRAS]
-        if headphones.CFG.EXTRAS:
-            extras = map(int, headphones.CFG.EXTRAS.split(','))
+        if headphones.CONFIG.EXTRAS:
+            extras = map(int, headphones.CONFIG.EXTRAS.split(','))
         else:
             extras = []
 
@@ -1185,7 +1185,7 @@ class WebInterface(object):
 
     def configUpdate(self, **kwargs):
         # Handle the variable config options. Note - keys with False values aren't getting passed
-        headphones.CFG.clear_extra_newznabs()
+        headphones.CONFIG.clear_extra_newznabs()
         for kwarg in kwargs:
             if kwarg.startswith('newznab_host'):
                 newznab_number = kwarg[12:]
@@ -1196,7 +1196,7 @@ class WebInterface(object):
                         newznab_enabled = int(kwargs.get('newznab_enabled' + newznab_number))
                     except KeyError:
                         newznab_enabled = 0
-                        headphones.CFG.add_extra_newznab((newznab_host, newznab_api, newznab_enabled))
+                        headphones.CONFIG.add_extra_newznab((newznab_host, newznab_api, newznab_enabled))
 
         # Convert the extras to list then string. Coming in as 0 or 1 (append new extras to the end)
         temp_extras_list = []
@@ -1222,17 +1222,17 @@ class WebInterface(object):
             if extra in kwargs:
                 del kwargs[extra]
 
-        headphones.CFG.EXTRAS = ','.join(str(n) for n in temp_extras_list)
+        headphones.CONFIG.EXTRAS = ','.join(str(n) for n in temp_extras_list)
 
-        headphones.CFG.process_kwargs(kwargs)
+        headphones.CONFIG.process_kwargs(kwargs)
 
         # Sanity checking
-        if headphones.CFG.SEARCH_INTERVAL < 360:
+        if headphones.CONFIG.SEARCH_INTERVAL < 360:
             logger.info("Search interval too low. Resetting to 6 hour minimum")
-            headphones.CFG.SEARCH_INTERVAL = 360
+            headphones.CONFIG.SEARCH_INTERVAL = 360
 
         # Write the config
-        headphones.CFG.write()
+        headphones.CONFIG.write()
 
         #reconfigure musicbrainz database connection with the new values
         mb.startmb()
@@ -1402,7 +1402,7 @@ class Artwork(object):
             cherrypy.response.headers['Cache-Control'] = 'no-cache'
         else:
             relpath = relpath.replace('cache/','',1)
-            path = os.path.join(headphones.CFG.CACHE_DIR,relpath)
+            path = os.path.join(headphones.CONFIG.CACHE_DIR,relpath)
             fileext = os.path.splitext(relpath)[1][1::]
             cherrypy.response.headers['Content-type'] = 'image/' + fileext
             cherrypy.response.headers['Cache-Control'] = 'max-age=31556926'
@@ -1435,7 +1435,7 @@ class Artwork(object):
                 cherrypy.response.headers['Cache-Control'] = 'no-cache'
             else:
                 relpath = relpath.replace('cache/','',1)
-                path = os.path.join(headphones.CFG.CACHE_DIR,relpath)
+                path = os.path.join(headphones.CONFIG.CACHE_DIR,relpath)
                 fileext = os.path.splitext(relpath)[1][1::]
                 cherrypy.response.headers['Content-type'] = 'image/' + fileext
                 cherrypy.response.headers['Cache-Control'] = 'max-age=31556926'

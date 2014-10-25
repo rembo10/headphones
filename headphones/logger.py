@@ -136,7 +136,7 @@ def initLogger(console=False, verbose=False):
     logger.setLevel(logging.DEBUG if verbose else logging.INFO)
 
     # Setup file logger
-    filename = os.path.join(headphones.CFG.LOG_DIR, FILENAME)
+    filename = os.path.join(headphones.CONFIG.LOG_DIR, FILENAME)
 
     file_formatter = logging.Formatter('%(asctime)s - %(levelname)-7s :: %(threadName)s : %(message)s', '%d-%b-%Y %H:%M:%S')
     file_handler = handlers.RotatingFileHandler(filename, maxBytes=MAX_SIZE, backupCount=MAX_FILES)

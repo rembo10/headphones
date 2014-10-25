@@ -33,7 +33,7 @@ def checkTorrentFinished():
             hash = album['FolderName']
             albumid = album['AlbumID']
             torrent_removed = False
-            if headphones.CFG.TORRENT_DOWNLOADER == 1:
+            if headphones.CONFIG.TORRENT_DOWNLOADER == 1:
                 torrent_removed = transmission.removeTorrent(hash, True)
             else:
                 torrent_removed = utorrent.removeTorrent(hash, True)

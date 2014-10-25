@@ -40,7 +40,7 @@ class Cache(object):
     and for info it is <musicbrainzid>.<date>.txt
     """
 
-    path_to_art_cache = os.path.join(headphones.CFG.CACHE_DIR, 'artwork')
+    path_to_art_cache = os.path.join(headphones.CONFIG.CACHE_DIR, 'artwork')
 
     def __init__(self):
         self.id = None

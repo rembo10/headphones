@@ -47,7 +47,7 @@ def request_response(url, method="get", auto_raise=True,
 
     # Disable verification of SSL certificates if requested. Note: this could
     # pose a security issue!
-    kwargs["verify"] = headphones.CFG.VERIFY_SSL_CERT
+    kwargs["verify"] = headphones.CONFIG.VERIFY_SSL_CERT
 
     # Map method to the request.XXX method. This is a simple hack, but it allows
     # requests to apply more magic per method. See lib/requests/api.py.

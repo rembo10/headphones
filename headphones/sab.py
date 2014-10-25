@@ -34,14 +34,14 @@ def sendNZB(nzb):
 
     params = {}
 
-    if headphones.CFG.SAB_USERNAME:
-        params['ma_username'] = headphones.CFG.SAB_USERNAME
-    if headphones.CFG.SAB_PASSWORD:
-        params['ma_password'] = headphones.CFG.SAB_PASSWORD
-    if headphones.CFG.SAB_APIKEY:
-        params['apikey'] = headphones.CFG.SAB_APIKEY
-    if headphones.CFG.SAB_CATEGORY:
-        params['cat'] = headphones.CFG.SAB_CATEGORY
+    if headphones.CONFIG.SAB_USERNAME:
+        params['ma_username'] = headphones.CONFIG.SAB_USERNAME
+    if headphones.CONFIG.SAB_PASSWORD:
+        params['ma_password'] = headphones.CONFIG.SAB_PASSWORD
+    if headphones.CONFIG.SAB_APIKEY:
+        params['apikey'] = headphones.CONFIG.SAB_APIKEY
+    if headphones.CONFIG.SAB_CATEGORY:
+        params['cat'] = headphones.CONFIG.SAB_CATEGORY
 
     # if it's a normal result we just pass SAB the URL
     if nzb.resultType == "nzb":
@@ -64,13 +64,13 @@ def sendNZB(nzb):
         params['mode'] = 'addfile'
         multiPartParams = {"nzbfile": (helpers.latinToAscii(nzb.name)+".nzb", nzbdata)}
 
-    if not headphones.CFG.SAB_HOST.startswith('http'):
-        headphones.CFG.SAB_HOST = 'http://' + headphones.CFG.SAB_HOST
+    if not headphones.CONFIG.SAB_HOST.startswith('http'):
+        headphones.CONFIG.SAB_HOST = 'http://' + headphones.CONFIG.SAB_HOST
 
-    if headphones.CFG.SAB_HOST.endswith('/'):
-        headphones.CFG.SAB_HOST = headphones.CFG.SAB_HOST[0:len(headphones.CFG.SAB_HOST)-1]
+    if headphones.CONFIG.SAB_HOST.endswith('/'):
+        headphones.CONFIG.SAB_HOST = headphones.CONFIG.SAB_HOST[0:len(headphones.CONFIG.SAB_HOST)-1]
 
-    url = headphones.CFG.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
+    url = headphones.CONFIG.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
 
     try:
 
@@ -92,7 +92,7 @@ def sendNZB(nzb):
         return False
 
     except httplib.InvalidURL, e:
-        logger.error(u"Invalid SAB host, check your config. Current host: %s" % headphones.CFG.SAB_HOST)
+        logger.error(u"Invalid SAB host, check your config. Current host: %s" % headphones.CONFIG.SAB_HOST)
         return False
         
     except Exception, e:
@@ -133,20 +133,20 @@ def checkConfig():
                'section' : 'misc' 
                }
 
-    if headphones.CFG.SAB_USERNAME:
-        params['ma_username'] = headphones.CFG.SAB_USERNAME
-    if headphones.CFG.SAB_PASSWORD:
-        params['ma_password'] = headphones.CFG.SAB_PASSWORD
-    if headphones.CFG.SAB_APIKEY:
-        params['apikey'] = headphones.CFG.SAB_APIKEY
+    if headphones.CONFIG.SAB_USERNAME:
+        params['ma_username'] = headphones.CONFIG.SAB_USERNAME
+    if headphones.CONFIG.SAB_PASSWORD:
+        params['ma_password'] = headphones.CONFIG.SAB_PASSWORD
+    if headphones.CONFIG.SAB_APIKEY:
+        params['apikey'] = headphones.CONFIG.SAB_APIKEY
 
-    if not headphones.CFG.SAB_HOST.startswith('http'):
-        headphones.CFG.SAB_HOST = 'http://' + headphones.CFG.SAB_HOST
+    if not headphones.CONFIG.SAB_HOST.startswith('http'):
+        headphones.CONFIG.SAB_HOST = 'http://' + headphones.CONFIG.SAB_HOST
 
-    if headphones.CFG.SAB_HOST.endswith('/'):
-        headphones.CFG.SAB_HOST = headphones.CFG.SAB_HOST[0:len(headphones.CFG.SAB_HOST)-1]
+    if headphones.CONFIG.SAB_HOST.endswith('/'):
+        headphones.CONFIG.SAB_HOST = headphones.CONFIG.SAB_HOST[0:len(headphones.CONFIG.SAB_HOST)-1]
     
-    url = headphones.CFG.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
+    url = headphones.CONFIG.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
     
     try:
         f = urllib.urlopen(url).read()

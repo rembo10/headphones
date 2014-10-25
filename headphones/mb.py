@@ -37,19 +37,19 @@ def startmb():
     mbuser = None
     mbpass = None
 
-    if headphones.CFG.MIRROR == "musicbrainz.org":
+    if headphones.CONFIG.MIRROR == "musicbrainz.org":
         mbhost = "musicbrainz.org"
         mbport = 80
         sleepytime = 1
-    elif headphones.CFG.MIRROR == "custom":
-        mbhost = headphones.CFG.CUSTOMHOST
-        mbport = int(headphones.CFG.CUSTOMPORT)
-        sleepytime = int(headphones.CFG.CUSTOMSLEEP)
-    elif headphones.CFG.MIRROR == "headphones":
+    elif headphones.CONFIG.MIRROR == "custom":
+        mbhost = headphones.CONFIG.CUSTOMHOST
+        mbport = int(headphones.CONFIG.CUSTOMPORT)
+        sleepytime = int(headphones.CONFIG.CUSTOMSLEEP)
+    elif headphones.CONFIG.MIRROR == "headphones":
         mbhost = "144.76.94.239"
         mbport = 8181
-        mbuser = headphones.CFG.HPUSER
-        mbpass = headphones.CFG.HPPASS
+        mbuser = headphones.CONFIG.HPUSER
+        mbpass = headphones.CONFIG.HPPASS
         sleepytime = 0
     else:
         return False
@@ -63,7 +63,7 @@ def startmb():
         musicbrainzngs.set_rate_limit(limit_or_interval=float(sleepytime))
 
     # Add headphones credentials
-    if headphones.CFG.MIRROR == "headphones":
+    if headphones.CONFIG.MIRROR == "headphones":
         if not mbuser and mbpass:
             logger.warn("No username or password set for VIP server")
         else:

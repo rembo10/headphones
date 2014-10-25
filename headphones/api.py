@@ -44,13 +44,13 @@ class Api(object):
 
     def checkParams(self,*args,**kwargs):
 
-        if not headphones.CFG.API_ENABLED:
+        if not headphones.CONFIG.API_ENABLED:
             self.data = 'API not enabled'
             return
-        if not headphones.CFG.API_KEY:
+        if not headphones.CONFIG.API_KEY:
             self.data = 'API key not generated'
             return
-        if len(headphones.CFG.API_KEY) != 32:
+        if len(headphones.CONFIG.API_KEY) != 32:
             self.data = 'API key not generated correctly'
             return
 
@@ -58,7 +58,7 @@ class Api(object):
             self.data = 'Missing api key'
             return
 
-        if kwargs['apikey'] != headphones.CFG.API_KEY:
+        if kwargs['apikey'] != headphones.CONFIG.API_KEY:
             self.data = 'Incorrect API key'
             return
         else:
@@ -314,7 +314,7 @@ class Api(object):
 
     def _getVersion(self, **kwargs):
         self.data = {
-            'git_path' : headphones.CFG.GIT_PATH,
+            'git_path' : headphones.CONFIG.GIT_PATH,
             'install_type' : headphones.INSTALL_TYPE,
             'current_version' : headphones.CURRENT_VERSION,
             'latest_version' : headphones.LATEST_VERSION,
