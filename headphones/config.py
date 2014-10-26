@@ -276,6 +276,15 @@ class Config(object):
         new_config = ConfigObj(encoding="UTF-8")
         new_config.filename = self._config_file
 
+        # first copy over everything from the old config, even if it is not correctly
+        # defined to keep from losing data
+        for key, subkeys in self._config.items():
+            if key not in new_config:
+                new_config[key] = {}
+            for subkey, value in subkeys.items():
+                new_config[key][subkey] = value
+
+        # next make sure that everything we expect to have defined is so
         for key in _config_definitions.keys():
             key, definition_type, section, ini_key, default = self._define(key)
             self.check_setting(key)
