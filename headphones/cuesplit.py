@@ -37,7 +37,7 @@ CUE_HEADER = {
     'catalog': '^CATALOG (.+?)$',
     'artist': '^PERFORMER (.+?)$',
     'title': '^TITLE (.+?)$',
-    'file': '^FILE (.+?) WAVE$',
+    'file': '^FILE (.+?) (WAVE|FLAC)$',
     'accurateripid': '^REM ACCURATERIPID (.+?)$'
 }
 
