@@ -178,66 +178,18 @@ def verify(albumid, albumpath, Kind=None, forced=False):
                 logger.info("Looks like " + os.path.basename(albumpath).decode(headphones.SYS_ENCODING, 'replace') + " isn't complete yet. Will try again on the next run")
                 return
 
-
-    # use xld to split cue
-
-    if headphones.CONFIG.ENCODER == 'xld' and headphones.CONFIG.MUSIC_ENCODER and downloaded_cuecount and downloaded_cuecount >= len(downloaded_track_list):
-
-        import getXldProfile
-
-        (xldProfile, xldFormat, xldBitrate) = getXldProfile.getXldProfile(headphones.CONFIG.XLDPROFILE)
-        if not xldFormat:
-            logger.info(u'Details for xld profile "%s" not found, cannot split cue' % (xldProfile))
+    # Split cue
+    if downloaded_cuecount and downloaded_cuecount >= len(downloaded_track_list):
+        if headphones.CONFIG.KEEP_TORRENT_FILES and Kind=="torrent":
+            albumpath = helpers.preserve_torrent_direcory(albumpath)
+        if albumpath and helpers.cue_split(albumpath):
+            downloaded_track_list = helpers.get_downloaded_track_list(albumpath)
         else:
-            if headphones.CONFIG.ENCODERFOLDER:
-                xldencoder = os.path.join(headphones.CONFIG.ENCODERFOLDER, 'xld')
-            else:
-                xldencoder = os.path.join('/Applications','xld')
-
-            for r,d,f in os.walk(albumpath):
-                xldfolder = r
-                xldfile = ''
-                xldcue = ''
-                for file in f:
-                    if any(file.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS) and not xldfile:
-                        xldfile = os.path.join(r, file)
-                    elif file.lower().endswith('.cue') and not xldcue:
-                        xldcue = os.path.join(r, file)
-
-                if xldfile and xldcue and xldfolder:
-                    xldcmd = xldencoder
-                    xldcmd = xldcmd + ' "' + xldfile + '"'
-                    xldcmd = xldcmd + ' -c'
-                    xldcmd = xldcmd + ' "' + xldcue + '"'
-                    xldcmd = xldcmd + ' --profile'
-                    xldcmd = xldcmd + ' "' + xldProfile + '"'
-                    xldcmd = xldcmd + ' -o'
-                    xldcmd = xldcmd + ' "' + xldfolder + '"'
-                    logger.info(u"Cue found, splitting file " + xldfile.decode(headphones.SYS_ENCODING, 'replace'))
-                    logger.debug(xldcmd)
-                    os.system(xldcmd)
-
-            # count files, should now be more than original if xld successfully split
-
-            new_downloaded_track_list_count = 0
-            for r,d,f in os.walk(albumpath):
-                for file in f:
-                    if any(file.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
-                        new_downloaded_track_list_count += 1
-
-            if new_downloaded_track_list_count > len(downloaded_track_list):
-
-                # rename original unsplit files
-                for downloaded_track in downloaded_track_list:
-                    os.rename(downloaded_track, downloaded_track + '.original')
-
-                #reload
-
-                downloaded_track_list = []
-                for r,d,f in os.walk(albumpath):
-                    for file in f:
-                        if any(file.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
-                            downloaded_track_list.append(os.path.join(r, file))
+            myDB.action('UPDATE snatched SET status = "Unprocessed" WHERE status NOT LIKE "Seed%" and AlbumID=?', [albumid])
+            processed = re.search(r' \(Unprocessed\)(?:\[\d+\])?', albumpath)
+            if not processed:
+                renameUnprocessedFolder(albumpath)
+            return
 
     # test #1: metadata - usually works
     logger.debug('Verifying metadata...')
@@ -328,7 +280,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
 
     logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
     # Check to see if we're preserving the torrent dir
-    if headphones.CONFIG.KEEP_TORRENT_FILES and Kind=="torrent":
+    if headphones.CONFIG.KEEP_TORRENT_FILES and Kind=="torrent" and 'headphones-modified' not in albumpath:
         new_folder = os.path.join(albumpath, 'headphones-modified'.encode(headphones.SYS_ENCODING, 'replace'))
         logger.info("Copying files to 'headphones-modified' subfolder to preserve downloaded files for seeding")
         try:
@@ -343,14 +295,11 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         # Could probably just throw in the "headphones-modified" folder,
         # but this is good to make sure we're not counting files that may have failed to move
         downloaded_track_list = []
-        downloaded_cuecount = 0
 
         for r,d,f in os.walk(albumpath):
             for files in f:
                 if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
                     downloaded_track_list.append(os.path.join(r, files))
-                elif files.lower().endswith('.cue'):
-                    downloaded_cuecount += 1
 
     # Check if files are valid media files and are writeable, before the steps
     # below are executed. This simplifies errors and prevents unfinished steps.
@@ -1178,6 +1127,13 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
             name, album, year = helpers.extract_metadata(folder)
         except Exception as e:
             name = album = year = None
+
+        # Check if there's a cue to split
+        if not name and not album and helpers.cue_split(folder):
+            try:
+                name, album, year = helpers.extract_metadata(folder)
+            except Exception as e:
+                name = album = year = None
 
         if name and album:
             release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
