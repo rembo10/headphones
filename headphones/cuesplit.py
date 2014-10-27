@@ -492,7 +492,7 @@ class MetaFile(File):
 
     def folders(self):
         artist = self.content['artist']
-        album = self.content['date'] + ' - ' + self.content['title'] + ' (' +  self.content['label'] + ' - ' + self.content['catalog'] + ')'
+        album = self.content['date'] + ' - ' + self.content['title'] + ' (' + self.content['label'] + ' - ' + self.content['catalog'] + ')'
         return artist, album
     
     def complete(self):

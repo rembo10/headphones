@@ -72,8 +72,8 @@ def getTorrentFolder(torrentid):
 
     tries = 1
 
-    while percentdone == 0  and tries <10:
-        tries+=1
+    while percentdone == 0  and tries < 10:
+        tries += 1
         time.sleep(5)
         response = torrentAction(method, arguments)
         percentdone = response['arguments']['torrents'][0]['percentDone']
@@ -95,7 +95,7 @@ def setSeedRatio(torrentid, ratio):
         return False
 
 
-def removeTorrent(torrentid, remove_data = False):
+def removeTorrent(torrentid, remove_data=False):
 
     method = 'torrent-get'
     arguments = { 'ids': torrentid, 'fields': ['isFinished', 'name']}

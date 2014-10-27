@@ -407,7 +407,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
 
             if rg_exists:
                 newValueDict['DateAdded'] = rg_exists['DateAdded']
-                newValueDict['Status']    = rg_exists['Status']
+                newValueDict['Status'] = rg_exists['Status']
 
             else:
                 today = helpers.today()

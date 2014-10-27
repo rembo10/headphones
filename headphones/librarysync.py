@@ -94,9 +94,9 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
 
                 subdirectory = r.replace(dir, '')
                 latest_subdirectory.append(subdirectory)
-                if file_count == 0 and r.replace(dir, '') !='':
+                if file_count == 0 and r.replace(dir, '') != '':
                     logger.info("[%s] Now scanning subdirectory %s" % (dir.decode(headphones.SYS_ENCODING, 'replace'), subdirectory.decode(headphones.SYS_ENCODING, 'replace')))
-                elif latest_subdirectory[file_count] != latest_subdirectory[file_count-1] and file_count !=0:
+                elif latest_subdirectory[file_count] != latest_subdirectory[file_count-1] and file_count != 0:
                     logger.info("[%s] Now scanning subdirectory %s" % (dir.decode(headphones.SYS_ENCODING, 'replace'), subdirectory.decode(headphones.SYS_ENCODING, 'replace')))
 
                 song = os.path.join(r, files)
@@ -130,7 +130,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                 # TODO: skip adding songs without the minimum requisite information (just a matter of putting together the right if statements)
 
                 if f_artist and f.album and f.title:
-                    CleanName = helpers.cleanName(f_artist +' '+ f.album +' '+ f.title)
+                    CleanName = helpers.cleanName(f_artist + ' ' + f.album + ' ' + f.title)
                 else:
                     CleanName = None
 
@@ -158,7 +158,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                     if f_artist:
                         new_artists.append(f_artist)
                     myDB.upsert("have", newValueDict, controlValueDict)
-                    new_song_count+=1
+                    new_song_count += 1
                 else:
                     if check_exist_song['ArtistName'] != f_artist or check_exist_song['AlbumTitle'] != f.album or check_exist_song['TrackTitle'] != f.title:
                         #Important track metadata has been modified, need to run matcher again
@@ -173,13 +173,13 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                         myDB.upsert("have", newValueDict, controlValueDict)
                         myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE Location=?', [None, None, None, unicode_song_path])
                         myDB.action('UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE Location=?', [None, None, None, unicode_song_path])
-                        new_song_count+=1
+                        new_song_count += 1
                     else:
                         #This track information hasn't changed
                         if f_artist and check_exist_song['Matched'] != "Ignored":
                             new_artists.append(f_artist)
 
-                file_count+=1
+                file_count += 1
 
     # Now we start track matching
     logger.info("%s new/modified songs found and added to the database" % new_song_count)
@@ -202,13 +202,13 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         latest_artist.append(song['ArtistName'])
         if song_count == 0:
             logger.info("Now matching songs by %s" % song['ArtistName'])
-        elif latest_artist[song_count] != latest_artist[song_count-1] and song_count !=0:
+        elif latest_artist[song_count] != latest_artist[song_count-1] and song_count != 0:
             logger.info("Now matching songs by %s" % song['ArtistName'])
 
         song_count += 1
         completion_percentage = float(song_count)/total_number_of_songs * 100
 
-        if completion_percentage%10 == 0:
+        if completion_percentage % 10 == 0:
             logger.info("Track matching is " + str(completion_percentage) + "% complete")
 
         #THE "MORE-SPECIFIC" CLAUSES HERE HAVE ALL BEEN REMOVED.  WHEN RUNNING A LIBRARY SCAN, THE ONLY CLAUSES THAT
@@ -356,9 +356,9 @@ def update_album_status(AlbumID=None):
         total_tracks = 0
         have_tracks = 0
         for track in track_counter:
-            total_tracks+=1
+            total_tracks += 1
             if track['Location']:
-                have_tracks+=1
+                have_tracks += 1
         if total_tracks != 0:
             album_completion = float(float(have_tracks) / float(total_tracks)) * 100
         else:

@@ -48,14 +48,14 @@ SNATCHED_PROPER = 9 # qualified with quality
 class Quality:
 
     NONE = 0
-    B192 = 1<<1     # 2
-    VBR =  1<<2     # 4
-    B256 = 1<<3     # 8
-    B320 = 1<<4     #16
-    FLAC = 1<<5     #32
+    B192 = 1 << 1     # 2
+    VBR = 1 << 2     # 4
+    B256 = 1 << 3     # 8
+    B320 = 1 << 4     #16
+    FLAC = 1 << 5     #32
 
     # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
-    UNKNOWN = 1<<15
+    UNKNOWN = 1 << 15
 
     qualityStrings = {NONE: "N/A",
                       UNKNOWN: "Unknown",
@@ -83,7 +83,7 @@ class Quality:
             anyQuality = reduce(operator.or_, anyQualities)
         if bestQualities:
             bestQuality = reduce(operator.or_, bestQualities)
-        return anyQuality | (bestQuality<<16)
+        return anyQuality | (bestQuality << 16)
 
     @staticmethod
     def splitQuality(quality):
@@ -92,7 +92,7 @@ class Quality:
         for curQual in Quality.qualityStrings.keys():
             if curQual & quality:
                 anyQualities.append(curQual)
-            if curQual<<16 & quality:
+            if curQual << 16 & quality:
                 bestQualities.append(curQual)
 
         return (anyQualities, bestQualities)

@@ -189,7 +189,7 @@ def update():
         update_dir = os.path.join(headphones.PROG_DIR, 'update')
         version_path = os.path.join(headphones.PROG_DIR, 'version.txt')
 
-        logger.info('Downloading update from: '+ tar_download_url)
+        logger.info('Downloading update from: ' + tar_download_url)
         data = request.request_content(tar_download_url)
 
         if not data:

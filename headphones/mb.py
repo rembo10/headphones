@@ -495,7 +495,7 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
             release['ReleaseCountry'] = unicode(releasedata['country']) if 'country' in releasedata else u'Unknown'
             #assuming that the list will contain media and that the format will be consistent
             try:
-                additional_medium=''
+                additional_medium = ''
                 for position in releasedata['medium-list']:
                     if position['format'] == releasedata['medium-list'][0]['format']:
                         medium_count = int(position['position'])

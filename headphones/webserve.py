@@ -56,7 +56,7 @@ class WebInterface(object):
 
     def index(self):
         raise cherrypy.HTTPRedirect("home")
-    index.exposed=True
+    index.exposed = True
 
     def home(self):
         myDB = db.DBConnection()
@@ -99,7 +99,7 @@ class WebInterface(object):
                 extras_dict[extra] = "checked"
             else:
                 extras_dict[extra] = ""
-            i+=1
+            i += 1
 
         return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums, extras=extras_dict)
     artistPage.exposed = True
@@ -123,7 +123,7 @@ class WebInterface(object):
             raise cherrypy.HTTPRedirect("home")
 
         if not album['ArtistName']:
-            title =  ' - '
+            title = ' - '
         else:
             title = album['ArtistName'] + ' - '
         if not album['AlbumTitle']:
@@ -215,7 +215,7 @@ class WebInterface(object):
         myDB = db.DBConnection()
         namecheck = myDB.select('SELECT ArtistName from artists where ArtistID=?', [ArtistID])
         for name in namecheck:
-            artistname=name['ArtistName']
+            artistname = name['ArtistName']
         myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
 
         from headphones import cache
@@ -255,7 +255,7 @@ class WebInterface(object):
     def refreshArtist(self, ArtistID):
         threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, False, True]).start()
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
-    refreshArtist.exposed=True
+    refreshArtist.exposed = True
 
     def markAlbums(self, ArtistID=None, action=None, **args):
         myDB = db.DBConnection()
@@ -511,7 +511,7 @@ class WebInterface(object):
                         if match_tracks:
                             myDB.upsert("tracks", newValueDict, controlValueDict)
                             myDB.action('UPDATE have SET Matched="Manual" WHERE CleanName=?', [new_clean_filename])
-                            update_count+=1
+                            update_count += 1
                     #This was throwing errors and I don't know why, but it seems to be working fine.
                     #else:
                         #logger.info("There was an error modifying Artist %s. This should not have happened" % existing_artist)
@@ -550,7 +550,7 @@ class WebInterface(object):
                             myDB.upsert("tracks", newValueDict, controlValueDict)
                             myDB.action('UPDATE have SET Matched="Manual" WHERE CleanName=?', [new_clean_filename])
                             album_id = match_tracks['AlbumID']
-                            update_count+=1
+                            update_count += 1
                     #This was throwing errors and I don't know why, but it seems to be working fine.
                     #else:
                         #logger.info("There was an error modifying Artist %s / Album %s with clean name %s" % (existing_artist, existing_album, existing_clean_string))
@@ -607,7 +607,7 @@ class WebInterface(object):
                     myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?', [None, None, None, tracks['CleanName']])
                     myDB.action('UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?', [None, None, None, tracks['CleanName']])
                     myDB.action('UPDATE have SET CleanName=?, Matched="Failed" WHERE ArtistName=? AND AlbumTitle=? AND TrackTitle=?', (original_clean, artist, album, track_title))
-                    update_count+=1
+                    update_count += 1
             if update_count > 0:
                 librarysync.update_album_status()
             logger.info("Artist: %s successfully restored to unmatched list" % artist)
@@ -627,7 +627,7 @@ class WebInterface(object):
                     myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?', [None, None, None, tracks['CleanName']])
                     myDB.action('UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?', [None, None, None, tracks['CleanName']])
                     myDB.action('UPDATE have SET CleanName=?, Matched="Failed" WHERE ArtistName=? AND AlbumTitle=? AND TrackTitle=?', (original_clean, artist, album, track_title))
-                    update_count+=1
+                    update_count += 1
             if update_count > 0:
                 librarysync.update_album_status(album_id)
             logger.info("Album: %s successfully restored to unmatched list" % album)
@@ -795,7 +795,7 @@ class WebInterface(object):
             filtered = myDB.select(query)
             totalcount = len(filtered)
         else:
-            query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch +'%"' +  'ORDER BY %s COLLATE NOCASE %s' % (sortcolumn, sSortDir_0)
+            query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch + '%"' + 'ORDER BY %s COLLATE NOCASE %s' % (sortcolumn, sSortDir_0)
             filtered = myDB.select(query)
             totalcount = myDB.select('SELECT COUNT(*) from artists')[0][0]
 
@@ -844,7 +844,7 @@ class WebInterface(object):
         s = json.dumps(dict)
         cherrypy.response.headers['Content-type'] = 'application/json'
         return s
-    getArtists_json.exposed=True
+    getArtists_json.exposed = True
 
     def getAlbumsByArtist_json(self, artist=None):
         myDB = db.DBConnection()
@@ -853,12 +853,12 @@ class WebInterface(object):
         album_list = myDB.select("SELECT AlbumTitle from albums WHERE ArtistName=?", [artist])
         for album in album_list:
             album_json[counter] = album['AlbumTitle']
-            counter+=1
+            counter += 1
         json_albums = json.dumps(album_json)
 
         cherrypy.response.headers['Content-type'] = 'application/json'
         return json_albums
-    getAlbumsByArtist_json.exposed=True
+    getAlbumsByArtist_json.exposed = True
 
     def getArtistjson(self, ArtistID, **kwargs):
         myDB = db.DBConnection()
@@ -868,7 +868,7 @@ class WebInterface(object):
                                     'Status':     artist['Status']
                                  })
         return artist_json
-    getArtistjson.exposed=True
+    getArtistjson.exposed = True
 
     def getAlbumjson(self, AlbumID, **kwargs):
         myDB = db.DBConnection()
@@ -879,7 +879,7 @@ class WebInterface(object):
                                    'Status':     album['Status']
         })
         return album_json
-    getAlbumjson.exposed=True
+    getAlbumjson.exposed = True
 
     def clearhistory(self, type=None, date_added=None, title=None):
         myDB = db.DBConnection()
@@ -1156,7 +1156,7 @@ class WebInterface(object):
                 extras_dict[extra] = "checked"
             else:
                 extras_dict[extra] = ""
-            i+=1
+            i += 1
 
         config["extras"] = extras_dict
 
@@ -1193,7 +1193,7 @@ class WebInterface(object):
         for extra in extras_list:
             if extra:
                 temp_extras_list.append(i)
-            i+=1
+            i += 1
 
         for extra in expected_extras:
             temp = '%s_temp' % extra
@@ -1373,7 +1373,7 @@ class Artwork(object):
         elif ArtistOrAlbum == "album":
             AlbumID = ID
 
-        relpath =  cache.getArtwork(ArtistID, AlbumID)
+        relpath = cache.getArtwork(ArtistID, AlbumID)
 
         if not relpath:
             relpath = "data/interfaces/default/images/no-cover-art.png"
@@ -1407,7 +1407,7 @@ class Artwork(object):
             elif ArtistOrAlbum == "album":
                 AlbumID = ID
 
-            relpath =  cache.getThumb(ArtistID, AlbumID)
+            relpath = cache.getThumb(ArtistID, AlbumID)
 
             if not relpath:
                 relpath = "data/interfaces/default/images/no-cover-artist.png"

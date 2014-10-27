@@ -628,22 +628,22 @@ def sab_sanitize_foldername(name):
         Remove any leading and trailing dot and space characters
     """
     CH_ILLEGAL = r'\/<>?*|"'
-    CH_LEGAL   = r'++{}!@#`'
+    CH_LEGAL = r'++{}!@#`'
 
     FL_ILLEGAL = CH_ILLEGAL + ':\x92"'
-    FL_LEGAL   = CH_LEGAL +   "-''"
+    FL_LEGAL = CH_LEGAL + "-''"
 
     uFL_ILLEGAL = FL_ILLEGAL.decode('latin-1')
-    uFL_LEGAL   = FL_LEGAL.decode('latin-1')
+    uFL_LEGAL = FL_LEGAL.decode('latin-1')
 
     if not name:
         return name
     if isinstance(name, unicode):
         illegal = uFL_ILLEGAL
-        legal   = uFL_LEGAL
+        legal = uFL_LEGAL
     else:
         illegal = FL_ILLEGAL
-        legal   = FL_LEGAL
+        legal = FL_LEGAL
 
     lst = []
     for ch in name.strip():
