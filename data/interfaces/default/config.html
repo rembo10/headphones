@@ -414,7 +414,7 @@
                             <fieldset>
                                 <legend>Headphones Indexer</legend>
                                 <div class="row checkbox">
-                                    <input id="use_headphones_indexer" type="checkbox" name="use_headphones_indexer" onclick="initConfigCheckbox($(this));" value="1" ${config['use_headphones_indexer']} /><label>Use Headphones Indexer</label>
+                                    <input id="headphones_indexer" type="checkbox" name="headphones_indexer" onclick="initConfigCheckbox($(this));" value="1" ${config['headphones_indexer']} /><label>Use Headphones Indexer</label>
                                 </div>
                                 <div class="config">
                                     <div class="row">
@@ -1320,7 +1320,7 @@
                                     <select name="interface"><h3>
                                     %for interface in config['interface_list']:
                                     <%
-                                        if interface == headphones.INTERFACE:
+                                        if interface == headphones.CONFIG.INTERFACE:
                                             selected = 'selected="selected"'
                                         else:
                                             selected = ''
@@ -1369,7 +1369,7 @@
                                     <select name="mirror" id="mirror">
                                     %for mirror in config['mirror_list']:
                                         <%
-                                            if mirror == headphones.MIRROR:
+                                            if mirror == headphones.CONFIG.MIRROR:
                                                 selected = 'selected="selected"'
                                             else:
                                                 selected = ''
@@ -2030,7 +2030,7 @@
                     $( "#tabs" ).tabs();
                 });
                 initActions();
-                initConfigCheckbox("#use_headphones_indexer");
+                initConfigCheckbox("#headphones_indexer");
                 initConfigCheckbox("#usenewznab");
                 initConfigCheckbox("#usenzbsorg");
                 initConfigCheckbox("#useomgwtfnzbs");

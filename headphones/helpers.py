@@ -520,11 +520,11 @@ def extract_logline(s):
 def extract_song_data(s):
 
     #headphones default format
-    music_dir = headphones.MUSIC_DIR
-    folder_format = headphones.FOLDER_FORMAT
-    file_format = headphones.FILE_FORMAT
+    music_dir = headphones.CONFIG.MUSIC_DIR
+    folder_format = headphones.CONFIG.FOLDER_FORMAT
+    file_format = headphones.CONFIG.FILE_FORMAT
 
-    full_format = os.path.join(headphones.MUSIC_DIR)
+    full_format = os.path.join(headphones.CONFIG.MUSIC_DIR)
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
     match = pattern.match(s)
 

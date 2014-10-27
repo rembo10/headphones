@@ -206,15 +206,15 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False, choose_specific_
 
 def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
 
-    NZB_PROVIDERS = (headphones.HEADPHONES_INDEXER or headphones.NEWZNAB or headphones.NZBSORG or headphones.OMGWTFNZBS)
-    NZB_DOWNLOADERS = (headphones.SAB_HOST or headphones.BLACKHOLE_DIR or headphones.NZBGET_HOST)
-    TORRENT_PROVIDERS = (headphones.KAT or headphones.PIRATEBAY or headphones.MININOVA or headphones.WAFFLES or headphones.RUTRACKER or headphones.WHATCD)
+    NZB_PROVIDERS = (headphones.CONFIG.HEADPHONES_INDEXER or headphones.CONFIG.NEWZNAB or headphones.CONFIG.NZBSORG or headphones.CONFIG.OMGWTFNZBS)
+    NZB_DOWNLOADERS = (headphones.CONFIG.SAB_HOST or headphones.CONFIG.BLACKHOLE_DIR or headphones.CONFIG.NZBGET_HOST)
+    TORRENT_PROVIDERS = (headphones.CONFIG.KAT or headphones.CONFIG.PIRATEBAY or headphones.CONFIG.MININOVA or headphones.CONFIG.WAFFLES or headphones.CONFIG.RUTRACKER or headphones.CONFIG.WHATCD)
 
     results = []
     myDB = db.DBConnection()
     albumlength = myDB.select('SELECT sum(TrackDuration) from tracks WHERE AlbumID=?', [album['AlbumID']])[0][0]
 
-    if headphones.PREFER_TORRENTS == 0:
+    if headphones.CONFIG.PREFER_TORRENTS == 0:
 
         if NZB_PROVIDERS and NZB_DOWNLOADERS:
             results = searchNZB(album, new, losslessOnly, albumlength)
@@ -222,7 +222,7 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
         if not results and TORRENT_PROVIDERS:
             results = searchTorrent(album, new, losslessOnly, albumlength)
 
-    elif headphones.PREFER_TORRENTS == 1:
+    elif headphones.CONFIG.PREFER_TORRENTS == 1:
 
         if TORRENT_PROVIDERS:
             results = searchTorrent(album, new, losslessOnly, albumlength)
@@ -277,23 +277,23 @@ def more_filtering(results, album, albumlength, new):
     myDB = db.DBConnection()
 
     # Lossless - ignore results if target size outside bitrate range
-    if headphones.PREFERRED_QUALITY == 3 and albumlength and (headphones.LOSSLESS_BITRATE_FROM or headphones.LOSSLESS_BITRATE_TO):
-        if headphones.LOSSLESS_BITRATE_FROM:
-            low_size_limit = albumlength/1000 * int(headphones.LOSSLESS_BITRATE_FROM) * 128
-        if headphones.LOSSLESS_BITRATE_TO:
-            high_size_limit = albumlength/1000 * int(headphones.LOSSLESS_BITRATE_TO) * 128
+    if headphones.CONFIG.PREFERRED_QUALITY == 3 and albumlength and (headphones.CONFIG.LOSSLESS_BITRATE_FROM or headphones.CONFIG.LOSSLESS_BITRATE_TO):
+        if headphones.CONFIG.LOSSLESS_BITRATE_FROM:
+            low_size_limit = albumlength/1000 * int(headphones.CONFIG.LOSSLESS_BITRATE_FROM) * 128
+        if headphones.CONFIG.LOSSLESS_BITRATE_TO:
+            high_size_limit = albumlength/1000 * int(headphones.CONFIG.LOSSLESS_BITRATE_TO) * 128
 
     # Preferred Bitrate - ignore results if target size outside % buffer
-    elif headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
-        logger.debug('Target bitrate: %s kbps' % headphones.PREFERRED_BITRATE)
+    elif headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE:
+        logger.debug('Target bitrate: %s kbps' % headphones.CONFIG.PREFERRED_BITRATE)
         if albumlength:
-            targetsize = albumlength/1000 * int(headphones.PREFERRED_BITRATE) * 128
+            targetsize = albumlength/1000 * int(headphones.CONFIG.PREFERRED_BITRATE) * 128
             logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
-            if headphones.PREFERRED_BITRATE_LOW_BUFFER:
-                low_size_limit = targetsize - (targetsize * int(headphones.PREFERRED_BITRATE_LOW_BUFFER)/100)
-            if headphones.PREFERRED_BITRATE_HIGH_BUFFER:
-                high_size_limit = targetsize + (targetsize * int(headphones.PREFERRED_BITRATE_HIGH_BUFFER)/100)
-                if headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
+            if headphones.CONFIG.PREFERRED_BITRATE_LOW_BUFFER:
+                low_size_limit = targetsize - (targetsize * int(headphones.CONFIG.PREFERRED_BITRATE_LOW_BUFFER)/100)
+            if headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER:
+                high_size_limit = targetsize + (targetsize * int(headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER)/100)
+                if headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                     allow_lossless = True
 
     newlist = []
@@ -341,8 +341,8 @@ def sort_search_results(resultlist, album, new, albumlength):
     # Add a priority if it has any of the preferred words
     temp_list = []
     preferred_words = None
-    if headphones.PREFERRED_WORDS:
-        preferred_words = helpers.split_string(headphones.PREFERRED_WORDS)
+    if headphones.CONFIG.PREFERRED_WORDS:
+        preferred_words = helpers.split_string(headphones.CONFIG.PREFERRED_WORDS)
     for result in resultlist:
         priority = 0
         if preferred_words:
@@ -357,10 +357,10 @@ def sort_search_results(resultlist, album, new, albumlength):
 
     resultlist = temp_list
 
-    if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE:
+    if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE:
 
         try:
-            targetsize = albumlength/1000 * int(headphones.PREFERRED_BITRATE) * 128
+            targetsize = albumlength/1000 * int(headphones.CONFIG.PREFERRED_BITRATE) * 128
 
             if not targetsize:
                 logger.info('No track information for %s - %s. Defaulting to highest quality' % (album['ArtistName'], album['AlbumTitle']))
@@ -382,7 +382,7 @@ def sort_search_results(resultlist, album, new, albumlength):
 
                 finallist = sorted(newlist, key=lambda title: (-title[5], title[6]))
 
-                if not len(finallist) and len(flac_list) and headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
+                if not len(finallist) and len(flac_list) and headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                     logger.info("Since there were no appropriate lossy matches (and at least one lossless match, going to use lossless instead")
                     finallist = sorted(flac_list, key=lambda title: (title[5], int(title[1])), reverse=True)
         except Exception as e:
@@ -440,7 +440,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
     artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8')
 
     # If Preferred Bitrate and High Limit and Allow Lossless then get both lossy and lossless
-    if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE and headphones.PREFERRED_BITRATE_HIGH_BUFFER and headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
+    if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE and headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER and headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
         allow_lossless = True
     else:
         allow_lossless = False
@@ -449,12 +449,12 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
 
     resultlist = []
 
-    if headphones.HEADPHONES_INDEXER:
+    if headphones.CONFIG.HEADPHONES_INDEXER:
         provider = "headphones"
 
-        if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
             categories = "3040"
-        elif headphones.PREFERRED_QUALITY == 1 or allow_lossless:
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
             categories = "3040,3010"
         else:
             categories = "3010"
@@ -471,14 +471,14 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
             "t": "search",
             "cat": categories,
             "apikey": '964d601959918a578a670984bdee9357',
-            "maxage": headphones.USENET_RETENTION,
+            "maxage": headphones.CONFIG.USENET_RETENTION,
             "q": term
         }
 
         data = request.request_feed(
             url="http://indexer.codeshy.com/api",
             params=params, headers=headers,
-            auth=(headphones.HPUSER, headphones.HPPASS)
+            auth=(headphones.CONFIG.HPUSER, headphones.CONFIG.HPPASS)
         )
 
         # Process feed
@@ -498,21 +498,20 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
                     except Exception as e:
                         logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
 
-    if headphones.NEWZNAB:
+    if headphones.CONFIG.NEWZNAB:
         provider = "newznab"
         newznab_hosts = []
 
-        if headphones.NEWZNAB_HOST and headphones.NEWZNAB_ENABLED:
+        if headphones.CONFIG.NEWZNAB_HOST and headphones.CONFIG.NEWZNAB_ENABLED:
+            newznab_hosts.append((headphones.CONFIG.NEWZNAB_HOST, headphones.CONFIG.NEWZNAB_APIKEY, headphones.CONFIG.NEWZNAB_ENABLED))
 
-            newznab_hosts.append((headphones.NEWZNAB_HOST, headphones.NEWZNAB_APIKEY, headphones.NEWZNAB_ENABLED))
-
-        for newznab_host in headphones.EXTRA_NEWZNABS:
+        for newznab_host in headphones.CONFIG.get_extra_newznabs():
             if newznab_host[2] == '1' or newznab_host[2] == 1:
                 newznab_hosts.append(newznab_host)
 
-        if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
             categories = "3040"
-        elif headphones.PREFERRED_QUALITY == 1 or allow_lossless:
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
             categories = "3040,3010"
         else:
             categories = "3010"
@@ -544,7 +543,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
                 "t": "search",
                 "apikey": newznab_host[1],
                 "cat": categories,
-                "maxage": headphones.USENET_RETENTION,
+                "maxage": headphones.CONFIG.USENET_RETENTION,
                 "q": term
             }
 
@@ -572,11 +571,11 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
                         except Exception as e:
                             logger.exception("An unknown error occurred trying to parse the feed: %s" % e)
 
-    if headphones.NZBSORG:
+    if headphones.CONFIG.NZBSORG:
         provider = "nzbsorg"
-        if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
             categories = "3040"
-        elif headphones.PREFERRED_QUALITY == 1 or allow_lossless:
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
             categories = "3040,3010"
         else:
             categories = "3010"
@@ -591,9 +590,9 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
         headers = { 'User-Agent': USER_AGENT }
         params = {
             "t": "search",
-            "apikey": headphones.NZBSORG_HASH,
+            "apikey": headphones.CONFIG.NZBSORG_HASH,
             "cat": categories,
-            "maxage": headphones.USENET_RETENTION,
+            "maxage": headphones.CONFIG.USENET_RETENTION,
             "q": term
         }
 
@@ -618,12 +617,12 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
                     except Exception as e:
                         logger.exception("Unhandled exception while parsing feed")
 
-    if headphones.OMGWTFNZBS:
+    if headphones.CONFIG.OMGWTFNZBS:
         provider = "omgwtfnzbs"
 
-        if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
             categories = "22"
-        elif headphones.PREFERRED_QUALITY == 1 or allow_lossless:
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
             categories = "22,7"
         else:
              categories = "7"
@@ -637,10 +636,10 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
 
         headers = { 'User-Agent': USER_AGENT }
         params = {
-            "user": headphones.OMGWTFNZBS_UID,
-            "api": headphones.OMGWTFNZBS_APIKEY,
+            "user": headphones.CONFIG.OMGWTFNZBS_UID,
+            "api": headphones.CONFIG.OMGWTFNZBS_APIKEY,
             "catid": categories,
-            "retention": headphones.USENET_RETENTION,
+            "retention": headphones.CONFIG.USENET_RETENTION,
             "search": term
         }
 
@@ -690,7 +689,7 @@ def send_to_downloader(data, bestqual, album):
     if kind == 'nzb':
         folder_name = helpers.sab_sanitize_foldername(bestqual[0])
 
-        if headphones.NZB_DOWNLOADER == 1:
+        if headphones.CONFIG.NZB_DOWNLOADER == 1:
 
             nzb = classes.NZBDataSearchResult()
             nzb.extraInfo.append(data)
@@ -698,7 +697,7 @@ def send_to_downloader(data, bestqual, album):
             if not nzbget.sendNZB(nzb):
                 return
 
-        elif headphones.NZB_DOWNLOADER == 0:
+        elif headphones.CONFIG.NZB_DOWNLOADER == 0:
 
             nzb = classes.NZBDataSearchResult()
             nzb.extraInfo.append(data)
@@ -716,7 +715,7 @@ def send_to_downloader(data, bestqual, album):
 
         else:
             nzb_name = folder_name + '.nzb'
-            download_path = os.path.join(headphones.BLACKHOLE_DIR, nzb_name)
+            download_path = os.path.join(headphones.CONFIG.BLACKHOLE_DIR, nzb_name)
 
             try:
                 prev = os.umask(headphones.UMASK)
@@ -733,14 +732,14 @@ def send_to_downloader(data, bestqual, album):
         folder_name = '%s - %s [%s]' % (helpers.latinToAscii(album['ArtistName']).encode('UTF-8').replace('/', '_'), helpers.latinToAscii(album['AlbumTitle']).encode('UTF-8').replace('/', '_'), get_year_from_release_date(album['ReleaseDate']))
 
         # Blackhole
-        if headphones.TORRENT_DOWNLOADER == 0:
+        if headphones.CONFIG.TORRENT_DOWNLOADER == 0:
 
             # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
             torrent_name = helpers.replace_illegal_chars(folder_name) + '.torrent'
-            download_path = os.path.join(headphones.TORRENTBLACKHOLE_DIR, torrent_name)
+            download_path = os.path.join(headphones.CONFIG.TORRENTBLACKHOLE_DIR, torrent_name)
 
             if bestqual[2].lower().startswith("magnet:"):
-                if headphones.MAGNET_LINKS == 1:
+                if headphones.CONFIG.MAGNET_LINKS == 1:
                     try:
                         if headphones.SYS_PLATFORM == 'win32':
                             os.startfile(bestqual[2])
@@ -768,7 +767,6 @@ def send_to_downloader(data, bestqual, album):
                         if data and "torcache" in data:
                             if not torrent_to_file(download_path, data):
                                 return
-
                             # Extract folder name from torrent
                             folder_name = read_torrent_name(download_path,
                                 bestqual[0])
@@ -800,7 +798,7 @@ def send_to_downloader(data, bestqual, album):
                 # Extract folder name from torrent
                 folder_name = read_torrent_name(download_path, bestqual[0])
 
-        elif headphones.TORRENT_DOWNLOADER == 1:
+        elif headphones.CONFIG.TORRENT_DOWNLOADER == 1:
             logger.info("Sending torrent to Transmission")
 
             # rutracker needs cookies to be set, pass the .torrent file instead of url
@@ -834,7 +832,7 @@ def send_to_downloader(data, bestqual, album):
             if seed_ratio is not None:
                 transmission.setSeedRatio(torrentid, seed_ratio)
 
-        else:# if headphones.TORRENT_DOWNLOADER == 2:
+        else:# if headphones.CONFIG.TORRENT_DOWNLOADER == 2:
             logger.info("Sending torrent to uTorrent")
 
             # rutracker needs cookies to be set, pass the .torrent file instead of url
@@ -884,39 +882,39 @@ def send_to_downloader(data, bestqual, album):
         provider = provider.split("//")[1]
     name = folder_name if folder_name else None
 
-    if headphones.GROWL_ENABLED and headphones.GROWL_ONSNATCH:
+    if headphones.CONFIG.GROWL_ENABLED and headphones.CONFIG.GROWL_ONSNATCH:
         logger.info(u"Sending Growl notification")
         growl = notifiers.GROWL()
         growl.notify(name,"Download started")
-    if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
+    if headphones.CONFIG.PROWL_ENABLED and headphones.CONFIG.PROWL_ONSNATCH:
         logger.info(u"Sending Prowl notification")
         prowl = notifiers.PROWL()
         prowl.notify(name,"Download started")
-    if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
+    if headphones.CONFIG.PUSHOVER_ENABLED and headphones.CONFIG.PUSHOVER_ONSNATCH:
         logger.info(u"Sending Pushover notification")
         prowl = notifiers.PUSHOVER()
         prowl.notify(name,"Download started")
-    if headphones.PUSHBULLET_ENABLED and headphones.PUSHBULLET_ONSNATCH:
+    if headphones.CONFIG.PUSHBULLET_ENABLED and headphones.CONFIG.PUSHBULLET_ONSNATCH:
         logger.info(u"Sending PushBullet notification")
         pushbullet = notifiers.PUSHBULLET()
         pushbullet.notify(name + " has been snatched!", "Download started")
-    if headphones.TWITTER_ENABLED and headphones.TWITTER_ONSNATCH:
+    if headphones.CONFIG.TWITTER_ENABLED and headphones.CONFIG.TWITTER_ONSNATCH:
         logger.info(u"Sending Twitter notification")
         twitter = notifiers.TwitterNotifier()
         twitter.notify_snatch(name)
-    if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
+    if headphones.CONFIG.NMA_ENABLED and headphones.CONFIG.NMA_ONSNATCH:
         logger.info(u"Sending NMA notification")
         nma = notifiers.NMA()
         nma.notify(snatched=name)
-    if headphones.PUSHALOT_ENABLED and headphones.PUSHALOT_ONSNATCH:
+    if headphones.CONFIG.PUSHALOT_ENABLED and headphones.CONFIG.PUSHALOT_ONSNATCH:
         logger.info(u"Sending Pushalot notification")
         pushalot = notifiers.PUSHALOT()
         pushalot.notify(name,"Download started")
-    if headphones.OSX_NOTIFY_ENABLED and headphones.OSX_NOTIFY_ONSNATCH:
+    if headphones.CONFIG.OSX_NOTIFY_ENABLED and headphones.CONFIG.OSX_NOTIFY_ONSNATCH:
         logger.info(u"Sending OS X notification")
         osx_notify = notifiers.OSX_NOTIFY()
         osx_notify.notify(artist, albumname, 'Snatched: ' + provider + '. ' + name)
-    if headphones.BOXCAR_ENABLED and headphones.BOXCAR_ONSNATCH:
+    if headphones.CONFIG.BOXCAR_ENABLED and headphones.CONFIG.BOXCAR_ONSNATCH:
         logger.info(u"Sending Boxcar2 notification")
         b2msg = 'From ' + provider + '<br></br>' + name
         boxcar = notifiers.BOXCAR()
@@ -946,18 +944,18 @@ def verifyresult(title, artistterm, term, lossless):
         return False
 
     # Filter out FLAC if we're not specifically looking for it
-    if headphones.PREFERRED_QUALITY == (0 or '0') and 'flac' in title.lower() and not lossless:
+    if headphones.CONFIG.PREFERRED_QUALITY == (0 or '0') and 'flac' in title.lower() and not lossless:
         logger.info("Removed %s from results because it's a lossless album and we're not looking for a lossless album right now.", title)
         return False
 
-    if headphones.IGNORED_WORDS:
-        for each_word in helpers.split_string(headphones.IGNORED_WORDS):
+    if headphones.CONFIG.IGNORED_WORDS:
+        for each_word in helpers.split_string(headphones.CONFIG.IGNORED_WORDS):
             if each_word.lower() in title.lower():
                 logger.info("Removed '%s' from results because it contains ignored word: '%s'", title, each_word)
                 return False
 
-    if headphones.REQUIRED_WORDS:
-        for each_word in helpers.split_string(headphones.REQUIRED_WORDS):
+    if headphones.CONFIG.REQUIRED_WORDS:
+        for each_word in helpers.split_string(headphones.CONFIG.REQUIRED_WORDS):
             if ' OR ' in each_word:
                 or_words = helpers.split_string(each_word, 'OR')
                 if any(word.lower() in title.lower() for word in or_words):
@@ -992,8 +990,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
 
     # rutracker login
 
-    if headphones.RUTRACKER and album:
-        rulogin = rutracker.login(headphones.RUTRACKER_USER, headphones.RUTRACKER_PASSWORD)
+    if headphones.CONFIG.RUTRACKER and album:
+        rulogin = rutracker.login(headphones.CONFIG.RUTRACKER_USER, headphones.CONFIG.RUTRACKER_PASSWORD)
         if not rulogin:
             logger.info(u'Could not login to rutracker, search results will exclude this provider')
 
@@ -1040,7 +1038,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
     albumterm  = re.sub('[\.\-\/]', ' ', cleanalbum).encode('utf-8', 'replace')
 
     # If Preferred Bitrate and High Limit and Allow Lossless then get both lossy and lossless
-    if headphones.PREFERRED_QUALITY == 2 and headphones.PREFERRED_BITRATE and headphones.PREFERRED_BITRATE_HIGH_BUFFER and headphones.PREFERRED_BITRATE_ALLOW_LOSSLESS:
+    if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE and headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER and headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
         allow_lossless = True
     else:
         allow_lossless = False
@@ -1049,7 +1047,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
 
     resultlist = []
     pre_sorted_results = False
-    minimumseeders = int(headphones.NUMBEROFSEEDERS) - 1
+    minimumseeders = int(headphones.CONFIG.NUMBEROFSEEDERS) - 1
 
     def set_proxy(proxy_url):
         if not proxy_url.startswith('http'):
@@ -1060,13 +1058,13 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
         return proxy_url
 
 
-    if headphones.KAT:
+    if headphones.CONFIG.KAT:
         provider = "Kick Ass Torrents"
         ka_term = term.replace("!", "")
 
         # Use proxy if specified
-        if headphones.KAT_PROXY_URL:
-            providerurl = fix_url(set_proxy(headphones.KAT_PROXY_URL))
+        if headphones.CONFIG.KAT_PROXY_URL:
+            providerurl = fix_url(set_proxy(headphones.CONFIG.KAT_PROXY_URL))
         else:
             providerurl = fix_url("https://kickass.to")
 
@@ -1074,11 +1072,11 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
         providerurl = providerurl + "/usearch/" + ka_term
 
         # Pick category for torrents
-        if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
             categories = "7" # Music
             format = "2" # FLAC
             maxsize = 10000000000
-        elif headphones.PREFERRED_QUALITY == 1 or allow_lossless:
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
             categories = "7" # Music
             format = "10" # MP3 and FLAC
             maxsize = 10000000000
@@ -1124,16 +1122,16 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                     except Exception as e:
                         logger.exception("Unhandled exception in the KAT parser")
 
-    if headphones.WAFFLES:
+    if headphones.CONFIG.WAFFLES:
         provider = "Waffles.fm"
         providerurl = fix_url("https://www.waffles.fm/browse.php")
 
         bitrate = None
-        if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
             format = "FLAC"
             bitrate = "(Lossless)"
             maxsize = 10000000000
-        elif headphones.PREFERRED_QUALITY == 1 or allow_lossless:
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
             format = "FLAC OR MP3"
             maxsize = 10000000000
         else:
@@ -1158,8 +1156,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
         logger.info('Parsing results from Waffles')
 
         params = {
-            "uid": headphones.WAFFLES_UID,
-            "passkey": headphones.WAFFLES_PASSKEY,
+            "uid": headphones.CONFIG.WAFFLES_UID,
+            "passkey": headphones.CONFIG.WAFFLES_PASSKEY,
             "rss": "1",
             "c0": "1",
             "s": "seeders", # sort by
@@ -1190,7 +1188,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                         logger.error(u"An error occurred while trying to parse the response from Waffles.fm: %s", e)
 
     # rutracker.org
-    if headphones.RUTRACKER and rulogin:
+    if headphones.CONFIG.RUTRACKER and rulogin:
 
         provider = "rutracker.org"
 
@@ -1199,10 +1197,10 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
             logger.info(u'Release date not specified, ignoring for rutracker.org')
         else:
 
-            if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+            if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
                 format = 'lossless'
                 maxsize = 10000000000
-            elif headphones.PREFERRED_QUALITY == 1 or allow_lossless:
+            elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
                 format = 'lossless+mp3'
                 maxsize = 10000000000
             else:
@@ -1231,19 +1229,19 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
             else:
                 logger.info(u"No valid results found from %s" % (provider))
 
-    if headphones.WHATCD:
+    if headphones.CONFIG.WHATCD:
         provider = "What.cd"
         providerurl = "http://what.cd/"
 
         bitrate = None
         bitrate_string = bitrate
 
-        if headphones.PREFERRED_QUALITY == 3 or losslessOnly:  # Lossless Only mode
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:  # Lossless Only mode
             search_formats = [gazelleformat.FLAC]
             maxsize = 10000000000
-        elif headphones.PREFERRED_QUALITY == 2:  # Preferred quality mode
+        elif headphones.CONFIG.PREFERRED_QUALITY == 2:  # Preferred quality mode
             search_formats = [None]  # should return all
-            bitrate = headphones.PREFERRED_BITRATE
+            bitrate = headphones.CONFIG.PREFERRED_BITRATE
             if bitrate:
                 for encoding_string in gazelleencoding.ALL_ENCODINGS:
                     if re.search(bitrate, encoding_string, flags=re.I):
@@ -1251,7 +1249,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                 if bitrate_string not in gazelleencoding.ALL_ENCODINGS:
                     logger.info(u"Your preferred bitrate is not one of the available What.cd filters, so not using it as a search parameter.")
             maxsize = 10000000000
-        elif headphones.PREFERRED_QUALITY == 1 or allow_lossless:  # Highest quality including lossless
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:  # Highest quality including lossless
             search_formats = [gazelleformat.FLAC, gazelleformat.MP3]
             maxsize = 10000000000
         else:  # Highest quality excluding lossless
@@ -1261,7 +1259,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
         if not gazelle or not gazelle.logged_in():
             try:
                 logger.info(u"Attempting to log in to What.cd...")
-                gazelle = gazelleapi.GazelleAPI(headphones.WHATCD_USERNAME, headphones.WHATCD_PASSWORD)
+                gazelle = gazelleapi.GazelleAPI(headphones.CONFIG.WHATCD_USERNAME, headphones.CONFIG.WHATCD_PASSWORD)
                 gazelle._login()
             except Exception as e:
                 gazelle = None
@@ -1311,13 +1309,13 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                                    'torrent'))
 
     # Pirate Bay
-    if headphones.PIRATEBAY:
+    if headphones.CONFIG.PIRATEBAY:
         provider = "The Pirate Bay"
         tpb_term = term.replace("!", "")
 
         # Use proxy if specified
-        if headphones.PIRATEBAY_PROXY_URL:
-            providerurl = fix_url(set_proxy(headphones.PIRATEBAY_PROXY_URL))
+        if headphones.CONFIG.PIRATEBAY_PROXY_URL:
+            providerurl = fix_url(set_proxy(headphones.CONFIG.PIRATEBAY_PROXY_URL))
         else:
             providerurl = fix_url("https://thepiratebay.se")
 
@@ -1325,10 +1323,10 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
         providerurl = providerurl + "/search/" + tpb_term + "/0/7/" # 7 is sort by seeders
 
         # Pick category for torrents
-        if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
             category = '104' # FLAC
             maxsize = 10000000000
-        elif headphones.PREFERRED_QUALITY == 1 or allow_lossless:
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
             category = '100' # General audio category
             maxsize = 10000000000
         else:
@@ -1355,7 +1353,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                         title = ''.join(item.find("a", {"class" : "detLink"}))
                         seeds = int(''.join(item.find("td", {"align" : "right"})))
 
-                        if headphones.TORRENT_DOWNLOADER == 0:
+                        if headphones.CONFIG.TORRENT_DOWNLOADER == 0:
                             try:
                                 url = item.find("a", {"title":"Download this torrent"})['href']
                             except TypeError:
@@ -1381,15 +1379,15 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                     except Exception as e:
                         logger.error(u"An unknown error occurred in the Pirate Bay parser: %s" % e)
 
-    if headphones.MININOVA:
+    if headphones.CONFIG.MININOVA:
         provider = "Mininova"
         providerurl = fix_url("http://www.mininova.org/rss/" + term + "/5")
 
-        if headphones.PREFERRED_QUALITY == 3 or losslessOnly:
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
             categories = "7"        #music
             format = "2"             #flac
             maxsize = 10000000000
-        elif headphones.PREFERRED_QUALITY == 1 or allow_lossless:
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
             categories = "7"        #music
             format = "10"            #mp3+flac
             maxsize = 10000000000
@@ -1453,7 +1451,7 @@ def preprocess(resultlist):
     for result in resultlist:
         if result[4] == 'torrent':
             #Get out of here if we're using Transmission
-            if headphones.TORRENT_DOWNLOADER == 1:  ## if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
+            if headphones.CONFIG.TORRENT_DOWNLOADER == 1:  ## if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
                 return True, result
             # get outta here if rutracker
             if result[3] == 'rutracker.org':
@@ -1477,6 +1475,6 @@ def preprocess(resultlist):
             headers = {'User-Agent': USER_AGENT}
 
             if result[3] == 'headphones':
-                return request.request_content(url=result[2], headers=headers, auth=(headphones.HPUSER, headphones.HPPASS)), result
+                return request.request_content(url=result[2], headers=headers, auth=(headphones.CONFIG.HPUSER, headphones.CONFIG.HPPASS)), result
             else:
                 return request.request_content(url=result[2], headers=headers), result

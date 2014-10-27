@@ -24,8 +24,8 @@ from headphones import logger, version, request
 
 def runGit(args):
 
-    if headphones.GIT_PATH:
-        git_locations = ['"'+headphones.GIT_PATH+'"']
+    if headphones.CONFIG.GIT_PATH:
+        git_locations = ['"'+headphones.CONFIG.GIT_PATH+'"']
     else:
         git_locations = ['git']
 
@@ -82,16 +82,16 @@ def getVersion():
             logger.error('Output doesn\'t look like a hash, not using it')
             cur_commit_hash = None
 
-        if headphones.DO_NOT_OVERRIDE_GIT_BRANCH and headphones.GIT_BRANCH:
-            branch_name = headphones.GIT_BRANCH
+        if headphones.CONFIG.DO_NOT_OVERRIDE_GIT_BRANCH and headphones.CONFIG.GIT_BRANCH:
+            branch_name = headphones.CONFIG.GIT_BRANCH
 
         else:
             branch_name, err = runGit('rev-parse --abbrev-ref HEAD')
             branch_name = branch_name
 
-            if not branch_name and headphones.GIT_BRANCH:
-                logger.error('Could not retrieve branch name from git. Falling back to %s' % headphones.GIT_BRANCH)
-                branch_name = headphones.GIT_BRANCH
+            if not branch_name and headphones.CONFIG.GIT_BRANCH:
+                logger.error('Could not retrieve branch name from git. Falling back to %s' % headphones.CONFIG.GIT_BRANCH)
+                branch_name = headphones.CONFIG.GIT_BRANCH
             if not branch_name:
                 logger.error('Could not retrieve branch name from git. Defaulting to master')
                 branch_name = 'master'
@@ -111,7 +111,7 @@ def getVersion():
             current_version = f.read().strip(' \n\r')
 
         if current_version:
-            return current_version, headphones.GIT_BRANCH
+            return current_version, headphones.CONFIG.GIT_BRANCH
         else:
             return None, 'master'
 
@@ -120,7 +120,7 @@ def checkGithub():
 
     # Get the latest version available from github
     logger.info('Retrieving latest version information from GitHub')
-    url = 'https://api.github.com/repos/%s/headphones/commits/%s' % (headphones.GIT_USER, headphones.GIT_BRANCH)
+    url = 'https://api.github.com/repos/%s/headphones/commits/%s' % (headphones.CONFIG.GIT_USER, headphones.CONFIG.GIT_BRANCH)
     version = request.request_json(url, timeout=20, validator=lambda x: type(x) == dict)
 
     if version is None:
@@ -140,7 +140,7 @@ def checkGithub():
         return headphones.LATEST_VERSION
 
     logger.info('Comparing currently installed version with latest GitHub version')
-    url = 'https://api.github.com/repos/%s/headphones/compare/%s...%s' % (headphones.GIT_USER, headphones.LATEST_VERSION, headphones.CURRENT_VERSION)
+    url = 'https://api.github.com/repos/%s/headphones/compare/%s...%s' % (headphones.CONFIG.GIT_USER, headphones.LATEST_VERSION, headphones.CURRENT_VERSION)
     commits = request.request_json(url, timeout=20, whitelist_status_code=404, validator=lambda x: type(x) == dict)
 
     if commits is None:
@@ -166,7 +166,7 @@ def update():
         logger.info('Windows .exe updating not supported yet.')
 
     elif headphones.INSTALL_TYPE == 'git':
-        output, err = runGit('pull origin ' + headphones.GIT_BRANCH)
+        output, err = runGit('pull origin ' + headphones.CONFIG.GIT_BRANCH)
 
         if not output:
             logger.error('Couldn\'t download latest version')
@@ -181,7 +181,7 @@ def update():
                 logger.info('Output: ' + str(output))
 
     else:
-        tar_download_url = 'https://github.com/%s/headphones/tarball/%s' % (headphones.GIT_USER, headphones.GIT_BRANCH)
+        tar_download_url = 'https://github.com/%s/headphones/tarball/%s' % (headphones.CONFIG.GIT_USER, headphones.CONFIG.GIT_BRANCH)
         update_dir = os.path.join(headphones.PROG_DIR, 'update')
         version_path = os.path.join(headphones.PROG_DIR, 'version.txt')
 
@@ -192,7 +192,7 @@ def update():
             logger.error("Unable to retrieve new version from '%s', can't update", tar_download_url)
             return
 
-        download_name = headphones.GIT_BRANCH + '-github'
+        download_name = headphones.CONFIG.GIT_BRANCH + '-github'
         tar_download_path = os.path.join(headphones.PROG_DIR, download_name)
 
         # Save tar to disk

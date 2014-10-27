@@ -163,21 +163,21 @@
 	}
 
 	<%
-    if headphones.SONGKICK_FILTER_ENABLED:
+    if headphones.CONFIG.SONGKICK_FILTER_ENABLED:
         songkick_filter_enabled = "true"
     else:
         songkick_filter_enabled = "false"
 
-    if not headphones.SONGKICK_LOCATION:
+    if not headphones.CONFIG.SONGKICK_LOCATION:
     	songkick_location = "none"
     else:
-        songkick_location = headphones.SONGKICK_LOCATION
-    	
-    if headphones.SONGKICK_ENABLED:
+        songkick_location = headphones.CONFIG.SONGKICK_LOCATION
+
+    if headphones.CONFIG.SONGKICK_ENABLED:
         songkick_enabled = "true"
     else:
         songkick_enabled = "false"
-	
+
 	%>
 	function getArtistsCalendar() {
 		var template, calendarDomNode;
@@ -186,16 +186,16 @@
 
 		template = '<li><a target="_blank" href="URI"><span class="sk-name">NAME</span><span class="sk-location">LOC</span></a></li>';
 
-		$.getJSON("https://api.songkick.com/api/3.0/artists/mbid:${artist['ArtistID']}/calendar.json?apikey=${headphones.SONGKICK_APIKEY}&jsoncallback=?",
+		$.getJSON("https://api.songkick.com/api/3.0/artists/mbid:${artist['ArtistID']}/calendar.json?apikey=${headphones.CONFIG.SONGKICK_APIKEY}&jsoncallback=?",
 			function(data){
-				if (data['resultsPage'].totalEntries >= 1) {          
-          
+				if (data['resultsPage'].totalEntries >= 1) {
+
                     if( ${songkick_filter_enabled} ) {
                         data.resultsPage.results.event = $.grep(data.resultsPage.results.event, function(element,index){
                         return element.venue.metroArea.id == ${songkick_location};
                     });
                     }
-          
+
 					var tourDate;
 
 					calendarDomNode.show();
@@ -211,7 +211,7 @@
 					});
 
 					calendarDomNode.append('<li><img src="interfaces/default/images/songkick.png" alt="concerts by songkick" class="sk-logo" /></li>');
-					
+
 				$(function() {
 				  $("#artistCalendar").each(function() {
 					$("li:gt(4)", this).hide(); /* :gt() is zero-indexed */
@@ -269,7 +269,7 @@
 			$('#dialog').dialog();
 			event.preventDefault();
 		});
-		$('#menu_link_modifyextra').click(function() {
+		$('#menu_link_modifyextra').click(function(event) {
 			$('#dialog').dialog();
 			event.preventDefault();
 		});

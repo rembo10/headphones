@@ -574,14 +574,14 @@ def split(albumpath):
     xldprofile = None
 
     # use xld profile to split cue
-    if headphones.ENCODER == 'xld' and headphones.MUSIC_ENCODER and headphones.XLDPROFILE:
+    if headphones.CONFIG.ENCODER == 'xld' and headphones.CONFIG.MUSIC_ENCODER and headphones.CONFIG.XLDPROFILE:
         import getXldProfile
-        xldprofile, xldformat, _ = getXldProfile.getXldProfile(headphones.XLDPROFILE)
+        xldprofile, xldformat, _ = getXldProfile.getXldProfile(headphones.CONFIG.XLDPROFILE)
         if not xldformat:
             raise ValueError('Details for xld profile "%s" not found, cannot split cue' % (xldprofile))
         else:
-            if headphones.ENCODERFOLDER:
-                splitter = os.path.join(headphones.ENCODERFOLDER, 'xld')
+            if headphones.CONFIG.ENCODERFOLDER:
+                splitter = os.path.join(headphones.CONFIG.ENCODERFOLDER, 'xld')
             else:
                 splitter = 'xld'
     # use standard xld command to split cue
