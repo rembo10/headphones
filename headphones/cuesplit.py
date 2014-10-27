@@ -468,10 +468,12 @@ class MetaFile(File):
         common_tags['artist'] = self.content['artist']
         common_tags['album'] = self.content['title']
         common_tags['title'] = self.content['tracks'][track_nr]['title']
-        common_tags['date'] = self.content['date']
         common_tags['tracknumber'] = str(track_nr)
-        common_tags['genre'] = meta.content['genre']
         common_tags['tracktotal'] = str(len(self.content['tracks'])-1)
+        if 'date' in self.content:
+            common_tags['date'] = self.content['date']
+        if 'genre' in meta.content:
+            common_tags['genre'] = meta.content['genre']
 
         #freeform tags
         #freeform_tags['country'] = self.content['country']
