@@ -62,14 +62,14 @@ class DBConnection:
             return
 
         sqlResult = None
-        
+
         try:
             with self.connection as c:
                 if args == None:
                     sqlResult = c.execute(query)
                 else:
                     sqlResult = c.execute(query, args)
-                    
+
         except sqlite3.OperationalError, e:
             if "unable to open database file" in e.message or "database is locked" in e.message:
                 logger.warn('Database Error: %s', e)
@@ -80,13 +80,13 @@ class DBConnection:
         except sqlite3.DatabaseError, e:
             logger.error('Fatal Error executing %s :: %s', query, e)
             raise
-        
+
         return sqlResult
 
     def select(self, query, args=None):
 
         sqlResults = self.action(query, args).fetchall()
-        
+
         if sqlResults == None or sqlResults == [None]:
             return []
 

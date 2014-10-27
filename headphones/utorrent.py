@@ -260,4 +260,3 @@ def getSettingsDirectories():
     if 'dir_completed_download' in settings:
         completed = settings['dir_completed_download'][2]
     return active, completed
-

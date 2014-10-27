@@ -347,4 +347,3 @@ class Rutracker():
             except Exception:
                 logger.exception('Error adding file to utorrent')
                 return
-
