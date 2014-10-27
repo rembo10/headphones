@@ -1336,7 +1336,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
         # Request content
         logger.info("Searching The Pirate Bay using term: %s", tpb_term)
 
-        headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
         data = request.request_soup(url=providerurl + category, headers=headers)
 
         # Process content
@@ -1350,8 +1350,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                     try:
                         url = None
                         rightformat = True
-                        title = ''.join(item.find("a", {"class" : "detLink"}))
-                        seeds = int(''.join(item.find("td", {"align" : "right"})))
+                        title = ''.join(item.find("a", {"class": "detLink"}))
+                        seeds = int(''.join(item.find("td", {"align": "right"})))
 
                         if headphones.CONFIG.TORRENT_DOWNLOADER == 0:
                             try:

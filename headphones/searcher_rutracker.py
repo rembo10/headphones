@@ -47,9 +47,9 @@ class Rutracker():
         #if self.login_counter > 1:
         #    return False
 
-        params = urllib.urlencode({"login_username" : login,
-                                   "login_password" : password,
-                                   "login" : "Вход"})
+        params = urllib.urlencode({"login_username": login,
+                                   "login_password": password,
+                                   "login": "Вход"})
 
         try:
             self.opener.open("http://login.rutracker.org/forum/login.php", params)
@@ -114,26 +114,26 @@ class Rutracker():
             #logger.debug (soup.prettify())
 
             # Title
-            for link in soup.find_all('a', attrs={'class' : 'med tLink hl-tags bold'}):
+            for link in soup.find_all('a', attrs={'class': 'med tLink hl-tags bold'}):
                 title = link.get_text()
                 titles.append(title)
 
             # Download URL
-            for link in soup.find_all('a', attrs={'class' : 'small tr-dl dl-stub'}):
+            for link in soup.find_all('a', attrs={'class': 'small tr-dl dl-stub'}):
                 url = link.get('href')
                 urls.append(url)
 
             # Seeders
-            for link in soup.find_all('b', attrs={'class' : 'seedmed'}):
+            for link in soup.find_all('b', attrs={'class': 'seedmed'}):
                 seeder = link.get_text()
                 seeders.append(seeder)
 
             # Size
-            for link in soup.find_all('td', attrs={'class' : 'row4 small nowrap tor-size'}):
+            for link in soup.find_all('td', attrs={'class': 'row4 small nowrap tor-size'}):
                 size = link.u.string
                 sizes.append(size)
 
-        except :
+        except:
             pass
 
         # Combine lists

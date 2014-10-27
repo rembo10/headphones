@@ -510,7 +510,7 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
         # What we're doing here now is first updating the allalbums & alltracks table to the most
         # current info, then moving the appropriate release into the album table and its associated
         # tracks into the tracks table
-            controlValueDict = {"ReleaseID" : release['ReleaseID']}
+            controlValueDict = {"ReleaseID": release['ReleaseID']}
 
             newValueDict = {"ArtistID":         release['ArtistID'],
                             "ArtistName":       release['ArtistName'],
