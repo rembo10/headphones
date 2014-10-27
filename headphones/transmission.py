@@ -72,7 +72,7 @@ def getTorrentFolder(torrentid):
 
     tries = 1
 
-    while percentdone == 0  and tries < 10:
+    while percentdone == 0 and tries < 10:
         tries += 1
         time.sleep(5)
         response = torrentAction(method, arguments)
