@@ -33,7 +33,7 @@ class AuthURLOpener(HeadphonesURLopener):
     """
     URLOpener class that supports http auth without needing interactive password entry.
     If the provided username/password don't work it simply fails.
-    
+
     user: username to use for HTTP auth
     pw: password to use for HTTP auth
     """
@@ -44,7 +44,7 @@ class AuthURLOpener(HeadphonesURLopener):
 
         # remember if we've tried the username/password before
         self.numTries = 0
-        
+
         # call the base class
         urllib.FancyURLopener.__init__(self)
 
@@ -58,7 +58,7 @@ class AuthURLOpener(HeadphonesURLopener):
         if self.numTries == 0:
             self.numTries = 1
             return (self.username, self.password)
-        
+
         # if we've tried before then return blank which cancels the request
         else:
             return ('', '')
