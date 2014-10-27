@@ -219,7 +219,7 @@ class Directory:
                     n = int(search.group(1))
                     if n:
                         return n
-            for n in range(0,100):
+            for n in range(0, 100):
                 search = re.search(int_to_str(n), filename)
                 if search:
                     # TODO: not part of other value such as year

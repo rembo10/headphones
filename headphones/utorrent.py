@@ -48,7 +48,7 @@ class utorrentclient(object):
     def _make_opener(self, realm, base_url, username, password):
         """uTorrent API need HTTP Basic Auth and cookie support for token verify."""
         auth = urllib2.HTTPBasicAuthHandler()
-        auth.add_password(realm=realm,uri=base_url,user=username,passwd=password)
+        auth.add_password(realm=realm, uri=base_url, user=username, passwd=password)
         opener = urllib2.build_opener(auth)
         urllib2.install_opener(opener)
 
@@ -160,7 +160,7 @@ def labelTorrent(hash):
     label = headphones.CONFIG.UTORRENT_LABEL
     uTorrentClient = utorrentclient()
     if label:
-        uTorrentClient.setprops(hash,'label',label)
+        uTorrentClient.setprops(hash, 'label', label)
 
 def removeTorrent(hash, remove_data = False):
     uTorrentClient = utorrentclient()
@@ -181,10 +181,10 @@ def setSeedRatio(hash, ratio):
     uTorrentClient = utorrentclient()
     uTorrentClient.setprops(hash, 'seed_override', '1')
     if ratio != 0:
-        uTorrentClient.setprops(hash,'seed_ratio', ratio * 10)
+        uTorrentClient.setprops(hash, 'seed_ratio', ratio * 10)
     else:
         # TODO passing -1 should be unlimited
-        uTorrentClient.setprops(hash,'seed_ratio', -10)
+        uTorrentClient.setprops(hash, 'seed_ratio', -10)
 
 def dirTorrent(hash, cacheid=None, return_name=None):
 

@@ -322,11 +322,11 @@ class WebInterface(object):
         for result in results:
 
             result_dict = {
-                'title':result[0],
-                'size':result[1],
-                'url':result[2],
-                'provider':result[3],
-                'kind':result[4]
+                'title': result[0],
+                'size': result[1],
+                'url': result[2],
+                'provider': result[3],
+                'kind': result[4]
             }
             results_as_dicts.append(result_dict)
 
@@ -344,9 +344,9 @@ class WebInterface(object):
             url = urllib2.quote(url, safe=":?/=&") + '&' + urllib.urlencode(kwargs)
 
         try:
-            result = [(title,int(size),url,provider,kind)]
+            result = [(title, int(size), url, provider, kind)]
         except ValueError:
-            result = [(title,float(size),url,provider,kind)]
+            result = [(title, float(size), url, provider, kind)]
 
         logger.info(u"Making sure we can download the chosen result")
         (data, bestqual) = searcher.preprocess(result)
@@ -713,7 +713,7 @@ class WebInterface(object):
 
     def forcePostProcess(self, dir=None, album_dir=None):
         from headphones import postprocessor
-        threading.Thread(target=postprocessor.forcePostProcess, kwargs={'dir':dir,'album_dir':album_dir}).start()
+        threading.Thread(target=postprocessor.forcePostProcess, kwargs={'dir': dir, 'album_dir': album_dir}).start()
         raise cherrypy.HTTPRedirect("home")
     forcePostProcess.exposed = True
 
@@ -747,7 +747,7 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("logs")
     toggleVerbose.exposed = True
 
-    def getLog(self,iDisplayStart=0,iDisplayLength=100,iSortCol_0=0,sSortDir_0="desc",sSearch="",**kwargs):
+    def getLog(self, iDisplayStart=0, iDisplayLength=100, iSortCol_0=0, sSortDir_0="desc", sSearch="", **kwargs):
 
         iDisplayStart = int(iDisplayStart)
         iDisplayLength = int(iDisplayLength)
@@ -763,19 +763,19 @@ class WebInterface(object):
             sortcolumn = 2
         elif iSortCol_0 == '2':
             sortcolumn = 1
-        filtered.sort(key=lambda x:x[sortcolumn],reverse=sSortDir_0 == "desc")
+        filtered.sort(key=lambda x: x[sortcolumn], reverse=sSortDir_0 == "desc")
 
         rows = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
-        rows = [[row[0],row[2],row[1]] for row in rows]
+        rows = [[row[0], row[2], row[1]] for row in rows]
 
         return json.dumps({
-            'iTotalDisplayRecords':len(filtered),
-            'iTotalRecords':len(headphones.LOG_LIST),
-            'aaData':rows,
+            'iTotalDisplayRecords': len(filtered),
+            'iTotalRecords': len(headphones.LOG_LIST),
+            'aaData': rows,
         })
     getLog.exposed = True
 
-    def getArtists_json(self,iDisplayStart=0,iDisplayLength=100,sSearch="",iSortCol_0='0',sSortDir_0='asc',**kwargs):
+    def getArtists_json(self, iDisplayStart=0, iDisplayLength=100, sSearch="", iSortCol_0='0', sSortDir_0='asc', **kwargs):
         iDisplayStart = int(iDisplayStart)
         iDisplayLength = int(iDisplayLength)
         filtered = []
@@ -793,16 +793,16 @@ class WebInterface(object):
             sortbyhavepercent = True
 
         if sSearch == "":
-            query = 'SELECT * from artists order by %s COLLATE NOCASE %s' % (sortcolumn,sSortDir_0)
+            query = 'SELECT * from artists order by %s COLLATE NOCASE %s' % (sortcolumn, sSortDir_0)
             filtered = myDB.select(query)
             totalcount = len(filtered)
         else:
-            query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch +'%"' +  'ORDER BY %s COLLATE NOCASE %s' % (sortcolumn,sSortDir_0)
+            query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch +'%"' +  'ORDER BY %s COLLATE NOCASE %s' % (sortcolumn, sSortDir_0)
             filtered = myDB.select(query)
             totalcount = myDB.select('SELECT COUNT(*) from artists')[0][0]
 
         if sortbyhavepercent:
-            filtered.sort(key=lambda x:(float(x['HaveTracks'])/x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0,x['HaveTracks'] if x['HaveTracks'] else 0.0),reverse=sSortDir_0 == "asc")
+            filtered.sort(key=lambda x: (float(x['HaveTracks'])/x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0, x['HaveTracks'] if x['HaveTracks'] else 0.0), reverse=sSortDir_0 == "asc")
 
         #can't figure out how to change the datatables default sorting order when its using an ajax datasource so ill
         #just reverse it here and the first click on the "Latest Album" header will sort by descending release date
@@ -813,16 +813,16 @@ class WebInterface(object):
         artists = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
         rows = []
         for artist in artists:
-            row = {"ArtistID":artist['ArtistID'],
-                      "ArtistName":artist["ArtistName"],
-                      "ArtistSortName":artist["ArtistSortName"],
-                      "Status":artist["Status"],
-                      "TotalTracks":artist["TotalTracks"],
-                      "HaveTracks":artist["HaveTracks"],
-                      "LatestAlbum":"",
-                      "ReleaseDate":"",
-                      "ReleaseInFuture":"False",
-                      "AlbumID":"",
+            row = {"ArtistID": artist['ArtistID'],
+                      "ArtistName": artist["ArtistName"],
+                      "ArtistSortName": artist["ArtistSortName"],
+                      "Status": artist["Status"],
+                      "TotalTracks": artist["TotalTracks"],
+                      "HaveTracks": artist["HaveTracks"],
+                      "LatestAlbum": "",
+                      "ReleaseDate": "",
+                      "ReleaseInFuture": "False",
+                      "AlbumID": "",
                       }
 
             if not row['HaveTracks']:
@@ -841,9 +841,9 @@ class WebInterface(object):
             rows.append(row)
 
 
-        dict = {'iTotalDisplayRecords':len(filtered),
-                'iTotalRecords':totalcount,
-                'aaData':rows,
+        dict = {'iTotalDisplayRecords': len(filtered),
+                'iTotalRecords': totalcount,
+                'aaData': rows,
                 }
         s = json.dumps(dict)
         cherrypy.response.headers['Content-type'] = 'application/json'
@@ -1367,7 +1367,7 @@ class Artwork(object):
         return "Artwork"
     index.exposed = True
 
-    def default(self,ArtistOrAlbum="",ID=None):
+    def default(self, ArtistOrAlbum="", ID=None):
         from headphones import cache
         ArtistID = None
         AlbumID = None
@@ -1376,23 +1376,23 @@ class Artwork(object):
         elif ArtistOrAlbum == "album":
             AlbumID = ID
 
-        relpath =  cache.getArtwork(ArtistID,AlbumID)
+        relpath =  cache.getArtwork(ArtistID, AlbumID)
 
         if not relpath:
             relpath = "data/interfaces/default/images/no-cover-art.png"
             basedir = os.path.dirname(sys.argv[0])
-            path = os.path.join(basedir,relpath)
+            path = os.path.join(basedir, relpath)
             cherrypy.response.headers['Content-type'] = 'image/png'
             cherrypy.response.headers['Cache-Control'] = 'no-cache'
         else:
-            relpath = relpath.replace('cache/','',1)
-            path = os.path.join(headphones.CONFIG.CACHE_DIR,relpath)
+            relpath = relpath.replace('cache/', '', 1)
+            path = os.path.join(headphones.CONFIG.CACHE_DIR, relpath)
             fileext = os.path.splitext(relpath)[1][1::]
             cherrypy.response.headers['Content-type'] = 'image/' + fileext
             cherrypy.response.headers['Cache-Control'] = 'max-age=31556926'
 
         path = os.path.normpath(path)
-        f = open(path,'rb')
+        f = open(path, 'rb')
         return f.read()
     default.exposed = True
 
@@ -1400,7 +1400,7 @@ class Artwork(object):
         def index(self):
             return "Here be thumbs"
         index.exposed = True
-        def default(self,ArtistOrAlbum="",ID=None):
+        def default(self, ArtistOrAlbum="", ID=None):
             from headphones import cache
             ArtistID = None
             AlbumID = None
@@ -1409,23 +1409,23 @@ class Artwork(object):
             elif ArtistOrAlbum == "album":
                 AlbumID = ID
 
-            relpath =  cache.getThumb(ArtistID,AlbumID)
+            relpath =  cache.getThumb(ArtistID, AlbumID)
 
             if not relpath:
                 relpath = "data/interfaces/default/images/no-cover-artist.png"
                 basedir = os.path.dirname(sys.argv[0])
-                path = os.path.join(basedir,relpath)
+                path = os.path.join(basedir, relpath)
                 cherrypy.response.headers['Content-type'] = 'image/png'
                 cherrypy.response.headers['Cache-Control'] = 'no-cache'
             else:
-                relpath = relpath.replace('cache/','',1)
-                path = os.path.join(headphones.CONFIG.CACHE_DIR,relpath)
+                relpath = relpath.replace('cache/', '', 1)
+                path = os.path.join(headphones.CONFIG.CACHE_DIR, relpath)
                 fileext = os.path.splitext(relpath)[1][1::]
                 cherrypy.response.headers['Content-type'] = 'image/' + fileext
                 cherrypy.response.headers['Cache-Control'] = 'max-age=31556926'
 
             path = os.path.normpath(path)
-            f = open(path,'rb')
+            f = open(path, 'rb')
             return f.read()
         default.exposed = True
 
