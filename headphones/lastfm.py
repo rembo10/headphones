@@ -111,12 +111,12 @@ def getArtists():
     myDB = db.DBConnection()
     results = myDB.select("SELECT ArtistID from artists")
 
-    if not headphones.LASTFM_USERNAME:
+    if not headphones.CONFIG.LASTFM_USERNAME:
         logger.warn("Last.FM username not set, not importing artists.")
         return
 
-    logger.info("Fetching artists from Last.FM for username: %s", headphones.LASTFM_USERNAME)
-    data = request_lastfm("library.getartists", limit=10000, user=headphones.LASTFM_USERNAME)
+    logger.info("Fetching artists from Last.FM for username: %s", headphones.CONFIG.LASTFM_USERNAME)
+    data = request_lastfm("library.getartists", limit=10000, user=headphones.CONFIG.LASTFM_USERNAME)
 
     if data and "artists" in data:
         artistlist = []

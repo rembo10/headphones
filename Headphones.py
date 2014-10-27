@@ -21,8 +21,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib/'))
 
 from headphones import webstart, logger
 
-from configobj import ConfigObj
-
 import locale
 import time
 import signal
@@ -114,9 +112,9 @@ def main():
         headphones.DATA_DIR = headphones.PROG_DIR
 
     if args.config:
-        headphones.CONFIG_FILE = args.config
+        config_file = args.config
     else:
-        headphones.CONFIG_FILE = os.path.join(headphones.DATA_DIR, 'config.ini')
+        config_file = os.path.join(headphones.DATA_DIR, 'config.ini')
 
     # Try to create the DATA_DIR if it doesn't exist
     if not os.path.exists(headphones.DATA_DIR):
@@ -131,10 +129,9 @@ def main():
 
     # Put the database in the DATA_DIR
     headphones.DB_FILE = os.path.join(headphones.DATA_DIR, 'headphones.db')
-    headphones.CFG = ConfigObj(headphones.CONFIG_FILE, encoding='utf-8')
 
     # Read config and start logging
-    headphones.initialize()
+    headphones.initialize(config_file)
 
     if headphones.DAEMON:
         headphones.daemonize()
@@ -147,24 +144,25 @@ def main():
         http_port = args.port
         logger.info('Using forced web server port: %i', http_port)
     else:
-        http_port = int(headphones.HTTP_PORT)
+        http_port = int(headphones.CONFIG.HTTP_PORT)
 
     # Try to start the server. Will exit here is address is already in use.
-    webstart.initialize({
+    web_config = {
         'http_port': http_port,
-        'http_host': headphones.HTTP_HOST,
-        'http_root': headphones.HTTP_ROOT,
-        'http_proxy': headphones.HTTP_PROXY,
-        'enable_https': headphones.ENABLE_HTTPS,
-        'https_cert': headphones.HTTPS_CERT,
-        'https_key': headphones.HTTPS_KEY,
-        'http_username': headphones.HTTP_USERNAME,
-        'http_password': headphones.HTTP_PASSWORD,
-    })
+        'http_host': headphones.CONFIG.HTTP_HOST,
+        'http_root': headphones.CONFIG.HTTP_ROOT,
+        'http_proxy': headphones.CONFIG.HTTP_PROXY,
+        'enable_https': headphones.CONFIG.ENABLE_HTTPS,
+        'https_cert': headphones.CONFIG.HTTPS_CERT,
+        'https_key': headphones.CONFIG.HTTPS_KEY,
+        'http_username': headphones.CONFIG.HTTP_USERNAME,
+        'http_password': headphones.CONFIG.HTTP_PASSWORD,
+    }
+    webstart.initialize(web_config)
 
-    if headphones.LAUNCH_BROWSER and not args.nolaunch:
-        headphones.launch_browser(headphones.HTTP_HOST, http_port,
-            headphones.HTTP_ROOT)
+    if headphones.CONFIG.LAUNCH_BROWSER and not args.nolaunch:
+        headphones.launch_browser(headphones.CONFIG.HTTP_HOST, http_port,
+            headphones.CONFIG.HTTP_ROOT)
 
     # Start the background threads
     headphones.start()

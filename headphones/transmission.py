@@ -33,9 +33,9 @@ def addTorrent(link):
     if link.endswith('.torrent'):
         with open(link, 'rb') as f:
             metainfo = str(base64.b64encode(f.read()))
-        arguments = {'metainfo': metainfo, 'download-dir':headphones.DOWNLOAD_TORRENT_DIR}
+        arguments = {'metainfo': metainfo, 'download-dir':headphones.CONFIG.DOWNLOAD_TORRENT_DIR}
     else:
-        arguments = {'filename': link, 'download-dir': headphones.DOWNLOAD_TORRENT_DIR}
+        arguments = {'filename': link, 'download-dir': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}
 
     response = torrentAction(method,arguments)
 
@@ -122,9 +122,9 @@ def removeTorrent(torrentid, remove_data = False):
 
 def torrentAction(method, arguments):
 
-    host = headphones.TRANSMISSION_HOST
-    username = headphones.TRANSMISSION_USERNAME
-    password = headphones.TRANSMISSION_PASSWORD
+    host = headphones.CONFIG.TRANSMISSION_HOST
+    username = headphones.CONFIG.TRANSMISSION_USERNAME
+    password = headphones.CONFIG.TRANSMISSION_PASSWORD
     sessionid = None
 
     if not host.startswith('http'):
