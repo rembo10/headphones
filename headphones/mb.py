@@ -32,6 +32,8 @@ mb_lock = threading.Lock()
 
 # Quick fix to add mirror switching on the fly. Need to probably return the mbhost & mbport that's
 # being used, so we can send those values to the log
+
+
 def startmb():
 
     mbuser = None
@@ -72,6 +74,7 @@ def startmb():
     logger.debug('Using the following server values: MBHost: %s, MBPort: %i, Sleep Interval: %i', mbhost, mbport, sleepytime)
 
     return True
+
 
 def findArtist(name, limit=1):
 
@@ -122,6 +125,7 @@ def findArtist(name, limit=1):
                         'score':            int(result['ext:score'])
                         })
         return artistlist
+
 
 def findRelease(name, limit=1, artist=None):
 
@@ -201,6 +205,7 @@ def findRelease(name, limit=1, artist=None):
                         })
         return releaselist
 
+
 def getArtist(artistid, extrasonly=False):
 
     with mb_lock:
@@ -246,7 +251,6 @@ def getArtist(artistid, extrasonly=False):
         #        artist_dict['artist_begindate'] = unicode(artist['life-span']['begin'])
         #    if 'end' in artist['life-span']:
         #        artist_dict['artist_enddate'] = unicode(artist['life-span']['end'])
-
 
         releasegroups = []
 
@@ -321,6 +325,7 @@ def getArtist(artistid, extrasonly=False):
 
         return artist_dict
 
+
 def getReleaseGroup(rgid):
     """
     Returns a list of releases in a release group
@@ -341,6 +346,7 @@ def getReleaseGroup(rgid):
             return False
         else:
             return releaseGroup['release-list']
+
 
 def getRelease(releaseid, include_artist_info=True):
     """
@@ -377,7 +383,6 @@ def getRelease(releaseid, include_artist_info=True):
         except:
             release['country'] = u'Unknown'
 
-
         if include_artist_info:
 
             if 'release-group' in results:
@@ -403,6 +408,7 @@ def getRelease(releaseid, include_artist_info=True):
         release['tracks'] = getTracksFromRelease(results)
 
         return release
+
 
 def get_new_releases(rgid, includeExtras=False, forcefull=False):
 
@@ -485,7 +491,6 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
             else:
                 logger.warn('Release ' + releasedata['id'] + ' has no Artists associated.')
                 return False
-
 
             release['ReleaseCountry'] = unicode(releasedata['country']) if 'country' in releasedata else u'Unknown'
             #assuming that the list will contain media and that the format will be consistent
@@ -570,6 +575,7 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
 
     return num_new_releases
 
+
 def getTracksFromRelease(release):
     totalTracks = 1
     tracks = []
@@ -590,6 +596,8 @@ def getTracksFromRelease(release):
     return tracks
 
 # Used when there is a disambiguation
+
+
 def findArtistbyAlbum(name):
 
     myDB = db.DBConnection()
@@ -613,7 +621,6 @@ def findArtistbyAlbum(name):
         logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
         time.sleep(5)
 
-
     if not results:
         return False
 
@@ -631,9 +638,8 @@ def findArtistbyAlbum(name):
         #artist_dict['url'] = u'http://musicbrainz.org/artist/' + newArtist['id']
         #artist_dict['score'] = int(releaseGroup['ext:score'])
 
-
-
     return artist_dict
+
 
 def findAlbumID(artist=None, album=None):
 

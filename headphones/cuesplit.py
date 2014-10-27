@@ -69,6 +69,7 @@ WAVE_FILE_TYPE_BY_EXTENSION = {
 #SHNTOOL_COMPATIBLE = ('Waveform Audio', 'WavPack', 'Free Lossless Audio Codec')
 SHNTOOL_COMPATIBLE = ('Free Lossless Audio Codec')
 
+
 def check_splitter(command):
     '''Check xld or shntools installed'''
     try:
@@ -81,6 +82,7 @@ def check_splitter(command):
         if e.errno == os.errno.ENOENT:
             return False
     return True
+
 
 def split_baby(split_file, split_cmd):
     '''Let's split baby'''
@@ -115,6 +117,7 @@ def split_baby(split_file, split_cmd):
         logger.info('Split success %s', split_file.decode(headphones.SYS_ENCODING, 'replace'))
         return True
 
+
 def check_list(list, ignore=0):
     '''Checks a list for None elements. If list have None (after ignore index) then it should pass only if all elements
     are None threreafter. Returns a tuple without the None entries.'''
@@ -146,11 +149,13 @@ def check_list(list, ignore=0):
 
     return tuple(list1+list2)
 
+
 def trim_cue_entry(string):
     '''Removes leading and trailing "s.'''
     if string[0] == '"' and string[-1] == '"':
         string = string[1:-1]
     return string
+
 
 def int_to_str(value, length=2):
     '''Converts integer to string eg 3 to "03"'''
@@ -163,6 +168,7 @@ def int_to_str(value, length=2):
     while len(content) < length:
         content = '0' + content
     return content
+
 
 def split_file_list(ext=None):
     file_list = [None for m in range(100)]
@@ -260,6 +266,7 @@ class Directory:
                 else:
                     self.content.append(File(self.path + os.sep + i))
 
+
 class File:
     def __init__(self, path):
         self.path = path
@@ -284,6 +291,7 @@ class File:
             content = content.replace(' ', '\ ')
 
         return content
+
 
 class CueFile(File):
     def __init__(self, path):
@@ -434,6 +442,7 @@ class CueFile(File):
                     content += '\n'
         return content
 
+
 class MetaFile(File):
     def __init__(self, path):
         File.__init__(self, path)
@@ -498,6 +507,7 @@ class MetaFile(File):
         '''Returns tracks count'''
         return len(self.content['tracks']) - self.content['tracks'].count(None)
 
+
 class WaveFile(File):
     def __init__(self, path, track_nr=None):
         File.__init__(self, path)
@@ -536,6 +546,7 @@ class WaveFile(File):
     def mutagen(self):
         if self.type == 'Free Lossless Audio Codec':
             return FLAC(self.name)
+
 
 def split(albumpath):
 

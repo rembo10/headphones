@@ -27,6 +27,7 @@ import headphones
 # TODO: Store the session id so we don't need to make 2 calls
 #       Store torrent id so we can check up on it
 
+
 def addTorrent(link):
     method = 'torrent-add'
 
@@ -60,6 +61,7 @@ def addTorrent(link):
         logger.info('Transmission returned status %s' % response['result'])
         return False
 
+
 def getTorrentFolder(torrentid):
     method = 'torrent-get'
     arguments = { 'ids': torrentid, 'fields': ['name', 'percentDone']}
@@ -80,6 +82,7 @@ def getTorrentFolder(torrentid):
 
     return torrent_folder_name
 
+
 def setSeedRatio(torrentid, ratio):
     method = 'torrent-set'
     if ratio != 0:
@@ -90,6 +93,7 @@ def setSeedRatio(torrentid, ratio):
     response = torrentAction(method, arguments)
     if not response:
         return False
+
 
 def removeTorrent(torrentid, remove_data = False):
 
@@ -119,6 +123,7 @@ def removeTorrent(torrentid, remove_data = False):
         return False
 
     return False
+
 
 def torrentAction(method, arguments):
 

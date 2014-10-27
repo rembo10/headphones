@@ -44,6 +44,7 @@ ARCHIVED = 6 # releases that you don't have locally (counts toward download comp
 IGNORED = 7 # releases that you don't want included in your download stats
 SNATCHED_PROPER = 9 # qualified with quality
 
+
 class Quality:
 
     NONE = 0

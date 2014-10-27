@@ -54,6 +54,7 @@ gazelle = None
 # RUtracker search object
 rutracker = rutrackersearch.Rutracker()
 
+
 def fix_url(s, charset="utf-8"):
     """
     Fix the URL so it is proper formatted and encoded.
@@ -67,6 +68,7 @@ def fix_url(s, charset="utf-8"):
     qs = urllib.quote_plus(qs, ':&=')
 
     return urlparse.urlunsplit((scheme, netloc, path, qs, anchor))
+
 
 def torrent_to_file(target_file, data):
     """
@@ -93,6 +95,7 @@ def torrent_to_file(target_file, data):
 
     # Done
     return True
+
 
 def read_torrent_name(torrent_file, default_name=None):
     """
@@ -123,6 +126,7 @@ def read_torrent_name(torrent_file, default_name=None):
     # Return default
     return default_name
 
+
 def calculate_torrent_hash(link, data=None):
     """
     Calculate the torrent hash from a magnet link or data.
@@ -140,6 +144,7 @@ def calculate_torrent_hash(link, data=None):
             "or data")
 
     return torrent_hash
+
 
 def get_seed_ratio(provider):
     """
@@ -169,6 +174,7 @@ def get_seed_ratio(provider):
             logger.warn("Could not get seed ratio for %s" % provider)
 
     return seed_ratio
+
 
 def searchforalbum(albumid=None, new=False, losslessOnly=False, choose_specific_download=False):
     myDB = db.DBConnection()
@@ -203,6 +209,7 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False, choose_specific_
         do_sorted_search(album, new, losslessOnly)
 
     logger.info('Search for Wanted albums complete')
+
 
 def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
 
@@ -249,7 +256,6 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
 
         results = nzb_results + torrent_results
 
-
     if choose_specific_download:
         return results
 
@@ -264,10 +270,12 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
     if data and bestqual:
         send_to_downloader(data, bestqual, album)
 
+
 def removeDisallowedFilenameChars(filename):
     validFilenameChars = "-_.() %s%s" % (string.ascii_letters, string.digits)
     cleanedFilename = unicodedata.normalize('NFKD', filename).encode('ASCII', 'ignore').lower()
     return ''.join(c for c in cleanedFilename if c in validFilenameChars)
+
 
 def more_filtering(results, album, albumlength, new):
 
@@ -331,6 +339,7 @@ def more_filtering(results, album, albumlength, new):
     results = newlist
 
     return results
+
 
 def sort_search_results(resultlist, album, new, albumlength):
 
@@ -401,6 +410,7 @@ def sort_search_results(resultlist, album, new, albumlength):
 
     return finallist
 
+
 def get_year_from_release_date(release_date):
 
     try:
@@ -409,6 +419,7 @@ def get_year_from_release_date(release_date):
         year = ''
 
     return year
+
 
 def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
 
@@ -678,6 +689,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
 
     return results
 
+
 def send_to_downloader(data, bestqual, album):
 
     logger.info(u'Found best result from %s: <a href="%s">%s</a> - %s', bestqual[3], bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1]))
@@ -920,6 +932,7 @@ def send_to_downloader(data, bestqual, album):
         boxcar = notifiers.BOXCAR()
         boxcar.notify('Headphones snatched: ' + title, b2msg, rgid)
 
+
 def verifyresult(title, artistterm, term, lossless):
 
     title = re.sub('[\.\-\/\_]', ' ', title)
@@ -984,6 +997,7 @@ def verifyresult(title, artistterm, term, lossless):
                     return False
 
     return True
+
 
 def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
     global gazelle  # persistent what.cd api object to reduce number of login attempts
@@ -1056,7 +1070,6 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
             proxy_url = proxy_url[:-1]
 
         return proxy_url
-
 
     if headphones.CONFIG.KAT:
         provider = "Kick Ass Torrents"
@@ -1446,6 +1459,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
     return results
 
 # THIS IS KIND OF A MESS AND PROBABLY NEEDS TO BE CLEANED UP
+
+
 def preprocess(resultlist):
 
     for result in resultlist:

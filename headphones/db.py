@@ -28,9 +28,11 @@ import headphones
 
 from headphones import logger
 
+
 def dbFilename(filename="headphones.db"):
 
     return os.path.join(headphones.DATA_DIR, filename)
+
 
 def getCacheSize():
     #this will protect against typecasting problems produced by empty string and None settings
@@ -38,6 +40,7 @@ def getCacheSize():
         #sqlite will work with this (very slowly)
         return 0
     return int(headphones.CONFIG.CACHE_SIZEMB)
+
 
 class DBConnection:
 

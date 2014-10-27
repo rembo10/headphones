@@ -22,6 +22,7 @@ import subprocess
 
 from headphones import logger, version, request
 
+
 def runGit(args):
 
     if headphones.CONFIG.GIT_PATH:
@@ -58,6 +59,7 @@ def runGit(args):
             break
 
     return (output, err)
+
 
 def getVersion():
 
@@ -115,6 +117,7 @@ def getVersion():
         else:
             return None, 'master'
 
+
 def checkGithub():
     headphones.COMMITS_BEHIND = 0
 
@@ -160,6 +163,7 @@ def checkGithub():
         logger.info('Headphones is up to date')
 
     return headphones.LATEST_VERSION
+
 
 def update():
     if headphones.INSTALL_TYPE == 'win':

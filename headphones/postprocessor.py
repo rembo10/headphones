@@ -32,6 +32,7 @@ from headphones import logger, helpers, request, mb, music_encoder
 
 postprocessor_lock = threading.Lock()
 
+
 def checkFolder():
 
     with postprocessor_lock:
@@ -56,6 +57,7 @@ def checkFolder():
 
             else:
                 logger.info("No folder name found for " + album['Title'])
+
 
 def verify(albumid, albumpath, Kind=None, forced=False):
 
@@ -275,6 +277,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
         renameUnprocessedFolder(albumpath)
     else:
         logger.info(u"Already marked as unprocessed: " + albumpath.decode(headphones.SYS_ENCODING, 'replace'))
+
 
 def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind=None):
 
@@ -500,6 +503,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         mpc = notifiers.MPC()
         mpc.notify()
 
+
 def embedAlbumArt(artwork, downloaded_track_list):
     logger.info('Embedding album art')
 
@@ -518,6 +522,7 @@ def embedAlbumArt(artwork, downloaded_track_list):
         except Exception, e:
             logger.error(u'Error embedding album art to: %s. Error: %s' % (downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), str(e)))
             continue
+
 
 def addAlbumArt(artwork, albumpath, release):
     logger.info('Adding album art to folder')
@@ -552,6 +557,7 @@ def addAlbumArt(artwork, albumpath, release):
         logger.error('Error saving album art: %s', e)
         return
 
+
 def cleanupFiles(albumpath):
     logger.info('Cleaning up files')
 
@@ -563,6 +569,7 @@ def cleanupFiles(albumpath):
                     os.remove(os.path.join(r, files))
                 except Exception as e:
                     logger.error(u'Could not remove file: %s. Error: %s' % (files.decode(headphones.SYS_ENCODING, 'replace'), e))
+
 
 def renameNFO(albumpath):
     logger.info('Renaming NFO')
@@ -576,6 +583,7 @@ def renameNFO(albumpath):
                     os.rename(os.path.join(r, file), new_file_name)
                 except Exception as e:
                     logger.error(u'Could not rename file: %s. Error: %s' % (os.path.join(r, file).decode(headphones.SYS_ENCODING, 'replace'), e))
+
 
 def moveFiles(albumpath, release, tracks):
     logger.info("Moving files: %s" % albumpath)
@@ -809,6 +817,7 @@ def moveFiles(albumpath, release, tracks):
 
     return destination_paths
 
+
 def correctMetadata(albumid, release, downloaded_track_list):
 
     logger.info('Preparing to write metadata to tracks....')
@@ -862,6 +871,7 @@ def correctMetadata(albumid, release, downloaded_track_list):
             except Exception, e:
                 logger.warn("Error writing metadata to '%s': %s", item.path.decode(headphones.SYS_ENCODING, 'replace'), str(e))
 
+
 def embedLyrics(downloaded_track_list):
     logger.info('Adding lyrics')
 
@@ -908,6 +918,7 @@ def embedLyrics(downloaded_track_list):
                     logger.error('Cannot save lyrics to: %s. Skipping', item.title)
             else:
                 logger.debug('No lyrics found for track: %s', item.title)
+
 
 def renameFiles(albumpath, downloaded_track_list, release):
     logger.info('Renaming files')
@@ -975,7 +986,6 @@ def renameFiles(albumpath, downloaded_track_list, release):
 
             new_file_name = helpers.replace_all(headphones.CONFIG.FILE_FORMAT.strip(), values).replace('/', '_') + ext
 
-
         new_file_name = helpers.replace_illegal_chars(new_file_name).encode(headphones.SYS_ENCODING, 'replace')
 
         if headphones.CONFIG.FILE_UNDERSCORES:
@@ -997,6 +1007,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
             logger.error('Error renaming file: %s. Error: %s', downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), e)
             continue
 
+
 def updateFilePermissions(albumpaths):
 
     for folder in albumpaths:
@@ -1009,6 +1020,7 @@ def updateFilePermissions(albumpaths):
                 except:
                     logger.error("Could not change permissions for file: %s", full_path)
                     continue
+
 
 def renameUnprocessedFolder(albumpath):
 
@@ -1025,6 +1037,7 @@ def renameUnprocessedFolder(albumpath):
         else:
             os.rename(albumpath, new_folder_name)
             return
+
 
 def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
 

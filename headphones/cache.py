@@ -22,6 +22,7 @@ from headphones import db, helpers, logger, lastfm, request
 
 LASTFM_API_KEY = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
 
+
 class Cache(object):
     """
     This class deals with getting, storing and serving up artwork (album
@@ -91,7 +92,6 @@ class Cache(object):
         days_old = int(split_date[0])*365 + int(split_date[1])*30 + int(split_date[2])
 
         return days_old
-
 
     def _is_current(self, filename=None, date=None):
 
@@ -431,6 +431,7 @@ class Cache(object):
                     self.thumb_errors = True
                     self.thumb_url = image_url
 
+
 def getArtwork(ArtistID=None, AlbumID=None):
 
     c = Cache()
@@ -444,6 +445,7 @@ def getArtwork(ArtistID=None, AlbumID=None):
     else:
         artwork_file = os.path.basename(artwork_path)
         return "cache/artwork/" + artwork_file
+
 
 def getThumb(ArtistID=None, AlbumID=None):
 
@@ -459,6 +461,7 @@ def getThumb(ArtistID=None, AlbumID=None):
         thumbnail_file = os.path.basename(artwork_path)
         return "cache/artwork/" + thumbnail_file
 
+
 def getInfo(ArtistID=None, AlbumID=None):
 
     c = Cache()
@@ -466,6 +469,7 @@ def getInfo(ArtistID=None, AlbumID=None):
     info_dict = c.get_info_from_cache(ArtistID, AlbumID)
 
     return info_dict
+
 
 def getImageLinks(ArtistID=None, AlbumID=None):
 

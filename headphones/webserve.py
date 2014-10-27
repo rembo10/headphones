@@ -37,6 +37,7 @@ except ImportError:
     # Python 2.6.x fallback, from libs
     from ordereddict import OrderedDict
 
+
 def serve_template(templatename, **kwargs):
 
     interface_dir = os.path.join(str(headphones.PROG_DIR), 'data/interfaces/')
@@ -49,6 +50,7 @@ def serve_template(templatename, **kwargs):
         return template.render(**kwargs)
     except:
         return exceptions.html_error_template().render()
+
 
 class WebInterface(object):
 
@@ -102,7 +104,6 @@ class WebInterface(object):
         return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums, extras=extras_dict)
     artistPage.exposed = True
 
-
     def albumPage(self, AlbumID):
         myDB = db.DBConnection()
         album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
@@ -131,7 +132,6 @@ class WebInterface(object):
             title = title + album['AlbumTitle']
         return serve_template(templatename="album.html", title=title, album=album, tracks=tracks, description=description)
     albumPage.exposed = True
-
 
     def search(self, name, type):
         if len(name) == 0:
@@ -472,7 +472,6 @@ class WebInterface(object):
         check = set([(cleanName(d['ArtistName']).lower(), cleanName(d['AlbumTitle']).lower()) for d in headphones_album_dictionary])
         unmatchedalbums = [d for d in have_album_dictionary if (cleanName(d['ArtistName']).lower(), cleanName(d['AlbumTitle']).lower()) not in check]
 
-
         return serve_template(templatename="manageunmatched.html", title="Manage Unmatched Items", unmatchedalbums=unmatchedalbums)
     manageUnmatched.exposed = True
 
@@ -782,7 +781,6 @@ class WebInterface(object):
         totalcount = 0
         myDB = db.DBConnection()
 
-
         sortcolumn = 'ArtistSortName'
         sortbyhavepercent = False
         if iSortCol_0 == '2':
@@ -808,7 +806,6 @@ class WebInterface(object):
         #just reverse it here and the first click on the "Latest Album" header will sort by descending release date
         if sortcolumn == 'ReleaseDate':
             filtered.reverse()
-
 
         artists = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
         rows = []
@@ -839,7 +836,6 @@ class WebInterface(object):
                 row['AlbumID'] = artist['AlbumID']
 
             rows.append(row)
-
 
         dict = {'iTotalDisplayRecords': len(filtered),
                 'iTotalRecords': totalcount,
@@ -1362,6 +1358,7 @@ class WebInterface(object):
         return msg
     osxnotifyregister.exposed = True
 
+
 class Artwork(object):
     def index(self):
         return "Artwork"
@@ -1400,6 +1397,7 @@ class Artwork(object):
         def index(self):
             return "Here be thumbs"
         index.exposed = True
+
         def default(self, ArtistOrAlbum="", ID=None):
             from headphones import cache
             ArtistID = None
