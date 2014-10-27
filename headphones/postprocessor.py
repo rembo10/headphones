@@ -48,7 +48,7 @@ def checkFolder():
                 else:
                     download_dir = headphones.CONFIG.DOWNLOAD_TORRENT_DIR
 
-                album_path = os.path.join(download_dir, album['FolderName']).encode(headphones.SYS_ENCODING,'replace')
+                album_path = os.path.join(download_dir, album['FolderName']).encode(headphones.SYS_ENCODING, 'replace')
                 logger.info("Checking if %s exists" % album_path)
                 if os.path.exists(album_path):
                     logger.info('Found "' + album['FolderName'] + '" in ' + album['Kind'] + ' download folder. Verifying....')
@@ -167,7 +167,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
     downloaded_track_list = []
     downloaded_cuecount = 0
 
-    for r,d,f in os.walk(albumpath):
+    for r, d, f in os.walk(albumpath):
         for files in f:
             if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
                 downloaded_track_list.append(os.path.join(r, files))
@@ -296,7 +296,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         # but this is good to make sure we're not counting files that may have failed to move
         downloaded_track_list = []
 
-        for r,d,f in os.walk(albumpath):
+        for r, d, f in os.walk(albumpath):
             for files in f:
                 if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
                     downloaded_track_list.append(os.path.join(r, files))
@@ -555,7 +555,7 @@ def addAlbumArt(artwork, albumpath, release):
 def cleanupFiles(albumpath):
     logger.info('Cleaning up files')
 
-    for r,d,f in os.walk(albumpath):
+    for r, d, f in os.walk(albumpath):
         for files in f:
             if not any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
                 logger.debug('Removing: %s' % files)
@@ -567,7 +567,7 @@ def cleanupFiles(albumpath):
 def renameNFO(albumpath):
     logger.info('Renaming NFO')
 
-    for r,d,f in os.walk(albumpath):
+    for r, d, f in os.walk(albumpath):
         for file in f:
             if file.lower().endswith('.nfo'):
                 logger.debug('Renaming: "%s" to "%s"' % (file.decode(headphones.SYS_ENCODING, 'replace'), file.decode(headphones.SYS_ENCODING, 'replace') + '-orig'))
@@ -602,7 +602,7 @@ def moveFiles(albumpath, release, tracks):
     else:
         firstchar = sortname[0]
 
-    for r,d,f in os.walk(albumpath):
+    for r, d, f in os.walk(albumpath):
         try:
             origfolder = os.path.basename(os.path.normpath(r).decode(headphones.SYS_ENCODING, 'replace'))
         except:
@@ -627,7 +627,7 @@ def moveFiles(albumpath, release, tracks):
     folder = helpers.replace_all(headphones.CONFIG.FOLDER_FORMAT.strip(), values, normalize=True)
 
     folder = helpers.replace_illegal_chars(folder, type="folder")
-    folder = folder.replace('./', '_/').replace('/.','/_')
+    folder = folder.replace('./', '_/').replace('/.', '/_')
 
     if folder.endswith('.'):
         folder = folder[:-1] + '_'
@@ -641,7 +641,7 @@ def moveFiles(albumpath, release, tracks):
     lossy_media = False
     lossless_media = False
 
-    for r,d,f in os.walk(albumpath):
+    for r, d, f in os.walk(albumpath):
         for files in f:
             files_to_move.append(os.path.join(r, files))
             if any(files.lower().endswith('.' + x.lower()) for x in headphones.LOSSY_MEDIA_FORMATS):
@@ -973,7 +973,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
 
             ext = os.path.splitext(downloaded_track)[1]
 
-            new_file_name = helpers.replace_all(headphones.CONFIG.FILE_FORMAT.strip(), values).replace('/','_') + ext
+            new_file_name = helpers.replace_all(headphones.CONFIG.FILE_FORMAT.strip(), values).replace('/', '_') + ext
 
 
         new_file_name = helpers.replace_illegal_chars(new_file_name).encode(headphones.SYS_ENCODING, 'replace')
@@ -990,7 +990,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
             logger.debug("Renaming for: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + " is not neccessary")
             continue
 
-        logger.debug('Renaming %s ---> %s', downloaded_track.decode(headphones.SYS_ENCODING,'replace'), new_file_name.decode(headphones.SYS_ENCODING,'replace'))
+        logger.debug('Renaming %s ---> %s', downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), new_file_name.decode(headphones.SYS_ENCODING, 'replace'))
         try:
             os.rename(downloaded_track, new_file)
         except Exception, e:
@@ -1001,7 +1001,7 @@ def updateFilePermissions(albumpaths):
 
     for folder in albumpaths:
         logger.info("Updating file permissions in %s", folder)
-        for r,d,f in os.walk(folder):
+        for r, d, f in os.walk(folder):
             for files in f:
                 full_path = os.path.join(r, files)
                 try:

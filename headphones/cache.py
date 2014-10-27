@@ -59,12 +59,12 @@ class Cache(object):
         self.info_summary = None
         self.info_content = None
 
-    def _findfilesstartingwith(self,pattern,folder):
+    def _findfilesstartingwith(self, pattern, folder):
         files = []
         if os.path.exists(folder):
             for fname in os.listdir(folder):
                 if fname.startswith(pattern):
-                    files.append(os.path.join(folder,fname))
+                    files.append(os.path.join(folder, fname))
         return files
 
     def _exists(self, type):
@@ -72,14 +72,14 @@ class Cache(object):
         self.thumb_files = []
 
         if type == 'artwork':
-            self.artwork_files = self._findfilesstartingwith(self.id,self.path_to_art_cache)
+            self.artwork_files = self._findfilesstartingwith(self.id, self.path_to_art_cache)
             if self.artwork_files:
                 return True
             else:
                 return False
 
         elif type == 'thumb':
-            self.thumb_files = self._findfilesstartingwith("T_" + self.id,self.path_to_art_cache)
+            self.thumb_files = self._findfilesstartingwith("T_" + self.id, self.path_to_art_cache)
             if self.thumb_files:
                 return True
             else:
@@ -400,7 +400,7 @@ class Cache(object):
                     self.artwork_url = image_url
 
         # Grab the thumbnail as well if we're getting the full artwork (as long as it's missing/outdated
-        if thumb_url and self.query_type in ['thumb','artwork'] and not (self.thumb_files and self._is_current(self.thumb_files[0])):
+        if thumb_url and self.query_type in ['thumb', 'artwork'] and not (self.thumb_files and self._is_current(self.thumb_files[0])):
             artwork = request.request_content(thumb_url, timeout=20)
 
             if artwork:
