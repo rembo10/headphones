@@ -153,8 +153,8 @@ class PROWL(object):
 
         http_handler.request("POST",
                                 "/publicapi/add",
-                                headers = {'Content-type': "application/x-www-form-urlencoded"},
-                                body = urlencode(data))
+                                headers={'Content-type': "application/x-www-form-urlencoded"},
+                                body=urlencode(data))
         response = http_handler.getresponse()
         request_status = response.status
 
@@ -456,9 +456,9 @@ class PUSHBULLET(object):
 
         http_handler.request("POST",
                                 "/api/pushes",
-                                headers = {'Content-type': "application/x-www-form-urlencoded",
+                                headers={'Content-type': "application/x-www-form-urlencoded",
                                             'Authorization': 'Basic %s' % base64.b64encode(headphones.CONFIG.PUSHBULLET_APIKEY + ":") },
-                                body = urlencode(data))
+                                body=urlencode(data))
         response = http_handler.getresponse()
         request_status = response.status
         logger.debug(u"PushBullet response status: %r" % request_status)
@@ -508,8 +508,8 @@ class PUSHALOT(object):
 
         http_handler.request("POST",
                                 "/api/sendmessage",
-                                headers = {'Content-type': "application/x-www-form-urlencoded"},
-                                body = urlencode(data))
+                                headers={'Content-type': "application/x-www-form-urlencoded"},
+                                body=urlencode(data))
         response = http_handler.getresponse()
         request_status = response.status
 
@@ -594,8 +594,8 @@ class PUSHOVER(object):
 
         http_handler.request("POST",
                                 "/1/messages.json",
-                                headers = {'Content-type': "application/x-www-form-urlencoded"},
-                                body = urlencode(data))
+                                headers={'Content-type': "application/x-www-form-urlencoded"},
+                                body=urlencode(data))
         response = http_handler.getresponse()
         request_status = response.status
         logger.debug(u"Pushover response status: %r" % request_status)
@@ -627,9 +627,9 @@ class PUSHOVER(object):
 class TwitterNotifier(object):
 
     REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
-    ACCESS_TOKEN_URL  = 'https://api.twitter.com/oauth/access_token'
+    ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
     AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authorize'
-    SIGNIN_URL        = 'https://api.twitter.com/oauth/authenticate'
+    SIGNIN_URL = 'https://api.twitter.com/oauth/authenticate'
 
     def __init__(self):
         self.consumer_key = "oYKnp2ddX5gbARjqX8ZAAg"
@@ -649,8 +649,8 @@ class TwitterNotifier(object):
     def _get_authorization(self):
 
         signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1() #@UnusedVariable
-        oauth_consumer             = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
-        oauth_client               = oauth.Client(oauth_consumer)
+        oauth_consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
+        oauth_client = oauth.Client(oauth_consumer)
 
         logger.info('Requesting temp token from Twitter')
 
@@ -664,7 +664,7 @@ class TwitterNotifier(object):
             headphones.CONFIG.TWITTER_USERNAME = request_token['oauth_token']
             headphones.CONFIG.TWITTER_PASSWORD = request_token['oauth_token_secret']
 
-            return self.AUTHORIZATION_URL+"?oauth_token="+ request_token['oauth_token']
+            return self.AUTHORIZATION_URL+"?oauth_token=" + request_token['oauth_token']
 
     def _get_credentials(self, key):
         request_token = {}
@@ -679,14 +679,14 @@ class TwitterNotifier(object):
         logger.info('Generating and signing request for an access token using key '+key)
 
         signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1() #@UnusedVariable
-        oauth_consumer             = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
+        oauth_consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
         logger.info('oauth_consumer: '+str(oauth_consumer))
-        oauth_client  = oauth.Client(oauth_consumer, token)
+        oauth_client = oauth.Client(oauth_consumer, token)
         logger.info('oauth_client: '+str(oauth_client))
         resp, content = oauth_client.request(self.ACCESS_TOKEN_URL, method='POST', body='oauth_verifier=%s' % key)
         logger.info('resp, content: '+str(resp)+','+str(content))
 
-        access_token  = dict(parse_qsl(content))
+        access_token = dict(parse_qsl(content))
         logger.info('access_token: '+str(access_token))
 
         logger.info('resp[status] = '+str(resp['status']))
@@ -702,10 +702,10 @@ class TwitterNotifier(object):
 
     def _send_tweet(self, message=None):
 
-        username=self.consumer_key
-        password=self.consumer_secret
-        access_token_key=headphones.CONFIG.TWITTER_USERNAME
-        access_token_secret=headphones.CONFIG.TWITTER_PASSWORD
+        username = self.consumer_key
+        password = self.consumer_secret
+        access_token_key = headphones.CONFIG.TWITTER_USERNAME
+        access_token_secret = headphones.CONFIG.TWITTER_PASSWORD
 
         logger.info(u"Sending tweet: "+message)
 

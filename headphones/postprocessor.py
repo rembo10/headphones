@@ -182,7 +182,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
 
     # Split cue
     if downloaded_cuecount and downloaded_cuecount >= len(downloaded_track_list):
-        if headphones.CONFIG.KEEP_TORRENT_FILES and Kind=="torrent":
+        if headphones.CONFIG.KEEP_TORRENT_FILES and Kind == "torrent":
             albumpath = helpers.preserve_torrent_direcory(albumpath)
         if albumpath and helpers.cue_split(albumpath):
             downloaded_track_list = helpers.get_downloaded_track_list(albumpath)
@@ -283,7 +283,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
 
     logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
     # Check to see if we're preserving the torrent dir
-    if headphones.CONFIG.KEEP_TORRENT_FILES and Kind=="torrent" and 'headphones-modified' not in albumpath:
+    if headphones.CONFIG.KEEP_TORRENT_FILES and Kind == "torrent" and 'headphones-modified' not in albumpath:
         new_folder = os.path.join(albumpath, 'headphones-modified'.encode(headphones.SYS_ENCODING, 'replace'))
         logger.info("Copying files to 'headphones-modified' subfolder to preserve downloaded files for seeding")
         try:
@@ -337,7 +337,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
 
     #start encoding
     if headphones.CONFIG.MUSIC_ENCODER:
-        downloaded_track_list=music_encoder.encode(albumpath)
+        downloaded_track_list = music_encoder.encode(albumpath)
 
         if not downloaded_track_list:
             return

@@ -27,7 +27,7 @@ class utorrentclient(object):
     TOKEN_REGEX = "<div id='token' style='display:none;'>([^<>]+)</div>"
     UTSetting = namedtuple("UTSetting", ["name", "int", "str", "access"])
 
-    def __init__(self, base_url = None, username = None, password = None,):
+    def __init__(self, base_url=None, username=None, password=None,):
 
         host = headphones.CONFIG.UTORRENT_HOST
         if not host.startswith('http'):
@@ -133,7 +133,7 @@ class utorrentclient(object):
             return settings[key]
         return settings
 
-    def remove(self, hash, remove_data = False):
+    def remove(self, hash, remove_data=False):
         if remove_data:
             params = [('action', 'removedata'), ('hash', hash)]
         else:
@@ -165,7 +165,7 @@ def labelTorrent(hash):
         uTorrentClient.setprops(hash, 'label', label)
 
 
-def removeTorrent(hash, remove_data = False):
+def removeTorrent(hash, remove_data=False):
     uTorrentClient = utorrentclient()
     status, torrentList = uTorrentClient.list()
     torrents = torrentList['torrents']
