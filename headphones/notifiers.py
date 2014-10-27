@@ -450,7 +450,7 @@ class PUSHBULLET(object):
         http_handler.request("POST",
                                 "/api/pushes",
                                 headers = {'Content-type': "application/x-www-form-urlencoded",
-                                            'Authorization' : 'Basic %s' % base64.b64encode(headphones.CONFIG.PUSHBULLET_APIKEY + ":") },
+                                            'Authorization': 'Basic %s' % base64.b64encode(headphones.CONFIG.PUSHBULLET_APIKEY + ":") },
                                 body = urlencode(data))
         response = http_handler.getresponse()
         request_status = response.status

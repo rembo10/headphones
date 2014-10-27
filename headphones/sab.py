@@ -129,8 +129,8 @@ def sendNZB(nzb):
         
 def checkConfig():
 
-    params = { 'mode' : 'get_config', 
-               'section' : 'misc' 
+    params = { 'mode': 'get_config', 
+               'section': 'misc' 
                }
 
     if headphones.CONFIG.SAB_USERNAME:

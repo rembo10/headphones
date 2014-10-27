@@ -794,9 +794,9 @@ def getHybridRelease(fullreleaselist):
 
     a = helpers.multikeysort(sortable_release_list, ['-hasasin', 'country', 'format', 'trackscount_delta'])
 
-    release_dict = {'ReleaseDate'    : sortable_release_list[0]['releasedate'],
-                    'Tracks'         : a[0]['tracks'],
-                    'AlbumASIN'      : a[0]['asin']
+    release_dict = {'ReleaseDate': sortable_release_list[0]['releasedate'],
+                    'Tracks': a[0]['tracks'],
+                    'AlbumASIN': a[0]['asin']
                     }
 
     return release_dict

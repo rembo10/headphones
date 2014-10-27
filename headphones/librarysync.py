@@ -133,20 +133,20 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                 else:
                     CleanName = None
 
-                controlValueDict = {'Location'   : unicode_song_path}
+                controlValueDict = {'Location': unicode_song_path}
 
-                newValueDict = { 'TrackID' : f.mb_trackid,
+                newValueDict = { 'TrackID': f.mb_trackid,
                               #'ReleaseID' : f.mb_albumid,
-                              'ArtistName' : f_artist,
-                              'AlbumTitle' : f.album,
+                              'ArtistName': f_artist,
+                              'AlbumTitle': f.album,
                               'TrackNumber': f.track,
                               'TrackLength': f.length,
-                              'Genre'      : f.genre,
-                              'Date'       : f.date,
-                              'TrackTitle' : f.title,
-                              'BitRate'    : f.bitrate,
-                              'Format'     : f.format,
-                              'CleanName'  : CleanName
+                              'Genre': f.genre,
+                              'Date': f.date,
+                              'TrackTitle': f.title,
+                              'BitRate': f.bitrate,
+                              'Format': f.format,
+                              'CleanName': CleanName
                               }
 
                 #song_list.append(song_dict)
@@ -221,72 +221,72 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
             track = myDB.action('SELECT ArtistName, AlbumTitle, TrackTitle, AlbumID from tracks WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [song['ArtistName'], song['AlbumTitle'], song['TrackTitle']]).fetchone()
             have_updated = False
             if track:
-                controlValueDict = { 'ArtistName' : track['ArtistName'],
-                                     'AlbumTitle' : track['AlbumTitle'],
-                                     'TrackTitle' : track['TrackTitle'] }
-                newValueDict = { 'Location' : song['Location'],
-                                 'BitRate'  : song['BitRate'],
-                                 'Format'   : song['Format'] }
+                controlValueDict = { 'ArtistName': track['ArtistName'],
+                                     'AlbumTitle': track['AlbumTitle'],
+                                     'TrackTitle': track['TrackTitle'] }
+                newValueDict = { 'Location': song['Location'],
+                                 'BitRate': song['BitRate'],
+                                 'Format': song['Format'] }
                 myDB.upsert("tracks", newValueDict, controlValueDict)
 
-                controlValueDict2 = { 'Location' : song['Location']}
-                newValueDict2 = { 'Matched' : track['AlbumID']}
+                controlValueDict2 = { 'Location': song['Location']}
+                newValueDict2 = { 'Matched': track['AlbumID']}
                 myDB.upsert("have", newValueDict2, controlValueDict2)
                 have_updated = True
             else:
                 track = myDB.action('SELECT CleanName, AlbumID from tracks WHERE CleanName LIKE ?', [song['CleanName']]).fetchone()
                 if track:
-                    controlValueDict = { 'CleanName' : track['CleanName']}
-                    newValueDict = { 'Location' : song['Location'],
-                                     'BitRate'  : song['BitRate'],
-                                     'Format'   : song['Format'] }
+                    controlValueDict = { 'CleanName': track['CleanName']}
+                    newValueDict = { 'Location': song['Location'],
+                                     'BitRate': song['BitRate'],
+                                     'Format': song['Format'] }
                     myDB.upsert("tracks", newValueDict, controlValueDict)
 
-                    controlValueDict2 = { 'Location' : song['Location']}
-                    newValueDict2 = { 'Matched' : track['AlbumID']}
+                    controlValueDict2 = { 'Location': song['Location']}
+                    newValueDict2 = { 'Matched': track['AlbumID']}
                     myDB.upsert("have", newValueDict2, controlValueDict2)
                     have_updated = True
                 else:
-                    controlValueDict2 = { 'Location' : song['Location']}
-                    newValueDict2 = { 'Matched' : "Failed"}
+                    controlValueDict2 = { 'Location': song['Location']}
+                    newValueDict2 = { 'Matched': "Failed"}
                     myDB.upsert("have", newValueDict2, controlValueDict2)
                     have_updated = True
 
             alltrack = myDB.action('SELECT ArtistName, AlbumTitle, TrackTitle, AlbumID from alltracks WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [song['ArtistName'], song['AlbumTitle'], song['TrackTitle']]).fetchone()
             if alltrack:
-                controlValueDict = { 'ArtistName' : alltrack['ArtistName'],
-                                     'AlbumTitle' : alltrack['AlbumTitle'],
-                                     'TrackTitle' : alltrack['TrackTitle'] }
-                newValueDict = { 'Location' : song['Location'],
-                                 'BitRate'  : song['BitRate'],
-                                 'Format'   : song['Format'] }
+                controlValueDict = { 'ArtistName': alltrack['ArtistName'],
+                                     'AlbumTitle': alltrack['AlbumTitle'],
+                                     'TrackTitle': alltrack['TrackTitle'] }
+                newValueDict = { 'Location': song['Location'],
+                                 'BitRate': song['BitRate'],
+                                 'Format': song['Format'] }
                 myDB.upsert("alltracks", newValueDict, controlValueDict)
 
-                controlValueDict2 = { 'Location' : song['Location']}
-                newValueDict2 = { 'Matched' : alltrack['AlbumID']}
+                controlValueDict2 = { 'Location': song['Location']}
+                newValueDict2 = { 'Matched': alltrack['AlbumID']}
                 myDB.upsert("have", newValueDict2, controlValueDict2)
             else:
                 alltrack = myDB.action('SELECT CleanName, AlbumID from alltracks WHERE CleanName LIKE ?', [song['CleanName']]).fetchone()
                 if alltrack:
-                    controlValueDict = { 'CleanName' : alltrack['CleanName']}
-                    newValueDict = { 'Location' : song['Location'],
-                                     'BitRate'  : song['BitRate'],
-                                     'Format'   : song['Format'] }
+                    controlValueDict = { 'CleanName': alltrack['CleanName']}
+                    newValueDict = { 'Location': song['Location'],
+                                     'BitRate': song['BitRate'],
+                                     'Format': song['Format'] }
                     myDB.upsert("alltracks", newValueDict, controlValueDict)
 
-                    controlValueDict2 = { 'Location' : song['Location']}
-                    newValueDict2 = { 'Matched' : alltrack['AlbumID']}
+                    controlValueDict2 = { 'Location': song['Location']}
+                    newValueDict2 = { 'Matched': alltrack['AlbumID']}
                     myDB.upsert("have", newValueDict2, controlValueDict2)
                 else:
                     # alltracks may not exist if adding album manually, have should only be set to failed if not already updated in tracks
                     if not have_updated:
-                        controlValueDict2 = { 'Location' : song['Location']}
-                        newValueDict2 = { 'Matched' : "Failed"}
+                        controlValueDict2 = { 'Location': song['Location']}
+                        newValueDict2 = { 'Matched': "Failed"}
                         myDB.upsert("have", newValueDict2, controlValueDict2)
 
         else:
-            controlValueDict2 = { 'Location' : song['Location']}
-            newValueDict2 = { 'Matched' : "Failed"}
+            controlValueDict2 = { 'Location': song['Location']}
+            newValueDict2 = { 'Matched': "Failed"}
             myDB.upsert("have", newValueDict2, controlValueDict2)
 
         #######myDB.action('INSERT INTO have (ArtistName, AlbumTitle, TrackNumber, TrackTitle, TrackLength, BitRate, Genre, Date, TrackID, Location, CleanName, Format) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [song['ArtistName'], song['AlbumTitle'], song['TrackNumber'], song['TrackTitle'], song['TrackLength'], song['BitRate'], song['Genre'], song['Date'], song['TrackID'], song['Location'], CleanName, song['Format']])
@@ -379,7 +379,7 @@ def update_album_status(AlbumID=None):
         else:
             new_album_status = album['Status']
 
-        myDB.upsert("albums", {'Status'   : new_album_status}, {'AlbumID'   : album['AlbumID']})
+        myDB.upsert("albums", {'Status': new_album_status}, {'AlbumID': album['AlbumID']})
         if new_album_status != album['Status']:
             logger.info('Album %s changed to %s' % (album['AlbumTitle'], new_album_status))
     logger.info('Album status update complete')
