@@ -22,8 +22,9 @@ from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 from headphones import db, logger, helpers, importer, lastfm
 
 # You can scan a single directory and append it to the current library by specifying append=True, ArtistID & ArtistName
-def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=False):
 
+
+def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=False):
 
     if cron and not headphones.CONFIG.LIBRARYSCAN:
         return
@@ -180,7 +181,6 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
 
                 file_count+=1
 
-
     # Now we start track matching
     logger.info("%s new/modified songs found and added to the database" % new_song_count)
     song_list = myDB.action("SELECT * FROM have WHERE Matched IS NULL AND LOCATION LIKE ?", [dir.decode(headphones.SYS_ENCODING, 'replace')+"%"])
@@ -293,7 +293,6 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
 
     logger.info('Completed matching tracks from directory: %s' % dir.decode(headphones.SYS_ENCODING, 'replace'))
 
-
     if not append:
         logger.info('Updating scanned artist track counts')
 
@@ -343,6 +342,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
     logger.info('Library scan complete')
 
 #ADDED THIS SECTION TO MARK ALBUMS AS DOWNLOADED IF ARTISTS ARE ADDED EN MASSE BEFORE LIBRARY IS SCANNED
+
+
 def update_album_status(AlbumID=None):
     myDB = db.DBConnection()
     logger.info('Counting matched tracks to mark albums as skipped/downloaded')

@@ -31,6 +31,7 @@ RE_FEATURING = re.compile(r"[fF]t\.|[fF]eaturing|[fF]eat\.|\b[wW]ith\b|&|vs\.")
 RE_CD_ALBUM = re.compile(r"\(?((CD|disc)\s*[0-9]+)\)?", re.I)
 RE_CD = re.compile(r"^(CD|dics)\s*[0-9]+$", re.I)
 
+
 def multikeysort(items, columns):
     comparers = [ ((itemgetter(col[1:].strip()), -1) if col.startswith('-') else (itemgetter(col.strip()), 1)) for col in columns]
 
@@ -44,11 +45,13 @@ def multikeysort(items, columns):
 
     return sorted(items, cmp=comparer)
 
+
 def checked(variable):
     if variable:
         return 'Checked'
     else:
         return ''
+
 
 def radio(variable, pos):
 
@@ -56,6 +59,7 @@ def radio(variable, pos):
         return 'Checked'
     else:
         return ''
+
 
 def latinToAscii(unicrap):
     """
@@ -98,6 +102,7 @@ def latinToAscii(unicrap):
             r += str(i)
     return r
 
+
 def convert_milliseconds(ms):
 
     seconds = ms/1000
@@ -109,6 +114,7 @@ def convert_milliseconds(ms):
 
     return minutes
 
+
 def convert_seconds(s):
 
     gmtime = time.gmtime(s)
@@ -119,14 +125,17 @@ def convert_seconds(s):
 
     return minutes
 
+
 def today():
     today = datetime.date.today()
     yyyymmdd = datetime.date.isoformat(today)
     return yyyymmdd
 
+
 def now():
     now = datetime.datetime.now()
     return now.strftime("%Y-%m-%d %H:%M:%S")
+
 
 def get_age(date):
 
@@ -142,16 +151,19 @@ def get_age(date):
 
     return days_old
 
+
 def bytes_to_mb(bytes):
 
     mb = int(bytes)/1048576
     size = '%.1f MB' % mb
     return size
 
+
 def mb_to_bytes(mb_str):
     result = re.search('^(\d+(?:\.\d+)?)\s?(?:mb)?', mb_str, flags=re.I)
     if result:
         return int(float(result.group(1))*1048576)
+
 
 def piratesize(size):
     split = size.split(" ")
@@ -170,6 +182,7 @@ def piratesize(size):
 
     return size
 
+
 def replace_all(text, dic, normalize=False):
 
     if not text:
@@ -187,6 +200,7 @@ def replace_all(text, dic, normalize=False):
         text = text.replace(i, j)
     return text
 
+
 def replace_illegal_chars(string, type="file"):
     if type == "file":
         string = re.sub('[\?"*:|<>/]', '_', string)
@@ -195,12 +209,14 @@ def replace_illegal_chars(string, type="file"):
 
     return string
 
+
 def cleanName(string):
 
     pass1 = latinToAscii(string).lower()
     out_string = re.sub('[\.\-\/\!\@\#\$\%\^\&\*\(\)\+\-\"\'\,\;\:\[\]\{\}\<\>\=\_]', '', pass1).encode('utf-8')
 
     return out_string
+
 
 def cleanTitle(title):
 
@@ -212,6 +228,7 @@ def cleanTitle(title):
     title = title.title()
 
     return title
+
 
 def split_path(f):
     """
@@ -243,6 +260,7 @@ def split_path(f):
 
     # Done
     return components
+
 
 def expand_subfolders(f):
     """
@@ -310,6 +328,7 @@ def expand_subfolders(f):
     logger.debug("Expanded subfolders in folder: %s", media_folders)
     return media_folders
 
+
 def extract_data(s):
 
     s = s.replace('_', ' ')
@@ -336,6 +355,7 @@ def extract_data(s):
 
     else:
         return (None, None, None)
+
 
 def extract_metadata(f):
     """
@@ -435,6 +455,7 @@ def extract_metadata(f):
 
     return (None, None, None)
 
+
 def get_downloaded_track_list(albumpath):
     """
      Return a list of audio files for the given directory.
@@ -448,6 +469,7 @@ def get_downloaded_track_list(albumpath):
                 downloaded_track_list.append(os.path.join(root, _file))
 
     return downloaded_track_list
+
 
 def preserve_torrent_direcory(albumpath):
     """
@@ -464,6 +486,7 @@ def preserve_torrent_direcory(albumpath):
                     new_folder.decode(headphones.SYS_ENCODING, 'replace') + \
                     ". Not continuing. Error: " + str(e))
         return None
+
 
 def cue_split(albumpath):
     """
@@ -504,6 +527,7 @@ def cue_split(albumpath):
 
     return False
 
+
 def extract_logline(s):
     # Default log format
     pattern = re.compile(r'(?P<timestamp>.*?)\s\-\s(?P<level>.*?)\s*\:\:\s(?P<thread>.*?)\s\:\s(?P<message>.*)', re.VERBOSE)
@@ -516,6 +540,7 @@ def extract_logline(s):
         return (timestamp, level, thread, message)
     else:
         return None
+
 
 def extract_song_data(s):
 
@@ -547,6 +572,7 @@ def extract_song_data(s):
     else:
         logger.info("Couldn't parse %s into a valid Newbin format", s)
         return (name, album, year)
+
 
 def smartMove(src, dest, delete=True):
 
@@ -588,10 +614,14 @@ def smartMove(src, dest, delete=True):
 
 # TODO: Grab config values from sab to know when these options are checked. For now we'll just iterate through all combinations
 
+
 def sab_replace_dots(name):
     return name.replace('.', ' ')
+
+
 def sab_replace_spaces(name):
     return name.replace(' ', '_')
+
 
 def sab_sanitize_foldername(name):
     """ Return foldername with dodgy chars converted to safe ones
@@ -634,11 +664,13 @@ def sab_sanitize_foldername(name):
 
     return name
 
+
 def split_string(mystring, splitvar=','):
     mylist = []
     for each_word in mystring.split(splitvar):
         mylist.append(each_word.strip())
     return mylist
+
 
 def create_https_certificates(ssl_cert, ssl_key):
     """

@@ -21,6 +21,7 @@ import headphones
 from headphones import logger
 from collections import namedtuple
 
+
 class utorrentclient(object):
 
     TOKEN_REGEX = "<div id='token' style='display:none;'>([^<>]+)</div>"
@@ -156,11 +157,13 @@ class utorrentclient(object):
             logger.debug('URL: ' + str(url))
             logger.debug('uTorrent webUI raised the following error: ' + str(err))
 
+
 def labelTorrent(hash):
     label = headphones.CONFIG.UTORRENT_LABEL
     uTorrentClient = utorrentclient()
     if label:
         uTorrentClient.setprops(hash, 'label', label)
+
 
 def removeTorrent(hash, remove_data = False):
     uTorrentClient = utorrentclient()
@@ -177,6 +180,7 @@ def removeTorrent(hash, remove_data = False):
                 return False
     return False
 
+
 def setSeedRatio(hash, ratio):
     uTorrentClient = utorrentclient()
     uTorrentClient.setprops(hash, 'seed_override', '1')
@@ -185,6 +189,7 @@ def setSeedRatio(hash, ratio):
     else:
         # TODO passing -1 should be unlimited
         uTorrentClient.setprops(hash, 'seed_ratio', -10)
+
 
 def dirTorrent(hash, cacheid=None, return_name=None):
 
@@ -211,6 +216,7 @@ def dirTorrent(hash, cacheid=None, return_name=None):
                 return torrent[2], cacheid
 
     return None, None
+
 
 def addTorrent(link, hash):
     uTorrentClient = utorrentclient()
@@ -242,6 +248,7 @@ def addTorrent(link, hash):
     else:
         labelTorrent(hash)
         return os.path.basename(os.path.normpath(torrent_folder))
+
 
 def getSettingsDirectories():
     uTorrentClient = utorrentclient()

@@ -39,6 +39,7 @@ try:
 except ImportError:
     from cgi import parse_qsl
 
+
 class GROWL(object):
     """
     Growl notifications, for OS X.
@@ -124,6 +125,7 @@ class GROWL(object):
 
         self.notify('ZOMG Lazors Pewpewpew!', 'Test Message')
 
+
 class PROWL(object):
     """
     Prowl notifications.
@@ -176,6 +178,7 @@ class PROWL(object):
         self.priority = priority
 
         self.notify('ZOMG Lazors Pewpewpew!', 'Test Message')
+
 
 class MPC(object):
     """
@@ -264,6 +267,7 @@ class XBMC(object):
             except Exception:
                 logger.error('Error sending notification request to XBMC')
 
+
 class LMS(object):
     """
     Class for updating a Logitech Media Server
@@ -304,6 +308,7 @@ class LMS(object):
 
             if not request:
                 logger.warn('Error sending rescan request to LMS')
+
 
 class Plex(object):
     def __init__(self):
@@ -391,6 +396,7 @@ class Plex(object):
             except:
                 logger.warn('Error sending notification request to Plex Media Server')
 
+
 class NMA(object):
     def notify(self, artist=None, album=None, snatched=None):
         title = 'Headphones'
@@ -426,6 +432,7 @@ class NMA(object):
             return False
         else:
             return True
+
 
 class PUSHBULLET(object):
 
@@ -480,6 +487,7 @@ class PUSHBULLET(object):
 
         self.notify('Main Screen Activate', 'Test Message')
 
+
 class PUSHALOT(object):
 
     def notify(self, message, event):
@@ -519,6 +527,7 @@ class PUSHALOT(object):
                 logger.info(u"Pushalot notification failed.")
                 return False
 
+
 class Synoindex(object):
     def __init__(self, util_loc='/usr/syno/bin/synoindex'):
         self.util_loc = util_loc
@@ -554,6 +563,7 @@ class Synoindex(object):
         if isinstance(path_list, list):
             for path in path_list:
                 self.notify(path)
+
 
 class PUSHOVER(object):
 
@@ -612,6 +622,7 @@ class PUSHOVER(object):
         self.priority = priority
 
         self.notify('Main Screen Activate', 'Test Message')
+
 
 class TwitterNotifier(object):
 
@@ -689,7 +700,6 @@ class TwitterNotifier(object):
             headphones.CONFIG.TWITTER_PASSWORD = access_token['oauth_token_secret']
             return True
 
-
     def _send_tweet(self, message=None):
 
         username=self.consumer_key
@@ -717,6 +727,7 @@ class TwitterNotifier(object):
 
         return self._send_tweet(prefix+": "+message)
 
+
 class OSX_NOTIFY(object):
 
     def __init__(self):
@@ -727,6 +738,7 @@ class OSX_NOTIFY(object):
 
     def swizzle(self, cls, SEL, func):
         old_IMP = cls.instanceMethodForSelector_(SEL)
+
         def wrapper(self, *args, **kwargs):
             return func(self, old_IMP, *args, **kwargs)
         new_IMP = self.objc.selector(wrapper, selector=old_IMP.selector,
@@ -772,6 +784,7 @@ class OSX_NOTIFY(object):
     def swizzled_bundleIdentifier(self, original, swizzled):
         return 'ade.headphones.osxnotify'
 
+
 class BOXCAR(object):
 
     def __init__(self):
@@ -797,6 +810,7 @@ class BOXCAR(object):
         except urllib2.URLError as e:
             logger.warn('Error sending Boxcar2 Notification: %s' % e)
             return False
+
 
 class SubSonicNotifier(object):
 

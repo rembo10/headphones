@@ -30,6 +30,7 @@ from headphones.common import USER_AGENT
 from headphones import logger
 from headphones import notifiers, helpers
 
+
 def sendNZB(nzb):
 
     params = {}
@@ -127,6 +128,7 @@ def sendNZB(nzb):
         logger.info(u"Unknown failure sending NZB to sab. Return text is: " + sabText)
         return False
         
+
 def checkConfig():
 
     params = { 'mode': 'get_config', 

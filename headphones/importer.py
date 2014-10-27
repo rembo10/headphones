@@ -32,6 +32,7 @@ blacklisted_special_artists = ['f731ccc4-e22a-43af-a747-64213329e088',
     '125ec42a-7229-4250-afc5-e057484327fe',
     '89ad4ac3-39f7-470e-963a-56509c546377']
 
+
 def is_exists(artistid):
     myDB = db.DBConnection()
 
@@ -51,7 +52,6 @@ def artistlist_to_mbids(artistlist, forced=False):
 
         if not artist and not (artist == ' '):
             continue
-
 
         # If adding artists through Manage New Artists, they're coming through as non-unicode (utf-8?)
         # and screwing everything up
@@ -105,11 +105,13 @@ def artistlist_to_mbids(artistlist, forced=False):
     except Exception as e:
         logger.warn('Failed to update arist information from Last.fm: %s' % e)
 
+
 def addArtistIDListToDB(artistidlist):
     # Used to add a list of artist IDs to the database in a single thread
     logger.debug("Importer: Adding artist ids %s" % artistidlist)
     for artistid in artistidlist:
         addArtisttoDB(artistid)
+
 
 def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
 
@@ -171,7 +173,6 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
         sortname = artist['artist_name'][4:]
     else:
         sortname = artist['artist_name']
-
 
     logger.info(u"Now adding/updating: " + artist['artist_name'])
     controlValueDict = {"ArtistID":     artistid}
@@ -239,7 +240,6 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             except TypeError:
                 check_release_date = None
                 new_release_group = True
-
 
             if new_release_group:
                 logger.info("[%s] Now adding: %s (New Release Group)" % (artist['artist_name'], rg['title']))
@@ -504,6 +504,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
         for album_search in album_searches:
             searcher.searchforalbum(albumid=album_search)
 
+
 def finalize_update(artistid, artistname, errors=False):
     # Moving this little bit to it's own function so we can update have tracks & latest album when deleting extras
 
@@ -532,6 +533,7 @@ def finalize_update(artistid, artistname, errors=False):
         newValueDict['LastUpdated'] = helpers.now()
 
     myDB.upsert("artists", newValueDict, controlValueDict)
+
 
 def addReleaseById(rid, rgid=None):
 
@@ -689,6 +691,7 @@ def addReleaseById(rid, rgid=None):
     else:
         logger.info('Release ' + str(rid) + " already exists in the database!")
 
+
 def updateFormat():
     myDB = db.DBConnection()
     tracks = myDB.select('SELECT * from tracks WHERE Location IS NOT NULL and Format IS NULL')
@@ -717,6 +720,7 @@ def updateFormat():
             newValueDict = {"Format": f.format}
             myDB.upsert("have", newValueDict, controlValueDict)
         logger.info('Finished finding media format for %s files' % len(havetracks))
+
 
 def getHybridRelease(fullreleaselist):
     """

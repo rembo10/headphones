@@ -20,6 +20,7 @@ import urllib
 import re
 import os
 
+
 class Rutracker():
 
     logged_in = False

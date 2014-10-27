@@ -24,8 +24,10 @@ import datetime
 
 from common import USER_AGENT
 
+
 class HeadphonesURLopener(urllib.FancyURLopener):
     version = USER_AGENT
+
 
 class AuthURLOpener(HeadphonesURLopener):
     """
@@ -35,6 +37,7 @@ class AuthURLOpener(HeadphonesURLopener):
     user: username to use for HTTP auth
     pw: password to use for HTTP auth
     """
+
     def __init__(self, user, pw):
         self.username = user
         self.password = pw
@@ -64,6 +67,7 @@ class AuthURLOpener(HeadphonesURLopener):
     def openit(self, url):
         self.numTries = 0
         return HeadphonesURLopener.open(self, url)
+
 
 class SearchResult:
     """
@@ -96,11 +100,13 @@ class SearchResult:
             myString += "  " + extra + "\n"
         return myString
 
+
 class NZBSearchResult(SearchResult):
     """
     Regular NZB result with an URL to the NZB
     """
     resultType = "nzb"
+
 
 class NZBDataSearchResult(SearchResult):
     """
@@ -108,11 +114,13 @@ class NZBDataSearchResult(SearchResult):
     """
     resultType = "nzbdata"
 
+
 class TorrentSearchResult(SearchResult):
     """
     Torrent result with an URL to the torrent
     """
     resultType = "torrent"
+
 
 class Proper:
     def __init__(self, name, url, date):

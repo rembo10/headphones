@@ -22,6 +22,7 @@ from headphones import logger
 from headphones.webserve import WebInterface
 from headphones.helpers import create_https_certificates
 
+
 def initialize(options=None):
     if options is None:
         options = {}
@@ -110,7 +111,6 @@ def initialize(options=None):
                 })
         })
         conf['/api'] = { 'tools.auth_basic.on': False }
-
 
     # Prevent time-outs
     cherrypy.engine.timeout_monitor.unsubscribe()

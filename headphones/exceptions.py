@@ -13,10 +13,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
+
 class HeadphonesException(Exception):
     """
     Generic Headphones Exception - should never be thrown, only subclassed
     """
+
 
 class NewzbinAPIThrottled(HeadphonesException):
     """

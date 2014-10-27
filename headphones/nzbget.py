@@ -19,7 +19,6 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 import httplib
 import datetime
 
@@ -31,6 +30,7 @@ import xmlrpclib
 #from headphones.providers.generic import GenericProvider
 
 from headphones import logger
+
 
 def sendNZB(nzb):
 
@@ -47,7 +47,6 @@ def sendNZB(nzb):
     else:
         nzbgetXMLrpc = 'http://' + nzbgetXMLrpc
         headphones.CONFIG.NZBGET_HOST.replace('http://', '', 1)
-
 
     url = nzbgetXMLrpc % {"host": headphones.CONFIG.NZBGET_HOST, "username": headphones.CONFIG.NZBGET_USERNAME, "password": headphones.CONFIG.NZBGET_PASSWORD}
 

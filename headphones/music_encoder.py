@@ -30,6 +30,7 @@ if headphones.CONFIG.ENCODER == 'xld':
 else:
     XLD = False
 
+
 def encode(albumPath):
 
     # Return if xld details not found
@@ -226,6 +227,7 @@ def encode(albumPath):
 
     return musicFinalFiles
 
+
 def command_map(args):
     """
     Wrapper for the '[multiprocessing.]map()' method, to unpack the arguments
@@ -242,6 +244,7 @@ def command_map(args):
     except Exception as e:
         logger.exception("Encoder raised an exception.")
         return False
+
 
 def command(encoder, musicSource, musicDest, albumPath):
     """
@@ -356,6 +359,7 @@ def command(encoder, musicSource, musicDest, albumPath):
         encoded = True
 
     return encoded
+
 
 def getTimeEncode(start):
     seconds =int(time.time()-start)
