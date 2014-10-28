@@ -50,6 +50,7 @@ POSSIBLE_EXTRAS = [
 ]
 
 PROG_DIR = None
+FULL_PATH = None
 
 ARGS = None
 SIGNAL = None
@@ -66,7 +67,7 @@ PIDFILE= None
 SCHED = BackgroundScheduler()
 
 INIT_LOCK = threading.Lock()
-__INITIALIZED__ = False
+_INITIALIZED = False
 started = False
 
 DATA_DIR = None
@@ -95,15 +96,16 @@ def initialize(config_file):
     with INIT_LOCK:
 
         global CONFIG
-        global __INITIALIZED__
-        global EXTRA_NEWZNABS
+        global _INITIALIZED
+        global CURRENT_VERSION
         global LATEST_VERSION
+        global UMASK
 
         CONFIG = headphones.config.Config(config_file)
 
         assert CONFIG is not None
 
-        if __INITIALIZED__:
+        if _INITIALIZED:
             return False
 
         if CONFIG.HTTP_PORT < 21 or CONFIG.HTTP_PORT > 65535:
@@ -167,7 +169,7 @@ def initialize(config_file):
         UMASK = os.umask(0)
         os.umask(UMASK)
 
-        __INITIALIZED__ = True
+        _INITIALIZED = True
         return True
 
 def daemonize():
@@ -239,9 +241,9 @@ def launch_browser(host, port, root):
 
 def start():
 
-    global __INITIALIZED__, started
+    global started
 
-    if __INITIALIZED__:
+    if _INITIALIZED:
 
         # Start our scheduled background tasks
         from headphones import updater, searcher, librarysync, postprocessor, torrentfinished
@@ -446,8 +448,8 @@ def dbcheck():
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE artists ADD COLUMN Extras TEXT DEFAULT NULL')
         # Need to update some stuff when people are upgrading and have 'include extras' set globally/for an artist
-        if INCLUDE_EXTRAS:
-            EXTRAS = "1,2,3,4,5,6,7,8"
+        if CONFIG.INCLUDE_EXTRAS:
+            CONFIG.EXTRAS = "1,2,3,4,5,6,7,8"
         logger.info("Copying over current artist IncludeExtras information")
         artists = c.execute('SELECT ArtistID, IncludeExtras from artists').fetchall()
         for artist in artists:
