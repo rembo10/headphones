@@ -659,7 +659,7 @@ class WebInterface(object):
 
     def importLastFM(self, username):
         headphones.CONFIG.LASTFM_USERNAME = username
-        headphones.config_write()
+        headphones.CONFIG.write()
         threading.Thread(target=lastfm.getArtists).start()
         raise cherrypy.HTTPRedirect("home")
     importLastFM.exposed = True
@@ -671,7 +671,7 @@ class WebInterface(object):
 
     def importItunes(self, path):
         headphones.CONFIG.PATH_TO_XML = path
-        headphones.config_write()
+        headphones.CONFIG.write()
         threading.Thread(target=importer.itunesImport, args=[path]).start()
         time.sleep(10)
         raise cherrypy.HTTPRedirect("home")
@@ -681,7 +681,7 @@ class WebInterface(object):
         headphones.CONFIG.LIBRARYSCAN = libraryscan
         headphones.CONFIG.AUTO_ADD_ARTISTS = autoadd
         headphones.CONFIG.MUSIC_DIR = path
-        headphones.config_write()
+        headphones.CONFIG.write()
         if scan:
             try:
                 threading.Thread(target=librarysync.libraryScan).start()
@@ -937,9 +937,9 @@ class WebInterface(object):
 
         config = {
             "http_host" : headphones.CONFIG.HTTP_HOST,
-            "http_user" : headphones.CONFIG.HTTP_USERNAME,
+            "http_username" : headphones.CONFIG.HTTP_USERNAME,
             "http_port" : headphones.CONFIG.HTTP_PORT,
-            "http_pass" : headphones.CONFIG.HTTP_PASSWORD,
+            "http_password" : headphones.CONFIG.HTTP_PASSWORD,
             "launch_browser" : checked(headphones.CONFIG.LAUNCH_BROWSER),
             "enable_https" : checked(headphones.CONFIG.ENABLE_HTTPS),
             "https_cert" : headphones.CONFIG.HTTPS_CERT,
@@ -952,21 +952,21 @@ class WebInterface(object):
             "search_interval" : headphones.CONFIG.SEARCH_INTERVAL,
             "libraryscan_interval" : headphones.CONFIG.LIBRARYSCAN_INTERVAL,
             "sab_host" : headphones.CONFIG.SAB_HOST,
-            "sab_user" : headphones.CONFIG.SAB_USERNAME,
-            "sab_api" : headphones.CONFIG.SAB_APIKEY,
-            "sab_pass" : headphones.CONFIG.SAB_PASSWORD,
-            "sab_cat" : headphones.CONFIG.SAB_CATEGORY,
+            "sab_username" : headphones.CONFIG.SAB_USERNAME,
+            "sab_apikey" : headphones.CONFIG.SAB_APIKEY,
+            "sab_password" : headphones.CONFIG.SAB_PASSWORD,
+            "sab_category" : headphones.CONFIG.SAB_CATEGORY,
             "nzbget_host" : headphones.CONFIG.NZBGET_HOST,
-            "nzbget_user" : headphones.CONFIG.NZBGET_USERNAME,
-            "nzbget_pass" : headphones.CONFIG.NZBGET_PASSWORD,
-            "nzbget_cat" : headphones.CONFIG.NZBGET_CATEGORY,
+            "nzbget_username" : headphones.CONFIG.NZBGET_USERNAME,
+            "nzbget_password" : headphones.CONFIG.NZBGET_PASSWORD,
+            "nzbget_category" : headphones.CONFIG.NZBGET_CATEGORY,
             "nzbget_priority" : headphones.CONFIG.NZBGET_PRIORITY,
             "transmission_host" : headphones.CONFIG.TRANSMISSION_HOST,
-            "transmission_user" : headphones.CONFIG.TRANSMISSION_USERNAME,
-            "transmission_pass" : headphones.CONFIG.TRANSMISSION_PASSWORD,
+            "transmission_username" : headphones.CONFIG.TRANSMISSION_USERNAME,
+            "transmission_password" : headphones.CONFIG.TRANSMISSION_PASSWORD,
             "utorrent_host" : headphones.CONFIG.UTORRENT_HOST,
-            "utorrent_user" : headphones.CONFIG.UTORRENT_USERNAME,
-            "utorrent_pass" : headphones.CONFIG.UTORRENT_PASSWORD,
+            "utorrent_username" : headphones.CONFIG.UTORRENT_USERNAME,
+            "utorrent_password" : headphones.CONFIG.UTORRENT_PASSWORD,
             "utorrent_label" : headphones.CONFIG.UTORRENT_LABEL,
             "nzb_downloader_sabnzbd" : radio(headphones.CONFIG.NZB_DOWNLOADER, 0),
             "nzb_downloader_nzbget" : radio(headphones.CONFIG.NZB_DOWNLOADER, 1),
@@ -981,7 +981,7 @@ class WebInterface(object):
             "headphones_indexer" : checked(headphones.CONFIG.HEADPHONES_INDEXER),
             "use_newznab" : checked(headphones.CONFIG.NEWZNAB),
             "newznab_host" : headphones.CONFIG.NEWZNAB_HOST,
-            "newznab_api" : headphones.CONFIG.NEWZNAB_APIKEY,
+            "newznab_apikey" : headphones.CONFIG.NEWZNAB_APIKEY,
             "newznab_enabled" : checked(headphones.CONFIG.NEWZNAB_ENABLED),
             "extra_newznabs" : headphones.CONFIG.get_extra_newznabs(),
             "use_nzbsorg" : checked(headphones.CONFIG.NZBSORG),
@@ -1020,10 +1020,10 @@ class WebInterface(object):
             "pref_qual_1" : radio(headphones.CONFIG.PREFERRED_QUALITY, 1),
             "pref_qual_2" : radio(headphones.CONFIG.PREFERRED_QUALITY, 2),
             "pref_qual_3" : radio(headphones.CONFIG.PREFERRED_QUALITY, 3),
-            "pref_bitrate" : headphones.CONFIG.PREFERRED_BITRATE,
-            "pref_bitrate_high" : headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER,
-            "pref_bitrate_low" : headphones.CONFIG.PREFERRED_BITRATE_LOW_BUFFER,
-            "pref_bitrate_allow_lossless" : checked(headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS),
+            "preferred_bitrate" : headphones.CONFIG.PREFERRED_BITRATE,
+            "preferred_bitrate_high" : headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER,
+            "preferred_bitrate_low" : headphones.CONFIG.PREFERRED_BITRATE_LOW_BUFFER,
+            "preferred_bitrate_allow_lossless" : checked(headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS),
             "detect_bitrate" : checked(headphones.CONFIG.DETECT_BITRATE),
             "lossless_bitrate_from" : headphones.CONFIG.LOSSLESS_BITRATE_FROM,
             "lossless_bitrate_to" : headphones.CONFIG.LOSSLESS_BITRATE_TO,
@@ -1038,8 +1038,8 @@ class WebInterface(object):
             "embed_album_art" : checked(headphones.CONFIG.EMBED_ALBUM_ART),
             "embed_lyrics" : checked(headphones.CONFIG.EMBED_LYRICS),
             "replace_existing_folders" : checked(headphones.CONFIG.REPLACE_EXISTING_FOLDERS),
-            "dest_dir" : headphones.CONFIG.DESTINATION_DIR,
-            "lossless_dest_dir" : headphones.CONFIG.LOSSLESS_DESTINATION_DIR,
+            "destination_dir" : headphones.CONFIG.DESTINATION_DIR,
+            "lossless_destination_dir" : headphones.CONFIG.LOSSLESS_DESTINATION_DIR,
             "folder_format" : headphones.CONFIG.FOLDER_FORMAT,
             "file_format" : headphones.CONFIG.FILE_FORMAT,
             "file_underscores" : checked(headphones.CONFIG.FILE_UNDERSCORES),
@@ -1061,7 +1061,7 @@ class WebInterface(object):
             "encoder":      headphones.CONFIG.ENCODER,
             "xldprofile":   headphones.CONFIG.XLDPROFILE,
             "bitrate":      int(headphones.CONFIG.BITRATE),
-            "encoderfolder":    headphones.CONFIG.ENCODER_PATH,
+            "encoder_path":    headphones.CONFIG.ENCODER_PATH,
             "advancedencoder":  headphones.CONFIG.ADVANCEDENCODER,
             "encoderoutputformat": headphones.CONFIG.ENCODEROUTPUTFORMAT,
             "samplingfrequency": headphones.CONFIG.SAMPLINGFREQUENCY,
@@ -1123,7 +1123,7 @@ class WebInterface(object):
             "boxcar_enabled": checked(headphones.CONFIG.BOXCAR_ENABLED),
             "boxcar_onsnatch": checked(headphones.CONFIG.BOXCAR_ONSNATCH),
             "boxcar_token": headphones.CONFIG.BOXCAR_TOKEN,
-            "mirror_list": headphones.MIRRORLIST,
+            "mirrorlist": headphones.MIRRORLIST,
             "mirror": headphones.CONFIG.MIRROR,
             "customhost": headphones.CONFIG.CUSTOMHOST,
             "customport": headphones.CONFIG.CUSTOMPORT,
@@ -1140,7 +1140,8 @@ class WebInterface(object):
             "mpc_enabled": checked(headphones.CONFIG.MPC_ENABLED)
         }
 
-        # Need to convert EXTRAS to a dictionary we can pass to the config: it'll come in as a string like 2,5,6,8 (append new extras to the end)
+        # Need to convert EXTRAS to a dictionary we can pass to the config:
+        # it'll come in as a string like 2,5,6,8
         extra_munges = {
             "dj-mix": "dj_mix",
             "mixtape/street": "mixtape_street"
