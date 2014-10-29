@@ -50,13 +50,13 @@
                                     <label title="Username for web server authentication. Leave empty to disable.">
                                         HTTP Username
                                     </label>
-                                    <input type="text" name="http_username" value="${config['http_user']}" size="30">
+                                    <input type="text" name="http_username" value="${config['http_username']}" size="30">
                                 </div>
                                 <div class="row">
                                     <label title="Password for web server authentication. Leave empty to disable.">
                                         HTTP Password
                                     </label>
-                                    <input type="password" name="http_password" value="${config['http_pass']}" size="30">
+                                    <input type="password" name="http_password" value="${config['http_password']}" size="30">
                                 </div>
                                 <div class="row checkbox">
                                     <input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} />
@@ -166,25 +166,25 @@
                                     <label title="SABnzbd username. Leave empty if not applicable.">
                                         SABnzbd Username
                                     </label>
-                                    <input type="text" name="sab_username" value="${config['sab_user']}" size="20">
+                                    <input type="text" name="sab_username" value="${config['sab_username']}" size="20">
                                 </div>
                                 <div class="row">
                                     <label title="SABnzbd password. Leave empty if not applicable.">
                                         SABnzbd Password
                                     </label>
-                                    <input type="password" name="sab_password" value="${config['sab_pass']}" size="20">
+                                    <input type="password" name="sab_password" value="${config['sab_password']}" size="20">
                                 </div>
                                 <div class="row">
                                     <label title="SABnzbd API key. Can be found in SABnzbd settings.">
                                         SABnzbd API key
                                     </label>
-                                    <input type="text" name="sab_apikey" value="${config['sab_api']}" size="36">
+                                    <input type="text" name="sab_apikey" value="${config['sab_apikey']}" size="36">
                                 </div>
                                 <div class="row">
                                     <label title="Name of SABnzbd category to add downloads to.">
                                         SABnzbd Category
                                     </label>
-                                    <input type="text" name="sab_category" value="${config['sab_cat']}" size="20">
+                                    <input type="text" name="sab_category" value="${config['sab_category']}" size="20">
                                 </div>
                             </fieldset>
 
@@ -200,19 +200,19 @@
                                     <label title="NZBGet username. Leave empty if not applicable">
                                         NZBget Username
                                     </label>
-                                    <input type="text" name="nzbget_username" value="${config['nzbget_user']}" size="20">
+                                    <input type="text" name="nzbget_username" value="${config['nzbget_username']}" size="20">
                                 </div>
                                 <div class="row">
                                     <label title="NZBGet password. Leave empty if not applicable">
                                         NZBget Password
                                     </label>
-                                    <input type="password" name="nzbget_password" value="${config['nzbget_pass']}" size="20">
+                                    <input type="password" name="nzbget_password" value="${config['nzbget_password']}" size="20">
                                 </div>
                                 <div class="row">
                                     <label title="Name of NZBget category to add downloads to.">
                                         NZBget Category
                                     </label>
-                                    <input type="text" name="nzbget_category" value="${config['nzbget_cat']}" size="20">
+                                    <input type="text" name="nzbget_category" value="${config['nzbget_category']}" size="20">
                                 </div>
                                 <%
                                     if config['nzbget_priority'] == -100:
@@ -348,11 +348,11 @@
                                 </div>
                                 <div class="row">
                                     <label>Transmission Username</label>
-                                    <input type="text" name="transmission_username" value="${config['transmission_user']}" size="30">
+                                    <input type="text" name="transmission_username" value="${config['transmission_username']}" size="30">
                                 </div>
                                 <div class="row">
                                     <label>Transmission Password</label>
-                                    <input type="password" name="transmission_password" value="${config['transmission_pass']}" size="30">
+                                    <input type="password" name="transmission_password" value="${config['transmission_password']}" size="30">
                                 </div>
                                 <div class="row">
                                     <small>Note: With Transmission, you can specify a different download directory for downloads sent from Headphones.
@@ -368,11 +368,11 @@
                                 </div>
                                 <div class="row">
                                     <label>uTorrent Username</label>
-                                    <input type="text" name="utorrent_username" value="${config['utorrent_user']}" size="30">
+                                    <input type="text" name="utorrent_username" value="${config['utorrent_username']}" size="30">
                                 </div>
                                 <div class="row">
                                     <label>uTorrent Password</label>
-                                    <input type="password" name="utorrent_password" value="${config['utorrent_pass']}" size="30">
+                                    <input type="password" name="utorrent_password" value="${config['utorrent_password']}" size="30">
                                 </div>
                                 <div class="row">
                                     <label>uTorrent Label</label>
@@ -445,7 +445,7 @@
                                         </div>
                                         <div class="row">
                                             <label>Newznab API</label>
-                                            <input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36">
+                                            <input type="text" name="newznab_apikey" value="${config['newznab_apikey']}" size="36">
                                         </div>
                                         <div class="row checkbox">
                                             <input id="newznab_enabled" type="checkbox" name="newznab_enabled" onclick="initConfigCheckbox($(this));" value="1" ${config['newznab_enabled']} /><label>Enabled</label>
@@ -667,15 +667,15 @@
                                     <div id="preferred_bitrate_options">
                                         <div class="row">
                                             Target bitrate
-                                            <input type="text" class="override-float" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3">kbps<br>
+                                            <input type="text" class="override-float" name="preferred_bitrate" value="${config['preferred_bitrate']}" size="3">kbps<br>
                                         </div>
                                         <div class="row">
                                             <span style="padding-left: 20px">
-                                                Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['pref_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['pref_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br>
+                                                Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['preferred_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['preferred_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br>
                                             </span>
                                         </div>
                                         <div class="row checkbox left" style="padding-left: 20px">
-                                            <input type="checkbox" name="preferred_bitrate_allow_lossless" value="1" ${config['pref_bitrate_allow_lossless']}>
+                                            <input type="checkbox" name="preferred_bitrate_allow_lossless" value="1" ${config['preferred_bitrate_allow_lossless']}>
                                             <label>Allow lossless if no good lossy match found</label>
                                         </div>
                                         <div class="row checkbox left" style="padding-left: 20px">
@@ -762,12 +762,12 @@
                                 </div>
                                 <div class="row">
                                     <label>Path to Destination Folder</label>
-                                    <input type="text" name="destination_dir" value="${config['dest_dir']}" size="50">
+                                    <input type="text" name="destination_dir" value="${config['destination_dir']}" size="50">
                                     <small>e.g. /Users/name/Music/iTunes or /Volumes/share/music</small>
                                 </div>
                                 <div class="row">
                                     <label>Path to Lossless Destination folder (optional)</label>
-                                    <input type="text" name="lossless_destination_dir" value="${config['lossless_dest_dir']}" size="50">
+                                    <input type="text" name="lossless_destination_dir" value="${config['lossless_destination_dir']}" size="50">
                                     <small>Set this if you have a separate directory for lossless music</small>
                                 </div>
                             </fieldset>
@@ -1258,7 +1258,7 @@
                             </div>
                             <div class="row">
                                 <label>Path to Encoder</label>
-                                <input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43">
+                                <input type="text" name="encoder_path" value="${config['encoder_path']}" size="43">
                             </div>
                         </td>
                         <td>
@@ -1367,7 +1367,7 @@
                                 <div class="row">
                                     <label>Muscbrainz Mirror</label>
                                     <select name="mirror" id="mirror">
-                                    %for mirror in config['mirror_list']:
+                                    %for mirror in config['mirrorlist']:
                                         <%
                                             if mirror == headphones.CONFIG.MIRROR:
                                                 selected = 'selected="selected"'
