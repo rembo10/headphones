@@ -81,7 +81,7 @@ def convert_html_entities(s):
         hits.remove(amp)
     for hit in hits:
         name = hit[1:-1]
-        if htmlentitydefs.name2codepoint.has_key(name):
-                s = s.replace(hit, unichr(htmlentitydefs.name2codepoint[name]))
+        if name in htmlentitydefs.name2codepoint:
+            s = s.replace(hit, unichr(htmlentitydefs.name2codepoint[name]))
     s = s.replace(amp, "&")
     return s
