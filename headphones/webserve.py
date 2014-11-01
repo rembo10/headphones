@@ -1170,18 +1170,45 @@ class WebInterface(object):
 
     def configUpdate(self, **kwargs):
         # Handle the variable config options. Note - keys with False values aren't getting passed
-        headphones.CONFIG.clear_extra_newznabs()
-        for kwarg in kwargs:
-            if kwarg.startswith('newznab_host'):
-                newznab_number = kwarg[12:]
-                if len(newznab_number):
-                    newznab_host = kwargs.get('newznab_host' + newznab_number)
-                    newznab_api = kwargs.get('newznab_api' + newznab_number)
-                    try:
-                        newznab_enabled = int(kwargs.get('newznab_enabled' + newznab_number))
-                    except KeyError:
-                        newznab_enabled = 0
-                        headphones.CONFIG.add_extra_newznab((newznab_host, newznab_api, newznab_enabled))
+
+        checked_configs = [
+            "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer", "use_newznab", "newznab_enabled",
+            "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_mininova", "use_waffles", "use_rutracker", "use_whatcd",
+            "preferred_bitrate_allow_lossless", "detect_bitrate", "freeze_db", "move_files", "rename_files", "correct_metadata",
+            "cleanup_files", "keep_nfo", "add_album_art", "embed_album_art", "embed_lyrics", "replace_existing_folders", "file_underscores",
+            "include_extras", "autowant_upcoming", "autowant_all", "autowant_manually_added", "keep_torrent_files", "music_encoder",
+            "encoderlossless", "encoder_multicore", "delete_lossless_files", "growl_enabled", "growl_onsnatch", "prowl_enabled",
+            "prowl_onsnatch", "xbmc_enabled", "xbmc_update", "xbmc_notify", "lms_enabled", "plex_enabled", "plex_update", "plex_notify",
+            "nma_enabled", "nma_onsnatch", "pushalot_enabled", "pushalot_onsnatch", "synoindex_enabled", "pushover_enabled",
+            "pushover_onsnatch", "pushbullet_enabled", "pushbullet_onsnatch", "subsonic_enabled", "twitter_enabled", "twitter_onsnatch",
+            "osx_notify_enabled", "osx_notify_onsnatch", "boxcar_enabled", "boxcar_onsnatch", "songkick_enabled", "songkick_filter_enabled",
+            "mpc_enabled"
+        ]
+        for checked_config in checked_configs:
+            if checked_config not in kwargs:
+                # checked items should be zero or one. if they were not sent then the item was not checked
+                kwargs[checked_config] = 0
+
+        for plain_config, use_config in [(x[4:], x) for x in kwargs if x.startswith('use_')]:
+            # the use prefix is fairly nice in the html, but does not match the actual config
+            kwargs[plain_config] = kwargs[use_config]
+            del kwargs[use_config]
+
+        extra_newznabs = []
+        for kwarg in [x for x in kwargs if x.startswith('newznab_host')]:
+            newznab_host_key = kwarg
+            newznab_number = kwarg[12:]
+            if len(newznab_number):
+                newznab_api_key = 'newznab_api' + newznab_number
+                newznab_enabled_key = 'newznab_enabled' + newznab_number
+                newznab_host = kwargs.get(newznab_host_key, '')
+                newznab_api = kwargs.get(newznab_api_key, '')
+                newznab_enabled = int(kwargs.get(newznab_enabled_key, 0))
+                for key in [newznab_host_key, newznab_api_key, newznab_enabled_key]:
+                    if key in kwargs:
+                        del kwargs[key]
+                extra_newznabs.append((newznab_host, newznab_api, newznab_enabled))
+
 
         # Convert the extras to list then string. Coming in as 0 or 1 (append new extras to the end)
         temp_extras_list = []
@@ -1208,8 +1235,10 @@ class WebInterface(object):
                 del kwargs[extra]
 
         headphones.CONFIG.EXTRAS = ','.join(str(n) for n in temp_extras_list)
-
+        headphones.CONFIG.clear_extra_newznabs()
         headphones.CONFIG.process_kwargs(kwargs)
+        for extra_newznab in extra_newznabs:
+            headphones.CONFIG.add_extra_newznab(extra_newznab)
 
         # Sanity checking
         if headphones.CONFIG.SEARCH_INTERVAL < 360:

@@ -86,7 +86,7 @@
                             <fieldset>
                                 <legend>API</legend>
                                 <div class="row checkbox">
-                                    <input type="checkbox" id="useapi" name="api_enabled" id="api_enabled" value="1" ${config['api_enabled']} />
+                                    <input type="checkbox" id="api_enabled" name="api_enabled" value="1" ${config['api_enabled']} />
                                     <label title="Allow remote applications to interface with Headphones">
                                         Enable API
                                     </label>
@@ -414,7 +414,8 @@
                             <fieldset>
                                 <legend>Headphones Indexer</legend>
                                 <div class="row checkbox">
-                                    <input id="headphones_indexer" type="checkbox" name="headphones_indexer" onclick="initConfigCheckbox($(this));" value="1" ${config['headphones_indexer']} /><label>Use Headphones Indexer</label>
+                                    <input id="headphones_indexer" type="checkbox" name="headphones_indexer" onclick="initConfigCheckbox($(this));" value="1" ${config['headphones_indexer']} />
+                                    <label>Use Headphones Indexer</label>
                                 </div>
                                 <div class="config">
                                     <div class="row">
@@ -434,7 +435,7 @@
                             <fieldset>
                                 <legend>Custom Newznab Providers</legend>
                                 <div class="row checkbox">
-                                    <input  id="usenewznab" type="checkbox" name="newznab" onclick="initConfigCheckbox($(this));" value="1" ${config['use_newznab']} /><label>Use Newznab</label>
+                                    <input id="use_newznab" type="checkbox" name="use_newznab" onclick="initConfigCheckbox($(this));" value="1" ${config['use_newznab']} /><label>Use Newznab</label>
                                 </div>
                                 <div id="newznab_providers">
                                     <div class="config" id="newznab1">
@@ -488,7 +489,7 @@
                             <fieldset>
                                 <legend>NZBs.org</legend>
                                 <div class="row checkbox">
-                                    <input id="usenzbsorg" type="checkbox" name="nzbsorg" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbsorg']} /><label>Use NZBs.org</label>
+                                    <input id="use_nzbsorg" type="checkbox" name="use_nzbsorg" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbsorg']} /><label>Use NZBs.org</label>
                                 </div>
                                 <div class="config">
                                     <div class="row">
@@ -500,7 +501,7 @@
                             <fieldset>
                                 <legend>omgwtfnzbs</legend>
                                 <div class="row checkbox">
-                                    <input id="useomgwtfnzbs" type="checkbox" name="omgwtfnzbs" onclick="initConfigCheckbox($(this));" value="1" ${config['use_omgwtfnzbs']} /><label>Use omgwtfnzbs</label>
+                                    <input id="use_omgwtfnzbs" type="checkbox" name="use_omgwtfnzbs" onclick="initConfigCheckbox($(this));" value="1" ${config['use_omgwtfnzbs']} /><label>Use omgwtfnzbs</label>
                                 </div>
                                 <div class="config">
                                     <div class="row">
@@ -521,7 +522,7 @@
                                 <fieldset>
                                     <legend>The Pirate Bay</legend>
                                     <div class="row checkbox">
-                                        <input id="usepiratebay" type="checkbox" name="use_piratebay" value="1" ${config['use_piratebay']} /><label>Use The Pirate Bay</label>
+                                        <input id="use_piratebay" type="checkbox" name="use_piratebay" value="1" ${config['use_piratebay']} /><label>Use The Pirate Bay</label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -538,7 +539,7 @@
                                 <fieldset>
                                     <legend>Kick Ass Torrents</legend>
                                     <div class="row checkbox">
-                                        <input id="usekat" type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Use Kick Ass Torrents</label>
+                                        <input id="use_kat" type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Use Kick Ass Torrents</label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -555,7 +556,7 @@
                                 <fieldset>
                                     <legend>Waffles.fm</legend>
                                     <div class="row checkbox">
-                                        <input id="usewaffles" type="checkbox" name="waffles" onclick="initConfigCheckbox($(this));" value="1" ${config['use_waffles']} /><label>Use Waffles.fm</label>
+                                        <input id="use_waffles" type="checkbox" name="use_waffles" onclick="initConfigCheckbox($(this));" value="1" ${config['use_waffles']} /><label>Use Waffles.fm</label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -576,7 +577,7 @@
                                 <fieldset>
                                     <legend>rutracker.org</legend>
                                     <div class="row checkbox">
-                                        <input id="userutracker" type="checkbox" name="rutracker" onclick="initConfigCheckbox($(this));" value="1" ${config['use_rutracker']} /><label>Use rutracker.org</label>
+                                        <input id="use_rutracker" type="checkbox" name="use_rutracker" onclick="initConfigCheckbox($(this));" value="1" ${config['use_rutracker']} /><label>Use rutracker.org</label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -597,7 +598,7 @@
                                 <fieldset>
                                     <legend>What.cd</legend>
                                     <div class="row checkbox">
-                                        <input id="usewhatcd" type="checkbox" name="whatcd" onclick="initConfigCheckbox($(this));" value="1" ${config['use_whatcd']} /><label>Use What.cd</label>
+                                        <input id="use_whatcd" type="checkbox" name="use_whatcd" onclick="initConfigCheckbox($(this));" value="1" ${config['use_whatcd']} /><label>Use What.cd</label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -618,7 +619,7 @@
                                 <fieldset>
                                     <legend>Mininova</legend>
                                      <div class="row checkbox">
-                                        <input id="usemininova" type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /><label>Use Mininova</label>
+                                        <input id="use_mininova" type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /><label>Use Mininova</label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -2031,16 +2032,16 @@
                 });
                 initActions();
                 initConfigCheckbox("#headphones_indexer");
-                initConfigCheckbox("#usenewznab");
-                initConfigCheckbox("#usenzbsorg");
-                initConfigCheckbox("#useomgwtfnzbs");
-				initConfigCheckbox("#usekat");
-                initConfigCheckbox("#usepiratebay");
-                initConfigCheckbox("#usemininova");
-                initConfigCheckbox("#usewaffles");
-                initConfigCheckbox("#userutracker");
-                initConfigCheckbox("#usewhatcd");
-                initConfigCheckbox("#useapi");
+                initConfigCheckbox("#use_newznab");
+                initConfigCheckbox("#use_nzbsorg");
+                initConfigCheckbox("#use_omgwtfnzbs");
+                initConfigCheckbox("#use_kat");
+                initConfigCheckbox("#use_piratebay");
+                initConfigCheckbox("#use_mininova");
+                initConfigCheckbox("#use_waffles");
+                initConfigCheckbox("#use_rutracker");
+                initConfigCheckbox("#use_whatcd");
+                initConfigCheckbox("#api_enabled");
                 initConfigCheckbox("#enable_https");
 
 
