@@ -423,7 +423,8 @@ class NMA(object):
         keys = api.split(',')
         p.addkey(keys)
 
-        if len(keys) > 1: batch = True
+        if len(keys) > 1:
+            batch = True
 
         response = p.push(title, event, message, priority=nma_priority, batch_mode=batch)
 
