@@ -310,7 +310,7 @@ def more_filtering(results, album, albumlength, new):
 
         normalizedAlbumArtist = removeDisallowedFilenameChars(album['ArtistName'])
         normalizedAlbumTitle = removeDisallowedFilenameChars(album['AlbumTitle'])
-        normalizedResultTitle = removeDisallowedFilenameChars(result[0]);
+        normalizedResultTitle = removeDisallowedFilenameChars(result[0])
         artistTitleCount = normalizedResultTitle.count(normalizedAlbumArtist)
 
         if normalizedAlbumArtist in normalizedAlbumTitle and artistTitleCount < 2:
