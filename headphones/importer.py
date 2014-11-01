@@ -781,7 +781,7 @@ def getHybridRelease(fullreleaselist):
         # 'None' will put it at the top which was normal behaviour for pre-ngs
         # versions
         if releaseDate is None:
-            return 'None';
+            return 'None'
 
         if releaseDate.count('-') == 2:
             return releaseDate
