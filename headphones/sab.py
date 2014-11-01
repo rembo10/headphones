@@ -50,7 +50,7 @@ def sendNZB(nzb):
         if nzb.provider.getID() == 'newzbin':
             id = nzb.provider.getIDFromURL(nzb.url)
             if not id:
-                logger.info("Unable to send NZB to sab, can't find ID in URL "+str(nzb.url))
+                logger.info("Unable to send NZB to sab, can't find ID in URL " + str(nzb.url))
                 return False
             params['mode'] = 'addid'
             params['name'] = id
@@ -63,13 +63,13 @@ def sendNZB(nzb):
         # Sanitize the file a bit, since we can only use ascii chars with MultiPartPostHandler
         nzbdata = helpers.latinToAscii(nzb.extraInfo[0])
         params['mode'] = 'addfile'
-        multiPartParams = {"nzbfile": (helpers.latinToAscii(nzb.name)+".nzb", nzbdata)}
+        multiPartParams = {"nzbfile": (helpers.latinToAscii(nzb.name) + ".nzb", nzbdata)}
 
     if not headphones.CONFIG.SAB_HOST.startswith('http'):
         headphones.CONFIG.SAB_HOST = 'http://' + headphones.CONFIG.SAB_HOST
 
     if headphones.CONFIG.SAB_HOST.endswith('/'):
-        headphones.CONFIG.SAB_HOST = headphones.CONFIG.SAB_HOST[0:len(headphones.CONFIG.SAB_HOST)-1]
+        headphones.CONFIG.SAB_HOST = headphones.CONFIG.SAB_HOST[0:len(headphones.CONFIG.SAB_HOST) - 1]
 
     url = headphones.CONFIG.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
 
@@ -146,7 +146,7 @@ def checkConfig():
         headphones.CONFIG.SAB_HOST = 'http://' + headphones.CONFIG.SAB_HOST
 
     if headphones.CONFIG.SAB_HOST.endswith('/'):
-        headphones.CONFIG.SAB_HOST = headphones.CONFIG.SAB_HOST[0:len(headphones.CONFIG.SAB_HOST)-1]
+        headphones.CONFIG.SAB_HOST = headphones.CONFIG.SAB_HOST[0:len(headphones.CONFIG.SAB_HOST) - 1]
 
     url = headphones.CONFIG.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
 

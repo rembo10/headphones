@@ -23,7 +23,7 @@ import platform, operator, os, re
 from headphones import version
 
 #Identify Our Application
-USER_AGENT = 'Headphones/-'+version.HEADPHONES_VERSION+' ('+platform.system()+' '+platform.release()+')'
+USER_AGENT = 'Headphones/-' + version.HEADPHONES_VERSION + ' (' + platform.system() + ' ' + platform.release() + ')'
 
 ### Notification Types
 NOTIFY_SNATCH = 1
@@ -72,7 +72,7 @@ class Quality:
     def _getStatusStrings(status):
         toReturn = {}
         for x in Quality.qualityStrings.keys():
-            toReturn[Quality.compositeStatus(status, x)] = Quality.statusPrefixes[status]+" ("+Quality.qualityStrings[x]+")"
+            toReturn[Quality.compositeStatus(status, x)] = Quality.statusPrefixes[status] + " (" + Quality.qualityStrings[x] + ")"
         return toReturn
 
     @staticmethod
@@ -107,7 +107,7 @@ class Quality:
             if x == Quality.UNKNOWN:
                 continue
 
-            regex = '\W'+Quality.qualityStrings[x].replace(' ', '\W')+'\W'
+            regex = '\W' + Quality.qualityStrings[x].replace(' ', '\W') + '\W'
             regex_match = re.search(regex, name, re.I)
             if regex_match:
                 return x
@@ -148,8 +148,8 @@ class Quality:
     def splitCompositeStatus(status):
         """Returns a tuple containing (status, quality)"""
         for x in sorted(Quality.qualityStrings.keys(), reverse=True):
-            if status > x*100:
-                return (status-x*100, x)
+            if status > x * 100:
+                return (status - x * 100, x)
 
         return (Quality.NONE, status)
 

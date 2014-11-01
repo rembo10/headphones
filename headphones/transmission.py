@@ -146,7 +146,7 @@ def torrentAction(method, arguments):
         # Check if it ends in a port number
         i = host.rfind(':')
         if i >= 0:
-            possible_port = host[i+1:]
+            possible_port = host[i + 1:]
             try:
                 port = int(possible_port)
                 host = host + "/transmission/rpc"

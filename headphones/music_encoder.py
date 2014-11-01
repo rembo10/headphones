@@ -131,7 +131,7 @@ def encode(albumPath):
                 else:
                     encode = True
             elif (headphones.CONFIG.ENCODEROUTPUTFORMAT == 'mp3' or headphones.CONFIG.ENCODEROUTPUTFORMAT == 'm4a'):
-                if (music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.'+headphones.CONFIG.ENCODEROUTPUTFORMAT) and (int(infoMusic.bitrate / 1000) <= headphones.CONFIG.BITRATE)):
+                if (music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.' + headphones.CONFIG.ENCODEROUTPUTFORMAT) and (int(infoMusic.bitrate / 1000) <= headphones.CONFIG.BITRATE)):
                     logger.info('%s has bitrate <= %skb, will not be re-encoded', music, headphones.CONFIG.BITRATE)
                 else:
                     encode = True
@@ -143,7 +143,7 @@ def encode(albumPath):
             musicFiles[i] = None
             musicTempFiles[i] = None
 
-        i = i+1
+        i = i + 1
 
     # Encode music files
     if len(jobs) > 0:
@@ -362,9 +362,9 @@ def command(encoder, musicSource, musicDest, albumPath):
 
 
 def getTimeEncode(start):
-    seconds = int(time.time()-start)
+    seconds = int(time.time() - start)
     hours = seconds / 3600
-    seconds -= 3600*hours
+    seconds -= 3600 * hours
     minutes = seconds / 60
-    seconds -= 60*minutes
+    seconds -= 60 * minutes
     return "%02d:%02d:%02d" % (hours, minutes, seconds)

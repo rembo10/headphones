@@ -105,7 +105,7 @@ def latinToAscii(unicrap):
 
 def convert_milliseconds(ms):
 
-    seconds = ms/1000
+    seconds = ms / 1000
     gmtime = time.gmtime(seconds)
     if seconds > 3600:
         minutes = time.strftime("%H:%M:%S", gmtime)
@@ -145,7 +145,7 @@ def get_age(date):
         return False
 
     try:
-        days_old = int(split_date[0])*365 + int(split_date[1])*30 + int(split_date[2])
+        days_old = int(split_date[0]) * 365 + int(split_date[1]) * 30 + int(split_date[2])
     except IndexError:
         days_old = False
 
@@ -154,7 +154,7 @@ def get_age(date):
 
 def bytes_to_mb(bytes):
 
-    mb = int(bytes)/1048576
+    mb = int(bytes) / 1048576
     size = '%.1f MB' % mb
     return size
 
@@ -162,7 +162,7 @@ def bytes_to_mb(bytes):
 def mb_to_bytes(mb_str):
     result = re.search('^(\d+(?:\.\d+)?)\s?(?:mb)?', mb_str, flags=re.I)
     if result:
-        return int(float(result.group(1))*1048576)
+        return int(float(result.group(1)) * 1048576)
 
 
 def piratesize(size):
@@ -689,12 +689,12 @@ def create_https_certificates(ssl_cert, ssl_key):
     # Create the CA Certificate
     cakey = createKeyPair(TYPE_RSA, 1024)
     careq = createCertRequest(cakey, CN='Certificate Authority')
-    cacert = createCertificate(careq, (careq, cakey), serial, (0, 60*60*24*365*10)) # ten years
+    cacert = createCertificate(careq, (careq, cakey), serial, (0, 60 * 60 * 24 * 365 * 10)) # ten years
 
     cname = 'Headphones'
     pkey = createKeyPair(TYPE_RSA, 1024)
     req = createCertRequest(pkey, CN=cname)
-    cert = createCertificate(req, (cacert, cakey), serial, (0, 60*60*24*365*10)) # ten years
+    cert = createCertificate(req, (cacert, cakey), serial, (0, 60 * 60 * 24 * 365 * 10)) # ten years
 
     # Save the key and certificate to disk
     try:

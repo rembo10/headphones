@@ -147,7 +147,7 @@ def check_list(list, ignore=0):
         except:
             break
 
-    return tuple(list1+list2)
+    return tuple(list1 + list2)
 
 
 def trim_cue_entry(string):
@@ -179,7 +179,7 @@ def split_file_list(ext=None):
             if (ext and ext == os.path.splitext(f)[-1]) or not ext:
                 filename_parser = re.search('split-track(\d\d)', f)
                 track_nr = int(filename_parser.group(1))
-                if cue.htoa() and not os.path.exists('split-track00'+ext):
+                if cue.htoa() and not os.path.exists('split-track00' + ext):
                     track_nr -= 1
                 file_list[track_nr] = WaveFile(f, track_nr=track_nr)
     return check_list(file_list, ignore=1)
@@ -326,7 +326,7 @@ class CueFile(File):
             line_content = c[line_index]
             search_result = re.search(CUE_TRACK, line_content, re.I)
             if not search_result:
-                raise ValueError('inconsistent CUE sheet, TRACK expected at line {0}'.format(line_index+1))
+                raise ValueError('inconsistent CUE sheet, TRACK expected at line {0}'.format(line_index + 1))
             track_nr = int(search_result.group(1))
             line_index += 1
             next_track = False
@@ -358,14 +358,14 @@ class CueFile(File):
                         line_index += 1
                     elif re.search(CUE_TRACK, line_content, re.I):
                         next_track = True
-                    elif line_index == len(c)-1 and not line_content:
+                    elif line_index == len(c) - 1 and not line_content:
                         # last line is empty
                         line_index += 1
                     elif re.search('FLAGS DCP$', line_content, re.I):
                         track_meta['dcpflag'] = True
                         line_index += 1
                     else:
-                        raise ValueError('unknown entry in track error, line {0}'.format(line_index+1))
+                        raise ValueError('unknown entry in track error, line {0}'.format(line_index + 1))
                 else:
                     next_track = True
 
@@ -418,9 +418,9 @@ class CueFile(File):
         for i in range(len(self.tracks)):
             if self.tracks[i]:
                 if self.tracks[i].get('artist'):
-                    content += 'track'+int_to_str(i) + 'artist' + '\t' + self.tracks[i].get('artist') + '\n'
+                    content += 'track' + int_to_str(i) + 'artist' + '\t' + self.tracks[i].get('artist') + '\n'
                 if self.tracks[i].get('title'):
-                    content += 'track'+int_to_str(i) + 'title' + '\t' + self.tracks[i].get('title') + '\n'
+                    content += 'track' + int_to_str(i) + 'title' + '\t' + self.tracks[i].get('title') + '\n'
         return content
 
     def htoa(self):
@@ -478,7 +478,7 @@ class MetaFile(File):
         common_tags['album'] = self.content['title']
         common_tags['title'] = self.content['tracks'][track_nr]['title']
         common_tags['tracknumber'] = str(track_nr)
-        common_tags['tracktotal'] = str(len(self.content['tracks'])-1)
+        common_tags['tracktotal'] = str(len(self.content['tracks']) - 1)
         if 'date' in self.content:
             common_tags['date'] = self.content['date']
         if 'genre' in meta.content:
