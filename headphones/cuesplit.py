@@ -69,6 +69,7 @@ WAVE_FILE_TYPE_BY_EXTENSION = {
 #SHNTOOL_COMPATIBLE = ('Waveform Audio', 'WavPack', 'Free Lossless Audio Codec')
 SHNTOOL_COMPATIBLE = ('Free Lossless Audio Codec')
 
+
 def check_splitter(command):
     '''Check xld or shntools installed'''
     try:
@@ -81,6 +82,7 @@ def check_splitter(command):
         if e.errno == os.errno.ENOENT:
             return False
     return True
+
 
 def split_baby(split_file, split_cmd):
     '''Let's split baby'''
@@ -115,6 +117,7 @@ def split_baby(split_file, split_cmd):
         logger.info('Split success %s', split_file.decode(headphones.SYS_ENCODING, 'replace'))
         return True
 
+
 def check_list(list, ignore=0):
     '''Checks a list for None elements. If list have None (after ignore index) then it should pass only if all elements
     are None threreafter. Returns a tuple without the None entries.'''
@@ -146,11 +149,13 @@ def check_list(list, ignore=0):
 
     return tuple(list1+list2)
 
+
 def trim_cue_entry(string):
     '''Removes leading and trailing "s.'''
     if string[0] == '"' and string[-1] == '"':
         string = string[1:-1]
     return string
+
 
 def int_to_str(value, length=2):
     '''Converts integer to string eg 3 to "03"'''
@@ -163,6 +168,7 @@ def int_to_str(value, length=2):
     while len(content) < length:
         content = '0' + content
     return content
+
 
 def split_file_list(ext=None):
     file_list = [None for m in range(100)]
@@ -192,7 +198,7 @@ class Directory:
             if c.__class__.__name__ == classname:
                 content.append(c)
         return content
-    
+
     def tracks(self, ext=None, split=False):
         content = []
         for c in self.content:
@@ -204,14 +210,14 @@ class Directory:
                     if not split or (split and c.split_file):
                         content.append(c)
         return content
-    
+
     def update(self):
         def check_match(filename):
             for i in self.content:
                 if i.name == filename:
                     return True
             return False
-        
+
         def identify_track_number(filename):
             if 'split-track' in filename:
                 search = re.search('split-track(\d\d)', filename)
@@ -219,14 +225,14 @@ class Directory:
                     n = int(search.group(1))
                     if n:
                         return n
-            for n in range(0,100):
+            for n in range(0, 100):
                 search = re.search(int_to_str(n), filename)
                 if search:
                     # TODO: not part of other value such as year
                     return n
 
         list_dir = glob.glob(os.path.join(self.path, '*'))
-        
+
         # TODO: for some reason removes only one file
         rem_list = []
         for i in self.content:
@@ -234,7 +240,7 @@ class Directory:
                 rem_list.append(i)
         for i in rem_list:
             self.content.remove(i)
-        
+
         for i in list_dir:
             if not check_match(i):
                 # music file
@@ -244,7 +250,7 @@ class Directory:
                         self.content.append(WaveFile(self.path + os.sep + i, track_nr=track_nr))
                     else:
                         self.content.append(WaveFile(self.path + os.sep + i))
-                
+
                 # cue file
                 elif os.path.splitext(i)[-1] == '.cue':
                     self.content.append(CueFile(self.path + os.sep + i))
@@ -252,13 +258,14 @@ class Directory:
                 # meta file
                 elif i == ALBUM_META_FILE_NAME:
                     self.content.append(MetaFile(self.path + os.sep + i))
-                
+
                 # directory
                 elif os.path.isdir(i):
                     self.content.append(Directory(self.path + os.sep + i))
-                
+
                 else:
                     self.content.append(File(self.path + os.sep + i))
+
 
 class File:
     def __init__(self, path):
@@ -284,6 +291,7 @@ class File:
             content = content.replace(' ', '\ ')
 
         return content
+
 
 class CueFile(File):
     def __init__(self, path):
@@ -434,6 +442,7 @@ class CueFile(File):
                     content += '\n'
         return content
 
+
 class MetaFile(File):
     def __init__(self, path):
         File.__init__(self, path)
@@ -442,7 +451,7 @@ class MetaFile(File):
 
         content = {}
         content['tracks'] = [None for m in range(100)]
- 
+
         for l in self.rawcontent.splitlines():
             parsed_line = re.search('^(.+?)\t(.+?)$', l)
             if parsed_line:
@@ -455,11 +464,11 @@ class MetaFile(File):
                     content['tracks'][int(parsed_track.group(1))][parsed_track.group(2)] = parsed_line.group(2)
                 else:
                     content[parsed_line.group(1)] = parsed_line.group(2)
- 
+
         content['tracks'] = check_list(content['tracks'], ignore=1)
- 
+
         self.content = content
-                          
+
     def flac_tags(self, track_nr):
         common_tags = dict()
         freeform_tags = dict()
@@ -483,9 +492,9 @@ class MetaFile(File):
 
     def folders(self):
         artist = self.content['artist']
-        album = self.content['date'] + ' - ' + self.content['title'] + ' (' +  self.content['label'] + ' - ' + self.content['catalog'] + ')'
+        album = self.content['date'] + ' - ' + self.content['title'] + ' (' + self.content['label'] + ' - ' + self.content['catalog'] + ')'
         return artist, album
-    
+
     def complete(self):
         '''Check MetaFile for containing all data'''
         self.__init__(self.path)
@@ -493,10 +502,11 @@ class MetaFile(File):
             if re.search('^[0-9A-Za-z]+?\t$', l):
                 return False
         return True
-    
+
     def count_tracks(self):
         '''Returns tracks count'''
         return len(self.content['tracks']) - self.content['tracks'].count(None)
+
 
 class WaveFile(File):
     def __init__(self, path, track_nr=None):
@@ -508,7 +518,7 @@ class WaveFile(File):
     def filename(self, ext=None, cmd=False):
         title = meta.content['tracks'][self.track_nr]['title']
 
-        if ext:                
+        if ext:
             if ext[0] != '.':
                 ext = '.' + ext
         else:
@@ -536,6 +546,7 @@ class WaveFile(File):
     def mutagen(self):
         if self.type == 'Free Lossless Audio Codec':
             return FLAC(self.name)
+
 
 def split(albumpath):
 
@@ -662,5 +673,3 @@ def split(albumpath):
         # Rename original file
         os.rename(wave.name, wave.name + '.original')
         return True
-
-

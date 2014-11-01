@@ -15,12 +15,15 @@
 
 from headphones import request, db
 
+
 def getAlbumArt(albumid):
     myDB = db.DBConnection()
-    asin = myDB.action('SELECT AlbumASIN from albums WHERE AlbumID=?', [albumid]).fetchone()[0]
+    asin = myDB.action(
+        'SELECT AlbumASIN from albums WHERE AlbumID=?', [albumid]).fetchone()[0]
 
     if asin:
         return 'http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg' % asin
+
 
 def getCachedArt(albumid):
     from headphones import cache

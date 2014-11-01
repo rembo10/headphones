@@ -4,6 +4,7 @@ import os
 import re
 from configobj import ConfigObj
 
+
 def bool_int(value):
     """
     Casts a config value into a 0 or 1
@@ -232,6 +233,7 @@ _CONFIG_DEFINITIONS = {
     'XLDPROFILE': (str, 'General', '')
 }
 
+
 class Config(object):
     """ Wraps access to particular values in a config file """
 
@@ -316,8 +318,10 @@ class Config(object):
 
     def add_extra_newznab(self, newznab):
         """ Add a new extra newznab """
+        extra_newznabs = self.EXTRA_NEWZNABS
         for item in newznab:
-            self.EXTRA_NEWZNABS.append(item)
+            extra_newznabs.append(item)
+        self.EXTRA_NEWZNABS = extra_newznabs
 
     def __getattr__(self, name):
         """

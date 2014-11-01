@@ -39,6 +39,7 @@ try:
 except ImportError:
     from cgi import parse_qsl
 
+
 class GROWL(object):
     """
     Growl notifications, for OS X.
@@ -124,6 +125,7 @@ class GROWL(object):
 
         self.notify('ZOMG Lazors Pewpewpew!', 'Test Message')
 
+
 class PROWL(object):
     """
     Prowl notifications.
@@ -151,8 +153,8 @@ class PROWL(object):
 
         http_handler.request("POST",
                                 "/publicapi/add",
-                                headers = {'Content-type': "application/x-www-form-urlencoded"},
-                                body = urlencode(data))
+                                headers={'Content-type': "application/x-www-form-urlencoded"},
+                                body=urlencode(data))
         response = http_handler.getresponse()
         request_status = response.status
 
@@ -176,6 +178,7 @@ class PROWL(object):
         self.priority = priority
 
         self.notify('ZOMG Lazors Pewpewpew!', 'Test Message')
+
 
 class MPC(object):
     """
@@ -255,7 +258,7 @@ class XBMC(object):
                     request = self._sendhttp(host, notifycommand)
 
                 else: #Frodo
-                    params = {'title':header, 'message': message, 'displaytime': int(time), 'image': albumartpath}
+                    params = {'title': header, 'message': message, 'displaytime': int(time), 'image': albumartpath}
                     request = self._sendjson(host, 'GUI.ShowNotification', params)
 
                 if not request:
@@ -263,6 +266,7 @@ class XBMC(object):
 
             except Exception:
                 logger.error('Error sending notification request to XBMC')
+
 
 class LMS(object):
     """
@@ -273,7 +277,7 @@ class LMS(object):
         self.hosts = headphones.CONFIG.LMS_HOST
 
     def _sendjson(self, host):
-        data = {'id': 1, 'method': 'slim.request', 'params': ["",["rescan"]]}
+        data = {'id': 1, 'method': 'slim.request', 'params': ["", ["rescan"]]}
         data = json.JSONEncoder().encode(data)
 
         content = {'Content-Type': 'application/json'}
@@ -304,6 +308,7 @@ class LMS(object):
 
             if not request:
                 logger.warn('Error sending rescan request to LMS')
+
 
 class Plex(object):
     def __init__(self):
@@ -391,6 +396,7 @@ class Plex(object):
             except:
                 logger.warn('Error sending notification request to Plex Media Server')
 
+
 class NMA(object):
     def notify(self, artist=None, album=None, snatched=None):
         title = 'Headphones'
@@ -427,6 +433,7 @@ class NMA(object):
         else:
             return True
 
+
 class PUSHBULLET(object):
 
     def __init__(self):
@@ -449,9 +456,9 @@ class PUSHBULLET(object):
 
         http_handler.request("POST",
                                 "/api/pushes",
-                                headers = {'Content-type': "application/x-www-form-urlencoded",
-                                            'Authorization' : 'Basic %s' % base64.b64encode(headphones.CONFIG.PUSHBULLET_APIKEY + ":") },
-                                body = urlencode(data))
+                                headers={'Content-type': "application/x-www-form-urlencoded",
+                                            'Authorization': 'Basic %s' % base64.b64encode(headphones.CONFIG.PUSHBULLET_APIKEY + ":") },
+                                body=urlencode(data))
         response = http_handler.getresponse()
         request_status = response.status
         logger.debug(u"PushBullet response status: %r" % request_status)
@@ -480,6 +487,7 @@ class PUSHBULLET(object):
 
         self.notify('Main Screen Activate', 'Test Message')
 
+
 class PUSHALOT(object):
 
     def notify(self, message, event):
@@ -500,8 +508,8 @@ class PUSHALOT(object):
 
         http_handler.request("POST",
                                 "/api/sendmessage",
-                                headers = {'Content-type': "application/x-www-form-urlencoded"},
-                                body = urlencode(data))
+                                headers={'Content-type': "application/x-www-form-urlencoded"},
+                                body=urlencode(data))
         response = http_handler.getresponse()
         request_status = response.status
 
@@ -518,6 +526,7 @@ class PUSHALOT(object):
         else:
                 logger.info(u"Pushalot notification failed.")
                 return False
+
 
 class Synoindex(object):
     def __init__(self, util_loc='/usr/syno/bin/synoindex'):
@@ -555,6 +564,7 @@ class Synoindex(object):
             for path in path_list:
                 self.notify(path)
 
+
 class PUSHOVER(object):
 
     def __init__(self):
@@ -584,8 +594,8 @@ class PUSHOVER(object):
 
         http_handler.request("POST",
                                 "/1/messages.json",
-                                headers = {'Content-type': "application/x-www-form-urlencoded"},
-                                body = urlencode(data))
+                                headers={'Content-type': "application/x-www-form-urlencoded"},
+                                body=urlencode(data))
         response = http_handler.getresponse()
         request_status = response.status
         logger.debug(u"Pushover response status: %r" % request_status)
@@ -613,12 +623,13 @@ class PUSHOVER(object):
 
         self.notify('Main Screen Activate', 'Test Message')
 
+
 class TwitterNotifier(object):
 
     REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
-    ACCESS_TOKEN_URL  = 'https://api.twitter.com/oauth/access_token'
+    ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
     AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authorize'
-    SIGNIN_URL        = 'https://api.twitter.com/oauth/authenticate'
+    SIGNIN_URL = 'https://api.twitter.com/oauth/authenticate'
 
     def __init__(self):
         self.consumer_key = "oYKnp2ddX5gbARjqX8ZAAg"
@@ -638,8 +649,8 @@ class TwitterNotifier(object):
     def _get_authorization(self):
 
         signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1() #@UnusedVariable
-        oauth_consumer             = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
-        oauth_client               = oauth.Client(oauth_consumer)
+        oauth_consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
+        oauth_client = oauth.Client(oauth_consumer)
 
         logger.info('Requesting temp token from Twitter')
 
@@ -653,7 +664,7 @@ class TwitterNotifier(object):
             headphones.CONFIG.TWITTER_USERNAME = request_token['oauth_token']
             headphones.CONFIG.TWITTER_PASSWORD = request_token['oauth_token_secret']
 
-            return self.AUTHORIZATION_URL+"?oauth_token="+ request_token['oauth_token']
+            return self.AUTHORIZATION_URL+"?oauth_token=" + request_token['oauth_token']
 
     def _get_credentials(self, key):
         request_token = {}
@@ -668,14 +679,14 @@ class TwitterNotifier(object):
         logger.info('Generating and signing request for an access token using key '+key)
 
         signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1() #@UnusedVariable
-        oauth_consumer             = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
+        oauth_consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
         logger.info('oauth_consumer: '+str(oauth_consumer))
-        oauth_client  = oauth.Client(oauth_consumer, token)
+        oauth_client = oauth.Client(oauth_consumer, token)
         logger.info('oauth_client: '+str(oauth_client))
         resp, content = oauth_client.request(self.ACCESS_TOKEN_URL, method='POST', body='oauth_verifier=%s' % key)
         logger.info('resp, content: '+str(resp)+','+str(content))
 
-        access_token  = dict(parse_qsl(content))
+        access_token = dict(parse_qsl(content))
         logger.info('access_token: '+str(access_token))
 
         logger.info('resp[status] = '+str(resp['status']))
@@ -689,13 +700,12 @@ class TwitterNotifier(object):
             headphones.CONFIG.TWITTER_PASSWORD = access_token['oauth_token_secret']
             return True
 
-
     def _send_tweet(self, message=None):
 
-        username=self.consumer_key
-        password=self.consumer_secret
-        access_token_key=headphones.CONFIG.TWITTER_USERNAME
-        access_token_secret=headphones.CONFIG.TWITTER_PASSWORD
+        username = self.consumer_key
+        password = self.consumer_secret
+        access_token_key = headphones.CONFIG.TWITTER_USERNAME
+        access_token_secret = headphones.CONFIG.TWITTER_PASSWORD
 
         logger.info(u"Sending tweet: "+message)
 
@@ -717,6 +727,7 @@ class TwitterNotifier(object):
 
         return self._send_tweet(prefix+": "+message)
 
+
 class OSX_NOTIFY(object):
 
     def __init__(self):
@@ -727,6 +738,7 @@ class OSX_NOTIFY(object):
 
     def swizzle(self, cls, SEL, func):
         old_IMP = cls.instanceMethodForSelector_(SEL)
+
         def wrapper(self, *args, **kwargs):
             return func(self, old_IMP, *args, **kwargs)
         new_IMP = self.objc.selector(wrapper, selector=old_IMP.selector,
@@ -772,6 +784,7 @@ class OSX_NOTIFY(object):
     def swizzled_bundleIdentifier(self, original, swizzled):
         return 'ade.headphones.osxnotify'
 
+
 class BOXCAR(object):
 
     def __init__(self):
@@ -797,6 +810,7 @@ class BOXCAR(object):
         except urllib2.URLError as e:
             logger.warn('Error sending Boxcar2 Notification: %s' % e)
             return False
+
 
 class SubSonicNotifier(object):
 
