@@ -84,7 +84,7 @@ class BaseJobStore(six.with_metaclass(ABCMeta)):
     def get_all_jobs(self):
         """
         Returns a list of all jobs in this job store. The returned jobs should be sorted by next run time (ascending).
-        Paused jobs (next_run_time == None) should be sorted last.
+        Paused jobs (next_run_time is None) should be sorted last.
 
         The job store is responsible for setting the ``scheduler`` and ``jobstore`` attributes of the returned jobs to
         point to the scheduler and itself, respectively.

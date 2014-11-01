@@ -206,8 +206,8 @@ def string_dist(str1, str2):
     an edit distance, normalized by the string length, with a number of
     tweaks that reflect intuition about text.
     """
-    if str1 == None and str2 == None: return 0.0
-    if str1 == None or str2 == None:  return 1.0
+    if str1 is None and str2 is None: return 0.0
+    if str1 is None or str2 is None:  return 1.0
 
     str1 = str1.lower()
     str2 = str2.lower()

@@ -236,7 +236,7 @@ def addTorrent(link, hash):
     # If there's no folder yet then it's probably a magnet, try until folder is populated
     if torrent_folder == active_dir or not torrent_folder:
         tries = 1
-        while (torrent_folder == active_dir or torrent_folder == None) and tries <= 10:
+        while (torrent_folder == active_dir or torrent_folder is None) and tries <= 10:
             tries += 1
             time.sleep(6)
             torrent_folder, cacheid = dirTorrent(hash, cacheid)
