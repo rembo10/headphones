@@ -218,7 +218,7 @@ def getArtist(artistid, extrasonly=False):
             artist = musicbrainzngs.get_artist_by_id(artistid)['artist']
             newRgs = None
             artist['release-group-list'] = []
-            while newRgs == None or len(newRgs) >= limit:
+            while newRgs is None or len(newRgs) >= limit:
                 newRgs = musicbrainzngs.browse_release_groups(artistid, release_type="album", offset=len(artist['release-group-list']), limit=limit)['release-group-list']
                 artist['release-group-list'] += newRgs
         except musicbrainzngs.WebServiceError as e:
@@ -299,7 +299,7 @@ def getArtist(artistid, extrasonly=False):
                 try:
                     limit = 200
                     newRgs = None
-                    while newRgs == None or len(newRgs) >= limit:
+                    while newRgs is None or len(newRgs) >= limit:
                         newRgs = musicbrainzngs.browse_release_groups(artistid, release_type=include, offset=len(mb_extras_list), limit=limit)['release-group-list']
                         mb_extras_list += newRgs
                 except musicbrainzngs.WebServiceError as e:
@@ -417,7 +417,7 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
     try:
         limit = 100
         newResults = None
-        while newResults == None or len(newResults) >= limit:
+        while newResults is None or len(newResults) >= limit:
             newResults = musicbrainzngs.browse_releases(release_group=rgid, includes=['artist-credits', 'labels', 'recordings', 'release-groups', 'media'], limit=limit, offset=len(results))
             if 'release-list' not in newResults:
                 break #may want to raise an exception here instead ?

@@ -58,14 +58,14 @@ class DBConnection:
 
     def action(self, query, args=None):
 
-        if query == None:
+        if query is None:
             return
 
         sqlResult = None
 
         try:
             with self.connection as c:
-                if args == None:
+                if args is None:
                     sqlResult = c.execute(query)
                 else:
                     sqlResult = c.execute(query, args)
@@ -87,7 +87,7 @@ class DBConnection:
 
         sqlResults = self.action(query, args).fetchall()
 
-        if sqlResults == None or sqlResults == [None]:
+        if sqlResults is None or sqlResults == [None]:
             return []
 
         return sqlResults

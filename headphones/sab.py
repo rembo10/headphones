@@ -100,7 +100,7 @@ def sendNZB(nzb):
         logger.error(u"Error: " + str(e))
         return False
 
-    if f == None:
+    if f is None:
         logger.info(u"No data returned from SABnzbd, NZB not sent")
         return False
 

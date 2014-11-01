@@ -37,7 +37,7 @@ def sendNZB(nzb):
     addToTop = False
     nzbgetXMLrpc = "%(username)s:%(password)s@%(host)s/xmlrpc"
 
-    if headphones.CONFIG.NZBGET_HOST == None:
+    if headphones.CONFIG.NZBGET_HOST is None:
         logger.error(u"No NZBget host found in configuration. Please configure it.")
         return False
 
@@ -90,7 +90,7 @@ def sendNZB(nzb):
                 if nzb.resultType == "nzb":
                     genProvider = GenericProvider("")
                     data = genProvider.getURL(nzb.url)
-                    if (data == None):
+                    if (data is None):
                         return False
                     nzbcontent64 = standard_b64encode(data)
                 nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.CONFIG.NZBGET_CATEGORY, addToTop, nzbcontent64)
