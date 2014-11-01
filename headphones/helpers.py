@@ -33,7 +33,7 @@ RE_CD = re.compile(r"^(CD|dics)\s*[0-9]+$", re.I)
 
 
 def multikeysort(items, columns):
-    comparers = [ ((itemgetter(col[1:].strip()), -1) if col.startswith('-') else (itemgetter(col.strip()), 1)) for col in columns]
+    comparers = [((itemgetter(col[1:].strip()), -1) if col.startswith('-') else (itemgetter(col.strip()), 1)) for col in columns]
 
     def comparer(left, right):
         for fn, mult in comparers:
@@ -290,7 +290,7 @@ def expand_subfolders(f):
         return
 
     # Split into path components
-    media_folders = [ split_path(media_folder) for media_folder in media_folders ]
+    media_folders = [split_path(media_folder) for media_folder in media_folders]
 
     # Correct folder endings such as CD1 etc.
     for index, media_folder in enumerate(media_folders):
@@ -298,7 +298,7 @@ def expand_subfolders(f):
             media_folders[index] = media_folders[index][:-1]
 
     # Verify the result by computing path depth relative to root.
-    path_depths = [ len(media_folder) for media_folder in media_folders ]
+    path_depths = [len(media_folder) for media_folder in media_folders]
     difference = max(path_depths) - min(path_depths)
 
     if difference > 0:
@@ -308,15 +308,15 @@ def expand_subfolders(f):
         # directory may contain separate CD's and maybe some extra's. The
         # structure may look like X albums at same depth, and (one or more)
         # extra folders with a higher depth.
-        extra_media_folders = [ media_folder[:min(path_depths)] for media_folder in media_folders if len(media_folder) > min(path_depths) ]
-        extra_media_folders = list(set([ os.path.join(*media_folder) for media_folder in extra_media_folders ]))
+        extra_media_folders = [media_folder[:min(path_depths)] for media_folder in media_folders if len(media_folder) > min(path_depths)]
+        extra_media_folders = list(set([os.path.join(*media_folder) for media_folder in extra_media_folders]))
 
         logger.info("Please look at the following folder(s), since they cause the depth difference: %s", extra_media_folders)
         return
 
     # Convert back to paths and remove duplicates, which may be there after
     # correcting the paths
-    media_folders = list(set([ os.path.join(*media_folder) for media_folder in media_folders ]))
+    media_folders = list(set([os.path.join(*media_folder) for media_folder in media_folders]))
 
     # Don't return a result if the number of subfolders is one. In this case,
     # this algorithm will not improve processing and will likely interfere
@@ -406,9 +406,9 @@ def extract_metadata(f):
         return (None, None, None)
 
     # Count distinct values
-    artists = list(set([ x[0] for x in results ]))
-    albums = list(set([ x[1] for x in results ]))
-    years = list(set([ x[2] for x in results ]))
+    artists = list(set([x[0] for x in results]))
+    albums = list(set([x[1] for x in results]))
+    years = list(set([x[2] for x in results]))
 
     # Remove things such as CD2 from album names
     if len(albums) > 1:
@@ -436,8 +436,8 @@ def extract_metadata(f):
 
     # (Lots of) different artists. Could be a featuring album, so test for this.
     if len(artists) > 1 and len(albums) == 1:
-        split_artists = [ RE_FEATURING.split(artist) for artist in artists ]
-        featurings = [ len(split_artist) - 1 for split_artist in split_artists ]
+        split_artists = [RE_FEATURING.split(artist) for artist in artists]
+        featurings = [len(split_artist) - 1 for split_artist in split_artists]
         logger.info("Album seem to feature %d different artists", sum(featurings))
 
         if sum(featurings) > 0:

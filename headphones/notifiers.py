@@ -149,7 +149,7 @@ class PROWL(object):
                 'application': 'Headphones',
                 'event': event,
                 'description': message.encode("utf-8"),
-                'priority': headphones.CONFIG.PROWL_PRIORITY }
+                'priority': headphones.CONFIG.PROWL_PRIORITY}
 
         http_handler.request("POST",
                                 "/publicapi/add",
@@ -189,8 +189,8 @@ class MPC(object):
 
         pass
 
-    def notify( self ):
-        subprocess.call( ["mpc", "update"] )
+    def notify(self):
+        subprocess.call(["mpc", "update"])
 
 
 class XBMC(object):
@@ -452,12 +452,12 @@ class PUSHBULLET(object):
         data = {'device_iden': headphones.CONFIG.PUSHBULLET_DEVICEID,
                 'type': "note",
                 'title': "Headphones",
-                'body': message.encode("utf-8") }
+                'body': message.encode("utf-8")}
 
         http_handler.request("POST",
                                 "/api/pushes",
                                 headers={'Content-type': "application/x-www-form-urlencoded",
-                                            'Authorization': 'Basic %s' % base64.b64encode(headphones.CONFIG.PUSHBULLET_APIKEY + ":") },
+                                            'Authorization': 'Basic %s' % base64.b64encode(headphones.CONFIG.PUSHBULLET_APIKEY + ":")},
                                 body=urlencode(data))
         response = http_handler.getresponse()
         request_status = response.status
@@ -504,7 +504,7 @@ class PUSHALOT(object):
 
         data = {'AuthorizationToken': pushalot_authorizationtoken,
                 'Title': event.encode('utf-8'),
-                'Body': message.encode("utf-8") }
+                'Body': message.encode("utf-8")}
 
         http_handler.request("POST",
                                 "/api/sendmessage",
@@ -590,7 +590,7 @@ class PUSHOVER(object):
                 'user': headphones.CONFIG.PUSHOVER_KEYS,
                 'title': event,
                 'message': message.encode("utf-8"),
-                'priority': headphones.CONFIG.PUSHOVER_PRIORITY }
+                'priority': headphones.CONFIG.PUSHOVER_PRIORITY}
 
         http_handler.request("POST",
                                 "/1/messages.json",

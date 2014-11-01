@@ -477,7 +477,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
         # Request results
         logger.info('Parsing results from Headphones Indexer')
 
-        headers = { 'User-Agent': USER_AGENT }
+        headers = {'User-Agent': USER_AGENT}
         params = {
             "t": "search",
             "cat": categories,
@@ -549,7 +549,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
             # Request results
             logger.info('Parsing results from %s', newznab_host[0])
 
-            headers = { 'User-Agent': USER_AGENT }
+            headers = {'User-Agent': USER_AGENT}
             params = {
                 "t": "search",
                 "apikey": newznab_host[1],
@@ -598,7 +598,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
         # Request results
         logger.info('Parsing results from nzbs.org')
 
-        headers = { 'User-Agent': USER_AGENT }
+        headers = {'User-Agent': USER_AGENT}
         params = {
             "t": "search",
             "apikey": headphones.CONFIG.NZBSORG_HASH,
@@ -645,7 +645,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
         # Request results
         logger.info('Parsing results from omgwtfnzbs')
 
-        headers = { 'User-Agent': USER_AGENT }
+        headers = {'User-Agent': USER_AGENT}
         params = {
             "user": headphones.CONFIG.OMGWTFNZBS_UID,
             "api": headphones.CONFIG.OMGWTFNZBS_APIKEY,
@@ -1288,8 +1288,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
 
             # filter on format, size, and num seeders
             logger.info(u"Filtering torrents by format, maximum size, and minimum seeders...")
-            match_torrents = [ torrent for torrent in all_torrents if torrent.size <= maxsize ]
-            match_torrents = [ torrent for torrent in match_torrents if torrent.seeders >= minimumseeders ]
+            match_torrents = [torrent for torrent in all_torrents if torrent.size <= maxsize]
+            match_torrents = [torrent for torrent in match_torrents if torrent.seeders >= minimumseeders]
 
             logger.info(u"Remaining torrents: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
 

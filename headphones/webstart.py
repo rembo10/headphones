@@ -110,7 +110,7 @@ def initialize(options=None):
                     options['http_username']: options['http_password']
                 })
         })
-        conf['/api'] = { 'tools.auth_basic.on': False }
+        conf['/api'] = {'tools.auth_basic.on': False}
 
     # Prevent time-outs
     cherrypy.engine.timeout_monitor.unsubscribe()

@@ -109,11 +109,11 @@ def verify(albumid, albumpath, Kind=None, forced=False):
         else:
             sortname = release_dict['artist_name']
 
-        controlValueDict = {"ArtistID":     release_dict['artist_id']}
-        newValueDict = {"ArtistName":       release_dict['artist_name'],
-                        "ArtistSortName":   sortname,
-                        "DateAdded":        helpers.today(),
-                        "Status":           "Paused"}
+        controlValueDict = {"ArtistID": release_dict['artist_id']}
+        newValueDict = {"ArtistName": release_dict['artist_name'],
+                        "ArtistSortName": sortname,
+                        "DateAdded": helpers.today(),
+                        "Status": "Paused"}
 
         logger.info("ArtistID: " + release_dict['artist_id'] + " , ArtistName: " + release_dict['artist_name'])
 
@@ -124,17 +124,17 @@ def verify(albumid, albumpath, Kind=None, forced=False):
         myDB.upsert("artists", newValueDict, controlValueDict)
 
         logger.info(u"Now adding album: " + release_dict['title'])
-        controlValueDict = {"AlbumID":  albumid}
+        controlValueDict = {"AlbumID": albumid}
 
-        newValueDict = {"ArtistID":         release_dict['artist_id'],
-                        "ReleaseID":        albumid,
-                        "ArtistName":       release_dict['artist_name'],
-                        "AlbumTitle":       release_dict['title'],
-                        "AlbumASIN":        release_dict['asin'],
-                        "ReleaseDate":      release_dict['date'],
-                        "DateAdded":        helpers.today(),
-                        "Type":             release_dict['rg_type'],
-                        "Status":           "Snatched"
+        newValueDict = {"ArtistID": release_dict['artist_id'],
+                        "ReleaseID": albumid,
+                        "ArtistName": release_dict['artist_name'],
+                        "AlbumTitle": release_dict['title'],
+                        "AlbumASIN": release_dict['asin'],
+                        "ReleaseDate": release_dict['date'],
+                        "DateAdded": helpers.today(),
+                        "Type": release_dict['rg_type'],
+                        "Status": "Snatched"
                         }
 
         myDB.upsert("albums", newValueDict, controlValueDict)
@@ -143,22 +143,22 @@ def verify(albumid, albumpath, Kind=None, forced=False):
         myDB.action('DELETE from tracks WHERE AlbumID=?', [albumid])
         for track in release_dict['tracks']:
 
-            controlValueDict = {"TrackID":  track['id'],
-                                "AlbumID":  albumid}
+            controlValueDict = {"TrackID": track['id'],
+                                "AlbumID": albumid}
 
-            newValueDict = {"ArtistID":     release_dict['artist_id'],
-                        "ArtistName":       release_dict['artist_name'],
-                        "AlbumTitle":       release_dict['title'],
-                        "AlbumASIN":        release_dict['asin'],
-                        "TrackTitle":       track['title'],
-                        "TrackDuration":    track['duration'],
-                        "TrackNumber":      track['number']
+            newValueDict = {"ArtistID": release_dict['artist_id'],
+                        "ArtistName": release_dict['artist_name'],
+                        "AlbumTitle": release_dict['title'],
+                        "AlbumASIN": release_dict['asin'],
+                        "TrackTitle": track['title'],
+                        "TrackDuration": track['duration'],
+                        "TrackNumber": track['number']
                         }
 
             myDB.upsert("tracks", newValueDict, controlValueDict)
 
-        controlValueDict = {"ArtistID":     release_dict['artist_id']}
-        newValueDict = {"Status":           "Paused"}
+        controlValueDict = {"ArtistID": release_dict['artist_id']}
+        newValueDict = {"Status": "Paused"}
 
         myDB.upsert("artists", newValueDict, controlValueDict)
         logger.info(u"Addition complete for: " + release_dict['title'] + " - " + release_dict['artist_name'])
@@ -532,12 +532,12 @@ def addAlbumArt(artwork, albumpath, release):
     except TypeError:
         year = ''
 
-    values = {  '$Artist':      release['ArtistName'],
-                '$Album':       release['AlbumTitle'],
-                '$Year':        year,
-                '$artist':      release['ArtistName'].lower(),
-                '$album':       release['AlbumTitle'].lower(),
-                '$year':        year
+    values = {'$Artist': release['ArtistName'],
+                '$Album': release['AlbumTitle'],
+                '$Year': year,
+                '$artist': release['ArtistName'].lower(),
+                '$album': release['AlbumTitle'].lower(),
+                '$year': year
                 }
 
     album_art_name = helpers.replace_all(headphones.CONFIG.ALBUM_ART_FORMAT.strip(), values) + ".jpg"
@@ -616,19 +616,19 @@ def moveFiles(albumpath, release, tracks):
         except:
             origfolder = u''
 
-    values = {  '$Artist':  artist,
+    values = {'$Artist': artist,
                 '$SortArtist': sortname,
-                '$Album':   album,
-                '$Year':        year,
-                '$Type':  releasetype,
+                '$Album': album,
+                '$Year': year,
+                '$Type': releasetype,
                 '$OriginalFolder': origfolder,
-                '$First':   firstchar.upper(),
-                '$artist':  artist.lower(),
+                '$First': firstchar.upper(),
+                '$artist': artist.lower(),
                 '$sortartist': sortname.lower(),
-                '$album':   album.lower(),
-                '$year':        year,
-                '$type':  releasetype.lower(),
-                '$first':   firstchar.lower(),
+                '$album': album.lower(),
+                '$year': year,
+                '$type': releasetype.lower(),
+                '$first': firstchar.lower(),
                 '$originalfolder': origfolder.lower()
             }
 
@@ -966,20 +966,20 @@ def renameFiles(albumpath, downloaded_track_list, release):
             else:
                 sortname = artistname
 
-            values = {  '$Disc':        discnumber,
-                        '$Track':       tracknumber,
-                        '$Title':       title,
-                        '$Artist':      artistname,
-                        '$SortArtist':  sortname,
-                        '$Album':       release['AlbumTitle'],
-                        '$Year':        year,
-                        '$disc':        discnumber,
-                        '$track':       tracknumber,
-                        '$title':       title.lower(),
-                        '$artist':      artistname.lower(),
-                        '$sortartist':  sortname.lower(),
-                        '$album':       release['AlbumTitle'].lower(),
-                        '$year':        year
+            values = {'$Disc': discnumber,
+                        '$Track': tracknumber,
+                        '$Title': title,
+                        '$Artist': artistname,
+                        '$SortArtist': sortname,
+                        '$Album': release['AlbumTitle'],
+                        '$Year': year,
+                        '$disc': discnumber,
+                        '$track': tracknumber,
+                        '$title': title.lower(),
+                        '$artist': artistname.lower(),
+                        '$sortartist': sortname.lower(),
+                        '$album': release['AlbumTitle'].lower(),
+                        '$year': year
                         }
 
             ext = os.path.splitext(downloaded_track)[1]

@@ -12,11 +12,11 @@ def getXldProfile(xldProfile):
     try:
         preferences = plistlib.Plist.fromFile(expandedPath)
     except (expat.ExpatError):
-        os.system("/usr/bin/plutil -convert xml1 %s" % expandedPath )
+        os.system("/usr/bin/plutil -convert xml1 %s" % expandedPath)
         try:
             preferences = plistlib.Plist.fromFile(expandedPath)
         except (ImportError):
-            os.system("/usr/bin/plutil -convert binary1 %s" % expandedPath )
+            os.system("/usr/bin/plutil -convert binary1 %s" % expandedPath)
             logger.info('The plist at "%s" has a date in it, and therefore is not useable.' % expandedPath)
             return(xldProfileNotFound, None, None)
     except (ImportError):

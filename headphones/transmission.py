@@ -64,7 +64,7 @@ def addTorrent(link):
 
 def getTorrentFolder(torrentid):
     method = 'torrent-get'
-    arguments = { 'ids': torrentid, 'fields': ['name', 'percentDone']}
+    arguments = {'ids': torrentid, 'fields': ['name', 'percentDone']}
 
     response = torrentAction(method, arguments)
     percentdone = response['arguments']['torrents'][0]['percentDone']
@@ -98,7 +98,7 @@ def setSeedRatio(torrentid, ratio):
 def removeTorrent(torrentid, remove_data=False):
 
     method = 'torrent-get'
-    arguments = { 'ids': torrentid, 'fields': ['isFinished', 'name']}
+    arguments = {'ids': torrentid, 'fields': ['isFinished', 'name']}
 
     response = torrentAction(method, arguments)
     if not response:
@@ -181,8 +181,8 @@ def torrentAction(method, arguments):
         return
 
     # Prepare next request
-    headers = { 'x-transmission-session-id': sessionid }
-    data = { 'method': method, 'arguments': arguments }
+    headers = {'x-transmission-session-id': sessionid}
+    data = {'method': method, 'arguments': arguments}
 
     response = request.request_json(host, method="post", data=json.dumps(data), headers=headers, auth=auth)
 

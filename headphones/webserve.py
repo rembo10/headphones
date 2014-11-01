@@ -167,7 +167,7 @@ class WebInterface(object):
         myDB = db.DBConnection()
         controlValueDict = {'ArtistID': ArtistID}
         newValueDict = {'IncludeExtras': 1,
-                        'Extras':        extras}
+                        'Extras': extras}
         myDB.upsert("artists", newValueDict, controlValueDict)
         threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True, False]).start()
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
@@ -460,12 +460,12 @@ class WebInterface(object):
             # else:
             #     original_clean = None
                 if original_clean == albums['CleanName']:
-                    have_dict = { 'ArtistName': albums['ArtistName'], 'AlbumTitle': albums['AlbumTitle'] }
+                    have_dict = {'ArtistName': albums['ArtistName'], 'AlbumTitle': albums['AlbumTitle']}
                     have_album_dictionary.append(have_dict)
         headphones_albums = myDB.select('SELECT ArtistName, AlbumTitle from albums ORDER BY ArtistName')
         for albums in headphones_albums:
             if albums['ArtistName'] and albums['AlbumTitle']:
-                headphones_dict = { 'ArtistName': albums['ArtistName'], 'AlbumTitle': albums['AlbumTitle'] }
+                headphones_dict = {'ArtistName': albums['ArtistName'], 'AlbumTitle': albums['AlbumTitle']}
                 headphones_album_dictionary.append(headphones_dict)
         #unmatchedalbums = [f for f in have_album_dictionary if f not in [x for x in headphones_album_dictionary]]
 
@@ -574,7 +574,7 @@ class WebInterface(object):
                         album_status = "Ignored"
                     elif albums['Matched'] == "Manual" or albums['CleanName'] != original_clean:
                         album_status = "Matched"
-                    manual_dict = { 'ArtistName': albums['ArtistName'], 'AlbumTitle': albums['AlbumTitle'], 'AlbumStatus': album_status }
+                    manual_dict = {'ArtistName': albums['ArtistName'], 'AlbumTitle': albums['AlbumTitle'], 'AlbumStatus': album_status}
                     if manual_dict not in manual_albums:
                         manual_albums.append(manual_dict)
         manual_albums_sorted = sorted(manual_albums, key=itemgetter('ArtistName', 'AlbumTitle'))
@@ -865,7 +865,7 @@ class WebInterface(object):
         artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
         artist_json = json.dumps({
                                     'ArtistName': artist['ArtistName'],
-                                    'Status':     artist['Status']
+                                    'Status': artist['Status']
                                  })
         return artist_json
     getArtistjson.exposed = True
@@ -876,7 +876,7 @@ class WebInterface(object):
         album_json = json.dumps({
                                    'AlbumTitle': album['AlbumTitle'],
                                    'ArtistName': album['ArtistName'],
-                                   'Status':     album['Status']
+                                   'Status': album['Status']
         })
         return album_json
     getAlbumjson.exposed = True
@@ -900,7 +900,7 @@ class WebInterface(object):
 
         import hashlib, random
 
-        apikey = hashlib.sha224( str(random.getrandbits(256)) ).hexdigest()[0:32]
+        apikey = hashlib.sha224(str(random.getrandbits(256))).hexdigest()[0:32]
         logger.info("New API generated")
         return apikey
 
@@ -929,7 +929,7 @@ class WebInterface(object):
     def config(self):
 
         interface_dir = os.path.join(headphones.PROG_DIR, 'data/interfaces/')
-        interface_list = [ name for name in os.listdir(interface_dir) if os.path.isdir(os.path.join(interface_dir, name)) ]
+        interface_list = [name for name in os.listdir(interface_dir) if os.path.isdir(os.path.join(interface_dir, name))]
 
         config = {
             "http_host": headphones.CONFIG.HTTP_HOST,
@@ -1053,12 +1053,12 @@ class WebInterface(object):
             "log_dir": headphones.CONFIG.LOG_DIR,
             "cache_dir": headphones.CONFIG.CACHE_DIR,
             "interface_list": interface_list,
-            "music_encoder":        checked(headphones.CONFIG.MUSIC_ENCODER),
-            "encoder":      headphones.CONFIG.ENCODER,
-            "xldprofile":   headphones.CONFIG.XLDPROFILE,
-            "bitrate":      int(headphones.CONFIG.BITRATE),
-            "encoder_path":    headphones.CONFIG.ENCODER_PATH,
-            "advancedencoder":  headphones.CONFIG.ADVANCEDENCODER,
+            "music_encoder": checked(headphones.CONFIG.MUSIC_ENCODER),
+            "encoder": headphones.CONFIG.ENCODER,
+            "xldprofile": headphones.CONFIG.XLDPROFILE,
+            "bitrate": int(headphones.CONFIG.BITRATE),
+            "encoder_path": headphones.CONFIG.ENCODER_PATH,
+            "advancedencoder": headphones.CONFIG.ADVANCEDENCODER,
             "encoderoutputformat": headphones.CONFIG.ENCODEROUTPUTFORMAT,
             "samplingfrequency": headphones.CONFIG.SAMPLINGFREQUENCY,
             "encodervbrcbr": headphones.CONFIG.ENCODERVBRCBR,
@@ -1204,7 +1204,6 @@ class WebInterface(object):
                     if key in kwargs:
                         del kwargs[key]
                 extra_newznabs.append((newznab_host, newznab_api, newznab_enabled))
-
 
         # Convert the extras to list then string. Coming in as 0 or 1 (append new extras to the end)
         temp_extras_list = []
