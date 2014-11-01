@@ -191,11 +191,11 @@ class Cache(object):
         if not db_info or not db_info['LastUpdated'] or not self._is_current(date=db_info['LastUpdated']):
 
             self._update_cache()
-            info_dict = { 'Summary': self.info_summary, 'Content': self.info_content }
+            info_dict = {'Summary': self.info_summary, 'Content': self.info_content}
             return info_dict
 
         else:
-            info_dict = { 'Summary': db_info['Summary'], 'Content': db_info['Content'] }
+            info_dict = {'Summary': db_info['Summary'], 'Content': db_info['Content']}
             return info_dict
 
     def get_image_links(self, ArtistID=None, AlbumID=None):
@@ -240,7 +240,7 @@ class Cache(object):
             if not thumb_url:
                 logger.debug('No album thumbnail image found on last.fm')
 
-        return {'artwork': image_url, 'thumbnail': thumb_url }
+        return {'artwork': image_url, 'thumbnail': thumb_url}
 
     def remove_from_cache(self, ArtistID=None, AlbumID=None):
         """
@@ -343,13 +343,13 @@ class Cache(object):
 
         #Save the content & summary to the database no matter what if we've opened up the url
         if self.id_type == 'artist':
-            controlValueDict = {"ArtistID":     self.id}
+            controlValueDict = {"ArtistID": self.id}
         else:
-            controlValueDict = {"ReleaseGroupID":     self.id}
+            controlValueDict = {"ReleaseGroupID": self.id}
 
-        newValueDict = {"Summary":       self.info_summary,
-                        "Content":       self.info_content,
-                        "LastUpdated":   helpers.today()}
+        newValueDict = {"Summary": self.info_summary,
+                        "Content": self.info_content,
+                        "LastUpdated": helpers.today()}
 
         myDB.upsert("descriptions", newValueDict, controlValueDict)
 

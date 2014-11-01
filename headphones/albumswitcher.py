@@ -31,17 +31,17 @@ def switch(AlbumID, ReleaseID):
         'SELECT * from alltracks WHERE ReleaseID=?', [ReleaseID]).fetchall()
     myDB.action('DELETE from tracks WHERE AlbumID=?', [AlbumID])
 
-    controlValueDict = {"AlbumID":  AlbumID}
+    controlValueDict = {"AlbumID": AlbumID}
 
-    newValueDict = {"ArtistID":         newalbumdata['ArtistID'],
-                    "ArtistName":       newalbumdata['ArtistName'],
-                    "AlbumTitle":       newalbumdata['AlbumTitle'],
-                    "ReleaseID":        newalbumdata['ReleaseID'],
-                    "AlbumASIN":        newalbumdata['AlbumASIN'],
-                    "ReleaseDate":      newalbumdata['ReleaseDate'],
-                    "Type":             newalbumdata['Type'],
-                    "ReleaseCountry":   newalbumdata['ReleaseCountry'],
-                    "ReleaseFormat":    newalbumdata['ReleaseFormat']
+    newValueDict = {"ArtistID": newalbumdata['ArtistID'],
+                    "ArtistName": newalbumdata['ArtistName'],
+                    "AlbumTitle": newalbumdata['AlbumTitle'],
+                    "ReleaseID": newalbumdata['ReleaseID'],
+                    "AlbumASIN": newalbumdata['AlbumASIN'],
+                    "ReleaseDate": newalbumdata['ReleaseDate'],
+                    "Type": newalbumdata['Type'],
+                    "ReleaseCountry": newalbumdata['ReleaseCountry'],
+                    "ReleaseFormat": newalbumdata['ReleaseFormat']
                     }
 
     myDB.upsert("albums", newValueDict, controlValueDict)
@@ -53,21 +53,21 @@ def switch(AlbumID, ReleaseID):
 
     for track in newtrackdata:
 
-        controlValueDict = {"TrackID":  track['TrackID'],
-                            "AlbumID":  AlbumID}
+        controlValueDict = {"TrackID": track['TrackID'],
+                            "AlbumID": AlbumID}
 
-        newValueDict = {"ArtistID":     track['ArtistID'],
-                        "ArtistName":       track['ArtistName'],
-                        "AlbumTitle":       track['AlbumTitle'],
-                        "AlbumASIN":        track['AlbumASIN'],
-                        "ReleaseID":        track['ReleaseID'],
-                        "TrackTitle":       track['TrackTitle'],
-                        "TrackDuration":    track['TrackDuration'],
-                        "TrackNumber":      track['TrackNumber'],
-                        "CleanName":        track['CleanName'],
-                        "Location":         track['Location'],
-                        "Format":           track['Format'],
-                        "BitRate":          track['BitRate']
+        newValueDict = {"ArtistID": track['ArtistID'],
+                        "ArtistName": track['ArtistName'],
+                        "AlbumTitle": track['AlbumTitle'],
+                        "AlbumASIN": track['AlbumASIN'],
+                        "ReleaseID": track['ReleaseID'],
+                        "TrackTitle": track['TrackTitle'],
+                        "TrackDuration": track['TrackDuration'],
+                        "TrackNumber": track['TrackNumber'],
+                        "CleanName": track['CleanName'],
+                        "Location": track['Location'],
+                        "Format": track['Format'],
+                        "BitRate": track['BitRate']
                         }
 
         myDB.upsert("tracks", newValueDict, controlValueDict)
@@ -88,9 +88,9 @@ def switch(AlbumID, ReleaseID):
     havetracks = len(myDB.select(
         'SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [newalbumdata['ArtistID']]))
 
-    controlValueDict = {"ArtistID":     newalbumdata['ArtistID']}
+    controlValueDict = {"ArtistID": newalbumdata['ArtistID']}
 
-    newValueDict = {"TotalTracks":      totaltracks,
-                    "HaveTracks":       havetracks}
+    newValueDict = {"TotalTracks": totaltracks,
+                    "HaveTracks": havetracks}
 
     myDB.upsert("artists", newValueDict, controlValueDict)

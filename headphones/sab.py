@@ -131,7 +131,7 @@ def sendNZB(nzb):
 
 def checkConfig():
 
-    params = { 'mode': 'get_config',
+    params = {'mode': 'get_config',
                'section': 'misc'
                }
 

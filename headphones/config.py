@@ -381,16 +381,16 @@ class Config(object):
         if self.CONFIG_VERSION == '1':
             from headphones.helpers import replace_all
             file_values = {
-                'Track':        '$Track',
-                'Title':        '$Title',
-                'Artist':       '$Artist',
-                'Album':        '$Album',
-                'Year':         '$Year',
-                'track':        '$track',
-                'title':        '$title',
-                'artist':       '$artist',
-                'album':        '$album',
-                'year':         '$year'
+                'Track': '$Track',
+                'Title': '$Title',
+                'Artist': '$Artist',
+                'Album': '$Album',
+                'Year': '$Year',
+                'track': '$track',
+                'title': '$title',
+                'artist': '$artist',
+                'album': '$album',
+                'year': '$year'
             }
             folder_values = {
                 'Artist': '$Artist',

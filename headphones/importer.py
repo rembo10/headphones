@@ -133,19 +133,19 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
 
     # We need the current minimal info in the database instantly
     # so we don't throw a 500 error when we redirect to the artistPage
-    controlValueDict = {"ArtistID":     artistid}
+    controlValueDict = {"ArtistID": artistid}
 
     # Don't replace a known artist name with an "Artist ID" placeholder
     dbartist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [artistid]).fetchone()
 
     # Only modify the Include Extras stuff if it's a new artist. We need it early so we know what to fetch
     if not dbartist:
-        newValueDict = {"ArtistName":   "Artist ID: %s" % (artistid),
-                        "Status":       "Loading",
+        newValueDict = {"ArtistName": "Artist ID: %s" % (artistid),
+                        "Status": "Loading",
                         "IncludeExtras": headphones.CONFIG.INCLUDE_EXTRAS,
-                        "Extras":        headphones.CONFIG.EXTRAS }
+                        "Extras": headphones.CONFIG.EXTRAS}
     else:
-        newValueDict = {"Status":   "Loading"}
+        newValueDict = {"Status": "Loading"}
 
     myDB.upsert("artists", newValueDict, controlValueDict)
 
@@ -162,10 +162,10 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
     if not artist:
         logger.warn("Error fetching artist info. ID: " + artistid)
         if dbartist is None:
-            newValueDict = {"ArtistName":   "Fetch failed, try refreshing. (%s)" % (artistid),
-                    "Status":   "Active"}
+            newValueDict = {"ArtistName": "Fetch failed, try refreshing. (%s)" % (artistid),
+                    "Status": "Active"}
         else:
-            newValueDict = {"Status":   "Active"}
+            newValueDict = {"Status": "Active"}
         myDB.upsert("artists", newValueDict, controlValueDict)
         return
 
@@ -175,11 +175,11 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
         sortname = artist['artist_name']
 
     logger.info(u"Now adding/updating: " + artist['artist_name'])
-    controlValueDict = {"ArtistID":     artistid}
-    newValueDict = {"ArtistName":       artist['artist_name'],
-                    "ArtistSortName":   sortname,
-                    "DateAdded":        helpers.today(),
-                    "Status":           "Loading"}
+    controlValueDict = {"ArtistID": artistid}
+    newValueDict = {"ArtistName": artist['artist_name'],
+                    "ArtistSortName": sortname,
+                    "DateAdded": helpers.today(),
+                    "Status": "Loading"}
 
     myDB.upsert("artists", newValueDict, controlValueDict)
 
@@ -292,26 +292,26 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             for items in find_hybrid_releases:
                 if items['ReleaseID'] != rg['id']: #don't include hybrid information, since that's what we're replacing
                     hybrid_release_id = items['ReleaseID']
-                    newValueDict = {"ArtistID":         items['ArtistID'],
-                        "ArtistName":       items['ArtistName'],
-                        "AlbumTitle":       items['AlbumTitle'],
-                        "AlbumID":          items['AlbumID'],
-                        "AlbumASIN":        items['AlbumASIN'],
-                        "ReleaseDate":      items['ReleaseDate'],
-                        "Type":             items['Type'],
-                        "ReleaseCountry":   items['ReleaseCountry'],
-                        "ReleaseFormat":    items['ReleaseFormat']
+                    newValueDict = {"ArtistID": items['ArtistID'],
+                        "ArtistName": items['ArtistName'],
+                        "AlbumTitle": items['AlbumTitle'],
+                        "AlbumID": items['AlbumID'],
+                        "AlbumASIN": items['AlbumASIN'],
+                        "ReleaseDate": items['ReleaseDate'],
+                        "Type": items['Type'],
+                        "ReleaseCountry": items['ReleaseCountry'],
+                        "ReleaseFormat": items['ReleaseFormat']
                     }
                     find_hybrid_tracks = myDB.action("SELECT * from alltracks WHERE ReleaseID=?", [hybrid_release_id])
                     totalTracks = 1
                     hybrid_track_array = []
                     for hybrid_tracks in find_hybrid_tracks:
                         hybrid_track_array.append({
-                            'number':        hybrid_tracks['TrackNumber'],
-                            'title':         hybrid_tracks['TrackTitle'],
-                            'id':            hybrid_tracks['TrackID'],
+                            'number': hybrid_tracks['TrackNumber'],
+                            'title': hybrid_tracks['TrackTitle'],
+                            'id': hybrid_tracks['TrackID'],
                             #'url':           hybrid_tracks['TrackURL'],
-                            'duration':      hybrid_tracks['TrackDuration']
+                            'duration': hybrid_tracks['TrackDuration']
                             })
                         totalTracks += 1
                     newValueDict['ReleaseID'] = hybrid_release_id
@@ -331,15 +331,15 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             # Use the ReleaseGroupID as the ReleaseID for the hybrid release to differentiate it
             # We can then use the condition WHERE ReleaseID == ReleaseGroupID to select it
             # The hybrid won't have a country or a format
-            controlValueDict = {"ReleaseID":  rg['id']}
+            controlValueDict = {"ReleaseID": rg['id']}
 
-            newValueDict = {"ArtistID":         artistid,
-                            "ArtistName":       artist['artist_name'],
-                            "AlbumTitle":       rg['title'],
-                            "AlbumID":          rg['id'],
-                            "AlbumASIN":        hybridrelease['AlbumASIN'],
-                            "ReleaseDate":      hybridrelease['ReleaseDate'],
-                            "Type":             rg['type']
+            newValueDict = {"ArtistID": artistid,
+                            "ArtistName": artist['artist_name'],
+                            "AlbumTitle": rg['title'],
+                            "AlbumID": rg['id'],
+                            "AlbumASIN": hybridrelease['AlbumASIN'],
+                            "ReleaseDate": hybridrelease['ReleaseDate'],
+                            "Type": rg['type']
                         }
 
             myDB.upsert("allalbums", newValueDict, controlValueDict)
@@ -348,18 +348,18 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
 
                 cleanname = helpers.cleanName(artist['artist_name'] + ' ' + rg['title'] + ' ' + track['title'])
 
-                controlValueDict = {"TrackID":      track['id'],
-                                    "ReleaseID":    rg['id']}
+                controlValueDict = {"TrackID": track['id'],
+                                    "ReleaseID": rg['id']}
 
-                newValueDict = {"ArtistID":         artistid,
-                                "ArtistName":       artist['artist_name'],
-                                "AlbumTitle":       rg['title'],
-                                "AlbumASIN":        hybridrelease['AlbumASIN'],
-                                "AlbumID":          rg['id'],
-                                "TrackTitle":       track['title'],
-                                "TrackDuration":    track['duration'],
-                                "TrackNumber":      track['number'],
-                                "CleanName":        cleanname
+                newValueDict = {"ArtistID": artistid,
+                                "ArtistName": artist['artist_name'],
+                                "AlbumTitle": rg['title'],
+                                "AlbumASIN": hybridrelease['AlbumASIN'],
+                                "AlbumID": rg['id'],
+                                "TrackTitle": track['title'],
+                                "TrackDuration": track['duration'],
+                                "TrackNumber": track['number'],
+                                "CleanName": cleanname
                             }
 
                 match = myDB.action('SELECT Location, BitRate, Format from have WHERE CleanName=?', [cleanname]).fetchone()
@@ -392,17 +392,17 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
 
             album = myDB.action('SELECT * from allalbums WHERE ReleaseID=?', [releaseid]).fetchone()
 
-            controlValueDict = {"AlbumID":  rg['id']}
+            controlValueDict = {"AlbumID": rg['id']}
 
-            newValueDict = {"ArtistID":         album['ArtistID'],
-                            "ArtistName":       album['ArtistName'],
-                            "AlbumTitle":       album['AlbumTitle'],
-                            "ReleaseID":        album['ReleaseID'],
-                            "AlbumASIN":        album['AlbumASIN'],
-                            "ReleaseDate":      album['ReleaseDate'],
-                            "Type":             album['Type'],
-                            "ReleaseCountry":   album['ReleaseCountry'],
-                            "ReleaseFormat":    album['ReleaseFormat']
+            newValueDict = {"ArtistID": album['ArtistID'],
+                            "ArtistName": album['ArtistName'],
+                            "AlbumTitle": album['AlbumTitle'],
+                            "ReleaseID": album['ReleaseID'],
+                            "AlbumASIN": album['AlbumASIN'],
+                            "ReleaseDate": album['ReleaseDate'],
+                            "Type": album['Type'],
+                            "ReleaseCountry": album['ReleaseCountry'],
+                            "ReleaseFormat": album['ReleaseFormat']
                         }
 
             if rg_exists:
@@ -440,21 +440,21 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                 continue
 
             for track in tracks:
-                controlValueDict = {"TrackID":  track['TrackID'],
-                                    "AlbumID":  rg['id']}
+                controlValueDict = {"TrackID": track['TrackID'],
+                                    "AlbumID": rg['id']}
 
-                newValueDict = {"ArtistID":     track['ArtistID'],
-                            "ArtistName":       track['ArtistName'],
-                            "AlbumTitle":       track['AlbumTitle'],
-                            "AlbumASIN":        track['AlbumASIN'],
-                            "ReleaseID":        track['ReleaseID'],
-                            "TrackTitle":       track['TrackTitle'],
-                            "TrackDuration":    track['TrackDuration'],
-                            "TrackNumber":      track['TrackNumber'],
-                            "CleanName":        track['CleanName'],
-                            "Location":         track['Location'],
-                            "Format":           track['Format'],
-                            "BitRate":          track['BitRate']
+                newValueDict = {"ArtistID": track['ArtistID'],
+                            "ArtistName": track['ArtistName'],
+                            "AlbumTitle": track['AlbumTitle'],
+                            "AlbumASIN": track['AlbumASIN'],
+                            "ReleaseID": track['ReleaseID'],
+                            "TrackTitle": track['TrackTitle'],
+                            "TrackDuration": track['TrackDuration'],
+                            "TrackNumber": track['TrackNumber'],
+                            "CleanName": track['CleanName'],
+                            "Location": track['Location'],
+                            "Format": track['Format'],
+                            "BitRate": track['BitRate']
                             }
 
                 myDB.upsert("tracks", newValueDict, controlValueDict)
@@ -515,19 +515,19 @@ def finalize_update(artistid, artistname, errors=False):
     #havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['artist_name']]))
     havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"', [artistname]))
 
-    controlValueDict = {"ArtistID":     artistid}
+    controlValueDict = {"ArtistID": artistid}
 
     if latestalbum:
-        newValueDict = {"Status":           "Active",
-                        "LatestAlbum":      latestalbum['AlbumTitle'],
-                        "ReleaseDate":      latestalbum['ReleaseDate'],
-                        "AlbumID":          latestalbum['AlbumID'],
-                        "TotalTracks":      totaltracks,
-                        "HaveTracks":       havetracks}
+        newValueDict = {"Status": "Active",
+                        "LatestAlbum": latestalbum['AlbumTitle'],
+                        "ReleaseDate": latestalbum['ReleaseDate'],
+                        "AlbumID": latestalbum['AlbumID'],
+                        "TotalTracks": totaltracks,
+                        "HaveTracks": havetracks}
     else:
-        newValueDict = {"Status":           "Active",
-                        "TotalTracks":      totaltracks,
-                        "HaveTracks":       havetracks}
+        newValueDict = {"Status": "Active",
+                        "TotalTracks": totaltracks,
+                        "HaveTracks": havetracks}
 
     if not errors:
         newValueDict['LastUpdated'] = helpers.now()
@@ -545,10 +545,10 @@ def addReleaseById(rid, rgid=None):
         dbalbum = myDB.select("SELECT * from albums WHERE AlbumID=?", [rgid])
         if not dbalbum:
             status = 'Loading'
-            controlValueDict = {"AlbumID":  rgid}
-            newValueDict = {"AlbumTitle":   rgid,
-                            "ArtistName":   status,
-                            "Status":       status}
+            controlValueDict = {"AlbumID": rgid}
+            newValueDict = {"AlbumTitle": rgid,
+                            "ArtistName": status,
+                            "Status": status}
             myDB.upsert("albums", newValueDict, controlValueDict)
             time.sleep(1)
 
@@ -592,11 +592,11 @@ def addReleaseById(rid, rgid=None):
             sortname = release_dict['artist_name']
 
         logger.info(u"Now manually adding: " + release_dict['artist_name'] + " - with status Paused")
-        controlValueDict = {"ArtistID":     release_dict['artist_id']}
-        newValueDict = {"ArtistName":       release_dict['artist_name'],
-                        "ArtistSortName":   sortname,
-                        "DateAdded":        helpers.today(),
-                        "Status":           "Paused"}
+        controlValueDict = {"ArtistID": release_dict['artist_id']}
+        newValueDict = {"ArtistName": release_dict['artist_name'],
+                        "ArtistSortName": sortname,
+                        "DateAdded": helpers.today(),
+                        "Status": "Paused"}
 
         if headphones.CONFIG.INCLUDE_EXTRAS:
             newValueDict['IncludeExtras'] = 1
@@ -613,20 +613,20 @@ def addReleaseById(rid, rgid=None):
     if not rg_exists and release_dict or status == 'Loading' and release_dict:  #it should never be the case that we have an rg and not the artist
                                                                                 #but if it is this will fail
         logger.info(u"Now adding-by-id album (" + release_dict['title'] + ") from id: " + rgid)
-        controlValueDict = {"AlbumID":  rgid}
+        controlValueDict = {"AlbumID": rgid}
         if status != 'Loading':
             status = 'Wanted'
 
-        newValueDict = {"ArtistID":         release_dict['artist_id'],
-                        "ReleaseID":        rgid,
-                        "ArtistName":       release_dict['artist_name'],
-                        "AlbumTitle":       release_dict['title'] if 'title' in release_dict else release_dict['rg_title'],
-                        "AlbumASIN":        release_dict['asin'],
-                        "ReleaseDate":      release_dict['date'],
-                        "DateAdded":        helpers.today(),
-                        "Status":           status,
-                        "Type":             release_dict['rg_type'],
-                        "ReleaseID":        rid
+        newValueDict = {"ArtistID": release_dict['artist_id'],
+                        "ReleaseID": rgid,
+                        "ArtistName": release_dict['artist_name'],
+                        "AlbumTitle": release_dict['title'] if 'title' in release_dict else release_dict['rg_title'],
+                        "AlbumASIN": release_dict['asin'],
+                        "ReleaseDate": release_dict['date'],
+                        "DateAdded": helpers.today(),
+                        "Status": status,
+                        "Type": release_dict['rg_type'],
+                        "ReleaseID": rid
                         }
 
         myDB.upsert("albums", newValueDict, controlValueDict)
@@ -637,16 +637,16 @@ def addReleaseById(rid, rgid=None):
         for track in release_dict['tracks']:
             cleanname = helpers.cleanName(release_dict['artist_name'] + ' ' + release_dict['rg_title'] + ' ' + track['title'])
 
-            controlValueDict = {"TrackID":  track['id'],
-                                "AlbumID":  rgid}
-            newValueDict = {"ArtistID":     release_dict['artist_id'],
-                        "ArtistName":       release_dict['artist_name'],
-                        "AlbumTitle":       release_dict['rg_title'],
-                        "AlbumASIN":        release_dict['asin'],
-                        "TrackTitle":       track['title'],
-                        "TrackDuration":    track['duration'],
-                        "TrackNumber":      track['number'],
-                        "CleanName":        cleanname
+            controlValueDict = {"TrackID": track['id'],
+                                "AlbumID": rgid}
+            newValueDict = {"ArtistID": release_dict['artist_id'],
+                        "ArtistName": release_dict['artist_name'],
+                        "AlbumTitle": release_dict['rg_title'],
+                        "AlbumASIN": release_dict['asin'],
+                        "TrackTitle": track['title'],
+                        "TrackDuration": track['duration'],
+                        "TrackNumber": track['number'],
+                        "CleanName": cleanname
                         }
 
             match = myDB.action('SELECT Location, BitRate, Format, Matched from have WHERE CleanName=?', [cleanname]).fetchone()
@@ -671,11 +671,11 @@ def addReleaseById(rid, rgid=None):
 
         # Reset status
         if status == 'Loading':
-            controlValueDict = {"AlbumID":  rgid}
+            controlValueDict = {"AlbumID": rgid}
             if headphones.CONFIG.AUTOWANT_MANUALLY_ADDED:
-                newValueDict = {"Status":   "Wanted"}
+                newValueDict = {"Status": "Wanted"}
             else:
-                newValueDict = {"Status":   "Skipped"}
+                newValueDict = {"Status": "Skipped"}
             myDB.upsert("albums", newValueDict, controlValueDict)
 
         # Start a search for the album
@@ -703,7 +703,7 @@ def updateFormat():
             except Exception, e:
                 logger.info("Exception from MediaFile for: " + track['Location'] + " : " + str(e))
                 continue
-            controlValueDict = {"TrackID":  track['TrackID']}
+            controlValueDict = {"TrackID": track['TrackID']}
             newValueDict = {"Format": f.format}
             myDB.upsert("tracks", newValueDict, controlValueDict)
         logger.info('Finished finding media format for %s files' % len(tracks))
@@ -716,7 +716,7 @@ def updateFormat():
             except Exception, e:
                 logger.info("Exception from MediaFile for: " + track['Location'] + " : " + str(e))
                 continue
-            controlValueDict = {"TrackID":  track['TrackID']}
+            controlValueDict = {"TrackID": track['TrackID']}
             newValueDict = {"Format": f.format}
             myDB.upsert("have", newValueDict, controlValueDict)
         logger.info('Finished finding media format for %s files' % len(havetracks))
@@ -734,18 +734,18 @@ def getHybridRelease(fullreleaselist):
     sortable_release_list = []
 
     formats = {
-        '2xVinyl':          '2',
-        'Vinyl':            '2',
-        'CD':               '0',
-        'Cassette':         '3',
-        '2xCD':             '1',
-        'Digital Media':    '0'
+        '2xVinyl': '2',
+        'Vinyl': '2',
+        'CD': '0',
+        'Cassette': '3',
+        '2xCD': '1',
+        'Digital Media': '0'
     }
 
     countries = {
-        'US':    '0',
-        'GB':    '1',
-        'JP':    '2',
+        'US': '0',
+        'GB': '1',
+        'JP': '2',
     }
 
     for release in fullreleaselist:
@@ -762,14 +762,14 @@ def getHybridRelease(fullreleaselist):
 
         # Create record
         release_dict = {
-            'hasasin':        bool(release['AlbumASIN']),
-            'asin':           release['AlbumASIN'],
-            'trackscount':    len(release['Tracks']),
-            'releaseid':      release['ReleaseID'],
-            'releasedate':    release['ReleaseDate'],
-            'format':         format,
-            'country':        country,
-            'tracks':         release['Tracks']
+            'hasasin': bool(release['AlbumASIN']),
+            'asin': release['AlbumASIN'],
+            'trackscount': len(release['Tracks']),
+            'releaseid': release['ReleaseID'],
+            'releasedate': release['ReleaseDate'],
+            'format': format,
+            'country': country,
+            'tracks': release['Tracks']
         }
 
         sortable_release_list.append(release_dict)

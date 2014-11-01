@@ -21,7 +21,7 @@ from headphones import logger, request
 
 def getLyrics(artist, song):
 
-    params = {  "artist": artist.encode('utf-8'),
+    params = {"artist": artist.encode('utf-8'),
                 "song": song.encode('utf-8'),
                 "fmt": 'xml'
                 }

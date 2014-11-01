@@ -197,7 +197,7 @@ class Rutracker():
                         if torrent:
                             decoded = bdecode(torrent)
                             metainfo = decoded['info']
-                        page.close ()
+                        page.close()
                     except Exception, e:
                         logger.error('Error getting torrent: %s' % e)
                         return False
@@ -216,9 +216,9 @@ class Rutracker():
                                     cuecount += 1
 
                     title = returntitle.lower()
-                    logger.debug ('torrent title: %s' % title)
-                    logger.debug ('headphones trackcount: %s' % hptrackcount)
-                    logger.debug ('rutracker trackcount: %s' % trackcount)
+                    logger.debug('torrent title: %s' % title)
+                    logger.debug('headphones trackcount: %s' % hptrackcount)
+                    logger.debug('rutracker trackcount: %s' % trackcount)
 
                     # If torrent track count less than headphones track count, and there's a cue, then attempt to get track count from log(s)
                     # This is for the case where we have a single .flac/.wav which can be split by cue
@@ -246,7 +246,7 @@ class Rutracker():
 
                     if totallogcount > 0:
                         trackcount = totallogcount
-                        logger.debug ('rutracker logtrackcount: %s' % totallogcount)
+                        logger.debug('rutracker logtrackcount: %s' % totallogcount)
 
                     # If torrent track count = hp track count then return torrent,
                     # if greater, check for deluxe/special/foreign editions
