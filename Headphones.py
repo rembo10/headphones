@@ -14,7 +14,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, sys
+import os
+import sys
 
 # Ensure lib added to path, before any other imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib/'))
@@ -30,6 +31,7 @@ import headphones
 # Register signals, such as CTRL + C
 signal.signal(signal.SIGINT, headphones.sig_handler)
 signal.signal(signal.SIGTERM, headphones.sig_handler)
+
 
 def main():
     """
@@ -61,16 +63,24 @@ def main():
         headphones.SYS_ENCODING = 'UTF-8'
 
     # Set up and gather command line arguments
-    parser = argparse.ArgumentParser(description='Music add-on for SABnzbd+, Transmission and more.')
+    parser = argparse.ArgumentParser(
+        description='Music add-on for SABnzbd+, Transmission and more.')
 
-    parser.add_argument('-v', '--verbose', action='store_true', help='Increase console logging verbosity')
-    parser.add_argument('-q', '--quiet', action='store_true', help='Turn off console logging')
-    parser.add_argument('-d', '--daemon', action='store_true', help='Run as a daemon')
-    parser.add_argument('-p', '--port', type=int, help='Force Headphones to run on a specified port')
-    parser.add_argument('--datadir', help='Specify a directory where to store your data files')
+    parser.add_argument(
+        '-v', '--verbose', action='store_true', help='Increase console logging verbosity')
+    parser.add_argument(
+        '-q', '--quiet', action='store_true', help='Turn off console logging')
+    parser.add_argument(
+        '-d', '--daemon', action='store_true', help='Run as a daemon')
+    parser.add_argument(
+        '-p', '--port', type=int, help='Force Headphones to run on a specified port')
+    parser.add_argument(
+        '--datadir', help='Specify a directory where to store your data files')
     parser.add_argument('--config', help='Specify a config file to use')
-    parser.add_argument('--nolaunch', action='store_true', help='Prevent browser from launching on startup')
-    parser.add_argument('--pidfile', help='Create a pid file (only relevant when running as a daemon)')
+    parser.add_argument('--nolaunch', action='store_true',
+                        help='Prevent browser from launching on startup')
+    parser.add_argument(
+        '--pidfile', help='Create a pid file (only relevant when running as a daemon)')
 
     args = parser.parse_args()
 
@@ -81,7 +91,8 @@ def main():
 
     if args.daemon:
         if sys.platform == 'win32':
-            sys.stderr.write("Daemonizing not supported under Windows, starting normally\n")
+            sys.stderr.write(
+                "Daemonizing not supported under Windows, starting normally\n")
         else:
             headphones.DAEMON = True
             headphones.QUIET = True
@@ -89,11 +100,14 @@ def main():
     if args.pidfile:
         headphones.PIDFILE = str(args.pidfile)
 
-        # If the pidfile already exists, headphones may still be running, so exit
+        # If the pidfile already exists, headphones may still be running, so
+        # exit
         if os.path.exists(headphones.PIDFILE):
-            sys.exit("PID file '" + headphones.PIDFILE + "' already exists. Exiting.")
+            sys.exit(
+                "PID file '" + headphones.PIDFILE + "' already exists. Exiting.")
 
-        # The pidfile is only useful in daemon mode, make sure we can write the file properly
+        # The pidfile is only useful in daemon mode, make sure we can write the
+        # file properly
         if headphones.DAEMON:
             headphones.CREATEPID = True
 
@@ -101,9 +115,11 @@ def main():
                 with open(headphones.PIDFILE, 'w') as fp:
                     fp.write("pid\n")
             except IOError as e:
-                raise SystemExit("Unable to write PID file: %s [%d]", e.strerror, e.errno)
+                raise SystemExit(
+                    "Unable to write PID file: %s [%d]", e.strerror, e.errno)
         else:
-            logger.warn("Not running in daemon mode. PID file creation disabled.")
+            logger.warn(
+                "Not running in daemon mode. PID file creation disabled.")
 
     # Determine which data directory and config file to use
     if args.datadir:
@@ -121,11 +137,13 @@ def main():
         try:
             os.makedirs(headphones.DATA_DIR)
         except OSError:
-            raise SystemExit('Could not create data directory: ' + headphones.DATA_DIR + '. Exiting....')
+            raise SystemExit(
+                'Could not create data directory: ' + headphones.DATA_DIR + '. Exiting....')
 
     # Make sure the DATA_DIR is writeable
     if not os.access(headphones.DATA_DIR, os.W_OK):
-        raise SystemExit('Cannot write to the data directory: ' + headphones.DATA_DIR + '. Exiting...')
+        raise SystemExit(
+            'Cannot write to the data directory: ' + headphones.DATA_DIR + '. Exiting...')
 
     # Put the database in the DATA_DIR
     headphones.DB_FILE = os.path.join(headphones.DATA_DIR, 'headphones.db')
@@ -162,7 +180,7 @@ def main():
 
     if headphones.CONFIG.LAUNCH_BROWSER and not args.nolaunch:
         headphones.launch_browser(headphones.CONFIG.HTTP_HOST, http_port,
-            headphones.CONFIG.HTTP_ROOT)
+                                  headphones.CONFIG.HTTP_ROOT)
 
     # Start the background threads
     headphones.start()

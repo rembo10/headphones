@@ -21,11 +21,12 @@ import headphones
 import copy
 import json
 
-cmd_list = [ 'getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSimilar', 'getHistory', 'getLogs',
+cmd_list = ['getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSimilar', 'getHistory', 'getLogs',
             'findArtist', 'findAlbum', 'addArtist', 'delArtist', 'pauseArtist', 'resumeArtist', 'refreshArtist',
             'addAlbum', 'queueAlbum', 'unqueueAlbum', 'forceSearch', 'forceProcess', 'getVersion', 'checkGithub',
             'shutdown', 'restart', 'update', 'getArtistArt', 'getAlbumArt', 'getArtistInfo', 'getAlbumInfo',
             'getArtistThumb', 'getAlbumThumb', 'choose_specific_download', 'download_specific_release']
+
 
 class Api(object):
 
@@ -41,8 +42,7 @@ class Api(object):
 
         self.callback = None
 
-
-    def checkParams(self,*args,**kwargs):
+    def checkParams(self, *args, **kwargs):
 
         if not headphones.CONFIG.API_ENABLED:
             self.data = 'API not enabled'
@@ -96,7 +96,7 @@ class Api(object):
         else:
             return self.data
 
-    def _dic_from_query(self,query):
+    def _dic_from_query(self, query):
 
         myDB = db.DBConnection()
         rows = myDB.select(query)
@@ -111,7 +111,8 @@ class Api(object):
 
     def _getIndex(self, **kwargs):
 
-        self.data = self._dic_from_query('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
+        self.data = self._dic_from_query(
+            'SELECT * from artists order by ArtistSortName COLLATE NOCASE')
         return
 
     def _getArtist(self, **kwargs):
@@ -122,11 +123,15 @@ class Api(object):
         else:
             self.id = kwargs['id']
 
-        artist = self._dic_from_query('SELECT * from artists WHERE ArtistID="' + self.id + '"')
-        albums = self._dic_from_query('SELECT * from albums WHERE ArtistID="' + self.id + '" order by ReleaseDate DESC')
-        description = self._dic_from_query('SELECT * from descriptions WHERE ArtistID="' + self.id + '"')
+        artist = self._dic_from_query(
+            'SELECT * from artists WHERE ArtistID="' + self.id + '"')
+        albums = self._dic_from_query(
+            'SELECT * from albums WHERE ArtistID="' + self.id + '" order by ReleaseDate DESC')
+        description = self._dic_from_query(
+            'SELECT * from descriptions WHERE ArtistID="' + self.id + '"')
 
-        self.data = { 'artist': artist, 'albums': albums, 'description' : description }
+        self.data = {
+            'artist': artist, 'albums': albums, 'description': description}
         return
 
     def _getAlbum(self, **kwargs):
@@ -137,23 +142,30 @@ class Api(object):
         else:
             self.id = kwargs['id']
 
-        album = self._dic_from_query('SELECT * from albums WHERE AlbumID="' + self.id + '"')
-        tracks = self._dic_from_query('SELECT * from tracks WHERE AlbumID="' + self.id + '"')
-        description = self._dic_from_query('SELECT * from descriptions WHERE ReleaseGroupID="' + self.id + '"')
+        album = self._dic_from_query(
+            'SELECT * from albums WHERE AlbumID="' + self.id + '"')
+        tracks = self._dic_from_query(
+            'SELECT * from tracks WHERE AlbumID="' + self.id + '"')
+        description = self._dic_from_query(
+            'SELECT * from descriptions WHERE ReleaseGroupID="' + self.id + '"')
 
-        self.data = { 'album' : album, 'tracks' : tracks, 'description' : description }
+        self.data = {
+            'album': album, 'tracks': tracks, 'description': description}
         return
 
     def _getHistory(self, **kwargs):
-        self.data = self._dic_from_query('SELECT * from snatched WHERE status NOT LIKE "Seed%" order by DateAdded DESC')
+        self.data = self._dic_from_query(
+            'SELECT * from snatched WHERE status NOT LIKE "Seed%" order by DateAdded DESC')
         return
 
     def _getUpcoming(self, **kwargs):
-        self.data = self._dic_from_query("SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC")
+        self.data = self._dic_from_query(
+            "SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC")
         return
 
     def _getWanted(self, **kwargs):
-        self.data = self._dic_from_query("SELECT * from albums WHERE Status='Wanted'")
+        self.data = self._dic_from_query(
+            "SELECT * from albums WHERE Status='Wanted'")
         return
 
     def _getSimilar(self, **kwargs):
@@ -170,7 +182,7 @@ class Api(object):
         if 'limit' in kwargs:
             limit = kwargs['limit']
         else:
-            limit=50
+            limit = 50
 
         self.data = mb.findArtist(kwargs['name'], limit)
 
@@ -181,7 +193,7 @@ class Api(object):
         if 'limit' in kwargs:
             limit = kwargs['limit']
         else:
-            limit=50
+            limit = 50
 
         self.data = mb.findRelease(kwargs['name'], limit)
 
@@ -314,11 +326,11 @@ class Api(object):
 
     def _getVersion(self, **kwargs):
         self.data = {
-            'git_path' : headphones.CONFIG.GIT_PATH,
-            'install_type' : headphones.INSTALL_TYPE,
-            'current_version' : headphones.CURRENT_VERSION,
-            'latest_version' : headphones.LATEST_VERSION,
-            'commits_behind' : headphones.COMMITS_BEHIND,
+            'git_path': headphones.CONFIG.GIT_PATH,
+            'install_type': headphones.INSTALL_TYPE,
+            'current_version': headphones.CURRENT_VERSION,
+            'latest_version': headphones.LATEST_VERSION,
+            'commits_behind': headphones.COMMITS_BEHIND,
         }
 
     def _checkGithub(self, **kwargs):
@@ -402,18 +414,19 @@ class Api(object):
         else:
             self.id = kwargs['id']
 
-        results = searcher.searchforalbum(self.id, choose_specific_download=True)
+        results = searcher.searchforalbum(
+            self.id, choose_specific_download=True)
 
         results_as_dicts = []
 
         for result in results:
 
             result_dict = {
-                'title':result[0],
-                'size':result[1],
-                'url':result[2],
-                'provider':result[3],
-                'kind':result[4]
+                'title': result[0],
+                'size': result[1],
+                'url': result[2],
+                'provider': result[3],
+                'kind': result[4]
             }
             results_as_dicts.append(result_dict)
 
@@ -421,7 +434,7 @@ class Api(object):
 
     def _download_specific_release(self, **kwargs):
 
-        expected_kwargs =['id', 'title','size','url','provider','kind']
+        expected_kwargs = ['id', 'title', 'size', 'url', 'provider', 'kind']
 
         for kwarg in expected_kwargs:
             if kwarg not in kwargs:
@@ -438,20 +451,24 @@ class Api(object):
         for kwarg in expected_kwargs:
             del kwargs[kwarg]
 
-        # Handle situations where the torrent url contains arguments that are parsed
+        # Handle situations where the torrent url contains arguments that are
+        # parsed
         if kwargs:
-            import urllib, urllib2
-            url = urllib2.quote(url, safe=":?/=&") + '&' + urllib.urlencode(kwargs)
+            import urllib
+            import urllib2
+            url = urllib2.quote(
+                url, safe=":?/=&") + '&' + urllib.urlencode(kwargs)
 
         try:
-            result = [(title,int(size),url,provider,kind)]
+            result = [(title, int(size), url, provider, kind)]
         except ValueError:
-            result = [(title,float(size),url,provider,kind)]
+            result = [(title, float(size), url, provider, kind)]
 
         logger.info(u"Making sure we can download the chosen result")
         (data, bestqual) = searcher.preprocess(result)
 
         if data and bestqual:
-          myDB = db.DBConnection()
-          album = myDB.action('SELECT * from albums WHERE AlbumID=?', [id]).fetchone()
-          searcher.send_to_downloader(data, bestqual, album)
+            myDB = db.DBConnection()
+            album = myDB.action(
+                'SELECT * from albums WHERE AlbumID=?', [id]).fetchone()
+            searcher.send_to_downloader(data, bestqual, album)

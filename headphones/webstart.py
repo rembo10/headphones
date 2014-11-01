@@ -22,6 +22,7 @@ from headphones import logger
 from headphones.webserve import WebInterface
 from headphones.helpers import create_https_certificates
 
+
 def initialize(options=None):
     if options is None:
         options = {}
@@ -71,28 +72,28 @@ def initialize(options=None):
             'tools.staticdir.root': os.path.join(headphones.PROG_DIR, 'data'),
             'tools.proxy.on': options['http_proxy']  # pay attention to X-Forwarded-Proto header
         },
-        '/interfaces':{
+        '/interfaces': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': "interfaces"
         },
-        '/images':{
+        '/images': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': "images"
         },
-        '/css':{
+        '/css': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': "css"
         },
-        '/js':{
+        '/js': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': "js"
         },
-        '/favicon.ico':{
+        '/favicon.ico': {
             'tools.staticfile.on': True,
             'tools.staticfile.filename': os.path.join(os.path.abspath(
                 os.curdir), "images" + os.sep + "favicon.ico")
         },
-        '/cache':{
+        '/cache': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': headphones.CONFIG.CACHE_DIR
         }
@@ -110,7 +111,6 @@ def initialize(options=None):
                 })
         })
         conf['/api'] = { 'tools.auth_basic.on': False }
-
 
     # Prevent time-outs
     cherrypy.engine.timeout_monitor.unsubscribe()
