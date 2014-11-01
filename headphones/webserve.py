@@ -340,7 +340,8 @@ class WebInterface(object):
 
         # Handle situations where the torrent url contains arguments that are parsed
         if kwargs:
-            import urllib, urllib2
+            import urllib
+            import urllib2
             url = urllib2.quote(url, safe=":?/=&") + '&' + urllib.urlencode(kwargs)
 
         try:
@@ -898,7 +899,8 @@ class WebInterface(object):
 
     def generateAPI(self):
 
-        import hashlib, random
+        import hashlib
+        import random
 
         apikey = hashlib.sha224(str(random.getrandbits(256))).hexdigest()[0:32]
         logger.info("New API generated")

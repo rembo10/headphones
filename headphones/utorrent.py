@@ -13,8 +13,14 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib, urllib2, urlparse, cookielib
-import json, re, os, time
+import urllib
+import urllib2
+import urlparse
+import cookielib
+import json
+import re
+import os
+import time
 
 import headphones
 

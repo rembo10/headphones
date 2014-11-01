@@ -15,7 +15,8 @@
 
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
 
-import urllib, urlparse
+import urllib
+import urlparse
 from pygazelle import api as gazelleapi
 from pygazelle import encoding as gazelleencoding
 from pygazelle import format as gazelleformat

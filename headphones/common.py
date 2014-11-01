@@ -18,7 +18,10 @@ Created on Aug 1, 2011
 
 @author: Michael
 '''
-import platform, operator, os, re
+import platform
+import operator
+import os
+import re
 
 from headphones import version
 
