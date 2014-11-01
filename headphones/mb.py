@@ -84,7 +84,7 @@ def findArtist(name, limit=1):
 
         chars = set('!?*-')
         if any((c in chars) for c in name):
-            name = '"'+name+'"'
+            name = '"' + name + '"'
 
         criteria = {'artist': name.lower()}
 
@@ -139,9 +139,9 @@ def findRelease(name, limit=1, artist=None):
 
         chars = set('!?*-')
         if any((c in chars) for c in name):
-            name = '"'+name+'"'
+            name = '"' + name + '"'
         if artist and any((c in chars) for c in artist):
-            artist = '"'+artist+'"'
+            artist = '"' + artist + '"'
 
         try:
             releaseResults = musicbrainzngs.search_releases(query=name, limit=limit, artist=artist)['release-list']
@@ -500,12 +500,12 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
                     if position['format'] == releasedata['medium-list'][0]['format']:
                         medium_count = int(position['position'])
                     else:
-                        additional_medium = additional_medium+' + '+position['format']
+                        additional_medium = additional_medium + ' + ' + position['format']
                 if medium_count == 1:
                     disc_number = ''
                 else:
-                    disc_number = str(medium_count)+'x'
-                packaged_medium = disc_number+releasedata['medium-list'][0]['format']+additional_medium
+                    disc_number = str(medium_count) + 'x'
+                packaged_medium = disc_number + releasedata['medium-list'][0]['format'] + additional_medium
                 release['ReleaseFormat'] = unicode(packaged_medium)
             except:
                 release['ReleaseFormat'] = u'Unknown'
@@ -611,7 +611,7 @@ def findArtistbyAlbum(name):
     if not artist['AlbumTitle']:
         return False
 
-    term = '"'+artist['AlbumTitle']+'" AND artist:"'+name+'"'
+    term = '"' + artist['AlbumTitle'] + '" AND artist:"' + name + '"'
 
     results = None
 
@@ -649,14 +649,14 @@ def findAlbumID(artist=None, album=None):
     try:
         if album and artist:
             if any((c in chars) for c in album):
-                album = '"'+album+'"'
+                album = '"' + album + '"'
             if any((c in chars) for c in artist):
-                artist = '"'+artist+'"'
+                artist = '"' + artist + '"'
             criteria = {'release': album.lower()}
             criteria['artist'] = artist.lower()
         else:
             if any((c in chars) for c in album):
-                album = '"'+album+'"'
+                album = '"' + album + '"'
             criteria = {'release': album.lower()}
 
         results = musicbrainzngs.search_release_groups(limit=1, **criteria).get('release-group-list')

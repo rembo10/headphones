@@ -456,7 +456,7 @@ class WebInterface(object):
         for albums in have_albums:
             #Have to skip over manually matched tracks
             if albums['ArtistName'] and albums['AlbumTitle'] and albums['TrackTitle']:
-                original_clean = helpers.cleanName(albums['ArtistName']+" "+albums['AlbumTitle']+" "+albums['TrackTitle'])
+                original_clean = helpers.cleanName(albums['ArtistName'] + " " + albums['AlbumTitle'] + " " + albums['TrackTitle'])
             # else:
             #     original_clean = None
                 if original_clean == albums['CleanName']:
@@ -526,8 +526,8 @@ class WebInterface(object):
             new_artist_clean = helpers.cleanName(new_artist).lower()
             existing_album_clean = helpers.cleanName(existing_album).lower()
             new_album_clean = helpers.cleanName(new_album).lower()
-            existing_clean_string = existing_artist_clean+" "+existing_album_clean
-            new_clean_string = new_artist_clean+" "+new_album_clean
+            existing_clean_string = existing_artist_clean + " " + existing_album_clean
+            new_clean_string = new_artist_clean + " " + new_album_clean
             if existing_clean_string != new_clean_string:
                 have_tracks = myDB.action('SELECT Matched, CleanName, Location, BitRate, Format FROM have WHERE ArtistName=? AND AlbumTitle=?', (existing_artist, existing_album))
                 update_count = 0
@@ -568,7 +568,7 @@ class WebInterface(object):
         manualalbums = myDB.select('SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched from have')
         for albums in manualalbums:
             if albums['ArtistName'] and albums['AlbumTitle'] and albums['TrackTitle']:
-                original_clean = helpers.cleanName(albums['ArtistName']+" "+albums['AlbumTitle']+" "+albums['TrackTitle'])
+                original_clean = helpers.cleanName(albums['ArtistName'] + " " + albums['AlbumTitle'] + " " + albums['TrackTitle'])
                 if albums['Matched'] == "Ignored" or albums['Matched'] == "Manual" or albums['CleanName'] != original_clean:
                     if albums['Matched'] == "Ignored":
                         album_status = "Ignored"
@@ -600,7 +600,7 @@ class WebInterface(object):
             update_clean = myDB.select('SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched from have WHERE ArtistName=?', [artist])
             update_count = 0
             for tracks in update_clean:
-                original_clean = helpers.cleanName(tracks['ArtistName']+" "+tracks['AlbumTitle']+" "+tracks['TrackTitle']).lower()
+                original_clean = helpers.cleanName(tracks['ArtistName'] + " " + tracks['AlbumTitle'] + " " + tracks['TrackTitle']).lower()
                 album = tracks['AlbumTitle']
                 track_title = tracks['TrackTitle']
                 if tracks['CleanName'] != original_clean:
@@ -618,7 +618,7 @@ class WebInterface(object):
             update_clean = myDB.select('SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched from have WHERE ArtistName=? AND AlbumTitle=?', (artist, album))
             update_count = 0
             for tracks in update_clean:
-                original_clean = helpers.cleanName(tracks['ArtistName']+" "+tracks['AlbumTitle']+" "+tracks['TrackTitle']).lower()
+                original_clean = helpers.cleanName(tracks['ArtistName'] + " " + tracks['AlbumTitle'] + " " + tracks['TrackTitle']).lower()
                 track_title = tracks['TrackTitle']
                 if tracks['CleanName'] != original_clean:
                     album_id_check = myDB.action('SELECT AlbumID from tracks WHERE CleanName=?', [tracks['CleanName']]).fetchone()
@@ -764,7 +764,7 @@ class WebInterface(object):
             sortcolumn = 1
         filtered.sort(key=lambda x: x[sortcolumn], reverse=sSortDir_0 == "desc")
 
-        rows = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
+        rows = filtered[iDisplayStart:(iDisplayStart + iDisplayLength)]
         rows = [[row[0], row[2], row[1]] for row in rows]
 
         return json.dumps({
@@ -800,14 +800,14 @@ class WebInterface(object):
             totalcount = myDB.select('SELECT COUNT(*) from artists')[0][0]
 
         if sortbyhavepercent:
-            filtered.sort(key=lambda x: (float(x['HaveTracks'])/x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0, x['HaveTracks'] if x['HaveTracks'] else 0.0), reverse=sSortDir_0 == "asc")
+            filtered.sort(key=lambda x: (float(x['HaveTracks']) / x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0, x['HaveTracks'] if x['HaveTracks'] else 0.0), reverse=sSortDir_0 == "asc")
 
         #can't figure out how to change the datatables default sorting order when its using an ajax datasource so ill
         #just reverse it here and the first click on the "Latest Album" header will sort by descending release date
         if sortcolumn == 'ReleaseDate':
             filtered.reverse()
 
-        artists = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
+        artists = filtered[iDisplayStart:(iDisplayStart + iDisplayLength)]
         rows = []
         for artist in artists:
             row = {"ArtistID": artist['ArtistID'],
@@ -1357,7 +1357,7 @@ class WebInterface(object):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
         tweet = notifiers.TwitterNotifier()
         result = tweet._get_credentials(key)
-        logger.info(u"result: "+str(result))
+        logger.info(u"result: " + str(result))
         if result:
             return "Key verification successful"
         else:

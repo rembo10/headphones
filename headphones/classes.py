@@ -135,4 +135,4 @@ class Proper:
         self.episode = -1
 
     def __str__(self):
-        return str(self.date)+" "+self.name+" "+str(self.season)+"x"+str(self.episode)+" of "+str(self.tvdbid)
+        return str(self.date) + " " + self.name + " " + str(self.season) + "x" + str(self.episode) + " of " + str(self.tvdbid)

@@ -253,9 +253,9 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                     if len(check_release_date) == 10:
                         release_date = check_release_date
                     elif len(check_release_date) == 7:
-                        release_date = check_release_date+"-31"
+                        release_date = check_release_date + "-31"
                     elif len(check_release_date) == 4:
-                        release_date = check_release_date+"-12-31"
+                        release_date = check_release_date + "-12-31"
                     else:
                         release_date = today
                     if helpers.get_age(today) - helpers.get_age(release_date) < pause_delta:
@@ -464,11 +464,11 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
             marked_as_downloaded = False
 
             if rg_exists:
-                if rg_exists['Status'] == 'Skipped' and ((have_track_count/float(total_track_count)) >= (headphones.CONFIG.ALBUM_COMPLETION_PCT/100.0)):
+                if rg_exists['Status'] == 'Skipped' and ((have_track_count / float(total_track_count)) >= (headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0)):
                     myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', rg['id']])
                     marked_as_downloaded = True
             else:
-                if ((have_track_count/float(total_track_count)) >= (headphones.CONFIG.ALBUM_COMPLETION_PCT/100.0)):
+                if ((have_track_count / float(total_track_count)) >= (headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0)):
                     myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', rg['id']])
                     marked_as_downloaded = True
 

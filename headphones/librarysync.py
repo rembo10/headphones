@@ -96,7 +96,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                 latest_subdirectory.append(subdirectory)
                 if file_count == 0 and r.replace(dir, '') != '':
                     logger.info("[%s] Now scanning subdirectory %s" % (dir.decode(headphones.SYS_ENCODING, 'replace'), subdirectory.decode(headphones.SYS_ENCODING, 'replace')))
-                elif latest_subdirectory[file_count] != latest_subdirectory[file_count-1] and file_count != 0:
+                elif latest_subdirectory[file_count] != latest_subdirectory[file_count - 1] and file_count != 0:
                     logger.info("[%s] Now scanning subdirectory %s" % (dir.decode(headphones.SYS_ENCODING, 'replace'), subdirectory.decode(headphones.SYS_ENCODING, 'replace')))
 
                 song = os.path.join(r, files)
@@ -183,8 +183,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
 
     # Now we start track matching
     logger.info("%s new/modified songs found and added to the database" % new_song_count)
-    song_list = myDB.action("SELECT * FROM have WHERE Matched IS NULL AND LOCATION LIKE ?", [dir.decode(headphones.SYS_ENCODING, 'replace')+"%"])
-    total_number_of_songs = myDB.action("SELECT COUNT(*) FROM have WHERE Matched IS NULL AND LOCATION LIKE ?", [dir.decode(headphones.SYS_ENCODING, 'replace')+"%"]).fetchone()[0]
+    song_list = myDB.action("SELECT * FROM have WHERE Matched IS NULL AND LOCATION LIKE ?", [dir.decode(headphones.SYS_ENCODING, 'replace') + "%"])
+    total_number_of_songs = myDB.action("SELECT COUNT(*) FROM have WHERE Matched IS NULL AND LOCATION LIKE ?", [dir.decode(headphones.SYS_ENCODING, 'replace') + "%"]).fetchone()[0]
     logger.info("Found " + str(total_number_of_songs) + " new/modified tracks in: '" + dir.decode(headphones.SYS_ENCODING, 'replace') + "'. Matching tracks to the appropriate releases....")
 
     # Sort the song_list by most vague (e.g. no trackid or releaseid) to most specific (both trackid & releaseid)
@@ -202,11 +202,11 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         latest_artist.append(song['ArtistName'])
         if song_count == 0:
             logger.info("Now matching songs by %s" % song['ArtistName'])
-        elif latest_artist[song_count] != latest_artist[song_count-1] and song_count != 0:
+        elif latest_artist[song_count] != latest_artist[song_count - 1] and song_count != 0:
             logger.info("Now matching songs by %s" % song['ArtistName'])
 
         song_count += 1
-        completion_percentage = float(song_count)/total_number_of_songs * 100
+        completion_percentage = float(song_count) / total_number_of_songs * 100
 
         if completion_percentage % 10 == 0:
             logger.info("Track matching is " + str(completion_percentage) + "% complete")
@@ -327,7 +327,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                     myDB.action('INSERT OR IGNORE INTO newartists VALUES (?)', [artist])
 
         if headphones.CONFIG.DETECT_BITRATE:
-            headphones.CONFIG.PREFERRED_BITRATE = sum(bitrates)/len(bitrates)/1000
+            headphones.CONFIG.PREFERRED_BITRATE = sum(bitrates) / len(bitrates) / 1000
 
     else:
         # If we're appending a new album to the database, update the artists total track counts

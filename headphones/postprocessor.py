@@ -249,7 +249,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
 
         for track in tracks:
             try:
-                db_track_duration += track['TrackDuration']/1000
+                db_track_duration += track['TrackDuration'] / 1000
             except:
                 downloaded_track_duration = False
                 break

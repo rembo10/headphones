@@ -89,7 +89,7 @@ class Cache(object):
     def _get_age(self, date):
         # There's probably a better way to do this
         split_date = date.split('-')
-        days_old = int(split_date[0])*365 + int(split_date[1])*30 + int(split_date[2])
+        days_old = int(split_date[0]) * 365 + int(split_date[1]) * 30 + int(split_date[2])
 
         return days_old
 

@@ -26,7 +26,7 @@ from headphones import logger, version, request
 def runGit(args):
 
     if headphones.CONFIG.GIT_PATH:
-        git_locations = ['"'+headphones.CONFIG.GIT_PATH+'"']
+        git_locations = ['"' + headphones.CONFIG.GIT_PATH + '"']
     else:
         git_locations = ['git']
 
@@ -36,7 +36,7 @@ def runGit(args):
     output = err = None
 
     for cur_git in git_locations:
-        cmd = cur_git+' '+args
+        cmd = cur_git + ' ' + args
 
         try:
             logger.debug('Trying to execute: "' + cmd + '" with shell in ' + headphones.PROG_DIR)
@@ -181,7 +181,7 @@ def update():
                 logger.info('No update available, not updating')
                 logger.info('Output: ' + str(output))
             elif line.endswith('Aborting.'):
-                logger.error('Unable to update from git: '+line)
+                logger.error('Unable to update from git: ' + line)
                 logger.info('Output: ' + str(output))
 
     else:
@@ -216,13 +216,13 @@ def update():
         # Find update dir name
         update_dir_contents = [x for x in os.listdir(update_dir) if os.path.isdir(os.path.join(update_dir, x))]
         if len(update_dir_contents) != 1:
-            logger.error("Invalid update data, update failed: "+str(update_dir_contents))
+            logger.error("Invalid update data, update failed: " + str(update_dir_contents))
             return
         content_dir = os.path.join(update_dir, update_dir_contents[0])
 
         # walk temp folder and move files to main folder
         for dirname, dirnames, filenames in os.walk(content_dir):
-            dirname = dirname[len(content_dir)+1:]
+            dirname = dirname[len(content_dir) + 1:]
             for curfile in filenames:
                 old_path = os.path.join(content_dir, dirname, curfile)
                 new_path = os.path.join(headphones.PROG_DIR, dirname, curfile)
