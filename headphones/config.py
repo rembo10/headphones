@@ -14,11 +14,13 @@ def bool_int(value):
             value = 0
     return int(bool(value))
 
-_config_definitions = {
+_CONFIG_DEFINITIONS = {
     'ADD_ALBUM_ART': (int, 'General', 0),
     'ADVANCEDENCODER': (str, 'General', ''),
     'ALBUM_ART_FORMAT': (str, 'General', 'folder'),
-    'ALBUM_COMPLETION_PCT': (int, 'Advanced', 80), # This is used in importer.py to determine how complete an album needs to be - to be considered "downloaded". Percentage from 0-100
+    # This is used in importer.py to determine how complete an album needs to
+    # be - to be considered "downloaded". Percentage from 0-100
+    'ALBUM_COMPLETION_PCT': (int, 'Advanced', 80),
     'API_ENABLED': (int, 'General', 0),
     'API_KEY': (str, 'General', ''),
     'AUTOWANT_ALL': (int, 'General', 0),
@@ -239,7 +241,7 @@ class Config(object):
         """ Initialize the config with values from a file """
         self._config_file = config_file
         self._config = ConfigObj(self._config_file, encoding='utf-8')
-        for key in _config_definitions.keys():
+        for key in _CONFIG_DEFINITIONS.keys():
             self.check_setting(key)
         self.ENCODER_MULTICORE_COUNT = max(0, self.ENCODER_MULTICORE_COUNT)
         self._upgrade()
@@ -247,7 +249,7 @@ class Config(object):
     def _define(self, name):
         key = name.upper()
         ini_key = name.lower()
-        definition = _config_definitions[key]
+        definition = _CONFIG_DEFINITIONS[key]
         if len(definition) == 3:
             definition_type, section, default = definition
         else:
@@ -278,8 +280,8 @@ class Config(object):
         new_config = ConfigObj(encoding="UTF-8")
         new_config.filename = self._config_file
 
-        # first copy over everything from the old config, even if it is not correctly
-        # defined to keep from losing data
+        # first copy over everything from the old config, even if it is not
+        # correctly defined to keep from losing data
         for key, subkeys in self._config.items():
             if key not in new_config:
                 new_config[key] = {}
@@ -287,7 +289,7 @@ class Config(object):
                 new_config[key][subkey] = value
 
         # next make sure that everything we expect to have defined is so
-        for key in _config_definitions.keys():
+        for key in _CONFIG_DEFINITIONS.keys():
             key, definition_type, section, ini_key, default = self._define(key)
             self.check_setting(key)
             if section not in new_config:
