@@ -82,9 +82,9 @@ class Api(object):
         if self.data == 'OK':
             logger.info('Recieved API command: %s', self.cmd)
             methodToCall = getattr(self, "_" + self.cmd)
-            result = methodToCall(**self.kwargs)
+            methodToCall(**self.kwargs)
             if 'callback' not in self.kwargs:
-                if type(self.data) == type(''):
+                if isinstance(self.data, basestring):
                     return self.data
                 else:
                     return json.dumps(self.data)
