@@ -316,8 +316,10 @@ class Config(object):
 
     def add_extra_newznab(self, newznab):
         """ Add a new extra newznab """
+        extra_newznabs = self.EXTRA_NEWZNABS
         for item in newznab:
-            self.EXTRA_NEWZNABS.append(item)
+            extra_newznabs.append(item)
+        self.EXTRA_NEWZNABS = extra_newznabs
 
     def __getattr__(self, name):
         """
