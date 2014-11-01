@@ -22,6 +22,7 @@ import subprocess
 
 from headphones import logger, version, request
 
+
 def runGit(args):
 
     if headphones.CONFIG.GIT_PATH:
@@ -58,6 +59,7 @@ def runGit(args):
             break
 
     return (output, err)
+
 
 def getVersion():
 
@@ -115,6 +117,7 @@ def getVersion():
         else:
             return None, 'master'
 
+
 def checkGithub():
     headphones.COMMITS_BEHIND = 0
 
@@ -161,6 +164,7 @@ def checkGithub():
 
     return headphones.LATEST_VERSION
 
+
 def update():
     if headphones.INSTALL_TYPE == 'win':
         logger.info('Windows .exe updating not supported yet.')
@@ -185,7 +189,7 @@ def update():
         update_dir = os.path.join(headphones.PROG_DIR, 'update')
         version_path = os.path.join(headphones.PROG_DIR, 'version.txt')
 
-        logger.info('Downloading update from: '+ tar_download_url)
+        logger.info('Downloading update from: ' + tar_download_url)
         data = request.request_content(tar_download_url)
 
         if not data:

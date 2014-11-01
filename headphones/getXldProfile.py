@@ -5,6 +5,7 @@ import xml.parsers.expat as expat
 import commands
 from headphones import logger
 
+
 def getXldProfile(xldProfile):
     xldProfileNotFound = xldProfile
     expandedPath = os.path.expanduser('~/Library/Preferences/jp.tmkk.XLD.plist')

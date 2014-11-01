@@ -4,6 +4,7 @@ import os
 import re
 from configobj import ConfigObj
 
+
 def bool_int(value):
     """
     Casts a config value into a 0 or 1
@@ -231,6 +232,7 @@ _CONFIG_DEFINITIONS = {
     'XBMC_USERNAME': (str, 'XBMC', ''),
     'XLDPROFILE': (str, 'General', '')
 }
+
 
 class Config(object):
     """ Wraps access to particular values in a config file """

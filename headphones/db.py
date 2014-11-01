@@ -28,9 +28,11 @@ import headphones
 
 from headphones import logger
 
+
 def dbFilename(filename="headphones.db"):
 
     return os.path.join(headphones.DATA_DIR, filename)
+
 
 def getCacheSize():
     #this will protect against typecasting problems produced by empty string and None settings
@@ -38,6 +40,7 @@ def getCacheSize():
         #sqlite will work with this (very slowly)
         return 0
     return int(headphones.CONFIG.CACHE_SIZEMB)
+
 
 class DBConnection:
 
@@ -59,14 +62,14 @@ class DBConnection:
             return
 
         sqlResult = None
-        
+
         try:
             with self.connection as c:
                 if args == None:
                     sqlResult = c.execute(query)
                 else:
                     sqlResult = c.execute(query, args)
-                    
+
         except sqlite3.OperationalError, e:
             if "unable to open database file" in e.message or "database is locked" in e.message:
                 logger.warn('Database Error: %s', e)
@@ -77,13 +80,13 @@ class DBConnection:
         except sqlite3.DatabaseError, e:
             logger.error('Fatal Error executing %s :: %s', query, e)
             raise
-        
+
         return sqlResult
 
     def select(self, query, args=None):
 
         sqlResults = self.action(query, args).fetchall()
-        
+
         if sqlResults == None or sqlResults == [None]:
             return []
 
@@ -93,7 +96,7 @@ class DBConnection:
 
         changesBefore = self.connection.total_changes
 
-        genParams = lambda myDict : [x + " = ?" for x in myDict.keys()]
+        genParams = lambda myDict: [x + " = ?" for x in myDict.keys()]
 
         query = "UPDATE "+tableName+" SET " + ", ".join(genParams(valueDict)) + " WHERE " + " AND ".join(genParams(keyDict))
 

@@ -17,6 +17,7 @@ import headphones
 
 from headphones import logger, db, importer
 
+
 def dbUpdate(forcefull=False):
 
     myDB = db.DBConnection()

@@ -24,24 +24,27 @@ import datetime
 
 from common import USER_AGENT
 
+
 class HeadphonesURLopener(urllib.FancyURLopener):
     version = USER_AGENT
+
 
 class AuthURLOpener(HeadphonesURLopener):
     """
     URLOpener class that supports http auth without needing interactive password entry.
     If the provided username/password don't work it simply fails.
-    
+
     user: username to use for HTTP auth
     pw: password to use for HTTP auth
     """
+
     def __init__(self, user, pw):
         self.username = user
         self.password = pw
 
         # remember if we've tried the username/password before
         self.numTries = 0
-        
+
         # call the base class
         urllib.FancyURLopener.__init__(self)
 
@@ -55,7 +58,7 @@ class AuthURLOpener(HeadphonesURLopener):
         if self.numTries == 0:
             self.numTries = 1
             return (self.username, self.password)
-        
+
         # if we've tried before then return blank which cancels the request
         else:
             return ('', '')
@@ -64,6 +67,7 @@ class AuthURLOpener(HeadphonesURLopener):
     def openit(self, url):
         self.numTries = 0
         return HeadphonesURLopener.open(self, url)
+
 
 class SearchResult:
     """
@@ -96,11 +100,13 @@ class SearchResult:
             myString += "  " + extra + "\n"
         return myString
 
+
 class NZBSearchResult(SearchResult):
     """
     Regular NZB result with an URL to the NZB
     """
     resultType = "nzb"
+
 
 class NZBDataSearchResult(SearchResult):
     """
@@ -108,11 +114,13 @@ class NZBDataSearchResult(SearchResult):
     """
     resultType = "nzbdata"
 
+
 class TorrentSearchResult(SearchResult):
     """
     Torrent result with an URL to the torrent
     """
     resultType = "torrent"
+
 
 class Proper:
     def __init__(self, name, url, date):
