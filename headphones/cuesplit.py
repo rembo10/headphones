@@ -278,9 +278,9 @@ class File:
 
     def get_name(self, ext=True, cmd=False):
 
-        if ext == True:
+        if ext is True:
             content = self.name
-        elif ext == False:
+        elif ext is False:
             content = self.name_name
         elif ext[0] == '.':
             content = self.name_name + ext

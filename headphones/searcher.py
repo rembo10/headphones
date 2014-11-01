@@ -1128,7 +1128,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                             if not torrent or (int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1):
                                 rightformat = False
 
-                        if rightformat == True and size < maxsize and minimumseeders < int(seeders):
+                        if rightformat and size < maxsize and minimumseeders < int(seeders):
                             resultlist.append((title, size, url, provider, 'torrent'))
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                         else:
@@ -1436,10 +1436,9 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                         size = int(item.links[1]['length'])
                         if format == "2":
                             torrent = request.request_content(url)
-
                             if not torrent or (int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1):
                                 rightformat = False
-                        if rightformat == True and size < maxsize and minimumseeders < seeds:
+                        if rightformat and size < maxsize and minimumseeders < seeds:
                             resultlist.append((title, size, url, provider, 'torrent'))
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                         else:
