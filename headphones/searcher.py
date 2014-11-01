@@ -148,17 +148,17 @@ def get_seed_ratio(provider):
     """
 
     if provider == 'rutracker.org':
-        seed_ratio = headphones.RUTRACKER_RATIO
+        seed_ratio = headphones.CONFIG.RUTRACKER_RATIO
     elif provider == 'Kick Ass Torrents':
-        seed_ratio = headphones.KAT_RATIO
+        seed_ratio = headphones.CONFIG.KAT_RATIO
     elif provider == 'What.cd':
-        seed_ratio = headphones.WHATCD_RATIO
+        seed_ratio = headphones.CONFIG.WHATCD_RATIO
     elif provider == 'The Pirate Bay':
-        seed_ratio = headphones.PIRATEBAY_RATIO
+        seed_ratio = headphones.CONFIG.PIRATEBAY_RATIO
     elif provider == 'Waffles.fm':
-        seed_ratio = headphones.WAFFLES_RATIO
+        seed_ratio = headphones.CONFIG.WAFFLES_RATIO
     elif provider == 'Mininova':
-        seed_ratio = headphones.MININOVA_RATIO
+        seed_ratio = headphones.CONFIG.MININOVA_RATIO
     else:
         seed_ratio = None
 
