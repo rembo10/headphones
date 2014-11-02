@@ -22,15 +22,13 @@ import subprocess
 import threading
 import webbrowser
 import sqlite3
-import itertools
 import cherrypy
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
-from headphones import versioncheck, logger, version
+from headphones import versioncheck, logger
 import headphones.config
-from headphones.common import *
 
 # (append new extras to the end)
 POSSIBLE_EXTRAS = [
@@ -153,7 +151,7 @@ def initialize(config_file):
         logger.info('Checking to see if the database has all tables....')
         try:
             dbcheck()
-        except Exception, e:
+        except Exception as e:
             logger.error("Can't connect to the database: %s", e)
 
         # Get the currently installed version - returns None, 'win32' or the git hash
@@ -539,7 +537,7 @@ def shutdown(restart=False, update=False):
         logger.info('Headphones is updating...')
         try:
             versioncheck.update()
-        except Exception, e:
+        except Exception as e:
             logger.warn('Headphones failed to update: %s. Restarting.', e)
 
     if CREATEPID:

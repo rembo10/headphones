@@ -17,9 +17,7 @@ from headphones import logger, helpers, db, mb, lastfm
 
 from beets.mediafile import MediaFile
 
-import os
 import time
-import threading
 import headphones
 
 blacklisted_special_artist_names = ['[anonymous]', '[data]', '[no artist]',
@@ -700,7 +698,7 @@ def updateFormat():
         for track in tracks:
             try:
                 f = MediaFile(track['Location'])
-            except Exception, e:
+            except Exception as e:
                 logger.info("Exception from MediaFile for: " + track['Location'] + " : " + str(e))
                 continue
             controlValueDict = {"TrackID": track['TrackID']}
@@ -713,7 +711,7 @@ def updateFormat():
         for track in havetracks:
             try:
                 f = MediaFile(track['Location'])
-            except Exception, e:
+            except Exception as e:
                 logger.info("Exception from MediaFile for: " + track['Location'] + " : " + str(e))
                 continue
             controlValueDict = {"TrackID": track['TrackID']}

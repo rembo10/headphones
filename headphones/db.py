@@ -21,8 +21,6 @@ from __future__ import with_statement
 
 import os
 import sqlite3
-import threading
-import time
 
 import headphones
 

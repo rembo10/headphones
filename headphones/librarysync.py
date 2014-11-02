@@ -14,7 +14,6 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import glob
 import headphones
 
 from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
@@ -110,7 +109,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
                 except (FileTypeError, UnreadableFileError):
                     logger.warning("Cannot read media file '%s', skipping. It may be corrupted or not a media file.", unicode_song_path)
                     continue
-                except IOError as e:
+                except IOError:
                     logger.warning("Cannnot read media file '%s', skipping. Does the file exists?", unicode_song_path)
                     continue
 
@@ -301,15 +300,30 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
         current_artists = myDB.select('SELECT ArtistName, ArtistID from artists')
 
         #There was a bug where artists with special characters (-,') would show up in new artists.
-        artist_list = [f for f in unique_artists if helpers.cleanName(f).lower() not in [helpers.cleanName(x[0]).lower() for x in current_artists]]
-        artists_checked = [f for f in unique_artists if helpers.cleanName(f).lower() in [helpers.cleanName(x[0]).lower() for x in current_artists]]
+        artist_list = [
+            x for x in unique_artists
+            if helpers.cleanName(x).lower() not in [
+                helpers.cleanName(y[0]).lower()
+                for y in current_artists
+            ]
+        ]
+        artists_checked = [
+            x for x in unique_artists
+            if helpers.cleanName(x).lower() in [
+                helpers.cleanName(y[0]).lower()
+                for y in current_artists
+            ]
+        ]
 
         # Update track counts
 
         for artist in artists_checked:
             # Have tracks are selected from tracks table and not all tracks because of duplicates
             # We update the track count upon an album switch to compliment this
-            havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistName like ? AND Location IS NOT NULL', [artist])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"', [artist]))
+            havetracks = (
+                len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistName like ? AND Location IS NOT NULL', [artist]))
+                + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"', [artist]))
+            )
             #Note, some people complain about having "artist have tracks" > # of tracks total in artist official releases
             # (can fix by getting rid of second len statement)
             myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistName=?', [havetracks, artist])

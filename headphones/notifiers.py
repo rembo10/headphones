@@ -28,7 +28,6 @@ import headphones
 import os.path
 import subprocess
 import gntp.notifier
-import time
 import json
 
 import oauth2 as oauth
@@ -286,7 +285,7 @@ class LMS(object):
 
         try:
             handle = urllib2.urlopen(req)
-        except Exception, e:
+        except Exception as e:
             logger.warn('Error opening LMS url: %s' % e)
             return
 
@@ -337,7 +336,7 @@ class Plex(object):
 
         try:
             handle = urllib2.urlopen(req)
-        except Exception, e:
+        except Exception as e:
             logger.warn('Error opening Plex url: %s' % e)
             return
 
@@ -371,7 +370,7 @@ class Plex(object):
                     url = "%s/library/sections/%s/refresh" % (host, s.getAttribute('key'))
                     try:
                         urllib.urlopen(url)
-                    except Exception, e:
+                    except Exception as e:
                         logger.warn("Error updating library section for Plex Media Server: %s" % e)
                         return False
 
@@ -649,7 +648,6 @@ class TwitterNotifier(object):
 
     def _get_authorization(self):
 
-        signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1() #@UnusedVariable
         oauth_consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
         oauth_client = oauth.Client(oauth_consumer)
 
@@ -679,7 +677,6 @@ class TwitterNotifier(object):
 
         logger.info('Generating and signing request for an access token using key ' + key)
 
-        signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1() #@UnusedVariable
         oauth_consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
         logger.info('oauth_consumer: ' + str(oauth_consumer))
         oauth_client = oauth.Client(oauth_consumer, token)
@@ -714,7 +711,7 @@ class TwitterNotifier(object):
 
         try:
             api.PostUpdate(message)
-        except Exception, e:
+        except Exception as e:
             logger.info(u"Error Sending Tweet: %s" % e)
             return False
 
@@ -778,7 +775,7 @@ class OSX_NOTIFY(object):
             del pool
             return True
 
-        except Exception, e:
+        except Exception as e:
             logger.warn('Error sending OS X Notification: %s' % e)
             return False
 

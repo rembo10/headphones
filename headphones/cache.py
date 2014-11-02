@@ -14,8 +14,6 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import glob
-import urllib
 import headphones
 
 from headphones import db, helpers, logger, lastfm, request
@@ -269,7 +267,7 @@ class Cache(object):
             for thumb_file in self.thumb_files:
                 try:
                     os.remove(thumb_file)
-                except Exception as e:
+                except Exception:
                     logger.warn('Error deleting file from the cache: %s', thumb_file)
 
     def _update_cache(self):
@@ -376,7 +374,7 @@ class Cache(object):
                 if not os.path.isdir(self.path_to_art_cache):
                     try:
                         os.makedirs(self.path_to_art_cache)
-                    except Exception, e:
+                    except Exception as e:
                         logger.error('Unable to create artwork cache dir. Error: %s', e)
                         self.artwork_errors = True
                         self.artwork_url = image_url

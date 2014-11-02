@@ -20,14 +20,11 @@
 
 
 import httplib
-import datetime
 
 import headphones
 
 from base64 import standard_b64encode
 import xmlrpclib
-
-#from headphones.providers.generic import GenericProvider
 
 from headphones import logger
 
@@ -87,13 +84,15 @@ def sendNZB(nzb):
             if nzbcontent64 is not None:
                 nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.CONFIG.NZBGET_CATEGORY, addToTop, nzbcontent64)
             else:
-                if nzb.resultType == "nzb":
-                    genProvider = GenericProvider("")
-                    data = genProvider.getURL(nzb.url)
-                    if (data is None):
-                        return False
-                    nzbcontent64 = standard_b64encode(data)
-                nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.CONFIG.NZBGET_CATEGORY, addToTop, nzbcontent64)
+                # from headphones.common.providers.generic import GenericProvider
+                # if nzb.resultType == "nzb":
+                #     genProvider = GenericProvider("")
+                #     data = genProvider.getURL(nzb.url)
+                #     if (data is None):
+                #         return False
+                #     nzbcontent64 = standard_b64encode(data)
+                # nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.CONFIG.NZBGET_CATEGORY, addToTop, nzbcontent64)
+                return False
         elif nzbget_version == 12:
             if nzbcontent64 is not None:
                 nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.CONFIG.NZBGET_CATEGORY, headphones.CONFIG.NZBGET_PRIORITY, False,

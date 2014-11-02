@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import request, db
+from headphones import request, db, logger
 
 
 def getAlbumArt(albumid):

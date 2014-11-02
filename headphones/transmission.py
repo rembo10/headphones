@@ -13,9 +13,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import logger, notifiers, request
+from headphones import logger, request
 
-import re
 import time
 import json
 import base64
@@ -45,13 +44,10 @@ def addTorrent(link):
 
     if response['result'] == 'success':
         if 'torrent-added' in response['arguments']:
-            name = response['arguments']['torrent-added']['name']
             retid = response['arguments']['torrent-added']['hashString']
         elif 'torrent-duplicate' in response['arguments']:
-            name = response['arguments']['torrent-duplicate']['name']
             retid = response['arguments']['torrent-duplicate']['hashString']
         else:
-            name = link
             retid = False
 
         logger.info(u"Torrent sent to Transmission successfully")
@@ -147,11 +143,13 @@ def torrentAction(method, arguments):
         i = host.rfind(':')
         if i >= 0:
             possible_port = host[i + 1:]
+            host = host + "/rpc"
             try:
                 port = int(possible_port)
-                host = host + "/transmission/rpc"
+                if port:
+                    host = host + "/transmission/rpc"
             except ValueError:
-                host = host + "/rpc"
+                logger.debug('No port, assuming not transmission')
         else:
             logger.error('Transmission port missing')
             return

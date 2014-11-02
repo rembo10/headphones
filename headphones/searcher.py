@@ -20,13 +20,11 @@ import urlparse
 from pygazelle import api as gazelleapi
 from pygazelle import encoding as gazelleencoding
 from pygazelle import format as gazelleformat
-from pygazelle import media as gazellemedia
 from base64 import b16encode, b32decode
 from hashlib import sha1
 
 import os
 import re
-import time
 import string
 import shutil
 import random
@@ -395,7 +393,7 @@ def sort_search_results(resultlist, album, new, albumlength):
                 if not len(finallist) and len(flac_list) and headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                     logger.info("Since there were no appropriate lossy matches (and at least one lossless match, going to use lossless instead")
                     finallist = sorted(flac_list, key=lambda title: (title[5], int(title[1])), reverse=True)
-        except Exception as e:
+        except Exception:
             logger.exception('Unhandled exception')
             logger.info('No track information for %s - %s. Defaulting to highest quality', (album['ArtistName'], album['AlbumTitle']))
 
@@ -423,8 +421,6 @@ def get_year_from_release_date(release_date):
 
 
 def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
-
-    albumid = album['AlbumID']
     reldate = album['ReleaseDate']
     year = get_year_from_release_date(reldate)
 
@@ -1061,7 +1057,6 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
     logger.debug("Using search term: %s" % term)
 
     resultlist = []
-    pre_sorted_results = False
     minimumseeders = int(headphones.CONFIG.NUMBEROFSEEDERS) - 1
 
     def set_proxy(proxy_url):
@@ -1087,15 +1082,12 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
 
         # Pick category for torrents
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
-            categories = "7" # Music
             format = "2" # FLAC
             maxsize = 10000000000
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
-            categories = "7" # Music
             format = "10" # MP3 and FLAC
             maxsize = 10000000000
         else:
-            categories = "7" # Music
             format = "8" # MP3 only
             maxsize = 300000000
 
@@ -1289,8 +1281,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
 
             # filter on format, size, and num seeders
             logger.info(u"Filtering torrents by format, maximum size, and minimum seeders...")
-            match_torrents = [torrent for torrent in all_torrents if torrent.size <= maxsize]
-            match_torrents = [torrent for torrent in match_torrents if torrent.seeders >= minimumseeders]
+            match_torrents = [t for t in all_torrents if t.size <= maxsize and t.seeders >= minimumseeders]
 
             logger.info(u"Remaining torrents: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
 
@@ -1312,7 +1303,6 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
 #                    match_torrents.sort(key=lambda x: str(bitrate) in x.getTorrentFolderName(), reverse=True)
                 logger.info(u"New order: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
 
-            pre_sorted_results = True
             for torrent in match_torrents:
                 if not torrent.file_path:
                     torrent.group.update_group_data() # will load the file_path for the individual torrents
@@ -1398,15 +1388,15 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
         providerurl = fix_url("http://www.mininova.org/rss/" + term + "/5")
 
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
-            categories = "7"        #music
+            # categories = "7"        #music
             format = "2"             #flac
             maxsize = 10000000000
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
-            categories = "7"        #music
+            # categories = "7"        #music
             format = "10"            #mp3+flac
             maxsize = 10000000000
         else:
-            categories = "7"        #music
+            # categories = "7"        #music
             format = "8"            #mp3
             maxsize = 300000000
 

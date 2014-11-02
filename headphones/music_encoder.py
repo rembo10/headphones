@@ -24,18 +24,14 @@ from headphones import logger
 from beets.mediafile import MediaFile
 
 # xld
-if headphones.CONFIG.ENCODER == 'xld':
-    import getXldProfile
-    XLD = True
-else:
-    XLD = False
+import getXldProfile
 
 
 def encode(albumPath):
+    use_xld = headphones.CONFIG.ENCODER == 'xld'
 
     # Return if xld details not found
-    if XLD:
-        global xldProfile
+    if use_xld:
         (xldProfile, xldFormat, xldBitrate) = getXldProfile.getXldProfile(headphones.CONFIG.XLDPROFILE)
         if not xldFormat:
             logger.error('Details for xld profile \'%s\' not found, files will not be re-encoded', xldProfile)
@@ -61,7 +57,7 @@ def encode(albumPath):
     for r, d, f in os.walk(albumPath):
         for music in f:
             if any(music.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
-                if not XLD:
+                if not use_xld:
                     encoderFormat = headphones.CONFIG.ENCODEROUTPUTFORMAT.encode(headphones.SYS_ENCODING)
                 else:
                     xldMusicFile = os.path.join(r, music)
@@ -70,7 +66,7 @@ def encode(albumPath):
 
                 if (headphones.CONFIG.ENCODERLOSSLESS):
                     ext = os.path.normpath(os.path.splitext(music)[1].lstrip(".")).lower()
-                    if not XLD and ext == 'flac' or XLD and (ext != xldFormat and (xldInfoMusic.bitrate / 1000 > 400)):
+                    if not use_xld and ext == 'flac' or use_xld and (ext != xldFormat and (xldInfoMusic.bitrate / 1000 > 400)):
                         musicFiles.append(os.path.join(r, music))
                         musicTemp = os.path.normpath(os.path.splitext(music)[0] + '.' + encoderFormat)
                         musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
@@ -84,7 +80,7 @@ def encode(albumPath):
     if headphones.CONFIG.ENCODER_PATH:
         encoder = headphones.CONFIG.ENCODER_PATH.encode(headphones.SYS_ENCODING)
     else:
-        if XLD:
+        if use_xld:
             encoder = os.path.join('/Applications', 'xld')
         elif headphones.CONFIG.ENCODER == 'lame':
             if headphones.SYS_PLATFORM == "win32":
@@ -111,7 +107,7 @@ def encode(albumPath):
         infoMusic = MediaFile(music)
         encode = False
 
-        if XLD:
+        if use_xld:
             if xldBitrate and (infoMusic.bitrate / 1000 <= xldBitrate):
                 logger.info('%s has bitrate <= %skb, will not be re-encoded', music.decode(headphones.SYS_ENCODING, 'replace'), xldBitrate)
             else:
@@ -202,7 +198,7 @@ def encode(albumPath):
                     os.remove(check_dest)
                 try:
                     shutil.move(dest, albumPath)
-                except Exception, e:
+                except Exception as e:
                     logger.error('Could not move %s to %s: %s', dest, albumPath, e)
                     encoder_failed = True
                     break
@@ -241,7 +237,7 @@ def command_map(args):
     # Start encoding
     try:
         return command(*args)
-    except Exception as e:
+    except Exception:
         logger.exception("Encoder raised an exception.")
         return False
 
@@ -251,12 +247,17 @@ def command(encoder, musicSource, musicDest, albumPath):
     Encode a given music file with a certain encoder. Returns True on success,
     or False otherwise.
     """
+    use_xld = headphones.CONFIG.ENCODER == 'xld'
 
     startMusicTime = time.time()
     cmd = []
 
-    # XLD
-    if XLD:
+    # Return if xld details not found
+    if use_xld:
+        (xldProfile, xldFormat, xldBitrate) = getXldProfile.getXldProfile(headphones.CONFIG.XLDPROFILE)
+        if not xldFormat:
+            logger.error('Details for xld profile \'%s\' not found, files will not be re-encoded', xldProfile)
+            return None
         xldDestDir = os.path.split(musicDest)[0]
         cmd = [encoder]
         cmd.extend([musicSource])
