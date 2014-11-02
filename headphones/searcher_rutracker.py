@@ -4,8 +4,6 @@
 # Headphones rutracker.org search
 # Functions called from searcher.py
 
-from headphones import logger, db, utorrent
-
 from bencode import bencode as bencode, bdecode
 from urlparse import urlparse
 from bs4 import BeautifulSoup
@@ -19,6 +17,8 @@ import urllib2
 import urllib
 import re
 import os
+
+from headphones import db, logger
 
 
 class Rutracker():
@@ -198,7 +198,7 @@ class Rutracker():
                             decoded = bdecode(torrent)
                             metainfo = decoded['info']
                         page.close()
-                    except Exception, e:
+                    except Exception as e:
                         logger.error('Error getting torrent: %s' % e)
                         return False
 

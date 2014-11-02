@@ -23,7 +23,6 @@ import headphones
 
 from beets import autotag
 from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
-from beets import plugins
 from beetsplug import lyrics as beetslyrics
 
 from headphones import notifiers, utorrent, transmission
@@ -71,7 +70,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
         # Fetch album information from MusicBrainz
         try:
             release_list = mb.getReleaseGroup(albumid)
-        except Exception, e:
+        except Exception as e:
             logger.error('Unable to get release information for manual album with rgid: %s. Error: %s', albumid, e)
             return
 
@@ -199,7 +198,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
     for downloaded_track in downloaded_track_list:
         try:
             f = MediaFile(downloaded_track)
-        except Exception, e:
+        except Exception as e:
             logger.info(u"Exception from MediaFile for: " + downloaded_track.decode(headphones.SYS_ENCODING, 'replace') + u" : " + unicode(e))
             continue
 
@@ -290,7 +289,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
             shutil.copytree(albumpath, new_folder)
             # Update the album path with the new location
             albumpath = new_folder
-        except Exception, e:
+        except Exception as e:
             logger.warn("Cannot copy/move files to temp folder: " + new_folder.decode(headphones.SYS_ENCODING, 'replace') + ". Not continuing. Error: " + str(e))
             return
 
@@ -308,7 +307,10 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     # below are executed. This simplifies errors and prevents unfinished steps.
     for downloaded_track in downloaded_track_list:
         try:
-            media_file = MediaFile(downloaded_track)
+            f = MediaFile(downloaded_track)
+            if f is None:
+                # this test is just to keep pyflakes from complaining about an unused variable
+                return
         except (FileTypeError, UnreadableFileError):
             logger.error("Track file is not a valid media file: %s. Not " \
                 "continuing.", downloaded_track.decode(
@@ -329,7 +331,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
             try:
                 with open(downloaded_track, "a+b"):
                     pass
-            except IOError as e:
+            except IOError:
                 logger.error("Track file is not writeable. This is required " \
                     "for some post processing steps: %s. Not continuing.",
                     downloaded_track.decode(headphones.SYS_ENCODING, "replace"))
@@ -519,7 +521,7 @@ def embedAlbumArt(artwork, downloaded_track_list):
         try:
             f.art = artwork
             f.save()
-        except Exception, e:
+        except Exception as e:
             logger.error(u'Error embedding album art to: %s. Error: %s' % (downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), str(e)))
             continue
 
@@ -685,7 +687,7 @@ def moveFiles(albumpath, release, tracks):
             if headphones.CONFIG.REPLACE_EXISTING_FOLDERS:
                 try:
                     shutil.rmtree(lossless_destination_path)
-                except Exception, e:
+                except Exception as e:
                     logger.error("Error deleting existing folder: %s. Creating duplicate folder. Error: %s" % (lossless_destination_path.decode(headphones.SYS_ENCODING, 'replace'), e))
                     create_duplicate_folder = True
 
@@ -705,7 +707,7 @@ def moveFiles(albumpath, release, tracks):
         if not os.path.exists(lossless_destination_path):
             try:
                 os.makedirs(lossless_destination_path)
-            except Exception, e:
+            except Exception as e:
                 logger.error('Could not create lossless folder for %s. (Error: %s)' % (release['AlbumTitle'], e))
                 if not make_lossy_folder:
                     return [albumpath]
@@ -718,7 +720,7 @@ def moveFiles(albumpath, release, tracks):
             if headphones.CONFIG.REPLACE_EXISTING_FOLDERS:
                 try:
                     shutil.rmtree(lossy_destination_path)
-                except Exception, e:
+                except Exception as e:
                     logger.error("Error deleting existing folder: %s. Creating duplicate folder. Error: %s" % (lossy_destination_path.decode(headphones.SYS_ENCODING, 'replace'), e))
                     create_duplicate_folder = True
 
@@ -738,7 +740,7 @@ def moveFiles(albumpath, release, tracks):
         if not os.path.exists(lossy_destination_path):
             try:
                 os.makedirs(lossy_destination_path)
-            except Exception, e:
+            except Exception as e:
                 logger.error('Could not create folder for %s. Not moving: %s' % (release['AlbumTitle'], e))
                 return [albumpath]
 
@@ -766,7 +768,7 @@ def moveFiles(albumpath, release, tracks):
                 if moved_to_lossy_folder or moved_to_lossless_folder:
                     try:
                         os.remove(file_to_move)
-                    except Exception, e:
+                    except Exception as e:
                         logger.error("Error deleting file '" + file_to_move.decode(headphones.SYS_ENCODING, 'replace') + "' from source directory")
                 else:
                     logger.error("Error copying '" + file_to_move.decode(headphones.SYS_ENCODING, 'replace') + "'. Not deleting from download directory")
@@ -799,13 +801,13 @@ def moveFiles(albumpath, release, tracks):
 
             try:
                 os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING, 'replace'), int(headphones.CONFIG.FOLDER_PERMISSIONS, 8))
-            except Exception, e:
+            except Exception as e:
                 logger.error("Error trying to change permissions on folder: %s. %s", temp_f, e)
 
     # If we failed to move all the files out of the directory, this will fail too
     try:
         shutil.rmtree(albumpath)
-    except Exception, e:
+    except Exception as e:
         logger.error('Could not remove directory: %s. %s', albumpath, e)
 
     destination_paths = []
@@ -835,7 +837,7 @@ def correctMetadata(albumid, release, downloaded_track_list):
                 lossy_items.append(beets.library.Item.from_path(downloaded_track))
             else:
                 logger.warn("Skipping: %s because it is not a mutagen friendly file format", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
-        except Exception, e:
+        except Exception as e:
             logger.error("Beets couldn't create an Item from: %s - not a media file? %s", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), str(e))
 
     for items in [lossy_items, lossless_items]:
@@ -845,7 +847,7 @@ def correctMetadata(albumid, release, downloaded_track_list):
 
         try:
             cur_artist, cur_album, candidates, rec = autotag.tag_album(items, search_artist=helpers.latinToAscii(release['ArtistName']), search_album=helpers.latinToAscii(release['AlbumTitle']))
-        except Exception, e:
+        except Exception as e:
             logger.error('Error getting recommendation: %s. Not writing metadata', e)
             return
         if str(rec) == 'recommendation.none':
@@ -868,7 +870,7 @@ def correctMetadata(albumid, release, downloaded_track_list):
             try:
                 item.write()
                 logger.info("Successfully applied metadata to: %s", item.path.decode(headphones.SYS_ENCODING, 'replace'))
-            except Exception, e:
+            except Exception as e:
                 logger.warn("Error writing metadata to '%s': %s", item.path.decode(headphones.SYS_ENCODING, 'replace'), str(e))
 
 
@@ -891,7 +893,7 @@ def embedLyrics(downloaded_track_list):
                 lossy_items.append(beets.library.Item.from_path(downloaded_track))
             else:
                 logger.warn("Skipping: %s because it is not a mutagen friendly file format", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'))
-        except Exception, e:
+        except Exception as e:
             logger.error("Beets couldn't create an Item from: %s - not a media file? %s", downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), str(e))
 
     for items in [lossy_items, lossless_items]:
@@ -914,7 +916,7 @@ def embedLyrics(downloaded_track_list):
                 item.lyrics = lyrics
                 try:
                     item.write()
-                except Exception, e:
+                except Exception as e:
                     logger.error('Cannot save lyrics to: %s. Skipping', item.title)
             else:
                 logger.debug('No lyrics found for track: %s', item.title)
@@ -1003,7 +1005,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
         logger.debug('Renaming %s ---> %s', downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), new_file_name.decode(headphones.SYS_ENCODING, 'replace'))
         try:
             os.rename(downloaded_track, new_file)
-        except Exception, e:
+        except Exception as e:
             logger.error('Error renaming file: %s. Error: %s', downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), e)
             continue
 
@@ -1107,11 +1109,12 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                 verify(snatched['AlbumID'], folder, snatched['Kind'])
                 continue
 
+        year = None
         # Attempt 2a: parse the folder name into a valid format
         try:
             logger.debug('Attempting to extract name, album and year from folder name')
             name, album, year = helpers.extract_data(folder_basename)
-        except Exception as e:
+        except Exception:
             name = album = year = None
 
         if name and album:
@@ -1138,15 +1141,15 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
         try:
             logger.debug('Attempting to extract name, album and year from metadata')
             name, album, year = helpers.extract_metadata(folder)
-        except Exception as e:
-            name = album = year = None
+        except Exception:
+            name = album = None
 
         # Check if there's a cue to split
         if not name and not album and helpers.cue_split(folder):
             try:
                 name, album, year = helpers.extract_metadata(folder)
-            except Exception as e:
-                name = album = year = None
+            except Exception:
+                name = album = None
 
         if name and album:
             release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()

@@ -452,7 +452,6 @@ class WebInterface(object):
         myDB = db.DBConnection()
         have_album_dictionary = []
         headphones_album_dictionary = []
-        unmatched_albums = []
         have_albums = myDB.select('SELECT ArtistName, AlbumTitle, TrackTitle, CleanName from have WHERE Matched = "Failed" GROUP BY AlbumTitle ORDER BY ArtistName')
         for albums in have_albums:
             #Have to skip over manually matched tracks
@@ -685,7 +684,7 @@ class WebInterface(object):
         if scan:
             try:
                 threading.Thread(target=librarysync.libraryScan).start()
-            except Exception, e:
+            except Exception as e:
                 logger.error('Unable to complete the scan: %s' % e)
         if redirect:
             raise cherrypy.HTTPRedirect(redirect)
@@ -923,7 +922,7 @@ class WebInterface(object):
         logger.info('Marking all unwanted albums as Skipped')
         try:
             threading.Thread(target=librarysync.libraryScan).start()
-        except Exception, e:
+        except Exception as e:
             logger.error('Unable to complete the scan: %s' % e)
         raise cherrypy.HTTPRedirect("home")
     forceScan.exposed = True

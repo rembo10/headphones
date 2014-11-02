@@ -18,10 +18,11 @@ from headphones import db, logger, cache
 
 
 def switch(AlbumID, ReleaseID):
-    '''
+    """
     Takes the contents from allalbums & alltracks (based on ReleaseID) and switches them into
     the albums & tracks table.
-    '''
+    """
+    logger.debug('Switching allalbums and alltracks')
     myDB = db.DBConnection()
     oldalbumdata = myDB.action(
         'SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()

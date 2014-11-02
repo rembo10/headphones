@@ -2,7 +2,6 @@ import os.path
 import plistlib
 import sys
 import xml.parsers.expat as expat
-import commands
 from headphones import logger
 
 

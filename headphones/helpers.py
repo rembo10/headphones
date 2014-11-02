@@ -436,7 +436,7 @@ def extract_metadata(f):
 
     # (Lots of) different artists. Could be a featuring album, so test for this.
     if len(artists) > 1 and len(albums) == 1:
-        split_artists = [RE_FEATURING.split(artist) for artist in artists]
+        split_artists = [RE_FEATURING.split(x) for x in artists]
         featurings = [len(split_artist) - 1 for split_artist in split_artists]
         logger.info("Album seem to feature %d different artists", sum(featurings))
 
@@ -481,7 +481,7 @@ def preserve_torrent_direcory(albumpath):
     try:
         shutil.copytree(albumpath, new_folder)
         return new_folder
-    except Exception, e:
+    except Exception as e:
         logger.warn("Cannot copy/move files to temp folder: " + \
                     new_folder.decode(headphones.SYS_ENCODING, 'replace') + \
                     ". Not continuing. Error: " + str(e))
@@ -517,7 +517,7 @@ def cue_split(albumpath):
         for cue_dir in cue_dirs:
             try:
                 cuesplit.split(cue_dir)
-            except Exception, e:
+            except Exception as e:
                 os.chdir(cwd)
                 logger.warn("Cue not split: " + str(e))
                 return False
@@ -591,7 +591,7 @@ def smartMove(src, dest, delete=True):
                 try:
                     os.rename(src, os.path.join(source_dir, newfile))
                     filename = newfile
-                except Exception, e:
+                except Exception as e:
                     logger.warn('Error renaming %s: %s', src.decode(headphones.SYS_ENCODING, 'replace'), e)
                 break
 
@@ -601,7 +601,7 @@ def smartMove(src, dest, delete=True):
         else:
             shutil.copy(os.path.join(source_dir, filename), os.path.join(dest, filename))
             return True
-    except Exception, e:
+    except Exception as e:
         logger.warn('Error moving file %s: %s', filename.decode(headphones.SYS_ENCODING, 'replace'), e)
 
 #########################

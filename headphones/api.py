@@ -15,10 +15,7 @@
 
 from headphones import db, mb, importer, searcher, cache, postprocessor, versioncheck, logger
 
-from xml.dom.minidom import Document
-
 import headphones
-import copy
 import json
 
 cmd_list = ['getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSimilar', 'getHistory', 'getLogs',
@@ -206,7 +203,7 @@ class Api(object):
 
         try:
             importer.addArtisttoDB(self.id)
-        except Exception, e:
+        except Exception as e:
             self.data = e
 
         return
@@ -256,7 +253,7 @@ class Api(object):
 
         try:
             importer.addArtisttoDB(self.id)
-        except Exception, e:
+        except Exception as e:
             self.data = e
 
         return
@@ -270,7 +267,7 @@ class Api(object):
 
         try:
             importer.addReleaseById(self.id)
-        except Exception, e:
+        except Exception as e:
             self.data = e
 
         return

@@ -15,7 +15,6 @@
 
 
 from headphones import logger, db, helpers
-from headphones.helpers import multikeysort, replace_all
 
 import time
 import threading
@@ -224,7 +223,7 @@ def getArtist(artistid, extrasonly=False):
         except musicbrainzngs.WebServiceError as e:
             logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e)))
             time.sleep(5)
-        except Exception, e:
+        except Exception as e:
             pass
 
         if not artist:
@@ -331,8 +330,6 @@ def getReleaseGroup(rgid):
     Returns a list of releases in a release group
     """
     with mb_lock:
-
-        releaselist = []
 
         releaseGroup = None
 
@@ -463,8 +460,6 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
 
         release = {}
         rel_id_check = releasedata['id']
-        artistid = unicode(releasedata['artist-credit'][0]['artist']['id'])
-
         album_checker = myDB.action('SELECT * from allalbums WHERE ReleaseID=?', [rel_id_check]).fetchone()
         if not album_checker or forcefull:
             #DELETE all references to this release since we're updating it anyway.

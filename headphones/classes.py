@@ -17,10 +17,8 @@
 ## Stolen from Sick-Beard's classes.py ##
 #########################################
 
-import headphones
 
 import urllib
-import datetime
 
 from common import USER_AGENT
 

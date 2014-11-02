@@ -19,7 +19,6 @@
 
 import MultipartPostHandler
 import headphones
-import datetime
 import cookielib
 import urllib2
 import httplib
@@ -28,7 +27,7 @@ import ast
 
 from headphones.common import USER_AGENT
 from headphones import logger
-from headphones import notifiers, helpers
+from headphones import helpers
 
 
 def sendNZB(nzb):
@@ -88,15 +87,15 @@ def sendNZB(nzb):
 
             f = opener.open(req)
 
-    except (EOFError, IOError), e:
+    except (EOFError, IOError) as e:
         logger.error(u"Unable to connect to SAB with URL: %s" % url)
         return False
 
-    except httplib.InvalidURL, e:
+    except httplib.InvalidURL as e:
         logger.error(u"Invalid SAB host, check your config. Current host: %s" % headphones.CONFIG.SAB_HOST)
         return False
 
-    except Exception, e:
+    except Exception as e:
         logger.error(u"Error: " + str(e))
         return False
 
@@ -106,7 +105,7 @@ def sendNZB(nzb):
 
     try:
         result = f.readlines()
-    except Exception, e:
+    except Exception as e:
         logger.info(u"Error trying to get result from SAB, NZB not sent: ")
         return False
 
@@ -152,7 +151,7 @@ def checkConfig():
 
     try:
         f = urllib.urlopen(url).read()
-    except Exception, e:
+    except Exception:
         logger.warn("Unable to read SABnzbd config file - cannot determine renaming options (might affect auto & forced post processing)")
         return (0, 0)
 
