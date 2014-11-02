@@ -543,13 +543,9 @@ def extract_logline(s):
 
 
 def extract_song_data(s):
+    from headphones import logger
 
     #headphones default format
-    music_dir = headphones.CONFIG.MUSIC_DIR
-    folder_format = headphones.CONFIG.FOLDER_FORMAT
-    file_format = headphones.CONFIG.FILE_FORMAT
-
-    full_format = os.path.join(headphones.CONFIG.MUSIC_DIR)
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
     match = pattern.match(s)
 
@@ -681,7 +677,7 @@ def create_https_certificates(ssl_cert, ssl_key):
 
     try:
         from OpenSSL import crypto
-        from lib.certgen import createKeyPair, createCertRequest, createCertificate, TYPE_RSA, serial
+        from certgen import createKeyPair, createCertRequest, createCertificate, TYPE_RSA, serial
     except:
         logger.warn("pyOpenSSL module missing, please install to enable HTTPS")
         return False
