@@ -395,7 +395,7 @@ def sort_search_results(resultlist, album, new, albumlength):
                     finallist = sorted(flac_list, key=lambda title: (title[5], int(title[1])), reverse=True)
         except Exception:
             logger.exception('Unhandled exception')
-            logger.info('No track information for %s - %s. Defaulting to highest quality', (album['ArtistName'], album['AlbumTitle']))
+            logger.info('No track information for %s - %s. Defaulting to highest quality', album['ArtistName'], album['AlbumTitle'])
 
             finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
 
