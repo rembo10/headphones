@@ -19,35 +19,31 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 import httplib
-import datetime
 
 import headphones
 
 from base64 import standard_b64encode
 import xmlrpclib
 
-#from headphones.providers.generic import GenericProvider
-
 from headphones import logger
+
 
 def sendNZB(nzb):
 
     addToTop = False
     nzbgetXMLrpc = "%(username)s:%(password)s@%(host)s/xmlrpc"
 
-    if headphones.CONFIG.NZBGET_HOST == None:
+    if headphones.CONFIG.NZBGET_HOST is None:
         logger.error(u"No NZBget host found in configuration. Please configure it.")
         return False
 
     if headphones.CONFIG.NZBGET_HOST.startswith('https://'):
         nzbgetXMLrpc = 'https://' + nzbgetXMLrpc
-        headphones.CONFIG.NZBGET_HOST.replace('https://','',1)
+        headphones.CONFIG.NZBGET_HOST.replace('https://', '', 1)
     else:
         nzbgetXMLrpc = 'http://' + nzbgetXMLrpc
-        headphones.CONFIG.NZBGET_HOST.replace('http://','',1)
-
+        headphones.CONFIG.NZBGET_HOST.replace('http://', '', 1)
 
     url = nzbgetXMLrpc % {"host": headphones.CONFIG.NZBGET_HOST, "username": headphones.CONFIG.NZBGET_USERNAME, "password": headphones.CONFIG.NZBGET_PASSWORD}
 
@@ -88,13 +84,15 @@ def sendNZB(nzb):
             if nzbcontent64 is not None:
                 nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.CONFIG.NZBGET_CATEGORY, addToTop, nzbcontent64)
             else:
-                if nzb.resultType == "nzb":
-                    genProvider = GenericProvider("")
-                    data = genProvider.getURL(nzb.url)
-                    if (data == None):
-                        return False
-                    nzbcontent64 = standard_b64encode(data)
-                nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.CONFIG.NZBGET_CATEGORY, addToTop, nzbcontent64)
+                # from headphones.common.providers.generic import GenericProvider
+                # if nzb.resultType == "nzb":
+                #     genProvider = GenericProvider("")
+                #     data = genProvider.getURL(nzb.url)
+                #     if (data is None):
+                #         return False
+                #     nzbcontent64 = standard_b64encode(data)
+                # nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.CONFIG.NZBGET_CATEGORY, addToTop, nzbcontent64)
+                return False
         elif nzbget_version == 12:
             if nzbcontent64 is not None:
                 nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", headphones.CONFIG.NZBGET_CATEGORY, headphones.CONFIG.NZBGET_PRIORITY, False,

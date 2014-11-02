@@ -4,6 +4,7 @@ import os
 import re
 from configobj import ConfigObj
 
+
 def bool_int(value):
     """
     Casts a config value into a 0 or 1
@@ -233,6 +234,8 @@ _CONFIG_DEFINITIONS = {
     'XLDPROFILE': (str, 'General', '')
 }
 
+# pylint:disable=R0902
+# it might be nice to refactor for fewer instance variables
 class Config(object):
     """ Wraps access to particular values in a config file """
 
@@ -380,16 +383,16 @@ class Config(object):
         if self.CONFIG_VERSION == '1':
             from headphones.helpers import replace_all
             file_values = {
-                'Track':        '$Track',
-                'Title':        '$Title',
-                'Artist':       '$Artist',
-                'Album':        '$Album',
-                'Year':         '$Year',
-                'track':        '$track',
-                'title':        '$title',
-                'artist':       '$artist',
-                'album':        '$album',
-                'year':         '$year'
+                'Track': '$Track',
+                'Title': '$Title',
+                'Artist': '$Artist',
+                'Album': '$Album',
+                'Year': '$Year',
+                'track': '$track',
+                'title': '$title',
+                'artist': '$artist',
+                'album': '$album',
+                'year': '$year'
             }
             folder_values = {
                 'Artist': '$Artist',

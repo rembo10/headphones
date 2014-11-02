@@ -14,13 +14,12 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import glob
-import urllib
 import headphones
 
 from headphones import db, helpers, logger, lastfm, request
 
 LASTFM_API_KEY = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
+
 
 class Cache(object):
     """
@@ -59,12 +58,12 @@ class Cache(object):
         self.info_summary = None
         self.info_content = None
 
-    def _findfilesstartingwith(self,pattern,folder):
+    def _findfilesstartingwith(self, pattern, folder):
         files = []
         if os.path.exists(folder):
             for fname in os.listdir(folder):
                 if fname.startswith(pattern):
-                    files.append(os.path.join(folder,fname))
+                    files.append(os.path.join(folder, fname))
         return files
 
     def _exists(self, type):
@@ -72,14 +71,14 @@ class Cache(object):
         self.thumb_files = []
 
         if type == 'artwork':
-            self.artwork_files = self._findfilesstartingwith(self.id,self.path_to_art_cache)
+            self.artwork_files = self._findfilesstartingwith(self.id, self.path_to_art_cache)
             if self.artwork_files:
                 return True
             else:
                 return False
 
         elif type == 'thumb':
-            self.thumb_files = self._findfilesstartingwith("T_" + self.id,self.path_to_art_cache)
+            self.thumb_files = self._findfilesstartingwith("T_" + self.id, self.path_to_art_cache)
             if self.thumb_files:
                 return True
             else:
@@ -88,10 +87,9 @@ class Cache(object):
     def _get_age(self, date):
         # There's probably a better way to do this
         split_date = date.split('-')
-        days_old = int(split_date[0])*365 + int(split_date[1])*30 + int(split_date[2])
+        days_old = int(split_date[0]) * 365 + int(split_date[1]) * 30 + int(split_date[2])
 
         return days_old
-
 
     def _is_current(self, filename=None, date=None):
 
@@ -191,11 +189,11 @@ class Cache(object):
         if not db_info or not db_info['LastUpdated'] or not self._is_current(date=db_info['LastUpdated']):
 
             self._update_cache()
-            info_dict = { 'Summary' : self.info_summary, 'Content' : self.info_content }
+            info_dict = {'Summary': self.info_summary, 'Content': self.info_content}
             return info_dict
 
         else:
-            info_dict = { 'Summary' : db_info['Summary'], 'Content' : db_info['Content'] }
+            info_dict = {'Summary': db_info['Summary'], 'Content': db_info['Content']}
             return info_dict
 
     def get_image_links(self, ArtistID=None, AlbumID=None):
@@ -240,7 +238,7 @@ class Cache(object):
             if not thumb_url:
                 logger.debug('No album thumbnail image found on last.fm')
 
-        return {'artwork' : image_url, 'thumbnail' : thumb_url }
+        return {'artwork': image_url, 'thumbnail': thumb_url}
 
     def remove_from_cache(self, ArtistID=None, AlbumID=None):
         """
@@ -269,7 +267,7 @@ class Cache(object):
             for thumb_file in self.thumb_files:
                 try:
                     os.remove(thumb_file)
-                except Exception as e:
+                except Exception:
                     logger.warn('Error deleting file from the cache: %s', thumb_file)
 
     def _update_cache(self):
@@ -343,13 +341,13 @@ class Cache(object):
 
         #Save the content & summary to the database no matter what if we've opened up the url
         if self.id_type == 'artist':
-            controlValueDict = {"ArtistID":     self.id}
+            controlValueDict = {"ArtistID": self.id}
         else:
-            controlValueDict = {"ReleaseGroupID":     self.id}
+            controlValueDict = {"ReleaseGroupID": self.id}
 
-        newValueDict = {"Summary":       self.info_summary,
-                        "Content":       self.info_content,
-                        "LastUpdated":   helpers.today()}
+        newValueDict = {"Summary": self.info_summary,
+                        "Content": self.info_content,
+                        "LastUpdated": helpers.today()}
 
         myDB.upsert("descriptions", newValueDict, controlValueDict)
 
@@ -376,7 +374,7 @@ class Cache(object):
                 if not os.path.isdir(self.path_to_art_cache):
                     try:
                         os.makedirs(self.path_to_art_cache)
-                    except Exception, e:
+                    except Exception as e:
                         logger.error('Unable to create artwork cache dir. Error: %s', e)
                         self.artwork_errors = True
                         self.artwork_url = image_url
@@ -400,7 +398,7 @@ class Cache(object):
                     self.artwork_url = image_url
 
         # Grab the thumbnail as well if we're getting the full artwork (as long as it's missing/outdated
-        if thumb_url and self.query_type in ['thumb','artwork'] and not (self.thumb_files and self._is_current(self.thumb_files[0])):
+        if thumb_url and self.query_type in ['thumb', 'artwork'] and not (self.thumb_files and self._is_current(self.thumb_files[0])):
             artwork = request.request_content(thumb_url, timeout=20)
 
             if artwork:
@@ -431,6 +429,7 @@ class Cache(object):
                     self.thumb_errors = True
                     self.thumb_url = image_url
 
+
 def getArtwork(ArtistID=None, AlbumID=None):
 
     c = Cache()
@@ -444,6 +443,7 @@ def getArtwork(ArtistID=None, AlbumID=None):
     else:
         artwork_file = os.path.basename(artwork_path)
         return "cache/artwork/" + artwork_file
+
 
 def getThumb(ArtistID=None, AlbumID=None):
 
@@ -459,6 +459,7 @@ def getThumb(ArtistID=None, AlbumID=None):
         thumbnail_file = os.path.basename(artwork_path)
         return "cache/artwork/" + thumbnail_file
 
+
 def getInfo(ArtistID=None, AlbumID=None):
 
     c = Cache()
@@ -466,6 +467,7 @@ def getInfo(ArtistID=None, AlbumID=None):
     info_dict = c.get_info_from_cache(ArtistID, AlbumID)
 
     return info_dict
+
 
 def getImageLinks(ArtistID=None, AlbumID=None):
 
