@@ -710,6 +710,11 @@
                             <fieldset>
                                 <legend>Post-Processing</legend>
                                 <div class="row checkbox left clearfix">
+                                    <label title="Use associated .cue sheet to split single file albums into multiple tracks. Requires shntool with flac or xld cli (OS X) to be installed.">
+                                        Split single file albums into multiple tracks
+                                        <input type="checkbox" name="cue_split" id="cue_split" value="1" ${config['cue_split']} />
+                                    </label>
+                                <div class="row checkbox left clearfix">
                                     <label title="Freeze the database, so new artists won't be added automatically. Use this if Headphones adds artists because due to wrong snatches. This check is skipped when the folder name is appended with release group ID.">
                                         Freeze database for adding new artist
                                         <input type="checkbox" name="freeze_db" id="freeze_db" value="1" ${config['freeze_db']} />

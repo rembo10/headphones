@@ -179,7 +179,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
                 return
 
     # Split cue
-    if downloaded_cuecount and downloaded_cuecount >= len(downloaded_track_list):
+    if headphones.CONFIG.CUE_SPLIT and downloaded_cuecount and downloaded_cuecount >= len(downloaded_track_list):
         if headphones.CONFIG.KEEP_TORRENT_FILES and Kind=="torrent":
             albumpath = helpers.preserve_torrent_direcory(albumpath)
         if albumpath and helpers.cue_split(albumpath):
@@ -1129,7 +1129,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
             name = album = year = None
 
         # Check if there's a cue to split
-        if not name and not album and helpers.cue_split(folder):
+        if headphones.CONFIG.CUE_SPLIT and not name and not album and helpers.cue_split(folder):
             try:
                 name, album, year = helpers.extract_metadata(folder)
             except Exception as e:
