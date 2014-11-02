@@ -1378,7 +1378,7 @@ class WebInterface(object):
 
     def osxnotifyregister(self, app):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-        from lib.osxnotify import registerapp as osxnotify
+        from osxnotify import registerapp as osxnotify
         result, msg = osxnotify.registerapp(app)
         if result:
             osx_notify = notifiers.OSX_NOTIFY()
