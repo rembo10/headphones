@@ -233,7 +233,8 @@ _CONFIG_DEFINITIONS = {
     'XLDPROFILE': (str, 'General', '')
 }
 
-
+# pylint:disable=R0902
+# it might be nice to refactor for fewer instance variables
 class Config(object):
     """ Wraps access to particular values in a config file """
 

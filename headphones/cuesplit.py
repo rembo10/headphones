@@ -388,7 +388,7 @@ class CueFile(File):
             except:
                 raise ValueError('Cant encode CUE Sheet.')
 
-        if self.content[0] == '\ufeff':
+        if self.content[0] == u'\ufeff':
             self.content = self.content[1:]
 
         header = header_parser()
