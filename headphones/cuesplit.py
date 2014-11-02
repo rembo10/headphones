@@ -216,7 +216,7 @@ class Directory:
                     # TODO: not part of other value such as year
                     return n
 
-        list_dir = glob.glob(os.path.join(self.path, '*'))
+        list_dir = glob.glob1(self.path, '*')
 
         # TODO: for some reason removes only one file
         rem_list = []
