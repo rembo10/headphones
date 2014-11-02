@@ -15,6 +15,6 @@ install:
  - pip install nosetests
 script:
   - pep8 headphones
-  - pylint headphones
+  - pylint --rcfile=pylintrc headphones
   - pyflakes headphones
   - nosetests headphones
