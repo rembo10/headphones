@@ -32,7 +32,10 @@ import threading
 import headphones
 
 try:
+    # pylint:disable=E0611
+    # ignore this error because we are catching the ImportError
     from collections import OrderedDict
+    # pylint:enable=E0611
 except ImportError:
     # Python 2.6.x fallback, from libs
     from ordereddict import OrderedDict
