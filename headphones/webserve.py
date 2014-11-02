@@ -1028,6 +1028,7 @@ class WebInterface(object):
             "lossless_bitrate_from": headphones.CONFIG.LOSSLESS_BITRATE_FROM,
             "lossless_bitrate_to": headphones.CONFIG.LOSSLESS_BITRATE_TO,
             "freeze_db": checked(headphones.CONFIG.FREEZE_DB),
+            "cue_split": checked(headphones.CONFIG.CUE_SPLIT),
             "move_files": checked(headphones.CONFIG.MOVE_FILES),
             "rename_files": checked(headphones.CONFIG.RENAME_FILES),
             "correct_metadata": checked(headphones.CONFIG.CORRECT_METADATA),
@@ -1174,7 +1175,7 @@ class WebInterface(object):
         checked_configs = [
             "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer", "use_newznab", "newznab_enabled",
             "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_mininova", "use_waffles", "use_rutracker", "use_whatcd",
-            "preferred_bitrate_allow_lossless", "detect_bitrate", "freeze_db", "move_files", "rename_files", "correct_metadata",
+            "preferred_bitrate_allow_lossless", "detect_bitrate", "freeze_db", "cue_split", "move_files", "rename_files", "correct_metadata",
             "cleanup_files", "keep_nfo", "add_album_art", "embed_album_art", "embed_lyrics", "replace_existing_folders", "file_underscores",
             "include_extras", "autowant_upcoming", "autowant_all", "autowant_manually_added", "keep_torrent_files", "music_encoder",
             "encoderlossless", "encoder_multicore", "delete_lossless_files", "growl_enabled", "growl_onsnatch", "prowl_enabled",
