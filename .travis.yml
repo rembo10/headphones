@@ -12,7 +12,6 @@ install:
  - pip install pylint
  - pip install pyflakes
  - pip install pep8
- - pip install nosetests
 script:
   - pep8 headphones
   - pylint --rcfile=pylintrc headphones
