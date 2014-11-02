@@ -12,9 +12,9 @@ install:
  - pip install pylint
  - pip install pyflakes
  - pip install pep8
-before_script:
+ - pip install nosetests
+script:
   - pep8 headphones
   - pylint headphones
   - pyflakes headphones
-script:
   - nosetests headphones
