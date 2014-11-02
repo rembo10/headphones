@@ -19,7 +19,6 @@
 
 import MultipartPostHandler
 import headphones
-import datetime
 import cookielib
 import urllib2
 import httplib
@@ -28,7 +27,8 @@ import ast
 
 from headphones.common import USER_AGENT
 from headphones import logger
-from headphones import notifiers, helpers
+from headphones import helpers
+
 
 def sendNZB(nzb):
 
@@ -49,7 +49,7 @@ def sendNZB(nzb):
         if nzb.provider.getID() == 'newzbin':
             id = nzb.provider.getIDFromURL(nzb.url)
             if not id:
-                logger.info("Unable to send NZB to sab, can't find ID in URL "+str(nzb.url))
+                logger.info("Unable to send NZB to sab, can't find ID in URL " + str(nzb.url))
                 return False
             params['mode'] = 'addid'
             params['name'] = id
@@ -62,13 +62,13 @@ def sendNZB(nzb):
         # Sanitize the file a bit, since we can only use ascii chars with MultiPartPostHandler
         nzbdata = helpers.latinToAscii(nzb.extraInfo[0])
         params['mode'] = 'addfile'
-        multiPartParams = {"nzbfile": (helpers.latinToAscii(nzb.name)+".nzb", nzbdata)}
+        multiPartParams = {"nzbfile": (helpers.latinToAscii(nzb.name) + ".nzb", nzbdata)}
 
     if not headphones.CONFIG.SAB_HOST.startswith('http'):
         headphones.CONFIG.SAB_HOST = 'http://' + headphones.CONFIG.SAB_HOST
 
     if headphones.CONFIG.SAB_HOST.endswith('/'):
-        headphones.CONFIG.SAB_HOST = headphones.CONFIG.SAB_HOST[0:len(headphones.CONFIG.SAB_HOST)-1]
+        headphones.CONFIG.SAB_HOST = headphones.CONFIG.SAB_HOST[0:len(headphones.CONFIG.SAB_HOST) - 1]
 
     url = headphones.CONFIG.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
 
@@ -87,25 +87,25 @@ def sendNZB(nzb):
 
             f = opener.open(req)
 
-    except (EOFError, IOError), e:
+    except (EOFError, IOError) as e:
         logger.error(u"Unable to connect to SAB with URL: %s" % url)
         return False
 
-    except httplib.InvalidURL, e:
+    except httplib.InvalidURL as e:
         logger.error(u"Invalid SAB host, check your config. Current host: %s" % headphones.CONFIG.SAB_HOST)
         return False
-        
-    except Exception, e:
+
+    except Exception as e:
         logger.error(u"Error: " + str(e))
         return False
-        
-    if f == None:
+
+    if f is None:
         logger.info(u"No data returned from SABnzbd, NZB not sent")
         return False
 
     try:
         result = f.readlines()
-    except Exception, e:
+    except Exception as e:
         logger.info(u"Error trying to get result from SAB, NZB not sent: ")
         return False
 
@@ -126,11 +126,12 @@ def sendNZB(nzb):
     else:
         logger.info(u"Unknown failure sending NZB to sab. Return text is: " + sabText)
         return False
-        
+
+
 def checkConfig():
 
-    params = { 'mode' : 'get_config', 
-               'section' : 'misc' 
+    params = {'mode': 'get_config',
+               'section': 'misc'
                }
 
     if headphones.CONFIG.SAB_USERNAME:
@@ -144,19 +145,19 @@ def checkConfig():
         headphones.CONFIG.SAB_HOST = 'http://' + headphones.CONFIG.SAB_HOST
 
     if headphones.CONFIG.SAB_HOST.endswith('/'):
-        headphones.CONFIG.SAB_HOST = headphones.CONFIG.SAB_HOST[0:len(headphones.CONFIG.SAB_HOST)-1]
-    
+        headphones.CONFIG.SAB_HOST = headphones.CONFIG.SAB_HOST[0:len(headphones.CONFIG.SAB_HOST) - 1]
+
     url = headphones.CONFIG.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
-    
+
     try:
         f = urllib.urlopen(url).read()
-    except Exception, e:
+    except Exception:
         logger.warn("Unable to read SABnzbd config file - cannot determine renaming options (might affect auto & forced post processing)")
         return (0, 0)
-        
+
     config_options = ast.literal_eval(f)
-    
+
     replace_spaces = config_options['misc']['replace_spaces']
     replace_dots = config_options['misc']['replace_dots']
-    
+
     return (replace_spaces, replace_dots)

@@ -4,8 +4,6 @@
 # Headphones rutracker.org search
 # Functions called from searcher.py
 
-from headphones import logger, db, utorrent
-
 from bencode import bencode as bencode, bdecode
 from urlparse import urlparse
 from bs4 import BeautifulSoup
@@ -19,6 +17,9 @@ import urllib2
 import urllib
 import re
 import os
+
+from headphones import db, logger
+
 
 class Rutracker():
 
@@ -47,9 +48,9 @@ class Rutracker():
         #if self.login_counter > 1:
         #    return False
 
-        params = urllib.urlencode({"login_username" : login,
-                                   "login_password" : password,
-                                   "login" : "Вход"})
+        params = urllib.urlencode({"login_username": login,
+                                   "login_password": password,
+                                   "login": "Вход"})
 
         try:
             self.opener.open("http://login.rutracker.org/forum/login.php", params)
@@ -114,26 +115,26 @@ class Rutracker():
             #logger.debug (soup.prettify())
 
             # Title
-            for link in soup.find_all('a', attrs={'class' : 'med tLink hl-tags bold'}):
+            for link in soup.find_all('a', attrs={'class': 'med tLink hl-tags bold'}):
                 title = link.get_text()
                 titles.append(title)
 
             # Download URL
-            for link in soup.find_all('a', attrs={'class' : 'small tr-dl dl-stub'}):
+            for link in soup.find_all('a', attrs={'class': 'small tr-dl dl-stub'}):
                 url = link.get('href')
                 urls.append(url)
 
             # Seeders
-            for link in soup.find_all('b', attrs={'class' : 'seedmed'}):
+            for link in soup.find_all('b', attrs={'class': 'seedmed'}):
                 seeder = link.get_text()
                 seeders.append(seeder)
 
             # Size
-            for link in soup.find_all('td', attrs={'class' : 'row4 small nowrap tor-size'}):
+            for link in soup.find_all('td', attrs={'class': 'row4 small nowrap tor-size'}):
                 size = link.u.string
                 sizes.append(size)
 
-        except :
+        except:
             pass
 
         # Combine lists
@@ -196,8 +197,8 @@ class Rutracker():
                         if torrent:
                             decoded = bdecode(torrent)
                             metainfo = decoded['info']
-                        page.close ()
-                    except Exception, e:
+                        page.close()
+                    except Exception as e:
                         logger.error('Error getting torrent: %s' % e)
                         return False
 
@@ -215,9 +216,9 @@ class Rutracker():
                                     cuecount += 1
 
                     title = returntitle.lower()
-                    logger.debug ('torrent title: %s' % title)
-                    logger.debug ('headphones trackcount: %s' % hptrackcount)
-                    logger.debug ('rutracker trackcount: %s' % trackcount)
+                    logger.debug('torrent title: %s' % title)
+                    logger.debug('headphones trackcount: %s' % hptrackcount)
+                    logger.debug('rutracker trackcount: %s' % trackcount)
 
                     # If torrent track count less than headphones track count, and there's a cue, then attempt to get track count from log(s)
                     # This is for the case where we have a single .flac/.wav which can be split by cue
@@ -245,7 +246,7 @@ class Rutracker():
 
                     if totallogcount > 0:
                         trackcount = totallogcount
-                        logger.debug ('rutracker logtrackcount: %s' % totallogcount)
+                        logger.debug('rutracker logtrackcount: %s' % totallogcount)
 
                     # If torrent track count = hp track count then return torrent,
                     # if greater, check for deluxe/special/foreign editions
@@ -346,4 +347,3 @@ class Rutracker():
             except Exception:
                 logger.exception('Error adding file to utorrent')
                 return
-

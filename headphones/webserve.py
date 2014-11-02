@@ -32,10 +32,14 @@ import threading
 import headphones
 
 try:
+    # pylint:disable=E0611
+    # ignore this error because we are catching the ImportError
     from collections import OrderedDict
+    # pylint:enable=E0611
 except ImportError:
     # Python 2.6.x fallback, from libs
     from ordereddict import OrderedDict
+
 
 def serve_template(templatename, **kwargs):
 
@@ -50,11 +54,12 @@ def serve_template(templatename, **kwargs):
     except:
         return exceptions.html_error_template().render()
 
+
 class WebInterface(object):
 
     def index(self):
         raise cherrypy.HTTPRedirect("home")
-    index.exposed=True
+    index.exposed = True
 
     def home(self):
         myDB = db.DBConnection()
@@ -97,11 +102,10 @@ class WebInterface(object):
                 extras_dict[extra] = "checked"
             else:
                 extras_dict[extra] = ""
-            i+=1
+            i += 1
 
         return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums, extras=extras_dict)
     artistPage.exposed = True
-
 
     def albumPage(self, AlbumID):
         myDB = db.DBConnection()
@@ -122,7 +126,7 @@ class WebInterface(object):
             raise cherrypy.HTTPRedirect("home")
 
         if not album['ArtistName']:
-            title =  ' - '
+            title = ' - '
         else:
             title = album['ArtistName'] + ' - '
         if not album['AlbumTitle']:
@@ -131,7 +135,6 @@ class WebInterface(object):
             title = title + album['AlbumTitle']
         return serve_template(templatename="album.html", title=title, album=album, tracks=tracks, description=description)
     albumPage.exposed = True
-
 
     def search(self, name, type):
         if len(name) == 0:
@@ -167,7 +170,7 @@ class WebInterface(object):
         myDB = db.DBConnection()
         controlValueDict = {'ArtistID': ArtistID}
         newValueDict = {'IncludeExtras': 1,
-                        'Extras':        extras}
+                        'Extras': extras}
         myDB.upsert("artists", newValueDict, controlValueDict)
         threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True, False]).start()
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
@@ -215,7 +218,7 @@ class WebInterface(object):
         myDB = db.DBConnection()
         namecheck = myDB.select('SELECT ArtistName from artists where ArtistID=?', [ArtistID])
         for name in namecheck:
-            artistname=name['ArtistName']
+            artistname = name['ArtistName']
         myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
 
         from headphones import cache
@@ -255,7 +258,7 @@ class WebInterface(object):
     def refreshArtist(self, ArtistID):
         threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, False, True]).start()
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
-    refreshArtist.exposed=True
+    refreshArtist.exposed = True
 
     def markAlbums(self, ArtistID=None, action=None, **args):
         myDB = db.DBConnection()
@@ -322,11 +325,11 @@ class WebInterface(object):
         for result in results:
 
             result_dict = {
-                'title':result[0],
-                'size':result[1],
-                'url':result[2],
-                'provider':result[3],
-                'kind':result[4]
+                'title': result[0],
+                'size': result[1],
+                'url': result[2],
+                'provider': result[3],
+                'kind': result[4]
             }
             results_as_dicts.append(result_dict)
 
@@ -340,13 +343,14 @@ class WebInterface(object):
 
         # Handle situations where the torrent url contains arguments that are parsed
         if kwargs:
-            import urllib, urllib2
+            import urllib
+            import urllib2
             url = urllib2.quote(url, safe=":?/=&") + '&' + urllib.urlencode(kwargs)
 
         try:
-            result = [(title,int(size),url,provider,kind)]
+            result = [(title, int(size), url, provider, kind)]
         except ValueError:
-            result = [(title,float(size),url,provider,kind)]
+            result = [(title, float(size), url, provider, kind)]
 
         logger.info(u"Making sure we can download the chosen result")
         (data, bestqual) = searcher.preprocess(result)
@@ -451,27 +455,25 @@ class WebInterface(object):
         myDB = db.DBConnection()
         have_album_dictionary = []
         headphones_album_dictionary = []
-        unmatched_albums = []
         have_albums = myDB.select('SELECT ArtistName, AlbumTitle, TrackTitle, CleanName from have WHERE Matched = "Failed" GROUP BY AlbumTitle ORDER BY ArtistName')
         for albums in have_albums:
             #Have to skip over manually matched tracks
             if albums['ArtistName'] and albums['AlbumTitle'] and albums['TrackTitle']:
-                original_clean = helpers.cleanName(albums['ArtistName']+" "+albums['AlbumTitle']+" "+albums['TrackTitle'])
+                original_clean = helpers.cleanName(albums['ArtistName'] + " " + albums['AlbumTitle'] + " " + albums['TrackTitle'])
             # else:
             #     original_clean = None
                 if original_clean == albums['CleanName']:
-                    have_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'] }
+                    have_dict = {'ArtistName': albums['ArtistName'], 'AlbumTitle': albums['AlbumTitle']}
                     have_album_dictionary.append(have_dict)
         headphones_albums = myDB.select('SELECT ArtistName, AlbumTitle from albums ORDER BY ArtistName')
         for albums in headphones_albums:
             if albums['ArtistName'] and albums['AlbumTitle']:
-                headphones_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'] }
+                headphones_dict = {'ArtistName': albums['ArtistName'], 'AlbumTitle': albums['AlbumTitle']}
                 headphones_album_dictionary.append(headphones_dict)
         #unmatchedalbums = [f for f in have_album_dictionary if f not in [x for x in headphones_album_dictionary]]
 
         check = set([(cleanName(d['ArtistName']).lower(), cleanName(d['AlbumTitle']).lower()) for d in headphones_album_dictionary])
         unmatchedalbums = [d for d in have_album_dictionary if (cleanName(d['ArtistName']).lower(), cleanName(d['AlbumTitle']).lower()) not in check]
-
 
         return serve_template(templatename="manageunmatched.html", title="Manage Unmatched Items", unmatchedalbums=unmatchedalbums)
     manageUnmatched.exposed = True
@@ -500,9 +502,9 @@ class WebInterface(object):
                         new_clean_filename = old_clean_filename.replace(existing_artist_clean, new_artist_clean, 1)
                         myDB.action('UPDATE have SET CleanName=? WHERE ArtistName=? AND CleanName=?', [new_clean_filename, existing_artist, old_clean_filename])
                         controlValueDict = {"CleanName": new_clean_filename}
-                        newValueDict = {"Location" : entry['Location'],
-                                        "BitRate" : entry['BitRate'],
-                                        "Format" : entry['Format']
+                        newValueDict = {"Location": entry['Location'],
+                                        "BitRate": entry['BitRate'],
+                                        "Format": entry['Format']
                                         }
                         #Attempt to match tracks with new CleanName
                         match_alltracks = myDB.action('SELECT CleanName from alltracks WHERE CleanName=?', [new_clean_filename]).fetchone()
@@ -512,7 +514,7 @@ class WebInterface(object):
                         if match_tracks:
                             myDB.upsert("tracks", newValueDict, controlValueDict)
                             myDB.action('UPDATE have SET Matched="Manual" WHERE CleanName=?', [new_clean_filename])
-                            update_count+=1
+                            update_count += 1
                     #This was throwing errors and I don't know why, but it seems to be working fine.
                     #else:
                         #logger.info("There was an error modifying Artist %s. This should not have happened" % existing_artist)
@@ -527,8 +529,8 @@ class WebInterface(object):
             new_artist_clean = helpers.cleanName(new_artist).lower()
             existing_album_clean = helpers.cleanName(existing_album).lower()
             new_album_clean = helpers.cleanName(new_album).lower()
-            existing_clean_string = existing_artist_clean+" "+existing_album_clean
-            new_clean_string = new_artist_clean+" "+new_album_clean
+            existing_clean_string = existing_artist_clean + " " + existing_album_clean
+            new_clean_string = new_artist_clean + " " + new_album_clean
             if existing_clean_string != new_clean_string:
                 have_tracks = myDB.action('SELECT Matched, CleanName, Location, BitRate, Format FROM have WHERE ArtistName=? AND AlbumTitle=?', (existing_artist, existing_album))
                 update_count = 0
@@ -538,9 +540,9 @@ class WebInterface(object):
                         new_clean_filename = old_clean_filename.replace(existing_clean_string, new_clean_string, 1)
                         myDB.action('UPDATE have SET CleanName=? WHERE ArtistName=? AND AlbumTitle=? AND CleanName=?', [new_clean_filename, existing_artist, existing_album, old_clean_filename])
                         controlValueDict = {"CleanName": new_clean_filename}
-                        newValueDict = {"Location" : entry['Location'],
-                                        "BitRate" : entry['BitRate'],
-                                        "Format" : entry['Format']
+                        newValueDict = {"Location": entry['Location'],
+                                        "BitRate": entry['BitRate'],
+                                        "Format": entry['Format']
                                         }
                         #Attempt to match tracks with new CleanName
                         match_alltracks = myDB.action('SELECT CleanName from alltracks WHERE CleanName=?', [new_clean_filename]).fetchone()
@@ -551,7 +553,7 @@ class WebInterface(object):
                             myDB.upsert("tracks", newValueDict, controlValueDict)
                             myDB.action('UPDATE have SET Matched="Manual" WHERE CleanName=?', [new_clean_filename])
                             album_id = match_tracks['AlbumID']
-                            update_count+=1
+                            update_count += 1
                     #This was throwing errors and I don't know why, but it seems to be working fine.
                     #else:
                         #logger.info("There was an error modifying Artist %s / Album %s with clean name %s" % (existing_artist, existing_album, existing_clean_string))
@@ -569,13 +571,13 @@ class WebInterface(object):
         manualalbums = myDB.select('SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched from have')
         for albums in manualalbums:
             if albums['ArtistName'] and albums['AlbumTitle'] and albums['TrackTitle']:
-                original_clean = helpers.cleanName(albums['ArtistName']+" "+albums['AlbumTitle']+" "+albums['TrackTitle'])
+                original_clean = helpers.cleanName(albums['ArtistName'] + " " + albums['AlbumTitle'] + " " + albums['TrackTitle'])
                 if albums['Matched'] == "Ignored" or albums['Matched'] == "Manual" or albums['CleanName'] != original_clean:
                     if albums['Matched'] == "Ignored":
                         album_status = "Ignored"
                     elif albums['Matched'] == "Manual" or albums['CleanName'] != original_clean:
                         album_status = "Matched"
-                    manual_dict = { 'ArtistName' : albums['ArtistName'], 'AlbumTitle' : albums['AlbumTitle'], 'AlbumStatus' : album_status }
+                    manual_dict = {'ArtistName': albums['ArtistName'], 'AlbumTitle': albums['AlbumTitle'], 'AlbumStatus': album_status}
                     if manual_dict not in manual_albums:
                         manual_albums.append(manual_dict)
         manual_albums_sorted = sorted(manual_albums, key=itemgetter('ArtistName', 'AlbumTitle'))
@@ -601,14 +603,14 @@ class WebInterface(object):
             update_clean = myDB.select('SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched from have WHERE ArtistName=?', [artist])
             update_count = 0
             for tracks in update_clean:
-                original_clean = helpers.cleanName(tracks['ArtistName']+" "+tracks['AlbumTitle']+" "+tracks['TrackTitle']).lower()
+                original_clean = helpers.cleanName(tracks['ArtistName'] + " " + tracks['AlbumTitle'] + " " + tracks['TrackTitle']).lower()
                 album = tracks['AlbumTitle']
                 track_title = tracks['TrackTitle']
                 if tracks['CleanName'] != original_clean:
                     myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?', [None, None, None, tracks['CleanName']])
                     myDB.action('UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?', [None, None, None, tracks['CleanName']])
                     myDB.action('UPDATE have SET CleanName=?, Matched="Failed" WHERE ArtistName=? AND AlbumTitle=? AND TrackTitle=?', (original_clean, artist, album, track_title))
-                    update_count+=1
+                    update_count += 1
             if update_count > 0:
                 librarysync.update_album_status()
             logger.info("Artist: %s successfully restored to unmatched list" % artist)
@@ -619,7 +621,7 @@ class WebInterface(object):
             update_clean = myDB.select('SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched from have WHERE ArtistName=? AND AlbumTitle=?', (artist, album))
             update_count = 0
             for tracks in update_clean:
-                original_clean = helpers.cleanName(tracks['ArtistName']+" "+tracks['AlbumTitle']+" "+tracks['TrackTitle']).lower()
+                original_clean = helpers.cleanName(tracks['ArtistName'] + " " + tracks['AlbumTitle'] + " " + tracks['TrackTitle']).lower()
                 track_title = tracks['TrackTitle']
                 if tracks['CleanName'] != original_clean:
                     album_id_check = myDB.action('SELECT AlbumID from tracks WHERE CleanName=?', [tracks['CleanName']]).fetchone()
@@ -628,7 +630,7 @@ class WebInterface(object):
                     myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?', [None, None, None, tracks['CleanName']])
                     myDB.action('UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?', [None, None, None, tracks['CleanName']])
                     myDB.action('UPDATE have SET CleanName=?, Matched="Failed" WHERE ArtistName=? AND AlbumTitle=? AND TrackTitle=?', (original_clean, artist, album, track_title))
-                    update_count+=1
+                    update_count += 1
             if update_count > 0:
                 librarysync.update_album_status(album_id)
             logger.info("Album: %s successfully restored to unmatched list" % album)
@@ -685,7 +687,7 @@ class WebInterface(object):
         if scan:
             try:
                 threading.Thread(target=librarysync.libraryScan).start()
-            except Exception, e:
+            except Exception as e:
                 logger.error('Unable to complete the scan: %s' % e)
         if redirect:
             raise cherrypy.HTTPRedirect(redirect)
@@ -713,7 +715,7 @@ class WebInterface(object):
 
     def forcePostProcess(self, dir=None, album_dir=None):
         from headphones import postprocessor
-        threading.Thread(target=postprocessor.forcePostProcess, kwargs={'dir':dir,'album_dir':album_dir}).start()
+        threading.Thread(target=postprocessor.forcePostProcess, kwargs={'dir': dir, 'album_dir': album_dir}).start()
         raise cherrypy.HTTPRedirect("home")
     forcePostProcess.exposed = True
 
@@ -747,7 +749,7 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("logs")
     toggleVerbose.exposed = True
 
-    def getLog(self,iDisplayStart=0,iDisplayLength=100,iSortCol_0=0,sSortDir_0="desc",sSearch="",**kwargs):
+    def getLog(self, iDisplayStart=0, iDisplayLength=100, iSortCol_0=0, sSortDir_0="desc", sSearch="", **kwargs):
 
         iDisplayStart = int(iDisplayStart)
         iDisplayLength = int(iDisplayLength)
@@ -763,25 +765,24 @@ class WebInterface(object):
             sortcolumn = 2
         elif iSortCol_0 == '2':
             sortcolumn = 1
-        filtered.sort(key=lambda x:x[sortcolumn],reverse=sSortDir_0 == "desc")
+        filtered.sort(key=lambda x: x[sortcolumn], reverse=sSortDir_0 == "desc")
 
-        rows = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
-        rows = [[row[0],row[2],row[1]] for row in rows]
+        rows = filtered[iDisplayStart:(iDisplayStart + iDisplayLength)]
+        rows = [[row[0], row[2], row[1]] for row in rows]
 
         return json.dumps({
-            'iTotalDisplayRecords':len(filtered),
-            'iTotalRecords':len(headphones.LOG_LIST),
-            'aaData':rows,
+            'iTotalDisplayRecords': len(filtered),
+            'iTotalRecords': len(headphones.LOG_LIST),
+            'aaData': rows,
         })
     getLog.exposed = True
 
-    def getArtists_json(self,iDisplayStart=0,iDisplayLength=100,sSearch="",iSortCol_0='0',sSortDir_0='asc',**kwargs):
+    def getArtists_json(self, iDisplayStart=0, iDisplayLength=100, sSearch="", iSortCol_0='0', sSortDir_0='asc', **kwargs):
         iDisplayStart = int(iDisplayStart)
         iDisplayLength = int(iDisplayLength)
         filtered = []
         totalcount = 0
         myDB = db.DBConnection()
-
 
         sortcolumn = 'ArtistSortName'
         sortbyhavepercent = False
@@ -793,36 +794,35 @@ class WebInterface(object):
             sortbyhavepercent = True
 
         if sSearch == "":
-            query = 'SELECT * from artists order by %s COLLATE NOCASE %s' % (sortcolumn,sSortDir_0)
+            query = 'SELECT * from artists order by %s COLLATE NOCASE %s' % (sortcolumn, sSortDir_0)
             filtered = myDB.select(query)
             totalcount = len(filtered)
         else:
-            query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch +'%"' +  'ORDER BY %s COLLATE NOCASE %s' % (sortcolumn,sSortDir_0)
+            query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch + '%"' + 'ORDER BY %s COLLATE NOCASE %s' % (sortcolumn, sSortDir_0)
             filtered = myDB.select(query)
             totalcount = myDB.select('SELECT COUNT(*) from artists')[0][0]
 
         if sortbyhavepercent:
-            filtered.sort(key=lambda x:(float(x['HaveTracks'])/x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0,x['HaveTracks'] if x['HaveTracks'] else 0.0),reverse=sSortDir_0 == "asc")
+            filtered.sort(key=lambda x: (float(x['HaveTracks']) / x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0, x['HaveTracks'] if x['HaveTracks'] else 0.0), reverse=sSortDir_0 == "asc")
 
         #can't figure out how to change the datatables default sorting order when its using an ajax datasource so ill
         #just reverse it here and the first click on the "Latest Album" header will sort by descending release date
         if sortcolumn == 'ReleaseDate':
             filtered.reverse()
 
-
-        artists = filtered[iDisplayStart:(iDisplayStart+iDisplayLength)]
+        artists = filtered[iDisplayStart:(iDisplayStart + iDisplayLength)]
         rows = []
         for artist in artists:
-            row = {"ArtistID":artist['ArtistID'],
-                      "ArtistName":artist["ArtistName"],
-                      "ArtistSortName":artist["ArtistSortName"],
-                      "Status":artist["Status"],
-                      "TotalTracks":artist["TotalTracks"],
-                      "HaveTracks":artist["HaveTracks"],
-                      "LatestAlbum":"",
-                      "ReleaseDate":"",
-                      "ReleaseInFuture":"False",
-                      "AlbumID":"",
+            row = {"ArtistID": artist['ArtistID'],
+                      "ArtistName": artist["ArtistName"],
+                      "ArtistSortName": artist["ArtistSortName"],
+                      "Status": artist["Status"],
+                      "TotalTracks": artist["TotalTracks"],
+                      "HaveTracks": artist["HaveTracks"],
+                      "LatestAlbum": "",
+                      "ReleaseDate": "",
+                      "ReleaseInFuture": "False",
+                      "AlbumID": "",
                       }
 
             if not row['HaveTracks']:
@@ -840,15 +840,14 @@ class WebInterface(object):
 
             rows.append(row)
 
-
-        dict = {'iTotalDisplayRecords':len(filtered),
-                'iTotalRecords':totalcount,
-                'aaData':rows,
+        dict = {'iTotalDisplayRecords': len(filtered),
+                'iTotalRecords': totalcount,
+                'aaData': rows,
                 }
         s = json.dumps(dict)
         cherrypy.response.headers['Content-type'] = 'application/json'
         return s
-    getArtists_json.exposed=True
+    getArtists_json.exposed = True
 
     def getAlbumsByArtist_json(self, artist=None):
         myDB = db.DBConnection()
@@ -857,22 +856,22 @@ class WebInterface(object):
         album_list = myDB.select("SELECT AlbumTitle from albums WHERE ArtistName=?", [artist])
         for album in album_list:
             album_json[counter] = album['AlbumTitle']
-            counter+=1
+            counter += 1
         json_albums = json.dumps(album_json)
 
         cherrypy.response.headers['Content-type'] = 'application/json'
         return json_albums
-    getAlbumsByArtist_json.exposed=True
+    getAlbumsByArtist_json.exposed = True
 
     def getArtistjson(self, ArtistID, **kwargs):
         myDB = db.DBConnection()
         artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
         artist_json = json.dumps({
                                     'ArtistName': artist['ArtistName'],
-                                    'Status':     artist['Status']
+                                    'Status': artist['Status']
                                  })
         return artist_json
-    getArtistjson.exposed=True
+    getArtistjson.exposed = True
 
     def getAlbumjson(self, AlbumID, **kwargs):
         myDB = db.DBConnection()
@@ -880,10 +879,10 @@ class WebInterface(object):
         album_json = json.dumps({
                                    'AlbumTitle': album['AlbumTitle'],
                                    'ArtistName': album['ArtistName'],
-                                   'Status':     album['Status']
+                                   'Status': album['Status']
         })
         return album_json
-    getAlbumjson.exposed=True
+    getAlbumjson.exposed = True
 
     def clearhistory(self, type=None, date_added=None, title=None):
         myDB = db.DBConnection()
@@ -902,9 +901,10 @@ class WebInterface(object):
 
     def generateAPI(self):
 
-        import hashlib, random
+        import hashlib
+        import random
 
-        apikey = hashlib.sha224( str(random.getrandbits(256)) ).hexdigest()[0:32]
+        apikey = hashlib.sha224(str(random.getrandbits(256))).hexdigest()[0:32]
         logger.info("New API generated")
         return apikey
 
@@ -925,7 +925,7 @@ class WebInterface(object):
         logger.info('Marking all unwanted albums as Skipped')
         try:
             threading.Thread(target=librarysync.libraryScan).start()
-        except Exception, e:
+        except Exception as e:
             logger.error('Unable to complete the scan: %s' % e)
         raise cherrypy.HTTPRedirect("home")
     forceScan.exposed = True
@@ -933,137 +933,137 @@ class WebInterface(object):
     def config(self):
 
         interface_dir = os.path.join(headphones.PROG_DIR, 'data/interfaces/')
-        interface_list = [ name for name in os.listdir(interface_dir) if os.path.isdir(os.path.join(interface_dir, name)) ]
+        interface_list = [name for name in os.listdir(interface_dir) if os.path.isdir(os.path.join(interface_dir, name))]
 
         config = {
-            "http_host" : headphones.CONFIG.HTTP_HOST,
-            "http_username" : headphones.CONFIG.HTTP_USERNAME,
-            "http_port" : headphones.CONFIG.HTTP_PORT,
-            "http_password" : headphones.CONFIG.HTTP_PASSWORD,
-            "launch_browser" : checked(headphones.CONFIG.LAUNCH_BROWSER),
-            "enable_https" : checked(headphones.CONFIG.ENABLE_HTTPS),
-            "https_cert" : headphones.CONFIG.HTTPS_CERT,
-            "https_key" : headphones.CONFIG.HTTPS_KEY,
-            "api_enabled" : checked(headphones.CONFIG.API_ENABLED),
-            "api_key" : headphones.CONFIG.API_KEY,
-            "download_scan_interval" : headphones.CONFIG.DOWNLOAD_SCAN_INTERVAL,
-            "update_db_interval" : headphones.CONFIG.UPDATE_DB_INTERVAL,
-            "mb_ignore_age" : headphones.CONFIG.MB_IGNORE_AGE,
-            "search_interval" : headphones.CONFIG.SEARCH_INTERVAL,
-            "libraryscan_interval" : headphones.CONFIG.LIBRARYSCAN_INTERVAL,
-            "sab_host" : headphones.CONFIG.SAB_HOST,
-            "sab_username" : headphones.CONFIG.SAB_USERNAME,
-            "sab_apikey" : headphones.CONFIG.SAB_APIKEY,
-            "sab_password" : headphones.CONFIG.SAB_PASSWORD,
-            "sab_category" : headphones.CONFIG.SAB_CATEGORY,
-            "nzbget_host" : headphones.CONFIG.NZBGET_HOST,
-            "nzbget_username" : headphones.CONFIG.NZBGET_USERNAME,
-            "nzbget_password" : headphones.CONFIG.NZBGET_PASSWORD,
-            "nzbget_category" : headphones.CONFIG.NZBGET_CATEGORY,
-            "nzbget_priority" : headphones.CONFIG.NZBGET_PRIORITY,
-            "transmission_host" : headphones.CONFIG.TRANSMISSION_HOST,
-            "transmission_username" : headphones.CONFIG.TRANSMISSION_USERNAME,
-            "transmission_password" : headphones.CONFIG.TRANSMISSION_PASSWORD,
-            "utorrent_host" : headphones.CONFIG.UTORRENT_HOST,
-            "utorrent_username" : headphones.CONFIG.UTORRENT_USERNAME,
-            "utorrent_password" : headphones.CONFIG.UTORRENT_PASSWORD,
-            "utorrent_label" : headphones.CONFIG.UTORRENT_LABEL,
-            "nzb_downloader_sabnzbd" : radio(headphones.CONFIG.NZB_DOWNLOADER, 0),
-            "nzb_downloader_nzbget" : radio(headphones.CONFIG.NZB_DOWNLOADER, 1),
-            "nzb_downloader_blackhole" : radio(headphones.CONFIG.NZB_DOWNLOADER, 2),
-            "torrent_downloader_blackhole" : radio(headphones.CONFIG.TORRENT_DOWNLOADER, 0),
-            "torrent_downloader_transmission" : radio(headphones.CONFIG.TORRENT_DOWNLOADER, 1),
-            "torrent_downloader_utorrent" : radio(headphones.CONFIG.TORRENT_DOWNLOADER, 2),
-            "download_dir" : headphones.CONFIG.DOWNLOAD_DIR,
-            "use_blackhole" : checked(headphones.CONFIG.BLACKHOLE),
-            "blackhole_dir" : headphones.CONFIG.BLACKHOLE_DIR,
-            "usenet_retention" : headphones.CONFIG.USENET_RETENTION,
-            "headphones_indexer" : checked(headphones.CONFIG.HEADPHONES_INDEXER),
-            "use_newznab" : checked(headphones.CONFIG.NEWZNAB),
-            "newznab_host" : headphones.CONFIG.NEWZNAB_HOST,
-            "newznab_apikey" : headphones.CONFIG.NEWZNAB_APIKEY,
-            "newznab_enabled" : checked(headphones.CONFIG.NEWZNAB_ENABLED),
-            "extra_newznabs" : headphones.CONFIG.get_extra_newznabs(),
-            "use_nzbsorg" : checked(headphones.CONFIG.NZBSORG),
-            "nzbsorg_uid" : headphones.CONFIG.NZBSORG_UID,
-            "nzbsorg_hash" : headphones.CONFIG.NZBSORG_HASH,
-            "use_omgwtfnzbs" : checked(headphones.CONFIG.OMGWTFNZBS),
-            "omgwtfnzbs_uid" : headphones.CONFIG.OMGWTFNZBS_UID,
-            "omgwtfnzbs_apikey" : headphones.CONFIG.OMGWTFNZBS_APIKEY,
-            "preferred_words" : headphones.CONFIG.PREFERRED_WORDS,
-            "ignored_words" : headphones.CONFIG.IGNORED_WORDS,
-            "required_words" : headphones.CONFIG.REQUIRED_WORDS,
-            "torrentblackhole_dir" : headphones.CONFIG.TORRENTBLACKHOLE_DIR,
-            "download_torrent_dir" : headphones.CONFIG.DOWNLOAD_TORRENT_DIR,
-            "numberofseeders" : headphones.CONFIG.NUMBEROFSEEDERS,
-            "use_kat" : checked(headphones.CONFIG.KAT),
-            "kat_proxy_url" : headphones.CONFIG.KAT_PROXY_URL,
+            "http_host": headphones.CONFIG.HTTP_HOST,
+            "http_username": headphones.CONFIG.HTTP_USERNAME,
+            "http_port": headphones.CONFIG.HTTP_PORT,
+            "http_password": headphones.CONFIG.HTTP_PASSWORD,
+            "launch_browser": checked(headphones.CONFIG.LAUNCH_BROWSER),
+            "enable_https": checked(headphones.CONFIG.ENABLE_HTTPS),
+            "https_cert": headphones.CONFIG.HTTPS_CERT,
+            "https_key": headphones.CONFIG.HTTPS_KEY,
+            "api_enabled": checked(headphones.CONFIG.API_ENABLED),
+            "api_key": headphones.CONFIG.API_KEY,
+            "download_scan_interval": headphones.CONFIG.DOWNLOAD_SCAN_INTERVAL,
+            "update_db_interval": headphones.CONFIG.UPDATE_DB_INTERVAL,
+            "mb_ignore_age": headphones.CONFIG.MB_IGNORE_AGE,
+            "search_interval": headphones.CONFIG.SEARCH_INTERVAL,
+            "libraryscan_interval": headphones.CONFIG.LIBRARYSCAN_INTERVAL,
+            "sab_host": headphones.CONFIG.SAB_HOST,
+            "sab_username": headphones.CONFIG.SAB_USERNAME,
+            "sab_apikey": headphones.CONFIG.SAB_APIKEY,
+            "sab_password": headphones.CONFIG.SAB_PASSWORD,
+            "sab_category": headphones.CONFIG.SAB_CATEGORY,
+            "nzbget_host": headphones.CONFIG.NZBGET_HOST,
+            "nzbget_username": headphones.CONFIG.NZBGET_USERNAME,
+            "nzbget_password": headphones.CONFIG.NZBGET_PASSWORD,
+            "nzbget_category": headphones.CONFIG.NZBGET_CATEGORY,
+            "nzbget_priority": headphones.CONFIG.NZBGET_PRIORITY,
+            "transmission_host": headphones.CONFIG.TRANSMISSION_HOST,
+            "transmission_username": headphones.CONFIG.TRANSMISSION_USERNAME,
+            "transmission_password": headphones.CONFIG.TRANSMISSION_PASSWORD,
+            "utorrent_host": headphones.CONFIG.UTORRENT_HOST,
+            "utorrent_username": headphones.CONFIG.UTORRENT_USERNAME,
+            "utorrent_password": headphones.CONFIG.UTORRENT_PASSWORD,
+            "utorrent_label": headphones.CONFIG.UTORRENT_LABEL,
+            "nzb_downloader_sabnzbd": radio(headphones.CONFIG.NZB_DOWNLOADER, 0),
+            "nzb_downloader_nzbget": radio(headphones.CONFIG.NZB_DOWNLOADER, 1),
+            "nzb_downloader_blackhole": radio(headphones.CONFIG.NZB_DOWNLOADER, 2),
+            "torrent_downloader_blackhole": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 0),
+            "torrent_downloader_transmission": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 1),
+            "torrent_downloader_utorrent": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 2),
+            "download_dir": headphones.CONFIG.DOWNLOAD_DIR,
+            "use_blackhole": checked(headphones.CONFIG.BLACKHOLE),
+            "blackhole_dir": headphones.CONFIG.BLACKHOLE_DIR,
+            "usenet_retention": headphones.CONFIG.USENET_RETENTION,
+            "headphones_indexer": checked(headphones.CONFIG.HEADPHONES_INDEXER),
+            "use_newznab": checked(headphones.CONFIG.NEWZNAB),
+            "newznab_host": headphones.CONFIG.NEWZNAB_HOST,
+            "newznab_apikey": headphones.CONFIG.NEWZNAB_APIKEY,
+            "newznab_enabled": checked(headphones.CONFIG.NEWZNAB_ENABLED),
+            "extra_newznabs": headphones.CONFIG.get_extra_newznabs(),
+            "use_nzbsorg": checked(headphones.CONFIG.NZBSORG),
+            "nzbsorg_uid": headphones.CONFIG.NZBSORG_UID,
+            "nzbsorg_hash": headphones.CONFIG.NZBSORG_HASH,
+            "use_omgwtfnzbs": checked(headphones.CONFIG.OMGWTFNZBS),
+            "omgwtfnzbs_uid": headphones.CONFIG.OMGWTFNZBS_UID,
+            "omgwtfnzbs_apikey": headphones.CONFIG.OMGWTFNZBS_APIKEY,
+            "preferred_words": headphones.CONFIG.PREFERRED_WORDS,
+            "ignored_words": headphones.CONFIG.IGNORED_WORDS,
+            "required_words": headphones.CONFIG.REQUIRED_WORDS,
+            "torrentblackhole_dir": headphones.CONFIG.TORRENTBLACKHOLE_DIR,
+            "download_torrent_dir": headphones.CONFIG.DOWNLOAD_TORRENT_DIR,
+            "numberofseeders": headphones.CONFIG.NUMBEROFSEEDERS,
+            "use_kat": checked(headphones.CONFIG.KAT),
+            "kat_proxy_url": headphones.CONFIG.KAT_PROXY_URL,
             "kat_ratio": headphones.CONFIG.KAT_RATIO,
-            "use_piratebay" : checked(headphones.CONFIG.PIRATEBAY),
-            "piratebay_proxy_url" : headphones.CONFIG.PIRATEBAY_PROXY_URL,
+            "use_piratebay": checked(headphones.CONFIG.PIRATEBAY),
+            "piratebay_proxy_url": headphones.CONFIG.PIRATEBAY_PROXY_URL,
             "piratebay_ratio": headphones.CONFIG.PIRATEBAY_RATIO,
-            "use_mininova" : checked(headphones.CONFIG.MININOVA),
+            "use_mininova": checked(headphones.CONFIG.MININOVA),
             "mininova_ratio": headphones.CONFIG.MININOVA_RATIO,
-            "use_waffles" : checked(headphones.CONFIG.WAFFLES),
-            "waffles_uid" : headphones.CONFIG.WAFFLES_UID,
+            "use_waffles": checked(headphones.CONFIG.WAFFLES),
+            "waffles_uid": headphones.CONFIG.WAFFLES_UID,
             "waffles_passkey": headphones.CONFIG.WAFFLES_PASSKEY,
             "waffles_ratio": headphones.CONFIG.WAFFLES_RATIO,
-            "use_rutracker" : checked(headphones.CONFIG.RUTRACKER),
-            "rutracker_user" : headphones.CONFIG.RUTRACKER_USER,
+            "use_rutracker": checked(headphones.CONFIG.RUTRACKER),
+            "rutracker_user": headphones.CONFIG.RUTRACKER_USER,
             "rutracker_password": headphones.CONFIG.RUTRACKER_PASSWORD,
             "rutracker_ratio": headphones.CONFIG.RUTRACKER_RATIO,
-            "use_whatcd" : checked(headphones.CONFIG.WHATCD),
-            "whatcd_username" : headphones.CONFIG.WHATCD_USERNAME,
+            "use_whatcd": checked(headphones.CONFIG.WHATCD),
+            "whatcd_username": headphones.CONFIG.WHATCD_USERNAME,
             "whatcd_password": headphones.CONFIG.WHATCD_PASSWORD,
             "whatcd_ratio": headphones.CONFIG.WHATCD_RATIO,
-            "pref_qual_0" : radio(headphones.CONFIG.PREFERRED_QUALITY, 0),
-            "pref_qual_1" : radio(headphones.CONFIG.PREFERRED_QUALITY, 1),
-            "pref_qual_2" : radio(headphones.CONFIG.PREFERRED_QUALITY, 2),
-            "pref_qual_3" : radio(headphones.CONFIG.PREFERRED_QUALITY, 3),
-            "preferred_bitrate" : headphones.CONFIG.PREFERRED_BITRATE,
-            "preferred_bitrate_high" : headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER,
-            "preferred_bitrate_low" : headphones.CONFIG.PREFERRED_BITRATE_LOW_BUFFER,
-            "preferred_bitrate_allow_lossless" : checked(headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS),
-            "detect_bitrate" : checked(headphones.CONFIG.DETECT_BITRATE),
-            "lossless_bitrate_from" : headphones.CONFIG.LOSSLESS_BITRATE_FROM,
-            "lossless_bitrate_to" : headphones.CONFIG.LOSSLESS_BITRATE_TO,
-            "freeze_db" : checked(headphones.CONFIG.FREEZE_DB),
-            "cue_split" : checked(headphones.CONFIG.CUE_SPLIT),
-            "move_files" : checked(headphones.CONFIG.MOVE_FILES),
-            "rename_files" : checked(headphones.CONFIG.RENAME_FILES),
-            "correct_metadata" : checked(headphones.CONFIG.CORRECT_METADATA),
-            "cleanup_files" : checked(headphones.CONFIG.CLEANUP_FILES),
-            "keep_nfo" : checked(headphones.CONFIG.KEEP_NFO),
-            "add_album_art" : checked(headphones.CONFIG.ADD_ALBUM_ART),
-            "album_art_format" : headphones.CONFIG.ALBUM_ART_FORMAT,
-            "embed_album_art" : checked(headphones.CONFIG.EMBED_ALBUM_ART),
-            "embed_lyrics" : checked(headphones.CONFIG.EMBED_LYRICS),
-            "replace_existing_folders" : checked(headphones.CONFIG.REPLACE_EXISTING_FOLDERS),
-            "destination_dir" : headphones.CONFIG.DESTINATION_DIR,
-            "lossless_destination_dir" : headphones.CONFIG.LOSSLESS_DESTINATION_DIR,
-            "folder_format" : headphones.CONFIG.FOLDER_FORMAT,
-            "file_format" : headphones.CONFIG.FILE_FORMAT,
-            "file_underscores" : checked(headphones.CONFIG.FILE_UNDERSCORES),
-            "include_extras" : checked(headphones.CONFIG.INCLUDE_EXTRAS),
-            "autowant_upcoming" : checked(headphones.CONFIG.AUTOWANT_UPCOMING),
-            "autowant_all" : checked(headphones.CONFIG.AUTOWANT_ALL),
-            "autowant_manually_added" : checked(headphones.CONFIG.AUTOWANT_MANUALLY_ADDED),
-            "keep_torrent_files" : checked(headphones.CONFIG.KEEP_TORRENT_FILES),
-            "prefer_torrents_0" : radio(headphones.CONFIG.PREFER_TORRENTS, 0),
-            "prefer_torrents_1" : radio(headphones.CONFIG.PREFER_TORRENTS, 1),
-            "prefer_torrents_2" : radio(headphones.CONFIG.PREFER_TORRENTS, 2),
-            "magnet_links_0" : radio(headphones.CONFIG.MAGNET_LINKS, 0),
-            "magnet_links_1" : radio(headphones.CONFIG.MAGNET_LINKS, 1),
-            "magnet_links_2" : radio(headphones.CONFIG.MAGNET_LINKS, 2),
-            "log_dir" : headphones.CONFIG.LOG_DIR,
-            "cache_dir" : headphones.CONFIG.CACHE_DIR,
-            "interface_list" : interface_list,
-            "music_encoder":        checked(headphones.CONFIG.MUSIC_ENCODER),
-            "encoder":      headphones.CONFIG.ENCODER,
-            "xldprofile":   headphones.CONFIG.XLDPROFILE,
-            "bitrate":      int(headphones.CONFIG.BITRATE),
-            "encoder_path":    headphones.CONFIG.ENCODER_PATH,
-            "advancedencoder":  headphones.CONFIG.ADVANCEDENCODER,
+            "pref_qual_0": radio(headphones.CONFIG.PREFERRED_QUALITY, 0),
+            "pref_qual_1": radio(headphones.CONFIG.PREFERRED_QUALITY, 1),
+            "pref_qual_2": radio(headphones.CONFIG.PREFERRED_QUALITY, 2),
+            "pref_qual_3": radio(headphones.CONFIG.PREFERRED_QUALITY, 3),
+            "preferred_bitrate": headphones.CONFIG.PREFERRED_BITRATE,
+            "preferred_bitrate_high": headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER,
+            "preferred_bitrate_low": headphones.CONFIG.PREFERRED_BITRATE_LOW_BUFFER,
+            "preferred_bitrate_allow_lossless": checked(headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS),
+            "detect_bitrate": checked(headphones.CONFIG.DETECT_BITRATE),
+            "lossless_bitrate_from": headphones.CONFIG.LOSSLESS_BITRATE_FROM,
+            "lossless_bitrate_to": headphones.CONFIG.LOSSLESS_BITRATE_TO,
+            "freeze_db": checked(headphones.CONFIG.FREEZE_DB),
+            "cue_split": checked(headphones.CONFIG.CUE_SPLIT),
+            "move_files": checked(headphones.CONFIG.MOVE_FILES),
+            "rename_files": checked(headphones.CONFIG.RENAME_FILES),
+            "correct_metadata": checked(headphones.CONFIG.CORRECT_METADATA),
+            "cleanup_files": checked(headphones.CONFIG.CLEANUP_FILES),
+            "keep_nfo": checked(headphones.CONFIG.KEEP_NFO),
+            "add_album_art": checked(headphones.CONFIG.ADD_ALBUM_ART),
+            "album_art_format": headphones.CONFIG.ALBUM_ART_FORMAT,
+            "embed_album_art": checked(headphones.CONFIG.EMBED_ALBUM_ART),
+            "embed_lyrics": checked(headphones.CONFIG.EMBED_LYRICS),
+            "replace_existing_folders": checked(headphones.CONFIG.REPLACE_EXISTING_FOLDERS),
+            "destination_dir": headphones.CONFIG.DESTINATION_DIR,
+            "lossless_destination_dir": headphones.CONFIG.LOSSLESS_DESTINATION_DIR,
+            "folder_format": headphones.CONFIG.FOLDER_FORMAT,
+            "file_format": headphones.CONFIG.FILE_FORMAT,
+            "file_underscores": checked(headphones.CONFIG.FILE_UNDERSCORES),
+            "include_extras": checked(headphones.CONFIG.INCLUDE_EXTRAS),
+            "autowant_upcoming": checked(headphones.CONFIG.AUTOWANT_UPCOMING),
+            "autowant_all": checked(headphones.CONFIG.AUTOWANT_ALL),
+            "autowant_manually_added": checked(headphones.CONFIG.AUTOWANT_MANUALLY_ADDED),
+            "keep_torrent_files": checked(headphones.CONFIG.KEEP_TORRENT_FILES),
+            "prefer_torrents_0": radio(headphones.CONFIG.PREFER_TORRENTS, 0),
+            "prefer_torrents_1": radio(headphones.CONFIG.PREFER_TORRENTS, 1),
+            "prefer_torrents_2": radio(headphones.CONFIG.PREFER_TORRENTS, 2),
+            "magnet_links_0": radio(headphones.CONFIG.MAGNET_LINKS, 0),
+            "magnet_links_1": radio(headphones.CONFIG.MAGNET_LINKS, 1),
+            "magnet_links_2": radio(headphones.CONFIG.MAGNET_LINKS, 2),
+            "log_dir": headphones.CONFIG.LOG_DIR,
+            "cache_dir": headphones.CONFIG.CACHE_DIR,
+            "interface_list": interface_list,
+            "music_encoder": checked(headphones.CONFIG.MUSIC_ENCODER),
+            "encoder": headphones.CONFIG.ENCODER,
+            "xldprofile": headphones.CONFIG.XLDPROFILE,
+            "bitrate": int(headphones.CONFIG.BITRATE),
+            "encoder_path": headphones.CONFIG.ENCODER_PATH,
+            "advancedencoder": headphones.CONFIG.ADVANCEDENCODER,
             "encoderoutputformat": headphones.CONFIG.ENCODEROUTPUTFORMAT,
             "samplingfrequency": headphones.CONFIG.SAMPLINGFREQUENCY,
             "encodervbrcbr": headphones.CONFIG.ENCODERVBRCBR,
@@ -1162,7 +1162,7 @@ class WebInterface(object):
                 extras_dict[extra] = "checked"
             else:
                 extras_dict[extra] = ""
-            i+=1
+            i += 1
 
         config["extras"] = extras_dict
 
@@ -1210,7 +1210,6 @@ class WebInterface(object):
                         del kwargs[key]
                 extra_newznabs.append((newznab_host, newznab_api, newznab_enabled))
 
-
         # Convert the extras to list then string. Coming in as 0 or 1 (append new extras to the end)
         temp_extras_list = []
 
@@ -1226,7 +1225,7 @@ class WebInterface(object):
         for extra in extras_list:
             if extra:
                 temp_extras_list.append(i)
-            i+=1
+            i += 1
 
         for extra in expected_extras:
             temp = '%s_temp' % extra
@@ -1342,7 +1341,7 @@ class WebInterface(object):
         if AlbumID and not image_dict:
             image_url = "http://coverartarchive.org/release/%s/front-500.jpg" % AlbumID
             thumb_url = "http://coverartarchive.org/release/%s/front-250.jpg" % AlbumID
-            image_dict = {'artwork' : image_url, 'thumbnail' : thumb_url}
+            image_dict = {'artwork': image_url, 'thumbnail': thumb_url}
         elif AlbumID and (not image_dict['artwork'] or not image_dict['thumbnail']):
             if not image_dict['artwork']:
                 image_dict['artwork'] = "http://coverartarchive.org/release/%s/front-500.jpg" % AlbumID
@@ -1363,7 +1362,7 @@ class WebInterface(object):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
         tweet = notifiers.TwitterNotifier()
         result = tweet._get_credentials(key)
-        logger.info(u"result: "+str(result))
+        logger.info(u"result: " + str(result))
         if result:
             return "Key verification successful"
         else:
@@ -1382,7 +1381,7 @@ class WebInterface(object):
 
     def osxnotifyregister(self, app):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-        from lib.osxnotify import registerapp as osxnotify
+        from osxnotify import registerapp as osxnotify
         result, msg = osxnotify.registerapp(app)
         if result:
             osx_notify = notifiers.OSX_NOTIFY()
@@ -1393,12 +1392,13 @@ class WebInterface(object):
         return msg
     osxnotifyregister.exposed = True
 
+
 class Artwork(object):
     def index(self):
         return "Artwork"
     index.exposed = True
 
-    def default(self,ArtistOrAlbum="",ID=None):
+    def default(self, ArtistOrAlbum="", ID=None):
         from headphones import cache
         ArtistID = None
         AlbumID = None
@@ -1407,23 +1407,23 @@ class Artwork(object):
         elif ArtistOrAlbum == "album":
             AlbumID = ID
 
-        relpath =  cache.getArtwork(ArtistID,AlbumID)
+        relpath = cache.getArtwork(ArtistID, AlbumID)
 
         if not relpath:
             relpath = "data/interfaces/default/images/no-cover-art.png"
             basedir = os.path.dirname(sys.argv[0])
-            path = os.path.join(basedir,relpath)
+            path = os.path.join(basedir, relpath)
             cherrypy.response.headers['Content-type'] = 'image/png'
             cherrypy.response.headers['Cache-Control'] = 'no-cache'
         else:
-            relpath = relpath.replace('cache/','',1)
-            path = os.path.join(headphones.CONFIG.CACHE_DIR,relpath)
+            relpath = relpath.replace('cache/', '', 1)
+            path = os.path.join(headphones.CONFIG.CACHE_DIR, relpath)
             fileext = os.path.splitext(relpath)[1][1::]
             cherrypy.response.headers['Content-type'] = 'image/' + fileext
             cherrypy.response.headers['Cache-Control'] = 'max-age=31556926'
 
         path = os.path.normpath(path)
-        f = open(path,'rb')
+        f = open(path, 'rb')
         return f.read()
     default.exposed = True
 
@@ -1431,7 +1431,8 @@ class Artwork(object):
         def index(self):
             return "Here be thumbs"
         index.exposed = True
-        def default(self,ArtistOrAlbum="",ID=None):
+
+        def default(self, ArtistOrAlbum="", ID=None):
             from headphones import cache
             ArtistID = None
             AlbumID = None
@@ -1440,23 +1441,23 @@ class Artwork(object):
             elif ArtistOrAlbum == "album":
                 AlbumID = ID
 
-            relpath =  cache.getThumb(ArtistID,AlbumID)
+            relpath = cache.getThumb(ArtistID, AlbumID)
 
             if not relpath:
                 relpath = "data/interfaces/default/images/no-cover-artist.png"
                 basedir = os.path.dirname(sys.argv[0])
-                path = os.path.join(basedir,relpath)
+                path = os.path.join(basedir, relpath)
                 cherrypy.response.headers['Content-type'] = 'image/png'
                 cherrypy.response.headers['Cache-Control'] = 'no-cache'
             else:
-                relpath = relpath.replace('cache/','',1)
-                path = os.path.join(headphones.CONFIG.CACHE_DIR,relpath)
+                relpath = relpath.replace('cache/', '', 1)
+                path = os.path.join(headphones.CONFIG.CACHE_DIR, relpath)
                 fileext = os.path.splitext(relpath)[1][1::]
                 cherrypy.response.headers['Content-type'] = 'image/' + fileext
                 cherrypy.response.headers['Cache-Control'] = 'max-age=31556926'
 
             path = os.path.normpath(path)
-            f = open(path,'rb')
+            f = open(path, 'rb')
             return f.read()
         default.exposed = True
 

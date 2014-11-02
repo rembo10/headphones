@@ -939,7 +939,7 @@ the same interface as FileCache."""
                     if response.has_key('location'):
                         location = response['location']
                         (scheme, authority, path, query, fragment) = parse_uri(location)
-                        if authority == None:
+                        if authority is None:
                             response['location'] = urlparse.urljoin(absolute_uri, location)
                     if response.status == 301 and method in ["GET", "HEAD"]:
                         response['-x-permanent-redirect-url'] = response['location']

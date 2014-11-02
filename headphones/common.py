@@ -18,12 +18,15 @@ Created on Aug 1, 2011
 
 @author: Michael
 '''
-import platform, operator, os, re
+import platform
+import operator
+import os
+import re
 
 from headphones import version
 
 #Identify Our Application
-USER_AGENT = 'Headphones/-'+version.HEADPHONES_VERSION+' ('+platform.system()+' '+platform.release()+')'
+USER_AGENT = 'Headphones/-' + version.HEADPHONES_VERSION + ' (' + platform.system() + ' ' + platform.release() + ')'
 
 ### Notification Types
 NOTIFY_SNATCH = 1
@@ -44,17 +47,18 @@ ARCHIVED = 6 # releases that you don't have locally (counts toward download comp
 IGNORED = 7 # releases that you don't want included in your download stats
 SNATCHED_PROPER = 9 # qualified with quality
 
+
 class Quality:
 
     NONE = 0
-    B192 = 1<<1     # 2
-    VBR =  1<<2     # 4
-    B256 = 1<<3     # 8
-    B320 = 1<<4     #16
-    FLAC = 1<<5     #32
+    B192 = 1 << 1     # 2
+    VBR = 1 << 2     # 4
+    B256 = 1 << 3     # 8
+    B320 = 1 << 4     #16
+    FLAC = 1 << 5     #32
 
     # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
-    UNKNOWN = 1<<15
+    UNKNOWN = 1 << 15
 
     qualityStrings = {NONE: "N/A",
                       UNKNOWN: "Unknown",
@@ -71,7 +75,7 @@ class Quality:
     def _getStatusStrings(status):
         toReturn = {}
         for x in Quality.qualityStrings.keys():
-            toReturn[Quality.compositeStatus(status, x)] = Quality.statusPrefixes[status]+" ("+Quality.qualityStrings[x]+")"
+            toReturn[Quality.compositeStatus(status, x)] = Quality.statusPrefixes[status] + " (" + Quality.qualityStrings[x] + ")"
         return toReturn
 
     @staticmethod
@@ -82,7 +86,7 @@ class Quality:
             anyQuality = reduce(operator.or_, anyQualities)
         if bestQualities:
             bestQuality = reduce(operator.or_, bestQualities)
-        return anyQuality | (bestQuality<<16)
+        return anyQuality | (bestQuality << 16)
 
     @staticmethod
     def splitQuality(quality):
@@ -91,7 +95,7 @@ class Quality:
         for curQual in Quality.qualityStrings.keys():
             if curQual & quality:
                 anyQualities.append(curQual)
-            if curQual<<16 & quality:
+            if curQual << 16 & quality:
                 bestQualities.append(curQual)
 
         return (anyQualities, bestQualities)
@@ -106,7 +110,7 @@ class Quality:
             if x == Quality.UNKNOWN:
                 continue
 
-            regex = '\W'+Quality.qualityStrings[x].replace(' ','\W')+'\W'
+            regex = '\W' + Quality.qualityStrings[x].replace(' ', '\W') + '\W'
             regex_match = re.search(regex, name, re.I)
             if regex_match:
                 return x
@@ -147,8 +151,8 @@ class Quality:
     def splitCompositeStatus(status):
         """Returns a tuple containing (status, quality)"""
         for x in sorted(Quality.qualityStrings.keys(), reverse=True):
-            if status > x*100:
-                return (status-x*100, x)
+            if status > x * 100:
+                return (status - x * 100, x)
 
         return (Quality.NONE, status)
 
