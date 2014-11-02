@@ -236,6 +236,8 @@ def update():
             with open(version_path, 'w') as f:
                 f.write(str(headphones.LATEST_VERSION))
         except IOError as e:
-            logger.error("Unable to write current version to version.txt, " \
-                "update not complete: ", e)
+            logger.error(
+                "Unable to write current version to version.txt, update not complete: %s",
+                e
+            )
             return
