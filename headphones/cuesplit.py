@@ -66,8 +66,9 @@ WAVE_FILE_TYPE_BY_EXTENSION = {
 #SHNTOOL_COMPATIBLE = ('Waveform Audio', 'WavPack', 'Free Lossless Audio Codec')
 SHNTOOL_COMPATIBLE = ('Free Lossless Audio Codec')
 
+# TODO: Make this better!
 # this module-level variable is bad. :(
-META = None
+CUE_META = None
 
 
 def check_splitter(command):
@@ -466,8 +467,8 @@ class MetaFile(File):
         common_tags['tracktotal'] = str(len(self.content['tracks']) - 1)
         if 'date' in self.content:
             common_tags['date'] = self.content['date']
-        if 'genre' in META.content:
-            common_tags['genre'] = META.content['genre']
+        if 'genre' in CUE_META.content:
+            common_tags['genre'] = CUE_META.content['genre']
 
         #freeform tags
         #freeform_tags['country'] = self.content['country']
@@ -501,7 +502,7 @@ class WaveFile(File):
         self.type = WAVE_FILE_TYPE_BY_EXTENSION[self.name_ext]
 
     def filename(self, ext=None, cmd=False):
-        title = META.content['tracks'][self.track_nr]['title']
+        title = CUE_META.content['tracks'][self.track_nr]['title']
 
         if ext:
             if ext[0] != '.':
@@ -523,7 +524,7 @@ class WaveFile(File):
     def tag(self):
         if self.type == 'Free Lossless Audio Codec':
             f = FLAC(self.name)
-            tags = META.flac_tags(self.track_nr)
+            tags = CUE_META.flac_tags(self.track_nr)
             for t in tags[0]:
                 f[t] = tags[0][t]
             f.save()
@@ -533,14 +534,9 @@ class WaveFile(File):
             return FLAC(self.name)
 
 def split(albumpath):
-    global META
+    global CUE_META
     os.chdir(albumpath)
     base_dir = Directory(os.getcwd())
-    # check metafile for completeness
-    if not base_dir.filter('MetaFile'):
-        raise ValueError('Meta file {0} missing!'.format(ALBUM_META_FILE_NAME))
-    else:
-        META = base_dir.filter('MetaFile')[0]
 
     cue = None
     wave = None
@@ -599,12 +595,6 @@ def split(albumpath):
             wave.type not in SHNTOOL_COMPATIBLE:
         raise ValueError('Cannot split, audio file has unsupported extension')
 
-    # generate temporary metafile describing the cue
-    if not base_dir.filter('MetaFile'):
-        with open(ALBUM_META_FILE_NAME, mode='w') as meta_file:
-            meta_file.write(cue.get_meta())
-        base_dir.content.append(MetaFile(os.path.abspath(ALBUM_META_FILE_NAME)))
-
     # Split with xld
     if 'xld' in splitter:
         cmd = [splitter]
@@ -621,7 +611,19 @@ def split(albumpath):
         cmd.extend([base_dir.path])
         split = split_baby(wave.name, cmd)
     else:
+
         # Split with shntool
+
+        # generate temporary metafile describing the cue
+        with open(ALBUM_META_FILE_NAME, mode='w') as meta_file:
+            meta_file.write(cue.get_meta())
+        base_dir.content.append(MetaFile(os.path.abspath(ALBUM_META_FILE_NAME)))
+        # check metafile for completeness
+        if not base_dir.filter('MetaFile'):
+            raise ValueError('Cue Meta file {0} missing!'.format(ALBUM_META_FILE_NAME))
+        else:
+            CUE_META = base_dir.filter('MetaFile')[0]
+
         with open(SPLIT_FILE_NAME, mode='w') as split_file:
             split_file.write(cue.breakpoints())
 
@@ -637,19 +639,19 @@ def split(albumpath):
         base_dir.update()
 
         # tag FLAC files
-        if split and META.count_tracks() == len(base_dir.tracks(ext='.flac', split=True)):
+        if split and CUE_META.count_tracks() == len(base_dir.tracks(ext='.flac', split=True)):
             for t in base_dir.tracks(ext='.flac', split=True):
                 logger.info('Tagging {0}...'.format(t.name))
                 t.tag()
 
         # rename FLAC files
-        if split and META.count_tracks() == len(base_dir.tracks(ext='.flac', split=True)):
+        if split and CUE_META.count_tracks() == len(base_dir.tracks(ext='.flac', split=True)):
             for t in base_dir.tracks(ext='.flac', split=True):
                 if t.name != t.filename():
                     logger.info('Renaming {0} to {1}...'.format(t.name, t.filename()))
                     os.rename(t.name, t.filename())
 
-    os.remove(ALBUM_META_FILE_NAME)
+        os.remove(ALBUM_META_FILE_NAME)
 
     if not split:
         raise ValueError('Failed to split, check logs')
