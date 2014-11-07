@@ -87,7 +87,7 @@ def torrent_to_file(target_file, data):
 
     # Try to change permissions
     try:
-        os.chmod(target_file, int(headphones.FILE_PERMISSIONS, 8))
+        os.chmod(target_file, int(headphones.CONFIG.FILE_PERMISSIONS, 8))
     except OSError as e:
         logger.warn("Could not change permissions for file '%s': %s. " \
             "Continuing.", target_file, e.message)
@@ -762,7 +762,7 @@ def send_to_downloader(data, bestqual, album):
                     except Exception as e:
                         logger.error("Error opening magnet link: %s" % str(e))
                         return
-                elif headphones.MAGNET_LINKS == 2:
+                elif headphones.CONFIG.MAGNET_LINKS == 2:
                     # Procedure adapted from CouchPotato
                     torrent_hash = calculate_torrent_hash(bestqual[2])
 
@@ -795,8 +795,8 @@ def send_to_downloader(data, bestqual, album):
                     return
             else:
                 if bestqual[3] == "rutracker.org":
-                    download_path = rutracker.get_torrent(bestqual[2],
-                        headphones.TORRENTBLACKHOLE_DIR)
+                    download_path, _ = rutracker.get_torrent(bestqual[2],
+                        headphones.CONFIG.TORRENTBLACKHOLE_DIR)
 
                     if not download_path:
                         return
@@ -806,6 +806,8 @@ def send_to_downloader(data, bestqual, album):
 
                 # Extract folder name from torrent
                 folder_name = read_torrent_name(download_path, bestqual[0])
+                if folder_name:
+                    logger.info('Torrent folder name: %s' % folder_name)
 
         elif headphones.CONFIG.TORRENT_DOWNLOADER == 1:
             logger.info("Sending torrent to Transmission")
@@ -1361,7 +1363,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                             try:
                                 url = item.find("a", {"title": "Download this torrent"})['href']
                             except TypeError:
-                                if headphones.MAGNET_LINKS != 0:
+                                if headphones.CONFIG.MAGNET_LINKS != 0:
                                     url = item.findAll("a")[3]['href']
                                 else:
                                     logger.info('"%s" only has a magnet link, skipping' % title)

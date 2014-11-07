@@ -253,6 +253,8 @@ def addTorrent(link, hash):
         return torrent_folder
     else:
         labelTorrent(hash)
+        if headphones.SYS_PLATFORM != "win32":
+            torrent_folder = torrent_folder.replace('\\', '/')
         return os.path.basename(os.path.normpath(torrent_folder))
 
 
