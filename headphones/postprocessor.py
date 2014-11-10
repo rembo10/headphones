@@ -1109,10 +1109,31 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                 verify(snatched['AlbumID'], folder, snatched['Kind'])
                 continue
 
-        year = None
-        # Attempt 2a: parse the folder name into a valid format
+        # Attempt 2: strip release group id from filename
+        logger.debug('Attempting to extract release group from folder name')
+
         try:
-            logger.debug('Attempting to extract name, album and year from folder name')
+            possible_rgid = folder_basename[-36:]
+            rgid = uuid.UUID(possible_rgid)
+        except:
+            rgid = possible_rgid = None
+
+        if rgid:
+            rgid = possible_rgid
+            release = myDB.action('SELECT ArtistName, AlbumTitle, AlbumID from albums WHERE AlbumID=?', [rgid]).fetchone()
+            if release:
+                logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album', release['ArtistName'], release['AlbumTitle'])
+                verify(release['AlbumID'], folder, forced=True)
+                continue
+            else:
+                logger.info('Found a (possibly) valid Musicbrainz realse group id in album folder name.')
+                verify(rgid, folder, forced=True)
+                continue
+
+        # Attempt 3a: parse the folder name into a valid format
+        logger.debug('Attempting to extract name, album and year from folder name')
+
+        try:
             name, album, year = helpers.extract_data(folder_basename)
         except Exception:
             name = album = year = None
@@ -1137,9 +1158,10 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                 else:
                     logger.info('No match found on MusicBrainz for: %s - %s', name, album)
 
-        # Attempt 2b: deduce meta data into a valid format
+        # Attempt 3b: deduce meta data into a valid format
+        logger.debug('Attempting to extract name, album and year from metadata')
+
         try:
-            logger.debug('Attempting to extract name, album and year from metadata')
             name, album, year = helpers.extract_metadata(folder)
         except Exception:
             name = album = None
@@ -1171,29 +1193,8 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                 else:
                     logger.info('No match found on MusicBrainz for: %s - %s', name, album)
 
-        # Attempt 3: strip release group id from filename
-        try:
-            logger.debug('Attempting to extract release group from folder name')
-            possible_rgid = folder_basename[-36:]
-            # re pattern match: [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
-            rgid = uuid.UUID(possible_rgid)
-        except:
-            logger.info("Couldn't parse '%s' into any valid format. If adding albums from another source, they must be in an 'Artist - Album [Year]' format, or end with the musicbrainz release group id", folder_basename)
-            rgid = possible_rgid = None
-
-        if rgid:
-            rgid = possible_rgid
-            release = myDB.action('SELECT ArtistName, AlbumTitle, AlbumID from albums WHERE AlbumID=?', [rgid]).fetchone()
-            if release:
-                logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album', release['ArtistName'], release['AlbumTitle'])
-                verify(release['AlbumID'], folder, forced=True)
-                continue
-            else:
-                logger.info('Found a (possibly) valid Musicbrainz identifier in album folder name - continuing post-processing')
-                verify(rgid, folder, forced=True)
-                continue
-
-        # Attempt 4: Hail mary. Just assume the folder name is the album name if it doesn't have a separator in it
+        # Attempt 4: Hail mary. Just assume the folder name is the album name
+        # if it doesn't have a separator in it
         logger.debug('Attempt to extract album name by assuming it is the folder name')
 
         if '-' not in folder_basename:
@@ -1215,3 +1216,9 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                     continue
                 else:
                     logger.info('No match found on MusicBrainz for: %s - %s', name, album)
+
+        # Fail here
+        logger.info("Couldn't parse '%s' into any valid format. If adding " \
+            "albums from another source, they must be in an 'Artist - Album " \
+            "[Year]' format, or end with the musicbrainz release group id.",
+            folder_basename)
