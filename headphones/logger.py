@@ -39,6 +39,7 @@ logger = logging.getLogger("headphones")
 # Global queue for multiprocessing logging
 queue = None
 
+
 class LogListHandler(logging.Handler):
     """
     Log handler for Web UI.
@@ -49,6 +50,7 @@ class LogListHandler(logging.Handler):
         message = message.replace("\n", "<br />")
 
         headphones.LOG_LIST.insert(0, (helpers.now(), message, record.levelname, record.threadName))
+
 
 @contextlib.contextmanager
 def listener():
@@ -85,6 +87,7 @@ def listener():
         finally:
             queue_listener.stop()
 
+
 def initMultiprocessing():
     """
     Remove all handlers and add QueueHandler on top. This should only be called
@@ -107,6 +110,7 @@ def initMultiprocessing():
 
     # Change current thread name for log record
     threading.current_thread().name = multiprocessing.current_process().name
+
 
 def initLogger(console=False, verbose=False):
     """
@@ -136,7 +140,7 @@ def initLogger(console=False, verbose=False):
     logger.setLevel(logging.DEBUG if verbose else logging.INFO)
 
     # Setup file logger
-    filename = os.path.join(headphones.LOG_DIR, FILENAME)
+    filename = os.path.join(headphones.CONFIG.LOG_DIR, FILENAME)
 
     file_formatter = logging.Formatter('%(asctime)s - %(levelname)-7s :: %(threadName)s : %(message)s', '%d-%b-%Y %H:%M:%S')
     file_handler = handlers.RotatingFileHandler(filename, maxBytes=MAX_SIZE, backupCount=MAX_FILES)
@@ -162,6 +166,7 @@ def initLogger(console=False, verbose=False):
 
     # Install exception hooks
     initHooks()
+
 
 def initHooks(global_exceptions=True, thread_exceptions=True, pass_original=True):
     """

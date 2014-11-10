@@ -6,7 +6,7 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">
-			<a id="menu_link_scan" onclick="doAjaxCall('musicScan?path=${headphones.MUSIC_DIR}&redirect=manageNew',$(this))" data-success="Music library is getting scanned">Scan Music Library</a>
+			<a id="menu_link_scan" onclick="doAjaxCall('musicScan?path=${headphones.CONFIG.MUSIC_DIR}&redirect=manageNew',$(this))" data-success="Music library is getting scanned">Scan Music Library</a>
 		</div>		
 	</div>	
 	<a href="manage" class="back">&laquo; Back to manage overview</a>
@@ -53,18 +53,16 @@
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-	$(document).ready(function()
-	{
-		$('#artist_table').dataTable(
-			{
-				"aaSorting": [[1, 'asc']],
-				"bStateSave": false,
-				"bPaginate": false,
-				"oLanguage": {
-					"sSearch" : ""},
-				
-			});
-initActions();
+	$(document).ready(function() {
+		$('#artist_table').dataTable({
+			"aaSorting": [[1, 'asc']],
+			"bStateSave": false,
+			"bPaginate": false,
+			"oLanguage": {
+				"sSearch" : ""},
+		});
+
+		initActions();
 	});
 	</script>
 </%def>

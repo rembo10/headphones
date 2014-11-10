@@ -18,9 +18,10 @@ import htmlentitydefs
 
 from headphones import logger, request
 
+
 def getLyrics(artist, song):
 
-    params = {  "artist": artist.encode('utf-8'),
+    params = {"artist": artist.encode('utf-8'),
                 "song": song.encode('utf-8'),
                 "fmt": 'xml'
                 }
@@ -60,6 +61,7 @@ def getLyrics(artist, song):
 
     return lyrics
 
+
 def convert_html_entities(s):
     matches = re.findall("&#\d+;", s)
     if len(matches) > 0:
@@ -79,7 +81,7 @@ def convert_html_entities(s):
         hits.remove(amp)
     for hit in hits:
         name = hit[1:-1]
-        if htmlentitydefs.name2codepoint.has_key(name):
-                s = s.replace(hit, unichr(htmlentitydefs.name2codepoint[name]))
+        if name in htmlentitydefs.name2codepoint:
+            s = s.replace(hit, unichr(htmlentitydefs.name2codepoint[name]))
     s = s.replace(amp, "&")
     return s

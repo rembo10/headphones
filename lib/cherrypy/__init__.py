@@ -53,11 +53,10 @@ with customized or extended components. The core API's are:
  * Server API
  * WSGI API
 
-These API's are described in the CherryPy specification:
-http://www.cherrypy.org/wiki/CherryPySpec
+These API's are described in the `CherryPy specification <https://bitbucket.org/cherrypy/cherrypy/wiki/CherryPySpec>`_.
 """
 
-__version__ = "3.2.2"
+__version__ = "3.6.0"
 
 from cherrypy._cpcompat import urljoin as _urljoin, urlencode as _urlencode
 from cherrypy._cpcompat import basestring, unicodestr, set
@@ -94,6 +93,7 @@ except ImportError:
 engine.listeners['before_request'] = set()
 engine.listeners['after_request'] = set()
 
+
 class _TimeoutMonitor(process.plugins.Monitor):
 
     def __init__(self, bus):
@@ -125,6 +125,24 @@ engine.thread_manager.subscribe()
 engine.signal_handler = process.plugins.SignalHandler(engine)
 
 
+class _HandleSignalsPlugin(object):
+
+    """Handle signals from other processes based on the configured
+    platform handlers above."""
+
+    def __init__(self, bus):
+        self.bus = bus
+
+    def subscribe(self):
+        """Add the handlers based on the platform"""
+        if hasattr(self.bus, "signal_handler"):
+            self.bus.signal_handler.subscribe()
+        if hasattr(self.bus, "console_control_handler"):
+            self.bus.console_control_handler.subscribe()
+
+engine.signals = _HandleSignalsPlugin(engine)
+
+
 from cherrypy import _cpserver
 server = _cpserver.Server()
 server.subscribe()
@@ -152,18 +170,16 @@ def quickstart(root=None, script_name="", config=None):
 
     tree.mount(root, script_name, config)
 
-    if hasattr(engine, "signal_handler"):
-        engine.signal_handler.subscribe()
-    if hasattr(engine, "console_control_handler"):
-        engine.console_control_handler.subscribe()
-
+    engine.signals.subscribe()
     engine.start()
     engine.block()
 
 
 from cherrypy._cpcompat import threadlocal as _local
 
+
 class _Serving(_local):
+
     """An interface for registering request and response objects.
 
     Rather than have a separate "thread local" object for the request and
@@ -258,7 +274,10 @@ request = _ThreadLocalProxy('request')
 response = _ThreadLocalProxy('response')
 
 # Create thread_data object as a thread-specific all-purpose storage
+
+
 class _ThreadData(_local):
+
     """A container for thread-specific data."""
 thread_data = _ThreadData()
 
@@ -283,7 +302,9 @@ except ImportError:
 
 from cherrypy import _cplogging
 
+
 class _GlobalLogManager(_cplogging.LogManager):
+
     """A site-wide LogManager; routes to app.log or global log as appropriate.
 
     This :class:`LogManager<cherrypy._cplogging.LogManager>` implements
@@ -294,8 +315,10 @@ class _GlobalLogManager(_cplogging.LogManager):
     """
 
     def __call__(self, *args, **kwargs):
-        """Log the given message to the app.log or global log as appropriate."""
-        # Do NOT use try/except here. See http://www.cherrypy.org/ticket/945
+        """Log the given message to the app.log or global log as appropriate.
+        """
+        # Do NOT use try/except here. See
+        # https://bitbucket.org/cherrypy/cherrypy/issue/945
         if hasattr(request, 'app') and hasattr(request.app, 'log'):
             log = request.app.log
         else:
@@ -303,7 +326,8 @@ class _GlobalLogManager(_cplogging.LogManager):
         return log.error(*args, **kwargs)
 
     def access(self):
-        """Log an access message to the app.log or global log as appropriate."""
+        """Log an access message to the app.log or global log as appropriate.
+        """
         try:
             return request.app.log.access()
         except AttributeError:
@@ -316,6 +340,7 @@ log.screen = True
 log.error_file = ''
 # Using an access file makes CP about 10% slower. Leave off by default.
 log.access_file = ''
+
 
 def _buslog(msg, level):
     log.error(msg, 'ENGINE', severity=level)
@@ -336,7 +361,8 @@ def expose(func=None, alias=None):
                     parents[a.replace(".", "_")] = func
         return func
 
-    import sys, types
+    import sys
+    import types
     if isinstance(func, (types.FunctionType, types.MethodType)):
         if alias is None:
             # @expose
@@ -362,6 +388,7 @@ def expose(func=None, alias=None):
         parents = sys._getframe(1).f_locals
         alias = func
         return expose_
+
 
 def popargs(*args, **kwargs):
     """A decorator for _cp_dispatch
@@ -442,34 +469,34 @@ def popargs(*args, **kwargs):
 
     """
 
-    #Since keyword arg comes after *args, we have to process it ourselves
-    #for lower versions of python.
+    # Since keyword arg comes after *args, we have to process it ourselves
+    # for lower versions of python.
 
     handler = None
     handler_call = False
-    for k,v in kwargs.items():
+    for k, v in kwargs.items():
         if k == 'handler':
             handler = v
         else:
             raise TypeError(
-                "cherrypy.popargs() got an unexpected keyword argument '{0}'" \
+                "cherrypy.popargs() got an unexpected keyword argument '{0}'"
                 .format(k)
-                )
+            )
 
     import inspect
 
     if handler is not None \
-        and (hasattr(handler, '__call__') or inspect.isclass(handler)):
+            and (hasattr(handler, '__call__') or inspect.isclass(handler)):
         handler_call = True
 
     def decorated(cls_or_self=None, vpath=None):
         if inspect.isclass(cls_or_self):
-            #cherrypy.popargs is a class decorator
+            # cherrypy.popargs is a class decorator
             cls = cls_or_self
             setattr(cls, dispatch.Dispatcher.dispatch_method_name, decorated)
             return cls
 
-        #We're in the actual function
+        # We're in the actual function
         self = cls_or_self
         parms = {}
         for arg in args:
@@ -486,15 +513,16 @@ def popargs(*args, **kwargs):
 
         request.params.update(parms)
 
-        #If we are the ultimate handler, then to prevent our _cp_dispatch
-        #from being called again, we will resolve remaining elements through
-        #getattr() directly.
+        # If we are the ultimate handler, then to prevent our _cp_dispatch
+        # from being called again, we will resolve remaining elements through
+        # getattr() directly.
         if vpath:
             return getattr(self, vpath.pop(0), None)
         else:
             return self
 
     return decorated
+
 
 def url(path="", qs="", script_name=None, base=None, relative=None):
     """Create an absolute URL for the given path.
@@ -613,7 +641,7 @@ config.defaults = {
     'tools.log_headers.on': True,
     'tools.trailing_slash.on': True,
     'tools.encode.on': True
-    }
+}
 config.namespaces["log"] = lambda k, v: setattr(log, k, v)
 config.namespaces["checker"] = lambda k, v: setattr(checker, k, v)
 # Must reset to get our defaults applied.

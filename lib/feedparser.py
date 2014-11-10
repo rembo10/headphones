@@ -1736,7 +1736,7 @@ if _XML_AVAILABLE:
             else:
                 givenprefix = None
             prefix = self._matchnamespaces.get(lowernamespace, givenprefix)
-            if givenprefix and (prefix == None or (prefix == '' and lowernamespace == '')) and not self.namespacesInUse.has_key(givenprefix):
+            if givenprefix and (prefix is None or (prefix == '' and lowernamespace == '')) and not self.namespacesInUse.has_key(givenprefix):
                     raise UndeclaredNamespace, "'%s' is not associated with a namespace" % givenprefix
             localname = str(localname).lower()
 

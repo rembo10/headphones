@@ -15,7 +15,6 @@
 
 
 from headphones import logger, db, helpers
-from headphones.helpers import multikeysort, replace_all
 
 import time
 import threading
@@ -23,7 +22,10 @@ import headphones
 import musicbrainzngs
 
 try:
+    # pylint:disable=E0611
+    # ignore this error because we are catching the ImportError
     from collections import OrderedDict
+    # pylint:enable=E0611
 except ImportError:
     # Python 2.6.x fallback, from libs
     from ordereddict import OrderedDict
@@ -32,29 +34,31 @@ mb_lock = threading.Lock()
 
 # Quick fix to add mirror switching on the fly. Need to probably return the mbhost & mbport that's
 # being used, so we can send those values to the log
+
+
 def startmb():
 
     mbuser = None
     mbpass = None
 
-    if headphones.MIRROR == "musicbrainz.org":
+    if headphones.CONFIG.MIRROR == "musicbrainz.org":
         mbhost = "musicbrainz.org"
         mbport = 80
         sleepytime = 1
-    elif headphones.MIRROR == "custom":
-        mbhost = headphones.CUSTOMHOST
-        mbport = int(headphones.CUSTOMPORT)
-        sleepytime = int(headphones.CUSTOMSLEEP)
-    elif headphones.MIRROR == "headphones":
+    elif headphones.CONFIG.MIRROR == "custom":
+        mbhost = headphones.CONFIG.CUSTOMHOST
+        mbport = int(headphones.CONFIG.CUSTOMPORT)
+        sleepytime = int(headphones.CONFIG.CUSTOMSLEEP)
+    elif headphones.CONFIG.MIRROR == "headphones":
         mbhost = "144.76.94.239"
         mbport = 8181
-        mbuser = headphones.HPUSER
-        mbpass = headphones.HPPASS
+        mbuser = headphones.CONFIG.HPUSER
+        mbpass = headphones.CONFIG.HPPASS
         sleepytime = 0
     else:
         return False
 
-    musicbrainzngs.set_useragent("headphones","0.0","https://github.com/rembo10/headphones")
+    musicbrainzngs.set_useragent("headphones", "0.0", "https://github.com/rembo10/headphones")
     musicbrainzngs.set_hostname(mbhost + ":" + str(mbport))
     if sleepytime == 0:
         musicbrainzngs.set_rate_limit(False)
@@ -63,15 +67,16 @@ def startmb():
         musicbrainzngs.set_rate_limit(limit_or_interval=float(sleepytime))
 
     # Add headphones credentials
-    if headphones.MIRROR == "headphones":
+    if headphones.CONFIG.MIRROR == "headphones":
         if not mbuser and mbpass:
             logger.warn("No username or password set for VIP server")
         else:
-            musicbrainzngs.hpauth(mbuser,mbpass)
+            musicbrainzngs.hpauth(mbuser, mbpass)
 
     logger.debug('Using the following server values: MBHost: %s, MBPort: %i, Sleep Interval: %i', mbhost, mbport, sleepytime)
 
     return True
+
 
 def findArtist(name, limit=1):
 
@@ -81,7 +86,7 @@ def findArtist(name, limit=1):
 
         chars = set('!?*-')
         if any((c in chars) for c in name):
-            name = '"'+name+'"'
+            name = '"' + name + '"'
 
         criteria = {'artist': name.lower()}
 
@@ -107,7 +112,7 @@ def findArtist(name, limit=1):
                     # Just need the artist id if the limit is 1
                     #    'name':             unicode(result['sort-name']),
                     #    'uniquename':        uniquename,
-                        'id':                unicode(result['id']),
+                        'id': unicode(result['id']),
                     #    'url':                 unicode("http://musicbrainz.org/artist/" + result['id']),#probably needs to be changed
                     #    'score':            int(result['ext:score'])
                         })
@@ -115,13 +120,14 @@ def findArtist(name, limit=1):
                     artistlist.append(artistdict)
             else:
                 artistlist.append({
-                        'name':             unicode(result['sort-name']),
-                        'uniquename':       uniquename,
-                        'id':               unicode(result['id']),
-                        'url':              unicode("http://musicbrainz.org/artist/" + result['id']),#probably needs to be changed
-                        'score':            int(result['ext:score'])
+                        'name': unicode(result['sort-name']),
+                        'uniquename': uniquename,
+                        'id': unicode(result['id']),
+                        'url': unicode("http://musicbrainz.org/artist/" + result['id']),#probably needs to be changed
+                        'score': int(result['ext:score'])
                         })
         return artistlist
+
 
 def findRelease(name, limit=1, artist=None):
 
@@ -131,16 +137,16 @@ def findRelease(name, limit=1, artist=None):
 
         # additional artist search
         if not artist and ':' in name:
-            name, artist = name.rsplit(":",1)
+            name, artist = name.rsplit(":", 1)
 
         chars = set('!?*-')
         if any((c in chars) for c in name):
-            name = '"'+name+'"'
+            name = '"' + name + '"'
         if artist and any((c in chars) for c in artist):
-            artist = '"'+artist+'"'
+            artist = '"' + artist + '"'
 
         try:
-            releaseResults = musicbrainzngs.search_releases(query=name,limit=limit,artist=artist)['release-list']
+            releaseResults = musicbrainzngs.search_releases(query=name, limit=limit, artist=artist)['release-list']
         except musicbrainzngs.WebServiceError as e: #need to update exceptions
             logger.warn('Attempt to query MusicBrainz for "%s" failed: %s' % (name, str(e)))
             time.sleep(5)
@@ -185,21 +191,22 @@ def findRelease(name, limit=1, artist=None):
                         rg_type = secondary_type
 
             releaselist.append({
-                        'uniquename':        unicode(result['artist-credit'][0]['artist']['name']),
-                        'title':             unicode(title),
-                        'id':                unicode(result['artist-credit'][0]['artist']['id']),
-                        'albumid':           unicode(result['id']),
-                        'url':               unicode("http://musicbrainz.org/artist/" + result['artist-credit'][0]['artist']['id']),#probably needs to be changed
-                        'albumurl':          unicode("http://musicbrainz.org/release/" + result['id']),#probably needs to be changed
-                        'score':             int(result['ext:score']),
-                        'date':              unicode(result['date']) if 'date' in result else '',
-                        'country':           unicode(result['country']) if 'country' in result else '',
-                        'formats':           unicode(formats),
-                        'tracks':            unicode(tracks),
-                        'rgid':              unicode(result['release-group']['id']),
-                        'rgtype':            unicode(rg_type)
+                        'uniquename': unicode(result['artist-credit'][0]['artist']['name']),
+                        'title': unicode(title),
+                        'id': unicode(result['artist-credit'][0]['artist']['id']),
+                        'albumid': unicode(result['id']),
+                        'url': unicode("http://musicbrainz.org/artist/" + result['artist-credit'][0]['artist']['id']),#probably needs to be changed
+                        'albumurl': unicode("http://musicbrainz.org/release/" + result['id']),#probably needs to be changed
+                        'score': int(result['ext:score']),
+                        'date': unicode(result['date']) if 'date' in result else '',
+                        'country': unicode(result['country']) if 'country' in result else '',
+                        'formats': unicode(formats),
+                        'tracks': unicode(tracks),
+                        'rgid': unicode(result['release-group']['id']),
+                        'rgtype': unicode(rg_type)
                         })
         return releaselist
+
 
 def getArtist(artistid, extrasonly=False):
 
@@ -213,13 +220,13 @@ def getArtist(artistid, extrasonly=False):
             artist = musicbrainzngs.get_artist_by_id(artistid)['artist']
             newRgs = None
             artist['release-group-list'] = []
-            while newRgs == None or len(newRgs) >= limit:
-                newRgs = musicbrainzngs.browse_release_groups(artistid,release_type="album",offset=len(artist['release-group-list']),limit=limit)['release-group-list']
+            while newRgs is None or len(newRgs) >= limit:
+                newRgs = musicbrainzngs.browse_release_groups(artistid, release_type="album", offset=len(artist['release-group-list']), limit=limit)['release-group-list']
                 artist['release-group-list'] += newRgs
         except musicbrainzngs.WebServiceError as e:
             logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e)))
             time.sleep(5)
-        except Exception,e:
+        except Exception as e:
             pass
 
         if not artist:
@@ -247,7 +254,6 @@ def getArtist(artistid, extrasonly=False):
         #    if 'end' in artist['life-span']:
         #        artist_dict['artist_enddate'] = unicode(artist['life-span']['end'])
 
-
         releasegroups = []
 
         if not extrasonly:
@@ -255,10 +261,10 @@ def getArtist(artistid, extrasonly=False):
                 if "secondary-type-list" in rg.keys(): #only add releases without a secondary type
                     continue
                 releasegroups.append({
-                            'title':      unicode(rg['title']),
-                            'id':         unicode(rg['id']),
-                            'url':        u"http://musicbrainz.org/release-group/" + rg['id'],
-                            'type':       unicode(rg['type'])
+                            'title': unicode(rg['title']),
+                            'id': unicode(rg['id']),
+                            'url': u"http://musicbrainz.org/release-group/" + rg['id'],
+                            'type': unicode(rg['type'])
                     })
 
         # See if we need to grab extras. Artist specific extras take precedence over global option
@@ -278,7 +284,7 @@ def getArtist(artistid, extrasonly=False):
                 extras = map(int, db_artist['Extras'].split(','))
             else:
                 extras = []
-            extras_list = ["single", "ep", "compilation", "soundtrack", "live", "remix", "spokenword", "audiobook", "other", "dj-mix", "mixtape/street", "broadcast", "interview", "demo"]
+            extras_list = headphones.POSSIBLE_EXTRAS
 
             includes = []
 
@@ -295,8 +301,8 @@ def getArtist(artistid, extrasonly=False):
                 try:
                     limit = 200
                     newRgs = None
-                    while newRgs == None or len(newRgs) >= limit:
-                        newRgs = musicbrainzngs.browse_release_groups(artistid,release_type=include,offset=len(mb_extras_list),limit=limit)['release-group-list']
+                    while newRgs is None or len(newRgs) >= limit:
+                        newRgs = musicbrainzngs.browse_release_groups(artistid, release_type=include, offset=len(mb_extras_list), limit=limit)['release-group-list']
                         mb_extras_list += newRgs
                 except musicbrainzngs.WebServiceError as e:
                     logger.warn('Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (artistid, str(e)))
@@ -311,15 +317,16 @@ def getArtist(artistid, extrasonly=False):
                             rg_type = secondary_type
 
                     releasegroups.append({
-                            'title':        unicode(rg['title']),
-                            'id':           unicode(rg['id']),
-                            'url':          u"http://musicbrainz.org/release-group/" + rg['id'],
-                            'type':         unicode(rg_type)
+                            'title': unicode(rg['title']),
+                            'id': unicode(rg['id']),
+                            'url': u"http://musicbrainz.org/release-group/" + rg['id'],
+                            'type': unicode(rg_type)
                         })
 
         artist_dict['releasegroups'] = releasegroups
 
         return artist_dict
+
 
 def getReleaseGroup(rgid):
     """
@@ -327,12 +334,10 @@ def getReleaseGroup(rgid):
     """
     with mb_lock:
 
-        releaselist = []
-
         releaseGroup = None
 
         try:
-            releaseGroup = musicbrainzngs.get_release_group_by_id(rgid,["artists","releases","media","discids",])['release-group']
+            releaseGroup = musicbrainzngs.get_release_group_by_id(rgid, ["artists", "releases", "media", "discids", ])['release-group']
         except musicbrainzngs.WebServiceError as e:
             logger.warn('Attempt to retrieve information from MusicBrainz for release group "%s" failed (%s)' % (rgid, str(e)))
             time.sleep(5)
@@ -341,6 +346,7 @@ def getReleaseGroup(rgid):
             return False
         else:
             return releaseGroup['release-list']
+
 
 def getRelease(releaseid, include_artist_info=True):
     """
@@ -353,9 +359,9 @@ def getRelease(releaseid, include_artist_info=True):
 
         try:
             if include_artist_info:
-                results = musicbrainzngs.get_release_by_id(releaseid,["artists","release-groups","media","recordings"]).get('release')
+                results = musicbrainzngs.get_release_by_id(releaseid, ["artists", "release-groups", "media", "recordings"]).get('release')
             else:
-                results = musicbrainzngs.get_release_by_id(releaseid,["media","recordings"]).get('release')
+                results = musicbrainzngs.get_release_by_id(releaseid, ["media", "recordings"]).get('release')
         except musicbrainzngs.WebServiceError as e:
             logger.warn('Attempt to retrieve information from MusicBrainz for release "%s" failed (%s)' % (releaseid, str(e)))
             time.sleep(5)
@@ -376,7 +382,6 @@ def getRelease(releaseid, include_artist_info=True):
             release['country'] = unicode(results['country'])
         except:
             release['country'] = u'Unknown'
-
 
         if include_artist_info:
 
@@ -404,15 +409,16 @@ def getRelease(releaseid, include_artist_info=True):
 
         return release
 
-def get_new_releases(rgid,includeExtras=False,forcefull=False):
+
+def get_new_releases(rgid, includeExtras=False, forcefull=False):
 
     myDB = db.DBConnection()
     results = []
     try:
         limit = 100
         newResults = None
-        while newResults == None or len(newResults) >= limit:
-            newResults = musicbrainzngs.browse_releases(release_group=rgid,includes=['artist-credits','labels','recordings','release-groups','media'],limit=limit,offset=len(results))
+        while newResults is None or len(newResults) >= limit:
+            newResults = musicbrainzngs.browse_releases(release_group=rgid, includes=['artist-credits', 'labels', 'recordings', 'release-groups', 'media'], limit=limit, offset=len(results))
             if 'release-list' not in newResults:
                 break #may want to raise an exception here instead ?
             newResults = newResults['release-list']
@@ -457,8 +463,6 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
 
         release = {}
         rel_id_check = releasedata['id']
-        artistid = unicode(releasedata['artist-credit'][0]['artist']['id'])
-
         album_checker = myDB.action('SELECT * from allalbums WHERE ReleaseID=?', [rel_id_check]).fetchone()
         if not album_checker or forcefull:
             #DELETE all references to this release since we're updating it anyway.
@@ -486,21 +490,20 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
                 logger.warn('Release ' + releasedata['id'] + ' has no Artists associated.')
                 return False
 
-
             release['ReleaseCountry'] = unicode(releasedata['country']) if 'country' in releasedata else u'Unknown'
             #assuming that the list will contain media and that the format will be consistent
             try:
-                additional_medium=''
+                additional_medium = ''
                 for position in releasedata['medium-list']:
                     if position['format'] == releasedata['medium-list'][0]['format']:
                         medium_count = int(position['position'])
                     else:
-                        additional_medium = additional_medium+' + '+position['format']
+                        additional_medium = additional_medium + ' + ' + position['format']
                 if medium_count == 1:
                     disc_number = ''
                 else:
-                    disc_number = str(medium_count)+'x'
-                packaged_medium = disc_number+releasedata['medium-list'][0]['format']+additional_medium
+                    disc_number = str(medium_count) + 'x'
+                packaged_medium = disc_number + releasedata['medium-list'][0]['format'] + additional_medium
                 release['ReleaseFormat'] = unicode(packaged_medium)
             except:
                 release['ReleaseFormat'] = u'Unknown'
@@ -510,17 +513,17 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
         # What we're doing here now is first updating the allalbums & alltracks table to the most
         # current info, then moving the appropriate release into the album table and its associated
         # tracks into the tracks table
-            controlValueDict = {"ReleaseID" : release['ReleaseID']}
+            controlValueDict = {"ReleaseID": release['ReleaseID']}
 
-            newValueDict = {"ArtistID":         release['ArtistID'],
-                            "ArtistName":       release['ArtistName'],
-                            "AlbumTitle":       release['AlbumTitle'],
-                            "AlbumID":          release['AlbumID'],
-                            "AlbumASIN":        release['AlbumASIN'],
-                            "ReleaseDate":      release['ReleaseDate'],
-                            "Type":             release['Type'],
-                            "ReleaseCountry":   release['ReleaseCountry'],
-                            "ReleaseFormat":    release['ReleaseFormat']
+            newValueDict = {"ArtistID": release['ArtistID'],
+                            "ArtistName": release['ArtistName'],
+                            "AlbumTitle": release['AlbumTitle'],
+                            "AlbumID": release['AlbumID'],
+                            "AlbumASIN": release['AlbumASIN'],
+                            "ReleaseDate": release['ReleaseDate'],
+                            "Type": release['Type'],
+                            "ReleaseCountry": release['ReleaseCountry'],
+                            "ReleaseFormat": release['ReleaseFormat']
                         }
 
             myDB.upsert("allalbums", newValueDict, controlValueDict)
@@ -529,18 +532,18 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
 
                 cleanname = helpers.cleanName(release['ArtistName'] + ' ' + release['AlbumTitle'] + ' ' + track['title'])
 
-                controlValueDict = {"TrackID":      track['id'],
-                                    "ReleaseID":    release['ReleaseID']}
+                controlValueDict = {"TrackID": track['id'],
+                                    "ReleaseID": release['ReleaseID']}
 
-                newValueDict = {"ArtistID":         release['ArtistID'],
-                                "ArtistName":       release['ArtistName'],
-                                "AlbumTitle":       release['AlbumTitle'],
-                                "AlbumID":          release['AlbumID'],
-                                "AlbumASIN":        release['AlbumASIN'],
-                                "TrackTitle":       track['title'],
-                                "TrackDuration":    track['duration'],
-                                "TrackNumber":      track['number'],
-                                "CleanName":        cleanname
+                newValueDict = {"ArtistID": release['ArtistID'],
+                                "ArtistName": release['ArtistName'],
+                                "AlbumTitle": release['AlbumTitle'],
+                                "AlbumID": release['AlbumID'],
+                                "AlbumASIN": release['AlbumASIN'],
+                                "TrackTitle": track['title'],
+                                "TrackDuration": track['duration'],
+                                "TrackNumber": track['number'],
+                                "CleanName": cleanname
                             }
 
                 match = myDB.action('SELECT Location, BitRate, Format from have WHERE CleanName=?', [cleanname]).fetchone()
@@ -558,8 +561,6 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
 
                 myDB.upsert("alltracks", newValueDict, controlValueDict)
             num_new_releases = num_new_releases + 1
-            #print releasedata['title']
-            #print num_new_releases
             if album_checker:
                 logger.info('[%s] Existing release %s (%s) updated' % (release['ArtistName'], release['AlbumTitle'], rel_id_check))
             else:
@@ -572,6 +573,7 @@ def get_new_releases(rgid,includeExtras=False,forcefull=False):
 
     return num_new_releases
 
+
 def getTracksFromRelease(release):
     totalTracks = 1
     tracks = []
@@ -582,16 +584,18 @@ def getTracksFromRelease(release):
             except:
                 track_title = unicode(track['recording']['title'])
             tracks.append({
-                    'number':        totalTracks,
-                    'title':         track_title,
-                    'id':            unicode(track['recording']['id']),
-                    'url':           u"http://musicbrainz.org/track/" + track['recording']['id'],
-                    'duration':      int(track['length']) if 'length' in track else 0
+                    'number': totalTracks,
+                    'title': track_title,
+                    'id': unicode(track['recording']['id']),
+                    'url': u"http://musicbrainz.org/track/" + track['recording']['id'],
+                    'duration': int(track['length']) if 'length' in track else 0
                     })
             totalTracks += 1
     return tracks
 
 # Used when there is a disambiguation
+
+
 def findArtistbyAlbum(name):
 
     myDB = db.DBConnection()
@@ -605,7 +609,7 @@ def findArtistbyAlbum(name):
     if not artist['AlbumTitle']:
         return False
 
-    term = '"'+artist['AlbumTitle']+'" AND artist:"'+name+'"'
+    term = '"' + artist['AlbumTitle'] + '" AND artist:"' + name + '"'
 
     results = None
 
@@ -614,7 +618,6 @@ def findArtistbyAlbum(name):
     except musicbrainzngs.WebServiceError as e:
         logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
         time.sleep(5)
-
 
     if not results:
         return False
@@ -633,9 +636,8 @@ def findArtistbyAlbum(name):
         #artist_dict['url'] = u'http://musicbrainz.org/artist/' + newArtist['id']
         #artist_dict['score'] = int(releaseGroup['ext:score'])
 
-
-
     return artist_dict
+
 
 def findAlbumID(artist=None, album=None):
 
@@ -645,14 +647,14 @@ def findAlbumID(artist=None, album=None):
     try:
         if album and artist:
             if any((c in chars) for c in album):
-                album = '"'+album+'"'
+                album = '"' + album + '"'
             if any((c in chars) for c in artist):
-                artist = '"'+artist+'"'
+                artist = '"' + artist + '"'
             criteria = {'release': album.lower()}
             criteria['artist'] = artist.lower()
         else:
             if any((c in chars) for c in album):
-                album = '"'+album+'"'
+                album = '"' + album + '"'
             criteria = {'release': album.lower()}
 
         results = musicbrainzngs.search_release_groups(limit=1, **criteria).get('release-group-list')
