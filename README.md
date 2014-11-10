@@ -10,7 +10,7 @@ You are free to join the Headphones support community on IRC where you can ask q
 
 ## Installation and Notes
 
-* [Installation page](../../wiki/Usage-guide) shows you how to install Headphones.
+* [Installation page](../../wiki/Installation) shows you how to install Headphones.
 * [Usage guide](../../wiki/Usage-guide) introduces you to Headphones.
 * [Troubleshooting page](../../wiki/TroubleShooting) in the wiki can help you with common problems.
 
