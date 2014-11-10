@@ -20,7 +20,7 @@
 					</div>
 				</div>
 			<a class="menu_link_edit" href="manageArtists"><i class="fa fa-pencil"></i> Manage Artists</a>
-			%if not headphones.ADD_ARTISTS:
+			%if not headphones.CONFIG.AUTO_ADD_ARTISTS:
 			<a class="menu_link_edit" href="manageNew"><i class="fa fa-pencil"></i> Manage New Artists</a>
 			%endif
 			<a class="menu_link_edit" href="manageUnmatched"><i class="fa fa-pencil"></i> Manage Unmatched</a>
@@ -53,18 +53,18 @@
 					<br/>
 					<div class="row">
 								<label for="">Path to directory</label>
-					%if headphones.MUSIC_DIR:
-						<input type="text" value="${headphones.MUSIC_DIR}" name="path" size="70" />
+					%if headphones.CONFIG.MUSIC_DIR:
+						<input type="text" value="${headphones.CONFIG.MUSIC_DIR}" name="path" size="70" />
 					%else:
 						<input type="text" value="Enter a Music Directory to scan" onfocus="if
 						(this.value==this.defaultValue) this.value='';" name="path" size="70" />
 					%endif
 					</div>
 					<div class="row checkbox"> 
-					<input type="checkbox" name="libraryscan" id="libraryscan" value="1" ${checked(headphones.LIBRARYSCAN)}><label>Automatically scan library</label>
+					<input type="checkbox" name="libraryscan" id="libraryscan" value="1" ${checked(headphones.CONFIG.LIBRARYSCAN)}><label>Automatically scan library</label>
 					</div>
 					<div class="row checkbox"> 
-					<input type="checkbox" name="autoadd" id="autoadd" value="1" ${checked(headphones.ADD_ARTISTS)}><label>Auto-add new artists</label>
+					<input type="checkbox" name="autoadd" id="autoadd" value="1" ${checked(headphones.CONFIG.AUTO_ADD_ARTISTS)}><label>Auto-add new artists</label>
 					</div>
 								
 				</fieldset>
@@ -83,8 +83,8 @@
 			<div class="row">
 				<label for="">Username</label>
 				<%
-					if headphones.LASTFM_USERNAME:
-						lastfmvalue = headphones.LASTFM_USERNAME
+					if headphones.CONFIG.LASTFM_USERNAME:
+						lastfmvalue = headphones.CONFIG.LASTFM_USERNAME
 					else:
 						lastfmvalue = ''
 				%>

@@ -30,6 +30,7 @@ API_KEY = "395e6ec6bb557382fc41fde867bce66f"
 # Required for API request limit
 lock = threading.Lock()
 
+
 def request_lastfm(method, **kwargs):
     """
     Call a Last.FM API method. Automatically sets the method and API key. Method
@@ -61,6 +62,7 @@ def request_lastfm(method, **kwargs):
         return
 
     return data
+
 
 def getSimilar():
     myDB = db.DBConnection()
@@ -107,16 +109,17 @@ def getSimilar():
 
     logger.debug("Inserted %d artists into Last.FM tag cloud", len(top_list))
 
+
 def getArtists():
     myDB = db.DBConnection()
     results = myDB.select("SELECT ArtistID from artists")
 
-    if not headphones.LASTFM_USERNAME:
+    if not headphones.CONFIG.LASTFM_USERNAME:
         logger.warn("Last.FM username not set, not importing artists.")
         return
 
-    logger.info("Fetching artists from Last.FM for username: %s", headphones.LASTFM_USERNAME)
-    data = request_lastfm("library.getartists", limit=10000, user=headphones.LASTFM_USERNAME)
+    logger.info("Fetching artists from Last.FM for username: %s", headphones.CONFIG.LASTFM_USERNAME)
+    data = request_lastfm("library.getartists", limit=10000, user=headphones.CONFIG.LASTFM_USERNAME)
 
     if data and "artists" in data:
         artistlist = []
@@ -135,6 +138,7 @@ def getArtists():
             importer.addArtisttoDB(artistid)
 
         logger.info("Imported %d new artists from Last.FM", len(artistlist))
+
 
 def getTagTopArtists(tag, limit=50):
     myDB = db.DBConnection()

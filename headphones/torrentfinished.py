@@ -20,6 +20,8 @@ from headphones import db, utorrent, transmission, logger
 postprocessor_lock = threading.Lock()
 
 # Remove Torrent + data if Post Processed and finished Seeding
+
+
 def checkTorrentFinished():
 
     logger.info("Checking if any torrents have finished seeding and can be removed")
@@ -33,7 +35,7 @@ def checkTorrentFinished():
             hash = album['FolderName']
             albumid = album['AlbumID']
             torrent_removed = False
-            if headphones.TORRENT_DOWNLOADER == 1:
+            if headphones.CONFIG.TORRENT_DOWNLOADER == 1:
                 torrent_removed = transmission.removeTorrent(hash, True)
             else:
                 torrent_removed = utorrent.removeTorrent(hash, True)

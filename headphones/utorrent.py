@@ -13,22 +13,29 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib, urllib2, urlparse, cookielib
-import json, re, os, time
+import urllib
+import urllib2
+import urlparse
+import cookielib
+import json
+import re
+import os
+import time
 
 import headphones
 
 from headphones import logger
 from collections import namedtuple
 
+
 class utorrentclient(object):
 
     TOKEN_REGEX = "<div id='token' style='display:none;'>([^<>]+)</div>"
     UTSetting = namedtuple("UTSetting", ["name", "int", "str", "access"])
 
-    def __init__(self, base_url = None, username = None, password = None,):
+    def __init__(self, base_url=None, username=None, password=None,):
 
-        host = headphones.UTORRENT_HOST
+        host = headphones.CONFIG.UTORRENT_HOST
         if not host.startswith('http'):
             host = 'http://' + host
 
@@ -39,8 +46,8 @@ class utorrentclient(object):
             host = host[:-4]
 
         self.base_url = host
-        self.username = headphones.UTORRENT_USERNAME
-        self.password = headphones.UTORRENT_PASSWORD
+        self.username = headphones.CONFIG.UTORRENT_USERNAME
+        self.password = headphones.CONFIG.UTORRENT_PASSWORD
         self.opener = self._make_opener('uTorrent', self.base_url, self.username, self.password)
         self.token = self._get_token()
         #TODO refresh token, when necessary
@@ -48,7 +55,7 @@ class utorrentclient(object):
     def _make_opener(self, realm, base_url, username, password):
         """uTorrent API need HTTP Basic Auth and cookie support for token verify."""
         auth = urllib2.HTTPBasicAuthHandler()
-        auth.add_password(realm=realm,uri=base_url,user=username,passwd=password)
+        auth.add_password(realm=realm, uri=base_url, user=username, passwd=password)
         opener = urllib2.build_opener(auth)
         urllib2.install_opener(opener)
 
@@ -132,7 +139,7 @@ class utorrentclient(object):
             return settings[key]
         return settings
 
-    def remove(self, hash, remove_data = False):
+    def remove(self, hash, remove_data=False):
         if remove_data:
             params = [('action', 'removedata'), ('hash', hash)]
         else:
@@ -156,13 +163,15 @@ class utorrentclient(object):
             logger.debug('URL: ' + str(url))
             logger.debug('uTorrent webUI raised the following error: ' + str(err))
 
+
 def labelTorrent(hash):
-    label = headphones.UTORRENT_LABEL
+    label = headphones.CONFIG.UTORRENT_LABEL
     uTorrentClient = utorrentclient()
     if label:
-        uTorrentClient.setprops(hash,'label',label)
+        uTorrentClient.setprops(hash, 'label', label)
 
-def removeTorrent(hash, remove_data = False):
+
+def removeTorrent(hash, remove_data=False):
     uTorrentClient = utorrentclient()
     status, torrentList = uTorrentClient.list()
     torrents = torrentList['torrents']
@@ -177,14 +186,16 @@ def removeTorrent(hash, remove_data = False):
                 return False
     return False
 
+
 def setSeedRatio(hash, ratio):
     uTorrentClient = utorrentclient()
     uTorrentClient.setprops(hash, 'seed_override', '1')
     if ratio != 0:
-        uTorrentClient.setprops(hash,'seed_ratio', ratio * 10)
+        uTorrentClient.setprops(hash, 'seed_ratio', ratio * 10)
     else:
         # TODO passing -1 should be unlimited
-        uTorrentClient.setprops(hash,'seed_ratio', -10)
+        uTorrentClient.setprops(hash, 'seed_ratio', -10)
+
 
 def dirTorrent(hash, cacheid=None, return_name=None):
 
@@ -212,6 +223,7 @@ def dirTorrent(hash, cacheid=None, return_name=None):
 
     return None, None
 
+
 def addTorrent(link, hash):
     uTorrentClient = utorrentclient()
 
@@ -230,7 +242,7 @@ def addTorrent(link, hash):
     # If there's no folder yet then it's probably a magnet, try until folder is populated
     if torrent_folder == active_dir or not torrent_folder:
         tries = 1
-        while (torrent_folder == active_dir or torrent_folder == None) and tries <= 10:
+        while (torrent_folder == active_dir or torrent_folder is None) and tries <= 10:
             tries += 1
             time.sleep(6)
             torrent_folder, cacheid = dirTorrent(hash, cacheid)
@@ -241,7 +253,10 @@ def addTorrent(link, hash):
         return torrent_folder
     else:
         labelTorrent(hash)
+        if headphones.SYS_PLATFORM != "win32":
+            torrent_folder = torrent_folder.replace('\\', '/')
         return os.path.basename(os.path.normpath(torrent_folder))
+
 
 def getSettingsDirectories():
     uTorrentClient = utorrentclient()
@@ -253,4 +268,3 @@ def getSettingsDirectories():
     if 'dir_completed_download' in settings:
         completed = settings['dir_completed_download'][2]
     return active, completed
-

@@ -27,6 +27,7 @@ import collections
 # Dictionary with last request times, for rate limiting.
 last_requests = collections.defaultdict(int)
 
+
 def request_response(url, method="get", auto_raise=True,
     whitelist_status_code=None, rate_limit=None, **kwargs):
     """
@@ -47,7 +48,7 @@ def request_response(url, method="get", auto_raise=True,
 
     # Disable verification of SSL certificates if requested. Note: this could
     # pose a security issue!
-    kwargs["verify"] = headphones.VERIFY_SSL_CERT
+    kwargs["verify"] = bool(headphones.CONFIG.VERIFY_SSL_CERT)
 
     # Map method to the request.XXX method. This is a simple hack, but it allows
     # requests to apply more magic per method. See lib/requests/api.py.
@@ -125,6 +126,7 @@ def request_response(url, method="get", auto_raise=True,
     except requests.RequestException as e:
         logger.error("Request raised exception: %s", e)
 
+
 def request_soup(url, **kwargs):
     """
     Wrapper for `request_response', which will return a BeatifulSoup object if
@@ -137,6 +139,7 @@ def request_soup(url, **kwargs):
     if response is not None:
         return BeautifulSoup(response.content, parser)
 
+
 def request_minidom(url, **kwargs):
     """
     Wrapper for `request_response', which will return a Minidom object if no
@@ -147,6 +150,7 @@ def request_minidom(url, **kwargs):
 
     if response is not None:
         return minidom.parseString(response.content)
+
 
 def request_json(url, **kwargs):
     """
@@ -175,6 +179,7 @@ def request_json(url, **kwargs):
             if headphones.VERBOSE:
                 server_message(response)
 
+
 def request_content(url, **kwargs):
     """
     Wrapper for `request_response', which will return the raw content.
@@ -185,6 +190,7 @@ def request_content(url, **kwargs):
     if response is not None:
         return response.content
 
+
 def request_feed(url, **kwargs):
     """
     Wrapper for `request_response', which will return a feed object.
@@ -194,6 +200,7 @@ def request_feed(url, **kwargs):
 
     if response is not None:
         return feedparser.parse(response.content)
+
 
 def server_message(response):
     """

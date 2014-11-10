@@ -8,22 +8,22 @@ to a public caning.
 """
 
 from binascii import b2a_base64
-from cherrypy._cpcompat import BaseHTTPRequestHandler, HTTPDate, ntob, ntou, reversed, sorted
-from cherrypy._cpcompat import basestring, bytestr, iteritems, nativestr, unicodestr, unquote_qs
+from cherrypy._cpcompat import BaseHTTPRequestHandler, HTTPDate, ntob, ntou
+from cherrypy._cpcompat import basestring, bytestr, iteritems, nativestr
+from cherrypy._cpcompat import reversed, sorted, unicodestr, unquote_qs
 response_codes = BaseHTTPRequestHandler.responses.copy()
 
-# From http://www.cherrypy.org/ticket/361
+# From https://bitbucket.org/cherrypy/cherrypy/issue/361
 response_codes[500] = ('Internal Server Error',
-                      'The server encountered an unexpected condition '
-                      'which prevented it from fulfilling the request.')
+                       'The server encountered an unexpected condition '
+                       'which prevented it from fulfilling the request.')
 response_codes[503] = ('Service Unavailable',
-                      'The server is currently unable to handle the '
-                      'request due to a temporary overloading or '
-                      'maintenance of the server.')
+                       'The server is currently unable to handle the '
+                       'request due to a temporary overloading or '
+                       'maintenance of the server.')
 
 import re
 import urllib
-
 
 
 def urljoin(*atoms):
@@ -38,6 +38,7 @@ def urljoin(*atoms):
     # Special-case the final url of "", and return "/" instead.
     return url or "/"
 
+
 def urljoin_bytes(*atoms):
     """Return the given path *atoms, joined into a single URL.
 
@@ -50,9 +51,11 @@ def urljoin_bytes(*atoms):
     # Special-case the final url of "", and return "/" instead.
     return url or ntob("/")
 
+
 def protocol_from_http(protocol_str):
     """Return a protocol tuple from the given 'HTTP/x.y' string."""
     return int(protocol_str[5]), int(protocol_str[7])
+
 
 def get_ranges(headervalue, content_length):
     """Return a list of (start, stop) indices from a Range header, or None.
@@ -100,12 +103,20 @@ def get_ranges(headervalue, content_length):
                 # See rfc quote above.
                 return None
             # Negative subscript (last N bytes)
-            result.append((content_length - int(stop), content_length))
+            #
+            # RFC 2616 Section 14.35.1:
+            #   If the entity is shorter than the specified suffix-length,
+            #   the entire entity-body is used.
+            if int(stop) > content_length:
+              result.append((0, content_length))
+            else:
+              result.append((content_length - int(stop), content_length))
 
     return result
 
 
 class HeaderElement(object):
+
     """An element (with parameters) from an HTTP header's element list."""
 
     def __init__(self, value, params=None):
@@ -122,7 +133,7 @@ class HeaderElement(object):
 
     def __str__(self):
         p = [";%s=%s" % (k, v) for k, v in iteritems(self.params)]
-        return "%s%s" % (self.value, "".join(p))
+        return str("%s%s" % (self.value, "".join(p)))
 
     def __bytes__(self):
         return ntob(self.__str__())
@@ -160,7 +171,9 @@ class HeaderElement(object):
 
 q_separator = re.compile(r'; *q *=')
 
+
 class AcceptElement(HeaderElement):
+
     """An element (with parameters) from an Accept* header's element list.
 
     AcceptElement objects are comparable; the more-preferred object will be
@@ -206,14 +219,15 @@ class AcceptElement(HeaderElement):
         else:
             return self.qvalue < other.qvalue
 
-
+RE_HEADER_SPLIT = re.compile(',(?=(?:[^"]*"[^"]*")*[^"]*$)')
 def header_elements(fieldname, fieldvalue):
-    """Return a sorted HeaderElement list from a comma-separated header string."""
+    """Return a sorted HeaderElement list from a comma-separated header string.
+    """
     if not fieldvalue:
         return []
 
     result = []
-    for element in fieldvalue.split(","):
+    for element in RE_HEADER_SPLIT.split(fieldvalue):
         if fieldname.startswith("Accept") or fieldname == 'TE':
             hv = AcceptElement.from_str(element)
         else:
@@ -221,6 +235,7 @@ def header_elements(fieldname, fieldvalue):
         result.append(hv)
 
     return list(reversed(sorted(result)))
+
 
 def decode_TEXT(value):
     r"""Decode :rfc:`2047` TEXT (e.g. "=?utf-8?q?f=C3=BCr?=" -> "f\xfcr")."""
@@ -236,6 +251,7 @@ def decode_TEXT(value):
             atom = atom.decode(charset)
         decodedvalue += atom
     return decodedvalue
+
 
 def valid_status(status):
     """Return legal HTTP status Code, Reason-phrase and Message.
@@ -332,6 +348,7 @@ def _parse_qs(qs, keep_blank_values=0, strict_parsing=0, encoding='utf-8'):
 
 image_map_pattern = re.compile(r"[0-9]+,[0-9]+")
 
+
 def parse_query_string(query_string, keep_blank_values=True, encoding='utf-8'):
     """Build a params dictionary from a query_string.
 
@@ -350,6 +367,7 @@ def parse_query_string(query_string, keep_blank_values=True, encoding='utf-8'):
 
 
 class CaseInsensitiveDict(dict):
+
     """A case-insensitive dict subclass.
 
     Each key is changed on entry to str(key).title().
@@ -372,7 +390,7 @@ class CaseInsensitiveDict(dict):
 
     if hasattr({}, 'has_key'):
         def has_key(self, key):
-            return dict.has_key(self, str(key).title())
+            return str(key).title() in self
 
     def update(self, E):
         for k in E.keys():
@@ -404,13 +422,15 @@ class CaseInsensitiveDict(dict):
 # replaced with a single SP before interpretation of the TEXT value."
 if nativestr == bytestr:
     header_translate_table = ''.join([chr(i) for i in xrange(256)])
-    header_translate_deletechars = ''.join([chr(i) for i in xrange(32)]) + chr(127)
+    header_translate_deletechars = ''.join(
+        [chr(i) for i in xrange(32)]) + chr(127)
 else:
     header_translate_table = None
     header_translate_deletechars = bytes(range(32)) + bytes([127])
 
 
 class HeaderMap(CaseInsensitiveDict):
+
     """A dict subclass for HTTP request and response headers.
 
     Each key is changed on entry to str(key).title(). This allows headers
@@ -419,7 +439,7 @@ class HeaderMap(CaseInsensitiveDict):
     Values are header values (decoded according to :rfc:`2047` if necessary).
     """
 
-    protocol=(1, 1)
+    protocol = (1, 1)
     encodings = ["ISO-8859-1"]
 
     # Someday, when http-bis is done, this will probably get dropped
@@ -441,34 +461,42 @@ class HeaderMap(CaseInsensitiveDict):
 
     def output(self):
         """Transform self into a list of (name, value) tuples."""
-        header_list = []
-        for k, v in self.items():
+        return list(self.encode_header_items(self.items()))
+
+    def encode_header_items(cls, header_items):
+        """
+        Prepare the sequence of name, value tuples into a form suitable for
+        transmitting on the wire for HTTP.
+        """
+        for k, v in header_items:
             if isinstance(k, unicodestr):
-                k = self.encode(k)
+                k = cls.encode(k)
 
             if not isinstance(v, basestring):
                 v = str(v)
 
             if isinstance(v, unicodestr):
-                v = self.encode(v)
+                v = cls.encode(v)
 
             # See header_translate_* constants above.
             # Replace only if you really know what you're doing.
-            k = k.translate(header_translate_table, header_translate_deletechars)
-            v = v.translate(header_translate_table, header_translate_deletechars)
+            k = k.translate(header_translate_table,
+                            header_translate_deletechars)
+            v = v.translate(header_translate_table,
+                            header_translate_deletechars)
 
-            header_list.append((k, v))
-        return header_list
+            yield (k, v)
+    encode_header_items = classmethod(encode_header_items)
 
-    def encode(self, v):
+    def encode(cls, v):
         """Return the given header name or value, encoded for HTTP output."""
-        for enc in self.encodings:
+        for enc in cls.encodings:
             try:
                 return v.encode(enc)
             except UnicodeEncodeError:
                 continue
 
-        if self.protocol == (1, 1) and self.use_rfc_2047:
+        if cls.protocol == (1, 1) and cls.use_rfc_2047:
             # Encode RFC-2047 TEXT
             # (e.g. u"\u8200" -> "=?utf-8?b?6IiA?=").
             # We do our own here instead of using the email module
@@ -479,10 +507,12 @@ class HeaderMap(CaseInsensitiveDict):
 
         raise ValueError("Could not encode header part %r using "
                          "any of the encodings %r." %
-                         (v, self.encodings))
+                         (v, cls.encodings))
+    encode = classmethod(encode)
 
 
 class Host(object):
+
     """An internet address.
 
     name

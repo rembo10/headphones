@@ -50,13 +50,13 @@
                                     <label title="Username for web server authentication. Leave empty to disable.">
                                         HTTP Username
                                     </label>
-                                    <input type="text" name="http_username" value="${config['http_user']}" size="30">
+                                    <input type="text" name="http_username" value="${config['http_username']}" size="30">
                                 </div>
                                 <div class="row">
                                     <label title="Password for web server authentication. Leave empty to disable.">
                                         HTTP Password
                                     </label>
-                                    <input type="password" name="http_password" value="${config['http_pass']}" size="30">
+                                    <input type="password" name="http_password" value="${config['http_password']}" size="30">
                                 </div>
                                 <div class="row checkbox">
                                     <input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} />
@@ -86,7 +86,7 @@
                             <fieldset>
                                 <legend>API</legend>
                                 <div class="row checkbox">
-                                    <input type="checkbox" id="useapi" name="api_enabled" id="api_enabled" value="1" ${config['api_enabled']} />
+                                    <input type="checkbox" id="api_enabled" name="api_enabled" value="1" ${config['api_enabled']} />
                                     <label title="Allow remote applications to interface with Headphones">
                                         Enable API
                                     </label>
@@ -166,25 +166,25 @@
                                     <label title="SABnzbd username. Leave empty if not applicable.">
                                         SABnzbd Username
                                     </label>
-                                    <input type="text" name="sab_username" value="${config['sab_user']}" size="20">
+                                    <input type="text" name="sab_username" value="${config['sab_username']}" size="20">
                                 </div>
                                 <div class="row">
                                     <label title="SABnzbd password. Leave empty if not applicable.">
                                         SABnzbd Password
                                     </label>
-                                    <input type="password" name="sab_password" value="${config['sab_pass']}" size="20">
+                                    <input type="password" name="sab_password" value="${config['sab_password']}" size="20">
                                 </div>
                                 <div class="row">
                                     <label title="SABnzbd API key. Can be found in SABnzbd settings.">
                                         SABnzbd API key
                                     </label>
-                                    <input type="text" name="sab_apikey" value="${config['sab_api']}" size="36">
+                                    <input type="text" name="sab_apikey" value="${config['sab_apikey']}" size="36">
                                 </div>
                                 <div class="row">
                                     <label title="Name of SABnzbd category to add downloads to.">
                                         SABnzbd Category
                                     </label>
-                                    <input type="text" name="sab_category" value="${config['sab_cat']}" size="20">
+                                    <input type="text" name="sab_category" value="${config['sab_category']}" size="20">
                                 </div>
                             </fieldset>
 
@@ -200,19 +200,19 @@
                                     <label title="NZBGet username. Leave empty if not applicable">
                                         NZBget Username
                                     </label>
-                                    <input type="text" name="nzbget_username" value="${config['nzbget_user']}" size="20">
+                                    <input type="text" name="nzbget_username" value="${config['nzbget_username']}" size="20">
                                 </div>
                                 <div class="row">
                                     <label title="NZBGet password. Leave empty if not applicable">
                                         NZBget Password
                                     </label>
-                                    <input type="password" name="nzbget_password" value="${config['nzbget_pass']}" size="20">
+                                    <input type="password" name="nzbget_password" value="${config['nzbget_password']}" size="20">
                                 </div>
                                 <div class="row">
                                     <label title="Name of NZBget category to add downloads to.">
                                         NZBget Category
                                     </label>
-                                    <input type="text" name="nzbget_category" value="${config['nzbget_cat']}" size="20">
+                                    <input type="text" name="nzbget_category" value="${config['nzbget_category']}" size="20">
                                 </div>
                                 <%
                                     if config['nzbget_priority'] == -100:
@@ -317,10 +317,27 @@
                                     <input type="text" name="torrentblackhole_dir" value="${config['torrentblackhole_dir']}" size="50">
                                     <small>Folder your Download program watches for Torrents</small>
                                 </div>
-                                <div class="row checkbox">
-                                    <label>Open Magnet Links</label>
-                                    <input type="checkbox" name="open_magnet_links" value="1" ${config['open_magnet_links']}>
-                                    <small>Allow Headphones to open magnet links</small>
+
+                                <div class="row">
+                                    <label>Magnet links</label>
+
+                                    <label class="inline" title="Invoke shell command to open magnet URL.">
+                                        <input type="radio" name="magnet_links" id="magnet_links_0" value="0" ${config['magnet_links_0']}>
+                                        Ignore
+                                    </label>
+
+                                    <label class="inline" title="Use external service to convert magnet links into torrents.">
+                                        <input type="radio" name="magnet_links" id="magnet_links_1" value="1" ${config['magnet_links_1']}>
+                                        Open
+                                    </label>
+
+                                    <label class="inline">
+                                        <input type="radio" name="magnet_links" id="magnet_links_2" value="2" ${config['magnet_links_2']}>
+                                        Convert
+                                    </label>
+                                    <div style="clear: both"></div>
+
+                                    <small>Note: opening magnet URL's is not suitable for headless/console/terminal servers.</small>
                                 </div>
                             </fieldset>
                             <fieldset id="transmission_options">
@@ -331,11 +348,11 @@
                                 </div>
                                 <div class="row">
                                     <label>Transmission Username</label>
-                                    <input type="text" name="transmission_username" value="${config['transmission_user']}" size="30">
+                                    <input type="text" name="transmission_username" value="${config['transmission_username']}" size="30">
                                 </div>
                                 <div class="row">
                                     <label>Transmission Password</label>
-                                    <input type="password" name="transmission_password" value="${config['transmission_pass']}" size="30">
+                                    <input type="password" name="transmission_password" value="${config['transmission_password']}" size="30">
                                 </div>
                                 <div class="row">
                                     <small>Note: With Transmission, you can specify a different download directory for downloads sent from Headphones.
@@ -351,11 +368,11 @@
                                 </div>
                                 <div class="row">
                                     <label>uTorrent Username</label>
-                                    <input type="text" name="utorrent_username" value="${config['utorrent_user']}" size="30">
+                                    <input type="text" name="utorrent_username" value="${config['utorrent_username']}" size="30">
                                 </div>
                                 <div class="row">
                                     <label>uTorrent Password</label>
-                                    <input type="password" name="utorrent_password" value="${config['utorrent_pass']}" size="30">
+                                    <input type="password" name="utorrent_password" value="${config['utorrent_password']}" size="30">
                                 </div>
                                 <div class="row">
                                     <label>uTorrent Label</label>
@@ -382,7 +399,7 @@
                                     <input type="radio" name="prefer_torrents" id="prefer_torrents_0" value="0" ${config['prefer_torrents_0']}>NZBs
                                     <input type="radio" name="prefer_torrents" id="prefer_torrents_1" value="1" ${config['prefer_torrents_1']}>Torrents
                                     <input type="radio" name="prefer_torrents" id="prefer_torrents_2" value="2" ${config['prefer_torrents_2']}>No Preference
-                                    </div>
+                                </div>
                             </fieldset>
                         </td>
                     </tr>
@@ -397,7 +414,8 @@
                             <fieldset>
                                 <legend>Headphones Indexer</legend>
                                 <div class="row checkbox">
-                                    <input id="use_headphones_indexer" type="checkbox" name="use_headphones_indexer" onclick="initConfigCheckbox($(this));" value="1" ${config['use_headphones_indexer']} /><label>Use Headphones Indexer</label>
+                                    <input id="headphones_indexer" type="checkbox" name="headphones_indexer" onclick="initConfigCheckbox($(this));" value="1" ${config['headphones_indexer']} />
+                                    <label>Use Headphones Indexer</label>
                                 </div>
                                 <div class="config">
                                     <div class="row">
@@ -417,7 +435,7 @@
                             <fieldset>
                                 <legend>Custom Newznab Providers</legend>
                                 <div class="row checkbox">
-                                    <input  id="usenewznab" type="checkbox" name="newznab" onclick="initConfigCheckbox($(this));" value="1" ${config['use_newznab']} /><label>Use Newznab</label>
+                                    <input id="use_newznab" type="checkbox" name="use_newznab" onclick="initConfigCheckbox($(this));" value="1" ${config['use_newznab']} /><label>Use Newznab</label>
                                 </div>
                                 <div id="newznab_providers">
                                     <div class="config" id="newznab1">
@@ -428,7 +446,7 @@
                                         </div>
                                         <div class="row">
                                             <label>Newznab API</label>
-                                            <input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36">
+                                            <input type="text" name="newznab_apikey" value="${config['newznab_apikey']}" size="36">
                                         </div>
                                         <div class="row checkbox">
                                             <input id="newznab_enabled" type="checkbox" name="newznab_enabled" onclick="initConfigCheckbox($(this));" value="1" ${config['newznab_enabled']} /><label>Enabled</label>
@@ -471,7 +489,7 @@
                             <fieldset>
                                 <legend>NZBs.org</legend>
                                 <div class="row checkbox">
-                                    <input id="usenzbsorg" type="checkbox" name="nzbsorg" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbsorg']} /><label>Use NZBs.org</label>
+                                    <input id="use_nzbsorg" type="checkbox" name="use_nzbsorg" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbsorg']} /><label>Use NZBs.org</label>
                                 </div>
                                 <div class="config">
                                     <div class="row">
@@ -483,7 +501,7 @@
                             <fieldset>
                                 <legend>omgwtfnzbs</legend>
                                 <div class="row checkbox">
-                                    <input id="useomgwtfnzbs" type="checkbox" name="omgwtfnzbs" onclick="initConfigCheckbox($(this));" value="1" ${config['use_omgwtfnzbs']} /><label>Use omgwtfnzbs</label>
+                                    <input id="use_omgwtfnzbs" type="checkbox" name="use_omgwtfnzbs" onclick="initConfigCheckbox($(this));" value="1" ${config['use_omgwtfnzbs']} /><label>Use omgwtfnzbs</label>
                                 </div>
                                 <div class="config">
                                     <div class="row">
@@ -504,7 +522,7 @@
                                 <fieldset>
                                     <legend>The Pirate Bay</legend>
                                     <div class="row checkbox">
-                                        <input id="usepiratebay" type="checkbox" name="use_piratebay" value="1" ${config['use_piratebay']} /><label>Use The Pirate Bay</label>
+                                        <input id="use_piratebay" type="checkbox" name="use_piratebay" value="1" ${config['use_piratebay']} /><label>Use The Pirate Bay</label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -521,7 +539,7 @@
                                 <fieldset>
                                     <legend>Kick Ass Torrents</legend>
                                     <div class="row checkbox">
-                                        <input id="usekat" type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Use Kick Ass Torrents</label>
+                                        <input id="use_kat" type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Use Kick Ass Torrents</label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -538,7 +556,7 @@
                                 <fieldset>
                                     <legend>Waffles.fm</legend>
                                     <div class="row checkbox">
-                                        <input id="usewaffles" type="checkbox" name="waffles" onclick="initConfigCheckbox($(this));" value="1" ${config['use_waffles']} /><label>Use Waffles.fm</label>
+                                        <input id="use_waffles" type="checkbox" name="use_waffles" onclick="initConfigCheckbox($(this));" value="1" ${config['use_waffles']} /><label>Use Waffles.fm</label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -559,7 +577,7 @@
                                 <fieldset>
                                     <legend>rutracker.org</legend>
                                     <div class="row checkbox">
-                                        <input id="userutracker" type="checkbox" name="rutracker" onclick="initConfigCheckbox($(this));" value="1" ${config['use_rutracker']} /><label>Use rutracker.org</label>
+                                        <input id="use_rutracker" type="checkbox" name="use_rutracker" onclick="initConfigCheckbox($(this));" value="1" ${config['use_rutracker']} /><label>Use rutracker.org</label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -580,7 +598,7 @@
                                 <fieldset>
                                     <legend>What.cd</legend>
                                     <div class="row checkbox">
-                                        <input id="usewhatcd" type="checkbox" name="whatcd" onclick="initConfigCheckbox($(this));" value="1" ${config['use_whatcd']} /><label>Use What.cd</label>
+                                        <input id="use_whatcd" type="checkbox" name="use_whatcd" onclick="initConfigCheckbox($(this));" value="1" ${config['use_whatcd']} /><label>Use What.cd</label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -601,7 +619,7 @@
                                 <fieldset>
                                     <legend>Mininova</legend>
                                      <div class="row checkbox">
-                                        <input id="usemininova" type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /><label>Use Mininova</label>
+                                        <input id="use_mininova" type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /><label>Use Mininova</label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -650,15 +668,15 @@
                                     <div id="preferred_bitrate_options">
                                         <div class="row">
                                             Target bitrate
-                                            <input type="text" class="override-float" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3">kbps<br>
+                                            <input type="text" class="override-float" name="preferred_bitrate" value="${config['preferred_bitrate']}" size="3">kbps<br>
                                         </div>
                                         <div class="row">
                                             <span style="padding-left: 20px">
-                                                Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['pref_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['pref_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br>
+                                                Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['preferred_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['preferred_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br>
                                             </span>
                                         </div>
                                         <div class="row checkbox left" style="padding-left: 20px">
-                                            <input type="checkbox" name="preferred_bitrate_allow_lossless" value="1" ${config['pref_bitrate_allow_lossless']}>
+                                            <input type="checkbox" name="preferred_bitrate_allow_lossless" value="1" ${config['preferred_bitrate_allow_lossless']}>
                                             <label>Allow lossless if no good lossy match found</label>
                                         </div>
                                         <div class="row checkbox left" style="padding-left: 20px">
@@ -691,6 +709,11 @@
                         <td>
                             <fieldset>
                                 <legend>Post-Processing</legend>
+                                <div class="row checkbox left clearfix">
+                                    <label title="Use associated .cue sheet to split single file albums into multiple tracks. Requires shntool with flac or xld cli (OS X) to be installed.">
+                                        Split single file albums into multiple tracks
+                                        <input type="checkbox" name="cue_split" id="cue_split" value="1" ${config['cue_split']} />
+                                    </label>
                                 <div class="row checkbox left clearfix">
                                     <label title="Freeze the database, so new artists won't be added automatically. Use this if Headphones adds artists because due to wrong snatches. This check is skipped when the folder name is appended with release group ID.">
                                         Freeze database for adding new artist
@@ -745,12 +768,12 @@
                                 </div>
                                 <div class="row">
                                     <label>Path to Destination Folder</label>
-                                    <input type="text" name="destination_dir" value="${config['dest_dir']}" size="50">
+                                    <input type="text" name="destination_dir" value="${config['destination_dir']}" size="50">
                                     <small>e.g. /Users/name/Music/iTunes or /Volumes/share/music</small>
                                 </div>
                                 <div class="row">
                                     <label>Path to Lossless Destination folder (optional)</label>
-                                    <input type="text" name="lossless_destination_dir" value="${config['lossless_dest_dir']}" size="50">
+                                    <input type="text" name="lossless_destination_dir" value="${config['lossless_destination_dir']}" size="50">
                                     <small>Set this if you have a separate directory for lossless music</small>
                                 </div>
                             </fieldset>
@@ -1241,7 +1264,7 @@
                             </div>
                             <div class="row">
                                 <label>Path to Encoder</label>
-                                <input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43">
+                                <input type="text" name="encoder_path" value="${config['encoder_path']}" size="43">
                             </div>
                         </td>
                         <td>
@@ -1303,7 +1326,7 @@
                                     <select name="interface"><h3>
                                     %for interface in config['interface_list']:
                                     <%
-                                        if interface == headphones.INTERFACE:
+                                        if interface == headphones.CONFIG.INTERFACE:
                                             selected = 'selected="selected"'
                                         else:
                                             selected = ''
@@ -1350,9 +1373,9 @@
                                 <div class="row">
                                     <label>Muscbrainz Mirror</label>
                                     <select name="mirror" id="mirror">
-                                    %for mirror in config['mirror_list']:
+                                    %for mirror in config['mirrorlist']:
                                         <%
-                                            if mirror == headphones.MIRROR:
+                                            if mirror == headphones.CONFIG.MIRROR:
                                                 selected = 'selected="selected"'
                                             else:
                                                 selected = ''
@@ -2013,17 +2036,17 @@
                     $( "#tabs" ).tabs();
                 });
                 initActions();
-                initConfigCheckbox("#use_headphones_indexer");
-                initConfigCheckbox("#usenewznab");
-                initConfigCheckbox("#usenzbsorg");
-                initConfigCheckbox("#useomgwtfnzbs");
-				initConfigCheckbox("#usekat");
-                initConfigCheckbox("#usepiratebay");
-                initConfigCheckbox("#usemininova");
-                initConfigCheckbox("#usewaffles");
-                initConfigCheckbox("#userutracker");
-                initConfigCheckbox("#usewhatcd");
-                initConfigCheckbox("#useapi");
+                initConfigCheckbox("#headphones_indexer");
+                initConfigCheckbox("#use_newznab");
+                initConfigCheckbox("#use_nzbsorg");
+                initConfigCheckbox("#use_omgwtfnzbs");
+                initConfigCheckbox("#use_kat");
+                initConfigCheckbox("#use_piratebay");
+                initConfigCheckbox("#use_mininova");
+                initConfigCheckbox("#use_waffles");
+                initConfigCheckbox("#use_rutracker");
+                initConfigCheckbox("#use_whatcd");
+                initConfigCheckbox("#api_enabled");
                 initConfigCheckbox("#enable_https");
 
 

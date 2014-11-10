@@ -13,9 +13,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import logger, notifiers, request
+from headphones import logger, request
 
-import re
 import time
 import json
 import base64
@@ -27,30 +26,28 @@ import headphones
 # TODO: Store the session id so we don't need to make 2 calls
 #       Store torrent id so we can check up on it
 
+
 def addTorrent(link):
     method = 'torrent-add'
 
     if link.endswith('.torrent'):
         with open(link, 'rb') as f:
             metainfo = str(base64.b64encode(f.read()))
-        arguments = {'metainfo': metainfo, 'download-dir':headphones.DOWNLOAD_TORRENT_DIR}
+        arguments = {'metainfo': metainfo, 'download-dir': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}
     else:
-        arguments = {'filename': link, 'download-dir': headphones.DOWNLOAD_TORRENT_DIR}
+        arguments = {'filename': link, 'download-dir': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}
 
-    response = torrentAction(method,arguments)
+    response = torrentAction(method, arguments)
 
     if not response:
         return False
 
     if response['result'] == 'success':
         if 'torrent-added' in response['arguments']:
-            name = response['arguments']['torrent-added']['name']
             retid = response['arguments']['torrent-added']['hashString']
         elif 'torrent-duplicate' in response['arguments']:
-            name = response['arguments']['torrent-duplicate']['name']
             retid = response['arguments']['torrent-duplicate']['hashString']
         else:
-            name = link
             retid = False
 
         logger.info(u"Torrent sent to Transmission successfully")
@@ -60,9 +57,10 @@ def addTorrent(link):
         logger.info('Transmission returned status %s' % response['result'])
         return False
 
+
 def getTorrentFolder(torrentid):
     method = 'torrent-get'
-    arguments = { 'ids': torrentid, 'fields': ['name','percentDone']}
+    arguments = {'ids': torrentid, 'fields': ['name', 'percentDone']}
 
     response = torrentAction(method, arguments)
     percentdone = response['arguments']['torrents'][0]['percentDone']
@@ -70,8 +68,8 @@ def getTorrentFolder(torrentid):
 
     tries = 1
 
-    while percentdone == 0  and tries <10:
-        tries+=1
+    while percentdone == 0 and tries < 10:
+        tries += 1
         time.sleep(5)
         response = torrentAction(method, arguments)
         percentdone = response['arguments']['torrents'][0]['percentDone']
@@ -79,6 +77,7 @@ def getTorrentFolder(torrentid):
     torrent_folder_name = response['arguments']['torrents'][0]['name']
 
     return torrent_folder_name
+
 
 def setSeedRatio(torrentid, ratio):
     method = 'torrent-set'
@@ -91,10 +90,11 @@ def setSeedRatio(torrentid, ratio):
     if not response:
         return False
 
-def removeTorrent(torrentid, remove_data = False):
+
+def removeTorrent(torrentid, remove_data=False):
 
     method = 'torrent-get'
-    arguments = { 'ids': torrentid, 'fields': ['isFinished', 'name']}
+    arguments = {'ids': torrentid, 'fields': ['isFinished', 'name']}
 
     response = torrentAction(method, arguments)
     if not response:
@@ -120,11 +120,12 @@ def removeTorrent(torrentid, remove_data = False):
 
     return False
 
+
 def torrentAction(method, arguments):
 
-    host = headphones.TRANSMISSION_HOST
-    username = headphones.TRANSMISSION_USERNAME
-    password = headphones.TRANSMISSION_PASSWORD
+    host = headphones.CONFIG.TRANSMISSION_HOST
+    username = headphones.CONFIG.TRANSMISSION_USERNAME
+    password = headphones.CONFIG.TRANSMISSION_PASSWORD
     sessionid = None
 
     if not host.startswith('http'):
@@ -141,12 +142,14 @@ def torrentAction(method, arguments):
         # Check if it ends in a port number
         i = host.rfind(':')
         if i >= 0:
-            possible_port = host[i+1:]
+            possible_port = host[i + 1:]
+            host = host + "/rpc"
             try:
                 port = int(possible_port)
-                host = host + "/transmission/rpc"
+                if port:
+                    host = host + "/transmission/rpc"
             except ValueError:
-                host = host + "/rpc"
+                logger.debug('No port, assuming not transmission')
         else:
             logger.error('Transmission port missing')
             return
@@ -176,8 +179,8 @@ def torrentAction(method, arguments):
         return
 
     # Prepare next request
-    headers = { 'x-transmission-session-id': sessionid }
-    data = { 'method': method, 'arguments': arguments }
+    headers = {'x-transmission-session-id': sessionid}
+    data = {'method': method, 'arguments': arguments}
 
     response = request.request_json(host, method="post", data=json.dumps(data), headers=headers, auth=auth)
 
