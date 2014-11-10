@@ -39,12 +39,12 @@ Highlights:
 
 The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.3.4...v0.4).
 
-## v0.3.4 released
+## v0.3.4
 Released 15 May 2014
 
 The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.3.3...v0.3.4).
 
-## v0.3.3 released
+## v0.3.3
 Released 05 May 2014
 
 The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.3.2...v0.3.3).
