@@ -1,4 +1,4 @@
-#![Headphones Logo](https://github.com/rembo10/headphones/raw/master/data/images/headphoneslogo.png =96x96) Headphones
+#![Headphones Logo](https://github.com/rembo10/headphones/raw/master/data/images/headphoneslogo.png) Headphones
 
 Headphones is an automated music downloader for NZB and Torrent, written in Python. It supports SABnzbd, NZBget, Transmission, µTorrent and Blackhole.
 
