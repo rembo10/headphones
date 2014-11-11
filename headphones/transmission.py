@@ -143,12 +143,12 @@ def torrentAction(method, arguments):
         i = host.rfind(':')
         if i >= 0:
             possible_port = host[i + 1:]
-            host = host + "/rpc"
             try:
                 port = int(possible_port)
                 if port:
                     host = host + "/transmission/rpc"
             except ValueError:
+                host = host + "/rpc"
                 logger.debug('No port, assuming not transmission')
         else:
             logger.error('Transmission port missing')
