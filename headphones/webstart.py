@@ -23,9 +23,7 @@ from headphones.webserve import WebInterface
 from headphones.helpers import create_https_certificates
 
 
-def initialize(options=None):
-    if options is None:
-        options = {}
+def initialize(options):
 
     # HTTPS stuff stolen from sickbeard
     enable_https = options['enable_https']
@@ -33,16 +31,17 @@ def initialize(options=None):
     https_key = options['https_key']
 
     if enable_https:
-        # If either the HTTPS certificate or key do not exist, make some self-signed ones.
+        # If either the HTTPS certificate or key do not exist, try to make
+        # self-signed ones.
         if not (https_cert and os.path.exists(https_cert)) or not (https_key and os.path.exists(https_key)):
             if not create_https_certificates(https_cert, https_key):
-                logger.warn(u"Unable to create cert/key files, disabling HTTPS")
-                headphones.CONFIG.ENABLE_HTTPS = False
+                logger.warn("Unable to create certificate and key. Disabling " \
+                    "HTTPS")
                 enable_https = False
 
         if not (os.path.exists(https_cert) and os.path.exists(https_key)):
-            logger.warn(u"Disabled HTTPS because of missing CERT and KEY files")
-            headphones.CONFIG.ENABLE_HTTPS = False
+            logger.warn("Disabled HTTPS because of missing certificate and " \
+                "key.")
             enable_https = False
 
     options_dict = {

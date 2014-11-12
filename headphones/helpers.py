@@ -660,44 +660,41 @@ def sab_sanitize_foldername(name):
 
     return name
 
-
 def split_string(mystring, splitvar=','):
     mylist = []
     for each_word in mystring.split(splitvar):
         mylist.append(each_word.strip())
     return mylist
 
-
 def create_https_certificates(ssl_cert, ssl_key):
     """
-    Stolen from SickBeard (http://github.com/midgetspy/Sick-Beard):
-    Create self-signed HTTPS certificares and store in paths 'ssl_cert' and 'ssl_key'
+    Create a pair of self-signed HTTPS certificares and store in them in
+    'ssl_cert' and 'ssl_key'. Method assumes pyOpenSSL is installed.
+
+    This code is stolen from SickBeard (http://github.com/midgetspy/Sick-Beard).
     """
+
     from headphones import logger
 
-    try:
-        from OpenSSL import crypto
-        from certgen import createKeyPair, createCertRequest, createCertificate, TYPE_RSA, serial
-    except:
-        logger.warn("pyOpenSSL module missing, please install to enable HTTPS")
-        return False
+    from OpenSSL import crypto
+    from certgen import createKeyPair, createCertRequest, createCertificate, \
+        TYPE_RSA, serial
 
     # Create the CA Certificate
-    cakey = createKeyPair(TYPE_RSA, 1024)
-    careq = createCertRequest(cakey, CN='Certificate Authority')
+    cakey = createKeyPair(TYPE_RSA, 2048)
+    careq = createCertRequest(cakey, CN="Certificate Authority")
     cacert = createCertificate(careq, (careq, cakey), serial, (0, 60 * 60 * 24 * 365 * 10)) # ten years
 
-    cname = 'Headphones'
-    pkey = createKeyPair(TYPE_RSA, 1024)
-    req = createCertRequest(pkey, CN=cname)
+    pkey = createKeyPair(TYPE_RSA, 2048)
+    req = createCertRequest(pkey, CN="Headphones")
     cert = createCertificate(req, (cacert, cakey), serial, (0, 60 * 60 * 24 * 365 * 10)) # ten years
 
     # Save the key and certificate to disk
     try:
-        with open(ssl_key, 'w') as f:
-            f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey))
-        with open(ssl_cert, 'w') as f:
-            f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+        with open(ssl_key, "w") as fp:
+            fp.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey))
+        with open(ssl_cert, "w") as fp:
+            fp.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
     except IOError as e:
         logger.error("Error creating SSL key and certificate: %s", e)
         return False
