@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 
 import shutil
 import os
@@ -87,7 +87,7 @@ def registerapp(app):
         f.close()
 
         f = open(app_path + "/Contents/MacOS/main.py", "w")
-        f.write("""#!/usr/bin/python
+        f.write("""#!/usr/bin/env python2
 
 objc = None
 
