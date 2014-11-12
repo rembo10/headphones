@@ -9,7 +9,7 @@ In case you read this because you are posting an issue, please take a minute and
 * Close your issue if you resolved it.
 
 ## For developers
-If you think you can contribute code to the Headphones repository, do not hesitate to submit a pull request. 
+If you think you can contribute code to the Headphones repository, do not hesitate to submit a pull request.
 
 ### Branches
 All pull requests should be based on the `develop` branch. When you want to develop a new feature, clone the repository with `git clone origin/develop -b FEATURE_NAME`. Use meaningful commit messages.
@@ -31,5 +31,5 @@ Altough Headphones did not adapt a code convention in the past, we try to follow
  * `_private_something`
  * `self.__really_private_field`
  * `_global`
- 
+
 Document your code!
