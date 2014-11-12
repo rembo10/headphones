@@ -1,14 +1,8 @@
 #!/bin/bash
 
 # Parameter check
-if [ -z "$1" ] || [ -z "$2" ]; then
-    echo "Syntax: $0 <source directory> <data directory>"
-    exit 1
-fi
-
-# Repository check
-if [ ! -d "$1/.git" ]; then
-    echo "This script can only downgrade Headphones installations via Git."
+if [ -z "$1" ]; then
+    echo "Syntax: $0 <data directory>"
     exit 1
 fi
 
@@ -19,7 +13,7 @@ if [ ! -s "$2/version.lock" ]; then
 fi
 
 # Git installation check
-if [ ! -x "$(command -v wget)" ]; then
+if [ ! -x "$(command -v git)" ]; then
     echo "Git is required to downgrade."
     exit 1
 fi
@@ -32,7 +26,7 @@ echo "Press enter to continue, or CTRL + C to quit."
 read
 
 # Downgrade
-cd "$1"
+cd "`dirname $0`/.."
 git reset --hard "$HASH"
 
 echo "All done, Headphones should be downgraded to the last version that started."
