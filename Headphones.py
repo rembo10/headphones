@@ -164,6 +164,16 @@ def main():
     else:
         http_port = int(headphones.CONFIG.HTTP_PORT)
 
+    # Check if pyOpenSSL is installed. It is required for certificate generation
+    # and for CherryPy.
+    if headphones.CONFIG.ENABLE_HTTPS:
+        try:
+            import OpenSSL
+        except ImportError:
+            logger.warn("The pyOpenSSL module is missing. Install this " \
+                "module to enable HTTPS. HTTPS will be disabled.")
+            headphones.CONFIG.ENABLE_HTTPS = False
+
     # Try to start the server. Will exit here is address is already in use.
     web_config = {
         'http_port': http_port,
