@@ -20,6 +20,7 @@ cache/*
 ##################
 *.crt
 *.key
+*.csr
 
 # OS generated files #
 ######################
