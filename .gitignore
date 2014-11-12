@@ -6,12 +6,13 @@
 *.pyproj
 *.sln
 
-# Logs and databases #
+# Headphones files #
 ######################
 *.log
 *.db*
 *.db-journal
 *.ini
+version.lock
 logs/*
 cache/*
 
@@ -64,6 +65,3 @@ _ReSharper*/
 /logs
 .project
 .pydevproject
-
-
-headphones_docs

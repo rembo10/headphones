@@ -138,9 +138,8 @@ def initialize(config_file):
         if not os.path.exists(CONFIG.CACHE_DIR):
             try:
                 os.makedirs(CONFIG.CACHE_DIR)
-            except OSError:
-                logger.error(
-                    'Could not create cache dir. Check permissions of datadir: %s', DATA_DIR)
+            except OSError as e:
+                logger.error("Could not create cache dir '%s': %s", DATA_DIR, e)
 
         # Sanity check for search interval. Set it to at least 6 hours
         if CONFIG.SEARCH_INTERVAL < 360:
@@ -154,9 +153,22 @@ def initialize(config_file):
         except Exception as e:
             logger.error("Can't connect to the database: %s", e)
 
-        # Get the currently installed version - returns None, 'win32' or the git hash
-        # Also sets INSTALL_TYPE variable to 'win', 'git' or 'source'
+        # Get the currently installed version. Returns None, 'win32' or the git
+        # hash.
         CURRENT_VERSION, CONFIG.GIT_BRANCH = versioncheck.getVersion()
+
+        # Write current version to a file, so we know which version did work.
+        # This allowes one to restore to that version. The idea is that if we
+        # arrive here, most parts of Headphones seem to work.
+        if CURRENT_VERSION:
+            version_lock_file = os.path.join(DATA_DIR, "version.lock")
+
+            try:
+                with open(version_lock_file, "w") as fp:
+                    fp.write(CURRENT_VERSION)
+            except IOError as e:
+                logger.error("Unable to write current version to file '%s': %s",
+                    version_lock_file, e)
 
         # Check for new versions
         if CONFIG.CHECK_GITHUB_ON_STARTUP:
