@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: iso-8859-1 -*-
 
 # Documentation is intended to be processed by Epydoc.

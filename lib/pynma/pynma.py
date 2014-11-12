@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 
 from xml.dom.minidom import parseString
 from httplib import HTTPSConnection

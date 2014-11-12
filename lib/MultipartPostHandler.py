@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 
 ####
 # 06/2010 Nic Wolfe <nic@wolfeden.ca>

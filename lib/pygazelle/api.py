@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #
 # PyGazelle - https://github.com/cohena/pygazelle
 # A Python implementation of the What.cd Gazelle JSON API

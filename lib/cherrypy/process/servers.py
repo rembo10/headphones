@@ -54,7 +54,7 @@ CherryPy code
 
 hello.py::
 
-    #!/usr/bin/python
+    #!/usr/bin/env python2
     import cherrypy
 
     class HelloWorld:

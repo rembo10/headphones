@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #
 # vim: sw=2 ts=2 sts=2
 #
