@@ -64,6 +64,7 @@ CREATEPID = False
 PIDFILE = None
 
 SCHED = BackgroundScheduler()
+SCHED_LOCK = threading.Lock()
 
 INIT_LOCK = threading.Lock()
 _INITIALIZED = False
@@ -138,13 +139,12 @@ def initialize(config_file):
         if not os.path.exists(CONFIG.CACHE_DIR):
             try:
                 os.makedirs(CONFIG.CACHE_DIR)
-            except OSError:
-                logger.error(
-                    'Could not create cache dir. Check permissions of datadir: %s', DATA_DIR)
+            except OSError as e:
+                logger.error("Could not create cache dir '%s': %s", DATA_DIR, e)
 
         # Sanity check for search interval. Set it to at least 6 hours
-        if CONFIG.SEARCH_INTERVAL < 360:
-            logger.info("Search interval too low. Resetting to 6 hour minimum")
+        if CONFIG.SEARCH_INTERVAL and CONFIG.SEARCH_INTERVAL < 360:
+            logger.info("Search interval too low. Resetting to 6 hour minimum.")
             CONFIG.SEARCH_INTERVAL = 360
 
         # Initialize the database
@@ -154,9 +154,22 @@ def initialize(config_file):
         except Exception as e:
             logger.error("Can't connect to the database: %s", e)
 
-        # Get the currently installed version - returns None, 'win32' or the git hash
-        # Also sets INSTALL_TYPE variable to 'win', 'git' or 'source'
+        # Get the currently installed version. Returns None, 'win32' or the git
+        # hash.
         CURRENT_VERSION, CONFIG.GIT_BRANCH = versioncheck.getVersion()
+
+        # Write current version to a file, so we know which version did work.
+        # This allowes one to restore to that version. The idea is that if we
+        # arrive here, most parts of Headphones seem to work.
+        if CURRENT_VERSION:
+            version_lock_file = os.path.join(DATA_DIR, "version.lock")
+
+            try:
+                with open(version_lock_file, "w") as fp:
+                    fp.write(CURRENT_VERSION)
+            except IOError as e:
+                logger.error("Unable to write current version to file '%s': %s",
+                    version_lock_file, e)
 
         # Check for new versions
         if CONFIG.CHECK_GITHUB_ON_STARTUP:
@@ -244,36 +257,60 @@ def launch_browser(host, port, root):
         logger.error('Could not launch browser: %s', e)
 
 
+def initialize_scheduler():
+    """
+    Start the scheduled background tasks. Because this method can be called
+    multiple times, the old tasks will be first removed.
+    """
+
+    from headphones import updater, searcher, librarysync, postprocessor, \
+        torrentfinished
+
+    with SCHED_LOCK:
+        # Remove all jobs
+        count = len(SCHED.get_jobs())
+
+        if count > 0:
+            logger.debug("Current number of background tasks: %d", count)
+            SCHED.shutdown()
+            SCHED.remove_all_jobs()
+
+        # Regular jobs
+        if CONFIG.UPDATE_DB_INTERVAL > 0:
+            SCHED.add_job(updater.dbUpdate, trigger=IntervalTrigger(
+                hours=CONFIG.UPDATE_DB_INTERVAL))
+        if CONFIG.SEARCH_INTERVAL > 0:
+            SCHED.add_job(searcher.searchforalbum, trigger=IntervalTrigger(
+                minutes=CONFIG.SEARCH_INTERVAL))
+        if CONFIG.LIBRARYSCAN_INTERVAL > 0:
+            SCHED.add_job(librarysync.libraryScan, trigger=IntervalTrigger(
+                hours=CONFIG.LIBRARYSCAN_INTERVAL))
+        if CONFIG.DOWNLOAD_SCAN_INTERVAL > 0:
+            SCHED.add_job(postprocessor.checkFolder, trigger=IntervalTrigger(
+                minutes=CONFIG.DOWNLOAD_SCAN_INTERVAL))
+
+        # Update check
+        if CONFIG.CHECK_GITHUB:
+            SCHED.add_job(versioncheck.checkGithub, trigger=IntervalTrigger(
+                minutes=CONFIG.CHECK_GITHUB_INTERVAL))
+
+        # Remove Torrent + data if Post Processed and finished Seeding
+        if CONFIG.TORRENT_REMOVAL_INTERVAL > 0:
+            SCHED.add_job(torrentfinished.checkTorrentFinished,
+                trigger=IntervalTrigger(
+                    minutes=CONFIG.TORRENT_REMOVAL_INTERVAL))
+
+        # Start scheduler
+        logger.info("(Re-)Scheduling background tasks")
+        SCHED.start()
+
+
 def start():
 
     global started
 
     if _INITIALIZED:
-
-        # Start our scheduled background tasks
-        from headphones import updater, searcher, librarysync, postprocessor, torrentfinished
-        SCHED.add_job(updater.dbUpdate, trigger=IntervalTrigger(
-            hours=CONFIG.UPDATE_DB_INTERVAL))
-        SCHED.add_job(searcher.searchforalbum, trigger=IntervalTrigger(
-            minutes=CONFIG.SEARCH_INTERVAL))
-        SCHED.add_job(librarysync.libraryScan, trigger=IntervalTrigger(
-            hours=CONFIG.LIBRARYSCAN_INTERVAL))
-
-        if CONFIG.CHECK_GITHUB:
-            SCHED.add_job(versioncheck.checkGithub, trigger=IntervalTrigger(
-                minutes=CONFIG.CHECK_GITHUB_INTERVAL))
-
-        if CONFIG.DOWNLOAD_SCAN_INTERVAL > 0:
-            SCHED.add_job(postprocessor.checkFolder, trigger=IntervalTrigger(
-                minutes=CONFIG.DOWNLOAD_SCAN_INTERVAL))
-
-        # Remove Torrent + data if Post Processed and finished Seeding
-        if CONFIG.TORRENT_REMOVAL_INTERVAL > 0:
-            SCHED.add_job(torrentfinished.checkTorrentFinished, trigger=IntervalTrigger(
-                minutes=CONFIG.TORRENT_REMOVAL_INTERVAL))
-
-        SCHED.start()
-
+        initialize_scheduler()
         started = True
 
 

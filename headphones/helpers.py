@@ -604,6 +604,43 @@ def smartMove(src, dest, delete=True):
     except Exception as e:
         logger.warn('Error moving file %s: %s', filename.decode(headphones.SYS_ENCODING, 'replace'), e)
 
+def walk_directory(basedir, followlinks=True):
+    """
+    Enhanced version of 'os.walk' where symlink directores are traversed, but
+    with care. In case a folder is already processed, don't traverse it again.
+    """
+
+    import logger
+
+    # Add the base path, because symlinks poiting to the basedir should not be
+    # traversed again.
+    traversed = [os.path.abspath(basedir)]
+
+    def _inner(root, directories, files):
+        for directory in directories:
+            path = os.path.join(root, directory)
+
+            if followlinks and os.path.islink(path):
+                real_path = os.path.abspath(os.readlink(path))
+
+                if real_path in traversed:
+                    logger.debug("Skipping '%s' since it is a symlink to "\
+                        "'%s', which is already visited.", path, real_path)
+                else:
+                    traversed.append(real_path)
+
+                    for args in os.walk(real_path):
+                        for result in _inner(*args):
+                            yield result
+
+        # Pass on actual result
+        yield root, directories, files
+
+    # Start traversing
+    for args in os.walk(basedir):
+        for result in _inner(*args):
+            yield result
+
 #########################
 #Sab renaming functions #
 #########################
@@ -660,44 +697,41 @@ def sab_sanitize_foldername(name):
 
     return name
 
-
 def split_string(mystring, splitvar=','):
     mylist = []
     for each_word in mystring.split(splitvar):
         mylist.append(each_word.strip())
     return mylist
 
-
 def create_https_certificates(ssl_cert, ssl_key):
     """
-    Stolen from SickBeard (http://github.com/midgetspy/Sick-Beard):
-    Create self-signed HTTPS certificares and store in paths 'ssl_cert' and 'ssl_key'
+    Create a pair of self-signed HTTPS certificares and store in them in
+    'ssl_cert' and 'ssl_key'. Method assumes pyOpenSSL is installed.
+
+    This code is stolen from SickBeard (http://github.com/midgetspy/Sick-Beard).
     """
+
     from headphones import logger
 
-    try:
-        from OpenSSL import crypto
-        from certgen import createKeyPair, createCertRequest, createCertificate, TYPE_RSA, serial
-    except:
-        logger.warn("pyOpenSSL module missing, please install to enable HTTPS")
-        return False
+    from OpenSSL import crypto
+    from certgen import createKeyPair, createCertRequest, createCertificate, \
+        TYPE_RSA, serial
 
     # Create the CA Certificate
-    cakey = createKeyPair(TYPE_RSA, 1024)
-    careq = createCertRequest(cakey, CN='Certificate Authority')
+    cakey = createKeyPair(TYPE_RSA, 2048)
+    careq = createCertRequest(cakey, CN="Certificate Authority")
     cacert = createCertificate(careq, (careq, cakey), serial, (0, 60 * 60 * 24 * 365 * 10)) # ten years
 
-    cname = 'Headphones'
-    pkey = createKeyPair(TYPE_RSA, 1024)
-    req = createCertRequest(pkey, CN=cname)
+    pkey = createKeyPair(TYPE_RSA, 2048)
+    req = createCertRequest(pkey, CN="Headphones")
     cert = createCertificate(req, (cacert, cakey), serial, (0, 60 * 60 * 24 * 365 * 10)) # ten years
 
     # Save the key and certificate to disk
     try:
-        with open(ssl_key, 'w') as f:
-            f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey))
-        with open(ssl_cert, 'w') as f:
-            f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+        with open(ssl_key, "w") as fp:
+            fp.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey))
+        with open(ssl_cert, "w") as fp:
+            fp.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
     except IOError as e:
         logger.error("Error creating SSL key and certificate: %s", e)
         return False
