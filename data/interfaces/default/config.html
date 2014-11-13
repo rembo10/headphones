@@ -267,7 +267,7 @@
                                         prio_force = ''
                                 %>
                                 <div class="row">
-                                    <label>NZBget Priority:</label>
+                                    <label>NZBget Priority</label>
                                     <select name="nzbget_priority" id="nzbget_priority">
                                         <option value="-100" ${prio_verylow}>Very Low</option>
                                         <option value="-50" ${prio_low}>Low</option>
@@ -295,7 +295,7 @@
                                         Music Download Directory:
                                     </label>
                                     <input type="text" name="download_dir" value="${config['download_dir']}" size="50">
-                                    <small>Full path where SAB or NZBget downloads your music. e.g. /Users/name/Downloads/music</small>
+                                    <small>Full path where SAB or NZBget downloads your music, e.g. /Users/name/Downloads/music</small>
                                 </div>
                                 <div class="row">
                                     <label title="Number of days of retention your usenet provider provides.">
@@ -382,14 +382,14 @@
                             </fieldset>
                             <fieldset id="general_torrent_options">
                                 <div class="row">
-                                    <label>Minimum seeders:</label>
+                                    <label>Minimum seeders</label>
                                     <input type="text" name="numberofseeders" value="${config['numberofseeders']}" size="5">
                                     <small>Number of minimum seeders a torrent must have to be accepted</small>
                                 </div>
                                 <div class="row">
                                     <label>Music Download Directory</label>
                                     <input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="50">
-                                    <small>Full path where your torrent client downloads your music e.g. '/Users/name/Downloads/music'</small>
+                                    <small>Full path where your torrent client downloads your music e.g. /Users/name/Downloads/music.</small>
                                 </div>
                                 <div class="row checkbox">
                                     <label>Keep Files for Seeding</label>
@@ -527,11 +527,12 @@
                                     </div>
                                     <div class="config">
                                         <div class="row">
-                                            <label>Proxy URL (Optional): </label>
+                                            <label>Proxy URL</label>
                                             <input type="text" name="piratebay_proxy_url" value="${config['piratebay_proxy_url']}" size="36">
+                                            <small>Optional. Leave empty for default.</small>
                                         </div>
                                         <div class="row">
-                                            <label>Seed Ratio: </label>
+                                            <label>Seed Ratio</label>
                                             <input type="text" class="override-float" name="piratebay_ratio" value="${config['piratebay_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
                                         </div>
                                     </div>
@@ -544,11 +545,12 @@
                                     </div>
                                     <div class="config">
                                         <div class="row">
-                                            <label>Proxy URL (Optional): </label>
+                                            <label>Proxy URL</label>
                                             <input type="text" name="kat_proxy_url" value="${config['kat_proxy_url']}" size="36">
+                                            <small>Optional. Leave empty for default.</small>
                                         </div>
                                         <div class="row">
-                                            <label>Seed Ratio: </label>
+                                            <label>Seed Ratio</label>
                                             <input type="text" class="override-float" name="kat_ratio" value="${config['kat_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
                                         </div>
                                     </div>
@@ -561,15 +563,15 @@
                                     </div>
                                     <div class="config">
                                         <div class="row">
-                                            <label>UID Number: </label>
+                                            <label>UID Number</label>
                                             <input type="text" name="waffles_uid" value="${config['waffles_uid']}" size="36">
                                         </div>
                                         <div class="row">
-                                            <label>Passkey: </label>
+                                            <label>Passkey</label>
                                             <input type="password" name="waffles_passkey" value="${config['waffles_passkey']}" size="36">
                                         </div>
                                         <div class="row">
-                                            <label>Seed Ratio: </label>
+                                            <label>Seed Ratio</label>
                                             <input type="text" class="override-float" name="waffles_ratio" value="${config['waffles_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
                                         </div>
                                     </div>
@@ -582,15 +584,15 @@
                                     </div>
                                     <div class="config">
                                         <div class="row">
-                                            <label>User Name: </label>
+                                            <label>Userame</label>
                                             <input type="text" name="rutracker_user" value="${config['rutracker_user']}" size="36">
                                         </div>
                                         <div class="row">
-                                            <label>Password: </label>
+                                            <label>Password</label>
                                             <input type="password" name="rutracker_password" value="${config['rutracker_password']}" size="36">
                                         </div>
                                         <div class="row">
-                                            <label>Seed Ratio: </label>
+                                            <label>Seed Ratio</label>
                                             <input type="text" class="override-float" name="rutracker_ratio" value="${config['rutracker_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
                                         </div>
                                     </div>
@@ -689,7 +691,7 @@
                             </fieldset>
                             <fieldset>
                                 <legend>Search Words</legend>
-                                <small>Separate words with a comma, e.g. "word1,word2,word3"</small>
+                                <small>Separate words with a comma, e.g. "word1,word2,word3".</small>
                                 <div class="row">
                                     <label>Ignored Words</label>
                                     <input type="text" name="ignored_words" value="${config['ignored_words']}" size="50">
@@ -715,6 +717,7 @@
                                         Split single file albums into multiple tracks
                                         <input type="checkbox" name="cue_split" id="cue_split" value="1" ${config['cue_split']} />
                                     </label>
+                                </div>
                                 <div class="row checkbox left clearfix">
                                     <label title="Freeze the database, so new artists won't be added automatically. Use this if Headphones adds artists because due to wrong snatches. This check is skipped when the folder name is appended with release group ID.">
                                         Freeze database for adding new artist
@@ -768,14 +771,18 @@
                                     </label>
                                 </div>
                                 <div class="row">
-                                    <label>Path to Destination Folder</label>
+                                    <label>
+                                        Destination Directory:
+                                    </label>
                                     <input type="text" name="destination_dir" value="${config['destination_dir']}" size="50">
-                                    <small>e.g. /Users/name/Music/iTunes or /Volumes/share/music</small>
+                                    <small>The directory where Headphones will move file to after post processing, e.g. /Volumes/share/music.</small>
                                 </div>
                                 <div class="row">
-                                    <label>Path to Lossless Destination folder (optional)</label>
+                                    <label>
+                                        Lossless Destination Directory:
+                                    </label>
                                     <input type="text" name="lossless_destination_dir" value="${config['lossless_destination_dir']}" size="50">
-                                    <small>Set this if you have a separate directory for lossless music</small>
+                                    <small>Optional. Set this if you have a separate directory for lossless music.</small>
                                 </div>
                             </fieldset>
                         </td>
@@ -817,7 +824,7 @@
                                         <input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} /><label>Notify on snatch?</label>
                                     </div>
                                     <div class="row">
-                                        <label>Priority (-2,-1,0,1 or 2):</label>
+                                        <label>Priority (-2,-1,0,1 or 2)</label>
                                         <input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2">
                                     </div>
                                 </div>
@@ -992,11 +999,11 @@
                                         <input type="checkbox" name="pushover_onsnatch" value="1" ${config['pushover_onsnatch']} /><label>Notify on snatch?</label>
                                     </div>
                                     <div class="row">
-                                        <label>Priority (-1,0, or 1):</label>
+                                        <label>Priority (-1,0, or 1)</label>
                                         <input type="text" name="pushover_priority" value="${config['pushover_priority']}" size="2">
                                     </div>
                                     <div class="row">
-                                        <label>API Token (leave blank to use Headphones default):</label><input type="text" name="pushover_apitoken" value="${config['pushover_apitoken']}" size="50">
+                                        <label>API Token (leave blank to use Headphones default)</label><input type="text" name="pushover_apitoken" value="${config['pushover_apitoken']}" size="50">
                                     </div>
                                 </div>
                             </fieldset>
@@ -1164,7 +1171,7 @@
                             </div>
                             <div class="row">
                                 <div class="row">
-                                    <label>Multi-core count:</label>
+                                    <label>Multi-core count</label>
                                     <input type="text" name="encoder_multicore_count" value="${config['encoder_multicore_count']}" size="7">
                                     <small>Set equal to the number of cores, or 0 for auto</small>
                                 </div>
@@ -1308,15 +1315,15 @@
                                     <label>Automatically mark manually added albums as wanted</label>
                                 </div>
                                 <div class="row">
-                                    <label>Folder Permissions:</label>
+                                    <label>Folder Permissions</label>
                                     <input type="text" name="folder_permissions" value="${config['folder_permissions']}" size="7">
                                 </div>
                                 <div class="row">
-                                    <label>File Permissions:</label>
+                                    <label>File Permissions</label>
                                     <input type="text" name="file_permissions" value="${config['file_permissions']}" size="7">
                                 </div>
                                 <div class="row">
-                                    <label>Cache Size (in MB):</label>
+                                    <label>Cache Size (in MB)</label>
                                     <input type="text" name="cache_sizemb" value="${config['cache_sizemb']}" size="7">
                                 </div>
                             </fieldset>
@@ -1337,11 +1344,11 @@
                                     </select>
                                 </div>
                                 <div class="row">
-                                    <label>Log Directory:</label>
+                                    <label>Log Directory</label>
                                     <input type="text" name="log_dir" value="${config['log_dir']}" size="50">
                                 </div>
                                 <div class="row">
-                                    <label>Cache Directory:</label>
+                                    <label>Cache Directory</label>
                                     <input type="text" name="cache_dir" value="${config['cache_dir']}" size="50">
                                 </div>
                             </fieldset>
@@ -1353,7 +1360,7 @@
                                 </div>
                                 <div id="songkickoptions">
                                   <div class="row">
-                                      <label>API Key:</label>
+                                      <label>API Key</label>
                                       <input type="text" name="songkick_apikey" value="${config['songkick_apikey']}" size="50">
                                   </div>
                                   <div class="row checkbox">
@@ -1361,7 +1368,7 @@
                                   </div>
                                   <div id="songkick_filteroptions">
                                     <div class="row">
-                                      <label>Metro Area ID:</label>
+                                      <label>Metro Area ID</label>
                                       <input type="text" name="songkick_location" value="${config['songkick_location']}" size="10" title="Enter the Metro Area ID, e.g. the ID for London is 24426, this can be found by clicking the link and searching/selecting the city, e.g. London should find http://www.songkick.com/metro_areas/24426-uk-london">
                                         <a target="_blank" href="http://www.songkick.com/developer/location-search">Find Area ID</a>
                                     </div>
