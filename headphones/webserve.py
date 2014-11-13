@@ -1241,7 +1241,7 @@ class WebInterface(object):
             headphones.CONFIG.add_extra_newznab(extra_newznab)
 
         # Sanity checking
-        if headphones.CONFIG.SEARCH_INTERVAL < 360:
+        if headphones.CONFIG.SEARCH_INTERVAL < 360 and headphones.config.SEARCH_INTERVAL != 0:
             logger.info("Search interval too low. Resetting to 6 hour minimum")
             headphones.CONFIG.SEARCH_INTERVAL = 360
 

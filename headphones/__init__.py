@@ -143,8 +143,8 @@ def initialize(config_file):
                 logger.error("Could not create cache dir '%s': %s", DATA_DIR, e)
 
         # Sanity check for search interval. Set it to at least 6 hours
-        if CONFIG.SEARCH_INTERVAL < 360:
-            logger.info("Search interval too low. Resetting to 6 hour minimum")
+        if CONFIG.SEARCH_INTERVAL < 360 and CONFIG.SEARCH_INTERVAL != 0:
+            logger.info("Search interval too low. Resetting to 6 hour minimum.")
             CONFIG.SEARCH_INTERVAL = 360
 
         # Initialize the database
@@ -275,21 +275,24 @@ def initialize_scheduler():
             SCHED.shutdown()
             SCHED.remove_all_jobs()
 
-        # Then add all jobs
-        SCHED.add_job(updater.dbUpdate, trigger=IntervalTrigger(
-            hours=CONFIG.UPDATE_DB_INTERVAL))
-        SCHED.add_job(searcher.searchforalbum, trigger=IntervalTrigger(
-            minutes=CONFIG.SEARCH_INTERVAL))
-        SCHED.add_job(librarysync.libraryScan, trigger=IntervalTrigger(
-            hours=CONFIG.LIBRARYSCAN_INTERVAL))
-
-        if CONFIG.CHECK_GITHUB:
-            SCHED.add_job(versioncheck.checkGithub, trigger=IntervalTrigger(
-                minutes=CONFIG.CHECK_GITHUB_INTERVAL))
-
+        # Regular jobs
+        if CONFIG.UPDATE_DB_INTERVAL > 0:
+            SCHED.add_job(updater.dbUpdate, trigger=IntervalTrigger(
+                hours=CONFIG.UPDATE_DB_INTERVAL))
+        if CONFIG.SEARCH_INTERVAL > 0:
+            SCHED.add_job(searcher.searchforalbum, trigger=IntervalTrigger(
+                minutes=CONFIG.SEARCH_INTERVAL))
+        if CONFIG.LIBRARYSCAN_INTERVAL > 0:
+            SCHED.add_job(librarysync.libraryScan, trigger=IntervalTrigger(
+                hours=CONFIG.LIBRARYSCAN_INTERVAL))
         if CONFIG.DOWNLOAD_SCAN_INTERVAL > 0:
             SCHED.add_job(postprocessor.checkFolder, trigger=IntervalTrigger(
                 minutes=CONFIG.DOWNLOAD_SCAN_INTERVAL))
+
+        # Update check
+        if CONFIG.CHECK_GITHUB:
+            SCHED.add_job(versioncheck.checkGithub, trigger=IntervalTrigger(
+                minutes=CONFIG.CHECK_GITHUB_INTERVAL))
 
         # Remove Torrent + data if Post Processed and finished Seeding
         if CONFIG.TORRENT_REMOVAL_INTERVAL > 0:
