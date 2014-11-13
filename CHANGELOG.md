@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.5.1
+Released xx November 2014
+
+Highlights:
+* Added: allow one to disable interval tasks (#2002)
+* Added: script to downgrade Headphones to last version that started (Linux only)
+* Fixed: SSL issues in CherryPy (#1995)
+* Fixed: Transmission URL detection (#1998)
+* Fixed: missing dependencies for APScheduler and CherryPy (#2001)
+* Improved: Symlink infinite recursion detection
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.1...v0.5).
+
 ## v0.5
 Released 10 November 2014
 
