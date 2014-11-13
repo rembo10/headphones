@@ -143,7 +143,7 @@ def initialize(config_file):
                 logger.error("Could not create cache dir '%s': %s", DATA_DIR, e)
 
         # Sanity check for search interval. Set it to at least 6 hours
-        if CONFIG.SEARCH_INTERVAL < 360 and CONFIG.SEARCH_INTERVAL != 0:
+        if CONFIG.SEARCH_INTERVAL and CONFIG.SEARCH_INTERVAL < 360:
             logger.info("Search interval too low. Resetting to 6 hour minimum.")
             CONFIG.SEARCH_INTERVAL = 360
 
