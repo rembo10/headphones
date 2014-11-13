@@ -17,6 +17,7 @@ from headphones import logger, helpers, common, request
 
 from xml.dom import minidom
 from httplib import HTTPSConnection
+from urlparse import parse_qsl
 from urllib import urlencode
 from pynma import pynma
 
@@ -32,12 +33,6 @@ import json
 
 import oauth2 as oauth
 import pythontwitter as twitter
-
-try:
-    from urlparse import parse_qsl
-except ImportError:
-    from cgi import parse_qsl
-
 
 class GROWL(object):
     """

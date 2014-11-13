@@ -1241,14 +1241,17 @@ class WebInterface(object):
             headphones.CONFIG.add_extra_newznab(extra_newznab)
 
         # Sanity checking
-        if headphones.CONFIG.SEARCH_INTERVAL < 360:
+        if headphones.CONFIG.SEARCH_INTERVAL and headphones.CONFIG.SEARCH_INTERVAL < 360:
             logger.info("Search interval too low. Resetting to 6 hour minimum")
             headphones.CONFIG.SEARCH_INTERVAL = 360
 
         # Write the config
         headphones.CONFIG.write()
 
-        #reconfigure musicbrainz database connection with the new values
+        # Reconfigure scheduler
+        headphones.initialize_scheduler()
+
+        # Reconfigure musicbrainz database connection with the new values
         mb.startmb()
 
         raise cherrypy.HTTPRedirect("config")

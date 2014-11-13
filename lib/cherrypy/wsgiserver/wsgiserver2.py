@@ -1324,8 +1324,8 @@ class HTTPConnection(object):
     def __init__(self, server, sock, makefile=CP_fileobject):
         self.server = server
         self.socket = sock
-        self.rfile = makefile(sock._sock, "rb", self.rbufsize)
-        self.wfile = makefile(sock._sock, "wb", self.wbufsize)
+        self.rfile = makefile(sock, "rb", self.rbufsize)
+        self.wfile = makefile(sock, "wb", self.wbufsize)
         self.requests_seen = 0
 
     def communicate(self):

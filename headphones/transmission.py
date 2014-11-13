@@ -18,6 +18,7 @@ from headphones import logger, request
 import time
 import json
 import base64
+import urlparse
 import headphones
 
 # This is just a simple script to send torrents to transmission. The
@@ -126,7 +127,6 @@ def torrentAction(method, arguments):
     host = headphones.CONFIG.TRANSMISSION_HOST
     username = headphones.CONFIG.TRANSMISSION_USERNAME
     password = headphones.CONFIG.TRANSMISSION_PASSWORD
-    sessionid = None
 
     if not host.startswith('http'):
         host = 'http://' + host
@@ -134,30 +134,22 @@ def torrentAction(method, arguments):
     if host.endswith('/'):
         host = host[:-1]
 
-    # Either the host ends with a port, or some directory, or rpc
-    # If it ends with /rpc we don't have to do anything
-    # If it ends with a port we add /transmission/rpc
-    # anything else we just add rpc
-    if not host.endswith('/rpc'):
-        # Check if it ends in a port number
-        i = host.rfind(':')
-        if i >= 0:
-            possible_port = host[i + 1:]
-            host = host + "/rpc"
-            try:
-                port = int(possible_port)
-                if port:
-                    host = host + "/transmission/rpc"
-            except ValueError:
-                logger.debug('No port, assuming not transmission')
-        else:
-            logger.error('Transmission port missing')
-            return
+    # Fix the URL. We assume that the user does not point to the RPC endpoint,
+    # so add it if it is missing.
+    parts = list(urlparse.urlparse(host))
+
+    if not parts[0] in ("http", "https"):
+        parts[0] = "http"
+
+    if not parts[2].endswith("/rpc"):
+        parts[2] += "/transmission/rpc"
+
+    host = urlparse.urlunparse(parts)
 
     # Retrieve session id
     auth = (username, password) if username and password else None
-
-    response = request.request_response(host, auth=auth, whitelist_status_code=[401, 409])
+    response = request.request_response(host, auth=auth,
+        whitelist_status_code=[401, 409])
 
     if response is None:
         logger.error("Error gettings Transmission session ID")
@@ -166,23 +158,27 @@ def torrentAction(method, arguments):
     # Parse response
     if response.status_code == 401:
         if auth:
-            logger.error("Username and/or password not accepted by Transmission")
+            logger.error("Username and/or password not accepted by " \
+                "Transmission")
         else:
             logger.error("Transmission authorization required")
 
         return
     elif response.status_code == 409:
-        sessionid = response.headers['x-transmission-session-id']
+        session_id = response.headers['x-transmission-session-id']
 
-    if not sessionid:
-        logger.error("Error getting Session ID from Transmission")
-        return
+        if not session_id:
+            logger.error("Expected a Session ID from Transmission")
+            return
 
     # Prepare next request
-    headers = {'x-transmission-session-id': sessionid}
+    headers = {'x-transmission-session-id': session_id}
     data = {'method': method, 'arguments': arguments}
 
-    response = request.request_json(host, method="post", data=json.dumps(data), headers=headers, auth=auth)
+    response = request.request_json(host, method="POST", data=json.dumps(data),
+        headers=headers, auth=auth)
+
+    print response
 
     if not response:
         logger.error("Error sending torrent to Transmission")
