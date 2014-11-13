@@ -64,6 +64,7 @@ CREATEPID = False
 PIDFILE = None
 
 SCHED = BackgroundScheduler()
+SCHED_LOCK = threading.Lock()
 
 INIT_LOCK = threading.Lock()
 _INITIALIZED = False
@@ -256,14 +257,25 @@ def launch_browser(host, port, root):
         logger.error('Could not launch browser: %s', e)
 
 
-def start():
+def initialize_scheduler():
+    """
+    Start the scheduled background tasks. Because this method can be called
+    multiple times, the old tasks will be first removed.
+    """
 
-    global started
+    from headphones import updater, searcher, librarysync, postprocessor, \
+        torrentfinished
 
-    if _INITIALIZED:
+    with SCHED_LOCK:
+        # Remove all jobs
+        count = len(SCHED.get_jobs())
 
-        # Start our scheduled background tasks
-        from headphones import updater, searcher, librarysync, postprocessor, torrentfinished
+        if count > 0:
+            logger.debug("Current number of background tasks: %d", count)
+            SCHED.shutdown()
+            SCHED.remove_all_jobs()
+
+        # Then add all jobs
         SCHED.add_job(updater.dbUpdate, trigger=IntervalTrigger(
             hours=CONFIG.UPDATE_DB_INTERVAL))
         SCHED.add_job(searcher.searchforalbum, trigger=IntervalTrigger(
@@ -281,11 +293,21 @@ def start():
 
         # Remove Torrent + data if Post Processed and finished Seeding
         if CONFIG.TORRENT_REMOVAL_INTERVAL > 0:
-            SCHED.add_job(torrentfinished.checkTorrentFinished, trigger=IntervalTrigger(
-                minutes=CONFIG.TORRENT_REMOVAL_INTERVAL))
+            SCHED.add_job(torrentfinished.checkTorrentFinished,
+                trigger=IntervalTrigger(
+                    minutes=CONFIG.TORRENT_REMOVAL_INTERVAL))
 
+        # Start scheduler
+        logger.info("(Re-)Scheduling background tasks")
         SCHED.start()
 
+
+def start():
+
+    global started
+
+    if _INITIALIZED:
+        initialize_scheduler()
         started = True
 
 

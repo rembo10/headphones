@@ -1248,7 +1248,10 @@ class WebInterface(object):
         # Write the config
         headphones.CONFIG.write()
 
-        #reconfigure musicbrainz database connection with the new values
+        # Reconfigure scheduler
+        headphones.initialize_scheduler()
+
+        # Reconfigure musicbrainz database connection with the new values
         mb.startmb()
 
         raise cherrypy.HTTPRedirect("config")
