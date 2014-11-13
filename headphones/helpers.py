@@ -604,6 +604,43 @@ def smartMove(src, dest, delete=True):
     except Exception as e:
         logger.warn('Error moving file %s: %s', filename.decode(headphones.SYS_ENCODING, 'replace'), e)
 
+def walk_directory(basedir, followlinks=True):
+    """
+    Enhanced version of 'os.walk' where symlink directores are traversed, but
+    with care. In case a folder is already processed, don't traverse it again.
+    """
+
+    import logger
+
+    # Add the base path, because symlinks poiting to the basedir should not be
+    # traversed again.
+    traversed = [os.path.abspath(basedir)]
+
+    def _inner(root, directories, files):
+        for directory in directories:
+            path = os.path.join(root, directory)
+
+            if followlinks and os.path.islink(path):
+                real_path = os.path.abspath(os.readlink(path))
+
+                if real_path in traversed:
+                    logger.debug("Skipping '%s' since it is a symlink to "\
+                        "'%s', which is already visited.", path, real_path)
+                else:
+                    traversed.append(real_path)
+
+                    for args in os.walk(real_path):
+                        for result in _inner(*args):
+                            yield result
+
+        # Pass on actual result
+        yield root, directories, files
+
+    # Start traversing
+    for args in os.walk(basedir):
+        for result in _inner(*args):
+            yield result
+
 #########################
 #Sab renaming functions #
 #########################
