@@ -267,7 +267,8 @@ def initialize_scheduler():
         torrentfinished
 
     with SCHED_LOCK:
-        # Remove all jobs
+        # Remove all jobs first, because this method is also invoked when the
+        # settings are saved.
         count = len(SCHED.get_jobs())
 
         if count > 0:
@@ -301,7 +302,7 @@ def initialize_scheduler():
                               minutes=CONFIG.TORRENT_REMOVAL_INTERVAL))
 
         # Start scheduler
-        logger.info("(Re-)Scheduling background tasks")
+        logger.info("(Re-)Scheduled %d background tasks", len(SCHED.get_jobs()))
         SCHED.start()
 
 

@@ -176,7 +176,10 @@ def get_seed_ratio(provider):
     return seed_ratio
 
 
-def searchforalbum(albumid=None, new=False, losslessOnly=False, choose_specific_download=False):
+def searchforalbum(albumid=None, new=False, losslessOnly=False,
+    choose_specific_download=False):
+
+    logger.info('Searching for wanted albums')
     myDB = db.DBConnection()
 
     if not albumid:
@@ -185,7 +188,7 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False, choose_specific_
         for album in results:
 
             if not album['AlbumTitle'] or not album['ArtistName']:
-                logger.warn('Skipping release %s. No title available' % album['AlbumID'])
+                logger.warn('Skipping release %s. No title available', album['AlbumID'])
                 continue
 
             new = True
@@ -197,7 +200,6 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False, choose_specific_
             do_sorted_search(album, new, losslessOnly)
 
     elif albumid and choose_specific_download:
-
         album = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
         logger.info('Searching for "%s - %s"' % (album['ArtistName'], album['AlbumTitle']))
         results = do_sorted_search(album, new, losslessOnly, choose_specific_download=True)
@@ -208,7 +210,7 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False, choose_specific_
         logger.info('Searching for "%s - %s" since it was marked as wanted' % (album['ArtistName'], album['AlbumTitle']))
         do_sorted_search(album, new, losslessOnly)
 
-    logger.info('Search for Wanted albums complete')
+    logger.info('Search for wanted albums complete')
 
 
 def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
