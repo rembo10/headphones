@@ -20,10 +20,10 @@ from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 
 from headphones import db, logger, helpers, importer, lastfm
 
-# You can scan a single directory and append it to the current library by specifying append=True, ArtistID & ArtistName
-
-
-def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=False):
+# You can scan a single directory and append it to the current library by
+# specifying append=True, ArtistID and ArtistName.
+def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
+    cron=False):
 
     if cron and not headphones.CONFIG.LIBRARYSCAN:
         return
@@ -357,6 +357,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
     if not append:
         update_album_status()
         lastfm.getSimilar()
+
     logger.info('Library scan complete')
 
 #ADDED THIS SECTION TO MARK ALBUMS AS DOWNLOADED IF ARTISTS ARE ADDED EN MASSE BEFORE LIBRARY IS SCANNED

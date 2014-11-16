@@ -33,16 +33,14 @@ postprocessor_lock = threading.Lock()
 
 
 def checkFolder():
+    logger.info("Checking download folder for completed downloads")
 
     with postprocessor_lock:
-
         myDB = db.DBConnection()
         snatched = myDB.select('SELECT * from snatched WHERE Status="Snatched"')
 
         for album in snatched:
-
             if album['FolderName']:
-
                 if album['Kind'] == 'nzb':
                     download_dir = headphones.CONFIG.DOWNLOAD_DIR
                 else:
@@ -50,13 +48,14 @@ def checkFolder():
 
                 album_path = os.path.join(download_dir, album['FolderName']).encode(headphones.SYS_ENCODING, 'replace')
                 logger.info("Checking if %s exists" % album_path)
+
                 if os.path.exists(album_path):
                     logger.info('Found "' + album['FolderName'] + '" in ' + album['Kind'] + ' download folder. Verifying....')
                     verify(album['AlbumID'], album_path, album['Kind'])
-
             else:
                 logger.info("No folder name found for " + album['Title'])
 
+    logger.info("Checking download folder finished")
 
 def verify(albumid, albumpath, Kind=None, forced=False):
 
