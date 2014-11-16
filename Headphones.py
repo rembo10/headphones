@@ -188,12 +188,13 @@ def main():
     }
     webstart.initialize(web_config)
 
+    # Start the background threads
+    headphones.start()
+
+    # Open webbrowser
     if headphones.CONFIG.LAUNCH_BROWSER and not args.nolaunch:
         headphones.launch_browser(headphones.CONFIG.HTTP_HOST, http_port,
                                   headphones.CONFIG.HTTP_ROOT)
-
-    # Start the background threads
-    headphones.start()
 
     # Wait endlessy for a signal to happen
     while True:
