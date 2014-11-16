@@ -126,12 +126,15 @@ def initialize(config_file):
             try:
                 os.makedirs(CONFIG.LOG_DIR)
             except OSError:
-                if VERBOSE:
-                    sys.stderr.write(
-                        'Unable to create the log directory. Logging to screen only.\n')
+                CONFIG.LOG_DIR = None
+
+                if not QUIET:
+                    sys.stderr.write("Unable to create the log directory. " \
+                        "Logging to screen only.\n")
 
         # Start the logger, disable console if needed
-        logger.initLogger(console=not QUIET, verbose=VERBOSE)
+        logger.initLogger(console=not QUIET, log_dir=CONFIG.LOG_DIR,
+            verbose=VERBOSE)
 
         if not CONFIG.CACHE_DIR:
             # Put the cache dir in the data dir for now
