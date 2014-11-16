@@ -103,8 +103,8 @@ def main():
         # If the pidfile already exists, headphones may still be running, so
         # exit
         if os.path.exists(headphones.PIDFILE):
-            sys.exit(
-                "PID file '" + headphones.PIDFILE + "' already exists. Exiting.")
+            raise SystemExit("PID file '%s' already exists. Exiting." %
+                headphones.PIDFILE)
 
         # The pidfile is only useful in daemon mode, make sure we can write the
         # file properly
@@ -115,11 +115,10 @@ def main():
                 with open(headphones.PIDFILE, 'w') as fp:
                     fp.write("pid\n")
             except IOError as e:
-                raise SystemExit(
-                    "Unable to write PID file: %s [%d]", e.strerror, e.errno)
+                raise SystemExit("Unable to write PID file: %s", e)
         else:
-            logger.warn(
-                "Not running in daemon mode. PID file creation disabled.")
+            logger.warn("Not running in daemon mode. PID file creation " \
+                "disabled.")
 
     # Determine which data directory and config file to use
     if args.datadir:
