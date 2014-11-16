@@ -1,25 +1,27 @@
 # Contributing to Headphones
 
-## For users
+## Issues
 In case you read this because you are posting an issue, please take a minute and conside the things below. The issue tracker is not a support forum. It is primarily intended to submit bugs, improvements or feature requests. However, we are glad to help you, and make sure the problem is not caused by Headphones, but don't expect step-by-step answers.
 
-* Use the search function. Chances are that your problem is already discussed.
+* Use the search function. Chances are that your problem is already discussed. Do not append to (closed) issues if your problem does not fit the discussion.
 * Visit the [Troubleshooting](../../wiki/TroubleShooting) wiki first.
 * Use [proper formatting](https://help.github.com/articles/github-flavored-markdown/). Paste your logs in code blocks.
 * Close your issue if you resolved it.
 
-## For developers
+## Pull Requests
 If you think you can contribute code to the Headphones repository, do not hesitate to submit a pull request.
 
 ### Branches
-All pull requests should be based on the `develop` branch. When you want to develop a new feature, clone the repository with `git clone origin/develop -b FEATURE_NAME`. Use meaningful commit messages.
+All pull requests should be based on the `develop` branch, to minimize cross merges. When you want to develop a new feature, clone the repository with `git clone origin/develop -b FEATURE_NAME`. Use meaningful commit messages.
 
-### Code compatibility
+### Python Code
+
+#### Compatibility
 The code should work with Python 2.6 and 2.7. Note that Headphones runs on different platforms, including Network Attached Storage devices such as Synology.
 
 Re-use existing code. Do not hesitate to add logging in your code. You can the logger module `headphones.logger.*` for this. Web requests are invoked via `headphones.request.*` and derived ones. Use these methods to automatically add proper and meaningful error handling.
 
-### Code conventions
+#### Code conventions
 Although Headphones did not adapt a code convention in the past, we try to follow the [PEP8](http://legacy.python.org/dev/peps/pep-0008/) conventions for future code. A short summary to remind you (copied from http://wiki.ros.org/PyStyleGuide):
 
  * 4 space indentation
@@ -32,7 +34,19 @@ Although Headphones did not adapt a code convention in the past, we try to follo
  * `self.__really_private_field`
  * `_global`
 
-Document your code!
+#### Documentation
+Document your code. Use docstrings See [PEP-257](https://www.python.org/dev/peps/pep-0257/) for more information.
 
-### Continuous Integration
-Headphones has a configuration file for [travis-ci](https://travis-ci.org/). You can add your forked repo to travis to have it check your code against pep8, pylint, and pyflakes for you. Your pull request will show a green check mark or a red x on each tested commit, depending on if linting passes.
+#### Continuous Integration
+Headphones has a configuration file for [travis-ci](https://travis-ci.org/). You can add your forked repo to Travis to have it check your code against PEP8, PyLint, and PyFlakes for you. Your pull request will show a green check mark or a red cross on each tested commit, depending on if linting passes.
+
+### HTML/Template code
+
+#### Compatibility
+HTML5 compatible browsers are targetted. There is no specific mobile version of Headphones yet.
+
+#### Conventions
+* 4 space indentation
+* `methodName`
+* `variableName`
+* `ClassName`
