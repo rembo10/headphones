@@ -747,7 +747,8 @@ class WebInterface(object):
 
     def toggleVerbose(self):
         headphones.VERBOSE = not headphones.VERBOSE
-        logger.initLogger(not headphones.QUIET, headphones.VERBOSE)
+        logger.initLogger(console=not headphones.QUIET,
+            log_dir=headphones.CONFIG.LOG_DIR, verbose=headphones.VERBOSE)
         logger.info("Verbose toggled, set to %s", headphones.VERBOSE)
         logger.debug("If you read this message, debug logging is available")
         raise cherrypy.HTTPRedirect("logs")

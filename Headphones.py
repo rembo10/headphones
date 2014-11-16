@@ -89,6 +89,10 @@ def main():
     if args.quiet:
         headphones.QUIET = True
 
+    # Do an intial setup of the logger.
+    logger.initLogger(console=not headphones.QUIET, log_dir=False,
+        verbose=headphones.VERBOSE)
+
     if args.daemon:
         if sys.platform == 'win32':
             sys.stderr.write(

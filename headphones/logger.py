@@ -39,7 +39,6 @@ logger = logging.getLogger("headphones")
 # Global queue for multiprocessing logging
 queue = None
 
-
 class LogListHandler(logging.Handler):
     """
     Log handler for Web UI.
@@ -112,7 +111,7 @@ def initMultiprocessing():
     threading.current_thread().name = multiprocessing.current_process().name
 
 
-def initLogger(console=False, verbose=False):
+def initLogger(console=False, log_dir=False, verbose=False):
     """
     Setup logging for Headphones. It uses the logger instance with the name
     'headphones'. Three log handlers are added:
@@ -121,7 +120,8 @@ def initLogger(console=False, verbose=False):
     * LogListHandler: for Web UI
     * StreamHandler: for console (if console)
 
-    Console logging is only enabled if console is set to True.
+    Console logging is only enabled if console is set to True. This method can
+    be invoked multiple times, during different stages of Headphones.
     """
 
     # Close and remove old handlers. This is required to reinit the loggers
@@ -139,21 +139,22 @@ def initLogger(console=False, verbose=False):
     logger.propagate = False
     logger.setLevel(logging.DEBUG if verbose else logging.INFO)
 
-    # Setup file logger
-    filename = os.path.join(headphones.CONFIG.LOG_DIR, FILENAME)
-
-    file_formatter = logging.Formatter('%(asctime)s - %(levelname)-7s :: %(threadName)s : %(message)s', '%d-%b-%Y %H:%M:%S')
-    file_handler = handlers.RotatingFileHandler(filename, maxBytes=MAX_SIZE, backupCount=MAX_FILES)
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(file_formatter)
-
-    logger.addHandler(file_handler)
-
     # Add list logger
     loglist_handler = LogListHandler()
     loglist_handler.setLevel(logging.DEBUG)
 
     logger.addHandler(loglist_handler)
+
+    # Setup file logger
+    if log_dir:
+        filename = os.path.join(log_dir, FILENAME)
+
+        file_formatter = logging.Formatter('%(asctime)s - %(levelname)-7s :: %(threadName)s : %(message)s', '%d-%b-%Y %H:%M:%S')
+        file_handler = handlers.RotatingFileHandler(filename, maxBytes=MAX_SIZE, backupCount=MAX_FILES)
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(file_formatter)
+
+        logger.addHandler(file_handler)
 
     # Setup console logger
     if console:
