@@ -1,27 +1,21 @@
 import os.path
-import plistlib
-import sys
-import xml.parsers.expat as expat
+from biplist import *
 from headphones import logger
 
 
 def getXldProfile(xldProfile):
+
     xldProfileNotFound = xldProfile
-    expandedPath = os.path.expanduser('~/Library/Preferences/jp.tmkk.XLD.plist')
+    expanded = os.path.expanduser('~/Library/Preferences/jp.tmkk.XLD.plist')
+    if not os.path.isfile(expanded):
+        logger.warn("Could not find xld preferences at: %s", expanded)
+        return(xldProfileNotFound, None, None)
+
+    # Get xld preferences plist
     try:
-        preferences = plistlib.Plist.fromFile(expandedPath)
-    except (expat.ExpatError):
-        os.system("/usr/bin/plutil -convert xml1 %s" % expandedPath)
-        try:
-            preferences = plistlib.Plist.fromFile(expandedPath)
-        except (ImportError):
-            os.system("/usr/bin/plutil -convert binary1 %s" % expandedPath)
-            logger.info('The plist at "%s" has a date in it, and therefore is not useable.', expandedPath)
-            return(xldProfileNotFound, None, None)
-    except (ImportError):
-        logger.info('The plist at "%s" has a date in it, and therefore is not useable.', expandedPath)
-    except:
-        logger.info('Unexpected error: %s', sys.exc_info()[0])
+        preferences = readPlist(expanded)
+    except (InvalidPlistException, NotBinaryPlistException), e:
+        logger.error("Error reading xld preferences plist: %s", e)
         return(xldProfileNotFound, None, None)
 
     xldProfile = xldProfile.lower()
