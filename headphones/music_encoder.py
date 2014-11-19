@@ -36,6 +36,8 @@ def encode(albumPath):
         if not xldFormat:
             logger.error('Details for xld profile \'%s\' not found, files will not be re-encoded', xldProfile)
             return None
+    else:
+        xldProfile = None
 
     tempDirEncode = os.path.join(albumPath, "temp")
     musicFiles = []
@@ -133,7 +135,7 @@ def encode(albumPath):
                     encode = True
         # encode
         if encode:
-            job = (encoder, music, musicTempFiles[i], albumPath)
+            job = (encoder, music, musicTempFiles[i], albumPath, xldProfile)
             jobs.append(job)
         else:
             musicFiles[i] = None
@@ -242,22 +244,16 @@ def command_map(args):
         return False
 
 
-def command(encoder, musicSource, musicDest, albumPath):
+def command(encoder, musicSource, musicDest, albumPath, xldProfile):
     """
     Encode a given music file with a certain encoder. Returns True on success,
     or False otherwise.
     """
-    use_xld = headphones.CONFIG.ENCODER == 'xld'
 
     startMusicTime = time.time()
     cmd = []
 
-    # Return if xld details not found
-    if use_xld:
-        (xldProfile, xldFormat, xldBitrate) = getXldProfile.getXldProfile(headphones.CONFIG.XLDPROFILE)
-        if not xldFormat:
-            logger.error('Details for xld profile \'%s\' not found, files will not be re-encoded', xldProfile)
-            return None
+    if xldProfile:
         xldDestDir = os.path.split(musicDest)[0]
         cmd = [encoder]
         cmd.extend([musicSource])
