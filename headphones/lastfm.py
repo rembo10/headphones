@@ -13,10 +13,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
 import random
-import threading
 import headphones
+import headphones.lock
 
 from headphones import db, logger, request
 
@@ -28,7 +27,7 @@ ENTRY_POINT = "http://ws.audioscrobbler.com/2.0/"
 API_KEY = "395e6ec6bb557382fc41fde867bce66f"
 
 # Required for API request limit
-lock = threading.Lock()
+lastfm_lock = headphones.lock.TimedLock(REQUEST_LIMIT)
 
 
 def request_lastfm(method, **kwargs):
@@ -49,8 +48,7 @@ def request_lastfm(method, **kwargs):
     logger.debug("Calling Last.FM method: %s", method)
     logger.debug("Last.FM call parameters: %s", kwargs)
 
-    data = request.request_json(ENTRY_POINT, timeout=TIMEOUT, params=kwargs,
-        rate_limit=(lock, REQUEST_LIMIT))
+    data = request.request_json(ENTRY_POINT, timeout=TIMEOUT, params=kwargs, lock=lastfm_lock)
 
     # Parse response and check for errors.
     if not data:
@@ -73,7 +71,6 @@ def getSimilar():
 
     for result in results[:12]:
         data = request_lastfm("artist.getsimilar", mbid=result["ArtistId"])
-        time.sleep(10)
 
         if data and "similarartists" in data:
             artists = data["similarartists"]["artist"]
