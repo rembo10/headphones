@@ -57,7 +57,7 @@ def request_response(url, method="get", auto_raise=True,
 
     try:
         # Request URL and wait for response
-        if lock is not None:
+        with lock:
             logger.debug("Requesting URL via %s method: %s", method.upper(), url)
             response = request_method(url, **kwargs)
 
