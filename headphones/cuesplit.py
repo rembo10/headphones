@@ -546,8 +546,8 @@ def split(albumpath):
     for _cue in base_dir.filter('CueFile'):
         for _wave in base_dir.filter('WaveFile'):
             if _cue.header['file'] == _wave.name:
-                logger.info('CUE Sheet found: {0}'.format(_cue.name))
-                logger.info('Music file found: {0}'.format(_wave.name))
+                logger.info('CUE Sheet found: %s', _cue.name)
+                logger.info('Music file found: %s',_wave.name)
                 cue = _cue
                 wave = _wave
     # if no perfect match found then try without extensions
@@ -556,9 +556,9 @@ def split(albumpath):
         for _cue in base_dir.filter('CueFile'):
             for _wave in base_dir.filter('WaveFile'):
                 if ''.join(os.path.splitext(_cue.header['file'])[:-1]) == _wave.name_name:
-                    logger.info('Possible CUE Sheet found: {0}'.format(_cue.name))
-                    logger.info('CUE Sheet refers music file: {0}'.format(_cue.header['file']))
-                    logger.info('Possible Music file found: {0}'.format(_wave.name))
+                    logger.info('Possible CUE Sheet found: %s', _cue.name)
+                    logger.info('CUE Sheet refers music file: %s', _cue.header['file'])
+                    logger.info('Possible Music file found: %s', _wave.name)
                     cue = _cue
                     wave = _wave
                     cue.header['file'] = wave.name
@@ -641,14 +641,14 @@ def split(albumpath):
         # tag FLAC files
         if split and CUE_META.count_tracks() == len(base_dir.tracks(ext='.flac', split=True)):
             for t in base_dir.tracks(ext='.flac', split=True):
-                logger.info('Tagging {0}...'.format(t.name))
+                logger.info('Tagging %s...', t.name)
                 t.tag()
 
         # rename FLAC files
         if split and CUE_META.count_tracks() == len(base_dir.tracks(ext='.flac', split=True)):
             for t in base_dir.tracks(ext='.flac', split=True):
                 if t.name != t.filename():
-                    logger.info('Renaming {0} to {1}...'.format(t.name, t.filename()))
+                    logger.info('Renaming %s to %s...', t.name, t.filename())
                     os.rename(t.name, t.filename())
 
         os.remove(ALBUM_META_FILE_NAME)
