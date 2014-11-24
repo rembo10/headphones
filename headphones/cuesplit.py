@@ -547,7 +547,7 @@ def split(albumpath):
         for _wave in base_dir.filter('WaveFile'):
             if _cue.header['file'] == _wave.name:
                 logger.info('CUE Sheet found: %s', _cue.name)
-                logger.info('Music file found: %s',_wave.name)
+                logger.info('Music file found: %s', _wave.name)
                 cue = _cue
                 wave = _wave
     # if no perfect match found then try without extensions
