@@ -9,7 +9,7 @@ import Queue
 
 class TimedLock(object):
     """
-    Enfore request rate limit if applicable. This uses the lock so there
+    Enforce request rate limit if applicable. This uses the lock so there
     is synchronized access to the API. When N threads enter this method, the
     first will pass trough, since there there was no last request recorded.
     The last request time will be set. Then, the second thread will unlock,
