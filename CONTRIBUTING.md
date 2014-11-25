@@ -20,7 +20,7 @@ The code should work with Python 2.6 and 2.7. Note that Headphones runs on diffe
 Re-use existing code. Do not hesitate to add logging in your code. You can the logger module `headphones.logger.*` for this. Web requests are invoked via `headphones.request.*` and derived ones. Use these methods to automatically add proper and meaningful error handling.
 
 ### Code conventions
-Altough Headphones did not adapt a code convention in the past, we try to follow the [PEP8](http://legacy.python.org/dev/peps/pep-0008/) conventions for future code. A short summary to remind you (copied from http://wiki.ros.org/PyStyleGuide):
+Although Headphones did not adapt a code convention in the past, we try to follow the [PEP8](http://legacy.python.org/dev/peps/pep-0008/) conventions for future code. A short summary to remind you (copied from http://wiki.ros.org/PyStyleGuide):
 
  * 4 space indentation
  * 80 characters per line
@@ -33,3 +33,6 @@ Altough Headphones did not adapt a code convention in the past, we try to follow
  * `_global`
 
 Document your code!
+
+### Continuous Integration
+Headphones has a configuration file for [travis-ci](https://travis-ci.org/). You can add your forked repo to travis to have it check your code against pep8, pylint, and pyflakes for you. Your pull request will show a green check mark or a red x on each tested commit, depending on if linting passes.
