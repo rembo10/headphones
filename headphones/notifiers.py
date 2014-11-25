@@ -444,16 +444,15 @@ class PUSHBULLET(object):
 
         http_handler = HTTPSConnection("api.pushbullet.com")
 
-        data = {'device_iden': headphones.CONFIG.PUSHBULLET_DEVICEID,
-                'type': "note",
+        data = {'type': "note",
                 'title': "Headphones",
                 'body': message.encode("utf-8")}
 
         http_handler.request("POST",
-                                "/api/pushes",
-                                headers={'Content-type': "application/x-www-form-urlencoded",
+                                "/v2/pushes",
+                                headers={'Content-type': "application/json",
                                             'Authorization': 'Basic %s' % base64.b64encode(headphones.CONFIG.PUSHBULLET_APIKEY + ":")},
-                                body=urlencode(data))
+                                body=json.dumps(data))
         response = http_handler.getresponse()
         request_status = response.status
         logger.debug(u"PushBullet response status: %r" % request_status)
