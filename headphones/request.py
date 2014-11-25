@@ -18,18 +18,19 @@ from headphones import logger
 from xml.dom import minidom
 from bs4 import BeautifulSoup
 
-import time
 import requests
 import feedparser
 import headphones
+import headphones.lock
 import collections
 
 # Dictionary with last request times, for rate limiting.
 last_requests = collections.defaultdict(int)
+fake_lock = headphones.lock.FakeLock()
 
 
 def request_response(url, method="get", auto_raise=True,
-    whitelist_status_code=None, rate_limit=None, **kwargs):
+    whitelist_status_code=None, lock=fake_lock, **kwargs):
     """
     Convenient wrapper for `requests.get', which will capture the exceptions and
     log them. On success, the Response object is returned. In case of a
@@ -54,36 +55,11 @@ def request_response(url, method="get", auto_raise=True,
     # requests to apply more magic per method. See lib/requests/api.py.
     request_method = getattr(requests, method.lower())
 
-    # Enfore request rate limit if applicable. This uses the lock so there
-    # is synchronized access to the API. When N threads enter this method, the
-    # first will pass trough, since there there was no last request recorded.
-    # The last request time will be set. Then, the second thread will unlock,
-    # and see that the last request was X seconds ago. It will sleep
-    # (request_limit - X) seconds, and then continue. Then the third one will
-    # unblock, and so on. After all threads finished, the total time will at
-    # least be (N * request_limit) seconds. If some request takes longer than
-    # request_limit seconds, the next unblocked thread will wait less.
-    if rate_limit:
-        lock, request_limit = rate_limit
-
-        with lock:
-            delta = time.time() - last_requests[lock]
-            limit = int(1.0 / request_limit)
-
-            if delta < request_limit:
-                logger.debug("Sleeping %.2f seconds for request, limit " \
-                    "is %d req/sec.", request_limit - delta, limit)
-
-                # Sleep the remaining time
-                time.sleep(request_limit - delta)
-
-            # Update last request time.
-            last_requests[lock] = time.time()
-
     try:
         # Request URL and wait for response
-        logger.debug("Requesting URL via %s method: %s", method.upper(), url)
-        response = request_method(url, **kwargs)
+        with lock:
+            logger.debug("Requesting URL via %s method: %s", method.upper(), url)
+            response = request_method(url, **kwargs)
 
         # If status code != OK, then raise exception, except if the status code
         # is white listed.
@@ -100,11 +76,12 @@ def request_response(url, method="get", auto_raise=True,
 
         return response
     except requests.ConnectionError:
-        logger.error("Unable to connect to remote host. Check if the remote " \
+        logger.error(
+            "Unable to connect to remote host. Check if the remote "
             "host is up and running.")
     except requests.Timeout:
-        logger.error("Request timed out. The remote host did not respeond " \
-            "timely.")
+        logger.error(
+            "Request timed out. The remote host did not respeond timely.")
     except requests.HTTPError as e:
         if e.response is not None:
             if e.response.status_code >= 500:

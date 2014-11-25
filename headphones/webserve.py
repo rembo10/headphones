@@ -674,8 +674,9 @@ class WebInterface(object):
     def importItunes(self, path):
         headphones.CONFIG.PATH_TO_XML = path
         headphones.CONFIG.write()
-        threading.Thread(target=importer.itunesImport, args=[path]).start()
-        time.sleep(10)
+        thread = threading.Thread(target=importer.itunesImport, args=[path])
+        thread.start()
+        thread.join(10)
         raise cherrypy.HTTPRedirect("home")
     importItunes.exposed = True
 
