@@ -70,7 +70,7 @@ def request_response(url, method="get", auto_raise=True,
                 except:
                     logger.debug(
                         "Response status code %d is not white "
-                         "listed, raised exception", response.status_code)
+                        "listed, raised exception", response.status_code)
                     raise
         elif auto_raise:
             response.raise_for_status()
