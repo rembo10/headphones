@@ -65,7 +65,8 @@ def latinToAscii(unicrap):
     """
     From couch potato
     """
-    xlate = {0xc0: 'A', 0xc1: 'A', 0xc2: 'A', 0xc3: 'A', 0xc4: 'A', 0xc5: 'A',
+    xlate = {
+        0xc0: 'A', 0xc1: 'A', 0xc2: 'A', 0xc3: 'A', 0xc4: 'A', 0xc5: 'A',
         0xc6: 'Ae', 0xc7: 'C',
         0xc8: 'E', 0xc9: 'E', 0xca: 'E', 0xcb: 'E', 0x86: 'e',
         0xcc: 'I', 0xcd: 'I', 0xce: 'I', 0xcf: 'I',
@@ -90,7 +91,7 @@ def latinToAscii(unicrap):
         0xb9: '{^1}', 0xba: '{^o}', 0xbb: '>>',
         0xbc: '{1/4}', 0xbd: '{1/2}', 0xbe: '{3/4}', 0xbf: '?',
         0xd7: '*', 0xf7: '/'
-        }
+    }
 
     r = ''
     for i in unicrap:

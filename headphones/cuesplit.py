@@ -424,7 +424,7 @@ class CueFile(File):
             elif t >= 1:
                 t_index = self.tracks[t]['index']
                 content += t_index[1]
-                if (t < len(self.tracks) - 1):
+                if t < (len(self.tracks) - 1):
                     content += '\n'
         return content
 

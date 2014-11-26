@@ -38,8 +38,6 @@ load-plugins=
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
-#C0303 whitespace between the end of a line and the newline.
-#C0325 a single item in parentheses follows an if, for, or other keyword
 #C0326 wrong number of spaces is used around an operator, bracket or block opener
 #I0011 an inline option disables a pylint message or a messages category
 #R0801 a set of similar lines has been detected among multiple file
@@ -49,7 +47,7 @@ load-plugins=
 # C0330(bad-continuation)
 # E1205(logging-too-many-args)
 
-disable=C0303,C0325,C0326,I0011,R0801,W0142,C0103,C0111,C0301,C0302,C0304,C0321,C1001,E0101,E0203,E0602,E1101,E1123,R0201,R0401,R0911,R0912,R0914,R0915,R0923,W0102,W0109,W0120,W0141,W0201,W0212,W0231,W0232,W0233,W0301,W0311,W0401,W0403,W0404,W0511,W0601,W0602,W0603,W0611,W0612,W0613,W0621,W0622,W0633,W0702,W0703,W1401,W1201,C0330
+disable=C0326,I0011,R0801,W0142,C0103,C0111,C0301,C0302,C0304,C0321,C1001,E0101,E0203,E0602,E1101,E1123,R0201,R0401,R0911,R0912,R0914,R0915,R0923,W0102,W0109,W0120,W0141,W0201,W0212,W0231,W0232,W0233,W0301,W0311,W0401,W0403,W0404,W0511,W0601,W0602,W0603,W0611,W0612,W0613,W0621,W0622,W0633,W0702,W0703,W1401,W1201,C0330
 
 [REPORTS]
 
