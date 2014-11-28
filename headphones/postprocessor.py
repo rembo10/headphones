@@ -329,9 +329,10 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
            headphones.CONFIG.MOVE_FILES:
 
             try:
-                with open(downloaded_track, "a+b"):
-                    pass
-            except IOError:
+                with open(downloaded_track, "a+b") as fp:
+                    fp.seek(0)
+            except IOError as e:
+                logger.debug("Write check exact error: %s", e)
                 logger.error("Track file is not writeable. This is required " \
                     "for some post processing steps: %s. Not continuing.",
                     downloaded_track.decode(headphones.SYS_ENCODING, "replace"))

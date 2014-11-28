@@ -76,6 +76,10 @@ def request_response(url, method="get", auto_raise=True,
             response.raise_for_status()
 
         return response
+    except requests.exceptions.SSLError:
+        logger.error("Unable to connect to remote host because of a SSL " \
+            "error. It's likely the remote certificate is untrusted by your " \
+            "system. This check can be disabled (advanced users only).")
     except requests.ConnectionError:
         logger.error(
             "Unable to connect to remote host. Check if the remote "
