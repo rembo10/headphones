@@ -66,7 +66,7 @@ def encode(albumPath):
                     xldInfoMusic = MediaFile(xldMusicFile)
                     encoderFormat = xldFormat
 
-                if (headphones.CONFIG.ENCODERLOSSLESS):
+                if headphones.CONFIG.ENCODERLOSSLESS:
                     ext = os.path.normpath(os.path.splitext(music)[1].lstrip(".")).lower()
                     if not use_xld and ext == 'flac' or use_xld and (ext != xldFormat and (xldInfoMusic.bitrate / 1000 > 400)):
                         musicFiles.append(os.path.join(r, music))
@@ -118,7 +118,7 @@ def encode(albumPath):
             if not any(music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.' + x) for x in ["mp3", "wav"]):
                 logger.warn('Lame cannot encode %s format for %s, use ffmpeg', os.path.splitext(music)[1], music)
             else:
-                if (music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.mp3') and (int(infoMusic.bitrate / 1000) <= headphones.CONFIG.BITRATE)):
+                if music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.mp3') and (int(infoMusic.bitrate / 1000) <= headphones.CONFIG.BITRATE):
                     logger.info('%s has bitrate <= %skb, will not be re-encoded', music, headphones.CONFIG.BITRATE)
                 else:
                     encode = True
@@ -128,8 +128,8 @@ def encode(albumPath):
                     logger.warn('Cannot re-encode .ogg %s', music.decode(headphones.SYS_ENCODING, 'replace'))
                 else:
                     encode = True
-            elif (headphones.CONFIG.ENCODEROUTPUTFORMAT == 'mp3' or headphones.CONFIG.ENCODEROUTPUTFORMAT == 'm4a'):
-                if (music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.' + headphones.CONFIG.ENCODEROUTPUTFORMAT) and (int(infoMusic.bitrate / 1000) <= headphones.CONFIG.BITRATE)):
+            elif headphones.CONFIG.ENCODEROUTPUTFORMAT == 'mp3' or headphones.CONFIG.ENCODEROUTPUTFORMAT == 'm4a':
+                if music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.' + headphones.CONFIG.ENCODEROUTPUTFORMAT) and (int(infoMusic.bitrate / 1000) <= headphones.CONFIG.BITRATE):
                     logger.info('%s has bitrate <= %skb, will not be re-encoded', music, headphones.CONFIG.BITRATE)
                 else:
                     encode = True

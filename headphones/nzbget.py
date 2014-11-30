@@ -59,7 +59,7 @@ def sendNZB(nzb):
         return False
 
     except xmlrpclib.ProtocolError, e:
-        if (e.errmsg == "Unauthorized"):
+        if e.errmsg == "Unauthorized":
             logger.error(u"NZBget password is incorrect.")
         else:
             logger.error(u"Protocol Error: " + e.errmsg)

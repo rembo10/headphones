@@ -68,8 +68,9 @@ def request_response(url, method="get", auto_raise=True,
                 try:
                     response.raise_for_status()
                 except:
-                    logger.debug("Response status code %d is not white " \
-                         "listed, raised exception", response.status_code)
+                    logger.debug(
+                        "Response status code %d is not white "
+                        "listed, raised exception", response.status_code)
                     raise
         elif auto_raise:
             response.raise_for_status()
@@ -85,7 +86,7 @@ def request_response(url, method="get", auto_raise=True,
             "host is up and running.")
     except requests.Timeout:
         logger.error(
-            "Request timed out. The remote host did not respeond timely.")
+            "Request timed out. The remote host did not respond timely.")
     except requests.HTTPError as e:
         if e.response is not None:
             if e.response.status_code >= 500:

@@ -593,7 +593,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
             logger.info("Album type is audiobook/spokenword. Using audiobook category")
 
         # Request results
-        logger.info('Parsing results from nzbs.org')
+        logger.info('Requesting from nzbs.org')
 
         headers = {'User-Agent': USER_AGENT}
         params = {
@@ -606,9 +606,11 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
 
         data = request.request_feed(
             url='http://beta.nzbs.org/api',
-            params=params, headers=headers
+            params=params, headers=headers,
+            timeout=5
         )
 
+        logger.info('Parsing results from nzbs.org')
         # Process feed
         if data:
             if not len(data.entries):
