@@ -169,7 +169,7 @@ def initialize(config_file):
                     fp.write(CURRENT_VERSION)
             except IOError as e:
                 logger.error("Unable to write current version to file '%s': %s",
-                    version_lock_file, e)
+                             version_lock_file, e)
 
         # Check for new versions
         if CONFIG.CHECK_GITHUB_ON_STARTUP:
@@ -297,8 +297,8 @@ def initialize_scheduler():
         # Remove Torrent + data if Post Processed and finished Seeding
         if CONFIG.TORRENT_REMOVAL_INTERVAL > 0:
             SCHED.add_job(torrentfinished.checkTorrentFinished,
-                trigger=IntervalTrigger(
-                    minutes=CONFIG.TORRENT_REMOVAL_INTERVAL))
+                          trigger=IntervalTrigger(
+                              minutes=CONFIG.TORRENT_REMOVAL_INTERVAL))
 
         # Start scheduler
         logger.info("(Re-)Scheduling background tasks")
