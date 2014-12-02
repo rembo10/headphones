@@ -48,7 +48,7 @@ def artistlist_to_mbids(artistlist, forced=False):
 
     for artist in artistlist:
 
-        if not artist and not (artist == ' '):
+        if not artist and artist != ' ':
             continue
 
         # If adding artists through Manage New Artists, they're coming through as non-unicode (utf-8?)
@@ -466,7 +466,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                     myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', rg['id']])
                     marked_as_downloaded = True
             else:
-                if ((have_track_count / float(total_track_count)) >= (headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0)):
+                if (have_track_count / float(total_track_count)) >= (headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0):
                     myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', rg['id']])
                     marked_as_downloaded = True
 

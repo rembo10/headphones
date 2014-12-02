@@ -17,7 +17,7 @@
 <%def name="body()">
 	<div class="table_wrapper">
 	<div id="manageheader" class="title">
-		<h1 class="clearfix"><i class="fa fa-music"></i> Manage Manually Changed Albums</h1>
+		<h1 class="clearfix"><i class="fa fa-music"></i> Manage manually matched albums</h1>
 	</div>
 
 	<table class="display" id="artist_table">
@@ -37,30 +37,30 @@
 				old_album_clean = album['AlbumTitle'].replace('&','%26').replace('+', '%2B').replace("'","%27")
 			%>
 			<td id="artist">${album['ArtistName']}<BR>
-				<button id="restore_artist${count_albums}" onClick="restore_Artist(this.id)">(<-) Restore Artist</button>
-				<div id="restore_artist_dialog${count_albums}" title="Restore Artist" style="display:none">
+				<button id="reset_artist${count_albums}" onClick="reset_Artist(this.id)">(<-) Reset Artist</button>
+				<div id="reset_artist_dialog${count_albums}" title="Reset Artist" style="display:none">
 					<table>
-					<tr><td>Are you sure you want to restore Local Artist: ${album['ArtistName']} to unmatched?</td></tr>
+					<tr><td>Are you sure you want to reset Local Artist: ${album['ArtistName']} to unmatched?</td></tr>
 					<tr><td align="right"><BR>
 					%if album['AlbumStatus'] == "Ignored":
-						<button href="#" onclick="doAjaxCall('markManual?action=unignoreArtist&existing_artist=${old_artist_clean}', $(this), 'page');" data-success="Successfully restored ${album['ArtistName']} to unmatched">Restore Artist</button>
+						<button href="#" onclick="doAjaxCall('markManual?action=unignoreArtist&existing_artist=${old_artist_clean}', $(this), 'page');" data-success="Successfully reset ${album['ArtistName']} to unmatched">Restore Artist</button>
 					%elif album['AlbumStatus'] == "Matched":
-						<button href="#" onclick="doAjaxCall('markManual?action=unmatchArtist&existing_artist=${old_artist_clean}', $(this), 'page');" data-success="Successfully restored ${album['ArtistName']} to unmatched">Restore Artist</button>
+						<button href="#" onclick="doAjaxCall('markManual?action=unmatchArtist&existing_artist=${old_artist_clean}', $(this), 'page');" data-success="Successfully reset ${album['ArtistName']} to unmatched">Restore Artist</button>
 					%endif
 					</td></tr>
 					</table>
 				</div>
 			</td>
 			<td id="album">${album['AlbumTitle']}<BR>
-				<button id="restore_album${count_albums}" onClick="restore_Album(this.id)">(<-) Restore Album</button>
-				<div id="restore_album_dialog${count_albums}" title="Restore Album" style="display:none">
+				<button id="reset_album${count_albums}" onClick="reset_Album(this.id)">(<-) Reset Album</button>
+				<div id="reset_album_dialog${count_albums}" title="Reset Album" style="display:none">
 					<table>
-					<tr><td>Are you sure you want to restore Local Album: ${album['AlbumTitle']} to unmatched?</td></tr>
+					<tr><td>Are you sure you want to reset Local Album: ${album['AlbumTitle']} to unmatched?</td></tr>
 					<tr><td align="right"><BR>
 					%if album['AlbumStatus'] == "Ignored":
-						<button href="#" onclick="doAjaxCall('markManual?action=unignoreAlbum&existing_artist=${old_artist_clean}&existing_album=${old_album_clean}', $(this), 'page');" data-success="Successfully restored ${album['AlbumTitle']} to unmatched">Restore Album</button>
+						<button href="#" onclick="doAjaxCall('markManual?action=unignoreAlbum&existing_artist=${old_artist_clean}&existing_album=${old_album_clean}', $(this), 'page');" data-success="Successfully reset ${album['AlbumTitle']} to unmatched">Reset Album</button>
 					%elif album['AlbumStatus'] == "Matched":
-						<button href="#" onclick="doAjaxCall('markManual?action=unmatchAlbum&existing_artist=${old_artist_clean}&existing_album=${old_album_clean}', $(this), 'page');" data-success="Successfully restored ${album['AlbumTitle']} to unmatched">Restore Album</button>
+						<button href="#" onclick="doAjaxCall('markManual?action=unmatchAlbum&existing_artist=${old_artist_clean}&existing_album=${old_album_clean}', $(this), 'page');" data-success="Successfully reset ${album['AlbumTitle']} to unmatched">Reset Album</button>
 					%endif
 					</td></tr>
 					</table>
@@ -107,15 +107,15 @@
 		initActions();
 	});
 
-	function restore_Artist(clicked_id) {
-		n=clicked_id.replace("restore_artist","");
-		$("#restore_artist_dialog"+n).dialog();
+	function reset_Artist(clicked_id) {
+		n=clicked_id.replace("reset_artist","");
+		$("#reset_artist_dialog"+n).dialog();
 		return false;
 	}
 
-	function restore_Album(clicked_id) {
-		n=clicked_id.replace("restore_album","");
-		$("#restore_album_dialog"+n).dialog();
+	function reset_Album(clicked_id) {
+		n=clicked_id.replace("reset_album","");
+		$("#reset_album_dialog"+n).dialog();
 		return false;
 	}
 

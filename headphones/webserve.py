@@ -23,13 +23,15 @@ from mako import exceptions
 
 from operator import itemgetter
 
+import cherrypy
+import headphones
+import json
 import os
 import sys
-import json
 import time
-import cherrypy
+import urllib
+import urllib2
 import threading
-import headphones
 
 try:
     # pylint:disable=E0611
@@ -70,22 +72,20 @@ class WebInterface(object):
     def artistPage(self, ArtistID):
         myDB = db.DBConnection()
         artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
-        albums = myDB.select('SELECT * from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
 
         # Don't redirect to the artist page until it has the bare minimum info inserted
         # Redirect to the home page if we still can't get it after 5 seconds
         retry = 0
 
-        while retry < 5:
-            if not artist:
-                time.sleep(1)
-                artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
-                retry += 1
-            else:
-                break
+        while not artist and retry < 5:
+            time.sleep(1)
+            artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
+            retry += 1
 
         if not artist:
             raise cherrypy.HTTPRedirect("home")
+
+        albums = myDB.select('SELECT * from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
 
         # Serve the extras up as a dict to make things easier for new templates (append new extras to the end)
         extras_list = headphones.POSSIBLE_EXTRAS
@@ -110,8 +110,6 @@ class WebInterface(object):
     def albumPage(self, AlbumID):
         myDB = db.DBConnection()
         album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
-        tracks = myDB.select('SELECT * from tracks WHERE AlbumID=? ORDER BY CAST(TrackNumber AS INTEGER)', [AlbumID])
-        description = myDB.action('SELECT * from descriptions WHERE ReleaseGroupID=?', [AlbumID]).fetchone()
 
         retry = 0
         while retry < 5:
@@ -124,6 +122,9 @@ class WebInterface(object):
 
         if not album:
             raise cherrypy.HTTPRedirect("home")
+
+        tracks = myDB.select('SELECT * from tracks WHERE AlbumID=? ORDER BY CAST(TrackNumber AS INTEGER)', [AlbumID])
+        description = myDB.action('SELECT * from descriptions WHERE ReleaseGroupID=?', [AlbumID]).fetchone()
 
         if not album['ArtistName']:
             title = ' - '
@@ -147,7 +148,9 @@ class WebInterface(object):
     search.exposed = True
 
     def addArtist(self, artistid):
-        threading.Thread(target=importer.addArtisttoDB, args=[artistid]).start()
+        thread = threading.Thread(target=importer.addArtisttoDB, args=[artistid])
+        thread.start()
+        thread.join(1)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % artistid)
     addArtist.exposed = True
 
@@ -172,7 +175,9 @@ class WebInterface(object):
         newValueDict = {'IncludeExtras': 1,
                         'Extras': extras}
         myDB.upsert("artists", newValueDict, controlValueDict)
-        threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True, False]).start()
+        thread = threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True, False])
+        thread.start()
+        thread.join(1)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     getExtras.exposed = True
 
@@ -256,7 +261,9 @@ class WebInterface(object):
     deleteEmptyArtists.exposed = True
 
     def refreshArtist(self, ArtistID):
-        threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, False, True]).start()
+        thread = threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, False, True])
+        thread.start()
+        thread.join(1)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     refreshArtist.exposed = True
 
@@ -312,9 +319,8 @@ class WebInterface(object):
         myDB.upsert("albums", newValueDict, controlValueDict)
         searcher.searchforalbum(AlbumID, new)
         if ArtistID:
-            raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
-        else:
-            raise cherrypy.HTTPRedirect(redirect)
+            redirect = "artistPage?ArtistID=%s" % ArtistID
+        raise cherrypy.HTTPRedirect(redirect)
     queueAlbum.exposed = True
 
     def choose_specific_download(self, AlbumID):
@@ -332,7 +338,6 @@ class WebInterface(object):
                 'kind': result[4]
             }
             results_as_dicts.append(result_dict)
-
         s = json.dumps(results_as_dicts)
         cherrypy.response.headers['Content-type'] = 'application/json'
         return s
@@ -340,13 +345,9 @@ class WebInterface(object):
     choose_specific_download.exposed = True
 
     def download_specific_release(self, AlbumID, title, size, url, provider, kind, **kwargs):
-
         # Handle situations where the torrent url contains arguments that are parsed
         if kwargs:
-            import urllib
-            import urllib2
             url = urllib2.quote(url, safe=":?/=&") + '&' + urllib.urlencode(kwargs)
-
         try:
             result = [(title, int(size), url, provider, kind)]
         except ValueError:
@@ -376,8 +377,9 @@ class WebInterface(object):
         myDB = db.DBConnection()
 
         myDB.action('DELETE from have WHERE Matched=?', [AlbumID])
-        album = myDB.action('SELECT ArtistName, AlbumTitle from albums where AlbumID=?', [AlbumID]).fetchone()
+        album = myDB.action('SELECT ArtistID, ArtistName, AlbumTitle from albums where AlbumID=?', [AlbumID]).fetchone()
         if album:
+            ArtistID = album['ArtistID']
             myDB.action('DELETE from have WHERE ArtistName=? AND AlbumTitle=?', [album['ArtistName'], album['AlbumTitle']])
 
         myDB.action('DELETE from albums WHERE AlbumID=?', [AlbumID])
@@ -398,9 +400,10 @@ class WebInterface(object):
     deleteAlbum.exposed = True
 
     def switchAlbum(self, AlbumID, ReleaseID):
-        '''
-        Take the values from allalbums/alltracks (based on the ReleaseID) and swap it into the album & track tables
-        '''
+        """
+        Take the values from allalbums/alltracks (based on the ReleaseID) and
+        swap it into the album & track tables
+        """
         from headphones import albumswitcher
         albumswitcher.switch(AlbumID, ReleaseID)
         raise cherrypy.HTTPRedirect("albumPage?AlbumID=%s" % AlbumID)
@@ -674,8 +677,9 @@ class WebInterface(object):
     def importItunes(self, path):
         headphones.CONFIG.PATH_TO_XML = path
         headphones.CONFIG.write()
-        threading.Thread(target=importer.itunesImport, args=[path]).start()
-        time.sleep(10)
+        thread = threading.Thread(target=importer.itunesImport, args=[path])
+        thread.start()
+        thread.join(10)
         raise cherrypy.HTTPRedirect("home")
     importItunes.exposed = True
 
