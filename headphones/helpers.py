@@ -13,17 +13,19 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import re
-import time
-import shutil
-import datetime
-import headphones
-import unicodedata
-import sys
+from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 
 from operator import itemgetter
-from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
+
+import unicodedata
+import headphones
+import datetime
+import fnmatch
+import shutil
+import time
+import sys
+import re
+import os
 
 # Modified from https://github.com/Verrus/beets-plugin-featInTitle
 RE_FEATURING = re.compile(r"[fF]t\.|[fF]eaturing|[fF]eat\.|\b[wW]ith\b|&|vs\.")
@@ -330,6 +332,20 @@ def expand_subfolders(f):
     return media_folders
 
 
+def path_match_patterns(path, patterns):
+    """
+    Check if a path matches one or more patterns. The whole path will be
+    matched be matched against the patterns.
+    """
+
+    for pattern in patterns:
+        if fnmatch.fnmatch(path, pattern):
+            return True
+
+    # No match
+    return False
+
+
 def extract_data(s):
 
     s = s.replace('_', ' ')
@@ -474,8 +490,8 @@ def get_downloaded_track_list(albumpath):
 
 def preserve_torrent_direcory(albumpath):
     """
-     Copy torrent directory to headphones-modified to keep files for seeding.
-     """
+    Copy torrent directory to headphones-modified to keep files for seeding.
+    """
     from headphones import logger
     new_folder = os.path.join(albumpath, 'headphones-modified'.encode(headphones.SYS_ENCODING, 'replace'))
     logger.info("Copying files to 'headphones-modified' subfolder to preserve downloaded files for seeding")

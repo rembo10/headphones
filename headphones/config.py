@@ -91,6 +91,7 @@ _CONFIG_DEFINITIONS = {
     'HTTP_ROOT': (str, 'General', '/'),
     'HTTP_USERNAME': (str, 'General', ''),
     'IGNORED_WORDS': (str, 'General', ''),
+    'IGNORED_FOLDERS': (list, 'Advanced', ''),
     'INCLUDE_EXTRAS': (int, 'General', 0),
     'INTERFACE': (str, 'General', 'default'),
     'JOURNAL_MODE': (str, 'Advanced', 'wal'),
