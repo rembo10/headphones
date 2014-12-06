@@ -128,7 +128,8 @@ def read_torrent_name(torrent_file, default_name=None):
 
 def calculate_torrent_hash(link, data=None):
     """
-    Calculate the torrent hash from a magnet link or data.
+    Calculate the torrent hash from a magnet link or data. Raises a ValueError
+    when it cannot create a torrent hash given the input data.
     """
 
     if link.startswith("magnet:"):
@@ -142,7 +143,7 @@ def calculate_torrent_hash(link, data=None):
         raise ValueError("Cannot calculate torrent hash without magnet link " \
             "or data")
 
-    return torrent_hash
+    return torrent_hash.upper()
 
 
 def get_seed_ratio(provider):
