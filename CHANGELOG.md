@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.5.2
+Released xx december 2014
+
+Highlight:
+* Added: advanced option to ignore certain folders (#2037)
+* Fixed: magnet to torrent conversion (#1926)
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.1...v0.5.2).
+
 ## v0.5.1
 Released 13 November 2014
 
