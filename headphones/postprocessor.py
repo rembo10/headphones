@@ -1078,10 +1078,22 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                     else:
                         folders.append(path_to_folder)
 
+    # Scan for ignored folders. A copy of the list is taken because the original
+    # list is modified and list comprehensions don't work because of logging.
+    patterns = headphones.CONFIG.IGNORED_FOLDERS
+    ignored = 0
+
+    for folder in folders[:]:
+        if helpers.path_match_patterns(folder, patterns):
+            logger.debug("Folder ignored by pattern: %s", folder)
+            folders.remove(folder)
+            ignored += 1
+
     # Log number of folders
     if folders:
-        logger.info('Found %i folders to process.', len(folders))
         logger.debug('Expanded post processing folders: %s', folders)
+        logger.info('Found %d folders to process (%d ignored).',
+            len(folders), ignored)
     else:
         logger.info('Found no folders to process. Aborting.')
         return

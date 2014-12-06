@@ -79,12 +79,16 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None, cron=Fal
     latest_subdirectory = []
 
     for r, d, f in helpers.walk_directory(dir):
-        # Need to abuse slicing to get a copy of the list, doing it directly
-        # will skip the element after a deleted one using a list comprehension
-        # will not work correctly for nested subdirectories (os.walk keeps its
-        # original list)
+        # Scan for ignored folders. A copy of the list is taken because the
+        # original list is modified and list comprehensions don't work because
+        # of logging.
+        patterns = headphones.CONFIG.IGNORED_FOLDERS
+
         for directory in d[:]:
-            if directory.startswith("."):
+            full_path = os.path.join(r, directory)
+
+            if helpers.path_match_patterns(full_path, patterns):
+                logger.debug("Folder ignored by pattern: %s", full_path)
                 d.remove(directory)
 
         for files in f:
