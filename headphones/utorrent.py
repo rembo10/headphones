@@ -215,7 +215,7 @@ def dirTorrent(hash, cacheid=None, return_name=None):
     cacheid = torrentList['torrentc']
 
     for torrent in torrents:
-        if torrent[0].lower() == hash:
+        if torrent[0].upper() == hash:
             if not return_name:
                 return torrent[26], cacheid
             else:
