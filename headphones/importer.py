@@ -600,6 +600,17 @@ def addReleaseById(rid, rgid=None):
             newValueDict['IncludeExtras'] = 1
             newValueDict['Extras'] = headphones.CONFIG.EXTRAS
 
+        if 'title' in release_dict:
+            newValueDict['LatestAlbum'] = release_dict['title']
+        elif 'rg_title' in release_dict:
+            newValueDict['LatestAlbum'] = release_dict['rg_title']
+
+        if 'date' in release_dict:
+            newValueDict['ReleaseDate'] = release_dict['date']
+
+        if rgid:
+            newValueDict['AlbumID'] = rgid
+
         myDB.upsert("artists", newValueDict, controlValueDict)
 
     elif not artist_exists and not release_dict:
