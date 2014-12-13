@@ -1033,6 +1033,8 @@ class WebInterface(object):
             "lossless_bitrate_to": headphones.CONFIG.LOSSLESS_BITRATE_TO,
             "freeze_db": checked(headphones.CONFIG.FREEZE_DB),
             "cue_split": checked(headphones.CONFIG.CUE_SPLIT),
+            "cue_split_flac_path": headphones.CONFIG.CUE_SPLIT_FLAC_PATH,
+            "cue_split_shntool_path": headphones.CONFIG.CUE_SPLIT_SHNTOOL_PATH,
             "move_files": checked(headphones.CONFIG.MOVE_FILES),
             "rename_files": checked(headphones.CONFIG.RENAME_FILES),
             "correct_metadata": checked(headphones.CONFIG.CORRECT_METADATA),
