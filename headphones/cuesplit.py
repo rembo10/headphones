@@ -72,11 +72,13 @@ CUE_META = None
 
 
 def check_splitter(command):
-    '''Check xld or shntools installed'''
+    '''Check xld or shntool installed'''
     try:
         env = os.environ.copy()
         if 'xld' in command:
             env['PATH'] += os.pathsep + '/Applications'
+        elif headphones.CONFIG.CUE_SPLIT_FLAC_PATH:
+            command = os.path.join(headphones.CONFIG.CUE_SPLIT_SHNTOOL_PATH, 'shntool')
         devnull = open(os.devnull)
         subprocess.Popen([command], stdout=devnull, stderr=devnull, env=env).communicate()
     except OSError as e:
@@ -103,6 +105,8 @@ def split_baby(split_file, split_cmd):
     env = os.environ.copy()
     if 'xld' in split_cmd:
         env['PATH'] += os.pathsep + '/Applications'
+    elif headphones.CONFIG.CUE_SPLIT_FLAC_PATH:
+        env['PATH'] += os.pathsep + headphones.CONFIG.CUE_SPLIT_FLAC_PATH
 
     process = subprocess.Popen(split_cmd, startupinfo=startupinfo,
 
@@ -588,9 +592,9 @@ def split(albumpath):
             splitter = 'shntool'
 
     if splitter == 'shntool' and not check_splitter(splitter):
-            raise ValueError('Command not found, ensure shntools with FLAC or xld (OS X) installed')
+            raise ValueError('Command not found, ensure shntool with FLAC or xld (OS X) installed')
 
-    # Determine if file can be split (only flac allowed for shntools)
+    # Determine if file can be split (only flac allowed for shntool)
     if 'xld' in splitter and wave.name_ext not in WAVE_FILE_TYPE_BY_EXTENSION.keys() or \
             wave.type not in SHNTOOL_COMPATIBLE:
         raise ValueError('Cannot split, audio file has unsupported extension')
@@ -627,7 +631,11 @@ def split(albumpath):
         with open(SPLIT_FILE_NAME, mode='w') as split_file:
             split_file.write(cue.breakpoints())
 
-        cmd = ['shntool']
+        if headphones.CONFIG.CUE_SPLIT_SHNTOOL_PATH:
+            cmd = [os.path.join(headphones.CONFIG.CUE_SPLIT_SHNTOOL_PATH, 'shntool')]
+        else:
+            cmd = ['shntool']
+
         cmd.extend(['split'])
         cmd.extend(['-f'])
         cmd.extend([SPLIT_FILE_NAME])

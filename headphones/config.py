@@ -42,6 +42,8 @@ _CONFIG_DEFINITIONS = {
     'CONFIG_VERSION': (str, 'General', '0'),
     'CORRECT_METADATA': (int, 'General', 0),
     'CUE_SPLIT': (int, 'General', 1),
+    'CUE_SPLIT_FLAC_PATH': (str, 'General', ''),
+    'CUE_SPLIT_SHNTOOL_PATH': (str, 'General', ''),
     'CUSTOMHOST': (str, 'General', 'localhost'),
     'CUSTOMPORT': (int, 'General', 5000),
     'CUSTOMSLEEP': (int, 'General', 1),
