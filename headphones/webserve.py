@@ -23,15 +23,17 @@ from mako import exceptions
 
 from operator import itemgetter
 
-import cherrypy
 import headphones
-import json
-import os
-import sys
-import time
-import urllib
-import urllib2
 import threading
+import cherrypy
+import urllib2
+import hashlib
+import random
+import urllib
+import json
+import time
+import sys
+import os
 
 try:
     # pylint:disable=E0611
@@ -59,16 +61,17 @@ def serve_template(templatename, **kwargs):
 
 class WebInterface(object):
 
+    @cherrypy.expose
     def index(self):
         raise cherrypy.HTTPRedirect("home")
-    index.exposed = True
 
+    @cherrypy.expose
     def home(self):
         myDB = db.DBConnection()
         artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
         return serve_template(templatename="index.html", title="Home", artists=artists)
-    home.exposed = True
 
+    @cherrypy.expose
     def artistPage(self, ArtistID):
         myDB = db.DBConnection()
         artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
@@ -105,8 +108,8 @@ class WebInterface(object):
             i += 1
 
         return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums, extras=extras_dict)
-    artistPage.exposed = True
 
+    @cherrypy.expose
     def albumPage(self, AlbumID):
         myDB = db.DBConnection()
         album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
@@ -135,8 +138,8 @@ class WebInterface(object):
         else:
             title = title + album['AlbumTitle']
         return serve_template(templatename="album.html", title=title, album=album, tracks=tracks, description=description)
-    albumPage.exposed = True
 
+    @cherrypy.expose
     def search(self, name, type):
         if len(name) == 0:
             raise cherrypy.HTTPRedirect("home")
@@ -145,15 +148,15 @@ class WebInterface(object):
         else:
             searchresults = mb.findRelease(name, limit=100)
         return serve_template(templatename="searchresults.html", title='Search Results for: "' + name + '"', searchresults=searchresults, name=name, type=type)
-    search.exposed = True
 
+    @cherrypy.expose
     def addArtist(self, artistid):
         thread = threading.Thread(target=importer.addArtisttoDB, args=[artistid])
         thread.start()
         thread.join(1)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % artistid)
-    addArtist.exposed = True
 
+    @cherrypy.expose
     def getExtras(self, ArtistID, newstyle=False, **kwargs):
         # if calling this function without the newstyle, they're using the old format
         # which doesn't separate extras, so we'll grab all of them
@@ -179,8 +182,8 @@ class WebInterface(object):
         thread.start()
         thread.join(1)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
-    getExtras.exposed = True
 
+    @cherrypy.expose
     def removeExtras(self, ArtistID, ArtistName):
         myDB = db.DBConnection()
         controlValueDict = {'ArtistID': ArtistID}
@@ -198,8 +201,8 @@ class WebInterface(object):
             c.remove_from_cache(AlbumID=album['AlbumID'])
         importer.finalize_update(ArtistID, ArtistName)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
-    removeExtras.exposed = True
 
+    @cherrypy.expose
     def pauseArtist(self, ArtistID):
         logger.info(u"Pausing artist: " + ArtistID)
         myDB = db.DBConnection()
@@ -207,8 +210,8 @@ class WebInterface(object):
         newValueDict = {'Status': 'Paused'}
         myDB.upsert("artists", newValueDict, controlValueDict)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
-    pauseArtist.exposed = True
 
+    @cherrypy.expose
     def resumeArtist(self, ArtistID):
         logger.info(u"Resuming artist: " + ArtistID)
         myDB = db.DBConnection()
@@ -216,7 +219,6 @@ class WebInterface(object):
         newValueDict = {'Status': 'Active'}
         myDB.upsert("artists", newValueDict, controlValueDict)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
-    resumeArtist.exposed = True
 
     def removeArtist(self, ArtistID):
         logger.info(u"Deleting all traces of artist: " + ArtistID)
@@ -247,26 +249,27 @@ class WebInterface(object):
         myDB.action('DELETE from descriptions WHERE ArtistID=?', [ArtistID])
         myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
 
+    @cherrypy.expose
     def deleteArtist(self, ArtistID):
         self.removeArtist(ArtistID)
         raise cherrypy.HTTPRedirect("home")
-    deleteArtist.exposed = True
 
+    @cherrypy.expose
     def deleteEmptyArtists(self):
         logger.info(u"Deleting all empty artists")
         myDB = db.DBConnection()
         emptyArtistIDs = [row['ArtistID'] for row in myDB.select("SELECT ArtistID FROM artists WHERE LatestAlbum IS NULL")]
         for ArtistID in emptyArtistIDs:
             self.removeArtist(ArtistID)
-    deleteEmptyArtists.exposed = True
 
+    @cherrypy.expose
     def refreshArtist(self, ArtistID):
         thread = threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, False, True])
         thread.start()
         thread.join(1)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
-    refreshArtist.exposed = True
 
+    @cherrypy.expose
     def markAlbums(self, ArtistID=None, action=None, **args):
         myDB = db.DBConnection()
         if action == 'WantedNew' or action == 'WantedLossless':
@@ -293,8 +296,8 @@ class WebInterface(object):
             raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
         else:
             raise cherrypy.HTTPRedirect("upcoming")
-    markAlbums.exposed = True
 
+    @cherrypy.expose
     def addArtists(self, action=None, **args):
         if action == "add":
             threading.Thread(target=importer.artistlist_to_mbids, args=[args, True]).start()
@@ -305,8 +308,8 @@ class WebInterface(object):
                 myDB.action('UPDATE have SET Matched="Ignored" WHERE ArtistName=?', [artist.decode(headphones.SYS_ENCODING, 'replace')])
                 logger.info("Artist %s removed from new artist list and set to ignored" % artist)
         raise cherrypy.HTTPRedirect("home")
-    addArtists.exposed = True
 
+    @cherrypy.expose
     def queueAlbum(self, AlbumID, ArtistID=None, new=False, redirect=None, lossless=False):
         logger.info(u"Marking album: " + AlbumID + " as wanted...")
         myDB = db.DBConnection()
@@ -321,8 +324,8 @@ class WebInterface(object):
         if ArtistID:
             redirect = "artistPage?ArtistID=%s" % ArtistID
         raise cherrypy.HTTPRedirect(redirect)
-    queueAlbum.exposed = True
 
+    @cherrypy.expose
     def choose_specific_download(self, AlbumID):
         results = searcher.searchforalbum(AlbumID, choose_specific_download=True)
 
@@ -342,8 +345,7 @@ class WebInterface(object):
         cherrypy.response.headers['Content-type'] = 'application/json'
         return s
 
-    choose_specific_download.exposed = True
-
+    @cherrypy.expose
     def download_specific_release(self, AlbumID, title, size, url, provider, kind, **kwargs):
         # Handle situations where the torrent url contains arguments that are parsed
         if kwargs:
@@ -361,8 +363,7 @@ class WebInterface(object):
           album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
           searcher.send_to_downloader(data, bestqual, album)
 
-    download_specific_release.exposed = True
-
+    @cherrypy.expose
     def unqueueAlbum(self, AlbumID, ArtistID):
         logger.info(u"Marking album: " + AlbumID + "as skipped...")
         myDB = db.DBConnection()
@@ -370,8 +371,8 @@ class WebInterface(object):
         newValueDict = {'Status': 'Skipped'}
         myDB.upsert("albums", newValueDict, controlValueDict)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
-    unqueueAlbum.exposed = True
 
+    @cherrypy.expose
     def deleteAlbum(self, AlbumID, ArtistID=None):
         logger.info(u"Deleting all traces of album: " + AlbumID)
         myDB = db.DBConnection()
@@ -397,8 +398,8 @@ class WebInterface(object):
             raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
         else:
             raise cherrypy.HTTPRedirect("home")
-    deleteAlbum.exposed = True
 
+    @cherrypy.expose
     def switchAlbum(self, AlbumID, ReleaseID):
         """
         Take the values from allalbums/alltracks (based on the ReleaseID) and
@@ -407,8 +408,8 @@ class WebInterface(object):
         from headphones import albumswitcher
         albumswitcher.switch(AlbumID, ReleaseID)
         raise cherrypy.HTTPRedirect("albumPage?AlbumID=%s" % AlbumID)
-    switchAlbum.exposed = True
 
+    @cherrypy.expose
     def editSearchTerm(self, AlbumID, SearchTerm):
         logger.info(u"Updating search term for albumid: " + AlbumID)
         myDB = db.DBConnection()
@@ -416,27 +417,27 @@ class WebInterface(object):
         newValueDict = {'SearchTerm': SearchTerm}
         myDB.upsert("albums", newValueDict, controlValueDict)
         raise cherrypy.HTTPRedirect("albumPage?AlbumID=%s" % AlbumID)
-    editSearchTerm.exposed = True
 
+    @cherrypy.expose
     def upcoming(self):
         myDB = db.DBConnection()
         upcoming = myDB.select("SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate ASC")
         wanted = myDB.select("SELECT * from albums WHERE Status='Wanted'")
         return serve_template(templatename="upcoming.html", title="Upcoming", upcoming=upcoming, wanted=wanted)
-    upcoming.exposed = True
 
+    @cherrypy.expose
     def manage(self):
         myDB = db.DBConnection()
         emptyArtists = myDB.select("SELECT * FROM artists WHERE LatestAlbum IS NULL")
         return serve_template(templatename="manage.html", title="Manage", emptyArtists=emptyArtists)
-    manage.exposed = True
 
+    @cherrypy.expose
     def manageArtists(self):
         myDB = db.DBConnection()
         artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
         return serve_template(templatename="manageartists.html", title="Manage Artists", artists=artists)
-    manageArtists.exposed = True
 
+    @cherrypy.expose
     def manageAlbums(self, Status=None):
         myDB = db.DBConnection()
         if Status == "Upcoming":
@@ -446,14 +447,14 @@ class WebInterface(object):
         else:
             albums = myDB.select('SELECT * from albums')
         return serve_template(templatename="managealbums.html", title="Manage Albums", albums=albums)
-    manageAlbums.exposed = True
 
+    @cherrypy.expose
     def manageNew(self):
         myDB = db.DBConnection()
         newartists = myDB.select('SELECT * from newartists')
         return serve_template(templatename="managenew.html", title="Manage New Artists", newartists=newartists)
-    manageNew.exposed = True
 
+    @cherrypy.expose
     def manageUnmatched(self):
         myDB = db.DBConnection()
         have_album_dictionary = []
@@ -479,8 +480,8 @@ class WebInterface(object):
         unmatchedalbums = [d for d in have_album_dictionary if (cleanName(d['ArtistName']).lower(), cleanName(d['AlbumTitle']).lower()) not in check]
 
         return serve_template(templatename="manageunmatched.html", title="Manage Unmatched Items", unmatchedalbums=unmatchedalbums)
-    manageUnmatched.exposed = True
 
+    @cherrypy.expose
     def markUnmatched(self, action=None, existing_artist=None, existing_album=None, new_artist=None, new_album=None):
         myDB = db.DBConnection()
 
@@ -566,8 +567,7 @@ class WebInterface(object):
             else:
                 logger.info("Artist %s / Album %s already named appropriately; nothing to modify" % (existing_artist, existing_album))
 
-    markUnmatched.exposed = True
-
+    @cherrypy.expose
     def manageManual(self):
         myDB = db.DBConnection()
         manual_albums = []
@@ -586,8 +586,8 @@ class WebInterface(object):
         manual_albums_sorted = sorted(manual_albums, key=itemgetter('ArtistName', 'AlbumTitle'))
 
         return serve_template(templatename="managemanual.html", title="Manage Manual Items", manualalbums=manual_albums_sorted)
-    manageManual.exposed = True
 
+    @cherrypy.expose
     def markManual(self, action=None, existing_artist=None, existing_album=None):
         myDB = db.DBConnection()
         if action == "unignoreArtist":
@@ -638,8 +638,7 @@ class WebInterface(object):
                 librarysync.update_album_status(album_id)
             logger.info("Album: %s successfully restored to unmatched list" % album)
 
-    markManual.exposed = True
-
+    @cherrypy.expose
     def markArtists(self, action=None, **args):
         myDB = db.DBConnection()
         artistsToAdd = []
@@ -660,20 +659,20 @@ class WebInterface(object):
             logger.debug("Refreshing artists: %s" % artistsToAdd)
             threading.Thread(target=importer.addArtistIDListToDB, args=[artistsToAdd]).start()
         raise cherrypy.HTTPRedirect("home")
-    markArtists.exposed = True
 
+    @cherrypy.expose
     def importLastFM(self, username):
         headphones.CONFIG.LASTFM_USERNAME = username
         headphones.CONFIG.write()
         threading.Thread(target=lastfm.getArtists).start()
         raise cherrypy.HTTPRedirect("home")
-    importLastFM.exposed = True
 
+    @cherrypy.expose
     def importLastFMTag(self, tag, limit):
         threading.Thread(target=lastfm.getTagTopArtists, args=(tag, limit)).start()
         raise cherrypy.HTTPRedirect("home")
-    importLastFMTag.exposed = True
 
+    @cherrypy.expose
     def importItunes(self, path):
         headphones.CONFIG.PATH_TO_XML = path
         headphones.CONFIG.write()
@@ -681,8 +680,8 @@ class WebInterface(object):
         thread.start()
         thread.join(10)
         raise cherrypy.HTTPRedirect("home")
-    importItunes.exposed = True
 
+    @cherrypy.expose
     def musicScan(self, path, scan=0, redirect=None, autoadd=0, libraryscan=0):
         headphones.CONFIG.LIBRARYSCAN = libraryscan
         headphones.CONFIG.AUTO_ADD_ARTISTS = autoadd
@@ -697,54 +696,54 @@ class WebInterface(object):
             raise cherrypy.HTTPRedirect(redirect)
         else:
             raise cherrypy.HTTPRedirect("home")
-    musicScan.exposed = True
 
+    @cherrypy.expose
     def forceUpdate(self):
         from headphones import updater
         threading.Thread(target=updater.dbUpdate, args=[False]).start()
         raise cherrypy.HTTPRedirect("home")
-    forceUpdate.exposed = True
 
+    @cherrypy.expose
     def forceFullUpdate(self):
         from headphones import updater
         threading.Thread(target=updater.dbUpdate, args=[True]).start()
         raise cherrypy.HTTPRedirect("home")
-    forceFullUpdate.exposed = True
 
+    @cherrypy.expose
     def forceSearch(self):
         from headphones import searcher
         threading.Thread(target=searcher.searchforalbum).start()
         raise cherrypy.HTTPRedirect("home")
-    forceSearch.exposed = True
 
+    @cherrypy.expose
     def forcePostProcess(self, dir=None, album_dir=None):
         from headphones import postprocessor
         threading.Thread(target=postprocessor.forcePostProcess, kwargs={'dir': dir, 'album_dir': album_dir}).start()
         raise cherrypy.HTTPRedirect("home")
-    forcePostProcess.exposed = True
 
+    @cherrypy.expose
     def checkGithub(self):
         from headphones import versioncheck
         versioncheck.checkGithub()
         raise cherrypy.HTTPRedirect("home")
-    checkGithub.exposed = True
 
+    @cherrypy.expose
     def history(self):
         myDB = db.DBConnection()
         history = myDB.select('''SELECT * from snatched WHERE Status NOT LIKE "Seed%" order by DateAdded DESC''')
         return serve_template(templatename="history.html", title="History", history=history)
-    history.exposed = True
 
+    @cherrypy.expose
     def logs(self):
         return serve_template(templatename="logs.html", title="Log", lineList=headphones.LOG_LIST)
-    logs.exposed = True
 
+    @cherrypy.expose
     def clearLogs(self):
         headphones.LOG_LIST = []
         logger.info("Web logs cleared")
         raise cherrypy.HTTPRedirect("logs")
-    clearLogs.exposed = True
 
+    @cherrypy.expose
     def toggleVerbose(self):
         headphones.VERBOSE = not headphones.VERBOSE
         logger.initLogger(console=not headphones.QUIET,
@@ -752,10 +751,9 @@ class WebInterface(object):
         logger.info("Verbose toggled, set to %s", headphones.VERBOSE)
         logger.debug("If you read this message, debug logging is available")
         raise cherrypy.HTTPRedirect("logs")
-    toggleVerbose.exposed = True
 
+    @cherrypy.expose
     def getLog(self, iDisplayStart=0, iDisplayLength=100, iSortCol_0=0, sSortDir_0="desc", sSearch="", **kwargs):
-
         iDisplayStart = int(iDisplayStart)
         iDisplayLength = int(iDisplayLength)
 
@@ -780,8 +778,8 @@ class WebInterface(object):
             'iTotalRecords': len(headphones.LOG_LIST),
             'aaData': rows,
         })
-    getLog.exposed = True
 
+    @cherrypy.expose
     def getArtists_json(self, iDisplayStart=0, iDisplayLength=100, sSearch="", iSortCol_0='0', sSortDir_0='asc', **kwargs):
         iDisplayStart = int(iDisplayStart)
         iDisplayLength = int(iDisplayLength)
@@ -852,8 +850,8 @@ class WebInterface(object):
         s = json.dumps(dict)
         cherrypy.response.headers['Content-type'] = 'application/json'
         return s
-    getArtists_json.exposed = True
 
+    @cherrypy.expose
     def getAlbumsByArtist_json(self, artist=None):
         myDB = db.DBConnection()
         album_json = {}
@@ -866,7 +864,6 @@ class WebInterface(object):
 
         cherrypy.response.headers['Content-type'] = 'application/json'
         return json_albums
-    getAlbumsByArtist_json.exposed = True
 
     def getArtistjson(self, ArtistID, **kwargs):
         myDB = db.DBConnection()
@@ -876,8 +873,8 @@ class WebInterface(object):
                                     'Status': artist['Status']
                                  })
         return artist_json
-    getArtistjson.exposed = True
 
+    @cherrypy.expose
     def getAlbumjson(self, AlbumID, **kwargs):
         myDB = db.DBConnection()
         album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
@@ -887,8 +884,8 @@ class WebInterface(object):
                                    'Status': album['Status']
         })
         return album_json
-    getAlbumjson.exposed = True
 
+    @cherrypy.expose
     def clearhistory(self, type=None, date_added=None, title=None):
         myDB = db.DBConnection()
         if type:
@@ -902,19 +899,14 @@ class WebInterface(object):
             logger.info(u"Deleting '%s' from history" % title)
             myDB.action('DELETE from snatched WHERE Status NOT LIKE "Seed%" AND Title=? AND DateAdded=?', [title, date_added])
         raise cherrypy.HTTPRedirect("history")
-    clearhistory.exposed = True
 
+    @cherrypy.expose
     def generateAPI(self):
-
-        import hashlib
-        import random
-
         apikey = hashlib.sha224(str(random.getrandbits(256))).hexdigest()[0:32]
         logger.info("New API generated")
         return apikey
 
-    generateAPI.exposed = True
-
+    @cherrypy.expose
     def forceScan(self, keepmatched=None):
         myDB = db.DBConnection()
         #########################################
@@ -933,10 +925,9 @@ class WebInterface(object):
         except Exception as e:
             logger.error('Unable to complete the scan: %s' % e)
         raise cherrypy.HTTPRedirect("home")
-    forceScan.exposed = True
 
+    @cherrypy.expose
     def config(self):
-
         interface_dir = os.path.join(headphones.PROG_DIR, 'data/interfaces/')
         interface_list = [name for name in os.listdir(interface_dir) if os.path.isdir(os.path.join(interface_dir, name))]
 
@@ -1174,8 +1165,8 @@ class WebInterface(object):
         config["extras"] = extras_dict
 
         return serve_template(templatename="config.html", title="Settings", config=config)
-    config.exposed = True
 
+    @cherrypy.expose
     def configUpdate(self, **kwargs):
         # Handle the variable config options. Note - keys with False values aren't getting passed
 
@@ -1263,61 +1254,54 @@ class WebInterface(object):
 
         raise cherrypy.HTTPRedirect("config")
 
-    configUpdate.exposed = True
-
+    @cherrypy.expose
     def do_state_change(self, signal, title, timer):
         headphones.SIGNAL = signal
         message = title + '...'
         return serve_template(templatename="shutdown.html", title=title,
                               message=message, timer=timer)
 
+    @cherrypy.expose
     def shutdown(self):
         return self.do_state_change('shutdown', 'Shutting Down', 15)
-    shutdown.exposed = True
 
+    @cherrypy.expose
     def restart(self):
         return self.do_state_change('restart', 'Restarting', 30)
-    restart.exposed = True
 
+    @cherrypy.expose
     def update(self):
         return self.do_state_change('update', 'Updating', 120)
-    update.exposed = True
 
+    @cherrypy.expose
     def extras(self):
         myDB = db.DBConnection()
         cloudlist = myDB.select('SELECT * from lastfmcloud')
         return serve_template(templatename="extras.html", title="Extras", cloudlist=cloudlist)
-    extras.exposed = True
 
+    @cherrypy.expose
     def addReleaseById(self, rid, rgid=None):
         threading.Thread(target=importer.addReleaseById, args=[rid, rgid]).start()
         if rgid:
             raise cherrypy.HTTPRedirect("albumPage?AlbumID=%s" % rgid)
         else:
             raise cherrypy.HTTPRedirect("home")
-    addReleaseById.exposed = True
 
+    @cherrypy.expose
     def updateCloud(self):
-
         lastfm.getSimilar()
         raise cherrypy.HTTPRedirect("extras")
 
-    updateCloud.exposed = True
-
+    @cherrypy.expose
     def api(self, *args, **kwargs):
-
         from headphones.api import Api
 
         a = Api()
-
         a.checkParams(*args, **kwargs)
 
-        data = a.fetchData()
+        return a.fetchData()
 
-        return data
-
-    api.exposed = True
-
+    @cherrypy.expose
     def getInfo(self, ArtistID=None, AlbumID=None):
 
         from headphones import cache
@@ -1325,25 +1309,22 @@ class WebInterface(object):
 
         return json.dumps(info_dict)
 
-    getInfo.exposed = True
-
+    @cherrypy.expose
     def getArtwork(self, ArtistID=None, AlbumID=None):
 
         from headphones import cache
         return cache.getArtwork(ArtistID, AlbumID)
 
-    getArtwork.exposed = True
-
+    @cherrypy.expose
     def getThumb(self, ArtistID=None, AlbumID=None):
 
         from headphones import cache
         return cache.getThumb(ArtistID, AlbumID)
 
-    getThumb.exposed = True
-
-    # If you just want to get the last.fm image links for an album, make sure to pass a releaseid and not a releasegroupid
+    # If you just want to get the last.fm image links for an album, make sure
+    # to pass a releaseid and not a releasegroupid
+    @cherrypy.expose
     def getImageLinks(self, ArtistID=None, AlbumID=None):
-
         from headphones import cache
         image_dict = cache.getImageLinks(ArtistID, AlbumID)
 
@@ -1360,14 +1341,13 @@ class WebInterface(object):
 
         return json.dumps(image_dict)
 
-    getImageLinks.exposed = True
-
+    @cherrypy.expose
     def twitterStep1(self):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
         tweet = notifiers.TwitterNotifier()
         return tweet._get_authorization()
-    twitterStep1.exposed = True
 
+    @cherrypy.expose
     def twitterStep2(self, key):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
         tweet = notifiers.TwitterNotifier()
@@ -1377,8 +1357,8 @@ class WebInterface(object):
             return "Key verification successful"
         else:
             return "Unable to verify key"
-    twitterStep2.exposed = True
 
+    @cherrypy.expose
     def testTwitter(self):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
         tweet = notifiers.TwitterNotifier()
@@ -1387,8 +1367,8 @@ class WebInterface(object):
             return "Tweet successful, check your twitter to make sure it worked"
         else:
             return "Error sending tweet"
-    testTwitter.exposed = True
 
+    @cherrypy.expose
     def osxnotifyregister(self, app):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
         from osxnotify import registerapp as osxnotify
@@ -1400,14 +1380,13 @@ class WebInterface(object):
         else:
             logger.warn(msg)
         return msg
-    osxnotifyregister.exposed = True
-
 
 class Artwork(object):
+    @cherrypy.expose
     def index(self):
         return "Artwork"
-    index.exposed = True
 
+    @cherrypy.expose
     def default(self, ArtistOrAlbum="", ID=None):
         from headphones import cache
         ArtistID = None
@@ -1432,16 +1411,15 @@ class Artwork(object):
             cherrypy.response.headers['Content-type'] = 'image/' + fileext
             cherrypy.response.headers['Cache-Control'] = 'max-age=31556926'
 
-        path = os.path.normpath(path)
-        f = open(path, 'rb')
-        return f.read()
-    default.exposed = True
+        with open(os.path.normpath(path), "rb") as fp:
+            return fp.read()
 
     class Thumbs(object):
+        @cherrypy.expose
         def index(self):
             return "Here be thumbs"
-        index.exposed = True
 
+        @cherrypy.expose
         def default(self, ArtistOrAlbum="", ID=None):
             from headphones import cache
             ArtistID = None
@@ -1466,12 +1444,8 @@ class Artwork(object):
                 cherrypy.response.headers['Content-type'] = 'image/' + fileext
                 cherrypy.response.headers['Cache-Control'] = 'max-age=31556926'
 
-            path = os.path.normpath(path)
-            f = open(path, 'rb')
-            return f.read()
-        default.exposed = True
+            with open(os.path.normpath(path), "rb") as fp:
+                return fp.read()
 
     thumbs = Thumbs()
-
-
 WebInterface.artwork = Artwork()
