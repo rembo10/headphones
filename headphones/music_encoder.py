@@ -14,12 +14,12 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import headphones
-import shutil
 import time
+import shutil
+import subprocess
+import headphones
 import multiprocessing
 
-import subprocess
 from headphones import logger
 from beets.mediafile import MediaFile
 

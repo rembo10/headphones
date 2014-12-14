@@ -346,6 +346,30 @@ def path_match_patterns(path, patterns):
     return False
 
 
+def path_filter_patterns(paths, patterns, root=None):
+    """
+    Scan for ignored paths based on glob patterns. Note that the whole path
+    will be matched, therefore paths should only contain the relative paths.
+
+    The root is optional, and only used for producing meaningful debug info.
+    """
+
+    from headphones import logger
+
+    ignored = 0
+
+    for path in paths[:]:
+        if path_match_patterns(path, patterns):
+            logger.debug("Path ignored by pattern: %s",
+                os.path.join(root or "", path))
+
+            ignored += 1
+            paths.remove(path)
+
+    # Return number of ignored paths
+    return ignored
+
+
 def extract_data(s):
 
     s = s.replace('_', ' ')

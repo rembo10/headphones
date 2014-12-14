@@ -1043,11 +1043,13 @@ def renameUnprocessedFolder(albumpath):
 
 def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
 
+    ignored = 0
+
     if album_dir:
         folders = [album_dir.encode(headphones.SYS_ENCODING, 'replace')]
-
     else:
         download_dirs = []
+
         if dir:
             download_dirs.append(dir.encode(headphones.SYS_ENCODING, 'replace'))
         if headphones.CONFIG.DOWNLOAD_DIR and not dir:
@@ -1066,7 +1068,13 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
             if not os.path.isdir(download_dir):
                 logger.warn('Directory %s does not exist. Skipping', download_dir)
                 continue
-            for folder in os.listdir(download_dir):
+
+            # Scan for subfolders
+            subfolders = os.listdir(download_dir)
+            ignored += helpers.path_filter_patterns(subfolders,
+                headphones.CONFIG.IGNORED_FOLDERS, root=download_dir)
+
+            for folder in subfolders:
                 path_to_folder = os.path.join(download_dir, folder)
 
                 if os.path.isdir(path_to_folder):
@@ -1076,17 +1084,6 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                         folders.extend(subfolders)
                     else:
                         folders.append(path_to_folder)
-
-    # Scan for ignored folders. A copy of the list is taken because the original
-    # list is modified and list comprehensions don't work because of logging.
-    patterns = headphones.CONFIG.IGNORED_FOLDERS
-    ignored = 0
-
-    for folder in folders[:]:
-        if helpers.path_match_patterns(folder, patterns):
-            logger.debug("Folder ignored by pattern: %s", folder)
-            folders.remove(folder)
-            ignored += 1
 
     # Log number of folders
     if folders:
