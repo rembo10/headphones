@@ -4,8 +4,11 @@
 Released xx december 2014
 
 Highlight:
-* Added: advanced option to ignore certain folders (#2037)
+* Added: advanced option to ignore certain folders by patterns. (#2037)
+* Added: advanced option to ignore certain files by patterns (library only)
+* Added: specify optional paths to CUE splitting tools (#1938)
 * Fixed: magnet to torrent conversion (#1926)
+* Improved: notify user of SSL-related warnings, instead of silently failing.
 
 The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.1...v0.5.2).
 
