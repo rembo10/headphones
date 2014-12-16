@@ -290,7 +290,7 @@ class LMS(object):
             return response['result']
         except:
             logger.warn('LMS returned error: %s' % response['error'])
-            return
+            return response['error']
 
     def update(self):
 
@@ -300,7 +300,7 @@ class LMS(object):
             logger.info('Sending library rescan command to LMS @ ' + host)
             request = self._sendjson(host)
 
-            if not request:
+            if request:
                 logger.warn('Error sending rescan request to LMS')
 
 
