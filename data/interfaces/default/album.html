@@ -13,7 +13,7 @@
 		<div id="subhead_menu">
 
 			<a id="menu_link_delete" href="deleteAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}"><i class="fa fa-trash-o"></i> Delete Album</a>
-			%if album['Status'] == 'Skipped':
+			%if album['Status'] == 'Skipped' or album['Status'] == 'Ignored':
 			<a id="menu_link_wanted" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true)" data-success="'${album['AlbumTitle']}' added to queue"><i class="fa fa-heart"></i> Mark Album as Wanted</a>
 			%elif album['Status'] == 'Wanted':
 			<a id="menu_link_check" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this));" data-success="Forced checking successful"><i class="fa fa-search"></i> Force Check</a>
@@ -89,9 +89,15 @@
 			<div id="albumImg">
 				<img height="200" alt="" class="albumArt" src="artwork/album/${album['AlbumID']}">
 			</div>
-			
-			<h1><a href="http://musicbrainz.org/release-group/${album['AlbumID']}">${album['AlbumTitle']}</a></h1>
-			<h2><a href="http://musicbrainz.org/artist/${album['ArtistID']}">${album['ArtistName']}</a></h2>
+
+            <h1 id="albumname">
+                <a href="http://musicbrainz.org/release-group/${album['AlbumID']}" id="albumnamelink">${album['AlbumTitle']}</a>
+            </h1>
+
+            <h2 id="artistname">
+                <a href="http://musicbrainz.org/artist/${album['ArtistID']}" id="artistnamelink">${album['ArtistName']}</a>
+            </h2>
+
 			<%
 				totalduration = myDB.action("SELECT SUM(TrackDuration) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
 				totaltracks = len(myDB.select("SELECT TrackTitle from tracks WHERE AlbumID=?", [album['AlbumID']]))
@@ -275,9 +281,58 @@
 		feedback.fadeIn();
 	}
 
+    var loadingMessage = false;
+    var spinner_active = false;
+    var loadingtext_active = false;
+    var refreshInterval;
+    var wasLoading = false;
+    var x = 0;
+
+    function checkAlbumStatus() {
+        $.getJSON("getAlbumjson?AlbumID=${album['AlbumID']}", function(data) {
+            if (data['Status'] == "Loading"){
+                wasLoading = true;
+                $('#albumnamelink').text(data["AlbumTitle"]);
+                $('#artistnamelink').text(data["ArtistName"]);
+                if (loadingMessage == false){
+                    $("#ajaxMsg").after( "<div id='ajaxMsg2' class='ajaxMsg'></div>" );
+                    showArtistMsg("Getting album information");
+                    loadingMessage = true;
+                }
+                if (spinner_active == false){
+                    $('#albumname').prepend('<i class="fa fa-refresh fa-spin" id="albumnamespinner"></i>')
+                    spinner_active = true;
+                }
+                if (loadingtext_active == false){
+                    $('#albumname').append('<h3 id="loadingtext"><i>(Album information is currently being loaded)</i></h3>')
+                    loadingtext_active = true;
+                }
+            }
+            else{
+                if (++x === 10) {
+                    clearInterval(refreshInterval);
+                }
+                var sts = $("#artistname").text();
+                if (wasLoading == true || sts == "Loading"){
+                    location.reload();
+                $('#albumnamespinner').remove()
+                $('#loadingtext').remove()
+                $('#ajaxMsg2').remove()
+                spinner_active = false
+                loadingtext_active = false
+                loadingMessage = false
+                }
+            }
+        });
+    }
+
 	$(document).ready(function()	{
 		getAlbumInfo();
 		initThisPage();
+        checkAlbumStatus();
+        refreshInterval = setInterval(function(){
+            checkAlbumStatus();
+        }, 3000);
 	});
 
 	</script>

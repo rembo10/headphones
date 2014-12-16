@@ -10,7 +10,7 @@ from HTMLParser import HTMLParser
 import sys
 import json
 import time
-import lib.requests as requests
+import requests as requests
 
 from .user import User
 from .artist import Artist
@@ -201,7 +201,7 @@ class GazelleAPI(object):
         Returns the inbox Mailbox for the logged in user
         """
         return Mailbox(self, 'inbox', page, sort)
-        
+
     def get_sentbox(self, page='1', sort='unread'):
         """
         Returns the sentbox Mailbox for the logged in user

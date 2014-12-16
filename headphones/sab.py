@@ -17,31 +17,31 @@
 ## Stolen from Sick-Beard's sab.py ##
 #####################################
 
-import urllib, httplib
-import datetime
-
+import MultipartPostHandler
 import headphones
-
-from lib import MultipartPostHandler
-import urllib2, cookielib
+import cookielib
+import urllib2
+import httplib
+import urllib
 import ast
 
 from headphones.common import USER_AGENT
 from headphones import logger
-from headphones import notifiers, helpers
+from headphones import helpers
+
 
 def sendNZB(nzb):
 
     params = {}
 
-    if headphones.SAB_USERNAME:
-        params['ma_username'] = headphones.SAB_USERNAME
-    if headphones.SAB_PASSWORD:
-        params['ma_password'] = headphones.SAB_PASSWORD
-    if headphones.SAB_APIKEY:
-        params['apikey'] = headphones.SAB_APIKEY
-    if headphones.SAB_CATEGORY:
-        params['cat'] = headphones.SAB_CATEGORY
+    if headphones.CONFIG.SAB_USERNAME:
+        params['ma_username'] = headphones.CONFIG.SAB_USERNAME
+    if headphones.CONFIG.SAB_PASSWORD:
+        params['ma_password'] = headphones.CONFIG.SAB_PASSWORD
+    if headphones.CONFIG.SAB_APIKEY:
+        params['apikey'] = headphones.CONFIG.SAB_APIKEY
+    if headphones.CONFIG.SAB_CATEGORY:
+        params['cat'] = headphones.CONFIG.SAB_CATEGORY
 
     # if it's a normal result we just pass SAB the URL
     if nzb.resultType == "nzb":
@@ -49,7 +49,7 @@ def sendNZB(nzb):
         if nzb.provider.getID() == 'newzbin':
             id = nzb.provider.getIDFromURL(nzb.url)
             if not id:
-                logger.info("Unable to send NZB to sab, can't find ID in URL "+str(nzb.url))
+                logger.info("Unable to send NZB to sab, can't find ID in URL " + str(nzb.url))
                 return False
             params['mode'] = 'addid'
             params['name'] = id
@@ -62,15 +62,15 @@ def sendNZB(nzb):
         # Sanitize the file a bit, since we can only use ascii chars with MultiPartPostHandler
         nzbdata = helpers.latinToAscii(nzb.extraInfo[0])
         params['mode'] = 'addfile'
-        multiPartParams = {"nzbfile": (nzb.name+".nzb", nzbdata)}
+        multiPartParams = {"nzbfile": (helpers.latinToAscii(nzb.name) + ".nzb", nzbdata)}
 
-    if not headphones.SAB_HOST.startswith('http'):
-        headphones.SAB_HOST = 'http://' + headphones.SAB_HOST
+    if not headphones.CONFIG.SAB_HOST.startswith('http'):
+        headphones.CONFIG.SAB_HOST = 'http://' + headphones.CONFIG.SAB_HOST
 
-    if headphones.SAB_HOST.endswith('/'):
-        headphones.SAB_HOST = headphones.SAB_HOST[0:len(headphones.SAB_HOST)-1]
-    
-    url = headphones.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
+    if headphones.CONFIG.SAB_HOST.endswith('/'):
+        headphones.CONFIG.SAB_HOST = headphones.CONFIG.SAB_HOST[0:len(headphones.CONFIG.SAB_HOST) - 1]
+
+    url = headphones.CONFIG.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
 
     try:
 
@@ -87,25 +87,25 @@ def sendNZB(nzb):
 
             f = opener.open(req)
 
-    except (EOFError, IOError), e:
+    except (EOFError, IOError) as e:
         logger.error(u"Unable to connect to SAB with URL: %s" % url)
         return False
 
-    except httplib.InvalidURL, e:
-        logger.error(u"Invalid SAB host, check your config. Current host: %s" % headphones.SAB_HOST)
+    except httplib.InvalidURL as e:
+        logger.error(u"Invalid SAB host, check your config. Current host: %s" % headphones.CONFIG.SAB_HOST)
         return False
-        
-    except Exception, e:
+
+    except Exception as e:
         logger.error(u"Error: " + str(e))
         return False
-        
-    if f == None:
+
+    if f is None:
         logger.info(u"No data returned from SABnzbd, NZB not sent")
         return False
 
     try:
         result = f.readlines()
-    except Exception, e:
+    except Exception as e:
         logger.info(u"Error trying to get result from SAB, NZB not sent: ")
         return False
 
@@ -119,35 +119,6 @@ def sendNZB(nzb):
 
     if sabText == "ok":
         logger.info(u"NZB sent to SAB successfully")
-        if headphones.GROWL_ENABLED and headphones.GROWL_ONSNATCH:
-            logger.info(u"Sending Growl notification")
-            growl = notifiers.GROWL()
-            growl.notify(nzb.name,"Download started")
-        if headphones.PROWL_ENABLED and headphones.PROWL_ONSNATCH:
-            logger.info(u"Sending Prowl notification")
-            prowl = notifiers.PROWL()
-            prowl.notify(nzb.name,"Download started")
-        if headphones.PUSHOVER_ENABLED and headphones.PUSHOVER_ONSNATCH:
-            logger.info(u"Sending Pushover notification")
-            prowl = notifiers.PUSHOVER()
-            prowl.notify(nzb.name,"Download started")
-        if headphones.PUSHBULLET_ENABLED and headphones.PUSHBULLET_ONSNATCH:
-            logger.info(u"Sending PushBullet notification")
-            pushbullet = notifiers.PUSHBULLET()
-            pushbullet.notify(nzb.name + " has been snatched!", "Download started")
-        if headphones.TWITTER_ENABLED and headphones.TWITTER_ONSNATCH:
-            logger.info(u"Sending Twitter notification")
-            twitter = notifiers.TwitterNotifier()
-            twitter.notify_snatch(nzb.name)
-        if headphones.NMA_ENABLED and headphones.NMA_ONSNATCH:
-            logger.debug(u"Sending NMA notification")
-            nma = notifiers.NMA()
-            nma.notify(snatched_nzb=nzb.name)
-        if headphones.PUSHALOT_ENABLED and headphones.PUSHALOT_ONSNATCH:
-            logger.info(u"Sending Pushalot notification")
-            pushalot = notifiers.PUSHALOT()
-            pushalot.notify(nzb.name,"Download started")
-
         return True
     elif sabText == "Missing authentication":
         logger.info(u"Incorrect username/password sent to SAB, NZB not sent")
@@ -155,37 +126,38 @@ def sendNZB(nzb):
     else:
         logger.info(u"Unknown failure sending NZB to sab. Return text is: " + sabText)
         return False
-        
+
+
 def checkConfig():
 
-    params = { 'mode' : 'get_config', 
-               'section' : 'misc' 
+    params = {'mode': 'get_config',
+               'section': 'misc'
                }
 
-    if headphones.SAB_USERNAME:
-        params['ma_username'] = headphones.SAB_USERNAME
-    if headphones.SAB_PASSWORD:
-        params['ma_password'] = headphones.SAB_PASSWORD
-    if headphones.SAB_APIKEY:
-        params['apikey'] = headphones.SAB_APIKEY
+    if headphones.CONFIG.SAB_USERNAME:
+        params['ma_username'] = headphones.CONFIG.SAB_USERNAME
+    if headphones.CONFIG.SAB_PASSWORD:
+        params['ma_password'] = headphones.CONFIG.SAB_PASSWORD
+    if headphones.CONFIG.SAB_APIKEY:
+        params['apikey'] = headphones.CONFIG.SAB_APIKEY
 
-    if not headphones.SAB_HOST.startswith('http'):
-        headphones.SAB_HOST = 'http://' + headphones.SAB_HOST
+    if not headphones.CONFIG.SAB_HOST.startswith('http'):
+        headphones.CONFIG.SAB_HOST = 'http://' + headphones.CONFIG.SAB_HOST
 
-    if headphones.SAB_HOST.endswith('/'):
-        headphones.SAB_HOST = headphones.SAB_HOST[0:len(headphones.SAB_HOST)-1]
-    
-    url = headphones.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
-    
+    if headphones.CONFIG.SAB_HOST.endswith('/'):
+        headphones.CONFIG.SAB_HOST = headphones.CONFIG.SAB_HOST[0:len(headphones.CONFIG.SAB_HOST) - 1]
+
+    url = headphones.CONFIG.SAB_HOST + "/" + "api?" + urllib.urlencode(params)
+
     try:
         f = urllib.urlopen(url).read()
-    except Exception, e:
+    except Exception:
         logger.warn("Unable to read SABnzbd config file - cannot determine renaming options (might affect auto & forced post processing)")
         return (0, 0)
-        
+
     config_options = ast.literal_eval(f)
-    
+
     replace_spaces = config_options['misc']['replace_spaces']
     replace_dots = config_options['misc']['replace_dots']
-    
+
     return (replace_spaces, replace_dots)

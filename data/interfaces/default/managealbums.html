@@ -25,6 +25,7 @@
   			<option value="WantedNew">Wanted (new only)</option>
             <option value="WantedLossless">Wanted (lossless)</option>
   			<option value="Skipped">Skipped</option>
+			<option value="Ignored">Ignored</option>
   			<option value="Downloaded">Downloaded</option>
 		</select>
 		<input type="hidden" value="Go">
@@ -50,6 +51,8 @@
 					grade = 'Z'
 				elif album['Status'] == 'Wanted':
 					grade = 'X'
+				elif album['Status'] == 'Ignored':
+					grade = 'I'
 				elif album['Status'] == 'Snatched':
 					grade = 'C'
 				else:
@@ -109,40 +112,43 @@
 <%def name="javascriptIncludes()">
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
+		function initThisPage() {
+			$('#album_table').dataTable({
+				"bDestroy": true,
+				"aoColumns": [
+	                null,
+					null,
+					null,
+					null,
+					null,
+					null,
+					{ "sType": "title-numeric"},
+					null,
+					null
+				],
+				"aoColumnDefs": [
+				          { 'bSortable': false, 'aTargets': [ 0 ] }
+				],
+				"oLanguage": {
+					"sLengthMenu":"Show _MENU_ albums per page",
+					"sEmptyTable": "No album information available",
+					"sInfo":"Showing _TOTAL_ albums",
+					"sInfoEmpty":"Showing 0 to 0 of 0 albums",
+					"sInfoFiltered":"(filtered from _MAX_ total albums)",
+					"sSearch": ""},
+				"bPaginate": false,
+				"aaSorting": [[5, 'desc']],
+				"fnDrawCallback": function (o) {
+	                // Jump to top of page
+	                $('html,body').scrollTop(0);
+	            }
 
-	function initThisPage() {
-		$('#album_table').dataTable({
-			"bDestroy": true,
-			"aoColumns": [
-                null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				{ "sType": "title-numeric"},
-				null,
-				null
-			],
-			"aoColumnDefs": [
-			          { 'bSortable': false, 'aTargets': [ 0 ] }
-			],				
-			"oLanguage": {
-				"sLengthMenu":"Show _MENU_ albums per page",
-				"sEmptyTable": "No album information available",
-				"sInfo":"Showing _TOTAL_ albums",
-				"sInfoEmpty":"Showing 0 to 0 of 0 albums",
-				"sInfoFiltered":"(filtered from _MAX_ total albums)",
-				"sSearch": ""},
-			"bPaginate": false,
-			"aaSorting": [[5, 'desc']]
-
+			});
+			resetFilters("albums");
+		}
+		$(document).ready(function() {
+			initThisPage();
 		});
-		resetFilters("albums");
-	}
-	$(document).ready(function() {
-		initThisPage();
-	});
 	</script>
 </%def>
 

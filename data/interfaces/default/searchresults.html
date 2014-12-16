@@ -11,36 +11,51 @@
 				<th id="albumart"></th>
 				%if type == 'album':
 					<th id="albumname">Album Name</th>
+                    <th id="artistnamesmall">Artist Name</th>
+                    <th id="format">Format</th>
+                    <th id="tracks">Tracks</th>
+                    <th id="reldate">Date</th>
+                    <th id="scoresmall">Score</th>
+                    <th id="mbrelid" style="display:none;"</th>
+                %else:
+                    <th id="artistname">Artist Name</th>
+                    <th id="score">Score</th>
 				%endif
-				<th id="artistname">Artist Name</th>
-				<th id="score">Score</th>
-				<th id="add"></th>
+                <th id="mb"></th>
 			</tr>
 		</thead>
 		<tbody>
 			%if searchresults:
-				%for result in searchresults:
-				<%
-					if result['score'] == 100:
-						grade = 'A'
-					else:
-						grade = 'Z'
-				%>
+                %for result in searchresults:
+                <%
+                    if result['score'] == 100:
+                        grade = 'A'
+                    else:
+                        grade = 'Z'
+
+                    if type == 'album':
+                        albuminfo = 'Type: ' + result['rgtype'] + ', Country: ' + result['country']
+                        caa_group_url = "http://coverartarchive.org/release-group/%s/front-250.jpg" %result['rgid']
+                %>
 				<tr class="grade${grade}">
 				%if type == 'album':
-					<td id="albumart"><div id="artistImg"><img title="${result['albumid']}" class="albumArt" height="50" width="50"></div></td>
-				%else:
+					<td id="albumart" style=" text-align: center; vertical-align: middle;"><div id="artistImg"><img title="${result['albumid']}" class="albumArt" height="50" width="50" onerror="tryCCA(this, '${caa_group_url}')"></div></td>
+                %else:
 					<td id="albumart"><div id="artistImg"><img title="${result['id']}" class="albumArt" height="50" width="50"></div></td>
 				%endif
 				%if type == 'album':
-					<td id="albumname"><a href="${result['albumurl']}">${result['title']}</a></td>
-				%endif
-					<td id="artistname"><a href="${result['url']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
-					<td id="score"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></td>
-				%if type == 'album':	
-					<td id="add"><a href="addReleaseById?rid=${result['albumid']}"><i class="fa fa-plus"></i> Add this album</a></td>
-				%else:
-					<td id="add"><a href="addArtist?artistid=${result['id']}"><i class="fa fa-plus"></i> Add this artist</a></td>
+					<td id="albumname"><a href="addReleaseById?rid=${result['albumid']}&rgid=${result['rgid']}" title="${albuminfo}">${result['title']}</a></td>
+                    <td id="artistnamesmall"><a href="addArtist?artistid=${result['id']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
+                    <td id="format">${result['formats']}</td>
+                    <td id="tracks">${result['tracks']}</td>
+                    <td id="reldate">${result['date']}</td>
+                    <td id="score"><a href="${result['albumurl']} "title="View on MusicBrainz"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></a></td>
+                    <td id="musicbrainz" style=" text-align: center; line-height: 0; vertical-align: middle;"><a href="${result['albumurl']}"><img src="interfaces/default/images/MusicBrainz_Album_Icon.png" title="View on MusicBrainz" height="20" width="20"></a></td>
+                    <td id="mbrelid" style="display:none;">${result['albumid']}</td>
+                %else:
+                    <td id="artistname"><a href="addArtist?artistid=${result['id']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
+                    <td id="score"><a href="${result['url']} "title="View on MusicBrainz"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></a></td>
+                    <td id="musicbrainz" style=" text-align: center; line-height: 0; vertical-align: middle;"><a href="${result['url']}"><img src="interfaces/default/images/MusicBrainz_Artist_Icon.png" title="View on MusicBrainz" height="20" width="20"></a></td>
 				%endif
 				</tr>
 				%endfor
@@ -55,28 +70,34 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-
+    <script src="js/libs/jquery.unveil.min.js"></script>
 	<script src="js/libs/jquery.dataTables.min.js"></script>
-	
-	<script>
-	function getArt() {
-		$("table#searchresults_table tr td#albumart img").each(function(){	
-			var id = $(this).attr('title');
-			var image = $(this);
-			if ( !image.hasClass('done') ) {
-				image.addClass('done');
-				getImageLinks(image,id,"${type}");
-			}
-		});
-	}
-	function initThisPage() {
-		getArt();
-		$('#searchresults_table').dataTable(
-			{
+
+	<script type="text/javascript">
+        function tryCCA(element, url) {
+            element.onerror = function() {
+                element.onerror = null;
+                element.src = "interfaces/default/images/no-cover-art.png";
+            };
+            element.src = url;
+        }
+    	function getArt() {
+    		$("table#searchresults_table tr td#albumart img").each(function(){
+    			var id = $(this).attr('title');
+    			var image = $(this);
+
+    			if (!image.hasClass('done')) {
+    				image.addClass('done');
+    				getImageLinks(image, id, "${type}", true);
+    			}
+    		});
+    	}
+    	function initThisPage() {
+    		$('#searchresults_table').dataTable({
 				"bDestroy": true,
 				"aoColumnDefs": [
-			          { 'bSortable': false, 'aTargets': [ 0,3 ] }
-				],	
+			          { 'bSortable': false, 'aTargets': [ 0 ] }
+				],
 				"oLanguage": {
 					"sLengthMenu":"Show _MENU_ results per page",
 					"sEmptyTable": "No results",
@@ -86,15 +107,36 @@
 					"sSearch" : ""},
 				"iDisplayLength": 25,
 				"sPaginationType": "full_numbers",
-				"aaSorting": []
+				"aaSorting": [],
+                "fnDrawCallback": function (o) {
+                    // Jump to top of page
+                    $('html,body').scrollTop(0);
+                }
 			});
+            $('#searchresults_table').on("draw.dt", function () {
+                getArt();
+                $("img").unveil();
+            });
+            getArt();
 			resetFilters("album");
-	}
-	$(document).ready(function(){
-			initThisPage();		
-	});
-	$(window).load(function(){
-		initFancybox();
-	});
+    	}
+    	$(document).ready(function(){
+    		initFancybox();
+            initThisPage();
+    	});
 	</script>
+
+    <script type="text/javascript">
+        <%!
+            # Abuse JSON module for escaping JavaScript
+            import json
+        %>
+        $(document).ready(function() {
+            // Search parameter
+            $("#searchbar input[name=name]").val(${name | json.dumps});
+
+            // Album or artist
+            $("#searchbar select[name=type]").val(${type | json.dumps});
+        });
+    </script>
 </%def>

@@ -224,6 +224,14 @@ table.display tr.even.gradeA {
 	background-color: #ddffdd;
 }
 
+table.display tr.odd.gradeI {
+	background-color: #bebebe;
+}
+
+table.display tr.even.gradeI {
+	background-color: #bebebe;
+}
+
 table.display tr.odd.gradeC {
 	background-color: #ebf5ff;
 }
@@ -254,6 +262,13 @@ table.display tr.even.gradeU {
 	background-color: #eee;
 }
 
+table.display tr.odd.gradeW {
+	background-color: #ffffaa;
+}
+
+table.display tr.even.gradeW {
+	background-color: #ffffaa;
+}
 
 table.display tr.odd.gradeZ {
 	background-color: #FAFAFA;
@@ -269,6 +284,7 @@ table.display tr.gradeL #status {
 }
 table.display tr.gradeA td,
 table.display tr.gradeC td,
+table.display tr.gradeI td,
 table.display tr.gradeX td,
 table.display tr.gradeU td,
 table.display tr.gradeZ td {border-bottom: 1px solid #FFF;}

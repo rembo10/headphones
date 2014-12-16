@@ -3,7 +3,7 @@ from __future__ import generators
 httplib2
 
 A caching http interface that supports ETags and gzip
-to conserve bandwidth. 
+to conserve bandwidth.
 
 Requires Python 2.3 or later
 
@@ -24,8 +24,8 @@ __contributors__ = ["Thomas Broyer (t.broyer@ltgt.net)",
 __license__ = "MIT"
 __version__ = "$Rev$"
 
-import re 
-import sys 
+import re
+import sys
 import email
 import email.Utils
 import email.Message
@@ -56,7 +56,7 @@ import socket
 
 # Try using local version, followed by system, and none if neither are found
 try:
-    import lib.socks as socks
+    import socks as socks
 except ImportError:
     try:
         import socks as socks
@@ -85,7 +85,7 @@ def has_timeout(timeout): # python 2.6
     return (timeout is not None)
 
 __all__ = ['Http', 'Response', 'ProxyInfo', 'HttpLib2Error',
-  'RedirectMissingLocation', 'RedirectLimit', 'FailedToDecompressContent', 
+  'RedirectMissingLocation', 'RedirectLimit', 'FailedToDecompressContent',
   'UnimplementedDigestAuthOptionError', 'UnimplementedHmacDigestAuthOptionError',
   'debuglevel']
 
@@ -113,8 +113,8 @@ if not hasattr(httplib.HTTPResponse, 'getheaders'):
 # All exceptions raised here derive from HttpLib2Error
 class HttpLib2Error(Exception): pass
 
-# Some exceptions can be caught and optionally 
-# be turned back into responses. 
+# Some exceptions can be caught and optionally
+# be turned back into responses.
 class HttpLib2ErrorWithResponse(HttpLib2Error):
     def __init__(self, desc, response, content):
         self.response = response
@@ -176,7 +176,7 @@ def urlnorm(uri):
         raise RelativeURIError("Only absolute URIs are allowed. uri = %s" % uri)
     authority = authority.lower()
     scheme = scheme.lower()
-    if not path: 
+    if not path:
         path = "/"
     # Could do syntax based normalization of the URI before
     # computing the digest. See Section 6.2.2 of Std 66.
@@ -228,7 +228,7 @@ def _parse_cache_control(headers):
         parts_with_args = [tuple([x.strip().lower() for x in part.split("=", 1)]) for part in parts if -1 != part.find("=")]
         parts_wo_args = [(name.strip().lower(), 1) for name in parts if -1 == name.find("=")]
         retval = dict(parts_with_args + parts_wo_args)
-    return retval 
+    return retval
 
 # Whether to use a strict mode to parse WWW-Authenticate headers
 # Might lead to bad results in case of ill-formed header value,
@@ -254,10 +254,10 @@ def _parse_www_authenticate(headers, headername='www-authenticate'):
         while authenticate:
             # Break off the scheme at the beginning of the line
             if headername == 'authentication-info':
-                (auth_scheme, the_rest) = ('digest', authenticate)                
+                (auth_scheme, the_rest) = ('digest', authenticate)
             else:
                 (auth_scheme, the_rest) = authenticate.split(" ", 1)
-            # Now loop over all the key value pairs that come after the scheme, 
+            # Now loop over all the key value pairs that come after the scheme,
             # being careful not to roll into the next scheme
             match = www_auth.search(the_rest)
             auth_params = {}
@@ -279,17 +279,17 @@ def _entry_disposition(response_headers, request_headers):
     1. Cache-Control: max-stale
     2. Age: headers are not used in the calculations.
 
-    Not that this algorithm is simpler than you might think 
+    Not that this algorithm is simpler than you might think
     because we are operating as a private (non-shared) cache.
     This lets us ignore 's-maxage'. We can also ignore
     'proxy-invalidate' since we aren't a proxy.
-    We will never return a stale document as 
-    fresh as a design decision, and thus the non-implementation 
-    of 'max-stale'. This also lets us safely ignore 'must-revalidate' 
+    We will never return a stale document as
+    fresh as a design decision, and thus the non-implementation
+    of 'max-stale'. This also lets us safely ignore 'must-revalidate'
     since we operate as if every server has sent 'must-revalidate'.
     Since we are private we get to ignore both 'public' and
     'private' parameters. We also ignore 'no-transform' since
-    we don't do any transformations.    
+    we don't do any transformations.
     The 'no-store' parameter is handled at a higher level.
     So the only Cache-Control parameters we look at are:
 
@@ -298,7 +298,7 @@ def _entry_disposition(response_headers, request_headers):
     max-age
     min-fresh
     """
-    
+
     retval = "STALE"
     cc = _parse_cache_control(request_headers)
     cc_response = _parse_cache_control(response_headers)
@@ -340,10 +340,10 @@ def _entry_disposition(response_headers, request_headers):
                 min_fresh = int(cc['min-fresh'])
             except ValueError:
                 min_fresh = 0
-            current_age += min_fresh 
+            current_age += min_fresh
         if freshness_lifetime > current_age:
             retval = "FRESH"
-    return retval 
+    return retval
 
 def _decompressContent(response, new_content):
     content = new_content
@@ -408,10 +408,10 @@ def _wsse_username_token(cnonce, iso_now, password):
     return base64.b64encode(_sha("%s%s%s" % (cnonce, iso_now, password)).digest()).strip()
 
 
-# For credentials we need two things, first 
+# For credentials we need two things, first
 # a pool of credential to try (not necesarily tied to BAsic, Digest, etc.)
 # Then we also need a list of URIs that have already demanded authentication
-# That list is tricky since sub-URIs can take the same auth, or the 
+# That list is tricky since sub-URIs can take the same auth, or the
 # auth scheme may change as you descend the tree.
 # So we also need each Auth instance to be able to tell us
 # how close to the 'top' it is.
@@ -443,7 +443,7 @@ class Authentication(object):
         or such returned from the last authorized response.
         Over-rise this in sub-classes if necessary.
 
-        Return TRUE is the request is to be retried, for 
+        Return TRUE is the request is to be retried, for
         example Digest may return stale=true.
         """
         return False
@@ -461,7 +461,7 @@ class BasicAuthentication(Authentication):
 
 
 class DigestAuthentication(Authentication):
-    """Only do qop='auth' and MD5, since that 
+    """Only do qop='auth' and MD5, since that
     is all Apache currently implements"""
     def __init__(self, credentials, host, request_uri, headers, response, content, http):
         Authentication.__init__(self, credentials, host, request_uri, headers, response, content, http)
@@ -474,7 +474,7 @@ class DigestAuthentication(Authentication):
         self.challenge['algorithm'] = self.challenge.get('algorithm', 'MD5').upper()
         if self.challenge['algorithm'] != 'MD5':
             raise UnimplementedDigestAuthOptionError( _("Unsupported value for algorithm: %s." % self.challenge['algorithm']))
-        self.A1 = "".join([self.credentials[0], ":", self.challenge['realm'], ":", self.credentials[1]])   
+        self.A1 = "".join([self.credentials[0], ":", self.challenge['realm'], ":", self.credentials[1]])
         self.challenge['nc'] = 1
 
     def request(self, method, request_uri, headers, content, cnonce = None):
@@ -482,17 +482,17 @@ class DigestAuthentication(Authentication):
         H = lambda x: _md5(x).hexdigest()
         KD = lambda s, d: H("%s:%s" % (s, d))
         A2 = "".join([method, ":", request_uri])
-        self.challenge['cnonce'] = cnonce or _cnonce() 
-        request_digest  = '"%s"' % KD(H(self.A1), "%s:%s:%s:%s:%s" % (self.challenge['nonce'], 
-                    '%08x' % self.challenge['nc'], 
-                    self.challenge['cnonce'], 
+        self.challenge['cnonce'] = cnonce or _cnonce()
+        request_digest  = '"%s"' % KD(H(self.A1), "%s:%s:%s:%s:%s" % (self.challenge['nonce'],
+                    '%08x' % self.challenge['nc'],
+                    self.challenge['cnonce'],
                     self.challenge['qop'], H(A2)
-                    )) 
+                    ))
         headers['Authorization'] = 'Digest username="%s", realm="%s", nonce="%s", uri="%s", algorithm=%s, response=%s, qop=%s, nc=%08x, cnonce="%s"' % (
-                self.credentials[0], 
+                self.credentials[0],
                 self.challenge['realm'],
                 self.challenge['nonce'],
-                request_uri, 
+                request_uri,
                 self.challenge['algorithm'],
                 request_digest,
                 self.challenge['qop'],
@@ -506,14 +506,14 @@ class DigestAuthentication(Authentication):
             challenge = _parse_www_authenticate(response, 'www-authenticate').get('digest', {})
             if 'true' == challenge.get('stale'):
                 self.challenge['nonce'] = challenge['nonce']
-                self.challenge['nc'] = 1 
+                self.challenge['nc'] = 1
                 return True
         else:
             updated_challenge = _parse_www_authenticate(response, 'authentication-info').get('digest', {})
 
             if updated_challenge.has_key('nextnonce'):
                 self.challenge['nonce'] = updated_challenge['nextnonce']
-                self.challenge['nc'] = 1 
+                self.challenge['nc'] = 1
         return False
 
 
@@ -562,11 +562,11 @@ class HmacDigestAuthentication(Authentication):
         request_digest = "%s:%s:%s:%s:%s" % (method, request_uri, cnonce, self.challenge['snonce'], headers_val)
         request_digest  = hmac.new(self.key, request_digest, self.hashmod).hexdigest().lower()
         headers['Authorization'] = 'HMACDigest username="%s", realm="%s", snonce="%s", cnonce="%s", uri="%s", created="%s", response="%s", headers="%s"' % (
-                self.credentials[0], 
+                self.credentials[0],
                 self.challenge['realm'],
                 self.challenge['snonce'],
                 cnonce,
-                request_uri, 
+                request_uri,
                 created,
                 request_digest,
                 keylist,
@@ -583,7 +583,7 @@ class WsseAuthentication(Authentication):
     """This is thinly tested and should not be relied upon.
     At this time there isn't any third party server to test against.
     Blogger and TypePad implemented this algorithm at one point
-    but Blogger has since switched to Basic over HTTPS and 
+    but Blogger has since switched to Basic over HTTPS and
     TypePad has implemented it wrong, by never issuing a 401
     challenge but instead requiring your client to telepathically know that
     their endpoint is expecting WSSE profile="UsernameToken"."""
@@ -629,7 +629,7 @@ class GoogleLoginAuthentication(Authentication):
     def request(self, method, request_uri, headers, content):
         """Modify the request headers to add the appropriate
         Authorization header."""
-        headers['authorization'] = 'GoogleLogin Auth=' + self.Auth 
+        headers['authorization'] = 'GoogleLogin Auth=' + self.Auth
 
 
 AUTH_SCHEME_CLASSES = {
@@ -644,13 +644,13 @@ AUTH_SCHEME_ORDER = ["hmacdigest", "googlelogin", "digest", "wsse", "basic"]
 
 class FileCache(object):
     """Uses a local directory as a store for cached files.
-    Not really safe to use if multiple threads or processes are going to 
+    Not really safe to use if multiple threads or processes are going to
     be running on the same cache.
     """
     def __init__(self, cache, safe=safename): # use safe=lambda x: md5.new(x).hexdigest() for the old behavior
         self.cache = cache
         self.safe = safe
-        if not os.path.exists(cache): 
+        if not os.path.exists(cache):
             os.makedirs(self.cache)
 
     def get(self, key):
@@ -688,7 +688,7 @@ class Credentials(object):
     def iter(self, domain):
         for (cdomain, name, password) in self.credentials:
             if cdomain == "" or domain == cdomain:
-                yield (name, password) 
+                yield (name, password)
 
 class KeyCerts(Credentials):
     """Identical to Credentials except that
@@ -772,7 +772,7 @@ class HTTPSConnectionWithTimeout(httplib.HTTPSConnection):
             sock.setproxy(*self.proxy_info.astuple())
         else:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        
+
         if has_timeout(self.timeout):
             sock.settimeout(self.timeout)
         sock.connect((self.host, self.port))
@@ -820,7 +820,7 @@ the same interface as FileCache."""
 
         # If set to False then no redirects are followed, even safe ones.
         self.follow_redirects = True
-        
+
         # Which HTTP methods do we apply optimistic concurrency to, i.e.
         # which methods get an "if-match:" etag header added to them.
         self.optimistic_concurrency_methods = ["PUT"]
@@ -831,7 +831,7 @@ the same interface as FileCache."""
 
         self.ignore_etag = False
 
-        self.force_exception_to_status_code = False 
+        self.force_exception_to_status_code = False
 
         self.timeout = timeout
 
@@ -908,12 +908,12 @@ the same interface as FileCache."""
 
         auths = [(auth.depth(request_uri), auth) for auth in self.authorizations if auth.inscope(host, request_uri)]
         auth = auths and sorted(auths)[0][1] or None
-        if auth: 
+        if auth:
             auth.request(method, request_uri, headers, body)
 
         (response, content) = self._conn_request(conn, request_uri, method, body, headers)
 
-        if auth: 
+        if auth:
             if auth.response(response, body):
                 auth.request(method, request_uri, headers, body)
                 (response, content) = self._conn_request(conn, request_uri, method, body, headers )
@@ -921,7 +921,7 @@ the same interface as FileCache."""
 
         if response.status == 401:
             for authorization in self._auth_from_challenge(host, request_uri, headers, response, content):
-                authorization.request(method, request_uri, headers, body) 
+                authorization.request(method, request_uri, headers, body)
                 (response, content) = self._conn_request(conn, request_uri, method, body, headers, )
                 if response.status != 401:
                     self.authorizations.append(authorization)
@@ -939,12 +939,12 @@ the same interface as FileCache."""
                     if response.has_key('location'):
                         location = response['location']
                         (scheme, authority, path, query, fragment) = parse_uri(location)
-                        if authority == None:
+                        if authority is None:
                             response['location'] = urlparse.urljoin(absolute_uri, location)
                     if response.status == 301 and method in ["GET", "HEAD"]:
                         response['-x-permanent-redirect-url'] = response['location']
                         if not response.has_key('content-location'):
-                            response['content-location'] = absolute_uri 
+                            response['content-location'] = absolute_uri
                         _updateCache(headers, response, content, self.cache, cachekey)
                     if headers.has_key('if-none-match'):
                         del headers['if-none-match']
@@ -954,7 +954,7 @@ the same interface as FileCache."""
                         location = response['location']
                         old_response = copy.deepcopy(response)
                         if not old_response.has_key('content-location'):
-                            old_response['content-location'] = absolute_uri 
+                            old_response['content-location'] = absolute_uri
                         redirect_method = ((response.status == 303) and (method not in ["GET", "HEAD"])) and "GET" or method
                         (response, content) = self.request(location, redirect_method, body=body, headers = headers, redirections = redirections - 1)
                         response.previous = old_response
@@ -963,7 +963,7 @@ the same interface as FileCache."""
             elif response.status in [200, 203] and method == "GET":
                 # Don't cache 206's since we aren't going to handle byte range requests
                 if not response.has_key('content-location'):
-                    response['content-location'] = absolute_uri 
+                    response['content-location'] = absolute_uri
                 _updateCache(headers, response, content, self.cache, cachekey)
 
         return (response, content)
@@ -978,10 +978,10 @@ the same interface as FileCache."""
 
     def request(self, uri, method="GET", body=None, headers=None, redirections=DEFAULT_MAX_REDIRECTS, connection_type=None):
         """ Performs a single HTTP request.
-The 'uri' is the URI of the HTTP resource and can begin 
+The 'uri' is the URI of the HTTP resource and can begin
 with either 'http' or 'https'. The value of 'uri' must be an absolute URI.
 
-The 'method' is the HTTP method to perform, such as GET, POST, DELETE, etc. 
+The 'method' is the HTTP method to perform, such as GET, POST, DELETE, etc.
 There is no restriction on the methods allowed.
 
 The 'body' is the entity body to be sent with the request. It is a string
@@ -990,11 +990,11 @@ object.
 Any extra headers that are to be sent with the request should be provided in the
 'headers' dictionary.
 
-The maximum number of redirect to follow before raising an 
+The maximum number of redirect to follow before raising an
 exception is 'redirections. The default is 5.
 
-The return value is a tuple of (response, content), the first 
-being and instance of the 'Response' class, the second being 
+The return value is a tuple of (response, content), the first
+being and instance of the 'Response' class, the second being
 a string that contains the response entity body.
         """
         try:
@@ -1085,13 +1085,13 @@ a string that contains the response entity body.
                     # Determine our course of action:
                     #   Is the cached entry fresh or stale?
                     #   Has the client requested a non-cached response?
-                    #   
-                    # There seems to be three possible answers: 
+                    #
+                    # There seems to be three possible answers:
                     # 1. [FRESH] Return the cache entry w/o doing a GET
                     # 2. [STALE] Do the GET (but add in cache validators if available)
                     # 3. [TRANSPARENT] Do a GET w/o any cache validators (Cache-Control: no-cache) on the request
-                    entry_disposition = _entry_disposition(info, headers) 
-                    
+                    entry_disposition = _entry_disposition(info, headers)
+
                     if entry_disposition == "FRESH":
                         if not cached_value:
                             info['status'] = '504'
@@ -1113,7 +1113,7 @@ a string that contains the response entity body.
 
                 if response.status == 304 and method == "GET":
                     # Rewrite the cache entry with the new end-to-end headers
-                    # Take all headers that are in response 
+                    # Take all headers that are in response
                     # and overwrite their values in info.
                     # unless they are hop-by-hop, or are listed in the connection header.
 
@@ -1125,14 +1125,14 @@ a string that contains the response entity body.
                     _updateCache(headers, merged_response, content, self.cache, cachekey)
                     response = merged_response
                     response.status = 200
-                    response.fromcache = True 
+                    response.fromcache = True
 
                 elif response.status == 200:
                     content = new_content
                 else:
                     self.cache.delete(cachekey)
-                    content = new_content 
-            else: 
+                    content = new_content
+            else:
                 cc = _parse_cache_control(headers)
                 if cc.has_key('only-if-cached'):
                     info['status'] = '504'
@@ -1146,7 +1146,7 @@ a string that contains the response entity body.
                     response = e.response
                     content = e.content
                     response.status = 500
-                    response.reason = str(e) 
+                    response.reason = str(e)
                 elif isinstance(e, socket.timeout) or (isinstance(e, socket.error) and 'timed out' in str(e)):
                     content = "Request Timeout"
                     response = Response( {
@@ -1156,24 +1156,24 @@ a string that contains the response entity body.
                             })
                     response.reason = "Request Timeout"
                 else:
-                    content = str(e) 
+                    content = str(e)
                     response = Response( {
                             "content-type": "text/plain",
                             "status": "400",
                             "content-length": len(content)
                             })
-                    response.reason = "Bad Request" 
+                    response.reason = "Bad Request"
             else:
                 raise
 
- 
+
         return (response, content)
 
- 
+
 
 class Response(dict):
     """An object more like email.Message than httplib.HTTPResponse."""
-   
+
     """Is this response from our local cache"""
     fromcache = False
 
@@ -1189,27 +1189,27 @@ class Response(dict):
     previous = None
 
     def __init__(self, info):
-        # info is either an email.Message or 
+        # info is either an email.Message or
         # an httplib.HTTPResponse object.
         if isinstance(info, httplib.HTTPResponse):
-            for key, value in info.getheaders(): 
-                self[key.lower()] = value 
+            for key, value in info.getheaders():
+                self[key.lower()] = value
             self.status = info.status
             self['status'] = str(self.status)
             self.reason = info.reason
             self.version = info.version
         elif isinstance(info, email.Message.Message):
-            for key, value in info.items(): 
-                self[key] = value 
+            for key, value in info.items():
+                self[key] = value
             self.status = int(self['status'])
         else:
-            for key, value in info.iteritems(): 
-                self[key] = value 
+            for key, value in info.iteritems():
+                self[key] = value
             self.status = int(self.get('status', self.status))
 
 
     def __getattr__(self, name):
         if name == 'dict':
-            return self 
-        else:  
-            raise AttributeError, name 
+            return self
+        else:
+            raise AttributeError, name

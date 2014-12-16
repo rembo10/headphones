@@ -1,7 +1,7 @@
 <%inherit file="base.html"/>
 <%!
-        import headphones
-        import string
+    import headphones
+    import string
 %>
 
 <%def name="headerIncludes()">
@@ -12,13 +12,12 @@
         </div>
     </div>
 </%def>
-<%def name="body()">
 
+<%def name="body()">
     <div id="paddingheader">
         <h1 class="clearfix"><i class="fa fa-gear"></i> Settings</h1>
     </div>
     <form action="configUpdate" method="post" class="form" id="configUpdate">
-
         <div id="tabs">
             <ul>
                 <li><a href="#tabs-1">Web Interface</a></li>
@@ -29,34 +28,47 @@
                 <li><a href="#tabs-6">Advanced Settings</a></li>
             </ul>
             <div id="tabs-1">
-
                 <table class="configtable" summary="Web Interface">
                     <tr>
                         <td>
                             <fieldset>
                                 <legend>Basic</legend>
                                 <div class="row">
-                                    <label>HTTP Host</label>
+                                    <label title="Host to bind web server to">
+                                        HTTP Host
+                                    </label>
                                     <input type="text" name="http_host" value="${config['http_host']}" size="30">
-                                    <small>e.g. localhost or 0.0.0.0</small>
+                                    <small>e.g. localhost or an IP, such as 0.0.0.0</small>
                                 </div>
                                 <div class="row">
-                                    <label>HTTP Port</label>
+                                    <label title="Port to bind web server to. Note that ports below 1024 may require root.">
+                                        HTTP Port
+                                    </label>
                                     <input type="text" name="http_port" value="${config['http_port']}" size="10">
                                 </div>
                                 <div class="row">
-                                    <label>HTTP Username</label>
-                                    <input type="text" name="http_username" value="${config['http_user']}" size="30">
+                                    <label title="Username for web server authentication. Leave empty to disable.">
+                                        HTTP Username
+                                    </label>
+                                    <input type="text" name="http_username" value="${config['http_username']}" size="30">
                                 </div>
                                 <div class="row">
-                                    <label>HTTP Password</label>
-                                    <input type="password" name="http_password" value="${config['http_pass']}" size="30">
+                                    <label title="Password for web server authentication. Leave empty to disable.">
+                                        HTTP Password
+                                    </label>
+                                    <input type="password" name="http_password" value="${config['http_password']}" size="30">
                                 </div>
                                 <div class="row checkbox">
-                                    <input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} /> <label>Launch Browser on Startup</label>
+                                    <input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} />
+                                    <label title="Launch browser pointed to Headphones, on startup.">
+                                        Launch Browser on Startup
+                                    </label>
                                 </div>
                                 <div class="row checkbox">
-                                    <input type="checkbox" name="enable_https" id="enable_https" value="1" ${config['enable_https']} /> <label>Enable HTTPS</label>
+                                    <input type="checkbox" name="enable_https" id="enable_https" value="1" ${config['enable_https']} />
+                                    <label title="Enable HTTPS for web server for encrypted communication">
+                                        Enable HTTPS
+                                    </label>
                                 </div>
                                 <div id="https_options">
                                     <div class="row">
@@ -74,7 +86,10 @@
                             <fieldset>
                                 <legend>API</legend>
                                 <div class="row checkbox">
-                                    <input type="checkbox" id="useapi" name="api_enabled" id="api_enabled" value="1" ${config['api_enabled']} /><label>Enable API</label>
+                                    <input type="checkbox" id="api_enabled" name="api_enabled" value="1" ${config['api_enabled']} />
+                                    <label title="Allow remote applications to interface with Headphones">
+                                        Enable API
+                                    </label>
                                 </div>
                                 <div id="apioptions" class="row">
                                     <label>API key</label>
@@ -86,24 +101,36 @@
 
                             <fieldset>
                                 <legend>Interval</legend>
+                                <small>An interval of 0 will disable a task.</small>
                                 <div class="row">
-                                    <label>NZB Search Interval</label>
-                                    <input type="text" name="nzb_search_interval" value="${config['nzb_search_interval']}" size="4">mins
+                                    <label title="Time between two searches for new downloads.">
+                                        Search Interval
+                                    </label>
+                                    <input type="text" name="search_interval" value="${config['search_interval']}" size="4">mins
+                                    <small>minimum is 360 minutes</small>
                                 </div>
                                 <div class="row">
-                                    <label>Download Scan Interval</label>
+                                    <label title="Time between scans for downloaded files.">
+                                        Download Scan Interval
+                                    </label>
                                     <input type="text" name="download_scan_interval" value="${config['download_scan_interval']}" size="4">mins
                                 </div>
                                 <div class="row">
-                                    <label>Library Scan Interval</label>
+                                    <label title="Time between two library update scans.">
+                                        Library Scan Interval
+                                    </label>
                                     <input type="text" name="libraryscan_interval" value="${config['libraryscan_interval']}" size="4">hours
                                 </div>
                                 <div class="row">
-                                    <label>MusicBrainz Update Interval</label>
+                                    <label title="Time between two MusicBrainz updates.">
+                                        MusicBrainz Update Interval
+                                    </label>
                                     <input type="text" name="update_db_interval" value="${config['update_db_interval']}" size="4">hours
                                 </div>
                                 <div class="row">
-                                    <label>Ignore Album Updates</label>
+                                    <label title="Ignore MusicBrainz album updates older then certain number of days.">
+                                        Ignore Album Updates
+                                    </label>
                                     <input type="text" name="mb_ignore_age" value="${config['mb_ignore_age']}" size="4">days
                                 </div>
                             </fieldset>
@@ -111,7 +138,7 @@
                     </tr>
                     <tr>
                         <div class="configmessage">
-                            <i class="fa fa-info-circle"></i> Web Interface changes require a restart to take effect
+                            <i class="fa fa-info-circle"></i> Web Interface changes require a restart to take effect. Saving settings will restart intervals.
                         </div>
                     </tr>
                 </table>
@@ -122,57 +149,141 @@
                 <table class="configtable" summary="Download Settings">
                     <tr>
                         <td>
-                            <fieldset>
+                            <fieldset title="Method for downloading usenet files.">
                                 <legend>Usenet</legend>
-                                <input type="radio" name="nzb_downloader" id="nzb_downloader_sabnzbd" value="0" ${config['nzb_downloader_sabnzbd']}>Sabnzbd <input type="radio" name="nzb_downloader" id="nzb_downloader_nzbget" value="1" ${config['nzb_downloader_nzbget']}> NZBget <input type="radio" name="nzb_downloader" id="nzb_downloader_blackhole" value="2" ${config['nzb_downloader_blackhole']}>Black Hole
+                                <input type="radio" name="nzb_downloader" id="nzb_downloader_sabnzbd" value="0" ${config['nzb_downloader_sabnzbd']}> Sabnzbd
+                                <input type="radio" name="nzb_downloader" id="nzb_downloader_nzbget" value="1" ${config['nzb_downloader_nzbget']}> NZBget
+                                <input type="radio" name="nzb_downloader" id="nzb_downloader_blackhole" value="2" ${config['nzb_downloader_blackhole']}> Black Hole
                             </fieldset>
                             <fieldset id="sabnzbd_options">
                                 <div class="row">
-                                    <label>SABnzbd Host:</label>
+                                    <label title="SABnzbd host and port.">
+                                        SABnzbd Host
+                                    </label>
                                     <input type="text" name="sab_host" value="${config['sab_host']}" size="30">
                                     <small>usually http://localhost:8080</small>
                                 </div>
                                 <div class="row">
-                                    <label>SABnzbd Username</label>
-                                    <input type="text" name="sab_username" value="${config['sab_user']}" size="20">
+                                    <label title="SABnzbd username. Leave empty if not applicable.">
+                                        SABnzbd Username
+                                    </label>
+                                    <input type="text" name="sab_username" value="${config['sab_username']}" size="20">
                                 </div>
                                 <div class="row">
-                                    <label>SABnzbd Password:</label>
-                                    <input type="password" name="sab_password" value="${config['sab_pass']}" size="20">
+                                    <label title="SABnzbd password. Leave empty if not applicable.">
+                                        SABnzbd Password
+                                    </label>
+                                    <input type="password" name="sab_password" value="${config['sab_password']}" size="20">
                                 </div>
                                 <div class="row">
-                                    <label>SABnzbd API:</label>
-                                    <input type="text" name="sab_apikey" value="${config['sab_api']}" size="36">
+                                    <label title="SABnzbd API key. Can be found in SABnzbd settings.">
+                                        SABnzbd API key
+                                    </label>
+                                    <input type="text" name="sab_apikey" value="${config['sab_apikey']}" size="36">
                                 </div>
                                 <div class="row">
-                                    <label>SABnzbd Category:</label>
-                                    <input type="text" name="sab_category" value="${config['sab_cat']}" size="20">
+                                    <label title="Name of SABnzbd category to add downloads to.">
+                                        SABnzbd Category
+                                    </label>
+                                    <input type="text" name="sab_category" value="${config['sab_category']}" size="20">
                                 </div>
                             </fieldset>
 
                             <fieldset id="nzbget_options">
                                 <div class="row">
-                                    <label>NZBget Host:</label>
+                                    <label title="NZBget host and port.">
+                                        NZBget Host
+                                    </label>
                                     <input type="text" name="nzbget_host" value="${config['nzbget_host']}" size="30">
                                     <small>usually http://localhost:6789</small>
                                 </div>
                                 <div class="row">
-                                    <label>NZBget Username</label>
-                                    <input type="text" name="nzbget_username" value="${config['nzbget_user']}" size="20">
+                                    <label title="NZBGet username. Leave empty if not applicable">
+                                        NZBget Username
+                                    </label>
+                                    <input type="text" name="nzbget_username" value="${config['nzbget_username']}" size="20">
                                 </div>
                                 <div class="row">
-                                    <label>NZBget Password:</label>
-                                    <input type="password" name="nzbget_password" value="${config['nzbget_pass']}" size="20">
+                                    <label title="NZBGet password. Leave empty if not applicable">
+                                        NZBget Password
+                                    </label>
+                                    <input type="password" name="nzbget_password" value="${config['nzbget_password']}" size="20">
                                 </div>
                                 <div class="row">
-                                    <label>NZBget Category:</label>
-                                    <input type="text" name="nzbget_category" value="${config['nzbget_cat']}" size="20">
+                                    <label title="Name of NZBget category to add downloads to.">
+                                        NZBget Category
+                                    </label>
+                                    <input type="text" name="nzbget_category" value="${config['nzbget_category']}" size="20">
+                                </div>
+                                <%
+                                    if config['nzbget_priority'] == -100:
+                                        prio_verylow = 'selected="selected"'
+                                        prio_low = ''
+                                        prio_normal = ''
+                                        prio_high = ''
+                                        prio_veryhigh = ''
+                                        prio_force = ''
+                                    elif config['nzbget_priority'] == -50:
+                                        prio_verylow = ''
+                                        prio_low = 'selected="selected"'
+                                        prio_normal = ''
+                                        prio_high = ''
+                                        prio_veryhigh = ''
+                                        prio_force = ''
+                                    elif config['nzbget_priority'] == 0:
+                                        prio_verylow = ''
+                                        prio_low = ''
+                                        prio_normal = 'selected="selected"'
+                                        prio_high = ''
+                                        prio_veryhigh = ''
+                                        prio_force = ''
+                                    elif config['nzbget_priority'] == 50:
+                                        prio_verylow = ''
+                                        prio_low = ''
+                                        prio_normal = ''
+                                        prio_high = 'selected="selected"'
+                                        prio_veryhigh = ''
+                                        prio_force = ''
+                                    elif config['nzbget_priority'] == 100:
+                                        prio_verylow = ''
+                                        prio_low = ''
+                                        prio_normal = ''
+                                        prio_high = ''
+                                        prio_veryhigh = 'selected="selected"'
+                                        prio_force = ''
+                                    elif config['nzbget_priority'] == 900:
+                                        prio_verylow = ''
+                                        prio_low = ''
+                                        prio_normal = ''
+                                        prio_high = ''
+                                        prio_veryhigh = ''
+                                        prio_force = 'selected="selected"'
+                                    else:
+                                        prio_verylow = ''
+                                        prio_low = ''
+                                        prio_normal = 'selected="selected"'
+                                        prio_high = ''
+                                        prio_veryhigh = ''
+                                        prio_force = ''
+                                %>
+                                <div class="row">
+                                    <label>NZBget Priority</label>
+                                    <select name="nzbget_priority" id="nzbget_priority">
+                                        <option value="-100" ${prio_verylow}>Very Low</option>
+                                        <option value="-50" ${prio_low}>Low</option>
+                                        <option value="0" ${prio_normal}>Normal</option>
+                                        <option value="50" ${prio_high}>High</option>
+                                        <option value="100" ${prio_veryhigh}>Very High</option>
+                                        <option value="900" ${prio_force}>Force</option>
+                                    </select>
                                 </div>
                             </fieldset>
 
                             <fieldset id="blackhole_options">
                                 <div class="row">
-                                    <label>Black Hole Directory</label>
+                                    <label title="Path to folder to put NZB files in, for downloading.">
+                                        Black Hole Directory
+                                    </label>
                                     <input type="text" name="blackhole_dir" value="${config['blackhole_dir']}" size="50">
                                     <small>Folder your Download program watches for NZBs</small>
                                 </div>
@@ -180,19 +291,26 @@
 
                             <fieldset id="general_nzb_options">
                                 <div class="row">
-                                    <label>Music Download Directory:</label>
+                                    <label title="Path to folder where Headphones can find the downloads.">
+                                        Music Download Directory:
+                                    </label>
                                     <input type="text" name="download_dir" value="${config['download_dir']}" size="50">
-                                    <small>Full path where SAB or NZBget downloads your music. e.g. /Users/name/Downloads/music</small>
+                                    <small>Full path where SAB or NZBget downloads your music, e.g. /Users/name/Downloads/music</small>
                                 </div>
                                 <div class="row">
-                                    <input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5"><label>Usenet Retention</label>
+                                    <label title="Number of days of retention your usenet provider provides.">
+                                        Usenet Retention
+                                    </label>
+                                    <input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5">
                                 </div>
                             </fieldset>
                         </td>
                         <td>
-                            <fieldset>
+                            <fieldset title="Method for downloading torrent files.">
                                 <legend>Torrents</legend>
-                                <input type="radio" name="torrent_downloader" id="torrent_downloader_blackhole" value="0" ${config['torrent_downloader_blackhole']}>Black Hole <input type="radio" name="torrent_downloader" id="torrent_downloader_transmission" value="1" ${config['torrent_downloader_transmission']}> Transmission <!--  <input type="radio" name="torrent_downloader" id="torrent_downloader_utorrent" value="2" ${config['torrent_downloader_utorrent']}> uTorrent -->
+                                <input type="radio" name="torrent_downloader" id="torrent_downloader_blackhole" value="0" ${config['torrent_downloader_blackhole']}> Black Hole
+                                <input type="radio" name="torrent_downloader" id="torrent_downloader_transmission" value="1" ${config['torrent_downloader_transmission']}> Transmission
+                                <input type="radio" name="torrent_downloader" id="torrent_downloader_utorrent" value="2" ${config['torrent_downloader_utorrent']}> uTorrent (Beta)
                             </fieldset>
                             <fieldset id="torrent_blackhole_options">
                                 <div class="row">
@@ -200,20 +318,42 @@
                                     <input type="text" name="torrentblackhole_dir" value="${config['torrentblackhole_dir']}" size="50">
                                     <small>Folder your Download program watches for Torrents</small>
                                 </div>
+
+                                <div class="row">
+                                    <label>Magnet links</label>
+
+                                    <label class="inline" title="Invoke shell command to open magnet URL.">
+                                        <input type="radio" name="magnet_links" id="magnet_links_0" value="0" ${config['magnet_links_0']}>
+                                        Ignore
+                                    </label>
+
+                                    <label class="inline" title="Use external service to convert magnet links into torrents.">
+                                        <input type="radio" name="magnet_links" id="magnet_links_1" value="1" ${config['magnet_links_1']}>
+                                        Open
+                                    </label>
+
+                                    <label class="inline">
+                                        <input type="radio" name="magnet_links" id="magnet_links_2" value="2" ${config['magnet_links_2']}>
+                                        Convert
+                                    </label>
+                                    <div style="clear: both"></div>
+
+                                    <small>Note: opening magnet URL's is not suitable for headless/console/terminal servers.</small>
+                                </div>
                             </fieldset>
                             <fieldset id="transmission_options">
                                 <div class="row">
-                                    <label>Transmission Host:</label>
+                                    <label>Transmission Host</label>
                                     <input type="text" name="transmission_host" value="${config['transmission_host']}" size="30">
                                     <small>usually http://localhost:9091</small>
                                 </div>
                                 <div class="row">
-                                    <label>Transmission Username:</label>
-                                    <input type="text" name="transmission_username" value="${config['transmission_user']}" size="30">
+                                    <label>Transmission Username</label>
+                                    <input type="text" name="transmission_username" value="${config['transmission_username']}" size="30">
                                 </div>
                                 <div class="row">
-                                    <label>Transmission Password:</label>
-                                    <input type="password" name="transmission_password" value="${config['transmission_pass']}" size="30">
+                                    <label>Transmission Password</label>
+                                    <input type="password" name="transmission_password" value="${config['transmission_password']}" size="30">
                                 </div>
                                 <div class="row">
                                     <small>Note: With Transmission, you can specify a different download directory for downloads sent from Headphones.
@@ -221,30 +361,35 @@
                                 </div>
                             </fieldset>
                             <fieldset id="utorrent_options">
+                                <small class="heading"><i class="fa fa-info-circle"></i> Note: uTorrent may keep files read only when completed. Check 'Preferences -> Advanced -> bt.read_only_on_complete' in case of problems.</small>
                                 <div class="row">
-                                    <label>uTorrent Host:</label>
+                                    <label>uTorrent Host</label>
                                     <input type="text" name="utorrent_host" value="${config['utorrent_host']}" size="30">
                                     <small>usually http://localhost:9091</small>
                                 </div>
                                 <div class="row">
-                                    <label>uTorrent Username:</label>
-                                    <input type="text" name="utorrent_username" value="${config['utorrent_user']}" size="30">
+                                    <label>uTorrent Username</label>
+                                    <input type="text" name="utorrent_username" value="${config['utorrent_username']}" size="30">
                                 </div>
                                 <div class="row">
-                                    <label>uTorrent Password:</label>
-                                    <input type="text" name="utorrent_password" value="${config['utorrent_pass']}" size="30">
+                                    <label>uTorrent Password</label>
+                                    <input type="password" name="utorrent_password" value="${config['utorrent_password']}" size="30">
+                                </div>
+                                <div class="row">
+                                    <label>uTorrent Label</label>
+                                    <input type="text" name="utorrent_label" value="${config['utorrent_label']}" size="30">
                                 </div>
                             </fieldset>
                             <fieldset id="general_torrent_options">
                                 <div class="row">
-                                    <label>Minimum seeders:</label>
+                                    <label>Minimum seeders</label>
                                     <input type="text" name="numberofseeders" value="${config['numberofseeders']}" size="5">
                                     <small>Number of minimum seeders a torrent must have to be accepted</small>
                                 </div>
                                 <div class="row">
                                     <label>Music Download Directory</label>
                                     <input type="text" name="download_torrent_dir" value="${config['download_torrent_dir']}" size="50">
-                                    <small>Full path where your torrent client downloads your music e.g. /Users/name/Downloads/music</small>
+                                    <small>Full path where your torrent client downloads your music e.g. /Users/name/Downloads/music.</small>
                                 </div>
                                 <div class="row checkbox">
                                     <label>Keep Files for Seeding</label>
@@ -252,10 +397,10 @@
                                 </div>
                                 <div class="row checkbox">
                                     <label>Prefer</label>
-                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_0" value="0" ${config['prefer_torrents_0']}>NZBs 
-                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_1" value="1" ${config['prefer_torrents_1']}>Torrents 
+                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_0" value="0" ${config['prefer_torrents_0']}>NZBs
+                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_1" value="1" ${config['prefer_torrents_1']}>Torrents
                                     <input type="radio" name="prefer_torrents" id="prefer_torrents_2" value="2" ${config['prefer_torrents_2']}>No Preference
-                                    </div>
+                                </div>
                             </fieldset>
                         </td>
                     </tr>
@@ -270,13 +415,14 @@
                             <fieldset>
                                 <legend>Headphones Indexer</legend>
                                 <div class="row checkbox">
-                                    <input id="use_headphones_indexer" type="checkbox" name="use_headphones_indexer" onclick="initConfigCheckbox($(this));" value="1" ${config['use_headphones_indexer']} /><label>Use Headphones Indexer</label>
+                                    <input id="headphones_indexer" type="checkbox" name="headphones_indexer" onclick="initConfigCheckbox($(this));" value="1" ${config['headphones_indexer']} />
+                                    <label>Use Headphones Indexer</label>
                                 </div>
                                 <div class="config">
                                     <div class="row">
                                         <label>Username</label>
                                         <input class="hpuser" type="text" value="${config['hpuser']}" size="20">
-                                        <small>Headphones VIP Server username & password</small>
+                                        <small>Headphones VIP Server username &amp; password</small>
                                     </div>
                                     <div class="row">
                                         <label>Password</label>
@@ -288,9 +434,9 @@
                                 </div>
                             </fieldset>
                             <fieldset>
-                                <legend>Newznab</legend>
+                                <legend>Custom Newznab Providers</legend>
                                 <div class="row checkbox">
-                                    <input  id="usenewznab" type="checkbox" name="newznab" onclick="initConfigCheckbox($(this));" value="1" ${config['use_newznab']} /><label>Use Newznab</label>
+                                    <input id="use_newznab" type="checkbox" name="use_newznab" onclick="initConfigCheckbox($(this));" value="1" ${config['use_newznab']} /><label>Use Newznab</label>
                                 </div>
                                 <div id="newznab_providers">
                                     <div class="config" id="newznab1">
@@ -301,7 +447,7 @@
                                         </div>
                                         <div class="row">
                                             <label>Newznab API</label>
-                                            <input type="text" name="newznab_apikey" value="${config['newznab_api']}" size="36">
+                                            <input type="text" name="newznab_apikey" value="${config['newznab_apikey']}" size="36">
                                         </div>
                                         <div class="row checkbox">
                                             <input id="newznab_enabled" type="checkbox" name="newznab_enabled" onclick="initConfigCheckbox($(this));" value="1" ${config['newznab_enabled']} /><label>Enabled</label>
@@ -344,7 +490,7 @@
                             <fieldset>
                                 <legend>NZBs.org</legend>
                                 <div class="row checkbox">
-                                    <input id="usenzbsorg" type="checkbox" name="nzbsorg" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbsorg']} /><label>Use NZBs.org</label>
+                                    <input id="use_nzbsorg" type="checkbox" name="use_nzbsorg" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbsorg']} /><label>Use NZBs.org</label>
                                 </div>
                                 <div class="config">
                                     <div class="row">
@@ -354,25 +500,9 @@
                                 </div>
                             </fieldset>
                             <fieldset>
-                                <legend>NZBsRus</legend>
-                                <div class="row checkbox">
-                                    <input id="usenzbsrus" type="checkbox" name="nzbsrus" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbsrus']} /><label>Use NZBsRus</label>
-                                </div>
-                                <div class="config">
-                                    <div class="row">
-                                        <label>NZBsRus UID</label>
-                                        <input type="text" name="nzbsrus_uid" value="${config['nzbsrus_uid']}" size="10">
-                                    </div>
-                                    <div class="row">
-                                        <label>NZBsRus API Key</label>
-                                        <input type="text" name="nzbsrus_apikey" value="${config['nzbsrus_apikey']}" size="10">
-                                    </div>
-                                </div>
-                            </fieldset>
-                            <fieldset>
                                 <legend>omgwtfnzbs</legend>
                                 <div class="row checkbox">
-                                    <input id="useomgwtfnzbs" type="checkbox" name="omgwtfnzbs" onclick="initConfigCheckbox($(this));" value="1" ${config['use_omgwtfnzbs']} /><label>Use omgwtfnzbs</label>
+                                    <input id="use_omgwtfnzbs" type="checkbox" name="use_omgwtfnzbs" onclick="initConfigCheckbox($(this));" value="1" ${config['use_omgwtfnzbs']} /><label>Use omgwtfnzbs</label>
                                 </div>
                                 <div class="config">
                                     <div class="row">
@@ -381,7 +511,7 @@
                                     </div>
                                     <div class="row">
                                         <label>omgwtfnzbs API Key</label>
-                                        <input type="text" name="omgwtfnzbs_apikey" value="${config['omgwtfnzbs_apikey']}" size="10">
+                                        <input type="text" name="omgwtfnzbs_apikey" value="${config['omgwtfnzbs_apikey']}" size="30">
                                     </div>
                                 </div>
                             </fieldset>
@@ -389,63 +519,119 @@
                         <td>
                             <fieldset>
                                 <legend>Torrents</legend>
-                                <div class="row checkbox">
-                                    <input id="usepiratebay" type="checkbox" name="use_piratebay" value="1" ${config['use_piratebay']} /><label>The Pirate Bay</label>
-                                </div>
-                                <div class="config">
-                                    <div class="row">
-                                        <label>Proxy URL (Optional): </label>
-                                        <input type="text" name="piratebay_proxy_url" value="${config['piratebay_proxy_url']}" size="36">
+
+                                <fieldset>
+                                    <legend>The Pirate Bay</legend>
+                                    <div class="row checkbox">
+                                        <input id="use_piratebay" type="checkbox" name="use_piratebay" value="1" ${config['use_piratebay']} /><label>Use The Pirate Bay</label>
                                     </div>
-                                </div>
-                                <div class="row checkbox">
-                                    <input type="checkbox" name="use_isohunt" value="1" ${config['use_isohunt']} /><label>Isohunt</label>
-                                </div>
-                                <div class="row checkbox">
-                                    <input type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /><label>Mininova</label>
-                                </div>
-                                <div class="row checkbox">
-                                    <input type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Kick Ass Torrents</label>
-                                </div>
-                                <div class="row checkbox">
-                                    <input id="usewaffles" type="checkbox" name="waffles" onclick="initConfigCheckbox($(this));" value="1" ${config['use_waffles']} /><label>Waffles.fm</label>
-                                </div>
-                                <div class="config">
-                                    <div class="row">
-                                        <label>Waffles UID Number: </label>
-                                        <input type="text" name="waffles_uid" value="${config['waffles_uid']}" size="36">
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>Proxy URL</label>
+                                            <input type="text" name="piratebay_proxy_url" value="${config['piratebay_proxy_url']}" size="36">
+                                            <small>Optional. Leave empty for default.</small>
+                                        </div>
+                                        <div class="row">
+                                            <label>Seed Ratio</label>
+                                            <input type="text" class="override-float" name="piratebay_ratio" value="${config['piratebay_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
+                                        </div>
                                     </div>
-                                    <div class="row">
-                                        <label>Waffles Passkey: </label>
-                                        <input type="password" name="waffles_passkey" value="${config['waffles_passkey']}" size="36">
+                                </fieldset>
+
+                                <fieldset>
+                                    <legend>Kick Ass Torrents</legend>
+                                    <div class="row checkbox">
+                                        <input id="use_kat" type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Use Kick Ass Torrents</label>
                                     </div>
-                                </div>
-                                <div class="row checkbox">
-                                    <input id="userutracker" type="checkbox" name="rutracker" onclick="initConfigCheckbox($(this));" value="1" ${config['use_rutracker']} /><label>rutracker.org</label>
-                                </div>
-                                <div class="config">
-                                    <div class="row">
-                                        <label>rutracker User Name: </label>
-                                        <input type="text" name="rutracker_user" value="${config['rutracker_user']}" size="36">
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>Proxy URL</label>
+                                            <input type="text" name="kat_proxy_url" value="${config['kat_proxy_url']}" size="36">
+                                            <small>Optional. Leave empty for default.</small>
+                                        </div>
+                                        <div class="row">
+                                            <label>Seed Ratio</label>
+                                            <input type="text" class="override-float" name="kat_ratio" value="${config['kat_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
+                                        </div>
                                     </div>
-                                    <div class="row">
-                                        <label>rutracker Password: </label>
-                                        <input type="password" name="rutracker_password" value="${config['rutracker_password']}" size="36">
+                                </fieldset>
+
+                                <fieldset>
+                                    <legend>Waffles.fm</legend>
+                                    <div class="row checkbox">
+                                        <input id="use_waffles" type="checkbox" name="use_waffles" onclick="initConfigCheckbox($(this));" value="1" ${config['use_waffles']} /><label>Use Waffles.fm</label>
                                     </div>
-                                </div>
-                                <div class="row checkbox">
-                                    <input id="usewhatcd" type="checkbox" name="whatcd" onclick="initConfigCheckbox($(this));" value="1" ${config['use_whatcd']} /><label>What.cd</label>
-                                </div>
-                                <div class="config">
-                                    <div class="row">
-                                        <label>What.cd Username: </label>
-                                        <input type="text" name="whatcd_username" value="${config['whatcd_username']}" size="36">
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>UID Number</label>
+                                            <input type="text" name="waffles_uid" value="${config['waffles_uid']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Passkey</label>
+                                            <input type="password" name="waffles_passkey" value="${config['waffles_passkey']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Seed Ratio</label>
+                                            <input type="text" class="override-float" name="waffles_ratio" value="${config['waffles_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
+                                        </div>
                                     </div>
-                                    <div class="row">
-                                        <label>What.cd Password: </label>
-                                        <input type="password" name="whatcd_password" value="${config['whatcd_password']}" size="36">
+                                </fieldset>
+
+                                <fieldset>
+                                    <legend>rutracker.org</legend>
+                                    <div class="row checkbox">
+                                        <input id="use_rutracker" type="checkbox" name="use_rutracker" onclick="initConfigCheckbox($(this));" value="1" ${config['use_rutracker']} /><label>Use rutracker.org</label>
                                     </div>
-                                </div>
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>Userame</label>
+                                            <input type="text" name="rutracker_user" value="${config['rutracker_user']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Password</label>
+                                            <input type="password" name="rutracker_password" value="${config['rutracker_password']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Seed Ratio</label>
+                                            <input type="text" class="override-float" name="rutracker_ratio" value="${config['rutracker_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset>
+                                    <legend>What.cd</legend>
+                                    <div class="row checkbox">
+                                        <input id="use_whatcd" type="checkbox" name="use_whatcd" onclick="initConfigCheckbox($(this));" value="1" ${config['use_whatcd']} /><label>Use What.cd</label>
+                                    </div>
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>Username</label>
+                                            <input type="text" name="whatcd_username" value="${config['whatcd_username']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Password</label>
+                                            <input type="password" name="whatcd_password" value="${config['whatcd_password']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Seed Ratio</label>
+                                            <input type="text" class="override-float" name="whatcd_ratio" value="${config['whatcd_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset>
+                                    <legend>Mininova</legend>
+                                     <div class="row checkbox">
+                                        <input id="use_mininova" type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /><label>Use Mininova</label>
+                                    </div>
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>Seed Ratio</label>
+                                            <input type="text" class="override-float" name="mininova_ratio" value="${config['mininova_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
+                                        </div>
+                                    </div>
+                                </fieldset>
+
                             </fieldset>
                         </td>
                     </tr>
@@ -453,23 +639,50 @@
                 <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
             </div>
             <div id="tabs-4">
-                <table class="configtable" summary="Quality & Post Processing">
+                <table class="configtable" summary="Quality &amp; Post Processing">
                     <tr>
                         <td>
                             <fieldset>
                                 <legend>Quality</legend>
                                 <div class="row radio clearfix">
-                                    <input type="radio" name="preferred_quality" id="preferred_quality0" value="0" ${config['pref_qual_0']}><label>Highest Quality excluding Lossless</label>
-                                    <input type="radio" name="preferred_quality" id="preferred_quality1" value="1" ${config['pref_qual_1']}><label>Highest Quality including Lossless</label>
-                                    <input type="radio" name="preferred_quality" id="preferred_quality3" value="3" ${config['pref_qual_3']}><label>Lossless Only</label>
-                                    <input type="radio" id="preferred_bitrate" name="preferred_quality" value="2" ${config['pref_qual_2']}>Preferred Bitrate: <input type="text" class="override-float" name="preferred_bitrate" value="${config['pref_bitrate']}" size="3">kbps<br>
+                                    <label title="Snatch the highest quality available, excluding lossless.">
+                                        <input type="radio" name="preferred_quality" id="preferred_quality0" value="0" ${config['pref_qual_0']}>
+                                        Highest Quality excluding Lossless
+                                    </label>
+                                    <label title="Snatch the highest quality available, including lossless.">
+                                        <input type="radio" name="preferred_quality" id="preferred_quality1" value="1" ${config['pref_qual_1']}>
+                                        Highest Quality including Lossless
+                                    </label>
+                                    <label title="Snatch only lossless quality.">
+                                        <input type="radio" name="preferred_quality" id="lossless_only" value="3" ${config['pref_qual_3']}>
+                                        Lossless Only
+                                    </label>
+                                    <div id="lossless_only_options">
+                                        <span style="padding-left: 20px">
+                                            Reject if target size is not in bitrate range:
+                                            <input type="text" class="override-float" name="lossless_bitrate_from" value="${config['lossless_bitrate_from']}" size="4" title="e.g. if album length = 40 mins, from = 350 kbps, then min target size = 102.5 mb, anything less will be rejected">to\
+                                            <input type="text" class="override-float" name="lossless_bitrate_to" value="${config['lossless_bitrate_to']}" size="5" title="e.g. if album length = 40 mins, to = 2000 kbps, then max target size = 586 mb, anything greater will be rejected">kbps
+                                        </span>
+                                    </div>
+                                    <label title="Prefer certain bitrate range, including lossless fallback. Use this option if you have a lot of wrong snatches.">
+                                        <input type="radio" id="preferred_bitrate" name="preferred_quality" value="2" ${config['pref_qual_2']}>
+                                        Preferred Bitrate
+                                    <label>
                                     <div id="preferred_bitrate_options">
-                                        Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['pref_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['pref_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br><br>
-                                        <div class="row checkbox left">
-                                            <input type="checkbox" name="preferred_bitrate_allow_lossless" value="1" ${config['pref_bitrate_allow_lossless']}>
+                                        <div class="row">
+                                            Target bitrate
+                                            <input type="text" class="override-float" name="preferred_bitrate" value="${config['preferred_bitrate']}" size="3">kbps<br>
+                                        </div>
+                                        <div class="row">
+                                            <span style="padding-left: 20px">
+                                                Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['preferred_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['preferred_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br>
+                                            </span>
+                                        </div>
+                                        <div class="row checkbox left" style="padding-left: 20px">
+                                            <input type="checkbox" name="preferred_bitrate_allow_lossless" value="1" ${config['preferred_bitrate_allow_lossless']}>
                                             <label>Allow lossless if no good lossy match found</label>
                                         </div>
-                                        <div class="row checkbox left">
+                                        <div class="row checkbox left" style="padding-left: 20px">
                                             <input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />
                                             <label>Auto-Detect Preferred Bitrate</label>
                                         </div>
@@ -478,7 +691,7 @@
                             </fieldset>
                             <fieldset>
                                 <legend>Search Words</legend>
-                                <small>Separate words with a comma, e.g. "word1,word2,word3"</small>
+                                <small>Separate words with a comma, e.g. "word1,word2,word3".</small>
                                 <div class="row">
                                     <label>Ignored Words</label>
                                     <input type="text" name="ignored_words" value="${config['ignored_words']}" size="50">
@@ -487,7 +700,7 @@
                                 <div class="row">
                                     <label>Preferred Words</label>
                                     <input type="text" name="preferred_words" value="${config['preferred_words']}" size="50">
-                                    <small>Results with these words in the title will be preferred over results without them</small>
+                                    <small>Results with these words in the title will be preferred over results without them (search provider names can also be entered)</small>
                                 </div>
                                 <div class="row">
                                     <label>Required Words</label>
@@ -500,34 +713,76 @@
                             <fieldset>
                                 <legend>Post-Processing</legend>
                                 <div class="row checkbox left clearfix">
-                                    <input type="checkbox" name="move_files" id="move_files" value="1" ${config['move_files']} /><label>Move downloads to Destination Folder</label>
+                                    <label title="Use associated .cue sheet to split single file albums into multiple tracks. Requires shntool with flac or xld cli (OS X) to be installed.">
+                                        Split single file albums into multiple tracks
+                                        <input type="checkbox" name="cue_split" id="cue_split" value="1" ${config['cue_split']} />
+                                    </label>
+                                </div>
+                                <div class="row checkbox left clearfix">
+                                    <label title="Freeze the database, so new artists won't be added automatically. Use this if Headphones adds artists because due to wrong snatches. This check is skipped when the folder name is appended with release group ID.">
+                                        Freeze database for adding new artist
+                                        <input type="checkbox" name="freeze_db" id="freeze_db" value="1" ${config['freeze_db']} />
+                                    </label>
+                                    <label>
+                                        Move downloads to Destination Folder
+                                        <input type="checkbox" name="move_files" id="move_files" value="1" ${config['move_files']} />
+                                    </label>
                                     <div id="move_files_options">
                                         <div class="row indent">
-                                            <input type="checkbox" name="replace_existing_folders" value="1" ${config['replace_existing_folders']}><label>Replace existing folders?</label>
+                                            <label>
+                                                Replace existing folders?
+                                                <input type="checkbox" name="replace_existing_folders" value="1" ${config['replace_existing_folders']}>
+                                            </label>
                                          </div>
                                     </div>
-                                    <input type="checkbox" name="rename_files" value="1" ${config['rename_files']} /><label>Rename files</label>
-                                    <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} /><label>Correct metadata</label>
-                                    <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} /><label>Delete leftover files <small>(.m3u, .nfo, .sfv, .nzb, etc.)</small></label>
-                                    <input type="checkbox" name="add_album_art" id="add_album_art" value="1" ${config['add_album_art']}><label>Add album art jpeg to album folder</label>
-                                    <div id="album_art_options">
+                                    <label>
+                                        Rename files
+                                        <input type="checkbox" name="rename_files" value="1" ${config['rename_files']} />
+                                    </label>
+                                    <label>
+                                        Correct metadata
+                                        <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} />
+                                    </label>
+                                    <label>
+                                        Delete leftover files <small>(.m3u, .nfo, .sfv, .nzb, etc.)</small>
+                                        <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} />
+                                    </label>
+                                    <label>
+                                        Keep original nfo <small>(extension changed to .orig.nfo)</small>
+                                        <input type="checkbox" name="keep_nfo" value="1" ${config['keep_nfo']} />
+                                    </label>
+                                    <label>
+                                        Add album art jpeg to album folder
+                                        <input type="checkbox" name="add_album_art" id="add_album_art" value="1" ${config['add_album_art']}>
+                                    </label>
+                                    <div id="album_art_options" style="padding-left: 20px">
                                         <div class="row">
                                             as <input type="text" class="override-float" name="album_art_format" value="${config['album_art_format']}" size="10">.jpg
                                         </div>
                                         <small>Use $Artist/$artist, $Album/$album, $Year/$year</small>
                                     </div>
-                                    <input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}><label>Embed album art in each file</label>
-                                    <input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}><label>Embed lyrics</label>
+                                    <label>
+                                        Embed album art in each file
+                                        <input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}>
+                                    </label>
+                                    <label>
+                                        Embed lyrics
+                                        <input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}>
+                                    </label>
                                 </div>
                                 <div class="row">
-                                    <label>Path to Destination Folder</label>
-                                    <input type="text" name="destination_dir" value="${config['dest_dir']}" size="50">
-                                    <small>e.g. /Users/name/Music/iTunes or /Volumes/share/music</small>
+                                    <label>
+                                        Destination Directory:
+                                    </label>
+                                    <input type="text" name="destination_dir" value="${config['destination_dir']}" size="50">
+                                    <small>The directory where Headphones will move file to after post processing, e.g. /Volumes/share/music.</small>
                                 </div>
                                 <div class="row">
-                                    <label>Path to Lossless Destination folder (optional)</label>
-                                    <input type="text" name="lossless_destination_dir" value="${config['lossless_dest_dir']}" size="50">
-                                    <small>Set this if you have a separate directory for lossless music</small>
+                                    <label>
+                                        Lossless Destination Directory:
+                                    </label>
+                                    <input type="text" name="lossless_destination_dir" value="${config['lossless_destination_dir']}" size="50">
+                                    <small>Optional. Set this if you have a separate directory for lossless music.</small>
                                 </div>
                             </fieldset>
                         </td>
@@ -569,7 +824,7 @@
                                         <input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} /><label>Notify on snatch?</label>
                                     </div>
                                     <div class="row">
-                                        <label>Priority (-2,-1,0,1 or 2):</label>
+                                        <label>Priority (-2,-1,0,1 or 2)</label>
                                         <input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2">
                                     </div>
                                 </div>
@@ -672,8 +927,20 @@
                                     </div>
                                 </div>
                             </fieldset>
-                            </td>
-                            <td>
+                            <fieldset>
+                                <h3>Logitech Media Server</h3>
+                                <div class="checkbox row">
+                                    <input type="checkbox" name="lms_enabled" id="lms" value="1" ${config['lms_enabled']} /><label>Enable LMS Updates</label>
+                                </div>
+                                <div id="lmsoptions">
+                                    <div class="row">
+                                        <label>LMS Host:Port</label>
+                                        <input type="text" name="lms_host" value="${config['lms_host']}" size="30">
+                                        <small>e.g. http://localhost:9000. Seperate hosts with commas</small>
+                                    </div>
+                                </div>
+                            </fieldset>
+
                             <fieldset>
                                 <h3>Pushalot</h3>
                                 <div class="checkbox row">
@@ -690,6 +957,28 @@
                                     </div>
                                 </div>
                             </fieldset>
+
+                            <fieldset>
+                                <h3>Subsonic</h3>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="subsonic_enabled" id="subsonic" value="1" ${config['subsonic_enabled']} /><label>Enable Subsonic Updates</label>
+                                </div>
+                                <div id="subsonicoptions">
+                                    <div class="row">
+                                        <label>Subsonic URL</label><input type="text" name="subsonic_host" value="${config['subsonic_host']}" size="30">
+                                    </div>
+                                    <div class="row">
+                                        <label>Subsonic Username</label><input type="text" name="subsonic_username" value="${config['subsonic_username']}" size="30">
+                                    </div>
+                                    <div class="row">
+                                        <label>Subsonic Password</label><input type="password" name="subsonic_password" value="${config['subsonic_password']}" size="30">
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                        </td>
+                        <td>
+
                             <fieldset>
                                 <h3>Synology NAS</h3>
                                 <div class="checkbox row">
@@ -710,11 +999,11 @@
                                         <input type="checkbox" name="pushover_onsnatch" value="1" ${config['pushover_onsnatch']} /><label>Notify on snatch?</label>
                                     </div>
                                     <div class="row">
-                                        <label>Priority (-1,0, or 1):</label>
+                                        <label>Priority (-1,0, or 1)</label>
                                         <input type="text" name="pushover_priority" value="${config['pushover_priority']}" size="2">
                                     </div>
                                     <div class="row">
-                                        <label>API Token (leave blank to use Headphones default):</label><input type="text" name="pushover_apitoken" value="${config['pushover_apitoken']}" size="50">
+                                        <label>API Token (leave blank to use Headphones default)</label><input type="text" name="pushover_apitoken" value="${config['pushover_apitoken']}" size="50">
                                     </div>
                                 </div>
                             </fieldset>
@@ -758,7 +1047,48 @@
                                     </div>
                                 </div>
                             </fieldset>
-                        </td>
+
+                            <fieldset>
+                                <h3>OS X</h3>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="osx_notify_enabled" id="osx_notify" value="1" ${config['osx_notify_enabled']} /><label>Enable OS X Notifications</label>
+                                </div>
+                                <div id="osx_notify_options">
+                                     <div class="row">
+                                        <small>Enter the path/application name to be registered with the Notification Center, default is /Applications/Headphones</small>
+                                        <input type="text" id="osx_notify_reg" name="osx_notify_app" value="${config['osx_notify_app']}" size="50"><label>Register Notify App</label>
+                                        <input type="button" value="Register" id="osxnotifyregister">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="osx_notify_onsnatch" value="1" ${config['osx_notify_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <h3>Boxcar2</h3>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="boxcar_enabled" id="boxcar" value="1" ${config['boxcar_enabled']} /><label>Enable Boxcar2 Notifications</label>
+                                </div>
+                                <div id="boxcar_options">
+                                    <div class="row">
+                                        <label>Access Token</label><input type="text" name="boxcar_token" value="${config['boxcar_token']}" size="35">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="boxcar_onsnatch" value="1" ${config['boxcar_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                  </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <h3>MPC</h3>
+                                <div class="checkbox row">
+                                    <input type="checkbox" name="mpc_enabled" id="mpc" value="1" ${config['mpc_enabled']} /><label>Enable MPC Update</label>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                            </td>
                     </tr>
                 </table>
                 <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
@@ -772,7 +1102,7 @@
                             <div class="row">
                                 <label>Folder Format</label>
                                 <input type="text" name="folder_format" value="${config['folder_format']}" size="43">
-                                <small>Use: $Artist/$artist, $Album/$album, $Year/$year, $Type/$type (release type) and $First/$first (first letter in artist name)
+                                <small>Use: $Artist/$artist, $Album/$album, $Year/$year, $Type/$type (release type) and $First/$first (first letter in artist name), $OriginalFolder/$originalfolder (downloaded directory name)
                                                                 E.g.: $Type/$First/$artist/$album [$year] = Album/G/girl talk/all day [2010]</small>
 
                             </div>
@@ -802,24 +1132,35 @@
                                 </div>
                             </div>
                             <%
-                                    if config['encoder'] == 'lame':
-                                        lameselect = 'selected="selected"'
-                                        ffmpegselect = ''
-                                        xldselect = ''
-                                    elif config['encoder'] == 'ffmpeg':
-                                        lameselect = ''
-                                        ffmpegselect = 'selected="selected"'
-                                        xldselect = ''
-                                    else:
-                                        lameselect = ''
-                                        ffmpegselect = ''
-                                        xldselect = 'selected="selected"'
+                                if config['encoder'] == 'lame':
+                                    lameselect = 'selected="selected"'
+                                    ffmpegselect = ''
+                                    xldselect = ''
+                                    libavselect = ''
+                                elif config['encoder'] == 'ffmpeg':
+                                    lameselect = ''
+                                    ffmpegselect = 'selected="selected"'
+                                    xldselect = ''
+                                    libavselect = ''
+                                elif config['encoder'] == 'libav':
+                                    lameselect = ''
+                                    ffmpegselect = ''
+                                    xldselect = ''
+                                    libavselect = 'selected="selected"'
+                                else:
+                                    lameselect = ''
+                                    ffmpegselect = ''
+                                    xldselect = 'selected="selected"'
+                                    libavselect = ''
                             %>
                             <div class="row">
-                                <label>Encoder</label>
+                                <label title="Name of encoder to use. Lame, FFmpeg and libav are available for most Linux distributions. On Ubuntu, libav replaces FFmpeg. xld is OS X-only.">
+                                    Encoder
+                                </label>
                                 <select name="encoder" id="encoder">
                                     <option value="lame" ${lameselect}>lame</option>
                                     <option value="ffmpeg" ${ffmpegselect}>ffmpeg</option>
+                                    <option value="libav" ${libavselect}>libav</option>
                                     <option value="xld" ${xldselect}>xld</option>
                                 </select>
                             </div>
@@ -830,7 +1171,7 @@
                             </div>
                             <div class="row">
                                 <div class="row">
-                                    <label>Multi-core count:</label>
+                                    <label>Multi-core count</label>
                                     <input type="text" name="encoder_multicore_count" value="${config['encoder_multicore_count']}" size="7">
                                     <small>Set equal to the number of cores, or 0 for auto</small>
                                 </div>
@@ -916,8 +1257,9 @@
                                 <fieldset>
                                     <legend>Advanced Encoding Options</legend>
                                     <div class="row">
-                                        <label>(ignores audio properties)</label>
+                                        <label>Arguments</label>
                                         <input type="text" name="advancedencoder" value="${config['advancedencoder']}" size="43">
+                                        <small>Ignores all of the above options</small>
                                     </div>
                                 </fieldset>
                             </div>
@@ -930,14 +1272,14 @@
                             </div>
                             <div class="row">
                                 <label>Path to Encoder</label>
-                                <input type="text" name="encoderfolder" value="${config['encoderfolder']}" size="43">
+                                <input type="text" name="encoder_path" value="${config['encoder_path']}" size="43">
                             </div>
                         </td>
                         <td>
                             <fieldset>
                                 <legend>Miscellaneous</legend>
                                 <div class="checkbox left row">
-                                    <input type="checkbox" name="include_extras" id="include_extras" value="1" ${config['include_extras']} /><label>Automatically Include Extras When Adding an Artist <br>
+                                    <input type="checkbox" name="include_extras" id="include_extras" value="1" ${config['include_extras']} /><label>Automatically include extras when adding an artist <br>
                                     <%
                                         which_extras_selected = ""
                                         for extra in config['extras']:
@@ -962,32 +1304,37 @@
                                     </div>
                                 </div>
                                 <div class="row left checkbox">
-                                    <input type="checkbox" name="autowant_upcoming" value="1" ${config['autowant_upcoming']} /><label>Automatically Mark Upcoming Albums as Wanted</label>
+                                    <input type="checkbox" name="autowant_upcoming" value="1" ${config['autowant_upcoming']} /><label>Automatically mark upcoming albums as wanted</label>
                                 </div>
                                 <div class="row left checkbox">
-                                    <input type="checkbox" name="autowant_all" value="1" ${config['autowant_all']} /><label>Automatically Mark All Albums as Wanted</label>
+                                    <input type="checkbox" name="autowant_all" value="1" ${config['autowant_all']} /><label>Automatically mark all albums as wanted</label>
+                                </div>
+                                <div class="row left checkbox">
+                                    <input type="checkbox" title="Automatically mark manually added albums from search results as wanted"
+                                           name="autowant_manually_added" value="1" ${config['autowant_manually_added']} />
+                                    <label>Automatically mark manually added albums as wanted</label>
                                 </div>
                                 <div class="row">
-                                    <label>Folder Permissions:</label>
+                                    <label>Folder Permissions</label>
                                     <input type="text" name="folder_permissions" value="${config['folder_permissions']}" size="7">
                                 </div>
                                 <div class="row">
-                                    <label>File Permissions:</label>
+                                    <label>File Permissions</label>
                                     <input type="text" name="file_permissions" value="${config['file_permissions']}" size="7">
                                 </div>
                                 <div class="row">
-                                    <label>Cache Size (in MB):</label>
+                                    <label>Cache Size (in MB)</label>
                                     <input type="text" name="cache_sizemb" value="${config['cache_sizemb']}" size="7">
                                 </div>
                             </fieldset>
                             <fieldset>
                                 <legend>Interface</legend>
-                                <div class="row">
+                                <div class="row" style="display: none">
                                     <label>Interface</label>
                                     <select name="interface"><h3>
                                     %for interface in config['interface_list']:
                                     <%
-                                        if interface == headphones.INTERFACE:
+                                        if interface == headphones.CONFIG.INTERFACE:
                                             selected = 'selected="selected"'
                                         else:
                                             selected = ''
@@ -997,11 +1344,11 @@
                                     </select>
                                 </div>
                                 <div class="row">
-                                    <label>Log Directory:</label>
+                                    <label>Log Directory</label>
                                     <input type="text" name="log_dir" value="${config['log_dir']}" size="50">
                                 </div>
                                 <div class="row">
-                                    <label>Cache Directory:</label>
+                                    <label>Cache Directory</label>
                                     <input type="text" name="cache_dir" value="${config['cache_dir']}" size="50">
                                 </div>
                             </fieldset>
@@ -1013,29 +1360,30 @@
                                 </div>
                                 <div id="songkickoptions">
                                   <div class="row">
-                                      <label>API Key:</label>
+                                      <label>API Key</label>
                                       <input type="text" name="songkick_apikey" value="${config['songkick_apikey']}" size="50">
                                   </div>
                                   <div class="row checkbox">
-                                      <input type="checkbox" name="songkick_filter_enabled" id="songkick_filter" value="1" ${config['songkick_filter_enabled']} /><label>Enable Songkick filter per area</label>
+                                      <input type="checkbox" name="songkick_filter_enabled" id="songkick_filter" value="1" ${config['songkick_filter_enabled']} /><label>Filter by Metro Area</label>
                                   </div>
                                   <div id="songkick_filteroptions">
                                     <div class="row">
-                                      <label>Location:</label>
-                                      <input type="text" name="songkick_location" value="${config['songkick_location']}" size="50">
+                                      <label>Metro Area ID</label>
+                                      <input type="text" name="songkick_location" value="${config['songkick_location']}" size="10" title="Enter the Metro Area ID, e.g. the ID for London is 24426, this can be found by clicking the link and searching/selecting the city, e.g. London should find http://www.songkick.com/metro_areas/24426-uk-london">
+                                        <a target="_blank" href="http://www.songkick.com/developer/location-search">Find Area ID</a>
                                     </div>
                                   </div>
                                 </div>
                             </fieldset>
-                            
+
                             <fieldset>
                                 <legend>Musicbrainz</legend>
                                 <div class="row">
                                     <label>Muscbrainz Mirror</label>
                                     <select name="mirror" id="mirror">
-                                    %for mirror in config['mirror_list']:
+                                    %for mirror in config['mirrorlist']:
                                         <%
-                                            if mirror == headphones.MIRROR:
+                                            if mirror == headphones.CONFIG.MIRROR:
                                                 selected = 'selected="selected"'
                                             else:
                                                 selected = ''
@@ -1058,10 +1406,10 @@
 
                                 <div id="hpserveroptions">
                                     <div class="row">
-                                        <label>Username:</label><input type="text" class="hpuser" name="hpuser" value="${config['hpuser']}" size="20">
+                                        <label>Username</label><input type="text" class="hpuser" name="hpuser" value="${config['hpuser']}" size="20">
                                     </div>
                                     <div class="row">
-                                        <label>Password:</label><input type="password" class="hppass" name="hppass" value="${config['hppass']}" size="15"><br>
+                                        <label>Password</label><input type="password" class="hppass" name="hppass" value="${config['hppass']}" size="15"><br>
                                         <a href="http://headphones.codeshy.com/vip" id="vipserver" target="_blank">Get an Account!</a>
                                     </div>
                                 </div>
@@ -1077,7 +1425,7 @@
 </%def>
 
 <%def name="javascriptIncludes()">
-        <script>
+    <script>
 
         hideServerDivs = function () {
                 $("#customoptions").slideUp();
@@ -1090,33 +1438,34 @@
         };
 
         handleNewServerSelection = function () {
-
                 hideServerDivs();
 
                 switch ($(this).val()) {
                         case 'custom':
-                                $("#customoptions").slideDown();
+                            $("#customoptions").slideDown();
                         break;
                         case 'headphones':
-                                $("#hpserveroptions").slideDown();
+                            $("#hpserveroptions").slideDown();
                         break;
                 }
         };
 
         handleNewEncoderSelection = function () {
-
                 hideEncoderDivs();
 
                 switch ($(this).val()) {
                         case 'xld':
-                                $("#xldproperties").slideDown();
-                        break;
+                            $("#xldproperties").slideDown();
+                            break;
                         case 'ffmpeg':
-                                $("#lameffmpegproperties").slideDown();
-                        break;
+                            $("#lameffmpegproperties").slideDown();
+                            break;
+                        case 'libav':
+                            $("#lameffmpegproperties").slideDown();
+                            break;
                         case 'lame':
-                                $("#lameffmpegproperties").slideDown();
-                        break;
+                            $("#lameffmpegproperties").slideDown();
+                            break;
                 }
         };
 
@@ -1128,25 +1477,24 @@
         };
 
         function initThisPage()
-
         {
                 if ($("#api_enabled").is(":checked"))
                         {
-                                $("#apioptions").show();
+                            $("#apioptions").show();
                         }
                 else
                         {
-                                $("#apioptions").hide();
+                            $("#apioptions").hide();
                         }
 
                 $("#api_enabled").click(function(){
                         if ($("#api_enabled").is(":checked"))
                         {
-                                $("#apioptions").slideDown();
+                            $("#apioptions").slideDown();
                         }
                         else
                         {
-                                $("#apioptions").slideUp();
+                            $("#apioptions").slideUp();
                         }
                 });
 
@@ -1163,384 +1511,478 @@
         });
                 if ($("#enable_https").is(":checked"))
                         {
-                                $("#https_options").show();
+                            $("#https_options").show();
                         }
                 else
                         {
-                                $("#https_options").hide();
+                            $("#https_options").hide();
                         }
 
                 $("#enable_https").click(function(){
                         if ($("#enable_https").is(":checked"))
                         {
-                                $("#https_options").slideDown();
+                            $("#https_options").slideDown();
                         }
                         else
                         {
-                                $("#https_options").slideUp();
+                            $("#https_options").slideUp();
                         }
                 });
                 if ($("#music_encoder").is(":checked"))
                         {
-                                $("#encoderoptions").show();
+                            $("#encoderoptions").show();
                         }
                 else
                         {
-                                $("#encoderoptions").hide();
+                            $("#encoderoptions").hide();
                         }
 
                 $("#music_encoder").click(function(){
                         if ($("#music_encoder").is(":checked"))
                         {
-                                $("#encoderoptions").slideDown();
+                            $("#encoderoptions").slideDown();
                         }
                         else
                         {
-                                $("#encoderoptions").slideUp();
+                            $("#encoderoptions").slideUp();
                         }
                 });
 
                 if ($("#add_album_art").is(":checked"))
                         {
-                                $("#album_art_options").show();
+                            $("#album_art_options").show();
                         }
                 else
                         {
-                                $("#album_art_options").hide();
+                            $("#album_art_options").hide();
                         }
 
                 $("#add_album_art").click(function(){
                         if ($("#add_album_art").is(":checked"))
                         {
-                                $("#album_art_options").slideDown();
+                            $("#album_art_options").slideDown();
                         }
                         else
                         {
-                                $("#album_art_options").slideUp();
+                            $("#album_art_options").slideUp();
                         }
                 });
 
                 if ($("#move_files").is(":checked"))
                         {
-                                $("#move_files_options").show();
+                            $("#move_files_options").show();
                         }
                 else
                         {
-                                $("#move_files_options").hide();
+                            $("#move_files_options").hide();
                         }
 
                 $("#move_files").click(function(){
                         if ($("#move_files").is(":checked"))
                         {
-                                $("#move_files_options").slideDown();
+                            $("#move_files_options").slideDown();
                         }
                         else
                         {
-                                $("#move_files_options").slideUp();
+                            $("#move_files_options").slideUp();
                         }
                 });
 
                 if ($("#growl").is(":checked"))
                         {
-                                $("#growloptions").show();
+                            $("#growloptions").show();
                         }
                 else
                         {
-                                $("#growloptions").hide();
+                            $("#growloptions").hide();
                         }
 
                 $("#growl").click(function(){
                         if ($("#growl").is(":checked"))
                         {
-                                $("#growloptions").slideDown();
+                            $("#growloptions").slideDown();
                         }
                         else
                         {
-                                $("#growloptions").slideUp();
+                            $("#growloptions").slideUp();
                         }
                 });
 
                 if ($("#prowl").is(":checked"))
                         {
-                                $("#prowloptions").show();
+                            $("#prowloptions").show();
                         }
                 else
                         {
-                                $("#prowloptions").hide();
+                            $("#prowloptions").hide();
                         }
 
                 $("#prowl").click(function(){
                         if ($("#prowl").is(":checked"))
                         {
-                                $("#prowloptions").slideDown();
+                            $("#prowloptions").slideDown();
                         }
                         else
                         {
-                                $("#prowloptions").slideUp();
+                            $("#prowloptions").slideUp();
                         }
                 });
 
                 if ($("#xbmc").is(":checked"))
                         {
-                                $("#xbmcoptions").show();
+                            $("#xbmcoptions").show();
                         }
                 else
                         {
-                                $("#xbmcoptions").hide();
+                            $("#xbmcoptions").hide();
                         }
 
                 $("#xbmc").click(function(){
                         if ($("#xbmc").is(":checked"))
                         {
-                                $("#xbmcoptions").slideDown();
+                            $("#xbmcoptions").slideDown();
                         }
                         else
                         {
-                                $("#xbmcoptions").slideUp();
+                            $("#xbmcoptions").slideUp();
+                        }
+                });
+
+                if ($("#lms").is(":checked"))
+                        {
+                            $("#lmsoptions").show();
+                        }
+                else
+                        {
+                            $("#lmsoptions").hide();
+                        }
+
+                $("#lms").click(function(){
+                        if ($("#lms").is(":checked"))
+                        {
+                            $("#lmsoptions").slideDown();
+                        }
+                        else
+                        {
+                            $("#lmsoptions").slideUp();
                         }
                 });
 
                 if ($("#plex").is(":checked"))
                         {
-                                $("#plexoptions").show();
+                            $("#plexoptions").show();
                         }
                 else
                         {
-                                $("#plexoptions").hide();
+                            $("#plexoptions").hide();
                         }
 
                 $("#plex").click(function(){
                         if ($("#plex").is(":checked"))
                         {
-                                $("#plexoptions").slideDown();
+                            $("#plexoptions").slideDown();
                         }
                         else
                         {
-                                $("#plexoptions").slideUp();
+                            $("#plexoptions").slideUp();
                         }
                 });
 
                 if ($("#nma").is(":checked"))
                         {
-                                $("#nmaoptions").show();
+                            $("#nmaoptions").show();
                         }
                 else
                         {
-                                $("#nmaoptions").hide();
+                            $("#nmaoptions").hide();
                         }
 
                 $("#nma").click(function(){
                         if ($("#nma").is(":checked"))
                         {
-                                $("#nmaoptions").slideDown();
+                            $("#nmaoptions").slideDown();
                         }
                         else
                         {
-                                $("#nmaoptions").slideUp();
+                            $("#nmaoptions").slideUp();
                         }
                 });
 
                 if ($("#pushalot").is(":checked"))
                         {
-                                $("#pushalotoptions").show();
+                            $("#pushalotoptions").show();
                         }
                 else
                         {
-                                $("#pushalotoptions").hide();
+                            $("#pushalotoptions").hide();
                         }
 
                 $("#pushalot").click(function(){
                         if ($("#pushalot").is(":checked"))
                         {
-                                $("#pushalotoptions").slideDown();
+                            $("#pushalotoptions").slideDown();
                         }
                         else
                         {
-                                $("#pushalotoptions").slideUp();
+                            $("#pushalotoptions").slideUp();
                         }
                 });
 
                 if ($("#pushover").is(":checked"))
                         {
-                                $("#pushoveroptions").show();
+                            $("#pushoveroptions").show();
                         }
                 else
                         {
-                                $("#pushoveroptions").hide();
+                            $("#pushoveroptions").hide();
                         }
 
                 $("#pushover").click(function(){
                         if ($("#pushover").is(":checked"))
                         {
-                                $("#pushoveroptions").slideDown();
+                            $("#pushoveroptions").slideDown();
                         }
                         else
                         {
-                                $("#pushoveroptions").slideUp();
+                            $("#pushoveroptions").slideUp();
                         }
                 });
 
                 if ($("#pushbullet").is(":checked"))
                         {
-                                $("#pushbulletoptions").show();
+                            $("#pushbulletoptions").show();
                         }
                 else
                         {
-                                $("#pushbulletoptions").hide();
+                            $("#pushbulletoptions").hide();
                         }
+
 
                 $("#pushbullet").click(function(){
                         if ($("#pushbullet").is(":checked"))
                         {
-                                $("#pushbulletoptions").slideDown();
+                            $("#pushbulletoptions").slideDown();
                         }
                         else
                         {
-                                $("#pushbulletoptions").slideUp();
+                            $("#pushbulletoptions").slideUp();
                         }
                 });
 
                 if ($("#twitter").is(":checked"))
                         {
-                                $("#twitteroptions").show();
+                            $("#twitteroptions").show();
                         }
                 else
                         {
-                                $("#twitteroptions").hide();
+                            $("#twitteroptions").hide();
                         }
 
                 $("#twitter").click(function(){
                         if ($("#twitter").is(":checked"))
                         {
-                                $("#twitteroptions").slideDown();
+                            $("#twitteroptions").slideDown();
                         }
                         else
                         {
-                                $("#twitteroptions").slideUp();
+                            $("#twitteroptions").slideUp();
                         }
                 });
-                
-                 if ($("#songkick").is(":checked"))
+
+                if ($("#osx_notify").is(":checked"))
                         {
-                                $("#songkickoptions").show();
+                            $("#osx_notify_options").show();
                         }
                 else
                         {
-                                $("#songkickoptions").hide();
+                            $("#osx_notify_options").hide();
+                        }
+
+                $("#osx_notify").click(function(){
+                        if ($("#osx_notify").is(":checked"))
+                        {
+                            $("#osx_notify_options").slideDown();
+                        }
+                        else
+                        {
+                            $("#osx_notify_options").slideUp();
+                        }
+                });
+
+                if ($("#boxcar").is(":checked"))
+                        {
+                            $("#boxcar_options").show();
+                        }
+                else
+                        {
+                            $("#boxcar_options").hide();
+                        }
+
+                $("#boxcar").click(function(){
+                        if ($("#boxcar").is(":checked"))
+                        {
+                            $("#boxcar_options").slideDown();
+                        }
+                        else
+                        {
+                            $("#boxcar_options").slideUp();
+                        }
+                });
+
+                if ($("#subsonic").is(":checked"))
+                        {
+                            $("#subsonicoptions").show();
+                        }
+                else
+                        {
+                            $("#subsonicoptions").hide();
+                        }
+
+                $("#subsonic").click(function(){
+                        if ($("#subsonic").is(":checked"))
+                        {
+                            $("#subsonicoptions").slideDown();
+                        }
+                        else
+                        {
+                            $("#subsonicoptions").slideUp();
+                        }
+                });
+
+                if ($("#songkick").is(":checked"))
+                        {
+                            $("#songkickoptions").show();
+                        }
+                else
+                        {
+                            $("#songkickoptions").hide();
                         }
 
                 $("#songkick").click(function(){
                         if ($("#songkick").is(":checked"))
                         {
-                                $("#songkickoptions").slideDown();
+                            $("#songkickoptions").slideDown();
                         }
                         else
                         {
-                                $("#songkickoptions").slideUp();
+                            $("#songkickoptions").slideUp();
                         }
                 });
-                
+
                 if ($("#songkick_filter").is(":checked"))
                         {
-                                $("#songkick_filteroptions").show();
+                            $("#songkick_filteroptions").show();
                         }
                 else
                         {
-                                $("#songkick_filteroptions").hide();
+                            $("#songkick_filteroptions").hide();
                         }
 
                 $("#songkick_filter").click(function(){
                         if ($("#songkick_filter").is(":checked"))
                         {
-                                $("#songkick_filteroptions").slideDown();
+                            $("#songkick_filteroptions").slideDown();
                         }
                         else
                         {
-                                $("#songkick_filteroptions").slideUp();
+                            $("#songkick_filteroptions").slideUp();
                         }
                 });
 
-                if ($("#preferred_bitrate").is(":checked"))
+                if ($("#lossless_only").is(":checked"))
                         {
-                                $("#preferred_bitrate_options").show();
+                            $("#lossless_only_options").show();
                         }
                 else
                         {
-                                $("#preferred_bitrate_options").hide();
+                            $("#lossless_only_options").hide();
+                        }
+
+                if ($("#preferred_bitrate").is(":checked"))
+                        {
+                            $("#preferred_bitrate_options").show();
+                        }
+                else
+                        {
+                            $("#preferred_bitrate_options").hide();
                         }
 
                 if ($("#nzb_downloader_sabnzbd").is(":checked"))
                         {
-                                $("#sabnzbd_options").show();
-                                $("#nzbget_options,#blackhole_options").hide();
+                            $("#sabnzbd_options").show();
+                            $("#nzbget_options,#blackhole_options").hide();
                         }
                 if ($("#nzb_downloader_nzbget").is(":checked"))
                         {
-                                $("#sabnzbd_options,#blackhole_options").hide();
-                                $("#nzbget_options").show();
+                            $("#sabnzbd_options,#blackhole_options").hide();
+                            $("#nzbget_options").show();
                         }
                 if ($("#nzb_downloader_blackhole").is(":checked"))
                         {
-                                $("#sabnzbd_options,#nzbget_options").hide();
-                                $("#blackhole_options").show();
+                            $("#sabnzbd_options,#nzbget_options").hide();
+                            $("#blackhole_options").show();
                         }
 
                 if ($("#torrent_downloader_blackhole").is(":checked"))
                         {
-                                $("#transmission_options,#utorrent_options").hide();
-                                $("#torrent_blackhole_options").show();
+                            $("#transmission_options,#utorrent_options").hide();
+                            $("#torrent_blackhole_options").show();
                         }
                 if ($("#torrent_downloader_transmission").is(":checked"))
                         {
-                                $("#torrent_blackhole_options,#utorrent_options").hide();
-                                $("#transmission_options").show();
+                            $("#torrent_blackhole_options,#utorrent_options").hide();
+                            $("#transmission_options").show();
                         }
                 if ($("#torrent_downloader_utorrent").is(":checked"))
                         {
-                                $("#torrent_blackhole_options,#transmission_options").hide();
-                                $("#utorrent_options").show();
+                            $("#torrent_blackhole_options,#transmission_options").hide();
+                            $("#utorrent_options").show();
                         }
 
                 $('input[type=radio]').change(function(){
                         if ($("#preferred_bitrate").is(":checked"))
                         {
-                                $("#preferred_bitrate_options").slideDown("fast");
+                            $("#preferred_bitrate_options").slideDown("fast");
+                            $("#lossless_only_options").slideUp("fast");
                         }
                         if ($("#preferred_quality0").is(":checked"))
                         {
-                                $("#preferred_bitrate_options").slideUp("fast");
+                            $("#preferred_bitrate_options").slideUp("fast");
+                            $("#lossless_only_options").slideUp("fast");
                         }
                         if ($("#preferred_quality1").is(":checked"))
                         {
-                                $("#preferred_bitrate_options").slideUp("fast");
+                            $("#preferred_bitrate_options").slideUp("fast");
+                            $("#lossless_only_options").slideUp("fast");
                         }
-                        if ($("#preferred_quality3").is(":checked"))
+                        if ($("#lossless_only").is(":checked"))
                         {
-                                $("#preferred_bitrate_options").slideUp("fast");
+                            $("#lossless_only_options").slideDown("fast");
+                            $("#preferred_bitrate_options").slideUp("fast");
                         }
                         if ($("#nzb_downloader_sabnzbd").is(":checked"))
                         {
-                                $("#nzbget_options,#blackhole_options").fadeOut("fast", function() { $("#sabnzbd_options").fadeIn() });
+                            $("#nzbget_options,#blackhole_options").fadeOut("fast", function() { $("#sabnzbd_options").fadeIn() });
                         }
                         if ($("#nzb_downloader_nzbget").is(":checked"))
                         {
-                                $("#sabnzbd_options,#blackhole_options").fadeOut("fast", function() { $("#nzbget_options").fadeIn() });
+                            $("#sabnzbd_options,#blackhole_options").fadeOut("fast", function() { $("#nzbget_options").fadeIn() });
                         }
                         if ($("#nzb_downloader_blackhole").is(":checked"))
                         {
-                                $("#sabnzbd_options,#nzbget_options").fadeOut("fast", function() { $("#blackhole_options").fadeIn() });
+                            $("#sabnzbd_options,#nzbget_options").fadeOut("fast", function() { $("#blackhole_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_blackhole").is(":checked"))
                         {
-                                $("#transmission_options,#utorrent_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
+                            $("#transmission_options,#utorrent_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_transmission").is(":checked"))
                         {
-                                $("#torrent_blackhole_options,#utorrent_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
+                            $("#torrent_blackhole_options,#utorrent_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_utorrent").is(":checked"))
                         {
-                                $("#torrent_blackhole_options,#transmission_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
+                            $("#torrent_blackhole_options,#transmission_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
                         }
                 });
 
@@ -1599,21 +2041,21 @@
                 });
 
                 $(function() {
-                        $( "#tabs" ).tabs();
+                    $( "#tabs" ).tabs();
                 });
                 initActions();
-                initConfigCheckbox("#use_headphones_indexer");
-                initConfigCheckbox("#usenewznab");
-                initConfigCheckbox("#usenzbsrus");
-                initConfigCheckbox("#usenzbsorg");
-                initConfigCheckbox("#useomgwtfnzbs");
-                initConfigCheckbox("#usepiratebay");
-                initConfigCheckbox("#usewaffles");
-                initConfigCheckbox("#userutracker");
-                initConfigCheckbox("#usewhatcd");
-                initConfigCheckbox("#useapi");
+                initConfigCheckbox("#headphones_indexer");
+                initConfigCheckbox("#use_newznab");
+                initConfigCheckbox("#use_nzbsorg");
+                initConfigCheckbox("#use_omgwtfnzbs");
+                initConfigCheckbox("#use_kat");
+                initConfigCheckbox("#use_piratebay");
+                initConfigCheckbox("#use_mininova");
+                initConfigCheckbox("#use_waffles");
+                initConfigCheckbox("#use_rutracker");
+                initConfigCheckbox("#use_whatcd");
+                initConfigCheckbox("#api_enabled");
                 initConfigCheckbox("#enable_https");
-        
 
 
                 $('#twitterStep1').click(function () {
@@ -1633,11 +2075,17 @@
                         function (data) { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>"); });
                     $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
                 });
+
+                $('#osxnotifyregister').click(function () {
+                    var osx_notify_app = $("#osx_notify_reg").val();
+                    $.get("/osxnotifyregister", {'app': osx_notify_app}, function (data) { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>"); });
+                    $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut()
+                })
         }
 
         $(document).ready(function() {
             initThisPage();
         });
 
-        </script>
+    </script>
 </%def>

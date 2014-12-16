@@ -14,13 +14,12 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import glob
-import urllib
 import headphones
 
 from headphones import db, helpers, logger, lastfm, request
 
-lastfm_apikey = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
+LASTFM_API_KEY = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
+
 
 class Cache(object):
     """
@@ -40,34 +39,31 @@ class Cache(object):
     and for info it is <musicbrainzid>.<date>.txt
     """
 
-    path_to_art_cache = os.path.join(headphones.CACHE_DIR, 'artwork')
-
-    id = None
-    id_type = None # 'artist' or 'album' - set automatically depending on whether ArtistID or AlbumID is passed
-    query_type = None # 'artwork','thumb' or 'info' - set automatically
-
-    artwork_files = []
-    thumb_files = []
-
-    artwork_errors = False
-    artwork_url = None
-
-    thumb_errors = False
-    thumb_url = None
-
-    info_summary = None
-    info_content = None
+    path_to_art_cache = os.path.join(headphones.CONFIG.CACHE_DIR, 'artwork')
 
     def __init__(self):
+        self.id = None
+        self.id_type = None # 'artist' or 'album' - set automatically depending on whether ArtistID or AlbumID is passed
+        self.query_type = None # 'artwork','thumb' or 'info' - set automatically
 
-        pass
+        self.artwork_files = []
+        self.thumb_files = []
 
-    def _findfilesstartingwith(self,pattern,folder):
+        self.artwork_errors = False
+        self.artwork_url = None
+
+        self.thumb_errors = False
+        self.thumb_url = None
+
+        self.info_summary = None
+        self.info_content = None
+
+    def _findfilesstartingwith(self, pattern, folder):
         files = []
         if os.path.exists(folder):
             for fname in os.listdir(folder):
                 if fname.startswith(pattern):
-                    files.append(os.path.join(folder,fname))
+                    files.append(os.path.join(folder, fname))
         return files
 
     def _exists(self, type):
@@ -75,14 +71,14 @@ class Cache(object):
         self.thumb_files = []
 
         if type == 'artwork':
-            self.artwork_files = self._findfilesstartingwith(self.id,self.path_to_art_cache)
+            self.artwork_files = self._findfilesstartingwith(self.id, self.path_to_art_cache)
             if self.artwork_files:
                 return True
             else:
                 return False
 
         elif type == 'thumb':
-            self.thumb_files = self._findfilesstartingwith("T_" + self.id,self.path_to_art_cache)
+            self.thumb_files = self._findfilesstartingwith("T_" + self.id, self.path_to_art_cache)
             if self.thumb_files:
                 return True
             else:
@@ -91,10 +87,9 @@ class Cache(object):
     def _get_age(self, date):
         # There's probably a better way to do this
         split_date = date.split('-')
-        days_old = int(split_date[0])*365 + int(split_date[1])*30 + int(split_date[2])
+        days_old = int(split_date[0]) * 365 + int(split_date[1]) * 30 + int(split_date[2])
 
         return days_old
-
 
     def _is_current(self, filename=None, date=None):
 
@@ -126,9 +121,9 @@ class Cache(object):
         return thumb_url
 
     def get_artwork_from_cache(self, ArtistID=None, AlbumID=None):
-        '''
+        """
         Pass a musicbrainz id to this function (either ArtistID or AlbumID)
-        '''
+        """
 
         self.query_type = 'artwork'
 
@@ -152,9 +147,9 @@ class Cache(object):
                 return None
 
     def get_thumb_from_cache(self, ArtistID=None, AlbumID=None):
-        '''
+        """
         Pass a musicbrainz id to this function (either ArtistID or AlbumID)
-        '''
+        """
 
         self.query_type = 'thumb'
 
@@ -194,11 +189,11 @@ class Cache(object):
         if not db_info or not db_info['LastUpdated'] or not self._is_current(date=db_info['LastUpdated']):
 
             self._update_cache()
-            info_dict = { 'Summary' : self.info_summary, 'Content' : self.info_content }
+            info_dict = {'Summary': self.info_summary, 'Content': self.info_content}
             return info_dict
 
         else:
-            info_dict = { 'Summary' : db_info['Summary'], 'Content' : db_info['Content'] }
+            info_dict = {'Summary': db_info['Summary'], 'Content': db_info['Content']}
             return info_dict
 
     def get_image_links(self, ArtistID=None, AlbumID=None):
@@ -209,14 +204,14 @@ class Cache(object):
         if ArtistID:
 
             self.id_type = 'artist'
-            data = lastfm.request_lastfm("artist.getinfo", mbid=ArtistID, api_key=lastfm_apikey)
+            data = lastfm.request_lastfm("artist.getinfo", mbid=ArtistID, api_key=LASTFM_API_KEY)
 
             if not data:
                 return
 
             try:
                 image_url = data['artist']['image'][-1]['#text']
-            except Exception:
+            except (KeyError, IndexError):
                 logger.debug('No artist image found')
                 image_url = None
 
@@ -227,23 +222,53 @@ class Cache(object):
         else:
 
             self.id_type = 'album'
-            data = lastfm.request_lastfm("album.getinfo", mbid=AlbumID, api_key=lastfm_apikey)
+            data = lastfm.request_lastfm("album.getinfo", mbid=AlbumID, api_key=LASTFM_API_KEY)
 
             if not data:
                 return
 
             try:
-                image_url = data['artist']['image'][-1]['#text']
-            except Exception:
-                logger.debug('No artist image found')
+                image_url = data['album']['image'][-1]['#text']
+            except (KeyError, IndexError):
+                logger.debug('No album image found on last.fm')
                 image_url = None
 
             thumb_url = self._get_thumb_url(data)
 
             if not thumb_url:
-                logger.debug('No artist thumbnail image found')
+                logger.debug('No album thumbnail image found on last.fm')
 
-        return {'artwork' : image_url, 'thumbnail' : thumb_url }
+        return {'artwork': image_url, 'thumbnail': thumb_url}
+
+    def remove_from_cache(self, ArtistID=None, AlbumID=None):
+        """
+        Pass a musicbrainz id to this function (either ArtistID or AlbumID)
+        """
+
+        if ArtistID:
+            self.id = ArtistID
+            self.id_type = 'artist'
+        else:
+            self.id = AlbumID
+            self.id_type = 'album'
+
+        self.query_type = 'artwork'
+
+        if self._exists('artwork'):
+            for artwork_file in self.artwork_files:
+                try:
+                    os.remove(artwork_file)
+                except:
+                    logger.warn('Error deleting file from the cache: %s', artwork_file)
+
+        self.query_type = 'thumb'
+
+        if self._exists('thumb'):
+            for thumb_file in self.thumb_files:
+                try:
+                    os.remove(thumb_file)
+                except Exception:
+                    logger.warn('Error deleting file from the cache: %s', thumb_file)
 
     def _update_cache(self):
         '''
@@ -252,26 +277,27 @@ class Cache(object):
         myDB = db.DBConnection()
 
         # Since lastfm uses release ids rather than release group ids for albums, we have to do a artist + album search for albums
+        # Exception is when adding albums manually, then we should use release id
         if self.id_type == 'artist':
 
-            data = lastfm.request_lastfm("artist.getinfo", mbid=self.id, api_key=lastfm_apikey)
+            data = lastfm.request_lastfm("artist.getinfo", mbid=self.id, api_key=LASTFM_API_KEY)
 
             if not data:
                 return
 
             try:
                 self.info_summary = data['artist']['bio']['summary']
-            except Exception:
+            except KeyError:
                 logger.debug('No artist bio summary found')
                 self.info_summary = None
             try:
                 self.info_content = data['artist']['bio']['content']
-            except Exception:
+            except KeyError:
                 logger.debug('No artist bio found')
                 self.info_content = None
             try:
                 image_url = data['artist']['image'][-1]['#text']
-            except Exception:
+            except KeyError:
                 logger.debug('No artist image found')
                 image_url = None
 
@@ -281,25 +307,30 @@ class Cache(object):
 
         else:
 
-            dbartist = myDB.action('SELECT ArtistName, AlbumTitle FROM albums WHERE AlbumID=?', [self.id]).fetchone()
-            data = lastfm.request_lastfm("album.getinfo", artist=dbartist['ArtistName'], album=dbartist['AlbumTitle'], api_key=lastfm_apikey)
+            dbalbum = myDB.action('SELECT ArtistName, AlbumTitle, ReleaseID FROM albums WHERE AlbumID=?', [self.id]).fetchone()
+            if dbalbum['ReleaseID'] != self.id:
+                data = lastfm.request_lastfm("album.getinfo", mbid=dbalbum['ReleaseID'], api_key=LASTFM_API_KEY)
+                if not data:
+                    data = lastfm.request_lastfm("album.getinfo", artist=dbalbum['ArtistName'], album=dbalbum['AlbumTitle'], api_key=LASTFM_API_KEY)
+            else:
+                data = lastfm.request_lastfm("album.getinfo", artist=dbalbum['ArtistName'], album=dbalbum['AlbumTitle'], api_key=LASTFM_API_KEY)
 
             if not data:
                 return
 
             try:
                 self.info_summary = data['album']['wiki']['summary']
-            except Exception:
+            except KeyError:
                 logger.debug('No album summary found')
                 self.info_summary = None
             try:
                 self.info_content = data['album']['wiki']['content']
-            except Exception:
+            except KeyError:
                 logger.debug('No album infomation found')
                 self.info_content = None
             try:
                 image_url = data['album']['image'][-1]['#text']
-            except Exception:
+            except KeyError:
                 logger.debug('No album image link found')
                 image_url = None
 
@@ -310,13 +341,13 @@ class Cache(object):
 
         #Save the content & summary to the database no matter what if we've opened up the url
         if self.id_type == 'artist':
-            controlValueDict = {"ArtistID":     self.id}
+            controlValueDict = {"ArtistID": self.id}
         else:
-            controlValueDict = {"ReleaseGroupID":     self.id}
+            controlValueDict = {"ReleaseGroupID": self.id}
 
-        newValueDict = {"Summary":       self.info_summary,
-                        "Content":       self.info_content,
-                        "LastUpdated":   helpers.today()}
+        newValueDict = {"Summary": self.info_summary,
+                        "Content": self.info_content,
+                        "LastUpdated": helpers.today()}
 
         myDB.upsert("descriptions", newValueDict, controlValueDict)
 
@@ -343,7 +374,7 @@ class Cache(object):
                 if not os.path.isdir(self.path_to_art_cache):
                     try:
                         os.makedirs(self.path_to_art_cache)
-                    except Exception, e:
+                    except Exception as e:
                         logger.error('Unable to create artwork cache dir. Error: %s', e)
                         self.artwork_errors = True
                         self.artwork_url = image_url
@@ -359,16 +390,15 @@ class Cache(object):
 
                 artwork_path = os.path.join(self.path_to_art_cache, self.id + '.' + helpers.today() + ext)
                 try:
-                    f = open(artwork_path, 'wb')
-                    f.write(artwork)
-                    f.close()
-                except Exception, e:
+                    with open(artwork_path, 'wb') as f:
+                        f.write(artwork)
+                except IOError as e:
                     logger.error('Unable to write to the cache dir: %s', e)
                     self.artwork_errors = True
                     self.artwork_url = image_url
 
         # Grab the thumbnail as well if we're getting the full artwork (as long as it's missing/outdated
-        if thumb_url and self.query_type in ['thumb','artwork'] and not (self.thumb_files and self._is_current(self.thumb_files[0])):
+        if thumb_url and self.query_type in ['thumb', 'artwork'] and not (self.thumb_files and self._is_current(self.thumb_files[0])):
             artwork = request.request_content(thumb_url, timeout=20)
 
             if artwork:
@@ -376,7 +406,7 @@ class Cache(object):
                 if not os.path.isdir(self.path_to_art_cache):
                     try:
                         os.makedirs(self.path_to_art_cache)
-                    except Exception, e:
+                    except Exception as e:
                         logger.error('Unable to create artwork cache dir. Error: %s' + e)
                         self.thumb_errors = True
                         self.thumb_url = thumb_url
@@ -385,20 +415,20 @@ class Cache(object):
                 for thumb_file in self.thumb_files:
                     try:
                         os.remove(thumb_file)
-                    except:
+                    except Exception as e:
                         logger.error('Error deleting file from the cache: %s', thumb_file)
 
                 ext = os.path.splitext(image_url)[1]
 
                 thumb_path = os.path.join(self.path_to_art_cache, 'T_' + self.id + '.' + helpers.today() + ext)
                 try:
-                    f = open(thumb_path, 'wb')
-                    f.write(artwork)
-                    f.close()
-                except Exception, e:
+                    with open(thumb_path, 'wb') as f:
+                        f.write(artwork)
+                except IOError as e:
                     logger.error('Unable to write to the cache dir: %s', e)
                     self.thumb_errors = True
                     self.thumb_url = image_url
+
 
 def getArtwork(ArtistID=None, AlbumID=None):
 
@@ -414,6 +444,7 @@ def getArtwork(ArtistID=None, AlbumID=None):
         artwork_file = os.path.basename(artwork_path)
         return "cache/artwork/" + artwork_file
 
+
 def getThumb(ArtistID=None, AlbumID=None):
 
     c = Cache()
@@ -428,6 +459,7 @@ def getThumb(ArtistID=None, AlbumID=None):
         thumbnail_file = os.path.basename(artwork_path)
         return "cache/artwork/" + thumbnail_file
 
+
 def getInfo(ArtistID=None, AlbumID=None):
 
     c = Cache()
@@ -435,6 +467,7 @@ def getInfo(ArtistID=None, AlbumID=None):
     info_dict = c.get_info_from_cache(ArtistID, AlbumID)
 
     return info_dict
+
 
 def getImageLinks(ArtistID=None, AlbumID=None):
 

@@ -3,7 +3,7 @@ import inspect
 import os
 import sys
 import time
- 
+
 try:
     import objgraph
 except ImportError:
@@ -15,6 +15,7 @@ from cherrypy.process.plugins import SimplePlugin
 
 
 class ReferrerTree(object):
+
     """An object which gathers all referrers of an object to a given depth."""
 
     peek_length = 40
@@ -89,6 +90,7 @@ class ReferrerTree(object):
     def format(self, tree):
         """Return a list of string reprs from a nested list of referrers."""
         output = []
+
         def ascend(branch, depth=1):
             for parent, grandparents in branch:
                 output.append(("    " * depth) + self._format(parent))
@@ -103,15 +105,15 @@ def get_instances(cls):
 
 
 class RequestCounter(SimplePlugin):
-    
+
     def start(self):
         self.count = 0
-    
+
     def before_request(self):
         self.count += 1
-    
+
     def after_request(self):
-        self.count -=1
+        self.count -= 1
 request_counter = RequestCounter(cherrypy.engine)
 request_counter.subscribe()
 
@@ -129,15 +131,17 @@ def get_context(obj):
 
 
 class GCRoot(object):
+
     """A CherryPy page handler for testing reference leaks."""
 
-    classes = [(_cprequest.Request, 2, 2,
-                "Should be 1 in this request thread and 1 in the main thread."),
-               (_cprequest.Response, 2, 2,
-                "Should be 1 in this request thread and 1 in the main thread."),
-               (_cpwsgi.AppResponse, 1, 1,
-                "Should be 1 in this request thread only."),
-               ]
+    classes = [
+        (_cprequest.Request, 2, 2,
+         "Should be 1 in this request thread and 1 in the main thread."),
+        (_cprequest.Response, 2, 2,
+         "Should be 1 in this request thread and 1 in the main thread."),
+        (_cpwsgi.AppResponse, 1, 1,
+         "Should be 1 in this request thread only."),
+    ]
 
     def index(self):
         return "Hello, world!"
@@ -145,14 +149,14 @@ class GCRoot(object):
 
     def stats(self):
         output = ["Statistics:"]
-        
+
         for trial in range(10):
             if request_counter.count > 0:
                 break
             time.sleep(0.5)
         else:
             output.append("\nNot all requests closed properly.")
-        
+
         # gc_collect isn't perfectly synchronous, because it may
         # break reference cycles that then take time to fully
         # finalize. Call it thrice and hope for the best.
@@ -208,7 +212,6 @@ class GCRoot(object):
                     t = ReferrerTree(ignore=[objs], maxdepth=3)
                     tree = t.ascend(obj)
                     output.extend(t.format(tree))
-        
+
         return "\n".join(output)
     stats.exposed = True
-

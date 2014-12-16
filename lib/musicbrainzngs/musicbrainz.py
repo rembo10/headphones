@@ -93,7 +93,7 @@ VALID_RELEASE_TYPES = [
     "nat",
     "album", "single", "ep", "broadcast", "other", # primary types
     "compilation", "soundtrack", "spokenword", "interview", "audiobook",
-    "live", "remix", "dj-mix", "mixtape/street", # secondary types
+    "live", "remix", "dj-mix", "mixtape/street", "demo", # secondary types
 ]
 #: These can be used to filter whenever releases or release-groups are involved
 VALID_RELEASE_STATUSES = ["official", "promotion", "bootleg", "pseudo-release"]
@@ -279,7 +279,7 @@ def auth(u, p):
 	global user, password
 	user = u
 	password = p
-	
+
 def hpauth(u, p):
     """Set the username and password to be used in subsequent queries to
     the MusicBrainz XML API that require authentication.
@@ -574,7 +574,7 @@ def _mb_request(path, method='GET', auth_required=False, client_required=False,
     whether exceptions should be raised if the client and
     username/password are left unspecified, respectively.
     """
-    global parser_fun 
+    global parser_fun
 
     if args is None:
         args = {}
@@ -638,7 +638,7 @@ def _mb_request(path, method='GET', auth_required=False, client_required=False,
     if hostname == '144.76.94.239:8181':
         base64string = base64.encodestring('%s:%s' % (hpuser, hppassword)).replace('\n', '')
         req.add_header("Authorization", "Basic %s" % base64string)
-        
+
     _log.debug("requesting with UA %s" % _useragent)
     if body:
         req.add_header('Content-Type', 'application/xml; charset=UTF-8')
@@ -908,7 +908,7 @@ def get_releases_by_discid(id, includes=[], toc=None, cdstubs=True):
     The `toc` should have to same format as :attr:`discid.Disc.toc_string`.
 
     If no toc matches in musicbrainz but a :musicbrainz:`CD Stub` does,
-    the CD Stub will be returned. Prevent this from happening by 
+    the CD Stub will be returned. Prevent this from happening by
     passing `cdstubs=False`.
 
     The result is a dict with either a 'disc' , a 'cdstub' key
