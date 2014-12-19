@@ -332,13 +332,13 @@ class WebInterface(object):
         results_as_dicts = []
 
         for result in results:
-
             result_dict = {
                 'title': result[0],
                 'size': result[1],
                 'url': result[2],
                 'provider': result[3],
-                'kind': result[4]
+                'kind': result[4],
+                'matches': result[5]
             }
             results_as_dicts.append(result_dict)
         s = json.dumps(results_as_dicts)
