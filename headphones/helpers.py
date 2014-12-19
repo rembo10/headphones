@@ -171,13 +171,20 @@ def mb_to_bytes(mb_str):
 def piratesize(size):
     split = size.split(" ")
     factor = float(split[0])
-    unit = split[1]
+    unit = split[1].upper()
+
     if unit == 'MiB':
         size = factor * 1048576
+    elif unit == 'MB':
+        size = factor * 1000000
     elif unit == 'GiB':
         size = factor * 1073741824
+    elif unit == 'GB':
+        size = factor * 1000000000
     elif unit == 'KiB':
         size = factor * 1024
+    elif unit == 'KB':
+        size = factor * 1000
     elif unit == "B":
         size = factor
     else:
