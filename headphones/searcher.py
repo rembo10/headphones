@@ -28,6 +28,7 @@ import re
 import string
 import shutil
 import random
+import urllib
 import headphones
 import subprocess
 import unicodedata
@@ -160,6 +161,8 @@ def get_seed_ratio(provider):
         seed_ratio = headphones.CONFIG.WHATCD_RATIO
     elif provider == 'The Pirate Bay':
         seed_ratio = headphones.CONFIG.PIRATEBAY_RATIO
+    elif provider == 'Old Pirate Bay':
+        seed_ratio = headphones.CONFIG.OLDPIRATEBAY_RATIO
     elif provider == 'Waffles.fm':
         seed_ratio = headphones.CONFIG.WAFFLES_RATIO
     elif provider == 'Mininova':
@@ -186,7 +189,6 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False,
         results = myDB.select('SELECT * from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
 
         for album in results:
-
             if not album['AlbumTitle'] or not album['ArtistName']:
                 logger.warn('Skipping release %s. No title available', album['AlbumID'])
                 continue
@@ -217,7 +219,7 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
 
     NZB_PROVIDERS = (headphones.CONFIG.HEADPHONES_INDEXER or headphones.CONFIG.NEWZNAB or headphones.CONFIG.NZBSORG or headphones.CONFIG.OMGWTFNZBS)
     NZB_DOWNLOADERS = (headphones.CONFIG.SAB_HOST or headphones.CONFIG.BLACKHOLE_DIR or headphones.CONFIG.NZBGET_HOST)
-    TORRENT_PROVIDERS = (headphones.CONFIG.KAT or headphones.CONFIG.PIRATEBAY or headphones.CONFIG.MININOVA or headphones.CONFIG.WAFFLES or headphones.CONFIG.RUTRACKER or headphones.CONFIG.WHATCD)
+    TORRENT_PROVIDERS = (headphones.CONFIG.KAT or headphones.CONFIG.PIRATEBAY or headphones.CONFIG.OLDPIRATEBAY or headphones.CONFIG.MININOVA or headphones.CONFIG.WAFFLES or headphones.CONFIG.RUTRACKER or headphones.CONFIG.WHATCD)
 
     results = []
     myDB = db.DBConnection()
@@ -1347,7 +1349,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
         # Request content
         logger.info("Searching The Pirate Bay using term: %s", tpb_term)
 
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'}
         data = request.request_soup(url=providerurl + category, headers=headers)
 
         # Process content
@@ -1383,13 +1385,69 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                         size = helpers.piratesize(formatted_size)
 
                         if size < maxsize and minimumseeders < seeds and url is not None:
-                            resultlist.append((title, size, url, provider, "torrent"))
+                            match = True
                             logger.info('Found %s. Size: %s' % (title, formatted_size))
                         else:
+                            match = False
                             logger.info('%s is larger than the maxsize or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i)' % (title, size, int(seeds)))
+
+                        resultlist.append((title, size, url, provider, "torrent", match))
                     except Exception as e:
                         logger.error(u"An unknown error occurred in the Pirate Bay parser: %s" % e)
 
+    # Old Pirate Bay Compatible
+    if headphones.CONFIG.OLDPIRATEBAY:
+        provider = "Old Pirate Bay"
+        tpb_term = term.replace("!", "")
+
+        # Pick category for torrents
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
+            maxsize = 10000000000
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
+            maxsize = 10000000000
+        else:
+            maxsize = 300000000
+
+        # Requesting content
+        logger.info("Parsing results from Old Pirate Bay")
+
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'}
+        provider_url = fix_url(headphones.CONFIG.OLDPIRATEBAY_URL) + \
+            "/search.php?" + urllib.urlencode({"q": tpb_term, "iht": 6})
+
+        data = request.request_soup(url=provider_url, headers=headers)
+
+        # Process content
+        if data:
+            rows = data.select('table tbody tr')
+
+            if not rows:
+                logger.info("No results found")
+            else:
+                for item in rows:
+                    try:
+                        links = item.select("td.title-row a")
+
+                        rightformat = True
+                        title = links[1].text
+                        seeds = int(item.select("td.seeders-row")[0].text)
+                        url = links[0]["href"] # Magnet link. The actual download link is not based on the URL
+
+                        formatted_size = item.select("td.size-row")[0].text
+                        size = helpers.piratesize(formatted_size)
+
+                        if size < maxsize and minimumseeders < seeds and url is not None:
+                            match = True
+                            logger.info('Found %s. Size: %s' % (title, formatted_size))
+                        else:
+                            match = False
+                            logger.info('%s is larger than the maxsize or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i)' % (title, size, int(seeds)))
+
+                        resultlist.append((title, size, url, provider, "torrent", match))
+                    except Exception as e:
+                        logger.error(u"An unknown error occurred in the Old Pirate Bay parser: %s" % e)
+
+    # Mininova
     if headphones.CONFIG.MININOVA:
         provider = "Mininova"
         providerurl = fix_url("http://www.mininova.org/rss/" + term + "/5")
@@ -1479,8 +1537,8 @@ def preprocess(resultlist):
                 headers['Referer'] = 'http://kat.ph/'
             elif result[3] == 'What.cd':
                 headers['User-Agent'] = 'Headphones'
-            elif result[3] == "The Pirate Bay":
-                headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'
+            elif result[3] == "The Pirate Bay" or result[3] == "Old Pirate Bay":
+                headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
             return request.request_content(url=result[2], headers=headers), result
 
         else:
