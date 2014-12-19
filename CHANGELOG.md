@@ -7,8 +7,11 @@ Highlight:
 * Added: advanced option to ignore certain folders by patterns. (#2037)
 * Added: advanced option to ignore certain files by patterns (library only)
 * Added: specify optional paths to CUE splitting tools (#1938)
+* Added: experimental support for OPB (provide details yourself!)
 * Fixed: magnet to torrent conversion (#1926)
+* Fixed: new KAT URL (#2043)
 * Improved: notify user of SSL-related warnings, instead of silently failing.
+* Improved: show all search results for 'Choose Specific Release'
 
 The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.1...v0.5.2).
 
