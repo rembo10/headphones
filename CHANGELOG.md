@@ -10,6 +10,7 @@ Highlight:
 * Added: experimental support for OPB (provide details yourself!)
 * Fixed: magnet to torrent conversion (#1926)
 * Fixed: new KAT URL (#2043)
+* Fixed: LMS notifications (#1564)
 * Improved: notify user of SSL-related warnings, instead of silently failing.
 * Improved: show all search results for 'Choose Specific Release'
 
