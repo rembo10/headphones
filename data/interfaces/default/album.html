@@ -57,13 +57,12 @@
 									search_term = ""
 								else:
 									search_term = album['SearchTerm']
-								
 							%>
 							<input type="text" value="${search_term}" name="SearchTerm" size="40" />
 						</div>
 						<input type="button" value="Save changes" onclick="doAjaxCall('editSearchTerm',$(this),'tabs',true);return false;" data-success="Search term updated"/>
 					</form>
-				</div>	
+				</div>
 			<a class="menu_link_edit" id="choose_specific_download" href="#" onclick="getAvailableDownloads()"><i class="fa fa-search"></i> Choose Specific Download</a>
 				<div id="choose_specific_download_dialog" title="Choose a specific download for this album" style="display:none" class="configtable">
 						<table class="display" id="downloads_table">
@@ -73,19 +72,20 @@
 									<th id="size">Size</th>
 									<th id="provider">Provider</th>
 									<th id="kind">Kind</th>
+									<th id="matches" title="Matches quality and/or seed settings.">Matches</th>
 								</tr>
 							</thead>
 							<tbody id="downloads_table_body">
 							</tbody>
 						</table>
-				</div>	
+				</div>
 		</div>
-	</div>	
+	</div>
 </%def>
 
 <%def name="body()">
 	<div class="table_wrapper">
-		<div id="albumheader" class="clearfix">	
+		<div id="albumheader" class="clearfix">
 			<div id="albumImg">
 				<img height="200" alt="" class="albumArt" src="artwork/album/${album['AlbumID']}">
 			</div>
@@ -231,12 +231,13 @@
 			feedback.fadeOut();
 			search_results = data
 			for( var i = 0, len = data.length; i < len; i++ ) {
-    			$('#downloads_table_body').append('<tr><td id="title"><a href="#" onclick="downloadSpecificRelease('+i+')">'+data[i].title+'</a></td><td id="size"><span title='+data[i].size+'></span>'+(data[i].size / (1024*1024)).toFixed(2)+' MB</td><td id="provider">'+data[i].provider+'</td><td id="kind">'+data[i].kind+'</td></tr>');
+    			$('#downloads_table_body').append('<tr><td id="title"><a href="#" onclick="downloadSpecificRelease('+i+')">'+data[i].title+'</a></td><td id="size"><span title='+data[i].size+'></span>'+(data[i].size / (1024*1024)).toFixed(2)+' MB</td><td id="provider">'+data[i].provider+'</td><td id="kind">'+data[i].kind+'</td><td id="matches">'+data[i].matches+'</td></tr>');
     		}
 			$('#downloads_table').dataTable({
 				"aoColumns": [
 					null,
 					{ "sType": "title-numeric"},
+					null,
 					null,
 					null
 				],

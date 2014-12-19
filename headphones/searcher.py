@@ -263,6 +263,10 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
     if choose_specific_download:
         return results
 
+    # Filter all results that do not comply
+    results = [ result for result in results if result[5] ]
+
+    # Sort the remaining results
     sorted_search_results = sort_search_results(results, album, new, albumlength)
 
     if not sorted_search_results:
@@ -505,9 +509,8 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
                         title = item.title
                         size = int(item.links[1]['length'])
 
-                        resultlist.append((title, size, url, provider, 'nzb'))
+                        resultlist.append((title, size, url, provider, 'nzb', True))
                         logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-
                     except Exception as e:
                         logger.error(u"An unknown error occurred trying to parse the feed: %s" % e)
 
@@ -577,7 +580,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
                             size = int(item.links[1]['length'])
                             if all(word.lower() in title.lower() for word in term.split()):
                                 logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-                                resultlist.append((title, size, url, provider, 'nzb'))
+                                resultlist.append((title, size, url, provider, 'nzb', True))
                             else:
                                 logger.info('Skipping %s, not all search term words found' % title)
 
@@ -627,7 +630,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
                         title = item.title
                         size = int(item.links[1]['length'])
 
-                        resultlist.append((title, size, url, provider, 'nzb'))
+                        resultlist.append((title, size, url, provider, 'nzb', True))
                         logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                     except Exception as e:
                         logger.exception("Unhandled exception while parsing feed")
@@ -674,7 +677,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
                         title = item['release']
                         size = int(item['sizebytes'])
 
-                        resultlist.append((title, size, url, provider, 'nzb'))
+                        resultlist.append((title, size, url, provider, 'nzb', True))
                         logger.info('Found %s. Size: %s', title, helpers.bytes_to_mb(size))
                     except Exception as e:
                         logger.exception("Unhandled exception")
@@ -1009,7 +1012,6 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
     global gazelle  # persistent what.cd api object to reduce number of login attempts
 
     # rutracker login
-
     if headphones.CONFIG.RUTRACKER and album:
         rulogin = rutracker.login(headphones.CONFIG.RUTRACKER_USER, headphones.CONFIG.RUTRACKER_PASSWORD)
         if not rulogin:
@@ -1130,10 +1132,13 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                                 rightformat = False
 
                         if rightformat and size < maxsize and minimumseeders < int(seeders):
-                            resultlist.append((title, size, url, provider, 'torrent'))
+                            match = True
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                         else:
+                            match = False
                             logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d, Format: %s)', title, size, int(seeders), rightformat)
+
+                        resultlist.append((title, size, url, provider, 'torrent', match))
                     except Exception as e:
                         logger.exception("Unhandled exception in the KAT parser")
 
@@ -1197,14 +1202,13 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                         desc_match = re.search(r"Size: (\d+)<", item.description)
                         size = int(desc_match.group(1))
                         url = item.link
-                        resultlist.append((title, size, url, provider, 'torrent'))
+                        resultlist.append((title, size, url, provider, 'torrent', True))
                         logger.info('Found %s. Size: %s', title, helpers.bytes_to_mb(size))
                     except Exception as e:
                         logger.error(u"An error occurred while trying to parse the response from Waffles.fm: %s", e)
 
     # rutracker.org
     if headphones.CONFIG.RUTRACKER and rulogin:
-
         provider = "rutracker.org"
 
         # Ignore if release date not specified, results too unpredictable
@@ -1239,7 +1243,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                     title = ru[0].decode('utf-8')
                     size = ru[1]
                     url = ru[2]
-                    resultlist.append((title, size, url, provider, 'torrent'))
+                    resultlist.append((title, size, url, provider, 'torrent', True))
                     logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
             else:
                 logger.info(u"No valid results found from %s" % (provider))
@@ -1319,7 +1323,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                                    torrent.size,
                                    gazelle.generate_torrent_link(torrent.id),
                                    provider,
-                                   'torrent'))
+                                   'torrent', True))
 
     # Pirate Bay
     if headphones.CONFIG.PIRATEBAY:
@@ -1493,12 +1497,15 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
                             torrent = request.request_content(url)
                             if not torrent or (int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1):
                                 rightformat = False
+
                         if rightformat and size < maxsize and minimumseeders < seeds:
-                            resultlist.append((title, size, url, provider, 'torrent'))
+                            match = True
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                         else:
+                            match = False
                             logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (title, size, int(seeds), rightformat))
 
+                        resultlist.append((title, size, url, provider, 'torrent', match))
                     except Exception as e:
                         logger.exception("Unhandled exception in Mininova Parser")
 
