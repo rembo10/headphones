@@ -19,6 +19,7 @@ import shutil
 import uuid
 import beets
 import threading
+import itertools
 import headphones
 
 from beets import autotag
@@ -188,7 +189,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
             myDB.action('UPDATE snatched SET status = "Unprocessed" WHERE status NOT LIKE "Seed%" and AlbumID=?', [albumid])
             processed = re.search(r' \(Unprocessed\)(?:\[\d+\])?', albumpath)
             if not processed:
-                renameUnprocessedFolder(albumpath)
+                renameUnprocessedFolder(albumpath, tag="Unprocessed")
             return
 
     # test #1: metadata - usually works
@@ -272,7 +273,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
     myDB.action('UPDATE snatched SET status = "Unprocessed" WHERE status NOT LIKE "Seed%" and AlbumID=?', [albumid])
     processed = re.search(r' \(Unprocessed\)(?:\[\d+\])?', albumpath)
     if not processed:
-        renameUnprocessedFolder(albumpath)
+        renameUnprocessedFolder(albumpath, tag="Unprocessed")
     else:
         logger.info(u"Already marked as unprocessed: " + albumpath.decode(headphones.SYS_ENCODING, 'replace'))
 
@@ -1024,20 +1025,22 @@ def updateFilePermissions(albumpaths):
                     continue
 
 
-def renameUnprocessedFolder(albumpath):
+def renameUnprocessedFolder(path, tag):
+    """
+    Rename a unprocessed folder to a new unique name to indicate a certain
+    status.
+    """
 
-    i = 0
-    while True:
+    for i in itertools.count():
         if i == 0:
-            new_folder_name = albumpath + ' (Unprocessed)'
+            new_path = "%s (%s)" % (path, tag)
         else:
-            new_folder_name = albumpath + ' (Unprocessed)[%i]' % i
+            new_path = "%s (%s[%d])" % (path, tag, i)
 
-        if os.path.exists(new_folder_name):
+        if os.path.exists(new_path):
             i += 1
-
         else:
-            os.rename(albumpath, new_folder_name)
+            os.rename(path, new_path)
             return
 
 
