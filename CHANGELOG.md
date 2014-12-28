@@ -1,7 +1,7 @@
 # Changelog
 
 ## v0.5.2
-Released xx december 2014
+Released 28 december 2014
 
 Highlight:
 * Added: advanced option to ignore certain folders by patterns. (#2037)
