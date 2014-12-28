@@ -3,12 +3,14 @@ import sys
 import cherrypy
 from cherrypy._cpcompat import ntob
 
+
 def get_xmlrpclib():
     try:
         import xmlrpc.client as x
     except ImportError:
         import xmlrpclib as x
     return x
+
 
 def process_body():
     """Return (params, method) from request body."""
@@ -48,8 +50,8 @@ def respond(body, encoding='utf-8', allow_none=0):
                                   encoding=encoding,
                                   allow_none=allow_none))
 
+
 def on_error(*args, **kwargs):
     body = str(sys.exc_info()[1])
     xmlrpclib = get_xmlrpclib()
     _set_response(xmlrpclib.dumps(xmlrpclib.Fault(1, body)))
-

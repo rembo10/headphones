@@ -4,19 +4,22 @@
 # Headphones rutracker.org search
 # Functions called from searcher.py
 
-import urllib
-import urllib2
-import cookielib
+from bencode import bencode as bencode, bdecode
 from urlparse import urlparse
 from bs4 import BeautifulSoup
-import headphones
-from headphones import logger, db, utorrent
-from lib.bencode import bencode as bencode, bdecode
-import os
 from tempfile import mkdtemp
 from hashlib import sha1
+
+import headphones
 import requests
+import cookielib
+import urllib2
+import urllib
 import re
+import os
+
+from headphones import db, logger
+
 
 class Rutracker():
 
@@ -45,13 +48,13 @@ class Rutracker():
         #if self.login_counter > 1:
         #    return False
 
-        params = urllib.urlencode({"login_username" : login,
-                                   "login_password" : password,
-                                   "login" : "Вход"})
+        params = urllib.urlencode({"login_username": login,
+                                   "login_password": password,
+                                   "login": "Вход"})
 
         try:
             self.opener.open("http://login.rutracker.org/forum/login.php", params)
-        except :
+        except Exception:
             pass
 
         # Check if we're logged in
@@ -112,26 +115,26 @@ class Rutracker():
             #logger.debug (soup.prettify())
 
             # Title
-            for link in soup.find_all('a', attrs={'class' : 'med tLink hl-tags bold'}):
+            for link in soup.find_all('a', attrs={'class': 'med tLink hl-tags bold'}):
                 title = link.get_text()
                 titles.append(title)
 
             # Download URL
-            for link in soup.find_all('a', attrs={'class' : 'small tr-dl dl-stub'}):
+            for link in soup.find_all('a', attrs={'class': 'small tr-dl dl-stub'}):
                 url = link.get('href')
                 urls.append(url)
 
             # Seeders
-            for link in soup.find_all('b', attrs={'class' : 'seedmed'}):
+            for link in soup.find_all('b', attrs={'class': 'seedmed'}):
                 seeder = link.get_text()
                 seeders.append(seeder)
 
             # Size
-            for link in soup.find_all('td', attrs={'class' : 'row4 small nowrap tor-size'}):
+            for link in soup.find_all('td', attrs={'class': 'row4 small nowrap tor-size'}):
                 size = link.u.string
                 sizes.append(size)
 
-        except :
+        except:
             pass
 
         # Combine lists
@@ -194,8 +197,8 @@ class Rutracker():
                         if torrent:
                             decoded = bdecode(torrent)
                             metainfo = decoded['info']
-                        page.close ()
-                    except Exception, e:
+                        page.close()
+                    except Exception as e:
                         logger.error('Error getting torrent: %s' % e)
                         return False
 
@@ -213,9 +216,9 @@ class Rutracker():
                                     cuecount += 1
 
                     title = returntitle.lower()
-                    logger.debug ('torrent title: %s' % title)
-                    logger.debug ('headphones trackcount: %s' % hptrackcount)
-                    logger.debug ('rutracker trackcount: %s' % trackcount)
+                    logger.debug('torrent title: %s' % title)
+                    logger.debug('headphones trackcount: %s' % hptrackcount)
+                    logger.debug('rutracker trackcount: %s' % trackcount)
 
                     # If torrent track count less than headphones track count, and there's a cue, then attempt to get track count from log(s)
                     # This is for the case where we have a single .flac/.wav which can be split by cue
@@ -243,7 +246,7 @@ class Rutracker():
 
                     if totallogcount > 0:
                         trackcount = totallogcount
-                        logger.debug ('rutracker logtrackcount: %s' % totallogcount)
+                        logger.debug('rutracker logtrackcount: %s' % totallogcount)
 
                     # If torrent track count = hp track count then return torrent,
                     # if greater, check for deluxe/special/foreign editions
@@ -286,17 +289,17 @@ class Rutracker():
             else:
                 tempdir = mkdtemp(suffix='_rutracker_torrents')
                 download_path = os.path.join(tempdir, torrent_name)
-            fp = open (download_path, 'wb')
-            fp.write (torrent)
-            fp.close ()
+
+            with open(download_path, 'wb') as f:
+                f.write(torrent)
             os.umask(prev)
 
             # Add file to utorrent
-            if headphones.TORRENT_DOWNLOADER == 2:
+            if headphones.CONFIG.TORRENT_DOWNLOADER == 2:
                 self.utorrent_add_file(download_path)
 
-        except Exception, e:
-            logger.error('Error getting torrent: %s' % e)
+        except Exception as e:
+            logger.error('Error getting torrent: %s', e)
             return False
 
         return download_path, tor_hash
@@ -304,7 +307,7 @@ class Rutracker():
     #TODO get this working in utorrent.py
     def utorrent_add_file(self, filename):
 
-        host = headphones.UTORRENT_HOST
+        host = headphones.CONFIG.UTORRENT_HOST
         if not host.startswith('http'):
             host = 'http://' + host
         if host.endswith('/'):
@@ -313,8 +316,8 @@ class Rutracker():
             host = host[:-4]
 
         base_url = host
-        username = headphones.UTORRENT_USERNAME
-        password = headphones.UTORRENT_PASSWORD
+        username = headphones.CONFIG.UTORRENT_USERNAME
+        password = headphones.CONFIG.UTORRENT_PASSWORD
 
         session = requests.Session()
         url = base_url + '/gui/'
@@ -322,9 +325,10 @@ class Rutracker():
 
         try:
             r = session.get(url + 'token.html')
-        except:
-            logger.debug('Error getting token')
+        except Exception:
+            logger.exception('Error getting token')
             return
+
         if r.status_code == '401':
             logger.debug('Error reaching utorrent')
             return
@@ -336,15 +340,10 @@ class Rutracker():
 
         session.params = {'token': regex.group(1)}
 
-        params = {'action': 'add-file'}
-        f = open(filename, 'rb')
-        files = {'torrent_file': f}
-
-        try:
-            session.post(url, params=params, files=files)
-        except:
-            logger.debug('Error adding file to utorrent')
-            return
-        finally:
-            f.close()
-
+        with open(filename, 'rb') as f:
+            try:
+                session.post(url, params={'action': 'add-file'},
+                    files={'torrent_file': f})
+            except Exception:
+                logger.exception('Error adding file to utorrent')
+                return

@@ -35,7 +35,8 @@ module from the command line, it will call ``serve()`` for you.
 
 
 def new_func_strip_path(func_name):
-    """Make profiler output more readable by adding ``__init__`` modules' parents"""
+    """Make profiler output more readable by adding `__init__` modules' parents
+    """
     filename, line, name = func_name
     if filename.endswith("__init__.py"):
         return os.path.basename(filename[:-12]) + filename[-12:], line, name
@@ -49,13 +50,15 @@ except ImportError:
     profile = None
     pstats = None
 
-import os, os.path
+import os
+import os.path
 import sys
 import warnings
 
-from cherrypy._cpcompat import BytesIO
+from cherrypy._cpcompat import StringIO
 
 _count = 0
+
 
 class Profiler(object):
 
@@ -85,7 +88,7 @@ class Profiler(object):
     def stats(self, filename, sortby='cumulative'):
         """:rtype stats(index): output of print_stats() for the given profile.
         """
-        sio = BytesIO()
+        sio = StringIO()
         if sys.version_info >= (2, 5):
             s = pstats.Stats(os.path.join(self.path, filename), stream=sio)
             s.strip_dirs()
@@ -124,7 +127,8 @@ class Profiler(object):
         runs = self.statfiles()
         runs.sort()
         for i in runs:
-            yield "<a href='report?filename=%s' target='main'>%s</a><br />" % (i, i)
+            yield "<a href='report?filename=%s' target='main'>%s</a><br />" % (
+                i, i)
     menu.exposed = True
 
     def report(self, filename):
@@ -142,14 +146,15 @@ class ProfileAggregator(Profiler):
         self.count = _count = _count + 1
         self.profiler = profile.Profile()
 
-    def run(self, func, *args):
+    def run(self, func, *args, **params):
         path = os.path.join(self.path, "cp_%04d.prof" % self.count)
-        result = self.profiler.runcall(func, *args)
+        result = self.profiler.runcall(func, *args, **params)
         self.profiler.dump_stats(path)
         return result
 
 
 class make_app:
+
     def __init__(self, nextapp, path=None, aggregate=False):
         """Make a WSGI middleware app which wraps 'nextapp' with profiling.
 
@@ -167,9 +172,11 @@ class make_app:
 
         """
         if profile is None or pstats is None:
-            msg = ("Your installation of Python does not have a profile module. "
-                   "If you're on Debian, try `sudo apt-get install python-profiler`. "
-                   "See http://www.cherrypy.org/wiki/ProfilingOnDebian for details.")
+            msg = ("Your installation of Python does not have a profile "
+                   "module. If you're on Debian, try "
+                   "`sudo apt-get install python-profiler`. "
+                   "See http://www.cherrypy.org/wiki/ProfilingOnDebian "
+                   "for details.")
             warnings.warn(msg)
 
         self.nextapp = nextapp
@@ -191,8 +198,10 @@ class make_app:
 def serve(path=None, port=8080):
     if profile is None or pstats is None:
         msg = ("Your installation of Python does not have a profile module. "
-               "If you're on Debian, try `sudo apt-get install python-profiler`. "
-               "See http://www.cherrypy.org/wiki/ProfilingOnDebian for details.")
+               "If you're on Debian, try "
+               "`sudo apt-get install python-profiler`. "
+               "See http://www.cherrypy.org/wiki/ProfilingOnDebian "
+               "for details.")
         warnings.warn(msg)
 
     import cherrypy
@@ -205,4 +214,3 @@ def serve(path=None, port=8080):
 
 if __name__ == "__main__":
     serve(*tuple(sys.argv[1:]))
-

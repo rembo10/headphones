@@ -1,17 +1,18 @@
-#![preview thumb](https://github.com/rembo10/headphones/raw/master/data/images/headphoneslogo.png)Headphones
+#![Headphones Logo](https://github.com/rembo10/headphones/raw/master/data/images/headphoneslogo.png) Headphones
 
-###Support & Discuss
+Headphones is an automated music downloader for NZB and Torrent, written in Python. It supports SABnzbd, NZBget, Transmission, µTorrent and Blackhole.
 
-You are free to join the HP support community on IRC where you can ask questions, hang around and discuss anything related to HP.
+## Support & Discuss
+You are free to join the Headphones support community on IRC where you can ask questions, hang around and discuss anything related to HP.
 
-1. Use any IRC client and connect to the Freenode server.
-2. Join #headphones
+1. Use any IRC client and connect to the Freenode server, `irc.freenode.net`.
+2. Join the `#headphones` channel.
 
-###Installation and Notes
+## Installation and Notes
 
-[Read our Wiki](../../wiki) on how to install and use HeadPhones properly.
-
-[**Troubleshooting** page](../../wiki/TroubleShooting) in the wiki can help you with comon problems.
+* [Installation page](../../wiki/Installation) shows you how to install Headphones.
+* [Usage guide](../../wiki/Usage-guide) introduces you to Headphones.
+* [Troubleshooting page](../../wiki/TroubleShooting) in the wiki can help you with common problems.
 
 **Issues** can be reported on the GitHub issue tracker considering these rules:
 
@@ -27,17 +28,15 @@ You are free to join the HP support community on IRC where you can ask questions
 
 If you **comply with these rules** you can [post your request/issue](http://github.com/rembo10/headphones/issues).
 
-**Support** the project by implementing new features, solving support tickets and provide bug fixes. 
-If you change something in the code always make a PR to the developer branch instead of the master branch.
+**Support** the project by implementing new features, solving support tickets and provide bug fixes.
 
+## Screenshots
 
-###Screenshots
-
-Homepage (Artist Overview)
+Homepage (Artist Overview):
 
 ![preview thumb](http://i.imgur.com/LZO9a.png)
 
-One of the many settings pages....
+One of the many settings pages:
 
 ![preview thumb](http://i.imgur.com/xcWNy.png)
 
@@ -49,7 +48,7 @@ Import Your Favorite Artists:
 
 ![preview thumb](http://i.imgur.com/6tZoC.png)
 
-Artist Search Results (also search by album!):
+Search Results:
 
 ![preview thumb](http://i.imgur.com/rIV0P.png)
 
@@ -61,5 +60,5 @@ Album Page with track overview:
 
 ![preview thumb](http://i.imgur.com/kcjES.png)
 
-
-This is free software under the GPL v3 open source license - so feel free to do with it what you wish.
+## License
+This is free software under the GPL v3 open source license. Feel free to do with it what you wish, but any modification must be open sourced. A copy of the license is included.

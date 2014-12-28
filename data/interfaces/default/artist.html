@@ -21,17 +21,17 @@
 			%else:
 				<a id="menu_link_getextra" href="#"><i class="fa fa-plus"></i> Get Extras</a>
 			%endif
-					<div id="dialog" title="Choose Which Extras to Fetch" style="display:none" class="configtable">
-						<form action="getExtras" method="get" class="form">
-							<input type="hidden" name="ArtistID" value="${artist['ArtistID']}">
-							<input type="hidden" name="newstyle" value="true">
-							%for extra in extras:
-								<input type="checkbox" id="${extra}" name="${extra}" value="1" ${extras[extra]} />${string.capwords(extra)}<br>
-							%endfor
-							<br>
-							<input id="submit" type="submit" value="Fetch Extras">
-						</form>
-					</div>
+				<div id="dialog" title="Choose Which Extras to Fetch" style="display:none" class="configtable">
+					<form action="getExtras" method="get" class="form">
+						<input type="hidden" name="ArtistID" value="${artist['ArtistID']}">
+						<input type="hidden" name="newstyle" value="true">
+						%for extra in extras:
+							<input type="checkbox" id="${extra}" name="${extra}" value="1" ${extras[extra]} />${string.capwords(extra)}<br>
+						%endfor
+						<br>
+						<input id="submit" type="submit" value="Fetch Extras">
+					</form>
+				</div>
 		</div>
 	</div>
 	<a href="home" class="back">&laquo; Back to overview</a>
@@ -91,7 +91,7 @@
 
 				myDB = db.DBConnection()
 				totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=?', [album['AlbumID']]))
-				havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=? AND Location IS NOT NULL', [album['AlbumID']]))
+				havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=? AND Location IS NOT NULL', [album['AlbumID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle LIKE ? AND Matched = "Failed"', [album['ArtistName'], album['AlbumTitle']]))
 
 				try:
 					percent = (havetracks*100.0)/totaltracks
@@ -128,7 +128,7 @@
 				%if album['Status'] == 'Skipped' or album['Status'] == 'Ignored':
 					[<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' added to Wanted list">want</a>]
 				%elif (album['Status'] == 'Wanted' or album['Status'] == 'Wanted Lossless'):
-					[<a href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' skipped">skip</a>]
+                    [<a href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' skipped">skip</a>] [<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),'table')" data-success="Trying to download'${album['AlbumTitle']}'" title="Search if available for download">search</a>]
 				%else:
 					[<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),'table')" data-success="Retrying the same version of '${album['AlbumTitle']}'" title="Retry the same download again">retry</a>][<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),'table')" title="Try a new download, skipping all previously tried nzbs"  data-success="Downloading new version for '${album['AlbumTitle']}'" data-success="Looking for a new version of '${album['AlbumTitle']}'">new</a>]
 				%endif
@@ -163,21 +163,21 @@
 	}
 
 	<%
-    if headphones.SONGKICK_FILTER_ENABLED:
+    if headphones.CONFIG.SONGKICK_FILTER_ENABLED:
         songkick_filter_enabled = "true"
     else:
         songkick_filter_enabled = "false"
-    
-    if not headphones.SONGKICK_LOCATION:
+
+    if not headphones.CONFIG.SONGKICK_LOCATION:
     	songkick_location = "none"
     else:
-        songkick_location = headphones.SONGKICK_LOCATION
-    	
-    if headphones.SONGKICK_ENABLED:
+        songkick_location = headphones.CONFIG.SONGKICK_LOCATION
+
+    if headphones.CONFIG.SONGKICK_ENABLED:
         songkick_enabled = "true"
     else:
         songkick_enabled = "false"
-	
+
 	%>
 	function getArtistsCalendar() {
 		var template, calendarDomNode;
@@ -186,16 +186,16 @@
 
 		template = '<li><a target="_blank" href="URI"><span class="sk-name">NAME</span><span class="sk-location">LOC</span></a></li>';
 
-		$.getJSON("https://api.songkick.com/api/3.0/artists/mbid:${artist['ArtistID']}/calendar.json?apikey=${headphones.SONGKICK_APIKEY}&jsoncallback=?",
+		$.getJSON("https://api.songkick.com/api/3.0/artists/mbid:${artist['ArtistID']}/calendar.json?apikey=${headphones.CONFIG.SONGKICK_APIKEY}&jsoncallback=?",
 			function(data){
-				if (data['resultsPage'].totalEntries >= 1) {          
-          
-          if( ${songkick_filter_enabled} ) {
-            data.resultsPage.results.event = $.grep(data.resultsPage.results.event, function(element,index){
-              return element.venue.metroArea.id == ${songkick_location};
-            });
-          }
-          
+				if (data['resultsPage'].totalEntries >= 1) {
+
+                    if( ${songkick_filter_enabled} ) {
+                        data.resultsPage.results.event = $.grep(data.resultsPage.results.event, function(element,index){
+                        return element.venue.metroArea.id == ${songkick_location};
+                    });
+                    }
+
 					var tourDate;
 
 					calendarDomNode.show();
@@ -211,7 +211,7 @@
 					});
 
 					calendarDomNode.append('<li><img src="interfaces/default/images/songkick.png" alt="concerts by songkick" class="sk-logo" /></li>');
-					
+
 				$(function() {
 				  $("#artistCalendar").each(function() {
 					$("li:gt(4)", this).hide(); /* :gt() is zero-indexed */
@@ -265,12 +265,13 @@
 	}
 
 	function initThisPage() {
-		$('#menu_link_getextra').click(function() {
+		$('#menu_link_getextra').click(function(event) {
 			$('#dialog').dialog();
-			return false;
+			event.preventDefault();
 		});
-		$('#menu_link_modifyextra').click(function() {
+		$('#menu_link_modifyextra').click(function(event) {
 			$('#dialog').dialog();
+			event.preventDefault();
 		});
 		$('#album_table').dataTable({
 			"bDestroy": true,
@@ -314,7 +315,7 @@
       		getArtistsCalendar();
     	}
     	checkArtistStatus();
-    	setInterval(function(){ 
+    	setInterval(function(){
     		checkArtistStatus();
 		}, 1500);
 	});

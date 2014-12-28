@@ -6,12 +6,13 @@
 *.pyproj
 *.sln
 
-# Logs and databases #
+# Headphones files #
 ######################
 *.log
 *.db*
 *.db-journal
 *.ini
+version.lock
 logs/*
 cache/*
 
@@ -19,6 +20,7 @@ cache/*
 ##################
 *.crt
 *.key
+*.csr
 
 # OS generated files #
 ######################

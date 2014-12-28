@@ -11,6 +11,7 @@ from cherrypy.process import wspbus, plugins
 
 
 class ConsoleCtrlHandler(plugins.SimplePlugin):
+
     """A WSPBus plugin for handling Win32 console events (like Ctrl-C)."""
 
     def __init__(self, bus):
@@ -68,6 +69,7 @@ class ConsoleCtrlHandler(plugins.SimplePlugin):
 
 
 class Win32Bus(wspbus.Bus):
+
     """A Web Site Process Bus implementation for Win32.
 
     Instead of time.sleep, this bus blocks using native win32event objects.
@@ -90,6 +92,7 @@ class Win32Bus(wspbus.Bus):
 
     def _get_state(self):
         return self._state
+
     def _set_state(self, value):
         self._state = value
         event = self._get_state_event(value)
@@ -106,7 +109,8 @@ class Win32Bus(wspbus.Bus):
             # Don't wait for an event that beat us to the punch ;)
             if self.state not in state:
                 events = tuple([self._get_state_event(s) for s in state])
-                win32event.WaitForMultipleObjects(events, 0, win32event.INFINITE)
+                win32event.WaitForMultipleObjects(
+                    events, 0, win32event.INFINITE)
         else:
             # Don't wait for an event that beat us to the punch ;)
             if self.state != state:
@@ -115,6 +119,7 @@ class Win32Bus(wspbus.Bus):
 
 
 class _ControlCodes(dict):
+
     """Control codes used to "signal" a service via ControlService.
 
     User-defined control codes are in the range 128-255. We generally use
@@ -145,6 +150,7 @@ def signal_child(service, command):
 
 
 class PyWebService(win32serviceutil.ServiceFramework):
+
     """Python Web Service."""
 
     _svc_name_ = "Python Web Service"

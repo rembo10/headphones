@@ -23,7 +23,7 @@ import cookielib
 from urlparse import urlparse
 from bs4 import BeautifulSoup
 from headphones import logger, db
-from lib.bencode import bencode as bencode, bdecode
+from bencode import bencode as bencode, bdecode
 from tempfile import mkdtemp
 from hashlib import sha1
 import os
@@ -79,7 +79,7 @@ class T411():
     def search(self, searchurl, maxsize, minseeders, albumid, bitrate):
         
         if not self.login_done:
-            self._doLogin( headphones.T411_LOGIN, headphones.T411_PASSWORD )
+            self._doLogin( headphones.CONFIG.TONZE_LOGIN, headphones.CONFIG.TONZE_PASSWORD )
 
         results = []
         logger.debug(u"Search string: " + searchurl)
@@ -103,7 +103,7 @@ class T411():
                 downloadURL = ('http://www.t411.me/torrents/download/?id=%s' % id)
                 
                 
-                results.append( T411SearchResult( self.opener, title, downloadURL,size, seeders ) )
+                results.append( T411SearchResult( self.opener, title, downloadURL,size, seeders) )
                 
                 
         return results

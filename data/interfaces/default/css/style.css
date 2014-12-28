@@ -336,6 +336,10 @@ form .row label {
   padding-top: 7px;
   width: 175px;
 }
+form .row label.inline {
+  margin-right: 5px;
+  width: auto;
+}
 form .row input {
   margin-right: 5px;
 }
@@ -1260,6 +1264,13 @@ div#artistheader h2 a {
 #donate {
   float: left;
   text-align: left;
+}
+#info {
+  float: left;
+  text-align: left;
+  margin-left: 10px;
+  margin-top: -5px;
+  color: #cccccc;
 }
 #actions {
   float: right;
