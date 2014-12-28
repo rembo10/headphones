@@ -39,12 +39,12 @@ class TimedLock(object):
         sleep_amount = self.minimum_delta - delta
         if sleep_amount >= 0:
             # zero sleeps give the cpu a chance to task-switch
-            headphones.logger.info('Sleeping %s (interval)', sleep_amount)
+            headphones.logger.debug('Sleeping %s (interval)', sleep_amount)
             time.sleep(sleep_amount)
         while not self.queue.empty():
             try:
                 seconds = self.queue.get(False)
-                headphones.logger.info('Sleeping %s (queued)', seconds)
+                headphones.logger.debug('Sleeping %s (queued)', seconds)
                 time.sleep(seconds)
             except Queue.Empty:
                 continue
@@ -59,15 +59,14 @@ class TimedLock(object):
 
     def snooze(self, seconds):
         """
-        Asynchronously add time to the next request.
-        Can be called outside
+        Asynchronously add time to the next request. Can be called outside
         of the lock context, but it is possible for the next lock holder
         to not check the queue until after something adds time to it.
         """
-        # we use a queue so that we don't have to synchronize
+        # We use a queue so that we don't have to synchronize
         # across threads and with or without locks
         headphones.logger.info('Adding %s to queue', seconds)
-        self.queue.add(seconds)
+        self.queue.put(seconds)
 
 
 class FakeLock(object):
