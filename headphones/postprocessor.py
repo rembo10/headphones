@@ -99,6 +99,11 @@ def verify(albumid, albumpath, Kind=None, forced=False):
                     "but database is frozen. Will skip postprocessing for " \
                     "album with rgid: %s", release_dict['artist_name'],
                     release_dict['artist_id'], albumid)
+
+                myDB.action('UPDATE snatched SET status = "Frozen" WHERE status NOT LIKE "Seed%" and AlbumID=?', [albumid])
+                frozen = re.search(r' \(Frozen\)(?:\[\d+\])?', albumpath)
+                if not frozen:
+                    renameUnprocessedFolder(albumpath, tag="Frozen")
                 return
 
         logger.info(u"Now adding/updating artist: " + release_dict['artist_name'])
@@ -274,8 +279,6 @@ def verify(albumid, albumpath, Kind=None, forced=False):
     processed = re.search(r' \(Unprocessed\)(?:\[\d+\])?', albumpath)
     if not processed:
         renameUnprocessedFolder(albumpath, tag="Unprocessed")
-    else:
-        logger.info(u"Already marked as unprocessed: " + albumpath.decode(headphones.SYS_ENCODING, 'replace'))
 
 
 def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind=None):
