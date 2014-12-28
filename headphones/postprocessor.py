@@ -34,7 +34,7 @@ postprocessor_lock = threading.Lock()
 
 
 def checkFolder():
-    logger.info("Checking download folder for completed downloads")
+    logger.info("Checking download folder for completed downloads (only snatched ones).")
 
     with postprocessor_lock:
         myDB = db.DBConnection()
@@ -56,7 +56,7 @@ def checkFolder():
             else:
                 logger.info("No folder name found for " + album['Title'])
 
-    logger.info("Checking download folder finished")
+    logger.info("Checking download folder finished.")
 
 def verify(albumid, albumpath, Kind=None, forced=False):
 
