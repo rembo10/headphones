@@ -259,7 +259,7 @@ class WebInterface(object):
         logger.info(u"Scanning artist: " + ArtistID)
         myDB = db.DBConnection()
         artistname=myDB.select('select distinct ArtistName from artists WHERE ArtistID=?', [ArtistID])
-        artistfolder= os.path.join(headphones.CONFIG.DESTINATION_DIR,artistname[0][0])
+        artistfolder= os.path.join(headphones.CONFIG.DESTINATION_DIR,artistname[0][0].replace('/','_'))
         try:    
             threading.Thread(target=librarysync.libraryScan(dir=artistfolder)).start()
         except Exception, e:
