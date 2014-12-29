@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+encoding//headphones/ftdb.py=latin1
 encoding//headphones/searcher_rutracker.py=utf-8
 encoding//headphones/t411.py=latin1
 encoding//lib/requests/models.py=utf-8

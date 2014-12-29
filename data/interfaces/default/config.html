@@ -594,6 +594,28 @@
                                         </div>
                                     </div>
                                 </fieldset>
+                                
+                                <fieldset>
+                                    <legend>FTDB</legend>
+                                    <div class="row checkbox">
+                                        <input id="use_ftdb" type="checkbox" name="use_ftdb" value="1" ${config['use_ftdb']} /><label>Use FTDB</label>
+                                    </div>
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>FTDBLogin</label>
+                                            <input type="text" name="ftdb_login" value="${config['ftdb_login']}" size="36">
+                                            <small>User T411</small>
+                                        </div>
+                                        <div class="row">
+                                            <label>FTDB Password</label>
+                                            <input type="text" name="ftdb_password" value="${config['ftdb_password']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Seed Ratio</label>
+                                            <input type="text" class="override-float" name="ftdb_ratio" value="${config['ftdb_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
+                                        </div>
+                                    </div>
+                                </fieldset>
 
                                 <fieldset>
                                     <legend>Waffles.fm</legend>
@@ -2089,6 +2111,7 @@
                 initConfigCheckbox("#use_omgwtfnzbs");
                 initConfigCheckbox("#use_kat");
                 initConfigCheckbox("#use_tonze");
+                initConfigCheckbox("#use_ftdb");
                 initConfigCheckbox("#use_piratebay");
                 initConfigCheckbox("#use_oldpiratebay");
                 initConfigCheckbox("#use_mininova");

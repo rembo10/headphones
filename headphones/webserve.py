@@ -1011,6 +1011,10 @@ class WebInterface(object):
             "tonze_login": headphones.CONFIG.TONZE_LOGIN,
             "tonze_password": headphones.CONFIG.TONZE_PASSWORD,
             "tonze_ratio": headphones.CONFIG.TONZE_RATIO,
+            "use_ftdb": checked(headphones.CONFIG.FTDB),
+            "ftdb_login": headphones.CONFIG.FTDB_LOGIN,
+            "ftdb_password": headphones.CONFIG.FTDB_PASSWORD,
+            "ftdb_ratio": headphones.CONFIG.FTDB_RATIO,
             "use_rutracker": checked(headphones.CONFIG.RUTRACKER),
             "rutracker_user": headphones.CONFIG.RUTRACKER_USER,
             "rutracker_password": headphones.CONFIG.RUTRACKER_PASSWORD,
@@ -1179,7 +1183,7 @@ class WebInterface(object):
 
         checked_configs = [
             "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer", "use_newznab", "newznab_enabled",
-            "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay", "use_mininova", "use_waffles","use_tonze", "use_rutracker",
+            "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay", "use_mininova", "use_waffles","use_tonze","use_ftdb", "use_rutracker",
             "use_whatcd", "preferred_bitrate_allow_lossless", "detect_bitrate", "freeze_db", "cue_split", "move_files", "rename_files",
             "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art", "embed_album_art", "embed_lyrics", "replace_existing_folders",
             "file_underscores", "include_extras", "autowant_upcoming", "autowant_all", "autowant_manually_added", "keep_torrent_files", "music_encoder",

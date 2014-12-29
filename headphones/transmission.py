@@ -32,9 +32,13 @@ def addTorrent(link):
     method = 'torrent-add'
 
     if link.endswith('.torrent'):
-        with open(link, 'rb') as f:
-            metainfo = str(base64.b64encode(f.read()))
-        arguments = {'metainfo': metainfo, 'download-dir': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}
+        try:
+            with open(link, 'rb') as f:
+                metainfo = str(base64.b64encode(f.read()))
+            arguments = {'metainfo': metainfo, 'download-dir': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}
+        except Exception,err:
+            arguments = {'filename': link, 'download-dir': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}
+            
     else:
         arguments = {'filename': link, 'download-dir': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}
 

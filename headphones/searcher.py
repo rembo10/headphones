@@ -42,6 +42,8 @@ from bencode import bencode, bdecode
 import headphones.searcher_rutracker as rutrackersearch
 import headphones.t411 as t411search
 t411 = t411search.T411()
+import headphones.ftdb as ftdbsearch
+ftdb = ftdbsearch.FTDB()
 
 # Magnet to torrent services, for Black hole. Stolen from CouchPotato.
 TORRENT_TO_MAGNET_SERVICES = [
@@ -171,6 +173,8 @@ def get_seed_ratio(provider):
         seed_ratio = headphones.CONFIG.MININOVA_RATIO
     elif provider == 'T411':
         seed_ratio = headphones.CONFIG.TONZE_RATIO
+    elif provider == 'FTDB':
+        seed_ratio = headphones.CONFIG.FTDB_RATIO
     else:
         seed_ratio = None
 
@@ -223,7 +227,7 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
 
     NZB_PROVIDERS = (headphones.CONFIG.HEADPHONES_INDEXER or headphones.CONFIG.NEWZNAB or headphones.CONFIG.NZBSORG or headphones.CONFIG.OMGWTFNZBS)
     NZB_DOWNLOADERS = (headphones.CONFIG.SAB_HOST or headphones.CONFIG.BLACKHOLE_DIR or headphones.CONFIG.NZBGET_HOST)
-    TORRENT_PROVIDERS = (headphones.CONFIG.KAT or headphones.CONFIG.PIRATEBAY or headphones.CONFIG.OLDPIRATEBAY or headphones.CONFIG.MININOVA or headphones.CONFIG.WAFFLES or headphones.CONFIG.RUTRACKER or headphones.CONFIG.WHATCD or headphones.CONFIG.TONZE)
+    TORRENT_PROVIDERS = (headphones.CONFIG.KAT or headphones.CONFIG.PIRATEBAY or headphones.CONFIG.OLDPIRATEBAY or headphones.CONFIG.MININOVA or headphones.CONFIG.WAFFLES or headphones.CONFIG.RUTRACKER or headphones.CONFIG.WHATCD or headphones.CONFIG.TONZE or headphones.CONFIG.FTDB)
 
     results = []
     myDB = db.DBConnection()
@@ -1196,6 +1200,54 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
             # parse results and get best match
             
         rulist = t411.search(searchURL, maxsize, minimumseeders, albumid, bitrate)
+            
+        # add best match to overall results list
+            
+        if rulist:
+            for ru in rulist:
+                try:
+                    title = ru.title.decode('utf-8')
+                except:
+                    title=ru.title
+                size = ru.size
+                url = ru.url
+                resultlist.append((title, size, url, provider, 'torrent', True))
+                logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+        else:
+            logger.info(u"No valid results found from %s" % (provider))
+            
+    #FTDB
+    if headphones.CONFIG.FTDB:
+        
+        provider = "FTDB"
+            
+        # Ignore if release date not specified, results too unpredictable
+        bitrate = False
+            
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
+            format = 'lossless'
+            maxsize = 10000000000
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1:
+            format = 'lossless+mp3'
+            maxsize = 10000000000
+        else:
+            format = 'mp3'
+            maxsize = 300000000
+            if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE:
+                bitrate = True
+                
+            # build search url based on above
+
+        if not usersearchterm:
+            searchURL = ftdb.searchurl(artistterm, albumterm, year, format)
+        else:
+            searchURL = ftdb.searchurl(usersearchterm, ' ', ' ', format)
+
+        logger.info(u'Parsing results from <a href="%s">ftdb</a>' % searchURL)
+            
+            # parse results and get best match
+            
+        rulist = ftdb.search(searchURL, maxsize, minimumseeders, albumid, bitrate)
             
         # add best match to overall results list
             
