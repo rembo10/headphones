@@ -10,6 +10,8 @@
 		<div id="subhead_menu">
 			<a id="menu_link_refresh" onclick="doSimpleAjaxCall('refreshArtist?ArtistID=${artist['ArtistID']}')" href="#"><i class="fa fa-refresh"></i> Refresh Artist</a>
 			<a id="menu_link_delete" href="deleteArtist?ArtistID=${artist['ArtistID']}"><i class="fa fa-trash-o"></i> Delete Artist</a>
+			<a id="menu_link_refresh" href="scanArtist?ArtistID=${artist['ArtistID']}">Scan Artist</a>
+			<a id="menu_link_refresh" onclick="doAjaxCall('scanArtist?ArtistID=${artist['ArtistID']}', $(this)),'table'" href="#" data-success="'${artist['ArtistName']}' was scanned">Scan Artist</a>
 			%if artist['Status'] == 'Paused':
 				<a id="menu_link_resume" href="#" onclick="doAjaxCall('resumeArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} resumed"><i class="fa fa-play"></i> Resume Artist</a>
 			%else:
