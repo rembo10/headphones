@@ -68,6 +68,8 @@ Unmark album as wanted / i.e. mark as skipped
 force search for wanted albums - not launched in a separate thread so it may take a bit to complete
 ### forceProcess
 Force post process albums in download directory - also not launched in a separate thread
+### forceActiveArtistsUpdate
+force Active Artist Update - also not launched in a separate thread
 
 ### getVersion
 Returns some version information: git_path, install_type, current_version, installed_version, commits_behind
