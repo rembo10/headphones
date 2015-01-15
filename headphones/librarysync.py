@@ -64,19 +64,17 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
             encoded_track_string = track['Location'].encode(headphones.SYS_ENCODING, 'replace')
             if not os.path.isfile(encoded_track_string):
                 if track['ArtistName']:
-                    #Make sure deleted files get accounted for when updating artist track counts
+                    # Make sure deleted files get accounted for when updating artist track counts
                     new_artists.append(track['ArtistName'])
                 myDB.action('DELETE FROM have WHERE Location=?', [track['Location']])
                 logger.info('File %s removed from Headphones, as it is no longer on disk' % encoded_track_string.decode(headphones.SYS_ENCODING, 'replace'))
-           ###############myDB.action('DELETE from have')
 
     bitrates = []
-
     song_list = []
+    latest_subdirectory = []
+
     new_song_count = 0
     file_count = 0
-
-    latest_subdirectory = []
 
     for r, d, f in helpers.walk_directory(dir):
         # Filter paths based on config. Note that these methods work directly
@@ -313,7 +311,6 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
         ]
 
         # Update track counts
-
         for artist in artists_checked:
             # Have tracks are selected from tracks table and not all tracks because of duplicates
             # We update the track count upon an album switch to compliment this
@@ -321,13 +318,13 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                 len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistName like ? AND Location IS NOT NULL', [artist]))
                 + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"', [artist]))
             )
-            #Note, some people complain about having "artist have tracks" > # of tracks total in artist official releases
+            # Note: some people complain about having "artist have tracks" > # of tracks total in artist official releases
             # (can fix by getting rid of second len statement)
             myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistName=?', [havetracks, artist])
 
         logger.info('Found %i new artists' % len(artist_list))
 
-        if len(artist_list):
+        if artist_list:
             if headphones.CONFIG.AUTO_ADD_ARTISTS:
                 logger.info('Importing %i new artists' % len(artist_list))
                 importer.artistlist_to_mbids(artist_list)

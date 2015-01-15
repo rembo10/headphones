@@ -13,16 +13,17 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import db, mb, importer, searcher, cache, postprocessor, versioncheck, logger
+from headphones import db, mb, updater, importer, searcher, cache, postprocessor, versioncheck, logger
 
 import headphones
 import json
 
 cmd_list = ['getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSimilar', 'getHistory', 'getLogs',
             'findArtist', 'findAlbum', 'addArtist', 'delArtist', 'pauseArtist', 'resumeArtist', 'refreshArtist',
-            'addAlbum', 'queueAlbum', 'unqueueAlbum', 'forceSearch', 'forceProcess', 'getVersion', 'checkGithub',
-            'shutdown', 'restart', 'update', 'getArtistArt', 'getAlbumArt', 'getArtistInfo', 'getAlbumInfo',
-            'getArtistThumb', 'getAlbumThumb', 'choose_specific_download', 'download_specific_release']
+            'addAlbum', 'queueAlbum', 'unqueueAlbum', 'forceSearch', 'forceProcess', 'forceActiveArtistsUpdate', 
+            'getVersion', 'checkGithub','shutdown', 'restart', 'update', 'getArtistArt', 'getAlbumArt', 
+            'getArtistInfo', 'getAlbumInfo', 'getArtistThumb', 'getAlbumThumb', 
+            'choose_specific_download', 'download_specific_release']
 
 
 class Api(object):
@@ -320,6 +321,9 @@ class Api(object):
         if 'dir' in kwargs:
             self.dir = kwargs['dir']
         postprocessor.forcePostProcess(self.dir)
+
+    def _forceActiveArtistsUpdate(self, **kwargs):
+        updater.dbUpdate()
 
     def _getVersion(self, **kwargs):
         self.data = {

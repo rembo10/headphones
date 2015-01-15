@@ -19,6 +19,7 @@ import shutil
 import uuid
 import beets
 import threading
+import itertools
 import headphones
 
 from beets import autotag
@@ -33,7 +34,7 @@ postprocessor_lock = threading.Lock()
 
 
 def checkFolder():
-    logger.info("Checking download folder for completed downloads")
+    logger.info("Checking download folder for completed downloads (only snatched ones).")
 
     with postprocessor_lock:
         myDB = db.DBConnection()
@@ -55,7 +56,7 @@ def checkFolder():
             else:
                 logger.info("No folder name found for " + album['Title'])
 
-    logger.info("Checking download folder finished")
+    logger.info("Checking download folder finished.")
 
 def verify(albumid, albumpath, Kind=None, forced=False):
 
@@ -98,6 +99,11 @@ def verify(albumid, albumpath, Kind=None, forced=False):
                     "but database is frozen. Will skip postprocessing for " \
                     "album with rgid: %s", release_dict['artist_name'],
                     release_dict['artist_id'], albumid)
+
+                myDB.action('UPDATE snatched SET status = "Frozen" WHERE status NOT LIKE "Seed%" and AlbumID=?', [albumid])
+                frozen = re.search(r' \(Frozen\)(?:\[\d+\])?', albumpath)
+                if not frozen:
+                    renameUnprocessedFolder(albumpath, tag="Frozen")
                 return
 
         logger.info(u"Now adding/updating artist: " + release_dict['artist_name'])
@@ -188,7 +194,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
             myDB.action('UPDATE snatched SET status = "Unprocessed" WHERE status NOT LIKE "Seed%" and AlbumID=?', [albumid])
             processed = re.search(r' \(Unprocessed\)(?:\[\d+\])?', albumpath)
             if not processed:
-                renameUnprocessedFolder(albumpath)
+                renameUnprocessedFolder(albumpath, tag="Unprocessed")
             return
 
     # test #1: metadata - usually works
@@ -272,9 +278,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
     myDB.action('UPDATE snatched SET status = "Unprocessed" WHERE status NOT LIKE "Seed%" and AlbumID=?', [albumid])
     processed = re.search(r' \(Unprocessed\)(?:\[\d+\])?', albumpath)
     if not processed:
-        renameUnprocessedFolder(albumpath)
-    else:
-        logger.info(u"Already marked as unprocessed: " + albumpath.decode(headphones.SYS_ENCODING, 'replace'))
+        renameUnprocessedFolder(albumpath, tag="Unprocessed")
 
 
 def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind=None):
@@ -1024,20 +1028,22 @@ def updateFilePermissions(albumpaths):
                     continue
 
 
-def renameUnprocessedFolder(albumpath):
+def renameUnprocessedFolder(path, tag):
+    """
+    Rename a unprocessed folder to a new unique name to indicate a certain
+    status.
+    """
 
-    i = 0
-    while True:
+    for i in itertools.count():
         if i == 0:
-            new_folder_name = albumpath + ' (Unprocessed)'
+            new_path = "%s (%s)" % (path, tag)
         else:
-            new_folder_name = albumpath + ' (Unprocessed)[%i]' % i
+            new_path = "%s (%s[%d])" % (path, tag, i)
 
-        if os.path.exists(new_folder_name):
+        if os.path.exists(new_path):
             i += 1
-
         else:
-            os.rename(albumpath, new_folder_name)
+            os.rename(path, new_path)
             return
 
 
