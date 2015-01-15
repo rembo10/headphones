@@ -1,9 +1,19 @@
 # Changelog
 
-## v0.5.2
-Released 28 december 2014
+## v0.5.3
+Released 15 January 2015
 
-Highlight:
+Highlights:
+* Added: update active artists via API (#2075)
+* Fixed: queue instance lacks `add` method (#2055)
+* Improved: better SSL error messages (#2058)
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.2...v0.5.3).
+
+## v0.5.2
+Released 28 December 2014
+
+Highlights:
 * Added: advanced option to ignore certain folders by patterns. (#2037)
 * Added: advanced option to ignore certain files by patterns (library only)
 * Added: specify optional paths to CUE splitting tools (#1938)

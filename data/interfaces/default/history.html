@@ -10,9 +10,10 @@
 			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=all',$(this),'table')" data-success="All History cleared"><i class="fa fa-trash-o"></i> Clear All History</a>
 			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=Processed',$(this),'table')" data-success="All Processed cleared"><i class="fa fa-trash-o"></i> Clear Processed</a>
 			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=Unprocessed',$(this),'table')" data-success="All Unprocessed cleared"><i class="fa fa-trash-o"></i> Clear Unprocessed</a>
+			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=Frozen',$(this),'table')" data-success="All Frozen cleared"><i class="fa fa-trash-o"></i> Clear Frozen</a>
 			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=Snatched',$(this),'table')" data-success="All Snatched cleared"><i class="fa fa-trash-o"></i> Clear Snatched</a>
 		</div>
-	</div>	
+	</div>
 </%def>
 
 <%def name="body()">
@@ -39,9 +40,11 @@
 					grade = 'C'
 				elif item['Status'] == 'Unprocessed':
 					grade = 'X'
+				elif item['Status'] == 'Frozen':
+					grade = 'X'
 				else:
 					grade = 'U'
-					
+
 				fileid = 'unknown'
 				if item['URL'].find('nzb') != -1:
 					fileid = 'nzb'
