@@ -1,3 +1,4 @@
+# -*- coding: latin-1 -*-
 #  This file is part of Headphones.
 #
 #  Headphones is free software: you can redistribute it and/or modify
@@ -33,8 +34,8 @@ NOTIFY_SNATCH = 1
 NOTIFY_DOWNLOAD = 2
 
 notifyStrings = {}
-notifyStrings[NOTIFY_SNATCH] = "Started Download"
-notifyStrings[NOTIFY_DOWNLOAD] = "Download Finished"
+notifyStrings[NOTIFY_SNATCH] = "Album récupéré"
+notifyStrings[NOTIFY_DOWNLOAD] = "Album téléchargé"
 
 ### Release statuses
 UNKNOWN = -1 # should never happen

@@ -1,3 +1,4 @@
+# -*- coding: latin-1 -*-
 #  This file is part of Headphones.
 #
 #  Headphones is free software: you can redistribute it and/or modify
@@ -420,7 +421,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     logger.info(u'Post-processing for %s - %s complete' % (release['ArtistName'], release['AlbumTitle']))
 
     pushmessage = release['ArtistName'] + ' - ' + release['AlbumTitle']
-    statusmessage = "Download and Postprocessing completed"
+    statusmessage = "Téléchargement et post-processing complet"
 
     if headphones.CONFIG.GROWL_ENABLED:
         logger.info(u"Growl request")
