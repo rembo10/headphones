@@ -472,7 +472,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     if headphones.CONFIG.PUSHOVER_ENABLED:
         logger.info(u"Pushover request")
         pushover = notifiers.PUSHOVER()
-        pushover.notify(pushmessage, "Headphones")
+        pushover.notify(pushmessage, "Download album finis")
 
     if headphones.CONFIG.PUSHBULLET_ENABLED:
         logger.info(u"PushBullet request")
