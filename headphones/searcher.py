@@ -939,8 +939,8 @@ def send_to_downloader(data, bestqual, album):
         prowl.notify(name, "Download started")
     if headphones.CONFIG.PUSHOVER_ENABLED and headphones.CONFIG.PUSHOVER_ONSNATCH:
         logger.info(u"Sending Pushover notification")
-        prowl = notifiers.PUSHOVER()
-        prowl.notify(name, "Download started")
+        pushover = notifiers.PUSHOVER()
+        pushover.notify(name, "Download album en cours")
     if headphones.CONFIG.PUSHBULLET_ENABLED and headphones.CONFIG.PUSHBULLET_ONSNATCH:
         logger.info(u"Sending PushBullet notification")
         pushbullet = notifiers.PUSHBULLET()

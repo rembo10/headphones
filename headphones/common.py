@@ -34,8 +34,8 @@ NOTIFY_SNATCH = 1
 NOTIFY_DOWNLOAD = 2
 
 notifyStrings = {}
-notifyStrings[NOTIFY_SNATCH] = "Album récupéré"
-notifyStrings[NOTIFY_DOWNLOAD] = "Album téléchargé"
+notifyStrings[NOTIFY_SNATCH] = "Download album en cours"
+notifyStrings[NOTIFY_DOWNLOAD] = "Download album finis"
 
 ### Release statuses
 UNKNOWN = -1 # should never happen
