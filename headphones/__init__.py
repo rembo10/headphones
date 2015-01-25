@@ -23,6 +23,7 @@ import threading
 import webbrowser
 import sqlite3
 import cherrypy
+import datetime
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -262,51 +263,68 @@ def launch_browser(host, port, root):
 
 def initialize_scheduler():
     """
-    Start the scheduled background tasks. Because this method can be called
-    multiple times, the old tasks will be first removed.
+    Start the scheduled background tasks. Re-schedule if interval settings changed.
     """
 
     from headphones import updater, searcher, librarysync, postprocessor, \
         torrentfinished
 
     with SCHED_LOCK:
-        # Remove all jobs first, because this method is also invoked when the
-        # settings are saved.
-        count = len(SCHED.get_jobs())
 
-        if count > 0:
-            logger.debug("Current number of background tasks: %d", count)
-            SCHED.shutdown()
-            SCHED.remove_all_jobs()
+        # Only start scheduler if (re-)starting headphones
+        start_jobs = not len(SCHED.get_jobs())
 
         # Regular jobs
-        if CONFIG.UPDATE_DB_INTERVAL > 0:
-            SCHED.add_job(updater.dbUpdate, trigger=IntervalTrigger(
-                hours=CONFIG.UPDATE_DB_INTERVAL))
         if CONFIG.SEARCH_INTERVAL > 0:
-            SCHED.add_job(searcher.searchforalbum, trigger=IntervalTrigger(
-                minutes=CONFIG.SEARCH_INTERVAL))
-        if CONFIG.LIBRARYSCAN_INTERVAL > 0:
-            SCHED.add_job(librarysync.libraryScan, trigger=IntervalTrigger(
-                hours=CONFIG.LIBRARYSCAN_INTERVAL))
+            minutes = CONFIG.SEARCH_INTERVAL
+            schedule_job(searcher.searchforalbum, 'Search for Wanted', hours=0, minutes=minutes)
+
         if CONFIG.DOWNLOAD_SCAN_INTERVAL > 0:
-            SCHED.add_job(postprocessor.checkFolder, trigger=IntervalTrigger(
-                minutes=CONFIG.DOWNLOAD_SCAN_INTERVAL))
+            minutes = CONFIG.DOWNLOAD_SCAN_INTERVAL
+            schedule_job(postprocessor.checkFolder, 'Download Scan', hours=0, minutes=minutes)
+
+        if CONFIG.LIBRARYSCAN_INTERVAL > 0:
+            hours = CONFIG.LIBRARYSCAN_INTERVAL
+            schedule_job(librarysync.libraryScan, 'Library Scan', hours=hours, minutes=0)
+
+        if CONFIG.UPDATE_DB_INTERVAL > 0:
+            hours = CONFIG.UPDATE_DB_INTERVAL
+            schedule_job(updater.dbUpdate, 'MusicBrainz Update', hours=hours, minutes=0)
 
         # Update check
-        if CONFIG.CHECK_GITHUB:
-            SCHED.add_job(versioncheck.checkGithub, trigger=IntervalTrigger(
-                minutes=CONFIG.CHECK_GITHUB_INTERVAL))
+        if CONFIG.CHECK_GITHUB and CONFIG.CHECK_GITHUB_INTERVAL > 0:
+            minutes = CONFIG.CHECK_GITHUB_INTERVAL
+            schedule_job(versioncheck.checkGithub, 'Check GitHub for updates', hours=0, minutes=minutes)
 
         # Remove Torrent + data if Post Processed and finished Seeding
         if CONFIG.TORRENT_REMOVAL_INTERVAL > 0:
-            SCHED.add_job(torrentfinished.checkTorrentFinished,
-                          trigger=IntervalTrigger(
-                              minutes=CONFIG.TORRENT_REMOVAL_INTERVAL))
+            minutes = CONFIG.TORRENT_REMOVAL_INTERVAL
+            schedule_job(torrentfinished.checkTorrentFinished, 'Torrent removal check', hours=0, minutes=minutes)
 
-        # Start scheduler
-        logger.info("(Re-)Scheduled %d background tasks", len(SCHED.get_jobs()))
-        SCHED.start()
+        # Start scheduler (only if (re-)starting headphones)
+        if start_jobs and len(SCHED.get_jobs()):
+            SCHED.start()
+
+        # Debug
+        #SCHED.print_jobs()
+
+
+def schedule_job(function, name, hours=0, minutes=0):
+    """
+    Start scheduled job if starting or restarting headphones.
+    Re-schedule job if Interval Settings have changed.
+    """
+
+    job = SCHED.get_job(name)
+    if job:
+        if job.trigger.interval != datetime.timedelta(hours=hours, minutes=minutes):
+            SCHED.reschedule_job(name, trigger=IntervalTrigger(
+                hours=hours, minutes=minutes))
+            logger.info("Re-scheduled background task: %s", name)
+    else:
+        SCHED.add_job(function, id=name, trigger=IntervalTrigger(
+            hours=hours, minutes=minutes))
+        logger.info("Scheduled background task: %s", name)
 
 
 def start():
