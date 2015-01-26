@@ -271,39 +271,39 @@ def initialize_scheduler():
 
     with SCHED_LOCK:
 
-        # Only start scheduler if (re-)starting headphones
+        # Check if scheduler should be started
         start_jobs = not len(SCHED.get_jobs())
 
         # Regular jobs
-        if CONFIG.SEARCH_INTERVAL > 0:
-            minutes = CONFIG.SEARCH_INTERVAL
-            schedule_job(searcher.searchforalbum, 'Search for Wanted', hours=0, minutes=minutes)
+        minutes = CONFIG.SEARCH_INTERVAL
+        schedule_job(searcher.searchforalbum, 'Search for Wanted', hours=0, minutes=minutes)
 
-        if CONFIG.DOWNLOAD_SCAN_INTERVAL > 0:
-            minutes = CONFIG.DOWNLOAD_SCAN_INTERVAL
-            schedule_job(postprocessor.checkFolder, 'Download Scan', hours=0, minutes=minutes)
+        minutes = CONFIG.DOWNLOAD_SCAN_INTERVAL
+        schedule_job(postprocessor.checkFolder, 'Download Scan', hours=0, minutes=minutes)
 
-        if CONFIG.LIBRARYSCAN_INTERVAL > 0:
-            hours = CONFIG.LIBRARYSCAN_INTERVAL
-            schedule_job(librarysync.libraryScan, 'Library Scan', hours=hours, minutes=0)
+        hours = CONFIG.LIBRARYSCAN_INTERVAL
+        schedule_job(librarysync.libraryScan, 'Library Scan', hours=hours, minutes=0)
 
-        if CONFIG.UPDATE_DB_INTERVAL > 0:
-            hours = CONFIG.UPDATE_DB_INTERVAL
-            schedule_job(updater.dbUpdate, 'MusicBrainz Update', hours=hours, minutes=0)
+        hours = CONFIG.UPDATE_DB_INTERVAL
+        schedule_job(updater.dbUpdate, 'MusicBrainz Update', hours=hours, minutes=0)
 
-        # Update check
-        if CONFIG.CHECK_GITHUB and CONFIG.CHECK_GITHUB_INTERVAL > 0:
+        #Update check
+        if CONFIG.CHECK_GITHUB_INTERVAL:
             minutes = CONFIG.CHECK_GITHUB_INTERVAL
-            schedule_job(versioncheck.checkGithub, 'Check GitHub for updates', hours=0, minutes=minutes)
+        else:
+            minutes = 0
+        schedule_job(versioncheck.checkGithub, 'Check GitHub for updates', hours=0, minutes=minutes)
 
         # Remove Torrent + data if Post Processed and finished Seeding
-        if CONFIG.TORRENT_REMOVAL_INTERVAL > 0:
-            minutes = CONFIG.TORRENT_REMOVAL_INTERVAL
-            schedule_job(torrentfinished.checkTorrentFinished, 'Torrent removal check', hours=0, minutes=minutes)
+        minutes = CONFIG.TORRENT_REMOVAL_INTERVAL
+        schedule_job(torrentfinished.checkTorrentFinished, 'Torrent removal check', hours=0, minutes=minutes)
 
-        # Start scheduler (only if (re-)starting headphones)
+        # Start scheduler
         if start_jobs and len(SCHED.get_jobs()):
-            SCHED.start()
+            try:
+                SCHED.start()
+            except Exception as e:
+                logger.info(e)
 
         # Debug
         #SCHED.print_jobs()
@@ -312,16 +312,21 @@ def initialize_scheduler():
 def schedule_job(function, name, hours=0, minutes=0):
     """
     Start scheduled job if starting or restarting headphones.
-    Re-schedule job if Interval Settings have changed.
+    Reschedule job if Interval Settings have changed.
+    Remove job if if Interval Settings changed to 0
+
     """
 
     job = SCHED.get_job(name)
     if job:
-        if job.trigger.interval != datetime.timedelta(hours=hours, minutes=minutes):
+        if hours == 0 and minutes == 0:
+            SCHED.remove_job(name)
+            logger.info("Removed background task: %s", name)
+        elif job.trigger.interval != datetime.timedelta(hours=hours, minutes=minutes):
             SCHED.reschedule_job(name, trigger=IntervalTrigger(
                 hours=hours, minutes=minutes))
             logger.info("Re-scheduled background task: %s", name)
-    else:
+    elif hours > 0 or minutes > 0:
         SCHED.add_job(function, id=name, trigger=IntervalTrigger(
             hours=hours, minutes=minutes))
         logger.info("Scheduled background task: %s", name)

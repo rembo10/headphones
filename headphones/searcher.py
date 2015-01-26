@@ -932,9 +932,15 @@ def send_to_downloader(data, bestqual, album):
         pushalot = notifiers.PUSHALOT()
         pushalot.notify(name, "Download started")
     if headphones.CONFIG.OSX_NOTIFY_ENABLED and headphones.CONFIG.OSX_NOTIFY_ONSNATCH:
+        from headphones import cache
+        c = cache.Cache()
+        album_art = c.get_artwork_from_cache(None, rgid)
         logger.info(u"Sending OS X notification")
         osx_notify = notifiers.OSX_NOTIFY()
-        osx_notify.notify(artist, albumname, 'Snatched: ' + provider + '. ' + name)
+        osx_notify.notify(artist,
+                          albumname,
+                          'Snatched: ' + provider + '. ' + name,
+                          image=album_art)
     if headphones.CONFIG.BOXCAR_ENABLED and headphones.CONFIG.BOXCAR_ONSNATCH:
         logger.info(u"Sending Boxcar2 notification")
         b2msg = 'From ' + provider + '<br></br>' + name
