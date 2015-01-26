@@ -725,6 +725,7 @@ class OSX_NOTIFY(object):
     def __init__(self):
         try:
             self.objc = __import__("objc")
+            self.AppKit = __import__("AppKit")
         except:
             return False
 
@@ -737,7 +738,7 @@ class OSX_NOTIFY(object):
             signature=old_IMP.signature)
         self.objc.classAddMethod(cls, SEL, new_IMP)
 
-    def notify(self, title, subtitle=None, text=None, sound=True):
+    def notify(self, title, subtitle=None, text=None, sound=True, image=None):
 
         try:
             self.swizzle(self.objc.lookUpClass('NSBundle'),
@@ -761,6 +762,10 @@ class OSX_NOTIFY(object):
                 notification.setInformativeText_(text)
             if sound:
                 notification.setSoundName_("NSUserNotificationDefaultSoundName")
+            if image:
+                source_img = self.AppKit.NSImage.alloc().initByReferencingFile_(image)
+                notification.setContentImage_(source_img)
+                #notification.set_identityImage_(source_img)
             notification.setHasActionButton_(False)
 
             notification_center = NSUserNotificationCenter.defaultUserNotificationCenter()

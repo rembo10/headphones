@@ -9,9 +9,7 @@ import subprocess
 def registerapp(app):
 
     # don't do any of this unless >= 10.8
-    v, _, _ = platform.mac_ver()
-    v = float('.'.join(v.split('.')[:2]))
-    if v < 10.8:
+    if not [int(n) for n in platform.mac_ver()[0].split('.')] >= [10, 8]:
         return None, 'Registering requires OS X version >= 10.8'
 
     app_path = None
