@@ -18,3 +18,8 @@ Library.
 from .db import Model, Database
 from .query import Query, FieldQuery, MatchQuery, AndQuery, OrQuery
 from .types import Type
+from .queryparse import query_from_strings
+from .queryparse import sort_from_strings
+from .queryparse import parse_sorted_query
+
+# flake8: noqa

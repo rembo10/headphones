@@ -15,6 +15,7 @@
 """The Query type hierarchy for DBCore.
 """
 import re
+from operator import attrgetter
 from beets import util
 from datetime import datetime, timedelta
 
@@ -82,6 +83,23 @@ class MatchQuery(FieldQuery):
         return pattern == value
 
 
+class NoneQuery(FieldQuery):
+
+    def __init__(self, field, fast=True):
+        self.field = field
+        self.fast = fast
+
+    def col_clause(self):
+        return self.field + " IS NULL", ()
+
+    @classmethod
+    def match(self, item):
+        try:
+            return item[self.field] is None
+        except KeyError:
+            return True
+
+
 class StringFieldQuery(FieldQuery):
     """A FieldQuery that converts values to strings before matching
     them.
@@ -104,8 +122,11 @@ class StringFieldQuery(FieldQuery):
 class SubstringQuery(StringFieldQuery):
     """A query that matches a substring in a specific item field."""
     def col_clause(self):
-        search = '%' + (self.pattern.replace('\\','\\\\').replace('%','\\%')
-                            .replace('_','\\_')) + '%'
+        pattern = (self.pattern
+                       .replace('\\', '\\\\')
+                       .replace('%', '\\%')
+                       .replace('_', '\\_'))
+        search = '%' + pattern + '%'
         clause = self.field + " like ? escape '\\'"
         subvals = [search]
         return clause, subvals
@@ -200,7 +221,9 @@ class NumericQuery(FieldQuery):
             self.rangemax = self._convert(parts[1])
 
     def match(self, item):
-        value = getattr(item, self.field)
+        if self.field not in item:
+            return False
+        value = item[self.field]
         if isinstance(value, basestring):
             value = self._convert(value)
 
@@ -236,12 +259,16 @@ class CollectionQuery(Query):
         self.subqueries = subqueries
 
     # Act like a sequence.
+
     def __len__(self):
         return len(self.subqueries)
+
     def __getitem__(self, key):
         return self.subqueries[key]
+
     def __iter__(self):
         return iter(self.subqueries)
+
     def __contains__(self, item):
         return item in self.subqueries
 
@@ -334,9 +361,7 @@ class FalseQuery(Query):
         return False
 
 
-
 # Time/date queries.
-
 
 def _to_epoch_time(date):
     """Convert a `datetime` object to an integer number of seconds since
@@ -393,10 +418,14 @@ class Period(object):
             return None
         ordinal = string.count('-')
         if ordinal >= len(cls.date_formats):
-            raise ValueError('date is not in one of the formats '
-                             + ', '.join(cls.date_formats))
+            # Too many components.
+            return None
         date_format = cls.date_formats[ordinal]
-        date = datetime.strptime(string, date_format)
+        try:
+            date = datetime.strptime(string, date_format)
+        except ValueError:
+            # Parsing failed.
+            return None
         precision = cls.precisions[ordinal]
         return cls(date, precision)
 
@@ -492,3 +521,134 @@ class DateQuery(FieldQuery):
             # Match any date.
             clause = '1'
         return clause, subvals
+
+
+# Sorting.
+
+class Sort(object):
+    """An abstract class representing a sort operation for a query into
+    the item database.
+    """
+
+    def order_clause(self):
+        """Generates a SQL fragment to be used in a ORDER BY clause, or
+        None if no fragment is used (i.e., this is a slow sort).
+        """
+        return None
+
+    def sort(self, items):
+        """Sort the list of objects and return a list.
+        """
+        return sorted(items)
+
+    def is_slow(self):
+        """Indicate whether this query is *slow*, meaning that it cannot
+        be executed in SQL and must be executed in Python.
+        """
+        return False
+
+
+class MultipleSort(Sort):
+    """Sort that encapsulates multiple sub-sorts.
+    """
+
+    def __init__(self, sorts=None):
+        self.sorts = sorts or []
+
+    def add_sort(self, sort):
+        self.sorts.append(sort)
+
+    def _sql_sorts(self):
+        """Return the list of sub-sorts for which we can be (at least
+        partially) fast.
+
+        A contiguous suffix of fast (SQL-capable) sub-sorts are
+        executable in SQL. The remaining, even if they are fast
+        independently, must be executed slowly.
+        """
+        sql_sorts = []
+        for sort in reversed(self.sorts):
+            if not sort.order_clause() is None:
+                sql_sorts.append(sort)
+            else:
+                break
+        sql_sorts.reverse()
+        return sql_sorts
+
+    def order_clause(self):
+        order_strings = []
+        for sort in self._sql_sorts():
+            order = sort.order_clause()
+            order_strings.append(order)
+
+        return ", ".join(order_strings)
+
+    def is_slow(self):
+        for sort in self.sorts:
+            if sort.is_slow():
+                return True
+        return False
+
+    def sort(self, items):
+        slow_sorts = []
+        switch_slow = False
+        for sort in reversed(self.sorts):
+            if switch_slow:
+                slow_sorts.append(sort)
+            elif sort.order_clause() is None:
+                switch_slow = True
+                slow_sorts.append(sort)
+            else:
+                pass
+
+        for sort in slow_sorts:
+            items = sort.sort(items)
+        return items
+
+    def __repr__(self):
+        return u'MultipleSort({0})'.format(repr(self.sorts))
+
+
+class FieldSort(Sort):
+    """An abstract sort criterion that orders by a specific field (of
+    any kind).
+    """
+    def __init__(self, field, ascending=True):
+        self.field = field
+        self.ascending = ascending
+
+    def sort(self, objs):
+        # TODO: Conversion and null-detection here. In Python 3,
+        # comparisons with None fail. We should also support flexible
+        # attributes with different types without falling over.
+        return sorted(objs, key=attrgetter(self.field),
+                      reverse=not self.ascending)
+
+    def __repr__(self):
+        return u'<{0}: {1}{2}>'.format(
+            type(self).__name__,
+            self.field,
+            '+' if self.ascending else '-',
+        )
+
+
+class FixedFieldSort(FieldSort):
+    """Sort object to sort on a fixed field.
+    """
+    def order_clause(self):
+        order = "ASC" if self.ascending else "DESC"
+        return "{0} {1}".format(self.field, order)
+
+
+class SlowFieldSort(FieldSort):
+    """A sort criterion by some model field other than a fixed field:
+    i.e., a computed or flexible field.
+    """
+    def is_slow(self):
+        return True
+
+
+class NullSort(Sort):
+    """No sorting. Leave results unsorted."""
+    def sort(items):
+        return items
