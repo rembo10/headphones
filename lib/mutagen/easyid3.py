@@ -1,5 +1,6 @@
-# Simpler (but far more limited) API for ID3 editing
-# Copyright 2006 Joe Wreschnig
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2006  Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of version 2 of the GNU General Public License as
@@ -13,6 +14,7 @@ more like Vorbis or APEv2 tags.
 
 import mutagen.id3
 
+from ._compat import iteritems, text_type, PY2
 from mutagen import Metadata
 from mutagen._util import DictMixin, dict_match
 from mutagen.id3 import ID3, error, delete, ID3FileType
@@ -154,6 +156,8 @@ class EasyID3(DictMixin, Metadata):
                 for v in value:
                     if v and max(v) > u'\x7f':
                         enc = 3
+                        break
+
                 id3.add(mutagen.id3.TXXX(encoding=enc, text=value, desc=desc))
             else:
                 frame.text = value
@@ -171,8 +175,10 @@ class EasyID3(DictMixin, Metadata):
     load = property(lambda s: s.__id3.load,
                     lambda s, v: setattr(s.__id3, 'load', v))
 
-    save = property(lambda s: s.__id3.save,
-                    lambda s, v: setattr(s.__id3, 'save', v))
+    def save(self, *args, **kwargs):
+        # ignore v2_version until we support 2.3 here
+        kwargs.pop("v2_version", None)
+        self.__id3.save(*args, **kwargs)
 
     delete = property(lambda s: s.__id3.delete,
                       lambda s, v: setattr(s.__id3, 'delete', v))
@@ -193,8 +199,12 @@ class EasyID3(DictMixin, Metadata):
 
     def __setitem__(self, key, value):
         key = key.lower()
-        if isinstance(value, basestring):
-            value = [value]
+        if PY2:
+            if isinstance(value, basestring):
+                value = [value]
+        else:
+            if isinstance(value, text_type):
+                value = [value]
         func = dict_match(self.Set, key, self.SetFallback)
         if func is not None:
             return func(self.__id3, key, value)
@@ -261,6 +271,18 @@ def date_set(id3, key, value):
 
 def date_delete(id3, key):
     del(id3["TDRC"])
+
+
+def original_date_get(id3, key):
+    return [stamp.text for stamp in id3["TDOR"].text]
+
+
+def original_date_set(id3, key, value):
+    id3.add(mutagen.id3.TDOR(encoding=3, text=value))
+
+
+def original_date_delete(id3, key):
+    del(id3["TDOR"])
 
 
 def performer_get(id3, key):
@@ -433,7 +455,7 @@ def peakgain_list(id3, key):
         keys.append("replaygain_%s_peak" % frame.desc)
     return keys
 
-for frameid, key in {
+for frameid, key in iteritems({
     "TALB": "album",
     "TBPM": "bpm",
     "TCMP": "compilation",  # iTunes extension
@@ -461,17 +483,19 @@ for frameid, key in {
     "TSOT": "titlesort",
     "TSRC": "isrc",
     "TSST": "discsubtitle",
-}.iteritems():
+    "TLAN": "language",
+}):
     EasyID3.RegisterTextKey(key, frameid)
 
 EasyID3.RegisterKey("genre", genre_get, genre_set, genre_delete)
 EasyID3.RegisterKey("date", date_get, date_set, date_delete)
+EasyID3.RegisterKey("originaldate", original_date_get, original_date_set,
+                    original_date_delete)
 EasyID3.RegisterKey(
     "performer:*", performer_get, performer_set, performer_delete,
     performer_list)
 EasyID3.RegisterKey("musicbrainz_trackid", musicbrainz_trackid_get,
                     musicbrainz_trackid_set, musicbrainz_trackid_delete)
-EasyID3.RegisterKey("website", website_get, website_set, website_delete)
 EasyID3.RegisterKey("website", website_get, website_set, website_delete)
 EasyID3.RegisterKey(
     "replaygain_*_gain", gain_get, gain_set, gain_delete, peakgain_list)
@@ -481,7 +505,7 @@ EasyID3.RegisterKey("replaygain_*_peak", peak_get, peak_set, peak_delete)
 # http://musicbrainz.org/docs/specs/metadata_tags.html
 # http://bugs.musicbrainz.org/ticket/1383
 # http://musicbrainz.org/doc/MusicBrainzTag
-for desc, key in {
+for desc, key in iteritems({
     u"MusicBrainz Artist Id": "musicbrainz_artistid",
     u"MusicBrainz Album Id": "musicbrainz_albumid",
     u"MusicBrainz Album Artist Id": "musicbrainz_albumartistid",
@@ -495,7 +519,13 @@ for desc, key in {
     u"ASIN": "asin",
     u"ALBUMARTISTSORT": "albumartistsort",
     u"BARCODE": "barcode",
-}.iteritems():
+    u"CATALOGNUMBER": "catalognumber",
+    u"MusicBrainz Release Track Id": "musicbrainz_releasetrackid",
+    u"MusicBrainz Release Group Id": "musicbrainz_releasegroupid",
+    u"MusicBrainz Work Id": "musicbrainz_workid",
+    u"Acoustid Fingerprint": "acoustid_fingerprint",
+    u"Acoustid Id": "acoustid_id",
+}):
     EasyID3.RegisterTXXXKey(key, desc)
 
 

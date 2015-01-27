@@ -1,5 +1,6 @@
-# True Audio support for Mutagen
-# Copyright 2006 Joe Wreschnig
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2006  Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of version 2 of the GNU General Public License as
@@ -16,11 +17,13 @@ True Audio files use ID3 tags.
 
 __all__ = ["TrueAudio", "Open", "delete", "EasyTrueAudio"]
 
+from ._compat import endswith
+from mutagen import StreamInfo
 from mutagen.id3 import ID3FileType, delete
-from mutagen._util import cdata
+from mutagen._util import cdata, MutagenError
 
 
-class error(RuntimeError):
+class error(RuntimeError, MutagenError):
     pass
 
 
@@ -28,7 +31,7 @@ class TrueAudioHeaderError(error, IOError):
     pass
 
 
-class TrueAudioInfo(object):
+class TrueAudioInfo(StreamInfo):
     """True Audio stream information.
 
     Attributes:
@@ -40,7 +43,7 @@ class TrueAudioInfo(object):
     def __init__(self, fileobj, offset):
         fileobj.seek(offset or 0)
         header = fileobj.read(18)
-        if len(header) != 18 or not header.startswith("TTA"):
+        if len(header) != 18 or not header.startswith(b"TTA"):
             raise TrueAudioHeaderError("TTA header not found")
         self.sample_rate = cdata.int_le(header[10:14])
         samples = cdata.uint_le(header[14:18])
@@ -63,8 +66,8 @@ class TrueAudio(ID3FileType):
 
     @staticmethod
     def score(filename, fileobj, header):
-        return (header.startswith("ID3") + header.startswith("TTA") +
-                filename.lower().endswith(".tta") * 2)
+        return (header.startswith(b"ID3") + header.startswith(b"TTA") +
+                endswith(filename.lower(), b".tta") * 2)
 
 
 Open = TrueAudio

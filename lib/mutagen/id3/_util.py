@@ -1,12 +1,18 @@
+# -*- coding: utf-8 -*-
+
 # Copyright (C) 2005  Michael Urman
 #               2013  Christoph Reiter
+#               2014  Ben Ockmore
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of version 2 of the GNU General Public License as
 # published by the Free Software Foundation.
 
+from .._compat import long_, integer_types
+from .._util import MutagenError
 
-class error(Exception):
+
+class error(MutagenError):
     pass
 
 
@@ -45,43 +51,26 @@ class ID3Warning(error, UserWarning):
 class unsynch(object):
     @staticmethod
     def decode(value):
-        output = []
-        safe = True
-        append = output.append
-        for val in value:
-            if safe:
-                append(val)
-                safe = val != '\xFF'
-            else:
-                if val >= '\xE0':
-                    raise ValueError('invalid sync-safe string')
-                elif val != '\x00':
-                    append(val)
-                safe = True
-        if not safe:
+        fragments = bytearray(value).split(b'\xff')
+        if len(fragments) > 1 and not fragments[-1]:
             raise ValueError('string ended unsafe')
-        return ''.join(output)
+
+        for f in fragments[1:]:
+            if (not f) or (f[0] >= 0xE0):
+                raise ValueError('invalid sync-safe string')
+
+            if f[0] == 0x00:
+                del f[0]
+
+        return bytes(bytearray(b'\xff').join(fragments))
 
     @staticmethod
     def encode(value):
-        output = []
-        safe = True
-        append = output.append
-        for val in value:
-            if safe:
-                append(val)
-                if val == '\xFF':
-                    safe = False
-            elif val == '\x00' or val >= '\xE0':
-                append('\x00')
-                append(val)
-                safe = val != '\xFF'
-            else:
-                append(val)
-                safe = True
-        if not safe:
-            append('\x00')
-        return ''.join(output)
+        fragments = bytearray(value).split(b'\xff')
+        for f in fragments[1:]:
+            if (not f) or (f[0] >= 0xE0) or (f[0] == 0x00):
+                f.insert(0, 0x00)
+        return bytes(bytearray(b'\xff').join(fragments))
 
 
 class _BitPaddedMixin(object):
@@ -111,11 +100,11 @@ class _BitPaddedMixin(object):
             while value:
                 append(value & mask)
                 value >>= bits
-            bytes_ = bytes_.ljust(minwidth, "\x00")
+            bytes_ = bytes_.ljust(minwidth, b"\x00")
 
         if bigendian:
             bytes_.reverse()
-        return str(bytes_)
+        return bytes(bytes_)
 
     @staticmethod
     def has_valid_padding(value, bits=7):
@@ -125,14 +114,14 @@ class _BitPaddedMixin(object):
 
         mask = (((1 << (8 - bits)) - 1) << bits)
 
-        if isinstance(value, (int, long)):
+        if isinstance(value, integer_types):
             while value:
                 if value & mask:
                     return False
                 value >>= 8
-        elif isinstance(value, str):
-            for byte in value:
-                if ord(byte) & mask:
+        elif isinstance(value, bytes):
+            for byte in bytearray(value):
+                if byte & mask:
                     return False
         else:
             raise TypeError
@@ -148,29 +137,29 @@ class BitPaddedInt(int, _BitPaddedMixin):
         numeric_value = 0
         shift = 0
 
-        if isinstance(value, (int, long)):
+        if isinstance(value, integer_types):
             while value:
                 numeric_value += (value & mask) << shift
                 value >>= 8
                 shift += bits
-        elif isinstance(value, str):
+        elif isinstance(value, bytes):
             if bigendian:
                 value = reversed(value)
-            for byte in value:
-                numeric_value += (ord(byte) & mask) << shift
+            for byte in bytearray(value):
+                numeric_value += (byte & mask) << shift
                 shift += bits
         else:
             raise TypeError
 
-        if isinstance(numeric_value, long):
-            self = long.__new__(BitPaddedLong, numeric_value)
-        else:
+        if isinstance(numeric_value, int):
             self = int.__new__(BitPaddedInt, numeric_value)
+        else:
+            self = long_.__new__(BitPaddedLong, numeric_value)
 
         self.bits = bits
         self.bigendian = bigendian
         return self
 
 
-class BitPaddedLong(long, _BitPaddedMixin):
+class BitPaddedLong(long_, _BitPaddedMixin):
     pass

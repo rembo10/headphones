@@ -1,5 +1,5 @@
-# Ogg Vorbis support.
-#
+# -*- coding: utf-8 -*-
+
 # Copyright 2006 Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
@@ -19,6 +19,7 @@ __all__ = ["OggVorbis", "Open", "delete"]
 
 import struct
 
+from mutagen import StreamInfo
 from mutagen._vorbis import VCommentDict
 from mutagen.ogg import OggPage, OggFileType, error as OggError
 
@@ -31,7 +32,7 @@ class OggVorbisHeaderError(error):
     pass
 
 
-class OggVorbisInfo(object):
+class OggVorbisInfo(StreamInfo):
     """Ogg Vorbis stream information.
 
     Attributes:
@@ -44,7 +45,7 @@ class OggVorbisInfo(object):
 
     def __init__(self, fileobj):
         page = OggPage(fileobj)
-        while not page.packets[0].startswith("\x01vorbis"):
+        while not page.packets[0].startswith(b"\x01vorbis"):
             page = OggPage(fileobj)
         if not page.first:
             raise OggVorbisHeaderError(
@@ -73,7 +74,8 @@ class OggVorbisInfo(object):
         self.length = page.position / float(self.sample_rate)
 
     def pprint(self):
-        return "Ogg Vorbis, %.2f seconds, %d bps" % (self.length, self.bitrate)
+        return u"Ogg Vorbis, %.2f seconds, %d bps" % (
+            self.length, self.bitrate)
 
 
 class OggVCommentDict(VCommentDict):
@@ -97,7 +99,7 @@ class OggVCommentDict(VCommentDict):
         # plus grab any stray setup packet data out of them.
         fileobj.seek(0)
         page = OggPage(fileobj)
-        while not page.packets[0].startswith("\x03vorbis"):
+        while not page.packets[0].startswith(b"\x03vorbis"):
             page = OggPage(fileobj)
 
         old_pages = [page]
@@ -109,7 +111,7 @@ class OggVCommentDict(VCommentDict):
         packets = OggPage.to_packets(old_pages, strict=False)
 
         # Set the new comment packet.
-        packets[0] = "\x03vorbis" + self.write()
+        packets[0] = b"\x03vorbis" + self.write()
 
         new_pages = OggPage.from_packets(packets, old_pages[0].sequence)
         OggPage.replace(fileobj, old_pages, new_pages)
@@ -125,7 +127,7 @@ class OggVorbis(OggFileType):
 
     @staticmethod
     def score(filename, fileobj, header):
-        return (header.startswith("OggS") * ("\x01vorbis" in header))
+        return (header.startswith(b"OggS") * (b"\x01vorbis" in header))
 
 
 Open = OggVorbis

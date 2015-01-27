@@ -1,5 +1,5 @@
-# Ogg Speex support.
-#
+# -*- coding: utf-8 -*-
+
 # Copyright 2006 Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
@@ -19,6 +19,7 @@ http://lists.xiph.org/pipermail/speex-dev/2006-July/004676.html.
 
 __all__ = ["OggSpeex", "Open", "delete"]
 
+from mutagen import StreamInfo
 from mutagen._vorbis import VCommentDict
 from mutagen.ogg import OggPage, OggFileType, error as OggError
 from mutagen._util import cdata
@@ -32,7 +33,7 @@ class OggSpeexHeaderError(error):
     pass
 
 
-class OggSpeexInfo(object):
+class OggSpeexInfo(StreamInfo):
     """Ogg Speex stream information.
 
     Attributes:
@@ -49,7 +50,7 @@ class OggSpeexInfo(object):
 
     def __init__(self, fileobj):
         page = OggPage(fileobj)
-        while not page.packets[0].startswith("Speex   "):
+        while not page.packets[0].startswith(b"Speex   "):
             page = OggPage(fileobj)
         if not page.first:
             raise OggSpeexHeaderError(
@@ -64,7 +65,7 @@ class OggSpeexInfo(object):
         self.length = page.position / float(self.sample_rate)
 
     def pprint(self):
-        return "Ogg Speex, %.2f seconds" % self.length
+        return u"Ogg Speex, %.2f seconds" % self.length
 
 
 class OggSpeexVComment(VCommentDict):
@@ -78,7 +79,7 @@ class OggSpeexVComment(VCommentDict):
             if page.serial == info.serial:
                 pages.append(page)
                 complete = page.complete or (len(page.packets) > 1)
-        data = OggPage.to_packets(pages)[0] + "\x01"
+        data = OggPage.to_packets(pages)[0] + b"\x01"
         super(OggSpeexVComment, self).__init__(data, framing=False)
 
     def _inject(self, fileobj):
@@ -89,7 +90,7 @@ class OggSpeexVComment(VCommentDict):
         # Find the first header page, with the stream info.
         # Use it to get the serial number.
         page = OggPage(fileobj)
-        while not page.packets[0].startswith("Speex   "):
+        while not page.packets[0].startswith(b"Speex   "):
             page = OggPage(fileobj)
 
         # Look for the next page with that serial number, it'll start
@@ -125,7 +126,7 @@ class OggSpeex(OggFileType):
 
     @staticmethod
     def score(filename, fileobj, header):
-        return (header.startswith("OggS") * ("Speex   " in header))
+        return (header.startswith(b"OggS") * (b"Speex   " in header))
 
 
 Open = OggSpeex

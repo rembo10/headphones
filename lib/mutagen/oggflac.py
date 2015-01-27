@@ -1,6 +1,6 @@
-# Ogg FLAC support.
-#
-# Copyright 2006 Joe Wreschnig
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2006  Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,7 +19,7 @@ __all__ = ["OggFLAC", "Open", "delete"]
 
 import struct
 
-from cStringIO import StringIO
+from ._compat import cBytesIO
 
 from mutagen.flac import StreamInfo, VCFLACDict, StrictFileObject
 from mutagen.ogg import OggPage, OggFileType, error as OggError
@@ -54,11 +54,11 @@ class OggFLACStreamInfo(StreamInfo):
             data = data._fileobj
 
         page = OggPage(data)
-        while not page.packets[0].startswith("\x7FFLAC"):
+        while not page.packets[0].startswith(b"\x7FFLAC"):
             page = OggPage(data)
         major, minor, self.packets, flac = struct.unpack(
             ">BBH4s", page.packets[0][5:13])
-        if flac != "fLaC":
+        if flac != b"fLaC":
             raise OggFLACHeaderError("invalid FLAC marker (%r)" % flac)
         elif (major, minor) != (1, 0):
             raise OggFLACHeaderError(
@@ -66,7 +66,7 @@ class OggFLACStreamInfo(StreamInfo):
         self.serial = page.serial
 
         # Skip over the block header.
-        stringobj = StrictFileObject(StringIO(page.packets[0][17:]))
+        stringobj = StrictFileObject(cBytesIO(page.packets[0][17:]))
         super(OggFLACStreamInfo, self).load(stringobj)
 
     def _post_tags(self, fileobj):
@@ -76,7 +76,7 @@ class OggFLACStreamInfo(StreamInfo):
         self.length = page.position / float(self.sample_rate)
 
     def pprint(self):
-        return "Ogg " + super(OggFLACStreamInfo, self).pprint()
+        return u"Ogg " + super(OggFLACStreamInfo, self).pprint()
 
 
 class OggFLACVComment(VCFLACDict):
@@ -90,7 +90,7 @@ class OggFLACVComment(VCFLACDict):
             if page.serial == info.serial:
                 pages.append(page)
                 complete = page.complete or (len(page.packets) > 1)
-        comment = StringIO(OggPage.to_packets(pages)[0][4:])
+        comment = cBytesIO(OggPage.to_packets(pages)[0][4:])
         super(OggFLACVComment, self).load(comment, errors=errors)
 
     def _inject(self, fileobj):
@@ -100,7 +100,7 @@ class OggFLACVComment(VCFLACDict):
         # second packet - and second page - must be the comment data.
         fileobj.seek(0)
         page = OggPage(fileobj)
-        while not page.packets[0].startswith("\x7FFLAC"):
+        while not page.packets[0].startswith(b"\x7FFLAC"):
             page = OggPage(fileobj)
 
         first_page = page
@@ -117,7 +117,7 @@ class OggFLACVComment(VCFLACDict):
 
         # Set the new comment block.
         data = self.write()
-        data = packets[0][0] + struct.pack(">I", len(data))[-3:] + data
+        data = packets[0][:1] + struct.pack(">I", len(data))[-3:] + data
         packets[0] = data
 
         new_pages = OggPage.from_packets(packets, old_pages[0].sequence)
@@ -134,8 +134,8 @@ class OggFLAC(OggFileType):
 
     @staticmethod
     def score(filename, fileobj, header):
-        return (header.startswith("OggS") * (
-            ("FLAC" in header) + ("fLaC" in header)))
+        return (header.startswith(b"OggS") * (
+            (b"FLAC" in header) + (b"fLaC" in header)))
 
 
 Open = OggFLAC
