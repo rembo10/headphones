@@ -1,5 +1,5 @@
 # mako/_ast_util.py
-# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2015 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -34,42 +34,42 @@ from _ast import *
 from mako.compat import arg_stringname
 
 BOOLOP_SYMBOLS = {
-    And:        'and',
-    Or:         'or'
+    And: 'and',
+    Or: 'or'
 }
 
 BINOP_SYMBOLS = {
-    Add:        '+',
-    Sub:        '-',
-    Mult:       '*',
-    Div:        '/',
-    FloorDiv:   '//',
-    Mod:        '%',
-    LShift:     '<<',
-    RShift:     '>>',
-    BitOr:      '|',
-    BitAnd:     '&',
-    BitXor:     '^'
+    Add: '+',
+    Sub: '-',
+    Mult: '*',
+    Div: '/',
+    FloorDiv: '//',
+    Mod: '%',
+    LShift: '<<',
+    RShift: '>>',
+    BitOr: '|',
+    BitAnd: '&',
+    BitXor: '^'
 }
 
 CMPOP_SYMBOLS = {
-    Eq:         '==',
-    Gt:         '>',
-    GtE:        '>=',
-    In:         'in',
-    Is:         'is',
-    IsNot:      'is not',
-    Lt:         '<',
-    LtE:        '<=',
-    NotEq:      '!=',
-    NotIn:      'not in'
+    Eq: '==',
+    Gt: '>',
+    GtE: '>=',
+    In: 'in',
+    Is: 'is',
+    IsNot: 'is not',
+    Lt: '<',
+    LtE: '<=',
+    NotEq: '!=',
+    NotIn: 'not in'
 }
 
 UNARYOP_SYMBOLS = {
-    Invert:     '~',
-    Not:        'not',
-    UAdd:       '+',
-    USub:       '-'
+    Invert: '~',
+    Not: 'not',
+    UAdd: '+',
+    USub: '-'
 }
 
 ALL_SYMBOLS = {}
@@ -215,8 +215,8 @@ def get_compile_mode(node):
     if not isinstance(node, mod):
         raise TypeError('expected mod node, got %r' % node.__class__.__name__)
     return {
-        Expression:     'eval',
-        Interactive:    'single'
+        Expression: 'eval',
+        Interactive: 'single'
     }.get(node.__class__, 'expr')
 
 

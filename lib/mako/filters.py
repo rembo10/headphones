@@ -1,5 +1,5 @@
 # mako/filters.py
-# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2015 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -48,6 +48,10 @@ def url_escape(string):
     string = string.encode("utf8")
     return quote_plus(string)
 
+def legacy_url_escape(string):
+    # convert into a list of octets
+    return quote_plus(string)
+
 def url_unescape(string):
     text = unquote_plus(string)
     if not is_ascii_str(text):
@@ -64,7 +68,7 @@ class Decode(object):
             if isinstance(x, compat.text_type):
                 return x
             elif not isinstance(x, compat.binary_type):
-                return compat.text_type(str(x), encoding=key)
+                return decode(str(x))
             else:
                 return compat.text_type(x, encoding=key)
         return decode
@@ -193,4 +197,5 @@ if compat.py3k:
 
 NON_UNICODE_ESCAPES = DEFAULT_ESCAPES.copy()
 NON_UNICODE_ESCAPES['h'] = 'filters.legacy_html_escape'
+NON_UNICODE_ESCAPES['u'] = 'filters.legacy_url_escape'
 
