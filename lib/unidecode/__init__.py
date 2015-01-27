@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# vi:tabstop=4:expandtab:sw=4
 """Transliterate Unicode text into plain 7-bit ASCII.
 
 Example usage:
@@ -39,9 +40,14 @@ def unidecode(string):
         if codepoint < 0x80: # Basic ASCII
             retval.append(str(char))
             continue
-
+        
         if codepoint > 0xeffff:
             continue # Characters in Private Use Area and above are ignored
+
+        if 0xd800 <= codepoint <= 0xdfff:
+            warnings.warn(  "Surrogate character %r will be ignored. "
+                            "You might be using a narrow Python build." % (char,),
+                            RuntimeWarning, 2)
 
         section = codepoint >> 8   # Chop off the last two hex digits
         position = codepoint % 256 # Last two hex digits
@@ -50,7 +56,7 @@ def unidecode(string):
             table = Cache[section]
         except KeyError:
             try:
-                mod = __import__('unidecode.x%03x'%(section), [], [], ['data'])
+                mod = __import__('unidecode.x%03x'%(section), globals(), locals(), ['data'])
             except ImportError:
                 Cache[section] = None
                 continue   # No match: ignore this character and carry on.

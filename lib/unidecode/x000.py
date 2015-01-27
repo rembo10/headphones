@@ -1,132 +1,15 @@
 data = (
-'\x00',    # 0x00
-'\x01',    # 0x01
-'\x02',    # 0x02
-'\x03',    # 0x03
-'\x04',    # 0x04
-'\x05',    # 0x05
-'\x06',    # 0x06
-'\x07',    # 0x07
-'\x08',    # 0x08
-'\x09',    # 0x09
-'\x0a',    # 0x0a
-'\x0b',    # 0x0b
-'\x0c',    # 0x0c
-'\x0d',    # 0x0d
-'\x0e',    # 0x0e
-'\x0f',    # 0x0f
-'\x10',    # 0x10
-'\x11',    # 0x11
-'\x12',    # 0x12
-'\x13',    # 0x13
-'\x14',    # 0x14
-'\x15',    # 0x15
-'\x16',    # 0x16
-'\x17',    # 0x17
-'\x18',    # 0x18
-'\x19',    # 0x19
-'\x1a',    # 0x1a
-'\x1b',    # 0x1b
-'\x1c',    # 0x1c
-'\x1d',    # 0x1d
-'\x1e',    # 0x1e
-'\x1f',    # 0x1f
-' ',    # 0x20
-'!',    # 0x21
-'"',    # 0x22
-'#',    # 0x23
-'$',    # 0x24
-'%',    # 0x25
-'&',    # 0x26
-'\'',    # 0x27
-'(',    # 0x28
-')',    # 0x29
-'*',    # 0x2a
-'+',    # 0x2b
-',',    # 0x2c
-'-',    # 0x2d
-'.',    # 0x2e
-'/',    # 0x2f
-'0',    # 0x30
-'1',    # 0x31
-'2',    # 0x32
-'3',    # 0x33
-'4',    # 0x34
-'5',    # 0x35
-'6',    # 0x36
-'7',    # 0x37
-'8',    # 0x38
-'9',    # 0x39
-':',    # 0x3a
-';',    # 0x3b
-'<',    # 0x3c
-'=',    # 0x3d
-'>',    # 0x3e
-'?',    # 0x3f
-'@',    # 0x40
-'A',    # 0x41
-'B',    # 0x42
-'C',    # 0x43
-'D',    # 0x44
-'E',    # 0x45
-'F',    # 0x46
-'G',    # 0x47
-'H',    # 0x48
-'I',    # 0x49
-'J',    # 0x4a
-'K',    # 0x4b
-'L',    # 0x4c
-'M',    # 0x4d
-'N',    # 0x4e
-'O',    # 0x4f
-'P',    # 0x50
-'Q',    # 0x51
-'R',    # 0x52
-'S',    # 0x53
-'T',    # 0x54
-'U',    # 0x55
-'V',    # 0x56
-'W',    # 0x57
-'X',    # 0x58
-'Y',    # 0x59
-'Z',    # 0x5a
-']',    # 0x5b
-'\\',    # 0x5c
-']',    # 0x5d
-'^',    # 0x5e
-'_',    # 0x5f
-'`',    # 0x60
-'a',    # 0x61
-'b',    # 0x62
-'c',    # 0x63
-'d',    # 0x64
-'e',    # 0x65
-'f',    # 0x66
-'g',    # 0x67
-'h',    # 0x68
-'i',    # 0x69
-'j',    # 0x6a
-'k',    # 0x6b
-'l',    # 0x6c
-'m',    # 0x6d
-'n',    # 0x6e
-'o',    # 0x6f
-'p',    # 0x70
-'q',    # 0x71
-'r',    # 0x72
-'s',    # 0x73
-'t',    # 0x74
-'u',    # 0x75
-'v',    # 0x76
-'w',    # 0x77
-'x',    # 0x78
-'y',    # 0x79
-'z',    # 0x7a
-'{',    # 0x7b
-'|',    # 0x7c
-'}',    # 0x7d
-'~',    # 0x7e
-'',    # 0x7f
+# Code points u+007f and below are equivalent to ASCII and are handled by a
+# special case in the code. Hence they are not present in this table.
+'', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+'', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+'', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+'', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+'', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+'', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+'', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+'', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+
 '',    # 0x80
 '',    # 0x81
 '',    # 0x82
@@ -162,7 +45,10 @@ data = (
 ' ',    # 0xa0
 '!',    # 0xa1
 'C/',    # 0xa2
+
+# Not "GBP" - Pound Sign is used for more than just British Pounds.
 'PS',    # 0xa3
+
 '$?',    # 0xa4
 'Y=',    # 0xa5
 '|',    # 0xa6
@@ -177,8 +63,11 @@ data = (
 '-',    # 0xaf
 'deg',    # 0xb0
 '+-',    # 0xb1
+
+# These might be combined with other superscript digits (u+2070 - u+2079)
 '2',    # 0xb2
 '3',    # 0xb3
+
 '\'',    # 0xb4
 'u',    # 0xb5
 'P',    # 0xb6
@@ -195,7 +84,10 @@ data = (
 'A',    # 0xc1
 'A',    # 0xc2
 'A',    # 0xc3
+
+# Not "AE" - used in languages other than German
 'A',    # 0xc4
+
 'A',    # 0xc5
 'AE',    # 0xc6
 'C',    # 0xc7
@@ -213,13 +105,19 @@ data = (
 'O',    # 0xd3
 'O',    # 0xd4
 'O',    # 0xd5
+
+# Not "OE" - used in languages other than German
 'O',    # 0xd6
+
 'x',    # 0xd7
 'O',    # 0xd8
 'U',    # 0xd9
 'U',    # 0xda
 'U',    # 0xdb
+
+# Not "UE" - used in languages other than German
 'U',    # 0xdc
+
 'Y',    # 0xdd
 'Th',    # 0xde
 'ss',    # 0xdf
@@ -227,7 +125,10 @@ data = (
 'a',    # 0xe1
 'a',    # 0xe2
 'a',    # 0xe3
+
+# Not "ae" - used in languages other than German
 'a',    # 0xe4
+
 'a',    # 0xe5
 'ae',    # 0xe6
 'c',    # 0xe7
@@ -245,13 +146,19 @@ data = (
 'o',    # 0xf3
 'o',    # 0xf4
 'o',    # 0xf5
+
+# Not "oe" - used in languages other than German
 'o',    # 0xf6
+
 '/',    # 0xf7
 'o',    # 0xf8
 'u',    # 0xf9
 'u',    # 0xfa
 'u',    # 0xfb
+
+# Not "ue" - used in languages other than German
 'u',    # 0xfc
+
 'y',    # 0xfd
 'th',    # 0xfe
 'y',    # 0xff
