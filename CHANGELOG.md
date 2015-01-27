@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.x.x
+Released XX XX 2015
+
+Highlights:
+* Added: backported 'Scan Artist' feature from `sarakha63/headphones`
+* Fixed: change file permissions of cache files according to settings (#2102)
+* Fixed: hide Songkick if no regional events are available
+* Fixed: only reschedule jobs if timeout changed (#2099)
+* Fixed: limit dialog height (#2096)
+* Improved: upgraded requests to 2.5.1
+* Improved: upgraded unidecode to 0.04.17
+* Improved: upgraded tzlocal to 1.1.2
+* Improved: upgraded PyTZ to 2014.10
+* Improved: upgraded mako to 1.0.1
+* Improved: upgraded mutagen to 1.27
+* Improved: upgraded beets to 1.3.10
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.3...v0.X.X).
+
 ## v0.5.3
 Released 15 January 2015
 
