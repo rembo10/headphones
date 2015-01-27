@@ -1,6 +1,6 @@
-# A Monkey's Audio (APE) reader/tagger
-#
-# Copyright 2006 Lukas Lalinsky <lalinsky@gmail.com>
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2006  Lukas Lalinsky
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,6 +18,8 @@ __all__ = ["MonkeysAudio", "Open", "delete"]
 
 import struct
 
+from ._compat import endswith
+from mutagen import StreamInfo
 from mutagen.apev2 import APEv2File, error, delete
 from mutagen._util import cdata
 
@@ -26,7 +28,7 @@ class MonkeysAudioHeaderError(error):
     pass
 
 
-class MonkeysAudioInfo(object):
+class MonkeysAudioInfo(StreamInfo):
     """Monkey's Audio stream information.
 
     Attributes:
@@ -40,7 +42,7 @@ class MonkeysAudioInfo(object):
 
     def __init__(self, fileobj):
         header = fileobj.read(76)
-        if len(header) != 76 or not header.startswith("MAC "):
+        if len(header) != 76 or not header.startswith(b"MAC "):
             raise MonkeysAudioHeaderError("not a Monkey's Audio file")
         self.version = cdata.ushort_le(header[4:6])
         if self.version >= 3980:
@@ -62,7 +64,7 @@ class MonkeysAudioInfo(object):
                 blocks_per_frame = 9216
         self.version /= 1000.0
         self.length = 0.0
-        if self.sample_rate != 0 and total_frames > 0:
+        if (self.sample_rate != 0) and (total_frames > 0):
             total_blocks = ((total_frames - 1) * blocks_per_frame +
                             final_frame_blocks)
             self.length = float(total_blocks) / self.sample_rate
@@ -78,7 +80,7 @@ class MonkeysAudio(APEv2File):
 
     @staticmethod
     def score(filename, fileobj, header):
-        return header.startswith("MAC ") + filename.lower().endswith(".ape")
+        return header.startswith(b"MAC ") + endswith(filename.lower(), ".ape")
 
 
 Open = MonkeysAudio
