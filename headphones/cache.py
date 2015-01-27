@@ -23,20 +23,22 @@ LASTFM_API_KEY = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
 
 class Cache(object):
     """
-    This class deals with getting, storing and serving up artwork (album
-    art, artist images, etc) and info/descriptions (album info, artist descrptions)
-    to and from the cache folder. This can be called from within a web interface,
-    for example, using the helper functions getInfo(id) and getArtwork(id), to utilize the cached
-    images rather than having to retrieve them every time the page is reloaded.
+    This class deals with getting, storing and serving up artwork (album art,
+    artist images, etc) and info/descriptions (album info, artist descrptions)
+    to and from the cache folder. This can be called from within a web
+    interface. For example, using the helper functions `getInfo(id)` and
+    `getArtwork(id)`, to utilize the cached images rather than having to
+    retrieve them every time the page is reloaded.
 
-    So you can call cache.getArtwork(id) which will return an absolute path
-    to the image file on the local machine, or if the cache directory
-    doesn't exist, or can not be written to, it will return a url to the image.
+    You can call `getArtwork(id)` which will return an absolute path to the
+    image file on the local machine, or if the cache directory doesn't exist,
+    or can not be written to, it will return a url to the image.
 
-    Call cache.getInfo(id) to grab the artist/album info; will return the text description
+    Call `getInfo(id)` to grab the artist/album info. This will return the
+    text description.
 
-    The basic format for art in the cache is <musicbrainzid>.<date>.<ext>
-    and for info it is <musicbrainzid>.<date>.txt
+    The basic format for art in the cache is `<musicbrainzid>.<date>.<ext>`
+    and for info it is `<musicbrainzid>.<date>.txt`
     """
 
     path_to_art_cache = os.path.join(headphones.CONFIG.CACHE_DIR, 'artwork')
@@ -197,10 +199,10 @@ class Cache(object):
             return info_dict
 
     def get_image_links(self, ArtistID=None, AlbumID=None):
-        '''
+        """
         Here we're just going to open up the last.fm url, grab the image links and return them
         Won't save any image urls, or save the artwork in the cache. Useful for search results, etc.
-        '''
+        """
         if ArtistID:
 
             self.id_type = 'artist'
@@ -271,9 +273,10 @@ class Cache(object):
                     logger.warn('Error deleting file from the cache: %s', thumb_file)
 
     def _update_cache(self):
-        '''
+        """
         Since we call the same url for both info and artwork, we'll update both at the same time
-        '''
+        """
+
         myDB = db.DBConnection()
 
         # Since lastfm uses release ids rather than release group ids for albums, we have to do a artist + album search for albums
@@ -306,7 +309,6 @@ class Cache(object):
                 logger.debug('No artist thumbnail image found')
 
         else:
-
             dbalbum = myDB.action('SELECT ArtistName, AlbumTitle, ReleaseID FROM albums WHERE AlbumID=?', [self.id]).fetchone()
             if dbalbum['ReleaseID'] != self.id:
                 data = lastfm.request_lastfm("album.getinfo", mbid=dbalbum['ReleaseID'], api_key=LASTFM_API_KEY)
@@ -339,7 +341,8 @@ class Cache(object):
             if not thumb_url:
                 logger.debug('No album thumbnail image found')
 
-        #Save the content & summary to the database no matter what if we've opened up the url
+        # Save the content & summary to the database no matter what if we've
+        # opened up the url
         if self.id_type == 'artist':
             controlValueDict = {"ArtistID": self.id}
         else:
@@ -365,7 +368,8 @@ class Cache(object):
             else:
                 myDB.action('UPDATE albums SET ThumbURL=? WHERE AlbumID=?', [thumb_url, self.id])
 
-        # Should we grab the artwork here if we're just grabbing thumbs or info?? Probably not since the files can be quite big
+        # Should we grab the artwork here if we're just grabbing thumbs or
+        # info? Probably not since the files can be quite big
         if image_url and self.query_type == 'artwork':
             artwork = request.request_content(image_url, timeout=20)
 
@@ -374,12 +378,13 @@ class Cache(object):
                 if not os.path.isdir(self.path_to_art_cache):
                     try:
                         os.makedirs(self.path_to_art_cache)
-                    except Exception as e:
+                        os.chmod(self.path_to_art_cache, int(headphones.CONFIG.FOLDER_PERMISSIONS, 8))
+                    except OSError as e:
                         logger.error('Unable to create artwork cache dir. Error: %s', e)
                         self.artwork_errors = True
                         self.artwork_url = image_url
 
-                #Delete the old stuff
+                # Delete the old stuff
                 for artwork_file in self.artwork_files:
                     try:
                         os.remove(artwork_file)
@@ -392,12 +397,15 @@ class Cache(object):
                 try:
                     with open(artwork_path, 'wb') as f:
                         f.write(artwork)
-                except IOError as e:
+
+                    os.chmod(artwork_path, int(headphones.CONFIG.FILE_PERMISSIONS, 8))
+                except (OSError, IOError) as e:
                     logger.error('Unable to write to the cache dir: %s', e)
                     self.artwork_errors = True
                     self.artwork_url = image_url
 
-        # Grab the thumbnail as well if we're getting the full artwork (as long as it's missing/outdated
+        # Grab the thumbnail as well if we're getting the full artwork (as long
+        # as it's missing/outdated.
         if thumb_url and self.query_type in ['thumb', 'artwork'] and not (self.thumb_files and self._is_current(self.thumb_files[0])):
             artwork = request.request_content(thumb_url, timeout=20)
 
@@ -406,16 +414,17 @@ class Cache(object):
                 if not os.path.isdir(self.path_to_art_cache):
                     try:
                         os.makedirs(self.path_to_art_cache)
-                    except Exception as e:
+                        os.chmod(self.path_to_art_cache, int(headphones.CONFIG.FOLDER_PERMISSIONS, 8))
+                    except OSError as e:
                         logger.error('Unable to create artwork cache dir. Error: %s' + e)
                         self.thumb_errors = True
                         self.thumb_url = thumb_url
 
-                #Delete the old stuff
+                # Delete the old stuff
                 for thumb_file in self.thumb_files:
                     try:
                         os.remove(thumb_file)
-                    except Exception as e:
+                    except OSError as e:
                         logger.error('Error deleting file from the cache: %s', thumb_file)
 
                 ext = os.path.splitext(image_url)[1]
@@ -424,14 +433,15 @@ class Cache(object):
                 try:
                     with open(thumb_path, 'wb') as f:
                         f.write(artwork)
-                except IOError as e:
+
+                    os.chmod(thumb_path, int(headphones.CONFIG.FILE_PERMISSIONS, 8))
+                except (OSError, IOError) as e:
                     logger.error('Unable to write to the cache dir: %s', e)
                     self.thumb_errors = True
                     self.thumb_url = image_url
 
 
 def getArtwork(ArtistID=None, AlbumID=None):
-
     c = Cache()
     artwork_path = c.get_artwork_from_cache(ArtistID, AlbumID)
 
@@ -446,7 +456,6 @@ def getArtwork(ArtistID=None, AlbumID=None):
 
 
 def getThumb(ArtistID=None, AlbumID=None):
-
     c = Cache()
     artwork_path = c.get_thumb_from_cache(ArtistID, AlbumID)
 
@@ -461,16 +470,13 @@ def getThumb(ArtistID=None, AlbumID=None):
 
 
 def getInfo(ArtistID=None, AlbumID=None):
-
     c = Cache()
-
     info_dict = c.get_info_from_cache(ArtistID, AlbumID)
 
     return info_dict
 
 
 def getImageLinks(ArtistID=None, AlbumID=None):
-
     c = Cache()
     image_links = c.get_image_links(ArtistID, AlbumID)
 
