@@ -189,45 +189,45 @@
 		$.getJSON("https://api.songkick.com/api/3.0/artists/mbid:${artist['ArtistID']}/calendar.json?apikey=${headphones.CONFIG.SONGKICK_APIKEY}&jsoncallback=?",
 			function(data){
 				if (data['resultsPage'].totalEntries >= 1) {
-
-                    if( ${songkick_filter_enabled} ) {
+                    if (${songkick_filter_enabled}) {
                         data.resultsPage.results.event = $.grep(data.resultsPage.results.event, function(element,index){
-                        return element.venue.metroArea.id == ${songkick_location};
-                    });
+                    	    return element.venue.metroArea.id == ${songkick_location};
+                    	});
                     }
 
-					var tourDate;
+                    if (data.resultsPage.results.event.length > 0) {
+						var tourDate;
 
-					calendarDomNode.show();
-					$("#artistImg").addClass('on-tour');
+						calendarDomNode.show();
+						$("#artistImg").addClass('on-tour');
 
-					jQuery.each( data['resultsPage'].results.event, function( i, event ) {
-						tourDate = template;
-						tourDate = tourDate.replace('URI',event.uri);
-						tourDate = tourDate.replace('NAME',event.displayName);
-						tourDate = tourDate.replace('LOC',event.location.city);
+						jQuery.each(data.resultsPage.results.event, function(i, event) {
+							tourDate = template;
+							tourDate = tourDate.replace('URI',event.uri);
+							tourDate = tourDate.replace('NAME',event.displayName);
+							tourDate = tourDate.replace('LOC',event.location.city);
 
-						calendarDomNode.append(tourDate);
-					});
+							calendarDomNode.append(tourDate);
+						});
 
-					calendarDomNode.append('<li><img src="interfaces/default/images/songkick.png" alt="concerts by songkick" class="sk-logo" /></li>');
+						calendarDomNode.append('<li><img src="interfaces/default/images/songkick.png" alt="concerts by songkick" class="sk-logo" /></li>');
 
-				$(function() {
-				  $("#artistCalendar").each(function() {
-					$("li:gt(4)", this).hide(); /* :gt() is zero-indexed */
-					$("li:nth-child(5)", this).after("<br><li class='more'><a href='#'>More...</a></li>"); /* :nth-child() is one-indexed */
-				  });
-				  $("li.more a").live("click", function() {
-					var li = $(this).parents("li:first");
-					li.parent().children().show();
-					li.remove();
-					return false;
-				  });
-				});
-
+						$(function() {
+						  $("#artistCalendar").each(function() {
+							$("li:gt(4)", this).hide(); /* :gt() is zero-indexed */
+							$("li:nth-child(5)", this).after("<br><li class='more'><a href='#'>More...</a></li>"); /* :nth-child() is one-indexed */
+						  });
+						  $("li.more a").live("click", function() {
+							var li = $(this).parents("li:first");
+							li.parent().children().show();
+							li.remove();
+							return false;
+						  });
+						});
+					}
 				}
-			// data is JSON response object
-		});
+			}
+		);
 	}
 
 	var loadingMessage = false;
