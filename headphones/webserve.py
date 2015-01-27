@@ -253,17 +253,17 @@ class WebInterface(object):
     def deleteArtist(self, ArtistID):
         self.removeArtist(ArtistID)
         raise cherrypy.HTTPRedirect("home")
-    
+
     @cherrypy.expose
     def scanArtist(self, ArtistID):
-        logger.info(u"Scanning artist: " + ArtistID)
+        logger.info(u"Scanning artist: %s", ArtistID)
         myDB = db.DBConnection()
-        artistname=myDB.select('select distinct ArtistName from artists WHERE ArtistID=?', [ArtistID])
-        artistfolder= os.path.join(headphones.CONFIG.DESTINATION_DIR,artistname[0][0])
-        try:    
+        artistname = myDB.select('SELECT DISTINCT ArtistName FROM artists WHERE ArtistID=?', [ArtistID])
+        artistfolder = os.path.join(headphones.CONFIG.DESTINATION_DIR, artistname[0][0])
+        try:
             threading.Thread(target=librarysync.libraryScan(dir=artistfolder)).start()
-        except Exception, e:
-            logger.error('Unable to complete the scan: %s' % e)
+        except Exception as e:
+            logger.error('Unable to complete the scan: %s', e)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 
     @cherrypy.expose
