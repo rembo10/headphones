@@ -35,12 +35,12 @@ from __future__ import print_function
 import Queue
 from threading import Thread, Lock
 import sys
-import types
 
 BUBBLE = '__PIPELINE_BUBBLE__'
 POISON = '__PIPELINE_POISON__'
 
 DEFAULT_QUEUE_SIZE = 16
+
 
 def _invalidate_queue(q, val=None, sync=True):
     """Breaks a Queue such that it never blocks, always has size 1,
@@ -50,8 +50,10 @@ def _invalidate_queue(q, val=None, sync=True):
     """
     def _qsize(len=len):
         return 1
+
     def _put(item):
         pass
+
     def _get():
         return val
 
@@ -69,6 +71,7 @@ def _invalidate_queue(q, val=None, sync=True):
     finally:
         if sync:
             q.mutex.release()
+
 
 class CountedQueue(Queue.Queue):
     """A queue that keeps track of the number of threads that are
@@ -104,6 +107,7 @@ class CountedQueue(Queue.Queue):
 
                 # Replacement _get invalidates when no items remain.
                 _old_get = self._get
+
                 def _get():
                     out = _old_get()
                     if not self.queue:
@@ -117,17 +121,66 @@ class CountedQueue(Queue.Queue):
                     # No items. Invalidate immediately.
                     _invalidate_queue(self, POISON, False)
 
+
 class MultiMessage(object):
     """A message yielded by a pipeline stage encapsulating multiple
     values to be sent to the next stage.
     """
     def __init__(self, messages):
         self.messages = messages
+
+
 def multiple(messages):
     """Yield multiple([message, ..]) from a pipeline stage to send
     multiple values to the next pipeline stage.
     """
     return MultiMessage(messages)
+
+
+def stage(func):
+    """Decorate a function to become a simple stage.
+
+    >>> @stage
+    ... def add(n, i):
+    ...     return i + n
+    >>> pipe = Pipeline([
+    ...     iter([1, 2, 3]),
+    ...     add(2),
+    ... ])
+    >>> list(pipe.pull())
+    [3, 4, 5]
+    """
+
+    def coro(*args):
+        task = None
+        while True:
+            task = yield task
+            task = func(*(args + (task,)))
+    return coro
+
+
+def mutator_stage(func):
+    """Decorate a function that manipulates items in a coroutine to
+    become a simple stage.
+
+    >>> @mutator_stage
+    ... def setkey(key, item):
+    ...     item[key] = True
+    >>> pipe = Pipeline([
+    ...     iter([{'x': False}, {'a': False}]),
+    ...     setkey('x'),
+    ... ])
+    >>> list(pipe.pull())
+    [{'x': True}, {'a': False, 'x': True}]
+    """
+
+    def coro(*args):
+        task = None
+        while True:
+            task = yield task
+            func(*(args + (task,)))
+    return coro
+
 
 def _allmsgs(obj):
     """Returns a list of all the messages encapsulated in obj. If obj
@@ -140,6 +193,7 @@ def _allmsgs(obj):
         return []
     else:
         return [obj]
+
 
 class PipelineThread(Thread):
     """Abstract base class for pipeline-stage threads."""
@@ -168,6 +222,7 @@ class PipelineThread(Thread):
         self.exc_info = exc_info
         for thread in self.all_threads:
             thread.abort()
+
 
 class FirstPipelineThread(PipelineThread):
     """The thread running the first stage in a parallel pipeline setup.
@@ -208,6 +263,7 @@ class FirstPipelineThread(PipelineThread):
 
         # Generator finished; shut down the pipeline.
         self.out_queue.release()
+
 
 class MiddlePipelineThread(PipelineThread):
     """A thread running any stage in the pipeline except the first or
@@ -256,6 +312,7 @@ class MiddlePipelineThread(PipelineThread):
         # Pipeline is shutting down normally.
         self.out_queue.release()
 
+
 class LastPipelineThread(PipelineThread):
     """A thread running the last stage in a pipeline. The coroutine
     should yield nothing.
@@ -291,6 +348,7 @@ class LastPipelineThread(PipelineThread):
             self.abort_all(sys.exc_info())
             return
 
+
 class Pipeline(object):
     """Represents a staged pattern of work. Each stage in the pipeline
     is a coroutine that receives messages from the previous stage and
@@ -322,7 +380,8 @@ class Pipeline(object):
         messages between the stages are stored in queues of the given
         size.
         """
-        queues = [CountedQueue(queue_size) for i in range(len(self.stages)-1)]
+        queue_count = len(self.stages) - 1
+        queues = [CountedQueue(queue_size) for i in range(queue_count)]
         threads = []
 
         # Set up first stage.
@@ -330,10 +389,10 @@ class Pipeline(object):
             threads.append(FirstPipelineThread(coro, queues[0], threads))
 
         # Middle stages.
-        for i in range(1, len(self.stages)-1):
+        for i in range(1, queue_count):
             for coro in self.stages[i]:
                 threads.append(MiddlePipelineThread(
-                    coro, queues[i-1], queues[i], threads
+                    coro, queues[i - 1], queues[i], threads
                 ))
 
         # Last stage.
@@ -408,17 +467,20 @@ if __name__ == '__main__':
             print('generating %i' % i)
             time.sleep(1)
             yield i
+
     def work():
         num = yield
         while True:
             print('processing %i' % num)
             time.sleep(2)
-            num = yield num*2
+            num = yield num * 2
+
     def consume():
         while True:
             num = yield
             time.sleep(1)
             print('received %i' % num)
+
     ts_start = time.time()
     Pipeline([produce(), work(), consume()]).run_sequential()
     ts_seq = time.time()
@@ -437,6 +499,7 @@ if __name__ == '__main__':
             print('generating %i' % i)
             time.sleep(1)
             yield i
+
     def exc_work():
         num = yield
         while True:
@@ -445,10 +508,10 @@ if __name__ == '__main__':
             if num == 3:
                 raise Exception()
             num = yield num * 2
+
     def exc_consume():
         while True:
             num = yield
-            #if num == 4:
-            #   raise Exception()
             print('received %i' % num)
+
     Pipeline([exc_produce(), exc_work(), exc_consume()]).run_parallel(1)

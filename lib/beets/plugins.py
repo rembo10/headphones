@@ -16,7 +16,10 @@
 
 import logging
 import traceback
+import inspect
+import re
 from collections import defaultdict
+
 
 import beets
 from beets import mediafile
@@ -30,6 +33,14 @@ LASTFM_KEY = '2dc3914abf35f0d9c92d97d8f8e42b43'
 log = logging.getLogger('beets')
 
 
+class PluginConflictException(Exception):
+    """Indicates that the services provided by one plugin conflict with
+    those of another.
+
+    For example two plugins may define different types for flexible fields.
+    """
+
+
 # Managing the plugins themselves.
 
 class BeetsPlugin(object):
@@ -40,7 +51,6 @@ class BeetsPlugin(object):
     def __init__(self, name=None):
         """Perform one-time plugin setup.
         """
-        _add_media_fields(self.item_fields())
         self.import_stages = []
         self.name = name or self.__module__.split('.')[-1]
         self.config = beets.config[self.name]
@@ -86,14 +96,6 @@ class BeetsPlugin(object):
         """
         return ()
 
-    def item_fields(self):
-        """Returns field descriptors to be added to the MediaFile class,
-        in the form of a dictionary whose keys are field names and whose
-        values are descriptor (e.g., MediaField) instances. The Library
-        database schema is not (currently) extended.
-        """
-        return {}
-
     def album_for_id(self, album_id):
         """Return an AlbumInfo object or None if no matching release was
         found.
@@ -106,6 +108,20 @@ class BeetsPlugin(object):
         """
         return None
 
+    def add_media_field(self, name, descriptor):
+        """Add a field that is synchronized between media files and items.
+
+        When a media field is added ``item.write()`` will set the name
+        property of the item's MediaFile to ``item[name]`` and save the
+        changes. Similarly ``item.read()`` will set ``item[name]`` to
+        the value of the name property of the media file.
+
+        ``descriptor`` must be an instance of ``mediafile.MediaField``.
+        """
+        # Defer impor to prevent circular dependency
+        from beets import library
+        mediafile.MediaFile.add_field(name, descriptor)
+        library.Item._media_fields.add(name)
 
     listeners = None
 
@@ -130,7 +146,7 @@ class BeetsPlugin(object):
 
             >>> @MyPlugin.listen("imported")
             >>> def importListener(**kwargs):
-            >>>     pass
+            ...     pass
         """
         def helper(func):
             if cls.listeners is None:
@@ -170,7 +186,10 @@ class BeetsPlugin(object):
             return func
         return helper
 
+
 _classes = set()
+
+
 def load_plugins(names=()):
     """Imports the modules for a sequence of plugin names. Each name
     must be the name of a Python module under the "beetsplug" namespace
@@ -185,7 +204,7 @@ def load_plugins(names=()):
             except ImportError as exc:
                 # Again, this is hacky:
                 if exc.args[0].endswith(' ' + name):
-                    log.warn('** plugin %s not found' % name)
+                    log.warn(u'** plugin {0} not found'.format(name))
                 else:
                     raise
             else:
@@ -195,10 +214,13 @@ def load_plugins(names=()):
                         _classes.add(obj)
 
         except:
-            log.warn('** error loading plugin %s' % name)
+            log.warn(u'** error loading plugin {0}'.format(name))
             log.warn(traceback.format_exc())
 
+
 _instances = {}
+
+
 def find_plugins():
     """Returns a list of BeetsPlugin subclass instances from all
     currently loaded beets plugins. Loads the default plugin set
@@ -224,6 +246,7 @@ def commands():
         out += plugin.commands()
     return out
 
+
 def queries():
     """Returns a dict mapping prefix strings to Query subclasses all loaded
     plugins.
@@ -232,6 +255,24 @@ def queries():
     for plugin in find_plugins():
         out.update(plugin.queries())
     return out
+
+
+def types(model_cls):
+    # Gives us `item_types` and `album_types`
+    attr_name = '{0}_types'.format(model_cls.__name__.lower())
+    types = {}
+    for plugin in find_plugins():
+        plugin_types = getattr(plugin, attr_name, {})
+        for field in plugin_types:
+            if field in types and plugin_types[field] != types[field]:
+                raise PluginConflictException(
+                    u'Plugin {0} defines flexible field {1} '
+                    'which has already been defined with '
+                    'another type.'.format(plugin.name, field)
+                )
+        types.update(plugin_types)
+    return types
+
 
 def track_distance(item, info):
     """Gets the track distance calculated by all loaded plugins.
@@ -243,6 +284,7 @@ def track_distance(item, info):
         dist.update(plugin.track_distance(item, info))
     return dist
 
+
 def album_distance(items, album_info, mapping):
     """Returns the album distance calculated by plugins."""
     from beets.autotag.hooks import Distance
@@ -250,6 +292,7 @@ def album_distance(items, album_info, mapping):
     for plugin in find_plugins():
         dist.update(plugin.album_distance(items, album_info, mapping))
     return dist
+
 
 def candidates(items, artist, album, va_likely):
     """Gets MusicBrainz candidates for an album from each plugin.
@@ -259,6 +302,7 @@ def candidates(items, artist, album, va_likely):
         out.extend(plugin.candidates(items, artist, album, va_likely))
     return out
 
+
 def item_candidates(item, artist, title):
     """Gets MusicBrainz candidates for an item from the plugins.
     """
@@ -266,6 +310,7 @@ def item_candidates(item, artist, title):
     for plugin in find_plugins():
         out.extend(plugin.item_candidates(item, artist, title))
     return out
+
 
 def album_for_id(album_id):
     """Get AlbumInfo objects for a given ID string.
@@ -277,6 +322,7 @@ def album_for_id(album_id):
             out.append(res)
     return out
 
+
 def track_for_id(track_id):
     """Get TrackInfo objects for a given ID string.
     """
@@ -286,6 +332,7 @@ def track_for_id(track_id):
         if res:
             out.append(res)
     return out
+
 
 def template_funcs():
     """Get all the template functions declared by plugins as a
@@ -297,12 +344,6 @@ def template_funcs():
             funcs.update(plugin.template_funcs)
     return funcs
 
-def _add_media_fields(fields):
-    """Adds a {name: descriptor} dictionary of fields to the MediaFile
-    class. Called during the plugin initialization.
-    """
-    for key, value in fields.iteritems():
-        setattr(mediafile.MediaFile, key, value)
 
 def import_stages():
     """Get a list of import stage functions defined by plugins."""
@@ -324,6 +365,7 @@ def item_field_getters():
         if plugin.template_fields:
             funcs.update(plugin.template_fields)
     return funcs
+
 
 def album_field_getters():
     """As above, for album fields.
@@ -348,6 +390,7 @@ def event_handlers():
                 all_handlers[event] += handlers
     return all_handlers
 
+
 def send(event, **arguments):
     """Sends an event to all assigned event listeners. Event is the
     name of  the event to send, all other named arguments go to the
@@ -355,5 +398,38 @@ def send(event, **arguments):
 
     Returns a list of return values from the handlers.
     """
-    log.debug('Sending event: %s' % event)
-    return [handler(**arguments) for handler in event_handlers()[event]]
+    log.debug(u'Sending event: {0}'.format(event))
+    for handler in event_handlers()[event]:
+        # Don't break legacy plugins if we want to pass more arguments
+        argspec = inspect.getargspec(handler).args
+        args = dict((k, v) for k, v in arguments.items() if k in argspec)
+        handler(**args)
+
+
+def feat_tokens(for_artist=True):
+    """Return a regular expression that matches phrases like "featuring"
+    that separate a main artist or a song title from secondary artists.
+    The `for_artist` option determines whether the regex should be
+    suitable for matching artist fields (the default) or title fields.
+    """
+    feat_words = ['ft', 'featuring', 'feat', 'feat.', 'ft.']
+    if for_artist:
+        feat_words += ['with', 'vs', 'and', 'con', '&']
+    return '(?<=\s)(?:{0})(?=\s)'.format(
+        '|'.join(re.escape(x) for x in feat_words)
+    )
+
+
+def sanitize_choices(choices, choices_all):
+    """Clean up a stringlist configuration attribute: keep only choices
+    elements present in choices_all, remove duplicate elements, expand '*'
+    wildcard while keeping original stringlist order.
+    """
+    seen = set()
+    others = [x for x in choices_all if x not in choices]
+    res = []
+    for s in choices:
+        if s in list(choices_all) + ['*']:
+            if not (s in seen or seen.add(s)):
+                res.extend(list(others) if s == '*' else [s])
+    return res

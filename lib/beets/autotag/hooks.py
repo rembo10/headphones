@@ -116,6 +116,7 @@ class AlbumInfo(object):
             for track in self.tracks:
                 track.decode(codec)
 
+
 class TrackInfo(object):
     """Describes a canonical track present on a release. Appears as part
     of an AlbumInfo's ``tracks`` list. Consists of these data members:
@@ -126,6 +127,7 @@ class TrackInfo(object):
     - ``artist_id``
     - ``length``: float: duration of the track in seconds
     - ``index``: position on the entire release
+    - ``media``: delivery mechanism (Vinyl, etc.)
     - ``medium``: the disc number this track appears on in the album
     - ``medium_index``: the track's position on the disc
     - ``medium_total``: the number of tracks on the item's disc
@@ -140,13 +142,15 @@ class TrackInfo(object):
     def __init__(self, title, track_id, artist=None, artist_id=None,
                  length=None, index=None, medium=None, medium_index=None,
                  medium_total=None, artist_sort=None, disctitle=None,
-                 artist_credit=None, data_source=None, data_url=None):
+                 artist_credit=None, data_source=None, data_url=None,
+                 media=None):
         self.title = title
         self.track_id = track_id
         self.artist = artist
         self.artist_id = artist_id
         self.length = length
         self.index = index
+        self.media = media
         self.medium = medium
         self.medium_index = medium_index
         self.medium_total = medium_total
@@ -162,7 +166,7 @@ class TrackInfo(object):
         to Unicode.
         """
         for fld in ['title', 'artist', 'medium', 'artist_sort', 'disctitle',
-                    'artist_credit']:
+                    'artist_credit', 'media']:
             value = getattr(self, fld)
             if isinstance(value, str):
                 setattr(self, fld, value.decode(codec, 'ignore'))
@@ -187,6 +191,7 @@ SD_REPLACE = [
     (r'&', 'and'),
 ]
 
+
 def _string_dist_basic(str1, str2):
     """Basic edit distance between two strings, ignoring
     non-alphanumeric characters and case. Comparisons are based on a
@@ -201,13 +206,16 @@ def _string_dist_basic(str1, str2):
         return 0.0
     return levenshtein(str1, str2) / float(max(len(str1), len(str2)))
 
+
 def string_dist(str1, str2):
     """Gives an "intuitive" edit distance between two strings. This is
     an edit distance, normalized by the string length, with a number of
     tweaks that reflect intuition about text.
     """
-    if str1 is None and str2 is None: return 0.0
-    if str1 is None or str2 is None:  return 1.0
+    if str1 is None and str2 is None:
+        return 0.0
+    if str1 is None or str2 is None:
+        return 1.0
 
     str1 = str1.lower()
     str2 = str2.lower()
@@ -217,9 +225,9 @@ def string_dist(str1, str2):
     # "something, the".
     for word in SD_END_WORDS:
         if str1.endswith(', %s' % word):
-            str1 = '%s %s' % (word, str1[:-len(word)-2])
+            str1 = '%s %s' % (word, str1[:-len(word) - 2])
         if str2.endswith(', %s' % word):
-            str2 = '%s %s' % (word, str2[:-len(word)-2])
+            str2 = '%s %s' % (word, str2[:-len(word) - 2])
 
     # Perform a couple of basic normalizing substitutions.
     for pat, repl in SD_REPLACE:
@@ -256,6 +264,23 @@ def string_dist(str1, str2):
 
     return base_dist + penalty
 
+
+class LazyClassProperty(object):
+    """A decorator implementing a read-only property that is *lazy* in
+    the sense that the getter is only invoked once. Subsequent accesses
+    through *any* instance use the cached result.
+    """
+    def __init__(self, getter):
+        self.getter = getter
+        self.computed = False
+
+    def __get__(self, obj, owner):
+        if not self.computed:
+            self.value = self.getter(owner)
+            self.computed = True
+        return self.value
+
+
 class Distance(object):
     """Keeps track of multiple distance penalties. Provides a single
     weighted distance for all penalties as well as a weighted distance
@@ -264,11 +289,15 @@ class Distance(object):
     def __init__(self):
         self._penalties = {}
 
+    @LazyClassProperty
+    def _weights(cls):
+        """A dictionary from keys to floating-point weights.
+        """
         weights_view = config['match']['distance_weights']
-        self._weights = {}
+        weights = {}
         for key in weights_view.keys():
-            self._weights[key] = weights_view[key].as_number()
-
+            weights[key] = weights_view[key].as_number()
+        return weights
 
     # Access the components and their aggregates.
 
@@ -313,8 +342,7 @@ class Distance(object):
         # Convert distance into a negative float we can sort items in
         # ascending order (for keys, when the penalty is equal) and
         # still get the items with the biggest distance first.
-        return sorted(list_, key=lambda (key, dist): (0-dist, key))
-
+        return sorted(list_, key=lambda (key, dist): (0 - dist, key))
 
     # Behave like a float.
 
@@ -323,12 +351,12 @@ class Distance(object):
 
     def __float__(self):
         return self.distance
+
     def __sub__(self, other):
         return self.distance - other
 
     def __rsub__(self, other):
         return other - self.distance
-
 
     # Behave like a dict.
 
@@ -355,10 +383,10 @@ class Distance(object):
         """
         if not isinstance(dist, Distance):
             raise ValueError(
-                    '`dist` must be a Distance object. It is: %r' % dist)
+                '`dist` must be a Distance object, not {0}'.format(type(dist))
+            )
         for key, penalties in dist._penalties.iteritems():
             self._penalties.setdefault(key, []).extend(penalties)
-
 
     # Adding components.
 
@@ -379,7 +407,8 @@ class Distance(object):
         """
         if not 0.0 <= dist <= 1.0:
             raise ValueError(
-                    '`dist` must be between 0.0 and 1.0. It is: %r' % dist)
+                '`dist` must be between 0.0 and 1.0, not {0}'.format(dist)
+            )
         self._penalties.setdefault(key, []).append(dist)
 
     def add_equality(self, key, value, options):
@@ -476,6 +505,7 @@ def album_for_mbid(release_id):
     except mb.MusicBrainzAPIError as exc:
         exc.log(log)
 
+
 def track_for_mbid(recording_id):
     """Get a TrackInfo object for a MusicBrainz recording ID. Return None
     if the ID is not found.
@@ -485,17 +515,20 @@ def track_for_mbid(recording_id):
     except mb.MusicBrainzAPIError as exc:
         exc.log(log)
 
+
 def albums_for_id(album_id):
     """Get a list of albums for an ID."""
     candidates = [album_for_mbid(album_id)]
     candidates.extend(plugins.album_for_id(album_id))
     return filter(None, candidates)
 
+
 def tracks_for_id(track_id):
     """Get a list of tracks for an ID."""
     candidates = [track_for_mbid(track_id)]
     candidates.extend(plugins.track_for_id(track_id))
     return filter(None, candidates)
+
 
 def album_candidates(items, artist, album, va_likely):
     """Search for album matches. ``items`` is a list of Item objects
@@ -524,6 +557,7 @@ def album_candidates(items, artist, album, va_likely):
     out.extend(plugins.candidates(items, artist, album, va_likely))
 
     return out
+
 
 def item_candidates(item, artist, title):
     """Search for item matches. ``item`` is the Item to be matched.

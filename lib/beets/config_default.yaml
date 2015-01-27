@@ -5,6 +5,7 @@ import:
     write: yes
     copy: yes
     move: no
+    link: no
     delete: no
     resume: ask
     incremental: no
@@ -20,6 +21,7 @@ import:
     detail: no
     flat: no
     group_albums: no
+    pretend: false
 
 clutter: ["Thumbs.DB", ".DS_Store"]
 ignore: [".*", "*~", "System Volume Information"]
@@ -32,6 +34,7 @@ replace:
     '\s+$': ''
     '^\s+': ''
 path_sep_replace: _
+asciify_paths: false
 art_filename: cover
 max_filename_length: 0
 
@@ -53,6 +56,9 @@ ui:
 list_format_item: $artist - $album - $title
 list_format_album: $albumartist - $album
 time_format: '%Y-%m-%d %H:%M:%S'
+
+sort_album: albumartist+ album+
+sort_item: artist+ album+ disc+ track+
 
 paths:
     default: $albumartist/$album%aunique{}/$track $title
@@ -98,5 +104,6 @@ match:
         media: []
         original_year: no
     ignored: []
+    required: []
     track_length_grace: 10
     track_length_max: 30

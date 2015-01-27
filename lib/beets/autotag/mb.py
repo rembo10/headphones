@@ -32,6 +32,7 @@ BASE_URL = 'http://musicbrainz.org/'
 musicbrainzngs.set_useragent('beets', beets.__version__,
                              'http://beets.radbox.org/')
 
+
 class MusicBrainzAPIError(util.HumanReadableException):
     """An error while talking to MusicBrainz. The `query` field is the
     parameter to the action and may have any type.
@@ -41,7 +42,7 @@ class MusicBrainzAPIError(util.HumanReadableException):
         super(MusicBrainzAPIError, self).__init__(reason, verb, tb)
 
     def get_message(self):
-        return u'"{0}" in {1} with query {2}'.format(
+        return u'{0} in {1} with query {2}'.format(
             self._reasonstr(), self.verb, repr(self.query)
         )
 
@@ -51,11 +52,14 @@ RELEASE_INCLUDES = ['artists', 'media', 'recordings', 'release-groups',
                     'labels', 'artist-credits', 'aliases']
 TRACK_INCLUDES = ['artists', 'aliases']
 
+
 def track_url(trackid):
     return urljoin(BASE_URL, 'recording/' + trackid)
 
+
 def album_url(albumid):
     return urljoin(BASE_URL, 'release/' + albumid)
+
 
 def configure():
     """Set up the python-musicbrainz-ngs module according to settings
@@ -66,6 +70,7 @@ def configure():
         config['musicbrainz']['ratelimit_interval'].as_number(),
         config['musicbrainz']['ratelimit'].get(int),
     )
+
 
 def _preferred_alias(aliases):
     """Given an list of alias structures for an artist credit, select
@@ -81,12 +86,14 @@ def _preferred_alias(aliases):
     # Search configured locales in order.
     for locale in config['import']['languages'].as_str_seq():
         # Find matching primary aliases for this locale.
-        matches = [a for a in aliases if a['locale'] == locale and 'primary' in a]
+        matches = [a for a in aliases
+                   if a['locale'] == locale and 'primary' in a]
         # Skip to the next locale if we have no matches
         if not matches:
             continue
 
         return matches[0]
+
 
 def _flatten_artist_credit(credit):
     """Given a list representing an ``artist-credit`` block, flatten the
@@ -133,6 +140,7 @@ def _flatten_artist_credit(credit):
         ''.join(artist_credit_parts),
     )
 
+
 def track_info(recording, index=None, medium=None, medium_index=None,
                medium_total=None):
     """Translates a MusicBrainz recording result dictionary into a beets
@@ -167,6 +175,7 @@ def track_info(recording, index=None, medium=None, medium_index=None,
     info.decode()
     return info
 
+
 def _set_date_str(info, date_str, original=False):
     """Given a (possibly partial) YYYY-MM-DD string and an AlbumInfo
     object, set the object's release date fields appropriately. If
@@ -186,6 +195,7 @@ def _set_date_str(info, date_str, original=False):
                     key = 'original_' + key
                 setattr(info, key, date_num)
 
+
 def album_info(release):
     """Takes a MusicBrainz release result dictionary and returns a beets
     AlbumInfo object containing the interesting data about that release.
@@ -199,6 +209,7 @@ def album_info(release):
     index = 0
     for medium in release['medium-list']:
         disctitle = medium.get('title')
+        format = medium.get('format')
         for track in medium['track-list']:
             # Basic information from the recording.
             index += 1
@@ -210,6 +221,7 @@ def album_info(release):
                 len(medium['track-list']),
             )
             ti.disctitle = disctitle
+            ti.media = format
 
             # Prefer track data, where present, over recording data.
             if track.get('title'):
@@ -288,6 +300,7 @@ def album_info(release):
     info.decode()
     return info
 
+
 def match_album(artist, album, tracks=None, limit=SEARCH_LIMIT):
     """Searches for a single album ("release" in MusicBrainz parlance)
     and returns an iterator over AlbumInfo objects. May raise a
@@ -297,9 +310,9 @@ def match_album(artist, album, tracks=None, limit=SEARCH_LIMIT):
     optionally, a number of tracks on the album.
     """
     # Build search criteria.
-    criteria = {'release': album.lower()}
+    criteria = {'release': album.lower().strip()}
     if artist is not None:
-        criteria['artist'] = artist.lower()
+        criteria['artist'] = artist.lower().strip()
     else:
         # Various Artists search.
         criteria['arid'] = VARIOUS_ARTISTS_ID
@@ -322,13 +335,14 @@ def match_album(artist, album, tracks=None, limit=SEARCH_LIMIT):
         if albuminfo is not None:
             yield albuminfo
 
+
 def match_track(artist, title, limit=SEARCH_LIMIT):
     """Searches for a single track and returns an iterable of TrackInfo
     objects. May raise a MusicBrainzAPIError.
     """
     criteria = {
-        'artist': artist.lower(),
-        'recording': title.lower(),
+        'artist': artist.lower().strip(),
+        'recording': title.lower().strip(),
     }
 
     if not any(criteria.itervalues()):
@@ -342,6 +356,7 @@ def match_track(artist, title, limit=SEARCH_LIMIT):
     for recording in res['recording-list']:
         yield track_info(recording)
 
+
 def _parse_id(s):
     """Search for a MusicBrainz ID in the given string and return it. If
     no ID can be found, return None.
@@ -351,38 +366,40 @@ def _parse_id(s):
     if match:
         return match.group()
 
-def album_for_id(albumid):
+
+def album_for_id(releaseid):
     """Fetches an album by its MusicBrainz ID and returns an AlbumInfo
     object or None if the album is not found. May raise a
     MusicBrainzAPIError.
     """
-    albumid = _parse_id(albumid)
+    albumid = _parse_id(releaseid)
     if not albumid:
-        log.error('Invalid MBID.')
+        log.debug(u'Invalid MBID ({0}).'.format(releaseid))
         return
     try:
         res = musicbrainzngs.get_release_by_id(albumid,
                                                RELEASE_INCLUDES)
     except musicbrainzngs.ResponseError:
-        log.debug('Album ID match failed.')
+        log.debug(u'Album ID match failed.')
         return None
     except musicbrainzngs.MusicBrainzError as exc:
         raise MusicBrainzAPIError(exc, 'get release by ID', albumid,
                                   traceback.format_exc())
     return album_info(res['release'])
 
-def track_for_id(trackid):
+
+def track_for_id(releaseid):
     """Fetches a track by its MusicBrainz ID. Returns a TrackInfo object
     or None if no track is found. May raise a MusicBrainzAPIError.
     """
-    trackid = _parse_id(trackid)
+    trackid = _parse_id(releaseid)
     if not trackid:
-        log.error('Invalid MBID.')
+        log.debug(u'Invalid MBID ({0}).'.format(releaseid))
         return
     try:
         res = musicbrainzngs.get_recording_by_id(trackid, TRACK_INCLUDES)
     except musicbrainzngs.ResponseError:
-        log.debug('Track ID match failed.')
+        log.debug(u'Track ID match failed.')
         return None
     except musicbrainzngs.MusicBrainzError as exc:
         raise MusicBrainzAPIError(exc, 'get recording by ID', trackid,
