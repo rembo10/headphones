@@ -9,8 +9,8 @@ on how to use these modules.
 '''
 
 # The Olson database is updated several times a year.
-OLSON_VERSION = '2014g'
-VERSION = '2014.7'  # Switching to pip compatible version numbering.
+OLSON_VERSION = '2014j'
+VERSION = '2014.10'  # Switching to pip compatible version numbering.
 __version__ = VERSION
 
 OLSEN_VERSION = OLSON_VERSION # Old releases had this misspelling
@@ -1004,6 +1004,7 @@ all_timezones = \
  'PST8PDT',
  'Pacific/Apia',
  'Pacific/Auckland',
+ 'Pacific/Bougainville',
  'Pacific/Chatham',
  'Pacific/Chuuk',
  'Pacific/Easter',
@@ -1461,6 +1462,7 @@ common_timezones = \
  'Indian/Reunion',
  'Pacific/Apia',
  'Pacific/Auckland',
+ 'Pacific/Bougainville',
  'Pacific/Chatham',
  'Pacific/Chuuk',
  'Pacific/Easter',
