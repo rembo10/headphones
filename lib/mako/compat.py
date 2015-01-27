@@ -3,8 +3,8 @@ import time
 
 py3k = sys.version_info >= (3, 0)
 py33 = sys.version_info >= (3, 3)
+py2k = sys.version_info < (3,)
 py26 = sys.version_info >= (2, 6)
-py25 = sys.version_info >= (2, 5)
 jython = sys.platform.startswith('java')
 win32 = sys.platform.startswith('win')
 pypy = hasattr(sys, 'pypy_version_info')
@@ -22,6 +22,9 @@ if py3k:
 
     def u(s):
         return s
+
+    def b(s):
+        return s.encode("latin-1")
 
     def octal(lit):
         return eval("0o" + lit)
@@ -44,6 +47,9 @@ else:
     def u(s):
         return unicode(s, "utf-8")
 
+    def b(s):
+        return s
+
     def octal(lit):
         return eval("0" + lit)
 
@@ -60,6 +66,18 @@ else:
             return imp.load_source(module_id, path, fp)
         finally:
             fp.close()
+
+
+if py3k:
+    def reraise(tp, value, tb=None, cause=None):
+        if cause is not None:
+            value.__cause__ = cause
+        if value.__traceback__ is not tb:
+            raise value.with_traceback(tb)
+        raise value
+else:
+    exec("def reraise(tp, value, tb=None, cause=None):\n"
+            "    raise tp, value, tb\n")
 
 
 def exception_as():
@@ -93,23 +111,12 @@ except:
             return func(*(args + fargs), **newkeywords)
         return newfunc
 
-if not py25:
-    def all(iterable):
-        for i in iterable:
-            if not i:
-                return False
-        return True
 
-    def exception_name(exc):
-        try:
-            return exc.__class__.__name__
-        except AttributeError:
-            return exc.__name__
-else:
-    all = all
+all = all
+import json
 
-    def exception_name(exc):
-        return exc.__class__.__name__
+def exception_name(exc):
+    return exc.__class__.__name__
 
 try:
     from inspect import CO_VARKEYWORDS, CO_VARARGS

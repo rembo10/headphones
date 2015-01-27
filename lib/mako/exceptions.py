@@ -1,5 +1,5 @@
 # mako/exceptions.py
-# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2015 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -8,7 +8,6 @@
 
 import traceback
 import sys
-import re
 from mako import util, compat
 
 class MakoException(Exception):
@@ -28,7 +27,7 @@ class CompileException(MakoException):
     def __init__(self, message, source, lineno, pos, filename):
         MakoException.__init__(self,
                               message + _format_filepos(lineno, pos, filename))
-        self.lineno =lineno
+        self.lineno = lineno
         self.pos = pos
         self.filename = filename
         self.source = source
@@ -37,7 +36,7 @@ class SyntaxException(MakoException):
     def __init__(self, message, source, lineno, pos, filename):
         MakoException.__init__(self,
                               message + _format_filepos(lineno, pos, filename))
-        self.lineno =lineno
+        self.lineno = lineno
         self.pos = pos
         self.filename = filename
         self.source = source
@@ -77,7 +76,6 @@ class RichTraceback(object):
         self.records = self._init(traceback)
 
         if isinstance(self.error, (CompileException, SyntaxException)):
-            import mako.template
             self.source = self.error.source
             self.lineno = self.error.lineno
             self._has_source = True
@@ -167,19 +165,19 @@ class RichTraceback(object):
                                             None, None, None, None))
                     continue
 
-                template_ln = module_ln = 1
-                line_map = {}
-                for line in module_source.split("\n"):
-                    match = re.match(r'\s*# SOURCE LINE (\d+)', line)
-                    if match:
-                        template_ln = int(match.group(1))
-                    module_ln += 1
-                    line_map[module_ln] = template_ln
+                template_ln = 1
+
+                source_map = mako.template.ModuleInfo.\
+                                get_module_source_metadata(
+                                    module_source, full_line_map=True)
+                line_map = source_map['full_line_map']
+
                 template_lines = [line for line in
                                     template_source.split("\n")]
                 mods[filename] = (line_map, template_lines)
 
-            template_ln = line_map[lineno]
+            template_ln = line_map[lineno - 1]
+
             if template_ln <= len(template_lines):
                 template_line = template_lines[template_ln - 1]
             else:
@@ -188,7 +186,7 @@ class RichTraceback(object):
                                 line, template_filename, template_ln,
                                 template_line, template_source))
         if not self.source:
-            for l in range(len(new_trcback)-1, 0, -1):
+            for l in range(len(new_trcback) - 1, 0, -1):
                 if new_trcback[l][5]:
                     self.source = new_trcback[l][7]
                     self.lineno = new_trcback[l][5]
@@ -260,10 +258,11 @@ def html_error_template():
     filenames, line numbers and code for that of the originating source
     template, as applicable.
 
-    The template's default ``encoding_errors`` value is ``'htmlentityreplace'``. The
-    template has two options. With the ``full`` option disabled, only a section of
-    an HTML document is returned. With the ``css`` option disabled, the default
-    stylesheet won't be included.
+    The template's default ``encoding_errors`` value is
+    ``'htmlentityreplace'``. The template has two options. With the
+    ``full`` option disabled, only a section of an HTML document is
+    returned. With the ``css`` option disabled, the default stylesheet
+    won't be included.
 
     """
     import mako.template

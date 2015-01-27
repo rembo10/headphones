@@ -1,5 +1,5 @@
 # mako/template.py
-# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2015 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -595,6 +595,25 @@ class ModuleInfo(object):
         self._modules[module.__name__] = template._mmarker = self
         if module_filename:
             self._modules[module_filename] = self
+
+    @classmethod
+    def get_module_source_metadata(cls, module_source, full_line_map=False):
+        source_map = re.search(
+                        r"__M_BEGIN_METADATA(.+?)__M_END_METADATA",
+                        module_source, re.S).group(1)
+        source_map = compat.json.loads(source_map)
+        source_map['line_map'] = dict((int(k), int(v))
+                                    for k, v in source_map['line_map'].items())
+        if full_line_map:
+            f_line_map = source_map['full_line_map'] = []
+            line_map = source_map['line_map']
+
+            curr_templ_line = 1
+            for mod_line in range(1, max(line_map)):
+                if mod_line in line_map:
+                    curr_templ_line = line_map[mod_line]
+                f_line_map.append(curr_templ_line)
+        return source_map
 
     @property
     def code(self):

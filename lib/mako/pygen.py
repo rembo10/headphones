@@ -1,5 +1,5 @@
 # mako/pygen.py
-# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2015 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -26,6 +26,9 @@ class PythonPrinter(object):
         # the stream we are writing to
         self.stream = stream
 
+        # current line number
+        self.lineno = 1
+
         # a list of lines that represents a buffered "block" of code,
         # which can be later printed relative to an indent level
         self.line_buffer = []
@@ -34,8 +37,20 @@ class PythonPrinter(object):
 
         self._reset_multi_line_flags()
 
-    def write(self, text):
-        self.stream.write(text)
+        # mapping of generated python lines to template
+        # source lines
+        self.source_map = {}
+
+    def _update_lineno(self, num):
+        self.lineno += num
+
+    def start_source(self, lineno):
+        if self.lineno not in self.source_map:
+            self.source_map[self.lineno] = lineno
+
+    def write_blanks(self, num):
+        self.stream.write("\n" * num)
+        self._update_lineno(num)
 
     def write_indented_block(self, block):
         """print a line or lines of python which already contain indentation.
@@ -45,6 +60,7 @@ class PythonPrinter(object):
         self.in_indent_lines = False
         for l in re.split(r'\r?\n', block):
             self.line_buffer.append(l)
+            self._update_lineno(1)
 
     def writelines(self, *lines):
         """print a series of lines of python."""
@@ -80,7 +96,7 @@ class PythonPrinter(object):
             ):
 
             if self.indent > 0:
-                self.indent -=1
+                self.indent -= 1
                 # if the indent_detail stack is empty, the user
                 # probably put extra closures - the resulting
                 # module wont compile.
@@ -94,6 +110,7 @@ class PythonPrinter(object):
 
         # write the line
         self.stream.write(self._indent_line(line) + "\n")
+        self._update_lineno(len(line.split("\n")))
 
         # see if this line should increase the indentation level.
         # note that a line can both decrase (before printing) and
@@ -108,7 +125,7 @@ class PythonPrinter(object):
             if match:
                 # its a "compound" keyword, so we will check for "unindentors"
                 indentor = match.group(1)
-                self.indent +=1
+                self.indent += 1
                 self.indent_detail.append(indentor)
             else:
                 indentor = None
@@ -265,7 +282,7 @@ def adjust_whitespace(text):
 
         return start_state
 
-    def _indent_line(line, stripspace = ''):
+    def _indent_line(line, stripspace=''):
         return re.sub(r"^%s" % stripspace, '', line)
 
     lines = []

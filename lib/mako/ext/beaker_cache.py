@@ -4,7 +4,16 @@ from mako import exceptions
 
 from mako.cache import CacheImpl
 
+try:
+    from beaker import cache as beaker_cache
+except:
+    has_beaker = False
+else:
+    has_beaker = True
+
 _beaker_cache = None
+
+
 class BeakerCacheImpl(CacheImpl):
     """A :class:`.CacheImpl` provided for the Beaker caching system.
 
@@ -15,15 +24,11 @@ class BeakerCacheImpl(CacheImpl):
     """
 
     def __init__(self, cache):
+        if not has_beaker:
+            raise exceptions.RuntimeException(
+                "Can't initialize Beaker plugin; Beaker is not installed.")
         global _beaker_cache
         if _beaker_cache is None:
-            try:
-                from beaker import cache as beaker_cache
-            except ImportError:
-                raise exceptions.RuntimeException(
-                            "the Beaker package is required to use cache "
-                            "functionality.")
-
             if 'manager' in cache.template.cache_args:
                 _beaker_cache = cache.template.cache_args['manager']
             else:
@@ -48,7 +53,7 @@ class BeakerCacheImpl(CacheImpl):
             cache = _beaker_cache.get_cache_region(self.cache.id, region, **kw)
         else:
             cache = _beaker_cache.get_cache(self.cache.id, **kw)
-        cache_args = {'starttime':self.cache.starttime}
+        cache_args = {'starttime': self.cache.starttime}
         if expiretime:
             cache_args['expiretime'] = expiretime
         return cache, cache_args

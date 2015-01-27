@@ -1,5 +1,5 @@
 # mako/parsetree.py
-# Copyright (C) 2006-2013 the Mako authors and contributors <see AUTHORS file>
+# Copyright (C) 2006-2015 the Mako authors and contributors <see AUTHORS file>
 #
 # This module is part of Mako and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
@@ -437,7 +437,7 @@ class DefTag(Tag):
         return self.function_decl.get_argument_expressions(**kw)
 
     def declared_identifiers(self):
-        return self.function_decl.argnames
+        return self.function_decl.allargnames
 
     def undeclared_identifiers(self):
         res = []
@@ -451,7 +451,7 @@ class DefTag(Tag):
         ).union(
             self.expression_undeclared_identifiers
         ).difference(
-            self.function_decl.argnames
+            self.function_decl.allargnames
         )
 
 class BlockTag(Tag):
@@ -502,7 +502,7 @@ class BlockTag(Tag):
         return self.body_decl.get_argument_expressions(**kw)
 
     def declared_identifiers(self):
-        return self.body_decl.argnames
+        return self.body_decl.allargnames
 
     def undeclared_identifiers(self):
         return (self.filter_args.\
@@ -524,7 +524,7 @@ class CallTag(Tag):
                                             **self.exception_kwargs)
 
     def declared_identifiers(self):
-        return self.code.declared_identifiers.union(self.body_decl.argnames)
+        return self.code.declared_identifiers.union(self.body_decl.allargnames)
 
     def undeclared_identifiers(self):
         return self.code.undeclared_identifiers.\
@@ -554,7 +554,7 @@ class CallNamespaceTag(Tag):
                                     **self.exception_kwargs)
 
     def declared_identifiers(self):
-        return self.code.declared_identifiers.union(self.body_decl.argnames)
+        return self.code.declared_identifiers.union(self.body_decl.allargnames)
 
     def undeclared_identifiers(self):
         return self.code.undeclared_identifiers.\
@@ -589,6 +589,6 @@ class PageTag(Tag):
                                 **self.exception_kwargs)
 
     def declared_identifiers(self):
-        return self.body_decl.argnames
+        return self.body_decl.allargnames
 
 
