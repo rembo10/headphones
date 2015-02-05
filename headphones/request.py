@@ -30,10 +30,10 @@ fake_lock = headphones.lock.FakeLock()
 
 
 def request_response(url, method="get", auto_raise=True,
-    whitelist_status_code=None, lock=fake_lock, **kwargs):
+                     whitelist_status_code=None, lock=fake_lock, **kwargs):
     """
-    Convenient wrapper for `requests.get', which will capture the exceptions and
-    log them. On success, the Response object is returned. In case of a
+    Convenient wrapper for `requests.get', which will capture the exceptions
+    and log them. On success, the Response object is returned. In case of a
     exception, None is returned.
 
     Additionally, there is support for rate limiting. To use this feature,
@@ -51,14 +51,15 @@ def request_response(url, method="get", auto_raise=True,
     # pose a security issue!
     kwargs["verify"] = bool(headphones.CONFIG.VERIFY_SSL_CERT)
 
-    # Map method to the request.XXX method. This is a simple hack, but it allows
-    # requests to apply more magic per method. See lib/requests/api.py.
+    # Map method to the request.XXX method. This is a simple hack, but it
+    # allows requests to apply more magic per method. See lib/requests/api.py.
     request_method = getattr(requests, method.lower())
 
     try:
         # Request URL and wait for response
         with lock:
-            logger.debug("Requesting URL via %s method: %s", method.upper(), url)
+            logger.debug(
+                "Requesting URL via %s method: %s", method.upper(), url)
             response = request_method(url, **kwargs)
 
         # If status code != OK, then raise exception, except if the status code
@@ -77,14 +78,17 @@ def request_response(url, method="get", auto_raise=True,
 
         return response
     except requests.exceptions.SSLError as e:
-        if not kwargs["verify"]:
-            logger.error("Unable to connect to remote host because of a SSL " \
-                "error. It's likely the remote certificate is untrusted by " \
-                "your system. This check can be disabled (advanced users " \
-                "only).")
+        if kwargs["verify"]:
+            logger.error(
+                "Unable to connect to remote host because of a SSL error. "
+                "It is likely that your system cannot verify the validity"
+                "of the certificate. The remote certificate is either "
+                "self-signed, or the remote server uses SNI. See the wiki for "
+                "more information on this topic.")
         else:
-            logger.error("SSL error raised during connection, even with " \
-                "SSL certificate verification turned off: %s", e)
+            logger.error(
+                "SSL error raised during connection, with certificate "
+                "verification turned off: %s", e)
     except requests.ConnectionError:
         logger.error(
             "Unable to connect to remote host. Check if the remote "
@@ -102,7 +106,8 @@ def request_response(url, method="get", auto_raise=True,
                 # I don't think we will end up here, but for completeness
                 cause = "unknown"
 
-            logger.error("Request raise HTTP error with status code %d (%s).",
+            logger.error(
+                "Request raise HTTP error with status code %d (%s).",
                 e.response.status_code, cause)
 
             # Debug response
@@ -144,8 +149,8 @@ def request_json(url, **kwargs):
     Wrapper for `request_response', which will decode the response as JSON
     object and return the result, if no exceptions are raised.
 
-    As an option, a validator callback can be given, which should return True if
-    the result is valid.
+    As an option, a validator callback can be given, which should return True
+    if the result is valid.
     """
 
     validator = kwargs.pop("validator", None)
@@ -210,9 +215,9 @@ def server_message(response):
         # Find body and cleanup common tags to grab content, which probably
         # contains the message.
         message = soup.find("body")
+        elements = ("header", "script", "footer", "nav", "input", "textarea")
 
-        for element in ["header", "script", "footer", "nav", "input",
-            "textarea"]:
+        for element in elements:
 
             for tag in soup.find_all(element):
                 tag.replaceWith("")
