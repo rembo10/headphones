@@ -1,7 +1,7 @@
 # Changelog
 
-## v0.x.x
-Released XX XX 2015
+## v0.5.4
+Released 05 February 2015
 
 Highlights:
 * Added: backported 'Scan Artist' feature from `sarakha63/headphones`
@@ -17,7 +17,7 @@ Highlights:
 * Improved: upgraded mutagen to 1.27
 * Improved: upgraded beets to 1.3.10
 
-The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.3...v0.X.X).
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.3...v0.5.4).
 
 ## v0.5.3
 Released 15 January 2015
