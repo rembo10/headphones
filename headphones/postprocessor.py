@@ -513,6 +513,12 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         mpc = notifiers.MPC()
         mpc.notify()
 
+    if headphones.CONFIG.EMAIL_ENABLED:
+        logger.info(u"Sending Email notification")
+        email = notifiers.Email()
+        subject = release['ArtistName'] + ' - ' + release['AlbumTitle']
+        email.notify(subject, "Download and Postprocessing completed")
+
 
 def embedAlbumArt(artwork, downloaded_track_list):
     logger.info('Embedding album art')

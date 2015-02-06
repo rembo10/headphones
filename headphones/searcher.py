@@ -946,7 +946,12 @@ def send_to_downloader(data, bestqual, album):
         b2msg = 'From ' + provider + '<br></br>' + name
         boxcar = notifiers.BOXCAR()
         boxcar.notify('Headphones snatched: ' + title, b2msg, rgid)
-
+    if headphones.CONFIG.EMAIL_ENABLED and headphones.CONFIG.EMAIL_ONSNATCH:
+        logger.info(u"Sending Email notification")
+        email = notifiers.Email()
+        subject = artist + ' - ' + albumname
+        message = 'Snatched from ' + provider + '. ' + title
+        email.notify(subject, message)
 
 def verifyresult(title, artistterm, term, lossless):
 
