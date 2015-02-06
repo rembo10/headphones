@@ -949,9 +949,8 @@ def send_to_downloader(data, bestqual, album):
     if headphones.CONFIG.EMAIL_ENABLED and headphones.CONFIG.EMAIL_ONSNATCH:
         logger.info(u"Sending Email notification")
         email = notifiers.Email()
-        subject = artist + ' - ' + albumname
-        message = 'Snatched from ' + provider + '. ' + title
-        email.notify(subject, message)
+        message = 'Snatched from ' + provider + '. ' + name
+        email.notify(title, message)
 
 def verifyresult(title, artistterm, term, lossless):
 
