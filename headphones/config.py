@@ -247,7 +247,8 @@ _CONFIG_DEFINITIONS = {
     'XBMC_PASSWORD': (str, 'XBMC', ''),
     'XBMC_UPDATE': (int, 'XBMC', 0),
     'XBMC_USERNAME': (str, 'XBMC', ''),
-    'XLDPROFILE': (str, 'General', '')
+    'XLDPROFILE': (str, 'General', ''),
+    'IDTAG': (int, 'Beets', 0)
 }
 
 # pylint:disable=R0902
