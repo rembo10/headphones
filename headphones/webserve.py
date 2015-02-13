@@ -34,6 +34,7 @@ import json
 import time
 import sys
 import os
+import yaml
 
 try:
     # pylint:disable=E0611
@@ -1160,7 +1161,8 @@ class WebInterface(object):
             "email_smtp_password": headphones.CONFIG.EMAIL_SMTP_PASSWORD,
             "email_smtp_port": int(headphones.CONFIG.EMAIL_SMTP_PORT),
             "email_tls": checked(headphones.CONFIG.EMAIL_TLS),
-            "email_onsnatch": checked(headphones.CONFIG.EMAIL_ONSNATCH)
+            "email_onsnatch": checked(headphones.CONFIG.EMAIL_ONSNATCH),
+            "idtag": checked(headphones.CONFIG.IDTAG)
         }
 
         # Need to convert EXTRAS to a dictionary we can pass to the config:
@@ -1205,7 +1207,7 @@ class WebInterface(object):
             "nma_enabled", "nma_onsnatch", "pushalot_enabled", "pushalot_onsnatch", "synoindex_enabled", "pushover_enabled",
             "pushover_onsnatch", "pushbullet_enabled", "pushbullet_onsnatch", "subsonic_enabled", "twitter_enabled", "twitter_onsnatch",
             "osx_notify_enabled", "osx_notify_onsnatch", "boxcar_enabled", "boxcar_onsnatch", "songkick_enabled", "songkick_filter_enabled",
-            "mpc_enabled", "email_enabled", "email_tls", "email_onsnatch"
+            "mpc_enabled", "email_enabled", "email_tls", "email_onsnatch", "idtag"
         ]
         for checked_config in checked_configs:
             if checked_config not in kwargs:
@@ -1269,6 +1271,22 @@ class WebInterface(object):
 
         # Write the config
         headphones.CONFIG.write()
+        
+        # Write to beets config
+        relpath = "lib/beets/config_default.yaml"
+        basedir = os.path.dirname(sys.argv[0])
+        filename = os.path.join(basedir, relpath)
+
+        with open(filename, 'r') as f:
+            beets_config = yaml.load(f)
+
+            if headphones.CONFIG.IDTAG is 1:
+                beets_config['id3v23'] = "yes"
+            else:
+                beets_config['id3v23'] = "no"
+
+        with open(filename, 'w') as f:
+            yaml.dump(beets_config, f)
 
         # Reconfigure scheduler
         headphones.initialize_scheduler()
