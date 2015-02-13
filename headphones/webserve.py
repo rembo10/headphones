@@ -1281,9 +1281,9 @@ class WebInterface(object):
             beets_config = yaml.load(f)
 
             if headphones.CONFIG.IDTAG is 1:
-                beets_config['id3v23'] = "yes"
+                beets_config['id3v23'] = True
             else:
-                beets_config['id3v23'] = "no"
+                beets_config['id3v23'] = False
 
         with open(filename, 'w') as f:
             yaml.dump(beets_config, f)
