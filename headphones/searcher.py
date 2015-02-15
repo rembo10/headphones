@@ -1096,7 +1096,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
         if headphones.CONFIG.KAT_PROXY_URL:
             providerurl = fix_url(set_proxy(headphones.CONFIG.KAT_PROXY_URL))
         else:
-            providerurl = fix_url("https://kickass.so")
+            providerurl = fix_url("https://kickass.to")
 
         # Build URL
         providerurl = providerurl + "/usearch/" + ka_term
