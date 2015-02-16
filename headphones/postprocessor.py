@@ -23,6 +23,7 @@ import itertools
 import headphones
 
 from beets import autotag
+from beets import config as beetsconfig
 from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 from beetsplug import lyrics as beetslyrics
 
@@ -879,6 +880,14 @@ def correctMetadata(albumid, release, downloaded_track_list):
         # TODO: Handle extra_items & extra_tracks
 
         autotag.apply_metadata(info, mapping)
+        
+        # Set ID3 tag version
+        if headphones.CONFIG.IDTAG:
+            beetsconfig['id3v23'] = True
+            logger.info("Using ID3v2.3")
+        else:
+            beetsconfig['id3v23'] = False
+            logger.info("Using ID3v2.4")
 
         for item in items:
             try:
