@@ -1416,6 +1416,17 @@
                                     <div class="row">
                                         <label>Port</label><input type="text" name="customport" value="${config['customport']}" size="8">
                                     </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="customauth" id="customauth" value="1" ${config['customauth']} /><label>Requires Authentication</label>
+                                    </div>
+                                    <div id="customauth_options">
+                                        <div class="row">
+                                            <label>Username</label><input type="text" class="customuser" name="customuser" value="${config['customuser']}" size="20">
+                                        </div>
+                                        <div class="row">
+                                            <label>Password</label><input type="password" class="custompass" name="custompass" value="${config['custompass']}" size="15"><br>
+                                        </div>
+                                    </div>
                                     <div class="row">
                                         <label>Sleep Interval</label><input type="text" name="customsleep" value="${config['customsleep']}" size="4">
                                     </div>
@@ -1526,6 +1537,25 @@
                     $('#api_key').val(data);
             });
         });
+                if ($("#customauth").is(":checked"))
+                        {
+                            $("#customauth_options").show();
+                        }
+                else
+                        {
+                            $("#customauth_options").hide();
+                        }
+
+                $("#customauth").click(function(){
+                        if ($("#customauth").is(":checked"))
+                        {
+                            $("#customauth_options").slideDown();
+                        }
+                        else
+                        {
+                            $("#customauth_options").slideUp();
+                        }
+                });
                 if ($("#enable_https").is(":checked"))
                         {
                             $("#https_options").show();
@@ -2074,6 +2104,7 @@
                 initConfigCheckbox("#use_whatcd");
                 initConfigCheckbox("#api_enabled");
                 initConfigCheckbox("#enable_https");
+                initConfigCheckbox("#customauth");
 
 
                 $('#twitterStep1').click(function () {
