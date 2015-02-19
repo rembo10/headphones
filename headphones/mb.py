@@ -78,8 +78,8 @@ def startmb():
             musicbrainzngs.hpauth(mbuser, mbpass)
 
     # Let us know if we disable custom authentication
-    if not headphones.CONFIG.CUSTOMAUTH:
-        musicbrainzngs.disable_hpauth();
+    if not headphones.CONFIG.CUSTOMAUTH and headphones.CONFIG.MIRROR == "custom":
+        musicbrainzngs.disable_hpauth()
 
     logger.debug('Using the following server values: MBHost: %s, MBPort: %i, Sleep Interval: %i', mbhost, mbport, sleepytime)
 
