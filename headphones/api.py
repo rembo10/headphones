@@ -18,7 +18,7 @@ from headphones import db, mb, updater, importer, searcher, cache, postprocessor
 import headphones
 import json
 
-cmd_list = ['getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSimilar', 'getHistory', 'getLogs',
+cmd_list = ['getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSnatched', 'getSimilar', 'getHistory', 'getLogs',
             'findArtist', 'findAlbum', 'addArtist', 'delArtist', 'pauseArtist', 'resumeArtist', 'refreshArtist',
             'addAlbum', 'queueAlbum', 'unqueueAlbum', 'forceSearch', 'forceProcess', 'forceActiveArtistsUpdate', 
             'getVersion', 'checkGithub','shutdown', 'restart', 'update', 'getArtistArt', 'getAlbumArt', 
@@ -166,6 +166,11 @@ class Api(object):
             "SELECT * from albums WHERE Status='Wanted'")
         return
 
+    def _getSnatched(self, **kwargs):
+        self.data = self._dic_from_query(
+            "SELECT * from albums WHERE Status='Snatched'")
+        return
+        
     def _getSimilar(self, **kwargs):
         self.data = self._dic_from_query('SELECT * from lastfmcloud')
         return
