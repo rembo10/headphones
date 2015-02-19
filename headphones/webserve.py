@@ -1142,6 +1142,9 @@ class WebInterface(object):
             "customhost": headphones.CONFIG.CUSTOMHOST,
             "customport": headphones.CONFIG.CUSTOMPORT,
             "customsleep": headphones.CONFIG.CUSTOMSLEEP,
+            "customauth": checked(headphones.CONFIG.CUSTOMAUTH),
+            "customuser": headphones.CONFIG.CUSTOMUSER,
+            "custompass": headphones.CONFIG.CUSTOMPASS,
             "hpuser": headphones.CONFIG.HPUSER,
             "hppass": headphones.CONFIG.HPPASS,
             "songkick_enabled": checked(headphones.CONFIG.SONGKICK_ENABLED),
@@ -1205,7 +1208,7 @@ class WebInterface(object):
             "nma_enabled", "nma_onsnatch", "pushalot_enabled", "pushalot_onsnatch", "synoindex_enabled", "pushover_enabled",
             "pushover_onsnatch", "pushbullet_enabled", "pushbullet_onsnatch", "subsonic_enabled", "twitter_enabled", "twitter_onsnatch",
             "osx_notify_enabled", "osx_notify_onsnatch", "boxcar_enabled", "boxcar_onsnatch", "songkick_enabled", "songkick_filter_enabled",
-            "mpc_enabled", "email_enabled", "email_tls", "email_onsnatch"
+            "mpc_enabled", "email_enabled", "email_tls", "email_onsnatch", "customauth"
         ]
         for checked_config in checked_configs:
             if checked_config not in kwargs:

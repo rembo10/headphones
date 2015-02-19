@@ -47,6 +47,8 @@ def startmb():
     elif headphones.CONFIG.MIRROR == "custom":
         mbhost = headphones.CONFIG.CUSTOMHOST
         mbport = int(headphones.CONFIG.CUSTOMPORT)
+        mbuser = headphones.CONFIG.CUSTOMUSER
+        mbpass = headphones.CONFIG.CUSTOMPASS
         sleepytime = int(headphones.CONFIG.CUSTOMSLEEP)
     elif headphones.CONFIG.MIRROR == "headphones":
         mbhost = "144.76.94.239"
@@ -69,11 +71,15 @@ def startmb():
         mb_lock.minimum_delta = sleepytime
 
     # Add headphones credentials
-    if headphones.CONFIG.MIRROR == "headphones":
-        if not mbuser and mbpass:
-            logger.warn("No username or password set for VIP server")
+    if headphones.CONFIG.MIRROR == "headphones" or headphones.CONFIG.CUSTOMAUTH:
+        if not mbuser or not mbpass:
+            logger.warn("No username or password set for MusicBrainz server")
         else:
             musicbrainzngs.hpauth(mbuser, mbpass)
+
+    # Let us know if we disable custom authentication
+    if not headphones.CONFIG.CUSTOMAUTH and headphones.CONFIG.MIRROR == "custom":
+        musicbrainzngs.disable_hpauth()
 
     logger.debug('Using the following server values: MBHost: %s, MBPort: %i, Sleep Interval: %i', mbhost, mbport, sleepytime)
 
