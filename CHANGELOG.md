@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.5.5
+Released XX XX 2015
+
+Highlights:
+* Added: force ID3v2.3 during post processing (#2121)
+* Added: MusicBrainz authentication (#2125)
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.4...v0.5.5).
+
 ## v0.5.4
 Released 05 February 2015
 
