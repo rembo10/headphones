@@ -884,10 +884,10 @@ def correctMetadata(albumid, release, downloaded_track_list):
         # Set ID3 tag version
         if headphones.CONFIG.IDTAG:
             beetsconfig['id3v23'] = True
-            logger.info("Using ID3v2.3")
+            logger.debug("Using ID3v2.3")
         else:
             beetsconfig['id3v23'] = False
-            logger.info("Using ID3v2.4")
+            logger.debug("Using ID3v2.4")
 
         for item in items:
             try:
