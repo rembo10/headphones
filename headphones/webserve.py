@@ -877,6 +877,7 @@ class WebInterface(object):
         cherrypy.response.headers['Content-type'] = 'application/json'
         return json_albums
 
+	@cherrypy.expose
     def getArtistjson(self, ArtistID, **kwargs):
         myDB = db.DBConnection()
         artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
