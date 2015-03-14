@@ -374,6 +374,9 @@ class WebInterface(object):
           myDB = db.DBConnection()
           album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
           searcher.send_to_downloader(data, bestqual, album)
+          return json.dumps({'result':'success'})
+        else:
+          return json.dumps({'result':'failure'})
 
     @cherrypy.expose
     def unqueueAlbum(self, AlbumID, ArtistID):
