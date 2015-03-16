@@ -35,7 +35,7 @@ postprocessor_lock = threading.Lock()
 
 
 def checkFolder():
-    logger.info("Checking download folder for completed downloads (only snatched ones).")
+    logger.debug("Checking download folder for completed downloads (only snatched ones).")
 
     with postprocessor_lock:
         myDB = db.DBConnection()
@@ -57,7 +57,7 @@ def checkFolder():
             else:
                 logger.info("No folder name found for " + album['Title'])
 
-    logger.info("Checking download folder finished.")
+    logger.debug("Checking download folder finished.")
 
 def verify(albumid, albumpath, Kind=None, forced=False):
 
@@ -1068,6 +1068,8 @@ def renameUnprocessedFolder(path, tag):
 
 def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
 
+    logger.info('Force checking download folder for completed downloads')
+	
     ignored = 0
 
     if album_dir:
