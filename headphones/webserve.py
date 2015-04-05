@@ -1151,7 +1151,13 @@ class WebInterface(object):
             "cache_sizemb": headphones.CONFIG.CACHE_SIZEMB,
             "file_permissions": headphones.CONFIG.FILE_PERMISSIONS,
             "folder_permissions": headphones.CONFIG.FOLDER_PERMISSIONS,
-            "mpc_enabled": checked(headphones.CONFIG.MPC_ENABLED)
+            "mpc_enabled": checked(headphones.CONFIG.MPC_ENABLED),
+            "mdlesk_enabled": checked(headphones.CONFIG.MDLESK_ENABLED),
+	    "mdlesk_onsnatch": checked(headphones.CONFIG.MDLESK_ONSNATCH),
+	    "mdlesk_server": headphones.CONFIG.MDLESK_SERVER,
+            "mdlesk_apikey": headphones.CONFIG.MDLESK_APIKEY,
+            "mdlesk_source": headphones.CONFIG.MDLESK_SOURCE,
+            "mdlesk_username": headphones.CONFIG.MDLESK_USERNAME
         }
 
         # Need to convert EXTRAS to a dictionary we can pass to the config:
@@ -1196,7 +1202,7 @@ class WebInterface(object):
             "nma_enabled", "nma_onsnatch", "pushalot_enabled", "pushalot_onsnatch", "synoindex_enabled", "pushover_enabled",
             "pushover_onsnatch", "pushbullet_enabled", "pushbullet_onsnatch", "subsonic_enabled", "twitter_enabled", "twitter_onsnatch",
             "osx_notify_enabled", "osx_notify_onsnatch", "boxcar_enabled", "boxcar_onsnatch", "songkick_enabled", "songkick_filter_enabled",
-            "mpc_enabled"
+            "mpc_enabled","mdlesk_enabled","mdlesk_onsnatch"
         ]
         for checked_config in checked_configs:
             if checked_config not in kwargs:
@@ -1382,6 +1388,17 @@ class WebInterface(object):
             return "Tweet successful, check your twitter to make sure it worked"
         else:
             return "Error sending tweet"
+
+    @cherrypy.expose
+    def testMdlesk(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        mdlesk = notifiers.MDLESK()
+        result = mdlesk.test()
+        if result:
+            return "Test Notification Sent"
+        else:
+            return "Error sending notification"
+
 
     @cherrypy.expose
     def osxnotifyregister(self, app):
