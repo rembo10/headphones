@@ -1105,6 +1105,40 @@
                             </fieldset>
 
                             <fieldset>
+								<h3>MDLESK</h3>
+								<div class="row checkbox">
+									<input type="checkbox" name="mdlesk_enabled" id="mdlesk" value="1" ${config['mdlesk_enabled']} />
+									<label>Enable MDLESK Notifications</label>
+								</div>
+								<div id="mdleskoptions">
+									<div class="row">
+										<label>Server</label>
+										<input type="text" name="mdlesk_server" value="${config['mdlesk_server']}" size="35">
+										<small>Usually http://mdlesk.com/Api.svc</small>
+									</div>
+									<div class="row">
+										<label>Username</label>
+										<input type="text" name="mdlesk_username" value="${config['mdlesk_username']}" size="35">
+									</div>
+									<div class="row">
+										<label>API Key</label>
+										<input type="text" name="mdlesk_apikey" value="${config['mdlesk_apikey']}" size="35">
+									</div>
+									<div class="row">
+										<label>Source</label>
+										<input type="text" name="mdlesk_source" value="${config['mdlesk_source']}" size="35">
+										<small>Usually Headphones</small>
+									</div>
+									<div class="row checkbox">
+										<input type="checkbox" name="mdlesk_onsnatch" value="1" ${config['mdlesk_onsnatch']} /><label>Notify on snatch?</label>
+									</div>
+									<div class="row">
+										<input type="button" value="Test MDLESK" id="testMDLESK" />
+                                    </div>
+								  </div>
+                            </fieldset>
+
+                            <fieldset>
                             </td>
                     </tr>
                 </table>
@@ -1866,6 +1900,26 @@
                         }
                 });
 
+                if ($("#mdlesk").is(":checked"))
+				{
+					$("#mdleskoptions").show();
+				}
+				else
+				{
+					$("#mdleskoptions").hide();
+				}
+
+				$("#mdlesk").click(function(){
+					if ($("#mdlesk").is(":checked"))
+					{
+						$("#mdleskoptions").slideDown();
+					}
+					else
+					{
+						$("#mdleskoptions").slideUp();
+					}
+                });
+
                 if ($("#songkick").is(":checked"))
                         {
                             $("#songkickoptions").show();
@@ -2092,6 +2146,14 @@
                     $.get("/testTwitter",
                         function (data) { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>"); });
                     $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
+                });
+
+                $('#testMDLESK').click(function () {
+                	$.get( "/testMdlesk", function( data ) {
+					  $( "#ajaxMsg" ).html( "<div class='msg'><span class='ui-icon ui-icon-check'></span>" + data + "</div>" );
+					  $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
+					  alert( "Test Notification Sent" );
+					});
                 });
 
                 $('#osxnotifyregister').click(function () {

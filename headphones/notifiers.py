@@ -827,3 +827,50 @@ class SubSonicNotifier(object):
         # Invoke request
         request.request_response(self.host + "musicFolderSettings.view?scanNow",
             auth=(self.username, self.password))
+
+class MDLESK(object):
+    """
+    MDLESK Notifications
+    """
+    
+    def __init__(self):
+        self.enabled = headphones.CONFIG.MDLESK_ENABLED
+        self.server = headphones.CONFIG.MDLESK_SERVER
+        self.username = headphones.CONFIG.MDLESK_USERNAME
+        self.source = headphones.CONFIG.MDLESK_SOURCE
+        self.apikey = headphones.CONFIG.MDLESK_APIKEY
+
+    def conf(self, options):
+        return cherrypy.config['config'].get('MDLESK', options)
+
+    def notify(self, message, event):
+        if not self.enabled:
+            return
+	
+	requestParameters = ''
+	requestParameters = requestParameters + '?'
+	requestParameters = requestParameters + 'Username=%s' % urllib.quote_plus(self.username)
+	requestParameters = requestParameters + '&ApiKey=%s' % urllib.quote_plus(self.apikey)
+	requestParameters = requestParameters + '&Action=SendNotification'
+	requestParameters = requestParameters + '&Source=%s' % urllib.quote_plus(self.source)
+	requestParameters = requestParameters + '&Message=%s' % urllib.quote_plus(message)
+	requestUrl = self.server + requestParameters
+	
+        try:
+            req = urllib2.Request(requestUrl)
+            handle = urllib2.urlopen(req)
+            handle.close()
+        except urllib2.URLError, e:
+            logger.warning(u'MDLESK notification failed')
+            return
+
+        logger.info(u"MDLESK notification sent.")
+
+    def updateLibrary(self):
+        #For uniformity reasons not removed
+        return
+
+    def test(self):
+        self.enabled = True
+        self.notify('Test Message', 'Test Message')
+        return True
