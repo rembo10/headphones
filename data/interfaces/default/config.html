@@ -742,10 +742,6 @@
                                     </label>
                                 </div>
                                 <div class="row checkbox left clearfix">
-                                    <label title="Freeze the database, so new artists won't be added automatically. Use this if Headphones adds artists because due to wrong snatches. This check is skipped when the folder name is appended with release group ID.">
-                                        Freeze database for adding new artist
-                                        <input type="checkbox" name="freeze_db" id="freeze_db" value="1" ${config['freeze_db']} />
-                                    </label>
                                     <label>
                                         Move downloads to Destination Folder
                                         <input type="checkbox" name="move_files" id="move_files" value="1" ${config['move_files']} />
@@ -1373,6 +1369,12 @@
                                     <input type="checkbox" title="Automatically mark manually added albums from search results as wanted"
                                            name="autowant_manually_added" value="1" ${config['autowant_manually_added']} />
                                     <label>Automatically mark manually added albums as wanted</label>
+                                </div>
+                                <div class="row left checkbox">
+                                    <label title="Freeze the database, so new artists won't be added automatically. Use this if Headphones adds artists because due to wrong snatches. This check is skipped when the folder name is appended with release group ID.">
+                                        Don't add new artists when post-processing albums
+                                        <input type="checkbox" name="freeze_db" id="freeze_db" value="1" ${config['freeze_db']} />
+                                    </label>
                                 </div>
                                 <div class="row">
                                     <label>Folder Permissions</label>
