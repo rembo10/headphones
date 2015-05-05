@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.5.6
+Released xx xxx 2015
+
+Highlights:
+* Added: Filter out clean/edited/censored releases (#2198)
+* Added: Button on the log page to toggle verbose/debug logging
+* Improved: Moved the 'freeze db' option to the advanced->misc. tab
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.5...v0.5.6).
+
 ## v0.5.5
 Released 04 May 2015
 
