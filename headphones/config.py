@@ -105,6 +105,7 @@ _CONFIG_DEFINITIONS = {
     'HTTP_ROOT': (str, 'General', '/'),
     'HTTP_USERNAME': (str, 'General', ''),
     'IDTAG': (int, 'Beets', 0),
+    'IGNORE_CLEAN_RELEASES': (int, 'General', 0),
     'IGNORED_WORDS': (str, 'General', ''),
     'IGNORED_FOLDERS': (list, 'Advanced', []),
     'IGNORED_FILES': (list, 'Advanced', []),

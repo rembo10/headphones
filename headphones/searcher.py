@@ -999,6 +999,13 @@ def verifyresult(title, artistterm, term, lossless):
                 logger.info("Removed '%s' from results because it doesn't contain required word: '%s'", title, each_word)
                 return False
 
+    if headphones.CONFIG.IGNORE_CLEAN_RELEASES:
+        for each_word in ['clean','edited','censored']:
+            logger.debug("Checking if '%s' is in search result: '%s'", each_word, title)
+            if each_word.lower() in title.lower() and each_word.lower() not in term.lower():
+                logger.info("Removed '%s' from results because it contains clean album word: '%s'", title, each_word)
+                return False
+
     tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
     for token in tokens:
 
