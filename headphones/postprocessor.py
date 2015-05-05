@@ -23,6 +23,7 @@ import itertools
 import headphones
 
 from beets import autotag
+from beets import config as beetsconfig
 from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 from beetsplug import lyrics as beetslyrics
 
@@ -34,7 +35,7 @@ postprocessor_lock = threading.Lock()
 
 
 def checkFolder():
-    logger.info("Checking download folder for completed downloads (only snatched ones).")
+    logger.debug("Checking download folder for completed downloads (only snatched ones).")
 
     with postprocessor_lock:
         myDB = db.DBConnection()
@@ -56,7 +57,7 @@ def checkFolder():
             else:
                 logger.info("No folder name found for " + album['Title'])
 
-    logger.info("Checking download folder finished.")
+    logger.debug("Checking download folder finished.")
 
 def verify(albumid, albumpath, Kind=None, forced=False):
 
@@ -513,6 +514,12 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         mpc = notifiers.MPC()
         mpc.notify()
 
+    if headphones.CONFIG.EMAIL_ENABLED:
+        logger.info(u"Sending Email notification")
+        email = notifiers.Email()
+        subject = release['ArtistName'] + ' - ' + release['AlbumTitle']
+        email.notify(subject, "Download and Postprocessing completed")
+
 
 def embedAlbumArt(artwork, downloaded_track_list):
     logger.info('Embedding album art')
@@ -858,7 +865,7 @@ def correctMetadata(albumid, release, downloaded_track_list):
         except Exception as e:
             logger.error('Error getting recommendation: %s. Not writing metadata', e)
             return
-        if str(rec) == 'recommendation.none':
+        if str(rec) == 'Recommendation.none':
             logger.warn('No accurate album match found for %s, %s -  not writing metadata', release['ArtistName'], release['AlbumTitle'])
             return
 
@@ -873,6 +880,14 @@ def correctMetadata(albumid, release, downloaded_track_list):
         # TODO: Handle extra_items & extra_tracks
 
         autotag.apply_metadata(info, mapping)
+        
+        # Set ID3 tag version
+        if headphones.CONFIG.IDTAG:
+            beetsconfig['id3v23'] = True
+            logger.debug("Using ID3v2.3")
+        else:
+            beetsconfig['id3v23'] = False
+            logger.debug("Using ID3v2.4")
 
         for item in items:
             try:
@@ -1053,6 +1068,8 @@ def renameUnprocessedFolder(path, tag):
 
 def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
 
+    logger.info('Force checking download folder for completed downloads')
+	
     ignored = 0
 
     if album_dir:

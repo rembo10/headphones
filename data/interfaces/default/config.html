@@ -786,6 +786,10 @@
                                         Embed lyrics
                                         <input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}>
                                     </label>
+                                    <label title="Use ID3v2.3 instead of ID3v2.4">
+                                        Tag using ID3v2.3
+                                        <input type="checkbox" name="idtag" value="1" ${config['idtag']}>
+                                    </label>
                                 </div>
                                 <div class="row">
                                     <label>
@@ -1104,6 +1108,39 @@
                                 </div>
                             </fieldset>
 
+                           <fieldset>
+                                <h3>Email</h3>
+                                <div class="row checkbox">
+                                    <input type="checkbox" name="email_enabled" id="email" value="1" ${config['email_enabled']} /><label>Enable Email Notifications</label>
+                                </div>
+                                <div id="email_options">
+                                    <div class="row">
+                                        <label>From</label><input type="text" name="email_from" value="${config['email_from']}" size="254">
+                                    </div>
+                                    <div class="row">
+                                        <label>To</label><input type="text" name="email_to" value="${config['email_to']}" size="254">
+                                    </div>
+                                    <div class="row">
+                                        <label>SMTP Server</label><input type="text" name="email_smtp_server" value="${config['email_smtp_server']}" size="254">
+                                    </div>
+                                    <div class="row">
+                                        <label>SMTP User</label><input type="text" name="email_smtp_user" value="${config['email_smtp_user']}" size="254">
+                                    </div>
+                                    <div class="row">
+                                        <label>SMTP Password</label><input type="password" name="email_smtp_password" value="${config['email_smtp_password']}" size="50">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="text" class="override-float" name="email_smtp_port" value="${config['email_smtp_port']}" size="4"><label>SMTP Port</label>
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="email_tls" value="1" ${config['email_tls']} /><label>TLS</label>
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="email_onsnatch" value="1" ${config['email_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
                             <fieldset>
                             </td>
                     </tr>
@@ -1416,6 +1453,17 @@
                                     <div class="row">
                                         <label>Port</label><input type="text" name="customport" value="${config['customport']}" size="8">
                                     </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="customauth" id="customauth" value="1" ${config['customauth']} /><label>Requires Authentication</label>
+                                    </div>
+                                    <div id="customauth_options">
+                                        <div class="row">
+                                            <label>Username</label><input type="text" class="customuser" name="customuser" value="${config['customuser']}" size="20">
+                                        </div>
+                                        <div class="row">
+                                            <label>Password</label><input type="password" class="custompass" name="custompass" value="${config['custompass']}" size="15"><br>
+                                        </div>
+                                    </div>
                                     <div class="row">
                                         <label>Sleep Interval</label><input type="text" name="customsleep" value="${config['customsleep']}" size="4">
                                     </div>
@@ -1526,6 +1574,25 @@
                     $('#api_key').val(data);
             });
         });
+                if ($("#customauth").is(":checked"))
+                        {
+                            $("#customauth_options").show();
+                        }
+                else
+                        {
+                            $("#customauth_options").hide();
+                        }
+
+                $("#customauth").click(function(){
+                        if ($("#customauth").is(":checked"))
+                        {
+                            $("#customauth_options").slideDown();
+                        }
+                        else
+                        {
+                            $("#customauth_options").slideUp();
+                        }
+                });
                 if ($("#enable_https").is(":checked"))
                         {
                             $("#https_options").show();
@@ -1866,6 +1933,26 @@
                         }
                 });
 
+               if ($("#email").is(":checked"))
+                        {
+                            $("#email_options").show();
+                        }
+                else
+                        {
+                            $("#email_options").hide();
+                        }
+
+                $("#email").click(function(){
+                        if ($("#email").is(":checked"))
+                        {
+                            $("#email_options").slideDown();
+                        }
+                        else
+                        {
+                            $("#email_options").slideUp();
+                        }
+                });
+
                 if ($("#songkick").is(":checked"))
                         {
                             $("#songkickoptions").show();
@@ -2074,6 +2161,7 @@
                 initConfigCheckbox("#use_whatcd");
                 initConfigCheckbox("#api_enabled");
                 initConfigCheckbox("#enable_https");
+                initConfigCheckbox("#customauth");
 
 
                 $('#twitterStep1').click(function () {

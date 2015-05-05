@@ -374,6 +374,9 @@ class WebInterface(object):
           myDB = db.DBConnection()
           album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
           searcher.send_to_downloader(data, bestqual, album)
+          return json.dumps({'result':'success'})
+        else:
+          return json.dumps({'result':'failure'})
 
     @cherrypy.expose
     def unqueueAlbum(self, AlbumID, ArtistID):
@@ -877,6 +880,7 @@ class WebInterface(object):
         cherrypy.response.headers['Content-type'] = 'application/json'
         return json_albums
 
+    @cherrypy.expose
     def getArtistjson(self, ArtistID, **kwargs):
         myDB = db.DBConnection()
         artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
@@ -1142,6 +1146,9 @@ class WebInterface(object):
             "customhost": headphones.CONFIG.CUSTOMHOST,
             "customport": headphones.CONFIG.CUSTOMPORT,
             "customsleep": headphones.CONFIG.CUSTOMSLEEP,
+            "customauth": checked(headphones.CONFIG.CUSTOMAUTH),
+            "customuser": headphones.CONFIG.CUSTOMUSER,
+            "custompass": headphones.CONFIG.CUSTOMPASS,
             "hpuser": headphones.CONFIG.HPUSER,
             "hppass": headphones.CONFIG.HPPASS,
             "songkick_enabled": checked(headphones.CONFIG.SONGKICK_ENABLED),
@@ -1151,7 +1158,17 @@ class WebInterface(object):
             "cache_sizemb": headphones.CONFIG.CACHE_SIZEMB,
             "file_permissions": headphones.CONFIG.FILE_PERMISSIONS,
             "folder_permissions": headphones.CONFIG.FOLDER_PERMISSIONS,
-            "mpc_enabled": checked(headphones.CONFIG.MPC_ENABLED)
+            "mpc_enabled": checked(headphones.CONFIG.MPC_ENABLED),
+            "email_enabled": checked(headphones.CONFIG.EMAIL_ENABLED),
+            "email_from": headphones.CONFIG.EMAIL_FROM,
+            "email_to": headphones.CONFIG.EMAIL_TO,
+            "email_smtp_server": headphones.CONFIG.EMAIL_SMTP_SERVER,
+            "email_smtp_user": headphones.CONFIG.EMAIL_SMTP_USER,
+            "email_smtp_password": headphones.CONFIG.EMAIL_SMTP_PASSWORD,
+            "email_smtp_port": int(headphones.CONFIG.EMAIL_SMTP_PORT),
+            "email_tls": checked(headphones.CONFIG.EMAIL_TLS),
+            "email_onsnatch": checked(headphones.CONFIG.EMAIL_ONSNATCH),
+            "idtag": checked(headphones.CONFIG.IDTAG)
         }
 
         # Need to convert EXTRAS to a dictionary we can pass to the config:
@@ -1196,7 +1213,7 @@ class WebInterface(object):
             "nma_enabled", "nma_onsnatch", "pushalot_enabled", "pushalot_onsnatch", "synoindex_enabled", "pushover_enabled",
             "pushover_onsnatch", "pushbullet_enabled", "pushbullet_onsnatch", "subsonic_enabled", "twitter_enabled", "twitter_onsnatch",
             "osx_notify_enabled", "osx_notify_onsnatch", "boxcar_enabled", "boxcar_onsnatch", "songkick_enabled", "songkick_filter_enabled",
-            "mpc_enabled"
+            "mpc_enabled", "email_enabled", "email_tls", "email_onsnatch", "customauth", "idtag"
         ]
         for checked_config in checked_configs:
             if checked_config not in kwargs:

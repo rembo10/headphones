@@ -34,6 +34,11 @@ import json
 import oauth2 as oauth
 import pythontwitter as twitter
 
+from email.mime.text import MIMEText
+import smtplib
+import email.utils
+
+
 class GROWL(object):
     """
     Growl notifications, for OS X.
@@ -827,3 +832,31 @@ class SubSonicNotifier(object):
         # Invoke request
         request.request_response(self.host + "musicFolderSettings.view?scanNow",
             auth=(self.username, self.password))
+
+class Email(object):
+
+    def notify(self, subject, message):
+
+        message = MIMEText(message, 'plain', "utf-8")
+        message['Subject'] = subject
+        message['From'] = email.utils.formataddr(('Headphones', headphones.CONFIG.EMAIL_FROM))
+        message['To'] = headphones.CONFIG.EMAIL_TO
+
+        try:
+            mailserver = smtplib.SMTP(headphones.CONFIG.EMAIL_SMTP_SERVER, headphones.CONFIG.EMAIL_SMTP_PORT)
+
+            if (headphones.CONFIG.EMAIL_TLS):
+                mailserver.starttls()
+
+            mailserver.ehlo()
+
+            if headphones.CONFIG.EMAIL_SMTP_USER:
+                mailserver.login(headphones.CONFIG.EMAIL_SMTP_USER, headphones.CONFIG.EMAIL_SMTP_PASSWORD)
+
+            mailserver.sendmail(headphones.CONFIG.EMAIL_FROM, headphones.CONFIG.EMAIL_TO, message.as_string())
+            mailserver.quit()
+            return True
+
+        except Exception, e:
+            logger.warn('Error sending Email: %s' % e)
+            return False
