@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.5.5
+Released 04 May 2015
+
+Highlights:
+* Added: force ID3v2.3 during post processing (#2121)
+* Added: MusicBrainz authentication (#2125)
+* Added: Email notifications (addresses #1045)
+* Fixed: Kickass url updated to kickass.to (#2119)
+* Fixed: Piratebay returning 0 bytes for all files
+* Fixed: Albums stopped automatically refreshing when adding an artist
+* Fixed: Min/max sizes for target bitrate
+* Fixed: Don't filter any results if looking for a specific download
+* Fixed: Sort by size in the specific download table
+* Fixed: Deal with beets recommendation.none correctly
+* Improved: Close dialog window automatically when choosing a specific download
+* Improved: Move some repetitive log messages to debug level
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.4...v0.5.5).
+
 ## v0.5.4
 Released 05 February 2015
 

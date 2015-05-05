@@ -225,7 +225,7 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
     myDB = db.DBConnection()
     albumlength = myDB.select('SELECT sum(TrackDuration) from tracks WHERE AlbumID=?', [album['AlbumID']])[0][0]
 
-    if headphones.CONFIG.PREFER_TORRENTS == 0:
+    if headphones.CONFIG.PREFER_TORRENTS == 0 and not choose_specific_download:
 
         if NZB_PROVIDERS and NZB_DOWNLOADERS:
             results = searchNZB(album, new, losslessOnly, albumlength)
@@ -233,7 +233,7 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
         if not results and TORRENT_PROVIDERS:
             results = searchTorrent(album, new, losslessOnly, albumlength)
 
-    elif headphones.CONFIG.PREFER_TORRENTS == 1:
+    elif headphones.CONFIG.PREFER_TORRENTS == 1 and not choose_specific_download:
 
         if TORRENT_PROVIDERS:
             results = searchTorrent(album, new, losslessOnly, albumlength)
@@ -247,10 +247,10 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
         torrent_results = None
 
         if NZB_PROVIDERS and NZB_DOWNLOADERS:
-            nzb_results = searchNZB(album, new, losslessOnly, albumlength)
+            nzb_results = searchNZB(album, new, losslessOnly, albumlength, choose_specific_download)
 
         if TORRENT_PROVIDERS:
-            torrent_results = searchTorrent(album, new, losslessOnly, albumlength)
+            torrent_results = searchTorrent(album, new, losslessOnly, albumlength, choose_specific_download)
 
         if not nzb_results:
             nzb_results = []
@@ -306,9 +306,9 @@ def more_filtering(results, album, albumlength, new):
             targetsize = albumlength / 1000 * int(headphones.CONFIG.PREFERRED_BITRATE) * 128
             logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
             if headphones.CONFIG.PREFERRED_BITRATE_LOW_BUFFER:
-                low_size_limit = targetsize - (targetsize * int(headphones.CONFIG.PREFERRED_BITRATE_LOW_BUFFER) / 100)
+                low_size_limit =  targetsize * int(headphones.CONFIG.PREFERRED_BITRATE_LOW_BUFFER) / 100
             if headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER:
-                high_size_limit = targetsize + (targetsize * int(headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER) / 100)
+                high_size_limit = targetsize * int(headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER) / 100
                 if headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                     allow_lossless = True
 
@@ -429,7 +429,7 @@ def get_year_from_release_date(release_date):
     return year
 
 
-def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
+def searchNZB(album, new=False, losslessOnly=False, albumlength=None, choose_specific_download=False):
     reldate = album['ReleaseDate']
     year = get_year_from_release_date(reldate)
 
@@ -691,7 +691,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None):
     results = [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
 
     # Additional filtering for size etc
-    if results:
+    if results and not choose_specific_download:
         results = more_filtering(results, album, albumlength, new)
 
     return results
@@ -946,7 +946,11 @@ def send_to_downloader(data, bestqual, album):
         b2msg = 'From ' + provider + '<br></br>' + name
         boxcar = notifiers.BOXCAR()
         boxcar.notify('Headphones snatched: ' + title, b2msg, rgid)
-
+    if headphones.CONFIG.EMAIL_ENABLED and headphones.CONFIG.EMAIL_ONSNATCH:
+        logger.info(u"Sending Email notification")
+        email = notifiers.Email()
+        message = 'Snatched from ' + provider + '. ' + name
+        email.notify(title, message)
 
 def verifyresult(title, artistterm, term, lossless):
 
@@ -1014,7 +1018,7 @@ def verifyresult(title, artistterm, term, lossless):
     return True
 
 
-def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
+def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose_specific_download=False):
     global gazelle  # persistent what.cd api object to reduce number of login attempts
 
     # rutracker login
@@ -1092,7 +1096,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
         if headphones.CONFIG.KAT_PROXY_URL:
             providerurl = fix_url(set_proxy(headphones.CONFIG.KAT_PROXY_URL))
         else:
-            providerurl = fix_url("https://kickass.so")
+            providerurl = fix_url("https://kickass.to")
 
         # Build URL
         providerurl = providerurl + "/usearch/" + ka_term
@@ -1521,7 +1525,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None):
     results = [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
 
     # Additional filtering for size etc
-    if results:
+    if results and not choose_specific_download:
         results = more_filtering(results, album, albumlength, new)
 
     return results

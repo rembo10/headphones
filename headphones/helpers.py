@@ -173,15 +173,15 @@ def piratesize(size):
     factor = float(split[0])
     unit = split[1].upper()
     
-    if unit == 'MiB':
+    if unit == 'MIB':
         size = factor * 1048576
     elif unit == 'MB':
         size = factor * 1000000
-    elif unit == 'GiB':
+    elif unit == 'GIB':
         size = factor * 1073741824
     elif unit == 'GB':
         size = factor * 1000000000
-    elif unit == 'KiB':
+    elif unit == 'KIB':
         size = factor * 1024
     elif unit == 'KB':
         size = factor * 1000
