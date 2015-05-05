@@ -724,6 +724,12 @@
                                     <input type="text" name="required_words" value="${config['required_words']}" size="50">
                                     <small>Results without these words in the title will be filtered out. You can use OR: 'flac OR lossless OR alac, vinyl'</small>
                                 </div>
+                                <div class="row checkbox left clearfix">
+                                    <label title="Filter out releases that contain the words 'clean','edited' or 'censored', as long as those words aren't in the search term">
+                                        Ignore clean/censored releases
+                                        <input type="checkbox" name="ignore_clean_releases" id="ignore_clean_releases" value="1" ${config['ignore_clean_releases']} />
+                                    </label>
+                                </div>
                             </fieldset>
                         </td>
                         <td>

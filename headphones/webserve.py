@@ -1005,6 +1005,7 @@ class WebInterface(object):
             "preferred_words": headphones.CONFIG.PREFERRED_WORDS,
             "ignored_words": headphones.CONFIG.IGNORED_WORDS,
             "required_words": headphones.CONFIG.REQUIRED_WORDS,
+            "ignore_clean_releases": checked(headphones.CONFIG.IGNORE_CLEAN_RELEASES),
             "torrentblackhole_dir": headphones.CONFIG.TORRENTBLACKHOLE_DIR,
             "download_torrent_dir": headphones.CONFIG.DOWNLOAD_TORRENT_DIR,
             "numberofseeders": headphones.CONFIG.NUMBEROFSEEDERS,
@@ -1205,7 +1206,7 @@ class WebInterface(object):
         checked_configs = [
             "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer", "use_newznab", "newznab_enabled",
             "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay", "use_mininova", "use_waffles", "use_rutracker",
-            "use_whatcd", "preferred_bitrate_allow_lossless", "detect_bitrate", "freeze_db", "cue_split", "move_files", "rename_files",
+            "use_whatcd", "preferred_bitrate_allow_lossless", "detect_bitrate", "ignore_clean_releases", "freeze_db", "cue_split", "move_files", "rename_files",
             "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art", "embed_album_art", "embed_lyrics", "replace_existing_folders",
             "file_underscores", "include_extras", "autowant_upcoming", "autowant_all", "autowant_manually_added", "keep_torrent_files", "music_encoder",
             "encoderlossless", "encoder_multicore", "delete_lossless_files", "growl_enabled", "growl_onsnatch", "prowl_enabled",
