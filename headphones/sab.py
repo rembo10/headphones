@@ -48,17 +48,14 @@ def sab_api_call(request_type=None, params={}, **kwargs):
 
     params['output']='json'
 
-    logger.info("Trying to send nzb to SABnzbd")
+    logger.info("Attempting to connect to SABnzbd on url: %s" % url)
     response = request.request_json(url, params=params, **kwargs)
 
     if not response:
         logger.error("Error connecting to SABnzbd on url: %s" % url)
         return False
-    if response['status'] == False and response['error']:
-        logger.error("Error connecting to SABnzbd: %s" % response['error'])
-        return False
     else:
-        logger.info("Successfully connected to SABnzbd")
+        logger.info("Successfully connected to SABnzbd on url: %s" % url)
         return response
 
 def sendNZB(nzb):
