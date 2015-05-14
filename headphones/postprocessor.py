@@ -307,7 +307,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                 if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
                     downloaded_track_list.append(os.path.join(r, files))
 
-    # Check if files are valid media files and are writeable, before the steps
+    # Check if files are valid media files and are writable, before the steps
     # below are executed. This simplifies errors and prevents unfinished steps.
     for downloaded_track in downloaded_track_list:
         try:
@@ -337,7 +337,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                     fp.seek(0)
             except IOError as e:
                 logger.debug("Write check exact error: %s", e)
-                logger.error("Track file is not writeable. This is required " \
+                logger.error("Track file is not writable. This is required " \
                     "for some post processing steps: %s. Not continuing.",
                     downloaded_track.decode(headphones.SYS_ENCODING, "replace"))
                 return
