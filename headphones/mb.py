@@ -218,7 +218,7 @@ def getArtist(artistid, extrasonly=False):
     artist_dict = {}
     artist = None
     try:
-        limit = 200
+        limit = 100
         with mb_lock:
             artist = musicbrainzngs.get_artist_by_id(artistid)['artist']
         newRgs = None
@@ -288,7 +288,7 @@ def getArtist(artistid, extrasonly=False):
             mb_extras_list = []
 
             try:
-                limit = 200
+                limit = 100
                 newRgs = None
                 while newRgs is None or len(newRgs) >= limit:
                     with mb_lock:
