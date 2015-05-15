@@ -62,9 +62,7 @@ WAVE_FILE_TYPE_BY_EXTENSION = {
     '.flac': 'Free Lossless Audio Codec'
 }
 
-# TODO: Only alow flac for now
-#SHNTOOL_COMPATIBLE = ('Waveform Audio', 'WavPack', 'Free Lossless Audio Codec')
-SHNTOOL_COMPATIBLE = ('Free Lossless Audio Codec')
+#SHNTOOL_COMPATIBLE = ("Free Lossless Audio Codec", "Waveform Audio", "Monkey's Audio")
 
 # TODO: Make this better!
 # this module-level variable is bad. :(
@@ -109,10 +107,10 @@ def split_baby(split_file, split_cmd):
         env['PATH'] += os.pathsep + headphones.CONFIG.CUE_SPLIT_FLAC_PATH
 
     process = subprocess.Popen(split_cmd, startupinfo=startupinfo,
-
-    stdin=open(os.devnull, 'rb'), stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE, env=env)
+                               stdin=open(os.devnull, 'rb'), stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, env=env)
     stdout, stderr = process.communicate()
+
     if process.returncode:
         logger.error('Split failed for %s', split_file.decode(headphones.SYS_ENCODING, 'replace'))
         out = stdout if stdout else stderr
@@ -592,11 +590,10 @@ def split(albumpath):
             splitter = 'shntool'
 
     if splitter == 'shntool' and not check_splitter(splitter):
-            raise ValueError('Command not found, ensure shntool with FLAC or xld (OS X) installed')
+            raise ValueError('Command not found, ensure shntool or xld installed')
 
-    # Determine if file can be split (only flac allowed for shntool)
-    if 'xld' in splitter and wave.name_ext not in WAVE_FILE_TYPE_BY_EXTENSION.keys() or \
-            wave.type not in SHNTOOL_COMPATIBLE:
+    # Determine if file can be split
+    if wave.name_ext not in WAVE_FILE_TYPE_BY_EXTENSION.keys():
         raise ValueError('Cannot split, audio file has unsupported extension')
 
     # Split with xld
@@ -640,7 +637,7 @@ def split(albumpath):
         cmd.extend(['-f'])
         cmd.extend([SPLIT_FILE_NAME])
         cmd.extend(['-o'])
-        cmd.extend(['flac'])
+        cmd.extend([wave.name_ext.lstrip('.')])
         cmd.extend([wave.name])
         split = split_baby(wave.name, cmd)
         os.remove(SPLIT_FILE_NAME)
@@ -652,9 +649,9 @@ def split(albumpath):
                 logger.info('Tagging %s...', t.name)
                 t.tag()
 
-        # rename FLAC files
-        if split and CUE_META.count_tracks() == len(base_dir.tracks(ext='.flac', split=True)):
-            for t in base_dir.tracks(ext='.flac', split=True):
+        # rename files
+        if split and CUE_META.count_tracks() == len(base_dir.tracks(ext=wave.name_ext, split=True)):
+            for t in base_dir.tracks(ext=wave.name_ext, split=True):
                 if t.name != t.filename():
                     logger.info('Renaming %s to %s...', t.name, t.filename())
                     os.rename(t.name, t.filename())

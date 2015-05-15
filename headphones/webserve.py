@@ -1167,6 +1167,7 @@ class WebInterface(object):
             "email_smtp_user": headphones.CONFIG.EMAIL_SMTP_USER,
             "email_smtp_password": headphones.CONFIG.EMAIL_SMTP_PASSWORD,
             "email_smtp_port": int(headphones.CONFIG.EMAIL_SMTP_PORT),
+            "email_ssl": checked(headphones.CONFIG.EMAIL_SSL),
             "email_tls": checked(headphones.CONFIG.EMAIL_TLS),
             "email_onsnatch": checked(headphones.CONFIG.EMAIL_ONSNATCH),
             "idtag": checked(headphones.CONFIG.IDTAG)
@@ -1214,7 +1215,7 @@ class WebInterface(object):
             "nma_enabled", "nma_onsnatch", "pushalot_enabled", "pushalot_onsnatch", "synoindex_enabled", "pushover_enabled",
             "pushover_onsnatch", "pushbullet_enabled", "pushbullet_onsnatch", "subsonic_enabled", "twitter_enabled", "twitter_onsnatch",
             "osx_notify_enabled", "osx_notify_onsnatch", "boxcar_enabled", "boxcar_onsnatch", "songkick_enabled", "songkick_filter_enabled",
-            "mpc_enabled", "email_enabled", "email_tls", "email_onsnatch", "customauth", "idtag"
+            "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch", "customauth", "idtag"
         ]
         for checked_config in checked_configs:
             if checked_config not in kwargs:

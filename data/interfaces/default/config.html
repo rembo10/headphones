@@ -1135,6 +1135,9 @@
                                         <input type="text" class="override-float" name="email_smtp_port" value="${config['email_smtp_port']}" size="4"><label>SMTP Port</label>
                                     </div>
                                     <div class="row checkbox">
+                                        <input type="checkbox" name="email_ssl" value="1" ${config['email_ssl']} /><label>SSL</label>
+                                    </div>
+                                    <div class="row checkbox">
                                         <input type="checkbox" name="email_tls" value="1" ${config['email_tls']} /><label>TLS</label>
                                     </div>
                                     <div class="row checkbox">

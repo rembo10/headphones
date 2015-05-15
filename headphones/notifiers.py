@@ -843,7 +843,10 @@ class Email(object):
         message['To'] = headphones.CONFIG.EMAIL_TO
 
         try:
-            mailserver = smtplib.SMTP(headphones.CONFIG.EMAIL_SMTP_SERVER, headphones.CONFIG.EMAIL_SMTP_PORT)
+            if (headphones.CONFIG.EMAIL_SSL):
+                mailserver = smtplib.SMTP_SSL(headphones.CONFIG.EMAIL_SMTP_SERVER, headphones.CONFIG.EMAIL_SMTP_PORT)
+            else:
+                mailserver = smtplib.SMTP(headphones.CONFIG.EMAIL_SMTP_SERVER, headphones.CONFIG.EMAIL_SMTP_PORT)
 
             if (headphones.CONFIG.EMAIL_TLS):
                 mailserver.starttls()

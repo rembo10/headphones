@@ -64,6 +64,7 @@ _CONFIG_DEFINITIONS = {
     'EMAIL_SMTP_USER': (str, 'Email', ''),
     'EMAIL_SMTP_PASSWORD': (str, 'Email', ''),
     'EMAIL_SMTP_PORT': (int, 'Email', 25),
+    'EMAIL_SSL': (int, 'Email', 0),
     'EMAIL_TLS': (int, 'Email', 0),
     'EMAIL_ONSNATCH': (int, 'Email', 0),
     'EMBED_ALBUM_ART': (int, 'General', 0),
