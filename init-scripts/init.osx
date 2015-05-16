@@ -7,7 +7,7 @@
   <key>ProgramArguments</key>
   <array>
        <string>/usr/bin/python</string>
-       <string>/Applications/Headphones/headphones.py</string>
+       <string>/Applications/Headphones/Headphones.py</string>
        <string>--quiet</string>
        <string>--daemon</string>
        <string>--nolaunch</string>
