@@ -481,7 +481,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None, choose_spe
             categories = "3030"
 
         # Request results
-        logger.info('Parsing results from Headphones Indexer')
+        logger.info('Searching Headphones Indexer with search term: %s' % term)
 
         headers = {'User-Agent': USER_AGENT}
         params = {
@@ -552,7 +552,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None, choose_spe
                     categories = categories + ",4050"
 
             # Request results
-            logger.info('Parsing results from %s', newznab_host[0])
+            logger.info('Parsing results from %s using search term: %s' % (newznab_host[0],term))
 
             headers = {'User-Agent': USER_AGENT}
             params = {
@@ -600,9 +600,6 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None, choose_spe
             categories = "3030"
             logger.info("Album type is audiobook/spokenword. Using audiobook category")
 
-        # Request results
-        logger.info('Requesting from nzbs.org')
-
         headers = {'User-Agent': USER_AGENT}
         params = {
             "t": "search",
@@ -618,7 +615,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None, choose_spe
             timeout=5
         )
 
-        logger.info('Parsing results from nzbs.org')
+        logger.info('Parsing results from nzbs.org using search term: %s' % term)
         # Process feed
         if data:
             if not len(data.entries):
@@ -650,7 +647,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None, choose_spe
             logger.info("Album type is audiobook/spokenword. Searching all music categories")
 
         # Request results
-        logger.info('Parsing results from omgwtfnzbs')
+        logger.info('Parsing results from omgwtfnzbs using search term: %s' % term)
 
         headers = {'User-Agent': USER_AGENT}
         params = {
@@ -1106,7 +1103,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
             providerurl = fix_url("https://kickass.to")
 
         # Build URL
-        providerurl = providerurl + "/usearch/" + ka_term
+        providerurl = providerurl + "/json.php?"
 
         # Pick category for torrents
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
@@ -1120,28 +1117,27 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
             maxsize = 300000000
 
         # Requesting content
-        logger.info("Searching KAT using term: %s", ka_term)
+        logger.info("Searching %s using term: %s" % (provider,ka_term))
 
         params = {
-            "categories[0]": "music",
+            "q": ka_term + "+category:music",
             "field": "seeders",
-            "sorder": "desc",
-            "rss": "1"
+            "sorder": "desc"
         }
-        data = request.request_feed(url=providerurl, params=params)
+        data = request.request_json(url=providerurl, params=params)
 
         # Process feed
         if data:
-            if not len(data.entries):
-                logger.info("No results found")
+            if not data['list']:
+                logger.info("No results found on %s using search term: %s" % (provider, ka_term))
             else:
-                for item in data.entries:
+                for item in data['list']:
                     try:
                         rightformat = True
                         title = item['title']
-                        seeders = item['torrent_seeds']
-                        url = item['links'][1]['href']
-                        size = int(item['links'][1]['length'])
+                        seeders = item['seeds']
+                        url = item['torrentLink']
+                        size = int(item['size'])
 
                         if format == "2":
                             torrent = request.request_content(url)
@@ -1190,7 +1186,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
             query_items.append('bitrate:"%s"' % bitrate)
 
         # Requesting content
-        logger.info('Parsing results from Waffles')
+        logger.info('Parsing results from Waffles.fm')
 
         params = {
             "uid": headphones.CONFIG.WAFFLES_UID,
@@ -1378,7 +1374,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
             rows = data.select('table tbody tr')
 
             if not rows:
-                logger.info("No results found")
+                logger.info("No results found from The Pirate Bay using term: %s" % tpb_term)
             else:
                 for item in rows:
                     try:
