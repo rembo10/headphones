@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import logger, helpers, db, mb, lastfm
+from headphones import logger, helpers, db, mb, lastfm, metacritic
 
 from beets.mediafile import MediaFile
 
@@ -487,6 +487,9 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
 
     logger.info(u"Seeing if we need album art for: %s" % artist['artist_name'])
     cache.getThumb(ArtistID=artistid)
+
+    logger.info(u"Fetching Metacritic reviews for: %s" % artist['artist_name'])
+    metacritic.update(artist['artist_name'], artist['releasegroups'])
 
     if errors:
         logger.info("[%s] Finished updating artist: %s but with errors, so not marking it as updated in the database" % (artist['artist_name'], artist['artist_name']))
