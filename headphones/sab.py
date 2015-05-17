@@ -54,7 +54,7 @@ def sab_api_call(request_type=None, params={}, **kwargs):
         logger.error("Error connecting to SABnzbd on url: %s" % headphones.CONFIG.SAB_HOST)
         return False
     else:
-        logger.info("Successfully connected to SABnzbd on url: %s" % headphones.CONFIG.SAB_HOST)
+        logger.debug("Successfully connected to SABnzbd on url: %s" % headphones.CONFIG.SAB_HOST)
         return response
 
 def sendNZB(nzb):
@@ -82,6 +82,7 @@ def sendNZB(nzb):
         files = {"nzbfile": (helpers.latinToAscii(nzb.name) + ".nzb", nzbdata)}
         headers = {'User-Agent': USER_AGENT}
 
+    logger.info("Attempting to connect to SABnzbd on url: %s" % headphones.CONFIG.SAB_HOST)
     if nzb.resultType == "nzb":
         response = sab_api_call('send_nzb', params=params)
     elif nzb.resultType == "nzbdata":
