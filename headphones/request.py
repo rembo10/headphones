@@ -95,7 +95,7 @@ def request_response(url, method="get", auto_raise=True,
             "host is up and running.")
     except requests.Timeout:
         logger.error(
-            "Request timed out. The remote host did not respond timely.")
+            "Request timed out. The remote host did not respond in a timely manner.")
     except requests.HTTPError as e:
         if e.response is not None:
             if e.response.status_code >= 500:

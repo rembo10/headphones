@@ -48,14 +48,13 @@ def sab_api_call(request_type=None, params={}, **kwargs):
 
     params['output']='json'
 
-    logger.info("Attempting to connect to SABnzbd on url: %s" % url)
     response = request.request_json(url, params=params, **kwargs)
 
     if not response:
-        logger.error("Error connecting to SABnzbd on url: %s" % url)
+        logger.error("Error connecting to SABnzbd on url: %s" % headphones.CONFIG.SAB_HOST)
         return False
     else:
-        logger.info("Successfully connected to SABnzbd on url: %s" % url)
+        logger.info("Successfully connected to SABnzbd on url: %s" % headphones.CONFIG.SAB_HOST)
         return response
 
 def sendNZB(nzb):
