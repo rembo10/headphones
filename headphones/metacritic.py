@@ -26,11 +26,10 @@ def update(artist_name,release_groups):
     # We could just do a search, then take the top result, but at least this will
     # cut down on api calls. If it's ineffective then we'll switch to search
 
-    replacements = {" & " : " "}
-    pattern = re.compile(r'\b(' + '|'.join(replacements.keys()) + r')\b')
-    mc_artist_name = pattern.sub(lambda x: replacements[x.group()], artist_name)
+    replacements = {" & " : " ", "." : ""}
+    mc_artist_name = helpers.replace_all(artist_name.lower(),replacements)
 
-    mc_artist_name = artist_name.lower().replace(" ","-")
+    mc_artist_name = mc_artist_name.replace(" ","-")
 
     url = "http://www.metacritic.com/person/" + mc_artist_name + "?filter-options=music&sort_options=date&num_items=100"
 
