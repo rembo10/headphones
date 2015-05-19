@@ -1445,6 +1445,7 @@ div#artistheader h2 a {
 #album_table td#albumname,
 #album_table td#reldate,
 #album_table td#type,
+#album_table td#score,
 #track_table td#duration,
 #upcoming_table td#select,
 #upcoming_table td#status,
@@ -1455,6 +1456,7 @@ div#artistheader h2 a {
 }
 #album_table td#status,
 #album_table td#bitrate,
+#album_table td#score,
 #album_table td#albumformat,
 #album_table td#wantlossless {
   font-size: 13px;
