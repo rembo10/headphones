@@ -321,8 +321,10 @@ def more_filtering(results, album, albumlength, new):
         normalizedResultTitle = removeDisallowedFilenameChars(result[0])
         artistTitleCount = normalizedResultTitle.count(normalizedAlbumArtist)
 
-        if normalizedAlbumArtist in normalizedAlbumTitle and artistTitleCount < 2:
-            continue
+        # WHAT DOES THIS DO?
+        #if normalizedAlbumArtist in normalizedAlbumTitle and artistTitleCount < 2:
+        #    logger.info("Removing %s from %s" % (result[0], result[3]))
+        #    continue
 
         if low_size_limit and (int(result[1]) < low_size_limit):
             logger.info("%s from %s is too small for this album - not considering it. (Size: %s, Minsize: %s)", result[0], result[3], helpers.bytes_to_mb(result[1]), helpers.bytes_to_mb(low_size_limit))
@@ -400,7 +402,7 @@ def sort_search_results(resultlist, album, new, albumlength):
                 finallist = sorted(newlist, key=lambda title: (-title[5], title[6]))
 
                 if not len(finallist) and len(flac_list) and headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
-                    logger.info("Since there were no appropriate lossy matches (and at least one lossless match, going to use lossless instead")
+                    logger.info("Since there were no appropriate lossy matches (and at least one lossless match), going to use lossless instead")
                     finallist = sorted(flac_list, key=lambda title: (title[5], int(title[1])), reverse=True)
         except Exception:
             logger.exception('Unhandled exception')

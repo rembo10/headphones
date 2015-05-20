@@ -49,7 +49,7 @@ def checkFolder():
                     download_dir = headphones.CONFIG.DOWNLOAD_TORRENT_DIR
 
                 album_path = os.path.join(download_dir, album['FolderName']).encode(headphones.SYS_ENCODING, 'replace')
-                logger.info("Checking if %s exists" % album_path)
+                logger.debug("Checking if %s exists" % album_path)
 
                 if os.path.exists(album_path):
                     logger.info('Found "' + album['FolderName'] + '" in ' + album['Kind'] + ' download folder. Verifying....')
