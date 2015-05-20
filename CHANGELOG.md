@@ -5,6 +5,7 @@ Released xx xxx 2015
 
 Highlights:
 * Added: Metacritic scores
+* Added: Series support (e.g. Cafe Del Mar, Now That's What I Call Music, etc)
 * Added: Filter out clean/edited/censored releases (#2198)
 * Added: Button on the log page to toggle verbose/debug logging
 * Fixed: Connecting to SABnzbd over https with python >= 2.7.9

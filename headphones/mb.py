@@ -135,7 +135,6 @@ def findArtist(name, limit=1):
                      })
      return artistlist
 
-
 def findRelease(name, limit=1, artist=None):
     releaselist = []
     releaseResults = None
@@ -213,6 +212,39 @@ def findRelease(name, limit=1, artist=None):
                     })
     return releaselist
 
+def findSeries(name, limit=1):
+     serieslist = []
+     seriesResults = None
+
+     chars = set('!?*-')
+     if any((c in chars) for c in name):
+         name = '"' + name + '"'
+
+     criteria = {'series': name.lower()}
+
+     with mb_lock:
+         try:
+             seriesResults = musicbrainzngs.search_series(limit=limit, **criteria)['series-list']
+         except musicbrainzngs.WebServiceError as e:
+             logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
+             mb_lock.snooze(5)
+
+     if not seriesResults:
+         return False
+     for result in seriesResults:
+         if 'disambiguation' in result:
+             uniquename = unicode(result['name'] + " (" + result['disambiguation'] + ")")
+         else:
+             uniquename = unicode(result['name'])
+         serieslist.append({
+                     'uniquename': uniquename,
+                     'name': unicode(result['name']),
+                     'type': unicode(result['type']),
+                     'id': unicode(result['id']),
+                     'url': unicode("http://musicbrainz.org/series/" + result['id']),#probably needs to be changed
+                     'score': int(result['ext:score'])
+                     })
+     return serieslist
 
 def getArtist(artistid, extrasonly=False):
     artist_dict = {}
@@ -316,6 +348,38 @@ def getArtist(artistid, extrasonly=False):
     artist_dict['releasegroups'] = releasegroups
     return artist_dict
 
+def getSeries(seriesid):
+    series_dict = {}
+    series = None
+    try:
+        with mb_lock:
+            series = musicbrainzngs.get_series_by_id(seriesid,includes=['release-group-rels'])['series']
+    except musicbrainzngs.WebServiceError as e:
+        logger.warn('Attempt to retrieve series information from MusicBrainz failed for seriesid: %s (%s)' % (seriesid, str(e)))
+        mb_lock.snooze(5)
+    except Exception as e:
+        pass
+
+    if not series:
+        return False
+    
+    if 'disambiguation' in series:
+        series_dict['artist_name'] = unicode(series['name'] + " (" + unicode(series['disambiguation']) + ")")
+    else:
+        series_dict['artist_name'] = unicode(series['name'])
+
+    releasegroups = []
+
+    for rg in series['release_group-relation-list']:
+        releasegroup = rg['release-group']
+        releasegroups.append({
+            'title':releasegroup['title'],
+            'date':releasegroup['first-release-date'],
+            'id':releasegroup['id'],
+            'type':rg['type']
+            })
+    series_dict['releasegroups'] = releasegroups
+    return series_dict
 
 def getReleaseGroup(rgid):
     """

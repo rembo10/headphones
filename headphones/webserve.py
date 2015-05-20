@@ -145,8 +145,10 @@ class WebInterface(object):
             raise cherrypy.HTTPRedirect("home")
         if type == 'artist':
             searchresults = mb.findArtist(name, limit=100)
-        else:
+        elif type == 'album':
             searchresults = mb.findRelease(name, limit=100)
+        else:
+            searchresults = mb.findSeries(name, limit=100)
         return serve_template(templatename="searchresults.html", title='Search Results for: "' + name + '"', searchresults=searchresults, name=name, type=type)
 
     @cherrypy.expose
@@ -155,6 +157,13 @@ class WebInterface(object):
         thread.start()
         thread.join(1)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % artistid)
+
+    @cherrypy.expose
+    def addSeries(self, seriesid):
+        thread = threading.Thread(target=importer.addArtisttoDB, args=[seriesid, False, False, "series"])
+        thread.start()
+        thread.join(1)
+        raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % seriesid)
 
     @cherrypy.expose
     def getExtras(self, ArtistID, newstyle=False, **kwargs):

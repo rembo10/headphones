@@ -111,7 +111,7 @@ def addArtistIDListToDB(artistidlist):
         addArtisttoDB(artistid)
 
 
-def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
+def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
 
     # Putting this here to get around the circular import. We're using this to update thumbnails for artist/albums
     from headphones import cache
@@ -142,12 +142,19 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False):
                         "Status": "Loading",
                         "IncludeExtras": headphones.CONFIG.INCLUDE_EXTRAS,
                         "Extras": headphones.CONFIG.EXTRAS}
+        if type=="series":
+            newValueDict['Type'] = "series"
     else:
         newValueDict = {"Status": "Loading"}
+        if dbartist["Type"] == "series":
+            type = "series"
 
     myDB.upsert("artists", newValueDict, controlValueDict)
 
-    artist = mb.getArtist(artistid, extrasonly)
+    if type=="series":
+        artist = mb.getSeries(artistid)
+    else:
+        artist = mb.getArtist(artistid, extrasonly)
 
     if artist and artist.get('artist_name') in blacklisted_special_artist_names:
         logger.warn('Cannot import blocked special purpose artist: %s' % artist.get('artist_name'))
