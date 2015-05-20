@@ -493,7 +493,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None, choose_spe
         }
 
         data = request.request_feed(
-            url="http://indexer.codeshy.com/api",
+            url="https://indexer.codeshy.com/api",
             params=params, headers=headers,
             auth=(headphones.CONFIG.HPUSER, headphones.CONFIG.HPPASS)
         )
