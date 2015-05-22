@@ -443,6 +443,8 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None, choose_spe
     # Use the provided search term if available, otherwise build a search term
     if album['SearchTerm']:
         term = album['SearchTerm']
+    elif album['Type'] == 'part of':
+        term = cleanalbum + " " + year
     else:
         # FLAC usually doesn't have a year for some reason so leave it out.
         # Various Artist albums might be listed as VA, so I'll leave that out too
@@ -1050,7 +1052,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
     # of these torrent providers are just using cleanartist/cleanalbum terms
     if album['SearchTerm']:
         term = album['SearchTerm']
-
+    elif album['Type'] == 'part of':
+        term = cleanalbum + " " + year
     else:
         # FLAC usually doesn't have a year for some reason so I'll leave it out
         # Various Artist albums might be listed as VA, so I'll leave that out too
