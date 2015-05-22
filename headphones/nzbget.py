@@ -32,20 +32,20 @@ from headphones import logger
 def sendNZB(nzb):
 
     addToTop = False
-    nzbgetXMLrpc = "%(username)s:%(password)s@%(host)s/xmlrpc"
+    nzbgetXMLrpc = "%(protocol)s://%(username)s:%(password)s@%(host)s/xmlrpc"
 
-    if headphones.CONFIG.NZBGET_HOST is None:
+    if not headphones.CONFIG.NZBGET_HOST:
         logger.error(u"No NZBget host found in configuration. Please configure it.")
         return False
 
     if headphones.CONFIG.NZBGET_HOST.startswith('https://'):
-        nzbgetXMLrpc = 'https://' + nzbgetXMLrpc
-        headphones.CONFIG.NZBGET_HOST.replace('https://', '', 1)
+        protocol = 'https'
+        host = headphones.CONFIG.NZBGET_HOST.replace('https://', '', 1)
     else:
-        nzbgetXMLrpc = 'http://' + nzbgetXMLrpc
-        headphones.CONFIG.NZBGET_HOST.replace('http://', '', 1)
+        protocol = 'http'
+        host = headphones.CONFIG.NZBGET_HOST.replace('http://', '', 1)
 
-    url = nzbgetXMLrpc % {"host": headphones.CONFIG.NZBGET_HOST, "username": headphones.CONFIG.NZBGET_USERNAME, "password": headphones.CONFIG.NZBGET_PASSWORD}
+    url = nzbgetXMLrpc % {"protocol": protocol, "host": host, "username": headphones.CONFIG.NZBGET_USERNAME, "password": headphones.CONFIG.NZBGET_PASSWORD}
 
     nzbGetRPC = xmlrpclib.ServerProxy(url)
     try:
