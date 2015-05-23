@@ -176,7 +176,7 @@ def initialize(config_file):
                              version_lock_file, e)
 
         # Check for new versions
-        if CONFIG.CHECK_GITHUB_ON_STARTUP:
+        if CONFIG.CHECK_GITHUB and CONFIG.CHECK_GITHUB_ON_STARTUP:
             try:
                 LATEST_VERSION = versioncheck.checkGithub()
             except:
@@ -288,11 +288,12 @@ def initialize_scheduler():
         schedule_job(updater.dbUpdate, 'MusicBrainz Update', hours=hours, minutes=0)
 
         #Update check
-        if CONFIG.CHECK_GITHUB_INTERVAL:
-            minutes = CONFIG.CHECK_GITHUB_INTERVAL
-        else:
-            minutes = 0
-        schedule_job(versioncheck.checkGithub, 'Check GitHub for updates', hours=0, minutes=minutes)
+        if CONFIG.CHECK_GITHUB:
+            if CONFIG.CHECK_GITHUB_INTERVAL:
+                minutes = CONFIG.CHECK_GITHUB_INTERVAL
+            else:
+                minutes = 0
+            schedule_job(versioncheck.checkGithub, 'Check GitHub for updates', hours=0, minutes=minutes)
 
         # Remove Torrent + data if Post Processed and finished Seeding
         minutes = CONFIG.TORRENT_REMOVAL_INTERVAL
