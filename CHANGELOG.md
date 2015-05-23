@@ -16,6 +16,7 @@ Highlights:
 * Improved: Moved the 'freeze db' option to the advanced->misc. tab
 * Improved: Moved kickass searching to json api, so it doesn't throw 404 errors anymore when there are no results
 * Improved: SSL for headphones indexer
+* Improved: Disable update dialog box if check_github is diabled
 
 The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.5...v0.5.6).
 
