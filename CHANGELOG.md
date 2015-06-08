@@ -1,7 +1,7 @@
 # Changelog
 
 ## v0.5.6
-Released xx xxx 2015
+Released 08 June 2015
 
 Highlights:
 * Added: Metacritic scores
@@ -12,6 +12,7 @@ Highlights:
 * Fixed: Email Notifications with SSL
 * Fixed: Don't limit musicbrainz results to first 100
 * Fixed: nzbget url fix
+* Fixed: OSX Notifications
 * Improved: Cuesplit, allow wav, ape to be split
 * Improved: Moved the 'freeze db' option to the advanced->misc. tab
 * Improved: Moved kickass searching to json api, so it doesn't throw 404 errors anymore when there are no results
