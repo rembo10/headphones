@@ -145,8 +145,10 @@ class WebInterface(object):
             raise cherrypy.HTTPRedirect("home")
         if type == 'artist':
             searchresults = mb.findArtist(name, limit=100)
-        else:
+        elif type == 'album':
             searchresults = mb.findRelease(name, limit=100)
+        else:
+            searchresults = mb.findSeries(name, limit=100)
         return serve_template(templatename="searchresults.html", title='Search Results for: "' + name + '"', searchresults=searchresults, name=name, type=type)
 
     @cherrypy.expose
@@ -155,6 +157,13 @@ class WebInterface(object):
         thread.start()
         thread.join(1)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % artistid)
+
+    @cherrypy.expose
+    def addSeries(self, seriesid):
+        thread = threading.Thread(target=importer.addArtisttoDB, args=[seriesid, False, False, "series"])
+        thread.start()
+        thread.join(1)
+        raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % seriesid)
 
     @cherrypy.expose
     def getExtras(self, ArtistID, newstyle=False, **kwargs):
@@ -1005,6 +1014,7 @@ class WebInterface(object):
             "preferred_words": headphones.CONFIG.PREFERRED_WORDS,
             "ignored_words": headphones.CONFIG.IGNORED_WORDS,
             "required_words": headphones.CONFIG.REQUIRED_WORDS,
+            "ignore_clean_releases": checked(headphones.CONFIG.IGNORE_CLEAN_RELEASES),
             "torrentblackhole_dir": headphones.CONFIG.TORRENTBLACKHOLE_DIR,
             "download_torrent_dir": headphones.CONFIG.DOWNLOAD_TORRENT_DIR,
             "numberofseeders": headphones.CONFIG.NUMBEROFSEEDERS,
@@ -1166,6 +1176,7 @@ class WebInterface(object):
             "email_smtp_user": headphones.CONFIG.EMAIL_SMTP_USER,
             "email_smtp_password": headphones.CONFIG.EMAIL_SMTP_PASSWORD,
             "email_smtp_port": int(headphones.CONFIG.EMAIL_SMTP_PORT),
+            "email_ssl": checked(headphones.CONFIG.EMAIL_SSL),
             "email_tls": checked(headphones.CONFIG.EMAIL_TLS),
             "email_onsnatch": checked(headphones.CONFIG.EMAIL_ONSNATCH),
             "idtag": checked(headphones.CONFIG.IDTAG)
@@ -1205,7 +1216,7 @@ class WebInterface(object):
         checked_configs = [
             "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer", "use_newznab", "newznab_enabled",
             "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay", "use_mininova", "use_waffles", "use_rutracker",
-            "use_whatcd", "preferred_bitrate_allow_lossless", "detect_bitrate", "freeze_db", "cue_split", "move_files", "rename_files",
+            "use_whatcd", "preferred_bitrate_allow_lossless", "detect_bitrate", "ignore_clean_releases", "freeze_db", "cue_split", "move_files", "rename_files",
             "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art", "embed_album_art", "embed_lyrics", "replace_existing_folders",
             "file_underscores", "include_extras", "autowant_upcoming", "autowant_all", "autowant_manually_added", "keep_torrent_files", "music_encoder",
             "encoderlossless", "encoder_multicore", "delete_lossless_files", "growl_enabled", "growl_onsnatch", "prowl_enabled",
@@ -1213,7 +1224,7 @@ class WebInterface(object):
             "nma_enabled", "nma_onsnatch", "pushalot_enabled", "pushalot_onsnatch", "synoindex_enabled", "pushover_enabled",
             "pushover_onsnatch", "pushbullet_enabled", "pushbullet_onsnatch", "subsonic_enabled", "twitter_enabled", "twitter_onsnatch",
             "osx_notify_enabled", "osx_notify_onsnatch", "boxcar_enabled", "boxcar_onsnatch", "songkick_enabled", "songkick_filter_enabled",
-            "mpc_enabled", "email_enabled", "email_tls", "email_onsnatch", "customauth", "idtag"
+            "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch", "customauth", "idtag"
         ]
         for checked_config in checked_configs:
             if checked_config not in kwargs:

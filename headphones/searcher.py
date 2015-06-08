@@ -321,8 +321,10 @@ def more_filtering(results, album, albumlength, new):
         normalizedResultTitle = removeDisallowedFilenameChars(result[0])
         artistTitleCount = normalizedResultTitle.count(normalizedAlbumArtist)
 
-        if normalizedAlbumArtist in normalizedAlbumTitle and artistTitleCount < 2:
-            continue
+        # WHAT DOES THIS DO?
+        #if normalizedAlbumArtist in normalizedAlbumTitle and artistTitleCount < 2:
+        #    logger.info("Removing %s from %s" % (result[0], result[3]))
+        #    continue
 
         if low_size_limit and (int(result[1]) < low_size_limit):
             logger.info("%s from %s is too small for this album - not considering it. (Size: %s, Minsize: %s)", result[0], result[3], helpers.bytes_to_mb(result[1]), helpers.bytes_to_mb(low_size_limit))
@@ -400,7 +402,7 @@ def sort_search_results(resultlist, album, new, albumlength):
                 finallist = sorted(newlist, key=lambda title: (-title[5], title[6]))
 
                 if not len(finallist) and len(flac_list) and headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
-                    logger.info("Since there were no appropriate lossy matches (and at least one lossless match, going to use lossless instead")
+                    logger.info("Since there were no appropriate lossy matches (and at least one lossless match), going to use lossless instead")
                     finallist = sorted(flac_list, key=lambda title: (title[5], int(title[1])), reverse=True)
         except Exception:
             logger.exception('Unhandled exception')
@@ -441,6 +443,8 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None, choose_spe
     # Use the provided search term if available, otherwise build a search term
     if album['SearchTerm']:
         term = album['SearchTerm']
+    elif album['Type'] == 'part of':
+        term = cleanalbum + " " + year
     else:
         # FLAC usually doesn't have a year for some reason so leave it out.
         # Various Artist albums might be listed as VA, so I'll leave that out too
@@ -481,7 +485,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None, choose_spe
             categories = "3030"
 
         # Request results
-        logger.info('Parsing results from Headphones Indexer')
+        logger.info('Searching Headphones Indexer with search term: %s' % term)
 
         headers = {'User-Agent': USER_AGENT}
         params = {
@@ -493,7 +497,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None, choose_spe
         }
 
         data = request.request_feed(
-            url="http://indexer.codeshy.com/api",
+            url="https://indexer.codeshy.com/api",
             params=params, headers=headers,
             auth=(headphones.CONFIG.HPUSER, headphones.CONFIG.HPPASS)
         )
@@ -552,7 +556,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None, choose_spe
                     categories = categories + ",4050"
 
             # Request results
-            logger.info('Parsing results from %s', newznab_host[0])
+            logger.info('Parsing results from %s using search term: %s' % (newznab_host[0],term))
 
             headers = {'User-Agent': USER_AGENT}
             params = {
@@ -600,9 +604,6 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None, choose_spe
             categories = "3030"
             logger.info("Album type is audiobook/spokenword. Using audiobook category")
 
-        # Request results
-        logger.info('Requesting from nzbs.org')
-
         headers = {'User-Agent': USER_AGENT}
         params = {
             "t": "search",
@@ -618,7 +619,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None, choose_spe
             timeout=5
         )
 
-        logger.info('Parsing results from nzbs.org')
+        logger.info('Parsing results from nzbs.org using search term: %s' % term)
         # Process feed
         if data:
             if not len(data.entries):
@@ -650,7 +651,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None, choose_spe
             logger.info("Album type is audiobook/spokenword. Searching all music categories")
 
         # Request results
-        logger.info('Parsing results from omgwtfnzbs')
+        logger.info('Parsing results from omgwtfnzbs using search term: %s' % term)
 
         headers = {'User-Agent': USER_AGENT}
         params = {
@@ -999,6 +1000,13 @@ def verifyresult(title, artistterm, term, lossless):
                 logger.info("Removed '%s' from results because it doesn't contain required word: '%s'", title, each_word)
                 return False
 
+    if headphones.CONFIG.IGNORE_CLEAN_RELEASES:
+        for each_word in ['clean','edited','censored']:
+            logger.debug("Checking if '%s' is in search result: '%s'", each_word, title)
+            if each_word.lower() in title.lower() and each_word.lower() not in term.lower():
+                logger.info("Removed '%s' from results because it contains clean album word: '%s'", title, each_word)
+                return False
+
     tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
     for token in tokens:
 
@@ -1044,7 +1052,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
     # of these torrent providers are just using cleanartist/cleanalbum terms
     if album['SearchTerm']:
         term = album['SearchTerm']
-
+    elif album['Type'] == 'part of':
+        term = cleanalbum + " " + year
     else:
         # FLAC usually doesn't have a year for some reason so I'll leave it out
         # Various Artist albums might be listed as VA, so I'll leave that out too
@@ -1099,7 +1108,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
             providerurl = fix_url("https://kickass.to")
 
         # Build URL
-        providerurl = providerurl + "/usearch/" + ka_term
+        providerurl = providerurl + "/json.php?"
 
         # Pick category for torrents
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
@@ -1113,28 +1122,27 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
             maxsize = 300000000
 
         # Requesting content
-        logger.info("Searching KAT using term: %s", ka_term)
+        logger.info("Searching %s using term: %s" % (provider,ka_term))
 
         params = {
-            "categories[0]": "music",
+            "q": ka_term + "+category:music",
             "field": "seeders",
-            "sorder": "desc",
-            "rss": "1"
+            "sorder": "desc"
         }
-        data = request.request_feed(url=providerurl, params=params)
+        data = request.request_json(url=providerurl, params=params)
 
         # Process feed
         if data:
-            if not len(data.entries):
-                logger.info("No results found")
+            if not data['list']:
+                logger.info("No results found on %s using search term: %s" % (provider, ka_term))
             else:
-                for item in data.entries:
+                for item in data['list']:
                     try:
                         rightformat = True
                         title = item['title']
-                        seeders = item['torrent_seeds']
-                        url = item['links'][1]['href']
-                        size = int(item['links'][1]['length'])
+                        seeders = item['seeds']
+                        url = item['torrentLink']
+                        size = int(item['size'])
 
                         if format == "2":
                             torrent = request.request_content(url)
@@ -1183,7 +1191,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
             query_items.append('bitrate:"%s"' % bitrate)
 
         # Requesting content
-        logger.info('Parsing results from Waffles')
+        logger.info('Parsing results from Waffles.fm')
 
         params = {
             "uid": headphones.CONFIG.WAFFLES_UID,
@@ -1371,7 +1379,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
             rows = data.select('table tbody tr')
 
             if not rows:
-                logger.info("No results found")
+                logger.info("No results found from The Pirate Bay using term: %s" % tpb_term)
             else:
                 for item in rows:
                     try:

@@ -519,7 +519,7 @@ def get_downloaded_track_list(albumpath):
     return downloaded_track_list
 
 
-def preserve_torrent_direcory(albumpath):
+def preserve_torrent_directory(albumpath):
     """
     Copy torrent directory to headphones-modified to keep files for seeding.
     """

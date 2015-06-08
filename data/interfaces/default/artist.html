@@ -70,6 +70,7 @@
 				<th id="albumname">Name</th>
 				<th id="reldate">Date</th>
 				<th id="type">Type</th>
+				<th id="score">Metacritic</th>
 				<th id="status">Status</th>
 				<th id="have">Have</th>
 				<th id="bitrate">Bitrate</th>
@@ -125,6 +126,7 @@
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
+				<td id="score">${album['CriticScore']}/${album['UserScore']}</td>
 				<td id="status">${album['Status']}
 				%if album['Status'] == 'Skipped' or album['Status'] == 'Ignored':
 					[<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' added to Wanted list">want</a>]
@@ -218,7 +220,7 @@
 							$("li:gt(4)", this).hide(); /* :gt() is zero-indexed */
 							$("li:nth-child(5)", this).after("<br><li class='more'><a href='#'>More...</a></li>"); /* :nth-child() is one-indexed */
 						  });
-						  $("li.more a").live("click", function() {
+						  $("li.more").on("click", 'a', function() {
 							var li = $(this).parents("li:first");
 							li.parent().children().show();
 							li.remove();
@@ -281,6 +283,7 @@
 				null,
 				null,
 				{ "sType": "date" },
+				null,
 				null,
 				null,
 				{ "sType": "title-numeric"},
