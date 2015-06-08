@@ -732,23 +732,32 @@ class OSX_NOTIFY(object):
             self.objc = __import__("objc")
             self.AppKit = __import__("AppKit")
         except:
+            logger.warn('OS X Notification: Cannot import objc or AppKit')
             return False
 
     def swizzle(self, cls, SEL, func):
-        old_IMP = cls.instanceMethodForSelector_(SEL)
+        old_IMP = getattr(cls, SEL, None)
+        if old_IMP is None:
+            old_IMP = cls.instanceMethodForSelector_(SEL)
 
         def wrapper(self, *args, **kwargs):
             return func(self, old_IMP, *args, **kwargs)
-        new_IMP = self.objc.selector(wrapper, selector=old_IMP.selector,
-            signature=old_IMP.signature)
-        self.objc.classAddMethod(cls, SEL, new_IMP)
+
+        new_IMP = self.objc.selector(
+            wrapper,
+            selector=old_IMP.selector,
+            signature=old_IMP.signature
+        )
+        self.objc.classAddMethod(cls, SEL.encode(), new_IMP)
 
     def notify(self, title, subtitle=None, text=None, sound=True, image=None):
 
         try:
-            self.swizzle(self.objc.lookUpClass('NSBundle'),
-                b'bundleIdentifier',
-                self.swizzled_bundleIdentifier)
+            self.swizzle(
+                self.objc.lookUpClass('NSBundle'),
+                'bundleIdentifier',
+                self.swizzled_bundleIdentifier
+            )
 
             NSUserNotification = self.objc.lookUpClass('NSUserNotification')
             NSUserNotificationCenter = self.objc.lookUpClass('NSUserNotificationCenter')
@@ -843,7 +852,10 @@ class Email(object):
         message['To'] = headphones.CONFIG.EMAIL_TO
 
         try:
-            mailserver = smtplib.SMTP(headphones.CONFIG.EMAIL_SMTP_SERVER, headphones.CONFIG.EMAIL_SMTP_PORT)
+            if (headphones.CONFIG.EMAIL_SSL):
+                mailserver = smtplib.SMTP_SSL(headphones.CONFIG.EMAIL_SMTP_SERVER, headphones.CONFIG.EMAIL_SMTP_PORT)
+            else:
+                mailserver = smtplib.SMTP(headphones.CONFIG.EMAIL_SMTP_SERVER, headphones.CONFIG.EMAIL_SMTP_PORT)
 
             if (headphones.CONFIG.EMAIL_TLS):
                 mailserver.starttls()

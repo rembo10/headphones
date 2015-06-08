@@ -429,7 +429,7 @@
                                         <input class="hppass" type="password" value="${config['hppass']}" size="20">
                                     </div>
                                     <div class="row">
-                                        <a href="http://headphones.codeshy.com/vip" id="vipserver" target="_blank">Don't have an account? Sign up!</a>
+                                        <a href="https://headphones.codeshy.com/vip" id="vipserver" target="_blank">Don't have an account? Sign up!</a>
                                     </div>
                                 </div>
                             </fieldset>
@@ -724,6 +724,12 @@
                                     <input type="text" name="required_words" value="${config['required_words']}" size="50">
                                     <small>Results without these words in the title will be filtered out. You can use OR: 'flac OR lossless OR alac, vinyl'</small>
                                 </div>
+                                <div class="row checkbox left clearfix">
+                                    <label title="Filter out releases that contain the words 'clean','edited' or 'censored', as long as those words aren't in the search term">
+                                        Ignore clean/censored releases
+                                        <input type="checkbox" name="ignore_clean_releases" id="ignore_clean_releases" value="1" ${config['ignore_clean_releases']} />
+                                    </label>
+                                </div>
                             </fieldset>
                         </td>
                         <td>
@@ -736,10 +742,6 @@
                                     </label>
                                 </div>
                                 <div class="row checkbox left clearfix">
-                                    <label title="Freeze the database, so new artists won't be added automatically. Use this if Headphones adds artists because due to wrong snatches. This check is skipped when the folder name is appended with release group ID.">
-                                        Freeze database for adding new artist
-                                        <input type="checkbox" name="freeze_db" id="freeze_db" value="1" ${config['freeze_db']} />
-                                    </label>
                                     <label>
                                         Move downloads to Destination Folder
                                         <input type="checkbox" name="move_files" id="move_files" value="1" ${config['move_files']} />
@@ -1133,6 +1135,9 @@
                                         <input type="text" class="override-float" name="email_smtp_port" value="${config['email_smtp_port']}" size="4"><label>SMTP Port</label>
                                     </div>
                                     <div class="row checkbox">
+                                        <input type="checkbox" name="email_ssl" value="1" ${config['email_ssl']} /><label>SSL</label>
+                                    </div>
+                                    <div class="row checkbox">
                                         <input type="checkbox" name="email_tls" value="1" ${config['email_tls']} /><label>TLS</label>
                                     </div>
                                     <div class="row checkbox">
@@ -1368,6 +1373,12 @@
                                            name="autowant_manually_added" value="1" ${config['autowant_manually_added']} />
                                     <label>Automatically mark manually added albums as wanted</label>
                                 </div>
+                                <div class="row left checkbox">
+                                    <label title="Freeze the database, so new artists won't be added automatically. Use this if Headphones adds artists because due to wrong snatches. This check is skipped when the folder name is appended with release group ID.">
+                                        Don't add new artists when post-processing albums
+                                        <input type="checkbox" name="freeze_db" id="freeze_db" value="1" ${config['freeze_db']} />
+                                    </label>
+                                </div>
                                 <div class="row">
                                     <label>Folder Permissions</label>
                                     <input type="text" name="folder_permissions" value="${config['folder_permissions']}" size="7">
@@ -1475,7 +1486,7 @@
                                     </div>
                                     <div class="row">
                                         <label>Password</label><input type="password" class="hppass" name="hppass" value="${config['hppass']}" size="15"><br>
-                                        <a href="http://headphones.codeshy.com/vip" id="vipserver" target="_blank">Get an Account!</a>
+                                        <a href="https://headphones.codeshy.com/vip" id="vipserver" target="_blank">Get an Account!</a>
                                     </div>
                                 </div>
                             </fieldset>

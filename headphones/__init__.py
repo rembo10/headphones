@@ -176,7 +176,7 @@ def initialize(config_file):
                              version_lock_file, e)
 
         # Check for new versions
-        if CONFIG.CHECK_GITHUB_ON_STARTUP:
+        if CONFIG.CHECK_GITHUB and CONFIG.CHECK_GITHUB_ON_STARTUP:
             try:
                 LATEST_VERSION = versioncheck.checkGithub()
             except:
@@ -288,11 +288,12 @@ def initialize_scheduler():
         schedule_job(updater.dbUpdate, 'MusicBrainz Update', hours=hours, minutes=0)
 
         #Update check
-        if CONFIG.CHECK_GITHUB_INTERVAL:
-            minutes = CONFIG.CHECK_GITHUB_INTERVAL
-        else:
-            minutes = 0
-        schedule_job(versioncheck.checkGithub, 'Check GitHub for updates', hours=0, minutes=minutes)
+        if CONFIG.CHECK_GITHUB:
+            if CONFIG.CHECK_GITHUB_INTERVAL:
+                minutes = CONFIG.CHECK_GITHUB_INTERVAL
+            else:
+                minutes = 0
+            schedule_job(versioncheck.checkGithub, 'Check GitHub for updates', hours=0, minutes=minutes)
 
         # Remove Torrent + data if Post Processed and finished Seeding
         minutes = CONFIG.TORRENT_REMOVAL_INTERVAL
@@ -352,12 +353,12 @@ def dbcheck():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute(
-        'CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT, IncludeExtras INTEGER, LatestAlbum TEXT, ReleaseDate TEXT, AlbumID TEXT, HaveTracks INTEGER, TotalTracks INTEGER, LastUpdated TEXT, ArtworkURL TEXT, ThumbURL TEXT, Extras TEXT)')
+        'CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT, IncludeExtras INTEGER, LatestAlbum TEXT, ReleaseDate TEXT, AlbumID TEXT, HaveTracks INTEGER, TotalTracks INTEGER, LastUpdated TEXT, ArtworkURL TEXT, ThumbURL TEXT, Extras TEXT, Type TEXT)')
     # ReleaseFormat here means CD,Digital,Vinyl, etc. If using the default
     # Headphones hybrid release, ReleaseID will equal AlbumID (AlbumID is
     # releasegroup id)
     c.execute(
-        'CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT, Type TEXT, ArtworkURL TEXT, ThumbURL TEXT, ReleaseID TEXT, ReleaseCountry TEXT, ReleaseFormat TEXT, SearchTerm TEXT)')
+        'CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT, Type TEXT, ArtworkURL TEXT, ThumbURL TEXT, ReleaseID TEXT, ReleaseCountry TEXT, ReleaseFormat TEXT, SearchTerm TEXT, CriticScore TEXT, UserScore TEXT)')
     # Format here means mp3, flac, etc.
     c.execute(
         'CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT, Format TEXT, ReleaseID TEXT)')
@@ -582,6 +583,21 @@ def dbcheck():
         c.execute('SELECT SearchTerm from albums')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE albums ADD COLUMN SearchTerm TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT CriticScore from albums')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE albums ADD COLUMN CriticScore TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT UserScore from albums')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE albums ADD COLUMN UserScore TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT Type from artists')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE artists ADD COLUMN Type TEXT DEFAULT NULL')
 
     conn.commit()
     c.close()

@@ -3,16 +3,16 @@
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>com.headphones.headphones</string>
+  <string>headphones</string>
   <key>ProgramArguments</key>
   <array>
+       <!-- Modify these two lines if you need to to reflect your python location and Headphones install location -->
        <string>/usr/bin/python</string>
-       <string>/Applications/Headphones/headphones.py</string>
-       <string>--quiet</string>
-       <string>--daemon</string>
-       <string>--nolaunch</string>
+       <string>/Applications/Headphones/Headphones.py</string>
   </array>
   <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
   <true/>
 </dict>
 </plist>

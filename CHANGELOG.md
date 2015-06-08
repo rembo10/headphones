@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.5.6
+Released 08 June 2015
+
+Highlights:
+* Added: Metacritic scores
+* Added: Series support (e.g. Cafe Del Mar, Now That's What I Call Music, etc)
+* Added: Filter out clean/edited/censored releases (#2198)
+* Added: Button on the log page to toggle verbose/debug logging
+* Fixed: Connecting to SABnzbd over https with python >= 2.7.9
+* Fixed: Email Notifications with SSL
+* Fixed: Don't limit musicbrainz results to first 100
+* Fixed: nzbget url fix
+* Fixed: OSX Notifications
+* Improved: Cuesplit, allow wav, ape to be split
+* Improved: Moved the 'freeze db' option to the advanced->misc. tab
+* Improved: Moved kickass searching to json api, so it doesn't throw 404 errors anymore when there are no results
+* Improved: SSL for headphones indexer
+* Improved: Disable update dialog box if check_github is diabled
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.5...v0.5.6).
+
 ## v0.5.5
 Released 04 May 2015
 

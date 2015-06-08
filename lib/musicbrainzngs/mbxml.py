@@ -36,6 +36,22 @@ NS_MAP = {"http://musicbrainz.org/ns/mmd-2.0#": "ws2",
           "http://musicbrainz.org/ns/ext#-2.0": "ext"}
 _log = logging.getLogger("musicbrainzngs")
 
+def get_error_message(error):
+    """ Given an error XML message from the webservice containing
+    <error><text>x</text><text>y</text></error>, return a list
+    of [x, y]"""
+    try:
+        tree = util.bytes_to_elementtree(error)
+        root = tree.getroot()
+        errors = []
+        if root.tag == "error":
+            for ch in root:
+                if ch.tag == "text":
+                    errors.append(ch.text)
+        return errors
+    except ET.ParseError:
+        return None
+
 def make_artist_credit(artists):
     names = []
     for artist in artists:
@@ -123,6 +139,7 @@ def parse_message(message):
                       "place": parse_place,
                       "release": parse_release,
                       "release-group": parse_release_group,
+                      "series": parse_series,
                       "recording": parse_recording,
                       "work": parse_work,
                       "url": parse_url,
@@ -138,6 +155,7 @@ def parse_message(message):
                       "place-list": parse_place_list,
                       "release-list": parse_release_list,
                       "release-group-list": parse_release_group_list,
+                      "series-list": parse_series_list,
                       "recording-list": parse_recording_list,
                       "work-list": parse_work_list,
                       "url-list": parse_url_list,
@@ -297,7 +315,7 @@ def parse_relation_list(rl):
 def parse_relation(relation):
     result = {}
     attribs = ["type", "type-id"]
-    elements = ["target", "direction", "begin", "end", "ended"]
+    elements = ["target", "direction", "begin", "end", "ended", "ordering-key"]
     inner_els = {"area": parse_area,
                  "artist": parse_artist,
                  "label": parse_label,
@@ -305,6 +323,7 @@ def parse_relation(relation):
                  "recording": parse_recording,
                  "release": parse_release,
                  "release-group": parse_release_group,
+                 "series": parse_series,
                  "attribute-list": parse_element_list,
                  "work": parse_work,
                  "target": parse_relation_target
@@ -324,6 +343,8 @@ def parse_release(release):
                  "label-info-list": parse_label_info_list,
                  "medium-list": parse_medium_list,
                  "release-group": parse_release_group,
+                 "tag-list": parse_tag_list,
+                 "user-tag-list": parse_tag_list,
                  "relation-list": parse_relation_list,
                  "annotation": parse_annotation,
                  "cover-art-archive": parse_caa,
@@ -408,6 +429,22 @@ def parse_recording(recording):
 
     return result
 
+def parse_series_list(sl):
+    return [parse_series(s) for s in sl]
+
+def parse_series(series):
+    result = {}
+    attribs = ["id", "type", "ext:score"]
+    elements = ["name", "disambiguation"]
+    inner_els = {"alias-list": parse_alias_list,
+                 "relation-list": parse_relation_list,
+                 "annotation": parse_annotation}
+
+    result.update(parse_attributes(attribs, series))
+    result.update(parse_elements(elements, inner_els, series))
+
+    return result
+
 def parse_external_id_list(pl):
     return [parse_attributes(["id"], p)["id"] for p in pl]
 
@@ -427,12 +464,27 @@ def parse_work(work):
                  "alias-list": parse_alias_list,
                  "iswc-list": parse_element_list,
                  "relation-list": parse_relation_list,
-                 "annotation": parse_response_message}
+                 "annotation": parse_response_message,
+                 "attribute-list": parse_work_attribute_list
+    }
 
     result.update(parse_attributes(attribs, work))
     result.update(parse_elements(elements, inner_els, work))
 
     return result
+
+def parse_work_attribute_list(wal):
+    return [parse_work_attribute(wa) for wa in wal]
+
+def parse_work_attribute(wa):
+    result = {}
+    attribs = ["type"]
+
+    result.update(parse_attributes(attribs, wa))
+    result["attribute"] = wa.text
+
+    return result
+
 
 def parse_url_list(ul):
     return [parse_url(u) for u in ul]
@@ -617,45 +669,40 @@ def make_barcode_request(release2barcode):
 
     return ET.tostring(root, "utf-8")
 
-def make_tag_request(artist2tags, recording2tags):
+def make_tag_request(**kwargs):
     NS = "http://musicbrainz.org/ns/mmd-2.0#"
     root = ET.Element("{%s}metadata" % NS)
-    rec_list = ET.SubElement(root, "{%s}recording-list" % NS)
-    for rec, tags in recording2tags.items():
-        rec_xml = ET.SubElement(rec_list, "{%s}recording" % NS)
-        rec_xml.set("{%s}id" % NS, rec)
-        taglist = ET.SubElement(rec_xml, "{%s}user-tag-list" % NS)
-        for tag in tags:
-            usertag_xml = ET.SubElement(taglist, "{%s}user-tag" % NS)
-            name_xml = ET.SubElement(usertag_xml, "{%s}name" % NS)
-            name_xml.text = tag
-    art_list = ET.SubElement(root, "{%s}artist-list" % NS)
-    for art, tags in artist2tags.items():
-        art_xml = ET.SubElement(art_list, "{%s}artist" % NS)
-        art_xml.set("{%s}id" % NS, art)
-        taglist = ET.SubElement(art_xml, "{%s}user-tag-list" % NS)
-        for tag in tags:
-            usertag_xml = ET.SubElement(taglist, "{%s}user-tag" % NS)
-            name_xml = ET.SubElement(usertag_xml, "{%s}name" % NS)
-            name_xml.text = tag
+    for entity_type in ['artist', 'label', 'place', 'recording', 'release', 'release_group', 'work']:
+        entity_tags = kwargs.pop(entity_type + '_tags', None)
+        if entity_tags is not None:
+            e_list = ET.SubElement(root, "{%s}%s-list" % (NS, entity_type.replace('_', '-')))
+            for e, tags in entity_tags.items():
+                e_xml = ET.SubElement(e_list, "{%s}%s" % (NS, entity_type.replace('_', '-')))
+                e_xml.set("{%s}id" % NS, e)
+                taglist = ET.SubElement(e_xml, "{%s}user-tag-list" % NS)
+                for tag in tags:
+                    usertag_xml = ET.SubElement(taglist, "{%s}user-tag" % NS)
+                    name_xml = ET.SubElement(usertag_xml, "{%s}name" % NS)
+                    name_xml.text = tag
+    if kwargs.keys():
+        raise TypeError("make_tag_request() got an unexpected keyword argument '%s'" % kwargs.popitem()[0])
 
     return ET.tostring(root, "utf-8")
 
-def make_rating_request(artist2rating, recording2rating):
+def make_rating_request(**kwargs):
     NS = "http://musicbrainz.org/ns/mmd-2.0#"
     root = ET.Element("{%s}metadata" % NS)
-    rec_list = ET.SubElement(root, "{%s}recording-list" % NS)
-    for rec, rating in recording2rating.items():
-        rec_xml = ET.SubElement(rec_list, "{%s}recording" % NS)
-        rec_xml.set("{%s}id" % NS, rec)
-        rating_xml = ET.SubElement(rec_xml, "{%s}user-rating" % NS)
-        rating_xml.text = str(rating)
-    art_list = ET.SubElement(root, "{%s}artist-list" % NS)
-    for art, rating in artist2rating.items():
-        art_xml = ET.SubElement(art_list, "{%s}artist" % NS)
-        art_xml.set("{%s}id" % NS, art)
-        rating_xml = ET.SubElement(art_xml, "{%s}user-rating" % NS)
-        rating_xml.text = str(rating)
+    for entity_type in ['artist', 'label', 'recording', 'release_group', 'work']:
+        entity_ratings = kwargs.pop(entity_type + '_ratings', None)
+        if entity_ratings is not None:
+            e_list = ET.SubElement(root, "{%s}%s-list" % (NS, entity_type.replace('_', '-')))
+            for e, rating in entity_ratings.items():
+                e_xml = ET.SubElement(e_list, "{%s}%s" % (NS, entity_type.replace('_', '-')))
+                e_xml.set("{%s}id" % NS, e)
+                rating_xml = ET.SubElement(e_xml, "{%s}user-rating" % NS)
+                rating_xml.text = str(rating)
+    if kwargs.keys():
+        raise TypeError("make_rating_request() got an unexpected keyword argument '%s'" % kwargs.popitem()[0])
 
     return ET.tostring(root, "utf-8")
 

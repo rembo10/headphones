@@ -17,8 +17,12 @@
                     <th id="reldate">Date</th>
                     <th id="scoresmall">Score</th>
                     <th id="mbrelid" style="display:none;"</th>
-                %else:
+                %elif type == 'artist':
                     <th id="artistname">Artist Name</th>
+                    <th id="score">Score</th>
+                %else:
+                    <th id="seriesname">Series Name</th>
+                    <th id="type">Type</th>
                     <th id="score">Score</th>
 				%endif
                 <th id="mb"></th>
@@ -40,8 +44,10 @@
 				<tr class="grade${grade}">
 				%if type == 'album':
 					<td id="albumart" style=" text-align: center; vertical-align: middle;"><div id="artistImg"><img title="${result['albumid']}" class="albumArt" height="50" width="50" onerror="tryCCA(this, '${caa_group_url}')"></div></td>
-                %else:
+                %elif type == 'artist':
 					<td id="albumart"><div id="artistImg"><img title="${result['id']}" class="albumArt" height="50" width="50"></div></td>
+                %else:
+                    <td id="albumart"></td>
 				%endif
 				%if type == 'album':
 					<td id="albumname"><a href="addReleaseById?rid=${result['albumid']}&rgid=${result['rgid']}" title="${albuminfo}">${result['title']}</a></td>
@@ -52,8 +58,13 @@
                     <td id="score"><a href="${result['albumurl']} "title="View on MusicBrainz"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></a></td>
                     <td id="musicbrainz" style=" text-align: center; line-height: 0; vertical-align: middle;"><a href="${result['albumurl']}"><img src="interfaces/default/images/MusicBrainz_Album_Icon.png" title="View on MusicBrainz" height="20" width="20"></a></td>
                     <td id="mbrelid" style="display:none;">${result['albumid']}</td>
-                %else:
+                %elif type == 'artist':
                     <td id="artistname"><a href="addArtist?artistid=${result['id']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
+                    <td id="score"><a href="${result['url']} "title="View on MusicBrainz"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></a></td>
+                    <td id="musicbrainz" style=" text-align: center; line-height: 0; vertical-align: middle;"><a href="${result['url']}"><img src="interfaces/default/images/MusicBrainz_Artist_Icon.png" title="View on MusicBrainz" height="20" width="20"></a></td>
+                %else:
+                    <td id="seriesname"><a href="addSeries?seriesid=${result['id']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
+                    <td id="type">${result['type']}</td>
                     <td id="score"><a href="${result['url']} "title="View on MusicBrainz"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></a></td>
                     <td id="musicbrainz" style=" text-align: center; line-height: 0; vertical-align: middle;"><a href="${result['url']}"><img src="interfaces/default/images/MusicBrainz_Artist_Icon.png" title="View on MusicBrainz" height="20" width="20"></a></td>
 				%endif

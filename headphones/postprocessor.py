@@ -49,7 +49,7 @@ def checkFolder():
                     download_dir = headphones.CONFIG.DOWNLOAD_TORRENT_DIR
 
                 album_path = os.path.join(download_dir, album['FolderName']).encode(headphones.SYS_ENCODING, 'replace')
-                logger.info("Checking if %s exists" % album_path)
+                logger.debug("Checking if %s exists" % album_path)
 
                 if os.path.exists(album_path):
                     logger.info('Found "' + album['FolderName'] + '" in ' + album['Kind'] + ' download folder. Verifying....')
@@ -188,15 +188,9 @@ def verify(albumid, albumpath, Kind=None, forced=False):
     # Split cue
     if headphones.CONFIG.CUE_SPLIT and downloaded_cuecount and downloaded_cuecount >= len(downloaded_track_list):
         if headphones.CONFIG.KEEP_TORRENT_FILES and Kind == "torrent":
-            albumpath = helpers.preserve_torrent_direcory(albumpath)
+            albumpath = helpers.preserve_torrent_directory(albumpath)
         if albumpath and helpers.cue_split(albumpath):
             downloaded_track_list = helpers.get_downloaded_track_list(albumpath)
-        else:
-            myDB.action('UPDATE snatched SET status = "Unprocessed" WHERE status NOT LIKE "Seed%" and AlbumID=?', [albumid])
-            processed = re.search(r' \(Unprocessed\)(?:\[\d+\])?', albumpath)
-            if not processed:
-                renameUnprocessedFolder(albumpath, tag="Unprocessed")
-            return
 
     # test #1: metadata - usually works
     logger.debug('Verifying metadata...')
