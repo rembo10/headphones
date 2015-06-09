@@ -200,6 +200,7 @@ _CONFIG_DEFINITIONS = {
     'PUSHOVER_PRIORITY': (int, 'Pushover', 0),
     'RENAME_FILES': (int, 'General', 0),
     'REPLACE_EXISTING_FOLDERS': (int, 'General', 0),
+    'KEEP_ORIGINAL_FOLDER': (int, 'General', 0),
     'REQUIRED_WORDS': (str, 'General', ''),
     'RUTRACKER': (int, 'Rutracker', 0),
     'RUTRACKER_PASSWORD': (str, 'Rutracker', ''),

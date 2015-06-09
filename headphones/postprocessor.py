@@ -59,7 +59,7 @@ def checkFolder():
 
     logger.debug("Checking download folder finished.")
 
-def verify(albumid, albumpath, Kind=None, forced=False):
+def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=False):
 
     myDB = db.DBConnection()
     release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
@@ -216,7 +216,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
         logger.debug('Matching metadata album: %s with album name: %s' % (metaalbum, dbalbum))
 
         if metaartist == dbartist and metaalbum == dbalbum:
-            doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind)
+            doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind, keep_original_folder)
             return
 
     # test #2: filenames
@@ -234,7 +234,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
             logger.debug('Checking if track title: %s is in file name: %s' % (dbtrack, filetrack))
 
             if dbtrack in filetrack:
-                doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind)
+                doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind, keep_original_folder)
                 return
 
     # test #3: number of songs and duration
@@ -266,7 +266,7 @@ def verify(albumid, albumpath, Kind=None, forced=False):
             logger.debug('Database track duration: %i' % db_track_duration)
             delta = abs(downloaded_track_duration - db_track_duration)
             if delta < 240:
-                doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind)
+                doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind, keep_original_folder)
                 return
 
     logger.warn(u'Could not identify album: %s. It may not be the intended album.' % albumpath.decode(headphones.SYS_ENCODING, 'replace'))
@@ -276,11 +276,11 @@ def verify(albumid, albumpath, Kind=None, forced=False):
         renameUnprocessedFolder(albumpath, tag="Unprocessed")
 
 
-def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind=None):
+def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind=None, keep_original_folder=False):
 
     logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
     # Check to see if we're preserving the torrent dir
-    if headphones.CONFIG.KEEP_TORRENT_FILES and Kind == "torrent" and 'headphones-modified' not in albumpath:
+    if (headphones.CONFIG.KEEP_TORRENT_FILES and Kind == "torrent" and 'headphones-modified' not in albumpath) or headphones.CONFIG.KEEP_ORIGINAL_FOLDER or keep_original_folder:
         new_folder = os.path.join(albumpath, 'headphones-modified'.encode(headphones.SYS_ENCODING, 'replace'))
         logger.info("Copying files to 'headphones-modified' subfolder to preserve downloaded files for seeding")
         try:
@@ -1060,7 +1060,7 @@ def renameUnprocessedFolder(path, tag):
             return
 
 
-def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
+def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_original_folder=False):
 
     logger.info('Force checking download folder for completed downloads')
 	
@@ -1136,7 +1136,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                 continue
             else:
                 logger.info('Found a match in the database: %s. Verifying to make sure it is the correct album', snatched['Title'])
-                verify(snatched['AlbumID'], folder, snatched['Kind'])
+                verify(snatched['AlbumID'], folder, snatched['Kind'], keep_original_folder=keep_original_folder)
                 continue
 
         # Attempt 2: strip release group id from filename
@@ -1153,7 +1153,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
             release = myDB.action('SELECT ArtistName, AlbumTitle, AlbumID from albums WHERE AlbumID=?', [rgid]).fetchone()
             if release:
                 logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album', release['ArtistName'], release['AlbumTitle'])
-                verify(release['AlbumID'], folder, forced=True)
+                verify(release['AlbumID'], folder, forced=True, keep_original_folder=keep_original_folder)
                 continue
             else:
                 logger.info('Found a (possibly) valid Musicbrainz realse group id in album folder name.')
@@ -1172,7 +1172,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
             release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
             if release:
                 logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album', release['ArtistName'], release['AlbumTitle'])
-                verify(release['AlbumID'], folder)
+                verify(release['AlbumID'], folder, keep_original_folder=keep_original_folder)
                 continue
             else:
                 logger.info('Querying MusicBrainz for the release group id for: %s - %s', name, album)
@@ -1183,7 +1183,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                     rgid = None
 
                 if rgid:
-                    verify(rgid, folder)
+                    verify(rgid, folder, keep_original_folder=keep_original_folder)
                     continue
                 else:
                     logger.info('No match found on MusicBrainz for: %s - %s', name, album)
@@ -1207,7 +1207,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
             release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?', [name, album]).fetchone()
             if release:
                 logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album', release['ArtistName'], release['AlbumTitle'])
-                verify(release['AlbumID'], folder)
+                verify(release['AlbumID'], folder, keep_original_folder=keep_original_folder)
                 continue
             else:
                 logger.info('Querying MusicBrainz for the release group id for: %s - %s', name, album)
@@ -1218,7 +1218,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                     rgid = None
 
                 if rgid:
-                    verify(rgid, folder)
+                    verify(rgid, folder, keep_original_folder=keep_original_folder)
                     continue
                 else:
                     logger.info('No match found on MusicBrainz for: %s - %s', name, album)
@@ -1231,7 +1231,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
             release = myDB.action('SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE AlbumTitle LIKE ?', [folder_basename]).fetchone()
             if release:
                 logger.info('Found a match in the database: %s - %s. Verifying to make sure it is the correct album', release['ArtistName'], release['AlbumTitle'])
-                verify(release['AlbumID'], folder)
+                verify(release['AlbumID'], folder, keep_original_folder=keep_original_folder)
                 continue
             else:
                 logger.info('Querying MusicBrainz for the release group id for: %s', folder_basename)
@@ -1242,7 +1242,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None):
                     rgid = None
 
                 if rgid:
-                    verify(rgid, folder)
+                    verify(rgid, folder, keep_original_folder=keep_original_folder)
                     continue
                 else:
                     logger.info('No match found on MusicBrainz for: %s - %s', name, album)

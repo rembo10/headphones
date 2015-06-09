@@ -740,9 +740,9 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("home")
 
     @cherrypy.expose
-    def forcePostProcess(self, dir=None, album_dir=None):
+    def forcePostProcess(self, dir=None, album_dir=None, keep_original_folder=False):
         from headphones import postprocessor
-        threading.Thread(target=postprocessor.forcePostProcess, kwargs={'dir': dir, 'album_dir': album_dir}).start()
+        threading.Thread(target=postprocessor.forcePostProcess, kwargs={'dir': dir, 'album_dir': album_dir, 'keep_original_folder':keep_original_folder}).start()
         raise cherrypy.HTTPRedirect("home")
 
     @cherrypy.expose
@@ -1066,6 +1066,7 @@ class WebInterface(object):
             "embed_album_art": checked(headphones.CONFIG.EMBED_ALBUM_ART),
             "embed_lyrics": checked(headphones.CONFIG.EMBED_LYRICS),
             "replace_existing_folders": checked(headphones.CONFIG.REPLACE_EXISTING_FOLDERS),
+            "keep_original_folder" : checked(headphones.CONFIG.KEEP_ORIGINAL_FOLDER),
             "destination_dir": headphones.CONFIG.DESTINATION_DIR,
             "lossless_destination_dir": headphones.CONFIG.LOSSLESS_DESTINATION_DIR,
             "folder_format": headphones.CONFIG.FOLDER_FORMAT,
@@ -1217,7 +1218,7 @@ class WebInterface(object):
             "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer", "use_newznab", "newznab_enabled",
             "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay", "use_mininova", "use_waffles", "use_rutracker",
             "use_whatcd", "preferred_bitrate_allow_lossless", "detect_bitrate", "ignore_clean_releases", "freeze_db", "cue_split", "move_files", "rename_files",
-            "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art", "embed_album_art", "embed_lyrics", "replace_existing_folders",
+            "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art", "embed_album_art", "embed_lyrics", "replace_existing_folders", "keep_original_folder",
             "file_underscores", "include_extras", "autowant_upcoming", "autowant_all", "autowant_manually_added", "keep_torrent_files", "music_encoder",
             "encoderlossless", "encoder_multicore", "delete_lossless_files", "growl_enabled", "growl_onsnatch", "prowl_enabled",
             "prowl_onsnatch", "xbmc_enabled", "xbmc_update", "xbmc_notify", "lms_enabled", "plex_enabled", "plex_update", "plex_notify",

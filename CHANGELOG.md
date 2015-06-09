@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.5.7
+Released xx xxx 2015
+
+Highlights:
+*Improved: Specify whether to delete folders when force post-processing
+*Improved: Convert target bitrate to vbr preset for what.cd searching
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.6...v0.5.7).
+
 ## v0.5.6
 Released 08 June 2015
 
