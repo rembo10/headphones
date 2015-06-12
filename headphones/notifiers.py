@@ -583,7 +583,7 @@ class PUSHOVER(object):
         if not headphones.CONFIG.PUSHOVER_ENABLED:
             return
 
-        http_handler = HTTPSConnection("api.pushover.net")
+        url = "https://api.pushover.net/1/messages.json"
 
         data = {'token': self.application_token,
                 'user': headphones.CONFIG.PUSHOVER_KEYS,
@@ -591,25 +591,16 @@ class PUSHOVER(object):
                 'message': message.encode("utf-8"),
                 'priority': headphones.CONFIG.PUSHOVER_PRIORITY}
 
-        http_handler.request("POST",
-                                "/1/messages.json",
-                                headers={'Content-type': "application/x-www-form-urlencoded"},
-                                body=urlencode(data))
-        response = http_handler.getresponse()
-        request_status = response.status
-        logger.debug(u"Pushover response status: %r" % request_status)
-        logger.debug(u"Pushover response headers: %r" % response.getheaders())
-        logger.debug(u"Pushover response body: %r" % response.read())
+        headers = {'Content-type': "application/x-www-form-urlencoded"}
 
-        if request_status == 200:
-                logger.info(u"Pushover notifications sent.")
-                return True
-        elif request_status >= 400 and request_status < 500:
-                logger.info(u"Pushover request failed: %s" % response.reason)
-                return False
+        response = request.request_response(url, method="POST", headers=headers, data=data)
+
+        if response:
+            logger.info(u"Pushover notifications sent.")
+            return True
         else:
-                logger.info(u"Pushover notification failed.")
-                return False
+            logger.error(u"Pushover notification failed.")
+            return False
 
     def updateLibrary(self):
         #For uniformity reasons not removed
