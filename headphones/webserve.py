@@ -1430,7 +1430,7 @@ class WebInterface(object):
         logger.info(u"Sending Pushover notification")
         pushover = notifiers.PUSHOVER()
         result = pushover.notify("hooray!", "This is a test")
-        return result
+        return str(result)
 
 class Artwork(object):
     @cherrypy.expose
