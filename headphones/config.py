@@ -175,6 +175,7 @@ _CONFIG_DEFINITIONS = {
     'PLEX_SERVER_HOST': (str, 'Plex', ''),
     'PLEX_UPDATE': (int, 'Plex', 0),
     'PLEX_USERNAME': (str, 'Plex', ''),
+    'PLEX_TOKEN': (str, 'Plex', ''),
     'PREFERRED_BITRATE': (str, 'General', ''),
     'PREFERRED_BITRATE_ALLOW_LOSSLESS': (int, 'General', 0),
     'PREFERRED_BITRATE_HIGH_BUFFER': (int, 'General', 0),
