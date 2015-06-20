@@ -316,6 +316,7 @@ class Plex(object):
         self.client_hosts = headphones.CONFIG.PLEX_CLIENT_HOST
         self.username = headphones.CONFIG.PLEX_USERNAME
         self.password = headphones.CONFIG.PLEX_PASSWORD
+        self.token = headphones.CONFIG.PLEX_TOKEN
 
     def _sendhttp(self, host, command):
 
@@ -354,13 +355,15 @@ class Plex(object):
         for host in hosts:
             logger.info('Sending library update command to Plex Media Server@ ' + host)
             url = "%s/library/sections" % host
-            try:
-                xml_sections = minidom.parse(urllib.urlopen(url))
-            except IOError, e:
-                logger.warn("Error while trying to contact Plex Media Server: %s" % e)
-                return False
+            if self.token:
+                params = {'X-Plex-Token': self.token}
+            else:
+                params = False
 
-            sections = xml_sections.getElementsByTagName('Directory')
+            r = request.request_minidom(url, params=params)
+
+            sections = r.getElementsByTagName('Directory')
+
             if not sections:
                 logger.info(u"Plex Media Server not running on: " + host)
                 return False
@@ -368,11 +371,7 @@ class Plex(object):
             for s in sections:
                 if s.getAttribute('type') == "artist":
                     url = "%s/library/sections/%s/refresh" % (host, s.getAttribute('key'))
-                    try:
-                        urllib.urlopen(url)
-                    except Exception as e:
-                        logger.warn("Error updating library section for Plex Media Server: %s" % e)
-                        return False
+                    request.request_response(url, params=params)
 
     def notify(self, artist, album, albumartpath):
 

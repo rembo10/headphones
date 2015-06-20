@@ -1121,6 +1121,7 @@ class WebInterface(object):
             "plex_client_host": headphones.CONFIG.PLEX_CLIENT_HOST,
             "plex_username": headphones.CONFIG.PLEX_USERNAME,
             "plex_password": headphones.CONFIG.PLEX_PASSWORD,
+            "plex_token": headphones.CONFIG.PLEX_TOKEN,
             "plex_update": checked(headphones.CONFIG.PLEX_UPDATE),
             "plex_notify": checked(headphones.CONFIG.PLEX_NOTIFY),
             "nma_enabled": checked(headphones.CONFIG.NMA_ENABLED),
@@ -1431,6 +1432,12 @@ class WebInterface(object):
         pushover = notifiers.PUSHOVER()
         result = pushover.notify("hooray!", "This is a test")
         return str(result)
+
+    @cherrypy.expose
+    def testPlex(self):
+        logger.info(u"Testing plex updates")
+        plex = notifiers.Plex()
+        plex.update()
 
 class Artwork(object):
     @cherrypy.expose
