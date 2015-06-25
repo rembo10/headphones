@@ -21,8 +21,8 @@ import json
 cmd_list = ['getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSnatched', 'getSimilar', 'getHistory', 'getLogs',
             'findArtist', 'findAlbum', 'addArtist', 'delArtist', 'pauseArtist', 'resumeArtist', 'refreshArtist',
             'addAlbum', 'queueAlbum', 'unqueueAlbum', 'forceSearch', 'forceProcess', 'forceActiveArtistsUpdate', 
-            'getVersion', 'checkGithub','shutdown', 'restart', 'update', 'getArtistArt', 'getAlbumArt', 
-            'getArtistInfo', 'getAlbumInfo', 'getArtistThumb', 'getAlbumThumb', 
+            'getVersion', 'checkGithub', 'shutdown', 'restart', 'update', 'getArtistArt', 'getAlbumArt', 
+            'getArtistInfo', 'getAlbumInfo', 'getArtistThumb', 'getAlbumThumb', 'clearLogs',
             'choose_specific_download', 'download_specific_release']
 
 
@@ -176,7 +176,13 @@ class Api(object):
         return
 
     def _getLogs(self, **kwargs):
-        pass
+        self.data = headphones.LOG_LIST
+        return
+
+    def _clearLogs(self, **kwargs):
+        headphones.LOG_LIST = []
+        self.data = 'Cleared log'
+        return
 
     def _findArtist(self, **kwargs):
         if 'name' not in kwargs:
