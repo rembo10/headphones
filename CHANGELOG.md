@@ -1,13 +1,16 @@
 # Changelog
 
 ## v0.5.7
-Released xx xxx 2015
+Released 01 July 2015
 
 Highlights:
-*Improved: Cache MetaCritic scores. Added user-agent header to fix 403 errors
-*Improved: Specify whether to delete folders when force post-processing
-*Improved: Convert target bitrate to vbr preset for what.cd searching
-*Improved: Switched Pushover to requests lib
+* Improved: Moved pushover to use requests lib
+* Improved: Plex tokens with Plex Home
+* Improved: Added getLogs & clearLogs to api
+* Improved: Cache MetaCritic scores. Added user-agent header to fix 403 errors
+* Improved: Specify whether to delete folders when force post-processing
+* Improved: Convert target bitrate to vbr preset for what.cd searching
+* Improved: Switched Pushover to requests lib
 
 The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.6...v0.5.7).
 
