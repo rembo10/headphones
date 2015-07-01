@@ -316,6 +316,7 @@ class Plex(object):
         self.client_hosts = headphones.CONFIG.PLEX_CLIENT_HOST
         self.username = headphones.CONFIG.PLEX_USERNAME
         self.password = headphones.CONFIG.PLEX_PASSWORD
+        self.token = headphones.CONFIG.PLEX_TOKEN
 
     def _sendhttp(self, host, command):
 
@@ -354,13 +355,15 @@ class Plex(object):
         for host in hosts:
             logger.info('Sending library update command to Plex Media Server@ ' + host)
             url = "%s/library/sections" % host
-            try:
-                xml_sections = minidom.parse(urllib.urlopen(url))
-            except IOError, e:
-                logger.warn("Error while trying to contact Plex Media Server: %s" % e)
-                return False
+            if self.token:
+                params = {'X-Plex-Token': self.token}
+            else:
+                params = False
 
-            sections = xml_sections.getElementsByTagName('Directory')
+            r = request.request_minidom(url, params=params)
+
+            sections = r.getElementsByTagName('Directory')
+
             if not sections:
                 logger.info(u"Plex Media Server not running on: " + host)
                 return False
@@ -368,11 +371,7 @@ class Plex(object):
             for s in sections:
                 if s.getAttribute('type') == "artist":
                     url = "%s/library/sections/%s/refresh" % (host, s.getAttribute('key'))
-                    try:
-                        urllib.urlopen(url)
-                    except Exception as e:
-                        logger.warn("Error updating library section for Plex Media Server: %s" % e)
-                        return False
+                    request.request_response(url, params=params)
 
     def notify(self, artist, album, albumartpath):
 
@@ -583,7 +582,7 @@ class PUSHOVER(object):
         if not headphones.CONFIG.PUSHOVER_ENABLED:
             return
 
-        http_handler = HTTPSConnection("api.pushover.net")
+        url = "https://api.pushover.net/1/messages.json"
 
         data = {'token': self.application_token,
                 'user': headphones.CONFIG.PUSHOVER_KEYS,
@@ -591,25 +590,16 @@ class PUSHOVER(object):
                 'message': message.encode("utf-8"),
                 'priority': headphones.CONFIG.PUSHOVER_PRIORITY}
 
-        http_handler.request("POST",
-                                "/1/messages.json",
-                                headers={'Content-type': "application/x-www-form-urlencoded"},
-                                body=urlencode(data))
-        response = http_handler.getresponse()
-        request_status = response.status
-        logger.debug(u"Pushover response status: %r" % request_status)
-        logger.debug(u"Pushover response headers: %r" % response.getheaders())
-        logger.debug(u"Pushover response body: %r" % response.read())
+        headers = {'Content-type': "application/x-www-form-urlencoded"}
 
-        if request_status == 200:
-                logger.info(u"Pushover notifications sent.")
-                return True
-        elif request_status >= 400 and request_status < 500:
-                logger.info(u"Pushover request failed: %s" % response.reason)
-                return False
+        response = request.request_response(url, method="POST", headers=headers, data=data)
+
+        if response:
+            logger.info(u"Pushover notifications sent.")
+            return True
         else:
-                logger.info(u"Pushover notification failed.")
-                return False
+            logger.error(u"Pushover notification failed.")
+            return False
 
     def updateLibrary(self):
         #For uniformity reasons not removed

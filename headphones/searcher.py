@@ -1280,6 +1280,12 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
             search_formats = [None]  # should return all
             bitrate = headphones.CONFIG.PREFERRED_BITRATE
             if bitrate:
+                if 225 <= int(bitrate) < 256:
+                    bitrate = 'V0'
+                elif 200 <= int(bitrate) < 225:
+                    bitrate = 'V1'
+                elif 175 <= int(bitrate) < 200:
+                    bitrate = 'V2'
                 for encoding_string in gazelleencoding.ALL_ENCODINGS:
                     if re.search(bitrate, encoding_string, flags=re.I):
                         bitrate_string = encoding_string

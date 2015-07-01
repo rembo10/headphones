@@ -137,28 +137,27 @@
 					        No empty artists found.
 					    %endif
 					</div>
-				<a href="#" onclick="doAjaxCall('forcePostProcess',$(this))" data-success="Post-Processor is being loaded" data-error="Error during Post-Processing"><i class="fa fa-wrench fa-fw"></i> Force Post-Process Albums in Download Folder</a>
+					<div id="post_process">
+					<a href="#" class="btnOpenDialog"><i class="fa fa-wrench fa-fw"></i> Force Post-Process Albums in Download Folder</a>
+					</div>
 			</div>
 		</fieldset>
-		<form action="forcePostProcess" method="GET">
-		            <fieldset>
-		            <div class="row">
-		                <label>Force Post-Process Albums in Alternate Folder</label>
-					    <input type="text" value="" name="dir" id="dir" size="50" /><input type="submit" />
-		            </div>
-		            </fieldset>
-		      
-		</form>
-		<form action="forcePostProcess" method="GET">
-		            <fieldset>
-		            <div class="row">
-		                <label>Post-Process Single Folder</label>
-					    <input type="text" value="" name="album_dir" id="album_dir" size="50" /><input type="submit" />
-		            </div>
-		            </fieldset>
-		      
-		</form>
-		
+		<fieldset>
+            <div class="row" id="post_process_alternate">
+                <label>Force Post-Process Albums in Alternate Folder</label>
+			    <input type="text" value="" name="dir" id="dir" size="50" />
+			    <input type="button" class="btnOpenDialog" value="Submit" />
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <div class="row" id="post_process_single">
+                <label>Post-Process Single Folder</label>
+			    <input type="text" value="" name="album_dir" id="album_dir" size="50" />
+			    <input type="button" class="btnOpenDialog" value="Submit" />
+            </div>
+        </fieldset>
+
 	</div>
 
 
@@ -177,8 +176,7 @@
 		</fieldset>
 		
 	</div>
-
-
+	<div id="dialog-confirm"></div>
 
 </div>
 </%def>
@@ -187,6 +185,55 @@
 		function addScanAction() {
 			$('#autoadd').append('<input type="hidden" name="scan" value=1 />');
 		};
+
+		function fnOpenNormalDialog(id) {
+			if (id === "post_process"){
+				var url = "forcePostProcess?"
+			}
+			if (id === "post_process_alternate"){
+				var dir = $('#dir').val();
+				var url = "forcePostProcess?dir=" + dir + "&"
+			}
+			if (id === "post_process_single"){
+				var dir = $('#album_dir').val();
+				var url = "forcePostProcess?album_dir=" + dir + "&"
+			}
+			var t = $('<a data-success="Post-Processor is being loaded" data-error="Error during Post-Processing">');
+		    $("#dialog-confirm").html("Do you want to keep the original folder(s) after post-processing? If you click no, the folders still might be kept depending on your global settings");
+
+		    // Define the Dialog and its properties.
+		    $("#dialog-confirm").dialog({
+		        resizable: false,
+		        modal: true,
+		        title: "Keep original folder(s)?",
+		        height: 170,
+		        width: 400,
+		        buttons: {
+		            "Yes": function () {
+		                $(this).dialog('close');
+		                doAjaxCall(url + "keep_original_folder=True", t);
+		            },
+		                "No": function () {
+		                $(this).dialog('close');
+		                doAjaxCall(url + "keep_original_folder=False", t);
+		            }
+		        }
+		    });
+		}
+
+		$('.btnOpenDialog').click(function(e){
+			e.preventDefault();
+			var parentId = $(this).closest('div').prop('id');
+			fnOpenNormalDialog(parentId);
+		});
+
+		function callback(value) {
+		    if (value) {
+		        alert("Confirmed");
+		    } else {
+		        alert("Rejected");
+		    }
+		}
 		
 		function initThisPage() {
 			$('#manage_albums').click(function() {

@@ -353,7 +353,7 @@ def dbcheck():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute(
-        'CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT, IncludeExtras INTEGER, LatestAlbum TEXT, ReleaseDate TEXT, AlbumID TEXT, HaveTracks INTEGER, TotalTracks INTEGER, LastUpdated TEXT, ArtworkURL TEXT, ThumbURL TEXT, Extras TEXT, Type TEXT)')
+        'CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT, IncludeExtras INTEGER, LatestAlbum TEXT, ReleaseDate TEXT, AlbumID TEXT, HaveTracks INTEGER, TotalTracks INTEGER, LastUpdated TEXT, ArtworkURL TEXT, ThumbURL TEXT, Extras TEXT, Type TEXT, MetaCritic TEXT)')
     # ReleaseFormat here means CD,Digital,Vinyl, etc. If using the default
     # Headphones hybrid release, ReleaseID will equal AlbumID (AlbumID is
     # releasegroup id)
@@ -598,6 +598,11 @@ def dbcheck():
         c.execute('SELECT Type from artists')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE artists ADD COLUMN Type TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT MetaCritic from artists')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE artists ADD COLUMN MetaCritic TEXT DEFAULT NULL')
 
     conn.commit()
     c.close()
