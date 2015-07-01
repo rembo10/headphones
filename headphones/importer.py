@@ -496,7 +496,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
     cache.getThumb(ArtistID=artistid)
 
     logger.info(u"Fetching Metacritic reviews for: %s" % artist['artist_name'])
-    metacritic.update(artist['artist_name'], artist['releasegroups'])
+    metacritic.update(artistid, artist['artist_name'], artist['releasegroups'])
 
     if errors:
         logger.info("[%s] Finished updating artist: %s but with errors, so not marking it as updated in the database" % (artist['artist_name'], artist['artist_name']))
