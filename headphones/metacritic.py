@@ -17,6 +17,7 @@ import re
 import headphones
 
 from headphones import db, helpers, logger, request
+from headphones.common import USER_AGENT
 
 def update(artist_name,release_groups):
     """ Pretty simple and crude function to find the artist page on metacritic,
@@ -31,9 +32,11 @@ def update(artist_name,release_groups):
 
     mc_artist_name = mc_artist_name.replace(" ","-")
 
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'}
+
     url = "http://www.metacritic.com/person/" + mc_artist_name + "?filter-options=music&sort_options=date&num_items=100"
 
-    res = request.request_soup(url, parser='html.parser')
+    res = request.request_soup(url, headers=headers, parser='html.parser')
 
     try:
         rows = res.tbody.find_all('tr')
