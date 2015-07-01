@@ -4,6 +4,7 @@
 Released xx xxx 2015
 
 Highlights:
+*Improved: Cache MetaCritic scores. Added user-agent header to fix 403 errors
 *Improved: Specify whether to delete folders when force post-processing
 *Improved: Convert target bitrate to vbr preset for what.cd searching
 *Improved: Switched Pushover to requests lib
