@@ -1156,7 +1156,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
                 verify(release['AlbumID'], folder, forced=True, keep_original_folder=keep_original_folder)
                 continue
             else:
-                logger.info('Found a (possibly) valid Musicbrainz realse group id in album folder name.')
+                logger.info('Found a (possibly) valid Musicbrainz release group id in album folder name.')
                 verify(rgid, folder, forced=True)
                 continue
 
