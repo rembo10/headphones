@@ -154,6 +154,7 @@ _CONFIG_DEFINITIONS = {
     'NZBSORG_HASH': (str, 'NZBsorg', ''),
     'NZBSORG_UID': (str, 'NZBsorg', ''),
     'NZB_DOWNLOADER': (int, 'General', 0),
+    'OFFICIAL_RELEASES_ONLY': (int, 'General', 0),
     'OMGWTFNZBS': (int, 'omgwtfnzbs', 0),
     'OMGWTFNZBS_APIKEY': (str, 'omgwtfnzbs', ''),
     'OMGWTFNZBS_UID': (str, 'omgwtfnzbs', ''),
