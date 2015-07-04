@@ -206,7 +206,7 @@ def server_message(response):
     message = None
 
     # First attempt is to 'read' the response as HTML
-    if "text/html" in response.headers.get("content-type"):
+    if response.headers and "text/html" in response.headers.get("content-type"):
         try:
             soup = BeautifulSoup(response.content, "html5lib")
         except Exception:
