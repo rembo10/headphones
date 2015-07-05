@@ -1436,9 +1436,9 @@ class WebInterface(object):
 
     @cherrypy.expose
     def testPlex(self):
-        logger.info(u"Testing plex updates")
+        logger.info(u"Testing plex notifications")
         plex = notifiers.Plex()
-        plex.update()
+        plex.notify("hellooooo", "test album!", "")
 
 class Artwork(object):
     @cherrypy.expose
