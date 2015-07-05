@@ -32,6 +32,7 @@ import random
 import urllib
 import json
 import time
+import cgi
 import sys
 import os
 
@@ -149,7 +150,7 @@ class WebInterface(object):
             searchresults = mb.findRelease(name, limit=100)
         else:
             searchresults = mb.findSeries(name, limit=100)
-        return serve_template(templatename="searchresults.html", title='Search Results for: "' + name + '"', searchresults=searchresults, name=name, type=type)
+        return serve_template(templatename="searchresults.html", title='Search Results for: "' + cgi.escape(name) + '"', searchresults=searchresults, name=cgi.escape(name), type=type)
 
     @cherrypy.expose
     def addArtist(self, artistid):
