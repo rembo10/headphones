@@ -686,7 +686,7 @@
                                         <input type="text" class="override-float" name="lossless_bitrate_to" value="${config['lossless_bitrate_to']}" size="5" title="e.g. if album length = 40 mins, to = 2000 kbps, then max target size = 586 mb, anything greater will be rejected">kbps
                                     </span>
                                 </div>
-                                <div class="row left clearfix">
+                                <div class="row left clearfix nopad">
                                     <label title="Prefer certain bitrate range, including lossless fallback. Use this option if you have a lot of wrong snatches.">
                                         <input type="radio" id="preferred_bitrate" name="preferred_quality" value="2" ${config['pref_qual_2']}>
                                         Preferred Bitrate
@@ -911,7 +911,7 @@
                                     <div class="row">
                                         <label>Plex Client Host:Port</label>
                                         <input type="text" name="plex_client_host" value="${config['plex_client_host']}" size="30">
-                                        <small>Host running Plex Client (eg. http://192.168.1.100:3000)</small>
+                                        <small>Host running Plex Client (eg. http://192.168.1.100:3005)</small>
                                     </div>
                                     <div class="row">
                                         <label>Plex Username</label><input type="text" name="plex_username" value="${config['plex_username']}" size="30">
