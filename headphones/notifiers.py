@@ -345,6 +345,19 @@ class Plex(object):
 
         return response
 
+    def _sendjson(self, host, method, params={}):
+        data = [{'id': 0, 'jsonrpc': '2.0', 'method': method, 'params': params}]
+        headers = {'Content-Type': 'application/json'}
+        url = host + '/jsonrpc'
+
+        if self.password:
+            response = request.request_json(url, method="post", data=json.dumps(data), headers=headers, auth=(self.username, self.password))
+        else:
+            response = request.request_json(url, method="post", data=json.dumps(data), headers=headers)
+
+        if response:
+            return response[0]['result']
+
     def update(self):
 
         # From what I read you can't update the music library on a per directory or per path basis
@@ -382,17 +395,24 @@ class Plex(object):
         time = "3000" # in ms
 
         for host in hosts:
-            logger.info('Sending notification command to Plex Media Server @ ' + host)
+            logger.info('Sending notification command to Plex client @ ' + host)
             try:
-                notification = header + "," + message + "," + time + "," + albumartpath
-                notifycommand = {'command': 'ExecBuiltIn', 'parameter': 'Notification(' + notification + ')'}
-                request = self._sendhttp(host, notifycommand)
+                version = self._sendjson(host, 'Application.GetProperties', {'properties': ['version']})['version']['major']
+
+                if version < 12: #Eden
+                    notification = header + "," + message + "," + time + "," + albumartpath
+                    notifycommand = {'command': 'ExecBuiltIn', 'parameter': 'Notification(' + notification + ')'}
+                    request = self._sendhttp(host, notifycommand)
+
+                else: #Frodo
+                    params = {'title': header, 'message': message, 'displaytime': int(time), 'image': albumartpath}
+                    request = self._sendjson(host, 'GUI.ShowNotification', params)
 
                 if not request:
                     raise Exception
 
-            except:
-                logger.warn('Error sending notification request to Plex Media Server')
+            except Exception:
+                logger.error('Error sending notification request to Plex client @ ' + host)
 
 
 class NMA(object):
