@@ -325,7 +325,7 @@ form fieldset small.heading {
   margin-top: -15px;
 }
 form .row {
-  font-family: Helvetica, Arial;
+  font-family: Helvetica, Arial, sans-serif;
   margin-bottom: 10px;
 }
 form .row label {
