@@ -1036,11 +1036,11 @@
                             <fieldset>
                                 <h3>Pushover</h3>
                                 <div class="row checkbox">
-                                    <input type="checkbox" name="pushover_enabled" id="pushover" value="1" ${config['pushover_enabled']} /><label>Enable Pushover Notifications</label>
+                                    <input type="checkbox" name="pushover_enabled" id="pushover" value="1" ${config['pushover_enabled']} /><label>Enable Pushover</label>
                                 </div>
                                 <div id="pushoveroptions">
                                     <div class="row">
-                                        <label>User key</label><input type="text" name="pushover_keys" value="${config['pushover_keys']}" size="50">
+                                        <label>User Key</label><input type="text" name="pushover_keys" value="${config['pushover_keys']}" size="50">
                                     </div>
                                     <div class="row checkbox">
                                         <input type="checkbox" name="pushover_onsnatch" value="1" ${config['pushover_onsnatch']} /><label>Notify on snatch?</label>
@@ -1058,7 +1058,7 @@
                             <fieldset>
                                 <h3>Pushbullet</h3>
                                 <div class="row checkbox">
-                                    <input type="checkbox" name="pushbullet_enabled" id="pushbullet" value="1" ${config['pushbullet_enabled']} /><label>Enable PushBullet Notifications</label>
+                                    <input type="checkbox" name="pushbullet_enabled" id="pushbullet" value="1" ${config['pushbullet_enabled']} /><label>Enable PushBullet</label>
                                 </div>
                                 <div id="pushbulletoptions">
                                     <div class="row">
@@ -1115,7 +1115,7 @@
                             <fieldset>
                                 <h3>Boxcar2</h3>
                                 <div class="row checkbox">
-                                    <input type="checkbox" name="boxcar_enabled" id="boxcar" value="1" ${config['boxcar_enabled']} /><label>Enable Boxcar2 Notifications</label>
+                                    <input type="checkbox" name="boxcar_enabled" id="boxcar" value="1" ${config['boxcar_enabled']} /><label>Enable Boxcar2</label>
                                 </div>
                                 <div id="boxcar_options">
                                     <div class="row">
@@ -1169,9 +1169,7 @@
                                     </div>
                                 </div>
                             </fieldset>
-
-                            <fieldset>
-                            </td>
+                        </td>
                     </tr>
                 </table>
                 <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
