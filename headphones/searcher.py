@@ -29,6 +29,7 @@ import string
 import shutil
 import random
 import urllib
+import datetime
 import headphones
 import subprocess
 import unicodedata
@@ -189,10 +190,22 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False,
         results = myDB.select('SELECT * from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
 
         for album in results:
+
             if not album['AlbumTitle'] or not album['ArtistName']:
                 logger.warn('Skipping release %s. No title available', album['AlbumID'])
                 continue
 
+            if headphones.CONFIG.WAIT_UNTIL_RELEASE_DATE and album['ReleaseDate']:
+                try:
+                    release_date = datetime.datetime.strptime(album['ReleaseDate'], "%Y-%m-%d")
+                except:
+                    logger.warn("No valid date for: %s. Skipping automatic search" % album['AlbumTitle'])
+                    continue
+
+                if release_date > datetime.datetime.today():
+                    logger.info("Skipping: %s. Waiting for release date of: %s" % (album['AlbumTitle'], album['ReleaseDate']))
+                    continue
+            
             new = True
 
             if album['Status'] == "Wanted Lossless":

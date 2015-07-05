@@ -1403,6 +1403,10 @@
                                            name="autowant_manually_added" value="1" ${config['autowant_manually_added']} />Automatically mark manually added albums as wanted</label>
                                 </div>
                                 <div class="row checkbox left clearfix nopad">
+                                    <label><input type="checkbox" title="Wait until album release date before searching"
+                                           name="wait_until_release_date" value="1" ${config['wait_until_release_date']} />Wait until an album's release date before searching</label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label title="Freeze the database, so new artists won't be added automatically. Use this if Headphones adds artists because due to wrong snatches. This check is skipped when the folder name is appended with release group ID.">
                                         Don't add new artists when post-processing albums
                                         <input type="checkbox" name="freeze_db" id="freeze_db" value="1" ${config['freeze_db']} />
