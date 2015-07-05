@@ -659,50 +659,54 @@
                 <table class="configtable" summary="Quality &amp; Post Processing">
                     <tr>
                         <td>
+                            <legend>Quality</legend>
                             <fieldset>
-                                <legend>Quality</legend>
-                                <div class="row radio clearfix">
+                                <div class="row checkbox left clearfix nopad">
                                     <label title="Snatch the highest quality available, excluding lossless.">
                                         <input type="radio" name="preferred_quality" id="preferred_quality0" value="0" ${config['pref_qual_0']}>
                                         Highest Quality excluding Lossless
                                     </label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label title="Snatch the highest quality available, including lossless.">
                                         <input type="radio" name="preferred_quality" id="preferred_quality1" value="1" ${config['pref_qual_1']}>
                                         Highest Quality including Lossless
                                     </label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label title="Snatch only lossless quality.">
                                         <input type="radio" name="preferred_quality" id="lossless_only" value="3" ${config['pref_qual_3']}>
                                         Lossless Only
                                     </label>
-                                    <div id="lossless_only_options">
-                                        <span style="padding-left: 20px">
-                                            Reject if target size is not in bitrate range:
-                                            <input type="text" class="override-float" name="lossless_bitrate_from" value="${config['lossless_bitrate_from']}" size="4" title="e.g. if album length = 40 mins, from = 350 kbps, then min target size = 102.5 mb, anything less will be rejected">to\
-                                            <input type="text" class="override-float" name="lossless_bitrate_to" value="${config['lossless_bitrate_to']}" size="5" title="e.g. if album length = 40 mins, to = 2000 kbps, then max target size = 586 mb, anything greater will be rejected">kbps
-                                        </span>
-                                    </div>
+                                </div>
+                                <div id="lossless_only_options" class="row left clearfix">
+                                    <span style="padding-left: 20px">
+                                        Reject if target size is not in bitrate range:
+                                        <input type="text" class="override-float" name="lossless_bitrate_from" value="${config['lossless_bitrate_from']}" size="4" title="e.g. if album length = 40 mins, from = 350 kbps, then min target size = 102.5 mb, anything less will be rejected">to\
+                                        <input type="text" class="override-float" name="lossless_bitrate_to" value="${config['lossless_bitrate_to']}" size="5" title="e.g. if album length = 40 mins, to = 2000 kbps, then max target size = 586 mb, anything greater will be rejected">kbps
+                                    </span>
+                                </div>
+                                <div class="row left clearfix">
                                     <label title="Prefer certain bitrate range, including lossless fallback. Use this option if you have a lot of wrong snatches.">
                                         <input type="radio" id="preferred_bitrate" name="preferred_quality" value="2" ${config['pref_qual_2']}>
                                         Preferred Bitrate
                                     <label>
-                                    <div id="preferred_bitrate_options">
-                                        <div class="row">
-                                            Target bitrate
-                                            <input type="text" class="override-float" name="preferred_bitrate" value="${config['preferred_bitrate']}" size="3">kbps<br>
-                                        </div>
-                                        <div class="row">
-                                            <span style="padding-left: 20px">
-                                                Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['preferred_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['preferred_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br>
-                                            </span>
-                                        </div>
-                                        <div class="row checkbox left" style="padding-left: 20px">
-                                            <input type="checkbox" name="preferred_bitrate_allow_lossless" value="1" ${config['preferred_bitrate_allow_lossless']}>
-                                            <label>Allow lossless if no good lossy match found</label>
-                                        </div>
-                                        <div class="row checkbox left" style="padding-left: 20px">
-                                            <input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />
-                                            <label>Auto-Detect Preferred Bitrate</label>
-                                        </div>
+                                </div>
+                                <div id="preferred_bitrate_options" class="suboptions">
+                                    <div class="row nopad">
+                                        Target bitrate: 
+                                        <input type="text" class="override-float" name="preferred_bitrate" value="${config['preferred_bitrate']}" size="3">kbps<br>
+                                    </div>
+                                    <div class="row nopad">
+                                        Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['preferred_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['preferred_bitrate_high']}" size="3">% of the target size (leave blank for no limit)
+                                    </div>
+                                    <div class="row checkbox clearfix left nopad">
+                                        <input type="checkbox" name="preferred_bitrate_allow_lossless" value="1" ${config['preferred_bitrate_allow_lossless']}>
+                                        <label>Allow lossless if no good lossy match found</label>
+                                    </div>
+                                    <div class="row checkbox clearfix left nopad">
+                                        <input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} >
+                                        <label>Auto-Detect Preferred Bitrate</label>
                                     </div>
                                 </div>
                             </fieldset>
@@ -735,68 +739,78 @@
                         <td>
                             <fieldset>
                                 <legend>Post-Processing</legend>
-                                <div class="row checkbox left clearfix">
+                                <div class="row checkbox left clearfix nopad">
+                                    <label>
+                                        Move downloads to Destination Folder
+                                        <input type="checkbox" name="move_files" id="move_files" value="1" ${config['move_files']} />
+                                    </label>
+                                </div>
+                                <div id="move_files_options" class="suboptions">
+                                    <div class="row checkbox left clearfix nopad">
+                                        <label>
+                                            Replace existing folders?
+                                            <input type="checkbox" name="replace_existing_folders" value="1" ${config['replace_existing_folders']}>
+                                        </label>
+                                     </div>
+                                     <div class="row checkbox left clearfix nopad">
+                                        <label>
+                                            Keep original folder (i.e. copy)?
+                                            <input type="checkbox" name="keep_original_folder" value="1" ${config['keep_original_folder']}>
+                                        </label>
+                                     </div>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
+                                    <label>
+                                        Rename files
+                                        <input type="checkbox" name="rename_files" value="1" ${config['rename_files']} />
+                                    </label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
+                                    <label>
+                                        Correct metadata
+                                        <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} />
+                                    </label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label title="Use associated .cue sheet to split single file albums into multiple tracks. Requires shntool with flac or xld cli (OS X) to be installed.">
                                         Split single file albums into multiple tracks
                                         <input type="checkbox" name="cue_split" id="cue_split" value="1" ${config['cue_split']} />
                                     </label>
                                 </div>
-                                <div class="row checkbox left clearfix">
-                                    <label>
-                                        Move downloads to Destination Folder
-                                        <input type="checkbox" name="move_files" id="move_files" value="1" ${config['move_files']} />
-                                    </label>
-                                    <div id="move_files_options">
-                                        <div class="row indent">
-                                            <label>
-                                                Replace existing folders?
-                                                <input type="checkbox" name="replace_existing_folders" value="1" ${config['replace_existing_folders']}>
-                                            </label>
-                                         </div>
-                                         <div class="row indent">
-                                            <label>
-                                                Keep original folder?
-                                                <input type="checkbox" name="keep_original_folder" value="1" ${config['keep_original_folder']}>
-                                            </label>
-                                         </div>
-                                    </div>
-                                    <label>
-                                        Rename files
-                                        <input type="checkbox" name="rename_files" value="1" ${config['rename_files']} />
-                                    </label>
-                                    <label>
-                                        Correct metadata
-                                        <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} />
-                                    </label>
+                                <div class="row checkbox left clearfix nopad">
                                     <label>
                                         Delete leftover files <small>(.m3u, .nfo, .sfv, .nzb, etc.)</small>
                                         <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} />
                                     </label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label>
                                         Keep original nfo <small>(extension changed to .orig.nfo)</small>
                                         <input type="checkbox" name="keep_nfo" value="1" ${config['keep_nfo']} />
                                     </label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label>
                                         Add album art jpeg to album folder
                                         <input type="checkbox" name="add_album_art" id="add_album_art" value="1" ${config['add_album_art']}>
                                     </label>
-                                    <div id="album_art_options" style="padding-left: 20px">
-                                        <div class="row">
-                                            as <input type="text" class="override-float" name="album_art_format" value="${config['album_art_format']}" size="10">.jpg
-                                        </div>
-                                        <small>Use $Artist/$artist, $Album/$album, $Year/$year</small>
+                                </div>
+                                <div id="album_art_options" style="padding-left: 20px">
+                                    <div class="row">
+                                        as <input type="text" class="override-float" name="album_art_format" value="${config['album_art_format']}" size="10">.jpg
                                     </div>
+                                    <small>Use $Artist/$artist, $Album/$album, $Year/$year</small>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label>
                                         Embed album art in each file
                                         <input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}>
                                     </label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label>
                                         Embed lyrics
                                         <input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}>
-                                    </label>
-                                    <label title="Use ID3v2.3 instead of ID3v2.4">
-                                        Tag using ID3v2.3
-                                        <input type="checkbox" name="idtag" value="1" ${config['idtag']}>
                                     </label>
                                 </div>
                                 <div class="row">
@@ -1265,7 +1279,7 @@
                                     </div>
                                     <div class="row">
                                         <label>VBR/CBR</label>
-                                        <select name="encodervbrcbr">
+                                        <select name="encodervbrcbr" id="encodervbrcbr">
                                         %for x in ['cbr', 'vbr']:
                                             <%
                                                 if config['encodervbrcbr'] == x:
@@ -1277,35 +1291,38 @@
                                         %endfor
                                         </select>
                                     </div>
-                                    <div class="row">
-                                        <label>Quality</label>
-                                        <select name="encoderquality">
-                                        %for x in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
-                                            <%
-                                                if config['encoderquality'] == x:
-                                                    outputselect = 'selected'
-                                                else:
-                                                    outputselect = ''
-                                            %>
-                                            <option value=${x} ${outputselect}>${x}</option>
-                                        %endfor
-                                        </select>
+                                    <div id="vbr_options">
+                                        <div class="row">
+                                            <label>Quality</label>
+                                            <select name="encoderquality">
+                                            %for x in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
+                                                <%
+                                                    if config['encoderquality'] == x:
+                                                        outputselect = 'selected'
+                                                    else:
+                                                        outputselect = ''
+                                                %>
+                                                <option value=${x} ${outputselect}>${x}</option>
+                                            %endfor
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div class="row">
-                                        <label>Bitrate</label>
-                                        <select name="bitrate">
-                                        %for x in [64, 128, 192, 256, 320]:
-                                            <%
-                                                if config["bitrate"] == x:
-                                                    bitrateselected = "selected"
-                                                else:
-                                                    bitrateselected = ''
-                                            %>
-                                            <option value=${x} ${bitrateselected}> ${x} kbps</option>
-                                        %endfor
-                                        </select>
+                                    <div id="cbr_options">
+                                        <div class="row">
+                                            <label>Bitrate</label>
+                                            <select name="bitrate">
+                                            %for x in [64, 128, 192, 256, 320]:
+                                                <%
+                                                    if config["bitrate"] == x:
+                                                        bitrateselected = "selected"
+                                                    else:
+                                                        bitrateselected = ''
+                                                %>
+                                                <option value=${x} ${bitrateselected}> ${x} kbps</option>
+                                            %endfor
+                                            </select>
+                                        </div>
                                     </div>
-
                                     <%
                                         if config["samplingfrequency"] == 44100:
                                             freq44100 = 'selected="selected"'
@@ -1347,7 +1364,7 @@
                         <td>
                             <fieldset>
                                 <legend>Miscellaneous</legend>
-                                <div class="checkbox left row">
+                                <div class="row checkbox left clearfix nopad">
                                     <input type="checkbox" name="include_extras" id="include_extras" value="1" ${config['include_extras']} /><label>Automatically include extras when adding an artist <br>
                                     <%
                                         which_extras_selected = ""
@@ -1372,24 +1389,29 @@
                                     %endfor
                                     </div>
                                 </div>
-                                <div class="row left checkbox">
-                                    <input type="checkbox" name="official_releases_only" value="1" ${config['official_releases_only']} /><label>Only include 'official' extras (i.e. no bootlegs, promos, etc.)</label>
+                                <div class="row checkbox left clearfix nopad">
+                                    <label><input type="checkbox" name="official_releases_only" value="1" ${config['official_releases_only']} />Only include 'official' extras (i.e. no bootlegs, promos, etc.)</label>
                                 </div>
-                                <div class="row left checkbox">
-                                    <input type="checkbox" name="autowant_upcoming" value="1" ${config['autowant_upcoming']} /><label>Automatically mark upcoming albums as wanted</label>
+                                <div class="row checkbox left clearfix nopad">
+                                    <label><input type="checkbox" name="autowant_upcoming" value="1" ${config['autowant_upcoming']} />Automatically mark upcoming albums as wanted</label>
                                 </div>
-                                <div class="row left checkbox">
-                                    <input type="checkbox" name="autowant_all" value="1" ${config['autowant_all']} /><label>Automatically mark all albums as wanted</label>
+                                <div class="row checkbox left clearfix nopad">
+                                    <label><input type="checkbox" name="autowant_all" value="1" ${config['autowant_all']} />Automatically mark all albums as wanted</label>
                                 </div>
-                                <div class="row left checkbox">
-                                    <input type="checkbox" title="Automatically mark manually added albums from search results as wanted"
-                                           name="autowant_manually_added" value="1" ${config['autowant_manually_added']} />
-                                    <label>Automatically mark manually added albums as wanted</label>
+                                <div class="row checkbox left clearfix nopad">
+                                    <label><input type="checkbox" title="Automatically mark manually added albums from search results as wanted"
+                                           name="autowant_manually_added" value="1" ${config['autowant_manually_added']} />Automatically mark manually added albums as wanted</label>
                                 </div>
-                                <div class="row left checkbox">
+                                <div class="row checkbox left clearfix nopad">
                                     <label title="Freeze the database, so new artists won't be added automatically. Use this if Headphones adds artists because due to wrong snatches. This check is skipped when the folder name is appended with release group ID.">
                                         Don't add new artists when post-processing albums
                                         <input type="checkbox" name="freeze_db" id="freeze_db" value="1" ${config['freeze_db']} />
+                                    </label>
+                                </div>
+                                <div class="row checkbox left clearfix">
+                                    <label title="Use ID3v2.3 instead of ID3v2.4">
+                                        Tag using ID3v2.3 instead of ID3v2.4
+                                        <input type="checkbox" name="idtag" value="1" ${config['idtag']}>
                                     </label>
                                 </div>
                                 <div class="row">
@@ -1439,7 +1461,7 @@
                                 <div id="songkickoptions">
                                   <div class="row">
                                       <label>API Key</label>
-                                      <input type="text" name="songkick_apikey" value="${config['songkick_apikey']}" size="50">
+                                      <input type="text" name="songkick_apikey" value="${config['songkick_apikey']}" size="40">
                                   </div>
                                   <div class="row checkbox">
                                       <input type="checkbox" name="songkick_filter_enabled" id="songkick_filter" value="1" ${config['songkick_filter_enabled']} /><label>Filter by Metro Area</label>
@@ -1498,7 +1520,7 @@
                                         <label>Username</label><input type="text" class="hpuser" name="hpuser" value="${config['hpuser']}" size="20">
                                     </div>
                                     <div class="row">
-                                        <label>Password</label><input type="password" class="hppass" name="hppass" value="${config['hppass']}" size="15"><br>
+                                        <label>Password</label><input type="password" class="hppass" name="hppass" value="${config['hppass']}" size="20"><br>
                                         <a href="https://headphones.codeshy.com/vip" id="vipserver" target="_blank">Get an Account!</a>
                                     </div>
                                 </div>
@@ -1524,6 +1546,10 @@
         hideEncoderDivs = function () {
                 $("#lameffmpegproperties").slideUp();
                 $("#xldproperties").slideUp();
+        };
+        hideEncodingOptionDivs = function () {
+                $("#vbr_options").slideUp();
+                $("#cbr_options").slideUp();
         };
 
         handleNewServerSelection = function () {
@@ -1554,6 +1580,19 @@
                             break;
                         case 'lame':
                             $("#lameffmpegproperties").slideDown();
+                            break;
+                }
+        };
+
+        handleNewEncodingOptionSelection = function () {
+                hideEncodingOptionDivs();
+
+                switch ($(this).val()) {
+                        case 'vbr':
+                            $("#vbr_options").slideDown();
+                            break;
+                        case 'cbr':
+                            $("#cbr_options").slideDown();
                             break;
                 }
         };
@@ -2119,6 +2158,9 @@
 
                 $("#encoder").change(handleNewEncoderSelection);
                         handleNewEncoderSelection.apply($("#encoder"));
+
+                $("#encodervbrcbr").change(handleNewEncodingOptionSelection);
+                        handleNewEncodingOptionSelection.apply($("#encodervbrcbr"));
 
                 var deletedNewznabs = 0;
 
