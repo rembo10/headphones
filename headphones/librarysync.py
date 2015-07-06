@@ -374,7 +374,7 @@ def update_album_status(AlbumID=None):
             album_completion = 0
             logger.info('Album %s does not have any tracks in database' % album['AlbumTitle'])
 
-        if album_completion >= headphones.CONFIG.ALBUM_COMPLETION_PCT and album['Status'] == 'Skipped':
+        if album_completion >= headphones.CONFIG.ALBUM_COMPLETION_PCT:
             new_album_status = "Downloaded"
 
         # I don't think we want to change Downloaded->Skipped.....
