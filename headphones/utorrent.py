@@ -73,6 +73,7 @@ class utorrentclient(object):
         except urllib2.HTTPError as err:
             logger.debug('URL: ' + str(url))
             logger.debug('Error getting Token. uTorrent responded with error: ' + str(err))
+            return
         match = re.search(utorrentclient.TOKEN_REGEX, response.read())
         return match.group(1)
 
@@ -147,6 +148,10 @@ class utorrentclient(object):
         return self._action(params)
 
     def _action(self, params, body=None, content_type=None):
+
+        if not self.token:
+            return
+
         url = self.base_url + '/gui/' + '?token=' + self.token + '&' + urllib.urlencode(params)
         request = urllib2.Request(url)
 
