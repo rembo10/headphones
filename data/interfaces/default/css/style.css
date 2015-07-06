@@ -411,6 +411,15 @@ form .indent input {
 form .suboptions {
   margin-left: 15px;
 }
+.option{
+  font-size: 15px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+input.bigcheck[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
 ul,
 ol {
   margin-left: 2em;
