@@ -35,6 +35,7 @@ import time
 import cgi
 import sys
 import os
+import re
 
 try:
     # pylint:disable=E0611
@@ -268,12 +269,67 @@ class WebInterface(object):
     def scanArtist(self, ArtistID):
         logger.info(u"Scanning artist: %s", ArtistID)
         myDB = db.DBConnection()
-        artistname = myDB.select('SELECT DISTINCT ArtistName FROM artists WHERE ArtistID=?', [ArtistID])
-        artistfolder = os.path.join(headphones.CONFIG.DESTINATION_DIR, artistname[0][0])
-        try:
-            threading.Thread(target=librarysync.libraryScan(dir=artistfolder)).start()
-        except Exception as e:
-            logger.error('Unable to complete the scan: %s', e)
+        full_folder_format = headphones.CONFIG.FOLDER_FORMAT
+        folder_format = re.findall(r'(.*[Aa]rtist?)\.*', full_folder_format)[0]
+        acceptable_formats = ["$artist","$sortartist","$first/$artist","$first/$sortartist"]
+        if not folder_format.lower() in acceptable_formats:
+            logger.info("Can't determine the artist folder from the configured folder_format. Not scanning")
+            return
+
+        # Format the folder to match the settings
+        artist = myDB.select('SELECT DISTINCT ArtistName FROM artists WHERE ArtistID=?', [ArtistID])[0][0]
+        artist = artist.replace('/', '_')
+
+        if headphones.CONFIG.FILE_UNDERSCORES:
+            artist = artist.replace(' ', '_')
+
+        if artist.startswith('The '):
+            sortname = artist[4:] + ", The"
+        else:
+            sortname = artist
+
+        if sortname[0].isdigit():
+            firstchar = u'0-9'
+        else:
+            firstchar = sortname[0]
+
+        values = {'$Artist': artist,
+                '$SortArtist': sortname,
+                '$First': firstchar.upper(),
+                '$artist': artist.lower(),
+                '$sortartist': sortname.lower(),
+                '$first': firstchar.lower(),
+            }
+
+        folder = helpers.replace_all(folder_format.strip(), values, normalize=True)
+
+        folder = helpers.replace_illegal_chars(folder, type="folder")
+        folder = folder.replace('./', '_/').replace('/.', '/_')
+
+        if folder.endswith('.'):
+            folder = folder[:-1] + '_'
+
+        if folder.startswith('.'):
+            folder = '_' + folder[1:]
+
+        dirs = []
+        if headphones.CONFIG.MUSIC_DIR:
+            dirs.append(headphones.CONFIG.MUSIC_DIR)
+        if headphones.CONFIG.DESTINATION_DIR:
+            dirs.append(headphones.CONFIG.DESTINATION_DIR)
+        if headphones.CONFIG.LOSSLESS_DESTINATION_DIR:
+            dirs.append(headphones.CONFIG.LOSSLESS_DESTINATION_DIR)
+
+        dirs = set(dirs)
+
+        for dir in dirs:
+            artistfolder = os.path.join(dir, folder)
+            if not os.path.isdir(artistfolder):
+                continue
+            try:
+                threading.Thread(target=librarysync.libraryScan(dir=artistfolder)).start()
+            except Exception as e:
+                logger.error('Unable to complete the scan: %s', e)
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 
     @cherrypy.expose
