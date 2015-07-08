@@ -99,7 +99,7 @@ _CONFIG_DEFINITIONS = {
     'HPUSER': (str, 'General', ''),
     'HTTPS_CERT': (str, 'General', ''),
     'HTTPS_KEY': (str, 'General', ''),
-    'HTTP_HOST': (str, 'General', '0.0.0.0'),
+    'HTTP_HOST': (str, 'General', 'localhost'),
     'HTTP_PASSWORD': (str, 'General', ''),
     'HTTP_PORT': (int, 'General', 8181),
     'HTTP_PROXY': (int, 'General', 0),
