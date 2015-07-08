@@ -443,52 +443,30 @@ class PUSHBULLET(object):
         self.apikey = headphones.CONFIG.PUSHBULLET_APIKEY
         self.deviceid = headphones.CONFIG.PUSHBULLET_DEVICEID
 
-    def conf(self, options):
-        return cherrypy.config['config'].get('PUSHBULLET', options)
-
-    def notify(self, message, event):
+    def notify(self, message):
         if not headphones.CONFIG.PUSHBULLET_ENABLED:
             return
 
-        http_handler = HTTPSConnection("api.pushbullet.com")
+        url = "https://api.pushbullet.com/v2/pushes"
 
         data = {'type': "note",
                 'title': "Headphones",
-                'body': message.encode("utf-8")}
+                'body': message}
 
-        http_handler.request("POST",
-                                "/v2/pushes",
-                                headers={'Content-type': "application/json",
-                                            'Authorization': 'Basic %s' % base64.b64encode(headphones.CONFIG.PUSHBULLET_APIKEY + ":")},
-                                body=json.dumps(data))
-        response = http_handler.getresponse()
-        request_status = response.status
-        logger.debug(u"PushBullet response status: %r" % request_status)
-        logger.debug(u"PushBullet response headers: %r" % response.getheaders())
-        logger.debug(u"PushBullet response body: %r" % response.read())
+        if self.deviceid:
+            data['device_iden'] = self.deviceid
 
-        if request_status == 200:
-                logger.info(u"PushBullet notifications sent.")
-                return True
-        elif request_status >= 400 and request_status < 500:
-                logger.info(u"PushBullet request failed: %s" % response.reason)
-                return False
+        headers={'Content-type': "application/json",
+                 'Authorization': 'Bearer ' + headphones.CONFIG.PUSHBULLET_APIKEY}
+
+        response = request.request_json(url, method="post", headers=headers, data=json.dumps(data))
+
+        if response:
+            logger.info(u"PushBullet notifications sent.")
+            return True
         else:
-                logger.info(u"PushBullet notification failed serverside.")
-                return False
-
-    def updateLibrary(self):
-        #For uniformity reasons not removed
-        return
-
-    def test(self, apikey, deviceid):
-
-        self.enabled = True
-        self.apikey = apikey
-        self.deviceid = deviceid
-
-        self.notify('Main Screen Activate', 'Test Message')
-
+            logger.info(u"PushBullet notification failed.")
+            return False
 
 class PUSHALOT(object):
 
