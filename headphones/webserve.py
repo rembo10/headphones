@@ -1443,6 +1443,12 @@ class WebInterface(object):
         plex = notifiers.Plex()
         plex.notify("hellooooo", "test album!", "")
 
+    @cherrypy.expose
+    def testPushbullet(self):
+        logger.info("Testing Pushbullet notifications")
+        pushbullet = notifiers.PUSHBULLET()
+        pushbullet.notify("it works!")
+
 class Artwork(object):
     @cherrypy.expose
     def index(self):
