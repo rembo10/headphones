@@ -320,28 +320,12 @@ class Plex(object):
 
     def _sendhttp(self, host, command):
 
-        username = self.username
-        password = self.password
+        url = host + '/xbmcCmds/xbmcHttp/?' + command
 
-        url_command = urllib.urlencode(command)
-
-        url = host + '/xbmcCmds/xbmcHttp/?' + url_command
-
-        req = urllib2.Request(url)
-
-        if password:
-            base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
-            req.add_header("Authorization", "Basic %s" % base64string)
-
-        logger.info('Plex url: %s' % url)
-
-        try:
-            handle = urllib2.urlopen(req)
-        except Exception as e:
-            logger.warn('Error opening Plex url: %s' % e)
-            return
-
-        response = handle.read().decode(headphones.SYS_ENCODING)
+        if self.password:
+            response = request.request_response(url, auth=(self.username, self.password))
+        else:
+            response = request.request_response(url)
 
         return response
 
