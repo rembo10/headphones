@@ -267,17 +267,22 @@ class WebInterface(object):
 
     @cherrypy.expose
     def scanArtist(self, ArtistID):
-        logger.info(u"Scanning artist: %s", ArtistID)
+
         myDB = db.DBConnection()
+        artist = myDB.select('SELECT DISTINCT ArtistName FROM artists WHERE ArtistID=?', [ArtistID])[0][0]
+
+        logger.info(u"Scanning artist: %s", artist)
+
         full_folder_format = headphones.CONFIG.FOLDER_FORMAT
         folder_format = re.findall(r'(.*[Aa]rtist?)\.*', full_folder_format)[0]
+
         acceptable_formats = ["$artist","$sortartist","$first/$artist","$first/$sortartist"]
+
         if not folder_format.lower() in acceptable_formats:
             logger.info("Can't determine the artist folder from the configured folder_format. Not scanning")
             return
 
         # Format the folder to match the settings
-        artist = myDB.select('SELECT DISTINCT ArtistName FROM artists WHERE ArtistID=?', [ArtistID])[0][0]
         artist = artist.replace('/', '_')
 
         if headphones.CONFIG.FILE_UNDERSCORES:
@@ -325,11 +330,9 @@ class WebInterface(object):
         for dir in dirs:
             artistfolder = os.path.join(dir, folder)
             if not os.path.isdir(artistfolder):
+                logger.debug("Cannot find directory: " + artistfolder)
                 continue
-            try:
-                threading.Thread(target=librarysync.libraryScan(dir=artistfolder)).start()
-            except Exception as e:
-                logger.error('Unable to complete the scan: %s', e)
+            threading.Thread(target=librarysync.libraryScan, kwargs={"dir":artistfolder}).start()
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 
     @cherrypy.expose
