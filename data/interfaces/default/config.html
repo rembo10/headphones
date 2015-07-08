@@ -1076,10 +1076,10 @@
                                 </div>
                                 <div id="pushbulletoptions">
                                     <div class="row">
-                                        <label>API Key</label><input type="text" name="pushbullet_apikey" value="${config['pushbullet_apikey']}" size="50">
+                                        <label>Access Token</label><input type="text" name="pushbullet_apikey" value="${config['pushbullet_apikey']}" size="50">
                                     </div>
                                     <div class="row">
-                                        <label>Device ID</label><input type="text" name="pushbullet_deviceid" value="${config['pushbullet_deviceid']}" size="50">
+                                        <label>Device ID</label><input type="text" name="pushbullet_deviceid" value="${config['pushbullet_deviceid']}" size="50"><small>Leave blank to send to all devices</small>
                                     </div>
                                     <div class="row checkbox">
                                         <input type="checkbox" name="pushbullet_onsnatch" value="1" ${config['pushbullet_onsnatch']} /><label>Notify on snatch?</label>
