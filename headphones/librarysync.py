@@ -334,7 +334,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                 for artist in artist_list:
                     myDB.action('INSERT OR IGNORE INTO newartists VALUES (?)', [artist])
 
-        if headphones.CONFIG.DETECT_BITRATE:
+        if headphones.CONFIG.DETECT_BITRATE and bitrates:
             headphones.CONFIG.PREFERRED_BITRATE = sum(bitrates) / len(bitrates) / 1000
 
     else:
