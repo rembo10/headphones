@@ -347,7 +347,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
     if not append:
         update_album_status()
 
-    if not append or not scanArtist:
+    if not append and not artistScan:
         lastfm.getSimilar()
 
     logger.info('Library scan complete')
