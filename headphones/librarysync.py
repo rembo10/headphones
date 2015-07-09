@@ -23,7 +23,7 @@ from headphones import db, logger, helpers, importer, lastfm
 # You can scan a single directory and append it to the current library by
 # specifying append=True, ArtistID and ArtistName.
 def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
-    cron=False):
+    cron=False, artistScan=False):
 
     if cron and not headphones.CONFIG.LIBRARYSCAN:
         return
@@ -36,7 +36,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
 
     # If we're appending a dir, it's coming from the post processor which is
     # already bytestring
-    if not append:
+    if not append or artistScan:
         dir = dir.encode(headphones.SYS_ENCODING)
 
     if not os.path.isdir(dir):
@@ -287,7 +287,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
 
     logger.info('Completed matching tracks from directory: %s' % dir.decode(headphones.SYS_ENCODING, 'replace'))
 
-    if not append:
+    if not append or artistScan:
         logger.info('Updating scanned artist track counts')
 
         # Clean up the new artist list
@@ -346,6 +346,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
 
     if not append:
         update_album_status()
+
+    if not append or not scanArtist:
         lastfm.getSimilar()
 
     logger.info('Library scan complete')
