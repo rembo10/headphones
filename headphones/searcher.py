@@ -1325,7 +1325,10 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
             logger.info(u"Searching %s..." % provider)
             all_torrents = []
             for search_format in search_formats:
-                all_torrents.extend(gazelle.search_torrents(artistname=semi_clean_artist_term,
+                if usersearchterm:
+                    all_torrents.extend(gazelle.search_torrents(searchstr=usersearchterm, format=search_format, encoding=bitrate_string)['results'])
+                else:
+                    all_torrents.extend(gazelle.search_torrents(artistname=semi_clean_artist_term,
                                                               groupname=semi_clean_album_term,
                                                               format=search_format, encoding=bitrate_string)['results'])
 
