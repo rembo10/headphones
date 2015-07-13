@@ -38,7 +38,7 @@
                                         HTTP Host
                                     </label>
                                     <input type="text" name="http_host" value="${config['http_host']}" size="30">
-                                    <small>e.g. localhost or an IP, such as 0.0.0.0</small>
+                                    <small>Use 0.0.0.0 to allow outside connections</small>
                                 </div>
                                 <div class="row">
                                     <label title="Port to bind web server to. Note that ports below 1024 may require root.">
@@ -413,10 +413,9 @@
                         <td>
                             <legend>NZBs</legend>
                             <fieldset>
-                                <legend>Headphones Indexer</legend>
-                                <div class="row checkbox">
-                                    <input id="headphones_indexer" type="checkbox" name="headphones_indexer" onclick="initConfigCheckbox($(this));" value="1" ${config['headphones_indexer']} />
-                                    <label>Use Headphones Indexer</label>
+                                <div class="row checkbox left">
+                                    <input id="headphones_indexer" type="checkbox" class="bigcheck" name="headphones_indexer" value="1" ${config['headphones_indexer']} />
+                                    <label for="headphones_indexer"><span class="option">Headphones Indexer</span></label>
                                 </div>
                                 <div class="config">
                                     <div class="row">
@@ -434,9 +433,8 @@
                                 </div>
                             </fieldset>
                             <fieldset>
-                                <legend>Custom Newznab Providers</legend>
-                                <div class="row checkbox">
-                                    <input id="use_newznab" type="checkbox" name="use_newznab" onclick="initConfigCheckbox($(this));" value="1" ${config['use_newznab']} /><label>Use Newznab</label>
+                                <div class="row checkbox left">
+                                    <input id="use_newznab" type="checkbox" class="bigcheck" name="use_newznab" value="1" ${config['use_newznab']} /><label for="use_newznab"><span class="option">Custom Newznab Providers</span></label>
                                 </div>
                                 <div id="newznab_providers">
                                     <div class="config" id="newznab1">
@@ -450,7 +448,7 @@
                                             <input type="text" name="newznab_apikey" value="${config['newznab_apikey']}" size="36">
                                         </div>
                                         <div class="row checkbox">
-                                            <input id="newznab_enabled" type="checkbox" name="newznab_enabled" onclick="initConfigCheckbox($(this));" value="1" ${config['newznab_enabled']} /><label>Enabled</label>
+                                            <input id="newznab_enabled" type="checkbox" name="newznab_enabled" value="1" ${config['newznab_enabled']} /><label>Enabled</label>
                                         </div>
                                     </div>
                                     <%
@@ -488,9 +486,8 @@
                             </fieldset>
 
                             <fieldset>
-                                <legend>NZBs.org</legend>
-                                <div class="row checkbox">
-                                    <input id="use_nzbsorg" type="checkbox" name="use_nzbsorg" onclick="initConfigCheckbox($(this));" value="1" ${config['use_nzbsorg']} /><label>Use NZBs.org</label>
+                                <div class="row checkbox left">
+                                    <input id="use_nzbsorg" type="checkbox" class="bigcheck" name="use_nzbsorg" value="1" ${config['use_nzbsorg']} /><label for="use_nzbsorg"><span class="option">NZBs.org</span></label>
                                 </div>
                                 <div class="config">
                                     <div class="row">
@@ -500,9 +497,8 @@
                                 </div>
                             </fieldset>
                             <fieldset>
-                                <legend>omgwtfnzbs</legend>
-                                <div class="row checkbox">
-                                    <input id="use_omgwtfnzbs" type="checkbox" name="use_omgwtfnzbs" onclick="initConfigCheckbox($(this));" value="1" ${config['use_omgwtfnzbs']} /><label>Use omgwtfnzbs</label>
+                                <div class="row checkbox left">
+                                    <input id="use_omgwtfnzbs" type="checkbox" class="bigcheck" name="use_omgwtfnzbs" value="1" ${config['use_omgwtfnzbs']} /><label for="use_omgwtfnzbs"><span class="option">omgwtfnzbs</span></label>
                                 </div>
                                 <div class="config">
                                     <div class="row">
@@ -521,9 +517,8 @@
                                 <legend>Torrents</legend>
 
                                 <fieldset>
-                                    <legend>The Pirate Bay</legend>
-                                    <div class="row checkbox">
-                                        <input id="use_piratebay" type="checkbox" name="use_piratebay" value="1" ${config['use_piratebay']} /><label>Use The Pirate Bay</label>
+                                    <div class="row checkbox left">
+                                        <input id="use_piratebay" type="checkbox" class="bigcheck" name="use_piratebay" value="1" ${config['use_piratebay']} /><label for="use_piratebay"><span class="option">The Pirate Bay</span></label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -539,9 +534,8 @@
                                 </fieldset>
 
                                 <fieldset>
-                                    <legend>Old Pirate Bay</legend>
-                                    <div class="row checkbox">
-                                        <input id="use_oldpiratebay" type="checkbox" name="use_oldpiratebay" value="1" ${config['use_oldpiratebay']} /><label>Use Old Pirate Bay</label>
+                                    <div class="row checkbox left">
+                                        <input id="use_oldpiratebay" type="checkbox" class="bigcheck" name="use_oldpiratebay" value="1" ${config['use_oldpiratebay']} /><label for="use_oldpiratebay"><span class="option">Old Pirate Bay</span></label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -556,9 +550,8 @@
                                 </fieldset>
 
                                 <fieldset>
-                                    <legend>Kick Ass Torrents</legend>
-                                    <div class="row checkbox">
-                                        <input id="use_kat" type="checkbox" name="use_kat" value="1" ${config['use_kat']} /><label>Use Kick Ass Torrents</label>
+                                    <div class="row checkbox left">
+                                        <input id="use_kat" type="checkbox" class="bigcheck" name="use_kat" value="1" ${config['use_kat']} /><label for="use_kat"><span class="option">Kick Ass Torrents</span></label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -574,9 +567,8 @@
                                 </fieldset>
 
                                 <fieldset>
-                                    <legend>Waffles.fm</legend>
-                                    <div class="row checkbox">
-                                        <input id="use_waffles" type="checkbox" name="use_waffles" onclick="initConfigCheckbox($(this));" value="1" ${config['use_waffles']} /><label>Use Waffles.fm</label>
+                                    <div class="row checkbox left">
+                                        <input id="use_waffles" type="checkbox" class="bigcheck" name="use_waffles" value="1" ${config['use_waffles']} /><label for="use_waffles"><span class="option">Waffles.fm</span></label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -595,9 +587,8 @@
                                 </fieldset>
 
                                 <fieldset>
-                                    <legend>rutracker.org</legend>
-                                    <div class="row checkbox">
-                                        <input id="use_rutracker" type="checkbox" name="use_rutracker" onclick="initConfigCheckbox($(this));" value="1" ${config['use_rutracker']} /><label>Use rutracker.org</label>
+                                    <div class="row checkbox left">
+                                        <input id="use_rutracker" type="checkbox" class="bigcheck" name="use_rutracker" value="1" ${config['use_rutracker']} /><label for="use_rutracker"><span class="option">rutracker.org</span></label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -616,9 +607,8 @@
                                 </fieldset>
 
                                 <fieldset>
-                                    <legend>What.cd</legend>
-                                    <div class="row checkbox">
-                                        <input id="use_whatcd" type="checkbox" name="use_whatcd" onclick="initConfigCheckbox($(this));" value="1" ${config['use_whatcd']} /><label>Use What.cd</label>
+                                    <div class="row checkbox left">
+                                        <input id="use_whatcd" type="checkbox" class="bigcheck" name="use_whatcd" value="1" ${config['use_whatcd']} /><label for="use_whatcd"><span class="option">What.cd</span></label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -637,9 +627,8 @@
                                 </fieldset>
 
                                 <fieldset>
-                                    <legend>Mininova</legend>
-                                     <div class="row checkbox">
-                                        <input id="use_mininova" type="checkbox" name="use_mininova" value="1" ${config['use_mininova']} /><label>Use Mininova</label>
+                                     <div class="row checkbox left">
+                                        <input id="use_mininova" type="checkbox" class="bigcheck" name="use_mininova" value="1" ${config['use_mininova']} /><label for="use_mininova"><span class="option">Mininova</span></label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
@@ -659,50 +648,54 @@
                 <table class="configtable" summary="Quality &amp; Post Processing">
                     <tr>
                         <td>
+                            <legend>Quality</legend>
                             <fieldset>
-                                <legend>Quality</legend>
-                                <div class="row radio clearfix">
+                                <div class="row checkbox left clearfix nopad">
                                     <label title="Snatch the highest quality available, excluding lossless.">
                                         <input type="radio" name="preferred_quality" id="preferred_quality0" value="0" ${config['pref_qual_0']}>
                                         Highest Quality excluding Lossless
                                     </label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label title="Snatch the highest quality available, including lossless.">
                                         <input type="radio" name="preferred_quality" id="preferred_quality1" value="1" ${config['pref_qual_1']}>
                                         Highest Quality including Lossless
                                     </label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label title="Snatch only lossless quality.">
                                         <input type="radio" name="preferred_quality" id="lossless_only" value="3" ${config['pref_qual_3']}>
                                         Lossless Only
                                     </label>
-                                    <div id="lossless_only_options">
-                                        <span style="padding-left: 20px">
-                                            Reject if target size is not in bitrate range:
-                                            <input type="text" class="override-float" name="lossless_bitrate_from" value="${config['lossless_bitrate_from']}" size="4" title="e.g. if album length = 40 mins, from = 350 kbps, then min target size = 102.5 mb, anything less will be rejected">to\
-                                            <input type="text" class="override-float" name="lossless_bitrate_to" value="${config['lossless_bitrate_to']}" size="5" title="e.g. if album length = 40 mins, to = 2000 kbps, then max target size = 586 mb, anything greater will be rejected">kbps
-                                        </span>
-                                    </div>
+                                </div>
+                                <div id="lossless_only_options" class="row left clearfix">
+                                    <span style="padding-left: 20px">
+                                        Reject if target size is not in bitrate range:
+                                        <input type="text" class="override-float" name="lossless_bitrate_from" value="${config['lossless_bitrate_from']}" size="4" title="e.g. if album length = 40 mins, from = 350 kbps, then min target size = 102.5 mb, anything less will be rejected">to\
+                                        <input type="text" class="override-float" name="lossless_bitrate_to" value="${config['lossless_bitrate_to']}" size="5" title="e.g. if album length = 40 mins, to = 2000 kbps, then max target size = 586 mb, anything greater will be rejected">kbps
+                                    </span>
+                                </div>
+                                <div class="row left clearfix nopad">
                                     <label title="Prefer certain bitrate range, including lossless fallback. Use this option if you have a lot of wrong snatches.">
                                         <input type="radio" id="preferred_bitrate" name="preferred_quality" value="2" ${config['pref_qual_2']}>
                                         Preferred Bitrate
                                     <label>
-                                    <div id="preferred_bitrate_options">
-                                        <div class="row">
-                                            Target bitrate
-                                            <input type="text" class="override-float" name="preferred_bitrate" value="${config['preferred_bitrate']}" size="3">kbps<br>
-                                        </div>
-                                        <div class="row">
-                                            <span style="padding-left: 20px">
-                                                Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['preferred_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['preferred_bitrate_high']}" size="3">% of the target size (leave blank for no limit)<br>
-                                            </span>
-                                        </div>
-                                        <div class="row checkbox left" style="padding-left: 20px">
-                                            <input type="checkbox" name="preferred_bitrate_allow_lossless" value="1" ${config['preferred_bitrate_allow_lossless']}>
-                                            <label>Allow lossless if no good lossy match found</label>
-                                        </div>
-                                        <div class="row checkbox left" style="padding-left: 20px">
-                                            <input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} />
-                                            <label>Auto-Detect Preferred Bitrate</label>
-                                        </div>
+                                </div>
+                                <div id="preferred_bitrate_options" class="suboptions">
+                                    <div class="row nopad">
+                                        Target bitrate: 
+                                        <input type="text" class="override-float" name="preferred_bitrate" value="${config['preferred_bitrate']}" size="3">kbps<br>
+                                    </div>
+                                    <div class="row nopad">
+                                        Reject if <strong>less than</strong> <input type="text" class="override-float" name="preferred_bitrate_low_buffer" value="${config['preferred_bitrate_low']}" size="3">% or <strong>more than</strong> <input type="text" class="override-float" name="preferred_bitrate_high_buffer" value="${config['preferred_bitrate_high']}" size="3">% of the target size (leave blank for no limit)
+                                    </div>
+                                    <div class="row checkbox clearfix left nopad">
+                                        <input type="checkbox" name="preferred_bitrate_allow_lossless" value="1" ${config['preferred_bitrate_allow_lossless']}>
+                                        <label>Allow lossless if no good lossy match found</label>
+                                    </div>
+                                    <div class="row checkbox clearfix left nopad">
+                                        <input type="checkbox" name="detect_bitrate" value="1" ${config['detect_bitrate']} >
+                                        <label>Auto-Detect Preferred Bitrate</label>
                                     </div>
                                 </div>
                             </fieldset>
@@ -735,68 +728,78 @@
                         <td>
                             <fieldset>
                                 <legend>Post-Processing</legend>
-                                <div class="row checkbox left clearfix">
+                                <div class="row checkbox left clearfix nopad">
+                                    <label>
+                                        Move downloads to Destination Folder
+                                        <input type="checkbox" name="move_files" id="move_files" value="1" ${config['move_files']} />
+                                    </label>
+                                </div>
+                                <div id="move_files_options" class="suboptions">
+                                    <div class="row checkbox left clearfix nopad">
+                                        <label>
+                                            Replace existing folders?
+                                            <input type="checkbox" name="replace_existing_folders" value="1" ${config['replace_existing_folders']}>
+                                        </label>
+                                     </div>
+                                     <div class="row checkbox left clearfix nopad">
+                                        <label>
+                                            Keep original folder (i.e. copy)?
+                                            <input type="checkbox" name="keep_original_folder" value="1" ${config['keep_original_folder']}>
+                                        </label>
+                                     </div>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
+                                    <label>
+                                        Rename files
+                                        <input type="checkbox" name="rename_files" value="1" ${config['rename_files']} />
+                                    </label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
+                                    <label>
+                                        Correct metadata
+                                        <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} />
+                                    </label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label title="Use associated .cue sheet to split single file albums into multiple tracks. Requires shntool with flac or xld cli (OS X) to be installed.">
                                         Split single file albums into multiple tracks
                                         <input type="checkbox" name="cue_split" id="cue_split" value="1" ${config['cue_split']} />
                                     </label>
                                 </div>
-                                <div class="row checkbox left clearfix">
-                                    <label>
-                                        Move downloads to Destination Folder
-                                        <input type="checkbox" name="move_files" id="move_files" value="1" ${config['move_files']} />
-                                    </label>
-                                    <div id="move_files_options">
-                                        <div class="row indent">
-                                            <label>
-                                                Replace existing folders?
-                                                <input type="checkbox" name="replace_existing_folders" value="1" ${config['replace_existing_folders']}>
-                                            </label>
-                                         </div>
-                                         <div class="row indent">
-                                            <label>
-                                                Keep original folder?
-                                                <input type="checkbox" name="keep_original_folder" value="1" ${config['keep_original_folder']}>
-                                            </label>
-                                         </div>
-                                    </div>
-                                    <label>
-                                        Rename files
-                                        <input type="checkbox" name="rename_files" value="1" ${config['rename_files']} />
-                                    </label>
-                                    <label>
-                                        Correct metadata
-                                        <input type="checkbox" name="correct_metadata" value="1" ${config['correct_metadata']} />
-                                    </label>
+                                <div class="row checkbox left clearfix nopad">
                                     <label>
                                         Delete leftover files <small>(.m3u, .nfo, .sfv, .nzb, etc.)</small>
                                         <input type="checkbox" name="cleanup_files" value="1" ${config['cleanup_files']} />
                                     </label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label>
                                         Keep original nfo <small>(extension changed to .orig.nfo)</small>
                                         <input type="checkbox" name="keep_nfo" value="1" ${config['keep_nfo']} />
                                     </label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label>
                                         Add album art jpeg to album folder
                                         <input type="checkbox" name="add_album_art" id="add_album_art" value="1" ${config['add_album_art']}>
                                     </label>
-                                    <div id="album_art_options" style="padding-left: 20px">
-                                        <div class="row">
-                                            as <input type="text" class="override-float" name="album_art_format" value="${config['album_art_format']}" size="10">.jpg
-                                        </div>
-                                        <small>Use $Artist/$artist, $Album/$album, $Year/$year</small>
+                                </div>
+                                <div id="album_art_options" style="padding-left: 20px">
+                                    <div class="row">
+                                        as <input type="text" class="override-float" name="album_art_format" value="${config['album_art_format']}" size="10">.jpg
                                     </div>
+                                    <small>Use $Artist/$artist, $Album/$album, $Year/$year</small>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label>
                                         Embed album art in each file
                                         <input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}>
                                     </label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label>
                                         Embed lyrics
                                         <input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}>
-                                    </label>
-                                    <label title="Use ID3v2.3 instead of ID3v2.4">
-                                        Tag using ID3v2.3
-                                        <input type="checkbox" name="idtag" value="1" ${config['idtag']}>
                                     </label>
                                 </div>
                                 <div class="row">
@@ -824,284 +827,8 @@
                     <tr>
                         <td>
                             <fieldset>
-                                <h3>Growl</h3>
-                                <div class="row checkbox">
-                                    <input type="checkbox" name="growl_enabled" id="growl" value="1" ${config['growl_enabled']} /><label>Enable Growl Notifications</label>
-                                </div>
-                                <div id="growloptions">
-                                    <div class="row">
-                                        <label>Growl Host:Port</label><input type="text" name="growl_host" value="${config['growl_host']}" size="30">
-                                    </div>
-                                    <div class="row">
-                                        <label>Growl Password</label><input type="password" name="growl_password" value="${config['growl_password']}" size="30">
-                                    </div>
-                                    <div class="row checkbox">
-                                        <input type="checkbox" name="growl_onsnatch" value="1" ${config['growl_onsnatch']} /><label>Notify on snatch?</label>
-                                    </div>
-                                </div>
-                            </fieldset>
-                            <fieldset>
-                                <h3>Prowl</h3>
-                                <div class="row checkbox">
-                                    <input type="checkbox" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} /><label>Enable Prowl Notifications</label>
-                                </div>
-                                <div id="prowloptions">
-                                    <div class="row">
-                                        <label>API key</label><input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50">
-                                    </div>
-                                    <div class="row checkbox">
-                                        <input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} /><label>Notify on snatch?</label>
-                                    </div>
-                                    <div class="row">
-                                        <label>Priority (-2,-1,0,1 or 2)</label>
-                                        <input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2">
-                                    </div>
-                                </div>
-                            </fieldset>
-                            <fieldset>
-                                <h3>XBMC</h3>
-                                <div class="checkbox row">
-                                    <input type="checkbox" name="xbmc_enabled" id="xbmc" value="1" ${config['xbmc_enabled']} /><label>Enable XBMC Updates</label>
-                                </div>
-                                <div id="xbmcoptions">
-                                    <div class="row">
-                                        <label>XBMC Host:Port</label>
-                                        <input type="text" name="xbmc_host" value="${config['xbmc_host']}" size="30">
-                                        <small>e.g. http://localhost:8080. Separate hosts with commas</small>
-                                    </div>
-                                    <div class="row">
-                                        <label>XBMC Username</label><input type="text" name="xbmc_username" value="${config['xbmc_username']}" size="30">
-                                    </div>
-                                    <div class="row">
-                                        <label>XBMC Password</label><input type="password" name="xbmc_password" value="${config['xbmc_password']}" size="30">
-                                    </div>
-                                    <div class="checkbox row">
-                                        <input type="checkbox" name="xbmc_update" value="1" ${config['xbmc_update']} /><label>Update XBMC Library</label>
-                                    </div>
-                                    <div class="checkbox row">
-                                        <input type="checkbox" name="xbmc_notify" value="1" ${config['xbmc_notify']} /><label>Send Notification to XBMC</label>
-                                    </div>
-                                </div>
-                            </fieldset>
-                            <fieldset>
-                                <h3>Plex Media Server</h3>
-                                <div class="checkbox row">
-                                    <input type="checkbox" name="plex_enabled" id="plex" value="1" ${config['plex_enabled']} /><label>Enable Plex Updates</label>
-                                </div>
-                                <div id="plexoptions">
-                                    <div class="row">
-                                        <label>Plex Server Host:Port</label>
-                                        <input type="text" name="plex_server_host" value="${config['plex_server_host']}" size="30">
-                                        <small>Host running Plex Media Server (eg. http://192.168.1.100:32400)</small>
-                                    </div>
-                                    <div class="row">
-                                        <label>Plex Client Host:Port</label>
-                                        <input type="text" name="plex_client_host" value="${config['plex_client_host']}" size="30">
-                                        <small>Host running Plex Client (eg. http://192.168.1.100:3000)</small>
-                                    </div>
-                                    <div class="row">
-                                        <label>Plex Username</label><input type="text" name="plex_username" value="${config['plex_username']}" size="30">
-					                    <small>Username of your Plex client API (blank for none)</small>
-                                    </div>
-                                    <div class="row">
-                                        <label>Plex Password</label><input type="password" name="plex_password" value="${config['plex_password']}" size="30">
-					                    <small>Password of your Plex client API (blank for none)</small>
-                                    </div>
-                                    <div class="row">
-                                        <label>Plex Token</label><input type="text" name="plex_token" value="${config['plex_token']}" size="30">
-                              <small>Plex Token (for use with Plex Home)</small>
-                                    </div>
-                                    <div class="checkbox row">
-                                        <input type="checkbox" name="plex_update" value="1" ${config['plex_update']} /><label>Update Plex Library</label>
-                                    </div>
-                                    <div class="checkbox row">
-                                        <input type="checkbox" name="plex_notify" value="1" ${config['plex_notify']} /><label>Send Notifications to Plex</label>
-                                    </div>
-                                </div>
-                            </fieldset>
-                            <fieldset>
-                                <h3>NotifyMyAndroid</h3>
-                                <div class="checkbox row">
-                                    <input type="checkbox" name="nma_enabled" id="nma" value="1" ${config['nma_enabled']} /><label>Enable NotifyMyAndroid</label>
-                                </div>
-                                <div id="nmaoptions">
-                                    <div class="row checkbox">
-                                        <input type="checkbox" name="nma_onsnatch" value="1" ${config['nma_onsnatch']} /><label>Notify on snatch?</label>
-                                    </div>
-                                    <div class="row">
-                                        <label>NotifyMyAndroid API Key</label>
-                                        <input type="text" name="nma_apikey" value="${config['nma_apikey']}" size="30">
-                                        <small>Separate multiple api keys with commas</small>
-                                    </div>
-                                    <div class="row">
-                                        <label>Priority</label>
-                                        <select name="nma_priority">
-                                        %for x in [-2,-1,0,1,2]:
-                                        <%
-                                            if config['nma_priority'] == x:
-                                                nma_priority_selected = 'selected'
-                                            else:
-                                                nma_priority_selected = ''
-
-                                            if x == -2:
-                                                nma_priority_value = 'Very Low'
-                                            elif x == -1:
-                                                nma_priority_value = 'Moderate'
-                                            elif x == 0:
-                                                nma_priority_value = 'Normal'
-                                            elif x == 1:
-                                                nma_priority_value = 'High'
-                                            else:
-                                                nma_priority_value = 'Emergency'
-                                        %>
-                                            <option value=${x} ${nma_priority_selected}>${nma_priority_value}</option>
-                                        %endfor
-                                        </select>
-                                    </div>
-                                </div>
-                            </fieldset>
-                            <fieldset>
-                                <h3>Logitech Media Server</h3>
-                                <div class="checkbox row">
-                                    <input type="checkbox" name="lms_enabled" id="lms" value="1" ${config['lms_enabled']} /><label>Enable LMS Updates</label>
-                                </div>
-                                <div id="lmsoptions">
-                                    <div class="row">
-                                        <label>LMS Host:Port</label>
-                                        <input type="text" name="lms_host" value="${config['lms_host']}" size="30">
-                                        <small>e.g. http://localhost:9000. Seperate hosts with commas</small>
-                                    </div>
-                                </div>
-                            </fieldset>
-
-                            <fieldset>
-                                <h3>Pushalot</h3>
-                                <div class="checkbox row">
-                                    <input type="checkbox" name="pushalot_enabled" id="pushalot" value="1" ${config['pushalot_enabled']} /><label>Enable Pushalot</label>
-                                </div>
-                                <div id="pushalotoptions">
-                                    <div class="row checkbox">
-                                        <input type="checkbox" name="pushalot_onsnatch" value="1" ${config['pushalot_onsnatch']} /><label>Notify on snatch?</label>
-                                    </div>
-                                    <div class="row">
-                                        <label>Pushalot API Key</label>
-                                        <input type="text" name="pushalot_apikey" value="${config['pushalot_apikey']}" size="30">
-                                        <small>Separate multiple api keys with commas</small>
-                                    </div>
-                                </div>
-                            </fieldset>
-
-                            <fieldset>
-                                <h3>Subsonic</h3>
-                                <div class="row checkbox">
-                                    <input type="checkbox" name="subsonic_enabled" id="subsonic" value="1" ${config['subsonic_enabled']} /><label>Enable Subsonic Updates</label>
-                                </div>
-                                <div id="subsonicoptions">
-                                    <div class="row">
-                                        <label>Subsonic URL</label><input type="text" name="subsonic_host" value="${config['subsonic_host']}" size="30">
-                                    </div>
-                                    <div class="row">
-                                        <label>Subsonic Username</label><input type="text" name="subsonic_username" value="${config['subsonic_username']}" size="30">
-                                    </div>
-                                    <div class="row">
-                                        <label>Subsonic Password</label><input type="password" name="subsonic_password" value="${config['subsonic_password']}" size="30">
-                                    </div>
-                                </div>
-                            </fieldset>
-
-                        </td>
-                        <td>
-
-                            <fieldset>
-                                <h3>Synology NAS</h3>
-                                <div class="checkbox row">
-                                    <input type="checkbox" name="synoindex_enabled" id="synoindex" value="1" ${config['synoindex_enabled']} /><label>Enable Synoindex</label>
-                                </div>
-                            </fieldset>
-
-                            <fieldset>
-                                <h3>Pushover</h3>
-                                <div class="row checkbox">
-                                    <input type="checkbox" name="pushover_enabled" id="pushover" value="1" ${config['pushover_enabled']} /><label>Enable Pushover Notifications</label>
-                                </div>
-                                <div id="pushoveroptions">
-                                    <div class="row">
-                                        <label>User key</label><input type="text" name="pushover_keys" value="${config['pushover_keys']}" size="50">
-                                    </div>
-                                    <div class="row checkbox">
-                                        <input type="checkbox" name="pushover_onsnatch" value="1" ${config['pushover_onsnatch']} /><label>Notify on snatch?</label>
-                                    </div>
-                                    <div class="row">
-                                        <label>Priority (-1,0, or 1)</label>
-                                        <input type="text" name="pushover_priority" value="${config['pushover_priority']}" size="2">
-                                    </div>
-                                    <div class="row">
-                                        <label>API Token (leave blank to use Headphones default)</label><input type="text" name="pushover_apitoken" value="${config['pushover_apitoken']}" size="50">
-                                    </div>
-                                </div>
-                            </fieldset>
-
-                            <fieldset>
-                                <h3>Pushbullet</h3>
-                                <div class="row checkbox">
-                                    <input type="checkbox" name="pushbullet_enabled" id="pushbullet" value="1" ${config['pushbullet_enabled']} /><label>Enable PushBullet Notifications</label>
-                                </div>
-                                <div id="pushbulletoptions">
-                                    <div class="row">
-                                        <label>API Key</label><input type="text" name="pushbullet_apikey" value="${config['pushbullet_apikey']}" size="50">
-                                    </div>
-                                    <div class="row">
-                                        <label>Device ID</label><input type="text" name="pushbullet_deviceid" value="${config['pushbullet_deviceid']}" size="50">
-                                    </div>
-                                    <div class="row checkbox">
-                                        <input type="checkbox" name="pushbullet_onsnatch" value="1" ${config['pushbullet_onsnatch']} /><label>Notify on snatch?</label>
-                                    </div>
-                                </div>
-                            </fieldset>
-
-                            <fieldset>
-                                <h3>Twitter</h3>
-                                <div class="row checkbox">
-                                    <input type="checkbox" name="twitter_enabled" id="twitter" value="1" ${config['twitter_enabled']} /><label>Enable Twitter Notifications</label>
-                                </div>
-                                <div id="twitteroptions">
-                                    <div class="row checkbox">
-                                        <input type="checkbox" name="twitter_onsnatch" value="1" ${config['twitter_onsnatch']} /><label>Notify on snatch?</label>
-                                    </div>
-                                    <div class="row">
-                                        <input type="button" value="Request Authorization" id="twitterStep1" />
-                                    </div>
-                                    <div class="row">
-                                        <input type="text" id="twitter_key" value="" size="35" placeholder="Input Authorization Key" />
-                                        <input type="button" value="Verify Key" id="twitterStep2" />
-                                    </div>
-                                    <div class="row">
-                                        <input type="button" value="Test Twitter" id="testTwitter" />
-                                    </div>
-                                </div>
-                            </fieldset>
-
-                            <fieldset>
-                                <h3>OS X</h3>
-                                <div class="row checkbox">
-                                    <input type="checkbox" name="osx_notify_enabled" id="osx_notify" value="1" ${config['osx_notify_enabled']} /><label>Enable OS X Notifications</label>
-                                </div>
-                                <div id="osx_notify_options">
-                                     <div class="row">
-                                        <small>Enter the path/application name to be registered with the Notification Center, default is /Applications/Headphones</small>
-                                        <input type="text" id="osx_notify_reg" name="osx_notify_app" value="${config['osx_notify_app']}" size="50"><label>Register Notify App</label>
-                                        <input type="button" value="Register" id="osxnotifyregister">
-                                    </div>
-                                    <div class="row checkbox">
-                                        <input type="checkbox" name="osx_notify_onsnatch" value="1" ${config['osx_notify_onsnatch']} /><label>Notify on snatch?</label>
-                                    </div>
-                                </div>
-                            </fieldset>
-
-                            <fieldset>
-                                <h3>Boxcar2</h3>
-                                <div class="row checkbox">
-                                    <input type="checkbox" name="boxcar_enabled" id="boxcar" value="1" ${config['boxcar_enabled']} /><label>Enable Boxcar2 Notifications</label>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="boxcar_enabled" id="boxcar" value="1" ${config['boxcar_enabled']} /><label for="boxcar"><span class="option">Boxcar 2</span></label>
                                 </div>
                                 <div id="boxcar_options">
                                     <div class="row">
@@ -1114,16 +841,8 @@
                             </fieldset>
 
                             <fieldset>
-                                <h3>MPC</h3>
-                                <div class="checkbox row">
-                                    <input type="checkbox" name="mpc_enabled" id="mpc" value="1" ${config['mpc_enabled']} /><label>Enable MPC Update</label>
-                                </div>
-                            </fieldset>
-
-                           <fieldset>
-                                <h3>Email</h3>
-                                <div class="row checkbox">
-                                    <input type="checkbox" name="email_enabled" id="email" value="1" ${config['email_enabled']} /><label>Enable Email Notifications</label>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="email_enabled" id="email" value="1" ${config['email_enabled']} /><label for="email"><span class="option">Email</span></label>
                                 </div>
                                 <div id="email_options">
                                     <div class="row">
@@ -1157,7 +876,283 @@
                             </fieldset>
 
                             <fieldset>
-                            </td>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="growl_enabled" id="growl" value="1" ${config['growl_enabled']} /><label for="growl"><span class="option">Growl</span></label>
+                                </div>
+                                <div id="growloptions">
+                                    <div class="row">
+                                        <label>Growl Host:Port</label><input type="text" name="growl_host" value="${config['growl_host']}" size="30">
+                                    </div>
+                                    <div class="row">
+                                        <label>Growl Password</label><input type="password" name="growl_password" value="${config['growl_password']}" size="30">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="growl_onsnatch" value="1" ${config['growl_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="xbmc_enabled" id="xbmc" value="1" ${config['xbmc_enabled']} /><label for="xbmc"><span class="option">Kodi / XBMC</span></label>
+                                </div>
+                                <div id="xbmcoptions">
+                                    <div class="row">
+                                        <label>Host(s)</label>
+                                        <input type="text" name="xbmc_host" value="${config['xbmc_host']}" size="30">
+                                        <small>e.g. http://localhost:8080. Separate hosts with commas</small>
+                                    </div>
+                                    <div class="row">
+                                        <label>Username</label><input type="text" name="xbmc_username" value="${config['xbmc_username']}" size="30">
+                                    </div>
+                                    <div class="row">
+                                        <label>Password</label><input type="password" name="xbmc_password" value="${config['xbmc_password']}" size="30">
+                                    </div>
+                                    <div class="checkbox row">
+                                        <input type="checkbox" name="xbmc_update" value="1" ${config['xbmc_update']} /><label>Update Library</label>
+                                    </div>
+                                    <div class="checkbox row">
+                                        <input type="checkbox" name="xbmc_notify" value="1" ${config['xbmc_notify']} /><label>Send Notifications</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="lms_enabled" id="lms" value="1" ${config['lms_enabled']} /><label for="lms"><span class="option">Logitech Media Server</span></label>
+                                </div>
+                                <div id="lmsoptions">
+                                    <div class="row">
+                                        <label>LMS Host:Port</label>
+                                        <input type="text" name="lms_host" value="${config['lms_host']}" size="30">
+                                        <small>e.g. http://localhost:9000. Seperate hosts with commas</small>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="mpc_enabled" id="mpc" value="1" ${config['mpc_enabled']} /><label for="mpc"><span class="option">MPC</span></label>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="nma_enabled" id="nma" value="1" ${config['nma_enabled']} /><label for="nma"><span class="option">NotifyMyAndroid</span></label>
+                                </div>
+                                <div id="nmaoptions">
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="nma_onsnatch" value="1" ${config['nma_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                    <div class="row">
+                                        <label>API Key</label>
+                                        <input type="text" name="nma_apikey" value="${config['nma_apikey']}" size="30">
+                                        <small>Separate multiple api keys with commas</small>
+                                    </div>
+                                    <div class="row">
+                                        <label>Priority</label>
+                                        <select name="nma_priority">
+                                        %for x in [-2,-1,0,1,2]:
+                                        <%
+                                            if config['nma_priority'] == x:
+                                                nma_priority_selected = 'selected'
+                                            else:
+                                                nma_priority_selected = ''
+
+                                            if x == -2:
+                                                nma_priority_value = 'Very Low'
+                                            elif x == -1:
+                                                nma_priority_value = 'Moderate'
+                                            elif x == 0:
+                                                nma_priority_value = 'Normal'
+                                            elif x == 1:
+                                                nma_priority_value = 'High'
+                                            else:
+                                                nma_priority_value = 'Emergency'
+                                        %>
+                                            <option value=${x} ${nma_priority_selected}>${nma_priority_value}</option>
+                                        %endfor
+                                        </select>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="osx_notify_enabled" id="osx_notify" value="1" ${config['osx_notify_enabled']} /><label for="osx_notify"><span class="option">OS X</span></label>
+                                </div>
+                                <div id="osx_notify_options">
+                                    <div class="row">
+                                        <input type="text" id="osx_notify_reg" name="osx_notify_app" value="${config['osx_notify_app']}" size="50"><label>Register Notify App</label>
+                                    </div>
+                                    <div class="row">
+                                        <small>Enter the path/application name to be registered with the Notification Center, default is /Applications/Headphones</small>
+                                    </div>
+                                    <div class="row">
+                                        <input type="button" value="Register" id="osxnotifyregister"><label></label>
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="osx_notify_onsnatch" value="1" ${config['osx_notify_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                        </td>
+                        <td>
+
+                            <fieldset>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="plex_enabled" id="plex" value="1" ${config['plex_enabled']} /><label for="plex"><span class="option">Plex</span></label>
+                                </div>
+                                <div id="plexoptions">
+                                    <div class="row">
+                                        <label>Plex Server Host:Port</label>
+                                        <input type="text" name="plex_server_host" value="${config['plex_server_host']}" size="30">
+                                        <small>Host running Plex Media Server (eg. http://192.168.1.100:32400)</small>
+                                    </div>
+                                    <div class="row">
+                                        <label>Plex Client Host:Port</label>
+                                        <input type="text" name="plex_client_host" value="${config['plex_client_host']}" size="30">
+                                        <small>Host running Plex Client (eg. http://192.168.1.100:3005)</small>
+                                    </div>
+                                    <div class="row">
+                                        <label>Plex Username</label><input type="text" name="plex_username" value="${config['plex_username']}" size="30">
+                                        <small>Username of your Plex client API (blank for none)</small>
+                                    </div>
+                                    <div class="row">
+                                        <label>Plex Password</label><input type="password" name="plex_password" value="${config['plex_password']}" size="30">
+                                        <small>Password of your Plex client API (blank for none)</small>
+                                    </div>
+                                    <div class="row">
+                                        <label>Plex Token</label><input type="text" name="plex_token" value="${config['plex_token']}" size="30">
+                              <small>Plex Token (for use with Plex Home)</small>
+                                    </div>
+                                    <div class="checkbox row">
+                                        <input type="checkbox" name="plex_update" value="1" ${config['plex_update']} /><label>Update Plex Library</label>
+                                    </div>
+                                    <div class="checkbox row">
+                                        <input type="checkbox" name="plex_notify" value="1" ${config['plex_notify']} /><label>Send Notifications to Plex</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="prowl_enabled" id="prowl" value="1" ${config['prowl_enabled']} /><label for="prowl"><span class="option">Prowl</span></label>
+                                </div>
+                                <div id="prowloptions">
+                                    <div class="row">
+                                        <label>API key</label><input type="text" name="prowl_keys" value="${config['prowl_keys']}" size="50">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="prowl_onsnatch" value="1" ${config['prowl_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                    <div class="row">
+                                        <label>Priority (-2,-1,0,1 or 2)</label>
+                                        <input type="text" name="prowl_priority" value="${config['prowl_priority']}" size="2">
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="pushalot_enabled" id="pushalot" value="1" ${config['pushalot_enabled']} /><label for="pushalot"><span class="option">Pushalot</span></label>
+                                </div>
+                                <div id="pushalotoptions">
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="pushalot_onsnatch" value="1" ${config['pushalot_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                    <div class="row">
+                                        <label>Pushalot API Key</label>
+                                        <input type="text" name="pushalot_apikey" value="${config['pushalot_apikey']}" size="30">
+                                        <small>Separate multiple api keys with commas</small>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="pushbullet_enabled" id="pushbullet" value="1" ${config['pushbullet_enabled']} /><label for="pushbullet"><span class="option">Pushbullet</span></label>
+                                </div>
+                                <div id="pushbulletoptions">
+                                    <div class="row">
+                                        <label>Access Token</label><input type="text" name="pushbullet_apikey" value="${config['pushbullet_apikey']}" size="50">
+                                    </div>
+                                    <div class="row">
+                                        <label>Device ID</label><input type="text" name="pushbullet_deviceid" value="${config['pushbullet_deviceid']}" size="50"><small>Leave blank to send to all devices</small>
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="pushbullet_onsnatch" value="1" ${config['pushbullet_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="pushover_enabled" id="pushover" value="1" ${config['pushover_enabled']} /><label for="pushover"><span class="option">Pushover</span></label>
+                                </div>
+                                <div id="pushoveroptions">
+                                    <div class="row">
+                                        <label>User Key</label><input type="text" name="pushover_keys" value="${config['pushover_keys']}" size="50">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="pushover_onsnatch" value="1" ${config['pushover_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                    <div class="row">
+                                        <label>Priority (-1,0, or 1)</label>
+                                        <input type="text" name="pushover_priority" value="${config['pushover_priority']}" size="2">
+                                    </div>
+                                    <div class="row">
+                                        <label>API Token (leave blank to use Headphones default)</label><input type="text" name="pushover_apitoken" value="${config['pushover_apitoken']}" size="50">
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="subsonic_enabled" id="subsonic" value="1" ${config['subsonic_enabled']} /><label for="subsonic"><span class="option">Subsonic</span></label>
+                                </div>
+                                <div id="subsonicoptions">
+                                    <div class="row">
+                                        <label>Subsonic URL</label><input type="text" name="subsonic_host" value="${config['subsonic_host']}" size="30">
+                                    </div>
+                                    <div class="row">
+                                        <label>Subsonic Username</label><input type="text" name="subsonic_username" value="${config['subsonic_username']}" size="30">
+                                    </div>
+                                    <div class="row">
+                                        <label>Subsonic Password</label><input type="password" name="subsonic_password" value="${config['subsonic_password']}" size="30">
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" name="synoindex_enabled" id="synoindex" value="1" ${config['synoindex_enabled']} /><label for="synoindex"><span class="option">Synology NAS</span></label>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="twitter_enabled" id="twitter" value="1" ${config['twitter_enabled']} /><label for="twitter"><span class="option">Twitter</span></label>
+                                </div>
+                                <div id="twitteroptions">
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="twitter_onsnatch" value="1" ${config['twitter_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                    <div class="row">
+                                        <input type="button" value="Request Authorization" id="twitterStep1" />
+                                    </div>
+                                    <div class="row">
+                                        <input type="text" id="twitter_key" value="" size="35" placeholder="Input Authorization Key" />
+                                        <input type="button" value="Verify Key" id="twitterStep2" />
+                                    </div>
+                                    <div class="row">
+                                        <input type="button" value="Test Twitter" id="testTwitter" />
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                        </td>
                     </tr>
                 </table>
                 <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
@@ -1171,7 +1166,7 @@
                             <div class="row">
                                 <label>Folder Format</label>
                                 <input type="text" name="folder_format" value="${config['folder_format']}" size="43">
-                                <small>Use: $Artist/$artist, $Album/$album, $Year/$year, $Type/$type (release type) and $First/$first (first letter in artist name), $OriginalFolder/$originalfolder (downloaded directory name)
+                                <small>Use: $Artist/$artist, $SortArtist/$sortartist, $Album/$album, $Year/$year, $Type/$type (release type) and $First/$first (first letter in artist name), $OriginalFolder/$originalfolder (downloaded directory name)
                                                                 E.g.: $Type/$First/$artist/$album [$year] = Album/G/girl talk/all day [2010]</small>
 
                             </div>
@@ -1265,7 +1260,7 @@
                                     </div>
                                     <div class="row">
                                         <label>VBR/CBR</label>
-                                        <select name="encodervbrcbr">
+                                        <select name="encodervbrcbr" id="encodervbrcbr">
                                         %for x in ['cbr', 'vbr']:
                                             <%
                                                 if config['encodervbrcbr'] == x:
@@ -1277,35 +1272,38 @@
                                         %endfor
                                         </select>
                                     </div>
-                                    <div class="row">
-                                        <label>Quality</label>
-                                        <select name="encoderquality">
-                                        %for x in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
-                                            <%
-                                                if config['encoderquality'] == x:
-                                                    outputselect = 'selected'
-                                                else:
-                                                    outputselect = ''
-                                            %>
-                                            <option value=${x} ${outputselect}>${x}</option>
-                                        %endfor
-                                        </select>
+                                    <div id="vbr_options">
+                                        <div class="row">
+                                            <label>Quality</label>
+                                            <select name="encoderquality">
+                                            %for x in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
+                                                <%
+                                                    if config['encoderquality'] == x:
+                                                        outputselect = 'selected'
+                                                    else:
+                                                        outputselect = ''
+                                                %>
+                                                <option value=${x} ${outputselect}>${x}</option>
+                                            %endfor
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div class="row">
-                                        <label>Bitrate</label>
-                                        <select name="bitrate">
-                                        %for x in [64, 128, 192, 256, 320]:
-                                            <%
-                                                if config["bitrate"] == x:
-                                                    bitrateselected = "selected"
-                                                else:
-                                                    bitrateselected = ''
-                                            %>
-                                            <option value=${x} ${bitrateselected}> ${x} kbps</option>
-                                        %endfor
-                                        </select>
+                                    <div id="cbr_options">
+                                        <div class="row">
+                                            <label>Bitrate</label>
+                                            <select name="bitrate">
+                                            %for x in [64, 128, 192, 256, 320]:
+                                                <%
+                                                    if config["bitrate"] == x:
+                                                        bitrateselected = "selected"
+                                                    else:
+                                                        bitrateselected = ''
+                                                %>
+                                                <option value=${x} ${bitrateselected}> ${x} kbps</option>
+                                            %endfor
+                                            </select>
+                                        </div>
                                     </div>
-
                                     <%
                                         if config["samplingfrequency"] == 44100:
                                             freq44100 = 'selected="selected"'
@@ -1347,7 +1345,7 @@
                         <td>
                             <fieldset>
                                 <legend>Miscellaneous</legend>
-                                <div class="checkbox left row">
+                                <div class="row checkbox left clearfix nopad">
                                     <input type="checkbox" name="include_extras" id="include_extras" value="1" ${config['include_extras']} /><label>Automatically include extras when adding an artist <br>
                                     <%
                                         which_extras_selected = ""
@@ -1372,21 +1370,33 @@
                                     %endfor
                                     </div>
                                 </div>
-                                <div class="row left checkbox">
-                                    <input type="checkbox" name="autowant_upcoming" value="1" ${config['autowant_upcoming']} /><label>Automatically mark upcoming albums as wanted</label>
+                                <div class="row checkbox left clearfix nopad">
+                                    <label><input type="checkbox" name="official_releases_only" value="1" ${config['official_releases_only']} />Only include 'official' extras (i.e. no bootlegs, promos, etc.)</label>
                                 </div>
-                                <div class="row left checkbox">
-                                    <input type="checkbox" name="autowant_all" value="1" ${config['autowant_all']} /><label>Automatically mark all albums as wanted</label>
+                                <div class="row checkbox left clearfix nopad">
+                                    <label><input type="checkbox" name="autowant_upcoming" value="1" ${config['autowant_upcoming']} />Automatically mark upcoming albums as wanted</label>
                                 </div>
-                                <div class="row left checkbox">
-                                    <input type="checkbox" title="Automatically mark manually added albums from search results as wanted"
-                                           name="autowant_manually_added" value="1" ${config['autowant_manually_added']} />
-                                    <label>Automatically mark manually added albums as wanted</label>
+                                <div class="row checkbox left clearfix nopad">
+                                    <label><input type="checkbox" name="autowant_all" value="1" ${config['autowant_all']} />Automatically mark all albums as wanted</label>
                                 </div>
-                                <div class="row left checkbox">
+                                <div class="row checkbox left clearfix nopad">
+                                    <label><input type="checkbox" title="Automatically mark manually added albums from search results as wanted"
+                                           name="autowant_manually_added" value="1" ${config['autowant_manually_added']} />Automatically mark manually added albums as wanted</label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
+                                    <label><input type="checkbox" title="Wait until album release date before searching"
+                                           name="wait_until_release_date" value="1" ${config['wait_until_release_date']} />Wait until an album's release date before searching</label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label title="Freeze the database, so new artists won't be added automatically. Use this if Headphones adds artists because due to wrong snatches. This check is skipped when the folder name is appended with release group ID.">
                                         Don't add new artists when post-processing albums
                                         <input type="checkbox" name="freeze_db" id="freeze_db" value="1" ${config['freeze_db']} />
+                                    </label>
+                                </div>
+                                <div class="row checkbox left clearfix">
+                                    <label title="Use ID3v2.3 instead of ID3v2.4">
+                                        Tag using ID3v2.3 instead of ID3v2.4
+                                        <input type="checkbox" name="idtag" value="1" ${config['idtag']}>
                                     </label>
                                 </div>
                                 <div class="row">
@@ -1402,11 +1412,11 @@
                                     <input type="text" name="cache_sizemb" value="${config['cache_sizemb']}" size="7">
                                 </div>
                             </fieldset>
-                            <fieldset>
+                            <!--<fieldset>
                                 <legend>Interface</legend>
                                 <div class="row" style="display: none">
                                     <label>Interface</label>
-                                    <select name="interface"><h3>
+                                    <select name="interface">
                                     %for interface in config['interface_list']:
                                     <%
                                         if interface == headphones.CONFIG.INTERFACE:
@@ -1418,6 +1428,9 @@
                                     %endfor
                                     </select>
                                 </div>
+                            </fieldset>-->
+                            <fieldset>
+                                <legend>Directories</legend>
                                 <div class="row">
                                     <label>Log Directory</label>
                                     <input type="text" name="log_dir" value="${config['log_dir']}" size="50">
@@ -1431,12 +1444,12 @@
                             <fieldset>
                                 <legend>Songkick</legend>
                                 <div class="row checkbox">
-                                    <input type="checkbox" name="songkick_enabled" id="songkick" value="1" ${config['songkick_enabled']} /><label>Display concerts by Songkick</label>
+                                    <input type="checkbox" name="songkick_enabled" id="songkick" value="1" ${config['songkick_enabled']} /><label>Show concert info</label>
                                 </div>
                                 <div id="songkickoptions">
                                   <div class="row">
                                       <label>API Key</label>
-                                      <input type="text" name="songkick_apikey" value="${config['songkick_apikey']}" size="50">
+                                      <input type="text" name="songkick_apikey" value="${config['songkick_apikey']}" size="40">
                                   </div>
                                   <div class="row checkbox">
                                       <input type="checkbox" name="songkick_filter_enabled" id="songkick_filter" value="1" ${config['songkick_filter_enabled']} /><label>Filter by Metro Area</label>
@@ -1495,7 +1508,7 @@
                                         <label>Username</label><input type="text" class="hpuser" name="hpuser" value="${config['hpuser']}" size="20">
                                     </div>
                                     <div class="row">
-                                        <label>Password</label><input type="password" class="hppass" name="hppass" value="${config['hppass']}" size="15"><br>
+                                        <label>Password</label><input type="password" class="hppass" name="hppass" value="${config['hppass']}" size="20"><br>
                                         <a href="https://headphones.codeshy.com/vip" id="vipserver" target="_blank">Get an Account!</a>
                                     </div>
                                 </div>
@@ -1521,6 +1534,10 @@
         hideEncoderDivs = function () {
                 $("#lameffmpegproperties").slideUp();
                 $("#xldproperties").slideUp();
+        };
+        hideEncodingOptionDivs = function () {
+                $("#vbr_options").slideUp();
+                $("#cbr_options").slideUp();
         };
 
         handleNewServerSelection = function () {
@@ -1551,6 +1568,19 @@
                             break;
                         case 'lame':
                             $("#lameffmpegproperties").slideDown();
+                            break;
+                }
+        };
+
+        handleNewEncodingOptionSelection = function () {
+                hideEncodingOptionDivs();
+
+                switch ($(this).val()) {
+                        case 'vbr':
+                            $("#vbr_options").slideDown();
+                            break;
+                        case 'cbr':
+                            $("#cbr_options").slideDown();
                             break;
                 }
         };
@@ -2116,6 +2146,9 @@
 
                 $("#encoder").change(handleNewEncoderSelection);
                         handleNewEncoderSelection.apply($("#encoder"));
+
+                $("#encodervbrcbr").change(handleNewEncodingOptionSelection);
+                        handleNewEncodingOptionSelection.apply($("#encodervbrcbr"));
 
                 var deletedNewznabs = 0;
 

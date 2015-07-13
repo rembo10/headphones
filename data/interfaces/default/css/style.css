@@ -325,7 +325,7 @@ form fieldset small.heading {
   margin-top: -15px;
 }
 form .row {
-  font-family: Helvetica, Arial;
+  font-family: Helvetica, Arial, sans-serif;
   margin-bottom: 10px;
 }
 form .row label {
@@ -407,6 +407,18 @@ form .checkbox small {
 }
 form .indent input {
   margin-left: 15px;
+}
+form .suboptions {
+  margin-left: 15px;
+}
+.option{
+  font-size: 15px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+input.bigcheck[type="checkbox"] {
+  width: 16px;
+  height: 16px;
 }
 ul,
 ol {
@@ -1419,6 +1431,13 @@ div#artistheader h2 a {
   font-size: 10px;
   line-height: 10px;
   height: 10px;
+}
+.nopad {
+  margin-bottom: 0px !important;
+  margin-top: 0px !important;
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+  padding: 0px 0px !important;
 }
 #album_table th#albumname,
 #upcoming_table th#artistname,

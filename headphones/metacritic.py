@@ -37,12 +37,13 @@ def update(artistid, artist_name,release_groups):
 
     url = "http://www.metacritic.com/person/" + mc_artist_name + "?filter-options=music&sort_options=date&num_items=100"
 
-    res = request.request_soup(url, headers=headers, parser='html.parser')
+    res = request.request_soup(url, headers=headers)
 
     rows = None
 
     try:
-        rows = res.tbody.find_all('tr')
+        table = res.find("table", class_="credits person_credits")
+        rows = table.tbody.find_all('tr')
     except:
         logger.info("Unable to get metacritic scores for: %s" % artist_name)
 

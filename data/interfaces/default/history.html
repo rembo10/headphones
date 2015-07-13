@@ -52,6 +52,8 @@
                 fileid = 'torrent'
             if item['URL'].find('rutracker') != -1:
                 fileid = 'torrent'
+            if item['URL'].find('codeshy') != -1:
+                fileid = 'nzb'
 
             folder = 'Folder: ' + item['FolderName']
 
