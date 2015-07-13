@@ -32,8 +32,10 @@ import random
 import urllib
 import json
 import time
+import cgi
 import sys
 import os
+import re
 
 try:
     # pylint:disable=E0611
@@ -149,7 +151,7 @@ class WebInterface(object):
             searchresults = mb.findRelease(name, limit=100)
         else:
             searchresults = mb.findSeries(name, limit=100)
-        return serve_template(templatename="searchresults.html", title='Search Results for: "' + name + '"', searchresults=searchresults, name=name, type=type)
+        return serve_template(templatename="searchresults.html", title='Search Results for: "' + cgi.escape(name) + '"', searchresults=searchresults, name=cgi.escape(name), type=type)
 
     @cherrypy.expose
     def addArtist(self, artistid):
@@ -265,14 +267,72 @@ class WebInterface(object):
 
     @cherrypy.expose
     def scanArtist(self, ArtistID):
-        logger.info(u"Scanning artist: %s", ArtistID)
+
         myDB = db.DBConnection()
-        artistname = myDB.select('SELECT DISTINCT ArtistName FROM artists WHERE ArtistID=?', [ArtistID])
-        artistfolder = os.path.join(headphones.CONFIG.DESTINATION_DIR, artistname[0][0])
-        try:
-            threading.Thread(target=librarysync.libraryScan(dir=artistfolder)).start()
-        except Exception as e:
-            logger.error('Unable to complete the scan: %s', e)
+        artist_name = myDB.select('SELECT DISTINCT ArtistName FROM artists WHERE ArtistID=?', [ArtistID])[0][0]
+
+        logger.info(u"Scanning artist: %s", artist_name)
+
+        full_folder_format = headphones.CONFIG.FOLDER_FORMAT
+        folder_format = re.findall(r'(.*[Aa]rtist?)\.*', full_folder_format)[0]
+
+        acceptable_formats = ["$artist","$sortartist","$first/$artist","$first/$sortartist"]
+
+        if not folder_format.lower() in acceptable_formats:
+            logger.info("Can't determine the artist folder from the configured folder_format. Not scanning")
+            return
+
+        # Format the folder to match the settings
+        artist = artist_name.replace('/', '_')
+
+        if headphones.CONFIG.FILE_UNDERSCORES:
+            artist = artist.replace(' ', '_')
+
+        if artist.startswith('The '):
+            sortname = artist[4:] + ", The"
+        else:
+            sortname = artist
+
+        if sortname[0].isdigit():
+            firstchar = u'0-9'
+        else:
+            firstchar = sortname[0]
+
+        values = {'$Artist': artist,
+                '$SortArtist': sortname,
+                '$First': firstchar.upper(),
+                '$artist': artist.lower(),
+                '$sortartist': sortname.lower(),
+                '$first': firstchar.lower(),
+            }
+
+        folder = helpers.replace_all(folder_format.strip(), values, normalize=True)
+
+        folder = helpers.replace_illegal_chars(folder, type="folder")
+        folder = folder.replace('./', '_/').replace('/.', '/_')
+
+        if folder.endswith('.'):
+            folder = folder[:-1] + '_'
+
+        if folder.startswith('.'):
+            folder = '_' + folder[1:]
+
+        dirs = []
+        if headphones.CONFIG.MUSIC_DIR:
+            dirs.append(headphones.CONFIG.MUSIC_DIR)
+        if headphones.CONFIG.DESTINATION_DIR:
+            dirs.append(headphones.CONFIG.DESTINATION_DIR)
+        if headphones.CONFIG.LOSSLESS_DESTINATION_DIR:
+            dirs.append(headphones.CONFIG.LOSSLESS_DESTINATION_DIR)
+
+        dirs = set(dirs)
+
+        for dir in dirs:
+            artistfolder = os.path.join(dir, folder)
+            if not os.path.isdir(artistfolder):
+                logger.debug("Cannot find directory: " + artistfolder)
+                continue
+            threading.Thread(target=librarysync.libraryScan, kwargs={"dir":artistfolder, "artistScan":True, "ArtistID":ArtistID, "ArtistName":artist_name}).start()
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 
     @cherrypy.expose
@@ -1073,6 +1133,8 @@ class WebInterface(object):
             "file_format": headphones.CONFIG.FILE_FORMAT,
             "file_underscores": checked(headphones.CONFIG.FILE_UNDERSCORES),
             "include_extras": checked(headphones.CONFIG.INCLUDE_EXTRAS),
+            "official_releases_only": checked(headphones.CONFIG.OFFICIAL_RELEASES_ONLY),
+            "wait_until_release_date": checked(headphones.CONFIG.WAIT_UNTIL_RELEASE_DATE),
             "autowant_upcoming": checked(headphones.CONFIG.AUTOWANT_UPCOMING),
             "autowant_all": checked(headphones.CONFIG.AUTOWANT_ALL),
             "autowant_manually_added": checked(headphones.CONFIG.AUTOWANT_MANUALLY_ADDED),
@@ -1218,9 +1280,10 @@ class WebInterface(object):
         checked_configs = [
             "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer", "use_newznab", "newznab_enabled",
             "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay", "use_mininova", "use_waffles", "use_rutracker",
-            "use_whatcd", "preferred_bitrate_allow_lossless", "detect_bitrate", "ignore_clean_releases", "freeze_db", "cue_split", "move_files", "rename_files",
-            "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art", "embed_album_art", "embed_lyrics", "replace_existing_folders", "keep_original_folder",
-            "file_underscores", "include_extras", "autowant_upcoming", "autowant_all", "autowant_manually_added", "keep_torrent_files", "music_encoder",
+            "use_whatcd", "preferred_bitrate_allow_lossless", "detect_bitrate", "ignore_clean_releases", "freeze_db", "cue_split", "move_files", 
+            "rename_files", "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art", "embed_album_art", "embed_lyrics", 
+            "replace_existing_folders", "keep_original_folder", "file_underscores", "include_extras", "official_releases_only", 
+            "wait_until_release_date", "autowant_upcoming", "autowant_all", "autowant_manually_added", "keep_torrent_files", "music_encoder",
             "encoderlossless", "encoder_multicore", "delete_lossless_files", "growl_enabled", "growl_onsnatch", "prowl_enabled",
             "prowl_onsnatch", "xbmc_enabled", "xbmc_update", "xbmc_notify", "lms_enabled", "plex_enabled", "plex_update", "plex_notify",
             "nma_enabled", "nma_onsnatch", "pushalot_enabled", "pushalot_onsnatch", "synoindex_enabled", "pushover_enabled",
@@ -1435,9 +1498,15 @@ class WebInterface(object):
 
     @cherrypy.expose
     def testPlex(self):
-        logger.info(u"Testing plex updates")
+        logger.info(u"Testing plex notifications")
         plex = notifiers.Plex()
-        plex.update()
+        plex.notify("hellooooo", "test album!", "")
+
+    @cherrypy.expose
+    def testPushbullet(self):
+        logger.info("Testing Pushbullet notifications")
+        pushbullet = notifiers.PUSHBULLET()
+        pushbullet.notify("it works!")
 
 class Artwork(object):
     @cherrypy.expose

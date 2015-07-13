@@ -466,6 +466,11 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
 
     myDB = db.DBConnection()
     results = []
+
+    release_status = "official"
+    if includeExtras and not headphones.CONFIG.OFFICIAL_RELEASES_ONLY:
+        release_status = []
+
     try:
         limit = 100
         newResults = None
@@ -474,6 +479,7 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
                 newResults = musicbrainzngs.browse_releases(
                     release_group=rgid,
                     includes=['artist-credits', 'labels', 'recordings', 'release-groups', 'media'],
+                    release_status = release_status,
                     limit=limit,
                     offset=len(results))
             if 'release-list' not in newResults:
@@ -513,10 +519,6 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
     num_new_releases = 0
 
     for releasedata in results:
-        #releasedata.get will return None if it doesn't have a status
-        #all official releases should have the Official status included
-        if not includeExtras and releasedata.get('status') != 'Official':
-            continue
 
         release = {}
         rel_id_check = releasedata['id']

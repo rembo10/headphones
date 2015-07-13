@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.5.8
+Released 13 July 2015
+
+Highlights:
+* Added: Option to only include official extras
+* Added: Option to wait until album release date before searching
+* Fixed: NotifyMyAndroid notifications
+* Fixed: Plex Notifications
+* Fixed: Metacritic parsing
+* Fixed: Pushbullet notifications
+* Fixed: What.cd not honoring custom search term (#2279)
+* Improved: XSS Search bug
+* Improved: Config page layout
+* Improved: Set localhost as default
+* Improved: Better single artist scanning
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.6...v0.5.7).
+
 ## v0.5.7
 Released 01 July 2015
 

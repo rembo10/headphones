@@ -149,7 +149,7 @@ def get_age(date):
 
     try:
         days_old = int(split_date[0]) * 365 + int(split_date[1]) * 30 + int(split_date[2])
-    except IndexError:
+    except (IndexError,ValueError):
         days_old = False
 
     return days_old

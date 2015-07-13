@@ -35,6 +35,7 @@
 							%for alternate_album in alternate_albums:
 								<%
 									track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=?", [alternate_album['ReleaseID']]))
+									mb_link = "http://musicbrainz.org/release/" + alternate_album['ReleaseID']
 									have_track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=? AND Location IS NOT NULL", [alternate_album['ReleaseID']]))
 									if alternate_album['AlbumID'] == alternate_album['ReleaseID']:
 										alternate_album_name = "Headphones Default Release (" + str(alternate_album['ReleaseDate']) + ") [" + str(have_track_count) + "/" + str(track_count) + " tracks]"
@@ -42,7 +43,7 @@
 										alternate_album_name = alternate_album['AlbumTitle'] + " (" + alternate_album['ReleaseCountry'] + ", " + str(alternate_album['ReleaseDate']) + ", " + alternate_album['ReleaseFormat'] + ") [" + str(have_track_count) + "/" + str(track_count) + " tracks]"
 									
 								%>
-								<a href="#" onclick="doAjaxCall('switchAlbum?AlbumID=${album['AlbumID']}&ReleaseID=${alternate_album['ReleaseID']}', $(this), 'table');" data-success="Switched release to: ${alternate_album_name}">${alternate_album_name}</a><br>
+								<a href="#" onclick="doAjaxCall('switchAlbum?AlbumID=${album['AlbumID']}&ReleaseID=${alternate_album['ReleaseID']}', $(this), 'table');" data-success="Switched release to: ${alternate_album_name}">${alternate_album_name}</a><a href="${mb_link}" target="_blank">MB</a><br>
 							%endfor
 						%endif
 					</div>
