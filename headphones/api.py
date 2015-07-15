@@ -325,7 +325,7 @@ class Api(object):
         myDB.upsert("albums", newValueDict, controlValueDict)
         
     def _forceLibScan(self, **kwargs):
-        librarysync.libraryscan()
+        librarysync.libraryScan()
     
     def _forceSearch(self, **kwargs):
         searcher.searchforalbum()
