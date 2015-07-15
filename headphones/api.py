@@ -13,14 +13,14 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import db, mb, updater, importer, searcher, cache, postprocessor, versioncheck, logger
+from headphones import db, mb, updater, importer, searcher, cache, postprocessor, versioncheck, logger, librarysync
 
 import headphones
 import json
 
 cmd_list = ['getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSnatched', 'getSimilar', 'getHistory', 'getLogs',
             'findArtist', 'findAlbum', 'addArtist', 'delArtist', 'pauseArtist', 'resumeArtist', 'refreshArtist',
-            'addAlbum', 'queueAlbum', 'unqueueAlbum', 'forceSearch', 'forceProcess', 'forceActiveArtistsUpdate', 
+            'addAlbum', 'queueAlbum', 'unqueueAlbum', 'forceLibScan', 'forceSearch', 'forceProcess', 'forceActiveArtistsUpdate', 
             'getVersion', 'checkGithub', 'shutdown', 'restart', 'update', 'getArtistArt', 'getAlbumArt', 
             'getArtistInfo', 'getAlbumInfo', 'getArtistThumb', 'getAlbumThumb', 'clearLogs',
             'choose_specific_download', 'download_specific_release']
@@ -323,7 +323,10 @@ class Api(object):
         controlValueDict = {'AlbumID': self.id}
         newValueDict = {'Status': 'Skipped'}
         myDB.upsert("albums", newValueDict, controlValueDict)
-
+        
+    def _forceLibScan(self, **kwargs):
+        librarysync.libraryscan()
+    
     def _forceSearch(self, **kwargs):
         searcher.searchforalbum()
 
