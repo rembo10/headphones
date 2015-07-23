@@ -475,7 +475,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     if headphones.CONFIG.PUSHBULLET_ENABLED:
         logger.info(u"PushBullet request")
         pushbullet = notifiers.PUSHBULLET()
-        pushbullet.notify(pushmessage, "Download and Postprocessing completed")
+        pushbullet.notify(pushmessage, statusmessage)
 
     if headphones.CONFIG.TWITTER_ENABLED:
         logger.info(u"Sending Twitter notification")

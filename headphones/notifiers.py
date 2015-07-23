@@ -443,7 +443,7 @@ class PUSHBULLET(object):
         self.apikey = headphones.CONFIG.PUSHBULLET_APIKEY
         self.deviceid = headphones.CONFIG.PUSHBULLET_DEVICEID
 
-    def notify(self, message):
+    def notify(self, message, status):
         if not headphones.CONFIG.PUSHBULLET_ENABLED:
             return
 
@@ -451,7 +451,7 @@ class PUSHBULLET(object):
 
         data = {'type': "note",
                 'title': "Headphones",
-                'body': message}
+                'body': message + ': ' + status}
 
         if self.deviceid:
             data['device_iden'] = self.deviceid

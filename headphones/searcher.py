@@ -932,7 +932,7 @@ def send_to_downloader(data, bestqual, album):
     if headphones.CONFIG.PUSHBULLET_ENABLED and headphones.CONFIG.PUSHBULLET_ONSNATCH:
         logger.info(u"Sending PushBullet notification")
         pushbullet = notifiers.PUSHBULLET()
-        pushbullet.notify(name + " has been snatched!", "Download started")
+        pushbullet.notify(name, "Download started")
     if headphones.CONFIG.TWITTER_ENABLED and headphones.CONFIG.TWITTER_ONSNATCH:
         logger.info(u"Sending Twitter notification")
         twitter = notifiers.TwitterNotifier()
