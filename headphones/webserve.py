@@ -274,7 +274,7 @@ class WebInterface(object):
         logger.info(u"Scanning artist: %s", artist_name)
 
         full_folder_format = headphones.CONFIG.FOLDER_FORMAT
-        folder_format = re.findall(r'(.*[Aa]rtist?)\.*', full_folder_format)[0]
+        folder_format = re.findall(r'(.*?[Aa]rtist?)\.*', full_folder_format)[0]
 
         acceptable_formats = ["$artist","$sortartist","$first/$artist","$first/$sortartist"]
 
