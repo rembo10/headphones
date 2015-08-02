@@ -36,11 +36,9 @@ import unicodedata
 
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
-from headphones import utorrent, transmission, notifiers
+from headphones import utorrent, transmission, notifiers, rutracker
 
 from bencode import bencode, bdecode
-
-import headphones.searcher_rutracker as rutrackersearch
 
 # Magnet to torrent services, for Black hole. Stolen from CouchPotato.
 TORRENT_TO_MAGNET_SERVICES = [
@@ -51,9 +49,7 @@ TORRENT_TO_MAGNET_SERVICES = [
 
 # Persistent What.cd API object
 gazelle = None
-
-# RUtracker search object
-rutracker = rutrackersearch.Rutracker()
+ruobj = None
 
 
 def fix_url(s, charset="utf-8"):
@@ -818,15 +814,9 @@ def send_to_downloader(data, bestqual, album):
                         "to open or convert magnet links")
                     return
             else:
-                if bestqual[3] == "rutracker.org":
-                    download_path, _ = rutracker.get_torrent(bestqual[2],
-                        headphones.CONFIG.TORRENTBLACKHOLE_DIR)
 
-                    if not download_path:
-                        return
-                else:
-                    if not torrent_to_file(download_path, data):
-                        return
+                if not torrent_to_file(download_path, data):
+                    return
 
                 # Extract folder name from torrent
                 folder_name = read_torrent_name(download_path, bestqual[0])
@@ -836,13 +826,11 @@ def send_to_downloader(data, bestqual, album):
         elif headphones.CONFIG.TORRENT_DOWNLOADER == 1:
             logger.info("Sending torrent to Transmission")
 
-            # rutracker needs cookies to be set, pass the .torrent file instead of url
+            # Add torrent
             if bestqual[3] == 'rutracker.org':
-                file_or_url, torrentid = rutracker.get_torrent(bestqual[2])
+                torrentid = transmission.addTorrent('', data)
             else:
-                file_or_url = bestqual[2]
-
-            torrentid = transmission.addTorrent(file_or_url)
+                torrentid = transmission.addTorrent(bestqual[2])
 
             if not torrentid:
                 logger.error("Error sending torrent to Transmission. Are you sure it's running?")
@@ -855,13 +843,6 @@ def send_to_downloader(data, bestqual, album):
                 logger.error('Torrent folder name could not be determined')
                 return
 
-            # remove temp .torrent file created above
-            if bestqual[3] == 'rutracker.org':
-                try:
-                    shutil.rmtree(os.path.split(file_or_url)[0])
-                except Exception as e:
-                    logger.exception("Unhandled exception")
-
             # Set Seed Ratio
             seed_ratio = get_seed_ratio(bestqual[3])
             if seed_ratio is not None:
@@ -870,29 +851,29 @@ def send_to_downloader(data, bestqual, album):
         else:# if headphones.CONFIG.TORRENT_DOWNLOADER == 2:
             logger.info("Sending torrent to uTorrent")
 
-            # rutracker needs cookies to be set, pass the .torrent file instead of url
+            # Add torrent
             if bestqual[3] == 'rutracker.org':
-                file_or_url, torrentid = rutracker.get_torrent(bestqual[2])
-                folder_name, cacheid = utorrent.dirTorrent(torrentid)
-                folder_name = os.path.basename(os.path.normpath(folder_name))
-                utorrent.labelTorrent(torrentid)
+                ruobj.utorrent_add_file(data)
             else:
-                file_or_url = bestqual[2]
-                torrentid = calculate_torrent_hash(file_or_url, data)
-                folder_name = utorrent.addTorrent(file_or_url, torrentid)
+                utorrent.addTorrent(bestqual[2])
 
+            # Get hash
+            torrentid = calculate_torrent_hash(bestqual[2], data)
+            if not torrentid:
+                logger.error('Torrent id could not be determined')
+                return
+
+            # Set Label
+            if headphones.CONFIG.UTORRENT_LABEL:
+                utorrent.labelTorrent(torrentid)
+
+            # Get folder
+            folder_name = utorrent.getFolder(torrentid)
             if folder_name:
                 logger.info('Torrent folder name: %s' % folder_name)
             else:
                 logger.error('Torrent folder name could not be determined')
                 return
-
-            # remove temp .torrent file created above
-            if bestqual[3] == 'rutracker.org':
-                try:
-                    shutil.rmtree(os.path.split(file_or_url)[0])
-                except Exception as e:
-                    logger.exception("Unhandled exception")
 
             # Set Seed Ratio
             seed_ratio = get_seed_ratio(bestqual[3])
@@ -1041,12 +1022,7 @@ def verifyresult(title, artistterm, term, lossless):
 
 def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose_specific_download=False):
     global gazelle  # persistent what.cd api object to reduce number of login attempts
-
-    # rutracker login
-    if headphones.CONFIG.RUTRACKER and album:
-        rulogin = rutracker.login(headphones.CONFIG.RUTRACKER_USER, headphones.CONFIG.RUTRACKER_PASSWORD)
-        if not rulogin:
-            logger.info(u'Could not login to rutracker, search results will exclude this provider')
+    global ruobj    # and rutracker
 
     albumid = album['AlbumID']
     reldate = album['ReleaseDate']
@@ -1239,45 +1215,38 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
                         logger.error(u"An error occurred while trying to parse the response from Waffles.fm: %s", e)
 
     # rutracker.org
-    if headphones.CONFIG.RUTRACKER and rulogin:
+    if headphones.CONFIG.RUTRACKER:
         provider = "rutracker.org"
 
         # Ignore if release date not specified, results too unpredictable
         if not year and not usersearchterm:
-            logger.info(u'Release date not specified, ignoring for rutracker.org')
+            logger.info(u"Release date not specified, ignoring for rutracker.org")
         else:
-
             if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
                 format = 'lossless'
-                maxsize = 10000000000
             elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
                 format = 'lossless+mp3'
-                maxsize = 10000000000
             else:
                 format = 'mp3'
-                maxsize = 300000000
 
-            # build search url based on above
-            if not usersearchterm:
-                searchURL = rutracker.searchurl(artistterm, albumterm, year, format)
-            else:
-                searchURL = rutracker.searchurl(usersearchterm, ' ', ' ', format)
+            # Login
+            if not ruobj or not ruobj.logged_in():
+                ruobj = rutracker.Rutracker()
+                if not ruobj.login():
+                    ruobj = None
 
-            logger.info(u'Parsing results from <a href="%s">rutracker.org</a>' % searchURL)
+            if ruobj and ruobj.logged_in():
 
-            # parse results and get best match
-            rulist = rutracker.search(searchURL, maxsize, minimumseeders, albumid)
+                # build search url
+                if not usersearchterm:
+                    searchURL = ruobj.searchurl(artistterm, albumterm, year, format)
+                else:
+                    searchURL = ruobj.searchurl(usersearchterm, ' ', ' ', format)
 
-            # add best match to overall results list
-            if rulist:
-                for ru in rulist:
-                    title = ru[0].decode('utf-8')
-                    size = ru[1]
-                    url = ru[2]
-                    resultlist.append((title, size, url, provider, 'torrent', True))
-                    logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-            else:
-                logger.info(u"No valid results found from %s" % (provider))
+                # parse results
+                rulist = ruobj.search(searchURL)
+                if rulist:
+                    resultlist.extend(rulist)
 
     if headphones.CONFIG.WHATCD:
         provider = "What.cd"
@@ -1567,11 +1536,13 @@ def preprocess(resultlist):
 
     for result in resultlist:
         if result[4] == 'torrent':
+
+            # rutracker always needs the torrent data
+            if result[3] == 'rutracker.org':
+                return ruobj.get_torrent_data(result[2]), result
+
             #Get out of here if we're using Transmission
             if headphones.CONFIG.TORRENT_DOWNLOADER == 1:  ## if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
-                return True, result
-            # get outta here if rutracker
-            if result[3] == 'rutracker.org':
                 return True, result
             # Get out of here if it's a magnet link
             if result[2].lower().startswith("magnet:"):

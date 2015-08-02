@@ -7,12 +7,10 @@ except ImportError:
         from ordereddict import OrderedDict
     except ImportError:
         OrderedDict = dict
-import gettext
-_ = gettext.gettext
 
 import re
 
-from six import text_type
+from six import string_types
 
 from . import _base
 from ..utils import moduleFactoryFactory
@@ -60,7 +58,7 @@ def getETreeBuilder(ElementTreeImplementation):
                 return _base.COMMENT, node.text
 
             else:
-                assert type(node.tag) == text_type, type(node.tag)
+                assert isinstance(node.tag, string_types), type(node.tag)
                 # This is assumed to be an ordinary element
                 match = tag_regexp.match(node.tag)
                 if match:

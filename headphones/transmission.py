@@ -28,12 +28,15 @@ import headphones
 #       Store torrent id so we can check up on it
 
 
-def addTorrent(link):
+def addTorrent(link, data=None):
     method = 'torrent-add'
 
-    if link.endswith('.torrent'):
-        with open(link, 'rb') as f:
-            metainfo = str(base64.b64encode(f.read()))
+    if link.endswith('.torrent') or data:
+        if data:
+            metainfo = str(base64.b64encode(data))
+        else:
+            with open(link, 'rb') as f:
+                metainfo = str(base64.b64encode(f.read()))
         arguments = {'metainfo': metainfo, 'download-dir': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}
     else:
         arguments = {'filename': link, 'download-dir': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}

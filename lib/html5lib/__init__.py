@@ -20,4 +20,6 @@ from .serializer import serialize
 
 __all__ = ["HTMLParser", "parse", "parseFragment", "getTreeBuilder",
            "getTreeWalker", "serialize"]
-__version__ = "0.999"
+
+# this has to be at the top level, see how setup.py parses this
+__version__ = "0.999999"
