@@ -863,10 +863,6 @@ def send_to_downloader(data, bestqual, album):
                 logger.error('Torrent id could not be determined')
                 return
 
-            # Set Label
-            if headphones.CONFIG.UTORRENT_LABEL:
-                utorrent.labelTorrent(torrentid)
-
             # Get folder
             folder_name = utorrent.getFolder(torrentid)
             if folder_name:
@@ -874,6 +870,10 @@ def send_to_downloader(data, bestqual, album):
             else:
                 logger.error('Torrent folder name could not be determined')
                 return
+
+            # Set Label
+            if headphones.CONFIG.UTORRENT_LABEL:
+                utorrent.labelTorrent(torrentid)
 
             # Set Seed Ratio
             seed_ratio = get_seed_ratio(bestqual[3])
@@ -1552,7 +1552,8 @@ def preprocess(resultlist):
             headers = {}
 
             if result[3] == 'Kick Ass Torrents':
-                headers['Referer'] = 'http://kat.ph/'
+                #headers['Referer'] = 'http://kat.ph/'
+                headers['User-Agent'] = USER_AGENT
             elif result[3] == 'What.cd':
                 headers['User-Agent'] = 'Headphones'
             elif result[3] == "The Pirate Bay" or result[3] == "Old Pirate Bay":
