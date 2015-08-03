@@ -43,8 +43,6 @@ class Rutracker(object):
 
         logger.info("Attempting to log in to rutracker...")
 
-        # User agent doesn't seem to matter?
-        #self.headers['User-Agent'] = self.useragents[random.randrange(0, len(self.useragents))]
         try:
             r = self.session.post(loginpage, data=post_params, timeout=self.timeout)
             if r.status_code != 200:
@@ -55,8 +53,7 @@ class Rutracker(object):
                     self.loggedin = True
                     logger.info("Successfully logged in to rutracker")
                 else:
-                    logger.error("Could not login to rutracker, credentials maybe incorrect, " /
-                                 "site is down or too many attempts")
+                    logger.error("Could not login to rutracker, credentials maybe incorrect, site is down or too many attempts. Try again later")
                     self.loggedin = False
             return self.loggedin
         except Exception as e:
@@ -152,8 +149,7 @@ class Rutracker(object):
                     topicurl = 'http://rutracker.org/forum/viewtopic.php?t=' + torrent_id
                     rulist.append((title, size, topicurl, 'rutracker.org', 'torrent', True))
                 else:
-                    logger.info("%s is larger than the maxsize or has too little seeders for this category, " \
-                                "skipping. (Size: %i bytes, Seeders: %i)" % (title, size, int(seeds)))
+                    logger.info("%s is larger than the maxsize or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i)" % (title, size, int(seeds)))
 
             if not rulist:
                 logger.info("No valid results found from rutracker")
