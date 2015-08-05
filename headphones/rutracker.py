@@ -6,6 +6,7 @@ from urlparse import urlparse
 from bs4 import BeautifulSoup
 
 import os
+import time
 import re
 
 import headphones
@@ -45,6 +46,10 @@ class Rutracker(object):
 
         try:
             r = self.session.post(loginpage, data=post_params, timeout=self.timeout)
+            # try again
+            if 'bb_data' not in r.cookies.keys():
+                time.sleep(10)
+                r = self.session.post(loginpage, data=post_params, timeout=self.timeout)
             if r.status_code != 200:
                 logger.error("rutracker login returned status code %s" % r.status_code)
                 self.loggedin = False
