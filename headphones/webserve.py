@@ -802,7 +802,7 @@ class WebInterface(object):
     @cherrypy.expose
     def forcePostProcess(self, dir=None, album_dir=None, keep_original_folder=False):
         from headphones import postprocessor
-        threading.Thread(target=postprocessor.forcePostProcess, kwargs={'dir': dir, 'album_dir': album_dir, 'keep_original_folder':keep_original_folder}).start()
+        threading.Thread(target=postprocessor.forcePostProcess, kwargs={'dir': dir, 'album_dir': album_dir, 'keep_original_folder':keep_original_folder == 'True'}).start()
         raise cherrypy.HTTPRedirect("home")
 
     @cherrypy.expose
