@@ -79,7 +79,7 @@ def getSimilar():
                 try:
                     artist_mbid = artist["mbid"]
                     artist_name = artist["name"]
-                except TypeError:
+                except KeyError:
                     continue
 
                 if not any(artist_mbid in x for x in results):
