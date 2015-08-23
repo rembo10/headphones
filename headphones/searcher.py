@@ -228,7 +228,7 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
 
     NZB_PROVIDERS = (headphones.CONFIG.HEADPHONES_INDEXER or headphones.CONFIG.NEWZNAB or headphones.CONFIG.NZBSORG or headphones.CONFIG.OMGWTFNZBS)
     NZB_DOWNLOADERS = (headphones.CONFIG.SAB_HOST or headphones.CONFIG.BLACKHOLE_DIR or headphones.CONFIG.NZBGET_HOST)
-    TORRENT_PROVIDERS = (headphones.CONFIG.KAT or headphones.CONFIG.PIRATEBAY or headphones.CONFIG.OLDPIRATEBAY or headphones.CONFIG.MININOVA or headphones.CONFIG.WAFFLES or headphones.CONFIG.RUTRACKER or headphones.CONFIG.WHATCD)
+    TORRENT_PROVIDERS = (headphones.CONFIG.TORZNAB or headphones.CONFIG.KAT or headphones.CONFIG.PIRATEBAY or headphones.CONFIG.OLDPIRATEBAY or headphones.CONFIG.MININOVA or headphones.CONFIG.WAFFLES or headphones.CONFIG.RUTRACKER or headphones.CONFIG.WHATCD)
 
     results = []
     myDB = db.DBConnection()
@@ -1085,6 +1085,68 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
             proxy_url = proxy_url[:-1]
 
         return proxy_url
+
+    if headphones.CONFIG.TORZNAB:
+        provider = "torznab"
+        torznab_hosts = []
+
+        if headphones.CONFIG.TORZNAB_HOST and headphones.CONFIG.TORZNAB_ENABLED:
+            torznab_hosts.append((headphones.CONFIG.TORZNAB_HOST, headphones.CONFIG.TORZNAB_APIKEY, headphones.CONFIG.TORZNAB_ENABLED))
+
+        for torznab_host in headphones.CONFIG.get_extra_torznabs():
+            if torznab_host[2] == '1' or torznab_host[2] == 1:
+                torznab_hosts.append(torznab_host)
+
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
+            categories = "3040"
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
+            categories = "3040,3010"
+        else:
+            categories = "3010"
+
+        if album['Type'] == 'Other':
+            categories = "3030"
+            logger.info("Album type is audiobook/spokenword. Using audiobook category")
+
+        for torznab_host in torznab_hosts:
+
+            provider = torznab_host[0]
+
+            # Request results
+            logger.info('Parsing results from %s using search term: %s' % (torznab_host[0],term))
+
+            headers = {'User-Agent': USER_AGENT}
+            params = {
+                "t": "search",
+                "apikey": torznab_host[1],
+                "cat": categories,
+                "maxage": headphones.CONFIG.USENET_RETENTION,
+                "q": term
+            }
+
+            data = request.request_feed(
+                url=torznab_host[0] + '/api?',
+                params=params, headers=headers
+            )
+
+            # Process feed
+            if data:
+                if not len(data.entries):
+                    logger.info(u"No results found from %s for %s", torznab_host[0], term)
+                else:
+                    for item in data.entries:
+                        try:
+                            url = item.link
+                            title = item.title
+                            size = int(item.links[1]['length'])
+                            if all(word.lower() in title.lower() for word in term.split()):
+                                logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                                resultlist.append((title, size, url, provider, 'torrent', True))
+                            else:
+                                logger.info('Skipping %s, not all search term words found' % title)
+
+                        except Exception as e:
+                            logger.exception("An unknown error occurred trying to parse the feed: %s" % e)
 
     if headphones.CONFIG.KAT:
         provider = "Kick Ass Torrents"
