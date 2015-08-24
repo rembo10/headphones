@@ -81,6 +81,7 @@ _CONFIG_DEFINITIONS = {
     'ENCODER_PATH': (str, 'General', ''),
     'EXTRAS': (str, 'General', ''),
     'EXTRA_NEWZNABS': (list, 'Newznab', ''),
+    'EXTRA_TORZNABS': (list, 'Torznab', ''),
     'FILE_FORMAT': (str, 'General', 'Track Artist - Album [Year] - Title'),
     'FILE_PERMISSIONS': (str, 'General', '0644'),
     'FILE_UNDERSCORES': (int, 'General', 0),
@@ -140,6 +141,10 @@ _CONFIG_DEFINITIONS = {
     'NEWZNAB_APIKEY': (str, 'Newznab', ''),
     'NEWZNAB_ENABLED': (int, 'Newznab', 1),
     'NEWZNAB_HOST': (str, 'Newznab', ''),
+    'TORZNAB': (int, 'Torznab', 0),
+    'TORZNAB_APIKEY': (str, 'Torznab', ''),
+    'TORZNAB_ENABLED': (int, 'Torznab', 1),
+    'TORZNAB_HOST': (str, 'Torznab', ''),
     'NMA_APIKEY': (str, 'NMA', ''),
     'NMA_ENABLED': (int, 'NMA', 0),
     'NMA_ONSNATCH': (int, 'NMA', 0),
@@ -350,6 +355,25 @@ class Config(object):
         for item in newznab:
             extra_newznabs.append(item)
         self.EXTRA_NEWZNABS = extra_newznabs
+
+    def get_extra_torznabs(self):
+        """ Return the extra torznab tuples """
+        extra_torznabs = list(
+            itertools.izip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 3)
+            for i in range(3)])
+        )
+        return extra_torznabs
+
+    def clear_extra_torznabs(self):
+        """ Forget about the configured extra torznabs """
+        self.EXTRA_TORZNABS = []
+
+    def add_extra_torznab(self, torznab):
+        """ Add a new extra torznab """
+        extra_torznabs = self.EXTRA_TORZNABS
+        for item in torznab:
+            extra_torznabs.append(item)
+        self.EXTRA_TORZNABS = extra_torznabs
 
     def __getattr__(self, name):
         """
