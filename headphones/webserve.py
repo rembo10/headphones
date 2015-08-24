@@ -1065,6 +1065,11 @@ class WebInterface(object):
             "newznab_apikey": headphones.CONFIG.NEWZNAB_APIKEY,
             "newznab_enabled": checked(headphones.CONFIG.NEWZNAB_ENABLED),
             "extra_newznabs": headphones.CONFIG.get_extra_newznabs(),
+            "use_torznab": checked(headphones.CONFIG.TORZNAB),
+            "torznab_host": headphones.CONFIG.TORZNAB_HOST,
+            "torznab_apikey": headphones.CONFIG.TORZNAB_APIKEY,
+            "torznab_enabled": checked(headphones.CONFIG.TORZNAB_ENABLED),
+            "extra_torznabs": headphones.CONFIG.get_extra_torznabs(),
             "use_nzbsorg": checked(headphones.CONFIG.NZBSORG),
             "nzbsorg_uid": headphones.CONFIG.NZBSORG_UID,
             "nzbsorg_hash": headphones.CONFIG.NZBSORG_HASH,
@@ -1278,7 +1283,7 @@ class WebInterface(object):
         # Handle the variable config options. Note - keys with False values aren't getting passed
 
         checked_configs = [
-            "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer", "use_newznab", "newznab_enabled",
+            "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer", "use_newznab", "newznab_enabled", "use_torznab", "torznab_enabled",
             "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay", "use_mininova", "use_waffles", "use_rutracker",
             "use_whatcd", "preferred_bitrate_allow_lossless", "detect_bitrate", "ignore_clean_releases", "freeze_db", "cue_split", "move_files", 
             "rename_files", "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art", "embed_album_art", "embed_lyrics", 
@@ -1316,6 +1321,21 @@ class WebInterface(object):
                         del kwargs[key]
                 extra_newznabs.append((newznab_host, newznab_api, newznab_enabled))
 
+        extra_torznabs = []
+        for kwarg in [x for x in kwargs if x.startswith('torznab_host')]:
+            torznab_host_key = kwarg
+            torznab_number = kwarg[12:]
+            if len(torznab_number):
+                torznab_api_key = 'torznab_api' + torznab_number
+                torznab_enabled_key = 'torznab_enabled' + torznab_number
+                torznab_host = kwargs.get(torznab_host_key, '')
+                torznab_api = kwargs.get(torznab_api_key, '')
+                torznab_enabled = int(kwargs.get(torznab_enabled_key, 0))
+                for key in [torznab_host_key, torznab_api_key, torznab_enabled_key]:
+                    if key in kwargs:
+                        del kwargs[key]
+                extra_torznabs.append((torznab_host, torznab_api, torznab_enabled))
+
         # Convert the extras to list then string. Coming in as 0 or 1 (append new extras to the end)
         temp_extras_list = []
 
@@ -1345,6 +1365,11 @@ class WebInterface(object):
         headphones.CONFIG.process_kwargs(kwargs)
         for extra_newznab in extra_newznabs:
             headphones.CONFIG.add_extra_newznab(extra_newznab)
+
+        headphones.CONFIG.clear_extra_torznabs()
+        headphones.CONFIG.process_kwargs(kwargs)
+        for extra_torznab in extra_torznabs:
+            headphones.CONFIG.add_extra_torznab(extra_torznab)
 
         # Sanity checking
         if headphones.CONFIG.SEARCH_INTERVAL and headphones.CONFIG.SEARCH_INTERVAL < 360:
