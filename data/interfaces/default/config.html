@@ -637,7 +637,18 @@
                                         </div>
                                     </div>
                                 </fieldset>
-
+                                
+                                <fieldset>
+                                    <div class="row checkbox left">
+                                        <input id="use_strike" type="checkbox" class="bigcheck" name="use_strike" value="1" ${config['use_strike']} /><label for="use_strike"><span class="option">Strike Search</span></label>
+                                    </div>
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>Seed Ratio</label>
+                                            <input type="text" class="override-float" name="strike_ratio" value="${config['strike_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding.">
+                                        </div>
+                                    </div>
+                                </fieldset>
                             </fieldset>
                         </td>
                     </tr>
@@ -2213,6 +2224,7 @@
                 initConfigCheckbox("#use_waffles");
                 initConfigCheckbox("#use_rutracker");
                 initConfigCheckbox("#use_whatcd");
+                initConfigCheckbox("#use_strike");
                 initConfigCheckbox("#api_enabled");
                 initConfigCheckbox("#enable_https");
                 initConfigCheckbox("#customauth");
