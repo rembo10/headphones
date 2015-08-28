@@ -1112,49 +1112,54 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
 
         return proxy_url
 
-	if headphones.CONFIG.STRIKE:
-		provider = "Strike"
-		s_term = term.replace("!", "")
-		providerurl = fix_url("https://getstrike.net/api/v2/torrents/search/?phrase=")
+    if headphones.CONFIG.STRIKE:
+        provider = "Strike"
+        s_term = term.replace("!", "")
+        providerurl = fix_url("https://getstrike.net/api/v2/torrents/search/?phrase=")
 		
-		providerurl = providerurl + s_term + "&category=Music"
+        providerurl = providerurl + s_term + "&category=Music"
 		
-		if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
-			format = "2"
-			providerurl = providerurl + "&subcategory=Lossless"
-		else:
-			format = "8"
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
+            format = "2"
+            providerurl = providerurl + "&subcategory=Lossless"
+            maxsize = 10000000000
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
+            format = "10" # MP3 and FLAC
+            maxsize = 10000000000
+        else:
+            format = "8" # MP3 only
+            maxsize = 300000000
 		
-		logger.info("Searching %s using term: %s" % (provider,s_term))
-		data = request.request_json(url=providerurl)
+        logger.info("Searching %s using term: %s" % (provider,s_term))
+        data = request.request_json(url=providerurl)
 		
-		if data:
-			if not data['torrents']:
-				logger.info("No results found on %s using search term: %s" % (provider, s_term))
-			else:
-				for item in data['torrents']:
-					try:
-						rightformat = True
-						title = item['torrent_title']
-						seeders = item['seeds']
-						url = item['magnet_uri']
-						size = int(item['size'])
-						subcategory = item['sub_category']
+        if data:
+            if not data['torrents']:
+                logger.info("No results found on %s using search term: %s" % (provider, s_term))
+            else:
+                for item in data['torrents']:
+                    try:
+                        rightformat = True
+                        title = item['torrent_title']
+                        seeders = item['seeds']
+                        url = item['magnet_uri']
+                        size = int(item['size'])
+                        subcategory = item['sub_category']
 						
-						if format == 2:
-							if subcategory != "Lossless":
-								rightformat = False
+                        if format == 2:
+                            if subcategory != "Lossless":
+                                rightformat = False
 								
-						if rightformat and size < maxsize and minimumseeders < int(seeders):
-							match = True
-							logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-						else:
-							match = False
-							logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d, Format: %s)', title, size, int(seeders), rightformat)
+                        if rightformat and size < maxsize and minimumseeders < int(seeders):
+                            match = True
+                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                        else:
+                            match = False
+                            logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d, Format: %s)', title, size, int(seeders), rightformat)
 						
-						resultlist.append(title, size, url, provider, 'torrent', match)
-					except Exception as e:
-						logger.exception("Unhandled exception in the Strike parser")
+                        resultlist.append((title, size, url, provider, 'torrent', match))
+                    except Exception as e:
+                        logger.exception("Unhandled exception in the Strike parser")
 
     if headphones.CONFIG.KAT:
         provider = "Kick Ass Torrents"
