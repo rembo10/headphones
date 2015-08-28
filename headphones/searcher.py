@@ -1134,7 +1134,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
         data = request.request_json(url=providerurl)
 		
         if data:
-            if not data['torrents']:
+            if data['message'] == "No torrents found.":
                 logger.info("No results found on %s using search term: %s" % (provider, s_term))
             else:
                 for item in data['torrents']:
