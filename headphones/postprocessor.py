@@ -372,7 +372,9 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         addAlbumArt(artwork, albumpath, release)
 
     if headphones.CONFIG.CORRECT_METADATA:
-        correctMetadata(albumid, release, downloaded_track_list)
+        correctedMetadata = correctMetadata(albumid, release, downloaded_track_list)
+        if not correctedMetadata and headphones.CONFIG.DO_NOT_PROCESS_UNMATCHED:
+            return
 
     if headphones.CONFIG.EMBED_LYRICS:
         embedLyrics(downloaded_track_list)
@@ -594,7 +596,6 @@ def renameNFO(albumpath):
                     os.rename(os.path.join(r, file), new_file_name)
                 except Exception as e:
                     logger.error(u'Could not rename file: %s. Error: %s' % (os.path.join(r, file).decode(headphones.SYS_ENCODING, 'replace'), e))
-
 
 def moveFiles(albumpath, release, tracks):
     logger.info("Moving files: %s" % albumpath)
@@ -858,23 +859,23 @@ def correctMetadata(albumid, release, downloaded_track_list):
             cur_artist, cur_album, candidates, rec = autotag.tag_album(items, search_artist=helpers.latinToAscii(release['ArtistName']), search_album=helpers.latinToAscii(release['AlbumTitle']))
         except Exception as e:
             logger.error('Error getting recommendation: %s. Not writing metadata', e)
-            return
+            return False
         if str(rec) == 'Recommendation.none':
             logger.warn('No accurate album match found for %s, %s -  not writing metadata', release['ArtistName'], release['AlbumTitle'])
-            return
+            return False
 
         if candidates:
             dist, info, mapping, extra_items, extra_tracks = candidates[0]
         else:
             logger.warn('No accurate album match found for %s, %s -  not writing metadata', release['ArtistName'], release['AlbumTitle'])
-            return
+            return False
 
         logger.info('Beets recommendation for tagging items: %s' % rec)
 
         # TODO: Handle extra_items & extra_tracks
 
         autotag.apply_metadata(info, mapping)
-        
+
         # Set ID3 tag version
         if headphones.CONFIG.IDTAG:
             beetsconfig['id3v23'] = True
@@ -889,7 +890,9 @@ def correctMetadata(albumid, release, downloaded_track_list):
                 logger.info("Successfully applied metadata to: %s", item.path.decode(headphones.SYS_ENCODING, 'replace'))
             except Exception as e:
                 logger.warn("Error writing metadata to '%s': %s", item.path.decode(headphones.SYS_ENCODING, 'replace'), str(e))
+                return False
 
+        return True
 
 def embedLyrics(downloaded_track_list):
     logger.info('Adding lyrics')
@@ -1063,7 +1066,7 @@ def renameUnprocessedFolder(path, tag):
 def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_original_folder=False):
 
     logger.info('Force checking download folder for completed downloads')
-	
+
     ignored = 0
 
     if album_dir:
