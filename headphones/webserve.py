@@ -1361,13 +1361,15 @@ class WebInterface(object):
                 del kwargs[extra]
 
         headphones.CONFIG.EXTRAS = ','.join(str(n) for n in temp_extras_list)
+
         headphones.CONFIG.clear_extra_newznabs()
+        headphones.CONFIG.clear_extra_torznabs()
+
         headphones.CONFIG.process_kwargs(kwargs)
+
         for extra_newznab in extra_newznabs:
             headphones.CONFIG.add_extra_newznab(extra_newznab)
 
-        headphones.CONFIG.clear_extra_torznabs()
-        headphones.CONFIG.process_kwargs(kwargs)
         for extra_torznab in extra_torznabs:
             headphones.CONFIG.add_extra_torznab(extra_torznab)
 
