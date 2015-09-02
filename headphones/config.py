@@ -53,6 +53,7 @@ _CONFIG_DEFINITIONS = {
     'DELETE_LOSSLESS_FILES': (int, 'General', 1),
     'DESTINATION_DIR': (str, 'General', ''),
     'DETECT_BITRATE': (int, 'General', 0),
+    'DO_NOT_PROCESS_UNMATCHED': (int, 'General', 0),
     'DOWNLOAD_DIR': (str, 'General', ''),
     'DOWNLOAD_SCAN_INTERVAL': (int, 'General', 5),
     'DOWNLOAD_TORRENT_DIR': (str, 'General', ''),

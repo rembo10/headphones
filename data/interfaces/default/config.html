@@ -736,7 +736,7 @@
                                 </div>
                                 <div id="preferred_bitrate_options" class="suboptions">
                                     <div class="row nopad">
-                                        Target bitrate: 
+                                        Target bitrate:
                                         <input type="text" class="override-float" name="preferred_bitrate" value="${config['preferred_bitrate']}" size="3">kbps<br>
                                     </div>
                                     <div class="row nopad">
@@ -1445,6 +1445,10 @@
                                         Don't add new artists when post-processing albums
                                         <input type="checkbox" name="freeze_db" id="freeze_db" value="1" ${config['freeze_db']} />
                                     </label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
+                                    <label><input type="checkbox" title="Stop post-processing if no good metadata match found"
+                                           name="do_not_process_unmatched" value="1" ${config['do_not_process_unmatched']} />Stop post-processing if no good metadata match found</label>
                                 </div>
                                 <div class="row checkbox left clearfix">
                                     <label title="Use ID3v2.3 instead of ID3v2.4">
