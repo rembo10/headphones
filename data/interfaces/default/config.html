@@ -558,7 +558,7 @@
                                                     <input id="torznab_enabled" type="checkbox" name="torznab_enabled${torznab_number}" value="1" ${torznab_enabled} /><label>Enabled</label>
                                                 </div>
                                                 <div class="row">
-                                                    <input type="button" class="remove" id="torznab${torznab_number}" value="Remove ${torznab[0]}">
+                                                    <input type="button" class="remove_torznab" id="torznab${torznab_number}" value="Remove ${torznab[0]}">
                                                 </div>
                                             </div>
                                             <%
@@ -2209,14 +2209,14 @@
 
                 var deletedNewznabs = 0;
 
-                $(".removeNewznab").click(function() {
+                $(".remove").click(function() {
                     $(this).parent().parent().remove();
                     deletedNewznabs = deletedNewznabs + 1;
                 });
 
                 var deletedTorznabs = 0;
 
-                $(".removeTorznab").click(function() {
+                $(".remove_torznab").click(function() {
                     $(this).parent().parent().remove();
                     deletedTorznabs = deletedTorznabs + 1;
                 });
@@ -2243,7 +2243,7 @@
                 $("#add_newznab").click(function() {
                     var intId = $("#newznab_providers > div").size() + deletedNewznabs + 1;
                     var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
-                    var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"removeNewznab\" value=\"Remove\" /></div>");
+                    var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"remove\" value=\"Remove\" /></div>");
                     removeButton.click(function() {
                         $(this).parent().remove();
                         deletedNewznabs = deletedNewznabs + 1;
@@ -2257,13 +2257,13 @@
                 $("#add_torznab").click(function() {
                     var intId = $("#torznab_providers > div").size() + deletedTorznabs + 1;
                     var formfields = $("<div class=\"config\" id=\"torznab" + intId + "\"><div class=\"row\"><label>Torznab Host</label><input type=\"text\" name=\"torznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Torznab API</label><input type=\"text\" name=\"torznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"torznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
-                    var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"removeTorznab\" value=\"Remove\" /></div>");
-                    removeButton.click(function() {
+                    var removeTorznabButton = $("<div class=\"row\"><input type=\"button\" class=\"remove_torznab\" value=\"Remove\" /></div>");
+                    removeTorznabButton.click(function() {
                         $(this).parent().remove();
                         deletedTorznabs = deletedTorznabs + 1;
 
                     });
-                    formfields.append(removeButton);
+                    formfields.append(removeTorznabButton);
                     formfields.append("</div>");
                     $("#add_torznab").before(formfields);
                 });
