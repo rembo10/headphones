@@ -1182,7 +1182,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
             "field": "seeders",
             "sorder": "desc"
         }
-        data = request.request_json(url=providerurl, params=params)
+        headers = {'User-Agent': USER_AGENT}
+        data = request.request_json(url=providerurl, params=params, headers=headers)
 
         # Process feed
         if data:
@@ -1198,7 +1199,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
                         size = int(item['size'])
 
                         if format == "2":
-                            torrent = request.request_content(url)
+                            torrent = request.request_content(url, headers=headers)
                             if not torrent or (int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1):
                                 rightformat = False
 
