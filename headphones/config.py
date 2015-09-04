@@ -221,6 +221,8 @@ _CONFIG_DEFINITIONS = {
     'SONGKICK_ENABLED': (int, 'Songkick', 1),
     'SONGKICK_FILTER_ENABLED': (int, 'Songkick', 0),
     'SONGKICK_LOCATION': (str, 'Songkick', ''),
+    'STRIKE': (int, 'Strike', 0),
+    'STRIKE_RATIO': (str, 'Strike', ''),
     'SUBSONIC_ENABLED': (int, 'Subsonic', 0),
     'SUBSONIC_HOST': (str, 'Subsonic', ''),
     'SUBSONIC_PASSWORD': (str, 'Subsonic', ''),

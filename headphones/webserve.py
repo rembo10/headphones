@@ -1106,6 +1106,8 @@ class WebInterface(object):
             "whatcd_username": headphones.CONFIG.WHATCD_USERNAME,
             "whatcd_password": headphones.CONFIG.WHATCD_PASSWORD,
             "whatcd_ratio": headphones.CONFIG.WHATCD_RATIO,
+            "use_strike": checked(headphones.CONFIG.STRIKE),
+            "strike_ratio": headphones.CONFIG.STRIKE_RATIO,
             "pref_qual_0": radio(headphones.CONFIG.PREFERRED_QUALITY, 0),
             "pref_qual_1": radio(headphones.CONFIG.PREFERRED_QUALITY, 1),
             "pref_qual_2": radio(headphones.CONFIG.PREFERRED_QUALITY, 2),
@@ -1286,7 +1288,7 @@ class WebInterface(object):
         checked_configs = [
             "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer", "use_newznab", "newznab_enabled", "use_torznab", "torznab_enabled",
             "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay", "use_mininova", "use_waffles", "use_rutracker",
-            "use_whatcd", "preferred_bitrate_allow_lossless", "detect_bitrate", "ignore_clean_releases", "freeze_db", "cue_split", "move_files",
+            "use_whatcd", "use_strike", "preferred_bitrate_allow_lossless", "detect_bitrate", "ignore_clean_releases", "freeze_db", "cue_split", "move_files",
             "rename_files", "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art", "embed_album_art", "embed_lyrics",
             "replace_existing_folders", "keep_original_folder", "file_underscores", "include_extras", "official_releases_only",
             "wait_until_release_date", "autowant_upcoming", "autowant_all", "autowant_manually_added", "do_not_process_unmatched", "keep_torrent_files", "music_encoder",
