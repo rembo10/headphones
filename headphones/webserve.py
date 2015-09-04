@@ -232,11 +232,11 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 
     def removeArtist(self, ArtistID):
-        logger.info(u"Deleting all traces of artist: " + ArtistID)
         myDB = db.DBConnection()
         namecheck = myDB.select('SELECT ArtistName from artists where ArtistID=?', [ArtistID])
         for name in namecheck:
             artistname = name['ArtistName']
+        logger.info(u"Deleting all traces of artist: " + artistname)
         myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
 
         from headphones import cache
