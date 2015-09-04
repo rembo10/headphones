@@ -42,8 +42,8 @@ from bencode import bencode, bdecode
 
 # Magnet to torrent services, for Black hole. Stolen from CouchPotato.
 TORRENT_TO_MAGNET_SERVICES = [
-    'https://zoink.it/torrent/%s.torrent',
-    'http://torrage.com/torrent/%s.torrent',
+    #'https://zoink.it/torrent/%s.torrent',
+    #'http://torrage.com/torrent/%s.torrent',
     'https://torcache.net/torrent/%s.torrent',
 ]
 
@@ -791,10 +791,11 @@ def send_to_downloader(data, bestqual, album):
                     # Randomize list of services
                     services = TORRENT_TO_MAGNET_SERVICES[:]
                     random.shuffle(services)
+                    headers = {'User-Agent': USER_AGENT}
 
                     for service in services:
-                        data = request.request_content(service % torrent_hash)
 
+                        data = request.request_content(service % torrent_hash, headers=headers)
                         if data and "torcache" in data:
                             if not torrent_to_file(download_path, data):
                                 return
