@@ -33,12 +33,21 @@ def diagnose(data):
 
     if 'lxml' in basic_parsers:
         basic_parsers.append(["lxml", "xml"])
-        from lxml import etree
-        print "Found lxml version %s" % ".".join(map(str,etree.LXML_VERSION))
+        try:
+            from lxml import etree
+            print "Found lxml version %s" % ".".join(map(str,etree.LXML_VERSION))
+        except ImportError, e:
+            print (
+                "lxml is not installed or couldn't be imported.")
+
 
     if 'html5lib' in basic_parsers:
-        import html5lib
-        print "Found html5lib version %s" % html5lib.__version__
+        try:
+            import html5lib
+            print "Found html5lib version %s" % html5lib.__version__
+        except ImportError, e:
+            print (
+                "html5lib is not installed or couldn't be imported.")
 
     if hasattr(data, 'read'):
         data = data.read()
@@ -135,7 +144,7 @@ def rword(length=5):
 def rsentence(length=4):
     "Generate a random sentence-like string."
     return " ".join(rword(random.randint(4,9)) for i in range(length))
-
+        
 def rdoc(num_elements=1000):
     """Randomly generate an invalid HTML document."""
     tag_names = ['p', 'div', 'span', 'i', 'b', 'script', 'table']
@@ -159,7 +168,7 @@ def benchmark_parsers(num_elements=100000):
     print "Comparative parser benchmark on Beautiful Soup %s" % __version__
     data = rdoc(num_elements)
     print "Generated a large invalid HTML document (%d bytes)." % len(data)
-
+    
     for parser in ["lxml", ["lxml", "html"], "html5lib", "html.parser"]:
         success = False
         try:

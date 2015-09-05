@@ -53,7 +53,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
         tracks = myDB.select('SELECT Location from alltracks WHERE Location IS NOT NULL UNION SELECT Location from tracks WHERE Location IS NOT NULL')
 
         for track in tracks:
-            encoded_track_string = track['Location'].encode(headphones.SYS_ENCODING)
+            encoded_track_string = track['Location'].encode(headphones.SYS_ENCODING, 'replace')
             if not os.path.isfile(encoded_track_string):
                 myDB.action('UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE Location=?', [None, None, None, track['Location']])
                 myDB.action('UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE Location=?', [None, None, None, track['Location']])

@@ -51,7 +51,7 @@ def startmb():
         mbpass = headphones.CONFIG.CUSTOMPASS
         sleepytime = int(headphones.CONFIG.CUSTOMSLEEP)
     elif headphones.CONFIG.MIRROR == "headphones":
-        mbhost = "144.76.94.239"
+        mbhost = "codeshy.com"
         mbport = 8181
         mbuser = headphones.CONFIG.HPUSER
         mbpass = headphones.CONFIG.HPPASS
@@ -362,7 +362,7 @@ def getSeries(seriesid):
 
     if not series:
         return False
-    
+
     if 'disambiguation' in series:
         series_dict['artist_name'] = unicode(series['name'] + " (" + unicode(series['disambiguation']) + ")")
     else:

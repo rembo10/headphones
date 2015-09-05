@@ -79,7 +79,7 @@ def getSimilar():
                 try:
                     artist_mbid = artist["mbid"]
                     artist_name = artist["name"]
-                except TypeError:
+                except KeyError:
                     continue
 
                 if not any(artist_mbid in x for x in results):
@@ -116,7 +116,7 @@ def getArtists():
         return
 
     logger.info("Fetching artists from Last.FM for username: %s", headphones.CONFIG.LASTFM_USERNAME)
-    data = request_lastfm("library.getartists", limit=10000, user=headphones.CONFIG.LASTFM_USERNAME)
+    data = request_lastfm("library.getartists", limit=1000, user=headphones.CONFIG.LASTFM_USERNAME)
 
     if data and "artists" in data:
         artistlist = []
