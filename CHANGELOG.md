@@ -12,7 +12,7 @@ Highlights:
 * Fixed: Pushover notifications
 * Improved: Rutracker logging, switched to requests lib
 
-The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.6...v0.5.7).
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.8...v0.5.9).
 
 ## v0.5.8
 Released 13 July 2015
@@ -30,7 +30,7 @@ Highlights:
 * Improved: Set localhost as default
 * Improved: Better single artist scanning
 
-The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.6...v0.5.7).
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.7...v0.5.8).
 
 ## v0.5.7
 Released 01 July 2015
