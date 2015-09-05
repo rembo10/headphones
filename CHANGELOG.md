@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.5.9
+Released 05 September 2015
+
+Highlights:
+* Added: Providers Strike, Jackett, custom Torznabs
+* Added: Option to stop post-processing if no good match found (#2343)
+* Fixed: Blackhole -> Magnet, limit to torcache
+* Fixed: Kat 403 flac error
+* Fixed: Last.fm errors
+* Fixed: Pushover notifications
+* Improved: Rutracker logging, switched to requests lib
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.6...v0.5.7).
+
 ## v0.5.8
 Released 13 July 2015
 
