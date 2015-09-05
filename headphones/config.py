@@ -53,6 +53,7 @@ _CONFIG_DEFINITIONS = {
     'DELETE_LOSSLESS_FILES': (int, 'General', 1),
     'DESTINATION_DIR': (str, 'General', ''),
     'DETECT_BITRATE': (int, 'General', 0),
+    'DO_NOT_PROCESS_UNMATCHED': (int, 'General', 0),
     'DOWNLOAD_DIR': (str, 'General', ''),
     'DOWNLOAD_SCAN_INTERVAL': (int, 'General', 5),
     'DOWNLOAD_TORRENT_DIR': (str, 'General', ''),
@@ -81,6 +82,7 @@ _CONFIG_DEFINITIONS = {
     'ENCODER_PATH': (str, 'General', ''),
     'EXTRAS': (str, 'General', ''),
     'EXTRA_NEWZNABS': (list, 'Newznab', ''),
+    'EXTRA_TORZNABS': (list, 'Torznab', ''),
     'FILE_FORMAT': (str, 'General', 'Track Artist - Album [Year] - Title'),
     'FILE_PERMISSIONS': (str, 'General', '0644'),
     'FILE_UNDERSCORES': (int, 'General', 0),
@@ -219,6 +221,8 @@ _CONFIG_DEFINITIONS = {
     'SONGKICK_ENABLED': (int, 'Songkick', 1),
     'SONGKICK_FILTER_ENABLED': (int, 'Songkick', 0),
     'SONGKICK_LOCATION': (str, 'Songkick', ''),
+    'STRIKE': (int, 'Strike', 0),
+    'STRIKE_RATIO': (str, 'Strike', ''),
     'SUBSONIC_ENABLED': (int, 'Subsonic', 0),
     'SUBSONIC_HOST': (str, 'Subsonic', ''),
     'SUBSONIC_PASSWORD': (str, 'Subsonic', ''),
@@ -227,6 +231,10 @@ _CONFIG_DEFINITIONS = {
     'TORRENTBLACKHOLE_DIR': (str, 'General', ''),
     'TORRENT_DOWNLOADER': (int, 'General', 0),
     'TORRENT_REMOVAL_INTERVAL': (int, 'General', 720),
+    'TORZNAB': (int, 'Torznab', 0),
+    'TORZNAB_APIKEY': (str, 'Torznab', ''),
+    'TORZNAB_ENABLED': (int, 'Torznab', 1),
+    'TORZNAB_HOST': (str, 'Torznab', ''),
     'TRANSMISSION_HOST': (str, 'Transmission', ''),
     'TRANSMISSION_PASSWORD': (str, 'Transmission', ''),
     'TRANSMISSION_USERNAME': (str, 'Transmission', ''),
@@ -350,6 +358,25 @@ class Config(object):
         for item in newznab:
             extra_newznabs.append(item)
         self.EXTRA_NEWZNABS = extra_newznabs
+
+    def get_extra_torznabs(self):
+        """ Return the extra torznab tuples """
+        extra_torznabs = list(
+            itertools.izip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 3)
+            for i in range(3)])
+        )
+        return extra_torznabs
+
+    def clear_extra_torznabs(self):
+        """ Forget about the configured extra torznabs """
+        self.EXTRA_TORZNABS = []
+
+    def add_extra_torznab(self, torznab):
+        """ Add a new extra torznab """
+        extra_torznabs = self.EXTRA_TORZNABS
+        for item in torznab:
+            extra_torznabs.append(item)
+        self.EXTRA_TORZNABS = extra_torznabs
 
     def __getattr__(self, name):
         """

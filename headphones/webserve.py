@@ -232,11 +232,11 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 
     def removeArtist(self, ArtistID):
-        logger.info(u"Deleting all traces of artist: " + ArtistID)
         myDB = db.DBConnection()
         namecheck = myDB.select('SELECT ArtistName from artists where ArtistID=?', [ArtistID])
         for name in namecheck:
             artistname = name['ArtistName']
+        logger.info(u"Deleting all traces of artist: " + artistname)
         myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
 
         from headphones import cache
@@ -274,7 +274,7 @@ class WebInterface(object):
         logger.info(u"Scanning artist: %s", artist_name)
 
         full_folder_format = headphones.CONFIG.FOLDER_FORMAT
-        folder_format = re.findall(r'(.*[Aa]rtist?)\.*', full_folder_format)[0]
+        folder_format = re.findall(r'(.*?[Aa]rtist?)\.*', full_folder_format)[0]
 
         acceptable_formats = ["$artist","$sortartist","$first/$artist","$first/$sortartist"]
 
@@ -802,7 +802,7 @@ class WebInterface(object):
     @cherrypy.expose
     def forcePostProcess(self, dir=None, album_dir=None, keep_original_folder=False):
         from headphones import postprocessor
-        threading.Thread(target=postprocessor.forcePostProcess, kwargs={'dir': dir, 'album_dir': album_dir, 'keep_original_folder':keep_original_folder}).start()
+        threading.Thread(target=postprocessor.forcePostProcess, kwargs={'dir': dir, 'album_dir': album_dir, 'keep_original_folder':keep_original_folder == 'True'}).start()
         raise cherrypy.HTTPRedirect("home")
 
     @cherrypy.expose
@@ -1065,6 +1065,11 @@ class WebInterface(object):
             "newznab_apikey": headphones.CONFIG.NEWZNAB_APIKEY,
             "newznab_enabled": checked(headphones.CONFIG.NEWZNAB_ENABLED),
             "extra_newznabs": headphones.CONFIG.get_extra_newznabs(),
+            "use_torznab": checked(headphones.CONFIG.TORZNAB),
+            "torznab_host": headphones.CONFIG.TORZNAB_HOST,
+            "torznab_apikey": headphones.CONFIG.TORZNAB_APIKEY,
+            "torznab_enabled": checked(headphones.CONFIG.TORZNAB_ENABLED),
+            "extra_torznabs": headphones.CONFIG.get_extra_torznabs(),
             "use_nzbsorg": checked(headphones.CONFIG.NZBSORG),
             "nzbsorg_uid": headphones.CONFIG.NZBSORG_UID,
             "nzbsorg_hash": headphones.CONFIG.NZBSORG_HASH,
@@ -1101,6 +1106,8 @@ class WebInterface(object):
             "whatcd_username": headphones.CONFIG.WHATCD_USERNAME,
             "whatcd_password": headphones.CONFIG.WHATCD_PASSWORD,
             "whatcd_ratio": headphones.CONFIG.WHATCD_RATIO,
+            "use_strike": checked(headphones.CONFIG.STRIKE),
+            "strike_ratio": headphones.CONFIG.STRIKE_RATIO,
             "pref_qual_0": radio(headphones.CONFIG.PREFERRED_QUALITY, 0),
             "pref_qual_1": radio(headphones.CONFIG.PREFERRED_QUALITY, 1),
             "pref_qual_2": radio(headphones.CONFIG.PREFERRED_QUALITY, 2),
@@ -1138,6 +1145,7 @@ class WebInterface(object):
             "autowant_upcoming": checked(headphones.CONFIG.AUTOWANT_UPCOMING),
             "autowant_all": checked(headphones.CONFIG.AUTOWANT_ALL),
             "autowant_manually_added": checked(headphones.CONFIG.AUTOWANT_MANUALLY_ADDED),
+            "do_not_process_unmatched": checked(headphones.CONFIG.DO_NOT_PROCESS_UNMATCHED),
             "keep_torrent_files": checked(headphones.CONFIG.KEEP_TORRENT_FILES),
             "prefer_torrents_0": radio(headphones.CONFIG.PREFER_TORRENTS, 0),
             "prefer_torrents_1": radio(headphones.CONFIG.PREFER_TORRENTS, 1),
@@ -1278,12 +1286,12 @@ class WebInterface(object):
         # Handle the variable config options. Note - keys with False values aren't getting passed
 
         checked_configs = [
-            "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer", "use_newznab", "newznab_enabled",
+            "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer", "use_newznab", "newznab_enabled", "use_torznab", "torznab_enabled",
             "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay", "use_mininova", "use_waffles", "use_rutracker",
-            "use_whatcd", "preferred_bitrate_allow_lossless", "detect_bitrate", "ignore_clean_releases", "freeze_db", "cue_split", "move_files", 
-            "rename_files", "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art", "embed_album_art", "embed_lyrics", 
-            "replace_existing_folders", "keep_original_folder", "file_underscores", "include_extras", "official_releases_only", 
-            "wait_until_release_date", "autowant_upcoming", "autowant_all", "autowant_manually_added", "keep_torrent_files", "music_encoder",
+            "use_whatcd", "use_strike", "preferred_bitrate_allow_lossless", "detect_bitrate", "ignore_clean_releases", "freeze_db", "cue_split", "move_files",
+            "rename_files", "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art", "embed_album_art", "embed_lyrics",
+            "replace_existing_folders", "keep_original_folder", "file_underscores", "include_extras", "official_releases_only",
+            "wait_until_release_date", "autowant_upcoming", "autowant_all", "autowant_manually_added", "do_not_process_unmatched", "keep_torrent_files", "music_encoder",
             "encoderlossless", "encoder_multicore", "delete_lossless_files", "growl_enabled", "growl_onsnatch", "prowl_enabled",
             "prowl_onsnatch", "xbmc_enabled", "xbmc_update", "xbmc_notify", "lms_enabled", "plex_enabled", "plex_update", "plex_notify",
             "nma_enabled", "nma_onsnatch", "pushalot_enabled", "pushalot_onsnatch", "synoindex_enabled", "pushover_enabled",
@@ -1316,6 +1324,21 @@ class WebInterface(object):
                         del kwargs[key]
                 extra_newznabs.append((newznab_host, newznab_api, newznab_enabled))
 
+        extra_torznabs = []
+        for kwarg in [x for x in kwargs if x.startswith('torznab_host')]:
+            torznab_host_key = kwarg
+            torznab_number = kwarg[12:]
+            if len(torznab_number):
+                torznab_api_key = 'torznab_api' + torznab_number
+                torznab_enabled_key = 'torznab_enabled' + torznab_number
+                torznab_host = kwargs.get(torznab_host_key, '')
+                torznab_api = kwargs.get(torznab_api_key, '')
+                torznab_enabled = int(kwargs.get(torznab_enabled_key, 0))
+                for key in [torznab_host_key, torznab_api_key, torznab_enabled_key]:
+                    if key in kwargs:
+                        del kwargs[key]
+                extra_torznabs.append((torznab_host, torznab_api, torznab_enabled))
+
         # Convert the extras to list then string. Coming in as 0 or 1 (append new extras to the end)
         temp_extras_list = []
 
@@ -1341,10 +1364,17 @@ class WebInterface(object):
                 del kwargs[extra]
 
         headphones.CONFIG.EXTRAS = ','.join(str(n) for n in temp_extras_list)
+
         headphones.CONFIG.clear_extra_newznabs()
+        headphones.CONFIG.clear_extra_torznabs()
+
         headphones.CONFIG.process_kwargs(kwargs)
+
         for extra_newznab in extra_newznabs:
             headphones.CONFIG.add_extra_newznab(extra_newznab)
+
+        for extra_torznab in extra_torznabs:
+            headphones.CONFIG.add_extra_torznab(extra_torznab)
 
         # Sanity checking
         if headphones.CONFIG.SEARCH_INTERVAL and headphones.CONFIG.SEARCH_INTERVAL < 360:
