@@ -205,6 +205,8 @@ _CONFIG_DEFINITIONS = {
     'PUSHOVER_ONSNATCH': (int, 'Pushover', 0),
     'PUSHOVER_PRIORITY': (int, 'Pushover', 0),
     'RENAME_FILES': (int, 'General', 0),
+    'RENAME_UNPROCESSED': (bool_int, 'General', 1),
+    'RENAME_FROZEN': (bool_int, 'General', 1),
     'REPLACE_EXISTING_FOLDERS': (int, 'General', 0),
     'KEEP_ORIGINAL_FOLDER': (int, 'General', 0),
     'REQUIRED_WORDS': (str, 'General', ''),
