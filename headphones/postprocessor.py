@@ -812,7 +812,7 @@ def moveFiles(albumpath, release, tracks):
             try:
                 os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING, 'replace'), int(headphones.CONFIG.FOLDER_PERMISSIONS, 8))
             except Exception as e:
-                logger.error("Error trying to change permissions on folder: %s. %s", temp_f, e)
+                logger.error("Error trying to change permissions on folder: %s. %s", temp_f.decode(headphones.SYS_ENCODING, 'replace'), e)
 
     # If we failed to move all the files out of the directory, this will fail too
     try:
