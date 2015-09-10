@@ -79,16 +79,24 @@ def torrent_to_file(target_file, data):
         with open(target_file, "wb") as fp:
             fp.write(data)
     except IOError as e:
-        logger.error("Could not write torrent file '%s': %s. Skipping.",
+        logger.error(
+            "Could not write torrent file '%s': %s. Skipping.",
             target_file, e.message)
         return
 
     # Try to change permissions
-    try:
-        os.chmod(target_file, int(headphones.CONFIG.FILE_PERMISSIONS, 8))
-    except OSError as e:
-        logger.warn("Could not change permissions for file '%s': %s. " \
-            "Continuing.", target_file, e.message)
+    if headphones.CONFIG.FILE_PERMISSIONS_ENABLED:
+        try:
+            os.chmod(target_file, int(headphones.CONFIG.FILE_PERMISSIONS, 8))
+        except OSError as e:
+            logger.warn(
+                "Could not change permissions for file '%s': %s. Continuing.",
+                target_file.decode(headphones.SYS_ENCODING, "replace"),
+                e.message)
+    else:
+        logger.debug(
+            "Not changing file permissions, since it is disabled: %s",
+            target_file.decode(headphones.SYS_ENCODING, "replace"))
 
     # Done
     return True
@@ -203,7 +211,7 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False,
                 if release_date > datetime.datetime.today():
                     logger.info("Skipping: %s. Waiting for release date of: %s" % (album['AlbumTitle'], album['ReleaseDate']))
                     continue
-            
+
             new = True
 
             if album['Status'] == "Wanted Lossless":

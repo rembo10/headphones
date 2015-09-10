@@ -809,10 +809,13 @@ def moveFiles(albumpath, release, tracks):
 
             temp_f = os.path.join(temp_f, f)
 
-            try:
-                os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING, 'replace'), int(headphones.CONFIG.FOLDER_PERMISSIONS, 8))
-            except Exception as e:
-                logger.error("Error trying to change permissions on folder: %s. %s", temp_f.decode(headphones.SYS_ENCODING, 'replace'), e)
+            if headphones.CONFIG.FOLDER_PERMISSIONS_ENABLED:
+                try:
+                    os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING, 'replace'), int(headphones.CONFIG.FOLDER_PERMISSIONS, 8))
+                except Exception as e:
+                    logger.error("Error trying to change permissions on folder: %s. %s", temp_f.decode(headphones.SYS_ENCODING, 'replace'), e)
+            else:
+                logger.debug("Not changing folder permissions, since it is disabled: %s", temp_f.decode(headphones.SYS_ENCODING, 'replace'))
 
     # If we failed to move all the files out of the directory, this will fail too
     try:
@@ -1037,11 +1040,14 @@ def updateFilePermissions(albumpaths):
         for r, d, f in os.walk(folder):
             for files in f:
                 full_path = os.path.join(r, files)
-                try:
-                    os.chmod(full_path, int(headphones.CONFIG.FILE_PERMISSIONS, 8))
-                except:
-                    logger.error("Could not change permissions for file: %s", full_path)
-                    continue
+                if headphones.CONFIG.FILE_PERMISSIONS_ENABLED:
+                    try:
+                        os.chmod(full_path, int(headphones.CONFIG.FILE_PERMISSIONS, 8))
+                    except:
+                        logger.error("Could not change permissions for file: %s", full_path)
+                        continue
+                else:
+                    logger.debug("Not changing file permissions, since it is disabled: %s", full_path.decode(headphones.SYS_ENCODING, 'replace'))
 
 
 def renameUnprocessedFolder(path, tag):
