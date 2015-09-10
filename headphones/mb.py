@@ -99,6 +99,12 @@ def findArtist(name, limit=1):
      with mb_lock:
          try:
              artistResults = musicbrainzngs.search_artists(limit=limit, **criteria)['artist-list']
+         except ValueError as e:
+             if "at least one query term is required" in e.message:
+                 logger.error("Tried to search without a term, or an empty one. Provided artist (probably emtpy): %s", name)
+                 return False
+             else:
+                 raise
          except musicbrainzngs.WebServiceError as e:
              logger.warn('Attempt to query MusicBrainz for %s failed (%s)' % (name, str(e)))
              mb_lock.snooze(5)
