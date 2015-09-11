@@ -55,10 +55,10 @@
             if item['URL'].find('codeshy') != -1:
                 fileid = 'nzb'
 
-			if 'FolderName' in item:
-            	folder = 'Folder: ' + item['FolderName']
-			else:
-				folder = 'Folder: ?'
+            if 'FolderName' in item:
+                folder = 'Folder: ' + item['FolderName']
+            else:
+                folder = 'Folder: ?'
 
         %>
 			<tr class="grade${grade}">
