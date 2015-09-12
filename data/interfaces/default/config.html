@@ -1423,7 +1423,7 @@
                                         else:
                                             which_extras_selected = "None"
                                     %>
-                                    <small>Currently Selected: ${which_extras_selected} <a href="#" id="modify_extras">(Change)</a></small></label>
+                                    <small>Currently Selected: ${which_extras_selected} <a href="javascript:void(0)" id="modify_extras">(Change)</a></small></label>
                                     <div id="dialog" title="Choose Which Extras to Include" style="display:none" class="configtable">
                                     %for extra in config['extras']:
                                         <input type="checkbox" id="${extra}_temp" name="${extra}_temp" value="1" ${config['extras'][extra]} />${string.capwords(extra)}<br>
