@@ -7,11 +7,11 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">
-			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=all',$(this),'table')" data-success="All History cleared"><i class="fa fa-trash-o"></i> Clear All History</a>
-			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=Processed',$(this),'table')" data-success="All Processed cleared"><i class="fa fa-trash-o"></i> Clear Processed</a>
-			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=Unprocessed',$(this),'table')" data-success="All Unprocessed cleared"><i class="fa fa-trash-o"></i> Clear Unprocessed</a>
-			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=Frozen',$(this),'table')" data-success="All Frozen cleared"><i class="fa fa-trash-o"></i> Clear Frozen</a>
-			<a id="menu_link_delete" href="#" onclick="doAjaxCall('clearhistory?type=Snatched',$(this),'table')" data-success="All Snatched cleared"><i class="fa fa-trash-o"></i> Clear Snatched</a>
+			<a id="menu_link_delete" href="javascript:void(0)" onclick="doAjaxCall('clearhistory?type=all',$(this),'table')" data-success="All History cleared"><i class="fa fa-trash-o"></i> Clear All History</a>
+			<a id="menu_link_delete" href="javascript:void(0)" onclick="doAjaxCall('clearhistory?type=Processed',$(this),'table')" data-success="All Processed cleared"><i class="fa fa-trash-o"></i> Clear Processed</a>
+			<a id="menu_link_delete" href="javascript:void(0)" onclick="doAjaxCall('clearhistory?type=Unprocessed',$(this),'table')" data-success="All Unprocessed cleared"><i class="fa fa-trash-o"></i> Clear Unprocessed</a>
+			<a id="menu_link_delete" href="javascript:void(0)" onclick="doAjaxCall('clearhistory?type=Frozen',$(this),'table')" data-success="All Frozen cleared"><i class="fa fa-trash-o"></i> Clear Frozen</a>
+			<a id="menu_link_delete" href="javascript:void(0)" onclick="doAjaxCall('clearhistory?type=Snatched',$(this),'table')" data-success="All Snatched cleared"><i class="fa fa-trash-o"></i> Clear Snatched</a>
 		</div>
 	</div>
 </%def>
@@ -63,8 +63,8 @@
 				<td id="filename">${cgi.escape(item['Title'], quote=True)} [<a href="${item['URL']}">${fileid}</a>]<a href="albumPage?AlbumID=${item['AlbumID']}">[album page]</a></td>
 				<td id="size">${helpers.bytes_to_mb(item['Size'])}</td>
 				<td title="${folder}" id="status">${item['Status']}</td>
-				<td id="action">[<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${item['AlbumID']}&redirect=history', $(this),'table')"  data-success="Retrying download of '${cgi.escape(item['Title'], quote=True)}'">retry</a>][<a href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${item['AlbumID']}&new=True&redirect=history',$(this),'table')"  data-success="Looking for a new version of '${cgi.escape(item['Title'], quote=True)}'">new</a>]</td>
-				<td id="delete"><a href="#" onclick="doAjaxCall('clearhistory?date_added=${item['DateAdded']}&title=${cgi.escape(item['Title'], quote=True)}',$(this),'table')" data-success="${cgi.escape(item['Title'], quote=True)} cleared from history"><img src="interfaces/default/images/trashcan.png" height="18" width="18" id="trashcan" title="Clear this item from the history"></a>
+				<td id="action">[<a href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${item['AlbumID']}&redirect=history', $(this),'table')"  data-success="Retrying download of '${cgi.escape(item['Title'], quote=True)}'">retry</a>][<a href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${item['AlbumID']}&new=True&redirect=history',$(this),'table')"  data-success="Looking for a new version of '${cgi.escape(item['Title'], quote=True)}'">new</a>]</td>
+				<td id="delete"><a href="javascript:void(0)" onclick="doAjaxCall('clearhistory?date_added=${item['DateAdded']}&title=${cgi.escape(item['Title'], quote=True)}',$(this),'table')" data-success="${cgi.escape(item['Title'], quote=True)} cleared from history"><img src="interfaces/default/images/trashcan.png" height="18" width="18" id="trashcan" title="Clear this item from the history"></a>
 			</tr>
 		%endfor
 		</tbody>

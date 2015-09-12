@@ -34,11 +34,11 @@
 		% if headphones.CONFIG.CHECK_GITHUB and not headphones.CURRENT_VERSION:
 			<div id="updatebar">
 				You're running an unknown version of Headphones. <a href="update">Update</a> or
-				<a href="#" onclick="$('#updatebar').slideUp('slow');">Close</a>
+				<a href="javascript:void(0)" onclick="$('#updatebar').slideUp('slow');">Close</a>
 			</div>
 		% elif headphones.CONFIG.CHECK_GITHUB and headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.COMMITS_BEHIND > 0 and headphones.INSTALL_TYPE != 'win':
 			<div id="updatebar">
-				A <a href="https://github.com/${headphones.CONFIG.GIT_USER}/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}"> newer version</a> is available. You're ${headphones.COMMITS_BEHIND} commits behind. <a href="update">Update</a> or <a href="#" onclick="$('#updatebar').slideUp('slow');">Close</a>
+				A <a href="https://github.com/${headphones.CONFIG.GIT_USER}/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}"> newer version</a> is available. You're ${headphones.COMMITS_BEHIND} commits behind. <a href="update">Update</a> or <a href="javascript:void(0)" onclick="$('#updatebar').slideUp('slow');">Close</a>
 			</div>
 		% endif
 
@@ -89,7 +89,7 @@
 				<small>
 				<a href="shutdown"><i class="fa fa-power-off"></i> Shutdown</a> |
 				<a href="restart"><i class="fa fa-power-off"></i> Restart</a> |
-				<a href="#" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update successful" data-error="Error checking for update"><i class="fa fa-refresh"></i> Check for new version</a>
+				<a href="javascript:void(0)" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update successful" data-error="Error checking for update"><i class="fa fa-refresh"></i> Check for new version</a>
 				</small>
 			</div>
 			<div id="version">
