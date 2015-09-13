@@ -165,7 +165,7 @@ def get_seed_ratio(provider):
     elif provider == 'Mininova':
         seed_ratio = headphones.CONFIG.MININOVA_RATIO
     elif provider == 'Strike':
-    	seed_ratio = headphones.CONFIG.STRIKE_RATIO
+        seed_ratio = headphones.CONFIG.STRIKE_RATIO
     else:
         seed_ratio = None
 
@@ -711,7 +711,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None, choose_spe
 
 def send_to_downloader(data, bestqual, album):
 
-    logger.info(u'Found best result from %s: <a href="%s">%s</a> - %s', bestqual[3], bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1]))
+    logger.info(u'Found best result from %s: [%s] - %s - %s', bestqual[3], bestqual[2], bestqual[0], helpers.bytes_to_mb(bestqual[1]))
     # Get rid of any dodgy chars here so we can prevent sab from renaming our downloads
     kind = bestqual[4]
     seed_ratio = None
@@ -810,8 +810,11 @@ def send_to_downloader(data, bestqual, album):
                         logger.warning("Unable to convert magnet with hash " \
                             "'%s' into a torrent file.", torrent_hash)
                         return
+                elif headphones.CONFIG.MAGNET_LINKS == 3:
+                    torrent_to_file(download_path, data)
+                    return
                 else:
-                    logger.error("Cannot save magnet link in blackhole. " \
+                    logger.error("Ignoring magnet links for blackhole. " \
                         "Please switch your torrent downloader to " \
                         "Transmission or uTorrent, or allow Headphones " \
                         "to open or convert magnet links")
@@ -1198,20 +1201,41 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
                         seeders = item['seeds']
                         url = item['torrentLink']
                         size = int(item['size'])
+                        hash = item['hash']
+                        # The "tr" querystring used in magnetUri is a hack since it assumes the tracker is always the same for KAT.
+                        # It currently works for all torrents tested but it should be changed to load the HTML, and parse out the real magnet URI.
+                        magnetUri = r"magnet:?xt=urn:btih:" + hash + r"&tr=udp%3A%2F%2Fopen.demonii.com%3A1337"
 
                         if format == "2":
                             torrent = request.request_content(url, headers=headers)
                             if not torrent or (int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1):
                                 rightformat = False
 
-                        if rightformat and size < maxsize and minimumseeders < int(seeders):
-                            match = True
-                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-                        else:
-                            match = False
-                            logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d, Format: %s)', title, size, int(seeders), rightformat)
+                        #if rightformat and size < maxsize and minimumseeders < int(seeders):
+                        #    match = True
+                        #    logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                        #else:
+                        #    match = False
+                        #    logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d, Format: %s)', title, size, int(seeders), rightformat)
 
-                        resultlist.append((title, size, url, provider, 'torrent', match))
+                        match = False
+                        if rightformat:
+                            if size < maxsize:
+                                if minimumseeders < int(seeders):
+                                    match = True
+                                    logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                                else:
+                                    logger.info('%s has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d, Format: %s)', title, size, int(seeders), rightformat)
+                            else:
+                                logger.info('%s is larger than the maxsize for this category, skipping. (Size: %i bytes, Seeders: %d, Format: %s)', title, size, int(seeders), rightformat)
+                        else:
+                            logger.info('%s is the wrong format for this category, skipping. (Size: %i bytes, Seeders: %d, Format: %s)', title, size, int(seeders), rightformat)
+
+
+                        # The URL returned from KAT is NOT a torrent URL. It is a jump page.
+                        # More work needs to be done here to get this to work right for real torrent files. Refer to CouchPotatos HTML parsing method.
+                        #resultlist.append((title, size, url, provider, 'torrent', match))
+                        resultlist.append((title, size, magnetUri, provider, 'magnet', match))
                     except Exception as e:
                         logger.exception("Unhandled exception in the KAT parser")
 
@@ -1669,13 +1693,16 @@ def preprocess(resultlist):
             headers = {}
 
             if result[3] == 'Kick Ass Torrents':
-                #headers['Referer'] = 'http://kat.ph/'
                 headers['User-Agent'] = USER_AGENT
             elif result[3] == 'What.cd':
                 headers['User-Agent'] = 'Headphones'
             elif result[3] == "The Pirate Bay" or result[3] == "Old Pirate Bay":
                 headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
             return request.request_content(url=result[2], headers=headers), result
+
+        if result[4] == 'magnet':
+            magnet_link = result[2]
+            return "d10:magnet-uri%d:%se" % (len(magnet_link), magnet_link), result
 
         else:
             headers = {'User-Agent': USER_AGENT}

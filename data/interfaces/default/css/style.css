@@ -334,7 +334,7 @@ form .row label {
   font-size: 12px;
   line-height: normal;
   padding-top: 7px;
-  width: 175px;
+  width: 170px;
 }
 form .row label.inline {
   margin-right: 5px;
@@ -368,7 +368,7 @@ form .row small {
   display: block;
   font-size: 9px;
   line-height: 12px;
-  margin-left: 175px;
+  margin-left: 170px;
   margin-top: 3px;
 }
 form .left label {
