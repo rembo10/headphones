@@ -951,7 +951,7 @@ def send_to_downloader(data, bestqual, album):
         logger.info(u"Sending Email notification")
         email = notifiers.Email()
         message = 'Snatched from ' + provider + '. ' + name
-        email.notify(title, message)
+        email.notify("Snatched: " + title, message)
 
 def verifyresult(title, artistterm, term, lossless):
 
