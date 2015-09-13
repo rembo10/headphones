@@ -1153,6 +1153,7 @@ class WebInterface(object):
             "magnet_links_0": radio(headphones.CONFIG.MAGNET_LINKS, 0),
             "magnet_links_1": radio(headphones.CONFIG.MAGNET_LINKS, 1),
             "magnet_links_2": radio(headphones.CONFIG.MAGNET_LINKS, 2),
+            "magnet_links_3": radio(headphones.CONFIG.MAGNET_LINKS, 3),
             "log_dir": headphones.CONFIG.LOG_DIR,
             "cache_dir": headphones.CONFIG.CACHE_DIR,
             "interface_list": interface_list,
