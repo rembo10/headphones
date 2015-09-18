@@ -50,15 +50,14 @@
                 fileid = 'nzb'
             if item['URL'].find('torrent') != -1:
                 fileid = 'torrent'
+            if item['URL'].find('magnet:') != -1:
+                fileid = 'torrent'
             if item['URL'].find('rutracker') != -1:
                 fileid = 'torrent'
             if item['URL'].find('codeshy') != -1:
                 fileid = 'nzb'
 
-            if 'FolderName' in item:
-                folder = 'Folder: ' + item['FolderName']
-            else:
-                folder = 'Folder: ?'
+            folder = 'Folder: ' + item['FolderName']
 
         %>
 			<tr class="grade${grade}">

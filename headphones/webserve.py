@@ -814,7 +814,7 @@ class WebInterface(object):
     @cherrypy.expose
     def history(self):
         myDB = db.DBConnection()
-        history = myDB.select('''SELECT * from snatched WHERE Status NOT LIKE "Seed%" order by DateAdded DESC''')
+        history = myDB.select('''SELECT AlbumID, Title, Size, URL, DateAdded, Status, Kind, ifnull(FolderName, '?') FolderName FROM snatched WHERE Status NOT LIKE "Seed%" ORDER BY DateAdded DESC''')
         return serve_template(templatename="history.html", title="History", history=history)
 
     @cherrypy.expose
