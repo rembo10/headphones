@@ -112,6 +112,9 @@ class ConnectTimeoutError(TimeoutError):
     "Raised when a socket timeout occurs while connecting to a server"
     pass
 
+class NewConnectionError(ConnectTimeoutError, PoolError):
+    "Raised when we fail to establish a new connection. Usually ECONNREFUSED."
+    pass
 
 class EmptyPoolError(PoolError):
     "Raised when a pool runs out of connections and no more are allowed."
@@ -149,6 +152,11 @@ class SecurityWarning(HTTPWarning):
     pass
 
 
+class SubjectAltNameWarning(SecurityWarning):
+    "Warned when connecting to a host with a certificate missing a SAN."
+    pass
+
+
 class InsecureRequestWarning(SecurityWarning):
     "Warned when making an unverified HTTPS request."
     pass
@@ -157,3 +165,29 @@ class InsecureRequestWarning(SecurityWarning):
 class SystemTimeWarning(SecurityWarning):
     "Warned when system time is suspected to be wrong"
     pass
+
+
+class InsecurePlatformWarning(SecurityWarning):
+    "Warned when certain SSL configuration is not available on a platform."
+    pass
+
+
+class ResponseNotChunked(ProtocolError, ValueError):
+    "Response needs to be chunked in order to read it as chunks."
+    pass
+
+
+class ProxySchemeUnknown(AssertionError, ValueError):
+    "ProxyManager does not support the supplied scheme"
+    # TODO(t-8ch): Stop inheriting from AssertionError in v2.0.
+
+    def __init__(self, scheme):
+        message = "Not supported proxy scheme %s" % scheme
+        super(ProxySchemeUnknown, self).__init__(message)
+
+
+class HeaderParsingError(HTTPError):
+    "Raised by assert_header_parsing, but we convert it to a log.warning statement."
+    def __init__(self, defects, unparsed_data):
+        message = '%s, unparsed data: %r' % (defects or 'Unknown', unparsed_data)
+        super(HeaderParsingError, self).__init__(message)

@@ -79,16 +79,24 @@ def torrent_to_file(target_file, data):
         with open(target_file, "wb") as fp:
             fp.write(data)
     except IOError as e:
-        logger.error("Could not write torrent file '%s': %s. Skipping.",
+        logger.error(
+            "Could not write torrent file '%s': %s. Skipping.",
             target_file, e.message)
         return
 
     # Try to change permissions
-    try:
-        os.chmod(target_file, int(headphones.CONFIG.FILE_PERMISSIONS, 8))
-    except OSError as e:
-        logger.warn("Could not change permissions for file '%s': %s. " \
-            "Continuing.", target_file, e.message)
+    if headphones.CONFIG.FILE_PERMISSIONS_ENABLED:
+        try:
+            os.chmod(target_file, int(headphones.CONFIG.FILE_PERMISSIONS, 8))
+        except OSError as e:
+            logger.warn(
+                "Could not change permissions for file '%s': %s. Continuing.",
+                target_file.decode(headphones.SYS_ENCODING, "replace"),
+                e.message)
+    else:
+        logger.debug(
+            "Not changing file permissions, since it is disabled: %s",
+            target_file.decode(headphones.SYS_ENCODING, "replace"))
 
     # Done
     return True
@@ -203,7 +211,7 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False,
                 if release_date > datetime.datetime.today():
                     logger.info("Skipping: %s. Waiting for release date of: %s" % (album['AlbumTitle'], album['ReleaseDate']))
                     continue
-            
+
             new = True
 
             if album['Status'] == "Wanted Lossless":
@@ -792,6 +800,7 @@ def send_to_downloader(data, bestqual, album):
                     services = TORRENT_TO_MAGNET_SERVICES[:]
                     random.shuffle(services)
                     headers = {'User-Agent': USER_AGENT}
+                    headers['Referer'] = 'https://torcache.net/'
 
                     for service in services:
 
@@ -1159,59 +1168,53 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
         if headphones.CONFIG.KAT_PROXY_URL:
             providerurl = fix_url(set_proxy(headphones.CONFIG.KAT_PROXY_URL))
         else:
-            providerurl = fix_url("https://kickass.to")
+            providerurl = fix_url("https://kat.cr")
 
         # Build URL
-        providerurl = providerurl + "/json.php?"
+        providerurl = providerurl + "/usearch/" + ka_term
 
-        # Pick category for torrents
+        # Set max size and category
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
-            format = "2" # FLAC
             maxsize = 10000000000
+            providerurl += " category:lossless/"
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
-            format = "10" # MP3 and FLAC
             maxsize = 10000000000
+            providerurl += " category:music/"
         else:
-            format = "8" # MP3 only
             maxsize = 300000000
+            providerurl += " category:music/"
 
         # Requesting content
         logger.info("Searching %s using term: %s" % (provider,ka_term))
 
         params = {
-            "q": ka_term + "+category:music",
             "field": "seeders",
-            "sorder": "desc"
+            "sorder": "desc",
+            "rss": "1"
         }
-        headers = {'User-Agent': USER_AGENT}
-        data = request.request_json(url=providerurl, params=params, headers=headers)
+
+        data = request.request_feed(url=providerurl, params=params,
+            whitelist_status_code=[404])
 
         # Process feed
         if data:
-            if not data['list']:
+            if not len(data.entries):
                 logger.info("No results found on %s using search term: %s" % (provider, ka_term))
             else:
-                for item in data['list']:
+                for item in data.entries:
                     try:
-                        rightformat = True
                         title = item['title']
-                        seeders = item['seeds']
-                        url = item['torrentLink']
-                        size = int(item['size'])
-
-                        if format == "2":
-                            torrent = request.request_content(url, headers=headers)
-                            if not torrent or (int(torrent.find(".mp3")) > 0 and int(torrent.find(".flac")) < 1):
-                                rightformat = False
-
-                        if rightformat and size < maxsize and minimumseeders < int(seeders):
-                            match = True
+                        seeders = item['torrent_seeds']
+                        if headphones.CONFIG.TORRENT_DOWNLOADER == 0:
+                            url = item['links'][1]['href']
+                        else:
+                            url = item['torrent_magneturi']
+                        size = int(item['links'][1]['length'])
+                        if size < maxsize and minimumseeders < int(seeders):
+                            resultlist.append((title, size, url, provider, 'torrent', True))
                             logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                         else:
-                            match = False
-                            logger.info('%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d, Format: %s)', title, size, int(seeders), rightformat)
-
-                        resultlist.append((title, size, url, provider, 'torrent', match))
+                            logger.info('%s is larger than the maxsize or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d)', title, size, int(seeders))
                     except Exception as e:
                         logger.exception("Unhandled exception in the KAT parser")
 
@@ -1669,7 +1672,7 @@ def preprocess(resultlist):
             headers = {}
 
             if result[3] == 'Kick Ass Torrents':
-                #headers['Referer'] = 'http://kat.ph/'
+                headers['Referer'] = 'https://torcache.net/'
                 headers['User-Agent'] = USER_AGENT
             elif result[3] == 'What.cd':
                 headers['User-Agent'] = 'Headphones'

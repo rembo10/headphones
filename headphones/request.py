@@ -24,6 +24,9 @@ import headphones
 import headphones.lock
 import collections
 
+# Disable SSL certificate warnings. We have our own handling
+requests.packages.urllib3.disable_warnings()
+
 # Dictionary with last request times, for rate limiting.
 last_requests = collections.defaultdict(int)
 fake_lock = headphones.lock.FakeLock()
@@ -95,7 +98,8 @@ def request_response(url, method="get", auto_raise=True,
             "host is up and running.")
     except requests.Timeout:
         logger.error(
-            "Request timed out. The remote host did not respond in a timely manner.")
+            "Request timed out. The remote host did not respond in a timely "
+            "manner.")
     except requests.HTTPError as e:
         if e.response is not None:
             if e.response.status_code >= 500:
@@ -206,7 +210,8 @@ def server_message(response):
     message = None
 
     # First attempt is to 'read' the response as HTML
-    if response.headers.get("content-type") and "text/html" in response.headers.get("content-type"):
+    if response.headers.get("content-type") and \
+            "text/html" in response.headers.get("content-type"):
         try:
             soup = BeautifulSoup(response.content, "html5lib")
         except Exception:

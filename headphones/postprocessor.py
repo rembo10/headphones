@@ -104,7 +104,10 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
                 myDB.action('UPDATE snatched SET status = "Frozen" WHERE status NOT LIKE "Seed%" and AlbumID=?', [albumid])
                 frozen = re.search(r' \(Frozen\)(?:\[\d+\])?', albumpath)
                 if not frozen:
-                    renameUnprocessedFolder(albumpath, tag="Frozen")
+                    if headphones.CONFIG.RENAME_FROZEN:
+                        renameUnprocessedFolder(albumpath, tag="Frozen")
+                    else:
+                        logger.warn(u"Won't rename %s to mark as 'Frozen', because it is disabled.", albumpath.decode(headphones.SYS_ENCODING, 'replace'))
                 return
 
         logger.info(u"Now adding/updating artist: " + release_dict['artist_name'])
@@ -269,11 +272,14 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
                 doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind, keep_original_folder)
                 return
 
-    logger.warn(u'Could not identify album: %s. It may not be the intended album.' % albumpath.decode(headphones.SYS_ENCODING, 'replace'))
+    logger.warn(u'Could not identify album: %s. It may not be the intended album.', albumpath.decode(headphones.SYS_ENCODING, 'replace'))
     myDB.action('UPDATE snatched SET status = "Unprocessed" WHERE status NOT LIKE "Seed%" and AlbumID=?', [albumid])
     processed = re.search(r' \(Unprocessed\)(?:\[\d+\])?', albumpath)
     if not processed:
-        renameUnprocessedFolder(albumpath, tag="Unprocessed")
+        if headphones.CONFIG.RENAME_UNPROCESSED:
+            renameUnprocessedFolder(albumpath, tag="Unprocessed")
+        else:
+            logger.warn(u"Won't rename %s to mark as 'Unprocessed', because it is disabled.", albumpath.decode(headphones.SYS_ENCODING, 'replace'))
 
 
 def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind=None, keep_original_folder=False):
@@ -809,10 +815,13 @@ def moveFiles(albumpath, release, tracks):
 
             temp_f = os.path.join(temp_f, f)
 
-            try:
-                os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING, 'replace'), int(headphones.CONFIG.FOLDER_PERMISSIONS, 8))
-            except Exception as e:
-                logger.error("Error trying to change permissions on folder: %s. %s", temp_f, e)
+            if headphones.CONFIG.FOLDER_PERMISSIONS_ENABLED:
+                try:
+                    os.chmod(os.path.normpath(temp_f).encode(headphones.SYS_ENCODING, 'replace'), int(headphones.CONFIG.FOLDER_PERMISSIONS, 8))
+                except Exception as e:
+                    logger.error("Error trying to change permissions on folder: %s. %s", temp_f.decode(headphones.SYS_ENCODING, 'replace'), e)
+            else:
+                logger.debug("Not changing folder permissions, since it is disabled: %s", temp_f.decode(headphones.SYS_ENCODING, 'replace'))
 
     # If we failed to move all the files out of the directory, this will fail too
     try:
@@ -1037,11 +1046,14 @@ def updateFilePermissions(albumpaths):
         for r, d, f in os.walk(folder):
             for files in f:
                 full_path = os.path.join(r, files)
-                try:
-                    os.chmod(full_path, int(headphones.CONFIG.FILE_PERMISSIONS, 8))
-                except:
-                    logger.error("Could not change permissions for file: %s", full_path)
-                    continue
+                if headphones.CONFIG.FILE_PERMISSIONS_ENABLED:
+                    try:
+                        os.chmod(full_path, int(headphones.CONFIG.FILE_PERMISSIONS, 8))
+                    except:
+                        logger.error("Could not change permissions for file: %s", full_path)
+                        continue
+                else:
+                    logger.debug("Not changing file permissions, since it is disabled: %s", full_path.decode(headphones.SYS_ENCODING, 'replace'))
 
 
 def renameUnprocessedFolder(path, tag):
