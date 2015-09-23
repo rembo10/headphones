@@ -1538,45 +1538,35 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None, choose
         providerurl = providerurl + s_term + "&category=Music"
 
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
-            format = "2"
             providerurl = providerurl + "&subcategory=Lossless"
             maxsize = 10000000000
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
-            format = "10"  # MP3 and FLAC
             maxsize = 10000000000
         else:
-            format = "8"  # MP3 only
             maxsize = 300000000
 
         logger.info("Searching %s using term: %s" % (provider, s_term))
-        data = request.request_json(url=providerurl)
+        data = request.request_json(url=providerurl,
+            whitelist_status_code=[404])
 
         if not data or not data.get('torrents'):
             logger.info("No results found on %s using search term: %s" % (provider, s_term))
         else:
             for item in data['torrents']:
                 try:
-                    rightformat = True
                     title = item['torrent_title']
                     seeders = item['seeds']
                     url = item['magnet_uri']
                     size = int(item['size'])
                     subcategory = item['sub_category']
 
-                    if format == 2:
-                        if subcategory != "Lossless":
-                            rightformat = False
-
-                    if rightformat and size < maxsize and minimumseeders < int(seeders):
-                        match = True
+                    if size < maxsize and minimumseeders < int(seeders):
+                        resultlist.append((title, size, url, provider, 'torrent', True))
                         logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                     else:
-                        match = False
                         logger.info(
-                            '%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d, Format: %s)',
-                            title, size, int(seeders), rightformat)
-
-                    resultlist.append((title, size, url, provider, 'torrent', match))
+                            '%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d)',
+                            title, size, int(seeders))
                 except Exception as e:
                     logger.exception("Unhandled exception in the Strike parser")
 
