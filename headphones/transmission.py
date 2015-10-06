@@ -31,7 +31,7 @@ import headphones
 def addTorrent(link, data=None):
     method = 'torrent-add'
 
-    if link.endswith('.torrent') or data:
+    if link.endswith('.torrent') and not link.startswith('http') or data:
         if data:
             metainfo = str(base64.b64encode(data))
         else:
