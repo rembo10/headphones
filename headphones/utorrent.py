@@ -181,7 +181,7 @@ def removeTorrent(hash, remove_data=False):
     status, torrentList = uTorrentClient.list()
     torrents = torrentList['torrents']
     for torrent in torrents:
-        if torrent[0].lower() == hash:
+        if torrent[0].upper() == hash.upper():
             if torrent[21] == 'Finished':
                 logger.info('%s has finished seeding, removing torrent and data' % torrent[2])
                 uTorrentClient.remove(hash, remove_data)
