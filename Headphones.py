@@ -177,6 +177,16 @@ def main():
                 "module to enable HTTPS. HTTPS will be disabled.")
             headphones.CONFIG.ENABLE_HTTPS = False
 
+    #This fix is put in place for systems with broken SSL (like QNAP)
+    certificate_verification = headphones.CONFIG.VERIFY_SSL_CERT
+    if not certificate_verification:
+        try:
+            import ssl
+            ssl._create_default_https_context = ssl._create_unverified_context
+        except:
+            pass
+    #==== end block (should be configurable at settings level)
+
     # Try to start the server. Will exit here is address is already in use.
     web_config = {
         'http_port': http_port,
