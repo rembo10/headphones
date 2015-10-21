@@ -1025,6 +1025,7 @@ class WebInterface(object):
             "enable_https": checked(headphones.CONFIG.ENABLE_HTTPS),
             "https_cert": headphones.CONFIG.HTTPS_CERT,
             "https_key": headphones.CONFIG.HTTPS_KEY,
+            "verify_ssl_cert": checked(headphones.CONFIG.VERIFY_SSL_CERT),
             "api_enabled": checked(headphones.CONFIG.API_ENABLED),
             "api_key": headphones.CONFIG.API_KEY,
             "download_scan_interval": headphones.CONFIG.DOWNLOAD_SCAN_INTERVAL,
@@ -1286,7 +1287,7 @@ class WebInterface(object):
         # Handle the variable config options. Note - keys with False values aren't getting passed
 
         checked_configs = [
-            "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer", "use_newznab", "newznab_enabled", "use_torznab", "torznab_enabled",
+            "launch_browser", "enable_https", "verify_ssl_cert", "api_enabled", "use_blackhole", "headphones_indexer", "use_newznab", "newznab_enabled", "use_torznab", "torznab_enabled",
             "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay", "use_mininova", "use_waffles", "use_rutracker",
             "use_whatcd", "use_strike", "preferred_bitrate_allow_lossless", "detect_bitrate", "ignore_clean_releases", "freeze_db", "cue_split", "move_files",
             "rename_files", "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art", "embed_album_art", "embed_lyrics",
