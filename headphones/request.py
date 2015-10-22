@@ -18,6 +18,7 @@ from headphones import logger
 from xml.dom import minidom
 from bs4 import BeautifulSoup
 
+import sys
 import requests
 import feedparser
 import headphones
@@ -53,6 +54,14 @@ def request_response(url, method="get", auto_raise=True,
     # Disable verification of SSL certificates if requested. Note: this could
     # pose a security issue!
     kwargs["verify"] = bool(headphones.CONFIG.VERIFY_SSL_CERT)
+
+    #This fix is put in place for systems with broken SSL (like QNAP)
+    if not headphones.CONFIG.VERIFY_SSL_CERT and sys.version_info >= (2, 7, 9):
+        try:
+            import ssl
+            ssl._create_default_https_context = ssl._create_unverified_context
+        except:
+            pass
 
     # Map method to the request.XXX method. This is a simple hack, but it
     # allows requests to apply more magic per method. See lib/requests/api.py.

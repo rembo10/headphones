@@ -22,11 +22,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib/'))
 
 from headphones import webstart, logger
 
-if sys.version_info >= (2, 7, 9):
-    import ssl
-    # pylint: disable=W0212
-    ssl._create_default_https_context = ssl._create_unverified_context
-
 import locale
 import time
 import signal
