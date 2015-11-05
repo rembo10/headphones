@@ -15,6 +15,7 @@
 
 import os
 import headphones
+import math
 
 from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 
@@ -190,6 +191,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
     # We'll use this to give a % completion, just because the track matching might take a while
     song_count = 0
     latest_artist = []
+    last_completion_percentage = 0
 
     for song in song_list:
 
@@ -200,10 +202,11 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
             logger.info("Now matching songs by %s" % song['ArtistName'])
 
         song_count += 1
-        completion_percentage = float(song_count) / total_number_of_songs * 100
+        completion_percentage = math.floor(float(song_count) / total_number_of_songs * 1000) / 10
 
-        if completion_percentage % 10 == 0:
+        if completion_percentage >= (last_completion_percentage + 10):
             logger.info("Track matching is " + str(completion_percentage) + "% complete")
+            last_completion_percentage = completion_percentage
 
         #THE "MORE-SPECIFIC" CLAUSES HERE HAVE ALL BEEN REMOVED.  WHEN RUNNING A LIBRARY SCAN, THE ONLY CLAUSES THAT
         #EVER GOT HIT WERE [ARTIST/ALBUM/TRACK] OR CLEANNAME.  ARTISTID & RELEASEID ARE NEVER PASSED TO THIS FUNCTION,
