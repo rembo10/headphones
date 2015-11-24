@@ -958,6 +958,11 @@ def send_to_downloader(data, bestqual, album):
         email = notifiers.Email()
         message = 'Snatched from ' + provider + '. ' + name
         email.notify(title, message)
+    if headphones.CONFIG.ANDROIDPN_ENABLED and headphones.CONFIG.ANDROIDPN_ONSNATCH:
+        logger.info(u"Sending AndroidPN notification")
+        msg = 'From ' + provider + '<br></br>' + name
+        androidpn = notifiers.ANDROIDPN()
+        androidpn.notify('Headphones snatched: ' + title, msg)
 
 def verifyresult(title, artistterm, term, lossless):
 

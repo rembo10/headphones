@@ -844,3 +844,88 @@ class Email(object):
         except Exception, e:
             logger.warn('Error sending Email: %s' % e)
             return False
+class ANDROIDPN:
+
+    def __init__(self):
+        self.username = headphones.CONFIG.ANDROIDPN_USERNAME
+        self.url = headphones.CONFIG.ANDROIDPN_URL
+        if headphones.CONFIG.ANDROIDPN_BROADCAST:
+            self.broadcast = 'Y'
+        else:
+            self.broadcast = 'N'
+        
+#        self._session = requests.Session()
+#        self._session.headers = {'Content-type': "application/x-www-form-urlencoded"}
+
+
+    def notify(self, subject, message, url=None, username=None, broadcast=None,module=None):
+        if module is None:
+            module = ''
+        module += '[NOTIFIER]'
+        if not headphones.CONFIG.ANDROIDPN_ENABLED and not force:
+            logger.fdebug(module + ' Notification for AndroidPN not enabled, skipping this notification.')
+            return False
+
+
+        logger.info(module + ' Sending notification to AndroidPN')
+
+        self._sendAndroidPN(subject,message,self.url,self.username,self.broadcast, module)
+        return True
+
+    def _sendAndroidPN(self, title, msg, url, username, broadcast, module):
+
+        # build up the URL and parameters
+        msg = msg.strip()
+
+        data = urllib.urlencode({
+            'action': "send",
+            'broadcast': broadcast,
+            'uri': "",
+            'title': title,
+            'username': username,
+            'message': msg.encode('utf-8'),
+            })
+
+        # send the request to pushover
+        try:
+            req = urllib2.Request(url)
+            handle = urllib2.urlopen(req, data)
+            handle.close()
+
+        except urllib2.URLError, e:
+            # FIXME: Python 2.5 hack, it wrongly reports 201 as an error
+            if hasattr(e, 'code') and e.code == 201:
+                logger.info(module + u"ANDROIDPN: Notification successful.")
+                return True
+
+            # if we get an error back that doesn't have an error code then who knows what's really happening
+            if not hasattr(e, 'code'):
+                logger.error(module+ u"ANDROIDPN: Notification failed." + ex(e))
+                return False
+            else:
+                logger.error(module + u"ANDROIDPN: Notification failed. Error code: " + str(e.code))
+
+            # HTTP status 404 if the provided email address isn't a AndroidPN user.
+            if e.code == 404:
+                logger.info(module + u"ANDROIDPN: Username is wrong/not a AndroidPN email. AndroidPN will send an email to it")
+                return False
+
+            # For HTTP status code 401's, it is because you are passing in either an invalid token, or the user has not added your service.
+            elif e.code == 401:
+
+                # HTTP status 401 if the user doesn't have the service added
+                subscribeNote = self._sendAndroidPN(title, msg, username)
+                if subscribeNote:
+                    logger.info(module + u"ANDROIDPN: Subscription sent")
+                    return True
+                else:
+                    logger.error(module + u"ANDROIDPN: Subscription could not be sent")
+                    return False
+
+            # If you receive an HTTP status code of 400, it is because you failed to send the proper parameters
+            elif e.code == 400:
+                logger.error(module + u"ANDROIDPN: Wrong data sent to AndroidPN")
+                return False
+
+        logger.info(module + u"ANDROIDPN: Notification successful.")
+        return True

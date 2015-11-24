@@ -522,6 +522,12 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         subject = release['ArtistName'] + ' - ' + release['AlbumTitle']
         email.notify(subject, "Download and Postprocessing completed")
 
+    if headphones.CONFIG.ANDROIDPN_ENABLED:
+        logger.info(u"Sending AndroidPN notification")
+        androidpn = notifiers.ANDROIDPN()
+        androidpn.notify('Headphones processed: ' + pushmessage,
+                         statusmessage)
+
 
 def embedAlbumArt(artwork, downloaded_track_list):
     logger.info('Embedding album art')

@@ -1207,6 +1207,11 @@ class WebInterface(object):
             "pushover_keys": headphones.CONFIG.PUSHOVER_KEYS,
             "pushover_apitoken": headphones.CONFIG.PUSHOVER_APITOKEN,
             "pushover_priority": headphones.CONFIG.PUSHOVER_PRIORITY,
+            "androidpn_enabled": checked(headphones.CONFIG.ANDROIDPN_ENABLED),
+            "androidpn_onsnatch": checked(headphones.CONFIG.ANDROIDPN_ONSNATCH),
+            "androidpn_broadcast": checked(headphones.CONFIG.ANDROIDPN_BROADCAST),
+            "androidpn_url": headphones.CONFIG.ANDROIDPN_URL,
+            "androidpn_username": headphones.CONFIG.ANDROIDPN_USERNAME,
             "pushbullet_enabled": checked(headphones.CONFIG.PUSHBULLET_ENABLED),
             "pushbullet_onsnatch": checked(headphones.CONFIG.PUSHBULLET_ONSNATCH),
             "pushbullet_apikey": headphones.CONFIG.PUSHBULLET_APIKEY,
@@ -1297,7 +1302,8 @@ class WebInterface(object):
             "nma_enabled", "nma_onsnatch", "pushalot_enabled", "pushalot_onsnatch", "synoindex_enabled", "pushover_enabled",
             "pushover_onsnatch", "pushbullet_enabled", "pushbullet_onsnatch", "subsonic_enabled", "twitter_enabled", "twitter_onsnatch",
             "osx_notify_enabled", "osx_notify_onsnatch", "boxcar_enabled", "boxcar_onsnatch", "songkick_enabled", "songkick_filter_enabled",
-            "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch", "customauth", "idtag"
+            "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch", "customauth", "idtag", "androidpn_enabled",
+            "androidpn_onsnatch", "androidpn_broadcast"
         ]
         for checked_config in checked_configs:
             if checked_config not in kwargs:
@@ -1537,6 +1543,13 @@ class WebInterface(object):
         logger.info("Testing Pushbullet notifications")
         pushbullet = notifiers.PUSHBULLET()
         pushbullet.notify("it works!")
+
+    @cherrypy.expose
+    def testAndroidPN(self):
+        logger.info("Testing AndroidPN notifications")
+        androidpn = notifiers.ANDROIDPN()
+        result = androidpn.notify("hooray!", "This is a test")
+        return str(result)
 
 class Artwork(object):
     @cherrypy.expose

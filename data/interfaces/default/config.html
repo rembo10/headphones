@@ -1173,6 +1173,33 @@
                                 </div>
                             </fieldset>
 
+		     <fieldset>
+		     	<div class="checkbox row left">
+		     		<input type="checkbox" name="androidpn_enabled" id="androidpn" id="androidpn" value="1" ${config['androidpn_enabled']} /><label for="androidpn"><span class="option">AndroidPN</span></label>
+			</div>
+			<div id="androidpnoptions">
+			   <div class="row">
+			     <div class="row checkbox">
+		     		<input type="checkbox" name="androidpn_onsnatch" value="1" ${config['androidpn_onsnatch']} /><label>Notify on snatch?</label>
+		     	     </div>
+		     	     <div class="row checkbox">
+		     		<input type="checkbox" name="androidpn_broadcast" id="androidpn_broadcast" value="1" ${config['androidpn_broadcast']} /><label>Broadcast notification</label>
+		     	     </div>
+		     	     <div class="row">
+		     		<label>AndroidPN Server Url</label>
+		     		<input type="text" name="androidpn_url"  value="${config['androidpn_url']}" size="30">
+		     	     </div>
+		     	     <div class="row" id="androidpn_username">
+		     		<label>AndroidPN Username</label>
+		     		<input type="text" name="androidpn_username"  value="${config['androidpn_username']}" size="30">
+		     	     </div>
+		     	     <div class="row">
+		     		<input type="button" value="Test AndroidPN" id="androidpn_test" />
+		     	     </div>
+		     	</div>
+		     </div>
+		     </fieldset>
+
                             <fieldset>
                                 <div class="row checkbox left">
                                     <input type="checkbox" class="bigcheck" name="subsonic_enabled" id="subsonic" value="1" ${config['subsonic_enabled']} /><label for="subsonic"><span class="option">Subsonic</span></label>
@@ -1993,6 +2020,43 @@
                         }
                 });
 
+		if ($("#androidpn").is(":checked"))
+			{
+				$("#androidpnoptions").show();
+			}
+		else
+			{
+				$("#androidpnoptions").hide();
+			}
+		$("#androidpn").click(function(){
+			if ($("#androidpn").is(":checked"))
+			{
+				$("#androidpnoptions").slideDown();
+			}
+			else
+			{
+				$("#androidpnoptions").slideUp();
+			}
+		});
+		if ($("#androidpn_broadcast").is(":checked"))
+			{
+				$("#androidpn_username").hide();
+			}
+		else
+			{
+				$("#androidpn_username").show();
+			}
+		$("#androidpn_broadcast").click(function(){
+			if ($("#androidpn_broadcast").is(":checked"))
+			{
+				$("#androidpn_username").slideUp();
+			}
+			else
+			{
+				$("#androidpn_username").slideDown();
+			}
+		});
+
                 if ($("#osx_notify").is(":checked"))
                         {
                             $("#osx_notify_options").show();
@@ -2333,6 +2397,12 @@
                     $.get("/osxnotifyregister", {'app': osx_notify_app}, function (data) { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>"); });
                     $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut()
                 })
+
+		$('#androidpn_test').click(function () {
+		    $.get("/testandroidpn",
+		    	function (data) { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>"); });
+		    $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
+		});
         }
 
         $(document).ready(function() {
