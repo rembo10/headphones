@@ -171,3 +171,7 @@ _ReSharper*/
 /logs
 .project
 .pydevproject
+.vs/
+
+#Python virtual environment
+env/
