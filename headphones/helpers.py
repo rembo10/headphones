@@ -13,19 +13,19 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
-
 from operator import itemgetter
-
 import unicodedata
-import headphones
 import datetime
-import fnmatch
 import shutil
 import time
 import sys
+
+import fnmatch
 import re
 import os
+from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
+import headphones
+
 
 # Modified from https://github.com/Verrus/beets-plugin-featInTitle
 RE_FEATURING = re.compile(r"[fF]t\.|[fF]eaturing|[fF]eat\.|\b[wW]ith\b|&|vs\.")
@@ -35,7 +35,9 @@ RE_CD = re.compile(r"^(CD|dics)\s*[0-9]+$", re.I)
 
 
 def multikeysort(items, columns):
-    comparers = [((itemgetter(col[1:].strip()), -1) if col.startswith('-') else (itemgetter(col.strip()), 1)) for col in columns]
+    comparers = [
+        ((itemgetter(col[1:].strip()), -1) if col.startswith('-') else (itemgetter(col.strip()), 1))
+        for col in columns]
 
     def comparer(left, right):
         for fn, mult in comparers:
@@ -56,7 +58,6 @@ def checked(variable):
 
 
 def radio(variable, pos):
-
     if variable == pos:
         return 'Checked'
     else:
@@ -107,7 +108,6 @@ def latinToAscii(unicrap):
 
 
 def convert_milliseconds(ms):
-
     seconds = ms / 1000
     gmtime = time.gmtime(seconds)
     if seconds > 3600:
@@ -119,7 +119,6 @@ def convert_milliseconds(ms):
 
 
 def convert_seconds(s):
-
     gmtime = time.gmtime(s)
     if s > 3600:
         minutes = time.strftime("%H:%M:%S", gmtime)
@@ -141,7 +140,6 @@ def now():
 
 
 def get_age(date):
-
     try:
         split_date = date.split('-')
     except:
@@ -149,14 +147,13 @@ def get_age(date):
 
     try:
         days_old = int(split_date[0]) * 365 + int(split_date[1]) * 30 + int(split_date[2])
-    except (IndexError,ValueError):
+    except (IndexError, ValueError):
         days_old = False
 
     return days_old
 
 
 def bytes_to_mb(bytes):
-
     mb = int(bytes) / 1048576
     size = '%.1f MB' % mb
     return size
@@ -172,7 +169,7 @@ def piratesize(size):
     split = size.split(" ")
     factor = float(split[0])
     unit = split[1].upper()
-    
+
     if unit == 'MIB':
         size = factor * 1048576
     elif unit == 'MB':
@@ -194,7 +191,6 @@ def piratesize(size):
 
 
 def replace_all(text, dic, normalize=False):
-
     if not text:
         return ''
 
@@ -221,15 +217,14 @@ def replace_illegal_chars(string, type="file"):
 
 
 def cleanName(string):
-
     pass1 = latinToAscii(string).lower()
-    out_string = re.sub('[\.\-\/\!\@\#\$\%\^\&\*\(\)\+\-\"\'\,\;\:\[\]\{\}\<\>\=\_]', '', pass1).encode('utf-8')
+    out_string = re.sub('[\.\-\/\!\@\#\$\%\^\&\*\(\)\+\-\"\'\,\;\:\[\]\{\}\<\>\=\_]', '',
+                        pass1).encode('utf-8')
 
     return out_string
 
 
 def cleanTitle(title):
-
     title = re.sub('[\.\-\/\_]', ' ', title).lower()
 
     # Strip out extra whitespace
@@ -312,16 +307,22 @@ def expand_subfolders(f):
     difference = max(path_depths) - min(path_depths)
 
     if difference > 0:
-        logger.info("Found %d media folders, but depth difference between lowest and deepest media folder is %d (expected zero). If this is a discography or a collection of albums, make sure albums are per folder.", len(media_folders), difference)
+        logger.info(
+            "Found %d media folders, but depth difference between lowest and deepest media folder is %d (expected zero). If this is a discography or a collection of albums, make sure albums are per folder.",
+            len(media_folders), difference)
 
         # While already failed, advice the user what he could try. We assume the
         # directory may contain separate CD's and maybe some extra's. The
         # structure may look like X albums at same depth, and (one or more)
         # extra folders with a higher depth.
-        extra_media_folders = [media_folder[:min(path_depths)] for media_folder in media_folders if len(media_folder) > min(path_depths)]
-        extra_media_folders = list(set([os.path.join(*media_folder) for media_folder in extra_media_folders]))
+        extra_media_folders = [media_folder[:min(path_depths)] for media_folder in media_folders if
+                               len(media_folder) > min(path_depths)]
+        extra_media_folders = list(
+            set([os.path.join(*media_folder) for media_folder in extra_media_folders]))
 
-        logger.info("Please look at the following folder(s), since they cause the depth difference: %s", extra_media_folders)
+        logger.info(
+            "Please look at the following folder(s), since they cause the depth difference: %s",
+            extra_media_folders)
         return
 
     # Convert back to paths and remove duplicates, which may be there after
@@ -368,7 +369,7 @@ def path_filter_patterns(paths, patterns, root=None):
     for path in paths[:]:
         if path_match_patterns(path, patterns):
             logger.debug("Path ignored by pattern: %s",
-                os.path.join(root or "", path))
+                         os.path.join(root or "", path))
 
             ignored += 1
             paths.remove(path)
@@ -378,11 +379,11 @@ def path_filter_patterns(paths, patterns, root=None):
 
 
 def extract_data(s):
-
     s = s.replace('_', ' ')
 
-    #headphones default format
-    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s[\[\(](?P<year>.*?)[\]\)]', re.VERBOSE)
+    # headphones default format
+    pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s[\[\(](?P<year>.*?)[\]\)]',
+                         re.VERBOSE)
     match = pattern.match(s)
 
     if match:
@@ -391,7 +392,7 @@ def extract_data(s):
         year = match.group("year")
         return (name, album, year)
 
-    #Gonna take a guess on this one - might be enough to search on mb
+    # Gonna take a guess on this one - might be enough to search on mb
     pat = re.compile(r"(?P<name>.*?)\s*-\s*(?P<album>[^\[(-]*)")
 
     match = pat.match(s)
@@ -468,7 +469,8 @@ def extract_metadata(f):
                 old_album = new_albums[index]
                 new_albums[index] = RE_CD_ALBUM.sub("", album).strip()
 
-                logger.debug("Stripped albumd number identifier: %s -> %s", old_album, new_albums[index])
+                logger.debug("Stripped albumd number identifier: %s -> %s", old_album,
+                             new_albums[index])
 
         # Remove duplicates
         new_albums = list(set(new_albums))
@@ -498,7 +500,8 @@ def extract_metadata(f):
             return (artist, albums[0], years[0])
 
     # Not sure what to do here.
-    logger.info("Found %d artists, %d albums and %d years in metadata, so ignoring", len(artists), len(albums), len(years))
+    logger.info("Found %d artists, %d albums and %d years in metadata, so ignoring", len(artists),
+                len(albums), len(years))
     logger.debug("Artists: %s, Albums: %s, Years: %s", artists, albums, years)
 
     return (None, None, None)
@@ -524,8 +527,10 @@ def preserve_torrent_directory(albumpath):
     Copy torrent directory to headphones-modified to keep files for seeding.
     """
     from headphones import logger
-    new_folder = os.path.join(albumpath, 'headphones-modified'.encode(headphones.SYS_ENCODING, 'replace'))
-    logger.info("Copying files to 'headphones-modified' subfolder to preserve downloaded files for seeding")
+    new_folder = os.path.join(albumpath,
+                              'headphones-modified'.encode(headphones.SYS_ENCODING, 'replace'))
+    logger.info(
+        "Copying files to 'headphones-modified' subfolder to preserve downloaded files for seeding")
     try:
         shutil.copytree(albumpath, new_folder)
         return new_folder
@@ -578,7 +583,9 @@ def cue_split(albumpath):
 
 def extract_logline(s):
     # Default log format
-    pattern = re.compile(r'(?P<timestamp>.*?)\s\-\s(?P<level>.*?)\s*\:\:\s(?P<thread>.*?)\s\:\s(?P<message>.*)', re.VERBOSE)
+    pattern = re.compile(
+        r'(?P<timestamp>.*?)\s\-\s(?P<level>.*?)\s*\:\:\s(?P<thread>.*?)\s\:\s(?P<message>.*)',
+        re.VERBOSE)
     match = pattern.match(s)
     if match:
         timestamp = match.group("timestamp")
@@ -593,7 +600,7 @@ def extract_logline(s):
 def extract_song_data(s):
     from headphones import logger
 
-    #headphones default format
+    # headphones default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\[(?P<year>.*?)\]', re.VERBOSE)
     match = pattern.match(s)
 
@@ -605,7 +612,7 @@ def extract_song_data(s):
     else:
         logger.info("Couldn't parse %s into a valid default format", s)
 
-    #newzbin default format
+    # newzbin default format
     pattern = re.compile(r'(?P<name>.*?)\s\-\s(?P<album>.*?)\s\((?P<year>\d+?\))', re.VERBOSE)
     match = pattern.match(s)
     if match:
@@ -619,7 +626,6 @@ def extract_song_data(s):
 
 
 def smartMove(src, dest, delete=True):
-
     from headphones import logger
 
     source_dir = os.path.dirname(src)
@@ -640,7 +646,8 @@ def smartMove(src, dest, delete=True):
                     os.rename(src, os.path.join(source_dir, newfile))
                     filename = newfile
                 except Exception as e:
-                    logger.warn('Error renaming %s: %s', src.decode(headphones.SYS_ENCODING, 'replace'), e)
+                    logger.warn('Error renaming %s: %s',
+                                src.decode(headphones.SYS_ENCODING, 'replace'), e)
                 break
 
     try:
@@ -650,7 +657,9 @@ def smartMove(src, dest, delete=True):
             shutil.copy(os.path.join(source_dir, filename), os.path.join(dest, filename))
             return True
     except Exception as e:
-        logger.warn('Error moving file %s: %s', filename.decode(headphones.SYS_ENCODING, 'replace'), e)
+        logger.warn('Error moving file %s: %s', filename.decode(headphones.SYS_ENCODING, 'replace'),
+                    e)
+
 
 def walk_directory(basedir, followlinks=True):
     """
@@ -672,8 +681,8 @@ def walk_directory(basedir, followlinks=True):
                 real_path = os.path.abspath(os.readlink(path))
 
                 if real_path in traversed:
-                    logger.debug("Skipping '%s' since it is a symlink to "\
-                        "'%s', which is already visited.", path, real_path)
+                    logger.debug("Skipping '%s' since it is a symlink to " \
+                                 "'%s', which is already visited.", path, real_path)
                 else:
                     traversed.append(real_path)
 
@@ -689,8 +698,9 @@ def walk_directory(basedir, followlinks=True):
         for result in _inner(*args):
             yield result
 
+
 #########################
-#Sab renaming functions #
+# Sab renaming functions #
 #########################
 
 # TODO: Grab config values from sab to know when these options are checked. For now we'll just iterate through all combinations
@@ -739,17 +749,19 @@ def sab_sanitize_foldername(name):
     if not name:
         name = 'unknown'
 
-    #maxlen = cfg.folder_max_length()
-    #if len(name) > maxlen:
+    # maxlen = cfg.folder_max_length()
+    # if len(name) > maxlen:
     #    name = name[:maxlen]
 
     return name
+
 
 def split_string(mystring, splitvar=','):
     mylist = []
     for each_word in mystring.split(splitvar):
         mylist.append(each_word.strip())
     return mylist
+
 
 def create_https_certificates(ssl_cert, ssl_key):
     """
@@ -768,11 +780,13 @@ def create_https_certificates(ssl_cert, ssl_key):
     # Create the CA Certificate
     cakey = createKeyPair(TYPE_RSA, 2048)
     careq = createCertRequest(cakey, CN="Certificate Authority")
-    cacert = createCertificate(careq, (careq, cakey), serial, (0, 60 * 60 * 24 * 365 * 10)) # ten years
+    cacert = createCertificate(careq, (careq, cakey), serial,
+                               (0, 60 * 60 * 24 * 365 * 10))  # ten years
 
     pkey = createKeyPair(TYPE_RSA, 2048)
     req = createCertRequest(pkey, CN="Headphones")
-    cert = createCertificate(req, (cacert, cakey), serial, (0, 60 * 60 * 24 * 365 * 10)) # ten years
+    cert = createCertificate(req, (cacert, cakey), serial,
+                             (0, 60 * 60 * 24 * 365 * 10))  # ten years
 
     # Save the key and certificate to disk
     try:

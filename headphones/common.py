@@ -20,15 +20,16 @@ Created on Aug 1, 2011
 '''
 import platform
 import operator
+
 import os
 import re
-
 from headphones import version
 
-#Identify Our Application
+
+# Identify Our Application
 USER_AGENT = 'Headphones/-' + version.HEADPHONES_VERSION + ' (' + platform.system() + ' ' + platform.release() + ')'
 
-### Notification Types
+# Notification Types
 NOTIFY_SNATCH = 1
 NOTIFY_DOWNLOAD = 2
 
@@ -36,26 +37,25 @@ notifyStrings = {}
 notifyStrings[NOTIFY_SNATCH] = "Started Download"
 notifyStrings[NOTIFY_DOWNLOAD] = "Download Finished"
 
-### Release statuses
-UNKNOWN = -1 # should never happen
-UNAIRED = 1 # releases that haven't dropped yet
-SNATCHED = 2 # qualified with quality
-WANTED = 3 # releases we don't have but want to get
-DOWNLOADED = 4 # qualified with quality
-SKIPPED = 5 # releases we don't want
-ARCHIVED = 6 # releases that you don't have locally (counts toward download completion stats)
-IGNORED = 7 # releases that you don't want included in your download stats
-SNATCHED_PROPER = 9 # qualified with quality
+# Release statuses
+UNKNOWN = -1  # should never happen
+UNAIRED = 1  # releases that haven't dropped yet
+SNATCHED = 2  # qualified with quality
+WANTED = 3  # releases we don't have but want to get
+DOWNLOADED = 4  # qualified with quality
+SKIPPED = 5  # releases we don't want
+ARCHIVED = 6  # releases that you don't have locally (counts toward download completion stats)
+IGNORED = 7  # releases that you don't want included in your download stats
+SNATCHED_PROPER = 9  # qualified with quality
 
 
 class Quality:
-
     NONE = 0
-    B192 = 1 << 1     # 2
-    VBR = 1 << 2     # 4
-    B256 = 1 << 3     # 8
-    B320 = 1 << 4     #16
-    FLAC = 1 << 5     #32
+    B192 = 1 << 1  # 2
+    VBR = 1 << 2  # 4
+    B256 = 1 << 3  # 8
+    B320 = 1 << 4  # 16
+    FLAC = 1 << 5  # 32
 
     # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
     UNKNOWN = 1 << 15
@@ -75,7 +75,8 @@ class Quality:
     def _getStatusStrings(status):
         toReturn = {}
         for x in Quality.qualityStrings.keys():
-            toReturn[Quality.compositeStatus(status, x)] = Quality.statusPrefixes[status] + " (" + Quality.qualityStrings[x] + ")"
+            toReturn[Quality.compositeStatus(status, x)] = Quality.statusPrefixes[status] + " (" + \
+                                                           Quality.qualityStrings[x] + ")"
         return toReturn
 
     @staticmethod
@@ -103,6 +104,9 @@ class Quality:
     @staticmethod
     def nameQuality(name):
 
+        def checkName(list, func):
+            return func([re.search(x, name, re.I) for x in list])
+
         name = os.path.basename(name)
 
         # if we have our exact text then assume we put it there
@@ -115,9 +119,7 @@ class Quality:
             if regex_match:
                 return x
 
-        checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
-
-        #TODO: fix quality checking here
+        # TODO: fix quality checking here
         if checkName(["mp3", "192"], any) and not checkName(["flac"], all):
             return Quality.B192
         elif checkName(["mp3", "256"], any) and not checkName(["flac"], all):
@@ -131,7 +133,6 @@ class Quality:
 
     @staticmethod
     def assumeQuality(name):
-
         if name.lower().endswith(".mp3"):
             return Quality.MP3
         elif name.lower().endswith(".flac"):
@@ -167,13 +168,16 @@ class Quality:
     SNATCHED = None
     SNATCHED_PROPER = None
 
+
 Quality.DOWNLOADED = [Quality.compositeStatus(DOWNLOADED, x) for x in Quality.qualityStrings.keys()]
 Quality.SNATCHED = [Quality.compositeStatus(SNATCHED, x) for x in Quality.qualityStrings.keys()]
-Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in Quality.qualityStrings.keys()]
+Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in
+                           Quality.qualityStrings.keys()]
 
 MP3 = Quality.combineQualities([Quality.B192, Quality.B256, Quality.B320, Quality.VBR], [])
 LOSSLESS = Quality.combineQualities([Quality.FLAC], [])
-ANY = Quality.combineQualities([Quality.B192, Quality.B256, Quality.B320, Quality.VBR, Quality.FLAC], [])
+ANY = Quality.combineQualities(
+    [Quality.B192, Quality.B256, Quality.B320, Quality.VBR, Quality.FLAC], [])
 
 qualityPresets = (MP3, LOSSLESS, ANY)
 qualityPresetStrings = {MP3: "MP3 (All bitrates 192+)",

@@ -1,29 +1,29 @@
 import os.path
+
 import biplist
 from headphones import logger
 
 
 def getXldProfile(xldProfile):
-
     xldProfileNotFound = xldProfile
 
     expanded = os.path.expanduser('~/Library/Preferences/jp.tmkk.XLD.plist')
     if not os.path.isfile(expanded):
         logger.warn("Could not find xld preferences at: %s", expanded)
-        return(xldProfileNotFound, None, None)
+        return (xldProfileNotFound, None, None)
 
     # Get xld preferences plist
     try:
         preferences = biplist.readPlist(expanded)
     except (biplist.InvalidPlistException, biplist.NotBinaryPlistException), e:
         logger.error("Error reading xld preferences plist: %s", e)
-        return(xldProfileNotFound, None, None)
+        return (xldProfileNotFound, None, None)
 
     if not isinstance(preferences, dict):
         logger.error("Error reading xld preferences plist, not a dict: %r", preferences)
-        return(xldProfileNotFound, None, None)
+        return (xldProfileNotFound, None, None)
 
-    profiles = preferences.get('Profiles', []) # pylint:disable=E1103
+    profiles = preferences.get('Profiles', [])  # pylint:disable=E1103
 
     xldProfile = xldProfile.lower()
     for profile in profiles:
@@ -175,6 +175,6 @@ def getXldProfile(xldProfile):
             if xldFormat and not xldBitrate:
                 xldBitrate = 400
 
-            return(xldProfileForCmd, xldFormat, xldBitrate)
+            return (xldProfileForCmd, xldFormat, xldBitrate)
 
-    return(xldProfileNotFound, None, None)
+    return (xldProfileNotFound, None, None)

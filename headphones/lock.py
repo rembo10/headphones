@@ -2,10 +2,11 @@
 Locking-related classes
 """
 
-import headphones.logger
 import time
 import threading
 import Queue
+
+import headphones.logger
 
 
 class TimedLock(object):

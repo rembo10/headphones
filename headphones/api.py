@@ -13,21 +13,25 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import db, mb, updater, importer, searcher, cache, postprocessor, versioncheck, logger
-
-import headphones
 import json
 
-cmd_list = ['getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSnatched', 'getSimilar', 'getHistory', 'getLogs',
-            'findArtist', 'findAlbum', 'addArtist', 'delArtist', 'pauseArtist', 'resumeArtist', 'refreshArtist',
-            'addAlbum', 'queueAlbum', 'unqueueAlbum', 'forceSearch', 'forceProcess', 'forceActiveArtistsUpdate', 
-            'getVersion', 'checkGithub', 'shutdown', 'restart', 'update', 'getArtistArt', 'getAlbumArt', 
+from headphones import db, mb, updater, importer, searcher, cache, postprocessor, versioncheck, \
+    logger
+import headphones
+
+cmd_list = ['getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'getSnatched',
+            'getSimilar', 'getHistory', 'getLogs',
+            'findArtist', 'findAlbum', 'addArtist', 'delArtist', 'pauseArtist', 'resumeArtist',
+            'refreshArtist',
+            'addAlbum', 'queueAlbum', 'unqueueAlbum', 'forceSearch', 'forceProcess',
+            'forceActiveArtistsUpdate',
+            'getVersion', 'checkGithub', 'shutdown', 'restart', 'update', 'getArtistArt',
+            'getAlbumArt',
             'getArtistInfo', 'getAlbumInfo', 'getArtistThumb', 'getAlbumThumb', 'clearLogs',
             'choose_specific_download', 'download_specific_release']
 
 
 class Api(object):
-
     def __init__(self):
 
         self.apikey = None
@@ -170,7 +174,7 @@ class Api(object):
         self.data = self._dic_from_query(
             "SELECT * from albums WHERE Status='Snatched'")
         return
-        
+
     def _getSimilar(self, **kwargs):
         self.data = self._dic_from_query('SELECT * from lastfmcloud')
         return
@@ -432,7 +436,6 @@ class Api(object):
         results_as_dicts = []
 
         for result in results:
-
             result_dict = {
                 'title': result[0],
                 'size': result[1],
