@@ -16,20 +16,20 @@
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of
 # XBian - XBMC on the Raspberry Pi
 
-import os
 import sys
 import subprocess
 import threading
 import webbrowser
 import sqlite3
-import cherrypy
 import datetime
 
+import os
+import cherrypy
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-
 from headphones import versioncheck, logger
 import headphones.config
+
 
 # (append new extras to the end)
 POSSIBLE_EXTRAS = [
@@ -94,7 +94,6 @@ UMASK = None
 
 
 def initialize(config_file):
-
     with INIT_LOCK:
 
         global CONFIG
@@ -131,11 +130,11 @@ def initialize(config_file):
 
                 if not QUIET:
                     sys.stderr.write("Unable to create the log directory. " \
-                        "Logging to screen only.\n")
+                                     "Logging to screen only.\n")
 
         # Start the logger, disable console if needed
         logger.initLogger(console=not QUIET, log_dir=CONFIG.LOG_DIR,
-            verbose=VERBOSE)
+                          verbose=VERBOSE)
 
         if not CONFIG.CACHE_DIR:
             # Put the cache dir in the data dir for now
@@ -246,7 +245,6 @@ def daemonize():
 
 
 def launch_browser(host, port, root):
-
     if host == '0.0.0.0':
         host = 'localhost'
 
@@ -287,17 +285,19 @@ def initialize_scheduler():
         hours = CONFIG.UPDATE_DB_INTERVAL
         schedule_job(updater.dbUpdate, 'MusicBrainz Update', hours=hours, minutes=0)
 
-        #Update check
+        # Update check
         if CONFIG.CHECK_GITHUB:
             if CONFIG.CHECK_GITHUB_INTERVAL:
                 minutes = CONFIG.CHECK_GITHUB_INTERVAL
             else:
                 minutes = 0
-            schedule_job(versioncheck.checkGithub, 'Check GitHub for updates', hours=0, minutes=minutes)
+            schedule_job(versioncheck.checkGithub, 'Check GitHub for updates', hours=0,
+                         minutes=minutes)
 
         # Remove Torrent + data if Post Processed and finished Seeding
         minutes = CONFIG.TORRENT_REMOVAL_INTERVAL
-        schedule_job(torrentfinished.checkTorrentFinished, 'Torrent removal check', hours=0, minutes=minutes)
+        schedule_job(torrentfinished.checkTorrentFinished, 'Torrent removal check', hours=0,
+                     minutes=minutes)
 
         # Start scheduler
         if start_jobs and len(SCHED.get_jobs()):
@@ -306,8 +306,8 @@ def initialize_scheduler():
             except Exception as e:
                 logger.info(e)
 
-        # Debug
-        #SCHED.print_jobs()
+                # Debug
+                # SCHED.print_jobs()
 
 
 def schedule_job(function, name, hours=0, minutes=0):
@@ -334,7 +334,6 @@ def schedule_job(function, name, hours=0, minutes=0):
 
 
 def start():
-
     global started
 
     if _INITIALIZED:
@@ -349,7 +348,6 @@ def sig_handler(signum=None, frame=None):
 
 
 def dbcheck():
-
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute(
@@ -609,7 +607,6 @@ def dbcheck():
 
 
 def shutdown(restart=False, update=False):
-
     cherrypy.engine.exit()
     SCHED.shutdown(wait=False)
 

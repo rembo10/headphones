@@ -1,7 +1,8 @@
-import headphones.logger
 import itertools
+
 import os
 import re
+import headphones.logger
 from configobj import ConfigObj
 
 
@@ -13,6 +14,7 @@ def bool_int(value):
         if value.lower() in ('', '0', 'false', 'f', 'no', 'n', 'off'):
             value = 0
     return int(bool(value))
+
 
 _CONFIG_DEFINITIONS = {
     'ADD_ALBUM_ART': (int, 'General', 0),
@@ -254,7 +256,7 @@ _CONFIG_DEFINITIONS = {
     'UTORRENT_PASSWORD': (str, 'uTorrent', ''),
     'UTORRENT_USERNAME': (str, 'uTorrent', ''),
     'VERIFY_SSL_CERT': (bool_int, 'Advanced', 1),
-    'WAIT_UNTIL_RELEASE_DATE' : (int, 'General', 0),
+    'WAIT_UNTIL_RELEASE_DATE': (int, 'General', 0),
     'WAFFLES': (int, 'Waffles', 0),
     'WAFFLES_PASSKEY': (str, 'Waffles', ''),
     'WAFFLES_RATIO': (str, 'Waffles', ''),
@@ -271,6 +273,7 @@ _CONFIG_DEFINITIONS = {
     'XBMC_USERNAME': (str, 'XBMC', ''),
     'XLDPROFILE': (str, 'General', '')
 }
+
 
 # pylint:disable=R0902
 # it might be nice to refactor for fewer instance variables
@@ -348,7 +351,7 @@ class Config(object):
         """ Return the extra newznab tuples """
         extra_newznabs = list(
             itertools.izip(*[itertools.islice(self.EXTRA_NEWZNABS, i, None, 3)
-            for i in range(3)])
+                             for i in range(3)])
         )
         return extra_newznabs
 
@@ -367,7 +370,7 @@ class Config(object):
         """ Return the extra torznab tuples """
         extra_torznabs = list(
             itertools.izip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 3)
-            for i in range(3)])
+                             for i in range(3)])
         )
         return extra_torznabs
 

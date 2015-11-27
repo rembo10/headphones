@@ -14,26 +14,24 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib
+import json
+import time
+from collections import namedtuple
 import urllib2
 import urlparse
 import cookielib
-import json
+
 import re
 import os
-import time
-
 import headphones
-
 from headphones import logger
-from collections import namedtuple
 
 
 class utorrentclient(object):
-
     TOKEN_REGEX = "<div id='token' style='display:none;'>([^<>]+)</div>"
     UTSetting = namedtuple("UTSetting", ["name", "int", "str", "access"])
 
-    def __init__(self, base_url=None, username=None, password=None,):
+    def __init__(self, base_url=None, username=None, password=None, ):
 
         host = headphones.CONFIG.UTORRENT_HOST
         if not host.startswith('http'):
@@ -50,7 +48,7 @@ class utorrentclient(object):
         self.password = headphones.CONFIG.UTORRENT_PASSWORD
         self.opener = self._make_opener('uTorrent', self.base_url, self.username, self.password)
         self.token = self._get_token()
-        #TODO refresh token, when necessary
+        # TODO refresh token, when necessary
 
     def _make_opener(self, realm, base_url, username, password):
         """uTorrent API need HTTP Basic Auth and cookie support for token verify."""
@@ -83,7 +81,7 @@ class utorrentclient(object):
         return self._action(params)
 
     def add_url(self, url):
-        #can receive magnet or normal .torrent link
+        # can receive magnet or normal .torrent link
         params = [('action', 'add-url'), ('s', url)]
         return self._action(params)
 
@@ -187,7 +185,9 @@ def removeTorrent(hash, remove_data=False):
                 uTorrentClient.remove(hash, remove_data)
                 return True
             else:
-                logger.info('%s has not finished seeding yet, torrent will not be removed, will try again on next run' % torrent[2])
+                logger.info(
+                    '%s has not finished seeding yet, torrent will not be removed, will try again on next run' %
+                    torrent[2])
                 return False
     return False
 
@@ -203,7 +203,6 @@ def setSeedRatio(hash, ratio):
 
 
 def dirTorrent(hash, cacheid=None, return_name=None):
-
     uTorrentClient = utorrentclient()
 
     if not cacheid:
@@ -228,19 +227,20 @@ def dirTorrent(hash, cacheid=None, return_name=None):
 
     return None, None
 
+
 def addTorrent(link):
     uTorrentClient = utorrentclient()
     uTorrentClient.add_url(link)
 
 
 def getFolder(hash):
-    uTorrentClient = utorrentclient()
 
     # Get Active Directory from settings
     active_dir, completed_dir = getSettingsDirectories()
 
     if not active_dir:
-        logger.error('Could not get "Put new downloads in:" directory from uTorrent settings, please ensure it is set')
+        logger.error(
+            'Could not get "Put new downloads in:" directory from uTorrent settings, please ensure it is set')
         return None
 
     # Get Torrent Folder Name

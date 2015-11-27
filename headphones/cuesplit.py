@@ -15,13 +15,13 @@
 
 # Most of this lifted from here: https://github.com/SzieberthAdam/gneposis-cdgrab
 
-import os
 import sys
-import re
 import subprocess
 import copy
 import glob
 
+import os
+import re
 import headphones
 from headphones import logger
 from mutagen.flac import FLAC
@@ -62,7 +62,7 @@ WAVE_FILE_TYPE_BY_EXTENSION = {
     '.flac': 'Free Lossless Audio Codec'
 }
 
-#SHNTOOL_COMPATIBLE = ("Free Lossless Audio Codec", "Waveform Audio", "Monkey's Audio")
+# SHNTOOL_COMPATIBLE = ("Free Lossless Audio Codec", "Waveform Audio", "Monkey's Audio")
 
 # TODO: Make this better!
 # this module-level variable is bad. :(
@@ -288,7 +288,7 @@ class CueFile(File):
             global line_content
             c = self.content.splitlines()
             header_dict = {}
-            #remaining_headers = CUE_HEADER
+            # remaining_headers = CUE_HEADER
             remaining_headers = copy.copy(CUE_HEADER)
             line_index = 0
             match = True
@@ -314,7 +314,8 @@ class CueFile(File):
             line_content = c[line_index]
             search_result = re.search(CUE_TRACK, line_content, re.I)
             if not search_result:
-                raise ValueError('inconsistent CUE sheet, TRACK expected at line {0}'.format(line_index + 1))
+                raise ValueError(
+                    'inconsistent CUE sheet, TRACK expected at line {0}'.format(line_index + 1))
             track_nr = int(search_result.group(1))
             line_index += 1
             next_track = False
@@ -353,7 +354,8 @@ class CueFile(File):
                         track_meta['dcpflag'] = True
                         line_index += 1
                     else:
-                        raise ValueError('unknown entry in track error, line {0}'.format(line_index + 1))
+                        raise ValueError(
+                            'unknown entry in track error, line {0}'.format(line_index + 1))
                 else:
                     next_track = True
 
@@ -371,8 +373,8 @@ class CueFile(File):
 
         if not self.content:
             try:
-                 with open(self.name, encoding="cp1252") as cue_file:
-                     self.content = cue_file.read()
+                with open(self.name, encoding="cp1252") as cue_file:
+                    self.content = cue_file.read()
             except:
                 raise ValueError('Cant encode CUE Sheet.')
 
@@ -406,9 +408,11 @@ class CueFile(File):
         for i in range(len(self.tracks)):
             if self.tracks[i]:
                 if self.tracks[i].get('artist'):
-                    content += 'track' + int_to_str(i) + 'artist' + '\t' + self.tracks[i].get('artist') + '\n'
+                    content += 'track' + int_to_str(i) + 'artist' + '\t' + self.tracks[i].get(
+                        'artist') + '\n'
                 if self.tracks[i].get('title'):
-                    content += 'track' + int_to_str(i) + 'title' + '\t' + self.tracks[i].get('title') + '\n'
+                    content += 'track' + int_to_str(i) + 'title' + '\t' + self.tracks[i].get(
+                        'title') + '\n'
         return content
 
     def htoa(self):
@@ -449,7 +453,8 @@ class MetaFile(File):
                         raise ValueError('Syntax error in album meta file')
                     if not content['tracks'][int(parsed_track.group(1))]:
                         content['tracks'][int(parsed_track.group(1))] = dict()
-                    content['tracks'][int(parsed_track.group(1))][parsed_track.group(2)] = parsed_line.group(2)
+                    content['tracks'][int(parsed_track.group(1))][
+                        parsed_track.group(2)] = parsed_line.group(2)
                 else:
                     content[parsed_line.group(1)] = parsed_line.group(2)
 
@@ -472,15 +477,16 @@ class MetaFile(File):
         if 'genre' in CUE_META.content:
             common_tags['genre'] = CUE_META.content['genre']
 
-        #freeform tags
-        #freeform_tags['country'] = self.content['country']
-        #freeform_tags['releasedate'] = self.content['releasedate']
+        # freeform tags
+        # freeform_tags['country'] = self.content['country']
+        # freeform_tags['releasedate'] = self.content['releasedate']
 
         return common_tags, freeform_tags
 
     def folders(self):
         artist = self.content['artist']
-        album = self.content['date'] + ' - ' + self.content['title'] + ' (' + self.content['label'] + ' - ' + self.content['catalog'] + ')'
+        album = self.content['date'] + ' - ' + self.content['title'] + ' (' + self.content[
+            'label'] + ' - ' + self.content['catalog'] + ')'
         return artist, album
 
     def complete(self):
@@ -535,6 +541,7 @@ class WaveFile(File):
         if self.type == 'Free Lossless Audio Codec':
             return FLAC(self.name)
 
+
 def split(albumpath):
     global CUE_META
     os.chdir(albumpath)
@@ -577,7 +584,8 @@ def split(albumpath):
         import getXldProfile
         xldprofile, xldformat, _ = getXldProfile.getXldProfile(headphones.CONFIG.XLDPROFILE)
         if not xldformat:
-            raise ValueError('Details for xld profile "%s" not found, cannot split cue' % (xldprofile))
+            raise ValueError(
+                'Details for xld profile "%s" not found, cannot split cue' % (xldprofile))
         else:
             if headphones.CONFIG.ENCODERFOLDER:
                 splitter = os.path.join(headphones.CONFIG.ENCODERFOLDER, 'xld')
@@ -590,7 +598,7 @@ def split(albumpath):
             splitter = 'shntool'
 
     if splitter == 'shntool' and not check_splitter(splitter):
-            raise ValueError('Command not found, ensure shntool or xld installed')
+        raise ValueError('Command not found, ensure shntool or xld installed')
 
     # Determine if file can be split
     if wave.name_ext not in WAVE_FILE_TYPE_BY_EXTENSION.keys():
