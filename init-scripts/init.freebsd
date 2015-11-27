@@ -28,11 +28,11 @@ rcvar=${name}_enable
 
 load_rc_config ${name}
 
-: ${headphones_enable:="NO"}
-: ${headphones_user:="_sabnzbd"}
-: ${headphones_dir:="/usr/local/headphones"}
-: ${headphones_chdir:="${headphones_dir}"}
-: ${headphones_pid:="${headphones_dir}/headphones.pid"}
+: "${headphones_enable:="NO"}"
+: "${headphones_user:="_sabnzbd"}"
+: "${headphones_dir:="/usr/local/headphones"}"
+: "${headphones_chdir:="${headphones_dir}"}"
+: "${headphones_pid:="${headphones_dir}/headphones.pid"}"
 
 status_cmd="${name}_status"
 stop_cmd="${name}_stop"
@@ -41,15 +41,15 @@ command="/usr/sbin/daemon"
 command_args="-f -p ${headphones_pid} python ${headphones_dir}/Headphones.py ${headphones_flags} --quiet --nolaunch"
 
 # Ensure user is root when running this script.
-if [ `id -u` != "0" ]; then
+if [ "$(id -u)" != "0" ]; then
   echo "Oops, you should be root before running this!"
   exit 1
 fi
 
 verify_headphones_pid() {
     # Make sure the pid corresponds to the Headphones process.
-    pid=`cat ${headphones_pid} 2>/dev/null`
-    ps -p ${pid} | grep -q "python ${headphones_dir}/Headphones.py"
+    pid=$(cat "${headphones_pid}" 2>/dev/null)
+    pgrep -F "${headphones_pid}" -q "python ${headphones_dir}/Headphones.py"
     return $?
 }
 
@@ -58,7 +58,7 @@ headphones_stop() {
     echo "Stopping $name"
     verify_headphones_pid
     if [ -n "${pid}" ]; then
-      wait_for_pids ${pid}
+      wait_for_pids "${pid}"
       echo "Stopped"
     fi
 }
