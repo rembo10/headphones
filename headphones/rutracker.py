@@ -176,7 +176,7 @@ class Rutracker(object):
         cookie = {'bb_dl': torrent_id}
         try:
             headers = {'Referer': url}
-            r = self.session.get(url=downloadurl, cookies=cookie, headers=headers, timeout=self.timeout)
+            r = self.session.post(url=downloadurl, cookies=cookie, headers=headers, timeout=self.timeout)
             return r.content
         except Exception as e:
             logger.error('Error getting torrent: %s', e)
