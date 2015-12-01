@@ -1,19 +1,17 @@
 #!/usr/bin/env python
 
 import urllib
-import requests as requests
-from urlparse import urlparse
-from bs4 import BeautifulSoup
-
-import os
 import time
-import re
+from urlparse import urlparse
 
+import re
+import requests as requests
+from bs4 import BeautifulSoup
 import headphones
 from headphones import logger
 
-class Rutracker(object):
 
+class Rutracker(object):
     def __init__(self):
         self.session = requests.session()
         self.timeout = 60
@@ -58,7 +56,8 @@ class Rutracker(object):
                     self.loggedin = True
                     logger.info("Successfully logged in to rutracker")
                 else:
-                    logger.error("Could not login to rutracker, credentials maybe incorrect, site is down or too many attempts. Try again later")
+                    logger.error(
+                        "Could not login to rutracker, credentials maybe incorrect, site is down or too many attempts. Try again later")
                     self.loggedin = False
             return self.loggedin
         except Exception as e:
@@ -111,7 +110,7 @@ class Rutracker(object):
             soup = BeautifulSoup(r.content, 'html5lib')
 
             # Debug
-            #logger.debug (soup.prettify())
+            # logger.debug (soup.prettify())
 
             # Check if still logged in
             if not self.still_logged_in(soup):
@@ -130,7 +129,8 @@ class Rutracker(object):
                 return None
             minimumseeders = int(headphones.CONFIG.NUMBEROFSEEDERS) - 1
 
-            for item in zip(i.find_all(class_='hl-tags'),i.find_all(class_='dl-stub'),i.find_all(class_='seedmed')):
+            for item in zip(i.find_all(class_='hl-tags'), i.find_all(class_='dl-stub'),
+                            i.find_all(class_='seedmed')):
                 title = item[0].get_text()
                 url = item[1].get('href')
                 size_formatted = item[1].get_text()[:-2]
@@ -149,12 +149,15 @@ class Rutracker(object):
 
                 if size < self.maxsize and minimumseeders < int(seeds):
                     logger.info('Found %s. Size: %s' % (title, size_formatted))
-                    #Torrent topic page
-                    torrent_id = dict([part.split('=') for part in urlparse(url)[4].split('&')])['t']
+                    # Torrent topic page
+                    torrent_id = dict([part.split('=') for part in urlparse(url)[4].split('&')])[
+                        't']
                     topicurl = 'http://rutracker.org/forum/viewtopic.php?t=' + torrent_id
                     rulist.append((title, size, topicurl, 'rutracker.org', 'torrent', True))
                 else:
-                    logger.info("%s is larger than the maxsize or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i)" % (title, size, int(seeds)))
+                    logger.info(
+                        "%s is larger than the maxsize or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i)" % (
+                        title, size, int(seeds)))
 
             if not rulist:
                 logger.info("No valid results found from rutracker")
@@ -164,7 +167,6 @@ class Rutracker(object):
         except Exception as e:
             logger.error("An unknown error occurred in the rutracker parser: %s" % e)
             return None
-
 
     def get_torrent_data(self, url):
         """
@@ -176,14 +178,14 @@ class Rutracker(object):
         cookie = {'bb_dl': torrent_id}
         try:
             headers = {'Referer': url}
-            r = self.session.post(url=downloadurl, cookies=cookie, headers=headers, timeout=self.timeout)
+            r = self.session.post(url=downloadurl, cookies=cookie, headers=headers,
+                                  timeout=self.timeout)
             return r.content
         except Exception as e:
             logger.error('Error getting torrent: %s', e)
             return False
 
-
-    #TODO get this working in utorrent.py
+    # TODO get this working in utorrent.py
     def utorrent_add_file(self, data):
 
         host = headphones.CONFIG.UTORRENT_HOST
@@ -197,7 +199,8 @@ class Rutracker(object):
         base_url = host
 
         url = base_url + '/gui/'
-        self.session.auth = (headphones.CONFIG.UTORRENT_USERNAME, headphones.CONFIG.UTORRENT_PASSWORD)
+        self.session.auth = (
+        headphones.CONFIG.UTORRENT_USERNAME, headphones.CONFIG.UTORRENT_PASSWORD)
 
         try:
             r = self.session.get(url + 'token.html')
@@ -221,4 +224,3 @@ class Rutracker(object):
             self.session.post(url, params={'action': 'add-file'}, files=files)
         except Exception as e:
             logger.exception('Error adding file to utorrent %s', e)
-

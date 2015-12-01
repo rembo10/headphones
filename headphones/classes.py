@@ -13,9 +13,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-#########################################
-## Stolen from Sick-Beard's classes.py ##
-#########################################
+#######################################
+# Stolen from Sick-Beard's classes.py #
+#######################################
 
 
 import urllib
@@ -133,4 +133,5 @@ class Proper:
         self.episode = -1
 
     def __str__(self):
-        return str(self.date) + " " + self.name + " " + str(self.season) + "x" + str(self.episode) + " of " + str(self.tvdbid)
+        return str(self.date) + " " + self.name + " " + str(self.season) + "x" + str(
+            self.episode) + " of " + str(self.tvdbid)

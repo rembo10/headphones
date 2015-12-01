@@ -13,17 +13,17 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import logger
-
 from xml.dom import minidom
-from bs4 import BeautifulSoup
+import collections
 
 import sys
+from bs4 import BeautifulSoup
 import requests
+from headphones import logger
 import feedparser
 import headphones
 import headphones.lock
-import collections
+
 
 # Disable SSL certificate warnings. We have our own handling
 requests.packages.urllib3.disable_warnings()
@@ -220,7 +220,7 @@ def server_message(response):
 
     # First attempt is to 'read' the response as HTML
     if response.headers.get("content-type") and \
-            "text/html" in response.headers.get("content-type"):
+                    "text/html" in response.headers.get("content-type"):
         try:
             soup = BeautifulSoup(response.content, "html5lib")
         except Exception:
