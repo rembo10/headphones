@@ -32,7 +32,6 @@
 ## HP_PIDFILE=      #$PID_FILE, the location of headphones.pid, the default is /var/run/headphones/headphones.pid
 ## PYTHON_BIN=      #$DAEMON, the location of the python binary, the default is /usr/bin/python
 ## HP_OPTS=         #$EXTRA_DAEMON_OPTS, extra cli option for headphones, i.e. " --config=/home/headphones/config.ini"
-## SSD_OPTS=        #$EXTRA_SSD_OPTS, extra start-stop-daemon option like " --group=users"
 ## HP_PORT=         #$PORT_OPTS, hardcoded port for the webserver, overrides value in config.ini
 ##
 ## EXAMPLE if want to run as different user
@@ -101,9 +100,6 @@ load_settings() {
         # Extra daemon option like: HP_OPTS=" --config=/home/headphones/config.ini"
         EXTRA_DAEMON_OPTS=${HP_OPTS-}
 
-        # Extra start-stop-daemon option like START_OPTS=" --group=users"
-        EXTRA_SSD_OPTS=${SSD_OPTS-}
-
         # Hardcoded port to run on, overrides config.ini settings
         [ -n "$HP_PORT" ] && {
             PORT_OPTS=" --port=${HP_PORT} "
@@ -114,7 +110,7 @@ load_settings() {
         SETTINGS_LOADED=TRUE
     fi
 
-    [ -x $DAEMON ] || {
+    [ -x "$DAEMON" ] || {
         log_warning_msg "$DESC: Can't execute daemon, aborting. See $DAEMON";
         return 1;}
 
@@ -125,8 +121,8 @@ load_settings || exit 0
 
 is_running () {
     # returns 1 when running, else 0.
-    if [ -e $PID_FILE ]; then
-      PID=`cat $PID_FILE`
+    if [ -e "$PID_FILE" ]; then
+      PID=$(cat "$PID_FILE")
 
       RET=$?
       [ $RET -gt 1 ] && exit 1 || return $RET
@@ -136,28 +132,28 @@ is_running () {
 }
 
 handle_pid () {
-    PID_PATH=`dirname $PID_FILE`
-    [ -d $PID_PATH ] || mkdir -p $PID_PATH && chown -R $RUN_AS $PID_PATH > /dev/null || {
+    PID_PATH=$(dirname "$PID_FILE")
+    [ -d "$PID_PATH" ] || mkdir -p "$PID_PATH" && chown -R "$RUN_AS" "$PID_PATH" > /dev/null || {
         log_warning_msg "$DESC: Could not create $PID_FILE, See $SETTINGS, aborting.";
         return 1;}
 
-    if [ -e $PID_FILE ]; then
-        PID=`cat $PID_FILE`
-        if ! kill -0 $PID > /dev/null 2>&1; then
+    if [ -e "$PID_FILE" ]; then
+        PID=$(cat "$PID_FILE")
+        if ! kill -0 "$PID" > /dev/null 2>&1; then
             log_warning_msg "Removing stale $PID_FILE"
-            rm $PID_FILE
+            rm "$PID_FILE"
         fi
     fi
 }
 
 handle_datadir () {
-    [ -d $DATA_DIR ] || mkdir -p $DATA_DIR && chown -R $RUN_AS $DATA_DIR > /dev/null || {
+    [ -d "$DATA_DIR" ] || mkdir -p "$DATA_DIR" && chown -R "$RUN_AS" "$DATA_DIR" > /dev/null || {
         log_warning_msg "$DESC: Could not create $DATA_DIR, See $SETTINGS, aborting.";
         return 1;}
 }
 
 handle_updates () {
-    chown -R $RUN_AS $APP_PATH > /dev/null || {
+    chown -R "$RUN_AS" "$APP_PATH" > /dev/null || {
         log_warning_msg "$DESC: $APP_PATH not writable by $RUN_AS for web-updates";
         return 0; }
 }
@@ -168,7 +164,7 @@ start_headphones () {
     handle_updates
     if ! is_running; then
         log_daemon_msg "Starting $DESC"
-        start-stop-daemon -o -d $APP_PATH -c $RUN_AS --start $EXTRA_SSD_OPTS --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
+        start-stop-daemon -o -d "$APP_PATH" -c "$RUN_AS" --start "$EXTRA_SSD"_OPTS --pidfile "$PID_FILE" --exec "$DAEMON" -- "$DAEMON_OPTS"
         check_retval
     else
         log_success_msg "$DESC: already running (pid $PID)"
@@ -178,7 +174,7 @@ start_headphones () {
 stop_headphones () {
     if is_running; then
         log_daemon_msg "Stopping $DESC"
-        start-stop-daemon -o --stop --pidfile $PID_FILE --retry 15
+        start-stop-daemon -o --stop --pidfile "$PID_FILE" --retry 15
         check_retval
     else
         log_success_msg "$DESC: not running"
