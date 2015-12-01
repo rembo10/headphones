@@ -1309,6 +1309,12 @@ class WebInterface(object):
             kwargs[plain_config] = kwargs[use_config]
             del kwargs[use_config]
 
+        # Check if encoderoutputformat is set multiple times
+        if len(kwargs['encoderoutputformat'][-1]) > 1:
+            kwargs['encoderoutputformat'] = kwargs['encoderoutputformat'][-1]
+        else:
+            kwargs['encoderoutputformat'] = kwargs['encoderoutputformat'][0]
+
         extra_newznabs = []
         for kwarg in [x for x in kwargs if x.startswith('newznab_host')]:
             newznab_host_key = kwarg
