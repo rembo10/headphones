@@ -6,7 +6,7 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">
-			<a class="menu_link_edit" id="manage_albums" href="#"><i class="fa fa-pencil"></i> Manage Albums</a>
+			<a class="menu_link_edit" id="manage_albums" href="javascript:void(0)"><i class="fa fa-pencil"></i> Manage Albums</a>
 				<div id="dialog" title="Choose Album Filter" style="display:none" class="configtable">
 					<div class="links">
 						<a href="manageAlbums?Status=Downloaded"><i class="fa fa-check fa-fw"></i> Manage Downloaded Albums</a><br>
@@ -90,7 +90,7 @@
 				%>
 				<input type="text" value="${lastfmvalue}" placeholder="Last.fm username" onfocus="if
 				(this.value==this.defaultValue) this.value='';" name="username" id="username" size="18" />
-				<a href="#" onclick="doAjaxCall('importLastFM?username=',$(this),'tabs');return false;" data-success="Last.fm username has been reset"><i class="fa fa-reply"></i> Reset username</a>
+				<a href="javascript:void(0)" onclick="doAjaxCall('importLastFM?username=',$(this),'tabs');return false;" data-success="Last.fm username has been reset"><i class="fa fa-reply"></i> Reset username</a>
 			</div>
 			</fieldset>
 			<input type="button" value="Save changes" onclick="doAjaxCall('importLastFM',$(this),'tabs',true);return false;" data-success="Last.fm artists will be imported" data-error="Fill in a last.fm username"/>
@@ -121,10 +121,10 @@
 		<fieldset>
 			<legend>Force Search</legend>
 			<div class="links">
-				<a href="#" onclick="doAjaxCall('forceSearch',$(this))" data-success="Checking for wanted albums successful" data-error="Error checking wanted albums"><i class="fa fa-search fa-fw"></i> Force Check for Wanted Albums</a>
-				<a href="#" onclick="doAjaxCall('forceUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><i class="fa fa-heart fa-fw"></i> Force Update Active Artists [Fast]</a>
-				<a href="#" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update successful" data-error="Error checking for update"><i class="fa fa-refresh fa-fw"></i> Check for Headphones Updates</a>
-				<a href="#" id="delete_empty_artists"><i class="fa fa-trash-o fa-fw"></i> Delete empty Artists</a>
+				<a href="javascript:void(0)" onclick="doAjaxCall('forceSearch',$(this))" data-success="Checking for wanted albums successful" data-error="Error checking wanted albums"><i class="fa fa-search fa-fw"></i> Force Check for Wanted Albums</a>
+				<a href="javascript:void(0)" onclick="doAjaxCall('forceUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><i class="fa fa-heart fa-fw"></i> Force Update Active Artists [Fast]</a>
+				<a href="javascript:void(0)" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update successful" data-error="Error checking for update"><i class="fa fa-refresh fa-fw"></i> Check for Headphones Updates</a>
+				<a href="javascript:void(0)" id="delete_empty_artists"><i class="fa fa-trash-o fa-fw"></i> Delete empty Artists</a>
 					<div id="emptyartistdialog" title="Confirm Artist Deletion" style="display:none" class="configtable">
 					    %if emptyArtists:
 						<h3>The following artists will be deleted:</h3>
@@ -138,7 +138,7 @@
 					    %endif
 					</div>
 					<div id="post_process">
-					<a href="#" class="btnOpenDialog"><i class="fa fa-wrench fa-fw"></i> Force Post-Process Albums in Download Folder</a>
+					<a href="javascript:void(0)" class="btnOpenDialog"><i class="fa fa-wrench fa-fw"></i> Force Post-Process Albums in Download Folder</a>
 					</div>
 			</div>
 		</fieldset>
@@ -166,9 +166,9 @@
 			<legend>Force Legacy</legend>
 				<p>Please note that these functions will take a significant amount of time to complete.</p>
 			<div class="links">
-				<a href="#" onclick="doAjaxCall('forceFullUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><i class="fa fa-heart fa-fw"></i> Force Update Active Artists [Comprehensive]</a>
+				<a href="javascript:void(0)" onclick="doAjaxCall('forceFullUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><i class="fa fa-heart fa-fw"></i> Force Update Active Artists [Comprehensive]</a>
 				<BR>
-				<a href="#" onclick="doAjaxCall('forceScan',$(this))" data-success="Library scan successful" data-error="Error forcing library scan"><i class="fa fa-refresh fa-fw"></i> Force Re-scan Library [Comprehensive]</a>
+				<a href="javascript:void(0)" onclick="doAjaxCall('forceScan',$(this))" data-success="Library scan successful" data-error="Error forcing library scan"><i class="fa fa-refresh fa-fw"></i> Force Re-scan Library [Comprehensive]</a>
 				<BR>
 				<small>*Warning: If you choose [Force Re-scan Library], any manually ignored/matched artists/albums will be reset to "unmatched".</small>
 

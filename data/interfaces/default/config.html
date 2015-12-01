@@ -336,9 +336,14 @@
                                         <input type="radio" name="magnet_links" id="magnet_links_2" value="2" ${config['magnet_links_2']}>
                                         Convert
                                     </label>
+
+                                    <label class="inline">
+                                        <input type="radio" name="magnet_links" id="magnet_links_3" value="3" ${config['magnet_links_3']}>
+                                        Embed
+                                    </label>
                                     <div style="clear: both"></div>
 
-                                    <small>Note: opening magnet URL's is not suitable for headless/console/terminal servers.</small>
+                                    <small>Note: Opening magnet URLs is not suitable for headless/console/terminal servers.<br />Embed only works for rTorrent.</small>
                                 </div>
                             </fieldset>
                             <fieldset id="transmission_options">
@@ -1428,7 +1433,7 @@
                                         else:
                                             which_extras_selected = "None"
                                     %>
-                                    <small>Currently Selected: ${which_extras_selected} <a href="#" id="modify_extras">(Change)</a></small></label>
+                                    <small>Currently Selected: ${which_extras_selected} <a href="javascript:void(0)" id="modify_extras">(Change)</a></small></label>
                                     <div id="dialog" title="Choose Which Extras to Include" style="display:none" class="configtable">
                                     %for extra in config['extras']:
                                         <input type="checkbox" id="${extra}_temp" name="${extra}_temp" value="1" ${config['extras'][extra]} />${string.capwords(extra)}<br>

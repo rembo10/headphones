@@ -164,7 +164,7 @@ _CONFIG_DEFINITIONS = {
     'OMGWTFNZBS': (int, 'omgwtfnzbs', 0),
     'OMGWTFNZBS_APIKEY': (str, 'omgwtfnzbs', ''),
     'OMGWTFNZBS_UID': (str, 'omgwtfnzbs', ''),
-    'OPEN_MAGNET_LINKS': (int, 'General', 0),  # 0: Ignore, 1: Open, 2: Convert
+    'OPEN_MAGNET_LINKS': (int, 'General', 0),  # 0: Ignore, 1: Open, 2: Convert, 3: Embed (rtorrent)
     'MAGNET_LINKS': (int, 'General', 0),
     'OSX_NOTIFY_APP': (str, 'OSX_Notify', '/Applications/Headphones'),
     'OSX_NOTIFY_ENABLED': (int, 'OSX_Notify', 0),

@@ -43,9 +43,9 @@
 					<tr><td>Are you sure you want to reset Local Artist: ${album['ArtistName']} to unmatched?</td></tr>
 					<tr><td align="right"><BR>
 					%if album['AlbumStatus'] == "Ignored":
-						<button href="#" onclick="doAjaxCall('markManual?action=unignoreArtist&existing_artist=${old_artist_clean}', $(this), 'page');" data-success="Successfully reset ${album['ArtistName']} to unmatched">Reset Artist</button>
+						<button href="javascript:void(0)" onclick="doAjaxCall('markManual?action=unignoreArtist&existing_artist=${old_artist_clean}', $(this), 'page');" data-success="Successfully reset ${album['ArtistName']} to unmatched">Reset Artist</button>
 					%elif album['AlbumStatus'] == "Matched":
-						<button href="#" onclick="doAjaxCall('markManual?action=unmatchArtist&existing_artist=${old_artist_clean}', $(this), 'page');" data-success="Successfully restored ${album['ArtistName']} to unmatched">Reset Artist</button>
+						<button href="javascript:void(0)" onclick="doAjaxCall('markManual?action=unmatchArtist&existing_artist=${old_artist_clean}', $(this), 'page');" data-success="Successfully restored ${album['ArtistName']} to unmatched">Reset Artist</button>
 					%endif
 					</td></tr>
 					</table>
@@ -58,9 +58,9 @@
 					<tr><td>Are you sure you want to reset Local Album: ${album['AlbumTitle']} to unmatched?</td></tr>
 					<tr><td align="right"><BR>
 					%if album['AlbumStatus'] == "Ignored":
-						<button href="#" onclick="doAjaxCall('markManual?action=unignoreAlbum&existing_artist=${old_artist_clean}&existing_album=${old_album_clean}', $(this), 'page');" data-success="Successfully reset ${album['AlbumTitle']} to unmatched">Reset Album</button>
+						<button href="javascript:void(0)" onclick="doAjaxCall('markManual?action=unignoreAlbum&existing_artist=${old_artist_clean}&existing_album=${old_album_clean}', $(this), 'page');" data-success="Successfully reset ${album['AlbumTitle']} to unmatched">Reset Album</button>
 					%elif album['AlbumStatus'] == "Matched":
-						<button href="#" onclick="doAjaxCall('markManual?action=unmatchAlbum&existing_artist=${old_artist_clean}&existing_album=${old_album_clean}', $(this), 'page');" data-success="Successfully reset ${album['AlbumTitle']} to unmatched">Reset Album</button>
+						<button href="javascript:void(0)" onclick="doAjaxCall('markManual?action=unmatchAlbum&existing_artist=${old_artist_clean}&existing_album=${old_album_clean}', $(this), 'page');" data-success="Successfully reset ${album['AlbumTitle']} to unmatched">Reset Album</button>
 					%endif
 					</td></tr>
 					</table>
