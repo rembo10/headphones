@@ -845,6 +845,9 @@ def send_to_downloader(data, bestqual, album):
                         logger.warning("Unable to convert magnet with hash " \
                                        "'%s' into a torrent file.", torrent_hash)
                         return
+                elif headphones.CONFIG.MAGNET_LINKS == 3:
+                    torrent_to_file(download_path, data)
+                    return
                 else:
                     logger.error("Cannot save magnet link in blackhole. " \
                                  "Please switch your torrent downloader to " \
@@ -988,7 +991,7 @@ def send_to_downloader(data, bestqual, album):
         logger.info(u"Sending Email notification")
         email = notifiers.Email()
         message = 'Snatched from ' + provider + '. ' + name
-        email.notify(title, message)
+        email.notify("Snatched: " + title, message)
 
 
 def verifyresult(title, artistterm, term, lossless):
@@ -1748,6 +1751,10 @@ def preprocess(resultlist):
                 headers[
                     'User-Agent'] = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
             return request.request_content(url=result[2], headers=headers), result
+
+        if result[4] == 'magnet':
+            magnet_link = result[2]
+            return "d10:magnet-uri%d:%se" % (len(magnet_link), magnet_link), result
 
         else:
             headers = {'User-Agent': USER_AGENT}
