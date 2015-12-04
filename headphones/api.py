@@ -332,13 +332,15 @@ class Api(object):
         searcher.searchforalbum()
 
     def _forceProcess(self, **kwargs):
-	dir = None
-        if 'dir' in kwargs:
-		dir = kwargs['dir']
-	album_dir = None
         if 'album_dir' in kwargs:
-		album_dir = kwargs['album_dir']
-        postprocessor.forcePostProcess(self, dir, album_dir)
+	    album_dir = kwargs['album_dir']
+	    dir = None
+	    postprocessor.forcePostProcess(self, dir, album_dir)
+	elif 'dir' in kwargs:
+	    self.dir = kwargs['dir']
+            postprocessor.forcePostProcess(self.dir)
+	else:
+            postprocessor.forcePostProcess()
 
     def _forceActiveArtistsUpdate(self, **kwargs):
         updater.dbUpdate()
