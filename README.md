@@ -19,7 +19,7 @@ You are free to join the Headphones support community on IRC where you can ask q
 1. Analyze your log, you just might find the solution yourself!
 2. You read the wiki and searched existing issues, but this is not solving your problem.
 3. Post the issue with a clear title, description and the HP log and use [proper markdown syntax](https://help.github.com/articles/github-flavored-markdown) to structure your text (code/log in code blocks). 
-4. Close your issue when it's solved! If you found the solution yourself please comment so that others benefit from it.
+4. Close your issue when it's solved! If you found the solution yourself, please comment so that others benefit from it.
 
 **Feature requests** can be reported on the GitHub issue tracker too:
 
