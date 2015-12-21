@@ -333,13 +333,13 @@ class Api(object):
 
     def _forceProcess(self, **kwargs):
         if 'album_dir' in kwargs:
-	    album_dir = kwargs['album_dir']
-	    dir = None
-	    postprocessor.forcePostProcess(self, dir, album_dir)
-	elif 'dir' in kwargs:
-	    self.dir = kwargs['dir']
+            album_dir = kwargs['album_dir']
+            dir = None
+            postprocessor.forcePostProcess(self, dir, album_dir)
+        elif 'dir' in kwargs:
+            self.dir = kwargs['dir']
             postprocessor.forcePostProcess(self.dir)
-	else:
+        else:
             postprocessor.forcePostProcess()
 
     def _forceActiveArtistsUpdate(self, **kwargs):

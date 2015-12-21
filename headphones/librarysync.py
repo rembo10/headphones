@@ -14,7 +14,6 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import headphones
 import math
 
 import headphones
