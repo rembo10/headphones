@@ -17,6 +17,7 @@ import shutil
 import uuid
 import threading
 import itertools
+import tempfile
 
 import os
 import re
@@ -309,22 +310,19 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
 
 def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind=None,
                      keep_original_folder=False):
-    logger.info(
-        'Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
+    logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
+    new_folder = None
     # Check to see if we're preserving the torrent dir
-    if (
-            headphones.CONFIG.KEEP_TORRENT_FILES and Kind == "torrent" and 'headphones-modified' not in albumpath) or headphones.CONFIG.KEEP_ORIGINAL_FOLDER or keep_original_folder:
-        new_folder = os.path.join(albumpath,
-                                  'headphones-modified'.encode(headphones.SYS_ENCODING, 'replace'))
-        logger.info(
-            "Copying files to 'headphones-modified' subfolder to preserve downloaded files for seeding")
+    if (headphones.CONFIG.KEEP_TORRENT_FILES and Kind == "torrent" and 'headphones-modified' not in albumpath) or headphones.CONFIG.KEEP_ORIGINAL_FOLDER or keep_original_folder:
+        new_folder = os.path.join(tempfile.mkdtemp(prefix="headphones_"), "headphones")
+        logger.info("Copying files to " + new_folder.decode(headphones.SYS_ENCODING, 'replace') + " subfolder to preserve downloaded files for seeding")
         try:
             shutil.copytree(albumpath, new_folder)
             # Update the album path with the new location
             albumpath = new_folder
         except Exception as e:
-            logger.warn("Cannot copy/move files to temp folder: " + new_folder.decode(
-                headphones.SYS_ENCODING, 'replace') + ". Not continuing. Error: " + str(e))
+            logger.warn("Cannot copy/move files to temp folder: " + new_folder.decode(headphones.SYS_ENCODING, 'replace') + ". Not continuing. Error: " + str(e))
+            shutil.rmtree(new_folder)
             return
 
         # Need to update the downloaded track list with the new location.
@@ -352,6 +350,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
             return
         except IOError:
             logger.error("Unable to find media file: %s. Not continuing.")
+            if new_folder:
+                shutil.rmtree(new_folder)
             return
 
         # If one of the options below is set, it will access/touch/modify the
@@ -370,6 +370,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                 logger.error("Track file is not writable. This is required " \
                              "for some post processing steps: %s. Not continuing.",
                              downloaded_track.decode(headphones.SYS_ENCODING, "replace"))
+                if new_folder:
+                    shutil.rmtree(new_folder)
                 return
 
     # start encoding
@@ -377,6 +379,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         downloaded_track_list = music_encoder.encode(albumpath)
 
         if not downloaded_track_list:
+            if new_folder:
+                shutil.rmtree(new_folder)
             return
 
     artwork = None
@@ -410,6 +414,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     if headphones.CONFIG.CORRECT_METADATA:
         correctedMetadata = correctMetadata(albumid, release, downloaded_track_list)
         if not correctedMetadata and headphones.CONFIG.DO_NOT_PROCESS_UNMATCHED:
+            if new_folder:
+                shutil.rmtree(new_folder)
             return
 
     if headphones.CONFIG.EMBED_LYRICS:
@@ -562,6 +568,9 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         email = notifiers.Email()
         subject = release['ArtistName'] + ' - ' + release['AlbumTitle']
         email.notify(subject, "Download and Postprocessing completed")
+
+    if new_folder:
+        shutil.rmtree(new_folder)
 
 
 def embedAlbumArt(artwork, downloaded_track_list):
