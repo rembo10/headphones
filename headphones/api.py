@@ -162,12 +162,12 @@ class Api(object):
 
     def _getUpcoming(self, **kwargs):
         self.data = self._dic_from_query(
-            "SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC")
+            "SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate ASC")
         return
 
     def _getWanted(self, **kwargs):
         self.data = self._dic_from_query(
-            "SELECT * from albums WHERE Status='Wanted'")
+            "SELECT * from albums WHERE Status='Wanted' and ReleaseDate <= date ('now') order by ReleaseDate DESC")
         return
 
     def _getSnatched(self, **kwargs):
