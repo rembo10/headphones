@@ -532,7 +532,7 @@ class WebInterface(object):
         upcoming = myDB.select(
             "SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate ASC")
         wanted = myDB.select(
-            "SELECT * from albums WHERE Status='Wanted' and ReleaseDate <= date ('now') order by ReleaseDate DESC)
+            "SELECT * from albums WHERE Status='Wanted' and ReleaseDate <= date ('now') order by ReleaseDate DESC")
         return serve_template(templatename="upcoming.html", title="Upcoming", upcoming=upcoming,
                               wanted=wanted)
 
