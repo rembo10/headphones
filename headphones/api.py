@@ -147,7 +147,7 @@ class Api(object):
         album = self._dic_from_query(
             'SELECT * from albums WHERE AlbumID="' + self.id + '"')
         tracks = self._dic_from_query(
-            'SELECT * from tracks WHERE AlbumID="' + self.id + '"')
+            'SELECT * from tracks WHERE AlbumID="' + self.id + '" order by TrackNumber ASC')
         description = self._dic_from_query(
             'SELECT * from descriptions WHERE ReleaseGroupID="' + self.id + '"')
 
