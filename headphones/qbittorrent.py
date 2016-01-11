@@ -15,10 +15,8 @@
 
 import urllib
 import urllib2
-import urlparse
 import cookielib
 import json
-import re
 import os
 import time
 
@@ -48,70 +46,70 @@ class qbittorrentclient(object):
         self.base_url = host
         self.username = headphones.CONFIG.QBITTORRENT_USERNAME
         self.password = headphones.CONFIG.QBITTORRENT_PASSWORD
-	self.cookiejar = cookielib.CookieJar()
+        self.cookiejar = cookielib.CookieJar()
         self.opener = self._make_opener()
         self._get_sid(self.base_url, self.username, self.password)
 
     def _make_opener(self):
-	# create opener with cookie handler to carry QBitTorrent SID cookie
+        # create opener with cookie handler to carry QBitTorrent SID cookie
         cookie_handler = urllib2.HTTPCookieProcessor(self.cookiejar)
         handlers = [cookie_handler]
         return urllib2.build_opener(*handlers)
 
     def _get_sid(self, base_url, username, password):
-	# login so we can capture SID cookie
-	login_data = urllib.urlencode({ 'username':username, 'password':password })
+        # login so we can capture SID cookie
+        login_data = urllib.urlencode({ 'username':username, 'password':password })
         try:
-            response = self.opener.open(base_url+'/login',login_data)
+            self.opener.open(base_url+'/login',login_data)
         except urllib2.URLError as err:
             logger.debug('Error getting SID. qBittorrent responded with error: ' + str(err.reason))
             return
-	for cookie in self.cookiejar:
-		logger.debug('login cookie: ' + cookie.name + ', value: ' + cookie.value)
+        for cookie in self.cookiejar:
+                logger.debug('login cookie: ' + cookie.name + ', value: ' + cookie.value)
         return
 
     def _command(self, command, args=None, content_type=None, files=None):
-	logger.debug('QBittorrent WebAPI Command: %s' % command)
+        logger.debug('QBittorrent WebAPI Command: %s' % command)
 
         url = self.base_url + '/' + command
 
-	data = None
-	headers = dict()
-	if files: #Use Multipart form
-	    data, headers = encode_multipart( args, files, '-------------------------acebdf13572468')
-	else:
-	    if args:
-	    	data = urllib.urlencode(args)
+        data = None
+        headers = dict()
+        if files: #Use Multipart form
+            data, headers = encode_multipart( args, files, '-------------------------acebdf13572468')
+        else:
+            if args:
+                data = urllib.urlencode(args)
             if content_type:
-	        headers['Content-Type'] = content_type
+                headers['Content-Type'] = content_type
 
         request = urllib2.Request(url,data,headers)
         try:
             response = self.opener.open(request)
-	    info = response.info()
-	    if info:
-		if info.getheader('content-type'):
-		    if info.getheader('content-type') == 'application/json':
-			resp = ''
-			for line in response:
-			    resp = resp + line
-			return response.code, json.loads(resp)
-	    return response.code, None
+            info = response.info()
+            if info:
+                if info.getheader('content-type'):
+                    if info.getheader('content-type') == 'application/json':
+                        resp = ''
+                        for line in response:
+                            resp = resp + line
+                        return response.code, json.loads(resp)
+            return response.code, None
         except urllib2.URLError as err:
             logger.debug('Failed URL: %s' % url)
             logger.debug('QBitTorrent webUI raised the following error: %s' % str(err))
-	    return None, None
+            return None, None
 
     def _get_list(self, **args):
         return self._command('query/torrents', args)
 
     def _get_settings(self):
         status, value = self._command('query/preferences')
-	logger.debug('get_settings() returned %d items' % len(value))
+        logger.debug('get_settings() returned %d items' % len(value))
         return value
 
     def get_savepath(self, hash):
-	logger.debug('qb.get_savepath(%s)' % hash)
+        logger.debug('qb.get_savepath(%s)' % hash)
         status, torrentList = self._get_list()
         for torrent in torrentList:
             if torrent['hash']:
@@ -120,37 +118,37 @@ class qbittorrentclient(object):
         return None
 
     def start(self, hash):
-	logger.debug('qb.start(%s)' % hash)
+        logger.debug('qb.start(%s)' % hash)
         args = { 'hash':hash }
-	return self._command('command/resume',args,'application/x-www-form-urlencoded')
+        return self._command('command/resume',args,'application/x-www-form-urlencoded')
 
     def pause(self, hash):
-	logger.debug('qb.pause(%s)' % hash)
+        logger.debug('qb.pause(%s)' % hash)
         args = { 'hash':hash }
-	return self._command('command/pause',args,'application/x-www-form-urlencoded')
+        return self._command('command/pause',args,'application/x-www-form-urlencoded')
 
     def getfiles(self, hash):
-	logger.debug('qb.getfiles(%s)' % hash)
+        logger.debug('qb.getfiles(%s)' % hash)
         return self._command('query/propertiesFiles/'+hash)
 
     def getprops(self, hash):
-	logger.debug('qb.getprops(%s)' % hash)
+        logger.debug('qb.getprops(%s)' % hash)
         return self._command('query/propertiesGeneral/'+hash)
 
     def setprio(self, hash, priority):
-	logger.debug('qb.setprio(%s,%d)' % (hash, priority))
+        logger.debug('qb.setprio(%s,%d)' % (hash, priority))
         args = { 'hash':hash, 'priority':priority }
         return self._command('command/setFilePrio', args,'application/x-www-form-urlencoded')
 
     def remove(self, hash, remove_data=False):
-	logger.debug('qb.remove(%s,%s)' % (hash,remove_data))
+        logger.debug('qb.remove(%s,%s)' % (hash,remove_data))
 
         args = { 'hashes':hash }
         if remove_data:
-	    command = 'command/deletePerm'
+            command = 'command/deletePerm'
         else:
-	    command = 'command/delete'
-	return self._command(command, args, 'application/x-www-form-urlencoded')
+            command = 'command/delete'
+        return self._command(command, args, 'application/x-www-form-urlencoded')
 
 def removeTorrent(hash, remove_data=False):
     logger.debug('removeTorrent(%s,%s)' % (hash,remove_data))
@@ -174,7 +172,7 @@ def addTorrent(link):
     qbclient = qbittorrentclient()
     args = { 'urls':link, 'savepath':headphones.CONFIG.DOWNLOAD_TORRENT_DIR }
     if headphones.CONFIG.QBITTORRENT_LABEL:
-	args['label'] = headphones.CONFIG.QBITTORRENT_LABEL
+        args['label'] = headphones.CONFIG.QBITTORRENT_LABEL
     return qbclient._command('command/download', args, 'application/x-www-form-urlencoded' )
 
 def addFile(data):
@@ -192,7 +190,6 @@ def getFolder(hash):
     # Get Active Directory from settings
     settings = qbclient._get_settings()
     active_dir = settings['temp_path']
-    completed_dir = settings['save_path']
 
     if not active_dir:
         logger.error('Could not get "Keep incomplete torrents in:" directory from QBitTorrent settings, please ensure it is set')

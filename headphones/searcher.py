@@ -28,7 +28,6 @@ import re
 import string
 import shutil
 import random
-import urllib
 import datetime
 import headphones
 import subprocess
