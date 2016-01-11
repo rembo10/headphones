@@ -353,7 +353,7 @@ def getSeries(seriesid):
     series = None
     try:
         with mb_lock:
-            series = musicbrainzngs.get_series_by_id(seriesid,includes=['release-group-rels'])['series']
+            series = musicbrainzngs.get_series_by_id(seriesid, includes=['release-group-rels'])['series']
     except musicbrainzngs.WebServiceError as e:
         logger.warn('Attempt to retrieve series information from MusicBrainz failed for seriesid: %s (%s)' % (seriesid, str(e)))
         mb_lock.snooze(5)
@@ -373,10 +373,10 @@ def getSeries(seriesid):
     for rg in series['release_group-relation-list']:
         releasegroup = rg['release-group']
         releasegroups.append({
-            'title':releasegroup['title'],
-            'date':releasegroup['first-release-date'],
-            'id':releasegroup['id'],
-            'type':rg['type']
+            'title': releasegroup['title'],
+            'date': releasegroup['first-release-date'],
+            'id': releasegroup['id'],
+            'type': rg['type']
             })
     series_dict['releasegroups'] = releasegroups
     return series_dict
@@ -479,7 +479,7 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
                 newResults = musicbrainzngs.browse_releases(
                     release_group=rgid,
                     includes=['artist-credits', 'labels', 'recordings', 'release-groups', 'media'],
-                    release_status = release_status,
+                    release_status=release_status,
                     limit=limit,
                     offset=len(results))
             if 'release-list' not in newResults:

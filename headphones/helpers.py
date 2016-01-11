@@ -149,7 +149,7 @@ def get_age(date):
 
     try:
         days_old = int(split_date[0]) * 365 + int(split_date[1]) * 30 + int(split_date[2])
-    except (IndexError,ValueError):
+    except (IndexError, ValueError):
         days_old = False
 
     return days_old
@@ -172,7 +172,7 @@ def piratesize(size):
     split = size.split(" ")
     factor = float(split[0])
     unit = split[1].upper()
-    
+
     if unit == 'MIB':
         size = factor * 1048576
     elif unit == 'MB':
