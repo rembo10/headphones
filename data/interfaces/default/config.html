@@ -311,6 +311,7 @@
                                 <input type="radio" name="torrent_downloader" id="torrent_downloader_blackhole" value="0" ${config['torrent_downloader_blackhole']}> Black Hole
                                 <input type="radio" name="torrent_downloader" id="torrent_downloader_transmission" value="1" ${config['torrent_downloader_transmission']}> Transmission
                                 <input type="radio" name="torrent_downloader" id="torrent_downloader_utorrent" value="2" ${config['torrent_downloader_utorrent']}> uTorrent (Beta)
+                                <input type="radio" name="torrent_downloader" id="torrent_downloader_qbittorrent" value="3" ${config['torrent_downloader_qbittorrent']}> QBitTorrent
                             </fieldset>
                             <fieldset id="torrent_blackhole_options">
                                 <div class="row">
@@ -378,6 +379,26 @@
                                 <div class="row">
                                     <label>uTorrent Label</label>
                                     <input type="text" name="utorrent_label" value="${config['utorrent_label']}" size="30">
+                                </div>
+                            </fieldset>
+                            <fieldset id="qbittorrent_options">
+                                <small class="heading"><i class="fa fa-info-circle"></i> Note: Works with WebAPI Rev 6 and later (QBitTorrent 3.4.0 and later) </small>
+                                <div class="row">
+                                    <label>QBitTorrent Host</label>
+                                    <input type="text" name="qbittorrent_host" value="${config['qbittorrent_host']}" size="30">
+                                    <small>usually http://localhost:8081</small>
+                                </div>
+                                <div class="row">
+                                    <label>QBitTorrent Username</label>
+                                    <input type="text" name="qbittorrent_username" value="${config['qbittorrent_username']}" size="30">
+                                </div>
+                                <div class="row">
+                                    <label>QBitTorrent Password</label>
+                                    <input type="password" name="qbittorrent_password" value="${config['qbittorrent_password']}" size="30">
+                                </div>
+                                <div class="row">
+                                    <label>QBitTorrent Label</label>
+                                    <input type="text" name="qbittorrent_label" value="${config['qbittorrent_label']}" size="30">
                                 </div>
                             </fieldset>
                             <fieldset id="general_torrent_options">
@@ -2149,18 +2170,23 @@
 
                 if ($("#torrent_downloader_blackhole").is(":checked"))
                         {
-                            $("#transmission_options,#utorrent_options").hide();
+                            $("#transmission_options,#utorrent_options,#qbittorrent_options").hide();
                             $("#torrent_blackhole_options").show();
                         }
                 if ($("#torrent_downloader_transmission").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#utorrent_options").hide();
+                            $("#torrent_blackhole_options,#utorrent_options,#qbittorrent_options").hide();
                             $("#transmission_options").show();
                         }
                 if ($("#torrent_downloader_utorrent").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#transmission_options").hide();
+                            $("#torrent_blackhole_options,#transmission_options,#qbittorrent_options").hide();
                             $("#utorrent_options").show();
+                        }
+                if ($("#torrent_downloader_qbittorrent").is(":checked"))
+                        {
+                            $("#torrent_blackhole_options,#transmission_options,#utorrent_options").hide();
+                            $("#qbittorrent_options").show();
                         }
 
                 $('input[type=radio]').change(function(){
@@ -2198,15 +2224,19 @@
                         }
                         if ($("#torrent_downloader_blackhole").is(":checked"))
                         {
-                            $("#transmission_options,#utorrent_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
+                            $("#transmission_options,#utorrent_options,#qbittorrent_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_transmission").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#utorrent_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
+                            $("#torrent_blackhole_options,#utorrent_options,#qbittorrent_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_utorrent").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#transmission_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
+                            $("#torrent_blackhole_options,#transmission_options,#qbittorrent_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
+                        }
+                        if ($("#torrent_downloader_qbittorrent").is(":checked"))
+                        {
+                            $("#torrent_blackhole_options,#transmission_options,#utorrent_options").fadeOut("fast", function() { $("#qbittorrent_options").fadeIn() });
                         }
                 });
 
