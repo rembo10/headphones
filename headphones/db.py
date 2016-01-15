@@ -13,9 +13,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-#####################################
-## Stolen from Sick-Beard's db.py  ##
-#####################################
+#-----------------------------------
+#  Stolen from Sick-Beard's db.py --
+#-----------------------------------
 
 from __future__ import with_statement
 

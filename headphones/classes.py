@@ -13,9 +13,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-#########################################
-## Stolen from Sick-Beard's classes.py ##
-#########################################
+#---------------------------------------
+# Stolen from Sick-Beard's classes.py --
+#---------------------------------------
 
 
 import urllib

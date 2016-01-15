@@ -142,7 +142,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                         "Status": "Loading",
                         "IncludeExtras": headphones.CONFIG.INCLUDE_EXTRAS,
                         "Extras": headphones.CONFIG.EXTRAS}
-        if type=="series":
+        if type == "series":
             newValueDict['Type'] = "series"
     else:
         newValueDict = {"Status": "Loading"}
@@ -151,7 +151,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
 
     myDB.upsert("artists", newValueDict, controlValueDict)
 
-    if type=="series":
+    if type == "series":
         artist = mb.getSeries(artistid)
     else:
         artist = mb.getArtist(artistid, extrasonly)
