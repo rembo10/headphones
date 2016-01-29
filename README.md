@@ -62,3 +62,7 @@ Album Page with track overview:
 
 ## License
 This is free software under the GPL v3 open source license. Feel free to do with it what you wish, but any modification must be open sourced. A copy of the license is included.
+
+Master Branch:  [![Build Status](https://travis-ci.org/rembo10/headphones.svg?branch=master)](https://travis-ci.org/rembo10/headphones)
+
+Develop Branch: [![Build Status](https://travis-ci.org/rembo10/headphones.svg?branch=develop)](https://travis-ci.org/rembo10/headphones)
