@@ -13,18 +13,17 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import sys
+
+import os
 import cherrypy
 import headphones
-
 from headphones import logger
 from headphones.webserve import WebInterface
 from headphones.helpers import create_https_certificates
 
 
 def initialize(options):
-
     # HTTPS stuff stolen from sickbeard
     enable_https = options['enable_https']
     https_cert = options['https_cert']
@@ -33,15 +32,16 @@ def initialize(options):
     if enable_https:
         # If either the HTTPS certificate or key do not exist, try to make
         # self-signed ones.
-        if not (https_cert and os.path.exists(https_cert)) or not (https_key and os.path.exists(https_key)):
+        if not (https_cert and os.path.exists(https_cert)) or not (
+            https_key and os.path.exists(https_key)):
             if not create_https_certificates(https_cert, https_key):
                 logger.warn("Unable to create certificate and key. Disabling " \
-                    "HTTPS")
+                            "HTTPS")
                 enable_https = False
 
         if not (os.path.exists(https_cert) and os.path.exists(https_key)):
             logger.warn("Disabled HTTPS because of missing certificate and " \
-                "key.")
+                        "key.")
             enable_https = False
 
     options_dict = {
@@ -63,7 +63,7 @@ def initialize(options):
         protocol = "http"
 
     logger.info("Starting Headphones web server on %s://%s:%d/", protocol,
-        options['http_host'], options['http_port'])
+                options['http_host'], options['http_port'])
     cherrypy.config.update(options_dict)
 
     conf = {
@@ -99,7 +99,8 @@ def initialize(options):
     }
 
     if options['http_password']:
-        logger.info("Web server authentication is enabled, username is '%s'", options['http_username'])
+        logger.info("Web server authentication is enabled, username is '%s'",
+                    options['http_username'])
 
         conf['/'].update({
             'tools.auth_basic.on': True,
@@ -118,7 +119,8 @@ def initialize(options):
         cherrypy.process.servers.check_port(str(options['http_host']), options['http_port'])
         cherrypy.server.start()
     except IOError:
-        sys.stderr.write('Failed to start on port: %i. Is something else running?\n' % (options['http_port']))
+        sys.stderr.write(
+            'Failed to start on port: %i. Is something else running?\n' % (options['http_port']))
         sys.exit(1)
 
     cherrypy.server.wait()

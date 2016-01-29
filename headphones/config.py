@@ -1,7 +1,8 @@
-import headphones.logger
 import itertools
+
 import os
 import re
+import headphones.logger
 from configobj import ConfigObj
 
 
@@ -13,6 +14,7 @@ def bool_int(value):
         if value.lower() in ('', '0', 'false', 'f', 'no', 'n', 'off'):
             value = 0
     return int(bool(value))
+
 
 _CONFIG_DEFINITIONS = {
     'ADD_ALBUM_ART': (int, 'General', 0),
@@ -85,8 +87,10 @@ _CONFIG_DEFINITIONS = {
     'EXTRA_TORZNABS': (list, 'Torznab', ''),
     'FILE_FORMAT': (str, 'General', 'Track Artist - Album [Year] - Title'),
     'FILE_PERMISSIONS': (str, 'General', '0644'),
+    'FILE_PERMISSIONS_ENABLED': (bool_int, 'General', True),
     'FILE_UNDERSCORES': (int, 'General', 0),
     'FOLDER_FORMAT': (str, 'General', 'Artist/Album [Year]'),
+    'FOLDER_PERMISSIONS_ENABLED': (bool_int, 'General', True),
     'FOLDER_PERMISSIONS': (str, 'General', '0755'),
     'FREEZE_DB': (int, 'General', 0),
     'GIT_BRANCH': (str, 'General', 'master'),
@@ -160,7 +164,7 @@ _CONFIG_DEFINITIONS = {
     'OMGWTFNZBS': (int, 'omgwtfnzbs', 0),
     'OMGWTFNZBS_APIKEY': (str, 'omgwtfnzbs', ''),
     'OMGWTFNZBS_UID': (str, 'omgwtfnzbs', ''),
-    'OPEN_MAGNET_LINKS': (int, 'General', 0),  # 0: Ignore, 1: Open, 2: Convert
+    'OPEN_MAGNET_LINKS': (int, 'General', 0),  # 0: Ignore, 1: Open, 2: Convert, 3: Embed (rtorrent)
     'MAGNET_LINKS': (int, 'General', 0),
     'OSX_NOTIFY_APP': (str, 'OSX_Notify', '/Applications/Headphones'),
     'OSX_NOTIFY_ENABLED': (int, 'OSX_Notify', 0),
@@ -203,6 +207,8 @@ _CONFIG_DEFINITIONS = {
     'PUSHOVER_ONSNATCH': (int, 'Pushover', 0),
     'PUSHOVER_PRIORITY': (int, 'Pushover', 0),
     'RENAME_FILES': (int, 'General', 0),
+    'RENAME_UNPROCESSED': (bool_int, 'General', 1),
+    'RENAME_FROZEN': (bool_int, 'General', 1),
     'REPLACE_EXISTING_FOLDERS': (int, 'General', 0),
     'KEEP_ORIGINAL_FOLDER': (int, 'General', 0),
     'REQUIRED_WORDS': (str, 'General', ''),
@@ -250,7 +256,7 @@ _CONFIG_DEFINITIONS = {
     'UTORRENT_PASSWORD': (str, 'uTorrent', ''),
     'UTORRENT_USERNAME': (str, 'uTorrent', ''),
     'VERIFY_SSL_CERT': (bool_int, 'Advanced', 1),
-    'WAIT_UNTIL_RELEASE_DATE' : (int, 'General', 0),
+    'WAIT_UNTIL_RELEASE_DATE': (int, 'General', 0),
     'WAFFLES': (int, 'Waffles', 0),
     'WAFFLES_PASSKEY': (str, 'Waffles', ''),
     'WAFFLES_RATIO': (str, 'Waffles', ''),
@@ -267,6 +273,7 @@ _CONFIG_DEFINITIONS = {
     'XBMC_USERNAME': (str, 'XBMC', ''),
     'XLDPROFILE': (str, 'General', '')
 }
+
 
 # pylint:disable=R0902
 # it might be nice to refactor for fewer instance variables
@@ -344,7 +351,7 @@ class Config(object):
         """ Return the extra newznab tuples """
         extra_newznabs = list(
             itertools.izip(*[itertools.islice(self.EXTRA_NEWZNABS, i, None, 3)
-            for i in range(3)])
+                             for i in range(3)])
         )
         return extra_newznabs
 
@@ -363,7 +370,7 @@ class Config(object):
         """ Return the extra torznab tuples """
         extra_torznabs = list(
             itertools.izip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 3)
-            for i in range(3)])
+                             for i in range(3)])
         )
         return extra_torznabs
 

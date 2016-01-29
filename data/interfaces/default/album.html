@@ -14,15 +14,15 @@
 
 			<a id="menu_link_delete" href="deleteAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}"><i class="fa fa-trash-o"></i> Delete Album</a>
 			%if album['Status'] == 'Skipped' or album['Status'] == 'Ignored':
-			<a id="menu_link_wanted" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true)" data-success="'${album['AlbumTitle']}' added to queue"><i class="fa fa-heart"></i> Mark Album as Wanted</a>
+			<a id="menu_link_wanted" href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true)" data-success="'${album['AlbumTitle']}' added to queue"><i class="fa fa-heart"></i> Mark Album as Wanted</a>
 			%elif album['Status'] == 'Wanted':
-			<a id="menu_link_check" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this));" data-success="Forced checking successful"><i class="fa fa-search"></i> Force Check</a>
-			<a id="menu_link_skipped" href="#" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),true);" data-success="'${album['AlbumTitle']}' marked as Skipped"><i class="fa fa-step-forward"></i> Mark Album as Skipped</a>
+			<a id="menu_link_check" href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this));" data-success="Forced checking successful"><i class="fa fa-search"></i> Force Check</a>
+			<a id="menu_link_skipped" href="javascript:void(0)" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),true);" data-success="'${album['AlbumTitle']}' marked as Skipped"><i class="fa fa-step-forward"></i> Mark Album as Skipped</a>
 			%else:
-			<a id="menu_link_retry" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true);" data-success="Retrying the same version of '${album['AlbumTitle']}'"><i class="fa fa-refresh"></i> Retry Download</a>
-			<a id="menu_link_new" href="#" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),true);" data-success="Looking for a new version of '${album['AlbumTitle']}'"><i class="fa fa-download"></i> Try New Version</a>
+			<a id="menu_link_retry" href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true);" data-success="Retrying the same version of '${album['AlbumTitle']}'"><i class="fa fa-refresh"></i> Retry Download</a>
+			<a id="menu_link_new" href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),true);" data-success="Looking for a new version of '${album['AlbumTitle']}'"><i class="fa fa-download"></i> Try New Version</a>
 			%endif		
-			<a class="menu_link_edit" id="album_chooser" href="#"><i class="fa fa-pencil"></i> Choose Alternate Release</a>
+			<a class="menu_link_edit" id="album_chooser" href="javascript:void(0)"><i class="fa fa-pencil"></i> Choose Alternate Release</a>
 				<div id="dialog" title="Choose an Alternate Release" style="display:none" class="configtable">
 					<div class="links">
 						<%
@@ -30,7 +30,7 @@
 						%>
 						%if not alternate_albums:
 							<p>No alternate releases found. Try refreshing the artist (if the artist is being refreshed, please wait until it's finished)</p>
-							<h2><a id="refresh_artist" onclick="doAjaxCall('refreshArtist?ArtistID=${album['ArtistID']}', $(this)), true" href="#" data-success="'${album['ArtistName']}' is being refreshed">Refresh Artist</a></h2>
+							<h2><a id="refresh_artist" onclick="doAjaxCall('refreshArtist?ArtistID=${album['ArtistID']}', $(this)), true" href="javascript:void(0)" data-success="'${album['ArtistName']}' is being refreshed">Refresh Artist</a></h2>
 						%else:
 							%for alternate_album in alternate_albums:
 								<%
@@ -43,12 +43,12 @@
 										alternate_album_name = alternate_album['AlbumTitle'] + " (" + alternate_album['ReleaseCountry'] + ", " + str(alternate_album['ReleaseDate']) + ", " + alternate_album['ReleaseFormat'] + ") [" + str(have_track_count) + "/" + str(track_count) + " tracks]"
 									
 								%>
-								<a href="#" onclick="doAjaxCall('switchAlbum?AlbumID=${album['AlbumID']}&ReleaseID=${alternate_album['ReleaseID']}', $(this), 'table');" data-success="Switched release to: ${alternate_album_name}">${alternate_album_name}</a><a href="${mb_link}" target="_blank">MB</a><br>
+								<a href="javascript:void(0)" onclick="doAjaxCall('switchAlbum?AlbumID=${album['AlbumID']}&ReleaseID=${alternate_album['ReleaseID']}', $(this), 'table');" data-success="Switched release to: ${alternate_album_name}">${alternate_album_name}</a><a href="${mb_link}" target="_blank">MB</a><br>
 							%endfor
 						%endif
 					</div>
 				</div>
-			<a class="menu_link_edit" id="edit_search_term" href="#"><i class="fa fa-pencil"></i> Edit Search Term</a>
+			<a class="menu_link_edit" id="edit_search_term" href="javascript:void(0)"><i class="fa fa-pencil"></i> Edit Search Term</a>
 			<div id="dialog2" title="Enter your own search term for this album" style="display:none" class="configtable">
 				<form action="editSearchTerm" method="GET" id="editSearchTerm">
 					<input type="hidden" name="AlbumID" value="${album['AlbumID']}">
@@ -64,7 +64,7 @@
 					<input type="button" value="Save changes" onclick="doAjaxCall('editSearchTerm',$(this),'tabs',true);return false;" data-success="Search term updated"/>
 				</form>
 			</div>
-			<a class="menu_link_edit" id="choose_specific_download" href="#" onclick="getAvailableDownloads()"><i class="fa fa-search"></i> Choose Specific Download</a>
+			<a class="menu_link_edit" id="choose_specific_download" href="javascript:void(0)" onclick="getAvailableDownloads()"><i class="fa fa-search"></i> Choose Specific Download</a>
 			<div id="choose_specific_download_dialog" title="Choose a specific download for this album" style="display:none" class="configtable">
 				<table class="display" id="downloads_table">
 					<thead>
@@ -238,7 +238,7 @@
 			feedback.fadeOut();
 			search_results = data
 			for( var i = 0, len = data.length; i < len; i++ ) {
-    			$('#downloads_table_body').append('<tr><td id="title"><a href="#" onclick="downloadSpecificRelease('+i+')">'+data[i].title+'</a></td><td id="size"><span title='+data[i].size+'></span>'+(data[i].size / (1024*1024)).toFixed(2)+' MB</td><td id="provider">'+data[i].provider+'</td><td id="kind">'+data[i].kind+'</td><td id="matches">'+data[i].matches+'</td></tr>');
+    			$('#downloads_table_body').append('<tr><td id="title"><a href="javascript:void(0)" onclick="downloadSpecificRelease('+i+')">'+data[i].title+'</a></td><td id="size"><span title='+data[i].size+'></span>'+(data[i].size / (1024*1024)).toFixed(2)+' MB</td><td id="provider">'+data[i].provider+'</td><td id="kind">'+data[i].kind+'</td><td id="matches">'+data[i].matches+'</td></tr>');
     		}
 			$('#downloads_table').dataTable({
 				"aoColumns": [
