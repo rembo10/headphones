@@ -13,18 +13,17 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
 import htmlentitydefs
 
+import re
 from headphones import logger, request
 
 
 def getLyrics(artist, song):
-
     params = {"artist": artist.encode('utf-8'),
-                "song": song.encode('utf-8'),
-                "fmt": 'xml'
-                }
+              "song": song.encode('utf-8'),
+              "fmt": 'xml'
+              }
 
     url = 'http://lyrics.wikia.com/api.php'
     data = request.request_minidom(url, params=params)
@@ -46,10 +45,13 @@ def getLyrics(artist, song):
         logger.warn('Error fetching lyrics from: %s' % lyricsurl)
         return
 
-    m = re.compile('''<div class='lyricbox'><div class='rtMatcher'>.*?</div>(.*?)<!--''').search(lyricspage)
+    m = re.compile('''<div class='lyricbox'><div class='rtMatcher'>.*?</div>(.*?)<!--''').search(
+        lyricspage)
 
     if not m:
-        m = re.compile('''<div class='lyricbox'><span style="padding:1em"><a href="/Category:Instrumental" title="Instrumental">''').search(lyricspage)
+        m = re.compile(
+            '''<div class='lyricbox'><span style="padding:1em"><a href="/Category:Instrumental" title="Instrumental">''').search(
+            lyricspage)
         if m:
             return u'(Instrumental)'
         else:
@@ -67,12 +69,12 @@ def convert_html_entities(s):
     if len(matches) > 0:
         hits = set(matches)
         for hit in hits:
-                name = hit[2:-1]
-                try:
-                        entnum = int(name)
-                        s = s.replace(hit, unichr(entnum))
-                except ValueError:
-                        pass
+            name = hit[2:-1]
+            try:
+                entnum = int(name)
+                s = s.replace(hit, unichr(entnum))
+            except ValueError:
+                pass
 
     matches = re.findall("&\w+;", s)
     hits = set(matches)

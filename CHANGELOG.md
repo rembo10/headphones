@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.5.10
+Released 29 January 2016
+
+Highlights:
+* Added: API option to post-process single folders
+* Added: Ability to specify extension when re-encoding
+* Added: Option to stop renaming folders
+* Fixed: Utorrent torrents not being removed (#2385)
+* Fixed: Torznab to transmission
+* Fixed: Magnet folder names in history
+* Fixed: Multiple torcache fixes
+* Fixed: Updated requests & urllib3 to latest versions to fix errors with pyOpenSSL
+* Improved: Use a temporary folder during post-processing
+* Improved: Added verify_ssl_cert option
+* Improved: Fixed track matching progress
+* Improved: pylint, pep8 & pylint fixes
+* Improved: Stop JS links from scrolling to the top of the page
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.9...v0.5.10).
+
 ## v0.5.9
 Released 05 September 2015
 
@@ -12,7 +32,7 @@ Highlights:
 * Fixed: Pushover notifications
 * Improved: Rutracker logging, switched to requests lib
 
-The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.6...v0.5.7).
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.8...v0.5.9).
 
 ## v0.5.8
 Released 13 July 2015
@@ -30,7 +50,7 @@ Highlights:
 * Improved: Set localhost as default
 * Improved: Better single artist scanning
 
-The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.6...v0.5.7).
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.7...v0.5.8).
 
 ## v0.5.7
 Released 01 July 2015
