@@ -1,4 +1,7 @@
-#![Headphones Logo](https://github.com/rembo10/headphones/raw/master/data/images/headphoneslogo.png) Headphones
+##![Headphones Logo](https://github.com/rembo10/headphones/raw/master/data/images/headphoneslogo.png) Headphones
+
+Master Branch:  [![Build Status](https://travis-ci.org/rembo10/headphones.svg?branch=master)](https://travis-ci.org/rembo10/headphones)
+Develop Branch: [![Build Status](https://travis-ci.org/rembo10/headphones.svg?branch=develop)](https://travis-ci.org/rembo10/headphones)
 
 Headphones is an automated music downloader for NZB and Torrent, written in Python. It supports SABnzbd, NZBget, Transmission, µTorrent and Blackhole.
 
@@ -18,7 +21,7 @@ You are free to join the Headphones support community on IRC where you can ask q
 
 1. Analyze your log, you just might find the solution yourself!
 2. You read the wiki and searched existing issues, but this is not solving your problem.
-3. Post the issue with a clear title, description and the HP log and use [proper markdown syntax](https://help.github.com/articles/github-flavored-markdown) to structure your text (code/log in code blocks). 
+3. Post the issue with a clear title, description and the HP log and use [proper markdown syntax](https://help.github.com/articles/github-flavored-markdown) to structure your text (code/log in code blocks).
 4. Close your issue when it's solved! If you found the solution yourself, please comment so that others benefit from it.
 
 **Feature requests** can be reported on the GitHub issue tracker too:
@@ -62,7 +65,3 @@ Album Page with track overview:
 
 ## License
 This is free software under the GPL v3 open source license. Feel free to do with it what you wish, but any modification must be open sourced. A copy of the license is included.
-
-Master Branch:  [![Build Status](https://travis-ci.org/rembo10/headphones.svg?branch=master)](https://travis-ci.org/rembo10/headphones)
-
-Develop Branch: [![Build Status](https://travis-ci.org/rembo10/headphones.svg?branch=develop)](https://travis-ci.org/rembo10/headphones)
