@@ -1,6 +1,7 @@
 ##![Headphones Logo](https://github.com/rembo10/headphones/raw/master/data/images/headphoneslogo.png) Headphones
 
-
+**Master Branch:**  [![Build Status](https://travis-ci.org/rembo10/headphones.svg?branch=master)](https://travis-ci.org/rembo10/headphones)
+**Develop Branch:** [![Build Status](https://travis-ci.org/rembo10/headphones.svg?branch=develop)](https://travis-ci.org/rembo10/headphones)
 
 Headphones is an automated music downloader for NZB and Torrent, written in Python. It supports SABnzbd, NZBget, Transmission, µTorrent and Blackhole.
 
