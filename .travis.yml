@@ -2,6 +2,7 @@
 # http://about.travis-ci.org/docs/
 
 language: python
+sudo: false
 
 # Available Python versions:
 # http://about.travis-ci.org/docs/user/ci-environment/#Python-VM-images
