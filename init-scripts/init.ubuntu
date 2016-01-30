@@ -164,7 +164,7 @@ start_headphones () {
     handle_updates
     if ! is_running; then
         log_daemon_msg "Starting $DESC"
-        start-stop-daemon -o -d "$APP_PATH" -c "$RUN_AS" --start $EXTRA_SSD_OPTS --pidfile "$PID_FILE" --exec "$DAEMON" -- "$DAEMON_OPTS"
+        start-stop-daemon -o -d "$APP_PATH" -c "$RUN_AS" --start $EXTRA_SSD_OPTS --pidfile "$PID_FILE" --exec "$DAEMON" -- $DAEMON_OPTS
         check_retval
     else
         log_success_msg "$DESC: already running (pid $PID)"
