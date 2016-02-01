@@ -66,7 +66,7 @@ Unmark album as wanted / i.e. mark as skipped
 
 ### forceSearch
 force search for wanted albums - not launched in a separate thread so it may take a bit to complete
-### forceProcess
+### forceProcess[&dir=/path/to/folder]
 Force post process albums in download directory - also not launched in a separate thread
 ### forceActiveArtistsUpdate
 force Active Artist Update - also not launched in a separate thread

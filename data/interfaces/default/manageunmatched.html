@@ -52,7 +52,7 @@
 					<table>
 					<tr><td>Are you sure you want to ignore Local Artist: ${album['ArtistName']} from future matching?</td></tr>
 					<tr><td align="right"><BR>
-					<button href="#" onclick="doAjaxCall('markUnmatched?action=ignoreArtist&existing_artist=${old_artist_clean}', $(this), 'page');" data-success="Successfully ignored ${album['ArtistName']} from future matching">Ignore Artist</button>
+					<button href="javascript:void(0)" onclick="doAjaxCall('markUnmatched?action=ignoreArtist&existing_artist=${old_artist_clean}', $(this), 'page');" data-success="Successfully ignored ${album['ArtistName']} from future matching">Ignore Artist</button>
 					</td></tr>
 					</table>
 				</div>
@@ -66,7 +66,7 @@
 						</select>
 						</td></tr>
 					<tr><td></td><td align="right"><BR>
-					<button href="#" onclick="artist_matcher(${count_albums}, '${old_artist_js}')">Match Artist</button>
+					<button href="javascript:void(0)" onclick="artist_matcher(${count_albums}, '${old_artist_js}')">Match Artist</button>
 					</td></tr>
 					</table>
 				</div>
@@ -78,7 +78,7 @@
 					<table>
 					<tr><td>Are you sure you want to ignore Local Album: ${album['AlbumTitle']} from future matching?</td></tr>
 					<tr><td align="right"><BR>
-					<button href="#" onclick="doAjaxCall('markUnmatched?action=ignoreAlbum&existing_artist=${old_artist_clean}&existing_album=${old_album_clean}', $(this), 'page');" data-success="Successfully ignored ${album['AlbumTitle']} from future matching">Ignore Album</button>
+					<button href="javascript:void(0)" onclick="doAjaxCall('markUnmatched?action=ignoreAlbum&existing_artist=${old_artist_clean}&existing_album=${old_album_clean}', $(this), 'page');" data-success="Successfully ignored ${album['AlbumTitle']} from future matching">Ignore Album</button>
 					</td></tr>
 					</table>
 				</div>
@@ -97,7 +97,7 @@
 					</select>
 					</td></tr>
 					<tr><td></td><td align="right"><BR>
-					<button href="#" onclick="album_matcher(${count_albums}, '${old_artist_js}', '${old_album_js}')">Match Album</button>
+					<button href="javascript:void(0)" onclick="album_matcher(${count_albums}, '${old_artist_js}', '${old_album_js}')">Match Album</button>
 					</td></tr>
 					</table>
 				</div>

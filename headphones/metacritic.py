@@ -13,14 +13,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
 import json
-import headphones
 
 from headphones import db, helpers, logger, request
-from headphones.common import USER_AGENT
 
-def update(artistid, artist_name,release_groups):
+
+def update(artistid, artist_name, release_groups):
     """ Pretty simple and crude function to find the artist page on metacritic,
     then parse that page to get critic & user scores for albums"""
 
@@ -28,12 +26,13 @@ def update(artistid, artist_name,release_groups):
     # We could just do a search, then take the top result, but at least this will
     # cut down on api calls. If it's ineffective then we'll switch to search
 
-    replacements = {" & " : " ", "." : ""}
-    mc_artist_name = helpers.replace_all(artist_name.lower(),replacements)
+    replacements = {" & ": " ", ".": ""}
+    mc_artist_name = helpers.replace_all(artist_name.lower(), replacements)
 
-    mc_artist_name = mc_artist_name.replace(" ","-")
+    mc_artist_name = mc_artist_name.replace(" ", "-")
 
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'}
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'}
 
     url = "http://www.metacritic.com/person/" + mc_artist_name + "?filter-options=music&sort_options=date&num_items=100"
 
@@ -67,12 +66,12 @@ def update(artistid, artist_name,release_groups):
             scores = row.find_all("span")
             critic_score = scores[0].string
             user_score = scores[1].string
-            score_dict = {'title':title,'critic_score':critic_score,'user_score':user_score}
+            score_dict = {'title': title, 'critic_score': critic_score, 'user_score': user_score}
             score_list.append(score_dict)
 
         # Save scores to the database
         controlValueDict = {"ArtistID": artistid}
-        newValueDict = {'MetaCritic':json.dumps(score_list)}
+        newValueDict = {'MetaCritic': json.dumps(score_list)}
         myDB.upsert("artists", newValueDict, controlValueDict)
 
     for score in score_list:
@@ -84,5 +83,5 @@ def update(artistid, artist_name,release_groups):
                 critic_score = score['critic_score']
                 user_score = score['user_score']
                 controlValueDict = {"AlbumID": rg['id']}
-                newValueDict = {'CriticScore':critic_score,'UserScore':user_score}
+                newValueDict = {'CriticScore': critic_score, 'UserScore': user_score}
                 myDB.upsert("albums", newValueDict, controlValueDict)

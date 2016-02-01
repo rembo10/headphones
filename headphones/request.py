@@ -13,16 +13,20 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import logger
-
 from xml.dom import minidom
-from bs4 import BeautifulSoup
+import collections
 
+import sys
+from bs4 import BeautifulSoup
 import requests
+from headphones import logger
 import feedparser
 import headphones
 import headphones.lock
-import collections
+
+
+# Disable SSL certificate warnings. We have our own handling
+requests.packages.urllib3.disable_warnings()
 
 # Dictionary with last request times, for rate limiting.
 last_requests = collections.defaultdict(int)
@@ -50,6 +54,14 @@ def request_response(url, method="get", auto_raise=True,
     # Disable verification of SSL certificates if requested. Note: this could
     # pose a security issue!
     kwargs["verify"] = bool(headphones.CONFIG.VERIFY_SSL_CERT)
+
+    #This fix is put in place for systems with broken SSL (like QNAP)
+    if not headphones.CONFIG.VERIFY_SSL_CERT and sys.version_info >= (2, 7, 9):
+        try:
+            import ssl
+            ssl._create_default_https_context = ssl._create_unverified_context
+        except:
+            pass
 
     # Map method to the request.XXX method. This is a simple hack, but it
     # allows requests to apply more magic per method. See lib/requests/api.py.
@@ -95,7 +107,8 @@ def request_response(url, method="get", auto_raise=True,
             "host is up and running.")
     except requests.Timeout:
         logger.error(
-            "Request timed out. The remote host did not respond in a timely manner.")
+            "Request timed out. The remote host did not respond in a timely "
+            "manner.")
     except requests.HTTPError as e:
         if e.response is not None:
             if e.response.status_code >= 500:
@@ -206,7 +219,8 @@ def server_message(response):
     message = None
 
     # First attempt is to 'read' the response as HTML
-    if response.headers.get("content-type") and "text/html" in response.headers.get("content-type"):
+    if response.headers.get("content-type") and \
+                    "text/html" in response.headers.get("content-type"):
         try:
             soup = BeautifulSoup(response.content, "html5lib")
         except Exception:

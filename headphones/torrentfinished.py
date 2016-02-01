@@ -13,12 +13,13 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import db, utorrent, transmission, logger
-
 import threading
+
+from headphones import db, utorrent, transmission, logger
 import headphones
 
 postprocessor_lock = threading.Lock()
+
 
 def checkTorrentFinished():
     """
@@ -41,6 +42,7 @@ def checkTorrentFinished():
                 torrent_removed = utorrent.removeTorrent(hash, True)
 
             if torrent_removed:
-                myDB.action('DELETE from snatched WHERE status = "Seed_Processed" and AlbumID=?', [albumid])
+                myDB.action('DELETE from snatched WHERE status = "Seed_Processed" and AlbumID=?',
+                            [albumid])
 
     logger.info("Checking finished torrents completed")
