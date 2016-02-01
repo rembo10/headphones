@@ -13,39 +13,39 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import logger, helpers, db, mb, lastfm, metacritic
-
-from beets.mediafile import MediaFile
-
 import time
+
+from headphones import logger, helpers, db, mb, lastfm, metacritic
+from beets.mediafile import MediaFile
 import headphones
 
 blacklisted_special_artist_names = ['[anonymous]', '[data]', '[no artist]',
-    '[traditional]', '[unknown]', 'Various Artists']
+                                    '[traditional]', '[unknown]', 'Various Artists']
 blacklisted_special_artists = ['f731ccc4-e22a-43af-a747-64213329e088',
-    '33cf029c-63b0-41a0-9855-be2a3665fb3b',
-    '314e1c25-dde7-4e4d-b2f4-0a7b9f7c56dc',
-    'eec63d3c-3b81-4ad4-b1e4-7c147d4d2b61',
-    '9be7f096-97ec-4615-8957-8d40b5dcbc41',
-    '125ec42a-7229-4250-afc5-e057484327fe',
-    '89ad4ac3-39f7-470e-963a-56509c546377']
+                               '33cf029c-63b0-41a0-9855-be2a3665fb3b',
+                               '314e1c25-dde7-4e4d-b2f4-0a7b9f7c56dc',
+                               'eec63d3c-3b81-4ad4-b1e4-7c147d4d2b61',
+                               '9be7f096-97ec-4615-8957-8d40b5dcbc41',
+                               '125ec42a-7229-4250-afc5-e057484327fe',
+                               '89ad4ac3-39f7-470e-963a-56509c546377']
 
 
 def is_exists(artistid):
     myDB = db.DBConnection()
 
     # See if the artist is already in the database
-    artistlist = myDB.select('SELECT ArtistID, ArtistName from artists WHERE ArtistID=?', [artistid])
+    artistlist = myDB.select('SELECT ArtistID, ArtistName from artists WHERE ArtistID=?',
+                             [artistid])
 
     if any(artistid in x for x in artistlist):
-        logger.info(artistlist[0][1] + u" is already in the database. Updating 'have tracks', but not artist information")
+        logger.info(artistlist[0][
+                        1] + u" is already in the database. Updating 'have tracks', but not artist information")
         return True
     else:
         return False
 
 
 def artistlist_to_mbids(artistlist, forced=False):
-
     for artist in artistlist:
 
         if not artist and artist != ' ':
@@ -77,9 +77,12 @@ def artistlist_to_mbids(artistlist, forced=False):
         myDB = db.DBConnection()
 
         if not forced:
-            bl_artist = myDB.action('SELECT * FROM blacklist WHERE ArtistID=?', [artistid]).fetchone()
+            bl_artist = myDB.action('SELECT * FROM blacklist WHERE ArtistID=?',
+                                    [artistid]).fetchone()
             if bl_artist or artistid in blacklisted_special_artists:
-                logger.info("Artist ID for '%s' is either blacklisted or Various Artists. To add artist, you must do it manually (Artist ID: %s)" % (artist, artistid))
+                logger.info(
+                    "Artist ID for '%s' is either blacklisted or Various Artists. To add artist, you must do it manually (Artist ID: %s)" % (
+                    artist, artistid))
                 continue
 
         # Add to database if it doesn't exist
@@ -88,7 +91,9 @@ def artistlist_to_mbids(artistlist, forced=False):
 
         # Just update the tracks if it does
         else:
-            havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist]))
+            havetracks = len(
+                myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid])) + len(
+                myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist]))
             myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, artistid])
 
         # Delete it from the New Artists if the request came from there
@@ -112,7 +117,6 @@ def addArtistIDListToDB(artistidlist):
 
 
 def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
-
     # Putting this here to get around the circular import. We're using this to update thumbnails for artist/albums
     from headphones import cache
 
@@ -142,7 +146,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                         "Status": "Loading",
                         "IncludeExtras": headphones.CONFIG.INCLUDE_EXTRAS,
                         "Extras": headphones.CONFIG.EXTRAS}
-        if type=="series":
+        if type == "series":
             newValueDict['Type'] = "series"
     else:
         newValueDict = {"Status": "Loading"}
@@ -151,7 +155,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
 
     myDB.upsert("artists", newValueDict, controlValueDict)
 
-    if type=="series":
+    if type == "series":
         artist = mb.getSeries(artistid)
     else:
         artist = mb.getArtist(artistid, extrasonly)
@@ -159,7 +163,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
     if artist and artist.get('artist_name') in blacklisted_special_artist_names:
         logger.warn('Cannot import blocked special purpose artist: %s' % artist.get('artist_name'))
         myDB.action('DELETE from artists WHERE ArtistID=?', [artistid])
-        #in case it's already in the db
+        # in case it's already in the db
         myDB.action('DELETE from albums WHERE ArtistID=?', [artistid])
         myDB.action('DELETE from tracks WHERE ArtistID=?', [artistid])
         return
@@ -168,7 +172,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
         logger.warn("Error fetching artist info. ID: " + artistid)
         if dbartist is None:
             newValueDict = {"ArtistName": "Fetch failed, try refreshing. (%s)" % (artistid),
-                    "Status": "Active"}
+                            "Status": "Active"}
         else:
             newValueDict = {"Status": "Active"}
         myDB.upsert("artists", newValueDict, controlValueDict)
@@ -191,7 +195,8 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
     # See if we need to grab extras. Artist specific extras take precedence
     # over global option. Global options are set when adding a new artist
     try:
-        db_artist = myDB.action('SELECT IncludeExtras, Extras from artists WHERE ArtistID=?', [artistid]).fetchone()
+        db_artist = myDB.action('SELECT IncludeExtras, Extras from artists WHERE ArtistID=?',
+                                [artistid]).fetchone()
         includeExtras = db_artist['IncludeExtras']
     except IndexError:
         includeExtras = False
@@ -206,9 +211,12 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
         for groups in artist['releasegroups']:
             group_list.append(groups['id'])
         if not extrasonly:
-            remove_missing_groups_from_albums = myDB.select("SELECT AlbumID FROM albums WHERE ArtistID=?", [artistid])
+            remove_missing_groups_from_albums = myDB.select(
+                "SELECT AlbumID FROM albums WHERE ArtistID=?", [artistid])
         else:
-            remove_missing_groups_from_albums = myDB.select('SELECT AlbumID FROM albums WHERE ArtistID=? AND Status="Skipped" AND Type!="Album"', [artistid])
+            remove_missing_groups_from_albums = myDB.select(
+                'SELECT AlbumID FROM albums WHERE ArtistID=? AND Status="Skipped" AND Type!="Album"',
+                [artistid])
         for items in remove_missing_groups_from_albums:
             if items['AlbumID'] not in group_list:
                 # Remove all from albums/tracks that aren't in release groups
@@ -217,12 +225,16 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                 myDB.action("DELETE FROM tracks WHERE AlbumID=?", [items['AlbumID']])
                 myDB.action("DELETE FROM alltracks WHERE AlbumID=?", [items['AlbumID']])
                 myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [items['AlbumID']])
-                logger.info("[%s] Removing all references to release group %s to reflect MusicBrainz refresh" % (artist['artist_name'], items['AlbumID']))
+                logger.info(
+                    "[%s] Removing all references to release group %s to reflect MusicBrainz refresh" % (
+                    artist['artist_name'], items['AlbumID']))
                 if not extrasonly:
                     force_repackage = 1
     else:
         if not extrasonly:
-            logger.info("[%s] There was either an error pulling data from MusicBrainz or there might not be any releases for this category" % artist['artist_name'])
+            logger.info(
+                "[%s] There was either an error pulling data from MusicBrainz or there might not be any releases for this category" %
+                artist['artist_name'])
 
     # Then search for releases within releasegroups, if releases don't exist, then remove from allalbums/alltracks
     album_searches = []
@@ -232,7 +244,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
         today = helpers.today()
         rgid = rg['id']
         skip_log = 0
-        #Make a user configurable variable to skip update of albums with release dates older than this date (in days)
+        # Make a user configurable variable to skip update of albums with release dates older than this date (in days)
         pause_delta = headphones.CONFIG.MB_IGNORE_AGE
 
         rg_exists = myDB.action("SELECT * from albums WHERE AlbumID=?", [rg['id']]).fetchone()
@@ -247,12 +259,14 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                 new_release_group = True
 
             if new_release_group:
-                logger.info("[%s] Now adding: %s (New Release Group)" % (artist['artist_name'], rg['title']))
+                logger.info("[%s] Now adding: %s (New Release Group)" % (
+                artist['artist_name'], rg['title']))
                 new_releases = mb.get_new_releases(rgid, includeExtras)
 
             else:
                 if check_release_date is None or check_release_date == u"None":
-                    logger.info("[%s] Now updating: %s (No Release Date)" % (artist['artist_name'], rg['title']))
+                    logger.info("[%s] Now updating: %s (No Release Date)" % (
+                    artist['artist_name'], rg['title']))
                     new_releases = mb.get_new_releases(rgid, includeExtras, True)
                 else:
                     if len(check_release_date) == 10:
@@ -264,20 +278,24 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                     else:
                         release_date = today
                     if helpers.get_age(today) - helpers.get_age(release_date) < pause_delta:
-                        logger.info("[%s] Now updating: %s (Release Date <%s Days)", artist['artist_name'], rg['title'], pause_delta)
+                        logger.info("[%s] Now updating: %s (Release Date <%s Days)",
+                                    artist['artist_name'], rg['title'], pause_delta)
                         new_releases = mb.get_new_releases(rgid, includeExtras, True)
                     else:
-                        logger.info("[%s] Skipping: %s (Release Date >%s Days)", artist['artist_name'], rg['title'], pause_delta)
+                        logger.info("[%s] Skipping: %s (Release Date >%s Days)",
+                                    artist['artist_name'], rg['title'], pause_delta)
                         skip_log = 1
                         new_releases = 0
 
             if force_repackage == 1:
                 new_releases = -1
-                logger.info('[%s] Forcing repackage of %s (Release Group Removed)', artist['artist_name'], al_title)
+                logger.info('[%s] Forcing repackage of %s (Release Group Removed)',
+                            artist['artist_name'], al_title)
             else:
                 new_releases = new_releases
         else:
-            logger.info("[%s] Now adding/updating: %s (Comprehensive Force)", artist['artist_name'], rg['title'])
+            logger.info("[%s] Now adding/updating: %s (Comprehensive Force)", artist['artist_name'],
+                        rg['title'])
             new_releases = mb.get_new_releases(rgid, includeExtras, forcefull)
 
         if new_releases != 0:
@@ -291,23 +309,26 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
             # This will be used later to build a hybrid release
             fullreleaselist = []
             # Search for releases within a release group
-            find_hybrid_releases = myDB.action("SELECT * from allalbums WHERE AlbumID=?", [rg['id']])
+            find_hybrid_releases = myDB.action("SELECT * from allalbums WHERE AlbumID=?",
+                                               [rg['id']])
 
             # Build the dictionary for the fullreleaselist
             for items in find_hybrid_releases:
-                if items['ReleaseID'] != rg['id']: #don't include hybrid information, since that's what we're replacing
+                if items['ReleaseID'] != rg[
+                    'id']:  # don't include hybrid information, since that's what we're replacing
                     hybrid_release_id = items['ReleaseID']
                     newValueDict = {"ArtistID": items['ArtistID'],
-                        "ArtistName": items['ArtistName'],
-                        "AlbumTitle": items['AlbumTitle'],
-                        "AlbumID": items['AlbumID'],
-                        "AlbumASIN": items['AlbumASIN'],
-                        "ReleaseDate": items['ReleaseDate'],
-                        "Type": items['Type'],
-                        "ReleaseCountry": items['ReleaseCountry'],
-                        "ReleaseFormat": items['ReleaseFormat']
-                    }
-                    find_hybrid_tracks = myDB.action("SELECT * from alltracks WHERE ReleaseID=?", [hybrid_release_id])
+                                    "ArtistName": items['ArtistName'],
+                                    "AlbumTitle": items['AlbumTitle'],
+                                    "AlbumID": items['AlbumID'],
+                                    "AlbumASIN": items['AlbumASIN'],
+                                    "ReleaseDate": items['ReleaseDate'],
+                                    "Type": items['Type'],
+                                    "ReleaseCountry": items['ReleaseCountry'],
+                                    "ReleaseFormat": items['ReleaseFormat']
+                                    }
+                    find_hybrid_tracks = myDB.action("SELECT * from alltracks WHERE ReleaseID=?",
+                                                     [hybrid_release_id])
                     totalTracks = 1
                     hybrid_track_array = []
                     for hybrid_tracks in find_hybrid_tracks:
@@ -315,9 +336,9 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                             'number': hybrid_tracks['TrackNumber'],
                             'title': hybrid_tracks['TrackTitle'],
                             'id': hybrid_tracks['TrackID'],
-                            #'url':           hybrid_tracks['TrackURL'],
+                            # 'url':           hybrid_tracks['TrackURL'],
                             'duration': hybrid_tracks['TrackDuration']
-                            })
+                        })
                         totalTracks += 1
                     newValueDict['ReleaseID'] = hybrid_release_id
                     newValueDict['Tracks'] = hybrid_track_array
@@ -327,10 +348,12 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
             # This may end up being called with an empty fullreleaselist
             try:
                 hybridrelease = getHybridRelease(fullreleaselist)
-                logger.info('[%s] Packaging %s releases into hybrid title' % (artist['artist_name'], rg['title']))
+                logger.info('[%s] Packaging %s releases into hybrid title' % (
+                artist['artist_name'], rg['title']))
             except Exception as e:
                 errors = True
-                logger.warn('[%s] Unable to get hybrid release information for %s: %s' % (artist['artist_name'], rg['title'], e))
+                logger.warn('[%s] Unable to get hybrid release information for %s: %s' % (
+                artist['artist_name'], rg['title'], e))
                 continue
 
             # Use the ReleaseGroupID as the ReleaseID for the hybrid release to differentiate it
@@ -345,13 +368,14 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                             "AlbumASIN": hybridrelease['AlbumASIN'],
                             "ReleaseDate": hybridrelease['ReleaseDate'],
                             "Type": rg['type']
-                        }
+                            }
 
             myDB.upsert("allalbums", newValueDict, controlValueDict)
 
             for track in hybridrelease['Tracks']:
 
-                cleanname = helpers.cleanName(artist['artist_name'] + ' ' + rg['title'] + ' ' + track['title'])
+                cleanname = helpers.cleanName(
+                    artist['artist_name'] + ' ' + rg['title'] + ' ' + track['title'])
 
                 controlValueDict = {"TrackID": track['id'],
                                     "ReleaseID": rg['id']}
@@ -365,25 +389,29 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                                 "TrackDuration": track['duration'],
                                 "TrackNumber": track['number'],
                                 "CleanName": cleanname
-                            }
+                                }
 
-                match = myDB.action('SELECT Location, BitRate, Format from have WHERE CleanName=?', [cleanname]).fetchone()
+                match = myDB.action('SELECT Location, BitRate, Format from have WHERE CleanName=?',
+                                    [cleanname]).fetchone()
 
                 if not match:
-                    match = myDB.action('SELECT Location, BitRate, Format from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [artist['artist_name'], rg['title'], track['title']]).fetchone()
-                #if not match:
-                    #match = myDB.action('SELECT Location, BitRate, Format from have WHERE TrackID=?', [track['id']]).fetchone()
+                    match = myDB.action(
+                        'SELECT Location, BitRate, Format from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?',
+                        [artist['artist_name'], rg['title'], track['title']]).fetchone()
+                    # if not match:
+                    # match = myDB.action('SELECT Location, BitRate, Format from have WHERE TrackID=?', [track['id']]).fetchone()
                 if match:
                     newValueDict['Location'] = match['Location']
                     newValueDict['BitRate'] = match['BitRate']
                     newValueDict['Format'] = match['Format']
-                    #myDB.action('UPDATE have SET Matched="True" WHERE Location=?', [match['Location']])
-                    myDB.action('UPDATE have SET Matched=? WHERE Location=?', (rg['id'], match['Location']))
+                    # myDB.action('UPDATE have SET Matched="True" WHERE Location=?', [match['Location']])
+                    myDB.action('UPDATE have SET Matched=? WHERE Location=?',
+                                (rg['id'], match['Location']))
 
                 myDB.upsert("alltracks", newValueDict, controlValueDict)
 
             # Delete matched tracks from the have table
-            #myDB.action('DELETE from have WHERE Matched="True"')
+            # myDB.action('DELETE from have WHERE Matched="True"')
 
             # If there's no release in the main albums tables, add the default (hybrid)
             # If there is a release, check the ReleaseID against the AlbumID to see if they differ (user updated)
@@ -408,7 +436,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                             "Type": album['Type'],
                             "ReleaseCountry": album['ReleaseCountry'],
                             "ReleaseFormat": album['ReleaseFormat']
-                        }
+                            }
 
             if rg_exists:
                 newValueDict['DateAdded'] = rg_exists['DateAdded']
@@ -425,14 +453,17 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                     newValueDict['Status'] = "Wanted"
                 # Sometimes "new" albums are added to musicbrainz after their release date, so let's try to catch these
                 # The first test just makes sure we have year-month-day
-                elif helpers.get_age(album['ReleaseDate']) and helpers.get_age(today) - helpers.get_age(album['ReleaseDate']) < 21 and headphones.CONFIG.AUTOWANT_UPCOMING:
+                elif helpers.get_age(album['ReleaseDate']) and helpers.get_age(
+                        today) - helpers.get_age(
+                        album['ReleaseDate']) < 21 and headphones.CONFIG.AUTOWANT_UPCOMING:
                     newValueDict['Status'] = "Wanted"
                 else:
                     newValueDict['Status'] = "Skipped"
 
             myDB.upsert("albums", newValueDict, controlValueDict)
 
-            tracks = myDB.action('SELECT * from alltracks WHERE ReleaseID=?', [releaseid]).fetchall()
+            tracks = myDB.action('SELECT * from alltracks WHERE ReleaseID=?',
+                                 [releaseid]).fetchall()
 
             # This is used to see how many tracks you have from an album - to
             # mark it as downloaded. Default is 80%, can be set in config as
@@ -441,7 +472,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
 
             if total_track_count == 0:
                 logger.warning("Total track count is zero for Release ID " +
-                    "'%s', skipping.", releaseid)
+                               "'%s', skipping.", releaseid)
                 continue
 
             for track in tracks:
@@ -449,35 +480,43 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                                     "AlbumID": rg['id']}
 
                 newValueDict = {"ArtistID": track['ArtistID'],
-                            "ArtistName": track['ArtistName'],
-                            "AlbumTitle": track['AlbumTitle'],
-                            "AlbumASIN": track['AlbumASIN'],
-                            "ReleaseID": track['ReleaseID'],
-                            "TrackTitle": track['TrackTitle'],
-                            "TrackDuration": track['TrackDuration'],
-                            "TrackNumber": track['TrackNumber'],
-                            "CleanName": track['CleanName'],
-                            "Location": track['Location'],
-                            "Format": track['Format'],
-                            "BitRate": track['BitRate']
-                            }
+                                "ArtistName": track['ArtistName'],
+                                "AlbumTitle": track['AlbumTitle'],
+                                "AlbumASIN": track['AlbumASIN'],
+                                "ReleaseID": track['ReleaseID'],
+                                "TrackTitle": track['TrackTitle'],
+                                "TrackDuration": track['TrackDuration'],
+                                "TrackNumber": track['TrackNumber'],
+                                "CleanName": track['CleanName'],
+                                "Location": track['Location'],
+                                "Format": track['Format'],
+                                "BitRate": track['BitRate']
+                                }
 
                 myDB.upsert("tracks", newValueDict, controlValueDict)
 
             # Mark albums as downloaded if they have at least 80% (by default, configurable) of the album
-            have_track_count = len(myDB.select('SELECT * from tracks WHERE AlbumID=? AND Location IS NOT NULL', [rg['id']]))
+            have_track_count = len(
+                myDB.select('SELECT * from tracks WHERE AlbumID=? AND Location IS NOT NULL',
+                            [rg['id']]))
             marked_as_downloaded = False
 
             if rg_exists:
-                if rg_exists['Status'] == 'Skipped' and ((have_track_count / float(total_track_count)) >= (headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0)):
-                    myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', rg['id']])
+                if rg_exists['Status'] == 'Skipped' and (
+                    (have_track_count / float(total_track_count)) >= (
+                    headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0)):
+                    myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?',
+                                ['Downloaded', rg['id']])
                     marked_as_downloaded = True
             else:
-                if (have_track_count / float(total_track_count)) >= (headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0):
-                    myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', rg['id']])
+                if (have_track_count / float(total_track_count)) >= (
+                    headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0):
+                    myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?',
+                                ['Downloaded', rg['id']])
                     marked_as_downloaded = True
 
-            logger.info(u"[%s] Seeing if we need album art for %s" % (artist['artist_name'], rg['title']))
+            logger.info(
+                u"[%s] Seeing if we need album art for %s" % (artist['artist_name'], rg['title']))
             cache.getThumb(AlbumID=rg['id'])
 
             # Start a search for the album if it's new, hasn't been marked as
@@ -487,7 +526,8 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                 album_searches.append(rg['id'])
         else:
             if skip_log == 0:
-                logger.info(u"[%s] No new releases, so no changes made to %s" % (artist['artist_name'], rg['title']))
+                logger.info(u"[%s] No new releases, so no changes made to %s" % (
+                artist['artist_name'], rg['title']))
 
     time.sleep(3)
     finalize_update(artistid, artist['artist_name'], errors)
@@ -499,7 +539,9 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
     metacritic.update(artistid, artist['artist_name'], artist['releasegroups'])
 
     if errors:
-        logger.info("[%s] Finished updating artist: %s but with errors, so not marking it as updated in the database" % (artist['artist_name'], artist['artist_name']))
+        logger.info(
+            "[%s] Finished updating artist: %s but with errors, so not marking it as updated in the database" % (
+            artist['artist_name'], artist['artist_name']))
     else:
         myDB.action('DELETE FROM newartists WHERE ArtistName = ?', [artist['artist_name']])
         logger.info(u"Updating complete for: %s" % artist['artist_name'])
@@ -518,10 +560,18 @@ def finalize_update(artistid, artistname, errors=False):
 
     myDB = db.DBConnection()
 
-    latestalbum = myDB.action('SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [artistid]).fetchone()
-    totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND AlbumID IN (SELECT AlbumID FROM albums WHERE Status != "Ignored")', [artistid]))
-    #havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['artist_name']]))
-    havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"', [artistname]))
+    latestalbum = myDB.action(
+        'SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC',
+        [artistid]).fetchone()
+    totaltracks = len(myDB.select(
+        'SELECT TrackTitle from tracks WHERE ArtistID=? AND AlbumID IN (SELECT AlbumID FROM albums WHERE Status != "Ignored")',
+        [artistid]))
+    # havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['artist_name']]))
+    havetracks = len(
+        myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL',
+                    [artistid])) + len(
+        myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"',
+                    [artistname]))
 
     controlValueDict = {"ArtistID": artistid}
 
@@ -544,7 +594,6 @@ def finalize_update(artistid, artistname, errors=False):
 
 
 def addReleaseById(rid, rgid=None):
-
     myDB = db.DBConnection()
 
     # Create minimum info upfront if added from searchresults
@@ -563,14 +612,18 @@ def addReleaseById(rid, rgid=None):
     rgid = None
     artistid = None
     release_dict = None
-    results = myDB.select("SELECT albums.ArtistID, releases.ReleaseGroupID from releases, albums WHERE releases.ReleaseID=? and releases.ReleaseGroupID=albums.AlbumID LIMIT 1", [rid])
+    results = myDB.select(
+        "SELECT albums.ArtistID, releases.ReleaseGroupID from releases, albums WHERE releases.ReleaseID=? and releases.ReleaseGroupID=albums.AlbumID LIMIT 1",
+        [rid])
     for result in results:
         rgid = result['ReleaseGroupID']
         artistid = result['ArtistID']
-        logger.debug("Found a cached releaseid : releasegroupid relationship: " + rid + " : " + rgid)
+        logger.debug(
+            "Found a cached releaseid : releasegroupid relationship: " + rid + " : " + rgid)
     if not rgid:
-        #didn't find it in the cache, get the information from MB
-        logger.debug("Didn't find releaseID " + rid + " in the cache. Looking up its ReleaseGroupID")
+        # didn't find it in the cache, get the information from MB
+        logger.debug(
+            "Didn't find releaseID " + rid + " in the cache. Looking up its ReleaseGroupID")
         try:
             release_dict = mb.getRelease(rid)
         except Exception as e:
@@ -587,10 +640,10 @@ def addReleaseById(rid, rgid=None):
         rgid = release_dict['rgid']
         artistid = release_dict['artist_id']
 
-    #we don't want to make more calls to MB here unless we have to, could be happening quite a lot
+    # we don't want to make more calls to MB here unless we have to, could be happening quite a lot
     rg_exists = myDB.select("SELECT * from albums WHERE AlbumID=?", [rgid])
 
-    #make sure the artist exists since I don't know what happens later if it doesn't
+    # make sure the artist exists since I don't know what happens later if it doesn't
     artist_exists = myDB.select("SELECT * from artists WHERE ArtistID=?", [artistid])
 
     if not artist_exists and release_dict:
@@ -599,7 +652,8 @@ def addReleaseById(rid, rgid=None):
         else:
             sortname = release_dict['artist_name']
 
-        logger.info(u"Now manually adding: " + release_dict['artist_name'] + " - with status Paused")
+        logger.info(
+            u"Now manually adding: " + release_dict['artist_name'] + " - with status Paused")
         controlValueDict = {"ArtistID": release_dict['artist_id']}
         newValueDict = {"ArtistName": release_dict['artist_name'],
                         "ArtistSortName": sortname,
@@ -624,13 +678,14 @@ def addReleaseById(rid, rgid=None):
         myDB.upsert("artists", newValueDict, controlValueDict)
 
     elif not artist_exists and not release_dict:
-        logger.error("Artist does not exist in the database and did not get a valid response from MB. Skipping release.")
+        logger.error(
+            "Artist does not exist in the database and did not get a valid response from MB. Skipping release.")
         if status == 'Loading':
             myDB.action("DELETE FROM albums WHERE AlbumID=?", [rgid])
         return
 
-    if not rg_exists and release_dict or status == 'Loading' and release_dict:  #it should never be the case that we have an rg and not the artist
-                                                                                #but if it is this will fail
+    if not rg_exists and release_dict or status == 'Loading' and release_dict:  # it should never be the case that we have an rg and not the artist
+        # but if it is this will fail
         logger.info(u"Now adding-by-id album (" + release_dict['title'] + ") from id: " + rgid)
         controlValueDict = {"AlbumID": rgid}
         if status != 'Loading':
@@ -639,7 +694,8 @@ def addReleaseById(rid, rgid=None):
         newValueDict = {"ArtistID": release_dict['artist_id'],
                         "ReleaseID": rgid,
                         "ArtistName": release_dict['artist_name'],
-                        "AlbumTitle": release_dict['title'] if 'title' in release_dict else release_dict['rg_title'],
+                        "AlbumTitle": release_dict['title'] if 'title' in release_dict else
+                        release_dict['rg_title'],
                         "AlbumASIN": release_dict['asin'],
                         "ReleaseDate": release_dict['date'],
                         "DateAdded": helpers.today(),
@@ -650,41 +706,48 @@ def addReleaseById(rid, rgid=None):
 
         myDB.upsert("albums", newValueDict, controlValueDict)
 
-        #keep a local cache of these so that external programs that are adding releasesByID don't hammer MB
+        # keep a local cache of these so that external programs that are adding releasesByID don't hammer MB
         myDB.action('INSERT INTO releases VALUES( ?, ?)', [rid, release_dict['rgid']])
 
         for track in release_dict['tracks']:
-            cleanname = helpers.cleanName(release_dict['artist_name'] + ' ' + release_dict['rg_title'] + ' ' + track['title'])
+            cleanname = helpers.cleanName(
+                release_dict['artist_name'] + ' ' + release_dict['rg_title'] + ' ' + track['title'])
 
             controlValueDict = {"TrackID": track['id'],
                                 "AlbumID": rgid}
             newValueDict = {"ArtistID": release_dict['artist_id'],
-                        "ArtistName": release_dict['artist_name'],
-                        "AlbumTitle": release_dict['rg_title'],
-                        "AlbumASIN": release_dict['asin'],
-                        "TrackTitle": track['title'],
-                        "TrackDuration": track['duration'],
-                        "TrackNumber": track['number'],
-                        "CleanName": cleanname
-                        }
+                            "ArtistName": release_dict['artist_name'],
+                            "AlbumTitle": release_dict['rg_title'],
+                            "AlbumASIN": release_dict['asin'],
+                            "TrackTitle": track['title'],
+                            "TrackDuration": track['duration'],
+                            "TrackNumber": track['number'],
+                            "CleanName": cleanname
+                            }
 
-            match = myDB.action('SELECT Location, BitRate, Format, Matched from have WHERE CleanName=?', [cleanname]).fetchone()
+            match = myDB.action(
+                'SELECT Location, BitRate, Format, Matched from have WHERE CleanName=?',
+                [cleanname]).fetchone()
 
             if not match:
-                match = myDB.action('SELECT Location, BitRate, Format, Matched from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?', [release_dict['artist_name'], release_dict['rg_title'], track['title']]).fetchone()
+                match = myDB.action(
+                    'SELECT Location, BitRate, Format, Matched from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND TrackTitle LIKE ?',
+                    [release_dict['artist_name'], release_dict['rg_title'],
+                     track['title']]).fetchone()
 
-            #if not match:
-                #match = myDB.action('SELECT Location, BitRate, Format from have WHERE TrackID=?', [track['id']]).fetchone()
+                # if not match:
+                # match = myDB.action('SELECT Location, BitRate, Format from have WHERE TrackID=?', [track['id']]).fetchone()
 
             if match:
                 newValueDict['Location'] = match['Location']
                 newValueDict['BitRate'] = match['BitRate']
                 newValueDict['Format'] = match['Format']
-                #myDB.action('DELETE from have WHERE Location=?', [match['Location']])
+                # myDB.action('DELETE from have WHERE Location=?', [match['Location']])
 
                 # If the album has been scanned before adding the release it will be unmatched, update to matched
                 if match['Matched'] == 'Failed':
-                    myDB.action('UPDATE have SET Matched=? WHERE Location=?', (release_dict['rgid'], match['Location']))
+                    myDB.action('UPDATE have SET Matched=? WHERE Location=?',
+                                (release_dict['rgid'], match['Location']))
 
             myDB.upsert("tracks", newValueDict, controlValueDict)
 
@@ -703,7 +766,8 @@ def addReleaseById(rid, rgid=None):
             searcher.searchforalbum(rgid, False)
 
     elif not rg_exists and not release_dict:
-        logger.error("ReleaseGroup does not exist in the database and did not get a valid response from MB. Skipping release.")
+        logger.error(
+            "ReleaseGroup does not exist in the database and did not get a valid response from MB. Skipping release.")
         if status == 'Loading':
             myDB.action("DELETE FROM albums WHERE AlbumID=?", [rgid])
         return
@@ -811,11 +875,13 @@ def getHybridRelease(fullreleaselist):
 
     sortable_release_list.sort(key=lambda x: getSortableReleaseDate(x['releasedate']))
 
-    average_tracks = sum(x['trackscount'] for x in sortable_release_list) / float(len(sortable_release_list))
+    average_tracks = sum(x['trackscount'] for x in sortable_release_list) / float(
+        len(sortable_release_list))
     for item in sortable_release_list:
         item['trackscount_delta'] = abs(average_tracks - item['trackscount'])
 
-    a = helpers.multikeysort(sortable_release_list, ['-hasasin', 'country', 'format', 'trackscount_delta'])
+    a = helpers.multikeysort(sortable_release_list,
+                             ['-hasasin', 'country', 'format', 'trackscount_delta'])
 
     release_dict = {'ReleaseDate': sortable_release_list[0]['releasedate'],
                     'Tracks': a[0]['tracks'],
