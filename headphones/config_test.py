@@ -1,4 +1,5 @@
 #import unittest
+import sys
 import mock
 from unittest import TestCase
 from mock import MagicMock
@@ -7,14 +8,14 @@ import headphones.config
 from headphones.config import path
 
 def is26():
-    if sys.version_info[0]==2 and sys.version_info[1]==6:
+    if sys.version_info[0] == 2 and sys.version_info[1] == 6:
         return True
     return False
 
 class ConfigPathTest(TestCase):
     def test_path(self):
         p = path('/tmp')
-        
+
         #fuckin python 2.6:
         if not is26():
             self.assertIsInstance(p, path)
