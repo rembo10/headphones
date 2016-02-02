@@ -13,6 +13,11 @@ cache:
 python:
   - "2.6"
   - "2.7"
+matrix:
+  include:
+    - python: "2.7"
+      env: SENDCOVERAGE=1
+
 # pylint 1.4 does not run under python 2.6
 install:
   - pip install pyOpenSSL
@@ -25,8 +30,8 @@ install:
 script:
   - pep8 headphones
   - pyflakes headphones
-  - nosetests headphones
+  - nosetests
 
 after_success:
   # coverage stuff:
-  coveralls
+  - if [ $SENDCOVERAGE ]; then coveralls; fi
