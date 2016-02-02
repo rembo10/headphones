@@ -18,3 +18,6 @@ script:
   - pep8 headphones
   - pyflakes headphones
   - nosetests headphones
+
+after_success:
+  coveralls
