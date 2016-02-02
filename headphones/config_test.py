@@ -1,10 +1,9 @@
 #import unittest
 import mock
 from unittest import TestCase
-from mock import Mock, MagicMock
+from mock import MagicMock
 
-import configobj
-
+import headphones.config
 from headphones.config import path
 
 class ConfigPathTest(TestCase):
@@ -35,8 +34,6 @@ class ConfigPathTest(TestCase):
         p1 = path(s)
         self.assertIn('headphones.config.path', p1.__repr__())
 
-
-import headphones.config
 
 # patch required, since Config works ower a
 @mock.patch('headphones.config.ConfigObj', name='ConfigObjMock')
