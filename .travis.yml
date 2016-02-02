@@ -12,7 +12,6 @@ cache:
 # http://about.travis-ci.org/docs/user/ci-environment/#Python-VM-images
 python:
   - "2.6"
-  - "2.7"
 matrix:
   include:
     - python: "2.7"
