@@ -1,6 +1,6 @@
-import unittest
+#import unittest
+#import mock
 from unittest import TestCase
-import mock
 
 import headphones.albumart
 
