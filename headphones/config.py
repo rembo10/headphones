@@ -26,7 +26,7 @@ class path(str):
         hstr = str.__new__(cls, *args, **kw)
         return hstr
 
-    def __repr__(self) :
+    def __repr__(self):
         return 'headphones.config.path(%s)' % self
 
 _CONFIG_DEFINITIONS = {
