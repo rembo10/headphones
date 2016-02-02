@@ -1,5 +1,5 @@
 #import unittest
-#import mock
+import mock
 from unittest import TestCase
 from mock import Mock, MagicMock
 
@@ -33,7 +33,7 @@ class ConfigPathTest(TestCase):
     def test_path_repr(self):
         s = '/tmp'
         p1 = path(s)
-        self.assertIn('headphones.config.path', p1.__repr__() )
+        self.assertIn('headphones.config.path', p1.__repr__())
 
 
 import headphones.config
@@ -45,7 +45,7 @@ class ConfigTest(TestCase):
     def putConfigToFabric(self, config_obj_fabric_mock):
         """ Helper for setting up the config_obj_fabric"""
 
-        config_obj_mock = MagicMock( )
+        config_obj_mock = MagicMock()
         config_obj_fabric_mock.return_value = config_obj_mock
         return config_obj_mock
 
@@ -71,6 +71,5 @@ class ConfigTest(TestCase):
         self.assertEqual(conf_mock.filename, path)
 
         general_opts_set = conf_mock['General'].__setitem__.call_args_list
-        general_opts_set = map( lambda x : x[0][0], general_opts_set )
-        self.assertIn('download_dir', general_opts_set , 'There is no download_dir in ConfigObj (submodule of Config)')
-
+        general_opts_set = map(lambda x: x[0][0], general_opts_set)
+        self.assertIn('download_dir', general_opts_set, 'There is no download_dir in ConfigObj (submodule of Config)')
