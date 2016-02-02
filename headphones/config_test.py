@@ -6,4 +6,4 @@ from headphones.config import path
 
 class ConfigPathTest(TestCase):
     def test_path(self):
-        self.assertFalse(True)
+        self.assertFalse(False)
