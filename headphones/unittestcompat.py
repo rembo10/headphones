@@ -24,5 +24,9 @@ class TestCase(TC):
         return super(TestCase, self).assertIsInstance(*args, **kw)
 
     @_d
-    def assertIsIn(self, *args, **kw):
-        return super(TestCase, self).assertIsIn(*args, **kw)
+    def assertIn(self, *args, **kw):
+        return super(TestCase, self).assertIn(*args, **kw)
+
+    @_d
+    def assertIsNotNone(self, *args, **kw):
+        return super(TestCase, self).assertIsNotNone(*args, **kw)
