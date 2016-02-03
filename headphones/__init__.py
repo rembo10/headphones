@@ -138,13 +138,13 @@ def initialize(config_file):
         logger.initLogger(console=not QUIET, log_dir=CONFIG.LOG_DIR,
                           verbose=VERBOSE)
 
-        if CONFIG.SOFT_CHROOT:
-            # soft chroot defined, lets try to initialize:
-            try:
-                SOFT_CHROOT = SoftChroot(str(CONFIG.SOFT_CHROOT))
-            except exceptions.SoftChrootError as e:
-                logger.error("SoftChroot error: %s", e)
-                raise e
+        try:
+            SOFT_CHROOT = SoftChroot(str(CONFIG.SOFT_CHROOT))
+            if SOFT_CHROOT.isEnabled():
+                logger.info("Soft-chroot enabled for dir: %s", str(CONFIG.SOFT_CHROOT))
+        except exceptions.SoftChrootError as e:
+            logger.error("SoftChroot error: %s", e)
+            raise e
 
         if not CONFIG.CACHE_DIR:
             # Put the cache dir in the data dir for now
