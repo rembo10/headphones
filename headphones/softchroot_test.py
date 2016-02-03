@@ -60,7 +60,6 @@ class SoftChrootTest(TestCase):
         self.assertRegexpMatches(str(exc.exception), r'No such directory')
         self.assertRegexpMatches(str(exc.exception), path)
 
-
     @TestArgs(
         (None, None),
         ('', ''),
