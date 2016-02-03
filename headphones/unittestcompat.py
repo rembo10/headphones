@@ -38,7 +38,7 @@ class TestCase(TC):
         if not _dummy:
             return super(TestCase, self).assertIsNotNone(val, msg)
         tst = val is not None
-        return super(TestCase, self).assertTrue(val, msg)
+        return super(TestCase, self).assertTrue(tst, msg)
 
     class _TestCaseRaiseStub:
         def __init__(self, exc, tc):
