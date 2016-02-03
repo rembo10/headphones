@@ -34,6 +34,10 @@ class TestCase(TC):
     def assertIn(self, *args, **kw):
         return super(TestCase, self).assertIn(*args, **kw)
 
+    @_d
+    def assertRegexpMatches(self, *args, **kw):
+        return super(TestCase, self).assertRegexpMatches(*args, **kw)
+        
     def assertIsNone(self, val, msg=None):
         if not _dummy:
             return super(TestCase, self).assertIsNone(val, msg)
