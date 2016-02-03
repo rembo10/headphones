@@ -2,6 +2,10 @@ import os
 from headphones.exceptions import SoftChrootError
 
 class SoftChroot(object):
+    """ SoftChroot provides SOFT chrooting for UI
+
+    IMPORTANT: call methods of this class just in modules, which generates data for client UI. Try to avoid unnecessary usage.
+    """
 
     enabled = False
     chroot = None
