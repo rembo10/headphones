@@ -18,8 +18,10 @@ class SoftChrootTest(TestCase):
 
         path = os.path.join('/tmp', 'notexist', 'asdf', '11', '12', 'np', 'itsssss')
 
+        cf = None
         with self.assertRaises(SoftChrootError) as exc:
             cf = SoftChroot(path)
+        self.assertIsNone(cf)
 
         self.assertRegexpMatches(str(exc.exception), r'No such directory')
         self.assertRegexpMatches(str(exc.exception), path)
@@ -33,8 +35,10 @@ class SoftChrootTest(TestCase):
         os_mock.path.sep = os.path.sep
         os_mock.path.isdir.side_effect = lambda x: x != path
 
+        cf = None
         with self.assertRaises(SoftChrootError) as exc:
-            cf = SoftChroot(str(path))
+            cf = SoftChroot(path)
+        self.assertIsNone(cf)
 
         self.assertTrue(os_mock.path.isdir.called)
 
