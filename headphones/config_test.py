@@ -1,6 +1,6 @@
 #import unittest
 import mock
-from headphones.unittestcompat import TestCase
+from headphones.unittestcompat import TestCase, TestArgs
 from mock import MagicMock
 
 import headphones.config
@@ -34,6 +34,17 @@ class ConfigPathTest(TestCase):
         p1 = path(s)
         self.assertIn('headphones.config.path', p1.__repr__())
 
+    @TestArgs(
+        (None),
+        (''),
+        ('     '),
+    )
+    def test_empty_path(self, s):
+        """ headphones.path does nom modify empty strings """
+        p1 = path(s)
+        a = str(p1)
+        e = str(s)
+        self.assertEqual(a, e)
 
 # patch required, since Config works ower a
 @mock.patch('headphones.config.ConfigObj', name='ConfigObjMock')
@@ -47,14 +58,14 @@ class ConfigTest(TestCase):
         return config_obj_mock
 
     def test_create(self, config_obj_fabric_mock):
-        """Test creating headphones.Config"""
+        """ creating headphones.Config """
 
         cf = headphones.config.Config('/tmp/notexist')
         self.assertIsInstance(cf, headphones.config.Config)
         self.assertTrue(True)
 
     def test_write(self, config_obj_fabric_mock):
-        """ Test writing config """
+        """ writing config """
         path = '/tmp/notexist'
 
         conf_mock = self.putConfigToFabric(config_obj_fabric_mock)
