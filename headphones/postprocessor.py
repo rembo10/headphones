@@ -27,7 +27,7 @@ from beets import autotag
 from beets import config as beetsconfig
 from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 from beetsplug import lyrics as beetslyrics
-from headphones import notifiers, utorrent, transmission
+from headphones import notifiers, utorrent, transmission, deluge
 from headphones import db, albumart, librarysync
 from headphones import logger, helpers, request, mb, music_encoder
 
@@ -46,7 +46,10 @@ def checkFolder():
                 if album['Kind'] == 'nzb':
                     download_dir = headphones.CONFIG.DOWNLOAD_DIR
                 else:
-                    download_dir = headphones.CONFIG.DOWNLOAD_TORRENT_DIR
+                    if headphones.CONFIG.DELUGE_DONE_DIRECTORY:
+                        download_dir = headphones.CONFIG.DELUGE_DONE_DIRECTORY
+                    else:
+                        download_dir = headphones.CONFIG.DOWNLOAD_TORRENT_DIR
 
                 album_path = os.path.join(download_dir, album['FolderName']).encode(
                     headphones.SYS_ENCODING, 'replace')
@@ -532,6 +535,11 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         pushbullet = notifiers.PUSHBULLET()
         pushbullet.notify(pushmessage, statusmessage)
 
+    if headphones.CONFIG.TELEGRAM_ENABLED:
+        logger.info(u"Telegram request")
+        telegram = notifiers.TELEGRAM()
+        telegram.notify(pushmessage, statusmessage)
+        
     if headphones.CONFIG.TWITTER_ENABLED:
         logger.info(u"Sending Twitter notification")
         twitter = notifiers.TwitterNotifier()
