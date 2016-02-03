@@ -61,7 +61,6 @@ class SoftChroot(object):
 
         if os.path.sep == p[0]:
             p = p[1:]
-        
 
         p = self.chroot + p
         return p

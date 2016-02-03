@@ -44,15 +44,17 @@ class TestCase(TC):
         def __init__(self, exc, tc):
             self.exc = exc
             self.tc = tc
+
         def __enter__(self):
             return self
+
         def __exit__(self, tp, value, traceback):
             tst = tp is self.exc
             self.tc.assertTrue(tst)
             self.exception = value
             return True
 
-    def assertRaises(self, exc, msg = None):
+    def assertRaises(self, exc, msg=None):
         if not _dummy:
             return super(TestCase, self).assertRaises(exc, msg)
         return TestCase._TestCaseRaiseStub(exc, self)
