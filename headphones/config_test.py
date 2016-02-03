@@ -1,26 +1,17 @@
 #import unittest
-import sys
 import mock
-from unittest import TestCase
+from headphones.unittestcompat import TestCase
 from mock import MagicMock
 
 import headphones.config
 from headphones.config import path
 
-def is26():
-    if sys.version_info[0] == 2 and sys.version_info[1] == 6:
-        return True
-    return False
-
 class ConfigPathTest(TestCase):
     def test_path(self):
         p = path('/tmp')
 
-        #fuckin python 2.6:
-        if not is26():
-            self.assertIsInstance(p, path)
-            self.assertIsNotNone(p)
-        self.assertTrue(True)
+        self.assertIsInstance(p, path)
+        self.assertIsNotNone(p)
 
     def test_path_call(self):
         s = '/tmp'
@@ -41,10 +32,7 @@ class ConfigPathTest(TestCase):
     def test_path_repr(self):
         s = '/tmp'
         p1 = path(s)
-        #fuckin python 2.6:
-        if not is26():
-            self.assertIn('headphones.config.path', p1.__repr__())
-        self.assertTrue(True)
+        self.assertIn('headphones.config.path', p1.__repr__())
 
 
 # patch required, since Config works ower a
@@ -62,9 +50,7 @@ class ConfigTest(TestCase):
         """Test creating headphones.Config"""
 
         cf = headphones.config.Config('/tmp/notexist')
-        #fuckin python 2.6:
-        if not is26():
-            self.assertIsInstance(cf, headphones.config.Config)
+        self.assertIsInstance(cf, headphones.config.Config)
         self.assertTrue(True)
 
     def test_write(self, config_obj_fabric_mock):
@@ -84,6 +70,4 @@ class ConfigTest(TestCase):
 
         general_opts_set = conf_mock['General'].__setitem__.call_args_list
         general_opts_set = map(lambda x: x[0][0], general_opts_set)
-        #fuckin python 2.6:
-        if not is26():
-            self.assertIn('download_dir', general_opts_set, 'There is no download_dir in ConfigObj (submodule of Config)')
+        self.assertIn('download_dir', general_opts_set, 'There is no download_dir in ConfigObj (submodule of Config)')

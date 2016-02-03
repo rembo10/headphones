@@ -29,7 +29,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from headphones import versioncheck, logger
 import headphones.config
-
+from headphones.softchroot import SoftChroot
+import headphones.exceptions
 
 # (append new extras to the end)
 POSSIBLE_EXTRAS = [
@@ -74,6 +75,7 @@ started = False
 DATA_DIR = None
 
 CONFIG = None
+SOFT_CHROOT = None
 
 DB_FILE = None
 
@@ -92,11 +94,11 @@ MIRRORLIST = ["musicbrainz.org", "headphones", "custom"]
 
 UMASK = None
 
-
 def initialize(config_file):
     with INIT_LOCK:
 
         global CONFIG
+        global SOFT_CHROOT
         global _INITIALIZED
         global CURRENT_VERSION
         global LATEST_VERSION
@@ -135,6 +137,14 @@ def initialize(config_file):
         # Start the logger, disable console if needed
         logger.initLogger(console=not QUIET, log_dir=CONFIG.LOG_DIR,
                           verbose=VERBOSE)
+
+        if CONFIG.SOFT_CHROOT:
+            # soft chroot defined, lets try to initialize:
+            try:
+                SOFT_CHROOT = SoftChroot(str(CONFIG.SOFT_CHROOT))
+            except exceptions.SoftChrootError as e:
+                logger.error("SoftChroot error: %s", e)
+                raise e
 
         if not CONFIG.CACHE_DIR:
             # Put the cache dir in the data dir for now

@@ -236,6 +236,7 @@ _CONFIG_DEFINITIONS = {
     'SAB_USERNAME': (str, 'SABnzbd', ''),
     'SAMPLINGFREQUENCY': (int, 'General', 44100),
     'SEARCH_INTERVAL': (int, 'General', 1440),
+    'SOFT_CHROOT': (path, 'General', ''),
     'SONGKICK_APIKEY': (str, 'Songkick', 'nd1We7dFW2RqxPw8'),
     'SONGKICK_ENABLED': (int, 'Songkick', 1),
     'SONGKICK_FILTER_ENABLED': (int, 'Songkick', 0),
@@ -308,7 +309,7 @@ class Config(object):
         definition = _CONFIG_DEFINITIONS[key]
         if len(definition) == 3:
             definition_type, section, default = definition
-        else:
+        elif len(definition) == 4:
             definition_type, section, _, default = definition
         return key, definition_type, section, ini_key, default
 
