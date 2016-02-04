@@ -105,7 +105,7 @@ load_settings() {
             PORT_OPTS=" --port=${HP_PORT} "
         }
 
-        DAEMON_OPTS=" Headphones.py --quiet --daemon --nolaunch --pidfile=${PID_FILE} --datadir=${DATA_DIR} ${PORT_OPTS}${EXTRA_DAEMON_OPTS}"
+        DAEMON_OPTS=" Headphones.py --quiet --daemon --nolaunch --pidfile=${PID_FILE} --datadir=${DATA_DIR} ${PORT_OPTS} ${EXTRA_DAEMON_OPTS}"
 
         SETTINGS_LOADED=TRUE
     fi
@@ -164,7 +164,7 @@ start_headphones () {
     handle_updates
     if ! is_running; then
         log_daemon_msg "Starting $DESC"
-        start-stop-daemon -o -d "$APP_PATH" -c "$RUN_AS" --start "$EXTRA_SSD"_OPTS --pidfile "$PID_FILE" --exec "$DAEMON" -- "$DAEMON_OPTS"
+        start-stop-daemon -o -d "$APP_PATH" -c "$RUN_AS" --start "$EXTRA_SSD_OPTS" --pidfile "$PID_FILE" --exec "$DAEMON" -- "$DAEMON_OPTS"
         check_retval
     else
         log_success_msg "$DESC: already running (pid $PID)"
