@@ -865,21 +865,21 @@ class TELEGRAM(object):
             return
 
         import requests
-        
+
         TELEGRAM_API = "https://api.telegram.org/bot%s/%s"
-        
+
         # Get configuration data
         token = headphones.CONFIG.TELEGRAM_TOKEN
         userid = headphones.CONFIG.TELEGRAM_USERID
-        
+
         # Construct message
-        payload = {'chat_id': userid, 'text': status + ': ' + message }
+        payload = {'chat_id': userid, 'text': status + ': ' + message}
 
         # Send message to user using Telegram's Bot API
         try:
             response = requests.post(TELEGRAM_API % (token, "sendMessage"), data=payload)
         except Exception, e:
-            logger.info(u'Telegram notify failed: ' + str(e) )
+            logger.info(u'Telegram notify failed: ' + str(e))
 
         # Error logging
         sent_successfuly = True
