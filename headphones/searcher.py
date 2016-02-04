@@ -895,36 +895,33 @@ def send_to_downloader(data, bestqual, album):
             try:
                 # Add torrent
                 if bestqual[3] == 'rutracker.org':
-                    torrentid = deluge.add_torrent('', data)
+                    torrentid = deluge.addTorrent('', data)
                 else:
-                    torrentid = deluge.add_torrent(bestqual[2])
+                    torrentid = deluge.addTorrent(bestqual[2])
 
                 if not torrentid:
                     logger.error("Error sending torrent to Deluge. Are you sure it's running? Maybe the torrent already exists?")
                     return
 
-                # This isn't really necessary for an "Add Paused" mode,
-                # but it's a bit different than the built-in "Add Paused"
-                # because it pauses the torrent a moment after it has already been added.
-                # May be useful in the future
+                # This pauses the torrent right after it is added
                 if headphones.CONFIG.DELUGE_PAUSED:
-                    deluge.set_torrent_pause({'hash': torrentid})
+                    deluge.setTorrentPause({'hash': torrentid})
 
                 # Set Label
                 if headphones.CONFIG.DELUGE_LABEL:
-                    deluge.set_torrent_label({'hash': torrentid})
+                    deluge.setTorrentLabel({'hash': torrentid})
 
                 # Set Seed Ratio
                 seed_ratio = get_seed_ratio(bestqual[3])
                 if seed_ratio is not None:
-                    deluge.set_torrent_ratio({'hash': torrentid, 'ratio': seed_ratio})
+                    deluge.setSeedRatio({'hash': torrentid, 'ratio': seed_ratio})
 
                 # Set move-to directory
                 if headphones.CONFIG.DELUGE_DONE_DIRECTORY:
-                    deluge.set_torrent_path({'hash': torrentid})
+                    deluge.setTorrentPath({'hash': torrentid})
                 
                 # I only just realized this function is useless...
-                folder_name = deluge.get_torrent_folder({'hash': torrentid})
+                folder_name = deluge.getTorrentFolder({'hash': torrentid})
                 if folder_name:
                     logger.info('Torrent folder name: %s' % folder_name)
                 else:
