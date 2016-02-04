@@ -919,7 +919,7 @@ def send_to_downloader(data, bestqual, album):
                 # Set move-to directory
                 if headphones.CONFIG.DELUGE_DONE_DIRECTORY:
                     deluge.setTorrentPath({'hash': torrentid})
-                
+
                 # I only just realized this function is useless...
                 folder_name = deluge.getTorrentFolder({'hash': torrentid})
                 if folder_name:
@@ -927,12 +927,12 @@ def send_to_downloader(data, bestqual, album):
                 else:
                     logger.error('Torrent folder name could not be determined')
                     return
-                
+
             except Exception as e:
                 #exc_type, exc_obj, exc_tb = sys.exc_info()
                 #fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
                 #print(exc_type, fname, exc_tb.tb_lineno)
-                logger.error( str(e) )
+                logger.error(str(e))
 
         else:  # if headphones.CONFIG.TORRENT_DOWNLOADER == 2:
             logger.info("Sending torrent to uTorrent")

@@ -1431,7 +1431,7 @@ class WebInterface(object):
             "synoindex_enabled", "pushover_enabled",
             "pushover_onsnatch", "pushbullet_enabled", "pushbullet_onsnatch", "subsonic_enabled",
             "twitter_enabled", "twitter_onsnatch",
-            "telegram_enabled", "telegram_onsnatch", 
+            "telegram_enabled", "telegram_onsnatch",
             "osx_notify_enabled", "osx_notify_onsnatch", "boxcar_enabled", "boxcar_onsnatch",
             "songkick_enabled", "songkick_filter_enabled",
             "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch",
