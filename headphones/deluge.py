@@ -74,8 +74,15 @@ def add_torrent(link, data=None):
                 with open(link, 'rb') as f:
                     metainfo = str(base64.b64encode(f.read()))
             # Extract torrent name from .torrent
-            name_length = int( re.findall( 'name([0-9]*)\:.*?\:', base64.b64encode(metainfo) )[0] )
-            name = re.findall('name[0-9]*\:(.*?)\:', base64.b64encode(metainfo) )[0][:size]
+            try:
+                name_length = int( re.findall( 'name([0-9]*)\:.*?\:', base64.b64encode(metainfo) )[0] )
+                name = re.findall('name[0-9]*\:(.*?)\:', base64.b64encode(metainfo) )[0][:size]
+            except:
+                # get last part of link/path (name only)
+                name = link.split('\\')[-1].split('/')[-1]
+                # remove '.torrent' suffix
+                if name[-len('.torrent'):] == '.torrent':
+                    name = name[:-len('.torrent')]
             result = {
                 'type'      : 'torrent',
                 'name'      : name,
