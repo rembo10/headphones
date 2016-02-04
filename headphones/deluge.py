@@ -71,16 +71,13 @@ def addTorrent(link, data=None):
                 if name[-len('.torrent'):] == '.torrent':
                     name = name[:-len('.torrent')]
             result = {'type': 'torrent',
-                'name'      : name,
-                'content'   : metainfo,
-                }
+                        'name': name,
+                        'content': metainfo}
             retid = _add_torrent_file(result)
 
         elif link.startswith('magnet:'):
-            result = {
-                'type'  : 'magnet',
-                'url'   : link,
-                }
+            result = {'type': 'magnet',
+                        'url': link}
             retid = _add_torrent_uri(result)
         else:
             logger.error('Deluge: Unknown file type - ' + str(link))
