@@ -34,14 +34,14 @@
 
 from __future__ import unicode_literals
 
-from headphones import logger, request
+from headphones import logger
+#from headphones import request
 
 import time
 import re
 import os
 import json
 import base64
-import urlparse
 import headphones
 import requests
 
@@ -50,33 +50,20 @@ from base64 import b64encode
 delugeweb_auth = {}
 delugeweb_url = ''
 
-def add_torrent(link, data=None):
+def addTorrent(link, data=None):
     try:
         result = {}
         retid = False
         if link.endswith('.torrent') or data: 
-        # .torrent? for torcache links
-        # or '.torrent?' in link 
             if data:
                 metainfo = str(base64.b64encode(data))
-            # before I found out HP handles the downloads
-            #elif link.startswith('http://') or link.startswith('https://'):
-            #    user_agent = 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.1546.111 Safari/582.36'
-            #    headers = { 'User-Agent': user_agent } 
-            #    torrentfile = ''
-            #    r = requests.get(link, headers=headers)
-            #    if r.status_code == 200:
-            #        for chunk in r.iter_content(chunk_size=1024): 
-            #            if chunk: # filter out keep-alive new chunks
-            #                torrent_file = torrentfile + chunk
-            #    metainfo = str(base64.b64encode(torrentfile.decode('utf-8')))
             else:
                 with open(link, 'rb') as f:
                     metainfo = str(base64.b64encode(f.read()))
             # Extract torrent name from .torrent
             try:
-                name_length = int( re.findall( 'name([0-9]*)\:.*?\:', base64.b64encode(metainfo) )[0] )
-                name = re.findall('name[0-9]*\:(.*?)\:', base64.b64encode(metainfo) )[0][:size]
+                name_length = int(re.findall('name([0-9]*)\:.*?\:', base64.b64encode(metainfo))[0])
+                name = re.findall('name[0-9]*\:(.*?)\:', base64.b64encode(metainfo))[0][:name_length]
             except:
                 # get last part of link/path (name only)
                 name = link.split('\\')[-1].split('/')[-1]
@@ -88,14 +75,14 @@ def add_torrent(link, data=None):
                 'name'      : name,
                 'content'   : metainfo,
                 }
-            retid = add_torrent_file(result)
+            retid = _add_torrent_file(result)
 
         elif link.startswith('magnet:'):
             result = {
                 'type'  : 'magnet',
                 'url'   : link,
                 }
-            retid = add_torrent_uri(result)
+            retid = _add_torrent_uri(result)
         else:
             logger.error('Deluge: Unknown file type - ' + str(link))
 
@@ -107,20 +94,20 @@ def add_torrent(link, data=None):
             return False
 
     except Exception, e:
-        logger.error( str(e) )
+        logger.error(str(e))
 
-def get_torrent_folder(result):
+def getTorrentFolder(result):
 
     if not any(delugeweb_auth):
-        get_auth()
+        _get_auth()
 
     post_data = json.dumps({
-          "method": "web.get_torrent_status",
-          "params": [
-            result['hash'],
-            [ "total_done" ]
-          ],
-          "id": 22
+            "method": "web.get_torrent_status",
+            "params": [
+                result['hash'],
+                ["total_done"]
+            ],
+            "id": 22
         })
 
     response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
@@ -134,20 +121,20 @@ def get_torrent_folder(result):
         result['total_done'] = json.loads(response.text)['result']['total_done']
 
     post_data = json.dumps({
-          "method": "web.get_torrent_status",
-          "params": [
-            result['hash'],
-            [
-              "name",
-              "save_path",
-              "total_size",
-              "num_files",
-              "message",
-              "tracker",
-              "comment"
-            ]
-          ],
-          "id": 23
+            "method": "web.get_torrent_status",
+            "params": [
+                result['hash'],
+                [
+                    "name",
+                    "save_path",
+                    "total_size",
+                    "num_files",
+                    "message",
+                    "tracker",
+                    "comment"
+                ]
+            ],
+            "id": 23
         })
 
     response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
@@ -157,19 +144,32 @@ def get_torrent_folder(result):
 
     return json.loads(response.text)['result']['name']
 
-def remove_torrent(torrentid, remove_data=False):
-    '''
-    todo
-    '''
-    return
+def removeTorrent(torrentid, remove_data=False):
 
-def get_auth():
+    if not any(delugeweb_auth):
+        _get_auth()
+
+    result = False
+    post_data = json.dumps({
+        "method": "core.remove_torrent",
+        "params": [
+            torrentid,
+            remove_data
+            ],
+            "id": 25
+        })
+    response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
+    result = json.loads(response.text)['result']
+
+    return result
+
+def _get_auth():
 
     global delugeweb_auth, delugeweb_url 
     delugeweb_auth = {}
 
     delugeweb_host = headphones.CONFIG.DELUGE_HOST
-    delugeweb_username = headphones.CONFIG.DELUGE_USERNAME
+    # delugeweb_username = headphones.CONFIG.DELUGE_USERNAME
     delugeweb_password = headphones.CONFIG.DELUGE_PASSWORD
 
     if not delugeweb_host.startswith('http'):
@@ -184,7 +184,7 @@ def get_auth():
                             "params": [delugeweb_password],
                             "id": 1})
     try:
-        response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth )
+        response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
         #                                  , verify=TORRENT_VERIFY_CERT)
     except Exception:
         return None
@@ -196,7 +196,7 @@ def get_auth():
                             "params": [],
                             "id": 10})
     try:
-        response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth )
+        response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
         #                                  , verify=TORRENT_VERIFY_CERT)
     except Exception:
         return None
@@ -204,11 +204,11 @@ def get_auth():
     connected = json.loads(response.text)['result']
 
     if not connected:
-        post_data = json.dumps({"method": "web.get_delugeweb_hosts",
+        post_data = json.dumps({"method": "web.get_hosts",
                                 "params": [],
                                 "id": 11})
         try:
-            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth )
+            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
             #                                  , verify=TORRENT_VERIFY_CERT)
         except Exception:
             return None
@@ -223,7 +223,7 @@ def get_auth():
                                 "id": 11})
 
         try:
-            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth )
+            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
             #                                  , verify=TORRENT_VERIFY_CERT)
         except Exception:
             return None
@@ -233,7 +233,7 @@ def get_auth():
                                 "id": 10})
 
         try:
-            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth )
+            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
             #                                  , verify=TORRENT_VERIFY_CERT)
         except Exception:
             return None
@@ -246,63 +246,39 @@ def get_auth():
 
     return auth
 
-def add_torrent_uri(result):
+def _add_torrent_uri(result):
 
     if not any(delugeweb_auth):
-        get_auth()
+        _get_auth()
 
     post_data = json.dumps({"method": "core.add_torrent_magnet",
                             "params": [result['url'], {}],
                             "id": 2})
-
-    '''
-    # This method doesn't return hash
-    post_data = json.dumps({
-          "method": "web.add_torrents",
-          "params": [
-            [
-              {
-                "path": result['url'],
-                "options": {
-                  "add_paused": headphones.CONFIG.DELUGE_PAUSED,
-                  #"download_location": headphones.CONFIG.DOWNLOAD_TORRENT_DIR,
-                  #"move_completed": true,
-                  #"move_completed_path": headphones.CONFIG.DELUGE_DONE_DIRECTORY,
-                }
-              }
-            ]
-          ],
-          "id": 2
-        })
-    '''
-
     response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
-
     result['hash'] = json.loads(response.text)['result']
 
     return json.loads(response.text)['result']
 
-def add_torrent_file(result):
+def _add_torrent_file(result):
 
     if not any(delugeweb_auth):
-        get_auth()
+        _get_auth()
 
     post_data = json.dumps({"method": "core.add_torrent_file",
                             "params": [result['name'] + '.torrent', b64encode(result['content']), {}],
                             "id": 2})
 
     response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
-
     result['hash'] = json.loads(response.text)['result']
 
     return json.loads(response.text)['result']
 
-def set_torrent_label(result):
+def setTorrentLabel(result):
 
     label = headphones.CONFIG.DELUGE_LABEL
 
     if not any(delugeweb_auth):
-        get_auth()
+        _get_auth()
 
     if ' ' in label:
         logger.error('Deluge: Invalid label. Label must not contain a space - replacing with underscores')
@@ -336,10 +312,10 @@ def set_torrent_label(result):
 
     return not json.loads(response.text)['error']
 
-def set_torrent_ratio(result):
+def setSeedRatio(result):
 
     if not any(delugeweb_auth):
-        get_auth()
+        _get_auth()
 
     ratio = None
     if result['ratio']:
@@ -359,10 +335,10 @@ def set_torrent_ratio(result):
 
     return True
 
-def set_torrent_path(result):
+def setTorrentPath(result):
 
     if not any(delugeweb_auth):
-        get_auth()
+        _get_auth()
 
     if headphones.CONFIG.DELUGE_DONE_DIRECTORY or headphones.CONFIG.DOWNLOAD_TORRENT_DIR:
         post_data = json.dumps({"method": "core.set_torrent_move_completed",
@@ -387,14 +363,14 @@ def set_torrent_path(result):
 
     return True
 
-def set_torrent_pause(result):
+def addTorrentPause(result):
     
     if not any(delugeweb_auth):
-        get_auth()
+        _get_auth()
 
     if headphones.CONFIG.DELUGE_PAUSED:
         post_data = json.dumps({"method": "core.pause_torrent",
-                                "params": [[ result['hash'] ]],
+                                "params": [[result['hash']]],
                                 "id": 9})
         response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
 
