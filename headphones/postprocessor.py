@@ -314,12 +314,13 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     new_folder = None
     # Check to see if we're preserving the torrent dir
     if (headphones.CONFIG.KEEP_TORRENT_FILES and Kind == "torrent" and 'headphones-modified' not in albumpath) or headphones.CONFIG.KEEP_ORIGINAL_FOLDER or keep_original_folder:
-        new_folder = os.path.join(tempfile.mkdtemp(prefix="headphones_"), "headphones")
-        logger.info("Copying files to " + new_folder.decode(headphones.SYS_ENCODING, 'replace') + " subfolder to preserve downloaded files for seeding")
+        new_folder = tempfile.mkdtemp(prefix="headphones_")
+        subdir = os.path.join(new_folder, "headphones")
+        logger.info("Copying files to " + subdir.decode(headphones.SYS_ENCODING, 'replace') + " subfolder to preserve downloaded files for seeding")
         try:
-            shutil.copytree(albumpath, new_folder)
+            shutil.copytree(albumpath, subdir)
             # Update the album path with the new location
-            albumpath = new_folder
+            albumpath = subdir
         except Exception as e:
             logger.warn("Cannot copy/move files to temp folder: " + new_folder.decode(headphones.SYS_ENCODING, 'replace') + ". Not continuing. Error: " + str(e))
             shutil.rmtree(new_folder)
