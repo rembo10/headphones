@@ -1,4 +1,7 @@
 <%inherit file="base.html"/>
+
+<%namespace file="config-templates.html" import="OptionString"/>
+
 <%!
     import headphones
     import string
@@ -33,19 +36,18 @@
                         <td>
                             <fieldset>
                                 <legend>Basic</legend>
-                                <div class="row">
-                                    <label title="Host to bind web server to">
-                                        HTTP Host
-                                    </label>
-                                    <input type="text" name="http_host" value="${config['http_host']}" size="30">
-                                    <small>Use 0.0.0.0 to allow outside connections</small>
-                                </div>
-                                <div class="row">
-                                    <label title="Port to bind web server to. Note that ports below 1024 may require root.">
-                                        HTTP Port
-                                    </label>
-                                    <input type="text" name="http_port" value="${config['http_port']}" size="10">
-                                </div>
+                                
+                                ${OptionString('http_host',
+                                        tip='Host to bind web server to',
+                                        label='HTTP Host',
+                                        caption='Use 0.0.0.0 to allow outside connections',
+                                        size=30)}
+                                
+                                ${OptionString('http_port',
+                                        tip='Port to bind web server to. Note that ports below 1024 may require root.',
+                                        label='HTTP Port',
+                                        size=10)}
+
                                 <div class="row">
                                     <label title="Username for web server authentication. Leave empty to disable.">
                                         HTTP Username

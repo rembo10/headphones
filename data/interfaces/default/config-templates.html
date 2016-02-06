@@ -1,0 +1,14 @@
+<%def name="OptionString(key, label='', tip='', caption='', size=None)">
+<%
+    txt_size_attr = ' size="%d"' % size if size is not None else '';
+%>
+    <div class="row">
+        <label title="${tip}">
+            ${label}
+        </label>
+        <input type="text" name="${key}" value="${config[key]}" ${txt_size_attr} />
+        %if caption:
+            <small>${caption}</small>
+        %endif
+    </div>
+</%def>
