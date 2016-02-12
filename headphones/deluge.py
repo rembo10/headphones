@@ -75,6 +75,37 @@ def addTorrent(link, data=None):
                         'content': metainfo}
             retid = _add_torrent_file(result)
 
+        elif link.startswith('http://') or link.startswith('https://'):
+            user_agent = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
+            headers = { 'User-Agent': user_agent }
+            torrentfile = ''
+            r = requests.get(link, headers=headers)
+            if r.status_code == 200:
+                for chunk in r.iter_content(chunk_size=1024):
+                    if chunk: # filter out keep-alive new chunks
+                        torrent_file = torrentfile + chunk
+            else:
+                logger.debug('Deluge: Trying to GET ' + link + ' returned status ' + r.status_code)
+                return False
+            metainfo = str(base64.b64encode(torrentfile.decode('utf-8')))
+            if 'announce' not in metainfo[:40]:
+                logger.debug('Deluge: Contents of ' + link + ' doesn\'t look like a torrent file')
+                return False
+            # Extract torrent name from .torrent
+            try:
+                name_length = int(re.findall('name([0-9]*)\:.*?\:', base64.b64encode(metainfo))[0])
+                name = re.findall('name[0-9]*\:(.*?)\:', base64.b64encode(metainfo))[0][:name_length]
+            except:
+                # get last part of link/path (name only)
+                name = link.split('\\')[-1].split('/')[-1]
+                # remove '.torrent' suffix
+                if name[-len('.torrent'):] == '.torrent':
+                    name = name[:-len('.torrent')]
+            result = {'type': 'torrent',
+                        'name': name,
+                        'content': metainfo}
+            retid = _add_torrent_file(result)
+
         elif link.startswith('magnet:'):
             result = {'type': 'magnet',
                         'url': link}
