@@ -77,13 +77,13 @@ def addTorrent(link, data=None):
 
         elif link.startswith('http://') or link.startswith('https://'):
             user_agent = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
-            headers = { 'User-Agent': user_agent }
+            headers = {'User-Agent': user_agent}
             torrentfile = ''
             r = requests.get(link, headers=headers)
             if r.status_code == 200:
                 for chunk in r.iter_content(chunk_size=1024):
                     if chunk: # filter out keep-alive new chunks
-                        torrent_file = torrentfile + chunk
+                        torrentfile = torrentfile + chunk
             else:
                 logger.debug('Deluge: Trying to GET ' + link + ' returned status ' + r.status_code)
                 return False
