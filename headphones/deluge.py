@@ -62,8 +62,8 @@ def addTorrent(link, data=None):
                     metainfo = str(base64.b64encode(f.read()))
             # Extract torrent name from .torrent
             try:
-                name_length = int(re.findall('name([0-9]*)\:.*?\:', base64.b64encode(metainfo))[0])
-                name = re.findall('name[0-9]*\:(.*?)\:', base64.b64encode(metainfo))[0][:name_length]
+                name_length = int(re.findall('name([0-9]*)\:.*?\:', torrentfile)[0])
+                name = re.findall('name[0-9]*\:(.*?)\:', torrentfile)[0][:name_length]
             except:
                 # get last part of link/path (name only)
                 name = link.split('\\')[-1].split('/')[-1]
@@ -87,14 +87,14 @@ def addTorrent(link, data=None):
             else:
                 logger.debug('Deluge: Trying to GET ' + link + ' returned status ' + r.status_code)
                 return False
-            metainfo = str(base64.b64encode(torrentfile.decode('utf-8')))
-            if 'announce' not in metainfo[:40]:
+            metainfo = str(base64.b64encode(torrentfile))
+            if 'announce' not in torrentfile[:40]:
                 logger.debug('Deluge: Contents of ' + link + ' doesn\'t look like a torrent file')
                 return False
             # Extract torrent name from .torrent
             try:
-                name_length = int(re.findall('name([0-9]*)\:.*?\:', base64.b64encode(metainfo))[0])
-                name = re.findall('name[0-9]*\:(.*?)\:', base64.b64encode(metainfo))[0][:name_length]
+                name_length = int(re.findall('name([0-9]*)\:.*?\:', torrentfile)[0])
+                name = re.findall('name[0-9]*\:(.*?)\:', torrentfile)[0][:name_length]
             except:
                 # get last part of link/path (name only)
                 name = link.split('\\')[-1].split('/')[-1]
@@ -286,7 +286,7 @@ def _add_torrent_file(result):
         _get_auth()
 
     post_data = json.dumps({"method": "core.add_torrent_file",
-                            "params": [result['name'] + '.torrent', b64encode(result['content']), {}],
+                            "params": [result['name'] + '.torrent', result['content'], {}],
                             "id": 2})
     response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
     result['hash'] = json.loads(response.text)['result']
