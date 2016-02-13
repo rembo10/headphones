@@ -45,8 +45,6 @@ import base64
 import headphones
 import requests
 
-from base64 import b64encode
-
 delugeweb_auth = {}
 delugeweb_url = ''
 
