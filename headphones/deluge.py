@@ -283,6 +283,7 @@ def _add_torrent_file(result):
     if not any(delugeweb_auth):
         _get_auth()
 
+    # content is already base64 encoded
     post_data = json.dumps({"method": "core.add_torrent_file",
                             "params": [result['name'] + '.torrent', result['content'], {}],
                             "id": 2})
