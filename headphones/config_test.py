@@ -146,8 +146,8 @@ class ConfigApiTest(TestCase):
         # call methods
         c = headphones.config.Config(path)
         # assertions:
-        with self.assertRaisesRegexp(KeyError, exc_regex) as exc:
-            res = c.check_setting(setting_name)
+        with self.assertRaisesRegexp(KeyError, exc_regex):
+            c.check_setting(setting_name)
         pass
 
     @TestArgs(
@@ -160,8 +160,8 @@ class ConfigApiTest(TestCase):
         # call methods
         c = headphones.config.Config(path)
         # assertions:
-        with self.assertRaises(AttributeError) as exc:
-            res = c.check_setting(setting_name)
+        with self.assertRaises(AttributeError):
+            c.check_setting(setting_name)
         pass
 
     def test_write(self):
@@ -211,7 +211,7 @@ class ConfigApiTest(TestCase):
         ('API_ENABLED', 1),
         ('API_KEY', 'Hello'),
     )
-    def test__getattr__ConfValuesDefault(self, name, value):
+    def test__getattr__ConfValues(self, name, value):
         """ Config: __getattr__ with setting value explicit """
         path = '/tmp/notexist'
 
@@ -241,7 +241,7 @@ class ConfigApiTest(TestCase):
         # assertions:
         self.assertEqual(res, value)
 
-    def test__getattr__ConfValuesDefault(self):
+    def test__getattr__ConfValuesDefaultUsingDotNotation(self):
         """ Config: __getattr__ from config (by dot), default values """
         path = '/tmp/notexist'
 
@@ -253,7 +253,6 @@ class ConfigApiTest(TestCase):
         self.assertEqual(c.API_ENABLED, 0)
         self.assertEqual(c.API_KEY, '')
 
-    @unittest.skip("this will fail if any other test failed, bcz all methods are under testing")
     def test__getattr__OwnAttributes(self):
         """ Config: __getattr__ access own attrs """
         path = '/tmp/notexist'
@@ -262,8 +261,8 @@ class ConfigApiTest(TestCase):
         c = headphones.config.Config(path)
 
         # assertions:
-        #self.assertIsInstance(c.check_setting, dict)
-        #self.assertEqual(c.__str__, 'folder')
+        self.assertIsNotNone(c)
+        self.assertIn('<headphones.config.Config', c.__str__())
 
     # ===========================================================
     #   SET ATTR
@@ -285,21 +284,28 @@ class ConfigApiTest(TestCase):
 
         # assertions:
         self.assertEqual(self.config_mock["General"][name.lower()], value)
+        self.assertEqual(act, value)
 
-    def test__getattr__ConfValuesDefault(self):
-        """ Config: __getattr__ from config (by dot), default values """
+    def test__setattr__ExplicitSetUsingDotNotation(self):
+        """ Config: __setattr__ with setting values using dot notation """
         path = '/tmp/notexist'
 
         # call methods
         c = headphones.config.Config(path)
-        c.ALBUM_ART_FORMAT = 'Apple'
-        c.API_ENABLED = True
-        c.API_KEY = 123
+        act1 = c.ALBUM_ART_FORMAT = 'Apple'
+        act2 = c.API_ENABLED = True
+        act3 = c.API_KEY = 123
 
         # assertions:
         self.assertEqual(self.config_mock["General"]['album_art_format'], 'Apple')
         self.assertEqual(self.config_mock["General"]['api_enabled'], 1)
         self.assertEqual(self.config_mock["General"]['api_key'], '123')
+
+        self.assertEqual(act1, 'Apple')
+        self.assertEqual(act2, 1)
+
+        # TODO : check this trange behaviour. I have expected to see here '123', not 123.
+        self.assertEqual(act3, 123)
 
     # ===========================================================
     #   NEWZNABS
@@ -348,6 +354,7 @@ class ConfigApiTest(TestCase):
         res = c.clear_extra_newznabs()
 
         # assertions:
+        self.assertIsNone(res)
         self.assertEqual(self.config_mock["Newznab"]["extra_newznabs"], [])
         self.assertEqual(self.config_mock["Newznab"]["do_not_touch"], random_value)
 
@@ -385,12 +392,13 @@ class ConfigApiTest(TestCase):
 
         # call methods
         c = headphones.config.Config(path)
-        with self.assertRaises(TypeError) as exc:
+        with self.assertRaises(TypeError):
             c.add_extra_newznab(None)
         pass
 
     # ===========================================================
     #   TORZNABS
+    # TODO : here is copypaste from of NEZNABS tests. Make tests better, plz refactor them
     #
     @TestArgs(
         ('', []),
@@ -434,6 +442,7 @@ class ConfigApiTest(TestCase):
         res = c.clear_extra_torznabs()
 
         # assertions:
+        self.assertIsNone(res)
         self.assertEqual(self.config_mock["Torznab"]["extra_torznabs"], [])
         self.assertEqual(self.config_mock["Torznab"]["do_not_touch"], random_value)
 
@@ -471,6 +480,6 @@ class ConfigApiTest(TestCase):
 
         # call methods
         c = headphones.config.Config(path)
-        with self.assertRaises(TypeError) as exc:
+        with self.assertRaises(TypeError):
             c.add_extra_torznab(None)
         pass
