@@ -1,9 +1,58 @@
+import sys
 import mock
 from mock import MagicMock
 import headphones.config
+from headphones.config import path
 import re
-import unittestcompat
-from unittestcompat import TestCase, TestArgs
+from headphones.unittestcompat import TestCase, TestArgs
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
+else:
+    import unittest
+
+
+class ConfigPathTest(TestCase):
+
+    def test_path(self):
+        p = path('/tmp')
+
+        self.assertIsNotNone(p)
+        self.assertIsInstance(p, path)
+
+    def test_path_call(self):
+        s = '/tmp'
+        p1 = path(s)
+        self.assertEqual(p1, s)
+
+    def test_path_static(self):
+        s = '/tmp'
+        p2 = path.__call__(s)
+        self.assertEqual(p2, s)
+
+    def test_path_static_equal_call(self):
+        s = '/tmp'
+        p1 = path(s)
+        p2 = path.__call__(s)
+        self.assertEqual(p1, p2)
+
+    def test_path_repr(self):
+        s = '/tmp'
+        p1 = path(s)
+        self.assertIn('headphones.config.path', p1.__repr__())
+
+    @TestArgs(
+        (None),
+        (''),
+        ('     '),
+    )
+    def test_empty_path(self, s):
+        """ headphones.path does not modify empty strings """
+        p1 = path(s)
+        a = str(p1)
+        e = str(s)
+        self.assertEqual(a, e)
+
+# pylint:disable=E241
 
 
 class ConfigApiTest(TestCase):
@@ -152,7 +201,7 @@ class ConfigApiTest(TestCase):
         # from 3.5... new_conf_mock['asdf'].__setitem__.assert_not_called('download_dir', '')
         new_conf_mock['asdf'].__setitem__.assert_any_call(option_name_not_from_definitions, option_name_not_from_definitions_value)
 
-    @unittestcompat.skip("process_kwargs should be removed")
+    @unittest.skip("process_kwargs should be removed")
     def test_process_kwargs(self):
         self.assertTrue(True)
 
