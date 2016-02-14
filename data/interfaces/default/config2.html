@@ -20,7 +20,7 @@
     <div id="paddingheader">
         <h1 class="clearfix"><i class="fa fa-gear"></i> Settings</h1>
     </div>
-    <form action="configUpdate" method="post" class="form" id="configUpdate">
+    <form action="configUpdate2" method="post" class="form" id="configUpdate2">
         <div id="tabs">
             <ul>
                 <li><a href="#tabs-1">Web Interface</a></li>
@@ -144,7 +144,7 @@
                         </div>
                     </tr>
                 </table>
-                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
+                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate2',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
             </div>
 
             <div id="tabs-2">
@@ -313,7 +313,6 @@
                                 <input type="radio" name="torrent_downloader" id="torrent_downloader_blackhole" value="0" ${config['torrent_downloader_blackhole']}> Black Hole
                                 <input type="radio" name="torrent_downloader" id="torrent_downloader_transmission" value="1" ${config['torrent_downloader_transmission']}> Transmission
                                 <input type="radio" name="torrent_downloader" id="torrent_downloader_utorrent" value="2" ${config['torrent_downloader_utorrent']}> uTorrent (Beta)
-                                <input type="radio" name="torrent_downloader" id="torrent_downloader_deluge" value="3" ${config['torrent_downloader_deluge']}> Deluge (Beta)
                             </fieldset>
                             <fieldset id="torrent_blackhole_options">
                                 <div class="row">
@@ -388,35 +387,6 @@
                                     <input type="text" name="utorrent_label" value="${config['utorrent_label']}" size="30">
                                 </div>
                             </fieldset>
-                            <fieldset id="deluge_options">
-                                <div class="row">
-                                    <label>Deluge WebUI Host and Port</label>
-                                    <input type="text" name="deluge_host" value="${config['deluge_host']}" size="30">
-                                    <small>Usually http://localhost:8112 (requires WebUI plugin)</small>
-                                </div>
-                                <div class="row">
-                                    <label>Deluge Password</label>
-                                    <input type="password" name="deluge_password" value="${config['deluge_password']}" size="30">
-                                </div>
-                                <div class="row">
-                                    <small>Note: With Deluge, you can specify a different download directory for downloads sent from Headphones.
-                                    Set it in the Music Download Directory below</small>
-                                </div>
-                                <div class="row">
-                                    <label>Deluge Label</label>
-                                    <input type="text" name="deluge_label" value="${config['deluge_label']}" size="30">
-                                    <small>Labels shouldn't contain spaces (requires Label plugin)</small>
-                                </div>
-                                <div class="row">
-                                    <label>Move When Completed</label>
-                                    <input type="text" name="deluge_done_directory" value="${config['deluge_done_directory']}" size="30">
-                                    <small>Directory where Deluge should move completed downloads</small>
-                                </div>
-                                <div class="row checkbox">
-                                    <label>Add Torrent Paused</label>
-                                    <input type="checkbox" name="deluge_paused" value="1" ${config['deluge_paused']}>
-                                </div>
-                            </fieldset>
                             <fieldset id="general_torrent_options">
                                 <div class="row">
                                     <label>Minimum seeders</label>
@@ -442,7 +412,7 @@
                         </td>
                     </tr>
                 </table>
-                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
+                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate2',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
             </div>
             <div id="tabs-3">
                 <table class="configtable" summary="Search Providers">
@@ -744,7 +714,7 @@
                         </td>
                     </tr>
                 </table>
-                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
+                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate2',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
             </div>
             <div id="tabs-4">
                 <table class="configtable" summary="Quality &amp; Post Processing">
@@ -890,7 +860,7 @@
                                     <div class="row">
                                         as <input type="text" class="override-float" name="album_art_format" value="${config['album_art_format']}" size="10">.jpg
                                     </div>
-                                    <small>Use $Artist/$artist, $Album/$album, $Year/$year, put optional variables in square brackets, use single-quote marks to escape square brackets literally ('[', ']').</small>
+                                    <small>Use $Artist/$artist, $Album/$album, $Year/$year</small>
                                 </div>
                                 <div class="row checkbox left clearfix nopad">
                                     <label>
@@ -922,7 +892,7 @@
                         </td>
                     </tr>
                 </table>
-                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
+                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate2',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
             </div>
             <div id="tabs-5">
                 <table class="configtable" summary="Notifications">
@@ -1254,27 +1224,10 @@
                                 </div>
                             </fieldset>
 
-                            <fieldset>
-                                <div class="row checkbox left">
-                                    <input type="checkbox" class="bigcheck" name="telegram_enabled" id="telegram" value="1" ${config['telegram_enabled']} /><label for="telegram"><span class="option">Telegram</span></label>
-                                </div>
-                                <div id="telegramoptions">
-                                    <div class="row">
-                                        <label>Bot Token</label><input type="text" name="telegram_token" value="${config['telegram_token']}" size="50"><small>Contact <a href="http://telegram.me/BotFather">@BotFather</a> to create a bot and get its token</small>
-                                    </div>
-                                    <div class="row">
-                                        <label>User ID</label><input type="text" name="telegram_userid" value="${config['telegram_userid']}" size="50"><small>Contact <a href="http://telegram.me/myidbot">@myidbot</a> to get your user ID</small>
-                                    </div>
-                                    <div class="row checkbox">
-                                        <input type="checkbox" name="telegram_onsnatch" value="1" ${config['telegram_onsnatch']} /><label>Notify on snatch?</label>
-                                    </div>
-                                </div>
-                            </fieldset>
-
                         </td>
                     </tr>
                 </table>
-                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
+                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate2',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
             </div>
             <div id="tabs-6">
                 <table class="configtable" summary="Advanced Settings">
@@ -1285,13 +1238,14 @@
                             <div class="row">
                                 <label>Folder Format</label>
                                 <input type="text" name="folder_format" value="${config['folder_format']}" size="43">
-                                <small>Use: $Artist/$artist, $SortArtist/$sortartist, $Album/$album, $Year/$year, $Type/$type (release type) and $First/$first (first letter in artist name), $OriginalFolder/$originalfolder (downloaded directory name). Put optional variables in square brackets, use single-quote marks to escape square brackets literally ('[', ']').<br>E.g.: $Type/$First/$artist/$album '['$year']' = Album/G/girl talk/all day [2010]</small>
+                                <small>Use: $Artist/$artist, $SortArtist/$sortartist, $Album/$album, $Year/$year, $Type/$type (release type) and $First/$first (first letter in artist name), $OriginalFolder/$originalfolder (downloaded directory name)
+                                                                E.g.: $Type/$First/$artist/$album [$year] = Album/G/girl talk/all day [2010]</small>
 
                             </div>
                             <div class="row">
                                 <label>File Format</label>
                                 <input type="text" name="file_format" value="${config['file_format']}" size="43">
-                                <small>Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title, $Artist/$artist, $Album/$album and $Year/$year. Put optional variables in square brackets, use single-quote marks to escape square brackets literally ('[', ']').</small>
+                                <small>Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title, $Artist/$artist, $Album/$album and $Year/$year</small>
                             </div>
                             <div class="checkbox row clearfix">
                                 <input type="checkbox" name="file_underscores" id="file_underscores" value="1" ${config['file_underscores']}/><label>Use underscores instead of spaces</label>
@@ -1644,7 +1598,7 @@
                         </td>
                     </tr>
                 </table>
-                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
+                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate2',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
             </div>
         </form>
     </div>
@@ -1715,7 +1669,7 @@
         function openExtrasDialog() {
             $("#dialog").dialog({ close: function(){
                 var elem = '<input type="button" data-success="Changes saved successfully">';
-                doAjaxCall('configUpdate', elem,'tabs',true);
+                doAjaxCall('configUpdate2', elem,'tabs',true);
             }}).dialog("open");
         };
 
@@ -2051,26 +2005,6 @@
                         }
                 });
 
-                if ($("#telegram").is(":checked"))
-                        {
-                            $("#telegramoptions").show();
-                        }
-                else
-                        {
-                            $("#telegramoptions").hide();
-                        }
-
-                $("#telegram").click(function(){
-                        if ($("#telegram").is(":checked"))
-                        {
-                            $("#telegramoptions").slideDown();
-                        }
-                        else
-                        {
-                            $("#telegramoptions").slideUp();
-                        }
-                });
-
                 if ($("#osx_notify").is(":checked"))
                         {
                             $("#osx_notify_options").show();
@@ -2227,25 +2161,19 @@
 
                 if ($("#torrent_downloader_blackhole").is(":checked"))
                         {
-                            $("#transmission_options,#utorrent_options,#deluge_options").hide();
+                            $("#transmission_options,#utorrent_options").hide();
                             $("#torrent_blackhole_options").show();
                         }
                 if ($("#torrent_downloader_transmission").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#utorrent_options,#deluge_options").hide();
+                            $("#torrent_blackhole_options,#utorrent_options").hide();
                             $("#transmission_options").show();
                         }
                 if ($("#torrent_downloader_utorrent").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#transmission_options,#deluge_options").hide();
+                            $("#torrent_blackhole_options,#transmission_options").hide();
                             $("#utorrent_options").show();
                         }
-                if ($("#torrent_downloader_deluge").is(":checked"))
-                        {
-                            $("#torrent_blackhole_options,#transmission_options,#utorrent_options").hide();
-                            $("#deluge_options").show();
-                        }
-
 
                 $('input[type=radio]').change(function(){
                         if ($("#preferred_bitrate").is(":checked"))
@@ -2282,19 +2210,15 @@
                         }
                         if ($("#torrent_downloader_blackhole").is(":checked"))
                         {
-                            $("#transmission_options,#utorrent_options,#deluge_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
+                            $("#transmission_options,#utorrent_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_transmission").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#utorrent_options,#deluge_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
+                            $("#torrent_blackhole_options,#utorrent_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_utorrent").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#transmission_options,#deluge_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
-                        }
-                        if ($("#torrent_downloader_deluge").is(":checked"))
-                        {
-                            $("#torrent_blackhole_options,#utorrent_options,#transmission_options").fadeOut("fast", function() { $("#deluge_options").fadeIn() });
+                            $("#torrent_blackhole_options,#transmission_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
                         }
                 });
 

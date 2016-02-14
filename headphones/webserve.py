@@ -1122,7 +1122,19 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("home")
 
     @cherrypy.expose
-    def config(self):
+    def configMetaUi(self):
+        # TODO : load config
+        config = None
+        return serve_template(templatename="config-meta-ui.html", title="Meta UI Settings", config=config)
+
+    @cherrypy.expose
+    def configMetaUiUpdate(self, **kwargs):
+        # TODO : save config
+        print ('configMetaUiUpdate', kwargs)        
+        raise cherrypy.HTTPRedirect("configMetaUi")
+
+    @cherrypy.expose
+    def config2(self):
         interface_dir = os.path.join(headphones.PROG_DIR, 'data/interfaces/')
         interface_list = [name for name in os.listdir(interface_dir) if
                           os.path.isdir(os.path.join(interface_dir, name))]
@@ -1410,10 +1422,10 @@ class WebInterface(object):
 
         config["extras"] = extras_dict
 
-        return serve_template(templatename="config.html", title="Settings", config=config)
+        return serve_template(templatename="config2.html", title="Settings", config=config)
 
     @cherrypy.expose
-    def configUpdate(self, **kwargs):
+    def configUpdate2(self, **kwargs):
         # Handle the variable config options. Note - keys with False values aren't getting passed
 
         checked_configs = [
@@ -1555,7 +1567,7 @@ class WebInterface(object):
         # Reconfigure musicbrainz database connection with the new values
         mb.startmb()
 
-        raise cherrypy.HTTPRedirect("config")
+        raise cherrypy.HTTPRedirect("config2")
 
     @cherrypy.expose
     def do_state_change(self, signal, title, timer):
