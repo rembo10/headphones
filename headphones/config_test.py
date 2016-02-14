@@ -1,5 +1,6 @@
 #import unittest
 import mock
+import unittest
 from headphones.unittestcompat import TestCase, TestArgs
 from mock import MagicMock
 
@@ -49,7 +50,7 @@ class ConfigPathTest(TestCase):
         e = str(s)
         self.assertEqual(a, e)
 
-
+# pylint:disable=E241
 class ConfigApiTest(TestCase):
     """ Common tests for headphones.Config
 
@@ -61,7 +62,7 @@ class ConfigApiTest(TestCase):
         # every constructor `xx = ConfigObj()` in headphones.config will return
         # this mock:
         self.config_mock = self.config_module_mock.return_value = mock
- 
+
         if sections:
             mock.__contains__.side_effect = sections.__contains__
             mock.__getitem__.side_effect = sections.__getitem__
@@ -168,19 +169,18 @@ class ConfigApiTest(TestCase):
         path = '/tmp/notexist'
 
         # overload mocks, defined in setUp:
-        old_conf_mock = self._setUpConfigMock(MagicMock(), {'a' : {}})
+        old_conf_mock = self._setUpConfigMock(MagicMock(), {'a': {}})
 
         option_name_not_from_definitions = 'some_invalid_option_with_super_uniq1_name'
         option_name_not_from_definitions_value = 1
-        old_conf_mock['asdf'] = { option_name_not_from_definitions : option_name_not_from_definitions_value }
-
+        old_conf_mock['asdf'] = {option_name_not_from_definitions: option_name_not_from_definitions_value}
 
         # call methods
         cf = headphones.config.Config(path)
 
         # overload mock-patching for NEW CONFIG
         new_patcher = mock.patch('headphones.config.ConfigObj', name='NEW_ConfigObjModuleMock_FOR_WRITE')
-        
+
         new_conf_module_mock = new_patcher.start()
         new_conf_mock = \
             new_conf_module_mock.return_value = \
@@ -197,6 +197,114 @@ class ConfigApiTest(TestCase):
         # from 3.5... new_conf_mock['asdf'].__setitem__.assert_not_called('download_dir', '')
         new_conf_mock['asdf'].__setitem__.assert_any_call(option_name_not_from_definitions, option_name_not_from_definitions_value)
 
+    @unittest.skip("process_kwargs should be removed")
+    def test_process_kwargs(self):
+        self.assertTrue(True)
+
+    # ===========================================================
+    #   GET ATTR
+    # ===========================================================
+
+    @TestArgs(
+        ('ADD_ALBUM_ART', True),
+        ('ALBUM_ART_FORMAT', 'shmolder'),
+        ('API_ENABLED', 1),
+        ('API_KEY', 'Hello'),
+    )
+    def test__getattr__ConfValuesDefault(self, name, value):
+        """ Config: __getattr__ with setting value explicit """
+        path = '/tmp/notexist'
+
+        self.config_mock["General"] = {name.lower(): value}
+
+        # call methods
+        c = headphones.config.Config(path)
+        act = c.__getattr__(name)
+
+        # assertions:
+        self.assertEqual(act, value)
+
+    @TestArgs(
+        ('ADD_ALBUM_ART', 0),
+        ('ALBUM_ART_FORMAT', 'folder'),
+        ('API_ENABLED', 0),
+        ('API_KEY', ''),
+    )
+    def test__getattr__ConfValuesDefault(self, name, value):
+        """ Config: __getattr__ from config(by braces), default values """
+        path = '/tmp/notexist'
+
+        # call methods
+        c = headphones.config.Config(path)
+        res = c.__getattr__(name)
+
+        # assertions:
+        self.assertEqual(res, value)
+
+    def test__getattr__ConfValuesDefault(self):
+        """ Config: __getattr__ from config (by dot), default values """
+        path = '/tmp/notexist'
+
+        # call methods
+        c = headphones.config.Config(path)
+
+        # assertions:
+        self.assertEqual(c.ALBUM_ART_FORMAT, 'folder')
+        self.assertEqual(c.API_ENABLED, 0)
+        self.assertEqual(c.API_KEY, '')
+
+    @unittest.skip("this will fail if any other test failed, bcz all methods are under testing")
+    def test__getattr__OwnAttributes(self):
+        """ Config: __getattr__ access own attrs """
+        path = '/tmp/notexist'
+
+        # call methods
+        c = headphones.config.Config(path)
+
+        # assertions:
+        #self.assertIsInstance(c.check_setting, dict)
+        #self.assertEqual(c.__str__, 'folder')
+
+    # ===========================================================
+    #   SET ATTR
+    # ===========================================================
+
+    @TestArgs(
+        ('ADD_ALBUM_ART', True),
+        ('ALBUM_ART_FORMAT', 'shmolder'),
+        ('API_ENABLED', 1),
+        ('API_KEY', 'Hello'),
+    )
+    def test__setattr__ConfValuesDefault(self, name, value):
+        """ Config: __setattr__ with setting value explicit """
+        path = '/tmp/notexist'
+
+        # call methods
+        c = headphones.config.Config(path)
+        act = c.__setattr__(name, value)
+
+        # assertions:
+        self.assertEqual(self.config_mock["General"][name.lower()], value)
+
+    def test__getattr__ConfValuesDefault(self):
+        """ Config: __getattr__ from config (by dot), default values """
+        path = '/tmp/notexist'
+
+        # call methods
+        c = headphones.config.Config(path)
+        c.ALBUM_ART_FORMAT = 'Apple'
+        c.API_ENABLED = True
+        c.API_KEY = 123
+
+        # assertions:
+        self.assertEqual(self.config_mock["General"]['album_art_format'], 'Apple')
+        self.assertEqual(self.config_mock["General"]['api_enabled'], 1)
+        self.assertEqual(self.config_mock["General"]['api_key'], '123')
+
+    # ===========================================================
+    #   NEWZNABS
+    #
+
     @TestArgs(
         ('', []),
         ('ABCDEF', [('A', 'B', 'C'), ('D', 'E', 'F')]),
@@ -208,6 +316,7 @@ class ConfigApiTest(TestCase):
         ([1, 2, 3, 'Aaa'], [(1, 2, 3)]),
         ([1, 2, 3, 'Aaa', 'Bbba'], [(1, 2, 3)]),
         ([1, 2, 3, 'Aaa', 'Bbba', 'Ccccc'], [(1, 2, 3), ('Aaa', 'Bbba', 'Ccccc')]),
+        ([1, 2, 3, 'Aaa', 'Bbba', 'Ccccc', 'Ddddda'], [(1, 2, 3), ('Aaa', 'Bbba', 'Ccccc')]),
     )
     def test_get_extra_newznabs(self, conf_value, expected):
         """ Config: get_extra_newznabs """
@@ -243,30 +352,46 @@ class ConfigApiTest(TestCase):
         self.assertEqual(self.config_mock["Newznab"]["do_not_touch"], random_value)
 
     @TestArgs(
-        ('', []),
-        ('ABCDEF', [('A', 'B', 'C'), ('D', 'E', 'F')]),
-        (['ABC', 'DEF'], []),
-        ([1], []),
-        ([1, 2], []),
-        ([1, 2, 3], [(1, 2, 3)]),
+        ([], [''], ['']),
+        ([], 'ABCDEF', ['A', 'B', 'C', 'D', 'E', 'F']),
 
-        ([1, 2, 3, 'Aaa'], [(1, 2, 3)]),
-        ([1, 2, 3, 'Aaa', 'Bbba'], [(1, 2, 3)]),
-        ([1, 2, 3, 'Aaa', 'Bbba', 'Ccccc'], [(1, 2, 3), ('Aaa', 'Bbba', 'Ccccc')]),
+        ([1, 2, [False, True]], ['3', [0, 0]], [1, 2, [False, True], '3', [0, 0]]),
     )
-    def add_extra_newznab(self, value, expected):
+    def test_add_extra_newznab(self, initial, added, expected):
         """ Config: add_extra_newznab """
         path = '/tmp/notexist'
 
-        self.config_mock["Newznab"] = {"extra_newznabs": conf_value}
+        self.config_mock["Newznab"] = {"extra_newznabs": initial}
 
         # call methods
         c = headphones.config.Config(path)
-        res = c.add_extra_newznab(value)
+        c.add_extra_newznab(added)
+        act = self.config_mock["Newznab"]["extra_newznabs"]
 
         # assertions:
-        self.assertEqual(res, expected)
+        self.assertEqual(act, expected)
 
+    @TestArgs(
+        (None),
+        ([]),
+        ([1, 2, 3]),
+        ([True]),
+    )
+    def test_add_extra_newznab_raise_on_none(self, initial):
+        """ Config: add_extra_newznab should raise on None adding"""
+        path = '/tmp/notexist'
+
+        self.config_mock["Newznab"] = {"extra_newznabs": initial}
+
+        # call methods
+        c = headphones.config.Config(path)
+        with self.assertRaises(TypeError) as exc:
+            c.add_extra_newznab(None)
+        pass
+
+    # ===========================================================
+    #   TORZNABS
+    #
     @TestArgs(
         ('', []),
         ('ABCDEF', [('A', 'B', 'C'), ('D', 'E', 'F')]),
@@ -278,29 +403,74 @@ class ConfigApiTest(TestCase):
         ([1, 2, 3, 'Aaa'], [(1, 2, 3)]),
         ([1, 2, 3, 'Aaa', 'Bbba'], [(1, 2, 3)]),
         ([1, 2, 3, 'Aaa', 'Bbba', 'Ccccc'], [(1, 2, 3), ('Aaa', 'Bbba', 'Ccccc')]),
+        ([1, 2, 3, 'Aaa', 'Bbba', 'Ccccc', 'Ddddda'], [(1, 2, 3), ('Aaa', 'Bbba', 'Ccccc')]),
     )
-    def add_extra_newznab(self, conf_value, expected):
-        """
-get_extra_torznabs(self)
-clear_extra_torznabs(self)
-add_extra_torznab(self, torznab)
-__getattr__(self, name)
-__setattr__(self, name, value)
-process_kwargs(self, kwargs)
-"""
-
-        """ Config: get_extra_newznabs """
+    def test_get_extra_torznabs(self, conf_value, expected):
+        """ Config: get_extra_torznabs """
         path = '/tmp/notexist'
 
         #itertools.izip(*[itertools.islice('', i, None, 3) for i in range(3)])
         # set up mocks:
-        # 'EXTRA_NEWZNABS': (list, 'Newznab', ''),
-        # 'EXTRA_TORZNABS': (list, 'Torznab', ''),
-        self.config_mock["Newznab"] = {"extra_newznabs": conf_value}
+        # 'EXTRA_TORZNABS': (list, '', ''),
+        self.config_mock["Torznab"] = {"extra_torznabs": conf_value}
 
         # call methods
         c = headphones.config.Config(path)
-        res = c.get_extra_newznabs()
+        res = c.get_extra_torznabs()
 
         # assertions:
         self.assertEqual(res, expected)
+
+    def test_clear_extra_torznabs(self):
+        """ Config: clear_extra_torznabs """
+        path = '/tmp/notexist'
+
+        random_value = -1292721
+        self.config_mock["Torznab"] = {"extra_torznabs": [1, 2, 3]}
+        self.config_mock["Torznab"] = {"do_not_touch": random_value}
+
+        # call methods
+        c = headphones.config.Config(path)
+        res = c.clear_extra_torznabs()
+
+        # assertions:
+        self.assertEqual(self.config_mock["Torznab"]["extra_torznabs"], [])
+        self.assertEqual(self.config_mock["Torznab"]["do_not_touch"], random_value)
+
+    @TestArgs(
+        ([], [''], ['']),
+        ([], 'ABCDEF', ['A', 'B', 'C', 'D', 'E', 'F']),
+
+        ([1, 2, [False, True]], ['3', [0, 0]], [1, 2, [False, True], '3', [0, 0]]),
+    )
+    def test_add_extra_torznab(self, initial, added, expected):
+        """ Config: add_extra_torznab """
+        path = '/tmp/notexist'
+
+        self.config_mock["Torznab"] = {"extra_torznabs": initial}
+
+        # call methods
+        c = headphones.config.Config(path)
+        c.add_extra_torznab(added)
+        act = self.config_mock["Torznab"]["extra_torznabs"]
+
+        # assertions:
+        self.assertEqual(act, expected)
+
+    @TestArgs(
+        (None),
+        ([]),
+        ([1, 2, 3]),
+        ([True]),
+    )
+    def test_add_extra_torznab_raise_on_none(self, initial):
+        """ Config: add_extra_torznab should raise on None adding"""
+        path = '/tmp/notexist'
+
+        self.config_mock["Torznab"] = {"extra_torznabs": initial}
+
+        # call methods
+        c = headphones.config.Config(path)
+        with self.assertRaises(TypeError) as exc:
+            c.add_extra_torznab(None)
+        pass
