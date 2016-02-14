@@ -131,12 +131,12 @@ select, input, textarea, button
 
 select 
 {
-    .rounded(5px);
-    background: #4F4F4F;
+    .rounded(@heading-input-radius);
+    background: @brand-color;
     border: 0;
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
     color: #fff;
-    padding: 3px 10px;
+    padding: 3px 5px;
     text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
 }
 
@@ -164,7 +164,7 @@ input[type="radio"]{ vertical-align: text-bottom; }
     text-shadow: none;
 }
 input[type=submit], input[type=button] {
-    .rounded(5px);
+    .rounded(@heading-input-radius);
     background: #222222 url("../images/button.png") repeat-x;
     border: 0;
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
@@ -456,7 +456,7 @@ footer {
             position: relative;
             z-index: 99;
            a {
-              	.gradient(#F4F4F4, #e7e7e7);
+              	.gradient(@brand-color, #e7e7e7);
               	font-family: @base-font-face;
               	font-size: 12px;
               	font-weight: normal;
@@ -481,6 +481,7 @@ div#searchbar {
     input[type=text] {
     	border: 1px solid #DDD;
        	border-top: 1px solid #CDCDCD;
+        .rounded(@heading-input-radius);
         .shadow(0 1px 0 #f1f1f1);
         .shadow(inset 0 1px 1px #e0e0e0);
         color: #999;
