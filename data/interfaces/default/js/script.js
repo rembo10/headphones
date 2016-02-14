@@ -330,23 +330,28 @@ function doAjaxCall(url,elem,reload,form) {
 	  },
 	  success: function(data,jqXHR) {
 	  	feedback.prepend(succesMsg);
-	  	feedback.addClass('success')
+	  	feedback.addClass('success');
+
 	  	setTimeout(function(e){
 	  		succesMsg.fadeOut(function(){
 	  			$(this).remove();
 	  			feedback.fadeOut(function(){
 	  				feedback.removeClass('success');
 	  			});
-	  			if ( reload == true ) 	refreshSubmenu();
-	  			if ( reload == "table") {
-	  				console.log('refresh'); refreshTable();
+
+	  			if ( reload === true ) 	refreshSubmenu();
+	  			if ( reload === "table") {
+	  				refreshTable();
 	  			}
-	  			if ( reload == "tabs") 	refreshTab();
-	  			if ( reload == "page") 	location.reload();
-	  			if ( reload == "submenu&table") {
+	  			if ( reload === "tabs") 	refreshTab();
+	  			if ( reload === "page") 	location.reload();
+
+	  			if ( reload === "submenu&table") {
 	  				refreshSubmenu();
 	  				refreshTable();
 	  			}
+	  			if ( $.isFunction(reload) ) reload(data);
+
 	  			if ( form ) {
 	  				// Change the option to 'choose...'
 	  				$(formID + " select").children('option[disabled=disabled]').attr('selected','selected');
