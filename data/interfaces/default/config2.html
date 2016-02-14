@@ -20,7 +20,7 @@
     <div id="paddingheader">
         <h1 class="clearfix"><i class="fa fa-gear"></i> Settings</h1>
     </div>
-    <form action="configUpdate" method="post" class="form" id="configUpdate">
+    <form action="configUpdate2" method="post" class="form" id="configUpdate2">
         <div id="tabs">
             <ul>
                 <li><a href="#tabs-1">Web Interface</a></li>
@@ -144,7 +144,7 @@
                         </div>
                     </tr>
                 </table>
-                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
+                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate2',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
             </div>
 
             <div id="tabs-2">
@@ -412,7 +412,7 @@
                         </td>
                     </tr>
                 </table>
-                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
+                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate2',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
             </div>
             <div id="tabs-3">
                 <table class="configtable" summary="Search Providers">
@@ -714,7 +714,7 @@
                         </td>
                     </tr>
                 </table>
-                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
+                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate2',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
             </div>
             <div id="tabs-4">
                 <table class="configtable" summary="Quality &amp; Post Processing">
@@ -892,7 +892,7 @@
                         </td>
                     </tr>
                 </table>
-                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
+                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate2',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
             </div>
             <div id="tabs-5">
                 <table class="configtable" summary="Notifications">
@@ -1227,7 +1227,7 @@
                         </td>
                     </tr>
                 </table>
-                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
+                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate2',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
             </div>
             <div id="tabs-6">
                 <table class="configtable" summary="Advanced Settings">
@@ -1598,7 +1598,7 @@
                         </td>
                     </tr>
                 </table>
-                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
+                <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate2',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
             </div>
         </form>
     </div>
@@ -1669,7 +1669,7 @@
         function openExtrasDialog() {
             $("#dialog").dialog({ close: function(){
                 var elem = '<input type="button" data-success="Changes saved successfully">';
-                doAjaxCall('configUpdate', elem,'tabs',true);
+                doAjaxCall('configUpdate2', elem,'tabs',true);
             }}).dialog("open");
         };
 

@@ -1,0 +1,32 @@
+<%inherit file="base.html"/>
+
+<%!
+    import headphones
+    import string
+%>
+
+<%def name="headerIncludes()">
+    <div id="subhead_container">
+        <div id="subhead_menu">
+            <a id="menu_link_shutdown" href="shutdown"><i class="fa fa-power-off"></i> Shut Down</a>
+            <a id="menu_link_shutdown" href="restart"><i class="fa fa-power-off"></i> Restart</a>
+        </div>
+    </div>
+</%def>
+
+<%def name="body()">
+    <div id="paddingheader">
+        <h1 class="clearfix"><i class="fa fa-gear"></i> Meta UI Settings</h1>
+    </div>
+
+    <form action="configMetaUiUpdate" id="configMetaUiUpdate" method="post" class="form">
+        <input type="number" name="keng" />
+        <input type="submit" value="Save Changes" data-success="Changes saved successfully">
+    </form>
+</%def>
+
+<%def name="javascriptIncludes()">
+    <script type="text/javascript">
+
+    </script>
+</%def>
