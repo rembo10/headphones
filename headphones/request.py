@@ -129,7 +129,7 @@ def request_response(url, method="get", auto_raise=True,
                 import os
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                logger.error('SUPER_DEBUG: ' + '; '.join([exc_type, fname, exc_tb.tb_lineno]))
+                logger.error('SUPER_DEBUG: ' + str(url) + ' -- ' + '; '.join([exc_type, fname, exc_tb.tb_lineno]))
 
             # Debug response
             if headphones.VERBOSE:
