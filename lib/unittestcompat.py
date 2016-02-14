@@ -1,12 +1,17 @@
 import sys
-from unittest import TestCase as TC
+if sys.version_info < (2, 7):
+    from unittest2 import TestCase as TC
+else:
+    from unittest import TestCase as TC
 
-def _is26():
-    if sys.version_info[0] == 2 and sys.version_info[1] == 6:
-        return True
-    return False
+""" It is just `skip` from `unittest` """
+skip = TC.skip
 
-_dummy = _is26()
+_dummy = False
+
+# less than 2.6 ...
+if sys.version_info[0] == 2 and sys.version_info[1] <= 6:
+    _dummy = True
 
 def _d(f):
     def decorate(self, *args, **kw):
@@ -14,6 +19,7 @@ def _d(f):
             return self.assertTrue(True)
         return f(self, *args, **kw)
     return decorate
+
 
 class TestCase(TC):
     """
@@ -50,10 +56,23 @@ class TestCase(TC):
         tst = val is not None
         return super(TestCase, self).assertTrue(tst, msg)
 
+    def assertRaises(self, exc, msg=None):
+        if not _dummy:
+            return super(TestCase, self).assertRaises(exc, msg)
+        return TestCase._TestCaseRaiseStub(exc, self)
+
+    def assertRaisesRegexp(self, exc, regex, msg=None):
+        if not _dummy:
+            return super(TestCase, self).assertRaises(exc, msg)
+        return TestCase._TestCaseRaiseStub(exc, self)
+
     class _TestCaseRaiseStub:
-        def __init__(self, exc, tc):
+        """ Internal stuff for stubbing `assertRaises*` """
+
+        def __init__(self, exc, regex, tc):
             self.exc = exc
             self.tc = tc
+            self.regex = regex
 
         def __enter__(self):
             return self
@@ -62,12 +81,11 @@ class TestCase(TC):
             tst = tp is self.exc
             self.tc.assertTrue(tst)
             self.exception = value
+
+            # TODO: implement self.regex checking
+
             return True
 
-    def assertRaises(self, exc, msg=None):
-        if not _dummy:
-            return super(TestCase, self).assertRaises(exc, msg)
-        return TestCase._TestCaseRaiseStub(exc, self)
 
 def TestArgs(*parameters):
     def tuplify(x):

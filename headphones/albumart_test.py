@@ -1,6 +1,6 @@
 #import unittest
 #import mock
-from headphones.unittestcompat import TestCase
+from unittestcompat import TestCase
 
 import headphones.albumart
 
