@@ -14,10 +14,10 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 # Parts of this file are a part of SickRage.
-# Author: echel0n <sickrage.tv@gmail.com>
-# URL: http://www.github.com/sickragetv/sickrage/
-#
+# Author: Mr_Orange <mr_orange@hotmail.it>
+# URL: http://code.google.com/p/sickbeard/
 # Adapted for Headphones by <noamgit@gmail.com>
+# URL: https://github.com/noam09
 #
 # SickRage is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,11 +26,11 @@
 #
 # SickRage is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with SickRage.  If not, see <http://www.gnu.org/licenses/>.
+# along with SickRage. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import unicode_literals
 
@@ -41,9 +41,9 @@ import time
 import re
 import os
 import json
-import base64
 import headphones
 import requests
+from base64 import b64encode
 
 delugeweb_auth = {}
 delugeweb_url = ''
@@ -54,10 +54,10 @@ def addTorrent(link, data=None):
         retid = False
         if link.endswith('.torrent') or data:
             if data:
-                metainfo = str(base64.b64encode(data))
+                torrentfile = data
             else:
                 with open(link, 'rb') as f:
-                    metainfo = str(base64.b64encode(f.read()))
+                    torrentfile = f.read()
             # Extract torrent name from .torrent
             try:
                 name_length = int(re.findall('name([0-9]*)\:.*?\:', torrentfile)[0])
@@ -70,7 +70,7 @@ def addTorrent(link, data=None):
                     name = name[:-len('.torrent')]
             result = {'type': 'torrent',
                         'name': name,
-                        'content': metainfo}
+                        'content': torrentfile}
             retid = _add_torrent_file(result)
 
         elif link.startswith('http://') or link.startswith('https://'):
@@ -85,7 +85,6 @@ def addTorrent(link, data=None):
             else:
                 logger.debug('Deluge: Trying to GET ' + link + ' returned status ' + r.status_code)
                 return False
-            metainfo = str(base64.b64encode(torrentfile))
             if 'announce' not in torrentfile[:40]:
                 logger.debug('Deluge: Contents of ' + link + ' doesn\'t look like a torrent file')
                 return False
@@ -101,7 +100,7 @@ def addTorrent(link, data=None):
                     name = name[:-len('.torrent')]
             result = {'type': 'torrent',
                         'name': name,
-                        'content': metainfo}
+                        'content': torrentfile}
             retid = _add_torrent_file(result)
 
         elif link.startswith('magnet:'):
@@ -283,9 +282,9 @@ def _add_torrent_file(result):
     if not any(delugeweb_auth):
         _get_auth()
 
-    # content is already base64 encoded
+    # content is torrent file contents that needs to be encoded to base64
     post_data = json.dumps({"method": "core.add_torrent_file",
-                            "params": [result['name'] + '.torrent', result['content'], {}],
+                            "params": [result['name'] + '.torrent', b64encode(result['content']), {}],
                             "id": 2})
     response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
     result['hash'] = json.loads(response.text)['result']
