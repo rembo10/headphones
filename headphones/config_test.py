@@ -4,12 +4,7 @@ from mock import MagicMock
 import headphones.config
 from headphones.config import path
 import re
-from headphones.unittestcompat import TestCase, TestArgs
-if sys.version_info < (2, 7):
-    import unittest2 as unittest
-else:
-    import unittest
-
+from unittestcompat import TestCase, TestArgs
 
 class ConfigPathTest(TestCase):
 
@@ -201,7 +196,7 @@ class ConfigApiTest(TestCase):
         # from 3.5... new_conf_mock['asdf'].__setitem__.assert_not_called('download_dir', '')
         new_conf_mock['asdf'].__setitem__.assert_any_call(option_name_not_from_definitions, option_name_not_from_definitions_value)
 
-    @unittest.skip("process_kwargs should be removed")
+    @unittestcompat.skip("process_kwargs should be removed")
     def test_process_kwargs(self):
         self.assertTrue(True)
 
