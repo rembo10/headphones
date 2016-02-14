@@ -1,16 +1,14 @@
 import sys
+import mock
+from mock import MagicMock
+import headphones.config
+from headphones.config import path
+import re
+from headphones.unittestcompat import TestCase, TestArgs
 if sys.version_info < (2, 7):
     import unittest2 as unittest
 else:
     import unittest
-
-from headphones.unittestcompat import TestCase, TestArgs
-import mock
-from mock import MagicMock
-
-import headphones.config
-from headphones.config import path
-import re
 
 
 class ConfigPathTest(TestCase):
@@ -55,6 +53,8 @@ class ConfigPathTest(TestCase):
         self.assertEqual(a, e)
 
 # pylint:disable=E241
+
+
 class ConfigApiTest(TestCase):
     """ Common tests for headphones.Config
 
