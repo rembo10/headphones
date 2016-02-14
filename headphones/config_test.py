@@ -1,10 +1,12 @@
 import sys
 import mock
 from mock import MagicMock
+import re
+import unittestcompat
+from unittestcompat import TestCase, TestArgs
+
 import headphones.config
 from headphones.config import path
-import re
-from unittestcompat import TestCase, TestArgs
 
 class ConfigPathTest(TestCase):
 
@@ -46,9 +48,6 @@ class ConfigPathTest(TestCase):
         a = str(p1)
         e = str(s)
         self.assertEqual(a, e)
-
-# pylint:disable=E241
-
 
 class ConfigApiTest(TestCase):
     """ Common tests for headphones.Config
@@ -303,7 +302,7 @@ class ConfigApiTest(TestCase):
         self.assertEqual(act1, 'Apple')
         self.assertEqual(act2, 1)
 
-        # TODO : check this trange behaviour. I have expected to see here '123', not 123.
+        # TODO : check this strange behaviour. I have expected to see here '123', not 123.
         self.assertEqual(act3, 123)
 
     # ===========================================================

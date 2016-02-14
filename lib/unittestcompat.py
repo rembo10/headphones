@@ -1,11 +1,12 @@
 import sys
 if sys.version_info < (2, 7):
+    import unittest2 as unittest
     from unittest2 import TestCase as TC
 else:
+    import unittest
     from unittest import TestCase as TC
 
-""" It is just `skip` from `unittest` """
-skip = TC.skip
+skip = unittest.skip
 
 _dummy = False
 
@@ -15,9 +16,9 @@ if sys.version_info[0] == 2 and sys.version_info[1] <= 6:
 
 def _d(f):
     def decorate(self, *args, **kw):
-        if _dummy:
-            return self.assertTrue(True)
-        return f(self, *args, **kw)
+        if not _dummy:
+            return f(self, *args, **kw)
+        return self.assertTrue(True)
     return decorate
 
 
@@ -44,6 +45,9 @@ class TestCase(TC):
     def assertRegexpMatches(self, *args, **kw):
         return super(TestCase, self).assertRegexpMatches(*args, **kw)
 
+    # -----------------------------------------------------------
+    # NOT DUMMY ASSERTIONS
+    # -----------------------------------------------------------
     def assertIsNone(self, val, msg=None):
         if not _dummy:
             return super(TestCase, self).assertIsNone(val, msg)
@@ -59,33 +63,34 @@ class TestCase(TC):
     def assertRaises(self, exc, msg=None):
         if not _dummy:
             return super(TestCase, self).assertRaises(exc, msg)
-        return TestCase._TestCaseRaiseStub(exc, self)
+        return TestCase._TestCaseRaiseStub(self, exc, msg=msg)
 
     def assertRaisesRegexp(self, exc, regex, msg=None):
         if not _dummy:
             return super(TestCase, self).assertRaises(exc, msg)
-        return TestCase._TestCaseRaiseStub(exc, self)
+        return TestCase._TestCaseRaiseStub(self, exc, regex=regex, msg=msg)
 
     class _TestCaseRaiseStub:
         """ Internal stuff for stubbing `assertRaises*` """
 
-        def __init__(self, exc, regex, tc):
+        def __init__(self, test_case, exc, regex=None, msg=None):
             self.exc = exc
-            self.tc = tc
+            self.test_case = test_case
             self.regex = regex
+            self.msg = msg
 
         def __enter__(self):
             return self
 
         def __exit__(self, tp, value, traceback):
             tst = tp is self.exc
-            self.tc.assertTrue(tst)
+            self.test_case.assertTrue(tst, msg=self.msg)
             self.exception = value
 
             # TODO: implement self.regex checking
 
+            # True indicates, that exception is handled
             return True
-
 
 def TestArgs(*parameters):
     def tuplify(x):
