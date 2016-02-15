@@ -343,7 +343,7 @@ class WebInterface(object):
 
         for dir in dirs:
             artistfolder = os.path.join(dir, folder)
-            if not os.path.isdir(artistfolder):
+            if not os.path.isdir(artistfolder.encode(headphones.SYS_ENCODING)):
                 logger.debug("Cannot find directory: " + artistfolder)
                 continue
             threading.Thread(target=librarysync.libraryScan,
