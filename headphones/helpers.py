@@ -207,7 +207,7 @@ def replace_all(text, dic, normalize=False):
                 j = unicodedata.normalize('NFC', j.decode(headphones.SYS_ENCODING, 'replace'))
             new_dic[i] = j
         dic = new_dic
-    return pathrender.render(text, dic)
+    return pathrender.render(text, dic)[0]
 
 
 def replace_illegal_chars(string, type="file"):
