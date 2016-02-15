@@ -1,3 +1,13 @@
+[Tt]est[Rr]esult*
+/cache
+/logs
+.project
+.pydevproject
+
+# coverage generated:
+/cover-html/
+.coverage
+.coveralls.yml
 
 # Compiled source #
 ###################
@@ -61,9 +71,4 @@ Thumbs.db
 obj/
 [Rr]elease*/
 _ReSharper*/
-[Tt]est[Rr]esult*
-/cache
-/logs
-.project
-.pydevproject
 .vscode

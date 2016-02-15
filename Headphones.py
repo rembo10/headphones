@@ -152,7 +152,10 @@ def main():
     headphones.DB_FILE = os.path.join(headphones.DATA_DIR, 'headphones.db')
 
     # Read config and start logging
-    headphones.initialize(config_file)
+    try:
+        headphones.initialize(config_file)
+    except headphones.exceptions.SoftChrootError as e:
+        raise SystemExit('FATAL ERROR')
 
     if headphones.DAEMON:
         headphones.daemonize()

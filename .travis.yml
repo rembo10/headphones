@@ -13,14 +13,25 @@ cache:
 # http://about.travis-ci.org/docs/user/ci-environment/#Python-VM-images
 python:
   - "2.6"
-  - "2.7"
+matrix:
+  include:
+    - python: "2.7"
+      env: SENDCOVERAGE=1
+
 # pylint 1.4 does not run under python 2.6
 install:
- - pip install pyOpenSSL
- - pip install pylint==1.3.1
- - pip install pyflakes
- - pip install pep8
+  - pip install pyOpenSSL
+  - pip install pylint==1.3.1
+  - pip install pyflakes
+  - pip install pep8
+  # coverage stuff:
+  - pip install coveralls
+  - pip install coverage
 script:
   - pep8 headphones
   - pyflakes headphones
-  - nosetests headphones
+  - nosetests
+
+after_success:
+  # coverage stuff:
+  - if [ $SENDCOVERAGE ]; then coveralls; fi
