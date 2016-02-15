@@ -31,7 +31,7 @@ import cherrypy
 import headphones
 import gntp.notifier
 import oauth2 as oauth
-import twitter
+import pythontwitter as twitter
 
 
 class GROWL(object):
