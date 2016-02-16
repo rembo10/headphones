@@ -381,7 +381,7 @@ def setTorrentPath(result):
 
     return True
 
-def addTorrentPause(result):
+def setTorrentPause(result):
 
     if not any(delugeweb_auth):
         _get_auth()
