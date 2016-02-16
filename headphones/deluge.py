@@ -44,6 +44,8 @@ import json
 import headphones
 import requests
 from base64 import b64encode
+# remove later
+import sys
 
 delugeweb_auth = {}
 delugeweb_url = ''
@@ -118,6 +120,13 @@ def addTorrent(link, data=None):
             return False
 
     except Exception, e:
+        # REMOVE LATER - FOR DEBUGGING
+        super_debug = True
+        if super_debug:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            logger.error('SUPER_DEBUG: ' + str(e) + ' -- ' + '; '.join([exc_type, fname, exc_tb.tb_lineno]))
+        ######
         logger.error(str(e))
 
 def getTorrentFolder(result):
