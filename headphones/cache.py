@@ -116,7 +116,7 @@ class Cache(object):
             return None
 
         for image in images:
-            if image['size'] == 'medium':
+            if image['size'] == 'medium' and '#text' in image:
                 thumb_url = image['#text']
                 break
 
