@@ -929,9 +929,14 @@ def send_to_downloader(data, bestqual, album):
                     return
 
             except Exception as e:
-                #exc_type, exc_obj, exc_tb = sys.exc_info()
-                #fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                #print(exc_type, fname, exc_tb.tb_lineno)
+                # REMOVE LATER - FOR DEBUGGING
+                super_debug = True
+                if super_debug:
+                    import sys
+                    exc_type, exc_obj, exc_tb = sys.exc_info()
+                    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                    logger.error('SUPER_DEBUG: ' + str(e) + ' -- ' + '; '.join([exc_type, fname, exc_tb.tb_lineno]))
+                ######
                 logger.error(str(e))
 
         else:  # if headphones.CONFIG.TORRENT_DOWNLOADER == 2:
