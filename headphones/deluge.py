@@ -89,9 +89,10 @@ def addTorrent(link, data=None):
                 r = requests.get(link, headers=headers)
                 if r.status_code == 200:
                     logger.debug('Deluge: 200 OK')
-                    for chunk in r.iter_content(chunk_size=1024):
-                        if chunk: # filter out keep-alive new chunks
-                            torrentfile = torrentfile + chunk
+                    torrentfile = r.text
+                    #for chunk in r.iter_content(chunk_size=1024):
+                    #    if chunk: # filter out keep-alive new chunks
+                    #        torrentfile = torrentfile + chunk
                 else:
                     logger.debug('Deluge: Trying to GET %s returned status %d' % (link, r.status_code))
                     return False
