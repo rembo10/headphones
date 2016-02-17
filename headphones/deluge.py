@@ -357,12 +357,15 @@ def setTorrentLabel(result):
 
         if labels is not None:
             if label not in labels:
-                logger.debug('Deluge: %s label doesn\'t exist in Deluge, let\'s add it' % label)
-                post_data = json.dumps({"method": 'label.add',
-                                        "params": [label],
-                                        "id": 4})
-                response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
-                logger.debug('Deluge: %s label added to Deluge' % label)
+                try:
+                    logger.debug('Deluge: %s label doesn\'t exist in Deluge, let\'s add it' % label)
+                    post_data = json.dumps({"method": 'label.add',
+                                            "params": [label],
+                                            "id": 4})
+                    response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
+                    logger.debug('Deluge: %s label added to Deluge' % label)
+                except:
+                    logger.error('Deluge: Setting label failed: %s' % str(e))
 
             # add label to torrent
             post_data = json.dumps({"method": 'label.set_torrent',
