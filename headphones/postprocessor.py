@@ -666,10 +666,10 @@ def renameNFO(albumpath):
 def moveFiles(albumpath, release, tracks):
     logger.info("Moving files: %s" % albumpath)
     try:
-        year = release['ReleaseDate'][:4]
+         date = release['ReleaseDate']
     except TypeError:
-        year = u''
-
+         date = u''
+    year = date[:4]
     artist = release['ArtistName'].replace('/', '_')
     album = release['AlbumTitle'].replace('/', '_')
     if headphones.CONFIG.FILE_UNDERSCORES:
@@ -699,6 +699,7 @@ def moveFiles(albumpath, release, tracks):
               '$SortArtist': sortname,
               '$Album': album,
               '$Year': year,
+              '$Date': date,
               '$Type': releasetype,
               '$OriginalFolder': origfolder,
               '$First': firstchar.upper(),
@@ -706,6 +707,7 @@ def moveFiles(albumpath, release, tracks):
               '$sortartist': sortname.lower(),
               '$album': album.lower(),
               '$year': year,
+              '$date': date,
               '$type': releasetype.lower(),
               '$first': firstchar.lower(),
               '$originalfolder': origfolder.lower()
@@ -1057,9 +1059,11 @@ def embedLyrics(downloaded_track_list):
 def renameFiles(albumpath, downloaded_track_list, release):
     logger.info('Renaming files')
     try:
-        year = release['ReleaseDate'][:4]
+        date = release['ReleaseDate']
     except TypeError:
-        year = ''
+        date = u''
+    year = date[:4]
+
     # Until tagging works better I'm going to rely on the already provided metadata
 
     for downloaded_track in downloaded_track_list:
@@ -1108,13 +1112,15 @@ def renameFiles(albumpath, downloaded_track_list, release):
                       '$SortArtist': sortname,
                       '$Album': release['AlbumTitle'],
                       '$Year': year,
+                      '$Date': date,
                       '$disc': discnumber,
                       '$track': tracknumber,
                       '$title': title.lower(),
                       '$artist': artistname.lower(),
                       '$sortartist': sortname.lower(),
                       '$album': release['AlbumTitle'].lower(),
-                      '$year': year
+                      '$year': year,
+                      '$date': date
                       }
 
             ext = os.path.splitext(downloaded_track)[1]
