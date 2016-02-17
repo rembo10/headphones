@@ -123,14 +123,6 @@ def request_response(url, method="get", auto_raise=True,
                 "Request raise HTTP error with status code %d (%s).",
                 e.response.status_code, cause)
 
-            # REMOVE LATER - FOR DEBUGGING
-            super_debug = True
-            if super_debug:
-                import os
-                exc_type, exc_obj, exc_tb = sys.exc_info()
-                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                logger.error('SUPER_DEBUG: ' + str(url) + ' -- ' + '; '.join([exc_type, fname, exc_tb.tb_lineno]))
-
             # Debug response
             if headphones.VERBOSE:
                 server_message(e.response)

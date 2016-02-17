@@ -929,15 +929,7 @@ def send_to_downloader(data, bestqual, album):
                     return
 
             except Exception as e:
-                # REMOVE LATER - FOR DEBUGGING
-                super_debug = True
-                if super_debug:
-                    import sys
-                    exc_type, exc_obj, exc_tb = sys.exc_info()
-                    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                    logger.error('SUPER_DEBUG: ' + str(e) + ' -- ' + '; '.join([exc_type, fname, exc_tb.tb_lineno]))
-                ######
-                logger.error(str(e))
+                logger.error('Error sending torrent to Deluge: %s' % str(e))
 
         else:  # if headphones.CONFIG.TORRENT_DOWNLOADER == 2:
             logger.info("Sending torrent to uTorrent")
