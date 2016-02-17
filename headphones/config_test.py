@@ -191,14 +191,14 @@ class ConfigApiTest(TestCase):
         self.assertTrue(new_conf_mock.write.called, 'write called for new config')
         self.assertEqual(new_conf_mock.filename, path)
 
-        # IMPORTANT ASSERTS: they check, that options are passed to the low-level ConfigObj 
+        # IMPORTANT ASSERTS: they check, that options are passed to the low-level ConfigObj
         # with appropriate values and names
         new_conf_mock['General'].__setitem__.assert_any_call('download_dir', '')
         new_conf_mock['Email'].__setitem__.assert_any_call('email_enabled', 0)
         new_conf_mock['Email'].__setitem__.assert_any_call('email_from', '')
         # from 3.5... new_conf_mock['asdf'].__setitem__.assert_not_called('download_dir', '')
         new_conf_mock['asdf'].__setitem__.assert_any_call(option_name_not_from_definitions,
-                option_name_not_from_definitions_value)
+                                                          option_name_not_from_definitions_value)
 
     @unittestcompat.skip("process_kwargs should be removed")
     def test_process_kwargs(self):

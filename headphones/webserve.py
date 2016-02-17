@@ -44,7 +44,6 @@ except ImportError:
     # Python 2.6.x fallback, from libs
     from ordereddict import OrderedDict
 
-
 def serve_template(templatename, **kwargs):
     interface_dir = os.path.join(str(headphones.PROG_DIR), 'data/interfaces/')
     template_dir = os.path.join(str(interface_dir), headphones.CONFIG.INTERFACE)
@@ -343,7 +342,7 @@ class WebInterface(object):
 
         for dir in dirs:
             artistfolder = os.path.join(dir, folder)
-            if not os.path.isdir(artistfolder.encode(headphones.SYS_ENCODING)):
+            if not os.path.isdir(artistfolder):
                 logger.debug("Cannot find directory: " + artistfolder)
                 continue
             threading.Thread(target=librarysync.libraryScan,
@@ -1130,11 +1129,206 @@ class WebInterface(object):
     @cherrypy.expose
     def configMetaUiUpdate(self, **kwargs):
         # TODO : save config
-        print ('configMetaUiUpdate', kwargs)        
+        print ('configMetaUiUpdate', kwargs)
         raise cherrypy.HTTPRedirect("configMetaUi")
 
     @cherrypy.expose
+    def config(self):
+
+        tabs = headphones.CONFIG.get_tabs()
+
+        # TODO : remove
+        config = self.fill_config()
+
+        return serve_template(templatename="config.html", title=_("Settings"), config=config, tabs=tabs)
+
+        for k, v in config.iteritems():
+            if isinstance(v, headphones.config.path):
+                # need to apply SoftChroot to paths:
+                nv = headphones.SOFT_CHROOT.apply(v)
+                if v != nv:
+                    config[k] = headphones.config.path(nv)
+
+        # Need to convert EXTRAS to a dictionary we can pass to the config:
+        # it'll come in as a string like 2,5,6,8
+
+        extra_munges = {
+            "dj-mix": "dj_mix",
+            "mixtape/street": "mixtape_street"
+        }
+
+        extras_list = [extra_munges.get(x, x) for x in headphones.POSSIBLE_EXTRAS]
+        if headphones.CONFIG.EXTRAS:
+            extras = map(int, headphones.CONFIG.EXTRAS.split(','))
+        else:
+            extras = []
+
+        extras_dict = OrderedDict()
+
+        i = 1
+        for extra in extras_list:
+            if i in extras:
+                extras_dict[extra] = "checked"
+            else:
+                extras_dict[extra] = ""
+            i += 1
+
+        config["extras"] = extras_dict
+
+        return serve_template(templatename="config.html", title=_("Settings"), config=config)
+
+
+    @cherrypy.expose
     def config2(self):
+
+        config = self.fill_config()
+
+ 
+
+        return serve_template(templatename="config2.html", title="Settings", config=config)
+
+    @cherrypy.expose
+    def configUpdate2(self, **kwargs):
+        # Handle the variable config options. Note - keys with False values aren't getting passed
+
+        checked_configs = [
+            "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer",
+            "use_newznab", "newznab_enabled", "use_torznab", "torznab_enabled",
+            "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay",
+            "use_mininova", "use_waffles", "use_rutracker",
+            "use_whatcd", "use_strike", "preferred_bitrate_allow_lossless", "detect_bitrate",
+            "ignore_clean_releases", "freeze_db", "cue_split", "move_files",
+            "rename_files", "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art",
+            "embed_album_art", "embed_lyrics",
+            "replace_existing_folders", "keep_original_folder", "file_underscores",
+            "include_extras", "official_releases_only",
+            "wait_until_release_date", "autowant_upcoming", "autowant_all",
+            "autowant_manually_added", "do_not_process_unmatched", "keep_torrent_files",
+            "music_encoder",
+            "encoderlossless", "encoder_multicore", "delete_lossless_files", "growl_enabled",
+            "growl_onsnatch", "prowl_enabled",
+            "prowl_onsnatch", "xbmc_enabled", "xbmc_update", "xbmc_notify", "lms_enabled",
+            "plex_enabled", "plex_update", "plex_notify",
+            "nma_enabled", "nma_onsnatch", "pushalot_enabled", "pushalot_onsnatch",
+            "synoindex_enabled", "pushover_enabled",
+            "pushover_onsnatch", "pushbullet_enabled", "pushbullet_onsnatch", "subsonic_enabled",
+            "twitter_enabled", "twitter_onsnatch",
+            "osx_notify_enabled", "osx_notify_onsnatch", "boxcar_enabled", "boxcar_onsnatch",
+            "songkick_enabled", "songkick_filter_enabled",
+            "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch",
+            "customauth", "idtag"
+        ]
+        for checked_config in checked_configs:
+            if checked_config not in kwargs:
+                # checked items should be zero or one. if they were not sent then the item was not checked
+                kwargs[checked_config] = 0
+
+        for plain_config, use_config in [(x[4:], x) for x in kwargs if x.startswith('use_')]:
+            # the use prefix is fairly nice in the html, but does not match the actual config
+            kwargs[plain_config] = kwargs[use_config]
+            del kwargs[use_config]
+
+        for k, v in kwargs.iteritems():
+            # TODO : HUGE crutch. It is all because there is no way to deal with options...
+            _conf = headphones.CONFIG._define(k)
+            conftype = _conf[1]
+
+            #print '===>', conftype
+            if conftype is headphones.config.path:
+                nv = headphones.SOFT_CHROOT.revoke(v)
+                if nv != v:
+                    kwargs[k] = nv
+
+        # Check if encoderoutputformat is set multiple times
+        if len(kwargs['encoderoutputformat'][-1]) > 1:
+            kwargs['encoderoutputformat'] = kwargs['encoderoutputformat'][-1]
+        else:
+            kwargs['encoderoutputformat'] = kwargs['encoderoutputformat'][0]
+
+        extra_newznabs = []
+        for kwarg in [x for x in kwargs if x.startswith('newznab_host')]:
+            newznab_host_key = kwarg
+            newznab_number = kwarg[12:]
+            if len(newznab_number):
+                newznab_api_key = 'newznab_api' + newznab_number
+                newznab_enabled_key = 'newznab_enabled' + newznab_number
+                newznab_host = kwargs.get(newznab_host_key, '')
+                newznab_api = kwargs.get(newznab_api_key, '')
+                newznab_enabled = int(kwargs.get(newznab_enabled_key, 0))
+                for key in [newznab_host_key, newznab_api_key, newznab_enabled_key]:
+                    if key in kwargs:
+                        del kwargs[key]
+                extra_newznabs.append((newznab_host, newznab_api, newznab_enabled))
+
+        extra_torznabs = []
+        for kwarg in [x for x in kwargs if x.startswith('torznab_host')]:
+            torznab_host_key = kwarg
+            torznab_number = kwarg[12:]
+            if len(torznab_number):
+                torznab_api_key = 'torznab_api' + torznab_number
+                torznab_enabled_key = 'torznab_enabled' + torznab_number
+                torznab_host = kwargs.get(torznab_host_key, '')
+                torznab_api = kwargs.get(torznab_api_key, '')
+                torznab_enabled = int(kwargs.get(torznab_enabled_key, 0))
+                for key in [torznab_host_key, torznab_api_key, torznab_enabled_key]:
+                    if key in kwargs:
+                        del kwargs[key]
+                extra_torznabs.append((torznab_host, torznab_api, torznab_enabled))
+
+        # Convert the extras to list then string. Coming in as 0 or 1 (append new extras to the end)
+        temp_extras_list = []
+
+        extra_munges = {
+            "dj-mix": "dj_mix",
+            "mixtape/street": "mixtape_street"
+        }
+
+        expected_extras = [extra_munges.get(x, x) for x in headphones.POSSIBLE_EXTRAS]
+        extras_list = [kwargs.get(x, 0) for x in expected_extras]
+
+        i = 1
+        for extra in extras_list:
+            if extra:
+                temp_extras_list.append(i)
+            i += 1
+
+        for extra in expected_extras:
+            temp = '%s_temp' % extra
+            if temp in kwargs:
+                del kwargs[temp]
+            if extra in kwargs:
+                del kwargs[extra]
+
+        headphones.CONFIG.EXTRAS = ','.join(str(n) for n in temp_extras_list)
+
+        headphones.CONFIG.clear_extra_newznabs()
+        headphones.CONFIG.clear_extra_torznabs()
+
+        headphones.CONFIG.process_kwargs(kwargs)
+
+        for extra_newznab in extra_newznabs:
+            headphones.CONFIG.add_extra_newznab(extra_newznab)
+
+        for extra_torznab in extra_torznabs:
+            headphones.CONFIG.add_extra_torznab(extra_torznab)
+
+        # Sanity checking
+        if headphones.CONFIG.SEARCH_INTERVAL and headphones.CONFIG.SEARCH_INTERVAL < 360:
+            logger.info("Search interval too low. Resetting to 6 hour minimum")
+            headphones.CONFIG.SEARCH_INTERVAL = 360
+
+        # Write the config
+        headphones.CONFIG.write()
+
+        # Reconfigure scheduler
+        headphones.initialize_scheduler()
+
+        # Reconfigure musicbrainz database connection with the new values
+        mb.startmb()
+
+        raise cherrypy.HTTPRedirect("config2")
+    
+    def fill_config(self):
         interface_dir = os.path.join(headphones.PROG_DIR, 'data/interfaces/')
         interface_list = [name for name in os.listdir(interface_dir) if
                           os.path.isdir(os.path.join(interface_dir, name))]
@@ -1168,11 +1362,6 @@ class WebInterface(object):
             "transmission_host": headphones.CONFIG.TRANSMISSION_HOST,
             "transmission_username": headphones.CONFIG.TRANSMISSION_USERNAME,
             "transmission_password": headphones.CONFIG.TRANSMISSION_PASSWORD,
-            "deluge_host": headphones.CONFIG.DELUGE_HOST,
-            "deluge_password": headphones.CONFIG.DELUGE_PASSWORD,
-            "deluge_label": headphones.CONFIG.DELUGE_LABEL,
-            "deluge_done_directory": headphones.CONFIG.DELUGE_DONE_DIRECTORY,
-            "deluge_paused": checked(headphones.CONFIG.DELUGE_PAUSED),
             "utorrent_host": headphones.CONFIG.UTORRENT_HOST,
             "utorrent_username": headphones.CONFIG.UTORRENT_USERNAME,
             "utorrent_password": headphones.CONFIG.UTORRENT_PASSWORD,
@@ -1183,7 +1372,6 @@ class WebInterface(object):
             "torrent_downloader_blackhole": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 0),
             "torrent_downloader_transmission": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 1),
             "torrent_downloader_utorrent": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 2),
-            "torrent_downloader_deluge": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 3),
             "download_dir": headphones.CONFIG.DOWNLOAD_DIR,
             "use_blackhole": checked(headphones.CONFIG.BLACKHOLE),
             "blackhole_dir": headphones.CONFIG.BLACKHOLE_DIR,
@@ -1342,10 +1530,6 @@ class WebInterface(object):
             "pushbullet_onsnatch": checked(headphones.CONFIG.PUSHBULLET_ONSNATCH),
             "pushbullet_apikey": headphones.CONFIG.PUSHBULLET_APIKEY,
             "pushbullet_deviceid": headphones.CONFIG.PUSHBULLET_DEVICEID,
-            "telegram_enabled": checked(headphones.CONFIG.TELEGRAM_ENABLED),
-            "telegram_onsnatch": checked(headphones.CONFIG.TELEGRAM_ONSNATCH),
-            "telegram_token": headphones.CONFIG.TELEGRAM_TOKEN,
-            "telegram_userid": headphones.CONFIG.TELEGRAM_USERID,
             "subsonic_enabled": checked(headphones.CONFIG.SUBSONIC_ENABLED),
             "subsonic_host": headphones.CONFIG.SUBSONIC_HOST,
             "subsonic_username": headphones.CONFIG.SUBSONIC_USERNAME,
@@ -1421,153 +1605,7 @@ class WebInterface(object):
             i += 1
 
         config["extras"] = extras_dict
-
-        return serve_template(templatename="config2.html", title="Settings", config=config)
-
-    @cherrypy.expose
-    def configUpdate2(self, **kwargs):
-        # Handle the variable config options. Note - keys with False values aren't getting passed
-
-        checked_configs = [
-            "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer",
-            "use_newznab", "newznab_enabled", "use_torznab", "torznab_enabled",
-            "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay",
-            "use_mininova", "use_waffles", "use_rutracker",
-            "use_whatcd", "use_strike", "preferred_bitrate_allow_lossless", "detect_bitrate",
-            "ignore_clean_releases", "freeze_db", "cue_split", "move_files",
-            "rename_files", "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art",
-            "embed_album_art", "embed_lyrics",
-            "replace_existing_folders", "keep_original_folder", "file_underscores",
-            "include_extras", "official_releases_only",
-            "wait_until_release_date", "autowant_upcoming", "autowant_all",
-            "autowant_manually_added", "do_not_process_unmatched", "keep_torrent_files",
-            "music_encoder",
-            "encoderlossless", "encoder_multicore", "delete_lossless_files", "growl_enabled",
-            "growl_onsnatch", "prowl_enabled",
-            "prowl_onsnatch", "xbmc_enabled", "xbmc_update", "xbmc_notify", "lms_enabled",
-            "plex_enabled", "plex_update", "plex_notify",
-            "nma_enabled", "nma_onsnatch", "pushalot_enabled", "pushalot_onsnatch",
-            "synoindex_enabled", "pushover_enabled",
-            "pushover_onsnatch", "pushbullet_enabled", "pushbullet_onsnatch", "subsonic_enabled",
-            "twitter_enabled", "twitter_onsnatch",
-            "telegram_enabled", "telegram_onsnatch",
-            "osx_notify_enabled", "osx_notify_onsnatch", "boxcar_enabled", "boxcar_onsnatch",
-            "songkick_enabled", "songkick_filter_enabled",
-            "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch",
-            "customauth", "idtag", "deluge_paused"
-        ]
-        for checked_config in checked_configs:
-            if checked_config not in kwargs:
-                # checked items should be zero or one. if they were not sent then the item was not checked
-                kwargs[checked_config] = 0
-
-        for plain_config, use_config in [(x[4:], x) for x in kwargs if x.startswith('use_')]:
-            # the use prefix is fairly nice in the html, but does not match the actual config
-            kwargs[plain_config] = kwargs[use_config]
-            del kwargs[use_config]
-
-        for k, v in kwargs.iteritems():
-            # TODO : HUGE crutch. It is all because there is no way to deal with options...
-            try:
-                _conf = headphones.CONFIG._define(k)
-            except KeyError:
-                continue
-            conftype = _conf[1]
-
-            #print '===>', conftype
-            if conftype is headphones.config.path:
-                nv = headphones.SOFT_CHROOT.revoke(v)
-                if nv != v:
-                    kwargs[k] = nv
-
-        # Check if encoderoutputformat is set multiple times
-        if len(kwargs['encoderoutputformat'][-1]) > 1:
-            kwargs['encoderoutputformat'] = kwargs['encoderoutputformat'][-1]
-        else:
-            kwargs['encoderoutputformat'] = kwargs['encoderoutputformat'][0]
-
-        extra_newznabs = []
-        for kwarg in [x for x in kwargs if x.startswith('newznab_host')]:
-            newznab_host_key = kwarg
-            newznab_number = kwarg[12:]
-            if len(newznab_number):
-                newznab_api_key = 'newznab_api' + newznab_number
-                newznab_enabled_key = 'newznab_enabled' + newznab_number
-                newznab_host = kwargs.get(newznab_host_key, '')
-                newznab_api = kwargs.get(newznab_api_key, '')
-                newznab_enabled = int(kwargs.get(newznab_enabled_key, 0))
-                for key in [newznab_host_key, newznab_api_key, newznab_enabled_key]:
-                    if key in kwargs:
-                        del kwargs[key]
-                extra_newznabs.append((newznab_host, newznab_api, newznab_enabled))
-
-        extra_torznabs = []
-        for kwarg in [x for x in kwargs if x.startswith('torznab_host')]:
-            torznab_host_key = kwarg
-            torznab_number = kwarg[12:]
-            if len(torznab_number):
-                torznab_api_key = 'torznab_api' + torznab_number
-                torznab_enabled_key = 'torznab_enabled' + torznab_number
-                torznab_host = kwargs.get(torznab_host_key, '')
-                torznab_api = kwargs.get(torznab_api_key, '')
-                torznab_enabled = int(kwargs.get(torznab_enabled_key, 0))
-                for key in [torznab_host_key, torznab_api_key, torznab_enabled_key]:
-                    if key in kwargs:
-                        del kwargs[key]
-                extra_torznabs.append((torznab_host, torznab_api, torznab_enabled))
-
-        # Convert the extras to list then string. Coming in as 0 or 1 (append new extras to the end)
-        temp_extras_list = []
-
-        extra_munges = {
-            "dj-mix": "dj_mix",
-            "mixtape/street": "mixtape_street"
-        }
-
-        expected_extras = [extra_munges.get(x, x) for x in headphones.POSSIBLE_EXTRAS]
-        extras_list = [kwargs.get(x, 0) for x in expected_extras]
-
-        i = 1
-        for extra in extras_list:
-            if extra:
-                temp_extras_list.append(i)
-            i += 1
-
-        for extra in expected_extras:
-            temp = '%s_temp' % extra
-            if temp in kwargs:
-                del kwargs[temp]
-            if extra in kwargs:
-                del kwargs[extra]
-
-        headphones.CONFIG.EXTRAS = ','.join(str(n) for n in temp_extras_list)
-
-        headphones.CONFIG.clear_extra_newznabs()
-        headphones.CONFIG.clear_extra_torznabs()
-
-        headphones.CONFIG.process_kwargs(kwargs)
-
-        for extra_newznab in extra_newznabs:
-            headphones.CONFIG.add_extra_newznab(extra_newznab)
-
-        for extra_torznab in extra_torznabs:
-            headphones.CONFIG.add_extra_torznab(extra_torznab)
-
-        # Sanity checking
-        if headphones.CONFIG.SEARCH_INTERVAL and headphones.CONFIG.SEARCH_INTERVAL < 360:
-            logger.info("Search interval too low. Resetting to 6 hour minimum")
-            headphones.CONFIG.SEARCH_INTERVAL = 360
-
-        # Write the config
-        headphones.CONFIG.write()
-
-        # Reconfigure scheduler
-        headphones.initialize_scheduler()
-
-        # Reconfigure musicbrainz database connection with the new values
-        mb.startmb()
-
-        raise cherrypy.HTTPRedirect("config2")
+        return config
 
     @cherrypy.expose
     def do_state_change(self, signal, title, timer):
@@ -1717,12 +1755,6 @@ class WebInterface(object):
         logger.info("Testing Pushbullet notifications")
         pushbullet = notifiers.PUSHBULLET()
         pushbullet.notify("it works!", "Test message")
-
-    @cherrypy.expose
-    def testTelegram(self):
-        logger.info("Testing Telegram notifications")
-        telegram = notifiers.TELEGRAM()
-        telegram.notify("it works!", "lazers pew pew")
 
 
 class Artwork(object):

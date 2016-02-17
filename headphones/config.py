@@ -4,31 +4,61 @@ import os
 import re
 import headphones.logger
 from configobj import ConfigObj
+from configview import Tab, Tabs, Block
+from configoptions import path, bool_int
 
+from configoptions import OptionString, OptionNumber, OptionSwitch
 
-def bool_int(value):
-    """
-    Casts a config value into a 0 or 1
-    """
-    if isinstance(value, basestring):
-        if value.lower() in ('', '0', 'false', 'f', 'no', 'n', 'off'):
-            value = 0
-    return int(bool(value))
+def _(x):
+    return x
 
+_TABS = Tabs((
+    Tab('webui', _("Web Interface")),
+    Tab('search', _("Search providers")),
+    Tab('download', _("Download settings")),
+    Tab('quality_processing', _("Quality &amp; Post Processing")),
+    Tab('notifications', _("Notifications")),
+    Tab('advanced', _("Advanced Settings")),
+))
 
-class path(str):
-    """Internal 'marker' type for paths in config."""
+def register_block(tabid, *blocks):
+    tab = None
+    for t in _TABS:
+        if t.id == tabid:
+            tab = t
+    if not tab:
+        raise Exception('no such tab: ' + str(tabid))
 
-    @staticmethod
-    def __call__(val):
-        return path(val)
+    for block in blocks:
+        tab.add([block])
 
-    def __new__(cls, *args, **kw):
-        hstr = str.__new__(cls, *args, **kw)
-        return hstr
+"""
+${OptionString('http_host',
+    tip='Host to bind web server to',
+    label='HTTP Host',
+    caption='Use 0.0.0.0 to allow outside connections',
+    size=30)}
 
-    def __repr__(self):
-        return 'headphones.config.path(%s)' % self
+${OptionString('http_port',
+    tip='Port to bind web server to. Note that ports below 1024 may require root.',
+    label='HTTP Port',
+    size=10)}
+"""
+register_block('webui',
+   Block('basic', caption=_("Basic"), options=[
+       OptionString('HTTP_HOST', default='', maxlength=30),
+       OptionNumber('HTTP_PORT', default=8181, minvalue=1, maxvalue=99999),
+   ]),
+
+   Block('api', caption=_("API"), options=[
+       OptionString('API_KEY', default='', maxlength=20),
+       OptionSwitch('API_ENABLED', default=False),
+   ]),
+)
+
+# =======================================================================================
+# =======================================================================================
+# =======================================================================================
 
 _CONFIG_DEFINITIONS = {
     'ADD_ALBUM_ART': (int, 'General', 0),
@@ -67,12 +97,7 @@ _CONFIG_DEFINITIONS = {
     'CUSTOMSLEEP': (int, 'General', 1),
     'CUSTOMUSER': (str, 'General', ''),
     'DELETE_LOSSLESS_FILES': (int, 'General', 1),
-    'DELUGE_HOST': (str, 'Deluge', ''),
-    'DELUGE_PASSWORD': (str, 'Deluge', ''),
-    'DELUGE_LABEL': (str, 'Deluge', ''),
-    'DELUGE_DONE_DIRECTORY': (str, 'Deluge', ''),
-    'DELUGE_PAUSED': (int, 'Deluge', 0),
-    'DESTINATION_DIR': (str, 'General', ''),
+    'DESTINATION_DIR': (path, 'General', ''),
     'DETECT_BITRATE': (int, 'General', 0),
     'DO_NOT_PROCESS_UNMATCHED': (int, 'General', 0),
     'DOWNLOAD_DIR': (path, 'General', ''),
@@ -254,11 +279,7 @@ _CONFIG_DEFINITIONS = {
     'SUBSONIC_PASSWORD': (str, 'Subsonic', ''),
     'SUBSONIC_USERNAME': (str, 'Subsonic', ''),
     'SYNOINDEX_ENABLED': (int, 'Synoindex', 0),
-    'TELEGRAM_TOKEN': (str, 'Telegram', ''),
-    'TELEGRAM_USERID': (str, 'Telegram', ''),
-    'TELEGRAM_ENABLED': (int, 'Telegram', 0),
-    'TELEGRAM_ONSNATCH': (int, 'Telegram', 0),
-    'TORRENTBLACKHOLE_DIR': (str, 'General', ''),
+    'TORRENTBLACKHOLE_DIR': (path, 'General', ''),
     'TORRENT_DOWNLOADER': (int, 'General', 0),
     'TORRENT_REMOVAL_INTERVAL': (int, 'General', 720),
     'TORZNAB': (int, 'Torznab', 0),
@@ -304,6 +325,11 @@ _CONFIG_DEFINITIONS = {
 class Config(object):
     """ Wraps access to particular values in a config file """
 
+
+
+    def get_tabs(self):
+        return self._tb
+
     def __init__(self, config_file):
         """ Initialize the config with values from a file """
         self._config_file = config_file
@@ -312,6 +338,8 @@ class Config(object):
             self.check_setting(key)
         self.ENCODER_MULTICORE_COUNT = max(0, self.ENCODER_MULTICORE_COUNT)
         self._upgrade()
+
+        self._tb = _TABS
 
     def _define(self, name):
         key = name.upper()
