@@ -44,6 +44,7 @@ import json
 import headphones
 import requests
 from base64 import b64encode
+import traceback
 
 delugeweb_auth = {}
 delugeweb_url = ''
@@ -67,7 +68,7 @@ def addTorrent(link, data=None):
                     name_length = int(re.findall('name([0-9]*)\:.*?\:', torrentfile)[0])
                     logger.debug('Deluge: Getting torrent name')
                     name = re.findall('name[0-9]*\:(.*?)\:', torrentfile)[0][:name_length]
-                except:
+                except Exception as e:
                     logger.debug('Deluge: Could not get torrent name, getting file name')
                     # get last part of link/path (name only)
                     name = link.split('\\')[-1].split('/')[-1]
@@ -108,7 +109,7 @@ def addTorrent(link, data=None):
                 name_length = int(re.findall('name([0-9]*)\:.*?\:', torrentfile)[0])
                 logger.debug('Deluge: Getting torrent name')
                 name = re.findall('name[0-9]*\:(.*?)\:', torrentfile)[0][:name_length]
-            except:
+            except Exception as e:
                 logger.debug('Deluge: Could not get torrent name, getting file name')
                 # get last part of link/path (name only)
                 name = link.split('\\')[-1].split('/')[-1]
@@ -138,6 +139,8 @@ def addTorrent(link, data=None):
 
     except Exception as e:
         logger.error(str(e))
+        formatted_lines = traceback.format_exc().splitlines()
+        logger.error('; '.join(formatted_lines))
 
 def getTorrentFolder(result):
     logger.debug('Deluge: Get torrent folder name')
@@ -328,6 +331,8 @@ def _add_torrent_file(result):
                                     "id": 2})
         except Exception as e:
             logger.error('Deluge: Encoding issue? Trying again with UTF8 (%s)' % str(e))
+            formatted_lines = traceback.format_exc().splitlines()
+            logger.error('; '.join(formatted_lines))
             post_data = json.dumps({"method": "core.add_torrent_file",
                                     "params": [result['name'] + '.torrent', b64encode(result['content'].encode('utf-8')), {}],
                                     "id": 2})
@@ -337,6 +342,8 @@ def _add_torrent_file(result):
         return json.loads(response.text)['result']
     except Exception as e:
         logger.error('Deluge: Adding torrent file failed: %s' % str(e))
+        formatted_lines = traceback.format_exc().splitlines()
+        logger.error('; '.join(formatted_lines))
 
 def setTorrentLabel(result):
     logger.debug('Deluge: Setting label')
@@ -365,8 +372,10 @@ def setTorrentLabel(result):
                                             "id": 4})
                     response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
                     logger.debug('Deluge: %s label added to Deluge' % label)
-                except:
+                except Exception as e:
                     logger.error('Deluge: Setting label failed: %s' % str(e))
+                    formatted_lines = traceback.format_exc().splitlines()
+                    logger.error('; '.join(formatted_lines))
 
             # add label to torrent
             post_data = json.dumps({"method": 'label.set_torrent',
