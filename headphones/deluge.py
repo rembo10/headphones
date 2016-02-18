@@ -297,7 +297,7 @@ def _add_torrent_magnet(result):
                                 "id": 2})
         response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
         result['hash'] = json.loads(response.text)['result']
-        logger.debug('Deluge: Response was %s' % json.loads(response.text)['result'])
+        logger.debug('Deluge: Response was %s' % str(json.loads(response.text)['result']))
         return json.loads(response.text)['result']
     except Exception as e:
         logger.error('Deluge: Adding torrent magnet failed: %s' % str(e))
@@ -313,7 +313,7 @@ def _add_torrent_url(result):
                                 "id": 2})
         response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
         result['hash'] = json.loads(response.text)['result']
-        logger.debug('Deluge: Response was %s' % json.loads(response.text)['result'])
+        logger.debug('Deluge: Response was %s' % str(json.loads(response.text)['result']))
         return json.loads(response.text)['result']
     except Exception as e:
         logger.error('Deluge: Adding torrent URL failed: %s' % str(e))
@@ -325,20 +325,12 @@ def _add_torrent_file(result):
         _get_auth()
     try:
         # content is torrent file contents that needs to be encoded to base64
-        try:
-            post_data = json.dumps({"method": "core.add_torrent_file",
-                                    "params": [result['name'] + '.torrent', b64encode(result['content']), {}],
-                                    "id": 2})
-        except Exception as e:
-            logger.error('Deluge: Encoding issue? Trying again with UTF8 (%s)' % str(e))
-            formatted_lines = traceback.format_exc().splitlines()
-            logger.error('; '.join(formatted_lines))
-            post_data = json.dumps({"method": "core.add_torrent_file",
-                                    "params": [result['name'] + '.torrent', b64encode(result['content'].encode('utf-8')), {}],
-                                    "id": 2})
+        post_data = json.dumps({"method": "core.add_torrent_file",
+                                "params": [result['name'] + '.torrent', b64encode(result['content'].encode('utf8')), {}],
+                                "id": 2})
         response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth)
         result['hash'] = json.loads(response.text)['result']
-        logger.debug('Deluge: Response was ' + json.loads(response.text)['result'])
+        logger.debug('Deluge: Response was %s' % str(json.loads(response.text)['result']))
         return json.loads(response.text)['result']
     except Exception as e:
         logger.error('Deluge: Adding torrent file failed: %s' % str(e))
