@@ -343,7 +343,7 @@ class WebInterface(object):
 
         for dir in dirs:
             artistfolder = os.path.join(dir, folder)
-            if not os.path.isdir(artistfolder):
+            if not os.path.isdir(artistfolder.encode(headphones.SYS_ENCODING)):
                 logger.debug("Cannot find directory: " + artistfolder)
                 continue
             threading.Thread(target=librarysync.libraryScan,
@@ -1367,8 +1367,16 @@ class WebInterface(object):
             "idtag": checked(headphones.CONFIG.IDTAG)
         }
 
+        for k, v in config.iteritems():
+            if isinstance(v, headphones.config.path):
+                # need to apply SoftChroot to paths:
+                nv = headphones.SOFT_CHROOT.apply(v)
+                if v != nv:
+                    config[k] = headphones.config.path(nv)
+
         # Need to convert EXTRAS to a dictionary we can pass to the config:
         # it'll come in as a string like 2,5,6,8
+
         extra_munges = {
             "dj-mix": "dj_mix",
             "mixtape/street": "mixtape_street"
@@ -1434,6 +1442,17 @@ class WebInterface(object):
             # the use prefix is fairly nice in the html, but does not match the actual config
             kwargs[plain_config] = kwargs[use_config]
             del kwargs[use_config]
+
+        for k, v in kwargs.iteritems():
+            # TODO : HUGE crutch. It is all because there is no way to deal with options...
+            _conf = headphones.CONFIG._define(k)
+            conftype = _conf[1]
+
+            #print '===>', conftype
+            if conftype is headphones.config.path:
+                nv = headphones.SOFT_CHROOT.revoke(v)
+                if nv != v:
+                    kwargs[k] = nv
 
         # Check if encoderoutputformat is set multiple times
         if len(kwargs['encoderoutputformat'][-1]) > 1:
