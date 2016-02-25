@@ -11,5 +11,5 @@
 # E265 block comment should start with '# '
 # E501 line too long (312 > 160 characters)
 # E502 the backslash is redundant between brackets
-ignore = E121,E122,E123,E124,E125,E126,E127,E128,E261,E262,E265,E501,E502
+ignore = E121,E122,E124,E125,E126,E127,E128,E261,E262,E265,E501,E502
 max-line-length = 160
