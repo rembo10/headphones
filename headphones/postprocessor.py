@@ -676,9 +676,9 @@ def renameNFO(albumpath):
 def moveFiles(albumpath, release, tracks):
     logger.info("Moving files: %s" % albumpath)
     try:
-         date = release['ReleaseDate']
+        date = release['ReleaseDate']
     except TypeError:
-         date = u''
+        date = u''
     year = date[:4]
     artist = release['ArtistName'].replace('/', '_')
     album = release['AlbumTitle'].replace('/', '_')
