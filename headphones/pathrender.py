@@ -34,6 +34,7 @@ from enum import Enum
 
 __author__ = "Andrzej Ciarkowski <andrzej.ciarkowski@gmail.com>"
 
+
 class _PatternElement(object):
     '''ABC for hierarchy of path name renderer pattern elements.'''
     def render(self, replacement):
@@ -41,10 +42,12 @@ class _PatternElement(object):
         '''Format this _PatternElement into string using provided substitution dictionary.'''
         raise NotImplementedError()
 
+
 class _Generator(_PatternElement):
     # pylint: disable=abstract-method
     '''Tagging interface for "content-generating" elements like replacement or optional block.'''
     pass
+
 
 class _Replacement(_Generator):
     '''Replacement variable, eg. $title.'''
@@ -95,14 +98,17 @@ _OPTIONAL_END = u'}'
 _ESCAPE_CHAR = u'\''
 _REPLACEMENT_START = u'$'
 
+
 def _is_replacement_valid(c):
     # type: (str) -> bool
     return c.isalnum() or c == u'_'
+
 
 class _State(Enum):
     LITERAL = 0
     ESCAPE = 1
     REPLACEMENT = 2
+
 
 def _append_literal(scope, text):
     # type: ([_PatternElement], str) -> None
@@ -111,10 +117,12 @@ def _append_literal(scope, text):
         return
     scope.append(_LiteralText(text))
 
+
 class Warnings(Enum):
     '''Pattern parsing warnings, as stored withing warnings property of Pattern object after parsing.'''
     UNCLOSED_ESCAPE = 'Warnings.UNCLOSED_ESCAPE'
     UNCLOSED_OPTIONAL = 'Warnings.UNCLOSED_OPTIONAL'
+
 
 def _parse_pattern(pattern, warnings):
     # type: (str,MutableSet[Warnings]) -> [_PatternElement]
@@ -187,6 +195,7 @@ def _parse_pattern(pattern, warnings):
         # don't care about unclosed elements :P
         _append_literal(root_scope, pattern[start:])
     return root_scope
+
 
 class Pattern(object):
     '''Stores preparsed rename pattern for repeated use.

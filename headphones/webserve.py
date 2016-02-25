@@ -1709,6 +1709,7 @@ class WebInterface(object):
         telegram = notifiers.TELEGRAM()
         telegram.notify("it works!", "lazers pew pew")
 
+
 class Artwork(object):
     @cherrypy.expose
     def index(self):
