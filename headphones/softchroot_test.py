@@ -6,6 +6,7 @@ from headphones.unittestcompat import TestCase, TestArgs
 from headphones.softchroot import SoftChroot
 from headphones.exceptions import SoftChrootError
 
+
 class SoftChrootTest(TestCase):
     def test_create(self):
         """ create headphones.SoftChroot """

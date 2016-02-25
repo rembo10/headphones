@@ -94,6 +94,7 @@ MIRRORLIST = ["musicbrainz.org", "headphones", "custom"]
 
 UMASK = None
 
+
 def initialize(config_file):
     with INIT_LOCK:
 
