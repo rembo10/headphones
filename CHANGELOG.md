@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.5.13
+Released 25 February 2016
+
+Another hotfix update
+
+Highlights:
+* Fixed: Saving config with non-defined options
+* Fixed: Pep8 errors
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.12...v0.5.13).
+
 ## v0.5.12
 Released 25 February 2016
 
