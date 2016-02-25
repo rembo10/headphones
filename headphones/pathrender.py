@@ -25,9 +25,9 @@
     * substitution variables, which start with dollar sign ($) and
       extend until next non-alphanumeric+underscore character
       (like $This and $5_that).
-    * optional elements enclosed in square brackets, which render
+    * optional elements enclosed in curly braces, which render
       nonempty value only if any variable or optional inside returned
-      nonempty value, ignoring literals (like [\'[\'$That\']\' ]).
+      nonempty value, ignoring literals (like {\'[\'$That\']\'}).
 '''
 from __future__ import print_function
 from enum import Enum
@@ -90,8 +90,8 @@ class _OptionalBlock(_Generator):
             return u""
 
 
-_OPTIONAL_START = u'['
-_OPTIONAL_END = u']'
+_OPTIONAL_START = u'{'
+_OPTIONAL_END = u'}'
 _ESCAPE_CHAR = u'\''
 _REPLACEMENT_START = u'$'
 
