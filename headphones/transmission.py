@@ -29,6 +29,7 @@ import headphones
 
 _session_id = None
 
+
 def addTorrent(link, data=None):
     method = 'torrent-add'
 
