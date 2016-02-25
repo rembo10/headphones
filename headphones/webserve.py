@@ -1456,7 +1456,10 @@ class WebInterface(object):
 
         for k, v in kwargs.iteritems():
             # TODO : HUGE crutch. It is all because there is no way to deal with options...
-            _conf = headphones.CONFIG._define(k)
+            try:
+                _conf = headphones.CONFIG._define(k)
+            except KeyError:
+                continue
             conftype = _conf[1]
 
             #print '===>', conftype
