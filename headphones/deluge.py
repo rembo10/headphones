@@ -101,8 +101,8 @@ def addTorrent(link, data=None):
                         'content': torrentfile}
             retid = _add_torrent_file(result)
 
+        # elif link.endswith('.torrent') or data:
         elif not (link.startswith('http://') or link.startswith('https://')):
-        #elif link.endswith('.torrent') or data:
             if data:
                 logger.debug('Deluge: Getting .torrent data')
                 torrentfile = data
