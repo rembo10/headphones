@@ -14,6 +14,7 @@ _dummy = False
 if sys.version_info[0] == 2 and sys.version_info[1] <= 6:
     _dummy = True
 
+
 def _d(f):
     def decorate(self, *args, **kw):
         if not _dummy:
@@ -91,6 +92,7 @@ class TestCase(TC):
 
             # True indicates, that exception is handled
             return True
+
 
 def TestArgs(*parameters):
     def tuplify(x):

@@ -15,6 +15,7 @@ def bool_int(value):
             value = 0
     return int(bool(value))
 
+
 class path(str):
     """Internal 'marker' type for paths in config."""
 
