@@ -33,7 +33,7 @@ from pygazelle import format as gazelleformat
 import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
-from headphones import utorrent, transmission, notifiers, rutracker
+from headphones import utorrent, transmission, notifiers, rutracker, deluge
 from bencode import bencode, bdecode
 
 
@@ -851,7 +851,7 @@ def send_to_downloader(data, bestqual, album):
                 else:
                     logger.error("Cannot save magnet link in blackhole. " \
                                  "Please switch your torrent downloader to " \
-                                 "Transmission or uTorrent, or allow Headphones " \
+                                 "Transmission, uTorrent or Deluge, or allow Headphones " \
                                  "to open or convert magnet links")
                     return
             else:
@@ -888,6 +888,48 @@ def send_to_downloader(data, bestqual, album):
             seed_ratio = get_seed_ratio(bestqual[3])
             if seed_ratio is not None:
                 transmission.setSeedRatio(torrentid, seed_ratio)
+
+        elif headphones.CONFIG.TORRENT_DOWNLOADER == 3: # Deluge
+            logger.info("Sending torrent to Deluge")
+
+            try:
+                # Add torrent
+                if bestqual[3] == 'rutracker.org':
+                    torrentid = deluge.addTorrent('', data)
+                else:
+                    torrentid = deluge.addTorrent(bestqual[2])
+
+                if not torrentid:
+                    logger.error("Error sending torrent to Deluge. Are you sure it's running? Maybe the torrent already exists?")
+                    return
+
+                # This pauses the torrent right after it is added
+                if headphones.CONFIG.DELUGE_PAUSED:
+                    deluge.setTorrentPause({'hash': torrentid})
+
+                # Set Label
+                if headphones.CONFIG.DELUGE_LABEL:
+                    deluge.setTorrentLabel({'hash': torrentid})
+
+                # Set Seed Ratio
+                seed_ratio = get_seed_ratio(bestqual[3])
+                if seed_ratio is not None:
+                    deluge.setSeedRatio({'hash': torrentid, 'ratio': seed_ratio})
+
+                # Set move-to directory
+                if headphones.CONFIG.DELUGE_DONE_DIRECTORY:
+                    deluge.setTorrentPath({'hash': torrentid})
+
+                # I only just realized this function is useless...
+                folder_name = deluge.getTorrentFolder({'hash': torrentid})
+                if folder_name:
+                    logger.info('Torrent folder name: %s' % folder_name)
+                else:
+                    logger.error('Torrent folder name could not be determined')
+                    return
+
+            except Exception as e:
+                logger.error('Error sending torrent to Deluge: %s' % str(e))
 
         else:  # if headphones.CONFIG.TORRENT_DOWNLOADER == 2:
             logger.info("Sending torrent to uTorrent")
@@ -960,6 +1002,10 @@ def send_to_downloader(data, bestqual, album):
         logger.info(u"Sending PushBullet notification")
         pushbullet = notifiers.PUSHBULLET()
         pushbullet.notify(name, "Download started")
+    if headphones.CONFIG.TELEGRAM_ENABLED and headphones.CONFIG.TELEGRAM_ONSNATCH:
+        logger.info(u"Sending Telegram notification")
+        telegram = notifiers.TELEGRAM()
+        telegram.notify(name, "Download started")
     if headphones.CONFIG.TWITTER_ENABLED and headphones.CONFIG.TWITTER_ONSNATCH:
         logger.info(u"Sending Twitter notification")
         twitter = notifiers.TwitterNotifier()

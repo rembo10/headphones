@@ -856,3 +856,36 @@ class Email(object):
         except Exception, e:
             logger.warn('Error sending Email: %s' % e)
             return False
+
+
+class TELEGRAM(object):
+
+    def notify(self, message, status):
+        if not headphones.CONFIG.TELEGRAM_ENABLED:
+            return
+
+        import requests
+
+        TELEGRAM_API = "https://api.telegram.org/bot%s/%s"
+
+        # Get configuration data
+        token = headphones.CONFIG.TELEGRAM_TOKEN
+        userid = headphones.CONFIG.TELEGRAM_USERID
+
+        # Construct message
+        payload = {'chat_id': userid, 'text': status + ': ' + message}
+
+        # Send message to user using Telegram's Bot API
+        try:
+            response = requests.post(TELEGRAM_API % (token, "sendMessage"), data=payload)
+        except Exception, e:
+            logger.info(u'Telegram notify failed: ' + str(e))
+
+        # Error logging
+        sent_successfuly = True
+        if not response.status_code == 200:
+            logger.info(u'Could not send notification to TelegramBot (token=%s). Response: [%s]', (token, response.text))
+            sent_successfuly = False
+
+        logger.info(u"Telegram notifications sent.")
+        return sent_successfuly

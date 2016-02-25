@@ -1156,6 +1156,11 @@ class WebInterface(object):
             "transmission_host": headphones.CONFIG.TRANSMISSION_HOST,
             "transmission_username": headphones.CONFIG.TRANSMISSION_USERNAME,
             "transmission_password": headphones.CONFIG.TRANSMISSION_PASSWORD,
+            "deluge_host": headphones.CONFIG.DELUGE_HOST,
+            "deluge_password": headphones.CONFIG.DELUGE_PASSWORD,
+            "deluge_label": headphones.CONFIG.DELUGE_LABEL,
+            "deluge_done_directory": headphones.CONFIG.DELUGE_DONE_DIRECTORY,
+            "deluge_paused": checked(headphones.CONFIG.DELUGE_PAUSED),
             "utorrent_host": headphones.CONFIG.UTORRENT_HOST,
             "utorrent_username": headphones.CONFIG.UTORRENT_USERNAME,
             "utorrent_password": headphones.CONFIG.UTORRENT_PASSWORD,
@@ -1166,6 +1171,7 @@ class WebInterface(object):
             "torrent_downloader_blackhole": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 0),
             "torrent_downloader_transmission": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 1),
             "torrent_downloader_utorrent": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 2),
+            "torrent_downloader_deluge": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 3),
             "download_dir": headphones.CONFIG.DOWNLOAD_DIR,
             "use_blackhole": checked(headphones.CONFIG.BLACKHOLE),
             "blackhole_dir": headphones.CONFIG.BLACKHOLE_DIR,
@@ -1324,6 +1330,10 @@ class WebInterface(object):
             "pushbullet_onsnatch": checked(headphones.CONFIG.PUSHBULLET_ONSNATCH),
             "pushbullet_apikey": headphones.CONFIG.PUSHBULLET_APIKEY,
             "pushbullet_deviceid": headphones.CONFIG.PUSHBULLET_DEVICEID,
+            "telegram_enabled": checked(headphones.CONFIG.TELEGRAM_ENABLED),
+            "telegram_onsnatch": checked(headphones.CONFIG.TELEGRAM_ONSNATCH),
+            "telegram_token": headphones.CONFIG.TELEGRAM_TOKEN,
+            "telegram_userid": headphones.CONFIG.TELEGRAM_USERID,
             "subsonic_enabled": checked(headphones.CONFIG.SUBSONIC_ENABLED),
             "subsonic_host": headphones.CONFIG.SUBSONIC_HOST,
             "subsonic_username": headphones.CONFIG.SUBSONIC_USERNAME,
@@ -1428,10 +1438,11 @@ class WebInterface(object):
             "synoindex_enabled", "pushover_enabled",
             "pushover_onsnatch", "pushbullet_enabled", "pushbullet_onsnatch", "subsonic_enabled",
             "twitter_enabled", "twitter_onsnatch",
+            "telegram_enabled", "telegram_onsnatch",
             "osx_notify_enabled", "osx_notify_onsnatch", "boxcar_enabled", "boxcar_onsnatch",
             "songkick_enabled", "songkick_filter_enabled",
             "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch",
-            "customauth", "idtag"
+            "customauth", "idtag", "deluge_paused"
         ]
         for checked_config in checked_configs:
             if checked_config not in kwargs:
@@ -1691,6 +1702,12 @@ class WebInterface(object):
         logger.info("Testing Pushbullet notifications")
         pushbullet = notifiers.PUSHBULLET()
         pushbullet.notify("it works!", "Test message")
+
+    @cherrypy.expose
+    def testTelegram(self):
+        logger.info("Testing Telegram notifications")
+        telegram = notifiers.TELEGRAM()
+        telegram.notify("it works!", "lazers pew pew")
 
 
 class Artwork(object):

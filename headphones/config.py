@@ -15,6 +15,7 @@ def bool_int(value):
             value = 0
     return int(bool(value))
 
+
 class path(str):
     """Internal 'marker' type for paths in config."""
 
@@ -66,7 +67,12 @@ _CONFIG_DEFINITIONS = {
     'CUSTOMSLEEP': (int, 'General', 1),
     'CUSTOMUSER': (str, 'General', ''),
     'DELETE_LOSSLESS_FILES': (int, 'General', 1),
-    'DESTINATION_DIR': (path, 'General', ''),
+    'DELUGE_HOST': (str, 'Deluge', ''),
+    'DELUGE_PASSWORD': (str, 'Deluge', ''),
+    'DELUGE_LABEL': (str, 'Deluge', ''),
+    'DELUGE_DONE_DIRECTORY': (str, 'Deluge', ''),
+    'DELUGE_PAUSED': (int, 'Deluge', 0),
+    'DESTINATION_DIR': (str, 'General', ''),
     'DETECT_BITRATE': (int, 'General', 0),
     'DO_NOT_PROCESS_UNMATCHED': (int, 'General', 0),
     'DOWNLOAD_DIR': (path, 'General', ''),
@@ -248,7 +254,11 @@ _CONFIG_DEFINITIONS = {
     'SUBSONIC_PASSWORD': (str, 'Subsonic', ''),
     'SUBSONIC_USERNAME': (str, 'Subsonic', ''),
     'SYNOINDEX_ENABLED': (int, 'Synoindex', 0),
-    'TORRENTBLACKHOLE_DIR': (path, 'General', ''),
+    'TELEGRAM_TOKEN': (str, 'Telegram', ''),
+    'TELEGRAM_USERID': (str, 'Telegram', ''),
+    'TELEGRAM_ENABLED': (int, 'Telegram', 0),
+    'TELEGRAM_ONSNATCH': (int, 'Telegram', 0),
+    'TORRENTBLACKHOLE_DIR': (str, 'General', ''),
     'TORRENT_DOWNLOADER': (int, 'General', 0),
     'TORRENT_REMOVAL_INTERVAL': (int, 'General', 720),
     'TORZNAB': (int, 'Torznab', 0),

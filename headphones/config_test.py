@@ -5,6 +5,7 @@ import re
 import unittestcompat
 from unittestcompat import TestCase, TestArgs
 
+
 class ConfigApiTest(TestCase):
     """ Common tests for headphones.Config
 
