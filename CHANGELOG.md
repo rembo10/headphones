@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.5.12
+Released 25 February 2016
+
+This is mostly a hotfix update
+
+Highlights:
+* Added: Experimental Deluge Support
+* Fixed: Some pep8 stuff
+* Improved: Use curly braces for pathrender optional variables
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.11...v0.5.12).
+
 ## v0.5.11
 Released 20 February 2016
 
