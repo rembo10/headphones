@@ -610,16 +610,23 @@ def addAlbumArt(artwork, albumpath, release):
     logger.info('Adding album art to folder')
 
     try:
-        year = release['ReleaseDate'][:4]
+        date = release['ReleaseDate']
     except TypeError:
-        year = ''
+        date = u''
+
+    if date is not None:
+        year = date[:4]
+    else:
+        year = u''
 
     values = {'$Artist': release['ArtistName'],
               '$Album': release['AlbumTitle'],
               '$Year': year,
+              '$Date': date,
               '$artist': release['ArtistName'].lower(),
               '$album': release['AlbumTitle'].lower(),
-              '$year': year
+              '$year': year,
+              '$date': date
               }
 
     album_art_name = helpers.replace_all(headphones.CONFIG.ALBUM_ART_FORMAT.strip(),
@@ -679,7 +686,12 @@ def moveFiles(albumpath, release, tracks):
         date = release['ReleaseDate']
     except TypeError:
         date = u''
-    year = date[:4]
+
+    if date is not None:
+        year = date[:4]
+    else:
+        year = u''
+
     artist = release['ArtistName'].replace('/', '_')
     album = release['AlbumTitle'].replace('/', '_')
     if headphones.CONFIG.FILE_UNDERSCORES:
@@ -1072,7 +1084,11 @@ def renameFiles(albumpath, downloaded_track_list, release):
         date = release['ReleaseDate']
     except TypeError:
         date = u''
-    year = date[:4]
+
+    if date is not None:
+        year = date[:4]
+    else:
+        year = u''
 
     # Until tagging works better I'm going to rely on the already provided metadata
 
