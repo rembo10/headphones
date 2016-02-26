@@ -1779,7 +1779,7 @@ def preprocess(resultlist):
                 return ruobj.get_torrent_data(result[2]), result
 
             # Get out of here if we're using Transmission
-            if headphones.CONFIG.TORRENT_DOWNLOADER == 1:  ## if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
+            if headphones.CONFIG.TORRENT_DOWNLOADER == 1:  # if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
                 return True, result
             # Get out of here if it's a magnet link
             if result[2].lower().startswith("magnet:"):
