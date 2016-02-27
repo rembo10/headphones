@@ -374,7 +374,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
 
             for track in hybridrelease['Tracks']:
 
-                cleanname = helpers.cleanName(
+                cleanname = helpers.clean_name(
                     artist['artist_name'] + ' ' + rg['title'] + ' ' + track['title'])
 
                 controlValueDict = {"TrackID": track['id'],
@@ -710,7 +710,7 @@ def addReleaseById(rid, rgid=None):
         myDB.action('INSERT INTO releases VALUES( ?, ?)', [rid, release_dict['rgid']])
 
         for track in release_dict['tracks']:
-            cleanname = helpers.cleanName(
+            cleanname = helpers.clean_name(
                 release_dict['artist_name'] + ' ' + release_dict['rg_title'] + ' ' + track['title'])
 
             controlValueDict = {"TrackID": track['id'],
