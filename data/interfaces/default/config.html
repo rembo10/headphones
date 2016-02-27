@@ -888,7 +888,7 @@
                                     <div class="row">
                                         as <input type="text" class="override-float" name="album_art_format" value="${config['album_art_format']}" size="10">.jpg
                                     </div>
-                                    <small>Use $Artist/$artist, $Album/$album, $Year/$year</small>
+                                    <small>Use $Artist/$artist, $Album/$album, $Year/$year, put optional variables in square brackets, use single-quote marks to escape square brackets literally ('[', ']').</small>
                                 </div>
                                 <div class="row checkbox left clearfix nopad">
                                     <label>
@@ -1125,7 +1125,7 @@
                                     </div>
                                     <div class="row">
                                         <label>Plex Token</label><input type="text" name="plex_token" value="${config['plex_token']}" size="30">
-                              <small>Plex Token (for use with Plex Home)</small>
+                                        <small>Plex Token (for use with Plex Home)</small>
                                     </div>
                                     <div class="checkbox row">
                                         <input type="checkbox" name="plex_update" value="1" ${config['plex_update']} /><label>Update Plex Library</label>
@@ -1283,14 +1283,13 @@
                             <div class="row">
                                 <label>Folder Format</label>
                                 <input type="text" name="folder_format" value="${config['folder_format']}" size="43">
-                                <small>Use: $Artist/$artist, $SortArtist/$sortartist, $Album/$album, $Year/$year, $Type/$type (release type) and $First/$first (first letter in artist name), $OriginalFolder/$originalfolder (downloaded directory name)
-                                                                E.g.: $Type/$First/$artist/$album [$year] = Album/G/girl talk/all day [2010]</small>
+                                <small>Use: $Artist/$artist, $SortArtist/$sortartist, $Album/$album, $Year/$year, $Type/$type (release type) and $First/$first (first letter in artist name), $OriginalFolder/$originalfolder (downloaded directory name). Put optional variables in square brackets, use single-quote marks to escape square brackets literally ('[', ']').<br>E.g.: $Type/$First/$artist/$album '['$year']' = Album/G/girl talk/all day [2010]</small>
 
                             </div>
                             <div class="row">
                                 <label>File Format</label>
                                 <input type="text" name="file_format" value="${config['file_format']}" size="43">
-                                <small>Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title, $Artist/$artist, $Album/$album and $Year/$year</small>
+                                <small>Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title, $Artist/$artist, $Album/$album and $Year/$year. Put optional variables in square brackets, use single-quote marks to escape square brackets literally ('[', ']').</small>
                             </div>
                             <div class="checkbox row clearfix">
                                 <input type="checkbox" name="file_underscores" id="file_underscores" value="1" ${config['file_underscores']}/><label>Use underscores instead of spaces</label>

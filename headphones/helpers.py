@@ -191,11 +191,13 @@ def piratesize(size):
 
 
 def replace_all(text, dic, normalize=False):
+    from headphones import pathrender
     if not text:
         return ''
 
-    for i, j in dic.iteritems():
-        if normalize:
+    if normalize:
+        new_dic = {}
+        for i, j in dic.iteritems():
             try:
                 if sys.platform == 'darwin':
                     j = unicodedata.normalize('NFD', j)
@@ -203,8 +205,9 @@ def replace_all(text, dic, normalize=False):
                     j = unicodedata.normalize('NFC', j)
             except TypeError:
                 j = unicodedata.normalize('NFC', j.decode(headphones.SYS_ENCODING, 'replace'))
-        text = text.replace(i, j)
-    return text
+            new_dic[i] = j
+        dic = new_dic
+    return pathrender.render(text, dic)[0]
 
 
 def replace_illegal_chars(string, type="file"):

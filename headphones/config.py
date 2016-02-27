@@ -16,6 +16,20 @@ def bool_int(value):
     return int(bool(value))
 
 
+class path(str):
+    """Internal 'marker' type for paths in config."""
+
+    @staticmethod
+    def __call__(val):
+        return path(val)
+
+    def __new__(cls, *args, **kw):
+        hstr = str.__new__(cls, *args, **kw)
+        return hstr
+
+    def __repr__(self):
+        return 'headphones.config.path(%s)' % self
+
 _CONFIG_DEFINITIONS = {
     'ADD_ALBUM_ART': (int, 'General', 0),
     'ADVANCEDENCODER': (str, 'General', ''),
@@ -31,11 +45,11 @@ _CONFIG_DEFINITIONS = {
     'AUTO_ADD_ARTISTS': (int, 'General', 1),
     'BITRATE': (int, 'General', 192),
     'BLACKHOLE': (int, 'General', 0),
-    'BLACKHOLE_DIR': (str, 'General', ''),
+    'BLACKHOLE_DIR': (path, 'General', ''),
     'BOXCAR_ENABLED': (int, 'Boxcar', 0),
     'BOXCAR_ONSNATCH': (int, 'Boxcar', 0),
     'BOXCAR_TOKEN': (str, 'Boxcar', ''),
-    'CACHE_DIR': (str, 'General', ''),
+    'CACHE_DIR': (path, 'General', ''),
     'CACHE_SIZEMB': (int, 'Advanced', 32),
     'CHECK_GITHUB': (int, 'General', 1),
     'CHECK_GITHUB_INTERVAL': (int, 'General', 360),
@@ -44,8 +58,8 @@ _CONFIG_DEFINITIONS = {
     'CONFIG_VERSION': (str, 'General', '0'),
     'CORRECT_METADATA': (int, 'General', 0),
     'CUE_SPLIT': (int, 'General', 1),
-    'CUE_SPLIT_FLAC_PATH': (str, 'General', ''),
-    'CUE_SPLIT_SHNTOOL_PATH': (str, 'General', ''),
+    'CUE_SPLIT_FLAC_PATH': (path, 'General', ''),
+    'CUE_SPLIT_SHNTOOL_PATH': (path, 'General', ''),
     'CUSTOMAUTH': (int, 'General', 0),
     'CUSTOMHOST': (str, 'General', 'localhost'),
     'CUSTOMPASS': (str, 'General', ''),
@@ -61,9 +75,9 @@ _CONFIG_DEFINITIONS = {
     'DESTINATION_DIR': (str, 'General', ''),
     'DETECT_BITRATE': (int, 'General', 0),
     'DO_NOT_PROCESS_UNMATCHED': (int, 'General', 0),
-    'DOWNLOAD_DIR': (str, 'General', ''),
+    'DOWNLOAD_DIR': (path, 'General', ''),
     'DOWNLOAD_SCAN_INTERVAL': (int, 'General', 5),
-    'DOWNLOAD_TORRENT_DIR': (str, 'General', ''),
+    'DOWNLOAD_TORRENT_DIR': (path, 'General', ''),
     'DO_NOT_OVERRIDE_GIT_BRANCH': (int, 'General', 0),
     'EMAIL_ENABLED': (int, 'Email', 0),
     'EMAIL_FROM': (str, 'Email', ''),
@@ -79,14 +93,14 @@ _CONFIG_DEFINITIONS = {
     'EMBED_LYRICS': (int, 'General', 0),
     'ENABLE_HTTPS': (int, 'General', 0),
     'ENCODER': (str, 'General', 'ffmpeg'),
-    'ENCODERFOLDER': (str, 'General', ''),
+    'ENCODERFOLDER': (path, 'General', ''),
     'ENCODERLOSSLESS': (int, 'General', 1),
     'ENCODEROUTPUTFORMAT': (str, 'General', 'mp3'),
     'ENCODERQUALITY': (int, 'General', 2),
     'ENCODERVBRCBR': (str, 'General', 'cbr'),
     'ENCODER_MULTICORE': (int, 'General', 0),
     'ENCODER_MULTICORE_COUNT': (int, 'General', 0),
-    'ENCODER_PATH': (str, 'General', ''),
+    'ENCODER_PATH': (path, 'General', ''),
     'EXTRAS': (str, 'General', ''),
     'EXTRA_NEWZNABS': (list, 'Newznab', ''),
     'EXTRA_TORZNABS': (list, 'Torznab', ''),
@@ -99,7 +113,7 @@ _CONFIG_DEFINITIONS = {
     'FOLDER_PERMISSIONS': (str, 'General', '0755'),
     'FREEZE_DB': (int, 'General', 0),
     'GIT_BRANCH': (str, 'General', 'master'),
-    'GIT_PATH': (str, 'General', ''),
+    'GIT_PATH': (path, 'General', ''),
     'GIT_USER': (str, 'General', 'rembo10'),
     'GROWL_ENABLED': (int, 'Growl', 0),
     'GROWL_HOST': (str, 'Growl', ''),
@@ -108,8 +122,8 @@ _CONFIG_DEFINITIONS = {
     'HEADPHONES_INDEXER': (bool_int, 'General', False),
     'HPPASS': (str, 'General', ''),
     'HPUSER': (str, 'General', ''),
-    'HTTPS_CERT': (str, 'General', ''),
-    'HTTPS_KEY': (str, 'General', ''),
+    'HTTPS_CERT': (path, 'General', ''),
+    'HTTPS_KEY': (path, 'General', ''),
     'HTTP_HOST': (str, 'General', 'localhost'),
     'HTTP_PASSWORD': (str, 'General', ''),
     'HTTP_PORT': (int, 'General', 8181),
@@ -119,8 +133,8 @@ _CONFIG_DEFINITIONS = {
     'IDTAG': (int, 'Beets', 0),
     'IGNORE_CLEAN_RELEASES': (int, 'General', 0),
     'IGNORED_WORDS': (str, 'General', ''),
-    'IGNORED_FOLDERS': (list, 'Advanced', []),
-    'IGNORED_FILES': (list, 'Advanced', []),
+    'IGNORED_FOLDERS': (list, 'Advanced', []),  # path
+    'IGNORED_FILES': (list, 'Advanced', []),    # path
     'INCLUDE_EXTRAS': (int, 'General', 0),
     'INTERFACE': (str, 'General', 'default'),
     'JOURNAL_MODE': (str, 'Advanced', 'wal'),
@@ -135,17 +149,17 @@ _CONFIG_DEFINITIONS = {
     'LIBRARYSCAN_INTERVAL': (int, 'General', 300),
     'LMS_ENABLED': (int, 'LMS', 0),
     'LMS_HOST': (str, 'LMS', ''),
-    'LOG_DIR': (str, 'General', ''),
+    'LOG_DIR': (path, 'General', ''),
     'LOSSLESS_BITRATE_FROM': (int, 'General', 0),
     'LOSSLESS_BITRATE_TO': (int, 'General', 0),
-    'LOSSLESS_DESTINATION_DIR': (str, 'General', ''),
+    'LOSSLESS_DESTINATION_DIR': (path, 'General', ''),
     'MB_IGNORE_AGE': (int, 'General', 365),
     'MININOVA': (int, 'Mininova', 0),
     'MININOVA_RATIO': (str, 'Mininova', ''),
     'MIRROR': (str, 'General', 'musicbrainz.org'),
     'MOVE_FILES': (int, 'General', 0),
     'MPC_ENABLED': (bool_int, 'MPC', False),
-    'MUSIC_DIR': (str, 'General', ''),
+    'MUSIC_DIR': (path, 'General', ''),
     'MUSIC_ENCODER': (int, 'General', 0),
     'NEWZNAB': (int, 'Newznab', 0),
     'NEWZNAB_APIKEY': (str, 'Newznab', ''),
@@ -228,6 +242,7 @@ _CONFIG_DEFINITIONS = {
     'SAB_USERNAME': (str, 'SABnzbd', ''),
     'SAMPLINGFREQUENCY': (int, 'General', 44100),
     'SEARCH_INTERVAL': (int, 'General', 1440),
+    'SOFT_CHROOT': (path, 'General', ''),
     'SONGKICK_APIKEY': (str, 'Songkick', 'nd1We7dFW2RqxPw8'),
     'SONGKICK_ENABLED': (int, 'Songkick', 1),
     'SONGKICK_FILTER_ENABLED': (int, 'Songkick', 0),
@@ -304,7 +319,7 @@ class Config(object):
         definition = _CONFIG_DEFINITIONS[key]
         if len(definition) == 3:
             definition_type, section, default = definition
-        else:
+        elif len(definition) == 4:
             definition_type, section, _, default = definition
         return key, definition_type, section, ini_key, default
 

@@ -49,6 +49,7 @@ import traceback
 delugeweb_auth = {}
 delugeweb_url = ''
 
+
 def addTorrent(link, data=None):
     try:
         result = {}
@@ -101,8 +102,8 @@ def addTorrent(link, data=None):
                         'content': torrentfile}
             retid = _add_torrent_file(result)
 
+        # elif link.endswith('.torrent') or data:
         elif not (link.startswith('http://') or link.startswith('https://')):
-        #elif link.endswith('.torrent') or data:
             if data:
                 logger.debug('Deluge: Getting .torrent data')
                 torrentfile = data
@@ -143,6 +144,7 @@ def addTorrent(link, data=None):
         logger.error(str(e))
         formatted_lines = traceback.format_exc().splitlines()
         logger.error('; '.join(formatted_lines))
+
 
 def getTorrentFolder(result):
     logger.debug('Deluge: Get torrent folder name')
@@ -190,6 +192,7 @@ def getTorrentFolder(result):
     except Exception as e:
         logger.debug('Deluge: Could not get torrent folder name: %s' % str(e))
 
+
 def removeTorrent(torrentid, remove_data=False):
 
     if not any(delugeweb_auth):
@@ -206,6 +209,7 @@ def removeTorrent(torrentid, remove_data=False):
     result = json.loads(response.text)['result']
 
     return result
+
 
 def _get_auth():
     logger.debug('Deluge: Authenticating...')
@@ -289,6 +293,7 @@ def _get_auth():
 
     return auth
 
+
 def _add_torrent_magnet(result):
     logger.debug('Deluge: Adding magnet')
     if not any(delugeweb_auth):
@@ -321,6 +326,7 @@ def _add_torrent_url(result):
         logger.error('Deluge: Adding torrent URL failed: %s' % str(e))
 '''
 
+
 def _add_torrent_file(result):
     logger.debug('Deluge: Adding file')
     if not any(delugeweb_auth):
@@ -338,6 +344,7 @@ def _add_torrent_file(result):
         logger.error('Deluge: Adding torrent file failed: %s' % str(e))
         formatted_lines = traceback.format_exc().splitlines()
         logger.error('; '.join(formatted_lines))
+
 
 def setTorrentLabel(result):
     logger.debug('Deluge: Setting label')
@@ -383,6 +390,7 @@ def setTorrentLabel(result):
 
     return not json.loads(response.text)['error']
 
+
 def setSeedRatio(result):
     logger.debug('Deluge: Setting seed ratio')
     if not any(delugeweb_auth):
@@ -405,6 +413,7 @@ def setSeedRatio(result):
         return not json.loads(response.text)['error']
 
     return True
+
 
 def setTorrentPath(result):
     logger.debug('Deluge: Setting download path')
@@ -433,6 +442,7 @@ def setTorrentPath(result):
         return not json.loads(response.text)['error']
 
     return True
+
 
 def setTorrentPause(result):
     logger.debug('Deluge: Pausing torrent')
