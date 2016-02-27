@@ -1,5 +1,41 @@
 # Changelog
 
+## v0.5.13
+Released 25 February 2016
+
+Another hotfix update
+
+Highlights:
+* Fixed: Saving config with non-defined options
+* Fixed: Pep8 errors
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.12...v0.5.13).
+
+## v0.5.12
+Released 25 February 2016
+
+This is mostly a hotfix update
+
+Highlights:
+* Added: Experimental Deluge Support
+* Fixed: Some pep8 stuff
+* Improved: Use curly braces for pathrender optional variables
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.11...v0.5.12).
+
+## v0.5.11
+Released 20 February 2016
+
+Highlights:
+* Added: Soft chroot option
+* Fixed: Post processing temporary directory fix (#2504)
+* Fixed: Ubuntu init script (#2509)
+* Fixed: Image cache uncaught exception (#2485)
+* Improved: $Date/$date variable in folder renaming
+* Improved: Reuse transmission session id
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.10...v0.5.11).
+
 ## v0.5.10
 Released 29 January 2016
 

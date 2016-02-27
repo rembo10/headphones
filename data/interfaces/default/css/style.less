@@ -124,7 +124,23 @@ table {
 
 
 // Forms
-select, input, textarea, button { font: 99%;}
+select, input, textarea, button
+{
+    font: 99%;
+}
+
+select 
+{
+    .rounded(5px);
+    background: #4F4F4F;
+    border: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+    color: #fff;
+    padding: 3px 10px;
+    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
+}
+
+
 textarea {overflow: auto;}
 input { .rounded(3px);}
 input:invalid, textarea:invalid {
