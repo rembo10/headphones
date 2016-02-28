@@ -396,7 +396,7 @@
                                     <label>Deluge SSL Certificate</label>
                                     <input type="text" name="deluge_cert" value="${config['deluge_cert']}" size="30">
                                     <small>Path to the certificate file. Make sure to use a valid certificate ("Issued To" field must match 
-                                        hostname).</small>
+                                        hostname) which is <em>not</em> the case with the default certificate. Path is usually <span style="font-family: monospace;">%appdata%\deluge\ssl</span> on Windows, <span style="font-family: monospace;">~/.config/deluge/ssl/</span> on Linux.</small>
                                 </div>
                                 <div class="row">
                                     <label>Deluge Password</label>
