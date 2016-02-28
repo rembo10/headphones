@@ -237,7 +237,7 @@ def _get_auth():
 
     if delugeweb_cert is None or delugeweb_cert.strip() == '':
         deluge_verify_cert = False
-        logger.debug('Deluge: No SSL certificate configured')
+        logger.debug('Deluge: FYI no SSL certificate configured')
     else:
         deluge_verify_cert = delugeweb_cert
         delugeweb_host = delugeweb_host.replace('http:', 'https:')
