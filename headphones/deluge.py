@@ -390,8 +390,9 @@ def _add_torrent_file(result):
     except UnicodeDecodeError:
         try:
             # content is torrent file contents that needs to be encoded to base64
+            # this time let's try leaving the encoding alone
             post_data = json.dumps({"method": "core.add_torrent_file",
-                                    "params": [result['name'] + '.torrent', b64encode(result['content'].decode('utf-8').encode('utf8')), {}],
+                                    "params": [result['name'] + '.torrent', b64encode(result['content']), {}],
                                     "id": 2})
             response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
                 verify=deluge_verify_cert)
