@@ -198,7 +198,7 @@ def getTorrentFolder(result):
 
 
 def removeTorrent(torrentid, remove_data=False):
-
+    logger.debug('Deluge: Remove torrent %s' % torrentid)
     if not any(delugeweb_auth):
         _get_auth()
 
@@ -387,6 +387,22 @@ def _add_torrent_file(result):
         result['hash'] = json.loads(response.text)['result']
         logger.debug('Deluge: Response was %s' % str(json.loads(response.text)['result']))
         return json.loads(response.text)['result']
+    except UnicodeDecodeError:
+        try:
+            # content is torrent file contents that needs to be encoded to base64
+            post_data = json.dumps({"method": "core.add_torrent_file",
+                                    "params": [result['name'] + '.torrent', b64encode(result['content'].decode('utf-8').encode('utf8')), {}],
+                                    "id": 2})
+            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
+                verify=deluge_verify_cert)
+            result['hash'] = json.loads(response.text)['result']
+            logger.debug('Deluge: Response was %s' % str(json.loads(response.text)['result']))
+            return json.loads(response.text)['result']
+        except Exception as e:
+            logger.error('Deluge: Adding torrent file failed after decode: %s' % str(e))
+            formatted_lines = traceback.format_exc().splitlines()
+            logger.error('; '.join(formatted_lines))
+            return None
     except Exception as e:
         logger.error('Deluge: Adding torrent file failed: %s' % str(e))
         formatted_lines = traceback.format_exc().splitlines()
