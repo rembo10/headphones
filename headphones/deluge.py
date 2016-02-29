@@ -49,7 +49,20 @@ import traceback
 delugeweb_auth = {}
 delugeweb_url = ''
 deluge_verify_cert = False
+scrub_logs = True
 
+def _scrubber(text):
+    if scrub_logs:
+        try:
+            # URL parameter values
+            text = re.sub('=[0-9a-zA-Z]*', '=REMOVED', text)
+            # Local host with port
+            text = re.sub('\:\/\/.*\:' , '://REMOVED:' , text)
+            #partial_link = re.sub('(auth.*?)=.*&','\g<1>=SECRETZ&', link)
+            #partial_link = re.sub('(\w)=[0-9a-zA-Z]*&*','\g<1>=REMOVED&', link)
+        except Exception as e:
+            logger.debug('Deluge: Scrubber failed: %s' % str(e))
+    return text
 
 def addTorrent(link, data=None):
     try:
@@ -57,13 +70,13 @@ def addTorrent(link, data=None):
         retid = False
 
         if link.startswith('magnet:'):
-            logger.debug('Deluge: Got a magnet link: %s' % link)
+            logger.debug('Deluge: Got a magnet link: %s' % _scrubber(link))
             result = {'type': 'magnet',
                         'url': link}
             retid = _add_torrent_magnet(result)
 
         elif link.startswith('http://') or link.startswith('https://'):
-            logger.debug('Deluge: Got a URL: %s' % link)
+            logger.debug('Deluge: Got a URL: %s' % _scrubber(link))
             user_agent = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
             headers = {'User-Agent': user_agent}
             torrentfile = ''
@@ -73,16 +86,13 @@ def addTorrent(link, data=None):
                 if r.status_code == 200:
                     logger.debug('Deluge: 200 OK')
                     torrentfile = r.text
-                    #for chunk in r.iter_content(chunk_size=1024):
-                    #    if chunk: # filter out keep-alive new chunks
-                    #        torrentfile = torrentfile + chunk
                 else:
-                    logger.debug('Deluge: Trying to GET %s returned status %d' % (link, r.status_code))
+                    logger.debug('Deluge: Trying to GET %s returned status %d' % (_scrubber(link), r.status_code))
                     return False
             except Exception as e:
                 logger.debug('Deluge: Download failed: %s' % str(e))
             if 'announce' not in torrentfile[:40]:
-                logger.debug('Deluge: Contents of %s doesn\'t look like a torrent file' % link)
+                logger.debug('Deluge: Contents of %s doesn\'t look like a torrent file' % _scrubber(link))
                 return False
             # Extract torrent name from .torrent
             try:
@@ -241,7 +251,7 @@ def _get_auth():
     else:
         deluge_verify_cert = delugeweb_cert
         delugeweb_host = delugeweb_host.replace('http:', 'https:')
-        logger.debug('Deluge: Using certificate %s, host is now %s' % (deluge_verify_cert, delugeweb_host))
+        logger.debug('Deluge: Using certificate %s, host is now %s' % (deluge_verify_cert, _scrubber(delugeweb_host)))
 
     if delugeweb_host.endswith('/'):
         delugeweb_host = delugeweb_host[:-1]
