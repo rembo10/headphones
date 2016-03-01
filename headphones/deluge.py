@@ -72,16 +72,20 @@ def addTorrent(link, data=None):
     try:
         result = {}
         retid = False
+        special_treatment_sites = ['https://what.cd/', 'http://what.cd/']
 
-        if link.startswith('magnet:'):
+        if link.lower().startswith('magnet:'):
             logger.debug('Deluge: Got a magnet link: %s' % _scrubber(link))
             result = {'type': 'magnet',
                         'url': link}
             retid = _add_torrent_magnet(result)
 
-        elif link.startswith('http://') or link.startswith('https://'):
+        elif link.lower().startswith('http://') or link.lower().startswith('https://'):
             logger.debug('Deluge: Got a URL: %s' % _scrubber(link))
-            user_agent = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
+            if link.lower().startswith(tuple(special_treatment_sites)):
+                user_agent = 'Headphones'
+            else:
+                user_agent = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
             headers = {'User-Agent': user_agent}
             torrentfile = ''
             logger.debug('Deluge: Trying to download (GET)')
@@ -118,7 +122,7 @@ def addTorrent(link, data=None):
             retid = _add_torrent_file(result)
 
         # elif link.endswith('.torrent') or data:
-        elif not (link.startswith('http://') or link.startswith('https://')):
+        elif not (link.lower().startswith('http://') or link.lower().startswith('https://')):
             if data:
                 logger.debug('Deluge: Getting .torrent data')
                 torrentfile = data
