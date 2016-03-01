@@ -7,9 +7,10 @@ from configobj import ConfigObj
 from configview import Tab, Tabs, Block
 from configoptions import path, bool_int
 
-from configoptions import OptionString, OptionNumber, OptionSwitch
+from configoptions import OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath
 
 def _(x):
+    """ required just for marking translatable strings"""
     return x
 
 _TABS = Tabs((
@@ -21,7 +22,7 @@ _TABS = Tabs((
     Tab('advanced', _("Advanced Settings")),
 ))
 
-def register_block(tabid, *blocks):
+def registerBlock(tabid, *blocks):
     tab = None
     for t in _TABS:
         if t.id == tabid:
@@ -32,28 +33,74 @@ def register_block(tabid, *blocks):
     for block in blocks:
         tab.add([block])
 
-"""
-${OptionString('http_host',
-    tip='Host to bind web server to',
-    label='HTTP Host',
-    caption='Use 0.0.0.0 to allow outside connections',
-    size=30)}
 
-${OptionString('http_port',
-    tip='Port to bind web server to. Note that ports below 1024 may require root.',
-    label='HTTP Port',
-    size=10)}
-"""
-register_block('webui',
+# <div class="row checkbox">
+#     <input type="checkbox" name="enable_https" id="enable_https" value="1" ${config['enable_https']} />
+#     <label title="Enable HTTPS for web server for encrypted communication">
+#         Enable HTTPS
+#     </label>
+# </div>
+# <div id="https_options">
+#     <div class="row">
+#         <label>HTTPS Cert</label>
+#         <input type="text" name="https_cert" value="${config['https_cert']}" size="30">
+#     </div>
+#     <div class="row">
+#         <label>HTTPS Key</label>
+#         <input type="text" name="https_key" value="${config['https_key']}" size="30">
+#     </div>
+# </div>
+
+
+registerBlock('webui',
    Block('basic', caption=_("Basic"), options=[
-       OptionString('HTTP_HOST', default='', maxlength=30),
-       OptionNumber('HTTP_PORT', default=8181, minvalue=1, maxvalue=99999),
+
+       OptionString('HTTP_HOST', 'General', 'localhost',
+            label=_('HTTP Host'),
+            caption=_('Use 0.0.0.0 to allow outside connections'),
+            tooltip=_('Host to bind web server to'),
+            maxlength=30
+            ),
+       OptionNumber('HTTP_PORT', 'General', 8181,
+            label=_('HTTP Port'),
+            tooltip=_('Port to bind web server to. Note that ports below 1024 may require root.'),
+            minvalue=1,
+            maxvalue=99999),
+       OptionPath('HTTP_USERNAME', 'General', '',
+            label=_('HTTP Username'),
+            tooltip=_('Username for web server authentication. Leave empty to disable.'),
+            maxlength=30),
+       OptionPassword('HTTP_PASSWORD', 'General', '',
+            label=_('HTTP Password'),
+            tooltip=_('Password for web server authentication. Leave empty to disable.'),
+            maxlength=30),
+       OptionBool('LAUNCH_BROWSER', 'General', True,
+            label=_('Launch Browser on Startup'),
+            tooltip=_('Launch browser pointed to Headphones, on startup.'),
+            ),
    ]),
 
+
+# <fieldset>
+#     <legend>API</legend>
+#     <div class="row checkbox">
+#         <input type="checkbox" id="api_enabled" />
+#     </div>
+#     <div id="apioptions" class="row">
+#         <label></label>
+#         <input type="text" name="api_key" id="api_key" value="${config['api_key']}" size="20">
+#         <input type="button" value="Generate" id="generate_api">
+#         <small>Current API key: <strong>${config['api_key']}</strong></small>
+#     </div>
+# </fieldset>
    Block('api', caption=_("API"), options=[
-       OptionString('API_KEY', default='', maxlength=20),
-       OptionSwitch('API_ENABLED', default=False),
-   ]),
+        OptionSwitch('API_ENABLED', 'General', False,
+            label=_('Enable API'),
+            tooltip=_('Allow remote applications to interface with Headphones')),
+        OptionString('API_KEY', 'General', '',
+            label=_('API key'),
+            maxlength=20),
+  ]),
 )
 
 # =======================================================================================
@@ -67,8 +114,8 @@ _CONFIG_DEFINITIONS = {
     # This is used in importer.py to determine how complete an album needs to
     # be - to be considered "downloaded". Percentage from 0-100
     'ALBUM_COMPLETION_PCT': (int, 'Advanced', 80),
-    'API_ENABLED': (int, 'General', 0),
-    'API_KEY': (str, 'General', ''),
+'API_ENABLED': (int, 'General', 0),
+'API_KEY': (str, 'General', ''),
     'AUTOWANT_ALL': (int, 'General', 0),
     'AUTOWANT_MANUALLY_ADDED': (int, 'General', 1),
     'AUTOWANT_UPCOMING': (int, 'General', 1),
@@ -149,12 +196,12 @@ _CONFIG_DEFINITIONS = {
     'HPUSER': (str, 'General', ''),
     'HTTPS_CERT': (path, 'General', ''),
     'HTTPS_KEY': (path, 'General', ''),
-    'HTTP_HOST': (str, 'General', 'localhost'),
-    'HTTP_PASSWORD': (str, 'General', ''),
-    'HTTP_PORT': (int, 'General', 8181),
+'HTTP_HOST': (str, 'General', 'localhost'),
+'HTTP_PASSWORD': (str, 'General', ''),
+'HTTP_PORT': (int, 'General', 8181),
     'HTTP_PROXY': (int, 'General', 0),
     'HTTP_ROOT': (str, 'General', '/'),
-    'HTTP_USERNAME': (str, 'General', ''),
+'HTTP_USERNAME': (str, 'General', ''),
     'IDTAG': (int, 'Beets', 0),
     'IGNORE_CLEAN_RELEASES': (int, 'General', 0),
     'IGNORED_WORDS': (str, 'General', ''),
@@ -169,7 +216,7 @@ _CONFIG_DEFINITIONS = {
     'KEEP_NFO': (int, 'General', 0),
     'KEEP_TORRENT_FILES': (int, 'General', 0),
     'LASTFM_USERNAME': (str, 'General', ''),
-    'LAUNCH_BROWSER': (int, 'General', 1),
+'LAUNCH_BROWSER': (int, 'General', 1),
     'LIBRARYSCAN': (int, 'General', 1),
     'LIBRARYSCAN_INTERVAL': (int, 'General', 300),
     'LMS_ENABLED': (int, 'LMS', 0),

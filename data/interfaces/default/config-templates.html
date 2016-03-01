@@ -1,14 +1,90 @@
-<%def name="OptionString(key, label='', tip='', caption='', size=None)">
+<%def name="OptionString(o)">
 <%
-    txt_size_attr = ' size="%d"' % size if size is not None else '';
+    size_attr = '' if o.maxlength is None else ' size="%d"' % o.maxlength
+    tooltip_attr = '' if o.tooltip is None else ' title="%s"' % o.tooltip
+    uiname = o.appkey + '_config_opt'
 %>
     <div class="row">
-        <label title="${tip}">
-            ${label}
-        </label>
-        <input type="text" name="${key}" value="${config[key]}" ${txt_size_attr} />
-        %if caption:
-            <small>${caption}</small>
+        %if o.label is not None:
+            <label ${tooltip_attr} for="${uiname}">
+                ${o.label}
+            </label>
+        %endif
+
+        <input type="text" id="${uiname}" name="${uiname}" value="${o.value}" ${size_attr} />
+
+        %if o.caption is not None:
+            <small>${o.caption}</small>
         %endif
     </div>
+</%def>
+
+
+<%def name="OptionPassword(o)">
+<%
+    size_attr = '' if o.maxlength is None else ' size="%d"' % o.maxlength
+    tooltip_attr = '' if o.tooltip is None else ' title="%s"' % o.tooltip
+    uiname = o.appkey + '_config_opt'
+%>
+    <div class="row">
+        %if o.label is not None:
+            <label ${tooltip_attr} for="${uiname}">
+                ${o.label}
+            </label>
+        %endif
+
+        <input type="password" id="${uiname}" name="${uiname}" value="${o.value}" ${size_attr} />
+
+        %if o.caption is not None:
+            <small>${o.caption}</small>
+        %endif
+    </div>
+</%def>
+
+
+<%def name="OptionNumber(o)">
+<%
+    min_attr = '' if o.minvalue is None else ' min="%d"' % o.minvalue
+    max_attr = '' if o.maxvalue is None else ' size="%d"' % o.maxvalue
+    tooltip_attr = '' if o.tooltip is None else ' title="%s"' % o.tooltip
+    uiname = o.appkey + '_config_opt'
+%>
+    <div class="row">
+        %if o.label is not None:
+            <label ${tooltip_attr} for="${uiname}">
+                ${o.label}
+            </label>
+        %endif
+
+        <input type="number" id="${uiname}" name="${uiname}" value="${o.value}" ${min_attr} ${max_attr} />
+
+        %if o.caption is not None:
+            <small>${o.caption}</small>
+        %endif
+    </div>
+</%def>
+
+<%def name="OptionBool(o)">
+<%
+    tooltip_attr = '' if o.tooltip is None else ' title="%s"' % o.tooltip
+    uiname = o.appkey + '_config_opt'
+    checked_attr = 'checked' if o.value else ''
+%>
+    <div class="row checkbox">
+        %if o.label is not None:
+            <label ${tooltip_attr} for="${uiname}">
+                ${o.label}
+            </label>
+        %endif
+
+        <input type="checkbox" id="${uiname}" name="${uiname}" value="1" ${checked_attr} />
+
+        %if o.caption is not None:
+            <small>${o.caption}</small>
+        %endif
+    </div>
+</%def>
+
+<%def name="OptionSwitch(o)">
+<strong>Turn</strong>
 </%def>

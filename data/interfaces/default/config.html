@@ -32,14 +32,16 @@
 
             % for tab in tabs:
             <div id="${tab.id}">
-                % for block in tab.iblocks():
+                % for block in tab:
                     <fieldset>
                         <legend>${block.caption}</legend>
-                        % for option in block.ioptions():
-                            <div>${${option.tmp}}</div>
-                        % endfor    # for option in block.ioptions() 
+                        % for option in block:
+                            <div>
+                                ${option.render()}
+                            </div>
+                        % endfor    # for option in block
                     </fieldset>
-                % endfor    # for block in tab.iblocks()
+                % endfor    # for block in tab
             </div>
             % endfor    # for tab in tabs
         </form>

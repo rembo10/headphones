@@ -1140,7 +1140,7 @@ class WebInterface(object):
         # TODO : remove
         config = self.fill_config()
 
-        return serve_template(templatename="config.html", title=_("Settings"), config=config, tabs=tabs)
+        return serve_template(templatename="config.html", title="Settings", config=config, tabs=tabs)
 
         for k, v in config.iteritems():
             if isinstance(v, headphones.config.path):
