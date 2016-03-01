@@ -85,6 +85,7 @@ def addTorrent(link, data=None):
         elif link.lower().startswith('http://') or link.lower().startswith('https://'):
             logger.debug('Deluge: Got a URL: %s' % _scrubber(link))
             if link.lower().startswith(tuple(special_treatment_sites)):
+                logger.debug('Deluge: Trying different user-agent for this site')
                 user_agent = 'Headphones'
             else:
                 user_agent = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
