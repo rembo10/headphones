@@ -78,7 +78,7 @@ def addTorrent(link, data=None):
 
         result = {}
         retid = False
-        special_treatment_sites = ['https://what.cd/', 'http://what.cd/']
+        special_treatment_sites = ['https://what.cd/', 'http://what.cd/', 'https://waffles.fm/', 'http://waffles.fm/']
 
         if link.lower().startswith('magnet:'):
             logger.debug('Deluge: Got a magnet link: %s' % _scrubber(link))
