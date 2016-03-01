@@ -60,8 +60,10 @@ def _scrubber(text):
             text = re.sub('\:\/\/.*\:' , '://REMOVED:' , text)
             # Session cookie
             text = re.sub("_session_id'\: '.*'", "_session_id': 'REMOVED'", text)
-            # Local Windows path
-            # TODO
+            # Local Windows user path
+            if text.lower().startswith('c:\\users\\'):
+                k = text.split('\\')
+                text = '\\'.join([k[0], k[1], '.....', k[-1]])
             #partial_link = re.sub('(auth.*?)=.*&','\g<1>=SECRETZ&', link)
             #partial_link = re.sub('(\w)=[0-9a-zA-Z]*&*','\g<1>=REMOVED&', link)
         except Exception as e:
