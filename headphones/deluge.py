@@ -72,6 +72,10 @@ def _scrubber(text):
 
 def addTorrent(link, data=None):
     try:
+        # Authenticate anyway
+        logger.debug('Deluge: addTorrent Authentication')
+        _get_auth()
+
         result = {}
         retid = False
         special_treatment_sites = ['https://what.cd/', 'http://what.cd/']
