@@ -2,11 +2,9 @@ import re
 from itertools import ifilter
 #from headphones import logger
 
-""" Structures and classes for UI-related part of configuration """
+""" ViewModel-classes of configuration """
 
-# translation
-
-
+# will be useful for translation
 def _(x):
     return x
 
@@ -17,24 +15,25 @@ class Tabs(object):
         self.tabs = list(*args)
         pass
 
-    def __iter__(self):
-        """ Default iterator is comfortable for UI tasks """
-
-        return self.iterate_ui()
-
-    def iterate_ui(self):
-        """ Iterates over non-empty tabs """
-        return ifilter(lambda t: True, self.tabs)    
-
     def __repr__(self):
         return "<%s with %d tabs>" % (
             self.__class__.__name__,
             len(self.tabs)
         )
+
+    def __iter__(self):
+        """ Default iterator is sharpened for UI tasks """
+
+        return ifilter(lambda t: True, self.tabs)
+
+    # def iterate_ui(self):
+    #     """ Iterates over non-empty tabs """
+    #     return self.iterate_ui()
+
     pass
 
 class Tab(object):
-    """ UI-tab for grouping option on a page """
+    """ UI-tab for grouping option on a UI-page """
 
     def __init__(self, id, caption=None, cssclass=None):
 
@@ -46,10 +45,6 @@ class Tab(object):
         self.cssclass = cssclass
         self.__setitem__ = None
 
-    # itertools:
-    def __getitem__(self, *args, **qw):
-        return self._map.__getitem__(*args, **qw)
-
     def __repr__(self):
         return "<%s id='%s', caption='%s', with %d blocks>" % (
             self.__class__.__name__,
@@ -58,15 +53,16 @@ class Tab(object):
             len(self._map)
         )
 
-    def iblocks(self):
-        return self.iterate_ui()
+    # itertools:
+    def __getitem__(self, *args, **qw):
+        return self._map.__getitem__(*args, **qw)
 
-    def iterate_ui(self):
+    def __iter__(self):
         """ Iterates over non-empty tabs """
-        return ifilter(lambda t: True, self._index)       
+        return ifilter(lambda t: True, self._index)
 
     def add(self, blocks_list):
-        """ add settings block to current tab """
+        """ add block of settings to current tab """
         if blocks_list:
             for block in blocks_list:
                 if not isinstance(block, Block):
@@ -101,12 +97,9 @@ class Block(object):
             self.caption,
             len(self._options)
         )
-    
-    def ioptions(self):
-        return self.iterate_ui()
 
-    def iterate_ui(self):
+    def __iter__(self):
         """ Iterates over non-empty tabs """
-        return ifilter(lambda t: True, self._options)     
+        return ifilter(lambda t: True, self._options)
 
     pass
