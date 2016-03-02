@@ -143,7 +143,7 @@ def initialize(config_file):
             SOFT_CHROOT = SoftChroot(str(CONFIG.SOFT_CHROOT))
             if SOFT_CHROOT.isEnabled():
                 logger.info("Soft-chroot enabled for dir: %s", str(CONFIG.SOFT_CHROOT))
-        except exceptions.SoftChrootError as e:
+        except headphones.exceptions.SoftChrootError as e:
             logger.error("SoftChroot error: %s", e)
             raise e
 
