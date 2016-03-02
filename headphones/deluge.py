@@ -51,13 +51,14 @@ delugeweb_url = ''
 deluge_verify_cert = False
 scrub_logs = True
 
+
 def _scrubber(text):
     if scrub_logs:
         try:
             # URL parameter values
             text = re.sub('=[0-9a-zA-Z]*', '=REMOVED', text)
             # Local host with port
-            text = re.sub('\:\/\/.*\:' , '://REMOVED:' , text)
+            text = re.sub('\:\/\/.*\:', '://REMOVED:', text)
             # Session cookie
             text = re.sub("_session_id'\: '.*'", "_session_id': 'REMOVED'", text)
             # Local Windows user path
@@ -69,6 +70,7 @@ def _scrubber(text):
         except Exception as e:
             logger.debug('Deluge: Scrubber failed: %s' % str(e))
     return text
+
 
 def addTorrent(link, data=None):
     try:
@@ -287,12 +289,12 @@ def _get_auth():
                             "params": [delugeweb_password],
                             "id": 1})
     try:
-        response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth, 
+        response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
             verify=deluge_verify_cert)
     except requests.ConnectionError:
         try:
             logger.debug('Deluge: Connection failed, let\'s try HTTPS just in case')
-            response = requests.post(delugeweb_url.replace('http:', 'https:'), data=post_data.encode('utf-8'), cookies=delugeweb_auth, 
+            response = requests.post(delugeweb_url.replace('http:', 'https:'), data=post_data.encode('utf-8'), cookies=delugeweb_auth,
                 verify=deluge_verify_cert)
             # If the previous line didn't fail, change delugeweb_url for the rest of this session
             logger.error('Deluge: Switching to HTTPS, but certificate won\'t be verified because NO CERTIFICATE WAS CONFIGURED!')
@@ -317,7 +319,7 @@ def _get_auth():
                             "params": [],
                             "id": 10})
     try:
-        response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth, 
+        response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
             verify=deluge_verify_cert)
     except Exception as e:
         logger.error('Deluge: Authentication failed: %s' % str(e))
@@ -334,7 +336,7 @@ def _get_auth():
                                 "params": [],
                                 "id": 11})
         try:
-            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth, 
+            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
                 verify=deluge_verify_cert)
         except Exception as e:
             logger.error('Deluge: Authentication failed: %s' % str(e))
@@ -352,7 +354,7 @@ def _get_auth():
                                 "id": 11})
 
         try:
-            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth, 
+            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
                 verify=deluge_verify_cert)
         except Exception as e:
             logger.error('Deluge: Authentication failed: %s' % str(e))
@@ -365,7 +367,7 @@ def _get_auth():
                                 "id": 10})
 
         try:
-            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth, 
+            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
                 verify=deluge_verify_cert)
         except Exception as e:
             logger.error('Deluge: Authentication failed: %s' % str(e))
