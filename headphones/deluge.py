@@ -78,7 +78,8 @@ def addTorrent(link, data=None):
 
         result = {}
         retid = False
-        special_treatment_sites = ['https://what.cd/', 'http://what.cd/', 'https://waffles.fm/', 'http://waffles.fm/']
+        url_what = ['https://what.cd/', 'http://what.cd/']
+        url_waffles = ['https://waffles.fm/', 'http://waffles.fm/']
 
         if link.lower().startswith('magnet:'):
             logger.debug('Deluge: Got a magnet link: %s' % _scrubber(link))
@@ -88,14 +89,17 @@ def addTorrent(link, data=None):
 
         elif link.lower().startswith('http://') or link.lower().startswith('https://'):
             logger.debug('Deluge: Got a URL: %s' % _scrubber(link))
-            if link.lower().startswith(tuple(special_treatment_sites)):
-                #logger.debug('Deluge: Trying different user-agent for this site')
-                #user_agent = 'Headphones'
+            if link.lower().startswith(tuple(url_waffles)):
+                if 'rss=' not in link:
+                    link = link + '&rss=1'
+            if link.lower().startswith(tuple(url_what)):
+                logger.debug('Deluge: Using different User-Agent for this site')
+                user_agent = 'Headphones'
                 # This method will make Deluge download the file
-                logger.debug('Deluge: Letting Deluge download this')
-                local_torrent_path = _add_torrent_url({'url': link})
-                logger.debug('Deluge: Returned this local path: %s' % _scrubber(local_torrent_path))
-                return addTorrent(local_torrent_path)
+                #logger.debug('Deluge: Letting Deluge download this')
+                #local_torrent_path = _add_torrent_url({'url': link})
+                #logger.debug('Deluge: Returned this local path: %s' % _scrubber(local_torrent_path))
+                #return addTorrent(local_torrent_path)
             else:
                 user_agent = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
             headers = {'User-Agent': user_agent}
@@ -105,21 +109,22 @@ def addTorrent(link, data=None):
                 r = requests.get(link, headers=headers)
                 if r.status_code == 200:
                     logger.debug('Deluge: 200 OK')
-                    torrentfile = r.text
+                    # .text will ruin the encoding for some torrents
+                    torrentfile = r.content
                 else:
                     logger.debug('Deluge: Trying to GET %s returned status %d' % (_scrubber(link), r.status_code))
                     return False
             except Exception as e:
                 logger.debug('Deluge: Download failed: %s' % str(e))
-            if 'announce' not in torrentfile[:40]:
+            if 'announce' not in str(torrentfile)[:40]:
                 logger.debug('Deluge: Contents of %s doesn\'t look like a torrent file' % _scrubber(link))
                 return False
             # Extract torrent name from .torrent
             try:
                 logger.debug('Deluge: Getting torrent name length')
-                name_length = int(re.findall('name([0-9]*)\:.*?\:', torrentfile)[0])
+                name_length = int(re.findall('name([0-9]*)\:.*?\:', str(torrentfile))[0])
                 logger.debug('Deluge: Getting torrent name')
-                name = re.findall('name[0-9]*\:(.*?)\:', torrentfile)[0][:name_length]
+                name = re.findall('name[0-9]*\:(.*?)\:', str(torrentfile))[0][:name_length]
             except Exception as e:
                 logger.debug('Deluge: Could not get torrent name, getting file name')
                 # get last part of link/path (name only)
@@ -127,7 +132,7 @@ def addTorrent(link, data=None):
                 # remove '.torrent' suffix
                 if name[-len('.torrent'):] == '.torrent':
                     name = name[:-len('.torrent')]
-            logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name, torrentfile[:40]))
+            logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name, str(torrentfile)[:40]))
             result = {'type': 'torrent',
                         'name': name,
                         'content': torrentfile}
@@ -145,9 +150,9 @@ def addTorrent(link, data=None):
             # Extract torrent name from .torrent
             try:
                 logger.debug('Deluge: Getting torrent name length')
-                name_length = int(re.findall('name([0-9]*)\:.*?\:', torrentfile)[0])
+                name_length = int(re.findall('name([0-9]*)\:.*?\:', str(torrentfile))[0])
                 logger.debug('Deluge: Getting torrent name')
-                name = re.findall('name[0-9]*\:(.*?)\:', torrentfile)[0][:name_length]
+                name = re.findall('name[0-9]*\:(.*?)\:', str(torrentfile))[0][:name_length]
             except Exception as e:
                 logger.debug('Deluge: Could not get torrent name, getting file name')
                 # get last part of link/path (name only)
@@ -155,7 +160,7 @@ def addTorrent(link, data=None):
                 # remove '.torrent' suffix
                 if name[-len('.torrent'):] == '.torrent':
                     name = name[:-len('.torrent')]
-            logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name, torrentfile[:40]))
+            logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name, str(torrentfile)[:40]))
             result = {'type': 'torrent',
                         'name': name,
                         'content': torrentfile}
@@ -260,7 +265,7 @@ def _get_auth():
     delugeweb_host = headphones.CONFIG.DELUGE_HOST
     delugeweb_cert = headphones.CONFIG.DELUGE_CERT
     delugeweb_password = headphones.CONFIG.DELUGE_PASSWORD
-    logger.debug('Deluge: Using password %s***%s' % (delugeweb_password[0], delugeweb_password[-1]))
+    logger.debug('Deluge: Using password %s******%s' % (delugeweb_password[0], delugeweb_password[-1]))
 
     if not delugeweb_host.startswith('http'):
         delugeweb_host = 'http://%s' % delugeweb_host
