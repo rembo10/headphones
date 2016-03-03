@@ -72,7 +72,7 @@ def _scrubber(text):
     return text
 
 
-def addTorrent(link, data=None):
+def addTorrent(link, data=None, name=None):
     try:
         # Authenticate anyway
         logger.debug('Deluge: addTorrent Authentication')
@@ -121,19 +121,20 @@ def addTorrent(link, data=None):
             if 'announce' not in str(torrentfile)[:40]:
                 logger.debug('Deluge: Contents of %s doesn\'t look like a torrent file' % _scrubber(link))
                 return False
-            # Extract torrent name from .torrent
-            try:
-                logger.debug('Deluge: Getting torrent name length')
-                name_length = int(re.findall('name([0-9]*)\:.*?\:', str(torrentfile))[0])
-                logger.debug('Deluge: Getting torrent name')
-                name = re.findall('name[0-9]*\:(.*?)\:', str(torrentfile))[0][:name_length]
-            except Exception as e:
-                logger.debug('Deluge: Could not get torrent name, getting file name')
-                # get last part of link/path (name only)
-                name = link.split('\\')[-1].split('/')[-1]
-                # remove '.torrent' suffix
-                if name[-len('.torrent'):] == '.torrent':
-                    name = name[:-len('.torrent')]
+            if not name:
+                # Extract torrent name from .torrent
+                try:
+                    logger.debug('Deluge: Getting torrent name length')
+                    name_length = int(re.findall('name([0-9]*)\:.*?\:', str(torrentfile))[0])
+                    logger.debug('Deluge: Getting torrent name')
+                    name = re.findall('name[0-9]*\:(.*?)\:', str(torrentfile))[0][:name_length]
+                except Exception as e:
+                    logger.debug('Deluge: Could not get torrent name, getting file name')
+                    # get last part of link/path (name only)
+                    name = link.split('\\')[-1].split('/')[-1]
+                    # remove '.torrent' suffix
+                    if name[-len('.torrent'):] == '.torrent':
+                        name = name[:-len('.torrent')]
             logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name, str(torrentfile)[:40]))
             result = {'type': 'torrent',
                         'name': name,
@@ -149,19 +150,20 @@ def addTorrent(link, data=None):
                 logger.debug('Deluge: Getting .torrent file')
                 with open(link, 'rb') as f:
                     torrentfile = f.read()
-            # Extract torrent name from .torrent
-            try:
-                logger.debug('Deluge: Getting torrent name length')
-                name_length = int(re.findall('name([0-9]*)\:.*?\:', str(torrentfile))[0])
-                logger.debug('Deluge: Getting torrent name')
-                name = re.findall('name[0-9]*\:(.*?)\:', str(torrentfile))[0][:name_length]
-            except Exception as e:
-                logger.debug('Deluge: Could not get torrent name, getting file name')
-                # get last part of link/path (name only)
-                name = link.split('\\')[-1].split('/')[-1]
-                # remove '.torrent' suffix
-                if name[-len('.torrent'):] == '.torrent':
-                    name = name[:-len('.torrent')]
+            if not name:
+                # Extract torrent name from .torrent
+                try:
+                    logger.debug('Deluge: Getting torrent name length')
+                    name_length = int(re.findall('name([0-9]*)\:.*?\:', str(torrentfile))[0])
+                    logger.debug('Deluge: Getting torrent name')
+                    name = re.findall('name[0-9]*\:(.*?)\:', str(torrentfile))[0][:name_length]
+                except Exception as e:
+                    logger.debug('Deluge: Could not get torrent name, getting file name')
+                    # get last part of link/path (name only)
+                    name = link.split('\\')[-1].split('/')[-1]
+                    # remove '.torrent' suffix
+                    if name[-len('.torrent'):] == '.torrent':
+                        name = name[:-len('.torrent')]
             logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name, str(torrentfile)[:40]))
             result = {'type': 'torrent',
                         'name': name,

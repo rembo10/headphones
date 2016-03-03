@@ -895,9 +895,9 @@ def send_to_downloader(data, bestqual, album):
             try:
                 # Add torrent
                 if bestqual[3] == 'rutracker.org':
-                    torrentid = deluge.addTorrent('', data)
+                    torrentid = deluge.addTorrent('', data, name=folder_name)
                 else:
-                    torrentid = deluge.addTorrent(bestqual[2])
+                    torrentid = deluge.addTorrent(bestqual[2], name=folder_name)
 
                 if not torrentid:
                     logger.error("Error sending torrent to Deluge. Are you sure it's running? Maybe the torrent already exists?")
