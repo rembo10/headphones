@@ -921,12 +921,13 @@ def send_to_downloader(data, bestqual, album):
                     deluge.setTorrentPath({'hash': torrentid})
 
                 # I only just realized this function is useless...
-                folder_name = deluge.getTorrentFolder({'hash': torrentid})
-                if folder_name:
-                    logger.info('Torrent folder name: %s' % folder_name)
-                else:
-                    logger.error('Torrent folder name could not be determined')
-                    return
+                # Hadn't realized folder_name was already being set to Artist - Album
+                #folder_name = deluge.getTorrentFolder({'hash': torrentid})
+                #if folder_name:
+                #    logger.info('Torrent folder name: %s' % folder_name)
+                #else:
+                #    logger.error('Torrent folder name could not be determined')
+                #    return
 
             except Exception as e:
                 logger.error('Error sending torrent to Deluge: %s' % str(e))
