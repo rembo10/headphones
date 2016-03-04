@@ -58,7 +58,8 @@ def _scrubber(text):
             # URL parameter values
             text = re.sub('=[0-9a-zA-Z]*', '=REMOVED', text)
             # Local host with port
-            text = re.sub('\:\/\/.*\:', '://REMOVED:', text)
+            # text = re.sub('\:\/\/.*\:', '://REMOVED:', text) # just host
+            text = re.sub('\:\/\/.*\:[0-9]*', '://REMOVED:', text)
             # Session cookie
             text = re.sub("_session_id'\: '.*'", "_session_id': 'REMOVED'", text)
             # Local Windows user path
@@ -197,7 +198,7 @@ def getTorrentFolder(result):
                                     result['hash'],
                                     ["total_done"]
                                 ],
-                                "id": 22})
+                                "id": 21})
         response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
             verify=deluge_verify_cert)
         result['total_done'] = json.loads(response.text)['result']['total_done']
