@@ -889,7 +889,7 @@ def send_to_downloader(data, bestqual, album):
             if seed_ratio is not None:
                 transmission.setSeedRatio(torrentid, seed_ratio)
 
-        elif headphones.CONFIG.TORRENT_DOWNLOADER == 3: # Deluge
+        elif headphones.CONFIG.TORRENT_DOWNLOADER == 3:  # Deluge
             logger.info("Sending torrent to Deluge")
 
             try:
