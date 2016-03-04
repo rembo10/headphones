@@ -895,9 +895,9 @@ def send_to_downloader(data, bestqual, album):
             try:
                 # Add torrent
                 if bestqual[3] == 'rutracker.org':
-                    torrentid = deluge.addTorrent('', data, name=folder_name)
+                    torrentid = deluge.addTorrent('', data)
                 else:
-                    torrentid = deluge.addTorrent(bestqual[2], name=folder_name)
+                    torrentid = deluge.addTorrent(bestqual[2])
 
                 if not torrentid:
                     logger.error("Error sending torrent to Deluge. Are you sure it's running? Maybe the torrent already exists?")
@@ -920,14 +920,13 @@ def send_to_downloader(data, bestqual, album):
                 if headphones.CONFIG.DELUGE_DONE_DIRECTORY:
                     deluge.setTorrentPath({'hash': torrentid})
 
-                # I only just realized this function is useless...
-                # Hadn't realized folder_name was already being set to Artist - Album
-                #folder_name = deluge.getTorrentFolder({'hash': torrentid})
-                #if folder_name:
-                #    logger.info('Torrent folder name: %s' % folder_name)
-                #else:
-                #    logger.error('Torrent folder name could not be determined')
-                #    return
+                # Get folder name from Deluge, it's usually the torrent name
+                folder_name = deluge.getTorrentFolder({'hash': torrentid})
+                if folder_name:
+                    logger.info('Torrent folder name: %s' % folder_name)
+                else:
+                    logger.error('Torrent folder name could not be determined')
+                    return
 
             except Exception as e:
                 logger.error('Error sending torrent to Deluge: %s' % str(e))
