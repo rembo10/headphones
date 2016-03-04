@@ -457,7 +457,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
             release['ArtistName'], release['AlbumTitle']))
             if headphones.CONFIG.TORRENT_DOWNLOADER == 1:
                 torrent_removed = transmission.removeTorrent(hash, True)
-            elif headphones.CONFIG.TORRENT_DOWNLOADER == 3: # Deluge
+            elif headphones.CONFIG.TORRENT_DOWNLOADER == 3:  # Deluge
                 torrent_removed = deluge.removeTorrent(hash, True)
             else:
                 torrent_removed = utorrent.removeTorrent(hash, True)
