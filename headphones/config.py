@@ -7,7 +7,9 @@ from configobj import ConfigObj
 from configview import Tab, Tabs, Block
 from configoptions import path, bool_int
 
-from configoptions import OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath
+from configoptions import OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, ApiKeyOptionExtension
+
+from headphones import logger
 
 def _(x):
     """ required just for marking translatable strings"""
@@ -23,6 +25,7 @@ _TABS = Tabs((
 ))
 
 def registerBlock(tabid, *blocks):
+    logger.info('config:registerBlock: {0}'.format(tabid))
     tab = None
     for t in _TABS:
         if t.id == tabid:
@@ -34,24 +37,7 @@ def registerBlock(tabid, *blocks):
         tab.add([block])
 
 
-# <div class="row checkbox">
-#     <input type="checkbox" name="enable_https" id="enable_https" value="1" ${config['enable_https']} />
-#     <label title="Enable HTTPS for web server for encrypted communication">
-#         Enable HTTPS
-#     </label>
-# </div>
-# <div id="https_options">
-#     <div class="row">
-#         <label>HTTPS Cert</label>
-#         <input type="text" name="https_cert" value="${config['https_cert']}" size="30">
-#     </div>
-#     <div class="row">
-#         <label>HTTPS Key</label>
-#         <input type="text" name="https_key" value="${config['https_key']}" size="30">
-#     </div>
-# </div>
-
-
+# =======================================================================================
 registerBlock('webui',
    Block('basic', caption=_("Basic"), options=[
 
@@ -78,9 +64,22 @@ registerBlock('webui',
             label=_('Launch Browser on Startup'),
             tooltip=_('Launch browser pointed to Headphones, on startup.'),
             ),
-   ]),
 
+       OptionSwitch('ENABLE_HTTPS', 'General', False,
+            label=_('Enable HTTPS'),
+            tooltip=_('Enable HTTPS for web server for encrypted communication'),
+            options=[
+                OptionPath('HTTPS_CERT', 'General', '',
+                    label=_('HTTPS Cert'),
+                    maxlength=30),
+                OptionPath('HTTPS_KEY', 'General', '',
+                    label=_('HTTPS Key'),
+                    maxlength=30),
+            ]),
+   ])
+)
 
+# =======================================================================================
 # <fieldset>
 #     <legend>API</legend>
 #     <div class="row checkbox">
@@ -89,17 +88,25 @@ registerBlock('webui',
 #     <div id="apioptions" class="row">
 #         <label></label>
 #         <input type="text" name="api_key" id="api_key" value="${config['api_key']}" size="20">
-#         <input type="button" value="Generate" id="generate_api">
-#         <small>Current API key: <strong>${config['api_key']}</strong></small>
-#     </div>
+
 # </fieldset>
+registerBlock('webui',
    Block('api', caption=_("API"), options=[
         OptionSwitch('API_ENABLED', 'General', False,
             label=_('Enable API'),
-            tooltip=_('Allow remote applications to interface with Headphones')),
-        OptionString('API_KEY', 'General', '',
-            label=_('API key'),
-            maxlength=20),
+            tooltip=_('Allow remote applications to interface with Headphones'),
+            options=[
+                OptionString('API_KEY', 'General', '',
+                    label=_('API key'),
+                    maxlength=20,
+                    options=[
+                        #Current API key: 
+
+                        ApiKeyOptionExtension()
+                    ],
+                ),
+            ]
+        ),
   ]),
 )
 
@@ -163,7 +170,7 @@ _CONFIG_DEFINITIONS = {
     'EMAIL_ONSNATCH': (int, 'Email', 0),
     'EMBED_ALBUM_ART': (int, 'General', 0),
     'EMBED_LYRICS': (int, 'General', 0),
-    'ENABLE_HTTPS': (int, 'General', 0),
+'ENABLE_HTTPS': (int, 'General', 0),
     'ENCODER': (str, 'General', 'ffmpeg'),
     'ENCODERFOLDER': (path, 'General', ''),
     'ENCODERLOSSLESS': (int, 'General', 1),
@@ -194,8 +201,8 @@ _CONFIG_DEFINITIONS = {
     'HEADPHONES_INDEXER': (bool_int, 'General', False),
     'HPPASS': (str, 'General', ''),
     'HPUSER': (str, 'General', ''),
-    'HTTPS_CERT': (path, 'General', ''),
-    'HTTPS_KEY': (path, 'General', ''),
+'HTTPS_CERT': (path, 'General', ''),
+'HTTPS_KEY': (path, 'General', ''),
 'HTTP_HOST': (str, 'General', 'localhost'),
 'HTTP_PASSWORD': (str, 'General', ''),
 'HTTP_PORT': (int, 'General', 8181),

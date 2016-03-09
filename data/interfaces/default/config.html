@@ -7,9 +7,9 @@
 
 <%page args="tabs, config"/>
 
-<%namespace file="config-templates.html" import="OptionString"/>
-
 <%def name="headerIncludes()">
+    <meta name="author" content="Koryukov Maksim">
+
     <div id="subhead_container">
         <div id="subhead_menu">
             <a id="menu_link_shutdown" href="shutdown"><i class="fa fa-power-off"></i> Shut Down</a>
@@ -49,6 +49,33 @@
 </%def>
 
 <%def name="javascriptIncludes()">
+    <script language="javascript" type="text/javascript">
+        $(document).ready(function(){
+
+            var updateSwitch = function ($el){
+                var divselector = $el.data('div');
+                if (divselector){
+                    var $div = $(divselector);
+                    if ($el.is(":checked")){
+                        $div.slideDown();
+                    } else {
+                        $div.slideUp();
+                    }
+                }
+            };
+
+            $(".hp-option-switch").each(function(i, val){
+                updateSwitch($(val));
+            });
+
+            $("body").on("click", ".hp-option-switch", function(){
+                updateSwitch($(this));
+            });
+        });
+    </script>
+
+
+
     <script>
 
         hideServerDivs = function () {
@@ -139,17 +166,7 @@
                         }
                 });
 
-        $('#api_key').click(function(){ $('#api_key').select() });
-        $("#generate_api").click(function(){
-            $.get('generateAPI',
-                function(data){
-                    if (data.error != undefined) {
-                        alert(data.error);
-                        return;
-                    }
-                    $('#api_key').val(data);
-            });
-        });
+
                 if ($("#customauth").is(":checked"))
                         {
                             $("#customauth_options").show();
