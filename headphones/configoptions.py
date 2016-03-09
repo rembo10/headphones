@@ -1,8 +1,9 @@
 import re
 import os
-import headphones
+from itertools import ifilter
 from mako.template import Template
 from mako.lookup import TemplateLookup
+import headphones
 
 # will be helpful for translations
 def _(x):
@@ -34,11 +35,60 @@ class path(str):
         return 'headphones.config.path(%s)' % self
 
 
+# ===============================================
+# Abstract, base class
+# ===============================================
 
+class Renderable(object):
+    """ Basic class for all things, which want be renderable on runtime """
 
-class OptionBase(object):
+    def __init__(self):
+        self._templateName=None
+        self._templateFileName = None
 
-    def __init__(self, appkey, section, default=None):
+        # internal templating stuff:
+        self._hplookup = None
+
+    def _getTemplateLookup(self):
+        if not self._hplookup:
+            opt_INTERFACE = headphones.CONFIG.INTERFACE
+            prog_dir = str(headphones.PROG_DIR)
+            _interface_dir = os.path.join(prog_dir, 'data/interfaces/')
+            _template_dir = os.path.join(str(_interface_dir), opt_INTERFACE)
+
+            _template_tmp_dir = os.path.join(prog_dir, 'auto')
+            self._hplookup = TemplateLookup(directories=[_template_dir], module_directory=_template_tmp_dir)
+
+        return self._hplookup
+
+    @property
+    def templateName(self):
+        return self._templateName
+
+    @property
+    def templateFileName(self):
+        return self._templateFileName
+
+    def render(self, **qwargs):
+        """ Used in the config UI, should return result of rendering MAKO template - string """
+
+        # TODO : add TRY-EXCEPT
+        # this block searches for a template of an option (by name)
+        # and render appropriate MAKO-def
+        template = self._getTemplateLookup().get_template(self.templateFileName)
+        defs = template.get_def(self.templateName)
+        print ('root render', qwargs)
+
+        return defs.render(**qwargs)
+
+# ===============================================
+# Abstract, base class
+# ===============================================
+
+class OptionBase(Renderable):
+    """ Base, abstract parent for all other options """
+
+    def __init__(self, appkey, section, default=None, options=None):
         """Initialization
 
         Args:
@@ -46,47 +96,56 @@ class OptionBase(object):
             section - name of section in CONFIG FILE
             default - default value
         """
+        super(OptionBase, self).__init__()
+
         self.appkey = appkey
         self.default = default
         self.section = section
+        self._options = options or []  # should not be None
 
         self.writable = True
         self.readable = True
 
         self.value = None
 
-    def render(self):
-        """ Used in the config UI, should return result of rendering MAKO template - string """
+    def __iter__(self):
+        """ Iterates over non-empty tabs """
+        return ifilter(lambda t: t.readable if hasattr(t, 'readable') else True, self._options)
 
-        # TEMPLATING PRECOMPUTED STUFF
-        # TODO : think twice about using option in options!!!!
-        opt_INTERFACE = headphones.CONFIG.INTERFACE
-        # TODO : compute this in static method
-        prog_dir = str(headphones.PROG_DIR)
-        _interface_dir = os.path.join(prog_dir, 'data/interfaces/')
-        _template_dir = os.path.join(str(_interface_dir), opt_INTERFACE)
+    def __len__(self):
+        return len(self._options)
 
-        _template_tmp_dir = os.path.join(prog_dir, 'auto')
-        self._hplookup = TemplateLookup(directories=[_template_dir], module_directory=_template_tmp_dir)
+    def uiId(self):
+        return self.appkey
 
-        # TODO : add TRY-EXCEPT
-
-        # this block searches for a template of an option (by name)
-        # and render appropriate MAKO-def
-        template = self._hplookup.get_template(self.getTemplateFileName())
-        defs = template.get_def(self.getTemplateName())
-        return defs.render(o=self)
-
-    def getTemplateName(self):
+    @property
+    def templateName(self):
         return self.__class__.__name__
 
-    def getTemplateFileName(self):
+    @property
+    def templateFileName(self):
         return "config-templates.html"
+
+    def render(self, parent=None):
+        return super(OptionBase, self).render(o=self, parent=parent)
+
+# ===============================================
+# API-usable options
+# ===============================================
+
+# class Option_SCAFFOLD_(OptionBase):
+
+#     def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None):
+#         super(Option_SCAFFOLD_, self).__init__(appkey, section, default)
+
+#         self.label = label
+#         self.caption = caption
+#         self.tooltip = tooltip
 
 class OptionString(OptionBase):
 
-    def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, maxlength=None):
-        super(OptionString, self).__init__(appkey, section, default)
+    def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, options=None, maxlength=None):
+        super(OptionString, self).__init__(appkey, section, default, options=options)
 
         self.label = label
         self.caption = caption
@@ -96,7 +155,8 @@ class OptionString(OptionBase):
 
 class OptionPath(OptionString):
 
-    def getTemplateName(self):
+    @property
+    def templateName(self):
         return "OptionString"
 
 class OptionPassword(OptionBase):
@@ -124,20 +184,41 @@ class OptionNumber(OptionBase):
 
 class OptionBool(OptionBase):
 
-    def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None):
-        super(OptionBool, self).__init__(appkey, section, default)
+    def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, options=None):
+        super(OptionBool, self).__init__(appkey, section, default, options=options)
 
         self.label = label
         self.caption = caption
         self.tooltip = tooltip
 
-class OptionSwitch(OptionBase):
+# ===============================================
+# API-usable options with SUBSTRUCTURE
+# ===============================================
 
-    def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None):
-        super(OptionSwitch, self).__init__(appkey, section, default)
+# TODO : think about inheritance from Block
+class OptionSwitch(OptionBool):
+    """ Option, which includes switcher and suboptions
+
+    This is **enabler**, or **switch** option. Its own value is `bool`, and when it is checked -
+    the set of suboptions is visible for editing. When its own value is `False` - nothing happens,
+    no additional settings are visible
+    """
+    pass
+
+    # def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, options=None):
+    #     super(OptionSwitch, self).__init__(appkey, section, default, options=options)
+
+    #     self.label = label
+    #     self.caption = caption
+    #     self.tooltip = tooltip
 
 
-# class Option_SCAFFOLD_(OptionBase):
 
-#     def __init__(self, appkey, section='General', default=None):
-#         super(Option_SCAFFOLD_, self).__init__(appkey, section, default)
+
+class ApiKeyOptionExtension(Renderable):
+    def __init__(self):
+        super(ApiKeyOptionExtension, self).__init__()
+
+    @property
+    def templateName(self):
+        return "ApiKeyOptionExtension"

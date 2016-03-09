@@ -2,11 +2,22 @@ import re
 from itertools import ifilter
 #from headphones import logger
 
+# ===============================================
 """ ViewModel-classes of configuration """
+# ===============================================
 
 # will be useful for translation
 def _(x):
     return x
+
+# ===============================================
+# Section "One-time used templates"
+#
+# Tabs, Tab and Block classes are defined here.
+# Their templates are used just once, and, as
+# a consequence, are embed to the main template -
+# - config.html
+# ===============================================
 
 class Tabs(object):
     """ This class required just to separate UI logic out of headphones.config """
@@ -25,11 +36,6 @@ class Tabs(object):
         """ Default iterator is sharpened for UI tasks """
 
         return ifilter(lambda t: True, self.tabs)
-
-    # def iterate_ui(self):
-    #     """ Iterates over non-empty tabs """
-    #     return self.iterate_ui()
-
     pass
 
 class Tab(object):
@@ -83,7 +89,7 @@ class Tab(object):
 class Block(object):
     """ UI-block for grouping options within `Tab` """
 
-    def __init__(self, id, order=100, caption=None, cssclass=None, options=[]):
+    def __init__(self, id, order=100, caption=None, cssclass=None, options=None):
         self.id = re.sub(r'[^\w\d_]', '_', id)
         self.caption = caption
         self._options = options or []  # should not be None
