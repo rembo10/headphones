@@ -39,6 +39,7 @@
 <%
     uiname = me.uiId()
     embed_id = uiname + '_embed'
+    val = me.value
 
     size_attr = '' if me.maxlength is None else ' size="%d"' % me.maxlength
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
@@ -52,9 +53,9 @@
 
         <div class="input-wrapper">
             %if me.writable:
-                <input type="text" id="${uiname}" name="${uiname}" value="${me.value}" ${size_attr} />
+                <input type="text" id="${uiname}" name="${uiname}" value="${val}" ${size_attr} />
             %else:
-                <span id="${uiname}" name="${uiname}">${me.value}</span>
+                <span id="${uiname}" name="${uiname}">${val}</span>
             %endif
 
             %if me.caption is not None:
@@ -77,6 +78,7 @@
 <%
     uiname = me.uiId()
     embed_id = uiname + '_embed'
+    val = me.value
 
     size_attr = '' if me.maxlength is None else ' size="%d"' % me.maxlength
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
@@ -90,9 +92,9 @@
 
         <div class="input-wrapper">
             %if me.writable:
-                <input type="password" id="${uiname}" name="${uiname}" value="${me.value}" ${size_attr} />
+                <input type="password" id="${uiname}" name="${uiname}" value="${val}" ${size_attr} />
             %else:
-                <span id="${uiname}" name="${uiname}">${'*' * len(me.value)}</span>
+                <span id="${uiname}" name="${uiname}">${'*' * len(val)}</span>
             %endif
 
             %if me.caption is not None:
@@ -114,6 +116,7 @@
 <%
     uiname = me.uiId()
     embed_id = uiname + '_embed'
+    val = me.value
 
     min_attr = '' if me.minvalue is None else ' min="%d"' % me.minvalue
     max_attr = '' if me.maxvalue is None else ' size="%d"' % me.maxvalue
@@ -127,7 +130,7 @@
         %endif
 
         <div class="input-wrapper">
-            <input type="number" id="${uiname}" name="${uiname}" value="${me.value}" ${min_attr} ${max_attr} />
+            <input type="number" id="${uiname}" name="${uiname}" value="${val}" ${min_attr} ${max_attr} />
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -148,9 +151,10 @@
 <%
     uiname = me.uiId()
     embed_id = uiname + '_embed'
+    val = me.value
 
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
-    checked_attr = 'checked' if me.value else ''
+    checked_attr = 'checked' if val else ''
 %>
     <div class="option">
         %if me.label is not None:
@@ -181,9 +185,11 @@
 <%
     uiname = me.uiId()
     embed_id = uiname + '_embed'
+    val = me.value
 
+    checked_attr = 'checked' if val else ''
+    embed_hidden_style_attr = '' if val else 'style="display:none"'
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
-    checked_attr = 'checked' if me.value else ''
 %>
     <div class="option">
         %if me.label is not None:
@@ -202,7 +208,7 @@
     </div>
 
     % if 0 < len(me):
-        <div id="${embed_id}">
+        <div id="${embed_id}" ${embed_hidden_style_attr}>
             % for option in me:
                 ${option.render()}
             % endfor    # for option in block
@@ -223,6 +229,8 @@
 <%
     ext = me
     me = parent
+    val = me.value
+
     uiname = me.uiId()
     embed_id = uiname + '_embed'
     button_class = embed_id + '_btn_cls'
@@ -232,7 +240,7 @@
         <button type="button" class="${button_class}">${ext.strings['button']}</button>
     </label>
     <div>
-        <div class="small caption">${ext.strings['caption']}<strong>${me.value}</strong></div>
+        <div class="small caption">${ext.strings['caption']}<strong>${val}</strong></div>
     </div>
 </div>
 <script type="text/javascript">
