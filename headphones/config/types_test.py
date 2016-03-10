@@ -32,7 +32,7 @@ class ConfigPathTest(TestCase):
     def test_path_repr(self):
         s = '/tmp'
         p1 = path(s)
-        self.assertIn('headphones.config.path', p1.__repr__())
+        self.assertIn('headphones.config.types.path', p1.__repr__())
 
     @TestArgs(
         (None),

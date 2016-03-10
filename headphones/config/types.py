@@ -9,7 +9,10 @@ def bool_int(value):
 
 
 class path(str):
-    """Internal 'marker' type for paths in config."""
+    """ path-type for option value 
+
+    Describes the path on the file system.
+    """
 
     @staticmethod
     def __call__(val):
@@ -20,4 +23,4 @@ class path(str):
         return hstr
 
     def __repr__(self):
-        return 'headphones.config.path(%s)' % self
+        return 'headphones.config.types.path(%s)' % self
