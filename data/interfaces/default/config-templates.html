@@ -1,172 +1,209 @@
-<%def name="OptionString(o, parent=None)">
+##
+## Here defined all templates, required for CONFIG page of the app
+##
+
+## ===============================================
+## TEMPLATES for TABS
+## ===============================================
+
+<%def name="Tab(me, parent=None)">
 <%
-    uiname = o.uiId()
+    cssclass = me.cssclass if me.cssclass else '';
+%>
+    ## ID for TAB here is required, it is used to choose appropriate tab
+    ## usign url in address bar (#bookmarks)
+    ## Do not delete ID!
+    <div id="${me.id}" class="tab tab-${me.id} ${cssclass}">
+        % if me.message:
+            <div class="message">
+                ${me.message}
+            </div>
+        % endif
+
+        % for block in me:
+            <fieldset class="block ${block.cssclass if block.cssclass else ''}">
+                <legend>${block.caption}</legend>
+                % for option in block:
+                    ${option.render()}
+                % endfor    # for option in block
+            </fieldset>
+        % endfor    # for block in tab
+    </div>
+</%def>
+
+## ===============================================
+## TEMPLATES for common set of OPTIONS
+## ===============================================
+
+<%def name="OptionString(me, parent=None)">
+<%
+    uiname = me.uiId()
     embed_id = uiname + '_embed'
 
-    size_attr = '' if o.maxlength is None else ' size="%d"' % o.maxlength
-    tooltip_attr = '' if o.tooltip is None else ' title="%s"' % o.tooltip
+    size_attr = '' if me.maxlength is None else ' size="%d"' % me.maxlength
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
     <div class="option">
-        %if o.label is not None:
+        %if me.label is not None:
             <label ${tooltip_attr} for="${uiname}">
-                ${o.label}
+                ${me.label}
             </label>
         %endif
 
         <div class="input-wrapper">
-            %if o.writable:
-                <input type="text" id="${uiname}" name="${uiname}" value="${o.value}" ${size_attr} />
+            %if me.writable:
+                <input type="text" id="${uiname}" name="${uiname}" value="${me.value}" ${size_attr} />
             %else:
-                <span id="${uiname}" name="${uiname}">${o.value}</span>
+                <span id="${uiname}" name="${uiname}">${me.value}</span>
             %endif
 
-            %if o.caption is not None:
-                <div class="small caption">${o.caption}</div>
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
             %endif
         </div>
     </div>
 
-    % if 0 < len(o):
+    % if 0 < len(me):
         <div id="${embed_id}">
-            % for option in o:
-                ${option.render(parent=o)}
+            % for option in me:
+                ${option.render(parent=me)}
             % endfor    # for option in block
         </div>
     % endif
 </%def>
 
 
-<%def name="OptionPassword(o, parent=None)">
+<%def name="OptionPassword(me, parent=None)">
 <%
-    uiname = o.uiId()
+    uiname = me.uiId()
     embed_id = uiname + '_embed'
 
-    size_attr = '' if o.maxlength is None else ' size="%d"' % o.maxlength
-    tooltip_attr = '' if o.tooltip is None else ' title="%s"' % o.tooltip
+    size_attr = '' if me.maxlength is None else ' size="%d"' % me.maxlength
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
     <div class="option">
-        %if o.label is not None:
+        %if me.label is not None:
             <label ${tooltip_attr} for="${uiname}">
-                ${o.label}
+                ${me.label}
             </label>
         %endif
 
         <div class="input-wrapper">
-            %if o.writable:
-                <input type="password" id="${uiname}" name="${uiname}" value="${o.value}" ${size_attr} />
+            %if me.writable:
+                <input type="password" id="${uiname}" name="${uiname}" value="${me.value}" ${size_attr} />
             %else:
-                <span id="${uiname}" name="${uiname}">${'*' * len(o.value)}</span>
+                <span id="${uiname}" name="${uiname}">${'*' * len(me.value)}</span>
             %endif
 
-            %if o.caption is not None:
-                <div class="small caption">${o.caption}</div>
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
             %endif
         </div>
     </div>
-    % if 0 < len(o):
+    % if 0 < len(me):
         <div id="${embed_id}">
-            % for option in o:
-                ${option.render(o)}
+            % for option in me:
+                ${option.render(me)}
             % endfor    # for option in block
         </div>
     % endif
 </%def>
 
 
-<%def name="OptionNumber(o, parent=None)">
+<%def name="OptionNumber(me, parent=None)">
 <%
-    uiname = o.uiId()
+    uiname = me.uiId()
     embed_id = uiname + '_embed'
 
-    min_attr = '' if o.minvalue is None else ' min="%d"' % o.minvalue
-    max_attr = '' if o.maxvalue is None else ' size="%d"' % o.maxvalue
-    tooltip_attr = '' if o.tooltip is None else ' title="%s"' % o.tooltip
+    min_attr = '' if me.minvalue is None else ' min="%d"' % me.minvalue
+    max_attr = '' if me.maxvalue is None else ' size="%d"' % me.maxvalue
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
     <div class="option">
-        %if o.label is not None:
+        %if me.label is not None:
             <label ${tooltip_attr} for="${uiname}">
-                ${o.label}
+                ${me.label}
             </label>
         %endif
 
         <div class="input-wrapper">
-            <input type="number" id="${uiname}" name="${uiname}" value="${o.value}" ${min_attr} ${max_attr} />
+            <input type="number" id="${uiname}" name="${uiname}" value="${me.value}" ${min_attr} ${max_attr} />
 
-            %if o.caption is not None:
-                <div class="small caption">${o.caption}</div>
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
             %endif
         </div>
     </div>
-    % if 0 < len(o):
+    % if 0 < len(me):
         <div id="${embed_id}">
-            % for option in o:
-                ${option.render(o)}
+            % for option in me:
+                ${option.render(me)}
             % endfor    # for option in block
         </div>
     % endif
 </%def>
 
 
-<%def name="OptionBool(o, parent=None)">
+<%def name="OptionBool(me, parent=None)">
 <%
-    uiname = o.uiId()
+    uiname = me.uiId()
     embed_id = uiname + '_embed'
 
-    tooltip_attr = '' if o.tooltip is None else ' title="%s"' % o.tooltip
-    checked_attr = 'checked' if o.value else ''
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+    checked_attr = 'checked' if me.value else ''
 %>
     <div class="option">
-        %if o.label is not None:
+        %if me.label is not None:
             <label ${tooltip_attr} for="${uiname}">
-                ${o.label}
+                ${me.label}
             </label>
         %endif
 
         <div class="input-wrapper">
             <input type="checkbox" id="${uiname}" name="${uiname}" value="1" ${checked_attr} />
 
-            %if o.caption is not None:
-                <div class="small caption">${o.caption}</div>
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
             %endif
         </div>
     </div>
-    % if 0 < len(o):
+    % if 0 < len(me):
         <div id="${embed_id}">
-            % for option in o:
-                ${option.render(o)}
+            % for option in me:
+                ${option.render(me)}
             % endfor    # for option in block
         </div>
     % endif
 </%def>
 
 
-<%def name="OptionSwitch(o, parent=None)">
+<%def name="OptionSwitch(me, parent=None)">
 <%
-    uiname = o.uiId()
+    uiname = me.uiId()
     embed_id = uiname + '_embed'
 
-    tooltip_attr = '' if o.tooltip is None else ' title="%s"' % o.tooltip
-    checked_attr = 'checked' if o.value else ''
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+    checked_attr = 'checked' if me.value else ''
 %>
     <div class="option">
-        %if o.label is not None:
+        %if me.label is not None:
             <label ${tooltip_attr} for="${uiname}">
-                ${o.label}
+                ${me.label}
             </label>
         %endif
 
         <div class="input-wrapper">
             <input class="hp-option-switch" type="checkbox" id="${uiname}" name="${uiname}" data-div="#${embed_id}" value="1" ${checked_attr} />
 
-            %if o.caption is not None:
-                <div class="small caption">${o.caption}</div>
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
             %endif
         </div>
     </div>
 
-    % if 0 < len(o):
+    % if 0 < len(me):
         <div id="${embed_id}">
-            % for option in o:
+            % for option in me:
                 ${option.render()}
             % endfor    # for option in block
         </div>
@@ -182,11 +219,11 @@
 ## Minimum of python code, just HTML and templates
 ## ===============================================
 
-<%def name="ApiKeyExtension(o, parent=None)">
+<%def name="ApiKeyExtension(me, parent=None)">
 <%
-    ext = o
-    o = parent
-    uiname = o.uiId()
+    ext = me
+    me = parent
+    uiname = me.uiId()
     embed_id = uiname + '_embed'
     button_class = embed_id + '_btn_cls'
 %>
@@ -195,7 +232,7 @@
         <button type="button" class="${button_class}">${ext.strings['button']}</button>
     </label>
     <div>
-        <div class="small caption">${ext.strings['caption']}<strong>${o.value}</strong></div>
+        <div class="small caption">${ext.strings['caption']}<strong>${me.value}</strong></div>
     </div>
 </div>
 <script type="text/javascript">
@@ -229,9 +266,9 @@
 </%def>
 
 
-<%def name="LabelExtension(o, parent=None)">
+<%def name="LabelExtension(me, parent=None)">
 <%
-    class_attr = '' if ((not 'class' in o.strings) or (not o.strings['class'])) else ' class="%s"' % o.strings['class']
+    class_attr = '' if ((not 'class' in me.strings) or (not me.strings['class'])) else ' class="%s"' % me.strings['class']
 %>
-    <div ${class_attr}>${o.strings['label']}</div>
+    <div ${class_attr}>${me.strings['label']}</div>
 </%def>
