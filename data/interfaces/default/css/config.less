@@ -11,11 +11,15 @@
 @msg-bg-success:			#D3FFD7;
 @msg-bg-error:				#FFD3D3;
 @brand-color:				#4F4F4F;
+@caption-color:				#999999;
+
+@gradient-color-1:			#FAFAFA;
+@gradient-color-2:			#E7E7E7;
 
 @heading-input-radius:		5px;
 
 /* Mixins */
-.rounded(@radius: 5px) {	
+.rounded(@radius: 5px) {
 	-moz-border-radius: @radius;
 	-webkit-border-radius: @radius;
 	border-radius: @radius;
@@ -78,3 +82,25 @@
 	opacity:@opacity_percent / 100 !important;
 }
 
+
+/* COLUMNS STUFF */
+.columnWidth(@width) {
+	-webkit-column-width: @width;
+	   -moz-column-width: @width;
+	        column-width: @width;
+}
+.columnCount(@count) {
+	-webkit-columns: @count;
+	   -moz-columns: @count;
+	        columns: @count;
+}
+.columnGap(@width) {
+	-webkit-column-gap: @width;
+	   -moz-column-gap: @width;
+	        column-gap: @width;
+}
+.columnRule(@rule) {
+	-webkit-column-rule: @rule;
+	   -moz-column-rule: @rule;
+	        column-rule: @rule;
+}

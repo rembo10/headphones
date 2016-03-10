@@ -1135,57 +1135,17 @@ class WebInterface(object):
     @cherrypy.expose
     def config(self):
 
-        tabs = headphones.CONFIG.get_tabs()
+        tabs = headphones.CONFIG.getTabs()
 
-        # TODO : remove
-        config = self.fill_config()
+        return serve_template(templatename="config.html", title="Settings", tabs=tabs)
 
-        return serve_template(templatename="config.html", title="Settings", config=config, tabs=tabs)
-
+        # TODO : implement softchroot
         for k, v in config.iteritems():
             if isinstance(v, headphones.config.path):
                 # need to apply SoftChroot to paths:
                 nv = headphones.SOFT_CHROOT.apply(v)
                 if v != nv:
                     config[k] = headphones.config.path(nv)
-
-        # Need to convert EXTRAS to a dictionary we can pass to the config:
-        # it'll come in as a string like 2,5,6,8
-
-        extra_munges = {
-            "dj-mix": "dj_mix",
-            "mixtape/street": "mixtape_street"
-        }
-
-        extras_list = [extra_munges.get(x, x) for x in headphones.POSSIBLE_EXTRAS]
-        if headphones.CONFIG.EXTRAS:
-            extras = map(int, headphones.CONFIG.EXTRAS.split(','))
-        else:
-            extras = []
-
-        extras_dict = OrderedDict()
-
-        i = 1
-        for extra in extras_list:
-            if i in extras:
-                extras_dict[extra] = "checked"
-            else:
-                extras_dict[extra] = ""
-            i += 1
-
-        config["extras"] = extras_dict
-
-        return serve_template(templatename="config.html", title=_("Settings"), config=config)
-
-
-    @cherrypy.expose
-    def config2(self):
-
-        config = self.fill_config()
-
- 
-
-        return serve_template(templatename="config2.html", title="Settings", config=config)
 
     @cherrypy.expose
     def configUpdate2(self, **kwargs):
@@ -1327,7 +1287,7 @@ class WebInterface(object):
         mb.startmb()
 
         raise cherrypy.HTTPRedirect("config2")
-    
+
     def fill_config(self):
         interface_dir = os.path.join(headphones.PROG_DIR, 'data/interfaces/')
         interface_list = [name for name in os.listdir(interface_dir) if
