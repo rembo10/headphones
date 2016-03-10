@@ -4,10 +4,11 @@ import os
 import re
 import headphones.logger
 from configobj import ConfigObj
-from configview import Tab, Tabs, Block
-from configoptions import path, bool_int
+from types import path, bool_int
 
-from configoptions import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, TemplaterExtension
+from viewmodel import Tab, Tabs, Block
+from viewmodel import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath
+from viewmodel import TemplaterExtension
 
 from headphones import logger
 
@@ -16,7 +17,7 @@ def _(x):
     return x
 
 _TABS = Tabs((
-    Tab('webui', _("Web Interface")),
+    Tab('webui', _("Web Interface"), message=_('<i class="fa fa-info-circle"></i> Web Interface changes require a restart to take effect. Saving settings will restart intervals if changed.')),
     Tab('search', _("Search providers")),
     Tab('download', _("Download settings")),
     Tab('quality_processing', _("Quality &amp; Post Processing")),
@@ -34,7 +35,7 @@ def registerBlock(tabid, *blocks):
 
     for block in blocks:
         logger.debug('config:registerBlock: {0} > {1}'.format(tabid, block.id))
-        tab.add([block])
+        tab.add(block)
 
 def registerOptions(*options):
     """ Registering option

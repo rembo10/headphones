@@ -38,27 +38,8 @@
             </ul>
 
             % for tab in tabs:
-            ## ID for TAB here is required, it is used to choose appropriate tab
-            ## usign url in address bar (#bookmarks)
-            ## Do not delete ID!
-            <div id="${tab.id}" class="tab tab-${tab.id}">
-                ## TODO : fix, using some template extension!
-                % if tab.id=='webui':
-                    <div class="message">
-                        <i class="fa fa-info-circle"></i> Web Interface changes require a restart to take effect. Saving settings will restart intervals if changed.
-                    </div>
-                % endif
-
-                % for block in tab:
-                    <fieldset class="block">
-                        <legend>${block.caption}</legend>
-                        % for option in block:
-                            ${option.render()}
-                        % endfor    # for option in block
-                    </fieldset>
-                % endfor    # for block in tab
-            </div>
-            % endfor    # for tab in tabs
+                ${tab.render(me=tab, parent=None)}
+            % endfor
         </div>
     </form>
 </div>
