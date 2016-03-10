@@ -134,25 +134,8 @@ function initHeader() {
 			inside = false;
 		}
 	});
-	
 }
 
-function initConfigCheckbox(elem) {
-	var config = $(elem).parent().next();	
-	if ( $(elem).is(":checked") ) {
-		config.show();
-	} else {
-		config.hide();
-	}
-	$(elem).click(function(){
-		var config = $(this).parent().next();	
-		if ( $(this).is(":checked") ) {
-			config.slideDown();
-		} else {
-			config.slideUp();
-		}
-	});
-}     
 function initActions() {
 	$("#subhead_menu #menu_link_refresh").button();
 	$("#subhead_menu #menu_link_edit").button();

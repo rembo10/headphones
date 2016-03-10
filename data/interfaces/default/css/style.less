@@ -26,6 +26,19 @@ body {
     padding: 0;
 }
 
+// Clearfix from http://stackoverflow.com/a/8554054/1115187
+.clearfix()
+{
+    &:after
+    {
+        content: " "; /* Older browser do not support empty content */
+        visibility: hidden;
+        display: block;
+        height: 0;
+        clear: both;
+    }
+}
+
 // Links
 a {
 	color: @link-color;
@@ -76,9 +89,94 @@ hr {
     margin: 1em 0;
     padding: 0;
 }
-small {
-    font-size: 85%;
+
+small, .small
+{
+    font-size: xx-small;
 }
+
+// -------------------------------------------------
+// Config Page
+// -------------------------------------------------
+
+.config
+{
+    legend {
+        font-size: larger;
+        font-weight: bold;
+        margin-bottom: 1em;
+        text-shadow: 1px 1px 0 #FFFFFF;
+    }
+
+    .caption
+    {
+        color: @caption-color;
+        line-height: @base-font-size;
+        margin-top: 3px;
+    }
+
+    .tab
+    {
+        .columnRule( 1px solid @border-color );
+        .columnCount(2);
+        .columnGap(4em);
+    }
+
+    .block
+    {
+        -webkit-column-break-inside: avoid;
+        page-break-inside: avoid;
+        break-inside: avoid-column;
+    }
+
+    .option
+    {
+        // TODO : need responsive - remove floating, use flexbox
+        .clearfix();
+        margin-bottom: 1em;
+        font-size: @base-font-size;
+
+        .input-wrapper
+        {
+            // TODO : need responsive
+            float: left;
+        }
+
+        label
+        {
+            // TODO : need responsive
+            width: 170px;
+            font-size: @base-font-size;
+            // TODO : need responsive
+            float: left;
+        }
+
+        input
+        {
+            margin-right: 5px;
+        }
+
+        input[type=text],
+        input[type=password],
+        input[type=number],
+        {
+            border: 1px solid #DDD;
+            border-top: 1px solid #CDCDCD;
+            .shadow(inset 0 1px 1px #e0e0e0);
+            color: @text-color;
+            font-size: larger;
+            // TODO : need responsive
+            max-width: 230px;
+            padding: 3px 5px;
+        }
+
+        input[type=number]
+        {
+            max-width: 4em;
+        }
+    }
+}
+
 img {
     &.albumArt {
         float: left;
@@ -105,9 +203,9 @@ table {
     border-collapse: collapse;
     border-spacing: 0;
     th {
-    	.gradient(#FAFAFA, #EAEAEA);
+    	.gradient(@gradient-color-1, @gradient-color-2);
     	border-left: 1px solid #E0E0E0;
-    	.shadow(1px 0 0 #FAFAFA);
+    	.shadow(1px 0 0 @gradient-color-1);
     	text-shadow:1px 1px 0 #FFFFFF ;
     	input[type="checkbox"]{ vertical-align: middle;}
     	&:first-child { border-left:0;.shadow(none)}
@@ -129,7 +227,7 @@ select, input, textarea, button
     font: 99%;
 }
 
-select 
+select
 {
     .rounded(@heading-input-radius);
     background: @brand-color;
@@ -197,6 +295,7 @@ form {
             }
         }
     }
+
     .row {
         font-family: Helvetica, Arial;
         margin-bottom: 10px;
@@ -292,7 +391,7 @@ ul#nav {
     float: right;
     margin: 0;
     padding: 0 0 0 10px;
-    border-left: 1px solid #FAFAFA;
+    border-left: 1px solid @gradient-color-1;
     .shadow(-1px 0 0 #e0e0e0);
     height: 58px;
     li {
@@ -314,8 +413,8 @@ ul#nav {
             	 .gradient(#F1F1F1, #E0E0E0);
             	 border: 1px solid #DDDDDD;
             	 .rounded(3px);
-            	 .shadow(0 1px 0 #FAFAFA);
-            	 .shadow(0 1px 0 #FAFAFA inset);
+            	 .shadow(0 1px 0 @gradient-color-1);
+            	 .shadow(0 1px 0 @gradient-color-1 inset);
             	-webkit-transition:color .2s ease-in;
             	-moz-transition:color .2s ease-in;
             	-o-transition:color .2s ease-in;
@@ -339,7 +438,7 @@ ul#nav {
 }
 // Layout
 header {
-    .gradient(#fafafa, #eaeaea);
+    .gradient(@gradient-color-1, @gradient-color-2);
     border-bottom: 1px solid #CACACA;
     .shadow(0 0 10px rgba(0, 0, 0, 0.1));
     height: 58px;
@@ -435,7 +534,7 @@ footer {
 #updatebar {
     #ajaxMsg;
     display: block;
-    .gradient(#FCF5C2,@msg-bg);
+    .gradient(#FCF5C2, @msg-bg);
 }
 
 // Subheader
@@ -456,9 +555,9 @@ footer {
             position: relative;
             z-index: 99;
            a {
-              	.gradient(@brand-color, #e7e7e7);
+              	.gradient(@gradient-color-1, @gradient-color-2);
               	font-family: @base-font-face;
-              	font-size: 12px;
+              	font-size: @base-font-size;
               	font-weight: normal;
               	&:hover {
               		.gradient(#599BDC, #3072B3);
@@ -472,7 +571,7 @@ footer {
 
 // Search
 div#searchbar {
-    border-left: 1px solid #FAFAFA;
+    border-left: 1px solid @gradient-color-1;
     .shadow(-1px 0 0 #e0e0e0);
     padding: 15px 0 15px 20px;
     position: absolute;
@@ -499,28 +598,6 @@ div#searchbar {
     	display: block;
     	margin-left: 9px;
     	margin-top: 7px;
-    }
-}
-
-// Config Page
-.configtable {
-	legend {
-		font-size: 16px;
-		font-weight: bold;
-		margin-bottom: 10px;
-		text-shadow: 1px 1px 0 #FFFFFF;
-	}
-    tr {
-        td {
-            &:last-child {
-                border-left: 1px dotted #ddd;
-                padding-left: 20px;
-            }
-        }
-    }
-    td {
-        padding-right: 15px;
-        width: 50%;
     }
 }
 
@@ -1089,17 +1166,6 @@ div#artistheader {
     width: auto;
 }
 .invisible { visibility: hidden; }
-
-.clearfix:before, .clearfix:after {
-    content: "\0020";
-    display: block;
-    height: 0;
-    overflow: hidden;
-}
-.clearfix {
-    zoom: 1px;
-    &:after { clear: both; }
-}
 
 // Table width
 #album_table th#albumname, #upcoming_table th#artistname, #wanted_table th#artistname {

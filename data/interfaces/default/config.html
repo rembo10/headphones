@@ -19,11 +19,18 @@
 </%def>
 
 <%def name="body()">
+<div class="config">
     <div id="paddingheader">
         <h1 class="clearfix"><i class="fa fa-gear"></i> Settings</h1>
     </div>
+
+    <%doc>
+        TODO : THIS IS A SCRUTCH!!! Remove this jquery-tag out there!!!
+    </%doc>
+    <script src="js/libs/jquery-1.11.1.min.js"></script>
+
     <form action="configUpdate" method="post" class="form" id="configUpdate">
-        <div id="tabs">
+        <div id="tabs" class="tabs">
             <ul>
                 % for tab in tabs:
                 <li><a href="#${tab.id}">${tab.caption}</a></li>
@@ -31,25 +38,34 @@
             </ul>
 
             % for tab in tabs:
-            <div id="${tab.id}">
+            ## ID for TAB here is required, it is used to choose appropriate tab
+            ## usign url in address bar (#bookmarks)
+            ## Do not delete ID!
+            <div id="${tab.id}" class="tab tab-${tab.id}">
+                ## TODO : fix, using some template extension!
+                % if tab.id=='webui':
+                    <div class="message">
+                        <i class="fa fa-info-circle"></i> Web Interface changes require a restart to take effect. Saving settings will restart intervals if changed.
+                    </div>
+                % endif
+
                 % for block in tab:
-                    <fieldset>
+                    <fieldset class="block">
                         <legend>${block.caption}</legend>
                         % for option in block:
-                            <div>
-                                ${option.render()}
-                            </div>
+                            ${option.render()}
                         % endfor    # for option in block
                     </fieldset>
                 % endfor    # for block in tab
             </div>
             % endfor    # for tab in tabs
-        </form>
-    </div>
+        </div>
+    </form>
+</div>
 </%def>
 
 <%def name="javascriptIncludes()">
-    <script language="javascript" type="text/javascript">
+    <script type="text/javascript">
         $(document).ready(function(){
 
             var updateSwitch = function ($el){
@@ -146,463 +162,6 @@
 
         function initThisPage()
         {
-                if ($("#api_enabled").is(":checked"))
-                        {
-                            $("#apioptions").show();
-                        }
-                else
-                        {
-                            $("#apioptions").hide();
-                        }
-
-                $("#api_enabled").click(function(){
-                        if ($("#api_enabled").is(":checked"))
-                        {
-                            $("#apioptions").slideDown();
-                        }
-                        else
-                        {
-                            $("#apioptions").slideUp();
-                        }
-                });
-
-
-                if ($("#customauth").is(":checked"))
-                        {
-                            $("#customauth_options").show();
-                        }
-                else
-                        {
-                            $("#customauth_options").hide();
-                        }
-
-                $("#customauth").click(function(){
-                        if ($("#customauth").is(":checked"))
-                        {
-                            $("#customauth_options").slideDown();
-                        }
-                        else
-                        {
-                            $("#customauth_options").slideUp();
-                        }
-                });
-                if ($("#enable_https").is(":checked"))
-                        {
-                            $("#https_options").show();
-                        }
-                else
-                        {
-                            $("#https_options").hide();
-                        }
-
-                $("#enable_https").click(function(){
-                        if ($("#enable_https").is(":checked"))
-                        {
-                            $("#https_options").slideDown();
-                        }
-                        else
-                        {
-                            $("#https_options").slideUp();
-                        }
-                });
-                if ($("#music_encoder").is(":checked"))
-                        {
-                            $("#encoderoptions").show();
-                        }
-                else
-                        {
-                            $("#encoderoptions").hide();
-                        }
-
-                $("#music_encoder").click(function(){
-                        if ($("#music_encoder").is(":checked"))
-                        {
-                            $("#encoderoptions").slideDown();
-                        }
-                        else
-                        {
-                            $("#encoderoptions").slideUp();
-                        }
-                });
-
-                if ($("#add_album_art").is(":checked"))
-                        {
-                            $("#album_art_options").show();
-                        }
-                else
-                        {
-                            $("#album_art_options").hide();
-                        }
-
-                $("#add_album_art").click(function(){
-                        if ($("#add_album_art").is(":checked"))
-                        {
-                            $("#album_art_options").slideDown();
-                        }
-                        else
-                        {
-                            $("#album_art_options").slideUp();
-                        }
-                });
-
-                if ($("#move_files").is(":checked"))
-                        {
-                            $("#move_files_options").show();
-                        }
-                else
-                        {
-                            $("#move_files_options").hide();
-                        }
-
-                $("#move_files").click(function(){
-                        if ($("#move_files").is(":checked"))
-                        {
-                            $("#move_files_options").slideDown();
-                        }
-                        else
-                        {
-                            $("#move_files_options").slideUp();
-                        }
-                });
-
-                if ($("#growl").is(":checked"))
-                        {
-                            $("#growloptions").show();
-                        }
-                else
-                        {
-                            $("#growloptions").hide();
-                        }
-
-                $("#growl").click(function(){
-                        if ($("#growl").is(":checked"))
-                        {
-                            $("#growloptions").slideDown();
-                        }
-                        else
-                        {
-                            $("#growloptions").slideUp();
-                        }
-                });
-
-                if ($("#prowl").is(":checked"))
-                        {
-                            $("#prowloptions").show();
-                        }
-                else
-                        {
-                            $("#prowloptions").hide();
-                        }
-
-                $("#prowl").click(function(){
-                        if ($("#prowl").is(":checked"))
-                        {
-                            $("#prowloptions").slideDown();
-                        }
-                        else
-                        {
-                            $("#prowloptions").slideUp();
-                        }
-                });
-
-                if ($("#xbmc").is(":checked"))
-                        {
-                            $("#xbmcoptions").show();
-                        }
-                else
-                        {
-                            $("#xbmcoptions").hide();
-                        }
-
-                $("#xbmc").click(function(){
-                        if ($("#xbmc").is(":checked"))
-                        {
-                            $("#xbmcoptions").slideDown();
-                        }
-                        else
-                        {
-                            $("#xbmcoptions").slideUp();
-                        }
-                });
-
-                if ($("#lms").is(":checked"))
-                        {
-                            $("#lmsoptions").show();
-                        }
-                else
-                        {
-                            $("#lmsoptions").hide();
-                        }
-
-                $("#lms").click(function(){
-                        if ($("#lms").is(":checked"))
-                        {
-                            $("#lmsoptions").slideDown();
-                        }
-                        else
-                        {
-                            $("#lmsoptions").slideUp();
-                        }
-                });
-
-                if ($("#plex").is(":checked"))
-                        {
-                            $("#plexoptions").show();
-                        }
-                else
-                        {
-                            $("#plexoptions").hide();
-                        }
-
-                $("#plex").click(function(){
-                        if ($("#plex").is(":checked"))
-                        {
-                            $("#plexoptions").slideDown();
-                        }
-                        else
-                        {
-                            $("#plexoptions").slideUp();
-                        }
-                });
-
-                if ($("#nma").is(":checked"))
-                        {
-                            $("#nmaoptions").show();
-                        }
-                else
-                        {
-                            $("#nmaoptions").hide();
-                        }
-
-                $("#nma").click(function(){
-                        if ($("#nma").is(":checked"))
-                        {
-                            $("#nmaoptions").slideDown();
-                        }
-                        else
-                        {
-                            $("#nmaoptions").slideUp();
-                        }
-                });
-
-                if ($("#pushalot").is(":checked"))
-                        {
-                            $("#pushalotoptions").show();
-                        }
-                else
-                        {
-                            $("#pushalotoptions").hide();
-                        }
-
-                $("#pushalot").click(function(){
-                        if ($("#pushalot").is(":checked"))
-                        {
-                            $("#pushalotoptions").slideDown();
-                        }
-                        else
-                        {
-                            $("#pushalotoptions").slideUp();
-                        }
-                });
-
-                if ($("#pushover").is(":checked"))
-                        {
-                            $("#pushoveroptions").show();
-                        }
-                else
-                        {
-                            $("#pushoveroptions").hide();
-                        }
-
-                $("#pushover").click(function(){
-                        if ($("#pushover").is(":checked"))
-                        {
-                            $("#pushoveroptions").slideDown();
-                        }
-                        else
-                        {
-                            $("#pushoveroptions").slideUp();
-                        }
-                });
-
-                if ($("#pushbullet").is(":checked"))
-                        {
-                            $("#pushbulletoptions").show();
-                        }
-                else
-                        {
-                            $("#pushbulletoptions").hide();
-                        }
-
-
-                $("#pushbullet").click(function(){
-                        if ($("#pushbullet").is(":checked"))
-                        {
-                            $("#pushbulletoptions").slideDown();
-                        }
-                        else
-                        {
-                            $("#pushbulletoptions").slideUp();
-                        }
-                });
-
-                if ($("#twitter").is(":checked"))
-                        {
-                            $("#twitteroptions").show();
-                        }
-                else
-                        {
-                            $("#twitteroptions").hide();
-                        }
-
-                $("#twitter").click(function(){
-                        if ($("#twitter").is(":checked"))
-                        {
-                            $("#twitteroptions").slideDown();
-                        }
-                        else
-                        {
-                            $("#twitteroptions").slideUp();
-                        }
-                });
-
-                if ($("#osx_notify").is(":checked"))
-                        {
-                            $("#osx_notify_options").show();
-                        }
-                else
-                        {
-                            $("#osx_notify_options").hide();
-                        }
-
-                $("#osx_notify").click(function(){
-                        if ($("#osx_notify").is(":checked"))
-                        {
-                            $("#osx_notify_options").slideDown();
-                        }
-                        else
-                        {
-                            $("#osx_notify_options").slideUp();
-                        }
-                });
-
-                if ($("#boxcar").is(":checked"))
-                        {
-                            $("#boxcar_options").show();
-                        }
-                else
-                        {
-                            $("#boxcar_options").hide();
-                        }
-
-                $("#boxcar").click(function(){
-                        if ($("#boxcar").is(":checked"))
-                        {
-                            $("#boxcar_options").slideDown();
-                        }
-                        else
-                        {
-                            $("#boxcar_options").slideUp();
-                        }
-                });
-
-                if ($("#subsonic").is(":checked"))
-                        {
-                            $("#subsonicoptions").show();
-                        }
-                else
-                        {
-                            $("#subsonicoptions").hide();
-                        }
-
-                $("#subsonic").click(function(){
-                        if ($("#subsonic").is(":checked"))
-                        {
-                            $("#subsonicoptions").slideDown();
-                        }
-                        else
-                        {
-                            $("#subsonicoptions").slideUp();
-                        }
-                });
-
-               if ($("#email").is(":checked"))
-                        {
-                            $("#email_options").show();
-                        }
-                else
-                        {
-                            $("#email_options").hide();
-                        }
-
-                $("#email").click(function(){
-                        if ($("#email").is(":checked"))
-                        {
-                            $("#email_options").slideDown();
-                        }
-                        else
-                        {
-                            $("#email_options").slideUp();
-                        }
-                });
-
-                if ($("#songkick").is(":checked"))
-                        {
-                            $("#songkickoptions").show();
-                        }
-                else
-                        {
-                            $("#songkickoptions").hide();
-                        }
-
-                $("#songkick").click(function(){
-                        if ($("#songkick").is(":checked"))
-                        {
-                            $("#songkickoptions").slideDown();
-                        }
-                        else
-                        {
-                            $("#songkickoptions").slideUp();
-                        }
-                });
-
-                if ($("#songkick_filter").is(":checked"))
-                        {
-                            $("#songkick_filteroptions").show();
-                        }
-                else
-                        {
-                            $("#songkick_filteroptions").hide();
-                        }
-
-                $("#songkick_filter").click(function(){
-                        if ($("#songkick_filter").is(":checked"))
-                        {
-                            $("#songkick_filteroptions").slideDown();
-                        }
-                        else
-                        {
-                            $("#songkick_filteroptions").slideUp();
-                        }
-                });
-
-                if ($("#lossless_only").is(":checked"))
-                        {
-                            $("#lossless_only_options").show();
-                        }
-                else
-                        {
-                            $("#lossless_only_options").hide();
-                        }
-
-                if ($("#preferred_bitrate").is(":checked"))
-                        {
-                            $("#preferred_bitrate_options").show();
-                        }
-                else
-                        {
-                            $("#preferred_bitrate_options").hide();
-                        }
 
                 if ($("#nzb_downloader_sabnzbd").is(":checked"))
                         {
@@ -714,16 +273,16 @@
                     }
                 });
 
-                %for extra in config['extras']:
-                $("#${extra}_temp").click(function(){
-                    if ($(this).is(":checked")){
-                        $("#${extra}").attr("checked", true);
-                    }
-                    else {
-                        $("#${extra}").attr("checked", false);
-                    }
-                });
-                %endfor
+                ## %for extra in config['extras']:
+                ## $("#${extra}_temp").click(function(){
+                ##     if ($(this).is(":checked")){
+                ##         $("#${extra}").attr("checked", true);
+                ##     }
+                ##     else {
+                ##         $("#${extra}").attr("checked", false);
+                ##     }
+                ## });
+                ## %endfor
 
                 $("#add_newznab").click(function() {
                     var intId = $("#newznab_providers > div").size() + deletedNewznabs + 1;
@@ -762,25 +321,10 @@
                 });
 
                 $(function() {
-                    $( "#tabs" ).tabs();
+                    $( ".tabs" ).tabs();
                 });
                 initActions();
-                initConfigCheckbox("#headphones_indexer");
-                initConfigCheckbox("#use_newznab");
-                initConfigCheckbox("#use_nzbsorg");
-                initConfigCheckbox("#use_omgwtfnzbs");
-                initConfigCheckbox("#use_torznab");
-                initConfigCheckbox("#use_kat");
-                initConfigCheckbox("#use_piratebay");
-                initConfigCheckbox("#use_oldpiratebay");
-                initConfigCheckbox("#use_mininova");
-                initConfigCheckbox("#use_waffles");
-                initConfigCheckbox("#use_rutracker");
-                initConfigCheckbox("#use_whatcd");
-                initConfigCheckbox("#use_strike");
-                initConfigCheckbox("#api_enabled");
-                initConfigCheckbox("#enable_https");
-                initConfigCheckbox("#customauth");
+
 
 
                 $('#twitterStep1').click(function () {

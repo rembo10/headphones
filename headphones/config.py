@@ -7,7 +7,7 @@ from configobj import ConfigObj
 from configview import Tab, Tabs, Block
 from configoptions import path, bool_int
 
-from configoptions import OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, ApiKeyOptionExtension
+from configoptions import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, TemplaterExtension
 
 from headphones import logger
 
@@ -25,7 +25,6 @@ _TABS = Tabs((
 ))
 
 def registerBlock(tabid, *blocks):
-    logger.info('config:registerBlock: {0}'.format(tabid))
     tab = None
     for t in _TABS:
         if t.id == tabid:
@@ -34,81 +33,112 @@ def registerBlock(tabid, *blocks):
         raise Exception('no such tab: ' + str(tabid))
 
     for block in blocks:
+        logger.debug('config:registerBlock: {0} > {1}'.format(tabid, block.id))
         tab.add([block])
 
+def registerOptions(*options):
+    """ Registering option
 
-# =======================================================================================
-registerBlock('webui',
-   Block('basic', caption=_("Basic"), options=[
+    the order of registering options is not defined """
+    for o in options:
+        if isinstance(o, OptionBase):
+            logger.debug('config:registerOptions (+option): {0}'.format(o.appkey))
+        else:
+            logger.debug('config:registerOptions (!option): {0}'.format(str(o)))
+    return options
 
-       OptionString('HTTP_HOST', 'General', 'localhost',
-            label=_('HTTP Host'),
-            caption=_('Use 0.0.0.0 to allow outside connections'),
-            tooltip=_('Host to bind web server to'),
-            maxlength=30
-            ),
-       OptionNumber('HTTP_PORT', 'General', 8181,
-            label=_('HTTP Port'),
-            tooltip=_('Port to bind web server to. Note that ports below 1024 may require root.'),
-            minvalue=1,
-            maxvalue=99999),
-       OptionPath('HTTP_USERNAME', 'General', '',
-            label=_('HTTP Username'),
-            tooltip=_('Username for web server authentication. Leave empty to disable.'),
-            maxlength=30),
-       OptionPassword('HTTP_PASSWORD', 'General', '',
-            label=_('HTTP Password'),
-            tooltip=_('Password for web server authentication. Leave empty to disable.'),
-            maxlength=30),
-       OptionBool('LAUNCH_BROWSER', 'General', True,
-            label=_('Launch Browser on Startup'),
-            tooltip=_('Launch browser pointed to Headphones, on startup.'),
-            ),
+def _reg():
+    # =======================================================================================
+    registerBlock('webui',
+       Block('basic', caption=_("Basic"), options=registerOptions(
 
-       OptionSwitch('ENABLE_HTTPS', 'General', False,
-            label=_('Enable HTTPS'),
-            tooltip=_('Enable HTTPS for web server for encrypted communication'),
-            options=[
-                OptionPath('HTTPS_CERT', 'General', '',
-                    label=_('HTTPS Cert'),
-                    maxlength=30),
-                OptionPath('HTTPS_KEY', 'General', '',
-                    label=_('HTTPS Key'),
-                    maxlength=30),
-            ]),
-   ])
-)
-
-# =======================================================================================
-# <fieldset>
-#     <legend>API</legend>
-#     <div class="row checkbox">
-#         <input type="checkbox" id="api_enabled" />
-#     </div>
-#     <div id="apioptions" class="row">
-#         <label></label>
-#         <input type="text" name="api_key" id="api_key" value="${config['api_key']}" size="20">
-
-# </fieldset>
-registerBlock('webui',
-   Block('api', caption=_("API"), options=[
-        OptionSwitch('API_ENABLED', 'General', False,
-            label=_('Enable API'),
-            tooltip=_('Allow remote applications to interface with Headphones'),
-            options=[
-                OptionString('API_KEY', 'General', '',
-                    label=_('API key'),
-                    maxlength=20,
-                    options=[
-                        #Current API key: 
-
-                        ApiKeyOptionExtension()
-                    ],
+           OptionString('HTTP_HOST', 'General', 'localhost',
+                label=_('HTTP Host'),
+                caption=_('Use 0.0.0.0 to allow outside connections'),
+                tooltip=_('Host to bind web server to'),
+                maxlength=30
                 ),
-            ]
-        ),
-  ]),
-)
+           OptionNumber('HTTP_PORT', 'General', 8181,
+                label=_('HTTP Port'),
+                tooltip=_('Port to bind web server to. Note that ports below 1024 may require root.'),
+                minvalue=1,
+                maxvalue=99999),
+           OptionPath('HTTP_USERNAME', 'General', '',
+                label=_('HTTP Username'),
+                tooltip=_('Username for web server authentication. Leave empty to disable.'),
+                maxlength=30),
+           OptionPassword('HTTP_PASSWORD', 'General', '',
+                label=_('HTTP Password'),
+                tooltip=_('Password for web server authentication. Leave empty to disable.'),
+                maxlength=30),
+           OptionBool('LAUNCH_BROWSER', 'General', True,
+                label=_('Launch Browser on Startup'),
+                tooltip=_('Launch browser pointed to Headphones, on startup.'),
+                ),
+
+           OptionSwitch('ENABLE_HTTPS', 'General', False,
+                label=_('Enable HTTPS'),
+                tooltip=_('Enable HTTPS for web server for encrypted communication'),
+                options=registerOptions(
+                    OptionPath('HTTPS_CERT', 'General', '',
+                        label=_('HTTPS Cert'),
+                        maxlength=30),
+                    OptionPath('HTTPS_KEY', 'General', '',
+                        label=_('HTTPS Key'),
+                        maxlength=30),
+                )),
+       ))
+    )
+
+    registerBlock('webui',
+       Block('api', caption=_("API"), options=registerOptions(
+            OptionSwitch('API_ENABLED', 'General', False,
+                label=_('Enable API'),
+                tooltip=_('Allow remote applications to interface with Headphones'),
+                options=registerOptions(
+                    OptionString('API_KEY', 'General', '',
+                        label=_('API key'),
+                        maxlength=20,
+                        options=registerOptions(
+                            TemplaterExtension('ApiKeyExtension', strings={'button':_('Generate'), 'caption':_('Current API key: ')})
+                        ),
+                    ),
+                )
+            ),
+      )),
+    )
+
+    registerBlock('webui',
+        Block('interval', caption=_("Interval"), options=registerOptions(
+            TemplaterExtension('LabelExtension', strings={'label':_('An interval of 0 will disable a task.'), 'class': 'small'}),
+            OptionNumber('SEARCH_INTERVAL', 'General', 1440,
+                label=_('Search Interval, mins'),
+                caption=_('minimum is 360 minutes'),
+                tooltip=_('Time between two searches for new downloads.'),
+                minvalue=0,
+                maxvalue=9999),
+            OptionNumber('DOWNLOAD_SCAN_INTERVAL', 'General', 5,
+                label=_('Download Scan Interval, mins'),
+                tooltip=_('Time between scans for downloaded files.'),
+                minvalue=0,
+                maxvalue=9999),
+            OptionNumber('LIBRARYSCAN_INTERVAL', 'General', 24,
+                label=_('Library Scan Interval, hours'),
+                tooltip=_('Time between two library update scans.'),
+                minvalue=0,
+                maxvalue=9999),
+            OptionNumber('UPDATE_DB_INTERVAL', 'General', 24,
+                label=_('MusicBrainz Update Interval, hours'),
+                tooltip=_('Time between two MusicBrainz updates.'),
+                minvalue=0,
+                maxvalue=9999),
+            OptionNumber('MB_IGNORE_AGE', 'General', 365,
+                label=_('Ignore Album Updates, days'),
+                tooltip=_('Ignore MusicBrainz album updates older then certain number of days.'),
+                minvalue=0,
+                maxvalue=9999),
+        ))
+    )
 
 # =======================================================================================
 # =======================================================================================
@@ -155,7 +185,7 @@ _CONFIG_DEFINITIONS = {
     'DETECT_BITRATE': (int, 'General', 0),
     'DO_NOT_PROCESS_UNMATCHED': (int, 'General', 0),
     'DOWNLOAD_DIR': (path, 'General', ''),
-    'DOWNLOAD_SCAN_INTERVAL': (int, 'General', 5),
+'DOWNLOAD_SCAN_INTERVAL': (int, 'General', 5),
     'DOWNLOAD_TORRENT_DIR': (path, 'General', ''),
     'DO_NOT_OVERRIDE_GIT_BRANCH': (int, 'General', 0),
     'EMAIL_ENABLED': (int, 'Email', 0),
@@ -225,14 +255,14 @@ _CONFIG_DEFINITIONS = {
     'LASTFM_USERNAME': (str, 'General', ''),
 'LAUNCH_BROWSER': (int, 'General', 1),
     'LIBRARYSCAN': (int, 'General', 1),
-    'LIBRARYSCAN_INTERVAL': (int, 'General', 300),
+'LIBRARYSCAN_INTERVAL': (int, 'General', 300),
     'LMS_ENABLED': (int, 'LMS', 0),
     'LMS_HOST': (str, 'LMS', ''),
     'LOG_DIR': (path, 'General', ''),
     'LOSSLESS_BITRATE_FROM': (int, 'General', 0),
     'LOSSLESS_BITRATE_TO': (int, 'General', 0),
     'LOSSLESS_DESTINATION_DIR': (path, 'General', ''),
-    'MB_IGNORE_AGE': (int, 'General', 365),
+'MB_IGNORE_AGE': (int, 'General', 365),
     'MININOVA': (int, 'Mininova', 0),
     'MININOVA_RATIO': (str, 'Mininova', ''),
     'MIRROR': (str, 'General', 'musicbrainz.org'),
@@ -320,7 +350,7 @@ _CONFIG_DEFINITIONS = {
     'SAB_PASSWORD': (str, 'SABnzbd', ''),
     'SAB_USERNAME': (str, 'SABnzbd', ''),
     'SAMPLINGFREQUENCY': (int, 'General', 44100),
-    'SEARCH_INTERVAL': (int, 'General', 1440),
+'SEARCH_INTERVAL': (int, 'General', 1440),
     'SOFT_CHROOT': (path, 'General', ''),
     'SONGKICK_APIKEY': (str, 'Songkick', 'nd1We7dFW2RqxPw8'),
     'SONGKICK_ENABLED': (int, 'Songkick', 1),
@@ -348,7 +378,7 @@ _CONFIG_DEFINITIONS = {
     'TWITTER_PASSWORD': (str, 'Twitter', ''),
     'TWITTER_PREFIX': (str, 'Twitter', 'Headphones'),
     'TWITTER_USERNAME': (str, 'Twitter', ''),
-    'UPDATE_DB_INTERVAL': (int, 'General', 24),
+'UPDATE_DB_INTERVAL': (int, 'General', 24),
     'USENET_RETENTION': (int, 'General', '1500'),
     'UTORRENT_HOST': (str, 'uTorrent', ''),
     'UTORRENT_LABEL': (str, 'uTorrent', ''),
@@ -379,12 +409,13 @@ _CONFIG_DEFINITIONS = {
 class Config(object):
     """ Wraps access to particular values in a config file """
 
-
-
-    def get_tabs(self):
+    def getTabs(self):
         return self._tb
 
     def __init__(self, config_file):
+
+        _reg()
+
         """ Initialize the config with values from a file """
         self._config_file = config_file
         self._config = ConfigObj(self._config_file, encoding='utf-8')
@@ -513,14 +544,6 @@ class Config(object):
             key, definition_type, section, ini_key, default = self._define(name)
             self._config[section][ini_key] = definition_type(value)
             return self._config[section][ini_key]
-
-    def process_kwargs(self, kwargs):
-        """
-        Given a big bunch of key value pairs, apply them to the ini.
-        """
-        for name, value in kwargs.items():
-            key, definition_type, section, ini_key, default = self._define(name)
-            self._config[section][ini_key] = definition_type(value)
 
     def _upgrade(self):
         """ Update folder formats in the config & bump up config version """

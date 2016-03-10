@@ -74,15 +74,19 @@ class SoftChrootTest(TestCase):
         self.assertEqual(a, e)
 
     @TestArgs(
-        ('/'),
-        ('/nonch/path/asdf'),
-        ('tmp/asdf'),
+        ('/', '/'),
+        ('/nonch/path/asdf', '/nonch/path/asdf'),
+        ('tmp/asdf', '/tmp/asdf'),
     )
-    def test_apply_out_of_root(self, p):
+    def test_apply_out_of_root(self, p, e):
         """ apply SoftChroot to paths outside of the chroot """
-        sc = SoftChroot('/tmp/')
+        chroot = '/tmp/'
+        sc = SoftChroot(chroot)
         a = sc.apply(p)
-        self.assertEqual(a, '/')
+
+        # !!! Important thing for compatibility with non-soft-chroot:
+        # !!! the path outside of chroot should be the same, but with chroot prefix!!
+        self.assertEqual(a, e)
 
     @TestArgs(
         (None, None),

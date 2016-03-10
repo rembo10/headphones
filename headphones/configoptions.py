@@ -3,7 +3,9 @@ import os
 from itertools import ifilter
 from mako.template import Template
 from mako.lookup import TemplateLookup
+
 import headphones
+from headphones import logger
 
 # will be helpful for translations
 def _(x):
@@ -43,13 +45,11 @@ class Renderable(object):
     """ Basic class for all things, which want be renderable on runtime """
 
     def __init__(self):
-        self._templateName=None
-        self._templateFileName = None
-
         # internal templating stuff:
         self._hplookup = None
 
     def _getTemplateLookup(self):
+        # TDO : make this static, to optimize the search for a template
         if not self._hplookup:
             opt_INTERFACE = headphones.CONFIG.INTERFACE
             prog_dir = str(headphones.PROG_DIR)
@@ -63,26 +63,28 @@ class Renderable(object):
 
     @property
     def templateName(self):
-        return self._templateName
+        return self.__class__.__name__
 
     @property
     def templateFileName(self):
-        return self._templateFileName
+        return "config-templates.html"
 
     def render(self, **qwargs):
         """ Used in the config UI, should return result of rendering MAKO template - string """
 
-        # TODO : add TRY-EXCEPT
-        # this block searches for a template of an option (by name)
-        # and render appropriate MAKO-def
-        template = self._getTemplateLookup().get_template(self.templateFileName)
-        defs = template.get_def(self.templateName)
-        print ('root render', qwargs)
+        try:
+            # this block searches for a template of an option (by name)
+            # and render appropriate MAKO-def
+            template = self._getTemplateLookup().get_template(self.templateFileName)
+            defs = template.get_def(self.templateName)
+        except Exception, e:
+            logger.error('Error on render template: {0}'.format(e.message))
+            raise
 
         return defs.render(**qwargs)
 
 # ===============================================
-# Abstract, base class
+# base class for options
 # ===============================================
 
 class OptionBase(Renderable):
@@ -117,14 +119,6 @@ class OptionBase(Renderable):
 
     def uiId(self):
         return self.appkey
-
-    @property
-    def templateName(self):
-        return self.__class__.__name__
-
-    @property
-    def templateFileName(self):
-        return "config-templates.html"
 
     def render(self, parent=None):
         return super(OptionBase, self).render(o=self, parent=parent)
@@ -191,6 +185,7 @@ class OptionBool(OptionBase):
         self.caption = caption
         self.tooltip = tooltip
 
+
 # ===============================================
 # API-usable options with SUBSTRUCTURE
 # ===============================================
@@ -205,20 +200,30 @@ class OptionSwitch(OptionBool):
     """
     pass
 
-    # def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, options=None):
-    #     super(OptionSwitch, self).__init__(appkey, section, default, options=options)
 
-    #     self.label = label
-    #     self.caption = caption
-    #     self.tooltip = tooltip
+# ===============================================
+# Option extensions
+# ===============================================
 
 
+class TemplaterExtension(Renderable):
+    """ Allow render any template, extending HTML for options with non-standart layout """
 
+    def __init__(self, template_name=None, strings=None):
+        super(TemplaterExtension, self).__init__()
+        self._template_name = template_name
 
-class ApiKeyOptionExtension(Renderable):
-    def __init__(self):
-        super(ApiKeyOptionExtension, self).__init__()
+        self.strings = strings
 
     @property
     def templateName(self):
-        return "ApiKeyOptionExtension"
+        return self._template_name
+
+    def render(self, parent=None):
+        return super(TemplaterExtension, self).render(o=self, parent=parent)
+
+    def __repr__(self):
+        return "<%s template_name=%s>" % (
+            self.__class__.__name__,
+            self._template_name
+        )
