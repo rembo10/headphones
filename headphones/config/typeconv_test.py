@@ -3,9 +3,9 @@ import re
 import unittestcompat
 from unittestcompat import TestCase, TestArgs
 
-from headphones.config.types import path
+from headphones.config.typeconv import path
 
-class ConfigPathTest(TestCase):
+class PathTest(TestCase):
 
     def test_path(self):
         p = path('/tmp')

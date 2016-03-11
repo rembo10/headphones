@@ -49,29 +49,6 @@ class ConfigApiTest(TestCase):
         self.assertIsInstance(cf, headphones.config.Config)
 
     @TestArgs(
-        # this sections are explicitly added in the test body:
-        ('General', False),
-        ('Email', False),
-
-        # this sections will not be created nor in the test, either in the
-        # Config module
-        ('some_new_section_never_defined', True),
-        ('another_new_section_never_defined', True),
-    )
-    def test_check_section(self, section_name, expected_return):
-        """ Config : check_section """
-        path = '/tmp/notexist'
-
-        # call methods
-        c = headphones.config.Config(path)
-        res = c.check_section(section_name)
-        res2 = c.check_section(section_name)
-
-        # assertions:
-        self.assertEqual(res, expected_return)
-        self.assertFalse(res2)
-
-    @TestArgs(
         ('api_enabled', 0, int),
         ('Api_Key', '', str),
     )

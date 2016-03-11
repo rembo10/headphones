@@ -1,11 +1,13 @@
-def bool_int(value):
-    """
-    Casts a config value into a 0 or 1
+def boolext(value):
+    """ extended bool could read bool values from strings like '0', 'f', 'no' ano others.
     """
     if isinstance(value, basestring):
-        if value.lower() in ('', '0', 'false', 'f', 'no', 'n', 'off'):
-            value = 0
-    return int(bool(value))
+        value = value.lower()
+        if value in ('', '0', 'false', 'f', 'no', 'n', 'off', '-'):
+            value = False
+        elif value.lower() in ('1', 'true', 't', 'yes', 'y', 'on', '+'):
+            value = True
+    return bool(value)
 
 
 class path(str):
