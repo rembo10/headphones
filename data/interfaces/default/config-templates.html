@@ -37,7 +37,7 @@
 
 <%def name="OptionString(me, parent=None)">
 <%
-    uiname = me.uiId()
+    uiname = me.uiName()
     embed_id = uiname + '_embed'
     val = me.value
 
@@ -76,7 +76,7 @@
 
 <%def name="OptionPassword(me, parent=None)">
 <%
-    uiname = me.uiId()
+    uiname = me.uiName()
     embed_id = uiname + '_embed'
     val = me.value
 
@@ -114,7 +114,7 @@
 
 <%def name="OptionNumber(me, parent=None)">
 <%
-    uiname = me.uiId()
+    uiname = me.uiName()
     embed_id = uiname + '_embed'
     val = me.value
 
@@ -149,7 +149,7 @@
 
 <%def name="OptionBool(me, parent=None)">
 <%
-    uiname = me.uiId()
+    uiname = me.uiName()
     embed_id = uiname + '_embed'
     val = me.value
 
@@ -183,7 +183,7 @@
 
 <%def name="OptionSwitch(me, parent=None)">
 <%
-    uiname = me.uiId()
+    uiname = me.uiName()
     embed_id = uiname + '_embed'
     val = me.value
 
@@ -231,7 +231,7 @@
     me = parent
     val = me.value
 
-    uiname = me.uiId()
+    uiname = me.uiName()
     embed_id = uiname + '_embed'
     button_class = embed_id + '_btn_cls'
 %>

@@ -7,8 +7,11 @@ from mako.lookup import TemplateLookup
 import headphones
 from headphones import logger
 
+from headphones.config.typeconv import path, boolext
+from headphones.config.datamodel import OptionModel
+
 # ===============================================
-""" ViewModel-classes of configuration 
+""" ViewModel-classes of configuration
 
 Some of classes still just ViewModels, without its own template (for example : Tabs)
 But the most classes have its own template (they are inherited from Renderable)
@@ -31,8 +34,10 @@ class Renderable(object):
         self._hplookup = None
 
     def _getTemplateLookup(self):
-        # TDO : make this static, to optimize the search for a template
+        # TODO : make this static, to optimize the search for a template
+        # TODO : it is important to optimize this, because this method called to often
         if not self._hplookup:
+            # TODO : to ensure, that there is enough calls - put PRINT here
             opt_INTERFACE = headphones.CONFIG.INTERFACE
             prog_dir = str(headphones.PROG_DIR)
             _interface_dir = os.path.join(prog_dir, 'data/interfaces/')
@@ -181,25 +186,30 @@ class Block(object):
 class OptionBase(Renderable):
     """ Base, abstract parent for all other options """
 
-    def __init__(self, appkey, section, default=None, options=None):
+    def __init__(self, appkey, section, default=None, options=None, typeconv=str):
         """Initialization
 
         Args:
             appkey - unique identifier for an option
             section - name of section in CONFIG FILE
             default - default value
+            options - list of suboptions
         """
         super(OptionBase, self).__init__()
 
-        self.appkey = appkey
-        self.default = default
-        self.section = section
+        self.model = OptionModel(appkey=appkey, section=section, default=default, typeconv=typeconv)
+
         self._options = options or []  # should not be None
 
         self.writable = True
         self.readable = True
 
-        self.value = None
+
+    def __repr__(self):
+        return "<{0:20} appkey={1}>".format(
+            self.__class__.__name__,
+            self.model.appkey
+        )
 
     def __iter__(self):
         """ Iterates over non-empty tabs """
@@ -208,11 +218,20 @@ class OptionBase(Renderable):
     def __len__(self):
         return len(self._options)
 
-    def uiId(self):
-        return self.appkey
-
     def render(self, parent=None):
         return super(OptionBase, self).render(me=self, parent=parent)
+
+    @property
+    def appkey(self):
+        return self.model.appkey
+
+    @property
+    def value(self):
+        return self.model.get()
+
+    def uiName(self):
+        "This is an identifier of option, when data are sended/received to/from UI"
+        return self.model.appkey
 
 # ===============================================
 # API-usable options
@@ -238,16 +257,10 @@ class OptionString(OptionBase):
 
         self.maxlength = maxlength
 
-class OptionPath(OptionString):
+class OptionPath(OptionBase):
 
-    @property
-    def templateName(self):
-        return "OptionString"
-
-class OptionPassword(OptionBase):
-
-    def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, maxlength=None):
-        super(OptionPassword, self).__init__(appkey, section, default)
+    def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, options=None, maxlength=None):
+        super(OptionPath, self).__init__(appkey, section, default, typeconv=path, options=options)
 
         self.label = label
         self.caption = caption
@@ -255,10 +268,18 @@ class OptionPassword(OptionBase):
 
         self.maxlength = maxlength
 
+    @property
+    def templateName(self):
+        # currently, path uses the same template as string
+        return "OptionString"
+
+class OptionPassword(OptionString):
+    pass
+
 class OptionNumber(OptionBase):
 
     def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, minvalue=None, maxvalue=None):
-        super(OptionNumber, self).__init__(appkey, section, default)
+        super(OptionNumber, self).__init__(appkey, section, default, typeconv=int)
 
         self.label = label
         self.caption = caption
@@ -270,12 +291,17 @@ class OptionNumber(OptionBase):
 class OptionBool(OptionBase):
 
     def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, options=None):
-        super(OptionBool, self).__init__(appkey, section, default, options=options)
+        super(OptionBool, self).__init__(appkey, section, default, typeconv=boolext, options=options)
 
         self.label = label
         self.caption = caption
         self.tooltip = tooltip
 
+class OptionList(OptionString):
+
+    @property
+    def templateName(self):
+        return "OptionString"
 
 # ===============================================
 # API-usable options with SUBSTRUCTURE
