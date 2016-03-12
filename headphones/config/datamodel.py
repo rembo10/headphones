@@ -1,5 +1,6 @@
 from headphones import logger
 
+""" List of types, which ConfigOpt could handle internally, without conversions """
 _primitives = (int, str, bool, list, float)
 
 class OptionModel:
@@ -74,6 +75,7 @@ class OptionModel:
         s = self._section   # section
         k = self._inikey    # key
         d = self._default
+        t = self._typeconv   # type
 
         if self._config_callback is None:
             msg = 'Option [{0}][{1}] was not binded/registered with config'.format(s,k)
@@ -86,9 +88,11 @@ class OptionModel:
             # create section:
             config[s] = {}
 
-        # convert value to storable value
+        # convert value to storable types:
         if not isinstance(value, _primitives):
             logger.debug('Value of option [{0}][{1}] is not primitive (but {2}), will stringify it'.format(s,k,type(value)))
             value = str(value)
+        else:
+            value = t(value)
 
         config[s][k] = value

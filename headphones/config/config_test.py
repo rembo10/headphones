@@ -49,24 +49,6 @@ class ConfigApiTest(TestCase):
         self.assertIsInstance(cf, headphones.config.Config)
 
     @TestArgs(
-        ('api_enabled', 0, int),
-        ('Api_Key', '', str),
-    )
-    def test_check_setting(self, setting_name, expected_return, expected_instance):
-        """ Config: check_setting , basic cases """
-        path = '/tmp/notexist'
-
-        # call methods
-        c = headphones.config.Config(path)
-        res = c.check_setting(setting_name)
-        res2 = c.check_setting(setting_name)
-
-        # assertions:
-        self.assertIsInstance(res, expected_instance)
-        self.assertEqual(res, expected_return)
-        self.assertEqual(res, res2)
-
-    @TestArgs(
         (''),
         ('This_IsNew_Name'),
     )
