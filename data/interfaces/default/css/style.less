@@ -237,7 +237,7 @@ table {
 // Forms
 select, input, textarea, button
 {
-    font: 99%;
+    font-size: 99%;
 }
 
 select
@@ -266,7 +266,7 @@ button {
     overflow: visible;
     width: auto;
 }
-input,select,form .checkbox input,.configtable td#middle, #artist_table td#have,#album_table td#have { vertical-align: middle; }
+input,select,form .checkbox input,.configtable td#middle, #artist_table td#have { vertical-align: middle; }
 
 input[type="radio"]{ vertical-align: text-bottom; }
 ::-moz-selection, ::selection {
@@ -310,7 +310,6 @@ form {
     }
 
     .row {
-        font-family: Helvetica, Arial;
         margin-bottom: 10px;
         label {
             display: block;
@@ -452,7 +451,7 @@ ul#nav {
 // Layout
 header {
     .gradient(@gradient-color-1, @gradient-color-2);
-    border-bottom: 1px solid #CACACA;
+    border-bottom: 1px solid @border-color;
     .shadow(0 0 10px rgba(0, 0, 0, 0.1));
     height: 58px;
     position: fixed;
@@ -462,7 +461,7 @@ header {
         margin: 0 auto;
         overflow: hidden;
         position: relative;
-        width: 960px;
+        width: 990px;
     }
     #logo {
         float: left;
@@ -500,12 +499,12 @@ footer {
         top: 4px;
     }
 }
-#ajaxMsg {
+.ajaxMsg {
     border: 1px solid @border-color;
     .gradient(#FFFFFF, #EEEEEE);
     .rounded(7px);
     display: none;
-    font-size: 14px;
+    font-size: larger;
     right: 10px;
     .shadow(0px 0px 2px #aaa);
     padding: 7px 10px;
@@ -562,22 +561,32 @@ footer {
         list-style-type: none;
         width: 100%;
         z-index: 998;
-        #subhead_menu {
+        #subhead_menu
+        {
             float: right;
-            margin-top: 5px;
+            margin-top: 0px;
             position: relative;
             z-index: 99;
-           a {
+           a
+           {
               	.gradient(@gradient-color-1, @gradient-color-2);
               	font-family: @base-font-face;
               	font-size: @base-font-size;
               	font-weight: normal;
-              	&:hover {
-              		.gradient(#599BDC, #3072B3);
-              		color: #FFF;
-              		border-color: #518CC6 #518CC6 #2A65A0;
+              	&:hover
+                {
+                    .gradient(#599BDC, #3072B3);
+                    color: #FFF;
+                    border-color: #518CC6 #518CC6 #2A65A0;
               	}
             }
+        }
+
+        #back_to_previous_link
+        {
+            margin-top: 20px;
+            position: relative;
+            z-index: 99;
         }
     }
 }
@@ -596,14 +605,14 @@ div#searchbar {
         .rounded(@heading-input-radius);
         .shadow(0 1px 0 #f1f1f1);
         .shadow(inset 0 1px 1px #e0e0e0);
-        color: #999;
+        color: @caption-color;
         float: left;
-        font-size: 14px;
+        font-size: larger;
         height: auto;
         line-height: normal;
         margin-right: 5px;
         padding: 4px 5px 4px 25px;
-        width: 150px;
+        width: 185px;
     }
     .mini-icon {
     	color: #999;
@@ -621,7 +630,7 @@ div#searchbar {
     _height: 302px;
     background-color: #FFF;
     clear: both;
-    margin: 30px auto 0;
+    margin: 60px auto 0;
     min-height: 100px;
     position: relative;
     width: 100%;
@@ -835,6 +844,15 @@ div#artistheader {
     }
 }
 
+.nopad
+{
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding: 0 !important;
+}
+
 #album_table {
 	background-color: #FFF;
     th#select {
@@ -848,7 +866,8 @@ div#artistheader {
         text-align: center;
         width: 175px;
     }
-    th#status, th#albumart {
+    th#albumart
+    {
         min-width: 50px;
         text-align: left;
     }
@@ -862,16 +881,78 @@ div#artistheader {
         text-align: center;
         width: 80px;
     }
-    td#albumart {
-        img {
-            background: #FFF;
-            border: 1px solid #ccc;
-            padding: 3px;
-        }
+    th#albumname
+    {
+        min-width: 150px;
+        text-align: center;
     }
-    td#status {
-        a#wantlossless {
-            white-space: nowrap;
+    th#bitrate,
+    th#albumformat
+    {
+        min-width: 60px;
+        text-align: center;
+    }
+    th#type
+    {
+        min-width: 100px;
+        text-align: center;
+        width: 175px;
+    }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Table width
+
+    td
+    {
+        vertical-align: middle;
+        font-size: larger;
+
+        &#have
+        {
+        }
+
+        &#albumname,
+        &#reldate,
+        &#type,
+        &#bitrate,
+        &#albumformat,
+        &#score,
+        &#wantlossless
+        {
+            text-align: center;
+        }
+
+        &#select
+        {
+            text-align: left;
+        }
+
+        &#albumart
+        {
+            text-align: left;
+            img {
+                background: #FFF;
+                border: 1px solid #ccc;
+                padding: 3px;
+            }
+        }
+        &#status
+        {
+            text-align: center;
+            a#wantlossless
+            {
+                white-space: nowrap;
+            }
         }
     }
 }
@@ -920,6 +1001,31 @@ div#artistheader {
     }
 }
 
+#downloads_table
+{
+    th
+    {
+        text-align: center;
+
+        &#title
+        {
+            min-width: 500px;
+        }
+        &#size
+        {
+            min-width: 80px;
+        }
+        &#provider
+        {
+            min-width: 100px;
+        }
+        &#kind
+        {
+            min-width: 80px;
+        }
+    }
+}
+
 // History
 #history_table {
     background-color: #FFF;
@@ -965,18 +1071,111 @@ div#artistheader {
         padding: 2px 10px;
     }
 }
+
 // Searchresults
-#searchresults_table {
-    th#albumname {
-        min-width: 225px;
+#searchresults_table
+{
+    th
+    {
+        font-size: larger;
         text-align: left;
+        min-width: 50px;
+
+        &#artistnamesmall
+        {
+            min-width: 125px;
+        }
+        &#reldate
+        {
+            min-width: 80px;
+            text-align: center;
+        }
+        &#format
+        {
+        }
+        &#tracks
+        {
+        }
+        &#albumname
+        {
+            min-width: 250px;
+        }
+        &#artistname
+        {
+            min-width: 325px;
+        }
+        &#score
+        {
+            min-width: 75px;
+            text-align: center;
+        }
+        &#scoresmall
+        {
+        }
     }
-    th#artistname {
-        min-width: 325px;
+
+    td
+    {
+        vertical-align: middle;
         text-align: left;
+        font-size: larger;
+        min-width: 50px;
+
+        &#artistnamesmall
+        {
+            min-width: 100px;
+        }
+        &#reldate
+        {
+            min-width: 80px;
+            text-align: center;
+        }
+        &#format
+        {
+        }
+        &#tracks
+        {
+        }
+
+        &#albumname
+        {
+            min-width: 220px;
+        }
+        &#artistname
+        {
+            min-width: 300px;
+        }
+        &#add
+        {
+        }
+
+        &#score
+        {
+            min-width: 75px;
+
+            .bar
+            {
+                width: 100px;
+                margin: 0 auto;
+                border: 1px solid @border-color;
+                padding: 1px;
+                background-color: #FFF;
+                .score
+                {
+                    height: 14px;
+                    color: @text-color;
+                    color: #FFF;
+                    font-size: 11px;
+                    vertical-align: middle;
+                    line-height: normal;
+                    .gradient(#A3E532,#90CC2A);
+                }
+            }
+        }
     }
+
     #artistImg {
-    	background: url("../images/loader_black.gif") no-repeat scroll center center #FFFFFF;
+        background: url("../images/loader_black.gif") no-repeat scroll center center #FFFFFF;
         border: 3px solid #FFFFFF;
         box-shadow: 1px 1px 2px 0 #555555;
         float: left;
@@ -985,36 +1184,8 @@ div#artistheader {
         text-indent: -3000px;
         width: 50px;
     }
-    td#albumname {
-        min-width: 200px;
-        text-align: left;
-        vertical-align: middle;
-    }
-    td#artistname {
-        min-width: 300px;
-        text-align: left;
-        vertical-align: middle;
-    }
-    td#add {vertical-align: middle;}
-    td#score {
-    	.bar {
-    		width: 100px;
-    		margin: 0 auto;
-    		border: 1px solid @border-color;
-    		padding: 1px;
-    		background-color: #FFF;
-    		.score {
-    			height: 14px;
-    			color: @text-color;
-    			color: #FFF;
-    			font-size: 11px;
-    			vertical-align: middle;
-    			line-height: normal;
-    			.gradient(#A3E532,#90CC2A);
-    		}
-    	}
-    }
 }
+
 .progress-container {
     background: #FFF;
     border: 1px solid #ccc;
@@ -1088,6 +1259,12 @@ div#artistheader {
         }
     }
 }
+
+#trashcan
+{
+    margin-top:15px;
+}
+
 .cloudtag {
     font-size: 16px;
     #cloud {
@@ -1180,37 +1357,11 @@ div#artistheader {
 }
 .invisible { visibility: hidden; }
 
-// Table width
-#album_table th#albumname, #upcoming_table th#artistname, #wanted_table th#artistname {
-    min-width: 150px;
-    text-align: center;
-}
-#album_table th#type, #track_table th#duration {
-    min-width: 100px;
-    text-align: center;
-    width: 175px;
-}
-#album_table th#bitrate, #album_table th#albumformat {
-    min-width: 60px;
-    text-align: center;
-}
-#album_table td#select, #album_table td#albumart {
-    text-align: left;
-    vertical-align: middle;
-}
-#album_table td#albumname,#album_table td#reldate, #album_table td#type, #track_table td#duration, #upcoming_table td#select, #upcoming_table td#status, #wanted_table td#select, #wanted_table td#status {
-    text-align: center;
-    vertical-align: middle;
-}
-#album_table td#status, #album_table td#bitrate, #album_table td#albumformat, #album_table td#wantlossless {
-    font-size: 13px;
-    text-align: center;
-    vertical-align: middle;
-}
 div#albumheader .albuminfo li span, div#artistheader h3 span {
     font-weight: 400;
 }
-#track_table th#bitrate, #track_table th#format, #upcoming_table th#type, #wanted_table th#type, #searchresults_table th#score {
+#track_table th#bitrate, #track_table th#format, #upcoming_table th#type, #wanted_table th#type
+{
     min-width: 75px;
     text-align: center;
 }
@@ -1224,6 +1375,33 @@ div#albumheader .albuminfo li span, div#artistheader h3 span {
     text-align: center;
     vertical-align: middle;
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#upcoming_table th#artistname, #wanted_table th#artistname
+{
+    min-width: 150px;
+    text-align: center;
+}
+#track_table th#duration {
+    min-width: 100px;
+    text-align: center;
+    width: 175px;
+}
+#track_table td#duration, #upcoming_table td#select, #upcoming_table td#status, #wanted_table td#select, #wanted_table td#status {
+    text-align: center;
+    vertical-align: middle;
+}
+
 #upcoming_table, #wanted_table {
 	td#albumart {
 	    img {
@@ -1265,7 +1443,8 @@ div#albumheader .albuminfo li span, div#artistheader h3 span {
     text-align: center;
     vertical-align: middle;
 }
-#upcoming_table td#type, #wanted_table td#type, #searchresults_table td#score {
+#upcoming_table td#type, #wanted_table td#type
+{
     min-width: 75px;
     text-align: center;
     vertical-align: middle;
