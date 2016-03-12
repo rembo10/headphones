@@ -226,8 +226,8 @@ class OptionBase(Renderable):
     def appkey(self):
         return self.model.appkey
 
-    @property
-    def value(self):
+    #@property
+    def uiValue(self):
         return self.model.get()
 
     def uiName(self):
