@@ -5,7 +5,7 @@
     import string
 %>
 
-<%page args="tabs, config"/>
+<%page args="model"/>
 
 <%def name="headerIncludes()">
     <meta name="author" content="Koryukov Maksim">
@@ -27,12 +27,12 @@
     <form action="configUpdate" method="post" class="form" id="configUpdate">
         <div id="tabs" class="tabs">
             <ul>
-                % for tab in tabs:
+                % for tab in model:
                 <li><a href="#${tab.id}">${tab.caption}</a></li>
                 % endfor
             </ul>
 
-            % for tab in tabs:
+            % for tab in model:
                 ${tab.render(me=tab, parent=None)}
             % endfor
         </div>

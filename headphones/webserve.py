@@ -44,6 +44,10 @@ except ImportError:
     # Python 2.6.x fallback, from libs
     from ordereddict import OrderedDict
 
+# will be useful for translation
+def _(x):
+    return x
+
 def serve_template(templatename, **kwargs):
     interface_dir = os.path.join(str(headphones.PROG_DIR), 'data/interfaces/')
     template_dir = os.path.join(str(interface_dir), headphones.CONFIG.INTERFACE)
@@ -1135,9 +1139,9 @@ class WebInterface(object):
     @cherrypy.expose
     def config(self):
 
-        tabs = headphones.CONFIG.getTabs()
+        model = headphones.CONFIG.getViewModel()
 
-        return serve_template(templatename="config.html", title="Settings", tabs=tabs)
+        return serve_template(templatename="config.html", title=_("Settings"), model=model)
 
         # TODO : implement softchroot
         for k, v in config.iteritems():
@@ -1159,38 +1163,6 @@ class WebInterface(object):
     @cherrypy.expose
     def configUpdate2(self, **kwargs):
         # Handle the variable config options. Note - keys with False values aren't getting passed
-
-        checked_configs = [
-            "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer",
-            "use_newznab", "newznab_enabled", "use_torznab", "torznab_enabled",
-            "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay",
-            "use_mininova", "use_waffles", "use_rutracker",
-            "use_whatcd", "use_strike", "preferred_bitrate_allow_lossless", "detect_bitrate",
-            "ignore_clean_releases", "freeze_db", "cue_split", "move_files",
-            "rename_files", "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art",
-            "embed_album_art", "embed_lyrics",
-            "replace_existing_folders", "keep_original_folder", "file_underscores",
-            "include_extras", "official_releases_only",
-            "wait_until_release_date", "autowant_upcoming", "autowant_all",
-            "autowant_manually_added", "do_not_process_unmatched", "keep_torrent_files",
-            "music_encoder",
-            "encoderlossless", "encoder_multicore", "delete_lossless_files", "growl_enabled",
-            "growl_onsnatch", "prowl_enabled",
-            "prowl_onsnatch", "xbmc_enabled", "xbmc_update", "xbmc_notify", "lms_enabled",
-            "plex_enabled", "plex_update", "plex_notify",
-            "nma_enabled", "nma_onsnatch", "pushalot_enabled", "pushalot_onsnatch",
-            "synoindex_enabled", "pushover_enabled",
-            "pushover_onsnatch", "pushbullet_enabled", "pushbullet_onsnatch", "subsonic_enabled",
-            "twitter_enabled", "twitter_onsnatch",
-            "osx_notify_enabled", "osx_notify_onsnatch", "boxcar_enabled", "boxcar_onsnatch",
-            "songkick_enabled", "songkick_filter_enabled",
-            "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch",
-            "customauth", "idtag"
-        ]
-        for checked_config in checked_configs:
-            if checked_config not in kwargs:
-                # checked items should be zero or one. if they were not sent then the item was not checked
-                kwargs[checked_config] = 0
 
         for plain_config, use_config in [(x[4:], x) for x in kwargs if x.startswith('use_')]:
             # the use prefix is fairly nice in the html, but does not match the actual config

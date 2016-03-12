@@ -9,6 +9,7 @@ from headphones.config.viewmodel import Tab, Tabs, OptionBase
 import headphones.config.definitions.webui
 import headphones.config.definitions.search
 import headphones.config.definitions.internal
+import headphones.config.definitions.advanced
 
 from headphones import logger
 
@@ -33,9 +34,11 @@ class Config(object):
         self._initTabs()
         self._vault = {}
 
-        definitions.internal.reg(self._registerBlock, self._registerOptions)
-        definitions.webui.reg(self._registerBlock, self._registerOptions)
-        definitions.search.reg(self._registerBlock, self._registerOptions)
+        # register options from definition's files:
+        definitions.internal.reg(None, self._registerBlock, self._registerOptions)
+        definitions.webui.reg('webui', self._registerBlock, self._registerOptions)
+        definitions.search.reg('search', self._registerBlock, self._registerOptions)
+        definitions.advanced.reg('advanced', self._registerBlock, self._registerOptions)
 
         logger.debug('All options registered. Total options: {0}'.format(len(self._vault)))
         self._upgrade()
@@ -70,7 +73,7 @@ class Config(object):
     #     return my_val
 
 
-    def getTabs(self):
+    def getViewModel(self):
         return self._tabs
 
     def _initTabs(self):
@@ -135,8 +138,6 @@ class Config(object):
     def write(self):
         """ Make a copy of the stored config and write it to the configured file """
 
-        # # TODO : try to use self._config.write
-
         # new_config = ConfigObj(encoding="UTF-8")
         # new_config.filename = self._config_file
 
@@ -163,7 +164,8 @@ class Config(object):
         try:
             # TODO : do not forget to write file!!!!
             # new_config.write()
-            # pass
+
+            # TODO : try to use self._config.write
             self._config.write()
             headphones.logger.info("Writing configuration to file: DONE")
         except IOError as e:
