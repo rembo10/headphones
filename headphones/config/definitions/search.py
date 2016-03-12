@@ -11,11 +11,10 @@ def _(x):
     return x
 
 
-def reg(register_block_cb, register_options_cb):
-    tabname = 'search'
+def reg(tabname, register_block_cb, register_options_cb):
 
     register_block_cb(tabname,
-        Block('usenet', caption=_("All"), options=register_options_cb(
+        Block('usenet', caption=_("Usenet"), options=register_options_cb(
             OptionString('SAB_HOST', 'SABnzbd', '',
                 label=_('SABnzbd Host'),
                 caption=_('usually http://localhost:8080'),
@@ -156,27 +155,6 @@ def reg(register_block_cb, register_options_cb):
                 minvalue=None,
                 maxvalue=None
             ),
-            OptionNumber('CHECK_GITHUB', 'General', 1,
-                label=_('zzCHECK_GITHUBzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('CHECK_GITHUB_INTERVAL', 'General', 360,
-                label=_('zzCHECK_GITHUB_INTERVALzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('CHECK_GITHUB_ON_STARTUP', 'General', 1,
-                label=_('zzCHECK_GITHUB_ON_STARTUPzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
             OptionNumber('CLEANUP_FILES', 'General', 0,
                 label=_('zzCLEANUP_FILESzz'),
                 caption=_(''),
@@ -276,13 +254,6 @@ def reg(register_block_cb, register_options_cb):
                 label=_('zzDOWNLOAD_TORRENT_DIRzz'),
                 caption=_(''),
                 tooltip=_(''),
-            ),
-            OptionNumber('DO_NOT_OVERRIDE_GIT_BRANCH', 'General', 0,
-                label=_('zzDO_NOT_OVERRIDE_GIT_BRANCHzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
             ),
             OptionNumber('DO_NOT_PROCESS_UNMATCHED', 'General', 0,
                 label=_('zzDO_NOT_PROCESS_UNMATCHEDzz'),
@@ -492,23 +463,6 @@ def reg(register_block_cb, register_options_cb):
                 minvalue=None,
                 maxvalue=None
             ),
-            OptionString('GIT_BRANCH', 'General', 'master',
-                label=_('zzGIT_BRANCHzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionPath('GIT_PATH', 'General', '',
-                label=_('zzGIT_PATHzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
-            OptionString('GIT_USER', 'General', 'rembo10',
-                label=_('zzGIT_USERzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
             OptionNumber('GROWL_ENABLED', 'Growl', 0,
                 label=_('zzGROWL_ENABLEDzz'),
                 caption=_(''),
@@ -548,19 +502,6 @@ def reg(register_block_cb, register_options_cb):
             ),
             OptionString('HPUSER', 'General', '',
                 label=_('zzHPUSERzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('HTTP_PROXY', 'General', 0,
-                label=_('zzHTTP_PROXYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('HTTP_ROOT', 'General', '/',
-                label=_('zzHTTP_ROOTzz'),
                 caption=_(''),
                 tooltip=_(''),
                 maxlength=None

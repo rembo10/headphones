@@ -11,8 +11,8 @@ def _(x):
     return x
 
 
-def reg(register_block_cb, register_options_cb):
-    tabname = 'webui'
+def reg(tabname, register_block_cb, register_options_cb):
+
     # =======================================================================================
     register_block_cb(tabname,
        Block('basic', caption=_("Basic"), options=register_options_cb(
