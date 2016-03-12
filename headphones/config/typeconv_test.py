@@ -3,7 +3,7 @@ import re
 import unittestcompat
 from unittestcompat import TestCase, TestArgs
 
-from headphones.config.typeconv import path
+from headphones.config.typeconv import path, boolext
 
 class PathTest(TestCase):
 
@@ -45,3 +45,37 @@ class PathTest(TestCase):
         a = str(p1)
         e = str(s)
         self.assertEqual(a, e)
+
+class boolextTest(TestCase):
+
+    @TestArgs(
+        (1),
+        (2),
+        ([1,2]),
+        (True),
+        ('Y'),
+        ('true'),
+        ('on'),
+        ('t'),
+        ('+'),
+    )
+    def test_true(self, val):
+        act = boolext(val)
+        self.assertTrue(act)
+
+    @TestArgs(
+        (None),
+        (False),
+        ([]),
+        (0),
+        (''),
+        ('nO'),
+        ('no'),
+        ('n'),
+        ('fAlse'),
+        ('-'),
+        ('off'),
+    )
+    def test_false(self, val):
+        act = boolext(val)
+        self.assertFalse(act)
