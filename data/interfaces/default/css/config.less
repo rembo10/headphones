@@ -1,4 +1,4 @@
-/* Variables */ 
+/* Variables */
 @base-font-face:			"Helvetica Neue", Helvetica, Arial, Geneva, sans-serif;
 @alt-font-face:				"Trebuchet MS", Helvetica, Arial, sans-serif;
 @base-font-size:			12px;
@@ -24,7 +24,7 @@
 	-webkit-border-radius: @radius;
 	border-radius: @radius;
 }
-.roundedTop(@radius: 5px) {	
+.roundedTop(@radius: 5px) {
 	-moz-border-radius-topleft: @radius;
 	-moz-border-radius-topright: @radius;
 	-webkit-border-top-right-radius: @radius;
@@ -32,17 +32,17 @@
 	border-top-left-radius: @radius;
 	border-top-right-radius: @radius;
 }
-.roundedLeftTop(@radius: 5px) {	
+.roundedLeftTop(@radius: 5px) {
 	-moz-border-radius-topleft: @radius;
 	-webkit-border-top-left-radius: @radius;
 	border-top-left-radius: @radius;
 }
-.roundedRightTop(@radius: 5px) {	
+.roundedRightTop(@radius: 5px) {
 	-moz-border-radius-topright: @radius;
 	-webkit-border-top-right-radius: @radius;
 	border-top-right-radius: @radius;
 }
-.roundedBottom(@radius: 5px) {	
+.roundedBottom(@radius: 5px) {
 	-moz-border-radius-bottomleft: @radius;
 	-moz-border-radius-bottomright: @radius;
 	-webkit-border-bottom-right-radius: @radius;
@@ -50,12 +50,12 @@
 	border-bottom-left-radius: @radius;
 	border-bottom-right-radius: @radius;
 }
-.roundedLeftBottom(@radius: 5px) {	
+.roundedLeftBottom(@radius: 5px) {
 	-moz-border-radius-bottomleft: @radius;
 	-webkit-border-bottom-left-radius: @radius;
 	border-bottom-left-radius: @radius;
 }
-.roundedRightBottom(@radius: 5px) {	
+.roundedRightBottom(@radius: 5px) {
 	-moz-border-radius-bottomright: @radius;
 	-webkit-border-bottom-right-radius: @radius;
 	border-bottom-right-radius: @radius;
@@ -76,7 +76,7 @@
 }
 .opacity(@opacity_percent:85) {
 	filter: ~"alpha(opacity=85)";
-	-moz-opacity: @opacity_percent / 100 !important; 
+	-moz-opacity: @opacity_percent / 100 !important;
 	-khtml-opacity:@opacity_percent / 100 !important;
 	-o-opacity:@opacity_percent / 100 !important;
 	opacity:@opacity_percent / 100 !important;
@@ -110,4 +110,21 @@
 .columnSpan(@what) {
 	-webkit-column-span: @what;
 	        column-span: @what;
+}
+
+// -------------------------------------------------------------------------
+// UTILS
+// -------------------------------------------------------------------------
+
+// Clearfix from http://stackoverflow.com/a/8554054/1115187
+.clearfix()
+{
+    &:after
+    {
+        content: " "; /* Older browser do not support empty content */
+        visibility: hidden;
+        display: block;
+        height: 0;
+        clear: both;
+    }
 }

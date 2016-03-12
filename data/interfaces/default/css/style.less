@@ -1,7 +1,8 @@
 // Config
 @import "config.less";
 
-html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,abbr,address,cite,code,del,dfn,em,img,ins,kbd,q,samp,small,strong,sub,sup,var,b,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,figcaption,figure,footer,header,hgroup,menu,nav,section,summary,time,mark,audio,video {
+html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,abbr,address,cite,code,del,dfn,em,img,ins,kbd,q,samp,small,strong,sub,sup,var,b,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,figcaption,figure,footer,header,hgroup,menu,nav,section,summary,time,mark,audio,video
+{
     border: 0;
     font: inherit;
     font-size: 100%;
@@ -10,34 +11,44 @@ html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,abbr,address
     vertical-align: baseline;
 }
 
-article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section {display: block;}
-
-html {
-    color: @text-color;
-    font-size: @base-font-size;
-    line-height: 1.5;
+article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section
+{
+    display: block;
 }
-body {
-    background: #fff;
+
+body
+{
+    line-height: 1.5;
     color: @text-color;
     font-family: @base-font-face;
-    margin: 0;
+    font-size: @base-font-size;
+
+    background: #fff;
+
     overflow-y: scroll;
-    padding: 0;
 }
 
-// Clearfix from http://stackoverflow.com/a/8554054/1115187
-.clearfix()
+// -------------------------------------------------------------------------
+// We want custom selection.
+// It is required to use two separate CSS-blocks, check this article :
+// https://css-tricks.com/almanac/selectors/s/selection/
+//
+// And there just one way to use the same code twice - mixin
+.-less-selection-mixin()
 {
-    &:after
-    {
-        content: " "; /* Older browser do not support empty content */
-        visibility: hidden;
-        display: block;
-        height: 0;
-        clear: both;
-    }
+    background: grey;
+    color: #fff;
+    text-shadow: none;
 }
+::selection
+{
+    .-less-selection-mixin();
+}
+::-moz-selection
+{
+    .-less-selection-mixin();
+}
+// -------------------------------------------------------------------------
 
 // Links
 a {
@@ -57,6 +68,7 @@ a {
 
 	}
 }
+
 .links {
     a {
         color: @swatch-grey;
@@ -93,124 +105,6 @@ hr {
 small, .small
 {
     font-size: xx-small;
-}
-
-// -------------------------------------------------
-// Config Page
-// -------------------------------------------------
-
-// OLD VERSION:
-.configtable {
-    legend {
-        font-size: 16px;
-        font-weight: bold;
-        margin-bottom: 10px;
-        text-shadow: 1px 1px 0 #FFFFFF;
-    }
-    tr {
-        td {
-            &:last-child {
-                border-left: 1px dotted #ddd;
-                padding-left: 20px;
-            }
-        }
-    }
-    td {
-        padding-right: 15px;
-        width: 50%;
-    }
-}
-
-// NEW VERSION:
-.config
-{
-    legend {
-        font-size: larger;
-        font-weight: bold;
-        margin-bottom: 1em;
-        text-shadow: 1px 1px 0 #FFFFFF;
-    }
-
-    .caption
-    {
-        color: @caption-color;
-        line-height: @base-font-size;
-        margin-top: 3px;
-    }
-
-    .tab
-    {
-        .columnRule( 1px solid @border-color );
-        .columnCount(2);
-        .columnGap(4em);
-
-        .message
-        {
-            .columnSpan(all);
-            display:block;
-            background-color:transparent;
-            margin-bottom:1em;
-        }
-    }
-
-    .block
-    {
-        -webkit-column-break-inside: avoid;
-        page-break-inside: avoid;
-        break-inside: avoid-column;
-    }
-
-    .option
-    {
-        // TODO : need responsive - remove floating, use flexbox
-        .clearfix();
-        margin-bottom: 1em;
-        font-size: @base-font-size;
-
-        .input-wrapper
-        {
-            // TODO : need responsive
-            float: left;
-        }
-
-        label
-        {
-            // TODO : need responsive
-            width: 170px;
-            font-size: @base-font-size;
-            // TODO : need responsive
-            float: left;
-        }
-
-        input
-        {
-            margin-right: 5px;
-        }
-
-        input[type=text],
-        input[type=password],
-        input[type=number],
-        {
-            border: 1px solid #DDD;
-            border-top: 1px solid #CDCDCD;
-            .shadow(inset 0 1px 1px #e0e0e0);
-            color: @text-color;
-            font-size: larger;
-            // TODO : need responsive
-            max-width: 230px;
-            padding: 3px 5px;
-        }
-
-        input[type=number]
-        {
-            max-width: 5em;
-        }
-    }
-
-    .embed-option-block
-    {
-        margin-left:1em;
-    }
 }
 
 img {
@@ -271,6 +165,7 @@ table {
 select, input, textarea, button
 {
     font-size: 99%;
+    margin: 0;
 }
 
 select
@@ -284,30 +179,64 @@ select
     text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
 }
 
-
 textarea {overflow: auto;}
 input { .rounded(3px);}
-input:invalid, textarea:invalid {
+
+/*
+    INVALID
+*/
+input:invalid,
+textarea:invalid
+{
    .shadow(0 0 5px #ff0000);
   .rounded(1px);
 }
-.no-boxshadow input:invalid,.no-boxshadow textarea:invalid { background-color: #f0dddd;}
-input[type="checkbox"] { vertical-align: bottom; }
-label, input[type="button"],input[type="submit"],input[type="image"], button { cursor: pointer;}
-button,input, select, textarea { margin: 0;}
-button {
+
+.no-boxshadow
+{
+    input:invalid,
+    textarea:invalid
+    {
+        background-color: #f0dddd;
+    }
+}
+
+/*
+
+// WHY??? Why all checkbox should flow down???
+// If you know answer - create a ticket for me:
+// https://github.com/maxkoryukov/headphones/issues/new
+
+input[type="checkbox"]
+{
+    vertical-align: bottom;
+}
+input[type="radio"]
+{
+    vertical-align: text-bottom;
+}
+*/
+
+button
+{
     overflow: visible;
     width: auto;
 }
+
+label,
+input[type="button"],
+input[type="submit"],
+input[type="image"],
+button
+{
+    cursor: pointer;
+}
+
 input,select,form .checkbox input,.configtable td#middle, #artist_table td#have { vertical-align: middle; }
 
-input[type="radio"]{ vertical-align: text-bottom; }
-::-moz-selection, ::selection {
-    background: grey;
-    color: #fff;
-    text-shadow: none;
-}
-input[type=submit], input[type=button] {
+input[type=submit],
+input[type=button]
+{
     .rounded(@heading-input-radius);
     background: #222222 url("../images/button.png") repeat-x;
     border: 0;
@@ -511,12 +440,17 @@ footer {
     padding-top: 10px;
     border-top: 1px solid #EEE;
 }
+
 #main {
     line-height: 24px;
     margin: 0 auto;
     padding: 75px 0 0;
     width: 960px;
 }
+
+// -------------------------------------------------------------------------
+// Pages
+// -------------------------------------------------------------------------
 
 // Messages
 .message {
@@ -624,7 +558,127 @@ footer {
     }
 }
 
+// -------------------------------------------------------------------------
+// Config Page
+// -------------------------------------------------------------------------
+
+// OLD VERSION:
+.configtable {
+    legend {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-shadow: 1px 1px 0 #FFFFFF;
+    }
+    tr {
+        td {
+            &:last-child {
+                border-left: 1px dotted #ddd;
+                padding-left: 20px;
+            }
+        }
+    }
+    td {
+        padding-right: 15px;
+        width: 50%;
+    }
+}
+
+// NEW VERSION:
+.config
+{
+    legend {
+        font-size: larger;
+        font-weight: bold;
+        margin-bottom: 1em;
+        text-shadow: 1px 1px 0 #FFFFFF;
+    }
+
+    .caption
+    {
+        color: @caption-color;
+        line-height: @base-font-size;
+        margin-top: 3px;
+    }
+
+    .tab
+    {
+        .columnRule( 1px solid @border-color );
+        .columnCount(2);
+        .columnGap(4em);
+
+        .message
+        {
+            .columnSpan(all);
+            display:block;
+            background-color:transparent;
+            margin-bottom:1em;
+        }
+    }
+
+    .block
+    {
+        -webkit-column-break-inside: avoid;
+        page-break-inside: avoid;
+        break-inside: avoid-column;
+    }
+
+    .option
+    {
+        // TODO : need responsive - remove floating, use flexbox
+        .clearfix();
+        margin-bottom: 1em;
+        font-size: @base-font-size;
+
+        .input-wrapper
+        {
+            // TODO : need responsive
+            float: left;
+        }
+
+        label
+        {
+            // TODO : need responsive
+            width: 170px;
+            font-size: @base-font-size;
+            // TODO : need responsive
+            float: left;
+        }
+
+        input
+        {
+            margin-right: 5px;
+        }
+
+        input[type=text],
+        input[type=password],
+        input[type=number],
+        {
+            border: 1px solid #DDD;
+            border-top: 1px solid #CDCDCD;
+            .shadow(inset 0 1px 1px #e0e0e0);
+            color: @text-color;
+            font-size: larger;
+            // TODO : need responsive
+            max-width: 230px;
+            padding: 3px 5px;
+        }
+
+        input[type=number]
+        {
+            max-width: 5em;
+        }
+    }
+
+    .embed-option-block
+    {
+        margin-left:1em;
+    }
+}
+
+// -------------------------------------------------------------------------
 // Search
+// -------------------------------------------------------------------------
 div#searchbar {
     border-left: 1px solid @gradient-color-1;
     .shadow(-1px 0 0 #e0e0e0);
@@ -1396,17 +1450,6 @@ div#albumheader .albuminfo li span, div#artistheader h3 span {
     vertical-align: middle;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #upcoming_table th#artistname, #wanted_table th#artistname
 {
     min-width: 150px;
