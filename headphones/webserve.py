@@ -1148,6 +1148,15 @@ class WebInterface(object):
                     config[k] = headphones.config.path(nv)
 
     @cherrypy.expose
+    def configUpdate(self, **kwargs):
+        logger.debug(len(kwargs))
+        logger.debug(len(kwargs))
+        logger.debug(len(kwargs))
+        logger.debug(kwargs)
+        headphones.CONFIG.write()
+        raise cherrypy.HTTPRedirect("config")
+
+    @cherrypy.expose
     def configUpdate2(self, **kwargs):
         # Handle the variable config options. Note - keys with False values aren't getting passed
 

@@ -184,12 +184,6 @@ def reg(register_block_cb, register_options_cb):
                 minvalue=None,
                 maxvalue=None
             ),
-            OptionString('CONFIG_VERSION', 'General', '0',
-                label=_('zzCONFIG_VERSIONzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
             OptionNumber('CORRECT_METADATA', 'General', 0,
                 label=_('zzCORRECT_METADATAzz'),
                 caption=_(''),
@@ -607,12 +601,6 @@ def reg(register_block_cb, register_options_cb):
                 tooltip=_(''),
                 minvalue=None,
                 maxvalue=None
-            ),
-            OptionString('INTERFACE', 'General', 'default',
-                label=_('zzINTERFACEzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
             ),
             OptionString('JOURNAL_MODE', 'Advanced', 'wal',
                 label=_('zzJOURNAL_MODEzz'),
@@ -1232,11 +1220,6 @@ def reg(register_block_cb, register_options_cb):
                 tooltip=_(''),
                 minvalue=None,
                 maxvalue=None
-            ),
-            OptionPath('SOFT_CHROOT', 'General', '',
-                label=_('zzSOFT_CHROOTzz'),
-                caption=_(''),
-                tooltip=_(''),
             ),
             OptionString('SONGKICK_APIKEY', 'Songkick', 'nd1We7dFW2RqxPw8',
                 label=_('zzSONGKICK_APIKEYzz'),
