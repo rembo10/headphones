@@ -24,11 +24,6 @@
         <h1 class="clearfix"><i class="fa fa-gear"></i> Settings</h1>
     </div>
 
-    <%doc>
-        TODO : THIS IS A SCRUTCH!!! Remove this jquery-tag out there!!!
-    </%doc>
-    <script src="js/libs/jquery-1.11.1.min.js"></script>
-
     <form action="configUpdate" method="post" class="form" id="configUpdate">
         <div id="tabs" class="tabs">
             <ul>
@@ -49,10 +44,14 @@
     <script type="text/javascript">
         $(document).ready(function(){
 
-            ## TODO : move this to the config-templates, because this bindings are
-            ##        parts of the templates. It is not directly linked to current
-            ##        template.
-            ## vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+            // ## TODO : move this to the config-templates, because these scripts are
+            // ##        parts of the appropriate templates. And these scripts are not
+            // ##        close-related to current common template.
+            // ## vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            // ## ============================================
+            // ## This is part of 'OptionSwitch' Template
+            // REQUIRED ONCE
             $("body").on("click", ".hp-option-switch", function(){
                 $el = $(this);
                 var divselector = $el.data('embed-div');
@@ -66,7 +65,10 @@
                 }
             });
 
-            $("body").on("click", ".checkbox-with-storage", function(){
+            // ## ============================================
+            // ## This is part of 'OptionBool' and 'OptionSwitch' Templates
+            // REQUIRED ONCE
+            $('body').on('click', '.checkbox-with-storage', function(){
                 $el = $(this);
                 var hisel = $el.data('hidden-sel');
                 if (hisel){
@@ -79,7 +81,43 @@
                 }
             });
 
-            ## ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            // ## ============================================
+            // ## This is part of 'OptionBool' and 'OptionSwitch' Templates
+            // REQUIRED only for one extension
+            $('.option input[name=API_KEY]').click(function(){ $(this).select() });
+            $('.option-extension button.API_KEY').click(function(){
+                var $self = $(this);
+                $.ajax({
+                    url: 'generateAPI',
+                    context : $(this),
+                })
+                    .done(
+                        function done (data){
+                            if (data.error) {
+                                console.error(data.error);
+                                alert(data.error);
+                            } else {
+
+                                var inputsel = $(this).data('input-sel');
+                                if (inputsel){
+                                    console.info('New api key:', data, ' . Save options to use new key.');
+                                    $(inputsel).val(data);
+                                }
+                            }
+                        })
+                    .fail(function fail(jqXHR, status, error){
+                        var msg = null;
+                        if (status.message)
+                            msg = status.message;
+                        else if (status)
+                            msg = status;
+
+                        console.error(msg);
+                        alert('Error occured:' + msg);
+                    });
+            });
+
+            // ## ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
         });
     </script>

@@ -107,7 +107,8 @@ def TestArgs(*parameters):
             name_for_parameter = method.__name__ + "(" + args_for_parameter + ")"
             frame = sys._getframe(1)    # pylint: disable-msg=W0212
             frame.f_locals[name_for_parameter] = method_for_parameter
-            frame.f_locals[name_for_parameter].__doc__ = method.__doc__ + '(' + args_for_parameter + ')'
+            if method.__doc__:
+                frame.f_locals[name_for_parameter].__doc__ = method.__doc__ + '(' + args_for_parameter + ')'
             method_for_parameter.__name__ = name_for_parameter + '(' + args_for_parameter + ')'
         return None
     return decorator
