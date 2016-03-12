@@ -1,5 +1,7 @@
 from headphones import logger
 
+_primitives = (int, str, bool, list, float)
+
 class OptionModel:
     def __init__(self, appkey, section, default, typeconv):
 
@@ -50,9 +52,10 @@ class OptionModel:
 
         v = None
         if not s in config:
+            # take default, there is no appropriate section in config
             v = d
         elif not k in config[s]:
-            # print 'USE DEFAULT NO KEY IN SEC', s, k, config
+            # take default, there is no appropriate option in config
             v = d
         else:
             v = config[s][k]
@@ -83,8 +86,9 @@ class OptionModel:
             # create section:
             config[s] = {}
 
-        if not k in config[s]:
-            # create option using default value
-            config[s][k] = d
+        # convert value to storable value
+        if not isinstance(value, _primitives):
+            logger.debug('Value of option [{0}][{1}] is not primitive (but {2}), will stringify it'.format(s,k,type(value)))
+            value = str(value)
 
         config[s][k] = value

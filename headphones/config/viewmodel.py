@@ -193,6 +193,7 @@ class OptionBase(Renderable):
             appkey - unique identifier for an option
             section - name of section in CONFIG FILE
             default - default value
+            typeconv - function to convert data from 
             options - list of suboptions
         """
         super(OptionBase, self).__init__()
@@ -201,19 +202,19 @@ class OptionBase(Renderable):
 
         self._options = options or []  # should not be None
 
-        self.writable = True
-        self.readable = True
+        self.visible = True
+        self.readonly = False
 
 
     def __repr__(self):
-        return "<{0:20} appkey={1}>".format(
+        return "<{0} appkey={1}>".format(
             self.__class__.__name__,
             self.model.appkey
         )
 
     def __iter__(self):
-        """ Iterates over non-empty tabs """
-        return ifilter(lambda t: t.readable if hasattr(t, 'readable') else True, self._options)
+        """ Iterates over visible suboptions """
+        return ifilter(lambda t: t.visible if hasattr(t, 'visible') else True, self._options)
 
     def __len__(self):
         return len(self._options)
@@ -245,6 +246,14 @@ class OptionBase(Renderable):
 #         self.label = label
 #         self.caption = caption
 #         self.tooltip = tooltip
+
+class OptionInternal(OptionBase):
+    """ This option will not appear in the UI. It is internal stuff"""
+    def __init__(self, appkey, section, default=None, typeconv=str):
+        super(OptionInternal, self).__init__(appkey, section, default, typeconv=typeconv)
+
+        self.readonly = True
+        self.visible = False
 
 class OptionString(OptionBase):
 

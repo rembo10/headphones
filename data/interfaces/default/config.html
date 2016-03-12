@@ -49,8 +49,13 @@
     <script type="text/javascript">
         $(document).ready(function(){
 
-            var updateSwitch = function ($el){
-                var divselector = $el.data('div');
+            ## TODO : move this to the config-templates, because this bindings are
+            ##        parts of the templates. It is not directly linked to current
+            ##        template.
+            ## vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+            $("body").on("click", ".hp-option-switch", function(){
+                $el = $(this);
+                var divselector = $el.data('embed-div');
                 if (divselector){
                     var $div = $(divselector);
                     if ($el.is(":checked")){
@@ -59,12 +64,23 @@
                         $div.slideUp();
                     }
                 }
-            };
-
-
-            $("body").on("click", ".hp-option-switch", function(){
-                updateSwitch($(this));
             });
+
+            $("body").on("click", ".checkbox-with-storage", function(){
+                $el = $(this);
+                var hisel = $el.data('hidden-sel');
+                if (hisel){
+                    var $h = $(hisel);
+                    if ($el.is(":checked")){
+                        $h.val('1');
+                    } else {
+                        $h.val('0');
+                    }
+                }
+            });
+
+            ## ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
         });
     </script>
 

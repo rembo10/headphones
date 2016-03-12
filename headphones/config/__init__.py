@@ -8,6 +8,7 @@ from headphones.config.viewmodel import Tab, Tabs, OptionBase
 
 import headphones.config.definitions.webui
 import headphones.config.definitions.search
+import headphones.config.definitions.internal
 
 from headphones import logger
 
@@ -22,15 +23,21 @@ class Config(object):
 
     def __init__(self, config_file):
 
+        # used in opt-register , it makes names os sections correct
+        self._section_name_spell_check_dic = {}
+
         """ Initialize the config with values from a file """
         self._config_file = config_file
         self._config = ConfigObj(self._config_file, encoding='utf-8')
 
         self._initTabs()
         self._vault = {}
+
+        definitions.internal.reg(self._registerBlock, self._registerOptions)
         definitions.webui.reg(self._registerBlock, self._registerOptions)
         definitions.search.reg(self._registerBlock, self._registerOptions)
 
+        logger.debug('All options registered. Total options: {0}'.format(len(self._vault)))
         self._upgrade()
 
     # def _define(self, name):
@@ -92,6 +99,18 @@ class Config(object):
             tab.add(block)
             logger.debug('config:Block registered: {0} > {1}'.format(tabid, block.id))
 
+    def _checkSectionName(self, section_name):
+        if section_name:
+            lc_section = section_name.lower()
+            if lc_section in self._section_name_spell_check_dic:
+                sec = self._section_name_spell_check_dic[lc_section]
+                if sec != section_name:
+                    # different section names!
+                    logger.info('Misspelling in section name [{0}] for option [{0}][{1}], expected [{2}]'
+                        .format(section_name, o.appkey, sec))
+            else:
+                self._section_name_spell_check_dic[lc_section] = section_name
+
     # TODO : refactor
     def _registerOptions(self, *options):
         """ Register option to use as config value """
@@ -101,6 +120,8 @@ class Config(object):
 
                 if o.appkey in self._vault:
                     raise Exception('Duplicate option:', o.appkey)
+
+                self._checkSectionName(o.model.section)
 
                 o.model.bindToConfig(lambda:self._config)
                 self._vault[o.appkey] = o.model
@@ -114,36 +135,37 @@ class Config(object):
     def write(self):
         """ Make a copy of the stored config and write it to the configured file """
 
-        # TODO : try to use self._config.write
+        # # TODO : try to use self._config.write
 
-        new_config = ConfigObj(encoding="UTF-8")
-        new_config.filename = self._config_file
+        # new_config = ConfigObj(encoding="UTF-8")
+        # new_config.filename = self._config_file
 
-        # first copy over everything from the old config, even if it is not
-        # correctly defined to keep from losing data
-        for key, subkeys in self._config.items():
-            if key not in new_config:
-                new_config[key] = {}
-            for subkey, value in subkeys.items():
-                new_config[key][subkey] = value
+        # # first copy over everything from the old config, even if it is not
+        # # correctly defined to keep from losing data
+        # for key, subkeys in self._config.items():
+        #     if key not in new_config:
+        #         new_config[key] = {}
+        #     for subkey, value in subkeys.items():
+        #         new_config[key][subkey] = value
 
-        """
-        # next make sure that everything we expect to have defined is so
-        for key in _CONFIG_DEFINITIONS.keys():
-            key, definition_type, section, ini_key, default = self._define(key)
-            self.check_setting(key)
-            if section not in new_config:
-                new_config[section] = {}
-            new_config[section][ini_key] = self._config[section][ini_key]
-        """
+        # """
+        # # next make sure that everything we expect to have defined is so
+        # for key in _CONFIG_DEFINITIONS.keys():
+        #     key, definition_type, section, ini_key, default = self._define(key)
+        #     self.check_setting(key)
+        #     if section not in new_config:
+        #         new_config[section] = {}
+        #     new_config[section][ini_key] = self._config[section][ini_key]
+        # """
         # Write it to file
         headphones.logger.info("Writing configuration to file")
 
         try:
             # TODO : do not forget to write file!!!!
-            #new_config.write()
-            pass
-
+            # new_config.write()
+            # pass
+            self._config.write()
+            headphones.logger.info("Writing configuration to file: DONE")
         except IOError as e:
             headphones.logger.error("Error writing configuration file: %s", e)
 
@@ -157,16 +179,16 @@ class Config(object):
         )
         return extra_newznabs
 
-    def clear_extra_newznabs(self):
-        """ Forget about the configured extra newznabs """
-        self.EXTRA_NEWZNABS = []
+    # def clear_extra_newznabs(self):
+    #     """ Forget about the configured extra newznabs """
+    #     self.EXTRA_NEWZNABS = []
 
-    def add_extra_newznab(self, newznab):
-        """ Add a new extra newznab """
-        extra_newznabs = self.EXTRA_NEWZNABS
-        for item in newznab:
-            extra_newznabs.append(item)
-        self.EXTRA_NEWZNABS = extra_newznabs
+    # def add_extra_newznab(self, newznab):
+    #     """ Add a new extra newznab """
+    #     extra_newznabs = self.EXTRA_NEWZNABS
+    #     for item in newznab:
+    #         extra_newznabs.append(item)
+    #     self.EXTRA_NEWZNABS = extra_newznabs
 
     def get_extra_torznabs(self):
         """ Return the extra torznab tuples """
@@ -178,16 +200,16 @@ class Config(object):
         )
         return extra_torznabs
 
-    def clear_extra_torznabs(self):
-        """ Forget about the configured extra torznabs """
-        self.EXTRA_TORZNABS = []
+    # def clear_extra_torznabs(self):
+    #     """ Forget about the configured extra torznabs """
+    #     self.EXTRA_TORZNABS = []
 
-    def add_extra_torznab(self, torznab):
-        """ Add a new extra torznab """
-        extra_torznabs = self.EXTRA_TORZNABS
-        for item in torznab:
-            extra_torznabs.append(item)
-        self.EXTRA_TORZNABS = extra_torznabs
+    # def add_extra_torznab(self, torznab):
+    #     """ Add a new extra torznab """
+    #     extra_torznabs = self.EXTRA_TORZNABS
+    #     for item in torznab:
+    #         extra_torznabs.append(item)
+    #     self.EXTRA_TORZNABS = extra_torznabs
 
     def __getattr__(self, name):
         """
@@ -212,6 +234,7 @@ class Config(object):
             m = self._vault[name]
             m.set(value)
             return m.get()
+# TODO : remove on finish config-improvements
 #            key, definition_type, section, ini_key, default = self._define(name)
 #            self._config[section][ini_key] = definition_type(value)
 #            return self._config[section][ini_key]

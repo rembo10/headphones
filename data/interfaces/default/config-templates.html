@@ -28,6 +28,8 @@
                 % endfor    # for option in block
             </fieldset>
         % endfor    # for block in tab
+
+        <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
     </div>
 </%def>
 
@@ -52,10 +54,10 @@
         %endif
 
         <div class="input-wrapper">
-            %if me.writable:
-                <input type="text" id="${uiname}" name="${uiname}" value="${val}" ${size_attr} />
-            %else:
+            %if me.readonly:
                 <span id="${uiname}" name="${uiname}">${val}</span>
+            %else:
+                <input type="text" id="${uiname}" name="${uiname}" value="${val}" ${size_attr} />
             %endif
 
             %if me.caption is not None:
@@ -65,7 +67,7 @@
     </div>
 
     % if 0 < len(me):
-        <div id="${embed_id}">
+        <div id="${embed_id}" class="embed-option-block">
             % for option in me:
                 ${option.render(parent=me)}
             % endfor    # for option in block
@@ -91,10 +93,10 @@
         %endif
 
         <div class="input-wrapper">
-            %if me.writable:
-                <input type="password" id="${uiname}" name="${uiname}" value="${val}" ${size_attr} />
-            %else:
+            %if me.readonly:
                 <span id="${uiname}" name="${uiname}">${'*' * len(val)}</span>
+            %else:
+                <input type="password" id="${uiname}" name="${uiname}" value="${val}" ${size_attr} />
             %endif
 
             %if me.caption is not None:
@@ -103,7 +105,7 @@
         </div>
     </div>
     % if 0 < len(me):
-        <div id="${embed_id}">
+        <div id="${embed_id}" class="embed-option-block">
             % for option in me:
                 ${option.render(me)}
             % endfor    # for option in block
@@ -138,7 +140,7 @@
         </div>
     </div>
     % if 0 < len(me):
-        <div id="${embed_id}">
+        <div id="${embed_id}" class="embed-option-block">
             % for option in me:
                 ${option.render(me)}
             % endfor    # for option in block
@@ -150,21 +152,25 @@
 <%def name="OptionBool(me, parent=None)">
 <%
     uiname = me.uiName()
+    checkbox_id = uiname
+    hidden_id = uiname + '_hidden_storage'
     embed_id = uiname + '_embed'
     val = me.value
 
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
     checked_attr = 'checked' if val else ''
+    hidden_value = '1' if val else '0'
 %>
     <div class="option">
         %if me.label is not None:
-            <label ${tooltip_attr} for="${uiname}">
+            <label ${tooltip_attr} for="${checkbox_id}">
                 ${me.label}
             </label>
         %endif
 
         <div class="input-wrapper">
-            <input type="checkbox" id="${uiname}" name="${uiname}" value="1" ${checked_attr} />
+            <input type="checkbox" class="checkbox-with-storage" data-hidden-sel="#${hidden_id}" id="${checkbox_id}" ${checked_attr} />
+            <input type="hidden" id="${hidden_id}" name="${uiname}" value="${hidden_value}" />
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -172,7 +178,7 @@
         </div>
     </div>
     % if 0 < len(me):
-        <div id="${embed_id}">
+        <div id="${embed_id}" class="embed-option-block">
             % for option in me:
                 ${option.render(me)}
             % endfor    # for option in block
@@ -184,22 +190,26 @@
 <%def name="OptionSwitch(me, parent=None)">
 <%
     uiname = me.uiName()
+    checkbox_id = uiname
+    hidden_id = uiname + '_hidden_storage'
     embed_id = uiname + '_embed'
     val = me.value
 
     checked_attr = 'checked' if val else ''
     embed_hidden_style_attr = '' if val else 'style="display:none"'
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+    hidden_value = '1' if val else '0'
 %>
     <div class="option">
         %if me.label is not None:
-            <label ${tooltip_attr} for="${uiname}">
+            <label ${tooltip_attr} for="${checkbox_id}">
                 ${me.label}
             </label>
         %endif
 
         <div class="input-wrapper">
-            <input class="hp-option-switch" type="checkbox" id="${uiname}" name="${uiname}" data-div="#${embed_id}" value="1" ${checked_attr} />
+            <input class="hp-option-switch checkbox-with-storage" type="checkbox" id="${checkbox_id}" data-hidden-sel="#${hidden_id}" data-embed-div="#${embed_id}" ${checked_attr} />
+            <input type="hidden" id="${hidden_id}" name="${uiname}" value="${hidden_value}" />
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -208,7 +218,7 @@
     </div>
 
     % if 0 < len(me):
-        <div id="${embed_id}" ${embed_hidden_style_attr}>
+        <div id="${embed_id}" class="embed-option-block" ${embed_hidden_style_attr}>
             % for option in me:
                 ${option.render()}
             % endfor    # for option in block
