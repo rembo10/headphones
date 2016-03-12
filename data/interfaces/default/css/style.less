@@ -191,13 +191,23 @@ small, .small
 }
 
 img {
-    &.albumArt {
+    .-less-albumArt(@size)
+    {
         float: left;
-        min-height: 100%;
-        min-width: 100%;
+        min-height: @size;
+        min-width: @size;
         max-width: 250px;
         max-height: 300px;
         position: relative;
+    }
+
+    &.albumArt
+    {
+        .-less-albumArt(100%);
+    }
+    &.albumArt-nostretch
+    {
+        .-less-albumArt(64px);
     }
 }
 .title {
