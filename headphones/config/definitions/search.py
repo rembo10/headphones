@@ -19,17 +19,17 @@ def reg(tabname, register_block_cb, register_options_cb):
                 label=_('SABnzbd Host'),
                 caption=_('usually http://localhost:8080'),
                 tooltip=_('SABnzbd host and port.'),
-                maxlength=30
+                maxlength=128
             ),
             OptionString('SAB_USERNAME', 'SABnzbd', '',
                 label=_('SABnzbd Username'),
                 tooltip=_('SABnzbd username. Leave empty if not applicable.'),
-                maxlength=20
+                maxlength=128
             ),
             OptionPassword('SAB_PASSWORD', 'SABnzbd', '',
                 label=_('SABnzbd Password'),
                 tooltip=_('SABnzbd password. Leave empty if not applicable.'),
-                maxlength=20
+                maxlength=128
             ),
             OptionString('SAB_APIKEY', 'SABnzbd', '',
                 label=_('SABnzbd API key'),
@@ -39,7 +39,7 @@ def reg(tabname, register_block_cb, register_options_cb):
             OptionString('SAB_CATEGORY', 'SABnzbd', '',
                 label=_('SABnzbd Category'),
                 tooltip=_('Name of SABnzbd category to add downloads to.'),
-                maxlength=20
+                maxlength=128
             ),
         ))
     )

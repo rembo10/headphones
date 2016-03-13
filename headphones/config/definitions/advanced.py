@@ -15,10 +15,15 @@ def reg(tabname, register_block_cb, register_options_cb):
     register_block_cb(tabname,
         Block('git', caption=_("GitHub"), options=register_options_cb(
             OptionSwitch('CHECK_GITHUB', 'General', True,
-                label=_('GitHub Updates Enabled'),
+                label=_('GitHub Updater Enabled'),
                 tooltip=_('Enable autoupdates for Headphones through GitHub '),
 
                 options=register_options_cb(
+                    OptionString('GIT_USER', 'General', 'rembo10'
+                        label=_('GitHub Username'),
+                        tooltip=_('Username, used to check updates on GitHub.com'),
+                        maxlength=64,
+                    ),
                     OptionNumber('CHECK_GITHUB_INTERVAL', 'General', 360,
                         label=_('Check interval'),
                         caption=_('in minutes'),
