@@ -103,6 +103,9 @@ class Config(object):
             logger.debug('config:Block registered: {0} > {1}'.format(tabid, block.id))
 
     def _checkSectionName(self, section_name):
+        """ Unnecessary method, it does not make any serious job, just make an additional
+        check of names of sections in the config-definition
+        """
         if section_name:
             lc_section = section_name.lower()
             if lc_section in self._section_name_spell_check_dic:
@@ -116,7 +119,19 @@ class Config(object):
 
     # TODO : refactor
     def _registerOptions(self, *options):
-        """ Register option to use as config value """
+        """ Register option to use as config value
+
+        This is the main part of setting up the routes for config values.
+        We will link together:
+            1. names of options from INI file
+            2. names of options in the web UI
+            3. datamodels (they store actual values of each option)
+            4. viewmodels (they know, how to render option, and how to handle value from UI)
+
+        Each option will be registered in the _vault - which is a map {OPTKEY -> datamodel}, and in
+        the _???, storing mapping {UINAME -> Option}.
+        """
+
         for o in options:
             if isinstance(o, OptionBase):
                 #logger.debug('config:Option registered: {0}'.format(str(o)))

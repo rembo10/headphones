@@ -3,7 +3,9 @@ from headphones import logger
 """ List of types, which ConfigOpt could handle internally, without conversions """
 _primitives = (int, str, bool, list, float)
 
-class OptionModel:
+class OptionModel(object):
+    """ Stores value of option, and know, how to write this value to the config file"""
+
     def __init__(self, appkey, section, default, typeconv):
 
         self._config_callback = None
@@ -24,6 +26,7 @@ class OptionModel:
 
     @section.setter
     def section(self, value):
+        """ The value of 'section' is immutable. But it is possible to change CASE of this value """
         ov = self._section.lower() if self._section else None
         nv = value.lower() if value else None
 

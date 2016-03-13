@@ -43,7 +43,7 @@
     embed_id = uiname + '_embed'
     val = me.uiValue()
 
-    size_attr = '' if me.maxlength is None else ' size="%d"' % me.maxlength
+    size_attr = '' if me.maxlength is None else ' maxlength="%d"' % me.maxlength
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
     <div class="option">
@@ -82,7 +82,7 @@
     embed_id = uiname + '_embed'
     val = me.uiValue()
 
-    size_attr = '' if me.maxlength is None else ' size="%d"' % me.maxlength
+    size_attr = '' if me.maxlength is None else ' maxlength="%d"' % me.maxlength
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
     <div class="option">
