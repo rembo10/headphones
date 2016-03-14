@@ -2,8 +2,8 @@
 # Special internal option, which will never be visible in UI
 # =======================================================================================
 
-from headphones.config.typeconv import path, boolext
-from headphones.config.viewmodel import OptionInternal
+from ..typeconv import path, boolext
+from .._viewmodel import OptionInternal
 
 def _(x):
     """ required just for marking translatable strings"""

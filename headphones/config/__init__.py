@@ -4,13 +4,16 @@ import os
 import re
 from configobj import ConfigObj
 
-from headphones.config.viewmodel import Tab, Tabs, OptionBase
+from _viewmodel import Tab, Tabs, OptionBase
+
+from _viewmodel import PostDataParser
 
 import headphones.config.definitions.webui
 import headphones.config.definitions.search
 import headphones.config.definitions.internal
 import headphones.config.definitions.advanced
 
+from headphones.exceptions import ConfigError
 from headphones import logger
 
 def _(x):
@@ -24,15 +27,17 @@ class Config(object):
 
     def __init__(self, config_file):
 
-        # used in opt-register , it makes names os sections correct
-        self._section_name_spell_check_dic = {}
-
         """ Initialize the config with values from a file """
         self._config_file = config_file
         self._config = ConfigObj(self._config_file, encoding='utf-8')
 
         self._initTabs()
+
+        # used in opt-register , it helps to make the names of sections correct
+        self._section_name_spell_check_dic = {}
+
         self._vault = {}
+        self._uiresolver = PostDataParser()
 
         # register options from definition's files:
         definitions.internal.reg(None, self._registerBlock, self._registerOptions)
@@ -41,6 +46,7 @@ class Config(object):
         definitions.advanced.reg('advanced', self._registerBlock, self._registerOptions)
 
         logger.debug('All options registered. Total options: {0}'.format(len(self._vault)))
+
         self._upgrade()
 
     # def _define(self, name):
@@ -129,7 +135,7 @@ class Config(object):
             4. viewmodels (they know, how to render option, and how to handle value from UI)
 
         Each option will be registered in the _vault - which is a map {OPTKEY -> datamodel}, and in
-        the _???, storing mapping {UINAME -> Option}.
+        the _uiresolver, storing mapping {UINAME -> Option}.
         """
 
         for o in options:
@@ -137,18 +143,25 @@ class Config(object):
                 #logger.debug('config:Option registered: {0}'.format(str(o)))
 
                 if o.appkey in self._vault:
-                    raise Exception('Duplicate option:', o.appkey)
+                    raise ConfigError('Duplicate option:', o.appkey)
 
                 self._checkSectionName(o.model.section)
 
+                # register INI
                 o.model.bindToConfig(lambda:self._config)
                 self._vault[o.appkey] = o.model
 
-                logger.debug('config:Option registered: {0}'.format(o.appkey))
+                # register UI
+                self._uiresolver.register(o)
+
+                logger.debug('config:option registered: {0}'.format(o.appkey))
             else:
-                logger.debug('config:non-option part registered: {0}'.format(str(o)))
+                logger.debug('config:non-option skip register: {0}'.format(str(o)))
         return options
 
+    def accept(self, uidata):
+        """ Not the best name for the method, which accepts data from UI, and apply them to running config """
+        self._uiresolver.accept(uidata)
 
     def write(self):
         """ Make a copy of the stored config and write it to the configured file """

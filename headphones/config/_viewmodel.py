@@ -6,9 +6,10 @@ from mako.lookup import TemplateLookup
 
 import headphones
 from headphones import logger
+from headphones.exceptions import ConfigError
 
 from headphones.config.typeconv import path, boolext
-from headphones.config.datamodel import OptionModel
+from _datamodel import OptionModel
 
 # ===============================================
 """ ViewModel-classes of configuration
@@ -139,14 +140,14 @@ class Tab(Renderable):
         """ add one block to current tab """
 
         if not isinstance(block, Block):
-            raise Exception('Not a Block')
+            raise TypeError('Not a Block')
 
         self._sorted = False
 
         bid = block.id
         if bid in self._map:
             # extend
-            raise Exception('Duplicate block')
+            raise ConfigError('Duplicate block')
         else:
             # append
             self._map[bid] = block
@@ -230,9 +231,16 @@ class OptionBase(Renderable):
     def uiValue(self):
         return self.model.get()
 
+    def uiValue2DataValue(self, value):
+        """
+        Parses the value, which will be receiven on POSTing form with this options.
+        Returned value MUST BE compatible with datamodel's value
+        """
+        return value
+
     def uiName(self):
         "This is an identifier of option, when data are sended/received to/from UI"
-        return self.model.appkey
+        return 'hp_ui_' + self.model.appkey.lower()
 
 # ===============================================
 # API-usable options
@@ -297,6 +305,10 @@ class OptionNumber(OptionBase):
         self.minvalue = minvalue
         self.maxvalue = maxvalue
 
+    def uiValue2DataValue(self, value):
+        # override
+        return int(value)
+
 class OptionBool(OptionBase):
 
     def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, options=None):
@@ -305,6 +317,14 @@ class OptionBool(OptionBase):
         self.label = label
         self.caption = caption
         self.tooltip = tooltip
+
+    def uiValue2DataValue(self, value):
+        # override
+        if value == '1':
+            return True
+        if value == '0':
+            return False
+        raise ValueError('Unexpected bool value accepted: {0}'.format(value))
 
 class OptionList(OptionString):
 
@@ -353,3 +373,54 @@ class TemplaterExtension(Renderable):
             self.__class__.__name__,
             self._template_name
         )
+
+
+# ===============================================
+# ===============================================
+# ViewModel Parser
+# ===============================================
+# ===============================================
+
+class PostDataParser(object):
+    """ Knows how to parse options, POSTed from UI """
+
+    def __init__(self):
+        self._vault = {}
+
+    def register(self, option):
+        if not isinstance(option, OptionBase):
+            raise TypeError('Could not register this option, because it '
+                    'should be child of {0}.{1}'.format(OptionBase.__module__, OptionBase.__name__))
+
+        k = option.uiName()
+        if k in self._vault:
+            raise ConfigError('Duplicate ui-key [{0}] for option [{1}]'.format(k, option.appkey))
+
+        self._vault[k] = option
+
+    def accept(self, values_as_dict):
+        if not isinstance(values_as_dict, dict):
+            raise TypeError('dict expected')
+
+        d = values_as_dict
+
+        diffcount = 0
+        for (k,v) in d.items():
+            if not k in self._vault:
+                print 'NOT IN VAULT', k
+                continue
+
+            opt = self._vault[k]
+
+            # new value
+            nv = opt.uiValue2DataValue(v)
+            # old value
+            ov = opt.model.get()
+
+            if ov != nv:
+                opt.model.set(nv)
+                logger.debug('The value of [{0}][{1}] changed [{2}] => [{3}]'.format(opt.model.section, opt.model.appkey, ov, nv))
+                diffcount += 1
+
+        return diffcount
+

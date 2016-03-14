@@ -4,7 +4,7 @@ import unittestcompat
 from unittestcompat import TestCase, TestArgs
 
 from headphones.config.typeconv import boolext, path
-from headphones.config.datamodel import OptionModel
+from _datamodel import OptionModel
 
 class OptionModelTest(TestCase):
 

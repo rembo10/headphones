@@ -30,3 +30,9 @@ class SoftChrootError(HeadphonesException):
     Fatal errors in SoftChroot module
     """
     pass
+
+class ConfigError(HeadphonesException):
+    """
+    Fatal errors in config module
+    """
+    pass
