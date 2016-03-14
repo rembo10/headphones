@@ -82,8 +82,8 @@
             });
 
             // ## ============================================
-            // ## This is part of 'OptionBool' and 'OptionSwitch' Templates
-            // REQUIRED only for one extension
+            // ## This is part of 'ApiKeyExtension' Template
+            // REQUIRED only for one tpl-extension
             $('.option input[name=API_KEY]').click(function(){ $(this).select() });
             $('.option-extension button.API_KEY').click(function(){
                 var $self = $(this);
@@ -115,6 +115,33 @@
                         console.error(msg);
                         alert('Error occured:' + msg);
                     });
+            });
+
+
+            // ## ============================================
+            // ## This is part of 'Tab' Template
+            // REQUIRED ONCE
+            $('.tabs div').on('click', '.configsubmit', function(){
+                var selected_tab_index = $( ".tabs" ).tabs( "option", "active" );
+
+                doAjaxCall('configUpdate',$(this),
+                    function(sdata){
+                        var url =  $(location).attr('href');
+                        //var tabId = $('.ui-tabs-panel:visible').attr("id");
+
+                        // TODO : I don't know, why here is second ajax call,
+                        //        but this call reload ENTIRE page
+                        //        I left this behaviour, because that is why...
+                        //        You could try to optimize this saving routine,
+                        //        but, please, be careful.. Here are a lot of
+                        //        pitstones..
+                        $('body').load(url, function(data) {
+                            initThisPage({ 'tabs' : { 'active' :selected_tab_index }});
+                        });
+                    }
+
+                    ,true);
+                return false;
             });
 
             // ## ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -192,7 +219,7 @@
             }}).dialog("open");
         };
 
-        function initThisPage()
+        function initThisPage(opts)
         {
 
                 if ($("#nzb_downloader_sabnzbd").is(":checked"))
@@ -353,7 +380,8 @@
                 });
 
                 $(function() {
-                    $( ".tabs" ).tabs();
+                    var tab_options = (opts && opts.tabs) || {};
+                    $( ".tabs" ).tabs(tab_options);
                 });
                 initActions();
 

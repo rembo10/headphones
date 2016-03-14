@@ -9,6 +9,7 @@ from _viewmodel import Tab, Tabs, OptionBase
 from _viewmodel import PostDataParser
 
 import headphones.config.definitions.webui
+import headphones.config.definitions.download
 import headphones.config.definitions.search
 import headphones.config.definitions.internal
 import headphones.config.definitions.advanced
@@ -42,6 +43,7 @@ class Config(object):
         # register options from definition's files:
         definitions.internal.reg(None, self._registerBlock, self._registerOptions)
         definitions.webui.reg('webui', self._registerBlock, self._registerOptions)
+        definitions.download.reg('download', self._registerBlock, self._registerOptions)
         definitions.search.reg('search', self._registerBlock, self._registerOptions)
         definitions.advanced.reg('advanced', self._registerBlock, self._registerOptions)
 
@@ -84,15 +86,15 @@ class Config(object):
 
     def _initTabs(self):
         self._tabs = Tabs((
-                Tab('webui', _("Web Interface"),
+                Tab('webui', _("Web Interface"), savecaption=_("Save Changes"),
                     message=_( ('<i class="fa fa-info-circle"></i> Web Interface changes require a restart to take effect.'
                                 'Saving settings will restart intervals if changed.'))
                 ),
-                Tab('search', _("Search providers")),
-                Tab('download', _("Download settings")),
-                Tab('quality_processing', _("Quality &amp; Post Processing")),
-                Tab('notifications', _("Notifications")),
-                Tab('advanced', _("Advanced Settings")),
+                Tab('download', _("Download settings"), savecaption=_("Save Changes")),
+                Tab('search', _("Search providers"), savecaption=_("Save Changes")),
+                Tab('quality_processing', _("Quality &amp; Post Processing"), savecaption=_("Save Changes")),
+                Tab('notifications', _("Notifications"), savecaption=_("Save Changes")),
+                Tab('advanced', _("Advanced Settings"), savecaption=_("Save Changes")),
             ))
 
     # TODO : refactor

@@ -192,7 +192,6 @@ function refreshLoadArtist() {
 function refreshTab() {
 	var url =  $(location).attr('href');
 	var tabId = $('.ui-tabs-panel:visible').attr("id");
-	console.debug('going to update tab-view: ', tabId);
 
 	$('.ui-tabs-panel:visible').load(url + " #"+ tabId, function() {
 		initThisPage();
@@ -242,7 +241,7 @@ function showArtistMsg(msg) {
 
 function doAjaxCall(url,elem,reload,form) {
 	// Set Message
-	feedback = $("#ajaxMsg");
+	feedback = $(".ajaxMsg");
 	update = $("#updatebar");
 	if ( update.is(":visible") ) {
 		var height = update.height() + 35;

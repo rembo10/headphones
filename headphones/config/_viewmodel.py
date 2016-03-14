@@ -102,7 +102,7 @@ class Tabs(object):
 class Tab(Renderable):
     """ UI-tab for grouping option on a UI-page """
 
-    def __init__(self, id, caption=None, cssclass=None, message=None):
+    def __init__(self, id, caption=None, cssclass=None, message=None, savecaption=None):
         super(Tab, self).__init__()
 
         self._map = {}
@@ -113,6 +113,7 @@ class Tab(Renderable):
         self.caption = caption
         self.cssclass = cssclass
         self.message = message
+        self.savecaption = savecaption
         self.__setitem__ = None
 
     def __repr__(self):
@@ -293,6 +294,12 @@ class OptionPath(OptionBase):
 class OptionPassword(OptionString):
     pass
 
+class OptionUrl(OptionString):
+    @property
+    def templateName(self):
+        # currently, url uses the same template as string
+        return "OptionString"
+
 class OptionNumber(OptionBase):
 
     def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, minvalue=None, maxvalue=None):
@@ -325,6 +332,31 @@ class OptionBool(OptionBase):
         if value == '0':
             return False
         raise ValueError('Unexpected bool value accepted: {0}'.format(value))
+
+class OptionDropdown(OptionBase):
+    class _HtmlOption:
+        def __init__(self, value, label):
+            self.value = value
+            self.label = label
+
+    def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, options=None, typeconv=str, items=None):
+        super(OptionDropdown, self).__init__(appkey, section, default, typeconv=typeconv, options=options)
+
+        self.label = label
+        self.caption = caption
+        self.tooltip = tooltip
+
+        self._typeconv = typeconv
+
+        self.items = []
+        if items:
+            for i in items:
+                o = OptionDropdown._HtmlOption(i[0], i[1])
+                self.items.append(o)
+
+    def uiValue2DataValue(self, value):
+        # override
+        return self._typeconv(value)
 
 class OptionList(OptionString):
 
