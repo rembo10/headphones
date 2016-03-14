@@ -1153,10 +1153,7 @@ class WebInterface(object):
 
     @cherrypy.expose
     def configUpdate(self, **kwargs):
-        logger.debug(len(kwargs))
-        logger.debug(len(kwargs))
-        logger.debug(len(kwargs))
-        logger.debug(kwargs)
+        headphones.CONFIG.accept(kwargs)
         headphones.CONFIG.write()
         raise cherrypy.HTTPRedirect("config")
 

@@ -2,9 +2,9 @@
 # Options from "Web Interface" Tab
 # =======================================================================================
 
-from headphones.config.viewmodel import Tab, Tabs, Block
-from headphones.config.viewmodel import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionList
-from headphones.config.viewmodel import TemplaterExtension
+from .._viewmodel import Tab, Tabs, Block
+from .._viewmodel import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionList
+from .._viewmodel import TemplaterExtension
 
 def _(x):
     """ required just for marking translatable strings"""

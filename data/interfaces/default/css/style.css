@@ -825,9 +825,9 @@ footer {
   float: left;
 }
 .config .option label {
+  float: left;
   width: 170px;
   font-size: 12px;
-  float: left;
 }
 .config .option input {
   margin-right: 5px;

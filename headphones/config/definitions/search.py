@@ -2,9 +2,9 @@
 # Options from "Search Providers" Tab
 # =======================================================================================
 
-from headphones.config.viewmodel import Tab, Tabs, Block
-from headphones.config.viewmodel import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionList
-from headphones.config.viewmodel import TemplaterExtension
+from .._viewmodel import Tab, Tabs, Block
+from .._viewmodel import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionList
+from .._viewmodel import TemplaterExtension
 
 def _(x):
     """ required just for marking translatable strings"""
@@ -142,18 +142,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 caption=_(''),
                 tooltip=_(''),
                 maxlength=None
-            ),
-            OptionPath('CACHE_DIR', 'General', '',
-                label=_('zzCACHE_DIRzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
-            OptionNumber('CACHE_SIZEMB', 'Advanced', 32,
-                label=_('zzCACHE_SIZEMBzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
             ),
             OptionNumber('CLEANUP_FILES', 'General', 0,
                 label=_('zzCLEANUP_FILESzz'),
@@ -421,17 +409,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_(''),
                 maxlength=None
             ),
-            OptionString('FILE_PERMISSIONS', 'General', '0644',
-                label=_('zzFILE_PERMISSIONSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionBool('FILE_PERMISSIONS_ENABLED', 'General', True,
-                label=_('zzFILE_PERMISSIONS_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
             OptionNumber('FILE_UNDERSCORES', 'General', 0,
                 label=_('zzFILE_UNDERSCORESzz'),
                 caption=_(''),
@@ -444,17 +421,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 caption=_(''),
                 tooltip=_(''),
                 maxlength=None
-            ),
-            OptionString('FOLDER_PERMISSIONS', 'General', '0755',
-                label=_('zzFOLDER_PERMISSIONSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionBool('FOLDER_PERMISSIONS_ENABLED', 'General', True,
-                label=_('zzFOLDER_PERMISSIONS_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
             ),
             OptionNumber('FREEZE_DB', 'General', 0,
                 label=_('zzFREEZE_DBzz'),
@@ -614,11 +580,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 caption=_(''),
                 tooltip=_(''),
                 maxlength=None
-            ),
-            OptionPath('LOG_DIR', 'General', '',
-                label=_('zzLOG_DIRzz'),
-                caption=_(''),
-                tooltip=_(''),
             ),
             OptionNumber('LOSSLESS_BITRATE_FROM', 'General', 0,
                 label=_('zzLOSSLESS_BITRATE_FROMzz'),
