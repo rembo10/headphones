@@ -12,6 +12,7 @@ def _(x):
 
 def reg(tabname, register_block_cb, register_options_cb):
 
+    # =======================================================================================
     register_block_cb(tabname,
         Block('git', caption=_("GitHub"), options=register_options_cb(
             OptionSwitch('CHECK_GITHUB', 'General', True,
@@ -40,6 +41,7 @@ def reg(tabname, register_block_cb, register_options_cb):
         ))
     )
 
+    # =======================================================================================
     register_block_cb(tabname,
         Block('directories', caption=_("Directories"), options=register_options_cb(
             OptionPath('LOG_DIR', 'General', '',
@@ -85,4 +87,5 @@ def reg(tabname, register_block_cb, register_options_cb):
             ),
         )
     ))
+    # =======================================================================================
 

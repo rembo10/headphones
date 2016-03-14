@@ -14,37 +14,6 @@ def _(x):
 def reg(tabname, register_block_cb, register_options_cb):
 
     register_block_cb(tabname,
-        Block('usenet', caption=_("Usenet"), options=register_options_cb(
-            OptionString('SAB_HOST', 'SABnzbd', '',
-                label=_('SABnzbd Host'),
-                caption=_('usually http://localhost:8080'),
-                tooltip=_('SABnzbd host and port.'),
-                maxlength=128
-            ),
-            OptionString('SAB_USERNAME', 'SABnzbd', '',
-                label=_('SABnzbd Username'),
-                tooltip=_('SABnzbd username. Leave empty if not applicable.'),
-                maxlength=128
-            ),
-            OptionPassword('SAB_PASSWORD', 'SABnzbd', '',
-                label=_('SABnzbd Password'),
-                tooltip=_('SABnzbd password. Leave empty if not applicable.'),
-                maxlength=128
-            ),
-            OptionString('SAB_APIKEY', 'SABnzbd', '',
-                label=_('SABnzbd API key'),
-                tooltip=_('SABnzbd API key. Can be found in SABnzbd settings.'),
-                maxlength=36
-            ),
-            OptionString('SAB_CATEGORY', 'SABnzbd', '',
-                label=_('SABnzbd Category'),
-                tooltip=_('Name of SABnzbd category to add downloads to.'),
-                maxlength=128
-            ),
-        ))
-    )
-
-    register_block_cb(tabname,
         Block('all', caption=_("All"), options=register_options_cb(
 
     # =======================================================================================
@@ -110,18 +79,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_(''),
                 minvalue=None,
                 maxvalue=None
-            ),
-            OptionNumber('BLACKHOLE', 'General', 0,
-                label=_('zzBLACKHOLEzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionPath('BLACKHOLE_DIR', 'General', '',
-                label=_('zzBLACKHOLE_DIRzz'),
-                caption=_(''),
-                tooltip=_(''),
             ),
             OptionNumber('BOXCAR_ENABLED', 'Boxcar', 0,
                 label=_('zzBOXCAR_ENABLEDzz'),
@@ -232,12 +189,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 minvalue=None,
                 maxvalue=None
             ),
-            OptionPath('DOWNLOAD_DIR', 'General', '',
-                label=_('zzDOWNLOAD_DIRzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
-
             OptionPath('DOWNLOAD_TORRENT_DIR', 'General', '',
                 label=_('zzDOWNLOAD_TORRENT_DIRzz'),
                 caption=_(''),
@@ -705,37 +656,6 @@ def reg(tabname, register_block_cb, register_options_cb):
             ),
             OptionString('NUMBEROFSEEDERS', 'General', '10',
                 label=_('zzNUMBEROFSEEDERSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('NZBGET_CATEGORY', 'NZBget', '',
-                label=_('zzNZBGET_CATEGORYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('NZBGET_HOST', 'NZBget', '',
-                label=_('zzNZBGET_HOSTzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('NZBGET_PASSWORD', 'NZBget', '',
-                label=_('zzNZBGET_PASSWORDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('NZBGET_PRIORITY', 'NZBget', 0,
-                label=_('zzNZBGET_PRIORITYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('NZBGET_USERNAME', 'NZBget', 'nzbget',
-                label=_('zzNZBGET_USERNAMEzz'),
                 caption=_(''),
                 tooltip=_(''),
                 maxlength=None
@@ -1288,13 +1208,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 caption=_(''),
                 tooltip=_(''),
                 maxlength=None
-            ),
-            OptionNumber('USENET_RETENTION', 'General', '1500',
-                label=_('zzUSENET_RETENTIONzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
             ),
             OptionString('UTORRENT_HOST', 'uTorrent', '',
                 label=_('zzUTORRENT_HOSTzz'),

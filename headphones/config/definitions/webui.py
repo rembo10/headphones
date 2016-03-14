@@ -3,7 +3,7 @@
 # =======================================================================================
 
 from .._viewmodel import Tab, Tabs, Block
-from .._viewmodel import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionList
+from .._viewmodel import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionList, OptionUrl
 from .._viewmodel import TemplaterExtension
 
 def _(x):
@@ -17,7 +17,7 @@ def reg(tabname, register_block_cb, register_options_cb):
     register_block_cb(tabname,
        Block('basic', caption=_("Basic"), options=register_options_cb(
 
-           OptionString('HTTP_HOST', 'General', 'localhost',
+           OptionUrl('HTTP_HOST', 'General', 'localhost',
                 label=_('HTTP Host'),
                 caption=_('Use 0.0.0.0 to allow outside connections'),
                 tooltip=_('Host to bind web server to'),

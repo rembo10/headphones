@@ -29,7 +29,7 @@
             </fieldset>
         % endfor    # for block in tab
 
-        <input type="button" class="configsubmit" value="Save Changes" onclick="doAjaxCall('configUpdate',$(this),'tabs',true);return false;" data-success="Changes saved successfully">
+        <input type="button" class="configsubmit" value="${me.savecaption}" data-success="Changes saved successfully" />
     </div>
 </%def>
 
@@ -226,6 +226,48 @@
     % endif
 </%def>
 
+
+<%def name="OptionDropdown(me, parent=None)">
+<%
+    uiname = me.uiName()
+    embed_id = uiname + '_embed'
+    val = me.uiValue()
+
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+%>
+    <div class="option">
+        %if me.label is not None:
+            <label ${tooltip_attr} for="${uiname}">
+                ${me.label}
+            </label>
+        %endif
+
+        <div ${tooltip_attr} class="input-wrapper">
+            %if me.readonly:
+                ## try to use disabled!
+                <span id="${uiname}" name="${uiname}">${val}</span>
+            %else:
+                <select id="${uiname}" name="${uiname}" size="1">
+                % for i in me.items:
+                    <option value="${i.value}" ${"selected" if i.value==val else ""}>${i.label}</option>
+                % endfor
+                </select>
+            %endif
+
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+        </div>
+    </div>
+
+    % if 0 < len(me):
+        <div id="${embed_id}" class="embed-option-block">
+            % for option in me:
+                ${option.render(parent=me)}
+            % endfor    # for option in block
+        </div>
+    % endif
+</%def>
 
 ## ===============================================
 ## TEMPLATES for
