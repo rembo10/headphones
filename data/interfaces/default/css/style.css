@@ -750,22 +750,10 @@ footer {
   position: relative;
   z-index: 99;
 }
-.configtable legend {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 10px;
-  text-shadow: 1px 1px 0 #FFFFFF;
-}
-.configtable tr td:last-child {
-  border-left: 1px dotted #ddd;
-  padding-left: 20px;
-}
-.configtable td {
-  padding-right: 15px;
-  width: 50%;
+.config {
+  /* gray text under field */
 }
 .config legend {
-  font-size: larger;
   font-weight: bold;
   margin-bottom: 1em;
   text-shadow: 1px 1px 0 #FFFFFF;
@@ -801,25 +789,23 @@ footer {
 .config .option {
   margin-bottom: 1em;
   font-size: 12px;
-}
-.config .option:after {
-  content: " ";
-  /* Older browser do not support empty content */
-  visibility: hidden;
-  display: block;
-  height: 0;
-  clear: both;
+  width: 100%;
+  position: relative;
 }
 .config .option .input-wrapper {
-  float: left;
+  margin-left: 170px;
 }
 .config .option label {
-  float: left;
   width: 170px;
   font-size: 12px;
+  position: absolute;
 }
 .config .option input {
   margin-right: 5px;
+  width: 100%;
+}
+.config .option input[type=checkbox] {
+  width: inherit;
 }
 .config .option input[type=text],
 .config .option input[type=password],
