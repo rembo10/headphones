@@ -335,7 +335,7 @@ class OptionBool(OptionBase):
 
 class OptionDropdown(OptionBase):
     class _HtmlOption:
-        def __init__(self, value, label):
+        def __init__(self, value, label = ""):
             self.value = value
             self.label = label
 
@@ -351,12 +351,41 @@ class OptionDropdown(OptionBase):
         self.items = []
         if items:
             for i in items:
-                o = OptionDropdown._HtmlOption(i[0], i[1])
+                o = OptionDropdown._HtmlOption(*i) # expected i[0] - value, i[1] - label
                 self.items.append(o)
 
     def uiValue2DataValue(self, value):
         # override
         return self._typeconv(value)
+
+class OptionDropdownSelector(OptionDropdown):
+    class _HtmlOptionExt:
+        def __init__(self, value, label, options=None):
+            self.value = value
+            self.label = label
+            self.options = options or []
+
+    def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, options=None, typeconv=str, items=None):
+        super(OptionDropdownSelector, self).__init__(
+                appkey,
+                section,
+                default,
+
+                label=label,
+                caption=caption,
+                tooltip=tooltip,
+
+                typeconv=typeconv,
+                options=options,
+                items=None # we will handle items in custom manner
+        )
+
+        # just one difference (from parent) - items handling
+        self.items = []
+        if items:
+            for i in items:
+                o = OptionDropdownSelector._HtmlOptionExt(*i)
+                self.items.append(o)
 
 class OptionList(OptionString):
 

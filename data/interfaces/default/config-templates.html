@@ -24,7 +24,7 @@
             <fieldset class="block ${block.cssclass if block.cssclass else ''}">
                 <legend>${block.caption}</legend>
                 % for option in block:
-                    ${option.render()}
+                    ${option.render(parent=me)}
                 % endfor    # for option in block
             </fieldset>
         % endfor    # for block in tab
@@ -169,7 +169,7 @@
         %endif
 
         <div class="input-wrapper">
-            <input type="checkbox" class="checkbox-with-storage" data-hidden-sel="#${hidden_id}" id="${checkbox_id}" ${checked_attr} />
+            <input type="checkbox" class="checkbox-with-hidden" data-hidden-sel="#${hidden_id}" id="${checkbox_id}" ${checked_attr} />
             <input type="hidden" id="${hidden_id}" name="${uiname}" value="${hidden_value}" />
 
             %if me.caption is not None:
@@ -208,7 +208,7 @@
         %endif
 
         <div class="input-wrapper">
-            <input class="hp-option-switch checkbox-with-storage" type="checkbox" id="${checkbox_id}" data-hidden-sel="#${hidden_id}" data-embed-div="#${embed_id}" ${checked_attr} />
+            <input class="hp-option-switch checkbox-with-hidden" type="checkbox" id="${checkbox_id}" data-hidden-sel="#${hidden_id}" data-embed-div="#${embed_id}" ${checked_attr} />
             <input type="hidden" id="${hidden_id}" name="${uiname}" value="${hidden_value}" />
 
             %if me.caption is not None:
@@ -230,7 +230,6 @@
 <%def name="OptionDropdown(me, parent=None)">
 <%
     uiname = me.uiName()
-    embed_id = uiname + '_embed'
     val = me.uiValue()
 
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
@@ -244,7 +243,7 @@
 
         <div ${tooltip_attr} class="input-wrapper">
             %if me.readonly:
-                ## try to use disabled!
+                ## TODO: try to use disabled!
                 <span id="${uiname}" name="${uiname}">${val}</span>
             %else:
                 <select id="${uiname}" name="${uiname}" size="1">
@@ -261,12 +260,67 @@
     </div>
 
     % if 0 < len(me):
-        <div id="${embed_id}" class="embed-option-block">
+        <div class="embed-option-block">
             % for option in me:
                 ${option.render(parent=me)}
             % endfor    # for option in block
         </div>
     % endif
+</%def>
+
+
+<%def name="OptionDropdownSelector(me, parent=None)">
+<%
+    uiname = me.uiName()
+    val = me.uiValue()
+
+    raw_hidden_style_attr = 'style="display:none"'
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+%>
+    <div class="option">
+        %if me.label is not None:
+            <label ${tooltip_attr} for="${uiname}">
+                ${me.label}
+            </label>
+        %endif
+
+        <div ${tooltip_attr} class="input-wrapper">
+            %if me.readonly:
+                ## try to use disabled!
+                <span id="${uiname}" name="${uiname}">${val}</span>
+            %else:
+                <select class="hp-option-selector" id="${uiname}" name="${uiname}" size="1">
+                % for i in me.items:
+                    <option value="${i.value}" ${"selected" if i.value==val else ""} data-linked-div-sel=".asdfasdf">${i.label}</option>
+                % endfor
+                </select>
+            %endif
+
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+        </div>
+    </div>
+
+    <!-- 1. select-embed items -->
+    % if 0 < len(me):
+        <div class="embed-option-block">
+            % for option in me:
+                ${option.render(parent=me)}
+            % endfor    # for option in block
+        </div>
+    % endif
+
+    <!-- 2. select's OPTION-child options -->
+    % for i in me.items:
+        % if len(i.options)>0:
+            <div ${"" if i.value==val else raw_hidden_style_attr} class="asdfasdf">
+            % for option in i.options:
+                ${option.render(parent=me)}
+            % endfor
+            </div>
+        % endif
+    % endfor
 </%def>
 
 ## ===============================================
@@ -284,7 +338,6 @@
     val = me.uiValue()
 
     uiname = me.uiName()
-    embed_id = uiname + '_embed'
 %>
 <div class="option-extension">
     <label>
