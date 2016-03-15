@@ -14,6 +14,8 @@ import headphones.config.definitions.search
 import headphones.config.definitions.internal
 import headphones.config.definitions.advanced
 
+from _meta import MetaConfig
+
 from headphones.exceptions import ConfigError
 from headphones import logger
 
@@ -31,6 +33,12 @@ class Config(object):
         """ Initialize the config with values from a file """
         self._config_file = config_file
         self._config = ConfigObj(self._config_file, encoding='utf-8')
+
+        # meta config preparation
+        (_basename, _ext) = os.path.splitext(self._config_file)
+        meta_config_name = _basename + '.meta' + _ext
+        logger.debug('Read meta config from: [{0}]'.format(meta_config_name))
+        self._meta_config = MetaConfig(meta_config_name)
 
         self._initTabs()
 
@@ -155,6 +163,9 @@ class Config(object):
 
                 # register UI
                 self._uiresolver.register(o)
+
+                # set meta options:
+                self._meta_config.apply(o)
 
                 logger.debug('config:option registered: {0}'.format(o.appkey))
             else:

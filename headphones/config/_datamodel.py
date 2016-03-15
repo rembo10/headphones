@@ -21,6 +21,10 @@ class OptionModel(object):
         return self._appkey
 
     @property
+    def inikey(self):
+        return self._inikey
+
+    @property
     def section(self):
         return self._section
 
