@@ -189,11 +189,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 minvalue=None,
                 maxvalue=None
             ),
-            OptionPath('DOWNLOAD_TORRENT_DIR', 'General', '',
-                label=_('zzDOWNLOAD_TORRENT_DIRzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
             OptionNumber('DO_NOT_PROCESS_UNMATCHED', 'General', 0,
                 label=_('zzDO_NOT_PROCESS_UNMATCHEDzz'),
                 caption=_(''),
@@ -499,13 +494,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 minvalue=None,
                 maxvalue=None
             ),
-            OptionNumber('KEEP_TORRENT_FILES', 'General', 0,
-                label=_('zzKEEP_TORRENT_FILESzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
             OptionString('LASTFM_USERNAME', 'General', '',
                 label=_('zzLASTFM_USERNAMEzz'),
                 caption=_(''),
@@ -654,12 +642,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 minvalue=None,
                 maxvalue=None
             ),
-            OptionString('NUMBEROFSEEDERS', 'General', '10',
-                label=_('zzNUMBEROFSEEDERSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
             OptionNumber('NZBSORG', 'NZBsorg', 0,
                 label=_('zzNZBSORGzz'),
                 caption=_(''),
@@ -678,13 +660,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 caption=_(''),
                 tooltip=_(''),
                 maxlength=None
-            ),
-            OptionNumber('NZB_DOWNLOADER', 'General', 0,
-                label=_('zzNZB_DOWNLOADERzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
             ),
             OptionNumber('OFFICIAL_RELEASES_ONLY', 'General', 0,
                 label=_('zzOFFICIAL_RELEASES_ONLYzz'),
@@ -867,13 +842,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 caption=_(''),
                 tooltip=_(''),
                 maxlength=None
-            ),
-            OptionNumber('PREFER_TORRENTS', 'General', 0,
-                label=_('zzPREFER_TORRENTSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
             ),
             OptionNumber('PROWL_ENABLED', 'Prowl', 0,
                 label=_('zzPROWL_ENABLEDzz'),
@@ -1118,13 +1086,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 label=_('zzTORRENTBLACKHOLE_DIRzz'),
                 caption=_(''),
                 tooltip=_(''),
-            ),
-            OptionNumber('TORRENT_DOWNLOADER', 'General', 0,
-                label=_('zzTORRENT_DOWNLOADERzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
             ),
             OptionNumber('TORRENT_REMOVAL_INTERVAL', 'General', 720,
                 label=_('zzTORRENT_REMOVAL_INTERVALzz'),

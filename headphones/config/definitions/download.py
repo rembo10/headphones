@@ -14,11 +14,18 @@ def _(x):
 def reg(tabname, register_block_cb, register_options_cb):
 
     # =======================================================================================
+    # USENET SETTINGS
+    # =======================================================================================
     register_block_cb(tabname,
         Block('usenet_selector', caption=_("Usenet Selector"), options=register_options_cb(
-            OptionBool('BLACKHOLE', 'General', False,
-                label=_('Black Hole'),
-                tooltip=_('Method for downloading usenet files.')
+            OptionDropdown('NZB_DOWNLOADER', 'General', 0, typeconv=int,
+                label=_('Usenet downloader'),
+                tooltip=_('Method for downloading usenet files.'),
+                items=(
+                    (0, _('Sabnzbd')),
+                    (1, _('NZBget')),
+                    (2, _('Black Hole')),
+                )
             ),
         ))
     )
@@ -125,3 +132,54 @@ def reg(tabname, register_block_cb, register_options_cb):
     )
 
     # =======================================================================================
+    # TORRENTS SETTINGS
+    # =======================================================================================
+    register_block_cb(tabname,
+        Block('torrent_selector', caption=_("Torrents Selector"), options=register_options_cb(
+            OptionDropdown('TORRENT_DOWNLOADER', 'General', 0, typeconv=int,
+                label=_('Torrent downloader'),
+                tooltip=_('Preferred torrent downloader'),
+                items=(
+                    (0, _('Black Hole')),
+                    (1, _('Transmission')),
+                    (2, _('uTorrent (Beta)')),
+                    (3, _('Deluge (Beta)')),
+                )
+            ),
+        ))
+    )
+
+
+
+    # =======================================================================================
+    register_block_cb(tabname,
+        Block('torrent_common', caption=_("Torrent Common"), options=register_options_cb(
+            OptionNumber('NUMBEROFSEEDERS', 'General', 10,
+                label=_('Minimum seeders'),
+                caption=_('Number of minimum seeders a torrent must have to be accepted'),
+                tooltip=_('Minimum seeders'),
+                minvalue=0,
+                maxvalue=99999
+            ),
+            OptionPath('DOWNLOAD_TORRENT_DIR', 'General', '',
+                label=_('Music Download Directory'),
+                caption=_('Full path where your torrent client downloads your music e.g. /Users/name/Downloads/music.'),
+                tooltip=_('Full path where your torrent client downloads your music'),
+                #maxlength=50
+            ),
+            OptionBool('KEEP_TORRENT_FILES', 'General', False,
+                label=_('Keep Files for Seeding'),
+                tooltip=_('Keep Files for Seeding')
+            ),
+
+            OptionDropdown('PREFER_TORRENTS', 'General', 0, typeconv=int,
+                label=_('Prefer'),
+                tooltip=_('Prefered way'),
+                items=(
+                    (0, _('NZBs')),
+                    (1, _('Torrents')),
+                    (2, _('No Preference')),
+                )
+            ),
+        ))
+    )

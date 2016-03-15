@@ -25,4 +25,14 @@ def reg(tabname, register_block_cb, register_options_cb):
 
         OptionInternal('HTTP_PROXY', 'General', False, typeconv=boolext),
         OptionInternal('HTTP_ROOT', 'General', '/', typeconv=str),
+
+
+
+        # TODO : need to check the following options (may be they are not internal):
+
+        OptionInternal('BLACKHOLE', 'General', False, typeconv=boolext),
+        # OptionBool('BLACKHOLE', 'General', False,
+        #     label=_('Black Hole DON KNOW WHERE!!'),
+        #     tooltip=_('Method for downloading usenet files.')
+        # ),
 	)
