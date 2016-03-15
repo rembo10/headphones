@@ -562,38 +562,18 @@ footer {
 // Config Page
 // -------------------------------------------------------------------------
 
-// OLD VERSION:
-.configtable {
-    legend {
-        font-size: 16px;
-        font-weight: bold;
-        margin-bottom: 10px;
-        text-shadow: 1px 1px 0 #FFFFFF;
-    }
-    tr {
-        td {
-            &:last-child {
-                border-left: 1px dotted #ddd;
-                padding-left: 20px;
-            }
-        }
-    }
-    td {
-        padding-right: 15px;
-        width: 50%;
-    }
-}
-
-// NEW VERSION:
 .config
 {
-    legend {
-        font-size: larger;
+    @caption-col-width : 170px;
+
+    legend
+    {
         font-weight: bold;
         margin-bottom: 1em;
         text-shadow: 1px 1px 0 #FFFFFF;
     }
 
+    /* gray text under field */
     .caption
     {
         color: @caption-color;
@@ -625,29 +605,37 @@ footer {
 
     .option
     {
-        // TODO : need responsive - remove floating, use flexbox
-        .clearfix();
         margin-bottom: 1em;
         font-size: @base-font-size;
+        width:100%;
+
+        /* TWO COLS inside option block */
+        position: relative;
 
         .input-wrapper
         {
-            // TODO : need responsive - remove floating, use flexbox
-            float: left;
+            /* TWO COLS inside option block */
+            margin-left: @caption-col-width;
         }
 
         label
         {
-            // TODO : need responsive - remove floating, use flexbox
-            float: left;
-            // TODO : need responsive
-            width: 170px;
+            width: @caption-col-width;
             font-size: @base-font-size;
+
+            /* TWO COLS inside option block */
+            position: absolute;
         }
 
         input
         {
             margin-right: 5px;
+            width:100%;
+        }
+
+        input[type=checkbox]
+        {
+            width: inherit;
         }
 
         input[type=text],
