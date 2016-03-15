@@ -52,8 +52,8 @@
             // ## ============================================
             // ## This is part of 'OptionSwitch' Template
             // REQUIRED ONCE
-            $("body").on("click", ".hp-option-switch", function(){
-                $el = $(this);
+            $(".config").on("click", ".hp-option-switch", function(){
+                var $el = $(this);
                 var divselector = $el.data('embed-div');
                 if (divselector){
                     var $div = $(divselector);
@@ -68,8 +68,8 @@
             // ## ============================================
             // ## This is part of 'OptionBool' and 'OptionSwitch' Templates
             // REQUIRED ONCE
-            $('body').on('click', '.checkbox-with-storage', function(){
-                $el = $(this);
+            $('.config').on('click', '.checkbox-with-hidden', function(){
+                var $el = $(this);
                 var hisel = $el.data('hidden-sel');
                 if (hisel){
                     var $h = $(hisel);
@@ -79,6 +79,27 @@
                         $h.val('0');
                     }
                 }
+            });
+
+            // ## ============================================
+            // ## This is part of 'OptionDropdownSelector' Template
+            // REQUIRED ONCE
+            $(".config").on("click", ".hp-option-selector", function(){
+                var $el = $(this);
+                var $opt = $el.find(":selected");
+console.debug($opt);
+                var divselector = $opt.data('linked-div-sel');
+console.debug(divselector);
+//## $('#aioConceptName').find(":selected").text();
+
+                // if (divselector){
+                //     var $div = $(divselector);
+                //     if ($el.is(":checked")){
+                //         $div.slideDown();
+                //     } else {
+                //         $div.slideUp();
+                //     }
+                // }
             });
 
             // ## ============================================
