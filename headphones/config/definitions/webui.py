@@ -2,8 +2,8 @@
 # Options from "Web Interface" Tab
 # =======================================================================================
 
-from .._viewmodel import Tab, Tabs, Block
-from .._viewmodel import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionList, OptionUrl, LabelExtension
+from .._viewmodel import Block
+from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionUrl, LabelExtension
 from .._viewmodel import TemplaterExtension
 
 def _(x):
