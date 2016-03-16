@@ -46,7 +46,7 @@
     size_attr = '' if me.maxlength is None else ' maxlength="%d"' % me.maxlength
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
-    <div class="option">
+    <div class="row option">
         %if me.label is not None:
             <label ${tooltip_attr} for="${uiname}">
                 ${me.label}
@@ -85,7 +85,7 @@
     size_attr = '' if me.maxlength is None else ' maxlength="%d"' % me.maxlength
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
-    <div class="option">
+    <div class="row option">
         %if me.label is not None:
             <label ${tooltip_attr} for="${uiname}">
                 ${me.label}
@@ -124,7 +124,7 @@
     max_attr = '' if me.maxvalue is None else ' size="%d"' % me.maxvalue
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
-    <div class="option">
+    <div class="row option">
         %if me.label is not None:
             <label ${tooltip_attr} for="${uiname}">
                 ${me.label}
@@ -161,7 +161,7 @@
     checked_attr = 'checked' if val else ''
     hidden_value = '1' if val else '0'
 %>
-    <div class="option">
+    <div class="row option">
         %if me.label is not None:
             <label ${tooltip_attr} for="${checkbox_id}">
                 ${me.label}
@@ -200,7 +200,7 @@
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
     hidden_value = '1' if val else '0'
 %>
-    <div class="option">
+    <div class="row option">
         %if me.label is not None:
             <label ${tooltip_attr} for="${checkbox_id}">
                 ${me.label}
@@ -234,7 +234,7 @@
 
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
-    <div class="option">
+    <div class="row option">
         %if me.label is not None:
             <label ${tooltip_attr} for="${uiname}">
                 ${me.label}
@@ -280,7 +280,7 @@
     raw_hidden_style_attr = 'style="display:none"'
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
-    <div class="option">
+    <div class="row option">
         %if me.label is not None:
             <label ${tooltip_attr} for="${uiname}">
                 ${me.label}
@@ -327,11 +327,36 @@
 </%def>
 
 ## ===============================================
+## PLACEHOLDERS and STATIC templates
+## ===============================================
+
+<%def name="LabelExtension(me, parent=None)">
+<%
+    cssclasses = list(me.cssclasses)
+    if not me.fullwidth:
+        cssclasses.append('input-wrapper')
+
+    class_attr = '' if not cssclasses else 'class="' + ' '.join(cssclasses) + '"'
+%>
+    ## TODO : define name of class for root divs
+    <div class="row">
+        % if not me.fullwidth:
+            <label>&nbsp;</label>
+        % endif
+        <div ${class_attr}>${me.label}</div>
+    </div>
+</%def>
+
+
+## ===============================================
 ## TEMPLATES for
 ##
 ## TemplaterExtension
 ##
 ## Minimum of python code, just HTML and templates
+##
+## USE THESE AS RARE AS POSSIBLE
+##
 ## ===============================================
 
 <%def name="ApiKeyExtension(me, parent=None)">
@@ -342,7 +367,7 @@
 
     uiname = me.uiName()
 %>
-<div class="option-extension">
+<div class="row option-extension">
     <label>
         <button type="button" data-input-sel=".option input[name=${uiname}]" class="API_KEY">${ext.strings['button']}</button>
     </label>
@@ -350,12 +375,4 @@
         <div class="small caption">${ext.strings['caption']}<strong>${val}</strong></div>
     </div>
 </div>
-</%def>
-
-
-<%def name="LabelExtension(me, parent=None)">
-<%
-    class_attr = '' if ((not 'class' in me.strings) or (not me.strings['class'])) else ' class="%s"' % me.strings['class']
-%>
-    <div ${class_attr}>${me.strings['label']}</div>
 </%def>

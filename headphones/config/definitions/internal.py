@@ -3,7 +3,7 @@
 # =======================================================================================
 
 from ..typeconv import path, boolext
-from .._viewmodel import OptionInternal
+from .._viewmodel import OptionInternal, OptionDeprecated
 
 def _(x):
     """ required just for marking translatable strings"""
@@ -26,13 +26,15 @@ def reg(tabname, register_block_cb, register_options_cb):
         OptionInternal('HTTP_PROXY', 'General', False, typeconv=boolext),
         OptionInternal('HTTP_ROOT', 'General', '/', typeconv=str),
 
+    )
 
 
-        # TODO : need to check the following options (may be they are not internal):
-
-        OptionInternal('BLACKHOLE', 'General', False, typeconv=boolext),
-        # OptionBool('BLACKHOLE', 'General', False,
-        #     label=_('Black Hole DON KNOW WHERE!!'),
-        #     tooltip=_('Method for downloading usenet files.')
-        # ),
+    # ==============================================================================
+    # DEPRECATED BLOCK
+    #
+    # This options are required to be able to read an old version of the config file and
+    # upgrade it
+    register_options_cb(
+        OptionDeprecated('BLACKHOLE', 'General', False, typeconv=boolext),
+        OptionDeprecated('OPEN_MAGNET_LINKS', 'General', False, typeconv=boolext),
 	)
