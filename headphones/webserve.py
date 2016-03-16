@@ -1144,12 +1144,12 @@ class WebInterface(object):
         return serve_template(templatename="config.html", title=_("Settings"), model=model)
 
         # TODO : implement softchroot
-        for k, v in config.iteritems():
-            if isinstance(v, headphones.config.path):
-                # need to apply SoftChroot to paths:
-                nv = headphones.SOFT_CHROOT.apply(v)
-                if v != nv:
-                    config[k] = headphones.config.path(nv)
+        # for k, v in config.iteritems():
+        #     if isinstance(v, headphones.config.path):
+        #         # need to apply SoftChroot to paths:
+        #         nv = headphones.SOFT_CHROOT.apply(v)
+        #         if v != nv:
+        #             config[k] = headphones.config.path(nv)
 
     @cherrypy.expose
     def configUpdate(self, **kwargs):

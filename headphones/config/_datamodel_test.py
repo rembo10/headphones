@@ -1,6 +1,3 @@
-import sys
-import re
-import unittestcompat
 from unittestcompat import TestCase, TestArgs
 
 from headphones.config.typeconv import boolext, path
@@ -20,7 +17,7 @@ class OptionModelTest(TestCase):
         (True, bool),
     )
     def test_default_get(self, deflt, tp):
-        """ test get of default value """
+        """ OptionModel: test get of default value """
         p = OptionModel('KEY', 'GeneralSection', deflt, tp)
         st = {}
         p.bindToConfig(lambda: st)
@@ -40,10 +37,12 @@ class OptionModelTest(TestCase):
         ("1", boolext, True, bool),
         ("on", boolext, True, bool),
 
+        ("/tmp/", path, '/tmp/', path),
+
         ("hello", str, "hello", str),
     )
     def test_default_get_with_conv(self, deflt, conv, expval, exptp):
-        """ test get of default value vith type conversion """
+        """ OptionModel: test get of default value vith type conversion """
         p = OptionModel('KEY', 'GeneralSection', deflt, conv)
         st = {}
         p.bindToConfig(lambda: st)

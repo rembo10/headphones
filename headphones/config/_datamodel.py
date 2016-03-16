@@ -72,7 +72,7 @@ class OptionModel(object):
         # cast to target type:
         try:
             v = t(v)
-        except TypeError as exc:
+        except TypeError:
             logger.error('The value of option [{0}[{1}] is not well-typed. Will try to use default value.'.format(s, k))
             v = t(d)
 
@@ -82,7 +82,6 @@ class OptionModel(object):
         # abbreviation. I am too lazy to write 'self._inikey', will use 'k'
         s = self._section   # section
         k = self._inikey    # key
-        d = self._default
         t = self._typeconv   # type
 
         if self._config_callback is None:
