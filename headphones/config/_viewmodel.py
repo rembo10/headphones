@@ -269,6 +269,10 @@ class OptionInternal(OptionBase):
         self.readonly = True
         self.visible = False
 
+    def render(self, *args, **qwargs):
+        """ Overridden. This kind of options are not renderable, so `render` always returns an empty string """
+        return ""
+
 class OptionDeprecated(OptionBase):
     """ This option will not appear in the UI. It is internal stuff"""
     def __init__(self, appkey, section, default=None, typeconv=str):
@@ -276,6 +280,10 @@ class OptionDeprecated(OptionBase):
 
         self.readonly = True
         self.visible = False
+
+    def render(self, *args, **qwargs):
+        """ Overridden. This kind of options are not renderable, so `render` always returns an empty string """
+        return ""
 
 class OptionString(OptionBase):
 
