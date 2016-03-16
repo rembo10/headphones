@@ -103,7 +103,7 @@ class Config(object):
             tab.add(block)
             logger.debug('config:Block registered: {0} > {1}'.format(tabid, block.id))
 
-    def _checkSectionName(self, section_name):
+    def _checkSectionName(self, section_name, appkey):
         """ Unnecessary method, it does not make any serious job, just make an additional
         check of names of sections in the config-definition
         """
@@ -114,7 +114,7 @@ class Config(object):
                 if sec != section_name:
                     # different section names!
                     logger.info('Misspelling in section name [{0}] for option [{0}][{1}], expected [{2}]'
-                        .format(section_name, o.appkey, sec))
+                        .format(section_name, appkey, sec))
             else:
                 self._section_name_spell_check_dic[lc_section] = section_name
 
@@ -140,7 +140,7 @@ class Config(object):
                 if o.appkey in self._vault:
                     raise ConfigError('Duplicate option:', o.appkey)
 
-                self._checkSectionName(o.model.section)
+                self._checkSectionName(o.model.section, o.model.appkey)
 
                 # register INI
                 o.model.bindToConfig(lambda: self._config)

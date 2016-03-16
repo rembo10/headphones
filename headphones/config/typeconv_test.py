@@ -1,6 +1,3 @@
-import sys
-import re
-import unittestcompat
 from unittestcompat import TestCase, TestArgs
 
 from headphones.config.typeconv import path, boolext

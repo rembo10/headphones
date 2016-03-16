@@ -30,7 +30,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from headphones import versioncheck, logger
 import headphones.config
 from headphones.softchroot import SoftChroot
-import headphones.exceptions
+from headphones.exceptions import SoftChrootError
 
 # (append new extras to the end)
 POSSIBLE_EXTRAS = [
@@ -142,7 +142,7 @@ def initialize(config_file):
             SOFT_CHROOT = SoftChroot(str(CONFIG.SOFT_CHROOT))
             if SOFT_CHROOT.isEnabled():
                 logger.info("Soft-chroot enabled for dir: %s", str(CONFIG.SOFT_CHROOT))
-        except exceptions.SoftChrootError as e:
+        except SoftChrootError as e:
             logger.error("SoftChroot error: %s", e)
             raise e
 

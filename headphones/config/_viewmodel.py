@@ -1,7 +1,6 @@
 import re
 import os
 from itertools import ifilter, imap
-from mako.template import Template
 from mako.lookup import TemplateLookup
 
 import headphones

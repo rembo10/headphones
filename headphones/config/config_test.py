@@ -1,9 +1,6 @@
-import sys
 import mock
 from mock import MagicMock
-import re
-import unittestcompat
-from unittestcompat import TestCase, TestArgs
+from unittestcompat import TestCase, TestArgs, skip
 
 import headphones.config
 
@@ -86,7 +83,7 @@ class ConfigApiTest(TestCase):
         new_conf_mock['asdf'].__setitem__.assert_any_call(option_name_not_from_definitions,
                                                           option_name_not_from_definitions_value)
 
-    @unittestcompat.skip("process_kwargs should be removed")
+    @skip("process_kwargs should be removed")
     def test_process_kwargs(self):
         self.assertTrue(True)
 
