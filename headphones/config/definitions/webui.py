@@ -46,9 +46,11 @@ def reg(tabname, register_block_cb, register_options_cb):
                 label=_('Enable HTTPS'),
                 tooltip=_('Enable HTTPS for web server for encrypted communication'),
                 options=register_options_cb(
+                    # TODO : check default value
                     OptionPath('HTTPS_CERT', 'General', '',
                         label=_('HTTPS Cert')
                     ),
+                    # TODO : check default value
                     OptionPath('HTTPS_KEY', 'General', '',
                         label=_('HTTPS Key'),
                     ),
