@@ -1,17 +1,17 @@
 import sys
 if sys.version_info < (2, 7):
     import unittest2 as unittest
-    from unittest2 import TestCase as TC
 else:
     import unittest
-    from unittest import TestCase as TC
+
+from unittest import TestCase as TC
 
 skip = unittest.skip
 
 _dummy = False
 
 # less than 2.6 ...
-if sys.version_info[0] == 2 and sys.version_info[1] <= 6:
+if sys.version_info < (2, 7):
     _dummy = True
 
 def _d(f):

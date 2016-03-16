@@ -2,9 +2,8 @@
 # Options from "Web Interface" Tab
 # =======================================================================================
 
-from .._viewmodel import Tab, Tabs, Block
-from .._viewmodel import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionList, OptionDropdown, OptionUrl, OptionDropdownSelector, LabelExtension
-from .._viewmodel import TemplaterExtension
+from .._viewmodel import Block
+from .._viewmodel import OptionString, OptionNumber, OptionPassword, OptionBool, OptionPath, OptionDropdown, OptionUrl, OptionDropdownSelector, LabelExtension
 
 def _(x):
     """ required just for marking translatable strings"""
