@@ -200,7 +200,7 @@ class OptionBase(Renderable):
             appkey - unique identifier for an option
             section - name of section in CONFIG FILE
             default - default value
-            typeconv - function to convert data from 
+            typeconv - function to convert data from
             options - list of suboptions
         """
         super(OptionBase, self).__init__()
@@ -211,7 +211,6 @@ class OptionBase(Renderable):
 
         self.visible = True
         self.readonly = False
-
 
     def __repr__(self):
         return "<{0} appkey={1}>".format(
@@ -287,7 +286,7 @@ class OptionDeprecated(OptionBase):
 
 class OptionString(OptionBase):
 
-    def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, options=None, maxlength=None):
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, maxlength=None):
         super(OptionString, self).__init__(appkey, section, default, options=options)
 
         self.label = label
@@ -298,7 +297,7 @@ class OptionString(OptionBase):
 
 class OptionPath(OptionBase):
 
-    def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, options=None, maxlength=None):
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, maxlength=None):
         super(OptionPath, self).__init__(appkey, section, default, typeconv=path, options=options)
 
         self.label = label
@@ -323,8 +322,8 @@ class OptionUrl(OptionString):
 
 class OptionNumber(OptionBase):
 
-    def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, minvalue=None, maxvalue=None):
-        super(OptionNumber, self).__init__(appkey, section, default, typeconv=int)
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, minvalue=None, maxvalue=None):
+        super(OptionNumber, self).__init__(appkey, section, default, typeconv=int, options=None)
 
         self.label = label
         self.caption = caption
@@ -339,7 +338,7 @@ class OptionNumber(OptionBase):
 
 class OptionBool(OptionBase):
 
-    def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, options=None):
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None):
         super(OptionBool, self).__init__(appkey, section, default, typeconv=boolext, options=options)
 
         self.label = label
@@ -356,11 +355,11 @@ class OptionBool(OptionBase):
 
 class OptionDropdown(OptionBase):
     class _HtmlOption:
-        def __init__(self, value, label = ""):
+        def __init__(self, value, label=""):
             self.value = value
             self.label = label
 
-    def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, options=None, typeconv=str, items=None):
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, typeconv=str, items=None):
         super(OptionDropdown, self).__init__(appkey, section, default, typeconv=typeconv, options=options)
 
         self.label = label
@@ -380,14 +379,20 @@ class OptionDropdown(OptionBase):
         return self._typeconv(value)
 
 class OptionDropdownSelector(OptionDropdown):
+    """ Dropbox-selector. On change selected item - appears appropriate block of sub-options
+
+    Used as root selector for compound options."""
+
     class _HtmlOptionExt:
+        """ INTERNAL class, represents one option in options list """
+
         def __init__(self, value, label, options=None):
             self.value = value
             self.label = label
             self.options = options or []
             self.uniq = None
 
-    def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, options=None, typeconv=str, items=None):
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, typeconv=str, items=None):
         super(OptionDropdownSelector, self).__init__(
                 appkey,
                 section,
@@ -412,11 +417,24 @@ class OptionDropdownSelector(OptionDropdown):
                 o.uniq = ic
                 self.items.append(o)
 
-class OptionList(OptionString):
+class OptionList(OptionBase):
+
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None):
+        super(OptionList, self).__init__(appkey, section, default, typeconv=list, options=None)
+
+        self.label = label
+        self.caption = caption
+        self.tooltip = tooltip
+
+        self.maxlength = None
 
     @property
     def templateName(self):
         return "OptionString"
+
+    def uiValue2DataValue(self, value):
+        # override
+        return [value]
 
 # ===============================================
 # API-usable options with SUBSTRUCTURE
@@ -511,8 +529,8 @@ class PostDataParser(object):
         d = values_as_dict
 
         diffcount = 0
-        for (k,v) in d.items():
-            if not k in self._vault:
+        for (k, v) in d.items():
+            if k not in self._vault:
                 print 'NOT IN VAULT', k
                 continue
 
@@ -529,4 +547,3 @@ class PostDataParser(object):
                 diffcount += 1
 
         return diffcount
-

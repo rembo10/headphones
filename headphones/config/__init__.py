@@ -65,7 +65,7 @@ class Config(object):
         # to the config file, explicitly touching each option in config
         # file.
         # If you want remove this line - first, try to remove config.ini,
-        # then - run HP, shutdown it, and check new created config.ini - 
+        # then - run HP, shutdown it, and check new created config.ini -
         # there will be not so much options.
         # The second case: try to add NEW OPTION to one of definition
         # files - you could observe the same behavior - HP won't save
@@ -80,7 +80,7 @@ class Config(object):
     def _registerTabs(self):
         self._tabs = Tabs((
                 Tab('webui', _("Web Interface"), savecaption=_("Save Changes"),
-                    message=_( ('<i class="fa fa-info-circle"></i> Web Interface changes require a restart to take effect.'
+                    message=_(('<i class="fa fa-info-circle"></i> Web Interface changes require a restart to take effect.'
                                 'Saving settings will restart intervals if changed.'))
                 ),
                 Tab('download', _("Download settings"), savecaption=_("Save Changes")),
@@ -143,7 +143,7 @@ class Config(object):
                 self._checkSectionName(o.model.section)
 
                 # register INI
-                o.model.bindToConfig(lambda:self._config)
+                o.model.bindToConfig(lambda: self._config)
                 self._vault[o.appkey] = o.model
 
                 # register UI
@@ -336,4 +336,3 @@ class Config(object):
         # of the config file, no more strings here!
         if self.CONFIG_VERSION == 6:
             self.CONFIG_VERSION = 7
-

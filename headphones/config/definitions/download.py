@@ -80,11 +80,11 @@ def reg(tabname, register_block_cb, register_options_cb):
                                 tooltip=_('NZBget Priority'),
                                 items=(
                                     (-100, _('Very low')),
-                                    ( -50, _('Low')),
-                                    (   0, _('Normal')),
-                                    (  50, _('High')),
-                                    ( 100, _('Very high')),
-                                    ( 900, _('Force')),
+                                    (-50, _('Low')),
+                                    (0, _('Normal')),
+                                    (50, _('High')),
+                                    (100, _('Very high')),
+                                    (900, _('Force')),
                                 )
                             ),
                         )

@@ -23,7 +23,7 @@ class OptionModelTest(TestCase):
         """ test get of default value """
         p = OptionModel('KEY', 'GeneralSection', deflt, tp)
         st = {}
-        p.bindToConfig(lambda:st)
+        p.bindToConfig(lambda: st)
 
         self.assertIsNotNone(p)
         self.assertIsInstance(p, OptionModel)
@@ -46,7 +46,7 @@ class OptionModelTest(TestCase):
         """ test get of default value vith type conversion """
         p = OptionModel('KEY', 'GeneralSection', deflt, conv)
         st = {}
-        p.bindToConfig(lambda:st)
+        p.bindToConfig(lambda: st)
 
         self.assertIsNotNone(p)
         self.assertIsInstance(p, OptionModel)

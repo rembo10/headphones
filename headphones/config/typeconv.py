@@ -11,7 +11,7 @@ def boolext(value):
 
 
 class path(str):
-    """ path-type for option value 
+    """ path-type for option value
 
     Describes the path on the file system.
     """

@@ -10,7 +10,7 @@ class MetaConfig(object):
         self._config = ConfigObj(self._filename, encoding='utf-8')
 
     def apply(self, option):
-        """ Sets up the appropriate meta-configuration for the option 
+        """ Sets up the appropriate meta-configuration for the option
 
         Args:
             - self - self

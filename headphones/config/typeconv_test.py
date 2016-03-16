@@ -51,7 +51,7 @@ class boolextTest(TestCase):
     @TestArgs(
         (1),
         (2),
-        ([1,2]),
+        ([1, 2]),
         (True),
         ('Y'),
         ('true'),

@@ -344,7 +344,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 caption=_(''),
                 tooltip=_(''),
             ),
-            OptionList('EXTRA_TORZNABS', 'Torznab', '',
+            OptionList('EXTRA_TORZNABS', 'Torznab', [],
                 label=_('zzEXTRA_TORZNABSzz'),
                 caption=_(''),
                 tooltip=_(''),
