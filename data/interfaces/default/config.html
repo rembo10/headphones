@@ -84,29 +84,27 @@
             // ## ============================================
             // ## This is part of 'OptionDropdownSelector' Template
             // REQUIRED ONCE
-            $(".config").on("click", ".hp-option-selector", function(){
+            $(".config").on("change", ".hp-option-selector", function(){
                 var $el = $(this);
+                var divselector_common = $el.data('linked-div-sel');
                 var $opt = $el.find(":selected");
-console.debug($opt);
                 var divselector = $opt.data('linked-div-sel');
-console.debug(divselector);
-//## $('#aioConceptName').find(":selected").text();
 
-                // if (divselector){
-                //     var $div = $(divselector);
-                //     if ($el.is(":checked")){
-                //         $div.slideDown();
-                //     } else {
-                //         $div.slideUp();
-                //     }
-                // }
+                ## Hide all old itemS
+                if (divselector_common){
+                    $(divselector_common).slideUp();
+                }
+                ## Show new item
+                if (divselector){
+                    $(divselector).slideDown();
+                }
             });
 
             // ## ============================================
             // ## This is part of 'ApiKeyExtension' Template
             // REQUIRED only for one tpl-extension
-            $('.option input[name=API_KEY]').click(function(){ $(this).select() });
-            $('.option-extension button.API_KEY').click(function(){
+            $('.config .option input[name=API_KEY]').click(function(){ $(this).select() });
+            $('.config .option-extension button.API_KEY').click(function(){
                 var $self = $(this);
                 $.ajax({
                     url: 'generateAPI',
@@ -142,7 +140,7 @@ console.debug(divselector);
             // ## ============================================
             // ## This is part of 'Tab' Template
             // REQUIRED ONCE
-            $('.tabs div').on('click', '.configsubmit', function(){
+            $('.config .tabs div').on('click', '.configsubmit', function(){
                 var selected_tab_index = $( ".tabs" ).tabs( "option", "active" );
 
                 doAjaxCall('configUpdate',$(this),
@@ -242,38 +240,6 @@ console.debug(divselector);
 
         function initThisPage(opts)
         {
-
-                if ($("#nzb_downloader_sabnzbd").is(":checked"))
-                        {
-                            $("#sabnzbd_options").show();
-                            $("#nzbget_options,#blackhole_options").hide();
-                        }
-                if ($("#nzb_downloader_nzbget").is(":checked"))
-                        {
-                            $("#sabnzbd_options,#blackhole_options").hide();
-                            $("#nzbget_options").show();
-                        }
-                if ($("#nzb_downloader_blackhole").is(":checked"))
-                        {
-                            $("#sabnzbd_options,#nzbget_options").hide();
-                            $("#blackhole_options").show();
-                        }
-
-                if ($("#torrent_downloader_blackhole").is(":checked"))
-                        {
-                            $("#transmission_options,#utorrent_options").hide();
-                            $("#torrent_blackhole_options").show();
-                        }
-                if ($("#torrent_downloader_transmission").is(":checked"))
-                        {
-                            $("#torrent_blackhole_options,#utorrent_options").hide();
-                            $("#transmission_options").show();
-                        }
-                if ($("#torrent_downloader_utorrent").is(":checked"))
-                        {
-                            $("#torrent_blackhole_options,#transmission_options").hide();
-                            $("#utorrent_options").show();
-                        }
 
                 $('input[type=radio]').change(function(){
                         if ($("#preferred_bitrate").is(":checked"))

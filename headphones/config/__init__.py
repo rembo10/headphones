@@ -40,7 +40,7 @@ class Config(object):
         logger.debug('Read meta config from: [{0}]'.format(meta_config_name))
         self._meta_config = MetaConfig(meta_config_name)
 
-        self._initTabs()
+        self._registerTabs()
 
         # used in opt-register , it helps to make the names of sections correct
         self._section_name_spell_check_dic = {}
@@ -51,48 +51,33 @@ class Config(object):
         # register options from definition's files:
         definitions.internal.reg(None, self._registerBlock, self._registerOptions)
         definitions.webui.reg('webui', self._registerBlock, self._registerOptions)
+
         definitions.download.reg('download', self._registerBlock, self._registerOptions)
         definitions.search.reg('search', self._registerBlock, self._registerOptions)
         definitions.advanced.reg('advanced', self._registerBlock, self._registerOptions)
 
         logger.debug('All options registered. Total options: {0}'.format(len(self._vault)))
 
+        # forced reinit of the config file, by default HP will not save
+        # values of non-touched options
+        # -------------------------------------------------------------
+        # Reinit is required, because only this method will add NEW options
+        # to the config file, explicitly touching each option in config
+        # file.
+        # If you want remove this line - first, try to remove config.ini,
+        # then - run HP, shutdown it, and check new created config.ini - 
+        # there will be not so much options.
+        # The second case: try to add NEW OPTION to one of definition
+        # files - you could observe the same behavior - HP won't save
+        # the value of non-touched options to the config file.
+        self._reInitConfigFile()
+
         self._upgrade()
-
-    # def _define(self, name):
-    #     key = name.upper()
-    #     ini_key = name.lower()
-    #     definition = _CONFIG_DEFINITIONS[key]
-    #     if len(definition) == 3:
-    #         definition_type, section, default = definition
-    #     elif len(definition) == 4:
-    #         definition_type, section, _, default = definition
-    #     return key, definition_type, section, ini_key, default
-
-    # def _check_section(self, section):
-    #     """ Check if INI section exists, if not create it """
-    #     if section not in self._config:
-    #         self._config[section] = {}
-    #         return True
-    #     else:
-    #         return False
-
-    # def check_setting(self, key):
-    #     """ Cast any value in the config to the right type or use the default """
-    #     key, definition_type, section, ini_key, default = self._define(key)
-    #     self.check_section(section)
-    #     try:
-    #         my_val = definition_type(self._config[section][ini_key])
-    #     except Exception:
-    #         my_val = definition_type(default)
-    #         self._config[section][ini_key] = my_val
-    #     return my_val
-
 
     def getViewModel(self):
         return self._tabs
 
-    def _initTabs(self):
+    def _registerTabs(self):
         self._tabs = Tabs((
                 Tab('webui', _("Web Interface"), savecaption=_("Save Changes"),
                     message=_( ('<i class="fa fa-info-circle"></i> Web Interface changes require a restart to take effect.'
@@ -179,38 +164,26 @@ class Config(object):
     def write(self):
         """ Make a copy of the stored config and write it to the configured file """
 
-        # new_config = ConfigObj(encoding="UTF-8")
-        # new_config.filename = self._config_file
-
-        # # first copy over everything from the old config, even if it is not
-        # # correctly defined to keep from losing data
-        # for key, subkeys in self._config.items():
-        #     if key not in new_config:
-        #         new_config[key] = {}
-        #     for subkey, value in subkeys.items():
-        #         new_config[key][subkey] = value
-
-        # """
-        # # next make sure that everything we expect to have defined is so
-        # for key in _CONFIG_DEFINITIONS.keys():
-        #     key, definition_type, section, ini_key, default = self._define(key)
-        #     self.check_setting(key)
-        #     if section not in new_config:
-        #         new_config[section] = {}
-        #     new_config[section][ini_key] = self._config[section][ini_key]
-        # """
-        # Write it to file
         headphones.logger.info("Writing configuration to file")
-
         try:
-            # TODO : do not forget to write file!!!!
-            # new_config.write()
-
-            # TODO : try to use self._config.write
             self._config.write()
             headphones.logger.info("Writing configuration to file: DONE")
         except IOError as e:
             headphones.logger.error("Error writing configuration file: %s", e)
+
+    def _reInitConfigFile(self):
+        """ Creates config file with all options with current values
+
+        The difference from `write` method - here, the first step is FORCED copying
+        of all options to config file
+        """
+        # force copying all options to config:
+        headphones.logger.info("Reinit config file")
+        for k in self._vault.keys():
+            optmod = self._vault[k]
+            optmod.set(optmod.get())
+        self.write()
+        headphones.logger.info("Reinit config file DONE")
 
     def get_extra_newznabs(self):
         """ Return the extra newznab tuples """
@@ -284,7 +257,7 @@ class Config(object):
 
     def _upgrade(self):
         """ Update folder formats in the config & bump up config version """
-        if self.CONFIG_VERSION == '0':
+        if str(self.CONFIG_VERSION) == '0':
             from headphones.helpers import replace_all
             file_values = {
                 'tracknumber': 'Track',
@@ -304,9 +277,9 @@ class Config(object):
             self.FILE_FORMAT = replace_all(self.FILE_FORMAT, file_values)
             self.FOLDER_FORMAT = replace_all(self.FOLDER_FORMAT, folder_values)
 
-            self.CONFIG_VERSION = '1'
+            self.CONFIG_VERSION = 1
 
-        if self.CONFIG_VERSION == '1':
+        if str(self.CONFIG_VERSION) == '1':
             from headphones.helpers import replace_all
             file_values = {
                 'Track': '$Track',
@@ -334,28 +307,33 @@ class Config(object):
             }
             self.FILE_FORMAT = replace_all(self.FILE_FORMAT, file_values)
             self.FOLDER_FORMAT = replace_all(self.FOLDER_FORMAT, folder_values)
-            self.CONFIG_VERSION = '2'
+            self.CONFIG_VERSION = 2
 
-        if self.CONFIG_VERSION == '2':
+        if str(self.CONFIG_VERSION) == '2':
             # Update the config to use direct path to the encoder rather than the encoder folder
             if self.ENCODERFOLDER:
                 self.ENCODER_PATH = os.path.join(self.ENCODERFOLDER, self.ENCODER)
-            self.CONFIG_VERSION = '3'
+            self.CONFIG_VERSION = 3
 
-        if self.CONFIG_VERSION == '3':
+        if str(self.CONFIG_VERSION) == '3':
             # Update the BLACKHOLE option to the NZB_DOWNLOADER format
             if self.BLACKHOLE:
                 self.NZB_DOWNLOADER = 2
-            self.CONFIG_VERSION = '4'
+            self.CONFIG_VERSION = 4
 
         # Enable Headphones Indexer if they have a VIP account
-        if self.CONFIG_VERSION == '4':
+        if str(self.CONFIG_VERSION) == '4':
             if self.HPUSER and self.HPPASS:
                 self.HEADPHONES_INDEXER = True
-            self.CONFIG_VERSION = '5'
+            self.CONFIG_VERSION = 5
 
-        if self.CONFIG_VERSION == '5':
+        if str(self.CONFIG_VERSION) == '5':
             if self.OPEN_MAGNET_LINKS:
                 self.MAGNET_LINKS = 2
-            self.CONFIG_VERSION = '5'
+            self.CONFIG_VERSION = 5
+
+        # HERE and further use INT values to determine version
+        # of the config file, no more strings here!
+        if self.CONFIG_VERSION == 5:
+            self.CONFIG_VERSION = 6
 

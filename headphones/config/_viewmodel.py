@@ -364,6 +364,7 @@ class OptionDropdownSelector(OptionDropdown):
             self.value = value
             self.label = label
             self.options = options or []
+            self.uniq = None
 
     def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, options=None, typeconv=str, items=None):
         super(OptionDropdownSelector, self).__init__(
@@ -383,8 +384,11 @@ class OptionDropdownSelector(OptionDropdown):
         # just one difference (from parent) - items handling
         self.items = []
         if items:
+            ic = 0
             for i in items:
+                ic += 1
                 o = OptionDropdownSelector._HtmlOptionExt(*i)
+                o.uniq = ic
                 self.items.append(o)
 
 class OptionList(OptionString):

@@ -274,6 +274,9 @@
     uiname = me.uiName()
     val = me.uiValue()
 
+    cssclass_items_common = 'hp-option-selector-items-' + uiname
+    cssclass_item_prefix = '-item-'
+
     raw_hidden_style_attr = 'style="display:none"'
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
@@ -289,9 +292,9 @@
                 ## try to use disabled!
                 <span id="${uiname}" name="${uiname}">${val}</span>
             %else:
-                <select class="hp-option-selector" id="${uiname}" name="${uiname}" size="1">
+                <select class="hp-option-selector" id="${uiname}" name="${uiname}" size="1" data-linked-div-sel=".${cssclass_items_common}">
                 % for i in me.items:
-                    <option value="${i.value}" ${"selected" if i.value==val else ""} data-linked-div-sel=".asdfasdf">${i.label}</option>
+                    <option value="${i.value}" ${"selected" if i.value==val else ""} data-linked-div-sel=".${cssclass_items_common}.${cssclass_item_prefix + str(i.uniq)}">${i.label}</option>
                 % endfor
                 </select>
             %endif
@@ -314,7 +317,7 @@
     <!-- 2. select's OPTION-child options -->
     % for i in me.items:
         % if len(i.options)>0:
-            <div ${"" if i.value==val else raw_hidden_style_attr} class="asdfasdf">
+            <div ${"" if i.value==val else raw_hidden_style_attr} class="${cssclass_items_common + ' ' + cssclass_item_prefix + str(i.uniq)}">
             % for option in i.options:
                 ${option.render(parent=me)}
             % endfor
