@@ -9,7 +9,6 @@ def _(x):
     """ required just for marking translatable strings"""
     return x
 
-
 def reg(tabname, register_block_cb, register_options_cb):
 
     register_options_cb(
@@ -20,14 +19,13 @@ def reg(tabname, register_block_cb, register_options_cb):
         # TODO : move git to advanced tab (if necessary) and make it visible
         OptionInternal('GIT_BRANCH', 'General', 'master', typeconv=str),
         # TODO : this is list of paths!
-        OptionInternal('GIT_PATH', 'General', '', typeconv=str), # full path to `git` binary. 
+        OptionInternal('GIT_PATH', 'General', '', typeconv=str), # full path to `git` binary.
         OptionInternal('DO_NOT_OVERRIDE_GIT_BRANCH', 'General', False, typeconv=boolext),
 
         OptionInternal('HTTP_PROXY', 'General', False, typeconv=boolext),
         OptionInternal('HTTP_ROOT', 'General', '/', typeconv=str),
 
     )
-
 
     # ==============================================================================
     # DEPRECATED BLOCK
@@ -37,4 +35,4 @@ def reg(tabname, register_block_cb, register_options_cb):
     register_options_cb(
         OptionDeprecated('BLACKHOLE', 'General', False, typeconv=boolext),
         OptionDeprecated('OPEN_MAGNET_LINKS', 'General', False, typeconv=boolext),
-	)
+    )

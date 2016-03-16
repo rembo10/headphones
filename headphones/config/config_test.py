@@ -48,37 +48,6 @@ class ConfigApiTest(TestCase):
         cf = headphones.config.Config('/tmp/notexist')
         self.assertIsInstance(cf, headphones.config.Config)
 
-    @TestArgs(
-        (''),
-        ('This_IsNew_Name'),
-    )
-    def test_check_setting_raise_on_unknown_settings(self, setting_name):
-        """ Config: check_setting should raise on unknown """
-        path = '/tmp/notexist'
-
-        exc_regex = re.compile(setting_name, re.IGNORECASE)
-
-        # call methods
-        c = headphones.config.Config(path)
-        # assertions:
-        with self.assertRaisesRegexp(KeyError, exc_regex):
-            c.check_setting(setting_name)
-        pass
-
-    @TestArgs(
-        (None)
-    )
-    def test_check_setting_raise_on_none(self, setting_name):
-        """ Config: check_setting shoud raise on None name """
-        path = '/tmp/notexist'
-
-        # call methods
-        c = headphones.config.Config(path)
-        # assertions:
-        with self.assertRaises(AttributeError):
-            c.check_setting(setting_name)
-        pass
-
     def test_write(self):
         """ Config : write """
         path = '/tmp/notexist'
@@ -261,61 +230,6 @@ class ConfigApiTest(TestCase):
         # assertions:
         self.assertEqual(res, expected)
 
-    def test_clear_extra_newznabs(self):
-        """ Config: clear_extra_newznabs """
-        path = '/tmp/notexist'
-
-        random_value = 1827746
-        self.config_mock["Newznab"] = {"extra_newznabs": [1, 2, 3]}
-        self.config_mock["Newznab"] = {"do_not_touch": random_value}
-
-        # call methods
-        c = headphones.config.Config(path)
-        res = c.clear_extra_newznabs()
-
-        # assertions:
-        self.assertIsNone(res)
-        self.assertEqual(self.config_mock["Newznab"]["extra_newznabs"], [])
-        self.assertEqual(self.config_mock["Newznab"]["do_not_touch"], random_value)
-
-    @TestArgs(
-        ([], [''], ['']),
-        ([], 'ABCDEF', ['A', 'B', 'C', 'D', 'E', 'F']),
-
-        ([1, 2, [False, True]], ['3', [0, 0]], [1, 2, [False, True], '3', [0, 0]]),
-    )
-    def test_add_extra_newznab(self, initial, added, expected):
-        """ Config: add_extra_newznab """
-        path = '/tmp/notexist'
-
-        self.config_mock["Newznab"] = {"extra_newznabs": initial}
-
-        # call methods
-        c = headphones.config.Config(path)
-        c.add_extra_newznab(added)
-        act = self.config_mock["Newznab"]["extra_newznabs"]
-
-        # assertions:
-        self.assertEqual(act, expected)
-
-    @TestArgs(
-        (None),
-        ([]),
-        ([1, 2, 3]),
-        ([True]),
-    )
-    def test_add_extra_newznab_raise_on_none(self, initial):
-        """ Config: add_extra_newznab should raise on None adding"""
-        path = '/tmp/notexist'
-
-        self.config_mock["Newznab"] = {"extra_newznabs": initial}
-
-        # call methods
-        c = headphones.config.Config(path)
-        with self.assertRaises(TypeError):
-            c.add_extra_newznab(None)
-        pass
-
     # ===========================================================
     #   TORZNABS
     # TODO : here is copypaste from of NEZNABS tests. Make tests better, plz refactor them
@@ -348,58 +262,3 @@ class ConfigApiTest(TestCase):
 
         # assertions:
         self.assertEqual(res, expected)
-
-    def test_clear_extra_torznabs(self):
-        """ Config: clear_extra_torznabs """
-        path = '/tmp/notexist'
-
-        random_value = -1292721
-        self.config_mock["Torznab"] = {"extra_torznabs": [1, 2, 3]}
-        self.config_mock["Torznab"] = {"do_not_touch": random_value}
-
-        # call methods
-        c = headphones.config.Config(path)
-        res = c.clear_extra_torznabs()
-
-        # assertions:
-        self.assertIsNone(res)
-        self.assertEqual(self.config_mock["Torznab"]["extra_torznabs"], [])
-        self.assertEqual(self.config_mock["Torznab"]["do_not_touch"], random_value)
-
-    @TestArgs(
-        ([], [''], ['']),
-        ([], 'ABCDEF', ['A', 'B', 'C', 'D', 'E', 'F']),
-
-        ([1, 2, [False, True]], ['3', [0, 0]], [1, 2, [False, True], '3', [0, 0]]),
-    )
-    def test_add_extra_torznab(self, initial, added, expected):
-        """ Config: add_extra_torznab """
-        path = '/tmp/notexist'
-
-        self.config_mock["Torznab"] = {"extra_torznabs": initial}
-
-        # call methods
-        c = headphones.config.Config(path)
-        c.add_extra_torznab(added)
-        act = self.config_mock["Torznab"]["extra_torznabs"]
-
-        # assertions:
-        self.assertEqual(act, expected)
-
-    @TestArgs(
-        (None),
-        ([]),
-        ([1, 2, 3]),
-        ([True]),
-    )
-    def test_add_extra_torznab_raise_on_none(self, initial):
-        """ Config: add_extra_torznab should raise on None adding"""
-        path = '/tmp/notexist'
-
-        self.config_mock["Torznab"] = {"extra_torznabs": initial}
-
-        # call methods
-        c = headphones.config.Config(path)
-        with self.assertRaises(TypeError):
-            c.add_extra_torznab(None)
-        pass

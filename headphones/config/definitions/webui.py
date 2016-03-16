@@ -69,7 +69,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                         label=_('API key'),
                         maxlength=32,
                         options=register_options_cb(
-                            TemplaterExtension('ApiKeyExtension', strings={'button':_('Generate'), 'caption':_('Current API key: ')})
+                            TemplaterExtension('ApiKeyExtension', strings={'button': _('Generate'), 'caption': _('Current API key: ')})
                         ),
                     ),
                 )
