@@ -71,6 +71,11 @@ class Renderable(object):
 
         return defs.render(**qwargs)
 
+    def __repr__(self):
+        return "<%s>" % (
+            self.__class__.__name__
+        )
+
 # ===============================================
 # Section "One-time used templates"
 #
@@ -264,6 +269,14 @@ class OptionInternal(OptionBase):
         self.readonly = True
         self.visible = False
 
+class OptionDeprecated(OptionBase):
+    """ This option will not appear in the UI. It is internal stuff"""
+    def __init__(self, appkey, section, default=None, typeconv=str):
+        super(OptionDeprecated, self).__init__(appkey, section, default, typeconv=typeconv)
+
+        self.readonly = True
+        self.visible = False
+
 class OptionString(OptionBase):
 
     def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None, options=None, maxlength=None):
@@ -413,9 +426,29 @@ class OptionSwitch(OptionBool):
 
 
 # ===============================================
-# Option extensions
+# PLACEHOLDERS and STATIC templates
 # ===============================================
 
+class LabelExtension(Renderable):
+    """ Render simple text on the same level, as other options """
+
+    def __init__(self, label=None, cssclasses=None, fullwidth=False):
+        super(LabelExtension, self).__init__()
+        self.label = label
+        self.fullwidth = fullwidth
+        if cssclasses:
+            if not isinstance(cssclasses, (tuple, list)):
+                logger.error('LabelExtension argument "cssclasses" should be an array. Will str() it.')
+                cssclasses = [str(cssclasses)]
+        self.cssclasses = cssclasses or []
+
+    def render(self, parent=None):
+        return super(LabelExtension, self).render(me=self, parent=parent)
+
+
+# ===============================================
+# Option extensions
+# ===============================================
 
 class TemplaterExtension(Renderable):
     """ Allow render any template, extending HTML for options with non-standart layout """

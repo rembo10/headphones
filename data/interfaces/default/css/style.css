@@ -345,10 +345,12 @@ form fieldset small.heading {
   margin-bottom: 10px;
   margin-top: -15px;
 }
-form .row {
+form .row,
+form .config .option {
   margin-bottom: 10px;
 }
-form .row label {
+form .row label,
+form .config .option label {
   display: block;
   float: left;
   font-size: 12px;
@@ -356,15 +358,19 @@ form .row label {
   padding-top: 7px;
   width: 170px;
 }
-form .row label.inline {
+form .row label.inline,
+form .config .option label.inline {
   margin-right: 5px;
   width: auto;
 }
-form .row input {
+form .row input,
+form .config .option input {
   margin-right: 5px;
 }
 form .row input[type=text],
-form .row input[type=password] {
+form .row input[type=password],
+form .config .option input[type=text],
+form .config .option input[type=password] {
   border: 1px solid #DDD;
   border-top: 1px solid #CDCDCD;
   -moz-box-shadow: 0 1px 0 #f1f1f1;
@@ -383,7 +389,8 @@ form .row input[type=password] {
   margin-right: 5px;
   padding: 3px 5px;
 }
-form .row small {
+form .row small,
+form .config .option small {
   color: #999;
   display: block;
   font-size: 9px;
@@ -786,19 +793,25 @@ footer {
   page-break-inside: avoid;
   break-inside: avoid-column;
 }
-.config .option {
+.config .row,
+.config .config .option {
   margin-bottom: 1em;
   font-size: 12px;
   width: 100%;
+  /* TWO COLS inside option block */
   position: relative;
 }
-.config .option .input-wrapper {
-  margin-left: 170px;
-}
-.config .option label {
+.config .row label,
+.config .config .option label {
   width: 170px;
   font-size: 12px;
+  /* TWO COLS inside option block */
   position: absolute;
+}
+.config .row .input-wrapper,
+.config .config .option .input-wrapper {
+  /* TWO COLS inside option block */
+  margin-left: 170px;
 }
 .config .option input {
   margin-right: 5px;
@@ -808,6 +821,7 @@ footer {
   width: inherit;
 }
 .config .option input[type=text],
+.config .option input[type=url],
 .config .option input[type=password],
 .config .option input[type=number] {
   border: 1px solid #DDD;

@@ -564,8 +564,6 @@ footer {
 
 .config
 {
-    @caption-col-width : 170px;
-
     legend
     {
         font-weight: bold;
@@ -603,7 +601,9 @@ footer {
         break-inside: avoid-column;
     }
 
-    .option
+    @caption-col-width : 170px;
+
+   .row
     {
         margin-bottom: 1em;
         font-size: @base-font-size;
@@ -611,12 +611,6 @@ footer {
 
         /* TWO COLS inside option block */
         position: relative;
-
-        .input-wrapper
-        {
-            /* TWO COLS inside option block */
-            margin-left: @caption-col-width;
-        }
 
         label
         {
@@ -627,6 +621,15 @@ footer {
             position: absolute;
         }
 
+        .input-wrapper
+        {
+            /* TWO COLS inside option block */
+            margin-left: @caption-col-width;
+        }
+    }
+
+    .option:extend(.row all)
+    {
         input
         {
             margin-right: 5px;
@@ -639,6 +642,7 @@ footer {
         }
 
         input[type=text],
+        input[type=url],
         input[type=password],
         input[type=number],
         {

@@ -330,10 +330,10 @@ class Config(object):
         if str(self.CONFIG_VERSION) == '5':
             if self.OPEN_MAGNET_LINKS:
                 self.MAGNET_LINKS = 2
-            self.CONFIG_VERSION = 5
+            self.CONFIG_VERSION = 6
 
         # HERE and further use INT values to determine version
         # of the config file, no more strings here!
-        if self.CONFIG_VERSION == 5:
-            self.CONFIG_VERSION = 6
+        if self.CONFIG_VERSION == 6:
+            self.CONFIG_VERSION = 7
 

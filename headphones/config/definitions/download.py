@@ -3,7 +3,7 @@
 # =======================================================================================
 
 from .._viewmodel import Tab, Tabs, Block
-from .._viewmodel import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionList, OptionDropdown, OptionUrl, OptionDropdownSelector
+from .._viewmodel import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionList, OptionDropdown, OptionUrl, OptionDropdownSelector, LabelExtension
 from .._viewmodel import TemplaterExtension
 
 def _(x):
@@ -126,21 +126,122 @@ def reg(tabname, register_block_cb, register_options_cb):
     # TORRENTS SETTINGS
     # =======================================================================================
     register_block_cb(tabname,
-        Block('torrent_selector', caption=_("Torrents Selector"), options=register_options_cb(
-            OptionDropdown('TORRENT_DOWNLOADER', 'General', 0, typeconv=int,
+        Block('torrent_selector', caption=_("Prefered Torrent"), options=register_options_cb(
+            OptionDropdownSelector('TORRENT_DOWNLOADER', 'General', 0, typeconv=int,
                 label=_('Torrent downloader'),
                 tooltip=_('Preferred torrent downloader'),
                 items=(
-                    (0, _('Black Hole')),
-                    (1, _('Transmission')),
-                    (2, _('uTorrent (Beta)')),
-                    (3, _('Deluge (Beta)')),
+                    (0, _('Black Hole'),
+                        register_options_cb(
+                            OptionPath('TORRENTBLACKHOLE_DIR', 'General', '',
+                                label=_('Black Hole Directory'),
+                                caption=_('Folder your Download program watches for Torrents'),
+                                tooltip=_('Black Hole Directory'),
+                                # maxlength = 50,
+                            ),
+                            OptionDropdown('MAGNET_LINKS', 'General', 0, typeconv=int,
+                                label=_('Magnet links'),
+                                tooltip=_('Magnet links'),
+                                caption=_('Note: Opening magnet URLs is not suitable for headless/console/terminal servers.<br />Embed only works for rTorrent.'),
+                                items=(
+                                    (0, _('Ignore')),  # title = Invoke shell command to open magnet URL
+                                    (1, _('Open')),    # title = Use external service to convert magnet links into torrents.
+                                    (2, _('Convert')),
+                                    (3, _('Embed')),
+                                )
+                            ),
+                        )
+                    ),
+                    (1, _('Transmission'),
+                        register_options_cb(
+                            OptionUrl('TRANSMISSION_HOST', 'Transmission', '',
+                                label=_('Transmission Host'),
+                                caption=_('usually http://localhost:9091'),
+                                tooltip=_('Transmission Host'),
+                                maxlength=128
+                            ),
+                            OptionString('TRANSMISSION_USERNAME', 'Transmission', '',
+                                label=_('Transmission Username'),
+                                tooltip=_('Transmission Username'),
+                                maxlength=30
+                            ),
+                            OptionPassword('TRANSMISSION_PASSWORD', 'Transmission', '',
+                                label=_('Transmission Password'),
+                                tooltip=_('Transmission Password'),
+                                maxlength=30
+                            ),
+
+                            LabelExtension(
+                                cssclasses=('small'),
+                                label=_(('Note: With Transmission, you can specify a different download'
+                                           ' directory for downloads sent from Headphones. Set it in the Music'
+                                           ' Download Directory below'))
+                            ),
+                        )
+                    ),
+                    (2, _('uTorrent (Beta)'),
+                        register_options_cb(
+                            LabelExtension(
+                                cssclasses=('small', 'heading'),
+                                label=_(('<i class="fa fa-info-circle"></i> Note: uTorrent may keep files'
+                                           ' read only when completed. Check "Preferences -> Advanced -> bt.read_only_on_complete"'
+                                           ' in case of problems.'))
+                            ),
+                            OptionUrl('UTORRENT_HOST', 'uTorrent', '',
+                                label=_('uTorrent Host'),
+                                caption=_('usually http://localhost:9091'),
+                                maxlength=128
+                            ),
+                            OptionString('UTORRENT_USERNAME', 'uTorrent', '',
+                                label=_('uTorrent Username'),
+                                maxlength=64
+                            ),
+                            OptionPassword('UTORRENT_PASSWORD', 'uTorrent', '',
+                                label=_('uTorrent Password'),
+                                maxlength=64
+                            ),
+                            OptionString('UTORRENT_LABEL', 'uTorrent', '',
+                                label=_('uTorrent Label'),
+                                maxlength=30
+                            ),
+                        )
+                    ),
+                    (3, _('Deluge (Beta)'),
+                        register_options_cb(
+                            OptionUrl('DELUGE_HOST', 'Deluge', '',
+                                label=_('Deluge WebUI Host and Port'),
+                                caption=_('Usually http://localhost:8112 (requires WebUI plugin)'),
+                                maxlength=128
+                            ),
+                            OptionPassword('DELUGE_PASSWORD', 'Deluge', '',
+                                label=_('Deluge Password'),
+                                maxlength=64
+                            ),
+                            LabelExtension(
+                                cssclasses=('small'),
+                                label=_(('Note: With Deluge, you can specify a different download'
+                                         ' directory for downloads sent from Headphones. Set it in'
+                                         ' the Music Download Directory below'))
+                            ),
+                            OptionString('DELUGE_LABEL', 'Deluge', '',
+                                label=_('Deluge Label'),
+                                caption=_('Labels shouldn\'t contain spaces (requires Label plugin)'),
+                                #maxlength=64
+                            ),
+                            OptionPath('DELUGE_DONE_DIRECTORY', 'Deluge', '',
+                                label=_('Move When Completed'),
+                                caption=_('Directory where Deluge should move completed downloads'),
+                                maxlength=64
+                            ),
+                            OptionBool('DELUGE_PAUSED', 'Deluge', False,
+                                label=_('Add Torrent Paused'),
+                            ),
+                        )
+                    ),
                 )
             ),
         ))
     )
-
-
 
     # =======================================================================================
     register_block_cb(tabname,

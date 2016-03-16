@@ -3,7 +3,7 @@
 # =======================================================================================
 
 from .._viewmodel import Tab, Tabs, Block
-from .._viewmodel import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionList, OptionUrl
+from .._viewmodel import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionList, OptionUrl, LabelExtension
 from .._viewmodel import TemplaterExtension
 
 def _(x):
@@ -80,7 +80,10 @@ def reg(tabname, register_block_cb, register_options_cb):
     # =======================================================================================
     register_block_cb(tabname,
         Block('interval', caption=_("Interval"), options=register_options_cb(
-            TemplaterExtension('LabelExtension', strings={'label':_('An interval of 0 will disable a task.'), 'class': 'small'}),
+            LabelExtension(
+                label=_('An interval of 0 will disable a task.'),
+                cssclasses=('small')
+            ),
             OptionNumber('SEARCH_INTERVAL', 'General', 1440,
                 label=_('Search Interval'),
                 caption=_('in minutes, minimum is 360 minutes'),
