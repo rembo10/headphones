@@ -788,6 +788,11 @@ footer {
   background-color: transparent;
   margin-bottom: 1em;
 }
+.config .tab .button-panel {
+  -webkit-column-span: all;
+  column-span: all;
+  margin-bottom: 2em;
+}
 .config .block {
   -webkit-column-break-inside: avoid;
   page-break-inside: avoid;

@@ -11,6 +11,7 @@ from _viewmodel import PostDataParser
 import headphones.config.definitions.webui
 import headphones.config.definitions.download
 import headphones.config.definitions.search
+import headphones.config.definitions.quality
 import headphones.config.definitions.internal
 import headphones.config.definitions.advanced
 
@@ -51,9 +52,11 @@ class Config(object):
         # register options from definition's files:
         definitions.internal.reg(None, self._registerBlock, self._registerOptions)
         definitions.webui.reg('webui', self._registerBlock, self._registerOptions)
-
         definitions.download.reg('download', self._registerBlock, self._registerOptions)
+
         definitions.search.reg('search', self._registerBlock, self._registerOptions)
+
+        definitions.quality.reg('quality_processing', self._registerBlock, self._registerOptions)
         definitions.advanced.reg('advanced', self._registerBlock, self._registerOptions)
 
         logger.debug('All options registered. Total options: {0}'.format(len(self._vault)))

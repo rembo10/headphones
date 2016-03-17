@@ -335,14 +335,20 @@ class OptionNumber(OptionBase):
         # override
         return int(value)
 
+class OptionPercent(OptionNumber):
+    pass
+
 class OptionBool(OptionBase):
 
-    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None):
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, alignleft=False):
         super(OptionBool, self).__init__(appkey, section, default, typeconv=boolext, options=options)
 
         self.label = label
         self.caption = caption
         self.tooltip = tooltip
+
+        # TODO : implement in template
+        self.alignleft = alignleft
 
     def uiValue2DataValue(self, value):
         # override
@@ -351,6 +357,16 @@ class OptionBool(OptionBase):
         if value == '0':
             return False
         raise ValueError('Unexpected bool value accepted: {0}'.format(value))
+
+# TODO : think about inheritance from Block
+class OptionSwitch(OptionBool):
+    """ Option, which includes switcher and suboptions
+
+    This is **enabler**, or **switch** option. Its own value is `bool`, and when it is checked -
+    the set of suboptions is visible for editing. When its own value is `False` - nothing happens,
+    no additional settings are visible
+    """
+    pass
 
 class OptionDropdown(OptionBase):
     class _HtmlOption:
@@ -434,20 +450,6 @@ class OptionList(OptionBase):
     def uiValue2DataValue(self, value):
         # override
         return [value]
-
-# ===============================================
-# API-usable options with SUBSTRUCTURE
-# ===============================================
-
-# TODO : think about inheritance from Block
-class OptionSwitch(OptionBool):
-    """ Option, which includes switcher and suboptions
-
-    This is **enabler**, or **switch** option. Its own value is `bool`, and when it is checked -
-    the set of suboptions is visible for editing. When its own value is `False` - nothing happens,
-    no additional settings are visible
-    """
-    pass
 
 
 # ===============================================

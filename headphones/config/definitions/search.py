@@ -19,25 +19,14 @@ def reg(tabname, register_block_cb, register_options_cb):
     # =======================================================================================
     # =======================================================================================
     # =======================================================================================
-            OptionNumber('ADD_ALBUM_ART', 'General', 0,
-                label=_('zzADD_ALBUM_ARTzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
+
             OptionString('ADVANCEDENCODER', 'General', '',
                 label=_('zzADVANCEDENCODERzz'),
                 caption=_(''),
                 tooltip=_(''),
                 maxlength=None
             ),
-            OptionString('ALBUM_ART_FORMAT', 'General', 'folder',
-                label=_('zzALBUM_ART_FORMATzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
+
             OptionNumber('ALBUM_COMPLETION_PCT', 'Advanced', 80,
                 label=_('zzALBUM_COMPLETION_PCTzz'),
                 caption=_(''),
@@ -100,27 +89,9 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_(''),
                 maxlength=None
             ),
-            OptionNumber('CLEANUP_FILES', 'General', 0,
-                label=_('zzCLEANUP_FILESzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('CORRECT_METADATA', 'General', 0,
-                label=_('zzCORRECT_METADATAzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('CUE_SPLIT', 'General', 1,
-                label=_('zzCUE_SPLITzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
+
+
+
             OptionPath('CUE_SPLIT_FLAC_PATH', 'General', '',
                 label=_('zzCUE_SPLIT_FLAC_PATHzz'),
                 caption=_(''),
@@ -177,18 +148,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 minvalue=None,
                 maxvalue=None
             ),
-            OptionPath('DESTINATION_DIR', 'General', '',
-                label=_('zzDESTINATION_DIRzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
-            OptionNumber('DETECT_BITRATE', 'General', 0,
-                label=_('zzDETECT_BITRATEzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
+
             OptionNumber('DO_NOT_PROCESS_UNMATCHED', 'General', 0,
                 label=_('zzDO_NOT_PROCESS_UNMATCHEDzz'),
                 caption=_(''),
@@ -261,20 +221,8 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_(''),
                 maxlength=None
             ),
-            OptionNumber('EMBED_ALBUM_ART', 'General', 0,
-                label=_('zzEMBED_ALBUM_ARTzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('EMBED_LYRICS', 'General', 0,
-                label=_('zzEMBED_LYRICSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
+
+
             OptionString('ENCODER', 'General', 'ffmpeg',
                 label=_('zzENCODERzz'),
                 caption=_(''),
@@ -435,19 +383,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 caption=_(''),
                 tooltip=_(''),
             ),
-            OptionString('IGNORED_WORDS', 'General', '',
-                label=_('zzIGNORED_WORDSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('IGNORE_CLEAN_RELEASES', 'General', 0,
-                label=_('zzIGNORE_CLEAN_RELEASESzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
             OptionNumber('INCLUDE_EXTRAS', 'General', 0,
                 label=_('zzINCLUDE_EXTRASzz'),
                 caption=_(''),
@@ -480,20 +415,8 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_(''),
                 maxlength=None
             ),
-            OptionNumber('KEEP_NFO', 'General', 0,
-                label=_('zzKEEP_NFOzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('KEEP_ORIGINAL_FOLDER', 'General', 0,
-                label=_('zzKEEP_ORIGINAL_FOLDERzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
+
+
             OptionString('LASTFM_USERNAME', 'General', '',
                 label=_('zzLASTFM_USERNAMEzz'),
                 caption=_(''),
@@ -520,25 +443,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_(''),
                 maxlength=None
             ),
-            OptionNumber('LOSSLESS_BITRATE_FROM', 'General', 0,
-                label=_('zzLOSSLESS_BITRATE_FROMzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('LOSSLESS_BITRATE_TO', 'General', 0,
-                label=_('zzLOSSLESS_BITRATE_TOzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionPath('LOSSLESS_DESTINATION_DIR', 'General', '',
-                label=_('zzLOSSLESS_DESTINATION_DIRzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
+
             OptionNumber('MININOVA', 'Mininova', 0,
                 label=_('zzMININOVAzz'),
                 caption=_(''),
@@ -558,13 +463,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_(''),
                 maxlength=None
             ),
-            OptionNumber('MOVE_FILES', 'General', 0,
-                label=_('zzMOVE_FILESzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
+
             OptionBool('MPC_ENABLED', 'MPC', False,
                 label=_('zzMPC_ENABLEDzz'),
                 caption=_(''),
@@ -789,46 +688,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_(''),
                 maxlength=None
             ),
-            OptionString('PREFERRED_BITRATE', 'General', '',
-                label=_('zzPREFERRED_BITRATEzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('PREFERRED_BITRATE_ALLOW_LOSSLESS', 'General', 0,
-                label=_('zzPREFERRED_BITRATE_ALLOW_LOSSLESSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('PREFERRED_BITRATE_HIGH_BUFFER', 'General', 0,
-                label=_('zzPREFERRED_BITRATE_HIGH_BUFFERzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('PREFERRED_BITRATE_LOW_BUFFER', 'General', 0,
-                label=_('zzPREFERRED_BITRATE_LOW_BUFFERzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('PREFERRED_QUALITY', 'General', 0,
-                label=_('zzPREFERRED_QUALITYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('PREFERRED_WORDS', 'General', '',
-                label=_('zzPREFERRED_WORDSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
+
             OptionNumber('PROWL_ENABLED', 'Prowl', 0,
                 label=_('zzPROWL_ENABLEDzz'),
                 caption=_(''),
@@ -935,13 +795,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 minvalue=None,
                 maxvalue=None
             ),
-            OptionNumber('RENAME_FILES', 'General', 0,
-                label=_('zzRENAME_FILESzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
+
             OptionBool('RENAME_FROZEN', 'General', True,
                 label=_('zzRENAME_FROZENzz'),
                 caption=_(''),
@@ -952,19 +806,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 caption=_(''),
                 tooltip=_(''),
             ),
-            OptionNumber('REPLACE_EXISTING_FOLDERS', 'General', 0,
-                label=_('zzREPLACE_EXISTING_FOLDERSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('REQUIRED_WORDS', 'General', '',
-                label=_('zzREQUIRED_WORDSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
+
             OptionNumber('RUTRACKER', 'Rutracker', 0,
                 label=_('zzRUTRACKERzz'),
                 caption=_(''),
