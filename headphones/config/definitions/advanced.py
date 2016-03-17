@@ -3,7 +3,10 @@
 # =======================================================================================
 
 from .._viewmodel import Block
-from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionBool, OptionPath, LabelExtension, OptionDropdownSelector, OptionDropdown, OptionCombobox # , OptionPassword
+
+from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionBool, OptionPath #, OptionPassword
+from .._viewmodel import OptionDropdownSelector, OptionDropdown, OptionCombobox, OptionCheckboxListExtrasCrutch # OptionCheckboxList
+from .._viewmodel import TemplaterExtension, LabelExtension
 
 def _(x):
     """ required just for marking translatable strings"""
@@ -75,7 +78,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 ),
             ),
 
-            OptionDropdownSelector('ENCODER', 'General', 'ffmpeg', typeconv=str,
+            OptionDropdownSelector('ENCODER', 'General', 'ffmpeg', initype=str,
                 label=_('Encoder'),
                 tooltip=_(('Name of encoder to use. Lame, FFmpeg and libav are available for most Linux'
                            ' distributions. On Ubuntu, libav replaces FFmpeg. xld is OS X-only.'
@@ -98,7 +101,7 @@ def reg(tabname, register_block_cb, register_options_cb):
     register_block_cb(tabname,
         Block('audio_sub_block', caption=_("Audio Properties"), options=register_options_cb(
             # FIX : I want add CUSTOM values here!!!!
-            OptionCombobox('ENCODEROUTPUTFORMAT', 'General', 'mp3', #typeconv=str,
+            OptionCombobox('ENCODEROUTPUTFORMAT', 'General', 'mp3', #initype=str,
                 label=_('Format'),
                 caption=_('Use one of "mp3", "ogg", "m4a", or <strong>any custom</strong> format'),
                 items=(
@@ -107,11 +110,11 @@ def reg(tabname, register_block_cb, register_options_cb):
                     'm4a',
                 )
             ),
-            OptionDropdownSelector('ENCODERVBRCBR', 'General', 'cbr', typeconv=str,
+            OptionDropdownSelector('ENCODERVBRCBR', 'General', 'cbr', initype=str,
                 label=_('VBR/CBR'),
                 items=(
                     ('cbr', _('cbr'), register_options_cb(
-                        OptionDropdown('BITRATE', 'General', 192, typeconv=int,
+                        OptionDropdown('BITRATE', 'General', 192, initype=int,
                             label=_('Bitrate'),
                             items=(
                                 (64, _('64')),
@@ -123,7 +126,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                         ),
                     )),
                     ('vbr', _('vbr'), register_options_cb(
-                        OptionDropdown('ENCODERQUALITY', 'General', 2, typeconv=int,
+                        OptionDropdown('ENCODERQUALITY', 'General', 2, initype=int,
                             label=_('Quality'),
                             items=(
                                 (0, _('0')),
@@ -141,7 +144,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                     )),
                 )
             ),
-            OptionDropdown('SAMPLINGFREQUENCY', 'General', 44100, typeconv=int,
+            OptionDropdown('SAMPLINGFREQUENCY', 'General', 44100, initype=int,
                 label=_('Sampling'),
                 items=(
                     (44100, _('44.1 kHz')),
@@ -149,11 +152,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 )
             ),
 
-            # TODO : use special separator!!!!!!
-            LabelExtension(
-                label='<hr />',
-                fullwidth=True,
-            ),
+            TemplaterExtension(template_name='DividerExtension'),
 
             OptionString('ADVANCEDENCODER', 'General', '',
                 label=_('Arguments'),
@@ -182,28 +181,34 @@ def reg(tabname, register_block_cb, register_options_cb):
     )
 
     # =======================================================================================
+    # Miscellaneous
     register_block_cb(tabname,
-        Block('git', caption=_("GitHub"), options=register_options_cb(
-            OptionSwitch('CHECK_GITHUB', 'General', True,
-                label=_('GitHub Updater Enabled'),
-                tooltip=_('Enable autoupdates for Headphones through GitHub '),
-
+        Block('miscellaneous', caption=_("Miscellaneous"), options=register_options_cb(
+            OptionSwitch('INCLUDE_EXTRAS', 'General', False,
+                label=_('Automatically include extras when adding an artist'),
+                alignleft=True,
                 options=register_options_cb(
-                    OptionString('GIT_USER', 'General', 'rembo10',
-                        label=_('GitHub Username'),
-                        tooltip=_('Username, used to check updates on GitHub.com'),
-                        maxlength=64,
-                    ),
-                    OptionNumber('CHECK_GITHUB_INTERVAL', 'General', 360,
-                        label=_('Check interval'),
-                        caption=_('in minutes'),
-                        tooltip=_('Interval between checks for updates'),
-                        minvalue=0,
-                        maxvalue=9999
-                    ),
-                    OptionBool('CHECK_GITHUB_ON_STARTUP', 'General', True,
-                        label=_('Check on startup'),
-                        tooltip=_('Perform check for updates on startup'),
+
+                    # TODO : somebody, please, convert the value of this option to list of int
+                    #        currently it is a string...
+                    OptionCheckboxListExtrasCrutch('EXTRAS', 'General', '',
+                        alignleft=True,
+                        items=(
+                            ("1", _("single")),
+                            ("2", _("ep")),
+                            ("3", _("compilation")),
+                            ("4", _("soundtrack")),
+                            ("5", _("live")),
+                            ("6", _("remix")),
+                            ("7", _("spokenword")),
+                            ("8", _("audiobook")),
+                            ("9", _("other")),
+                            ("10", _("dj-mix")),
+                            ("11", _("mixtape/street")),
+                            ("12", _("broadcast")),
+                            ("13", _("interview")),
+                            ("14", _("demo")),
+                        )
                     ),
                 )
             ),
@@ -256,4 +261,33 @@ def reg(tabname, register_block_cb, register_options_cb):
             ),
         )
     ))
+
+    # =======================================================================================
+    register_block_cb(tabname,
+        Block('git', caption=_("GitHub"), options=register_options_cb(
+            OptionSwitch('CHECK_GITHUB', 'General', True,
+                label=_('GitHub Updater Enabled'),
+                tooltip=_('Enable autoupdates for Headphones through GitHub '),
+
+                options=register_options_cb(
+                    OptionString('GIT_USER', 'General', 'rembo10',
+                        label=_('GitHub Username'),
+                        tooltip=_('Username, used to check updates on GitHub.com'),
+                        maxlength=64,
+                    ),
+                    OptionNumber('CHECK_GITHUB_INTERVAL', 'General', 360,
+                        label=_('Check interval'),
+                        caption=_('in minutes'),
+                        tooltip=_('Interval between checks for updates'),
+                        minvalue=0,
+                        maxvalue=9999
+                    ),
+                    OptionBool('CHECK_GITHUB_ON_STARTUP', 'General', True,
+                        label=_('Check on startup'),
+                        tooltip=_('Perform check for updates on startup'),
+                    ),
+                )
+            ),
+        ))
+    )
     # =======================================================================================

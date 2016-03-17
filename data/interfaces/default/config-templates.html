@@ -47,9 +47,9 @@
     size_attr = '' if me.maxlength is None else ' maxlength="%d"' % me.maxlength
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
-    <div class="row option">
+    <div class="option">
         %if me.label is not None:
-            <label ${tooltip_attr} for="${uiname}">
+            <label class="label" ${tooltip_attr} for="${uiname}">
                 ${me.label}
             </label>
         %endif
@@ -86,9 +86,9 @@
     size_attr = '' if me.maxlength is None else ' maxlength="%d"' % me.maxlength
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
-    <div class="row option">
+    <div class="option">
         %if me.label is not None:
-            <label ${tooltip_attr} for="${uiname}">
+            <label class="label" ${tooltip_attr} for="${uiname}">
                 ${me.label}
             </label>
         %endif
@@ -130,9 +130,9 @@
     size_attr = '' if me.maxlength is None else ' maxlength="%d"' % me.maxlength
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
-    <div class="row option">
+    <div class="option">
         %if me.label is not None:
-            <label ${tooltip_attr} for="${uiname}">
+            <label class="label" ${tooltip_attr} for="${uiname}">
                 ${me.label}
             </label>
         %endif
@@ -178,9 +178,9 @@
     max_attr = '' if me.maxvalue is None else ' max="%d"' % me.maxvalue
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
-    <div class="row option">
+    <div class="option">
         %if me.label is not None:
-            <label ${tooltip_attr} for="${uiname}">
+            <label class="label" ${tooltip_attr} for="${uiname}">
                 ${me.label}
             </label>
         %endif
@@ -223,9 +223,9 @@
     max_attr = '' if me.maxvalue is None else ' max="%d"' % me.maxvalue
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
-    <div class="row option">
+    <div class="option">
         %if me.label is not None:
-            <label ${tooltip_attr} for="${uiname}">
+            <label class="label" ${tooltip_attr} for="${uiname}">
                 ${me.label}
             </label>
         %endif
@@ -260,9 +260,9 @@
     checked_attr = 'checked' if val else ''
     hidden_value = '1' if val else '0'
 %>
-    <div class="row option">
+    <div class="option">
         %if me.label is not None:
-            <label ${tooltip_attr} for="${checkbox_id}">
+            <label class="label" ${tooltip_attr} for="${checkbox_id}">
                 ${me.label}
             </label>
         %endif
@@ -299,9 +299,9 @@
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
     hidden_value = '1' if val else '0'
 %>
-    <div class="row option">
+    <div class="option">
         %if me.label is not None:
-            <label ${tooltip_attr} for="${checkbox_id}">
+            <label class="label" ${tooltip_attr} for="${checkbox_id}">
                 ${me.label}
             </label>
         %endif
@@ -326,6 +326,46 @@
 </%def>
 
 
+<%def name="OptionCheckboxList(me, parent=None)">
+<%
+    uiname = me.uiName()
+
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+%>
+    <div class="option">
+
+        ## COULD NO APPLY THIS: <div class="input-wrapper">
+        ## because it is tight linked with two columns layout...
+
+        <div ${tooltip_attr}>
+            ## Fictive value, which will guarantee posting of at least one value
+            <input type="hidden" name="${uiname}" value="" />
+            % for i in me.items:
+                ## TODO : add an appropriate class for next div:
+                <div>
+                    <label>
+                        <input type="checkbox" id="${uiname + str(i.uniq) }" name="${uiname}" value="${i.value}" ${'checked' if i.checked else ''} />
+
+                        <span>${'&nbsp;' if i.label is None else i.label}</span>
+                    </label>
+                </div>
+            % endfor
+        </div>
+
+        %if me.caption is not None:
+            <div class="small caption">${me.caption}</div>
+        %endif
+    </div>
+    % if 0 < len(me):
+        <div class="embed-option-block">
+            % for option in me:
+                ${option.render(me)}
+            % endfor    # for option in block
+        </div>
+    % endif
+</%def>
+
+
 <%def name="OptionDropdown(me, parent=None)">
 <%
     uiname = me.uiName()
@@ -333,9 +373,9 @@
 
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
-    <div class="row option">
+    <div class="option">
         %if me.label is not None:
-            <label ${tooltip_attr} for="${uiname}">
+            <label class="label" ${tooltip_attr} for="${uiname}">
                 ${me.label}
             </label>
         %endif
@@ -379,9 +419,9 @@
     raw_hidden_style_attr = 'style="display:none"'
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
-    <div class="row option">
+    <div class="option">
         %if me.label is not None:
-            <label ${tooltip_attr} for="${uiname}">
+            <label class="label" ${tooltip_attr} for="${uiname}">
                 ${me.label}
             </label>
         %endif
@@ -438,7 +478,7 @@
     class_attr = '' if not cssclasses else 'class="' + ' '.join(cssclasses) + '"'
 %>
     ## TODO : define name of class for root divs
-    <div class="row">
+    <div class="extension">
         % if not me.fullwidth:
             <label>&nbsp;</label>
         % endif
@@ -466,12 +506,21 @@
 
     uiname = me.uiName()
 %>
-<div class="row option-extension">
+<div class="extension">
     <label>
         <button type="button" data-input-sel=".option input[name=${uiname}]" class="API_KEY">${ext.strings['button']}</button>
     </label>
     <div>
         <div class="small caption">${ext.strings['caption']}<strong>${val}</strong></div>
     </div>
+</div>
+</%def>
+
+
+<%def name="DividerExtension(me, parent=None)">
+<%
+%>
+<div class="extension">
+    <hr />
 </div>
 </%def>

@@ -14,7 +14,7 @@ def reg(tabname, register_block_cb, register_options_cb):
     register_block_cb(tabname,
        Block('quality', caption=_("Quality"), options=register_options_cb(
 
-            OptionDropdownSelector('PREFERRED_QUALITY', 'General', 0, typeconv=int,
+            OptionDropdownSelector('PREFERRED_QUALITY', 'General', 0, initype=int,
                 label=_('Preferred quality'),
                 tooltip=_('Preferred quality'),
                 items=(

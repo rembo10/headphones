@@ -4,6 +4,7 @@ from headphones.exceptions import ConfigError
 from headphones.config.typeconv import boolext, path
 from _datamodel import OptionModel
 
+
 class OptionModelTest(TestCase):
 
     # ---------------------------------------------------------------
@@ -29,7 +30,7 @@ class OptionModelTest(TestCase):
         p = OptionModel('ANYKEY', 'AnySection', deflt, tp)
 
         with self.assertRaisesRegexp(ConfigError, r'ANYKEY.*not\sbinded'):
-            act = p.get()
+            p.get()
 
     @TestArgs(
         (1, int),
@@ -82,8 +83,8 @@ class OptionModelTest(TestCase):
         inikey = key.lower()
         p = OptionModel(key, sec, deflt, conv)
         st = {
-            sec : {
-                inikey : confval
+            sec: {
+                inikey: confval
             }
         }
         p.bindToConfig(lambda: st)
@@ -102,7 +103,7 @@ class OptionModelTest(TestCase):
         p = OptionModel('ANYKEY', 'AnySection', deflt, tp)
 
         with self.assertRaisesRegexp(ConfigError, r'ANYKEY.*not\sbinded'):
-            act = p.set(deflt)
+            p.set(deflt)
 
     # ---------------------------------------------------------------
     # section

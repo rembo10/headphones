@@ -8,7 +8,7 @@ _primitives = (int, str, bool, list, float)
 class OptionModel(object):
     """ Stores value of option, and know, how to write this value to the config file"""
 
-    def __init__(self, appkey, section, default, typeconv):
+    def __init__(self, appkey, section, default, initype):
 
         self._config_callback = None
 
@@ -16,7 +16,7 @@ class OptionModel(object):
         self._inikey = appkey.lower()
         self._section = section
         self._default = default
-        self._typeconv = typeconv
+        self._initype = initype
 
     @property
     def appkey(self):
@@ -50,7 +50,7 @@ class OptionModel(object):
         # abbreviation. I am too lazy to write 'self._inikey', will use 'k'
         s = self._section   # section
         k = self._inikey    # key
-        t = self._typeconv   # type
+        t = self._initype   # type
         d = self._default
 
         if self._config_callback is None:
@@ -86,7 +86,7 @@ class OptionModel(object):
         # abbreviation. I am too lazy to write 'self._inikey', will use 'k'
         s = self._section   # section
         k = self._inikey    # key
-        t = self._typeconv   # type
+        t = self._initype   # type
 
         if self._config_callback is None:
             msg = 'Option [{0}][{1}] was not binded/registered with config'.format(s, k)

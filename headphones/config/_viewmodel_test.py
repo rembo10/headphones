@@ -1,4 +1,4 @@
-from unittestcompat import TestCase, TestArgs
+from unittestcompat import TestCase #, TestArgs
 from _viewmodel import OptionBase, OptionInternal, OptionDeprecated
 
 class OptionInternalTest(TestCase):
@@ -8,7 +8,7 @@ class OptionInternalTest(TestCase):
     # ---------------------------------------------------------------
     def test_init(self):
         """ OptionInternal: __init__ """
-        p = OptionInternal('KEY', 'GeneralSection', 0, typeconv=int)
+        p = OptionInternal('KEY', 'GeneralSection', 0, initype=int)
 
         self.assertIsNotNone(p)
         self.assertIsInstance(p, OptionBase)
@@ -19,7 +19,7 @@ class OptionInternalTest(TestCase):
     # ---------------------------------------------------------------
     def test_render(self):
         """ OptionInternal: render """
-        p = OptionInternal('KEY', 'GeneralSection', 0, typeconv=int)
+        p = OptionInternal('KEY', 'GeneralSection', 0, initype=int)
 
         self.assertEqual(p.render(), "")
 
@@ -31,7 +31,7 @@ class OptionDeprecatedTest(TestCase):
     # ---------------------------------------------------------------
     def test_init(self):
         """ OptionDeprecated: __init__ """
-        p = OptionDeprecated('KEY', 'GeneralSection', 0, typeconv=int)
+        p = OptionDeprecated('KEY', 'GeneralSection', 0, initype=int)
 
         self.assertIsNotNone(p)
         self.assertIsInstance(p, OptionBase)
@@ -42,6 +42,6 @@ class OptionDeprecatedTest(TestCase):
     # ---------------------------------------------------------------
     def test_render(self):
         """ OptionDeprecated: render """
-        p = OptionDeprecated('KEY', 'GeneralSection', 0, typeconv=int)
+        p = OptionDeprecated('KEY', 'GeneralSection', 0, initype=int)
 
         self.assertEqual(p.render(), "")
