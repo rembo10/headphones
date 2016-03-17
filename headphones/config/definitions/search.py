@@ -18,13 +18,6 @@ def reg(tabname, register_block_cb, register_options_cb):
     # =======================================================================================
     # =======================================================================================
 
-            OptionString('ADVANCEDENCODER', 'General', '',
-                label=_('zzADVANCEDENCODERzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-
             OptionNumber('ALBUM_COMPLETION_PCT', 'Advanced', 80,
                 label=_('zzALBUM_COMPLETION_PCTzz'),
                 caption=_(''),
@@ -55,13 +48,6 @@ def reg(tabname, register_block_cb, register_options_cb):
             ),
             OptionNumber('AUTO_ADD_ARTISTS', 'General', 1,
                 label=_('zzAUTO_ADD_ARTISTSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('BITRATE', 'General', 192,
-                label=_('zzBITRATEzz'),
                 caption=_(''),
                 tooltip=_(''),
                 minvalue=None,
@@ -139,14 +125,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_(''),
                 maxlength=None
             ),
-            OptionNumber('DELETE_LOSSLESS_FILES', 'General', 1,
-                label=_('zzDELETE_LOSSLESS_FILESzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-
             OptionNumber('DO_NOT_PROCESS_UNMATCHED', 'General', 0,
                 label=_('zzDO_NOT_PROCESS_UNMATCHEDzz'),
                 caption=_(''),
@@ -219,66 +197,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_(''),
                 maxlength=None
             ),
-
-
-            OptionString('ENCODER', 'General', 'ffmpeg',
-                label=_('zzENCODERzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionPath('ENCODERFOLDER', 'General', '',
-                label=_('zzENCODERFOLDERzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
-            OptionNumber('ENCODERLOSSLESS', 'General', 1,
-                label=_('zzENCODERLOSSLESSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('ENCODEROUTPUTFORMAT', 'General', 'mp3',
-                label=_('zzENCODEROUTPUTFORMATzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('ENCODERQUALITY', 'General', 2,
-                label=_('zzENCODERQUALITYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('ENCODERVBRCBR', 'General', 'cbr',
-                label=_('zzENCODERVBRCBRzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('ENCODER_MULTICORE', 'General', 0,
-                label=_('zzENCODER_MULTICOREzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-
-            # STRANGE 0 CHECK :(
-            OptionNumber('ENCODER_MULTICORE_COUNT', 'General', 0,
-                label=_('zzENCODER_MULTICORE_COUNTzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=0,
-                maxvalue=None
-            ),
-            OptionPath('ENCODER_PATH', 'General', '',
-                label=_('zzENCODER_PATHzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
             OptionString('EXTRAS', 'General', '',
                 label=_('zzEXTRASzz'),
                 caption=_(''),
@@ -294,25 +212,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 label=_('zzEXTRA_TORZNABSzz'),
                 caption=_(''),
                 tooltip=_(''),
-            ),
-            OptionString('FILE_FORMAT', 'General', 'Track Artist - Album [Year] - Title',
-                label=_('zzFILE_FORMATzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('FILE_UNDERSCORES', 'General', 0,
-                label=_('zzFILE_UNDERSCORESzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('FOLDER_FORMAT', 'General', 'Artist/Album [Year]',
-                label=_('zzFOLDER_FORMATzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
             ),
             OptionNumber('FREEZE_DB', 'General', 0,
                 label=_('zzFREEZE_DBzz'),
@@ -471,13 +370,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 label=_('zzMUSIC_DIRzz'),
                 caption=_(''),
                 tooltip=_(''),
-            ),
-            OptionNumber('MUSIC_ENCODER', 'General', 0,
-                label=_('zzMUSIC_ENCODERzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
             ),
             OptionNumber('NEWZNAB', 'Newznab', 0,
                 label=_('zzNEWZNABzz'),
@@ -830,13 +722,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_(''),
                 maxlength=None
             ),
-            OptionNumber('SAMPLINGFREQUENCY', 'General', 44100,
-                label=_('zzSAMPLINGFREQUENCYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
             OptionString('SONGKICK_APIKEY', 'Songkick', 'nd1We7dFW2RqxPw8',
                 label=_('zzSONGKICK_APIKEYzz'),
                 caption=_(''),
@@ -1070,12 +955,6 @@ def reg(tabname, register_block_cb, register_options_cb):
             ),
             OptionString('XBMC_USERNAME', 'XBMC', '',
                 label=_('zzXBMC_USERNAMEzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('XLDPROFILE', 'General', '',
-                label=_('zzXLDPROFILEzz'),
                 caption=_(''),
                 tooltip=_(''),
                 maxlength=None

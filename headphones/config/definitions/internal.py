@@ -35,4 +35,5 @@ def reg(tabname, register_block_cb, register_options_cb):
     register_options_cb(
         OptionDeprecated('BLACKHOLE', 'General', False, typeconv=boolext),
         OptionDeprecated('OPEN_MAGNET_LINKS', 'General', False, typeconv=boolext),
+        OptionDeprecated('ENCODERFOLDER', 'General', '', typeconv=path),
     )
