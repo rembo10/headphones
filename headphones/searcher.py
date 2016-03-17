@@ -319,22 +319,20 @@ def more_filtering(results, album, albumlength, new):
     if headphones.CONFIG.PREFERRED_QUALITY == 3 and albumlength and (
         headphones.CONFIG.LOSSLESS_BITRATE_FROM or headphones.CONFIG.LOSSLESS_BITRATE_TO):
         if headphones.CONFIG.LOSSLESS_BITRATE_FROM:
-            low_size_limit = albumlength / 1000 * int(headphones.CONFIG.LOSSLESS_BITRATE_FROM) * 128
+            low_size_limit = albumlength / 1000 * headphones.CONFIG.LOSSLESS_BITRATE_FROM * 128
         if headphones.CONFIG.LOSSLESS_BITRATE_TO:
-            high_size_limit = albumlength / 1000 * int(headphones.CONFIG.LOSSLESS_BITRATE_TO) * 128
+            high_size_limit = albumlength / 1000 * headphones.CONFIG.LOSSLESS_BITRATE_TO * 128
 
     # Preferred Bitrate - ignore results if target size outside % buffer
     elif headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE:
         logger.debug('Target bitrate: %s kbps' % headphones.CONFIG.PREFERRED_BITRATE)
         if albumlength:
-            targetsize = albumlength / 1000 * int(headphones.CONFIG.PREFERRED_BITRATE) * 128
+            targetsize = albumlength / 1000 * headphones.CONFIG.PREFERRED_BITRATE * 128
             logger.info('Target size: %s' % helpers.bytes_to_mb(targetsize))
             if headphones.CONFIG.PREFERRED_BITRATE_LOW_BUFFER:
-                low_size_limit = targetsize * int(
-                    headphones.CONFIG.PREFERRED_BITRATE_LOW_BUFFER) / 100
+                low_size_limit = targetsize * headphones.CONFIG.PREFERRED_BITRATE_LOW_BUFFER / 100
             if headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER:
-                high_size_limit = targetsize * int(
-                    headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER) / 100
+                high_size_limit = targetsize * headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER / 100
                 if headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                     allow_lossless = True
 
@@ -403,7 +401,7 @@ def sort_search_results(resultlist, album, new, albumlength):
     if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE:
 
         try:
-            targetsize = albumlength / 1000 * int(headphones.CONFIG.PREFERRED_BITRATE) * 128
+            targetsize = albumlength / 1000 * headphones.CONFIG.PREFERRED_BITRATE * 128
 
             if not targetsize:
                 logger.info('No track information for %s - %s. Defaulting to highest quality' % (
@@ -1432,14 +1430,18 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             maxsize = 10000000000
         elif headphones.CONFIG.PREFERRED_QUALITY == 2:  # Preferred quality mode
             search_formats = [None]  # should return all
-            bitrate = headphones.CONFIG.PREFERRED_BITRATE
-            if bitrate:
-                if 225 <= int(bitrate) < 256:
-                    bitrate = 'V0'
-                elif 200 <= int(bitrate) < 225:
-                    bitrate = 'V1'
-                elif 175 <= int(bitrate) < 200:
+            bitrate_int = headphones.CONFIG.PREFERRED_BITRATE
+            bitrate = str(bitrate_int)
+
+            if bitrate_int>=175:
+
+                if bitrate_int < 200:
                     bitrate = 'V2'
+                elif bitrate_int < 225:
+                    bitrate = 'V1'
+                elif bitrate_int < 256:
+                    bitrate = 'V0'
+
                 for encoding_string in gazelleencoding.ALL_ENCODINGS:
                     if re.search(bitrate, encoding_string, flags=re.I):
                         bitrate_string = encoding_string
