@@ -82,7 +82,7 @@ class OptionModelTest(TestCase):
 
         p = OptionModel('KEY', sec1, 0, int)
 
-        with self.assertRaisesRegexp(ValueError, r'already set') as exc:
+        with self.assertRaisesRegexp(ValueError, r'already set'):
             p.section = sec2
 
     @TestArgs(

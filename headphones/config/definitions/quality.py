@@ -1,6 +1,5 @@
 from .._viewmodel import Block
-from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionUrl, LabelExtension, OptionDropdownSelector, OptionPercent
-from .._viewmodel import TemplaterExtension
+from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionBool, OptionPath, LabelExtension, OptionDropdownSelector, OptionPercent
 
 """
 Options from "Quality and Post Processing" Tab

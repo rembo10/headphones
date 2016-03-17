@@ -50,14 +50,14 @@ class Config(object):
         self._uiresolver = PostDataParser()
 
         # register options from definition's files:
-        definitions.internal.reg(None, self._registerBlock, self._registerOptions)
-        definitions.webui.reg('webui', self._registerBlock, self._registerOptions)
-        definitions.download.reg('download', self._registerBlock, self._registerOptions)
+        headphones.config.definitions.internal.reg(None, self._registerBlock, self._registerOptions)
+        headphones.config.definitions.webui.reg('webui', self._registerBlock, self._registerOptions)
+        headphones.config.definitions.download.reg('download', self._registerBlock, self._registerOptions)
 
-        definitions.search.reg('search', self._registerBlock, self._registerOptions)
+        headphones.config.definitions.search.reg('search', self._registerBlock, self._registerOptions)
 
-        definitions.quality.reg('quality_processing', self._registerBlock, self._registerOptions)
-        definitions.advanced.reg('advanced', self._registerBlock, self._registerOptions)
+        headphones.config.definitions.quality.reg('quality_processing', self._registerBlock, self._registerOptions)
+        headphones.config.definitions.advanced.reg('advanced', self._registerBlock, self._registerOptions)
 
         logger.debug('All options registered. Total options: {0}'.format(len(self._vault)))
 

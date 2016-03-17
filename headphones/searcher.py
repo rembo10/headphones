@@ -1433,7 +1433,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             bitrate_int = headphones.CONFIG.PREFERRED_BITRATE
             bitrate = str(bitrate_int)
 
-            if bitrate_int>=175:
+            if bitrate_int >= 175:
 
                 if bitrate_int < 200:
                     bitrate = 'V2'
