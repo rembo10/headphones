@@ -171,7 +171,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                             ),
 
                             LabelExtension(
-                                cssclasses=('small'),
+                                cssclasses=['small'],
                                 label=_(('Note: With Transmission, you can specify a different download'
                                            ' directory for downloads sent from Headphones. Set it in the Music'
                                            ' Download Directory below'))
@@ -181,7 +181,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                     (2, _('uTorrent (Beta)'),
                         register_options_cb(
                             LabelExtension(
-                                cssclasses=('small', 'heading'),
+                                cssclasses=['small', 'heading'],
                                 label=_(('<i class="fa fa-info-circle"></i> Note: uTorrent may keep files'
                                            ' read only when completed. Check "Preferences -> Advanced -> bt.read_only_on_complete"'
                                            ' in case of problems.'))
@@ -217,7 +217,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                                 maxlength=64
                             ),
                             LabelExtension(
-                                cssclasses=('small'),
+                                cssclasses=['small'],
                                 label=_(('Note: With Deluge, you can specify a different download'
                                          ' directory for downloads sent from Headphones. Set it in'
                                          ' the Music Download Directory below'))

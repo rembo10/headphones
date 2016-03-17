@@ -1,14 +1,27 @@
+import os
+import sys
+import random
 import mock
+import logging
 from mock import MagicMock
 from unittestcompat import TestCase, TestArgs, skip
 
 import headphones.config
+
+logging.basicConfig( stream=sys.stderr )
+logger = logging.getLogger('headphones.config.TEST')
+logger.setLevel( logging.INFO )
 
 class ConfigApiTest(TestCase):
     """ Common tests for headphones.Config
 
     Common tests for headphones.Config This test suite guarantees, that external
     API of the Config class conforms all expectations of other modules.
+
+    HELPERS:
+        * self.config_mock - autoinitialized (on setUpt) mock of ConfigObj. By default it
+                             has two sections: 'Email' and 'General'
+        * self.path - unique name of non-existent file. Placeholder for your config.ini
     """
 
     def _setUpConfigMock(self, mock, sections):
@@ -36,52 +49,57 @@ class ConfigApiTest(TestCase):
         # this mock:
         self._setUpConfigMock(MagicMock(), existing_sections)
 
+        # get unique name for ini file
+        while True:
+            self.path = './config.' + str(random.randint(1, 999999999)) + '.ini'
+            if not os.path.isfile(self.path):
+                break
+
     def tearDown(self):
         self.config_module_mock_patcher.stop()
+        try:
+            os.remove(self.path)
+        except OSError:
+            pass
 
     def test_constructor(self):
         """ Config : creating """
 
-        cf = headphones.config.Config('/tmp/notexist')
+        cf = headphones.config.Config(self.path)
         self.assertIsInstance(cf, headphones.config.Config)
 
     def test_write(self):
-        """ Config : write """
-        path = '/tmp/notexist'
+        """ Config : write BE CAREFUL : this test write files on FS """
 
-        # overload mocks, defined in setUp:
-        old_conf_mock = self._setUpConfigMock(MagicMock(), {'a': {}})
+        self.config_module_mock_patcher.stop()
 
-        option_name_not_from_definitions = 'some_invalid_option_with_super_uniq1_name'
-        option_name_not_from_definitions_value = 1
-        old_conf_mock['asdf'] = {option_name_not_from_definitions: option_name_not_from_definitions_value}
-
+        logger.info('Config: write will use path[{0}]'.format(self.path))
         # call methods
-        cf = headphones.config.Config(path)
-
-        # overload mock-patching for NEW CONFIG
-        new_patcher = mock.patch('headphones.config.ConfigObj', name='NEW_ConfigObjModuleMock_FOR_WRITE')
-
-        new_conf_module_mock = new_patcher.start()
-        new_conf_mock = \
-            new_conf_module_mock.return_value = \
-            MagicMock()
+        cf = headphones.config.Config(self.path)
         cf.write()
-        new_patcher.stop()
-
-        # assertions:
-        self.assertFalse(old_conf_mock.write.called, 'write not called for old config')
-        self.assertTrue(new_conf_mock.write.called, 'write called for new config')
-        self.assertEqual(new_conf_mock.filename, path)
 
         # IMPORTANT ASSERTS: they check, that options are passed to the low-level ConfigObj
         # with appropriate values and names
-        new_conf_mock['General'].__setitem__.assert_any_call('download_dir', '')
-        new_conf_mock['Email'].__setitem__.assert_any_call('email_enabled', 0)
-        new_conf_mock['Email'].__setitem__.assert_any_call('email_from', '')
-        # from 3.5... new_conf_mock['asdf'].__setitem__.assert_not_called('download_dir', '')
-        new_conf_mock['asdf'].__setitem__.assert_any_call(option_name_not_from_definitions,
-                                                          option_name_not_from_definitions_value)
+        from configobj import ConfigObj
+        config_tester = ConfigObj(self.path)
+
+        self.assertTrue('General' in config_tester)
+        self.assertTrue('Email' in config_tester)
+
+        self.assertFalse('asdf' in config_tester)
+
+        self.assertTrue('download_dir' in config_tester['General'])
+        self.assertTrue('git_path' in config_tester['General'])
+        self.assertTrue('blackhole' in config_tester['General'])
+        self.assertTrue('open_magnet_links' in config_tester['General'])
+        self.assertTrue('interface' in config_tester['General'])
+        self.assertTrue('config_version' in config_tester['General'])
+
+        self.assertTrue('email_enabled' in config_tester['Email'])
+        self.assertTrue('email_from' in config_tester['Email'])
+
+
+        x = self.config_module_mock_patcher.start()
 
     @skip("process_kwargs should be removed")
     def test_process_kwargs(self):
@@ -99,12 +117,11 @@ class ConfigApiTest(TestCase):
     )
     def test__getattr__ConfValues(self, name, value):
         """ Config: __getattr__ with setting value explicit """
-        path = '/tmp/notexist'
 
         self.config_mock["General"] = {name.lower(): value}
 
         # call methods
-        c = headphones.config.Config(path)
+        c = headphones.config.Config(self.path)
         act = c.__getattr__(name)
 
         # assertions:
@@ -118,10 +135,9 @@ class ConfigApiTest(TestCase):
     )
     def test__getattr__ConfValuesDefault(self, name, value):
         """ Config: __getattr__ from config(by braces), default values """
-        path = '/tmp/notexist'
 
         # call methods
-        c = headphones.config.Config(path)
+        c = headphones.config.Config(self.path)
         res = c.__getattr__(name)
 
         # assertions:
@@ -129,10 +145,9 @@ class ConfigApiTest(TestCase):
 
     def test__getattr__ConfValuesDefaultUsingDotNotation(self):
         """ Config: __getattr__ from config (by dot), default values """
-        path = '/tmp/notexist'
 
         # call methods
-        c = headphones.config.Config(path)
+        c = headphones.config.Config(self.path)
 
         # assertions:
         self.assertEqual(c.ALBUM_ART_FORMAT, 'folder')
@@ -141,10 +156,9 @@ class ConfigApiTest(TestCase):
 
     def test__getattr__OwnAttributes(self):
         """ Config: __getattr__ access own attrs """
-        path = '/tmp/notexist'
 
         # call methods
-        c = headphones.config.Config(path)
+        c = headphones.config.Config(self.path)
 
         # assertions:
         self.assertIsNotNone(c)
@@ -162,10 +176,9 @@ class ConfigApiTest(TestCase):
     )
     def test__setattr__ConfValuesDefault(self, name, value):
         """ Config: __setattr__ with setting value explicit """
-        path = '/tmp/notexist'
 
         # call methods
-        c = headphones.config.Config(path)
+        c = headphones.config.Config(self.path)
         act = c.__setattr__(name, value)
 
         # assertions:
@@ -174,10 +187,9 @@ class ConfigApiTest(TestCase):
 
     def test__setattr__ExplicitSetUsingDotNotation(self):
         """ Config: __setattr__ with setting values using dot notation """
-        path = '/tmp/notexist'
 
         # call methods
-        c = headphones.config.Config(path)
+        c = headphones.config.Config(self.path)
         act1 = c.ALBUM_ART_FORMAT = 'Apple'
         act2 = c.API_ENABLED = True
         act3 = c.API_KEY = 123
@@ -212,7 +224,6 @@ class ConfigApiTest(TestCase):
     )
     def test_get_extra_newznabs(self, conf_value, expected):
         """ Config: get_extra_newznabs """
-        path = '/tmp/notexist'
 
         #itertools.izip(*[itertools.islice('', i, None, 3) for i in range(3)])
         # set up mocks:
@@ -221,7 +232,7 @@ class ConfigApiTest(TestCase):
         self.config_mock["Newznab"] = {"extra_newznabs": conf_value}
 
         # call methods
-        c = headphones.config.Config(path)
+        c = headphones.config.Config(self.path)
         res = c.get_extra_newznabs()
 
         # assertions:
@@ -246,7 +257,6 @@ class ConfigApiTest(TestCase):
     )
     def test_get_extra_torznabs(self, conf_value, expected):
         """ Config: get_extra_torznabs """
-        path = '/tmp/notexist'
 
         #itertools.izip(*[itertools.islice('', i, None, 3) for i in range(3)])
         # set up mocks:
@@ -254,7 +264,7 @@ class ConfigApiTest(TestCase):
         self.config_mock["Torznab"] = {"extra_torznabs": conf_value}
 
         # call methods
-        c = headphones.config.Config(path)
+        c = headphones.config.Config(self.path)
         res = c.get_extra_torznabs()
 
         # assertions:

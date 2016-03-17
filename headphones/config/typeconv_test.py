@@ -55,6 +55,8 @@ class boolextTest(TestCase):
         ('on'),
         ('t'),
         ('+'),
+        ('1'),
+        ('YES'),
     )
     def test_true(self, val):
         act = boolext(val)

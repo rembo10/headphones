@@ -5,9 +5,9 @@
 from ..typeconv import path, boolext
 from .._viewmodel import OptionInternal, OptionDeprecated
 
-def _(x):
-    """ required just for marking translatable strings"""
-    return x
+# def _(x):
+#     """ required just for marking translatable strings"""
+#     return x
 
 def reg(tabname, register_block_cb, register_options_cb):
 
