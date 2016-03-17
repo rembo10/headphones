@@ -1,4 +1,5 @@
 from headphones import logger
+from headphones.exceptions import ConfigError
 
 """ List of types, which ConfigOpt could handle internally, without conversions """
 _primitives = (int, str, bool, list, float)
@@ -55,7 +56,7 @@ class OptionModel(object):
         if self._config_callback is None:
             msg = 'Option [{0}][{1}] was not binded/registered with config'.format(s, k)
             logger.error(msg)
-            raise Exception(msg)
+            raise ConfigError(msg)
 
         config = self._config_callback()
 
@@ -90,7 +91,7 @@ class OptionModel(object):
         if self._config_callback is None:
             msg = 'Option [{0}][{1}] was not binded/registered with config'.format(s, k)
             logger.error(msg)
-            raise Exception(msg)
+            raise ConfigError(msg)
 
         config = self._config_callback()
 
