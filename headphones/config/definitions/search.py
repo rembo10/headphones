@@ -2,14 +2,12 @@
 # Options from "Search Providers" Tab
 # =======================================================================================
 
-from .._viewmodel import Tab, Tabs, Block
-from .._viewmodel import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionList
-from .._viewmodel import TemplaterExtension
+from .._viewmodel import Block
+from .._viewmodel import OptionString, OptionNumber, OptionPassword, OptionBool, OptionPath, OptionList
 
 def _(x):
     """ required just for marking translatable strings"""
     return x
-
 
 def reg(tabname, register_block_cb, register_options_cb):
 
@@ -176,7 +174,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 minvalue=None,
                 maxvalue=None
             ),
-            OptionString('EMAIL_SMTP_PASSWORD', 'Email', '',
+            OptionPassword('EMAIL_SMTP_PASSWORD', 'Email', '',
                 label=_('zzEMAIL_SMTP_PASSWORDzz'),
                 caption=_(''),
                 tooltip=_(''),

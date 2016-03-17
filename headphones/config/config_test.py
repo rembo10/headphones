@@ -8,9 +8,9 @@ from unittestcompat import TestCase, TestArgs, skip
 
 import headphones.config
 
-logging.basicConfig( stream=sys.stderr )
+logging.basicConfig(stream=sys.stderr)
 logger = logging.getLogger('headphones.config.TEST')
-logger.setLevel( logging.INFO )
+logger.setLevel(logging.INFO)
 
 class ConfigApiTest(TestCase):
     """ Common tests for headphones.Config
@@ -98,8 +98,7 @@ class ConfigApiTest(TestCase):
         self.assertTrue('email_enabled' in config_tester['Email'])
         self.assertTrue('email_from' in config_tester['Email'])
 
-
-        x = self.config_module_mock_patcher.start()
+        self.config_module_mock_patcher.start()
 
     @skip("process_kwargs should be removed")
     def test_process_kwargs(self):

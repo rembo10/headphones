@@ -3,8 +3,7 @@
 # =======================================================================================
 
 from .._viewmodel import Block
-from .._viewmodel import OptionBase, OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionList
-from .._viewmodel import TemplaterExtension
+from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionBool, OptionPath # , OptionPassword
 
 def _(x):
     """ required just for marking translatable strings"""
