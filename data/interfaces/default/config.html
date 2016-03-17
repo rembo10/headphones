@@ -242,26 +242,6 @@
         {
 
                 $('input[type=radio]').change(function(){
-                        if ($("#preferred_bitrate").is(":checked"))
-                        {
-                            $("#preferred_bitrate_options").slideDown("fast");
-                            $("#lossless_only_options").slideUp("fast");
-                        }
-                        if ($("#preferred_quality0").is(":checked"))
-                        {
-                            $("#preferred_bitrate_options").slideUp("fast");
-                            $("#lossless_only_options").slideUp("fast");
-                        }
-                        if ($("#preferred_quality1").is(":checked"))
-                        {
-                            $("#preferred_bitrate_options").slideUp("fast");
-                            $("#lossless_only_options").slideUp("fast");
-                        }
-                        if ($("#lossless_only").is(":checked"))
-                        {
-                            $("#lossless_only_options").slideDown("fast");
-                            $("#preferred_bitrate_options").slideUp("fast");
-                        }
                         if ($("#nzb_downloader_sabnzbd").is(":checked"))
                         {
                             $("#nzbget_options,#blackhole_options").fadeOut("fast", function() { $("#sabnzbd_options").fadeIn() });

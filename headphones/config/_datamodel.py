@@ -75,6 +75,9 @@ class OptionModel(object):
         except TypeError:
             logger.error('The value of option [{0}[{1}] is not well-typed. Will try to use default value.'.format(s, k))
             v = t(d)
+        except ValueError:
+            logger.error('The value of option [{0}[{1}] is not well-typed. Will try to use default value.'.format(s, k))
+            v = t(d)
 
         return v
 

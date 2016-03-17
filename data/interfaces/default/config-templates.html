@@ -29,7 +29,9 @@
             </fieldset>
         % endfor    # for block in tab
 
-        <input type="button" class="configsubmit" value="${me.savecaption}" data-success="Changes saved successfully" />
+        <div class="button-panel">
+            <input type="button" class="configsubmit" value="${me.savecaption}" data-success="Changes saved successfully" />
+        </div>
     </div>
 </%def>
 
@@ -120,8 +122,18 @@
     embed_id = uiname + '_embed'
     val = me.uiValue()
 
+    ## TODO: this is scrutch. The boundaries are tuned for actual
+    ##       value of option, to preserve its original value...
+    valr = me.model.get()
+    mi = me.minvalue
+    ma = me.maxvalue
+    if (ma is not None) and (valr > ma):
+        ma = valr
+    if (mi is not None) and (valr < mi):
+        mi = valr
+
     min_attr = '' if me.minvalue is None else ' min="%d"' % me.minvalue
-    max_attr = '' if me.maxvalue is None else ' size="%d"' % me.maxvalue
+    max_attr = '' if me.maxvalue is None else ' max="%d"' % me.maxvalue
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
     <div class="row option">
@@ -133,6 +145,51 @@
 
         <div class="input-wrapper">
             <input type="number" id="${uiname}" name="${uiname}" value="${val}" ${min_attr} ${max_attr} />
+
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+        </div>
+    </div>
+    % if 0 < len(me):
+        <div id="${embed_id}" class="embed-option-block">
+            % for option in me:
+                ${option.render(me)}
+            % endfor    # for option in block
+        </div>
+    % endif
+</%def>
+
+
+<%def name="OptionPercent(me, parent=None)">
+<%
+    uiname = me.uiName()
+    embed_id = uiname + '_embed'
+    val = me.uiValue()
+
+    ## TODO: this is scrutch. The boundaries are tuned for actual
+    ##       value of option, to preserve its original value...
+    valr = me.model.get()
+    mi = me.minvalue
+    ma = me.maxvalue
+    if (ma is not None) and (valr > ma):
+        ma = valr
+    if (mi is not None) and (valr < mi):
+        mi = valr
+
+    min_attr = '' if me.minvalue is None else ' min="%d"' % me.minvalue
+    max_attr = '' if me.maxvalue is None else ' max="%d"' % me.maxvalue
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+%>
+    <div class="row option">
+        %if me.label is not None:
+            <label ${tooltip_attr} for="${uiname}">
+                ${me.label}
+            </label>
+        %endif
+
+        <div class="input-wrapper">
+            <input type="number" id="${uiname}" name="${uiname}" value="${val}" ${min_attr} ${max_attr} /><span>%</span>
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>

@@ -143,8 +143,8 @@ def reg(tabname, register_block_cb, register_options_cb):
                                 tooltip=_('Magnet links'),
                                 caption=_('Note: Opening magnet URLs is not suitable for headless/console/terminal servers.<br />Embed only works for rTorrent.'),
                                 items=(
-                                    (0, _('Ignore')),  # title = Invoke shell command to open magnet URL
-                                    (1, _('Open')),    # title = Use external service to convert magnet links into torrents.
+                                    (0, _('Ignore')),  # TODO: title = Invoke shell command to open magnet URL
+                                    (1, _('Open')),    # TODO: title = Use external service to convert magnet links into torrents.
                                     (2, _('Convert')),
                                     (3, _('Embed')),
                                 )
