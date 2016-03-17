@@ -82,7 +82,7 @@ def reg(tabname, register_block_cb, register_options_cb):
         Block('interval', caption=_("Interval"), options=register_options_cb(
             LabelExtension(
                 label=_('An interval of 0 will disable a task.'),
-                cssclasses=('small')
+                cssclasses=['small']
             ),
             OptionNumber('SEARCH_INTERVAL', 'General', 1440,
                 label=_('Search Interval'),
