@@ -59,7 +59,7 @@ class Config(object):
         headphones.config.definitions.quality.reg('quality_processing', self._registerBlock, self._registerOptions)
         headphones.config.definitions.advanced.reg('advanced', self._registerBlock, self._registerOptions)
 
-        logger.debug('All options registered. Total options: {0}'.format(len(self._vault)))
+        logger.info('All options registered. Total options: {0}'.format(len(self._vault)))
 
         # forced reinit of the config file, by default HP will not save
         # values of non-touched options
@@ -167,7 +167,7 @@ class Config(object):
     def write(self):
         """ Make a copy of the stored config and write it to the configured file """
 
-        headphones.logger.info("Writing configuration to file")
+        headphones.logger.debug("Writing configuration to file")
         try:
             self._config.write()
             headphones.logger.info("Writing configuration to file: DONE")
@@ -181,7 +181,7 @@ class Config(object):
         of all options to config file
         """
         # force copying all options to config:
-        headphones.logger.info("Reinit config file")
+        headphones.logger.debug("Reinit config file")
         for k in self._vault.keys():
             optmod = self._vault[k]
             optmod.set(optmod.get())

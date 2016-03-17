@@ -294,6 +294,27 @@ class OptionString(OptionBase):
 
         self.maxlength = maxlength
 
+class OptionCombobox(OptionString):
+    """ Textbox with list of available variants """
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, maxlength=None, items=None):
+        super(OptionCombobox, self).__init__(
+            appkey,
+            section,
+            default,
+            options=options,
+            label=label,
+            caption=caption,
+            tooltip=tooltip,
+            maxlength=maxlength)
+
+        self.items = []
+        if items:
+            for i in items:
+                if isinstance(i, basestring):
+                    self.items.append(i)
+                else:
+                    self.items.append(str(i))
+
 class OptionPath(OptionBase):
 
     def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, maxlength=None):
