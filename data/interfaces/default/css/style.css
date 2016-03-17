@@ -345,12 +345,10 @@ form fieldset small.heading {
   margin-bottom: 10px;
   margin-top: -15px;
 }
-form .row,
-form .config .option {
+form .row {
   margin-bottom: 10px;
 }
-form .row label,
-form .config .option label {
+form .row label {
   display: block;
   float: left;
   font-size: 12px;
@@ -358,19 +356,15 @@ form .config .option label {
   padding-top: 7px;
   width: 170px;
 }
-form .row label.inline,
-form .config .option label.inline {
+form .row label.inline {
   margin-right: 5px;
   width: auto;
 }
-form .row input,
-form .config .option input {
+form .row input {
   margin-right: 5px;
 }
 form .row input[type=text],
-form .row input[type=password],
-form .config .option input[type=text],
-form .config .option input[type=password] {
+form .row input[type=password] {
   border: 1px solid #DDD;
   border-top: 1px solid #CDCDCD;
   -moz-box-shadow: 0 1px 0 #f1f1f1;
@@ -389,8 +383,7 @@ form .config .option input[type=password] {
   margin-right: 5px;
   padding: 3px 5px;
 }
-form .row small,
-form .config .option small {
+form .row small {
   color: #999;
   display: block;
   font-size: 9px;
@@ -793,42 +786,51 @@ footer {
   column-span: all;
   margin-bottom: 2em;
 }
-.config .block {
+.config .tab .block {
   -webkit-column-break-inside: avoid;
   page-break-inside: avoid;
   break-inside: avoid-column;
 }
-.config .row,
-.config .config .option {
+.config .tab .block .option,
+.config .tab .block .extension {
   margin-bottom: 1em;
   font-size: 12px;
   width: 100%;
   /* TWO COLS inside option block */
   position: relative;
 }
-.config .row label,
-.config .config .option label {
+.config .tab .block .option .label,
+.config .tab .block .extension .label {
+  padding-top: 7px;
   width: 170px;
   font-size: 12px;
+  line-height: normal;
+  display: block;
   /* TWO COLS inside option block */
   position: absolute;
 }
-.config .row .input-wrapper,
-.config .config .option .input-wrapper {
+.config .tab .block .option .input-wrapper,
+.config .tab .block .extension .input-wrapper {
   /* TWO COLS inside option block */
   margin-left: 170px;
 }
-.config .option input {
+.config .tab .block .option input,
+.config .tab .block .extension input {
   margin-right: 5px;
   width: 100%;
 }
-.config .option input[type=checkbox] {
+.config .tab .block .option input[type=checkbox],
+.config .tab .block .extension input[type=checkbox] {
   width: inherit;
 }
-.config .option input[type=text],
-.config .option input[type=url],
-.config .option input[type=password],
-.config .option input[type=number] {
+.config .tab .block .option input[type=text],
+.config .tab .block .extension input[type=text],
+.config .tab .block .option input[type=url],
+.config .tab .block .extension input[type=url],
+.config .tab .block .option input[type=password],
+.config .tab .block .extension input[type=password],
+.config .tab .block .option input[type=number],
+.config .tab .block .extension input[type=number] {
   border: 1px solid #DDD;
   border-top: 1px solid #CDCDCD;
   -moz-box-shadow: inset 0 1px 1px #e0e0e0;
@@ -840,10 +842,11 @@ footer {
   max-width: 230px;
   padding: 3px 5px;
 }
-.config .option input[type=number] {
+.config .tab .block .option input[type=number],
+.config .tab .block .extension input[type=number] {
   max-width: 5em;
 }
-.config .embed-option-block {
+.config .tab .block .embed-option-block {
   margin-left: 1em;
 }
 div#searchbar {

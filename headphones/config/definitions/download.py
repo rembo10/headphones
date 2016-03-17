@@ -17,7 +17,7 @@ def reg(tabname, register_block_cb, register_options_cb):
     # =======================================================================================
     register_block_cb(tabname,
         Block('usenet_selector', caption=_("Prefered Usenet"), options=register_options_cb(
-            OptionDropdownSelector('NZB_DOWNLOADER', 'General', 0, typeconv=int,
+            OptionDropdownSelector('NZB_DOWNLOADER', 'General', 0, initype=int,
                 label=_('Usenet downloader'),
                 tooltip=_('Method for downloading usenet files.'),
                 items=(
@@ -74,7 +74,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                                 tooltip=_('Name of NZBget category to add downloads to.'),
                                 maxlength=20
                             ),
-                            OptionDropdown('NZBGET_PRIORITY', 'NZBget', 0, typeconv=int,
+                            OptionDropdown('NZBGET_PRIORITY', 'NZBget', 0, initype=int,
                                 label=_('NZBget Priority'),
                                 tooltip=_('NZBget Priority'),
                                 items=(
@@ -126,7 +126,7 @@ def reg(tabname, register_block_cb, register_options_cb):
     # =======================================================================================
     register_block_cb(tabname,
         Block('torrent_selector', caption=_("Prefered Torrent"), options=register_options_cb(
-            OptionDropdownSelector('TORRENT_DOWNLOADER', 'General', 0, typeconv=int,
+            OptionDropdownSelector('TORRENT_DOWNLOADER', 'General', 0, initype=int,
                 label=_('Torrent downloader'),
                 tooltip=_('Preferred torrent downloader'),
                 items=(
@@ -138,7 +138,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                                 tooltip=_('Black Hole Directory'),
                                 # maxlength = 50,
                             ),
-                            OptionDropdown('MAGNET_LINKS', 'General', 0, typeconv=int,
+                            OptionDropdown('MAGNET_LINKS', 'General', 0, initype=int,
                                 label=_('Magnet links'),
                                 tooltip=_('Magnet links'),
                                 caption=_('Note: Opening magnet URLs is not suitable for headless/console/terminal servers.<br />Embed only works for rTorrent.'),
@@ -263,7 +263,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_('Keep Files for Seeding')
             ),
 
-            OptionDropdown('PREFER_TORRENTS', 'General', 0, typeconv=int,
+            OptionDropdown('PREFER_TORRENTS', 'General', 0, initype=int,
                 label=_('Prefer'),
                 tooltip=_('Prefered way'),
                 items=(

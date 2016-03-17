@@ -1,5 +1,6 @@
 import re
 import os
+import random
 from itertools import ifilter, imap
 from mako.lookup import TemplateLookup
 
@@ -192,21 +193,22 @@ class Block(object):
 class OptionBase(Renderable):
     """ Base, abstract parent for all other options """
 
-    def __init__(self, appkey, section, default=None, options=None, typeconv=str):
+    def __init__(self, appkey, section, default=None, options=None, initype=str):
         """Initialization
 
         Args:
             appkey - unique identifier for an option
             section - name of section in CONFIG FILE
             default - default value
-            typeconv - function to convert data from
+            initype - function to convert data from internal form to config
             options - list of suboptions
         """
         super(OptionBase, self).__init__()
 
-        self.model = OptionModel(appkey=appkey, section=section, default=default, typeconv=typeconv)
+        self.model = OptionModel(appkey=appkey, section=section, default=default, initype=initype)
 
         self._options = options or []  # should not be None
+        self._initype = initype
 
         self.visible = True
         self.readonly = False
@@ -237,10 +239,10 @@ class OptionBase(Renderable):
 
     def uiValue2DataValue(self, value):
         """
-        Parses the value, which will be receiven on POSTing form with this options.
+        Parses the value of an options, received from UI.
         Returned value MUST BE compatible with datamodel's value
         """
-        return value
+        return self._initype(value)
 
     def uiName(self):
         "This is an identifier of option, when data are sended/received to/from UI"
@@ -261,8 +263,8 @@ class OptionBase(Renderable):
 
 class OptionInternal(OptionBase):
     """ This option will not appear in the UI. It is internal stuff"""
-    def __init__(self, appkey, section, default=None, typeconv=str):
-        super(OptionInternal, self).__init__(appkey, section, default, typeconv=typeconv)
+    def __init__(self, appkey, section, default=None, initype=str):
+        super(OptionInternal, self).__init__(appkey, section, default, initype=initype)
 
         self.readonly = True
         self.visible = False
@@ -273,8 +275,8 @@ class OptionInternal(OptionBase):
 
 class OptionDeprecated(OptionBase):
     """ This option will not appear in the UI. It is internal stuff"""
-    def __init__(self, appkey, section, default=None, typeconv=str):
-        super(OptionDeprecated, self).__init__(appkey, section, default, typeconv=typeconv)
+    def __init__(self, appkey, section, default=None, initype=str):
+        super(OptionDeprecated, self).__init__(appkey, section, default, initype=initype)
 
         self.readonly = True
         self.visible = False
@@ -318,7 +320,7 @@ class OptionCombobox(OptionString):
 class OptionPath(OptionBase):
 
     def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, maxlength=None):
-        super(OptionPath, self).__init__(appkey, section, default, typeconv=path, options=options)
+        super(OptionPath, self).__init__(appkey, section, default, initype=path, options=options)
 
         self.label = label
         self.caption = caption
@@ -343,7 +345,7 @@ class OptionUrl(OptionString):
 class OptionNumber(OptionBase):
 
     def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, minvalue=None, maxvalue=None):
-        super(OptionNumber, self).__init__(appkey, section, default, typeconv=int, options=None)
+        super(OptionNumber, self).__init__(appkey, section, default, initype=int, options=None)
 
         self.label = label
         self.caption = caption
@@ -352,17 +354,13 @@ class OptionNumber(OptionBase):
         self.minvalue = minvalue
         self.maxvalue = maxvalue
 
-    def uiValue2DataValue(self, value):
-        # override
-        return int(value)
-
 class OptionPercent(OptionNumber):
     pass
 
 class OptionBool(OptionBase):
 
     def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, alignleft=False):
-        super(OptionBool, self).__init__(appkey, section, default, typeconv=boolext, options=options)
+        super(OptionBool, self).__init__(appkey, section, default, initype=boolext, options=options)
 
         self.label = label
         self.caption = caption
@@ -389,37 +387,156 @@ class OptionSwitch(OptionBool):
     """
     pass
 
-class OptionDropdown(OptionBase):
-    class _HtmlOption:
+class OptionCheckboxList(OptionBase):
+    class Item:
+        """ Internal class, defining one item of CheckBoxList """
         def __init__(self, value, label=""):
             self.value = value
             self.label = label
 
-    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, typeconv=str, items=None):
-        super(OptionDropdown, self).__init__(appkey, section, default, typeconv=typeconv, options=options)
+            self.uniq = None
+            self.checked_callback = None
+
+        @property
+        def checked(self):
+            return self.checked_callback(self.value)
+
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, alignleft=False, itemtype=str, items=None):
+        super(OptionCheckboxList, self).__init__(appkey, section, default, initype=list, options=options)
+
+        self.label = label
+        self.caption = caption
+        self.tooltip = tooltip
+        self._itemtype = itemtype
+
+        # TODO : implement in template
+        self.alignleft = alignleft
+
+        self.items = []
+        counter = 0
+        if items:
+            for i in items:
+                counter += 1
+                if isinstance(i, OptionCheckboxList.Item):
+                    ii = i
+                elif isinstance(i, (tuple, list)):
+                    ii = OptionCheckboxList.Item(*i)
+                elif isinstance(i, dict):
+                    ii = OptionCheckboxList.Item(**i)
+                else:
+                    raise TypeError('Unexpected type of item {0} in items: {1}'.format(counter, type(i)))
+
+                # COMMON stuff:
+                ii.unique = counter - 1 * 100000 + random.randint(1000, 9999)
+                ii.checked_callback = self._checked_cb
+                self.items.append(ii)
+
+    def _checked_cb(self, value):
+        if value in set(self.model.get()):
+            return True
+        return False
+
+    def uiValue2DataValue(self, value):
+        # override
+
+        #logger.debug('VALUE accepted: ({1}) {0}'.format(value, type(value)))
+        ret = None
+
+        # what is going on:
+        # there is input-hidden on the template. And it is posted always with ''-value.
+        # so, when we receive just ONE item - it is our fictive input-hidden, and when
+        # we got the list - then we should parse all values, excepting the first (hidden)
+        if isinstance(value, list):
+            print 'list'
+            ret = map(self._itemtype, value[1:])
+        else:
+            print 'not list'
+            ret = []
+        #logger.debug('VALUE converted: ({1}) {0}'.format(ret, type(ret)))
+        return ret
+
+# TODO : remove this class... It is a crutch
+class OptionCheckboxListExtrasCrutch(OptionCheckboxList):
+    """ The same as parent, but uses STRING-type for internal value """
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, alignleft=False, items=None):
+        super(OptionCheckboxListExtrasCrutch, self).__init__(appkey, section, default,
+            label=label,
+            caption=caption,
+            tooltip=tooltip,
+            options=options,
+            alignleft=alignleft,
+            items=items
+        )
+        super(OptionCheckboxList, self).__init__(appkey, section, default, initype=str, options=options)
+
+    def _checked_cb(self, value):
+        asstr = self.model.get()
+        aslist = asstr.split(',') if asstr else []
+        if value in set(aslist):
+            return True
+        return False
+
+    def uiValue2DataValue(self, value):
+        # override
+
+        #logger.debug('VALUE accepted: ({1}) {0}'.format(value, type(value)))
+
+        ret = super(OptionCheckboxListExtrasCrutch, self).uiValue2DataValue(value)
+
+        if ret:
+            ret = ",".join(ret)
+        else:
+            ret = ""
+
+        #logger.debug('VALUE converted: ({1}) {0}'.format(ret, type(ret)))
+        return ret
+
+    @property
+    def templateName(self):
+        # override
+        return "OptionCheckboxList"
+
+class OptionDropdown(OptionBase):
+    class Item:
+        def __init__(self, value, label=""):
+            self.value = value
+            self.label = label
+
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, initype=str, items=None):
+        super(OptionDropdown, self).__init__(appkey, section, default, initype=initype, options=options)
 
         self.label = label
         self.caption = caption
         self.tooltip = tooltip
 
-        self._typeconv = typeconv
+        self._uitype = initype
 
         self.items = []
+        counter = 0
         if items:
             for i in items:
-                o = OptionDropdown._HtmlOption(*i) # expected i[0] - value, i[1] - label
-                self.items.append(o)
+                counter += 1
+                if isinstance(i, OptionDropdown.Item):
+                    ii = i
+                elif isinstance(i, (tuple, list)):
+                    ii = OptionDropdown.Item(*i)
+                elif isinstance(i, dict):
+                    ii = OptionDropdown.Item(**i)
+                else:
+                    raise TypeError('Unexpected type of item {0} in items: {1}'.format(counter, type(i)))
+
+                self.items.append(ii)
 
     def uiValue2DataValue(self, value):
         # override
-        return self._typeconv(value)
+        return self._uitype(value)
 
 class OptionDropdownSelector(OptionDropdown):
     """ Dropbox-selector. On change selected item - appears appropriate block of sub-options
 
     Used as root selector for compound options."""
 
-    class _HtmlOptionExt:
+    class Item:
         """ INTERNAL class, represents one option in options list """
 
         def __init__(self, value, label, options=None):
@@ -428,7 +545,7 @@ class OptionDropdownSelector(OptionDropdown):
             self.options = options or []
             self.uniq = None
 
-    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, typeconv=str, items=None):
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, initype=str, items=None):
         super(OptionDropdownSelector, self).__init__(
                 appkey,
                 section,
@@ -438,25 +555,34 @@ class OptionDropdownSelector(OptionDropdown):
                 caption=caption,
                 tooltip=tooltip,
 
-                typeconv=typeconv,
+                initype=initype,
                 options=options,
                 items=None # we will handle items in custom manner
         )
 
         # just one difference (from parent) - items handling
         self.items = []
+        counter = 0
         if items:
-            ic = 0
             for i in items:
-                ic += 1
-                o = OptionDropdownSelector._HtmlOptionExt(*i)
-                o.uniq = ic
-                self.items.append(o)
+                counter += 1
+
+                if isinstance(i, OptionDropdownSelector.Item):
+                    ii = i
+                elif isinstance(i, (tuple, list)):
+                    ii = OptionDropdownSelector.Item(*i)
+                elif isinstance(i, dict):
+                    ii = OptionDropdownSelector.Item(**i)
+                else:
+                    raise TypeError('Unexpected type of item {0} in items: {1}'.format(counter, type(i)))
+
+                ii.uniq = counter
+                self.items.append(ii)
 
 class OptionList(OptionBase):
 
     def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None):
-        super(OptionList, self).__init__(appkey, section, default, typeconv=list, options=None)
+        super(OptionList, self).__init__(appkey, section, default, initype=list, options=None)
 
         self.label = label
         self.caption = caption
@@ -492,7 +618,6 @@ class LabelExtension(Renderable):
 
     def render(self, parent=None):
         return super(LabelExtension, self).render(me=self, parent=parent)
-
 
 # ===============================================
 # Option extensions

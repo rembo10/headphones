@@ -12,18 +12,18 @@ from .._viewmodel import OptionInternal, OptionDeprecated
 def reg(tabname, register_block_cb, register_options_cb):
 
     register_options_cb(
-        OptionInternal('CONFIG_VERSION', 'General', 0, typeconv=int),
-        OptionInternal('INTERFACE', 'General', 'default', typeconv=str),
-        OptionInternal('SOFT_CHROOT', 'General', '', typeconv=path),
+        OptionInternal('CONFIG_VERSION', 'General', 0, initype=int),
+        OptionInternal('INTERFACE', 'General', 'default', initype=str),
+        OptionInternal('SOFT_CHROOT', 'General', '', initype=path),
 
         # TODO : move git to advanced tab (if necessary) and make it visible
-        OptionInternal('GIT_BRANCH', 'General', 'master', typeconv=str),
+        OptionInternal('GIT_BRANCH', 'General', 'master', initype=str),
         # TODO : this is list of paths!
-        OptionInternal('GIT_PATH', 'General', '', typeconv=str), # full path to `git` binary.
-        OptionInternal('DO_NOT_OVERRIDE_GIT_BRANCH', 'General', False, typeconv=boolext),
+        OptionInternal('GIT_PATH', 'General', '', initype=str), # full path to `git` binary.
+        OptionInternal('DO_NOT_OVERRIDE_GIT_BRANCH', 'General', False, initype=boolext),
 
-        OptionInternal('HTTP_PROXY', 'General', False, typeconv=boolext),
-        OptionInternal('HTTP_ROOT', 'General', '/', typeconv=str),
+        OptionInternal('HTTP_PROXY', 'General', False, initype=boolext),
+        OptionInternal('HTTP_ROOT', 'General', '/', initype=str),
 
     )
 
@@ -33,7 +33,7 @@ def reg(tabname, register_block_cb, register_options_cb):
     # This options are required to be able to read an old version of the config file and
     # upgrade it
     register_options_cb(
-        OptionDeprecated('BLACKHOLE', 'General', False, typeconv=boolext),
-        OptionDeprecated('OPEN_MAGNET_LINKS', 'General', False, typeconv=boolext),
-        OptionDeprecated('ENCODERFOLDER', 'General', '', typeconv=path),
+        OptionDeprecated('BLACKHOLE', 'General', False, initype=boolext),
+        OptionDeprecated('OPEN_MAGNET_LINKS', 'General', False, initype=boolext),
+        OptionDeprecated('ENCODERFOLDER', 'General', '', initype=path),
     )

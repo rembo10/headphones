@@ -197,12 +197,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_(''),
                 maxlength=None
             ),
-            OptionString('EXTRAS', 'General', '',
-                label=_('zzEXTRASzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
             OptionList('EXTRA_NEWZNABS', 'Newznab', '',
                 label=_('zzEXTRA_NEWZNABSzz'),
                 caption=_(''),
@@ -279,13 +273,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 label=_('zzIGNORED_FOLDERSzz'),
                 caption=_(''),
                 tooltip=_(''),
-            ),
-            OptionNumber('INCLUDE_EXTRAS', 'General', 0,
-                label=_('zzINCLUDE_EXTRASzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
             ),
             OptionString('JOURNAL_MODE', 'Advanced', 'wal',
                 label=_('zzJOURNAL_MODEzz'),

@@ -598,84 +598,85 @@ footer {
             .columnSpan(all);
             margin-bottom:2em;
         }
-    }
 
-    .block
-    {
-        -webkit-column-break-inside: avoid;
-        page-break-inside: avoid;
-        break-inside: avoid-column;
-    }
-
-    @caption-col-width : 170px;
-
-    // TODO : bad name, use good name, plz
-   .row
-    {
-        margin-bottom: 1em;
-        font-size: @base-font-size;
-        width:100%;
-
-        /* TWO COLS inside option block */
-        position: relative;
-
-        label
+        .block
         {
-            width: @caption-col-width;
-            font-size: @base-font-size;
+            -webkit-column-break-inside: avoid;
+            page-break-inside: avoid;
+            break-inside: avoid-column;
 
-            /* TWO COLS inside option block */
-            position: absolute;
-        }
+            @caption-col-width : 170px;
 
-        .input-wrapper
-        {
-            /* TWO COLS inside option block */
-            margin-left: @caption-col-width;
-        }
-    }
+            .option,
+            .extension
+            {
+                margin-bottom: 1em;
+                font-size: @base-font-size;
+                width:100%;
 
-    .option:extend(.row all)
-    {
-        input
-        {
-            margin-right: 5px;
-            width:100%;
-        }
+                /* TWO COLS inside option block */
+                position: relative;
 
-        input[type=checkbox]
-        {
-            width: inherit;
-        }
+                .label
+                {
+                    padding-top: 7px;
+                    width: @caption-col-width;
+                    font-size: @base-font-size;
+                    line-height: normal;
 
-        input[type=text],
-        input[type=url],
-        input[type=password],
-        input[type=number],
-        {
-            border: 1px solid #DDD;
-            border-top: 1px solid #CDCDCD;
-            .shadow(inset 0 1px 1px #e0e0e0);
-            color: @text-color;
-            font-size: larger;
-            // TODO : need responsive
-            max-width: 230px;
-            padding: 3px 5px;
-        }
+                    display: block;
+                    /* TWO COLS inside option block */
+                    position: absolute;
+                }
 
-        input[type=number]
-        {
-            max-width: 5em;
-        }
-    }
+                .input-wrapper
+                {
+                    /* TWO COLS inside option block */
+                    margin-left: @caption-col-width;
+                }
 
-    // TODO : fix indentation of embed blocks of settings.
-    //        Currently the right edge is shifted to the right.
-    //        The width should be decreased!
-    .embed-option-block
-    {
-        margin-left: 1em;
-    }
+                input
+                {
+                    margin-right: 5px;
+                    width:100%;
+                }
+
+                input[type=checkbox]
+                {
+                    width: inherit;
+                }
+
+                input[type=text],
+                input[type=url],
+                input[type=password],
+                input[type=number],
+                {
+                    border: 1px solid #DDD;
+                    border-top: 1px solid #CDCDCD;
+                    .shadow(inset 0 1px 1px #e0e0e0);
+                    color: @text-color;
+                    font-size: larger;
+                    // TODO : need responsive
+                    max-width: 230px;
+                    padding: 3px 5px;
+                }
+
+                input[type=number]
+                {
+                    max-width: 5em;
+                }
+            } // .option, .extension
+
+            // TODO : fix indentation of embed blocks of settings.
+            //        Currently the right edge is shifted to the right.
+            //        The width should be decreased!
+            .embed-option-block
+            {
+                margin-left: 1em;
+            }
+        } // .block
+
+    } //.tab
 }
 
 // -------------------------------------------------------------------------
