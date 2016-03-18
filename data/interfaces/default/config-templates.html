@@ -383,6 +383,7 @@
 <%
     uiname = me.uiName()
 
+    cssclass_cb_prefix = '-item-'
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
 %>
     <div class="option">
@@ -397,7 +398,7 @@
                 ## TODO : add an appropriate class for next div:
                 <div>
                     <label>
-                        <input type="checkbox" id="${uiname + str(i.uniq) }" name="${uiname}" value="${i.value}" ${'checked' if i.checked else ''} ${'readonly disabled' if me.readonly else ''} />
+                        <input type="checkbox" id="${uiname + '-' + i.csssuffix}" class="${cssclass_cb_prefix + i.csssuffix}" name="${uiname}" value="${i.value}" ${'checked' if i.checked else ''} ${'readonly disabled' if me.readonly else ''} />
 
                         <span>${'&nbsp;' if i.label is None else i.label}</span>
                     </label>
@@ -477,7 +478,7 @@
         <div ${tooltip_attr} class="input-wrapper">
             <select class="hp-option-selector" id="${uiname}" name="${uiname}" size="1" data-linked-div-sel=".${cssclass_items_common}" ${'readonly disabled' if me.readonly else ''} >
             % for item in me.items:
-                <option value="${item.value}" ${"selected" if item.value==val else ""} data-linked-div-sel=".${cssclass_items_common}.${cssclass_item_prefix + str(item.uniq)}">${item.label}</option>
+                <option value="${item.value}" ${"selected" if item.value==val else ""} class="${cssclass_item_prefix + item.csssuffix}" data-linked-div-sel="div.${cssclass_items_common}.${cssclass_item_prefix + item.csssuffix}">${item.label}</option>
             % endfor
             </select>
 
@@ -499,7 +500,7 @@
     <!-- 2. select's OPTION-child options -->
     % for item in me.items:
         % if len(item)>0:
-            <div ${"" if item.value==val else raw_hidden_style_attr} class="${cssclass_items_common + ' ' + cssclass_item_prefix + str(item.uniq)}">
+            <div ${"" if item.isSelectorSectionVisible() else raw_hidden_style_attr} class="${cssclass_items_common + ' ' + cssclass_item_prefix + item.csssuffix}">
             % for option in item:
                 ${option.render(parent=me)}
             % endfor

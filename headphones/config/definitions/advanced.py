@@ -81,88 +81,76 @@ def reg(tabname, register_block_cb, register_options_cb):
                            ' distributions. On Ubuntu, libav replaces FFmpeg. xld is OS X-only.'
                 ),
                 items=(
-                    ('lame', _('lame'), register_options_cb(
-                    )),
-                    ('ffmpeg', _('ffmpeg'), register_options_cb(
-                    )),
-                    ('libav', _('libav'), register_options_cb(
-                    )),
-                    ('xld', _('xld'), register_options_cb(
-                    )),
-                )
-            )
-        ))
-    )
-
-    # TODO : move this block
-    register_block_cb(tabname,
-        Block('audio_sub_block', caption=_("Audio Properties [LAME FFMPEG LIBAV]"), options=register_options_cb(
-            # FIX : I want add CUSTOM values here!!!!
-            OptionCombobox('ENCODEROUTPUTFORMAT', 'General', 'mp3', #initype=str,
-                label=_('Format'),
-                caption=_('Use one of "mp3", "ogg", "m4a", or <strong>any custom</strong> format'),
-                items=(
-                    'mp3',
-                    'ogg',
-                    'm4a',
-                )
-            ),
-            OptionDropdownSelector('ENCODERVBRCBR', 'General', 'cbr', initype=str,
-                label=_('VBR/CBR'),
-                items=(
-                    ('cbr', _('cbr'), register_options_cb(
-                        OptionDropdown('BITRATE', 'General', 192, initype=int,
-                            label=_('Bitrate'),
+                    OptionDropdownSelector.Item('lame', _('lame'), csssuffix='encoder-lame-ffmpeg-libav-embed'),
+                    OptionDropdownSelector.Item('ffmpeg', _('ffmpeg'), csssuffix='encoder-lame-ffmpeg-libav-embed'),
+                    OptionDropdownSelector.Item('libav', _('libav'), csssuffix='encoder-lame-ffmpeg-libav-embed', options=register_options_cb(
+                        # DONE : I want add CUSTOM values here!!!!
+                        OptionCombobox('ENCODEROUTPUTFORMAT', 'General', 'mp3', #initype=str,
+                            label=_('Format'),
+                            caption=_('Use one of "mp3", "ogg", "m4a", or <strong>any custom</strong> format'),
                             items=(
-                                (64, _('64')),
-                                (128, _('128')),
-                                (192, _('192')),
-                                (256, _('256')),
-                                (320, _('320')),
+                                'mp3',
+                                'ogg',
+                                'm4a',
                             )
                         ),
-                    )),
-                    ('vbr', _('vbr'), register_options_cb(
-                        OptionDropdown('ENCODERQUALITY', 'General', 2, initype=int,
-                            label=_('Quality'),
+                        OptionDropdownSelector('ENCODERVBRCBR', 'General', 'cbr', initype=str,
+                            label=_('VBR/CBR'),
                             items=(
-                                (0, _('0')),
-                                (1, _('1')),
-                                (2, _('2')),
-                                (3, _('3')),
-                                (4, _('4')),
-                                (5, _('5')),
-                                (6, _('6')),
-                                (7, _('7')),
-                                (8, _('8')),
-                                (9, _('9')),
+                                ('cbr', _('cbr'), register_options_cb(
+                                    OptionDropdown('BITRATE', 'General', 192, initype=int,
+                                        label=_('Bitrate'),
+                                        items=(
+                                            (64, _('64')),
+                                            (128, _('128')),
+                                            (192, _('192')),
+                                            (256, _('256')),
+                                            (320, _('320')),
+                                        )
+                                    ),
+                                )),
+                                ('vbr', _('vbr'), register_options_cb(
+                                    OptionDropdown('ENCODERQUALITY', 'General', 2, initype=int,
+                                        label=_('Quality'),
+                                        items=(
+                                            (0, _('0')),
+                                            (1, _('1')),
+                                            (2, _('2')),
+                                            (3, _('3')),
+                                            (4, _('4')),
+                                            (5, _('5')),
+                                            (6, _('6')),
+                                            (7, _('7')),
+                                            (8, _('8')),
+                                            (9, _('9')),
+                                        )
+                                    ),
+                                )),
                             )
                         ),
+                        OptionDropdown('SAMPLINGFREQUENCY', 'General', 44100, initype=int,
+                            label=_('Sampling'),
+                            items=(
+                                (44100, _('44.1 kHz')),
+                                (48000, _('48.0 kHz')),
+                            )
+                        ),
+
+                        TemplaterExtension(template_name='DividerExtension'),
+
+                        OptionString('ADVANCEDENCODER', 'General', '',
+                            label=_('Arguments'),
+                            caption=_('<i class="fa fa-exclamation-circle"></i> Ignores all of the above options'),
+                            tooltip=_('Advanced Encoding Options'),
+                        ),
                     )),
-                )
-            ),
-            OptionDropdown('SAMPLINGFREQUENCY', 'General', 44100, initype=int,
-                label=_('Sampling'),
-                items=(
-                    (44100, _('44.1 kHz')),
-                    (48000, _('48.0 kHz')),
-                )
-            ),
 
-            TemplaterExtension(template_name='DividerExtension'),
-
-            OptionString('ADVANCEDENCODER', 'General', '',
-                label=_('Arguments'),
-                caption=_('<i class="fa fa-exclamation-circle"></i> Ignores all of the above options'),
-                tooltip=_('Advanced Encoding Options'),
-            ),
-        ))
-    )
-    # TODO : move this block too [ XLD ]
-    register_block_cb(tabname,
-        Block('audio_sub_block_2', caption=_("Audio Properties [XLD]"), options=register_options_cb(
-            OptionString('XLDPROFILE', 'General', '',
-                label=_('XLD Profile'),
+                    OptionDropdownSelector.Item('xld', _('xld'), register_options_cb(
+                        OptionString('XLDPROFILE', 'General', '',
+                            label=_('XLD Profile'),
+                        )
+                   )),
+                )
             )
         ))
     )
@@ -188,7 +176,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 options=register_options_cb(
 
                     # TODO : somebody, please, convert the value of this option to list of int
-                    #        currently it is a string...
+                    #        currently it is a string, not a list - JUST COMMA SEPARATED STRING...
                     OptionCheckboxListExtrasCrutch('EXTRAS', 'General', '',
                         alignleft=True,
                         items=(
@@ -337,7 +325,7 @@ def reg(tabname, register_block_cb, register_options_cb):
     register_block_cb(tabname,
         Block('musicbrainz', caption=_("Musicbrainz"), options=register_options_cb(
             OptionDropdownSelector('MIRROR', 'General', 'musicbrainz.org', initype=str,
-                label=_('Muscbrainz Mirror'),
+                label=_('Musicbrainz Mirror'),
                 items=(
                     OptionDropdownSelector.Item(value='musicbrainz.org', label=_('musicbrainz.org')),
                     OptionDropdownSelector.Item(value='custom', label=_('custom'), options=register_options_cb(
