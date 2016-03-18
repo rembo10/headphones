@@ -23,6 +23,9 @@ But the most classes have its own template (they are inherited from Renderable)
 def _(x):
     return x
 
+def _get_iterator_over_visible(items):
+    return ifilter(lambda t: not hasattr(t, 'visible') or t.visible, items)
+
 # ===============================================
 # Abstract, base class
 # ===============================================
@@ -101,7 +104,7 @@ class Tabs(object):
     def __iter__(self):
         """ Default iterator is sharpened for UI tasks """
 
-        return ifilter(lambda t: True, self.tabs)
+        return _get_iterator_over_visible(self.tabs)
     pass
 
 class Tab(Renderable):
@@ -140,7 +143,7 @@ class Tab(Renderable):
             self._index.sort(key=lambda a: a[0])
 
         # TODO : omit empty blocks
-        return imap(lambda x: x[1], ifilter(lambda t: True, self._index))
+        return imap(lambda x: x[1], _get_iterator_over_visible(self._index))
 
     def add(self, block, order=None):
         """ add one block to current tab """
@@ -181,7 +184,7 @@ class Block(object):
     def __iter__(self):
         """ Iterates over non-empty tabs """
         # TODO : omit invisible options blocks
-        return ifilter(lambda t: True, self._options)
+        return _get_iterator_over_visible(self._options)
 
     pass
 
@@ -221,7 +224,7 @@ class OptionBase(Renderable):
 
     def __iter__(self):
         """ Iterates over visible suboptions """
-        return ifilter(lambda t: t.visible if hasattr(t, 'visible') else True, self._options)
+        return _get_iterator_over_visible(self._options)
 
     def __len__(self):
         return len(self._options)
@@ -551,14 +554,20 @@ class OptionDropdownSelector(OptionDropdown):
 
     Used as root selector for compound options."""
 
-    class Item:
+    class Item(object):
         """ INTERNAL class, represents one option in options list """
 
         def __init__(self, value, label, options=None):
             self.value = value
             self.label = label
-            self.options = options or []
+            self._options = options or []
             self.uniq = None
+
+        def __iter__(self):
+            return _get_iterator_over_visible(self._options)
+
+        def __len__(self):
+            return len(self._options)
 
     def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, initype=str, items=None):
         super(OptionDropdownSelector, self).__init__(
@@ -694,10 +703,14 @@ class PostDataParser(object):
         diffcount = 0
         for (k, v) in d.items():
             if k not in self._vault:
-                print 'NOT IN VAULT', k
+                logger.debug('This form-key [{0}] is unknown for config, skip'.format(k))
                 continue
 
             opt = self._vault[k]
+
+            if opt.readonly:
+                logger.info('This option [{0}][{1}] is readonly, but it was confirmed! SKIP'.format(opt.model.section, opt.model.appkey))
+                continue
 
             # new value
             nv = opt.uiValue2DataValue(v)

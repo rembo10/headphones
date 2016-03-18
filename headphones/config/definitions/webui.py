@@ -67,6 +67,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 options=register_options_cb(
                     OptionString('API_KEY', 'General', '',
                         label=_('API key'),
+                        cssclasses=['-hp-api-key'],
                         maxlength=32,
                         options=register_options_cb(
                             TemplaterExtension('ApiKeyExtension', strings={'button': _('Generate'), 'caption': _('Current API key: ')})

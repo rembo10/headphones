@@ -103,8 +103,8 @@
             // ## ============================================
             // ## This is part of 'ApiKeyExtension' Template
             // REQUIRED only for one tpl-extension
-            $('.config .option input[name=API_KEY]').click(function(){ $(this).select() });
-            $('.config .option-extension button.API_KEY').click(function(){
+            $('.config .option input.-hp-api-key').click(function(){ $(this).select() });
+            $('.config .extension button.-hp-api-key').click(function(){
                 var $self = $(this);
                 $.ajax({
                     url: 'generateAPI',
@@ -201,9 +201,6 @@
                             $("#torrent_blackhole_options,#transmission_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
                         }
                 });
-
-                $("#mirror").change(handleNewServerSelection);
-                        handleNewServerSelection.apply($("#mirror"));
 
                 var deletedNewznabs = 0;
 
