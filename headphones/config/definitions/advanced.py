@@ -7,10 +7,7 @@ from .._viewmodel import Block
 from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionBool, OptionPath, OptionPassword
 from .._viewmodel import OptionDropdownSelector, OptionDropdown, OptionCombobox, OptionCheckboxListExtrasCrutch # OptionCheckboxList
 from .._viewmodel import TemplaterExtension, LabelExtension
-
-def _(x):
-    """ required just for marking translatable strings"""
-    return x
+from ..loc import _
 
 def reg(tabname, register_block_cb, register_options_cb):
 
@@ -20,21 +17,21 @@ def reg(tabname, register_block_cb, register_options_cb):
 
             OptionString('FOLDER_FORMAT', 'General', 'Artist/Album [Year]',
                 label=_('Folder Format'),
-                caption=_(('Use: $Artist/$artist, $SortArtist/$sortartist, $Album/$album, $Year/$year,'
+                caption=_('Use: $Artist/$artist, $SortArtist/$sortartist, $Album/$album, $Year/$year,'
                            ' $Type/$type (release type) and $First/$first (first letter in artist name),'
                            ' $OriginalFolder/$originalfolder (downloaded directory name). Put optional'
                            ' variables in square brackets, use single-quote marks to escape square brackets'
                            ' literally (\'[\', \']\').<br>E.g.: $Type/$First/$artist/$album \'[\'$year\']\''
                            ' = Album/G/girl talk/all day [2010]'
-                )),
+                ),
             ),
             OptionString('FILE_FORMAT', 'General', 'Track Artist - Album [Year] - Title',
                 label=_('File Format'),
-                caption=_(('Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title,'
+                caption=_('Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title,'
                            ' $Artist/$artist, $Album/$album and $Year/$year. Put optional variables in'
                            ' square brackets, use single-quote marks to escape square brackets literally'
                            ' (\'[\', \']\').'
-                )),
+                ),
             ),
             OptionBool('FILE_UNDERSCORES', 'General', False,
                 label=_('Use underscores instead of spaces'),
@@ -46,9 +43,9 @@ def reg(tabname, register_block_cb, register_options_cb):
     register_block_cb(tabname,
         Block('reencoding_options', caption=_("Re-Encoding Options"), options=register_options_cb(
             LabelExtension(
-                label=_(('<i class="fa fa-info-circle"></i> Note: this option requires the lame,'
+                label=_('<i class="fa fa-info-circle"></i> Note: this option requires the lame,'
                          ' ffmpeg or xld encoder'
-                )),
+                ),
                 cssclasses=['heading'],
                 fullwidth=True,
             ),
@@ -80,9 +77,9 @@ def reg(tabname, register_block_cb, register_options_cb):
 
             OptionDropdownSelector('ENCODER', 'General', 'ffmpeg', initype=str,
                 label=_('Encoder'),
-                tooltip=_(('Name of encoder to use. Lame, FFmpeg and libav are available for most Linux'
+                tooltip=_('Name of encoder to use. Lame, FFmpeg and libav are available for most Linux'
                            ' distributions. On Ubuntu, libav replaces FFmpeg. xld is OS X-only.'
-                )),
+                ),
                 items=(
                     ('lame', _('lame'), register_options_cb(
                     )),
@@ -99,7 +96,7 @@ def reg(tabname, register_block_cb, register_options_cb):
 
     # TODO : move this block
     register_block_cb(tabname,
-        Block('audio_sub_block', caption=_("Audio Properties"), options=register_options_cb(
+        Block('audio_sub_block', caption=_("Audio Properties [LAME FFMPEG LIBAV]"), options=register_options_cb(
             # FIX : I want add CUSTOM values here!!!!
             OptionCombobox('ENCODEROUTPUTFORMAT', 'General', 'mp3', #initype=str,
                 label=_('Format'),
@@ -163,7 +160,7 @@ def reg(tabname, register_block_cb, register_options_cb):
     )
     # TODO : move this block too [ XLD ]
     register_block_cb(tabname,
-        Block('audio_sub_block_2', caption=_("Audio Properties XLD"), options=register_options_cb(
+        Block('audio_sub_block_2', caption=_("Audio Properties [XLD]"), options=register_options_cb(
             OptionString('XLDPROFILE', 'General', '',
                 label=_('XLD Profile'),
             )
@@ -238,10 +235,10 @@ def reg(tabname, register_block_cb, register_options_cb):
             OptionBool('FREEZE_DB', 'General', False,
                 alignleft=True,
                 label=_('Don\'t add new artists when post-processing albums'),
-                tooltip=_(('Freeze the database, so new artists won\'t be added automatically. Use'
+                tooltip=_('Freeze the database, so new artists won\'t be added automatically. Use'
                            ' this if Headphones adds artists because due to wrong snatches. This check'
                            ' is skipped when the folder name is appended with release group ID.'
-                )),
+                ),
             ),
             OptionBool('DO_NOT_PROCESS_UNMATCHED', 'General', False,
                 alignleft=True,
@@ -321,11 +318,11 @@ def reg(tabname, register_block_cb, register_options_cb):
                         options=register_options_cb(
                             OptionString('SONGKICK_LOCATION', 'Songkick', '',
                                 label=_('Metro Area ID'),
-                                tooltip=_(('Enter the Metro Area ID, e.g. the ID for London is 24426,'
+                                tooltip=_('Enter the Metro Area ID, e.g. the ID for London is 24426,'
                                            ' this can be found by clicking the link and searching/selecting'
                                            ' the city, e.g. London should find'
                                            ' http://www.songkick.com/metro_areas/24426-uk-london'
-                                )),
+                                ),
                             ),
                             TemplaterExtension(template_name='SongkickAreaIdExtension', strings={'caption': _('Find Area ID')}),
                         )

@@ -274,11 +274,10 @@
             <input type="checkbox" class="checkbox-with-hidden" data-hidden-sel="#${hidden_id}" id="${checkbox_id}" ${checked_attr} ${'readonly disabled' if me.readonly else ''} />
             <input type="hidden" id="${hidden_id}" name="${uiname}" value="${hidden_value}" ${'readonly disabled' if me.readonly else ''} />
 
+        % if not me.alignleft:
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
             %endif
-
-        % if not me.alignleft:
         </div>
         % endif
 
@@ -289,6 +288,12 @@
                 <span class="label-text">${me.label}</span></label>
             % endif
         %endif
+
+        % if me.alignleft:
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+        % endif
 
     </div>
     % if 0 < len(me):
@@ -343,6 +348,9 @@
             %endif
 
         % if not me.alignleft:
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
         </div>
         % endif
 
@@ -353,6 +361,12 @@
                 <span class="label-text">${me.label}</span></label>
             % endif
         %endif
+
+        % if me.alignleft:
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+        % endif
     </div>
 
     % if 0 < len(me):

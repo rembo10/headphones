@@ -6,10 +6,7 @@ from .._viewmodel import Block
 from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionUrl, LabelExtension
 from .._viewmodel import TemplaterExtension
 
-def _(x):
-    """ required just for marking translatable strings"""
-    return x
-
+from ..loc import _
 
 def reg(tabname, register_block_cb, register_options_cb):
 

@@ -3,6 +3,7 @@ import itertools
 import os
 import re
 from configobj import ConfigObj
+from loc import _
 
 from _viewmodel import Tab, Tabs, OptionBase
 
@@ -19,10 +20,6 @@ from _meta import MetaConfig
 
 from headphones.exceptions import ConfigError
 from headphones import logger
-
-def _(x):
-    """ required just for marking translatable strings"""
-    return x
 
 # pylint:disable=R0902
 # it might be nice to refactor for fewer instance variables
@@ -83,8 +80,8 @@ class Config(object):
     def _registerTabs(self):
         self._tabs = Tabs((
                 Tab('webui', _("Web Interface"), savecaption=_("Save Changes"),
-                    message=_(('<i class="fa fa-info-circle"></i> Web Interface changes require a restart to take effect.'
-                                'Saving settings will restart intervals if changed.'))
+                    message=_('<i class="fa fa-info-circle"></i> Web Interface changes require a restart to take effect.'
+                                'Saving settings will restart intervals if changed.')
                 ),
                 Tab('download', _("Download settings"), savecaption=_("Save Changes")),
                 Tab('search', _("Search providers"), savecaption=_("Save Changes")),

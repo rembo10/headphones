@@ -4,10 +4,7 @@
 
 from .._viewmodel import Block
 from .._viewmodel import OptionString, OptionNumber, OptionPassword, OptionBool, OptionPath, OptionList
-
-def _(x):
-    """ required just for marking translatable strings"""
-    return x
+from ..loc import _
 
 def reg(tabname, register_block_cb, register_options_cb):
 
@@ -802,7 +799,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 maxvalue=None
             ),
             OptionString('XBMC_USERNAME', 'XBMC', '',
-                label=_('zzXBMC_USERNAMEzz'),
+                label=_('zzXBMC_USERNAME_nestor_zz'),
                 caption=_(''),
                 tooltip=_(''),
                 maxlength=None
