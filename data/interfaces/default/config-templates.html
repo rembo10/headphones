@@ -55,11 +55,7 @@
         %endif
 
         <div class="input-wrapper">
-            %if me.readonly:
-                <span id="${uiname}" name="${uiname}">${val}</span>
-            %else:
-                <input type="text" class="${ ' '.join(me.cssclasses) }" id="${uiname}" name="${uiname}" value="${val}" ${size_attr} />
-            %endif
+            <input type="text" class="${ ' '.join(me.cssclasses) }" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${size_attr} />
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -94,17 +90,15 @@
         %endif
 
         <div class="input-wrapper">
-            %if me.readonly:
-                <span id="${uiname}" name="${uiname}">${val}</span>
-            %else:
-                <input type="text" id="${uiname}" name="${uiname}" value="${val}" ${size_attr} list="${datalist_id}" />
+            <input type="text" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${size_attr} list="${datalist_id}" />
 
+            % if not me.readonly:
                 <datalist id="${datalist_id}">
                 % for di in me.items:
                     <option value="${di}">${di}</option>
                 % endfor
                 </datalist>
-            %endif
+            % endif
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -138,11 +132,7 @@
         %endif
 
         <div class="input-wrapper">
-            %if me.readonly:
-                <span id="${uiname}" name="${uiname}">${'*' * len(val)}</span>
-            %else:
-                <input type="password" class="${ ' '.join(me.cssclasses) }" id="${uiname}" name="${uiname}" value="${val}" ${size_attr} />
-            %endif
+            <input type="password" class="${ ' '.join(me.cssclasses) }" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${size_attr} />
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -186,7 +176,7 @@
         %endif
 
         <div class="input-wrapper">
-            <input type="number" class="${ ' '.join(me.cssclasses) }" id="${uiname}" name="${uiname}" value="${val}" ${min_attr} ${max_attr} />
+            <input type="number" class="${ ' '.join(me.cssclasses) }" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${min_attr} ${max_attr} />
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -231,7 +221,7 @@
         %endif
 
         <div class="input-wrapper">
-            <input type="number" class="${ ' '.join(me.cssclasses) }" id="${uiname}" name="${uiname}" value="${val}" ${min_attr} ${max_attr} /><span>%</span>
+            <input type="number" class="${ ' '.join(me.cssclasses) }" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${min_attr} ${max_attr} /><span>%</span>
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -281,8 +271,8 @@
         <div class="input-wrapper">
         % endif
 
-            <input type="checkbox" class="checkbox-with-hidden" data-hidden-sel="#${hidden_id}" id="${checkbox_id}" ${checked_attr} />
-            <input type="hidden" id="${hidden_id}" name="${uiname}" value="${hidden_value}" />
+            <input type="checkbox" class="checkbox-with-hidden" data-hidden-sel="#${hidden_id}" id="${checkbox_id}" ${checked_attr} ${'readonly disabled' if me.readonly else ''} />
+            <input type="hidden" id="${hidden_id}" name="${uiname}" value="${hidden_value}" ${'readonly disabled' if me.readonly else ''} />
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -345,8 +335,8 @@
         <div class="input-wrapper">
         % endif
 
-            <input class="hp-option-switch checkbox-with-hidden" type="checkbox" id="${checkbox_id}" data-hidden-sel="#${hidden_id}" data-embed-div="#${embed_id}" ${checked_attr} />
-            <input type="hidden" id="${hidden_id}" name="${uiname}" value="${hidden_value}" />
+            <input class="hp-option-switch checkbox-with-hidden" type="checkbox" id="${checkbox_id}" data-hidden-sel="#${hidden_id}" data-embed-div="#${embed_id}" ${checked_attr} ${'readonly disabled' if me.readonly else ''} />
+            <input type="hidden" id="${hidden_id}" name="${uiname}" value="${hidden_value}" ${'readonly disabled' if me.readonly else ''} />
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -393,7 +383,7 @@
                 ## TODO : add an appropriate class for next div:
                 <div>
                     <label>
-                        <input type="checkbox" id="${uiname + str(i.uniq) }" name="${uiname}" value="${i.value}" ${'checked' if i.checked else ''} />
+                        <input type="checkbox" id="${uiname + str(i.uniq) }" name="${uiname}" value="${i.value}" ${'checked' if i.checked else ''} ${'readonly disabled' if me.readonly else ''} />
 
                         <span>${'&nbsp;' if i.label is None else i.label}</span>
                     </label>
@@ -430,16 +420,11 @@
         %endif
 
         <div ${tooltip_attr} class="input-wrapper">
-            %if me.readonly:
-                ## TODO: try to use disabled!
-                <span id="${uiname}" name="${uiname}">${val}</span>
-            %else:
-                <select id="${uiname}" name="${uiname}" size="1">
-                % for i in me.items:
-                    <option value="${i.value}" ${"selected" if i.value==val else ""}>${i.label}</option>
-                % endfor
-                </select>
-            %endif
+            <select id="${uiname}" name="${uiname}" size="1" ${'readonly disabled' if me.readonly else ''}>
+            % for i in me.items:
+                <option value="${i.value}" ${"selected" if i.value==val else ""}>${i.label}</option>
+            % endfor
+            </select>
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -476,16 +461,11 @@
         %endif
 
         <div ${tooltip_attr} class="input-wrapper">
-            %if me.readonly:
-                ## try to use disabled!
-                <span id="${uiname}" name="${uiname}">${val}</span>
-            %else:
-                <select class="hp-option-selector" id="${uiname}" name="${uiname}" size="1" data-linked-div-sel=".${cssclass_items_common}">
-                % for i in me.items:
-                    <option value="${i.value}" ${"selected" if i.value==val else ""} data-linked-div-sel=".${cssclass_items_common}.${cssclass_item_prefix + str(i.uniq)}">${i.label}</option>
-                % endfor
-                </select>
-            %endif
+            <select class="hp-option-selector" id="${uiname}" name="${uiname}" size="1" data-linked-div-sel=".${cssclass_items_common}" ${'readonly disabled' if me.readonly else ''} >
+            % for item in me.items:
+                <option value="${item.value}" ${"selected" if item.value==val else ""} data-linked-div-sel=".${cssclass_items_common}.${cssclass_item_prefix + str(item.uniq)}">${item.label}</option>
+            % endfor
+            </select>
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -503,10 +483,10 @@
     % endif
 
     <!-- 2. select's OPTION-child options -->
-    % for i in me.items:
-        % if len(i.options)>0:
-            <div ${"" if i.value==val else raw_hidden_style_attr} class="${cssclass_items_common + ' ' + cssclass_item_prefix + str(i.uniq)}">
-            % for option in i.options:
+    % for item in me.items:
+        % if len(item)>0:
+            <div ${"" if item.value==val else raw_hidden_style_attr} class="${cssclass_items_common + ' ' + cssclass_item_prefix + str(item.uniq)}">
+            % for option in item:
                 ${option.render(parent=me)}
             % endfor
             </div>
@@ -536,6 +516,13 @@
 </%def>
 
 
+<%def name="DividerExtension(me, parent=None)">
+<div class="extension">
+    <hr />
+</div>
+</%def>
+
+
 ## ===============================================
 ## TEMPLATES for
 ##
@@ -554,22 +541,13 @@
 %>
 <div class="extension">
     <label>
-        <button type="button" data-input-sel=".option input[name=${uiname}]" class="API_KEY">${me.strings['button']}</button>
+        <button type="button" data-input-sel=".option input[name=${uiname}]" class="-hp-api-key">${me.strings['button']}</button>
     </label>
     <div>
         <div class="small caption">${me.strings['caption']}<strong>${val}</strong></div>
     </div>
 </div>
 </%def>
-
-
-
-<%def name="DividerExtension(me, parent=None)">
-<div class="extension">
-    <hr />
-</div>
-</%def>
-
 
 
 <%def name="SongkickAreaIdExtension(me, parent=None)">
@@ -579,7 +557,6 @@
     </div>
 </div>
 </%def>
-
 
 
 <%def name="CodeshyRegExtension(me, parent=None)">
