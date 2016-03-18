@@ -58,7 +58,7 @@
             %if me.readonly:
                 <span id="${uiname}" name="${uiname}">${val}</span>
             %else:
-                <input type="text" id="${uiname}" name="${uiname}" value="${val}" ${size_attr} />
+                <input type="text" class="${ ' '.join(me.cssclasses) }" id="${uiname}" name="${uiname}" value="${val}" ${size_attr} />
             %endif
 
             %if me.caption is not None:
@@ -141,7 +141,7 @@
             %if me.readonly:
                 <span id="${uiname}" name="${uiname}">${'*' * len(val)}</span>
             %else:
-                <input type="password" id="${uiname}" name="${uiname}" value="${val}" ${size_attr} />
+                <input type="password" class="${ ' '.join(me.cssclasses) }" id="${uiname}" name="${uiname}" value="${val}" ${size_attr} />
             %endif
 
             %if me.caption is not None:
@@ -186,7 +186,7 @@
         %endif
 
         <div class="input-wrapper">
-            <input type="number" id="${uiname}" name="${uiname}" value="${val}" ${min_attr} ${max_attr} />
+            <input type="number" class="${ ' '.join(me.cssclasses) }" id="${uiname}" name="${uiname}" value="${val}" ${min_attr} ${max_attr} />
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -231,7 +231,7 @@
         %endif
 
         <div class="input-wrapper">
-            <input type="number" id="${uiname}" name="${uiname}" value="${val}" ${min_attr} ${max_attr} /><span>%</span>
+            <input type="number" class="${ ' '.join(me.cssclasses) }" id="${uiname}" name="${uiname}" value="${val}" ${min_attr} ${max_attr} /><span>%</span>
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -250,31 +250,56 @@
 
 <%def name="OptionBool(me, parent=None)">
 <%
+    ## TODO: try to simplify this template
+    ## SORRY, there is enouth complicated layout in this template. The `alignleft` make it dirty....
+    ## When checkbox is left aligned - input is inside of the label. In other case - outside...
+
     uiname = me.uiName()
     checkbox_id = uiname
     hidden_id = uiname + '_hidden_storage'
     embed_id = uiname + '_embed'
     val = me.uiValue()
 
+    need_label = me.label is not None
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
     checked_attr = 'checked' if val else ''
     hidden_value = '1' if val else '0'
 %>
-    <div class="option">
-        %if me.label is not None:
-            <label class="label" ${tooltip_attr} for="${checkbox_id}">
-                ${me.label}
-            </label>
+    <div class="option" ${tooltip_attr}>
+
+        ## ENTIRE LABEL or OPEN LABEL (when left aligned)
+        %if need_label:
+
+            % if me.alignleft:
+                <label for="${checkbox_id}">
+            % else:
+                <label class="label" for="${checkbox_id}"><span class="label-text">${me.label}</span></label>
+            % endif
         %endif
 
+        % if not me.alignleft:
         <div class="input-wrapper">
+        % endif
+
             <input type="checkbox" class="checkbox-with-hidden" data-hidden-sel="#${hidden_id}" id="${checkbox_id}" ${checked_attr} />
             <input type="hidden" id="${hidden_id}" name="${uiname}" value="${hidden_value}" />
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
             %endif
+
+        % if not me.alignleft:
         </div>
+        % endif
+
+        ## CLOSE LABEL (when left aligned)
+        %if need_label:
+
+            % if me.alignleft:
+                <span class="label-text">${me.label}</span></label>
+            % endif
+        %endif
+
     </div>
     % if 0 < len(me):
         <div id="${embed_id}" class="embed-option-block">
@@ -288,32 +313,56 @@
 
 <%def name="OptionSwitch(me, parent=None)">
 <%
+    ## TODO: try to simplify this template
+    ## SORRY, there is enouth complicated layout in this template. The `alignleft` make it dirty....
+    ## When checkbox is left aligned - input is inside of the label. In other case - outside...
+
     uiname = me.uiName()
     checkbox_id = uiname
     hidden_id = uiname + '_hidden_storage'
     embed_id = uiname + '_embed'
     val = me.uiValue()
 
+    need_label = me.label is not None
     checked_attr = 'checked' if val else ''
     embed_hidden_style_attr = '' if val else 'style="display:none"'
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
     hidden_value = '1' if val else '0'
 %>
-    <div class="option">
-        %if me.label is not None:
-            <label class="label" ${tooltip_attr} for="${checkbox_id}">
-                ${me.label}
-            </label>
+    <div class="option" ${tooltip_attr}>
+
+        ## ENTIRE LABEL or OPEN LABEL (when left aligned)
+        %if need_label:
+
+            % if me.alignleft:
+                <label for="${checkbox_id}">
+            % else:
+                <label class="label" for="${checkbox_id}"><span class="label-text">${me.label}</span></label>
+            % endif
         %endif
 
+        % if not me.alignleft:
         <div class="input-wrapper">
+        % endif
+
             <input class="hp-option-switch checkbox-with-hidden" type="checkbox" id="${checkbox_id}" data-hidden-sel="#${hidden_id}" data-embed-div="#${embed_id}" ${checked_attr} />
             <input type="hidden" id="${hidden_id}" name="${uiname}" value="${hidden_value}" />
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
             %endif
+
+        % if not me.alignleft:
         </div>
+        % endif
+
+        ## CLOSE LABEL (when left aligned)
+        %if need_label:
+
+            % if me.alignleft:
+                <span class="label-text">${me.label}</span></label>
+            % endif
+        %endif
     </div>
 
     % if 0 < len(me):
@@ -500,27 +549,43 @@
 
 <%def name="ApiKeyExtension(me, parent=None)">
 <%
-    ext = me
-    me = parent
-    val = me.uiValue()
-
-    uiname = me.uiName()
+    val = parent.uiValue()
+    uiname = parent.uiName()
 %>
 <div class="extension">
     <label>
-        <button type="button" data-input-sel=".option input[name=${uiname}]" class="API_KEY">${ext.strings['button']}</button>
+        <button type="button" data-input-sel=".option input[name=${uiname}]" class="API_KEY">${me.strings['button']}</button>
     </label>
     <div>
-        <div class="small caption">${ext.strings['caption']}<strong>${val}</strong></div>
+        <div class="small caption">${me.strings['caption']}<strong>${val}</strong></div>
     </div>
 </div>
 </%def>
 
 
+
 <%def name="DividerExtension(me, parent=None)">
-<%
-%>
 <div class="extension">
     <hr />
+</div>
+</%def>
+
+
+
+<%def name="SongkickAreaIdExtension(me, parent=None)">
+<div class="extension">
+    <div class="input-wrapper">
+        <a target="_blank" href="http://www.songkick.com/developer/location-search">${me.strings['caption']} <i class="fa fa-external-link"></i></a>
+    </div>
+</div>
+</%def>
+
+
+
+<%def name="CodeshyRegExtension(me, parent=None)">
+<div class="extension">
+    <div class="input-wrapper">
+        <a href="https://headphones.codeshy.com/vip" id="vipserver" target="_blank">${me.strings['caption']} <i class="fa fa-external-link"></i></a>
+    </div>
 </div>
 </%def>
