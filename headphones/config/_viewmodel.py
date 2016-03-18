@@ -19,12 +19,14 @@ But the most classes have its own template (they are inherited from Renderable)
 """
 # ===============================================
 
+
 def _get_iterator_over_visible(items):
     return ifilter(lambda t: not hasattr(t, 'visible') or t.visible, items)
 
 # ===============================================
 # Abstract, base class
 # ===============================================
+
 
 class Renderable(object):
     """ Basic class for all things, which could be rendered in runtime from python code """
@@ -84,6 +86,7 @@ class Renderable(object):
 # - config.html
 # ===============================================
 
+
 class Tabs(object):
     """ ViewModel for entire TABS element. Contains all the tabs """
 
@@ -102,6 +105,7 @@ class Tabs(object):
 
         return _get_iterator_over_visible(self.tabs)
     pass
+
 
 class Tab(Renderable):
     """ UI-tab for grouping option on a UI-page """
@@ -159,6 +163,7 @@ class Tab(Renderable):
             self._index.append(tuple([order, block]))
 
     pass
+
 
 class Block(object):
     """ UI-block for grouping options within `Tab` """
@@ -260,8 +265,10 @@ class OptionBase(Renderable):
 #         self.caption = caption
 #         self.tooltip = tooltip
 
+
 class OptionInternal(OptionBase):
     """ This option will not appear in the UI. It is internal stuff"""
+
     def __init__(self, appkey, section, default=None, initype=str):
         super(OptionInternal, self).__init__(appkey, section, default, initype=initype)
 
@@ -272,8 +279,10 @@ class OptionInternal(OptionBase):
         """ Overridden. This kind of options are not renderable, so `render` always returns an empty string """
         return ""
 
+
 class OptionDeprecated(OptionBase):
     """ This option will not appear in the UI. It is internal stuff"""
+
     def __init__(self, appkey, section, default=None, initype=str):
         super(OptionDeprecated, self).__init__(appkey, section, default, initype=initype)
 
@@ -283,6 +292,7 @@ class OptionDeprecated(OptionBase):
     def render(self, *args, **qwargs):
         """ Overridden. This kind of options are not renderable, so `render` always returns an empty string """
         return ""
+
 
 class OptionString(OptionBase):
 
@@ -300,8 +310,10 @@ class OptionString(OptionBase):
         else:
             self.cssclasses = []
 
+
 class OptionCombobox(OptionString):
     """ Textbox with list of available variants """
+
     def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, maxlength=None, items=None):
         super(OptionCombobox, self).__init__(
             appkey,
@@ -320,6 +332,7 @@ class OptionCombobox(OptionString):
                     self.items.append(i)
                 else:
                     self.items.append(str(i))
+
 
 class OptionPath(OptionBase):
 
@@ -342,14 +355,18 @@ class OptionPath(OptionBase):
         # currently, path uses the same template as string
         return "OptionString"
 
+
 class OptionPassword(OptionString):
     pass
 
+
 class OptionUrl(OptionString):
+
     @property
     def templateName(self):
         # currently, url uses the same template as string
         return "OptionString"
+
 
 class OptionNumber(OptionBase):
 
@@ -368,8 +385,10 @@ class OptionNumber(OptionBase):
         self.minvalue = minvalue
         self.maxvalue = maxvalue
 
+
 class OptionPercent(OptionNumber):
     pass
+
 
 class OptionBool(OptionBase):
 
@@ -392,6 +411,8 @@ class OptionBool(OptionBase):
         raise ValueError('Unexpected bool value accepted: {0}'.format(value))
 
 # TODO : think about inheritance from Block
+
+
 class OptionSwitch(OptionBool):
     """ Option, which includes switcher and suboptions
 
@@ -401,14 +422,17 @@ class OptionSwitch(OptionBool):
     """
     pass
 
+
 class OptionCheckboxList(OptionBase):
+
     class Item:
         """ Internal class, defining one item of CheckBoxList """
-        def __init__(self, value, label=""):
+
+        def __init__(self, value, label="", csssuffix=None):
             self.value = value
             self.label = label
 
-            self.uniq = None
+            self.csssuffix = csssuffix
             self.checked_callback = None
 
         @property
@@ -441,7 +465,9 @@ class OptionCheckboxList(OptionBase):
                     raise TypeError('Unexpected type of item {0} in items: {1}'.format(counter, type(i)))
 
                 # COMMON stuff:
-                ii.unique = counter - 1 * 100000 + random.randint(1000, 9999)
+                if ii.csssuffix is None:
+                    ii.csssuffix = str(counter - 1 * 100000 + random.randint(1000, 9999))
+
                 ii.checked_callback = self._checked_cb
                 self.items.append(ii)
 
@@ -453,7 +479,7 @@ class OptionCheckboxList(OptionBase):
     def uiValue2DataValue(self, value):
         # override
 
-        #logger.debug('VALUE accepted: ({1}) {0}'.format(value, type(value)))
+        # logger.debug('VALUE accepted: ({1}) {0}'.format(value, type(value)))
         ret = None
 
         # what is going on:
@@ -466,21 +492,24 @@ class OptionCheckboxList(OptionBase):
         else:
             print 'not list'
             ret = []
-        #logger.debug('VALUE converted: ({1}) {0}'.format(ret, type(ret)))
+        # logger.debug('VALUE converted: ({1}) {0}'.format(ret, type(ret)))
         return ret
 
 # TODO : remove this class... It is a crutch
+
+
 class OptionCheckboxListExtrasCrutch(OptionCheckboxList):
     """ The same as parent, but uses STRING-type for internal value """
+
     def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, alignleft=False, items=None):
         super(OptionCheckboxListExtrasCrutch, self).__init__(appkey, section, default,
-            label=label,
-            caption=caption,
-            tooltip=tooltip,
-            options=options,
-            alignleft=alignleft,
-            items=items
-        )
+                                                             label=label,
+                                                             caption=caption,
+                                                             tooltip=tooltip,
+                                                             options=options,
+                                                             alignleft=alignleft,
+                                                             items=items
+                                                             )
         super(OptionCheckboxList, self).__init__(appkey, section, default, initype=str, options=options)
 
     def _checked_cb(self, value):
@@ -493,7 +522,7 @@ class OptionCheckboxListExtrasCrutch(OptionCheckboxList):
     def uiValue2DataValue(self, value):
         # override
 
-        #logger.debug('VALUE accepted: ({1}) {0}'.format(value, type(value)))
+        # logger.debug('VALUE accepted: ({1}) {0}'.format(value, type(value)))
 
         ret = super(OptionCheckboxListExtrasCrutch, self).uiValue2DataValue(value)
 
@@ -502,7 +531,7 @@ class OptionCheckboxListExtrasCrutch(OptionCheckboxList):
         else:
             ret = ""
 
-        #logger.debug('VALUE converted: ({1}) {0}'.format(ret, type(ret)))
+        # logger.debug('VALUE converted: ({1}) {0}'.format(ret, type(ret)))
         return ret
 
     @property
@@ -510,8 +539,11 @@ class OptionCheckboxListExtrasCrutch(OptionCheckboxList):
         # override
         return "OptionCheckboxList"
 
+
 class OptionDropdown(OptionBase):
+
     class Item:
+
         def __init__(self, value, label=""):
             self.value = value
             self.label = label
@@ -545,6 +577,7 @@ class OptionDropdown(OptionBase):
         # override
         return self._uitype(value)
 
+
 class OptionDropdownSelector(OptionDropdown):
     """ Dropbox-selector. On change selected item - appears appropriate block of sub-options
 
@@ -553,11 +586,13 @@ class OptionDropdownSelector(OptionDropdown):
     class Item(object):
         """ INTERNAL class, represents one option in options list """
 
-        def __init__(self, value, label, options=None):
+        def __init__(self, value, label, options=None, csssuffix=None):
             self.value = value
             self.label = label
+            self.csssuffix = csssuffix
             self._options = options or []
-            self.uniq = None
+            self.csssuffix = csssuffix
+            self._section_visible_cb = None
 
         def __iter__(self):
             return _get_iterator_over_visible(self._options)
@@ -565,23 +600,32 @@ class OptionDropdownSelector(OptionDropdown):
         def __len__(self):
             return len(self._options)
 
+        def isSelectorSectionVisible(self):
+            if not self._section_visible_cb:
+                logger.warn('Misconfigured option. You could\'t fix it, a hand of'
+                            ' a developer is required. Label of option [{0}]'.format(self.label))
+                return False
+            return self._section_visible_cb(self.csssuffix)
+
     def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, initype=str, items=None):
         super(OptionDropdownSelector, self).__init__(
-                appkey,
-                section,
-                default,
+            appkey,
+            section,
+            default,
 
-                label=label,
-                caption=caption,
-                tooltip=tooltip,
+            label=label,
+            caption=caption,
+            tooltip=tooltip,
 
-                initype=initype,
-                options=options,
-                items=None # we will handle items in custom manner
+            initype=initype,
+            options=options,
+            items=None  # we will handle items in custom manner
         )
 
         # just one difference (from parent) - items handling
         self.items = []
+        self.value2csssuffix = {}
+
         counter = 0
         if items:
             for i in items:
@@ -596,8 +640,21 @@ class OptionDropdownSelector(OptionDropdown):
                 else:
                     raise TypeError('Unexpected type of item {0} in items: {1}'.format(counter, type(i)))
 
-                ii.uniq = counter
+                if ii.csssuffix is None:
+                    ii.csssuffix = str(counter)
+
+                self.value2csssuffix[ii.value] = ii.csssuffix
+                ii._section_visible_cb = self._item_section_visible
+
                 self.items.append(ii)
+
+    def _item_section_visible(self, csssuffix):
+        val = self.model.get()
+        if val not in self.value2csssuffix:
+            return False
+        css = self.value2csssuffix[val]
+        return css == csssuffix
+
 
 class OptionList(OptionBase):
 
@@ -609,7 +666,7 @@ class OptionList(OptionBase):
         self.tooltip = tooltip
 
         self.maxlength = None
-        self.cssclasses = [] # check implementation in OptionString
+        self.cssclasses = []  # check implementation in OptionString
 
     @property
     def templateName(self):
@@ -643,6 +700,7 @@ class LabelExtension(Renderable):
 # ===============================================
 # Option extensions
 # ===============================================
+
 
 class TemplaterExtension(Renderable):
     """ Allow render any template, extending HTML for options with non-standart layout """
@@ -682,7 +740,7 @@ class PostDataParser(object):
     def register(self, option):
         if not isinstance(option, OptionBase):
             raise TypeError('Could not register this option, because it '
-                    'should be child of {0}.{1}'.format(OptionBase.__module__, OptionBase.__name__))
+                            'should be child of {0}.{1}'.format(OptionBase.__module__, OptionBase.__name__))
 
         k = option.uiName()
         if k in self._vault:

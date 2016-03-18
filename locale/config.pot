@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2016-03-18 12:04+YEKT\n"
+"POT-Creation-Date: 2016-03-19 04:21+YEKT\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -370,428 +370,420 @@ msgstr ""
 msgid "lame"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:86
+#: ../headphones/config/definitions/advanced.py:85
 msgid "ffmpeg"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:88
+#: ../headphones/config/definitions/advanced.py:86
 msgid "libav"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:90
-msgid "xld"
-msgstr ""
-
-#: ../headphones/config/definitions/advanced.py:99
-msgid "Audio Properties [LAME FFMPEG LIBAV]"
-msgstr ""
-
-#: ../headphones/config/definitions/advanced.py:102
+#: ../headphones/config/definitions/advanced.py:89
 msgid "Format"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:103
+#: ../headphones/config/definitions/advanced.py:90
 msgid "Use one of \"mp3\", \"ogg\", \"m4a\", or <strong>any custom</strong> format"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:111
+#: ../headphones/config/definitions/advanced.py:98
 msgid "VBR/CBR"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:113
+#: ../headphones/config/definitions/advanced.py:100
 msgid "cbr"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:115
+#: ../headphones/config/definitions/advanced.py:102
 msgid "Bitrate"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:117
+#: ../headphones/config/definitions/advanced.py:104
 msgid "64"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:118
+#: ../headphones/config/definitions/advanced.py:105
 msgid "128"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:119
+#: ../headphones/config/definitions/advanced.py:106
 msgid "192"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:120
+#: ../headphones/config/definitions/advanced.py:107
 msgid "256"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:121
+#: ../headphones/config/definitions/advanced.py:108
 msgid "320"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:125
+#: ../headphones/config/definitions/advanced.py:112
 msgid "vbr"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:127
+#: ../headphones/config/definitions/advanced.py:114
 #: ../headphones/config/definitions/quality.py:12
 msgid "Quality"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:129
+#: ../headphones/config/definitions/advanced.py:116
 msgid "0"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:130
+#: ../headphones/config/definitions/advanced.py:117
 msgid "1"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:131
+#: ../headphones/config/definitions/advanced.py:118
 msgid "2"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:132
+#: ../headphones/config/definitions/advanced.py:119
 msgid "3"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:133
+#: ../headphones/config/definitions/advanced.py:120
 msgid "4"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:134
+#: ../headphones/config/definitions/advanced.py:121
 msgid "5"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:135
+#: ../headphones/config/definitions/advanced.py:122
 msgid "6"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:136
+#: ../headphones/config/definitions/advanced.py:123
 msgid "7"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:137
+#: ../headphones/config/definitions/advanced.py:124
 msgid "8"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:138
+#: ../headphones/config/definitions/advanced.py:125
 msgid "9"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:145
+#: ../headphones/config/definitions/advanced.py:132
 msgid "Sampling"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:147
+#: ../headphones/config/definitions/advanced.py:134
 msgid "44.1 kHz"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:148
+#: ../headphones/config/definitions/advanced.py:135
 msgid "48.0 kHz"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:155
+#: ../headphones/config/definitions/advanced.py:142
 msgid "Arguments"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:156
+#: ../headphones/config/definitions/advanced.py:143
 msgid "<i class=\"fa fa-exclamation-circle\"></i> Ignores all of the above options"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:157
-#: ../headphones/config/definitions/advanced.py:173
+#: ../headphones/config/definitions/advanced.py:144
+#: ../headphones/config/definitions/advanced.py:161
 msgid "Advanced Encoding Options"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:163
-msgid "Audio Properties [XLD]"
+#: ../headphones/config/definitions/advanced.py:148
+msgid "xld"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:165
+#: ../headphones/config/definitions/advanced.py:150
 msgid "XLD Profile"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:175
+#: ../headphones/config/definitions/advanced.py:163
 msgid "Path to Encoder"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:183
+#: ../headphones/config/definitions/advanced.py:171
 msgid "Miscellaneous"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:185
+#: ../headphones/config/definitions/advanced.py:173
 msgid "Automatically include extras when adding an artist"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:186
+#: ../headphones/config/definitions/advanced.py:174
 msgid "Choose Which Extras to Include"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:195
+#: ../headphones/config/definitions/advanced.py:183
 msgid "single"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:196
+#: ../headphones/config/definitions/advanced.py:184
 msgid "ep"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:197
+#: ../headphones/config/definitions/advanced.py:185
 msgid "compilation"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:198
+#: ../headphones/config/definitions/advanced.py:186
 msgid "soundtrack"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:199
+#: ../headphones/config/definitions/advanced.py:187
 msgid "live"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:200
+#: ../headphones/config/definitions/advanced.py:188
 msgid "remix"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:201
+#: ../headphones/config/definitions/advanced.py:189
 msgid "spokenword"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:202
+#: ../headphones/config/definitions/advanced.py:190
 msgid "audiobook"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:203
+#: ../headphones/config/definitions/advanced.py:191
 msgid "other"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:204
+#: ../headphones/config/definitions/advanced.py:192
 msgid "dj-mix"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:205
+#: ../headphones/config/definitions/advanced.py:193
 msgid "mixtape/street"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:206
+#: ../headphones/config/definitions/advanced.py:194
 msgid "broadcast"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:207
+#: ../headphones/config/definitions/advanced.py:195
 msgid "interview"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:208
+#: ../headphones/config/definitions/advanced.py:196
 msgid "demo"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:215
+#: ../headphones/config/definitions/advanced.py:203
 msgid "Only include 'official' extras (i.e. no bootlegs, promos, etc.)"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:219
+#: ../headphones/config/definitions/advanced.py:207
 msgid "Automatically mark upcoming albums as wanted"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:223
+#: ../headphones/config/definitions/advanced.py:211
 msgid "Automatically mark all albums as wanted"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:227
+#: ../headphones/config/definitions/advanced.py:215
 msgid "Automatically mark manually added albums as wanted"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:228
+#: ../headphones/config/definitions/advanced.py:216
 msgid "Automatically mark manually added albums from search results as wanted"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:232
-#: ../headphones/config/definitions/advanced.py:233
+#: ../headphones/config/definitions/advanced.py:220
+#: ../headphones/config/definitions/advanced.py:221
 msgid "Wait until an album's release date before searching"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:237
+#: ../headphones/config/definitions/advanced.py:225
 msgid "Don't add new artists when post-processing albums"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:238
+#: ../headphones/config/definitions/advanced.py:226
 msgid "Freeze the database, so new artists won't be added automatically. Use this if Headphones adds artists because due to wrong snatches. This check is skipped when the folder name is appended with release group ID."
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:245
-#: ../headphones/config/definitions/advanced.py:246
+#: ../headphones/config/definitions/advanced.py:233
+#: ../headphones/config/definitions/advanced.py:234
 msgid "Stop post-processing if no good metadata match found"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:250
-#: ../headphones/config/definitions/advanced.py:251
+#: ../headphones/config/definitions/advanced.py:238
+#: ../headphones/config/definitions/advanced.py:239
 msgid "Tag using ID3v2.3 instead of ID3v2.4"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:260
+#: ../headphones/config/definitions/advanced.py:248
 msgid "Directories"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:262
+#: ../headphones/config/definitions/advanced.py:250
 msgid "Log Directory"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:266
+#: ../headphones/config/definitions/advanced.py:254
 msgid "Cache Directory"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:270
+#: ../headphones/config/definitions/advanced.py:258
 msgid "Cache Size"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:271
+#: ../headphones/config/definitions/advanced.py:259
 msgid "in MB"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:277
+#: ../headphones/config/definitions/advanced.py:265
 msgid "File Permissions Enabled"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:278
+#: ../headphones/config/definitions/advanced.py:266
 msgid "Change file permissions during post-processing"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:283
+#: ../headphones/config/definitions/advanced.py:271
 msgid "File Permissions"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:284
+#: ../headphones/config/definitions/advanced.py:272
 msgid "Desired file permissions"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:290
+#: ../headphones/config/definitions/advanced.py:278
 msgid "Folder Permissions Enabled"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:291
+#: ../headphones/config/definitions/advanced.py:279
 msgid "Change folder permissions during post-processing"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:296
+#: ../headphones/config/definitions/advanced.py:284
 msgid "Folder Permissions"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:297
+#: ../headphones/config/definitions/advanced.py:285
 msgid "Desired folder permissions"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:308
+#: ../headphones/config/definitions/advanced.py:296
 msgid "Songkick"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:310
+#: ../headphones/config/definitions/advanced.py:298
 msgid "Show concert info"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:313
+#: ../headphones/config/definitions/advanced.py:301
 msgid "API Key"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:317
+#: ../headphones/config/definitions/advanced.py:305
 msgid "Filter by Metro Area"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:320
+#: ../headphones/config/definitions/advanced.py:308
 msgid "Metro Area ID"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:321
+#: ../headphones/config/definitions/advanced.py:309
 msgid "Enter the Metro Area ID, e.g. the ID for London is 24426, this can be found by clicking the link and searching/selecting the city, e.g. London should find http://www.songkick.com/metro_areas/24426-uk-london"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:327
+#: ../headphones/config/definitions/advanced.py:315
 msgid "Find Area ID"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:338
+#: ../headphones/config/definitions/advanced.py:326
 msgid "Musicbrainz"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:340
-msgid "Muscbrainz Mirror"
+#: ../headphones/config/definitions/advanced.py:328
+msgid "Musicbrainz Mirror"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:342
+#: ../headphones/config/definitions/advanced.py:330
 msgid "musicbrainz.org"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:343
+#: ../headphones/config/definitions/advanced.py:331
 msgid "custom"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:345
+#: ../headphones/config/definitions/advanced.py:333
 msgid "Host"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:349
+#: ../headphones/config/definitions/advanced.py:337
 msgid "Port"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:354
+#: ../headphones/config/definitions/advanced.py:342
 msgid "Requires Authentication"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:357
-#: ../headphones/config/definitions/advanced.py:375
+#: ../headphones/config/definitions/advanced.py:345
+#: ../headphones/config/definitions/advanced.py:363
 msgid "Username"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:361
-#: ../headphones/config/definitions/advanced.py:380
+#: ../headphones/config/definitions/advanced.py:349
+#: ../headphones/config/definitions/advanced.py:368
 msgid "Password"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:367
+#: ../headphones/config/definitions/advanced.py:355
 msgid "Sleep Interval"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:368
-#: ../headphones/config/definitions/advanced.py:408
+#: ../headphones/config/definitions/advanced.py:356
+#: ../headphones/config/definitions/advanced.py:396
 #: ../headphones/config/definitions/webui.py:93
 msgid "in minutes"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:373
+#: ../headphones/config/definitions/advanced.py:361
 msgid "headphones"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:384
+#: ../headphones/config/definitions/advanced.py:372
 msgid "Don't have an account? Sign up!"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:395
+#: ../headphones/config/definitions/advanced.py:383
 msgid "GitHub"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:397
+#: ../headphones/config/definitions/advanced.py:385
 msgid "GitHub Updater Enabled"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:398
+#: ../headphones/config/definitions/advanced.py:386
 msgid "Enable autoupdates for Headphones through GitHub "
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:402
+#: ../headphones/config/definitions/advanced.py:390
 msgid "GitHub Username"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:403
+#: ../headphones/config/definitions/advanced.py:391
 msgid "Username, used to check updates on GitHub.com"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:407
+#: ../headphones/config/definitions/advanced.py:395
 msgid "Check interval"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:409
+#: ../headphones/config/definitions/advanced.py:397
 msgid "Interval between checks for updates"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:414
+#: ../headphones/config/definitions/advanced.py:402
 msgid "Check on startup"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:415
+#: ../headphones/config/definitions/advanced.py:403
 msgid "Perform check for updates on startup"
 msgstr ""
 
