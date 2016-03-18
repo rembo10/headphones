@@ -172,72 +172,6 @@
 
     <script>
 
-        hideServerDivs = function () {
-                $("#customoptions").slideUp();
-                $("#hpserveroptions").slideUp();
-        };
-
-        hideEncoderDivs = function () {
-                $("#lameffmpegproperties").slideUp();
-                $("#xldproperties").slideUp();
-        };
-        hideEncodingOptionDivs = function () {
-                $("#vbr_options").slideUp();
-                $("#cbr_options").slideUp();
-        };
-
-        handleNewServerSelection = function () {
-                hideServerDivs();
-
-                switch ($(this).val()) {
-                        case 'custom':
-                            $("#customoptions").slideDown();
-                        break;
-                        case 'headphones':
-                            $("#hpserveroptions").slideDown();
-                        break;
-                }
-        };
-
-        handleNewEncoderSelection = function () {
-                hideEncoderDivs();
-
-                switch ($(this).val()) {
-                        case 'xld':
-                            $("#xldproperties").slideDown();
-                            break;
-                        case 'ffmpeg':
-                            $("#lameffmpegproperties").slideDown();
-                            break;
-                        case 'libav':
-                            $("#lameffmpegproperties").slideDown();
-                            break;
-                        case 'lame':
-                            $("#lameffmpegproperties").slideDown();
-                            break;
-                }
-        };
-
-        handleNewEncodingOptionSelection = function () {
-                hideEncodingOptionDivs();
-
-                switch ($(this).val()) {
-                        case 'vbr':
-                            $("#vbr_options").slideDown();
-                            break;
-                        case 'cbr':
-                            $("#cbr_options").slideDown();
-                            break;
-                }
-        };
-
-        function openExtrasDialog() {
-            $("#dialog").dialog({ close: function(){
-                var elem = '<input type="button" data-success="Changes saved successfully">';
-                doAjaxCall('configUpdate', elem,'tabs',true);
-            }}).dialog("open");
-        };
-
         function initThisPage(opts)
         {
 
@@ -271,12 +205,6 @@
                 $("#mirror").change(handleNewServerSelection);
                         handleNewServerSelection.apply($("#mirror"));
 
-                $("#encoder").change(handleNewEncoderSelection);
-                        handleNewEncoderSelection.apply($("#encoder"));
-
-                $("#encodervbrcbr").change(handleNewEncodingOptionSelection);
-                        handleNewEncodingOptionSelection.apply($("#encodervbrcbr"));
-
                 var deletedNewznabs = 0;
 
                 $(".remove").click(function() {
@@ -290,25 +218,6 @@
                     $(this).parent().parent().remove();
                     deletedTorznabs = deletedTorznabs + 1;
                 });
-
-                $("#modify_extras").click(openExtrasDialog);
-
-                $("#include_extras").click(function(){
-                    if ($("#include_extras").is(":checked")){
-                        openExtrasDialog();
-                    }
-                });
-
-                ## %for extra in config['extras']:
-                ## $("#${extra}_temp").click(function(){
-                ##     if ($(this).is(":checked")){
-                ##         $("#${extra}").attr("checked", true);
-                ##     }
-                ##     else {
-                ##         $("#${extra}").attr("checked", false);
-                ##     }
-                ## });
-                ## %endfor
 
                 $("#add_newznab").click(function() {
                     var intId = $("#newznab_providers > div").size() + deletedNewznabs + 1;

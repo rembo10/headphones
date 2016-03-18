@@ -287,7 +287,7 @@ class OptionDeprecated(OptionBase):
 
 class OptionString(OptionBase):
 
-    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, maxlength=None):
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, cssclasses=None, maxlength=None):
         super(OptionString, self).__init__(appkey, section, default, options=options)
 
         self.label = label
@@ -295,6 +295,11 @@ class OptionString(OptionBase):
         self.tooltip = tooltip
 
         self.maxlength = maxlength
+
+        if isinstance(cssclasses, (tuple, list)):
+            self.cssclasses = map(str, cssclasses)
+        else:
+            self.cssclasses = []
 
 class OptionCombobox(OptionString):
     """ Textbox with list of available variants """
@@ -319,7 +324,7 @@ class OptionCombobox(OptionString):
 
 class OptionPath(OptionBase):
 
-    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, maxlength=None):
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, cssclasses=None, maxlength=None):
         super(OptionPath, self).__init__(appkey, section, default, initype=path, options=options)
 
         self.label = label
@@ -327,6 +332,11 @@ class OptionPath(OptionBase):
         self.tooltip = tooltip
 
         self.maxlength = maxlength
+
+        if isinstance(cssclasses, (tuple, list)):
+            self.cssclasses = map(str, cssclasses)
+        else:
+            self.cssclasses = []
 
     @property
     def templateName(self):
@@ -344,12 +354,17 @@ class OptionUrl(OptionString):
 
 class OptionNumber(OptionBase):
 
-    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, minvalue=None, maxvalue=None):
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, cssclasses=None, minvalue=None, maxvalue=None):
         super(OptionNumber, self).__init__(appkey, section, default, initype=int, options=None)
 
         self.label = label
         self.caption = caption
         self.tooltip = tooltip
+
+        if isinstance(cssclasses, (tuple, list)):
+            self.cssclasses = map(str, cssclasses)
+        else:
+            self.cssclasses = []
 
         self.minvalue = minvalue
         self.maxvalue = maxvalue
@@ -366,7 +381,7 @@ class OptionBool(OptionBase):
         self.caption = caption
         self.tooltip = tooltip
 
-        # TODO : implement in template
+        # DONE : implement in template
         self.alignleft = alignleft
 
     def uiValue2DataValue(self, value):
@@ -409,7 +424,7 @@ class OptionCheckboxList(OptionBase):
         self.tooltip = tooltip
         self._itemtype = itemtype
 
-        # TODO : implement in template
+        # DONE : implement in template
         self.alignleft = alignleft
 
         self.items = []
@@ -589,6 +604,7 @@ class OptionList(OptionBase):
         self.tooltip = tooltip
 
         self.maxlength = None
+        self.cssclasses = [] # check implementation in OptionString
 
     @property
     def templateName(self):

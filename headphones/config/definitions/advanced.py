@@ -4,7 +4,7 @@
 
 from .._viewmodel import Block
 
-from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionBool, OptionPath #, OptionPassword
+from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionBool, OptionPath, OptionPassword
 from .._viewmodel import OptionDropdownSelector, OptionDropdown, OptionCombobox, OptionCheckboxListExtrasCrutch # OptionCheckboxList
 from .._viewmodel import TemplaterExtension, LabelExtension
 
@@ -156,7 +156,7 @@ def reg(tabname, register_block_cb, register_options_cb):
 
             OptionString('ADVANCEDENCODER', 'General', '',
                 label=_('Arguments'),
-                caption=_('Ignores all of the above options'),
+                caption=_('<i class="fa fa-exclamation-circle"></i> Ignores all of the above options'),
                 tooltip=_('Advanced Encoding Options'),
             ),
         ))
@@ -186,6 +186,7 @@ def reg(tabname, register_block_cb, register_options_cb):
         Block('miscellaneous', caption=_("Miscellaneous"), options=register_options_cb(
             OptionSwitch('INCLUDE_EXTRAS', 'General', False,
                 label=_('Automatically include extras when adding an artist'),
+                tooltip=_('Choose Which Extras to Include'),
                 alignleft=True,
                 options=register_options_cb(
 
@@ -212,6 +213,48 @@ def reg(tabname, register_block_cb, register_options_cb):
                     ),
                 )
             ),
+            OptionBool('OFFICIAL_RELEASES_ONLY', 'General', False,
+                alignleft=True,
+                label=_('Only include \'official\' extras (i.e. no bootlegs, promos, etc.)'),
+            ),
+            OptionBool('AUTOWANT_UPCOMING', 'General', True,
+                alignleft=True,
+                label=_('Automatically mark upcoming albums as wanted'),
+            ),
+            OptionBool('AUTOWANT_ALL', 'General', False,
+                alignleft=True,
+                label=_('Automatically mark all albums as wanted'),
+            ),
+            OptionBool('AUTOWANT_MANUALLY_ADDED', 'General', True,
+                alignleft=True,
+                label=_('Automatically mark manually added albums as wanted'),
+                tooltip=_('Automatically mark manually added albums from search results as wanted'),
+            ),
+            OptionBool('WAIT_UNTIL_RELEASE_DATE', 'General', False,
+                alignleft=True,
+                label=_('Wait until an album\'s release date before searching'),
+                tooltip=_('Wait until an album\'s release date before searching'),
+            ),
+            OptionBool('FREEZE_DB', 'General', False,
+                alignleft=True,
+                label=_('Don\'t add new artists when post-processing albums'),
+                tooltip=_(('Freeze the database, so new artists won\'t be added automatically. Use'
+                           ' this if Headphones adds artists because due to wrong snatches. This check'
+                           ' is skipped when the folder name is appended with release group ID.'
+                )),
+            ),
+            OptionBool('DO_NOT_PROCESS_UNMATCHED', 'General', False,
+                alignleft=True,
+                label=_('Stop post-processing if no good metadata match found'),
+                tooltip=_('Stop post-processing if no good metadata match found'),
+            ),
+            OptionBool('IDTAG', 'Beets', False,
+                alignleft=True,
+                label=_('Tag using ID3v2.3 instead of ID3v2.4'),
+                tooltip=_('Tag using ID3v2.3 instead of ID3v2.4'),
+            ),
+
+
         ))
     )
 
@@ -261,6 +304,94 @@ def reg(tabname, register_block_cb, register_options_cb):
             ),
         )
     ))
+
+    # =======================================================================================
+    # SongKick
+    register_block_cb(tabname,
+        Block('songkick', caption=_("Songkick"), options=register_options_cb(
+            OptionSwitch('SONGKICK_ENABLED', 'Songkick', True,
+                label=_('Show concert info'),
+                options=register_options_cb(
+                    OptionString('SONGKICK_APIKEY', 'Songkick', 'nd1We7dFW2RqxPw8',
+                        label=_('API Key'),
+                        maxlength=128
+                    ),
+                    OptionSwitch('SONGKICK_FILTER_ENABLED', 'Songkick', False,
+                        label=_('Filter by Metro Area'),
+                        options=register_options_cb(
+                            OptionString('SONGKICK_LOCATION', 'Songkick', '',
+                                label=_('Metro Area ID'),
+                                tooltip=_(('Enter the Metro Area ID, e.g. the ID for London is 24426,'
+                                           ' this can be found by clicking the link and searching/selecting'
+                                           ' the city, e.g. London should find'
+                                           ' http://www.songkick.com/metro_areas/24426-uk-london'
+                                )),
+                            ),
+                            TemplaterExtension(template_name='SongkickAreaIdExtension', strings={'caption': _('Find Area ID')}),
+                        )
+                    ),
+                )
+            ),
+        ))
+    )
+
+    # =======================================================================================
+    # Musicbrainz
+    register_block_cb(tabname,
+        Block('musicbrainz', caption=_("Musicbrainz"), options=register_options_cb(
+            OptionDropdownSelector('MIRROR', 'General', 'musicbrainz.org', initype=str,
+                label=_('Muscbrainz Mirror'),
+                items=(
+                    OptionDropdownSelector.Item(value='musicbrainz.org', label=_('musicbrainz.org')),
+                    OptionDropdownSelector.Item(value='custom', label=_('custom'), options=register_options_cb(
+                        OptionString('CUSTOMHOST', 'General', 'localhost',
+                            label=_('Host'),
+                            maxlength=128
+                        ),
+                        OptionNumber('CUSTOMPORT', 'General', 5000,
+                            label=_('Port'),
+                            minvalue=0,
+                            maxvalue=999999
+                        ),
+                        OptionSwitch('CUSTOMAUTH', 'General', False,
+                            label=_('Requires Authentication'),
+                            options=register_options_cb(
+                                OptionString('CUSTOMUSER', 'General', '',
+                                    label=_('Username'),
+                                    maxlength=128
+                                ),
+                                OptionPassword('CUSTOMPASS', 'General', '',
+                                    label=_('Password'),
+                                    maxlength=64
+                                ),
+                            )
+                        ),
+                        OptionNumber('CUSTOMSLEEP', 'General', 1,
+                            label=_('Sleep Interval'),
+                            caption=_('in minutes'),
+                            minvalue=0,
+                            maxvalue=999999
+                        ),
+                    )),
+                    OptionDropdownSelector.Item(value='headphones', label=_('headphones'), options=register_options_cb(
+                        OptionString('HPUSER', 'General', '',
+                            label=_('Username'),
+                            cssclasses=['hpuser'],
+                            maxlength=128
+                        ),
+                        OptionString('HPPASS', 'General', '',
+                            label=_('Password'),
+                            cssclasses=['hppass'],
+                            maxlength=128
+                        ),
+                        TemplaterExtension(template_name='CodeshyRegExtension', strings={'caption': _('Don\'t have an account? Sign up!')}),
+                    )),
+                )
+            ),
+
+
+        ))
+    )
 
     # =======================================================================================
     register_block_cb(tabname,
