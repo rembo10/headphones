@@ -19,10 +19,6 @@ But the most classes have its own template (they are inherited from Renderable)
 """
 # ===============================================
 
-# will be useful for translation
-def _(x):
-    return x
-
 def _get_iterator_over_visible(items):
     return ifilter(lambda t: not hasattr(t, 'visible') or t.visible, items)
 

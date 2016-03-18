@@ -1,13 +1,10 @@
 from .._viewmodel import Block
 from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionBool, OptionPath, LabelExtension, OptionDropdownSelector, OptionPercent
+from ..loc import _
 
 """
 Options from "Quality and Post Processing" Tab
 """
-
-def _(x):
-    """ required just for marking translatable strings"""
-    return x
 
 def reg(tabname, register_block_cb, register_options_cb):
     # =======================================================================================
@@ -25,23 +22,23 @@ def reg(tabname, register_block_cb, register_options_cb):
                             LabelExtension(
                                 cssclasses=None,
                                 fullwidth=True,
-                                label=_(('Reject if target size is not in bitrate range:'))
+                                label=_('Reject if target size is not in bitrate range:')
                             ),
                             OptionNumber('LOSSLESS_BITRATE_FROM', 'General', 0,
                                 label=_('from:'),
                                 caption=_('in kbps'),
-                                tooltip=_(('e.g. if album length = 40 mins, from = 350 kbps, then min'
+                                tooltip=_('e.g. if album length = 40 mins, from = 350 kbps, then min'
                                            ' target size = 102.5 mb, anything less will be rejected'
-                                )),
+                                ),
                                 minvalue=0,
                                 maxvalue=999999
                             ),
                             OptionNumber('LOSSLESS_BITRATE_TO', 'General', 0,
                                 label=_('to'),
                                 caption=_('in kbps'),
-                                tooltip=_(('e.g. if album length = 40 mins, to = 2000 kbps, then max'
+                                tooltip=_('e.g. if album length = 40 mins, to = 2000 kbps, then max'
                                            ' target size = 586 mb, anything greater will be rejected'
-                                )),
+                                ),
                                 minvalue=0,
                                 maxvalue=999999
                             ),
@@ -69,7 +66,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                                 maxvalue=100
                             ),
                             LabelExtension(
-                                label=_(('of the target size ')),
+                                label=_('of the target size '),
                                 fullwidth=False,
                             ),
                             OptionBool('PREFERRED_BITRATE_ALLOW_LOSSLESS', 'General', False,
@@ -93,7 +90,7 @@ def reg(tabname, register_block_cb, register_options_cb):
             LabelExtension(
                 cssclasses=None, # ['small'],
                 fullwidth=True,
-                label=_(('Separate words with a comma, e.g. "word1,word2,word3".'))
+                label=_('Separate words with a comma, e.g. "word1,word2,word3".')
             ),
             OptionString('IGNORED_WORDS', 'General', '',
                 label=_('Ignored Words'),
@@ -101,23 +98,23 @@ def reg(tabname, register_block_cb, register_options_cb):
             ),
             OptionString('PREFERRED_WORDS', 'General', '',
                 label=_('Preferred Words'),
-                caption=_(('Results with these words in the title will be preferred over results'
+                caption=_('Results with these words in the title will be preferred over results'
                            ' without them (search provider names can also be entered)'
-                )),
+                ),
             ),
             OptionString('REQUIRED_WORDS', 'General', '',
                 label=_('Required Words'),
-                caption=_(('Results without these words in the title will be filtered out. You can'
+                caption=_('Results without these words in the title will be filtered out. You can'
                            ' use OR: "flac OR lossless OR alac, vinyl"'
-                )),
+                ),
             ),
             OptionBool('IGNORE_CLEAN_RELEASES', 'General', False,
                 alignleft=True,
                 label=_('Ignore clean/censored releases'),
                 caption=_(''),
-                tooltip=_(('Filter out releases that contain the words "clean","edited" or'
+                tooltip=_('Filter out releases that contain the words "clean","edited" or'
                            ' "censored", as long as those words aren\'t in the search term'
-                )),
+                ),
             ),
         ))
     )
@@ -150,9 +147,9 @@ def reg(tabname, register_block_cb, register_options_cb):
             OptionBool('CUE_SPLIT', 'General', True,
                 alignleft=True,
                 label=_('Split single file albums into multiple tracks'),
-                tooltip=_(('Use associated .cue sheet to split single file albums into multiple tracks.'
+                tooltip=_('Use associated .cue sheet to split single file albums into multiple tracks.'
                            ' Requires shntool with flac or xld cli (OS X) to be installed.'
-                )),
+                ),
             ),
             OptionBool('CLEANUP_FILES', 'General', False,
                 alignleft=True,
@@ -176,9 +173,10 @@ def reg(tabname, register_block_cb, register_options_cb):
                     LabelExtension(
                         cssclasses=['small'],
                         fullwidth=True,
-                        label=_(('Use $Artist/$artist, $Album/$album, $Year/$year, put optional variables'
+                        label=_('Use $Artist/$artist, $Album/$album, $Year/$year, put optional variables'
                                  ' in square brackets, use single-quote marks to escape square brackets'
-                                 ' literally (\'[\', \']\').'))
+                                 ' literally (\'[\', \']\').'
+                        )
                     ),
                 )
             ),
@@ -193,9 +191,9 @@ def reg(tabname, register_block_cb, register_options_cb):
 
             OptionPath('DESTINATION_DIR', 'General', '',
                 label=_('Destination Directory'),
-                caption=_(('The directory where Headphones will move file to after post processing, e.g.'
+                caption=_('The directory where Headphones will move file to after post processing, e.g.'
                            ' /Volumes/share/music.'
-                )),
+                ),
             ),
             OptionPath('LOSSLESS_DESTINATION_DIR', 'General', '',
                 label=_('Lossless Destination Directory'),

@@ -4,11 +4,7 @@
 
 from .._viewmodel import Block
 from .._viewmodel import OptionString, OptionNumber, OptionPassword, OptionBool, OptionPath, OptionDropdown, OptionUrl, OptionDropdownSelector, LabelExtension
-
-def _(x):
-    """ required just for marking translatable strings"""
-    return x
-
+from ..loc import _
 
 def reg(tabname, register_block_cb, register_options_cb):
 
@@ -172,9 +168,10 @@ def reg(tabname, register_block_cb, register_options_cb):
 
                             LabelExtension(
                                 cssclasses=['small'],
-                                label=_(('Note: With Transmission, you can specify a different download'
+                                label=_('Note: With Transmission, you can specify a different download'
                                            ' directory for downloads sent from Headphones. Set it in the Music'
-                                           ' Download Directory below'))
+                                           ' Download Directory below'
+                                )
                             ),
                         )
                     ),
@@ -182,9 +179,10 @@ def reg(tabname, register_block_cb, register_options_cb):
                         register_options_cb(
                             LabelExtension(
                                 cssclasses=['small', 'heading'],
-                                label=_(('<i class="fa fa-info-circle"></i> Note: uTorrent may keep files'
+                                label=_('<i class="fa fa-info-circle"></i> Note: uTorrent may keep files'
                                            ' read only when completed. Check "Preferences -> Advanced -> bt.read_only_on_complete"'
-                                           ' in case of problems.'))
+                                           ' in case of problems.'
+                                )
                             ),
                             OptionUrl('UTORRENT_HOST', 'uTorrent', '',
                                 label=_('uTorrent Host'),
@@ -218,9 +216,10 @@ def reg(tabname, register_block_cb, register_options_cb):
                             ),
                             LabelExtension(
                                 cssclasses=['small'],
-                                label=_(('Note: With Deluge, you can specify a different download'
+                                label=_('Note: With Deluge, you can specify a different download'
                                          ' directory for downloads sent from Headphones. Set it in'
-                                         ' the Music Download Directory below'))
+                                         ' the Music Download Directory below'
+                                )
                             ),
                             OptionString('DELUGE_LABEL', 'Deluge', '',
                                 label=_('Deluge Label'),
