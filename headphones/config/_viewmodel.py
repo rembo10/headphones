@@ -11,14 +11,15 @@ from headphones.exceptions import ConfigError
 from headphones.config.typeconv import path, boolext
 from _datamodel import OptionModel
 
-# ===============================================
 """ ViewModel-classes of configuration
 
 Some of classes still just ViewModels, without its own template (for example : Tabs)
 But the most classes have its own template (they are inherited from Renderable)
 """
-# ===============================================
 
+# ===============================================
+# Internal helpers
+# ===============================================
 
 def _get_iterator_over_visible(items):
     return ifilter(lambda t: not hasattr(t, 'visible') or t.visible, items)
@@ -27,6 +28,30 @@ def _get_iterator_over_visible(items):
 # Abstract, base class
 # ===============================================
 
+class CssClassable(object):
+    def __init__(self):
+        self._cssclasses = []
+
+    @property
+    def cssclasses(self):
+        return self._cssclasses
+
+    @cssclasses.setter
+    def cssclasses(self, value):
+        if not value:
+            self._cssclasses = []
+        elif isinstance(value, (tuple, list)):
+            self._cssclasses = map(str, value)
+        elif isinstance(value, basestring):
+            self._cssclasses = [value]
+        else:
+            raise TypeError('Unexpected type of "cssclasses": {0}'.format(type(value)))
+        return
+
+    def uiCssClasses(self):
+        if self.cssclasses:
+            return ' '.join(self.cssclasses)
+        return ''
 
 class Renderable(object):
     """ Basic class for all things, which could be rendered in runtime from python code """
@@ -107,10 +132,10 @@ class Tabs(object):
     pass
 
 
-class Tab(Renderable):
+class Tab(Renderable, CssClassable):
     """ UI-tab for grouping option on a UI-page """
 
-    def __init__(self, id, caption=None, cssclass=None, message=None, savecaption=None):
+    def __init__(self, id, caption=None, cssclasses=None, message=None, savecaption=None):
         super(Tab, self).__init__()
 
         self._map = {}
@@ -119,7 +144,7 @@ class Tab(Renderable):
 
         self.id = re.sub(r'[^\w\d_]', '_', id)
         self.caption = caption
-        self.cssclass = cssclass
+        self.cssclasses = cssclasses
         self.message = message
         self.savecaption = savecaption
         self.__setitem__ = None
@@ -165,14 +190,14 @@ class Tab(Renderable):
     pass
 
 
-class Block(object):
+class Block(CssClassable):
     """ UI-block for grouping options within `Tab` """
 
-    def __init__(self, id, caption=None, cssclass=None, options=None):
+    def __init__(self, id, caption=None, cssclasses=None, options=None):
         self.id = re.sub(r'[^\w\d_]', '_', id)
         self.caption = caption
         self._options = options or []  # should not be None
-        self.cssclass = cssclass
+        self.cssclasses = cssclasses
 
     def __repr__(self):
         return "<%s id=%s, caption=%s, with %d options>" % (
@@ -237,8 +262,13 @@ class OptionBase(Renderable):
     def appkey(self):
         return self.model.appkey
 
-    #@property
+    @property
+    def value(self):
+        """ raw, runtime value of the option """
+        return self.model.get()
+
     def uiValue(self):
+        """ UI-friendly value of the option """
         return self.model.get()
 
     def uiValue2DataValue(self, value):
@@ -294,7 +324,7 @@ class OptionDeprecated(OptionBase):
         return ""
 
 
-class OptionString(OptionBase):
+class OptionString(OptionBase, CssClassable):
 
     def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, cssclasses=None, maxlength=None):
         super(OptionString, self).__init__(appkey, section, default, options=options)
@@ -305,11 +335,7 @@ class OptionString(OptionBase):
 
         self.maxlength = maxlength
 
-        if isinstance(cssclasses, (tuple, list)):
-            self.cssclasses = map(str, cssclasses)
-        else:
-            self.cssclasses = []
-
+        self.cssclasses = cssclasses
 
 class OptionCombobox(OptionString):
     """ Textbox with list of available variants """
@@ -334,7 +360,7 @@ class OptionCombobox(OptionString):
                     self.items.append(str(i))
 
 
-class OptionPath(OptionBase):
+class OptionPath(OptionBase, CssClassable):
 
     def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, cssclasses=None, maxlength=None):
         super(OptionPath, self).__init__(appkey, section, default, initype=path, options=options)
@@ -344,11 +370,7 @@ class OptionPath(OptionBase):
         self.tooltip = tooltip
 
         self.maxlength = maxlength
-
-        if isinstance(cssclasses, (tuple, list)):
-            self.cssclasses = map(str, cssclasses)
-        else:
-            self.cssclasses = []
+        self.cssclasses = cssclasses
 
     @property
     def templateName(self):
@@ -368,7 +390,7 @@ class OptionUrl(OptionString):
         return "OptionString"
 
 
-class OptionNumber(OptionBase):
+class OptionNumber(OptionBase, CssClassable):
 
     def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, cssclasses=None, minvalue=None, maxvalue=None):
         super(OptionNumber, self).__init__(appkey, section, default, initype=int, options=None)
@@ -377,10 +399,7 @@ class OptionNumber(OptionBase):
         self.caption = caption
         self.tooltip = tooltip
 
-        if isinstance(cssclasses, (tuple, list)):
-            self.cssclasses = map(str, cssclasses)
-        else:
-            self.cssclasses = []
+        self.cssclasses = cssclasses
 
         self.minvalue = minvalue
         self.maxvalue = maxvalue
@@ -656,9 +675,9 @@ class OptionDropdownSelector(OptionDropdown):
         return css == csssuffix
 
 
-class OptionList(OptionBase):
+class OptionList(OptionBase, CssClassable):
 
-    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None):
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, cssclasses=None):
         super(OptionList, self).__init__(appkey, section, default, initype=list, options=None)
 
         self.label = label
@@ -666,7 +685,7 @@ class OptionList(OptionBase):
         self.tooltip = tooltip
 
         self.maxlength = None
-        self.cssclasses = []  # check implementation in OptionString
+        self.cssclasses = cssclasses
 
     @property
     def templateName(self):
@@ -681,18 +700,14 @@ class OptionList(OptionBase):
 # PLACEHOLDERS and STATIC templates
 # ===============================================
 
-class LabelExtension(Renderable):
+class LabelExtension(Renderable, CssClassable):
     """ Render simple text on the same level, as other options """
 
     def __init__(self, label=None, cssclasses=None, fullwidth=False):
         super(LabelExtension, self).__init__()
         self.label = label
         self.fullwidth = fullwidth
-        if cssclasses:
-            if not isinstance(cssclasses, (tuple, list)):
-                logger.error('LabelExtension argument "cssclasses" should be an array. Will str() it.')
-                cssclasses = [str(cssclasses)]
-        self.cssclasses = cssclasses or []
+        self.cssclasses = cssclasses
 
     def render(self, parent=None):
         return super(LabelExtension, self).render(me=self, parent=parent)

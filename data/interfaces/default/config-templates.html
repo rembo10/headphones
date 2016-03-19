@@ -7,13 +7,10 @@
 ## ===============================================
 
 <%def name="Tab(me, parent=None)">
-<%
-    cssclass = me.cssclass if me.cssclass else '';
-%>
     ## ID for TAB here is required, it is used to choose appropriate tab
     ## usign url in address bar (#bookmarks)
     ## Do not delete ID!
-    <div id="${me.id}" class="tab tab-${me.id} ${cssclass}">
+    <div id="${me.id}" class="tab tab-${me.id} ${me.uiCssClasses()}">
         % if me.message:
             <div class="message">
                 ${me.message}
@@ -21,7 +18,7 @@
         % endif
 
         % for block in me:
-            <fieldset class="block ${block.cssclass if block.cssclass else ''}">
+            <fieldset class="block ${block.uiCssClasses()}">
                 <legend>${block.caption}</legend>
                 % for option in block:
                     ${option.render(parent=me)}
@@ -55,7 +52,7 @@
         %endif
 
         <div class="input-wrapper">
-            <input type="text" class="${ ' '.join(me.cssclasses) }" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${size_attr} />
+            <input type="text" class="${me.uiCssClasses()}" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${size_attr} />
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -132,7 +129,7 @@
         %endif
 
         <div class="input-wrapper">
-            <input type="password" class="${ ' '.join(me.cssclasses) }" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${size_attr} />
+            <input type="password" class="${me.uiCssClasses()}" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${size_attr} />
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -154,16 +151,6 @@
     uiname = me.uiName()
     val = me.uiValue()
 
-    ## TODO: this is scrutch. The boundaries are tuned for actual
-    ##       value of option, to preserve its original value...
-    valr = me.model.get()
-    mi = me.minvalue
-    ma = me.maxvalue
-    if (ma is not None) and (valr > ma):
-        ma = valr
-    if (mi is not None) and (valr < mi):
-        mi = valr
-
     min_attr = '' if me.minvalue is None else ' min="%d"' % me.minvalue
     max_attr = '' if me.maxvalue is None else ' max="%d"' % me.maxvalue
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
@@ -176,7 +163,7 @@
         %endif
 
         <div class="input-wrapper">
-            <input type="number" class="${ ' '.join(me.cssclasses) }" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${min_attr} ${max_attr} />
+            <input type="number" class="${me.uiCssClasses()}" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${min_attr} ${max_attr} />
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -199,16 +186,6 @@
     embed_id = uiname + '_embed'
     val = me.uiValue()
 
-    ## TODO: this is scrutch. The boundaries are tuned for actual
-    ##       value of option, to preserve its original value...
-    valr = me.model.get()
-    mi = me.minvalue
-    ma = me.maxvalue
-    if (ma is not None) and (valr > ma):
-        ma = valr
-    if (mi is not None) and (valr < mi):
-        mi = valr
-
     min_attr = '' if me.minvalue is None else ' min="%d"' % me.minvalue
     max_attr = '' if me.maxvalue is None else ' max="%d"' % me.maxvalue
     tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
@@ -221,7 +198,7 @@
         %endif
 
         <div class="input-wrapper">
-            <input type="number" class="${ ' '.join(me.cssclasses) }" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${min_attr} ${max_attr} /><span>%</span>
+            <input type="number" class="${me.uiCssClasses()}" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${min_attr} ${max_attr} /><span>%</span>
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -515,7 +492,7 @@
 
 <%def name="LabelExtension(me, parent=None)">
 <%
-    cssclasses = list(me.cssclasses)
+    cssclasses = list(me.cssclasses) # important - it should be new list!!
     if not me.fullwidth:
         cssclasses.append('input-wrapper')
 
