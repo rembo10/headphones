@@ -2,18 +2,20 @@
 # Options from "Search Providers" Tab
 # =======================================================================================
 
-from .._viewmodel import Block
+from .._viewmodel import BlockExtension
 
 from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionBool, OptionPath, OptionPassword
 from .._viewmodel import OptionDropdownSelector, OptionDropdown, OptionCombobox, OptionCheckboxListExtrasCrutch # OptionCheckboxList
 from .._viewmodel import TemplaterExtension, LabelExtension
 from ..loc import _
 
-def reg(tabname, register_block_cb, register_options_cb):
+def reg(_extend_cb):
+
+    opts = []
 
     # =======================================================================================
-    register_block_cb(tabname,
-        Block('renaming_options', caption=_("Renaming options"), options=register_options_cb(
+    opts.extend([
+        BlockExtension('renaming_options', caption=_("Renaming options"), options=_extend_cb(
 
             OptionString('FOLDER_FORMAT', 'General', 'Artist/Album [Year]',
                 label=_('Folder Format'),
@@ -37,11 +39,11 @@ def reg(tabname, register_block_cb, register_options_cb):
                 label=_('Use underscores instead of spaces'),
             ),
         ))
-    )
+    ])
 
     # =======================================================================================
-    register_block_cb(tabname,
-        Block('reencoding_options', caption=_("Re-Encoding Options"), options=register_options_cb(
+    opts.extend([
+        BlockExtension('reencoding_options', caption=_("Re-Encoding Options"), options=_extend_cb(
             LabelExtension(
                 label=_('<i class="fa fa-info-circle"></i> Note: this option requires the lame,'
                          ' ffmpeg or xld encoder'
@@ -51,7 +53,7 @@ def reg(tabname, register_block_cb, register_options_cb):
             ),
             OptionSwitch('MUSIC_ENCODER', 'General', False,
                 label=_('Re-encode downloads during postprocessing'),
-                options=register_options_cb(
+                options=_extend_cb(
                     OptionBool('ENCODERLOSSLESS', 'General', True,
                         label=_('Only re-encode lossless files (.flac)'),
                     ),
@@ -65,7 +67,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 label=_('Enable multi-core'),
                 caption=_(''),
                 tooltip=_(''),
-                options=register_options_cb(
+                options=_extend_cb(
                     OptionNumber('ENCODER_MULTICORE_COUNT', 'General', 0,
                         label=_('Multi-core count'),
                         caption=_('Set equal to the number of cores, or 0 for auto'),
@@ -83,7 +85,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 items=(
                     OptionDropdownSelector.Item('lame', _('lame'), csssuffix='encoder-lame-ffmpeg-libav-embed'),
                     OptionDropdownSelector.Item('ffmpeg', _('ffmpeg'), csssuffix='encoder-lame-ffmpeg-libav-embed'),
-                    OptionDropdownSelector.Item('libav', _('libav'), csssuffix='encoder-lame-ffmpeg-libav-embed', options=register_options_cb(
+                    OptionDropdownSelector.Item('libav', _('libav'), csssuffix='encoder-lame-ffmpeg-libav-embed', options=_extend_cb(
                         # DONE : I want add CUSTOM values here!!!!
                         OptionCombobox('ENCODEROUTPUTFORMAT', 'General', 'mp3', #initype=str,
                             label=_('Format'),
@@ -97,7 +99,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                         OptionDropdownSelector('ENCODERVBRCBR', 'General', 'cbr', initype=str,
                             label=_('VBR/CBR'),
                             items=(
-                                ('cbr', _('cbr'), register_options_cb(
+                                ('cbr', _('cbr'), _extend_cb(
                                     OptionDropdown('BITRATE', 'General', 192, initype=int,
                                         label=_('Bitrate'),
                                         items=(
@@ -109,7 +111,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                                         )
                                     ),
                                 )),
-                                ('vbr', _('vbr'), register_options_cb(
+                                ('vbr', _('vbr'), _extend_cb(
                                     OptionDropdown('ENCODERQUALITY', 'General', 2, initype=int,
                                         label=_('Quality'),
                                         items=(
@@ -145,7 +147,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                         ),
                     )),
 
-                    OptionDropdownSelector.Item('xld', _('xld'), register_options_cb(
+                    OptionDropdownSelector.Item('xld', _('xld'), _extend_cb(
                         OptionString('XLDPROFILE', 'General', '',
                             label=_('XLD Profile'),
                         )
@@ -153,27 +155,27 @@ def reg(tabname, register_block_cb, register_options_cb):
                 )
             )
         ))
-    )
+    ])
 
     # =======================================================================================
     # REAL Advanced block
-    register_block_cb(tabname,
-        Block('advanced_encoding_options', caption=_("Advanced Encoding Options"), options=register_options_cb(
+    opts.extend([
+        BlockExtension('advanced_encoding_options', caption=_("Advanced Encoding Options"), options=_extend_cb(
             OptionPath('ENCODER_PATH', 'General', '',
                 label=_('Path to Encoder'),
             ),
         ))
-    )
+    ])
 
     # =======================================================================================
     # Miscellaneous
-    register_block_cb(tabname,
-        Block('miscellaneous', caption=_("Miscellaneous"), options=register_options_cb(
+    opts.extend([
+        BlockExtension('miscellaneous', caption=_("Miscellaneous"), options=_extend_cb(
             OptionSwitch('INCLUDE_EXTRAS', 'General', False,
                 label=_('Automatically include extras when adding an artist'),
                 tooltip=_('Choose Which Extras to Include'),
                 alignleft=True,
-                options=register_options_cb(
+                options=_extend_cb(
 
                     # TODO : somebody, please, convert the value of this option to list of int
                     #        currently it is a string, not a list - JUST COMMA SEPARATED STRING...
@@ -241,11 +243,11 @@ def reg(tabname, register_block_cb, register_options_cb):
 
 
         ))
-    )
+    ])
 
     # =======================================================================================
-    register_block_cb(tabname,
-        Block('directories', caption=_("Directories"), options=register_options_cb(
+    opts.extend([
+        BlockExtension('directories', caption=_("Directories"), options=_extend_cb(
             OptionPath('LOG_DIR', 'General', '',
                 label=_('Log Directory'),
                 maxlength=64,
@@ -265,7 +267,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 label=_('File Permissions Enabled'),
                 tooltip=_('Change file permissions during post-processing'),
 
-                options=register_options_cb(
+                options=_extend_cb(
                     # TODO: Convert to OptionFilePermission
                     OptionString('FILE_PERMISSIONS', 'General', '0644',
                         label=_('File Permissions'),
@@ -278,7 +280,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 label=_('Folder Permissions Enabled'),
                 tooltip=_('Change folder permissions during post-processing'),
 
-                options=register_options_cb(
+                options=_extend_cb(
                     # TODO: Convert to OptionFilePermission
                     OptionString('FOLDER_PERMISSIONS', 'General', '0755',
                         label=_('Folder Permissions'),
@@ -287,23 +289,23 @@ def reg(tabname, register_block_cb, register_options_cb):
                     ),
                 )
             ),
-        )
-    ))
+        ))
+    ])
 
     # =======================================================================================
     # SongKick
-    register_block_cb(tabname,
-        Block('songkick', caption=_("Songkick"), options=register_options_cb(
+    opts.extend([
+        BlockExtension('songkick', caption=_("Songkick"), options=_extend_cb(
             OptionSwitch('SONGKICK_ENABLED', 'Songkick', True,
                 label=_('Show concert info'),
-                options=register_options_cb(
+                options=_extend_cb(
                     OptionString('SONGKICK_APIKEY', 'Songkick', 'nd1We7dFW2RqxPw8',
                         label=_('API Key'),
                         maxlength=128
                     ),
                     OptionSwitch('SONGKICK_FILTER_ENABLED', 'Songkick', False,
                         label=_('Filter by Metro Area'),
-                        options=register_options_cb(
+                        options=_extend_cb(
                             OptionString('SONGKICK_LOCATION', 'Songkick', '',
                                 label=_('Metro Area ID'),
                                 tooltip=_('Enter the Metro Area ID, e.g. the ID for London is 24426,'
@@ -318,17 +320,17 @@ def reg(tabname, register_block_cb, register_options_cb):
                 )
             ),
         ))
-    )
+    ])
 
     # =======================================================================================
     # Musicbrainz
-    register_block_cb(tabname,
-        Block('musicbrainz', caption=_("Musicbrainz"), options=register_options_cb(
+    opts.extend([
+        BlockExtension('musicbrainz', caption=_("Musicbrainz"), options=_extend_cb(
             OptionDropdownSelector('MIRROR', 'General', 'musicbrainz.org', initype=str,
                 label=_('Musicbrainz Mirror'),
                 items=(
                     OptionDropdownSelector.Item(value='musicbrainz.org', label=_('musicbrainz.org')),
-                    OptionDropdownSelector.Item(value='custom', label=_('custom'), options=register_options_cb(
+                    OptionDropdownSelector.Item(value='custom', label=_('custom'), options=_extend_cb(
                         OptionString('CUSTOMHOST', 'General', 'localhost',
                             label=_('Host'),
                             maxlength=128
@@ -340,7 +342,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                         ),
                         OptionSwitch('CUSTOMAUTH', 'General', False,
                             label=_('Requires Authentication'),
-                            options=register_options_cb(
+                            options=_extend_cb(
                                 OptionString('CUSTOMUSER', 'General', '',
                                     label=_('Username'),
                                     maxlength=128
@@ -358,7 +360,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                             maxvalue=999999
                         ),
                     )),
-                    OptionDropdownSelector.Item(value='headphones', label=_('headphones'), options=register_options_cb(
+                    OptionDropdownSelector.Item(value='headphones', label=_('headphones'), options=_extend_cb(
                         OptionString('HPUSER', 'General', '',
                             label=_('Username'),
                             cssclasses=['hpuser'],
@@ -373,19 +375,17 @@ def reg(tabname, register_block_cb, register_options_cb):
                     )),
                 )
             ),
-
-
         ))
-    )
+    ])
 
     # =======================================================================================
-    register_block_cb(tabname,
-        Block('git', caption=_("GitHub"), options=register_options_cb(
+    opts.extend([
+        BlockExtension('git', caption=_("GitHub"), options=_extend_cb(
             OptionSwitch('CHECK_GITHUB', 'General', True,
                 label=_('GitHub Updater Enabled'),
                 tooltip=_('Enable autoupdates for Headphones through GitHub '),
 
-                options=register_options_cb(
+                options=_extend_cb(
                     OptionString('GIT_USER', 'General', 'rembo10',
                         label=_('GitHub Username'),
                         tooltip=_('Username, used to check updates on GitHub.com'),
@@ -405,5 +405,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 )
             ),
         ))
-    )
+    ])
     # =======================================================================================
+
+    return opts

@@ -1,5 +1,58 @@
-from unittestcompat import TestCase #, TestArgs
+from unittestcompat import TestCase, TestArgs
 from _viewmodel import OptionBase, OptionInternal, OptionDeprecated
+
+from _viewmodel import CssClassable
+
+class CssClassableTest(TestCase):
+
+    @TestArgs(
+        (None, []),
+
+        ("class-red", ['class-red']),
+
+        (["class-red"], ['class-red']),
+        (['class-red', 'green'], ['class-red', 'green']),
+
+        (tuple(["-red"]), ['-red']),
+        (tuple(['-box', '-shad']), ['-box', '-shad']),
+    )
+    def test_cssclasses_setget(self, val, exp):
+        """ CssClassable cssclasses set-get normal """
+
+        o = CssClassable()
+        o.cssclasses = val
+
+        self.assertEqual(o.cssclasses, exp)
+
+    @TestArgs(
+        (True),
+        (1),
+    )
+    def test_cssclasses_set_raises(self, val):
+        """ CssClassable cssclasses set SHOULD raise on invalid values """
+
+        o = CssClassable()
+        with self.assertRaisesRegexp(TypeError, r'Unexpected\s+type.*"cssclasses'):
+            o.cssclasses = val
+        self.assertEqual(o.cssclasses, [])
+
+    @TestArgs(
+        (None, ''),
+
+        ("class-red", 'class-red'),
+
+        (["class-red"], 'class-red'),
+        (['class-red', 'green'], 'class-red green'),
+
+        (tuple(["-red"]), '-red'),
+        (tuple(['-box', '-shad']), '-box -shad'),
+    )
+    def test_uiCssClasses(self, val, exp):
+        o = CssClassable()
+        o.cssclasses = val
+
+        self.assertEqual(o.uiCssClasses(), exp)
+
 
 class OptionInternalTest(TestCase):
 

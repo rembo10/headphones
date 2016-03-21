@@ -252,10 +252,12 @@ input[type=button]
 }
 
 form {
-	legend, h2 {
+	legend, h2
+    {
 	    font-size: 16px;
 	    font-weight: bold;
 	    margin-bottom: 10px;
+        text-shadow: 1px 1px 0 #FFFFFF;
 	}
     table { width: 100%; }
     fieldset {
@@ -564,19 +566,12 @@ footer {
 
 .config
 {
-    legend
+    .-hp-heading-mixin()
     {
         font-weight: bold;
+        font-size:larger;
         margin-bottom: 1em;
         text-shadow: 1px 1px 0 #FFFFFF;
-    }
-
-    /* gray text under field */
-    .caption
-    {
-        color: @caption-color;
-        line-height: @base-font-size;
-        margin-top: 3px;
     }
 
     .tab
@@ -584,6 +579,24 @@ footer {
         .columnRule( 1px solid @border-color );
         .columnCount(2);
         .columnGap(4em);
+
+        legend
+        {
+            .-hp-heading-mixin();
+        }
+
+        .heading
+        {
+            .-hp-heading-mixin();
+        }
+
+        /* gray text under field */
+        .caption
+        {
+            color: @caption-color;
+            line-height: @base-font-size;
+            margin-top: 3px;
+        }
 
         .message
         {
@@ -611,7 +624,7 @@ footer {
             .extension
             {
                 margin-bottom: 1em;
-                font-size: @base-font-size;
+                //font-size: @base-font-size;
                 width:100%;
 
                 /* TWO COLS inside option block */
@@ -621,7 +634,7 @@ footer {
                 {
                     padding-top: 7px;
                     width: @caption-col-width;
-                    font-size: @base-font-size;
+                    //font-size: @base-font-size;
                     line-height: normal;
 
                     display: block;
@@ -655,7 +668,6 @@ footer {
                     border-top: 1px solid #CDCDCD;
                     .shadow(inset 0 1px 1px #e0e0e0);
                     color: @text-color;
-                    font-size: larger;
                     // TODO : need responsive
                     max-width: 230px;
                     padding: 3px 5px;

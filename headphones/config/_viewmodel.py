@@ -105,19 +105,17 @@ class Renderable(object):
 # ===============================================
 # Section "One-time used templates"
 #
-# Tabs, Tab and Block classes are defined here.
+# Tabs, Tab classes are defined here.
 # Their templates are used just once, and, as
 # a consequence, are embed to the main template -
 # - config.html
 # ===============================================
 
-
 class Tabs(object):
     """ ViewModel for entire TABS element. Contains all the tabs """
 
-    def __init__(self, *args):
-        self.tabs = list(*args)
-        pass
+    def __init__(self, tabs=None):
+        self.tabs = list(tabs)
 
     def __repr__(self):
         return "<%s with %d tabs>" % (
@@ -129,25 +127,27 @@ class Tabs(object):
         """ Default iterator is sharpened for UI tasks """
 
         return _get_iterator_over_visible(self.tabs)
-    pass
-
 
 class Tab(Renderable, CssClassable):
     """ UI-tab for grouping option on a UI-page """
 
-    def __init__(self, id, caption=None, cssclasses=None, message=None, savecaption=None):
+    def __init__(self, id, caption=None, cssclasses=None, message=None, savecaption=None, options=None):
         super(Tab, self).__init__()
 
         self._map = {}
         self._index = []
         self._sorted = True
+        self.__setitem__ = None
+        self._id = re.sub(r'[^\w\d_]', '_', id)
 
-        self.id = re.sub(r'[^\w\d_]', '_', id)
         self.caption = caption
-        self.cssclasses = cssclasses
         self.message = message
         self.savecaption = savecaption
-        self.__setitem__ = None
+        self.cssclasses = cssclasses
+
+        if options:
+            for i in options:
+                self.add(i)
 
     def __repr__(self):
         return "<%s id='%s', caption='%s', with %d blocks>" % (
@@ -164,56 +164,47 @@ class Tab(Renderable, CssClassable):
     def __iter__(self):
         """ Iterates over non-empty tabs """
 
-        if not self._sorted:
-            self._index.sort(key=lambda a: a[0])
+        self._sort()
 
         # TODO : omit empty blocks
         return imap(lambda x: x[1], _get_iterator_over_visible(self._index))
 
-    def add(self, block, order=None):
-        """ add one block to current tab """
+    def _print_content(self):
+        self._sort()
+        for i in self._items:
+            logger.debug('tab [{2}] item, order:[{0}], item: [{1}]'.format(i[0], type(i[1]), self.id))
 
-        if not isinstance(block, Block):
-            raise TypeError('Not a Block')
+    def _sort(self):
+        if not self._sorted:
+            self._index.sort(key=lambda a: a[0])
+            self._sorted = True
 
-        self._sorted = False
+    @property
+    def id(self):
+        return self._id
 
-        bid = block.id
+    def add(self, item, order=None):
+        """ add one item to current tab """
+
+        if not isinstance(item, Renderable):
+            raise TypeError('Tab: item [{0}] is not Renderable child'.format(type(item)))
+
+        if hasattr(item, 'id'):
+            bid = item.id
+        elif hasattr(item, 'appkey'):
+            bid = item.appkey
+        else:
+            ll = len(self._index)
+            bid = 'item' + str(ll)
+
         if bid in self._map:
             # extend
-            raise ConfigError('Duplicate block')
+            raise ConfigError('Duplicate item')
         else:
             # append
-            self._map[bid] = block
-            self._index.append(tuple([order, block]))
-
-    pass
-
-
-class Block(CssClassable):
-    """ UI-block for grouping options within `Tab` """
-
-    def __init__(self, id, caption=None, cssclasses=None, options=None):
-        self.id = re.sub(r'[^\w\d_]', '_', id)
-        self.caption = caption
-        self._options = options or []  # should not be None
-        self.cssclasses = cssclasses
-
-    def __repr__(self):
-        return "<%s id=%s, caption=%s, with %d options>" % (
-            self.__class__.__name__,
-            self.id,
-            self.caption,
-            len(self._options)
-        )
-
-    def __iter__(self):
-        """ Iterates over non-empty tabs """
-        # TODO : omit invisible options blocks
-        return _get_iterator_over_visible(self._options)
-
-    pass
-
+            self._sorted = False
+            self._map[bid] = item
+            self._index.append(tuple([order, item]))
 
 # ===============================================
 # base class for options
@@ -302,7 +293,7 @@ class OptionInternal(OptionBase):
     def __init__(self, appkey, section, default=None, initype=str):
         super(OptionInternal, self).__init__(appkey, section, default, initype=initype)
 
-        self.readonly = True
+        self.readonly = False
         self.visible = False
 
     def render(self, *args, **qwargs):
@@ -389,6 +380,12 @@ class OptionUrl(OptionString):
         # currently, url uses the same template as string
         return "OptionString"
 
+class OptionEmail(OptionString):
+
+    @property
+    def templateName(self):
+        # currently, url uses the same template as string
+        return "OptionString"
 
 class OptionNumber(OptionBase, CssClassable):
 
@@ -409,9 +406,9 @@ class OptionPercent(OptionNumber):
     pass
 
 
-class OptionBool(OptionBase):
+class OptionBool(OptionBase, CssClassable):
 
-    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, alignleft=False):
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, cssclasses=None, alignleft=False):
         super(OptionBool, self).__init__(appkey, section, default, initype=boolext, options=options)
 
         self.label = label
@@ -420,6 +417,7 @@ class OptionBool(OptionBase):
 
         # DONE : implement in template
         self.alignleft = alignleft
+        self.cssclasses = cssclasses
 
     def uiValue2DataValue(self, value):
         # override
@@ -695,10 +693,41 @@ class OptionList(OptionBase, CssClassable):
         # override
         return [value]
 
-
 # ===============================================
 # PLACEHOLDERS and STATIC templates
 # ===============================================
+
+class BlockExtension(Renderable, CssClassable):
+    """ UI-block for grouping options within `Tab` """
+
+    def __init__(self, id, caption=None, cssclasses=None, options=None):
+        super(BlockExtension, self).__init__()
+
+        self._id = id
+        self.caption = caption
+        self._options = options or []  # should not be None
+        self.cssclasses = cssclasses
+
+    @property
+    def id(self):
+        return self._id
+
+    def __repr__(self):
+        return "<%s id=%s, caption=%s, with %d options>" % (
+            self.__class__.__name__,
+            self.id,
+            self.caption,
+            len(self._options)
+        )
+
+    def __iter__(self):
+        """ Iterates over non-empty tabs """
+        # TODO : omit invisible options blocks
+        return _get_iterator_over_visible(self._options)
+
+    def render(self, parent=None):
+        return super(BlockExtension, self).render(me=self, parent=parent)
+
 
 class LabelExtension(Renderable, CssClassable):
     """ Render simple text on the same level, as other options """
@@ -715,7 +744,6 @@ class LabelExtension(Renderable, CssClassable):
 # ===============================================
 # Option extensions
 # ===============================================
-
 
 class TemplaterExtension(Renderable):
     """ Allow render any template, extending HTML for options with non-standart layout """
@@ -738,7 +766,6 @@ class TemplaterExtension(Renderable):
             self.__class__.__name__,
             self._template_name
         )
-
 
 # ===============================================
 # ===============================================

@@ -1,4 +1,4 @@
-from .._viewmodel import Block
+from .._viewmodel import BlockExtension
 from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionBool, OptionPath, LabelExtension, OptionDropdownSelector, OptionPercent
 from ..loc import _
 
@@ -6,10 +6,11 @@ from ..loc import _
 Options from "Quality and Post Processing" Tab
 """
 
-def reg(tabname, register_block_cb, register_options_cb):
+def reg(_extend_cb):
+    opts = []
     # =======================================================================================
-    register_block_cb(tabname,
-       Block('quality', caption=_("Quality"), options=register_options_cb(
+    opts.extend([
+       BlockExtension('quality', caption=_("Quality"), options=_extend_cb(
 
             OptionDropdownSelector('PREFERRED_QUALITY', 'General', 0, initype=int,
                 label=_('Preferred quality'),
@@ -18,14 +19,14 @@ def reg(tabname, register_block_cb, register_options_cb):
                     (0, _('Highest Quality excluding Lossless')),    # TODO: title = Snatch the highest quality available, excluding lossless.
                     (1, _('Highest Quality including Lossless')),    # TODO: title = Snatch the highest quality available, including lossless.
                     (3, _('Lossless Only'),     # TODO: title = Snatch only lossless quality.
-                        register_options_cb(
+                        _extend_cb(
                             LabelExtension(
                                 cssclasses=None,
                                 fullwidth=True,
                                 label=_('Reject if target size is not in bitrate range:')
                             ),
                             OptionNumber('LOSSLESS_BITRATE_FROM', 'General', 0,
-                                label=_('from:'),
+                                label=_('From'),
                                 caption=_('in kbps'),
                                 tooltip=_('e.g. if album length = 40 mins, from = 350 kbps, then min'
                                            ' target size = 102.5 mb, anything less will be rejected'
@@ -34,7 +35,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                                 maxvalue=999999
                             ),
                             OptionNumber('LOSSLESS_BITRATE_TO', 'General', 0,
-                                label=_('to'),
+                                label=_('To'),
                                 caption=_('in kbps'),
                                 tooltip=_('e.g. if album length = 40 mins, to = 2000 kbps, then max'
                                            ' target size = 586 mb, anything greater will be rejected'
@@ -46,7 +47,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                         )
                     ),
                     (2, _('Preferred Bitrate'),    # TODO: title = Prefer certain bitrate range, including lossless fallback. Use this option if you have a lot of wrong snatches.
-                        register_options_cb(
+                        _extend_cb(
                             OptionNumber('PREFERRED_BITRATE', 'General', 0,
                                 label=_('Target bitrate'),
                                 caption=_('in kbps'),
@@ -82,11 +83,11 @@ def reg(tabname, register_block_cb, register_options_cb):
                 )
             ),
        ))
-    )
+    ])
 
     # =======================================================================================
-    register_block_cb(tabname,
-       Block('search_words', caption=_("Search Words"), options=register_options_cb(
+    opts.extend([
+       BlockExtension('search_words', caption=_("Search Words"), options=_extend_cb(
             LabelExtension(
                 cssclasses=None, # ['small'],
                 fullwidth=True,
@@ -117,15 +118,15 @@ def reg(tabname, register_block_cb, register_options_cb):
                 ),
             ),
         ))
-    )
+    ])
 
     # =======================================================================================
-    register_block_cb(tabname,
-        Block('post_processing', caption=_("Post-Processing"), options=register_options_cb(
+    opts.extend([
+        BlockExtension('post_processing', caption=_("Post-Processing"), options=_extend_cb(
             OptionSwitch('MOVE_FILES', 'General', False,
                 alignleft=True,
                 label=_('Move downloads to Destination Folder'),
-                options=register_options_cb(
+                options=_extend_cb(
                     OptionBool('REPLACE_EXISTING_FOLDERS', 'General', False,
                         alignleft=True,
                         label=_('Replace existing folders?'),
@@ -164,7 +165,7 @@ def reg(tabname, register_block_cb, register_options_cb):
             OptionSwitch('ADD_ALBUM_ART', 'General', False,
                 alignleft=True,
                 label=_('Add album art jpeg to album folder'),
-                options=register_options_cb(
+                options=_extend_cb(
                     OptionString('ALBUM_ART_FORMAT', 'General', 'folder',
                         label=_('Name of album art file'),
                         caption=_('will be suffixed with ".jpg"'),
@@ -200,4 +201,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 caption=_('Optional. Set this if you have a separate directory for lossless music.'),
             ),
         ))
-    )
+    ])
+
+    return opts

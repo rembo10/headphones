@@ -342,6 +342,7 @@ form h2 {
   font-size: 16px;
   font-weight: bold;
   margin-bottom: 10px;
+  text-shadow: 1px 1px 0 #FFFFFF;
 }
 form table {
   width: 100%;
@@ -761,19 +762,6 @@ footer {
   position: relative;
   z-index: 99;
 }
-.config {
-  /* gray text under field */
-}
-.config legend {
-  font-weight: bold;
-  margin-bottom: 1em;
-  text-shadow: 1px 1px 0 #FFFFFF;
-}
-.config .caption {
-  color: #999999;
-  line-height: 12px;
-  margin-top: 3px;
-}
 .config .tab {
   -webkit-column-rule: 1px solid #CCCCCC;
   -moz-column-rule: 1px solid #CCCCCC;
@@ -784,6 +772,24 @@ footer {
   -webkit-column-gap: 4em;
   -moz-column-gap: 4em;
   column-gap: 4em;
+  /* gray text under field */
+}
+.config .tab legend {
+  font-weight: bold;
+  font-size: larger;
+  margin-bottom: 1em;
+  text-shadow: 1px 1px 0 #FFFFFF;
+}
+.config .tab .heading {
+  font-weight: bold;
+  font-size: larger;
+  margin-bottom: 1em;
+  text-shadow: 1px 1px 0 #FFFFFF;
+}
+.config .tab .caption {
+  color: #999999;
+  line-height: 12px;
+  margin-top: 3px;
 }
 .config .tab .message {
   -webkit-column-span: all;
@@ -805,7 +811,6 @@ footer {
 .config .tab .block .option,
 .config .tab .block .extension {
   margin-bottom: 1em;
-  font-size: 12px;
   width: 100%;
   /* TWO COLS inside option block */
   position: relative;
@@ -814,7 +819,6 @@ footer {
 .config .tab .block .extension .label {
   padding-top: 7px;
   width: 170px;
-  font-size: 12px;
   line-height: normal;
   display: block;
   /* TWO COLS inside option block */
@@ -849,7 +853,6 @@ footer {
   -o-box-shadow: inset 0 1px 1px #e0e0e0;
   box-shadow: inset 0 1px 1px #e0e0e0;
   color: #343434;
-  font-size: larger;
   max-width: 230px;
   padding: 3px 5px;
 }
