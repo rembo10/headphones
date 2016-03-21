@@ -2,23 +2,25 @@
 # Options from "Web Interface" Tab
 # =======================================================================================
 
-from .._viewmodel import Block
+from .._viewmodel import BlockExtension
 from .._viewmodel import OptionString, OptionNumber, OptionPassword, OptionBool, OptionPath, OptionDropdown, OptionUrl, OptionDropdownSelector, LabelExtension
 from ..loc import _
 
-def reg(tabname, register_block_cb, register_options_cb):
+def reg(_extend_cb):
+
+    opts = []
 
     # =======================================================================================
     # USENET SETTINGS
     # =======================================================================================
-    register_block_cb(tabname,
-        Block('usenet_selector', caption=_("Prefered Usenet"), options=register_options_cb(
+    opts.extend([
+        BlockExtension('usenet_selector', caption=_("Prefered Usenet"), options=_extend_cb(
             OptionDropdownSelector('NZB_DOWNLOADER', 'General', 0, initype=int,
                 label=_('Usenet downloader'),
                 tooltip=_('Method for downloading usenet files.'),
                 items=(
                     (0, _('Sabnzbd'),
-                        register_options_cb(
+                        _extend_cb(
                             OptionUrl('SAB_HOST', 'SABnzbd', '',
                                 label=_('SABnzbd Host'),
                                 caption=_('usually http://localhost:8080'),
@@ -48,7 +50,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                         )
                     ),
                     (1, _('NZBget'),
-                        register_options_cb(
+                        _extend_cb(
                             OptionUrl('NZBGET_HOST', 'NZBget', '',
                                 label=_('NZBget Host'),
                                 caption=_('usually http://localhost:6789'),
@@ -74,18 +76,18 @@ def reg(tabname, register_block_cb, register_options_cb):
                                 label=_('NZBget Priority'),
                                 tooltip=_('NZBget Priority'),
                                 items=(
-                                    (-100, _('Very low')),
+                                    (-100, _('Very Low')),
                                     (-50, _('Low')),
                                     (0, _('Normal')),
                                     (50, _('High')),
-                                    (100, _('Very high')),
+                                    (100, _('Very High')),
                                     (900, _('Force')),
                                 )
                             ),
                         )
                     ),
                     (2, _('Black Hole'),
-                        register_options_cb(
+                        _extend_cb(
                             OptionPath('BLACKHOLE_DIR', 'General', '',
                                 label=_('Black Hole Directory'),
                                 caption=_('Folder your Download program watches for NZBs'),
@@ -96,12 +98,12 @@ def reg(tabname, register_block_cb, register_options_cb):
                 )
             ),
         ))
-    )
+    ])
 
     # =======================================================================================
 
-    register_block_cb(tabname,
-        Block('usenet_common', caption=_("Usenet Common Settings"), options=register_options_cb(
+    opts.extend([
+        BlockExtension('usenet_common', caption=_("Usenet Common Settings"), options=_extend_cb(
             OptionPath('DOWNLOAD_DIR', 'General', '',
                 label=_('Music Download Directory'),
                 caption=_('Full path where SAB or NZBget downloads your music, e.g. <code>/Users/name/Downloads/music</code>'),
@@ -115,19 +117,19 @@ def reg(tabname, register_block_cb, register_options_cb):
                 maxvalue=99999
             ),
         ))
-    )
+    ])
 
     # =======================================================================================
     # TORRENTS SETTINGS
     # =======================================================================================
-    register_block_cb(tabname,
-        Block('torrent_selector', caption=_("Prefered Torrent"), options=register_options_cb(
+    opts.extend([
+        BlockExtension('torrent_selector', caption=_("Prefered Torrent"), options=_extend_cb(
             OptionDropdownSelector('TORRENT_DOWNLOADER', 'General', 0, initype=int,
                 label=_('Torrent downloader'),
                 tooltip=_('Preferred torrent downloader'),
                 items=(
                     (0, _('Black Hole'),
-                        register_options_cb(
+                        _extend_cb(
                             OptionPath('TORRENTBLACKHOLE_DIR', 'General', '',
                                 label=_('Black Hole Directory'),
                                 caption=_('Folder your Download program watches for Torrents'),
@@ -148,7 +150,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                         )
                     ),
                     (1, _('Transmission'),
-                        register_options_cb(
+                        _extend_cb(
                             OptionUrl('TRANSMISSION_HOST', 'Transmission', '',
                                 label=_('Transmission Host'),
                                 caption=_('usually http://localhost:9091'),
@@ -176,7 +178,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                         )
                     ),
                     (2, _('uTorrent (Beta)'),
-                        register_options_cb(
+                        _extend_cb(
                             LabelExtension(
                                 cssclasses=['small', 'heading'],
                                 label=_('<i class="fa fa-info-circle"></i> Note: uTorrent may keep files'
@@ -204,7 +206,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                         )
                     ),
                     (3, _('Deluge (Beta)'),
-                        register_options_cb(
+                        _extend_cb(
                             OptionUrl('DELUGE_HOST', 'Deluge', '',
                                 label=_('Deluge WebUI Host and Port'),
                                 caption=_('Usually http://localhost:8112 (requires WebUI plugin)'),
@@ -239,11 +241,11 @@ def reg(tabname, register_block_cb, register_options_cb):
                 )
             ),
         ))
-    )
+    ])
 
     # =======================================================================================
-    register_block_cb(tabname,
-        Block('torrent_common', caption=_("Torrent Common Settings"), options=register_options_cb(
+    opts.extend([
+        BlockExtension('torrent_common', caption=_("Torrent Common Settings"), options=_extend_cb(
             OptionNumber('NUMBEROFSEEDERS', 'General', 10,
                 label=_('Minimum seeders'),
                 caption=_('Number of minimum seeders a torrent must have to be accepted'),
@@ -272,4 +274,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 )
             ),
         ))
-    )
+    ])
+    # =======================================================================================
+
+    return opts

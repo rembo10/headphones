@@ -2,18 +2,13 @@
 # Options from "Search Providers" Tab
 # =======================================================================================
 
-from .._viewmodel import Block
+# from .._viewmodel import BlockExtension
 from .._viewmodel import OptionString, OptionNumber, OptionPassword, OptionBool, OptionPath, OptionList
 from ..loc import _
 
-def reg(tabname, register_block_cb, register_options_cb):
+def reg(_extend_cb):
 
-    register_block_cb(tabname,
-        Block('all', caption=_("All"), options=register_options_cb(
-
-    # =======================================================================================
-    # =======================================================================================
-    # =======================================================================================
+    opts = [
 
             OptionNumber('ALBUM_COMPLETION_PCT', 'Advanced', 80,
                 label=_('zzALBUM_COMPLETION_PCTzz'),
@@ -30,29 +25,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 minvalue=None,
                 maxvalue=None
             ),
-            OptionNumber('BOXCAR_ENABLED', 'Boxcar', 0,
-                label=_('zzBOXCAR_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('BOXCAR_ONSNATCH', 'Boxcar', 0,
-                label=_('zzBOXCAR_ONSNATCHzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('BOXCAR_TOKEN', 'Boxcar', '',
-                label=_('zzBOXCAR_TOKENzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-
-
-
             OptionPath('CUE_SPLIT_FLAC_PATH', 'General', '',
                 label=_('zzCUE_SPLIT_FLAC_PATHzz'),
                 caption=_(''),
@@ -63,71 +35,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 caption=_(''),
                 tooltip=_(''),
             ),
-            OptionNumber('EMAIL_ENABLED', 'Email', 0,
-                label=_('zzEMAIL_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('EMAIL_FROM', 'Email', '',
-                label=_('zzEMAIL_FROMzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('EMAIL_ONSNATCH', 'Email', 0,
-                label=_('zzEMAIL_ONSNATCHzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionPassword('EMAIL_SMTP_PASSWORD', 'Email', '',
-                label=_('zzEMAIL_SMTP_PASSWORDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('EMAIL_SMTP_PORT', 'Email', 25,
-                label=_('zzEMAIL_SMTP_PORTzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('EMAIL_SMTP_SERVER', 'Email', '',
-                label=_('zzEMAIL_SMTP_SERVERzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('EMAIL_SMTP_USER', 'Email', '',
-                label=_('zzEMAIL_SMTP_USERzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('EMAIL_SSL', 'Email', 0,
-                label=_('zzEMAIL_SSLzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('EMAIL_TLS', 'Email', 0,
-                label=_('zzEMAIL_TLSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('EMAIL_TO', 'Email', '',
-                label=_('zzEMAIL_TOzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
             OptionList('EXTRA_NEWZNABS', 'Newznab', '',
                 label=_('zzEXTRA_NEWZNABSzz'),
                 caption=_(''),
@@ -137,32 +44,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 label=_('zzEXTRA_TORZNABSzz'),
                 caption=_(''),
                 tooltip=_(''),
-            ),
-            OptionNumber('GROWL_ENABLED', 'Growl', 0,
-                label=_('zzGROWL_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('GROWL_HOST', 'Growl', '',
-                label=_('zzGROWL_HOSTzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('GROWL_ONSNATCH', 'Growl', 0,
-                label=_('zzGROWL_ONSNATCHzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('GROWL_PASSWORD', 'Growl', '',
-                label=_('zzGROWL_PASSWORDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
             ),
             OptionBool('HEADPHONES_INDEXER', 'General', False,
                 label=_('zzHEADPHONES_INDEXERzz'),
@@ -219,20 +100,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 minvalue=None,
                 maxvalue=None
             ),
-            OptionNumber('LMS_ENABLED', 'LMS', 0,
-                label=_('zzLMS_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('LMS_HOST', 'LMS', '',
-                label=_('zzLMS_HOSTzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-
             OptionNumber('MININOVA', 'Mininova', 0,
                 label=_('zzMININOVAzz'),
                 caption=_(''),
@@ -245,11 +112,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 caption=_(''),
                 tooltip=_(''),
                 maxlength=None
-            ),
-            OptionBool('MPC_ENABLED', 'MPC', False,
-                label=_('zzMPC_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
             ),
             OptionPath('MUSIC_DIR', 'General', '',
                 label=_('zzMUSIC_DIRzz'),
@@ -281,33 +143,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 caption=_(''),
                 tooltip=_(''),
                 maxlength=None
-            ),
-            OptionString('NMA_APIKEY', 'NMA', '',
-                label=_('zzNMA_APIKEYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('NMA_ENABLED', 'NMA', 0,
-                label=_('zzNMA_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('NMA_ONSNATCH', 'NMA', 0,
-                label=_('zzNMA_ONSNATCHzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('NMA_PRIORITY', 'NMA', 0,
-                label=_('zzNMA_PRIORITYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
             ),
             OptionNumber('NZBSORG', 'NZBsorg', 0,
                 label=_('zzNZBSORGzz'),
@@ -366,26 +201,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_(''),
                 maxlength=None
             ),
-            OptionString('OSX_NOTIFY_APP', 'OSX_Notify', '/Applications/Headphones',
-                label=_('zzOSX_NOTIFY_APPzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('OSX_NOTIFY_ENABLED', 'OSX_Notify', 0,
-                label=_('zzOSX_NOTIFY_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('OSX_NOTIFY_ONSNATCH', 'OSX_Notify', 0,
-                label=_('zzOSX_NOTIFY_ONSNATCHzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
             OptionNumber('PIRATEBAY', 'Piratebay', 0,
                 label=_('zzPIRATEBAYzz'),
                 caption=_(''),
@@ -405,165 +220,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_(''),
                 maxlength=None
             ),
-            OptionString('PLEX_CLIENT_HOST', 'Plex', '',
-                label=_('zzPLEX_CLIENT_HOSTzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('PLEX_ENABLED', 'Plex', 0,
-                label=_('zzPLEX_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('PLEX_NOTIFY', 'Plex', 0,
-                label=_('zzPLEX_NOTIFYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('PLEX_PASSWORD', 'Plex', '',
-                label=_('zzPLEX_PASSWORDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('PLEX_SERVER_HOST', 'Plex', '',
-                label=_('zzPLEX_SERVER_HOSTzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('PLEX_TOKEN', 'Plex', '',
-                label=_('zzPLEX_TOKENzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('PLEX_UPDATE', 'Plex', 0,
-                label=_('zzPLEX_UPDATEzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('PLEX_USERNAME', 'Plex', '',
-                label=_('zzPLEX_USERNAMEzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-
-            OptionNumber('PROWL_ENABLED', 'Prowl', 0,
-                label=_('zzPROWL_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('PROWL_KEYS', 'Prowl', '',
-                label=_('zzPROWL_KEYSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('PROWL_ONSNATCH', 'Prowl', 0,
-                label=_('zzPROWL_ONSNATCHzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('PROWL_PRIORITY', 'Prowl', 0,
-                label=_('zzPROWL_PRIORITYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('PUSHALOT_APIKEY', 'Pushalot', '',
-                label=_('zzPUSHALOT_APIKEYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('PUSHALOT_ENABLED', 'Pushalot', 0,
-                label=_('zzPUSHALOT_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('PUSHALOT_ONSNATCH', 'Pushalot', 0,
-                label=_('zzPUSHALOT_ONSNATCHzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('PUSHBULLET_APIKEY', 'PushBullet', '',
-                label=_('zzPUSHBULLET_APIKEYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('PUSHBULLET_DEVICEID', 'PushBullet', '',
-                label=_('zzPUSHBULLET_DEVICEIDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('PUSHBULLET_ENABLED', 'PushBullet', 0,
-                label=_('zzPUSHBULLET_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('PUSHBULLET_ONSNATCH', 'PushBullet', 0,
-                label=_('zzPUSHBULLET_ONSNATCHzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('PUSHOVER_APITOKEN', 'Pushover', '',
-                label=_('zzPUSHOVER_APITOKENzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('PUSHOVER_ENABLED', 'Pushover', 0,
-                label=_('zzPUSHOVER_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('PUSHOVER_KEYS', 'Pushover', '',
-                label=_('zzPUSHOVER_KEYSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('PUSHOVER_ONSNATCH', 'Pushover', 0,
-                label=_('zzPUSHOVER_ONSNATCHzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('PUSHOVER_PRIORITY', 'Pushover', 0,
-                label=_('zzPUSHOVER_PRIORITYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-
             OptionBool('RENAME_FROZEN', 'General', True,
                 label=_('zzRENAME_FROZENzz'),
                 caption=_(''),
@@ -613,38 +269,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_(''),
                 maxlength=None
             ),
-            OptionNumber('SUBSONIC_ENABLED', 'Subsonic', 0,
-                label=_('zzSUBSONIC_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('SUBSONIC_HOST', 'Subsonic', '',
-                label=_('zzSUBSONIC_HOSTzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('SUBSONIC_PASSWORD', 'Subsonic', '',
-                label=_('zzSUBSONIC_PASSWORDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('SUBSONIC_USERNAME', 'Subsonic', '',
-                label=_('zzSUBSONIC_USERNAMEzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('SYNOINDEX_ENABLED', 'Synoindex', 0,
-                label=_('zzSYNOINDEX_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
             OptionNumber('TORRENT_REMOVAL_INTERVAL', 'General', 720,
                 label=_('zzTORRENT_REMOVAL_INTERVALzz'),
                 caption=_(''),
@@ -674,38 +298,6 @@ def reg(tabname, register_block_cb, register_options_cb):
             ),
             OptionString('TORZNAB_HOST', 'Torznab', '',
                 label=_('zzTORZNAB_HOSTzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('TWITTER_ENABLED', 'Twitter', 0,
-                label=_('zzTWITTER_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('TWITTER_ONSNATCH', 'Twitter', 0,
-                label=_('zzTWITTER_ONSNATCHzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('TWITTER_PASSWORD', 'Twitter', '',
-                label=_('zzTWITTER_PASSWORDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('TWITTER_PREFIX', 'Twitter', 'Headphones',
-                label=_('zzTWITTER_PREFIXzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('TWITTER_USERNAME', 'Twitter', '',
-                label=_('zzTWITTER_USERNAMEzz'),
                 caption=_(''),
                 tooltip=_(''),
                 maxlength=None
@@ -747,7 +339,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 minvalue=None,
                 maxvalue=None
             ),
-            OptionString('WHATCD_PASSWORD', 'What.cd', '',
+            OptionPassword('WHATCD_PASSWORD', 'What.cd', '',
                 label=_('zzWHATCD_PASSWORDzz'),
                 caption=_(''),
                 tooltip=_(''),
@@ -765,49 +357,10 @@ def reg(tabname, register_block_cb, register_options_cb):
                 tooltip=_(''),
                 maxlength=None
             ),
-            OptionNumber('XBMC_ENABLED', 'XBMC', 0,
-                label=_('zzXBMC_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('XBMC_HOST', 'XBMC', '',
-                label=_('zzXBMC_HOSTzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('XBMC_NOTIFY', 'XBMC', 0,
-                label=_('zzXBMC_NOTIFYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('XBMC_PASSWORD', 'XBMC', '',
-                label=_('zzXBMC_PASSWORDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('XBMC_UPDATE', 'XBMC', 0,
-                label=_('zzXBMC_UPDATEzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('XBMC_USERNAME', 'XBMC', '',
-                label=_('zzXBMC_USERNAME_nestor_zz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
 
     # =======================================================================================
     # =======================================================================================
     # =======================================================================================
+    ]
 
-        ))
-    )
+    return opts

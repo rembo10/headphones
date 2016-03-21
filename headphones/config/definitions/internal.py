@@ -5,9 +5,8 @@
 from ..typeconv import path, boolext
 from .._viewmodel import OptionInternal, OptionDeprecated
 
-def reg(tabname, register_block_cb, register_options_cb):
-
-    register_options_cb(
+def reg(_extend_cb):
+    opts = [
         OptionInternal('CONFIG_VERSION', 'General', 0, initype=int),
         OptionInternal('INTERFACE', 'General', 'default', initype=str),
         OptionInternal('SOFT_CHROOT', 'General', '', initype=path),
@@ -21,15 +20,16 @@ def reg(tabname, register_block_cb, register_options_cb):
         OptionInternal('HTTP_PROXY', 'General', False, initype=boolext),
         OptionInternal('HTTP_ROOT', 'General', '/', initype=str),
 
-    )
 
-    # ==============================================================================
-    # DEPRECATED BLOCK
-    #
-    # This options are required to be able to read an old version of the config file and
-    # upgrade it
-    register_options_cb(
+        # ==============================================================================
+        # DEPRECATED BLOCK
+        #
+        # This options are required to be able to read an old version of the config file and
+        # upgrade it
+
         OptionDeprecated('BLACKHOLE', 'General', False, initype=boolext),
         OptionDeprecated('OPEN_MAGNET_LINKS', 'General', False, initype=boolext),
         OptionDeprecated('ENCODERFOLDER', 'General', '', initype=path),
-    )
+    ]
+
+    return opts

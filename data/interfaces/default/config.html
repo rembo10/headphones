@@ -101,9 +101,35 @@
             });
 
             // ## ============================================
+            // ## This is part of 'Tab' Template
+            // REQUIRED ONCE
+            $('.config .tabs').on('click', '.configsubmit', function(){
+                var selected_tab_index = $( ".tabs" ).tabs( "option", "active" );
+
+                doAjaxCall('configUpdate',$(this),
+                    function(sdata){
+                        var url =  $(location).attr('href');
+                        //var tabId = $('.ui-tabs-panel:visible').attr("id");
+
+                        // TODO : I don't know, why here is second ajax call,
+                        //        but this call reload ENTIRE page
+                        //        I left this behaviour, because that is why...
+                        //        You could try to optimize this saving routine,
+                        //        but, please, be careful.. Here are a lot of
+                        //        pitstones..
+                        $('body').load(url, function(data) {
+                            initThisPage({ 'tabs' : { 'active' :selected_tab_index }});
+                        });
+                    }
+
+                    ,true);
+                return false;
+            });
+
+            // ## ============================================
             // ## This is part of 'ApiKeyExtension' Template
             // REQUIRED only for one tpl-extension
-            $('.config .option input.-hp-api-key').click(function(){ $(this).select() });
+            $('.config .option .-hp-api-key input').click(function(){ $(this).select() });
             $('.config .extension button.-hp-api-key').click(function(){
                 var $self = $(this);
                 $.ajax({
@@ -136,31 +162,54 @@
                     });
             });
 
+            // ## ============================================
+            // ## This is part of 'OsxAppRegisterExtension' Template
+            // REQUIRED only for one tpl-extension
+
+            // TODO : HANDLE ERROR !!!!
+            $('.config').on('click', 'button.-hp-notify-osx-register', function () {
+                var osx_notify_app = $(".-hp-notify-osx-register input[type=text]").val();
+                $.get("/osxnotifyregister",
+                    {'app': osx_notify_app},
+                    function (data) {
+                        $('.ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>"); 
+                        $('.ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut()
+                    }
+                );
+            })
 
             // ## ============================================
-            // ## This is part of 'Tab' Template
-            // REQUIRED ONCE
-            $('.config .tabs div').on('click', '.configsubmit', function(){
-                var selected_tab_index = $( ".tabs" ).tabs( "option", "active" );
+            // ## This is part of 'TwitterNotifyExtension' Template
+            // REQUIRED only for one tpl-extension
+            $('.config').on('click', 'button.-hp-twitter-step-1', function () {
+                var _local_msg = $(this).data('request-message');
+                $.get("/twitterStep1", function (data){
+                    window.open(data);
+                })
+                .done(function () {
+                    $('.ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>" + _local_msg + "</div>");
+                    $('.ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
+                });
+            });
 
-                doAjaxCall('configUpdate',$(this),
-                    function(sdata){
-                        var url =  $(location).attr('href');
-                        //var tabId = $('.ui-tabs-panel:visible').attr("id");
+            $('.config').on('click', 'button.-hp-twitter-step-2', function () {
+                var twitter_key = $(".config input.-hp-twitter-step-2").val();
+                console.debug('Going to verify twitter key: ', twitter_key);
+                $.get(
+                    "/twitterStep2",
+                    {'key': twitter_key},
+                    function (data) {
+                        $('.ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>");
+                        $('.ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
+                });
+            });
 
-                        // TODO : I don't know, why here is second ajax call,
-                        //        but this call reload ENTIRE page
-                        //        I left this behaviour, because that is why...
-                        //        You could try to optimize this saving routine,
-                        //        but, please, be careful.. Here are a lot of
-                        //        pitstones..
-                        $('body').load(url, function(data) {
-                            initThisPage({ 'tabs' : { 'active' :selected_tab_index }});
-                        });
-                    }
-
-                    ,true);
-                return false;
+            $('.config').on('click', 'button.-hp-twitter-test', function () {
+                $.get("/testTwitter",
+                    function (data) {
+                        $('.ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>");
+                        $('.ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
+                });
             });
 
             // ## ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -174,34 +223,6 @@
 
         function initThisPage(opts)
         {
-
-                $('input[type=radio]').change(function(){
-                        if ($("#nzb_downloader_sabnzbd").is(":checked"))
-                        {
-                            $("#nzbget_options,#blackhole_options").fadeOut("fast", function() { $("#sabnzbd_options").fadeIn() });
-                        }
-                        if ($("#nzb_downloader_nzbget").is(":checked"))
-                        {
-                            $("#sabnzbd_options,#blackhole_options").fadeOut("fast", function() { $("#nzbget_options").fadeIn() });
-                        }
-                        if ($("#nzb_downloader_blackhole").is(":checked"))
-                        {
-                            $("#sabnzbd_options,#nzbget_options").fadeOut("fast", function() { $("#blackhole_options").fadeIn() });
-                        }
-                        if ($("#torrent_downloader_blackhole").is(":checked"))
-                        {
-                            $("#transmission_options,#utorrent_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
-                        }
-                        if ($("#torrent_downloader_transmission").is(":checked"))
-                        {
-                            $("#torrent_blackhole_options,#utorrent_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
-                        }
-                        if ($("#torrent_downloader_utorrent").is(":checked"))
-                        {
-                            $("#torrent_blackhole_options,#transmission_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
-                        }
-                });
-
                 var deletedNewznabs = 0;
 
                 $(".remove").click(function() {
@@ -258,31 +279,6 @@
                 });
                 initActions();
 
-
-
-                $('#twitterStep1').click(function () {
-                    $.get("/twitterStep1", function (data) {window.open(data); })
-                    .done(function () { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>Confirm Authorization. Check pop-up blocker if no response.</div>"); });
-                    $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
-                });
-
-                $('#twitterStep2').click(function () {
-                    var twitter_key = $("#twitter_key").val();
-                    $.get("/twitterStep2", {'key': twitter_key}, function (data) { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>"); });
-                    $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
-                });
-
-                $('#testTwitter').click(function () {
-                    $.get("/testTwitter",
-                        function (data) { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>"); });
-                    $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut();
-                });
-
-                $('#osxnotifyregister').click(function () {
-                    var osx_notify_app = $("#osx_notify_reg").val();
-                    $.get("/osxnotifyregister", {'app': osx_notify_app}, function (data) { $('#ajaxMsg').html("<div class='msg'><span class='ui-icon ui-icon-check'></span>"+data+"</div>"); });
-                    $('#ajaxMsg').addClass('success').fadeIn().delay(3000).fadeOut()
-                })
         }
 
         $(document).ready(function() {

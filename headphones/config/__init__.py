@@ -9,12 +9,13 @@ from _viewmodel import Tab, Tabs, OptionBase
 
 from _viewmodel import PostDataParser
 
-import headphones.config.definitions.webui
-import headphones.config.definitions.download
-import headphones.config.definitions.search
-import headphones.config.definitions.quality
-import headphones.config.definitions.internal
-import headphones.config.definitions.advanced
+from headphones.config.definitions.internal import reg as reg_internal
+from headphones.config.definitions.webui import reg as reg_webui
+from headphones.config.definitions.download import reg as reg_download
+from headphones.config.definitions.search import reg as reg_search
+from headphones.config.definitions.quality import reg as reg_quality
+from headphones.config.definitions.notifications import reg as reg_notifications
+from headphones.config.definitions.advanced import reg as reg_advanced
 
 from _meta import MetaConfig
 
@@ -38,70 +39,53 @@ class Config(object):
         logger.debug('Read meta config from: [{0}]'.format(meta_config_name))
         self._meta_config = MetaConfig(meta_config_name)
 
-        self._registerTabs()
-
         # used in opt-register , it helps to make the names of sections correct
         self._section_name_spell_check_dic = {}
 
-        self._vault = {}
+        self._options = {}
         self._uiresolver = PostDataParser()
 
-        # register options from definition's files:
-        headphones.config.definitions.internal.reg(None, self._registerBlock, self._registerOptions)
-        headphones.config.definitions.webui.reg('webui', self._registerBlock, self._registerOptions)
-        headphones.config.definitions.download.reg('download', self._registerBlock, self._registerOptions)
-
-        headphones.config.definitions.search.reg('search', self._registerBlock, self._registerOptions)
-
-        headphones.config.definitions.quality.reg('quality_processing', self._registerBlock, self._registerOptions)
-        headphones.config.definitions.advanced.reg('advanced', self._registerBlock, self._registerOptions)
-
-        logger.info('All options registered. Total options: {0}'.format(len(self._vault)))
-
-        # forced reinit of the config file, by default HP will not save
-        # values of non-touched options
         # -------------------------------------------------------------
-        # Reinit is required, because only this method will add NEW options
-        # to the config file, explicitly touching each option in config
-        # file.
-        # If you want remove this line - first, try to remove config.ini,
-        # then - run HP, shutdown it, and check new created config.ini -
-        # there will be not so much options.
-        # The second case: try to add NEW OPTION to one of definition
-        # files - you could observe the same behavior - HP won't save
-        # the value of non-touched options to the config file.
-        self._reInitConfigFile()
+        # register options from definition's files:
+        # -------------------------------------------------------------
+        self._initOptions()
+
+        logger.info('All options registered. Total options: {0}'.format(len(self._options)))
 
         self._upgrade()
 
     def getViewModel(self):
         return self._tabs
 
-    def _registerTabs(self):
-        self._tabs = Tabs((
+    def _initOptions(self):
+
+        # Internal options will exist out of the tabs:
+        self._extend(*reg_internal(self._extend))
+
+        self._tabs = Tabs(tabs=[
                 Tab('webui', _("Web Interface"), savecaption=_("Save Changes"),
-                    message=_('<i class="fa fa-info-circle"></i> Web Interface changes require a restart to take effect.'
-                                'Saving settings will restart intervals if changed.')
+                    message=_('<i class="fa fa-info-circle"></i> Web Interface changes require a'
+                                ' restart to take effect. Saving settings will restart intervals'
+                                ' if changed.'),
+                    options=self._extend(*reg_webui(self._extend))
                 ),
-                Tab('download', _("Download settings"), savecaption=_("Save Changes")),
-                Tab('search', _("Search providers"), savecaption=_("Save Changes")),
-                Tab('quality_processing', _("Quality &amp; Post Processing"), savecaption=_("Save Changes")),
-                Tab('notifications', _("Notifications"), savecaption=_("Save Changes")),
-                Tab('advanced', _("Advanced Settings"), savecaption=_("Save Changes")),
-            ))
-
-    # TODO : refactor
-    def _registerBlock(self, tabid, *blocks):
-        tab = None
-        for t in self._tabs:
-            if t.id == tabid:
-                tab = t
-        if not tab:
-            raise Exception('no such tab: ' + str(tabid))
-
-        for block in blocks:
-            tab.add(block)
-            logger.debug('config:Block registered: {0} > {1}'.format(tabid, block.id))
+                Tab('download', _("Download settings"), savecaption=_("Save Changes"),
+                    options=self._extend(*reg_download(self._extend))
+                ),
+                Tab('search', _("Search providers"), savecaption=_("Save Changes"),
+                    options=self._extend(*reg_search(self._extend))
+                ),
+                Tab('quality_processing', _("Quality &amp; Post Processing"),
+                    savecaption=_("Save Changes"),
+                    options=self._extend(*reg_quality(self._extend))
+                ),
+                Tab('notifications', _("Notifications"), savecaption=_("Save Changes"),
+                    options=self._extend(*reg_notifications(self._extend))
+                ),
+                Tab('advanced', _("Advanced Settings"), savecaption=_("Save Changes"),
+                    options=self._extend(*reg_advanced(self._extend))
+                ),
+            ])
 
     def _checkSectionName(self, section_name, appkey):
         """ Unnecessary method, it does not make any serious job, just make an additional
@@ -119,32 +103,34 @@ class Config(object):
                 self._section_name_spell_check_dic[lc_section] = section_name
 
     # TODO : refactor
-    def _registerOptions(self, *options):
-        """ Register option to use as config value
+    def _extend(self, *options):
+        """ Extends configuration with new options
 
-        This is the main part of setting up the routes for config values.
+        This is the cornerstone of tuning routes for saving and loading config values between app-core,
+        UI and INI-file.
         We will link together:
             1. names of options from INI file
             2. names of options in the web UI
-            3. datamodels (they store actual values of each option)
+            3. datamodels (they store runtime values of each option)
             4. viewmodels (they know, how to render option, and how to handle value from UI)
 
-        Each option will be registered in the _vault - which is a map {OPTKEY -> datamodel}, and in
-        the _uiresolver, storing mapping {UINAME -> Option}.
+        Each option will be registered:
+            1. in `self._options` - it is a map {OPTKEY -> datamodel},
+            2. and in the `self._uiresolver`, which stores mapping {UINAME -> viewmodel}.
         """
 
         for o in options:
             if isinstance(o, OptionBase):
                 #logger.debug('config:Option registered: {0}'.format(str(o)))
 
-                if o.appkey in self._vault:
+                if o.appkey in self._options:
                     raise ConfigError('Duplicate option:', o.appkey)
 
                 self._checkSectionName(o.model.section, o.model.appkey)
 
                 # register INI
                 o.model.bindToConfig(lambda: self._config)
-                self._vault[o.appkey] = o.model
+                self._options[o.appkey] = o.model
 
                 # register UI
                 self._uiresolver.register(o)
@@ -164,30 +150,16 @@ class Config(object):
     def write(self):
         """ Make a copy of the stored config and write it to the configured file """
 
-        headphones.logger.debug("Writing configuration to file")
+        logger.debug("Writing configuration to file")
         try:
             self._config.write()
-            headphones.logger.info("Writing configuration to file: DONE")
+            logger.info("Writing configuration to file: DONE")
         except IOError as e:
-            headphones.logger.error("Error writing configuration file: %s", e)
-
-    def _reInitConfigFile(self):
-        """ Creates config file with all options with current values
-
-        The difference from `write` method - here, the first step is FORCED copying
-        of all options to config file
-        """
-        # force copying all options to config:
-        headphones.logger.debug("Reinit config file")
-        for k in self._vault.keys():
-            optmod = self._vault[k]
-            optmod.set(optmod.get())
-        self.write()
-        headphones.logger.info("Reinit config file DONE")
+            logger.error("Error writing configuration file: %s", e)
 
     def get_extra_newznabs(self):
         """ Return the extra newznab tuples """
-        headphones.logger.debug("DEPRECATED: config.get_extra_newznabs")
+        logger.debug("DEPRECATED: config.get_extra_newznabs")
 
         extra_newznabs = list(
             itertools.izip(*[itertools.islice(self.EXTRA_NEWZNABS, i, None, 3)
@@ -208,7 +180,7 @@ class Config(object):
 
     def get_extra_torznabs(self):
         """ Return the extra torznab tuples """
-        headphones.logger.debug("DEPRECATED: config.get_extra_torznabs")
+        logger.debug("DEPRECATED: config.get_extra_torznabs")
 
         extra_torznabs = list(
             itertools.izip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 3)
@@ -236,7 +208,7 @@ class Config(object):
             return super(Config, self).__getattr__(name)
         else:
             #return self.check_setting(name)
-            return self._vault[name].get()
+            return self._options[name].get()
 
     def __setattr__(self, name, value):
         """
@@ -247,7 +219,7 @@ class Config(object):
             super(Config, self).__setattr__(name, value)
             return value
         else:
-            m = self._vault[name]
+            m = self._options[name]
             m.set(value)
             return m.get()
 # TODO : remove on finish config-improvements

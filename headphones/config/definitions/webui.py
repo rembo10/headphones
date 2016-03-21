@@ -2,17 +2,18 @@
 # Options from "Web Interface" Tab
 # =======================================================================================
 
-from .._viewmodel import Block
-from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionUrl, LabelExtension
+from .._viewmodel import BlockExtension, LabelExtension
+from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionUrl
 from .._viewmodel import TemplaterExtension
 
 from ..loc import _
 
-def reg(tabname, register_block_cb, register_options_cb):
+def reg(_extend_cb):
 
+    opts = []
     # =======================================================================================
-    register_block_cb(tabname,
-       Block('basic', caption=_("Basic"), options=register_options_cb(
+    opts.extend([
+       BlockExtension('basic', caption=_("Basic"), options=_extend_cb(
 
            OptionUrl('HTTP_HOST', 'General', 'localhost',
                 label=_('HTTP Host'),
@@ -22,7 +23,7 @@ def reg(tabname, register_block_cb, register_options_cb):
                 ),
            OptionNumber('HTTP_PORT', 'General', 8181,
                 label=_('HTTP Port'),
-                tooltip=_('Port to bind web server to. Note that ports below 1024 may require root.'),
+                tooltip=_('Port to bind web server to. Note that ports below 1024 may require root. Default : 8181'),
                 minvalue=1,
                 maxvalue=99999),
            OptionString('HTTP_USERNAME', 'General', '',
@@ -42,7 +43,7 @@ def reg(tabname, register_block_cb, register_options_cb):
            OptionSwitch('ENABLE_HTTPS', 'General', False,
                 label=_('Enable HTTPS'),
                 tooltip=_('Enable HTTPS for web server for encrypted communication'),
-                options=register_options_cb(
+                options=_extend_cb(
                     # TODO : check default value
                     OptionPath('HTTPS_CERT', 'General', '',
                         label=_('HTTPS Cert')
@@ -53,31 +54,31 @@ def reg(tabname, register_block_cb, register_options_cb):
                     ),
                 )),
        ))
-    )
+    ])
 
     # =======================================================================================
-    register_block_cb(tabname,
-       Block('api', caption=_("API"), options=register_options_cb(
+    opts.extend([
+       BlockExtension('api', caption=_("API"), options=_extend_cb(
             OptionSwitch('API_ENABLED', 'General', False,
                 label=_('Enable API'),
                 tooltip=_('Allow remote applications to interface with Headphones'),
-                options=register_options_cb(
+                options=_extend_cb(
                     OptionString('API_KEY', 'General', '',
                         label=_('API key'),
                         cssclasses=['-hp-api-key'],
                         maxlength=32,
-                        options=register_options_cb(
+                        options=_extend_cb(
                             TemplaterExtension('ApiKeyExtension', strings={'button': _('Generate'), 'caption': _('Current API key: ')})
                         ),
                     ),
                 )
             ),
       )),
-    )
+    ])
 
     # =======================================================================================
-    register_block_cb(tabname,
-        Block('interval', caption=_("Interval"), options=register_options_cb(
+    opts.extend([
+        BlockExtension('interval', caption=_("Interval"), options=_extend_cb(
             LabelExtension(
                 label=_('An interval of 0 will disable a task.'),
                 cssclasses=['small']
@@ -113,4 +114,6 @@ def reg(tabname, register_block_cb, register_options_cb):
                 minvalue=0,
                 maxvalue=9999),
         ))
-    )
+    ])
+
+    return opts
