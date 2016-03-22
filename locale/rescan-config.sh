@@ -1,3 +1,3 @@
 #!/bin/sh
 
-pygettext -d config ../headphones/config/
+pygettext -d config --no-location ../headphones/config/

@@ -436,7 +436,7 @@ def reg(_extend_cb):
             MessageExtension(
                 message=_('This is a block of forgotten settings. Previously, they did not have any'
                           ' visible representation in UI, but they are used by app\'s modules. <strong>'
-                          'Help them to find an appropriate place on the settings page'
+                          'Help them to find an appropriate place on the settings page</strong>'
                 ),
                 icon='<i class="fa fa-question-circle"></i>',
                 fullwidth=True,

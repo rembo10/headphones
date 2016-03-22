@@ -542,7 +542,12 @@ class WebInterface(object):
     def manage(self):
         myDB = db.DBConnection()
         emptyArtists = myDB.select("SELECT * FROM artists WHERE LatestAlbum IS NULL")
-        return serve_template(templatename="manage.html", title="Manage", emptyArtists=emptyArtists)
+
+        # DONE : softchroot
+        model = {
+            'MUSIC_DIR': headphones.SOFT_CHROOT.apply(headphones.CONFIG.MUSIC_DIR)
+        }
+        return serve_template(templatename="manage.html", title="Manage", emptyArtists=emptyArtists, model=model)
 
     @cherrypy.expose
     def manageArtists(self):
@@ -868,9 +873,10 @@ class WebInterface(object):
 
     @cherrypy.expose
     def musicScan(self, path, scan=0, redirect=None, autoadd=0, libraryscan=0):
+        # DONE : softchroot
         headphones.CONFIG.LIBRARYSCAN = libraryscan
         headphones.CONFIG.AUTO_ADD_ARTISTS = autoadd
-        headphones.CONFIG.MUSIC_DIR = path
+        headphones.CONFIG.MUSIC_DIR = headphones.SOFT_CHROOT.revoke(path)
         headphones.CONFIG.write()
         if scan:
             try:
@@ -902,10 +908,14 @@ class WebInterface(object):
 
     @cherrypy.expose
     def forcePostProcess(self, dir=None, album_dir=None, keep_original_folder=False):
+        # DONE : softchroot
         from headphones import postprocessor
         threading.Thread(target=postprocessor.forcePostProcess,
-                         kwargs={'dir': dir, 'album_dir': album_dir,
-                                 'keep_original_folder': keep_original_folder == 'True'}).start()
+                         kwargs={
+                            'dir': headphones.SOFT_CHROOT.revoke(dir),
+                            'album_dir': headphones.SOFT_CHROOT.revoke(album_dir),
+                            'keep_original_folder': keep_original_folder == 'True'
+        }).start()
         raise cherrypy.HTTPRedirect("home")
 
     @cherrypy.expose
@@ -1143,14 +1153,6 @@ class WebInterface(object):
 
         return serve_template(templatename="config.html", title=_("Settings"), model=model)
 
-        # TODO : implement softchroot
-        # for k, v in config.iteritems():
-        #     if isinstance(v, headphones.config.path):
-        #         # need to apply SoftChroot to paths:
-        #         nv = headphones.SOFT_CHROOT.apply(v)
-        #         if v != nv:
-        #             config[k] = headphones.config.path(nv)
-
     @cherrypy.expose
     def configUpdate(self, **kwargs):
         headphones.CONFIG.accept(kwargs)
@@ -1175,17 +1177,6 @@ class WebInterface(object):
     @cherrypy.expose
     def configUpdate2(self, **kwargs):
         # Handle the variable config options. Note - keys with False values aren't getting passed
-
-        for k, v in kwargs.iteritems():
-            # TODO : HUGE crutch. It is all because there is no way to deal with options...
-            _conf = headphones.CONFIG._define(k)
-            conftype = _conf[1]
-
-            #print '===>', conftype
-            if conftype is headphones.config.path:
-                nv = headphones.SOFT_CHROOT.revoke(v)
-                if nv != v:
-                    kwargs[k] = nv
 
         extra_newznabs = []
         for kwarg in [x for x in kwargs if x.startswith('newznab_host')]:

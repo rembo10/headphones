@@ -371,6 +371,29 @@ class OptionPath(OptionBase, CssClassable):
         # currently, path uses the same template as string
         return "OptionString"
 
+    def uiValue(self):
+        # override
+        v = self.model.get()
+
+        # TODO : this is not the best way to implement SoftChroot
+        # reimplement please WITHOUT IMPORT
+        import headphones
+        v = headphones.SOFT_CHROOT.apply(v)
+
+        return v
+
+    def uiValue2DataValue(self, value):
+        # override
+
+        v = self._initype(value)
+
+        # TODO : this is not the best way to implement SoftChroot
+        # reimplement please WITHOUT IMPORT
+        import headphones
+        v = headphones.SOFT_CHROOT.revoke(v)
+
+        return v
+
 
 class OptionPassword(OptionString):
     pass
