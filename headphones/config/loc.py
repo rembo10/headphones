@@ -6,6 +6,6 @@ import gettext
 current_locale, encoding = locale.getdefaultlocale()
 
 # TODO : fix path
-__t = gettext.translation('config', 'locale/', [current_locale], fallback=True)
+__t = gettext.translation('config', 'locale/', [current_locale, 'en'], fallback=True)
 
 _ = __t.ugettext

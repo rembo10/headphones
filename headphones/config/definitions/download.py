@@ -23,7 +23,7 @@ def reg(_extend_cb):
                         _extend_cb(
                             OptionUrl('SAB_HOST', 'SABnzbd', '',
                                 label=_('SABnzbd Host'),
-                                caption=_('usually http://localhost:8080'),
+                                caption=_('usually {0}').format('http://localhost:8080'),
                                 tooltip=_('SABnzbd host and port.'),
                                 maxlength=128
                             ),
@@ -53,7 +53,7 @@ def reg(_extend_cb):
                         _extend_cb(
                             OptionUrl('NZBGET_HOST', 'NZBget', '',
                                 label=_('NZBget Host'),
-                                caption=_('usually http://localhost:6789'),
+                                caption=_('usually {0}').format('http://localhost:6789'),
                                 tooltip=_('NZBget host and port.'),
                                 maxlength=128
                             ),
@@ -153,7 +153,7 @@ def reg(_extend_cb):
                         _extend_cb(
                             OptionUrl('TRANSMISSION_HOST', 'Transmission', '',
                                 label=_('Transmission Host'),
-                                caption=_('usually http://localhost:9091'),
+                                caption=_('usually {0}').format('http://localhost:9091'),
                                 tooltip=_('Transmission Host'),
                                 maxlength=128
                             ),
@@ -181,14 +181,15 @@ def reg(_extend_cb):
                         _extend_cb(
                             MessageExtension(
                                 cssclasses=[],
-                                message=_('<i class="fa fa-info-circle"></i> Note: uTorrent may keep files'
+                                message=_('Note: uTorrent may keep files'
                                            ' read only when completed. Check <code>Preferences -> Advanced -> bt.read_only_on_complete</code>'
                                            ' in case of problems.'
-                                )
+                                ),
+                                icon='<i class="fa fa-info-circle"></i>',
                             ),
                             OptionUrl('UTORRENT_HOST', 'uTorrent', '',
                                 label=_('uTorrent Host'),
-                                caption=_('usually http://localhost:9091'),
+                                caption=_('usually {0}').format('http://localhost:9091'),
                                 maxlength=128
                             ),
                             OptionString('UTORRENT_USERNAME', 'uTorrent', '',

@@ -42,11 +42,11 @@ def reg(extend_cb):
                 alignleft=True,
                 options=extend_cb(
                     OptionEmail('EMAIL_FROM', 'Email', '',
-                        label=_('From'),
+                        label=_('Email From'),
                         maxlength=255
                     ),
                     OptionEmail('EMAIL_TO', 'Email', '',
-                        label=_('To'),
+                        label=_('Email To'),
                         maxlength=255
                     ),
                     OptionString('EMAIL_SMTP_SERVER', 'Email', '',
@@ -348,8 +348,6 @@ def reg(extend_cb):
                 options=extend_cb(
                     OptionString('PUSHOVER_KEYS', 'Pushover', '',
                         label=_('User Key'),
-                        caption=_(''),
-                        tooltip=_(''),
                         maxlength=None
                     ),
                     OptionDropdown('PUSHOVER_PRIORITY', 'Pushover', 0, initype=int,
