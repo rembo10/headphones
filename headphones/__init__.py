@@ -90,8 +90,6 @@ LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a", "asf", "wma"]
 LOSSLESS_MEDIA_FORMATS = ["flac"]
 MEDIA_FORMATS = LOSSY_MEDIA_FORMATS + LOSSLESS_MEDIA_FORMATS
 
-MIRRORLIST = ["musicbrainz.org", "headphones", "custom"]
-
 UMASK = None
 
 
@@ -143,7 +141,7 @@ def initialize(config_file):
             SOFT_CHROOT = SoftChroot(str(CONFIG.SOFT_CHROOT))
             if SOFT_CHROOT.isEnabled():
                 logger.info("Soft-chroot enabled for dir: %s", str(CONFIG.SOFT_CHROOT))
-        except exceptions.SoftChrootError as e:
+        except headphones.exceptions.SoftChrootError as e:
             logger.error("SoftChroot error: %s", e)
             raise e
 

@@ -1,17 +1,17 @@
 import sys
 if sys.version_info < (2, 7):
     import unittest2 as unittest
-    from unittest2 import TestCase as TC
 else:
     import unittest
-    from unittest import TestCase as TC
+
+from unittest import TestCase as TC
 
 skip = unittest.skip
 
 _dummy = False
 
 # less than 2.6 ...
-if sys.version_info[0] == 2 and sys.version_info[1] <= 6:
+if sys.version_info < (2, 7):
     _dummy = True
 
 def _d(f):
@@ -107,7 +107,8 @@ def TestArgs(*parameters):
             name_for_parameter = method.__name__ + "(" + args_for_parameter + ")"
             frame = sys._getframe(1)    # pylint: disable-msg=W0212
             frame.f_locals[name_for_parameter] = method_for_parameter
-            frame.f_locals[name_for_parameter].__doc__ = method.__doc__ + '(' + args_for_parameter + ')'
+            if method.__doc__:
+                frame.f_locals[name_for_parameter].__doc__ = method.__doc__ + '(' + args_for_parameter + ')'
             method_for_parameter.__name__ = name_for_parameter + '(' + args_for_parameter + ')'
         return None
     return decorator
