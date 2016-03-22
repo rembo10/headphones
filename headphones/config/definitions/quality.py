@@ -1,5 +1,5 @@
 from .._viewmodel import BlockExtension
-from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionBool, OptionPath, LabelExtension, OptionDropdownSelector, OptionPercent
+from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionBool, OptionPath, MessageExtension, OptionDropdownSelector, OptionPercent
 from ..loc import _
 
 """
@@ -20,10 +20,10 @@ def reg(_extend_cb):
                     (1, _('Highest Quality including Lossless')),    # TODO: title = Snatch the highest quality available, including lossless.
                     (3, _('Lossless Only'),     # TODO: title = Snatch only lossless quality.
                         _extend_cb(
-                            LabelExtension(
+                            MessageExtension(
                                 cssclasses=None,
                                 fullwidth=True,
-                                label=_('Reject if target size is not in bitrate range:')
+                                message=_('Reject if target size is not in bitrate range:')
                             ),
                             OptionNumber('LOSSLESS_BITRATE_FROM', 'General', 0,
                                 label=_('From'),
@@ -66,8 +66,8 @@ def reg(_extend_cb):
                                 minvalue=0,
                                 maxvalue=100
                             ),
-                            LabelExtension(
-                                label=_('of the target size '),
+                            MessageExtension(
+                                message=_('of the target size '),
                                 fullwidth=False,
                             ),
                             OptionBool('PREFERRED_BITRATE_ALLOW_LOSSLESS', 'General', False,
@@ -88,10 +88,10 @@ def reg(_extend_cb):
     # =======================================================================================
     opts.extend([
        BlockExtension('search_words', caption=_("Search Words"), options=_extend_cb(
-            LabelExtension(
+            MessageExtension(
                 cssclasses=None, # ['small'],
                 fullwidth=True,
-                label=_('Separate words with a comma, e.g. "word1,word2,word3".')
+                message=_('Separate words with a comma, e.g. "word1,word2,word3".')
             ),
             OptionString('IGNORED_WORDS', 'General', '',
                 label=_('Ignored Words'),
@@ -124,8 +124,8 @@ def reg(_extend_cb):
     opts.extend([
         BlockExtension('post_processing', caption=_("Post-Processing"), options=_extend_cb(
             OptionSwitch('MOVE_FILES', 'General', False,
-                alignleft=True,
                 label=_('Move downloads to Destination Folder'),
+                alignleft=True,
                 options=_extend_cb(
                     OptionBool('REPLACE_EXISTING_FOLDERS', 'General', False,
                         alignleft=True,
@@ -138,43 +138,43 @@ def reg(_extend_cb):
                 )
             ),
             OptionBool('RENAME_FILES', 'General', False,
-                alignleft=True,
                 label=_('Rename files'),
+                alignleft=True,
             ),
             OptionBool('CORRECT_METADATA', 'General', False,
-                alignleft=True,
                 label=_('Correct metadata'),
+                alignleft=True,
             ),
             OptionBool('CUE_SPLIT', 'General', True,
-                alignleft=True,
                 label=_('Split single file albums into multiple tracks'),
+                alignleft=True,
                 tooltip=_('Use associated .cue sheet to split single file albums into multiple tracks.'
                            ' Requires shntool with flac or xld cli (OS X) to be installed.'
                 ),
             ),
             OptionBool('CLEANUP_FILES', 'General', False,
-                alignleft=True,
                 label=_('Delete leftover files'),
+                alignleft=True,
                 caption=_('(.m3u, .nfo, .sfv, .nzb, etc.)'),
             ),
             OptionBool('KEEP_NFO', 'General', False,
-                alignleft=True,
                 label=_('Keep original nfo'),
+                alignleft=True,
                 caption=_('(extension changed to .orig.nfo)'),
             ),
             OptionSwitch('ADD_ALBUM_ART', 'General', False,
-                alignleft=True,
                 label=_('Add album art jpeg to album folder'),
+                alignleft=True,
                 options=_extend_cb(
                     OptionString('ALBUM_ART_FORMAT', 'General', 'folder',
                         label=_('Name of album art file'),
                         caption=_('will be suffixed with ".jpg"'),
                         tooltip=_(''),
                     ),
-                    LabelExtension(
+                    MessageExtension(
                         cssclasses=['small'],
                         fullwidth=True,
-                        label=_('Use $Artist/$artist, $Album/$album, $Year/$year, put optional variables'
+                        message=_('Use $Artist/$artist, $Album/$album, $Year/$year, put optional variables'
                                  ' in square brackets, use single-quote marks to escape square brackets'
                                  ' literally (\'[\', \']\').'
                         )
@@ -182,12 +182,16 @@ def reg(_extend_cb):
                 )
             ),
             OptionBool('EMBED_ALBUM_ART', 'General', False,
-                alignleft=True,
                 label=_('Embed album art in each file'),
+                alignleft=True,
             ),
             OptionBool('EMBED_LYRICS', 'General', False,
-                alignleft=True,
                 label=_('Embed lyrics'),
+                alignleft=True,
+            ),
+            OptionBool('RENAME_UNPROCESSED', 'General', True,
+                label=_('Rename unprocesed'),
+                alignleft=True,
             ),
 
             OptionPath('DESTINATION_DIR', 'General', '',

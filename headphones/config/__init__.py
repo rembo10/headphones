@@ -72,7 +72,7 @@ class Config(object):
                 Tab('download', _("Download settings"), savecaption=_("Save Changes"),
                     options=self._extend(*reg_download(self._extend))
                 ),
-                Tab('search', _("Search providers"), savecaption=_("Save Changes"),
+                Tab('search', _("Search Providers"), savecaption=_("Save Changes"),
                     options=self._extend(*reg_search(self._extend))
                 ),
                 Tab('quality_processing', _("Quality &amp; Post Processing"),

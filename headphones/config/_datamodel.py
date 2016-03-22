@@ -71,15 +71,16 @@ class OptionModel(object):
 
         config = self._config_callback()
         v = config[s][k]
+
         # cast to target type IF REQUIRED. do not convert, if variable is already of target type
         if not isinstance(t, type) or not isinstance(v, t):
             try:
                 v = t(v)
-            except TypeError:
-                logger.error('The value of option [{0}][{1}] is not well-typed. Will try to use default value.'.format(s, k))
+            except TypeError as exc:
+                logger.error('The type of option [{0}][{1}] is not compatible. Going to use the default value. {2}'.format(s, k, exc))
                 v = d if isinstance(t, type) and isinstance(d, t) else t(d)
-            except ValueError:
-                logger.error('The value of option [{0}][{1}] is not well-typed. Will try to use default value.'.format(s, k))
+            except ValueError as exc:
+                logger.error('The value of option [{0}][{1}] is not well-typed. Going to use the default value. {2}'.format(s, k, exc))
                 v = d if isinstance(t, type) and isinstance(d, t) else t(d)
 
         return v
@@ -107,7 +108,9 @@ class OptionModel(object):
             logger.debug('Option [{0}][{1}] doesn\'t exists in config. Set to default.'.format(s, k))
 
         # convert value to storable types:
-        if not isinstance(value, _primitives):
+        if value is None:
+            value = ''
+        elif not isinstance(value, _primitives):
             logger.debug('Value of option [{0}][{1}] is not primitive [{2}], will `str` it'.format(s, k, type(value)))
             value = str(value)
         else:

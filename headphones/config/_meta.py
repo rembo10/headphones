@@ -2,6 +2,7 @@ from configobj import ConfigObj
 
 from headphones import logger
 
+
 class MetaConfig(object):
     """ Handles metainformation about options """
 
@@ -25,8 +26,6 @@ class MetaConfig(object):
 
         if (s in self._config) and (k in self._config[s]):
             mode = self._config[s][k]
-            logger.debug('Set up meta for [{0}][{1}] = [{2}]'.format(s, k, mode))
-
             self._parseConfigValueAndApply(mode, option, s, k)
 
     def _parseConfigValueAndApply(self, value, option, s, k):
@@ -42,6 +41,8 @@ class MetaConfig(object):
 
         tokens = map(lambda x: x.strip(), tokens)
         tokens = map(lambda x: x.lower(), tokens)
+
+        logger.debug('Set up meta for [{0}][{1}] = [{2}]'.format(s, k, ','.join(tokens)))
 
         for mo in tokens:
 

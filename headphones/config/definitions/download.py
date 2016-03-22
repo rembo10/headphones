@@ -3,7 +3,7 @@
 # =======================================================================================
 
 from .._viewmodel import BlockExtension
-from .._viewmodel import OptionString, OptionNumber, OptionPassword, OptionBool, OptionPath, OptionDropdown, OptionUrl, OptionDropdownSelector, LabelExtension
+from .._viewmodel import OptionString, OptionNumber, OptionPassword, OptionBool, OptionPath, OptionDropdown, OptionUrl, OptionDropdownSelector, MessageExtension
 from ..loc import _
 
 def reg(_extend_cb):
@@ -168,9 +168,9 @@ def reg(_extend_cb):
                                 maxlength=30
                             ),
 
-                            LabelExtension(
+                            MessageExtension(
                                 cssclasses=['small'],
-                                label=_('Note: With Transmission, you can specify a different download'
+                                message=_('Note: With Transmission, you can specify a different download'
                                            ' directory for downloads sent from Headphones. Set it in the Music'
                                            ' Download Directory below'
                                 )
@@ -179,10 +179,10 @@ def reg(_extend_cb):
                     ),
                     (2, _('uTorrent (Beta)'),
                         _extend_cb(
-                            LabelExtension(
-                                cssclasses=['small', 'heading'],
-                                label=_('<i class="fa fa-info-circle"></i> Note: uTorrent may keep files'
-                                           ' read only when completed. Check "Preferences -> Advanced -> bt.read_only_on_complete"'
+                            MessageExtension(
+                                cssclasses=[],
+                                message=_('<i class="fa fa-info-circle"></i> Note: uTorrent may keep files'
+                                           ' read only when completed. Check <code>Preferences -> Advanced -> bt.read_only_on_complete</code>'
                                            ' in case of problems.'
                                 )
                             ),
@@ -216,9 +216,9 @@ def reg(_extend_cb):
                                 label=_('Deluge Password'),
                                 maxlength=64
                             ),
-                            LabelExtension(
+                            MessageExtension(
                                 cssclasses=['small'],
-                                label=_('Note: With Deluge, you can specify a different download'
+                                message=_('Note: With Deluge, you can specify a different download'
                                          ' directory for downloads sent from Headphones. Set it in'
                                          ' the Music Download Directory below'
                                 )

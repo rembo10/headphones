@@ -193,7 +193,7 @@
         %endif
 
         <div class="input-wrapper">
-            <input type="number" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${min_attr} ${max_attr} /><span>%</span>
+            <input type="number" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${min_attr} ${max_attr} /><span> <i class="fa fa-percent"></i></span>
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -485,7 +485,6 @@
 ## PLACEHOLDERS and STATIC templates
 ## ===============================================
 
-
 <%def name="BlockExtension(me, parent=None)">
     <fieldset class="block ${me.uiCssClasses()}">
         % if me.caption is not None:
@@ -498,23 +497,20 @@
     </fieldset>
 </%def>
 
-<%def name="LabelExtension(me, parent=None)">
+## ===============================================
+
+<%def name="MessageExtension(me, parent=None)">
 <%
     cls = list(me.cssclasses) # important - it should be new list!!
     if not me.fullwidth:
         cls.append('input-wrapper')
-
-    class_attr = '' if not cls else 'class="' + ' '.join(cls) + '"'
 %>
-    ## TODO : define name of class for root divs
-    <div class="extension">
-        % if not me.fullwidth:
-            <label>&nbsp;</label>
-        % endif
-        <div ${class_attr}>${me.label}</div>
-    </div>
+<div class="extension ${' '.join(cls)}">
+    <div class="message">${me.icon + " " if me.icon else ''}${me.message}</div>
+</div>
 </%def>
 
+## ===============================================
 
 <%def name="DividerExtension(me, parent=None)">
 <div class="extension">
@@ -549,6 +545,7 @@
 </div>
 </%def>
 
+## ===============================================
 
 <%def name="SongkickAreaIdExtension(me, parent=None)">
 <div class="extension">
@@ -558,6 +555,7 @@
 </div>
 </%def>
 
+## ===============================================
 
 <%def name="CodeshyRegExtension(me, parent=None)">
 <div class="extension">
@@ -567,6 +565,7 @@
 </div>
 </%def>
 
+## ===============================================
 
 <%def name="OsxAppRegisterExtension(me, parent=None)">
 <div class="extension">
@@ -576,13 +575,13 @@
 </div>
 </%def>
 
+## ===============================================
 
 <%def name="TwitterNotifyExtension(me, parent=None)">
 <!-- TODO : check layout of this template.
             First note: one extension should produce just one DIV
             Second: it looks ugly
 -->
-
 <div class="extension">
     <div>
         <button type="button" class="-hp-twitter-step-1" data-request-message="${me.strings['request-message']}">${me.strings['request-button-caption']}</button>
@@ -605,3 +604,5 @@
 </div>
 
 </%def>
+
+## ===============================================

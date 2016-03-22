@@ -50,6 +50,32 @@
             // ## vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
             // ## ============================================
+            // ## This is part of 'Tab' Template
+            // REQUIRED ONCE
+            $('.config .tabs').on('click', '.configsubmit', function(){
+                var selected_tab_index = $( ".tabs" ).tabs( "option", "active" );
+
+                doAjaxCall('configUpdate',$(this),
+                    function(sdata){
+                        var url =  $(location).attr('href');
+                        //var tabId = $('.ui-tabs-panel:visible').attr("id");
+
+                        // TODO : I don't know, why here is second ajax call,
+                        //        but this call reload ENTIRE page
+                        //        I left this behaviour, because that is why...
+                        //        You could try to optimize this saving routine,
+                        //        but, please, be careful.. Here are a lot of
+                        //        pitstones..
+                        $('body').load(url, function(data) {
+                            initThisPage({ 'tabs' : { 'active' :selected_tab_index }});
+                        });
+                    }
+
+                    ,true);
+                return false;
+            });
+
+            // ## ============================================
             // ## This is part of 'OptionSwitch' Template
             // REQUIRED ONCE
             $(".config").on("click", ".hp-option-switch", function(){
@@ -98,32 +124,6 @@
                 if (divselector){
                     $(divselector).slideDown();
                 }
-            });
-
-            // ## ============================================
-            // ## This is part of 'Tab' Template
-            // REQUIRED ONCE
-            $('.config .tabs').on('click', '.configsubmit', function(){
-                var selected_tab_index = $( ".tabs" ).tabs( "option", "active" );
-
-                doAjaxCall('configUpdate',$(this),
-                    function(sdata){
-                        var url =  $(location).attr('href');
-                        //var tabId = $('.ui-tabs-panel:visible').attr("id");
-
-                        // TODO : I don't know, why here is second ajax call,
-                        //        but this call reload ENTIRE page
-                        //        I left this behaviour, because that is why...
-                        //        You could try to optimize this saving routine,
-                        //        but, please, be careful.. Here are a lot of
-                        //        pitstones..
-                        $('body').load(url, function(data) {
-                            initThisPage({ 'tabs' : { 'active' :selected_tab_index }});
-                        });
-                    }
-
-                    ,true);
-                return false;
             });
 
             // ## ============================================
@@ -220,64 +220,55 @@
 
 
     <script>
-
         function initThisPage(opts)
         {
-                var deletedNewznabs = 0;
+            var deletedNewznabs = 0;
 
-                $(".remove").click(function() {
-                    $(this).parent().parent().remove();
+            $(".remove").click(function() {
+                $(this).parent().parent().remove();
+                deletedNewznabs = deletedNewznabs + 1;
+            });
+
+            var deletedTorznabs = 0;
+
+            $(".remove_torznab").click(function() {
+                $(this).parent().parent().remove();
+                deletedTorznabs = deletedTorznabs + 1;
+            });
+
+            $("#add_newznab").click(function() {
+                var intId = $("#newznab_providers > div").size() + deletedNewznabs + 1;
+                var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
+                var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"remove\" value=\"Remove\" /></div>");
+                removeButton.click(function() {
+                    $(this).parent().remove();
                     deletedNewznabs = deletedNewznabs + 1;
+
                 });
+                formfields.append(removeButton);
+                formfields.append("</div>");
+                $("#add_newznab").before(formfields);
+            });
 
-                var deletedTorznabs = 0;
-
-                $(".remove_torznab").click(function() {
-                    $(this).parent().parent().remove();
+            $("#add_torznab").click(function() {
+                var intId = $("#torznab_providers > div").size() + deletedTorznabs + 1;
+                var formfields = $("<div class=\"config\" id=\"torznab" + intId + "\"><div class=\"row\"><label>Torznab Host</label><input type=\"text\" name=\"torznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Torznab API</label><input type=\"text\" name=\"torznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"torznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
+                var removeTorznabButton = $("<div class=\"row\"><input type=\"button\" class=\"remove_torznab\" value=\"Remove\" /></div>");
+                removeTorznabButton.click(function() {
+                    $(this).parent().remove();
                     deletedTorznabs = deletedTorznabs + 1;
+
                 });
+                formfields.append(removeTorznabButton);
+                formfields.append("</div>");
+                $("#add_torznab").before(formfields);
+            });
 
-                $("#add_newznab").click(function() {
-                    var intId = $("#newznab_providers > div").size() + deletedNewznabs + 1;
-                    var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
-                    var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"remove\" value=\"Remove\" /></div>");
-                    removeButton.click(function() {
-                        $(this).parent().remove();
-                        deletedNewznabs = deletedNewznabs + 1;
-
-                    });
-                    formfields.append(removeButton);
-                    formfields.append("</div>");
-                    $("#add_newznab").before(formfields);
-                });
-
-                $("#add_torznab").click(function() {
-                    var intId = $("#torznab_providers > div").size() + deletedTorznabs + 1;
-                    var formfields = $("<div class=\"config\" id=\"torznab" + intId + "\"><div class=\"row\"><label>Torznab Host</label><input type=\"text\" name=\"torznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Torznab API</label><input type=\"text\" name=\"torznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"torznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
-                    var removeTorznabButton = $("<div class=\"row\"><input type=\"button\" class=\"remove_torznab\" value=\"Remove\" /></div>");
-                    removeTorznabButton.click(function() {
-                        $(this).parent().remove();
-                        deletedTorznabs = deletedTorznabs + 1;
-
-                    });
-                    formfields.append(removeTorznabButton);
-                    formfields.append("</div>");
-                    $("#add_torznab").before(formfields);
-                });
-
-                $(".hpuser").keyup(function() {
-                    $(".hpuser").val($(this).val());
-                });
-
-                $(".hppass").keyup(function() {
-                    $(".hppass").val($(this).val());
-                });
-
-                $(function() {
-                    var tab_options = (opts && opts.tabs) || {};
-                    $( ".tabs" ).tabs(tab_options);
-                });
-                initActions();
+            $(function() {
+                var tab_options = (opts && opts.tabs) || {};
+                $( ".tabs" ).tabs(tab_options);
+            });
+            initActions();
 
         }
 

@@ -10,6 +10,32 @@ def boolext(value):
     return bool(value)
 
 
+def floatnullable(value):
+    """ Nullable float. Works good for empty strings ( "" => None )
+    """
+    if value is None:
+        return None
+
+    # check for empty STRING:
+    if isinstance(value, basestring) and not value.strip():
+        return None
+
+    return float(value)
+
+
+def intnullable(value):
+    """ Nullable int. Works good for empty strings ( "" => None )
+    """
+    if value is None:
+        return None
+
+    # check for empty STRING:
+    if isinstance(value, basestring) and not value.strip():
+        return None
+
+    return int(value)
+
+
 class path(str):
     """ path-type for option value
 

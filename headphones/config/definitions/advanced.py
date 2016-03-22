@@ -3,10 +3,12 @@
 # =======================================================================================
 
 from .._viewmodel import BlockExtension
-
-from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionBool, OptionPath, OptionPassword
+from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionBool, OptionPath, OptionPassword, OptionPercent, OptionInternal
 from .._viewmodel import OptionDropdownSelector, OptionDropdown, OptionCombobox, OptionCheckboxListExtrasCrutch # OptionCheckboxList
-from .._viewmodel import TemplaterExtension, LabelExtension
+from .._viewmodel import TemplaterExtension, MessageExtension
+
+from ..typeconv import boolext
+
 from ..loc import _
 
 def reg(_extend_cb):
@@ -44,11 +46,11 @@ def reg(_extend_cb):
     # =======================================================================================
     opts.extend([
         BlockExtension('reencoding_options', caption=_("Re-Encoding Options"), options=_extend_cb(
-            LabelExtension(
-                label=_('<i class="fa fa-info-circle"></i> Note: this option requires the lame,'
+            MessageExtension(
+                message=_('Note: this option requires the lame,'
                          ' ffmpeg or xld encoder'
                 ),
-                cssclasses=['heading'],
+                icon='<i class="fa fa-info-circle"></i>',
                 fullwidth=True,
             ),
             OptionSwitch('MUSIC_ENCODER', 'General', False,
@@ -222,6 +224,7 @@ def reg(_extend_cb):
                 label=_('Wait until an album\'s release date before searching'),
                 tooltip=_('Wait until an album\'s release date before searching'),
             ),
+            OptionInternal('RENAME_FROZEN', 'General', True, initype=boolext),
             OptionBool('FREEZE_DB', 'General', False,
                 alignleft=True,
                 label=_('Don\'t add new artists when post-processing albums'),
@@ -360,20 +363,42 @@ def reg(_extend_cb):
                             maxvalue=999999
                         ),
                     )),
+
+                    # THIS options already registered on "search tab"
+                    # so we will not call extend_cb
+                    # !!!!!
                     OptionDropdownSelector.Item(value='headphones', label=_('headphones'), options=_extend_cb(
-                        OptionString('HPUSER', 'General', '',
-                            label=_('Username'),
-                            cssclasses=['hpuser'],
-                            maxlength=128
+                        MessageExtension(message=_('You could set settings of the this mirror on the block'
+                                                   ' <code>Settins > Search Providers > Headphones Indexer</code>'
+                            ),
+                            icon='<i class="fa fa-comments-o"></i>',
                         ),
-                        OptionString('HPPASS', 'General', '',
-                            label=_('Password'),
-                            cssclasses=['hppass'],
-                            maxlength=128
-                        ),
-                        TemplaterExtension(template_name='CodeshyRegExtension', strings={'caption': _('Don\'t have an account? Sign up!')}),
+                        # OptionString('HPUSER', 'General', '',
+                        #     label=_('Username'),
+                        #     cssclasses=['-hp-hp-user'],
+                        #     maxlength=128
+                        # ),
+                        # OptionPassword('HPPASS', 'General', '',
+                        #     label=_('Password'),
+                        #     cssclasses=['-hp-hp-pass'],
+                        #     maxlength=128
+                        # ),
+                        # TemplaterExtension(template_name='CodeshyRegExtension', strings={'caption': _('Don\'t have an account? Sign up!')}),
                     )),
                 )
+            ),
+        ))
+    ])
+
+    # =======================================================================================
+    opts.extend([
+        BlockExtension('advanced_ssl', caption=_("SSL"), options=_extend_cb(
+            OptionBool('VERIFY_SSL_CERT', 'Advanced', True,
+                label=_('Enable verification of SSL certificates'),
+                caption=_('Note: disabling could pose a <strong>security issue!</strong>. Could be truly disabled only with'
+                          ' python &gt; 2.7.9'
+                ),
+                tooltip=_('This patch for systems with broken SSL (like QNAP)'),
             ),
         ))
     ])
@@ -406,6 +431,28 @@ def reg(_extend_cb):
             ),
         ))
     ])
+
+    # =======================================================================================
+    opts.extend([
+        BlockExtension('advanced_forgotten', caption=_("Strange hidden options"), options=_extend_cb(
+            MessageExtension(
+                message=_('This is a block of forgotten settings. Previously, they did not have any'
+                          ' visible representation in UI, but they are used by app\'s modules. <strong>'
+                          'Help them to find an appropriate place on the settings page'
+                ),
+                icon='<i class="fa fa-question-circle"></i>',
+                fullwidth=True,
+            ),
+
+            OptionPercent('ALBUM_COMPLETION_PCT', 'Advanced', 80,
+                label=_('Album completion'),
+                caption=_('This is used to see how many tracks you have from an album - to mark it as downloaded. Default is 80%'),
+                minvalue=0,
+                maxvalue=150
+            ),
+        ))
+    ])
+
     # =======================================================================================
 
     return opts
