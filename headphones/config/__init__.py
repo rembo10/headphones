@@ -24,11 +24,12 @@ from headphones import logger
 
 # pylint:disable=R0902
 # it might be nice to refactor for fewer instance variables
+
+
 class Config(object):
     """ Wraps access to particular values in a config file """
 
     def __init__(self, config_file):
-
         """ Initialize the config with values from a file """
         self._config_file = config_file
         self._config = ConfigObj(self._config_file, encoding='utf-8')
@@ -63,29 +64,29 @@ class Config(object):
         self._extend(*reg_internal(self._extend))
 
         self._tabs = Tabs(tabs=[
-                Tab('webui', _("Web Interface"), savecaption=_("Save Changes"),
-                    message=_('<i class="fa fa-info-circle"></i> Web Interface changes require a'
-                                ' restart to take effect. Saving settings will restart intervals'
-                                ' if changed.'),
-                    options=self._extend(*reg_webui(self._extend))
+            Tab('webui', _("Web Interface"), savecaption=_("Save Changes"),
+                message=_('<i class="fa fa-info-circle"></i> Web Interface changes require a'
+                          ' restart to take effect. Saving settings will restart intervals'
+                          ' if changed.'),
+                options=self._extend(*reg_webui(self._extend))
                 ),
-                Tab('download', _("Download settings"), savecaption=_("Save Changes"),
-                    options=self._extend(*reg_download(self._extend))
+            Tab('download', _("Download settings"), savecaption=_("Save Changes"),
+                options=self._extend(*reg_download(self._extend))
                 ),
-                Tab('search', _("Search Providers"), savecaption=_("Save Changes"),
-                    options=self._extend(*reg_search(self._extend))
+            Tab('search', _("Search Providers"), savecaption=_("Save Changes"),
+                options=self._extend(*reg_search(self._extend))
                 ),
-                Tab('quality_processing', _("Quality &amp; Post Processing"),
-                    savecaption=_("Save Changes"),
-                    options=self._extend(*reg_quality(self._extend))
+            Tab('quality_processing', _("Quality &amp; Post Processing"),
+                savecaption=_("Save Changes"),
+                options=self._extend(*reg_quality(self._extend))
                 ),
-                Tab('notifications', _("Notifications"), savecaption=_("Save Changes"),
-                    options=self._extend(*reg_notifications(self._extend))
+            Tab('notifications', _("Notifications"), savecaption=_("Save Changes"),
+                options=self._extend(*reg_notifications(self._extend))
                 ),
-                Tab('advanced', _("Advanced Settings"), savecaption=_("Save Changes"),
-                    options=self._extend(*reg_advanced(self._extend))
+            Tab('advanced', _("Advanced Settings"), savecaption=_("Save Changes"),
+                options=self._extend(*reg_advanced(self._extend))
                 ),
-            ])
+        ])
 
     def _checkSectionName(self, section_name, appkey):
         """ Unnecessary method, it does not make any serious job, just make an additional
@@ -98,7 +99,7 @@ class Config(object):
                 if sec != section_name:
                     # different section names!
                     logger.info('Misspelling in section name [{0}] for option [{0}][{1}], expected [{2}]'
-                        .format(section_name, appkey, sec))
+                                .format(section_name, appkey, sec))
             else:
                 self._section_name_spell_check_dic[lc_section] = section_name
 
@@ -207,7 +208,7 @@ class Config(object):
         if not re.match(r'[A-Z_]+$', name):
             return super(Config, self).__getattr__(name)
         else:
-            #return self.check_setting(name)
+            # return self.check_setting(name)
             return self._options[name].get()
 
     def __setattr__(self, name, value):

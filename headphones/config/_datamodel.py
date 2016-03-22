@@ -2,7 +2,7 @@ from headphones import logger
 from headphones.exceptions import ConfigError
 
 """ List of types, which ConfigOpt could handle internally, without conversions """
-_primitives = (int, str, bool, list, float)
+_primitives = (int, str, unicode, bool, list, float)
 
 
 class OptionModel(object):

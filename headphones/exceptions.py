@@ -32,6 +32,7 @@ class SoftChrootError(HeadphonesException):
     """
     pass
 
+
 class ConfigError(HeadphonesException):
     """
     Fatal errors in config module

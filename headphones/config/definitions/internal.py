@@ -5,6 +5,7 @@
 from ..typeconv import path, boolext
 from .._viewmodel import OptionInternal, OptionDeprecated
 
+
 def reg(_extend_cb):
     opts = [
         OptionInternal('CONFIG_VERSION', 'General', 0, initype=int),

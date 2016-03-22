@@ -6,6 +6,7 @@ from ..loc import _
 Options from "Quality and Post Processing" Tab
 """
 
+
 def reg(_extend_cb):
     opts = []
     # =======================================================================================
@@ -112,8 +113,8 @@ def reg(_extend_cb):
             OptionBool('IGNORE_CLEAN_RELEASES', 'General', False,
                 alignleft=True,
                 label=_('Ignore clean/censored releases'),
-                tooltip=_('Filter out releases that contain the words "clean","edited" or'
-                           ' "censored", as long as those words aren\'t in the search term'
+                tooltip=_('Filter out releases that contain the words \'clean\',\'edited\' or'
+                           ' \'censored\', as long as those words aren\'t in the search term'
                 ),
             ),
         ))

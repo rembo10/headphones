@@ -3,6 +3,7 @@ from _viewmodel import OptionBase, OptionInternal, OptionDeprecated
 
 from _viewmodel import CssClassable
 
+
 class CssClassableTest(TestCase):
 
     @TestArgs(

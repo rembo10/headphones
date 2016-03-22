@@ -8,6 +8,7 @@ from .._viewmodel import TemplaterExtension
 
 from ..loc import _
 
+
 def reg(_extend_cb):
 
     opts = []

@@ -45,8 +45,11 @@ except ImportError:
     from ordereddict import OrderedDict
 
 # will be useful for translation
+
+
 def _(x):
     return x
+
 
 def serve_template(templatename, **kwargs):
     interface_dir = os.path.join(str(headphones.PROG_DIR), 'data/interfaces/')
@@ -62,6 +65,7 @@ def serve_template(templatename, **kwargs):
 
 
 class WebInterface(object):
+
     @cherrypy.expose
     def index(self):
         raise cherrypy.HTTPRedirect("home")
@@ -285,7 +289,7 @@ class WebInterface(object):
 
         myDB = db.DBConnection()
         artist_name = \
-        myDB.select('SELECT DISTINCT ArtistName FROM artists WHERE ArtistID=?', [ArtistID])[0][0]
+            myDB.select('SELECT DISTINCT ArtistName FROM artists WHERE ArtistID=?', [ArtistID])[0][0]
 
         logger.info(u"Scanning artist: %s", artist_name)
 
@@ -392,7 +396,7 @@ class WebInterface(object):
                 ArtistIDT = ArtistID
             else:
                 ArtistIDT = \
-                myDB.action('SELECT ArtistID FROM albums WHERE AlbumID=?', [mbid]).fetchone()[0]
+                    myDB.action('SELECT ArtistID FROM albums WHERE AlbumID=?', [mbid]).fetchone()[0]
             myDB.action(
                 'UPDATE artists SET TotalTracks=(SELECT COUNT(*) FROM tracks WHERE ArtistID = ? AND AlbumTitle IN (SELECT AlbumTitle FROM albums WHERE Status != "Ignored")) WHERE ArtistID = ?',
                 [ArtistIDT, ArtistIDT])
@@ -542,7 +546,12 @@ class WebInterface(object):
     def manage(self):
         myDB = db.DBConnection()
         emptyArtists = myDB.select("SELECT * FROM artists WHERE LatestAlbum IS NULL")
-        return serve_template(templatename="manage.html", title="Manage", emptyArtists=emptyArtists)
+
+        # DONE : softchroot
+        model = {
+            'MUSIC_DIR': headphones.SOFT_CHROOT.apply(headphones.CONFIG.MUSIC_DIR)
+        }
+        return serve_template(templatename="manage.html", title="Manage", emptyArtists=emptyArtists, model=model)
 
     @cherrypy.expose
     def manageArtists(self):
@@ -601,7 +610,7 @@ class WebInterface(object):
             [(cleanName(d['ArtistName']).lower(), cleanName(d['AlbumTitle']).lower()) for d in
              headphones_album_dictionary])
         unmatchedalbums = [d for d in have_album_dictionary if (
-        cleanName(d['ArtistName']).lower(), cleanName(d['AlbumTitle']).lower()) not in check]
+            cleanName(d['ArtistName']).lower(), cleanName(d['AlbumTitle']).lower()) not in check]
 
         return serve_template(templatename="manageunmatched.html", title="Manage Unmatched Items",
                               unmatchedalbums=unmatchedalbums)
@@ -663,7 +672,7 @@ class WebInterface(object):
                             # else:
                             # logger.info("There was an error modifying Artist %s. This should not have happened" % existing_artist)
                 logger.info("Manual matching yielded %s new matches for Artist: %s" % (
-                update_count, new_artist))
+                    update_count, new_artist))
                 if update_count > 0:
                     librarysync.update_album_status()
             else:
@@ -715,13 +724,13 @@ class WebInterface(object):
                             # else:
                             # logger.info("There was an error modifying Artist %s / Album %s with clean name %s" % (existing_artist, existing_album, existing_clean_string))
                 logger.info("Manual matching yielded %s new matches for Artist: %s / Album: %s" % (
-                update_count, new_artist, new_album))
+                    update_count, new_artist, new_album))
                 if update_count > 0:
                     librarysync.update_album_status(album_id)
             else:
                 logger.info(
                     "Artist %s / Album %s already named appropriately; nothing to modify" % (
-                    existing_artist, existing_album))
+                        existing_artist, existing_album))
 
     @cherrypy.expose
     def manageManual(self):
@@ -734,7 +743,7 @@ class WebInterface(object):
                 original_clean = helpers.cleanName(
                     albums['ArtistName'] + " " + albums['AlbumTitle'] + " " + albums['TrackTitle'])
                 if albums['Matched'] == "Ignored" or albums['Matched'] == "Manual" or albums[
-                    'CleanName'] != original_clean:
+                        'CleanName'] != original_clean:
                     if albums['Matched'] == "Ignored":
                         album_status = "Ignored"
                     elif albums['Matched'] == "Manual" or albums['CleanName'] != original_clean:
@@ -868,9 +877,10 @@ class WebInterface(object):
 
     @cherrypy.expose
     def musicScan(self, path, scan=0, redirect=None, autoadd=0, libraryscan=0):
+        # DONE : softchroot
         headphones.CONFIG.LIBRARYSCAN = libraryscan
         headphones.CONFIG.AUTO_ADD_ARTISTS = autoadd
-        headphones.CONFIG.MUSIC_DIR = path
+        headphones.CONFIG.MUSIC_DIR = headphones.SOFT_CHROOT.revoke(path)
         headphones.CONFIG.write()
         if scan:
             try:
@@ -902,10 +912,14 @@ class WebInterface(object):
 
     @cherrypy.expose
     def forcePostProcess(self, dir=None, album_dir=None, keep_original_folder=False):
+        # DONE : softchroot
         from headphones import postprocessor
         threading.Thread(target=postprocessor.forcePostProcess,
-                         kwargs={'dir': dir, 'album_dir': album_dir,
-                                 'keep_original_folder': keep_original_folder == 'True'}).start()
+                         kwargs={
+                             'dir': headphones.SOFT_CHROOT.revoke(dir),
+                             'album_dir': headphones.SOFT_CHROOT.revoke(album_dir),
+                             'keep_original_folder': keep_original_folder == 'True'
+                         }).start()
         raise cherrypy.HTTPRedirect("home")
 
     @cherrypy.expose
@@ -993,14 +1007,14 @@ class WebInterface(object):
             totalcount = len(filtered)
         else:
             query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch + '%"' + 'ORDER BY %s COLLATE NOCASE %s' % (
-            sortcolumn, sSortDir_0)
+                sortcolumn, sSortDir_0)
             filtered = myDB.select(query)
             totalcount = myDB.select('SELECT COUNT(*) from artists')[0][0]
 
         if sortbyhavepercent:
             filtered.sort(key=lambda x: (
-            float(x['HaveTracks']) / x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0,
-            x['HaveTracks'] if x['HaveTracks'] else 0.0), reverse=sSortDir_0 == "asc")
+                float(x['HaveTracks']) / x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0,
+                x['HaveTracks'] if x['HaveTracks'] else 0.0), reverse=sSortDir_0 == "asc")
 
         # can't figure out how to change the datatables default sorting order when its using an ajax datasource so ill
         # just reverse it here and the first click on the "Latest Album" header will sort by descending release date
@@ -1133,7 +1147,7 @@ class WebInterface(object):
     @cherrypy.expose
     def configMetaUiUpdate(self, **kwargs):
         # TODO : save config
-        print ('configMetaUiUpdate', kwargs)
+        print('configMetaUiUpdate', kwargs)
         raise cherrypy.HTTPRedirect("configMetaUi")
 
     @cherrypy.expose
@@ -1142,14 +1156,6 @@ class WebInterface(object):
         model = headphones.CONFIG.getViewModel()
 
         return serve_template(templatename="config.html", title=_("Settings"), model=model)
-
-        # TODO : implement softchroot
-        # for k, v in config.iteritems():
-        #     if isinstance(v, headphones.config.path):
-        #         # need to apply SoftChroot to paths:
-        #         nv = headphones.SOFT_CHROOT.apply(v)
-        #         if v != nv:
-        #             config[k] = headphones.config.path(nv)
 
     @cherrypy.expose
     def configUpdate(self, **kwargs):
@@ -1175,17 +1181,6 @@ class WebInterface(object):
     @cherrypy.expose
     def configUpdate2(self, **kwargs):
         # Handle the variable config options. Note - keys with False values aren't getting passed
-
-        for k, v in kwargs.iteritems():
-            # TODO : HUGE crutch. It is all because there is no way to deal with options...
-            _conf = headphones.CONFIG._define(k)
-            conftype = _conf[1]
-
-            #print '===>', conftype
-            if conftype is headphones.config.path:
-                nv = headphones.SOFT_CHROOT.revoke(v)
-                if nv != v:
-                    kwargs[k] = nv
 
         extra_newznabs = []
         for kwarg in [x for x in kwargs if x.startswith('newznab_host')]:
@@ -1379,6 +1374,7 @@ class WebInterface(object):
 
 
 class Artwork(object):
+
     @cherrypy.expose
     def index(self):
         return "Artwork"
@@ -1412,6 +1408,7 @@ class Artwork(object):
             return fp.read()
 
     class Thumbs(object):
+
         @cherrypy.expose
         def index(self):
             return "Here be thumbs"

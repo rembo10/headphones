@@ -10,6 +10,7 @@ from ..loc import _
 Options for "Notifications" Tab
 """
 
+
 def reg(extend_cb):
     opts = []
 

@@ -22,6 +22,8 @@ But the most classes have its own template (they are inherited from Renderable)
 # ===============================================
 
 # TODO : convert to base/abstract class
+
+
 def _get_iterator_over_visible(items):
     return ifilter(lambda t: not hasattr(t, 'visible') or t.visible, items)
 
@@ -29,7 +31,9 @@ def _get_iterator_over_visible(items):
 # Abstract, base class
 # ===============================================
 
+
 class CssClassable(object):
+
     def __init__(self):
         self._cssclasses = []
 
@@ -53,6 +57,7 @@ class CssClassable(object):
         if self.cssclasses:
             return ' '.join(self.cssclasses)
         return ''
+
 
 class Renderable(object):
     """ Basic class for all things, which could be rendered in runtime from python code """
@@ -112,6 +117,7 @@ class Renderable(object):
 # - config.html
 # ===============================================
 
+
 class Tabs(object):
     """ ViewModel for entire TABS element. Contains all the tabs """
 
@@ -128,6 +134,7 @@ class Tabs(object):
         """ Default iterator is sharpened for UI tasks """
 
         return _get_iterator_over_visible(self.tabs)
+
 
 class Tab(Renderable, CssClassable):
     """ UI-tab for grouping option on a UI-page """
@@ -209,6 +216,7 @@ class Tab(Renderable, CssClassable):
 # ===============================================
 # base class for options
 # ===============================================
+
 
 class OptionBase(Renderable):
     """ Base, abstract parent for all other options """
@@ -331,6 +339,7 @@ class OptionString(OptionBase, CssClassable):
 
         self.cssclasses = cssclasses
 
+
 class OptionCombobox(OptionString):
     """ Textbox with list of available variants """
 
@@ -371,6 +380,29 @@ class OptionPath(OptionBase, CssClassable):
         # currently, path uses the same template as string
         return "OptionString"
 
+    def uiValue(self):
+        # override
+        v = self.model.get()
+
+        # TODO : this is not the best way to implement SoftChroot
+        # reimplement please WITHOUT IMPORT
+        import headphones
+        v = headphones.SOFT_CHROOT.apply(v)
+
+        return v
+
+    def uiValue2DataValue(self, value):
+        # override
+
+        v = self._initype(value)
+
+        # TODO : this is not the best way to implement SoftChroot
+        # reimplement please WITHOUT IMPORT
+        import headphones
+        v = headphones.SOFT_CHROOT.revoke(v)
+
+        return v
+
 
 class OptionPassword(OptionString):
     pass
@@ -383,12 +415,14 @@ class OptionUrl(OptionString):
         # currently, url uses the same template as string
         return "OptionString"
 
+
 class OptionEmail(OptionString):
 
     @property
     def templateName(self):
         # currently, url uses the same template as string
         return "OptionString"
+
 
 class OptionNumber(OptionBase, CssClassable):
 
@@ -722,6 +756,7 @@ class OptionList(OptionBase, CssClassable):
 # PLACEHOLDERS and STATIC templates
 # ===============================================
 
+
 class BlockExtension(Renderable, CssClassable):
     """ UI-block for grouping options within `Tab` """
 
@@ -770,6 +805,7 @@ class MessageExtension(Renderable, CssClassable):
 # Option extensions
 # ===============================================
 
+
 class TemplaterExtension(Renderable):
     """ Allow render any template, extending HTML for options with non-standart layout """
 
@@ -797,6 +833,7 @@ class TemplaterExtension(Renderable):
 # ViewModel Parser
 # ===============================================
 # ===============================================
+
 
 class PostDataParser(object):
     """ Knows how to parse options, POSTed from UI """

@@ -6,6 +6,7 @@ from .._viewmodel import BlockExtension
 from .._viewmodel import OptionString, OptionNumber, OptionPassword, OptionBool, OptionPath, OptionDropdown, OptionUrl, OptionDropdownSelector, MessageExtension
 from ..loc import _
 
+
 def reg(_extend_cb):
 
     opts = []

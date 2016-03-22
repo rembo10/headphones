@@ -12,6 +12,7 @@ logging.basicConfig(stream=sys.stderr)
 logger = logging.getLogger('headphones.config.TEST')
 logger.setLevel(logging.INFO)
 
+
 class ConfigApiTest(TestCase):
     """ Common tests for headphones.Config
 
