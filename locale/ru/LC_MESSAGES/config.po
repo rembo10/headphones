@@ -38,7 +38,7 @@ msgid "Download settings"
 msgstr "Настройки Загрузки"
 
 #: ../headphones/config/__init__.py:75
-msgid "Search providers"
+msgid "Search Providers"
 msgstr "Поисковики"
 
 #: ../headphones/config/__init__.py:78
@@ -53,15 +53,15 @@ msgstr "Уведомления"
 msgid "Advanced Settings"
 msgstr "Дополнительно"
 
-#: ../headphones/config/definitions/advanced.py:18
+#: ../headphones/config/definitions/advanced.py:20
 msgid "Renaming options"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:21
+#: ../headphones/config/definitions/advanced.py:23
 msgid "Folder Format"
 msgstr "Формат имени папок"
 
-#: ../headphones/config/definitions/advanced.py:22
+#: ../headphones/config/definitions/advanced.py:24
 msgid ""
 "Use: $Artist/$artist, $SortArtist/$sortartist, $Album/$album, $Year/$year, "
 "$Type/$type (release type) and $First/$first (first letter in artist name), "
@@ -71,11 +71,11 @@ msgid ""
 "'['$year']' = Album/G/girl talk/all day [2010]"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:31
+#: ../headphones/config/definitions/advanced.py:33
 msgid "File Format"
 msgstr "Формат Файла"
 
-#: ../headphones/config/definitions/advanced.py:32
+#: ../headphones/config/definitions/advanced.py:34
 msgid ""
 "Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title, $Artist/"
 "$artist, $Album/$album and $Year/$year. Put optional variables in square "
@@ -83,33 +83,31 @@ msgid ""
 "']')."
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:39
+#: ../headphones/config/definitions/advanced.py:41
 msgid "Use underscores instead of spaces"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:46
+#: ../headphones/config/definitions/advanced.py:48
 msgid "Re-Encoding Options"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:48
-msgid ""
-"<i class=\"fa fa-info-circle\"></i> Note: this option requires the lame, "
-"ffmpeg or xld encoder"
+#: ../headphones/config/definitions/advanced.py:50
+msgid "Note: this option requires the lame, ffmpeg or xld encoder"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:55
+#: ../headphones/config/definitions/advanced.py:57
 msgid "Re-encode downloads during postprocessing"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:58
+#: ../headphones/config/definitions/advanced.py:60
 msgid "Only re-encode lossless files (.flac)"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:61
+#: ../headphones/config/definitions/advanced.py:63
 msgid "Delete original lossless files after encoding"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:67
+#: ../headphones/config/definitions/advanced.py:69
 msgid "Enable multi-core"
 msgstr "Использовать многоядерность"
 
@@ -154,7 +152,7 @@ msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:100
 msgid "VBR/CBR"
-msgstr ""
+msgstr "VBR/CBR"
 
 #: ../headphones/config/definitions/advanced.py:102
 msgid "cbr"
@@ -186,7 +184,7 @@ msgstr "320"
 
 #: ../headphones/config/definitions/advanced.py:114
 msgid "vbr"
-msgstr ""
+msgstr "vbr"
 
 #: ../headphones/config/definitions/advanced.py:116
 #: ../headphones/config/definitions/quality.py:13
@@ -365,206 +363,258 @@ msgstr ""
 msgid "Wait until an album's release date before searching"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:227
+#: ../headphones/config/definitions/advanced.py:228
 msgid "Don't add new artists when post-processing albums"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:228
+#: ../headphones/config/definitions/advanced.py:229
 msgid ""
 "Freeze the database, so new artists won't be added automatically. Use this "
 "if Headphones adds artists because due to wrong snatches. This check is "
 "skipped when the folder name is appended with release group ID."
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:235
 #: ../headphones/config/definitions/advanced.py:236
+#: ../headphones/config/definitions/advanced.py:237
 msgid "Stop post-processing if no good metadata match found"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:240
 #: ../headphones/config/definitions/advanced.py:241
+#: ../headphones/config/definitions/advanced.py:242
 msgid "Tag using ID3v2.3 instead of ID3v2.4"
 msgstr "Использовать тэги ID3v2.3, а не ID3v2.4"
 
-#: ../headphones/config/definitions/advanced.py:250
+#: ../headphones/config/definitions/advanced.py:251
 msgid "Directories"
 msgstr "Каталоги"
 
-#: ../headphones/config/definitions/advanced.py:252
+#: ../headphones/config/definitions/advanced.py:253
 msgid "Log Directory"
-msgstr ""
+msgstr "Папка журналов"
 
-#: ../headphones/config/definitions/advanced.py:256
+#: ../headphones/config/definitions/advanced.py:257
 msgid "Cache Directory"
 msgstr "Папка кэша"
 
-#: ../headphones/config/definitions/advanced.py:260
-msgid "Cache Size"
-msgstr ""
-
 #: ../headphones/config/definitions/advanced.py:261
+msgid "Cache Size"
+msgstr "Размер кэша"
+
+#: ../headphones/config/definitions/advanced.py:262
 msgid "in MB"
 msgstr "в МБ"
 
-#: ../headphones/config/definitions/advanced.py:267
+#: ../headphones/config/definitions/advanced.py:268
 msgid "File Permissions Enabled"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:268
+#: ../headphones/config/definitions/advanced.py:269
 msgid "Change file permissions during post-processing"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:273
+#: ../headphones/config/definitions/advanced.py:274
 msgid "File Permissions"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:274
+#: ../headphones/config/definitions/advanced.py:275
 msgid "Desired file permissions"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:280
+#: ../headphones/config/definitions/advanced.py:281
 msgid "Folder Permissions Enabled"
 msgstr "Включить разрешения для папок"
 
-#: ../headphones/config/definitions/advanced.py:281
+#: ../headphones/config/definitions/advanced.py:282
 msgid "Change folder permissions during post-processing"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:286
+#: ../headphones/config/definitions/advanced.py:287
 msgid "Folder Permissions"
 msgstr "Разрешения для папок"
 
-#: ../headphones/config/definitions/advanced.py:287
+#: ../headphones/config/definitions/advanced.py:288
 msgid "Desired folder permissions"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:298
+#: ../headphones/config/definitions/advanced.py:299
 msgid "Songkick"
 msgstr "Songkick"
 
-#: ../headphones/config/definitions/advanced.py:300
+#: ../headphones/config/definitions/advanced.py:301
 msgid "Show concert info"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:303
+#: ../headphones/config/definitions/advanced.py:304
 #: ../headphones/config/definitions/notifications.py:177
 msgid "API Key"
 msgstr "API-ключ"
 
-#: ../headphones/config/definitions/advanced.py:307
+#: ../headphones/config/definitions/advanced.py:308
 msgid "Filter by Metro Area"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:310
+#: ../headphones/config/definitions/advanced.py:311
 msgid "Metro Area ID"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:311
+#: ../headphones/config/definitions/advanced.py:312
 msgid ""
 "Enter the Metro Area ID, e.g. the ID for London is 24426, this can be found "
 "by clicking the link and searching/selecting the city, e.g. London should "
 "find http://www.songkick.com/metro_areas/24426-uk-london"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:317
+#: ../headphones/config/definitions/advanced.py:318
 msgid "Find Area ID"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:328
+#: ../headphones/config/definitions/advanced.py:329
 msgid "Musicbrainz"
 msgstr "Musicbrainz"
 
-#: ../headphones/config/definitions/advanced.py:330
+#: ../headphones/config/definitions/advanced.py:331
 msgid "Musicbrainz Mirror"
 msgstr "Зеркало Musicbrainz"
 
-#: ../headphones/config/definitions/advanced.py:332
-msgid "musicbrainz.org"
-msgstr ""
-
 #: ../headphones/config/definitions/advanced.py:333
+msgid "musicbrainz.org"
+msgstr "musicbrainz.org"
+
+#: ../headphones/config/definitions/advanced.py:334
 msgid "custom"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:335
+#: ../headphones/config/definitions/advanced.py:336
 msgid "Host"
 msgstr "Хост"
 
-#: ../headphones/config/definitions/advanced.py:339
+#: ../headphones/config/definitions/advanced.py:340
 msgid "Port"
 msgstr "Порт"
 
-#: ../headphones/config/definitions/advanced.py:344
+#: ../headphones/config/definitions/advanced.py:345
 msgid "Requires Authentication"
 msgstr "Требуется Аутентификация"
 
-#: ../headphones/config/definitions/advanced.py:347
-#: ../headphones/config/definitions/advanced.py:365
+#: ../headphones/config/definitions/advanced.py:348
 #: ../headphones/config/definitions/notifications.py:121
-#: ../headphones/config/definitions/notifications.py:390
+#: ../headphones/config/definitions/notifications.py:388
+#: ../headphones/config/definitions/search.py:29
+#: ../headphones/config/definitions/search.py:207
+#: ../headphones/config/definitions/search.py:235
 msgid "Username"
 msgstr "Имя пользователя"
 
-#: ../headphones/config/definitions/advanced.py:351
-#: ../headphones/config/definitions/advanced.py:370
+#: ../headphones/config/definitions/advanced.py:352
 #: ../headphones/config/definitions/notifications.py:125
-#: ../headphones/config/definitions/notifications.py:393
+#: ../headphones/config/definitions/notifications.py:391
+#: ../headphones/config/definitions/search.py:35
+#: ../headphones/config/definitions/search.py:211
+#: ../headphones/config/definitions/search.py:239
 msgid "Password"
 msgstr "Пароль"
 
-#: ../headphones/config/definitions/advanced.py:357
+#: ../headphones/config/definitions/advanced.py:358
 msgid "Sleep Interval"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:358
-#: ../headphones/config/definitions/advanced.py:396
-#: ../headphones/config/definitions/webui.py:94
+#: ../headphones/config/definitions/advanced.py:359
+#: ../headphones/config/definitions/advanced.py:419
+#: ../headphones/config/definitions/webui.py:95
+#: ../headphones/config/definitions/webui.py:123
 msgid "in minutes"
 msgstr "в минутах"
 
-#: ../headphones/config/definitions/advanced.py:363
+#: ../headphones/config/definitions/advanced.py:368
 msgid "headphones"
 msgstr "headphones"
 
-#: ../headphones/config/definitions/advanced.py:374
-msgid "Don't have an account? Sign up!"
-msgstr "Нет аккаунта? Зарегистрируйтесь!"
+#: ../headphones/config/definitions/advanced.py:369
+msgid ""
+"You could set settings of the this mirror on the block <code>Settings > "
+"Search Providers > Headphones Indexer</code>"
+msgstr ""
+"Вы можете задать настройки для этого зеркала на вкладке <code>Настройки > "
+"Поисковики > Headphones Indexer</code>"
 
-#: ../headphones/config/definitions/advanced.py:383
+#: ../headphones/config/definitions/advanced.py:393
+#: ../headphones/config/definitions/notifications.py:71
+msgid "SSL"
+msgstr "SSL"
+
+#: ../headphones/config/definitions/advanced.py:395
+msgid "Enable verification of SSL certificates"
+msgstr ""
+
+#: ../headphones/config/definitions/advanced.py:396
+msgid ""
+"Note: disabling could pose a <strong>security issue!</strong>. Could be "
+"truly disabled only with python &gt; 2.7.9"
+msgstr ""
+"На заметку: отключение может стать причиной <strong>проблем с безопасностью</"
+"strong>. Опция может быть действительно отключена только при использовании "
+"python версии &gt; 2.7.9"
+
+#: ../headphones/config/definitions/advanced.py:399
+msgid "This patch for systems with broken SSL (like QNAP)"
+msgstr ""
+
+#: ../headphones/config/definitions/advanced.py:406
 msgid "GitHub"
 msgstr "GitHub"
 
-#: ../headphones/config/definitions/advanced.py:385
+#: ../headphones/config/definitions/advanced.py:408
 msgid "GitHub Updater Enabled"
 msgstr "Включить обновления через GitHub"
 
-#: ../headphones/config/definitions/advanced.py:386
+#: ../headphones/config/definitions/advanced.py:409
 msgid "Enable autoupdates for Headphones through GitHub "
 msgstr "Включить автопроверку обновлений для Headphones через GitHub"
 
-#: ../headphones/config/definitions/advanced.py:390
+#: ../headphones/config/definitions/advanced.py:413
 msgid "GitHub Username"
-msgstr "Имя пользователя GitHub"
+msgstr "GitHub Имя пользователя"
 
-#: ../headphones/config/definitions/advanced.py:391
+#: ../headphones/config/definitions/advanced.py:414
 msgid "Username, used to check updates on GitHub.com"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:395
+#: ../headphones/config/definitions/advanced.py:418
 msgid "Check interval"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:397
+#: ../headphones/config/definitions/advanced.py:420
 msgid "Interval between checks for updates"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:402
+#: ../headphones/config/definitions/advanced.py:425
 msgid "Check on startup"
 msgstr ""
 
-#: ../headphones/config/definitions/advanced.py:403
+#: ../headphones/config/definitions/advanced.py:426
 msgid "Perform check for updates on startup"
 msgstr "Проверять обновления при запуске"
+
+#: ../headphones/config/definitions/advanced.py:435
+msgid "Strange hidden options"
+msgstr ""
+
+#: ../headphones/config/definitions/advanced.py:437
+msgid ""
+"This is a block of forgotten settings. Previously, they did not have any "
+"visible representation in UI, but they are used by app's modules. "
+"<strong>Help them to find an appropriate place on the settings page"
+msgstr ""
+
+#: ../headphones/config/definitions/advanced.py:446
+msgid "Album completion"
+msgstr "Завершенность скачивания альбома"
+
+#: ../headphones/config/definitions/advanced.py:447
+msgid ""
+"This is used to see how many tracks you have from an album - to mark it as "
+"downloaded. Default is 80%"
+msgstr ""
 
 #: ../headphones/config/definitions/download.py:17
 msgid "Prefered Usenet"
@@ -572,7 +622,7 @@ msgstr ""
 
 #: ../headphones/config/definitions/download.py:19
 msgid "Usenet downloader"
-msgstr ""
+msgstr "Чем скачивать из Usenet"
 
 #: ../headphones/config/definitions/download.py:20
 msgid "Method for downloading usenet files."
@@ -587,8 +637,11 @@ msgid "SABnzbd Host"
 msgstr ""
 
 #: ../headphones/config/definitions/download.py:26
-msgid "usually http://localhost:8080"
-msgstr ""
+#: ../headphones/config/definitions/download.py:56
+#: ../headphones/config/definitions/download.py:156
+#: ../headphones/config/definitions/download.py:192
+msgid "usually {0}"
+msgstr "Обычно {0}"
 
 #: ../headphones/config/definitions/download.py:27
 msgid "SABnzbd host and port."
@@ -634,10 +687,6 @@ msgstr "NZBget"
 msgid "NZBget Host"
 msgstr ""
 
-#: ../headphones/config/definitions/download.py:56
-msgid "usually http://localhost:6789"
-msgstr ""
-
 #: ../headphones/config/definitions/download.py:57
 msgid "NZBget host and port."
 msgstr ""
@@ -678,21 +727,21 @@ msgid "Very Low"
 msgstr "Очень низкий"
 
 #: ../headphones/config/definitions/download.py:80
-#: ../headphones/config/definitions/notifications.py:359
+#: ../headphones/config/definitions/notifications.py:357
 msgid "Low"
 msgstr "Низкий"
 
 #: ../headphones/config/definitions/download.py:81
 #: ../headphones/config/definitions/notifications.py:186
 #: ../headphones/config/definitions/notifications.py:285
-#: ../headphones/config/definitions/notifications.py:360
+#: ../headphones/config/definitions/notifications.py:358
 msgid "Normal"
 msgstr "Нормальный"
 
 #: ../headphones/config/definitions/download.py:82
 #: ../headphones/config/definitions/notifications.py:187
 #: ../headphones/config/definitions/notifications.py:286
-#: ../headphones/config/definitions/notifications.py:361
+#: ../headphones/config/definitions/notifications.py:359
 msgid "High"
 msgstr "Высокий"
 
@@ -728,9 +777,9 @@ msgid "Usenet Common Settings"
 msgstr ""
 
 #: ../headphones/config/definitions/download.py:108
-#: ../headphones/config/definitions/download.py:257
+#: ../headphones/config/definitions/download.py:258
 msgid "Music Download Directory"
-msgstr ""
+msgstr "Папка для скачивания музыки"
 
 #: ../headphones/config/definitions/download.py:109
 msgid ""
@@ -756,7 +805,7 @@ msgstr ""
 
 #: ../headphones/config/definitions/download.py:128
 msgid "Torrent downloader"
-msgstr ""
+msgstr "Чем скачивать торренты"
 
 #: ../headphones/config/definitions/download.py:129
 msgid "Preferred torrent downloader"
@@ -795,154 +844,155 @@ msgstr "Встроенный"
 
 #: ../headphones/config/definitions/download.py:152
 msgid "Transmission"
-msgstr ""
+msgstr "Transmission"
 
 #: ../headphones/config/definitions/download.py:155
 #: ../headphones/config/definitions/download.py:157
 msgid "Transmission Host"
-msgstr ""
-
-#: ../headphones/config/definitions/download.py:156
-#: ../headphones/config/definitions/download.py:191
-msgid "usually http://localhost:9091"
-msgstr ""
+msgstr "Хост"
 
 #: ../headphones/config/definitions/download.py:161
 #: ../headphones/config/definitions/download.py:162
 msgid "Transmission Username"
-msgstr ""
+msgstr "Имя пользователя"
 
 #: ../headphones/config/definitions/download.py:166
 #: ../headphones/config/definitions/download.py:167
 msgid "Transmission Password"
-msgstr ""
+msgstr "Пароль"
 
 #: ../headphones/config/definitions/download.py:173
 msgid ""
 "Note: With Transmission, you can specify a different download directory for "
 "downloads sent from Headphones. Set it in the Music Download Directory below"
 msgstr ""
+"На заметку: с Transmission, вы можете использовать отдельную папку для "
+"загрузок из Headphones. Её можно указать ниже, в поле \"Папка для скачивания "
+"музыки\""
 
 #: ../headphones/config/definitions/download.py:180
 msgid "uTorrent (Beta)"
-msgstr ""
+msgstr "uTorrent (Beta)"
 
 #: ../headphones/config/definitions/download.py:184
 msgid ""
-"<i class=\"fa fa-info-circle\"></i> Note: uTorrent may keep files read only "
-"when completed. Check \"Preferences -> Advanced -> bt.read_only_on_complete"
-"\" in case of problems."
+"Note: uTorrent may keep files read only when completed. Check "
+"<code>Preferences -> Advanced -> bt.read_only_on_complete</code> in case of "
+"problems."
 msgstr ""
 
-#: ../headphones/config/definitions/download.py:190
+#: ../headphones/config/definitions/download.py:191
 msgid "uTorrent Host"
-msgstr ""
+msgstr "Хост"
 
-#: ../headphones/config/definitions/download.py:195
+#: ../headphones/config/definitions/download.py:196
 msgid "uTorrent Username"
-msgstr ""
+msgstr "Имя пользователя"
 
-#: ../headphones/config/definitions/download.py:199
+#: ../headphones/config/definitions/download.py:200
 msgid "uTorrent Password"
-msgstr ""
+msgstr "Пароль"
 
-#: ../headphones/config/definitions/download.py:203
+#: ../headphones/config/definitions/download.py:204
 msgid "uTorrent Label"
-msgstr ""
+msgstr "Метка загрузок"
 
-#: ../headphones/config/definitions/download.py:208
+#: ../headphones/config/definitions/download.py:209
 msgid "Deluge (Beta)"
 msgstr "Deluge (бета)"
 
-#: ../headphones/config/definitions/download.py:211
-msgid "Deluge WebUI Host and Port"
-msgstr ""
-
 #: ../headphones/config/definitions/download.py:212
+msgid "Deluge WebUI Host and Port"
+msgstr "Хост и порт Deluge WebUI"
+
+#: ../headphones/config/definitions/download.py:213
 msgid "Usually http://localhost:8112 (requires WebUI plugin)"
-msgstr ""
+msgstr "Обычно http://localhost:8112 (требуется наличие плагина WebUI)"
 
-#: ../headphones/config/definitions/download.py:216
+#: ../headphones/config/definitions/download.py:217
 msgid "Deluge Password"
-msgstr ""
+msgstr "Пароль"
 
-#: ../headphones/config/definitions/download.py:221
+#: ../headphones/config/definitions/download.py:222
 msgid ""
 "Note: With Deluge, you can specify a different download directory for "
 "downloads sent from Headphones. Set it in the Music Download Directory below"
 msgstr ""
-
-#: ../headphones/config/definitions/download.py:227
-msgid "Deluge Label"
-msgstr ""
+"На заметку: с Deluge, вы можете использовать отдельную папку для загрузок из "
+"Headphones. Её можно указать ниже, в поле \"Папка для скачивания музыки\""
 
 #: ../headphones/config/definitions/download.py:228
+msgid "Deluge Label"
+msgstr "Метка"
+
+#: ../headphones/config/definitions/download.py:229
 msgid "Labels shouldn't contain spaces (requires Label plugin)"
 msgstr ""
-
-#: ../headphones/config/definitions/download.py:232
-msgid "Move When Completed"
-msgstr ""
+"Метки не должны содержать пробелов (необходим плагин <strong>Label</strong>)"
 
 #: ../headphones/config/definitions/download.py:233
-msgid "Directory where Deluge should move completed downloads"
-msgstr ""
+msgid "Move When Completed"
+msgstr "Переместить по завершению"
 
-#: ../headphones/config/definitions/download.py:237
+#: ../headphones/config/definitions/download.py:234
+msgid "Directory where Deluge should move completed downloads"
+msgstr "Папка, в которую Deluge следует переместить завершенные загрузки"
+
+#: ../headphones/config/definitions/download.py:238
 msgid "Add Torrent Paused"
 msgstr "Добавлять торрент остановленным"
 
-#: ../headphones/config/definitions/download.py:248
+#: ../headphones/config/definitions/download.py:249
 msgid "Torrent Common Settings"
-msgstr ""
+msgstr "Общие настройки торрентов"
 
-#: ../headphones/config/definitions/download.py:250
-#: ../headphones/config/definitions/download.py:252
+#: ../headphones/config/definitions/download.py:251
+#: ../headphones/config/definitions/download.py:253
 msgid "Minimum seeders"
 msgstr ""
 
-#: ../headphones/config/definitions/download.py:251
+#: ../headphones/config/definitions/download.py:252
 msgid "Number of minimum seeders a torrent must have to be accepted"
 msgstr ""
 
-#: ../headphones/config/definitions/download.py:258
+#: ../headphones/config/definitions/download.py:259
 msgid ""
 "Full path where your torrent client downloads your music e.g. /Users/name/"
 "Downloads/music."
 msgstr ""
 
-#: ../headphones/config/definitions/download.py:259
+#: ../headphones/config/definitions/download.py:260
 msgid "Full path where your torrent client downloads your music"
 msgstr ""
 
-#: ../headphones/config/definitions/download.py:263
 #: ../headphones/config/definitions/download.py:264
+#: ../headphones/config/definitions/download.py:265
 msgid "Keep Files for Seeding"
-msgstr ""
+msgstr "Сохранять файлы для раздачи"
 
-#: ../headphones/config/definitions/download.py:268
+#: ../headphones/config/definitions/download.py:269
 msgid "Prefer"
 msgstr ""
 
-#: ../headphones/config/definitions/download.py:269
+#: ../headphones/config/definitions/download.py:270
 msgid "Prefered way"
 msgstr "Предпочтительный способ"
 
-#: ../headphones/config/definitions/download.py:271
-msgid "NZBs"
-msgstr ""
-
 #: ../headphones/config/definitions/download.py:272
-msgid "Torrents"
-msgstr ""
+msgid "NZBs"
+msgstr "NZBs"
 
 #: ../headphones/config/definitions/download.py:273
+msgid "Torrents"
+msgstr "Торренты"
+
+#: ../headphones/config/definitions/download.py:274
 msgid "No Preference"
 msgstr "Без Предпочтений"
 
 #: ../headphones/config/definitions/notifications.py:20
 msgid "Boxcar 2"
-msgstr ""
+msgstr "Boxcar 2"
 
 #: ../headphones/config/definitions/notifications.py:25
 #: ../headphones/config/definitions/notifications.py:327
@@ -957,9 +1007,9 @@ msgstr ""
 #: ../headphones/config/definitions/notifications.py:291
 #: ../headphones/config/definitions/notifications.py:311
 #: ../headphones/config/definitions/notifications.py:334
-#: ../headphones/config/definitions/notifications.py:370
-#: ../headphones/config/definitions/notifications.py:424
-#: ../headphones/config/definitions/notifications.py:465
+#: ../headphones/config/definitions/notifications.py:368
+#: ../headphones/config/definitions/notifications.py:422
+#: ../headphones/config/definitions/notifications.py:463
 msgid "Notify on snatch?"
 msgstr ""
 
@@ -968,22 +1018,20 @@ msgid "Email"
 msgstr "Email"
 
 #: ../headphones/config/definitions/notifications.py:45
-#: ../headphones/config/definitions/quality.py:29
-msgid "From"
-msgstr "От"
+msgid "Email From"
+msgstr "От кого"
 
 #: ../headphones/config/definitions/notifications.py:49
-#: ../headphones/config/definitions/quality.py:38
-msgid "To"
-msgstr ""
+msgid "Email To"
+msgstr "Кому"
 
 #: ../headphones/config/definitions/notifications.py:53
 msgid "SMTP Server"
-msgstr ""
+msgstr "SMTP Сервер"
 
 #: ../headphones/config/definitions/notifications.py:57
 msgid "SMTP User"
-msgstr ""
+msgstr "SMTP Пользователь"
 
 #: ../headphones/config/definitions/notifications.py:61
 msgid "SMTP Password"
@@ -993,13 +1041,9 @@ msgstr "Пароль SMTP"
 msgid "SMTP Port"
 msgstr "Порт SMTP"
 
-#: ../headphones/config/definitions/notifications.py:71
-msgid "SSL"
-msgstr ""
-
 #: ../headphones/config/definitions/notifications.py:74
 msgid "TLS"
-msgstr ""
+msgstr "TLS"
 
 #: ../headphones/config/definitions/notifications.py:87
 msgid "Growl"
@@ -1039,7 +1083,7 @@ msgstr "Отправлять уведомления"
 
 #: ../headphones/config/definitions/notifications.py:144
 msgid "Logitech Media Server"
-msgstr ""
+msgstr "Logitech Media Server"
 
 #: ../headphones/config/definitions/notifications.py:149
 msgid "LMS Host:Port"
@@ -1051,24 +1095,24 @@ msgstr "напр.: http://localhost:9000. Разделитель хостов - 
 
 #: ../headphones/config/definitions/notifications.py:161
 msgid "MPC"
-msgstr ""
+msgstr "MPC"
 
 #: ../headphones/config/definitions/notifications.py:172
 msgid "NotifyMyAndroid"
-msgstr ""
+msgstr "NotifyMyAndroid"
 
 #: ../headphones/config/definitions/notifications.py:178
 msgid "Separate multiple api keys with commas"
-msgstr ""
+msgstr "Если ключей много, то их можно записать через запятую"
 
 #: ../headphones/config/definitions/notifications.py:181
 #: ../headphones/config/definitions/notifications.py:182
 #: ../headphones/config/definitions/notifications.py:280
 #: ../headphones/config/definitions/notifications.py:281
-#: ../headphones/config/definitions/notifications.py:356
-#: ../headphones/config/definitions/notifications.py:357
+#: ../headphones/config/definitions/notifications.py:354
+#: ../headphones/config/definitions/notifications.py:355
 msgid "Priority"
-msgstr ""
+msgstr "Приоритет"
 
 #: ../headphones/config/definitions/notifications.py:185
 #: ../headphones/config/definitions/notifications.py:284
@@ -1082,7 +1126,7 @@ msgstr "Аварийный"
 
 #: ../headphones/config/definitions/notifications.py:203
 msgid "OS X"
-msgstr ""
+msgstr "OS X"
 
 #: ../headphones/config/definitions/notifications.py:208
 msgid "Register Notify App"
@@ -1100,7 +1144,7 @@ msgstr ""
 
 #: ../headphones/config/definitions/notifications.py:229
 msgid "Plex"
-msgstr ""
+msgstr "Plex"
 
 #: ../headphones/config/definitions/notifications.py:234
 msgid "Plex Server Host:Port"
@@ -1152,7 +1196,7 @@ msgstr "Отправлять уведомления через Plex"
 
 #: ../headphones/config/definitions/notifications.py:271
 msgid "Prowl"
-msgstr ""
+msgstr "Prowl"
 
 #: ../headphones/config/definitions/notifications.py:276
 #: ../headphones/config/definitions/webui.py:67
@@ -1161,7 +1205,7 @@ msgstr "API-ключ"
 
 #: ../headphones/config/definitions/notifications.py:302
 msgid "Pushalot"
-msgstr ""
+msgstr "Pushalot"
 
 #: ../headphones/config/definitions/notifications.py:307
 msgid "Pushalot API Key"
@@ -1173,7 +1217,7 @@ msgstr ""
 
 #: ../headphones/config/definitions/notifications.py:322
 msgid "Pushbullet"
-msgstr ""
+msgstr "Pushbullet"
 
 #: ../headphones/config/definitions/notifications.py:330
 msgid "Device ID"
@@ -1185,81 +1229,81 @@ msgstr "Оставьте пустым, чтобы отправлять увед�
 
 #: ../headphones/config/definitions/notifications.py:345
 msgid "Pushover"
-msgstr ""
+msgstr "Pushover"
 
 #: ../headphones/config/definitions/notifications.py:350
 msgid "User Key"
 msgstr "Ключ пользователя"
 
-#: ../headphones/config/definitions/notifications.py:365
+#: ../headphones/config/definitions/notifications.py:363
 msgid "API Token"
 msgstr "API-ключ"
 
-#: ../headphones/config/definitions/notifications.py:366
+#: ../headphones/config/definitions/notifications.py:364
 msgid "Leave blank to use Headphones default"
 msgstr ""
 
-#: ../headphones/config/definitions/notifications.py:381
+#: ../headphones/config/definitions/notifications.py:379
 msgid "Subsonic"
-msgstr ""
+msgstr "Subsonic"
 
-#: ../headphones/config/definitions/notifications.py:386
+#: ../headphones/config/definitions/notifications.py:384
 msgid "Subsonic URL"
 msgstr ""
 
-#: ../headphones/config/definitions/notifications.py:404
+#: ../headphones/config/definitions/notifications.py:402
 msgid "Synology NAS"
-msgstr ""
+msgstr "Synology NAS"
 
-#: ../headphones/config/definitions/notifications.py:415
+#: ../headphones/config/definitions/notifications.py:413
 msgid "Twitter"
 msgstr "Twitter"
 
-#: ../headphones/config/definitions/notifications.py:420
+#: ../headphones/config/definitions/notifications.py:418
 msgid "Prefix for tweets"
 msgstr ""
 
-#: ../headphones/config/definitions/notifications.py:428
+#: ../headphones/config/definitions/notifications.py:426
 msgid "Step 1: Request Authorization"
 msgstr "Шаг 1: Запрос авторизации"
 
-#: ../headphones/config/definitions/notifications.py:429
+#: ../headphones/config/definitions/notifications.py:427
 msgid "Confirm Authorization. Check pop-up blocker if no response."
 msgstr ""
 "Подтвердить авторизацию. Проверьте блокировщик всплывающих окон, если ответ "
 "не приходит."
 
-#: ../headphones/config/definitions/notifications.py:430
+#: ../headphones/config/definitions/notifications.py:428
 msgid "Step 2: Verify Key"
-msgstr ""
+msgstr "Шаг 2: Проверка ключа"
 
-#: ../headphones/config/definitions/notifications.py:431
+#: ../headphones/config/definitions/notifications.py:429
 msgid "Input Authorization Key"
 msgstr ""
 
-#: ../headphones/config/definitions/notifications.py:432
+#: ../headphones/config/definitions/notifications.py:430
 msgid "Test Twitter"
-msgstr ""
+msgstr "Проверить Twitter"
 
-#: ../headphones/config/definitions/notifications.py:448
+#: ../headphones/config/definitions/notifications.py:446
 msgid "Telegram"
-msgstr ""
+msgstr "Telegram"
 
-#: ../headphones/config/definitions/notifications.py:453
+#: ../headphones/config/definitions/notifications.py:451
 msgid "Bot Token"
 msgstr ""
 
-#: ../headphones/config/definitions/notifications.py:454
+#: ../headphones/config/definitions/notifications.py:452
 msgid ""
 "Contact <a href=\"http://telegram.me/BotFather\">@BotFather</a> to create a "
 "bot and get its token"
 msgstr ""
 
-#: ../headphones/config/definitions/notifications.py:459
+#: ../headphones/config/definitions/notifications.py:457
 msgid "User ID"
-msgstr ""
+msgstr "Идентификатор пользователя"
 
-#: ../headphones/config/definitions/notifications.py:460
+#: ../headphones/config/definitions/notifications.py:458
 msgid ""
 "Contact <a href=\"http://telegram.me/myidbot\">@myidbot</a> to get your user "
 "ID"
@@ -1284,7 +1328,11 @@ msgstr ""
 
 #: ../headphones/config/definitions/quality.py:26
 msgid "Reject if target size is not in bitrate range:"
-msgstr ""
+msgstr "Отбросить, если битрейт за пределами интервала: "
+
+#: ../headphones/config/definitions/quality.py:29
+msgid "From"
+msgstr "От"
 
 #: ../headphones/config/definitions/quality.py:30
 #: ../headphones/config/definitions/quality.py:39
@@ -1298,6 +1346,10 @@ msgid ""
 "102.5 mb, anything less will be rejected"
 msgstr ""
 
+#: ../headphones/config/definitions/quality.py:38
+msgid "To"
+msgstr "До"
+
 #: ../headphones/config/definitions/quality.py:40
 msgid ""
 "e.g. if album length = 40 mins, to = 2000 kbps, then max target size = 586 "
@@ -1305,8 +1357,8 @@ msgid ""
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:49
-msgid "Preferred Bitrate"
-msgstr "Предпочтительный битрейт"
+msgid "Custom Bitrate"
+msgstr "Указать битрейт"
 
 #: ../headphones/config/definitions/quality.py:52
 msgid "Target bitrate"
@@ -1377,330 +1429,270 @@ msgstr ""
 msgid "Ignore clean/censored releases"
 msgstr ""
 
-#: ../headphones/config/definitions/quality.py:116
+#: ../headphones/config/definitions/quality.py:115
 msgid ""
 "Filter out releases that contain the words \"clean\",\"edited\" or \"censored"
 "\", as long as those words aren't in the search term"
 msgstr ""
 
-#: ../headphones/config/definitions/quality.py:125
+#: ../headphones/config/definitions/quality.py:124
 msgid "Post-Processing"
 msgstr "Доп. Обработка"
 
-#: ../headphones/config/definitions/quality.py:128
-msgid "Move downloads to Destination Folder"
-msgstr ""
-
-#: ../headphones/config/definitions/quality.py:132
-msgid "Replace existing folders?"
-msgstr "Заменять существующие папки?"
-
-#: ../headphones/config/definitions/quality.py:136
-msgid "Keep original folder (i.e. copy)"
-msgstr "Сохранять папку (т.е. копировать, а не перемещать)"
-
-#: ../headphones/config/definitions/quality.py:142
+#: ../headphones/config/definitions/quality.py:126
 msgid "Rename files"
 msgstr "Переименовывать файлы"
 
-#: ../headphones/config/definitions/quality.py:146
+#: ../headphones/config/definitions/quality.py:130
 msgid "Correct metadata"
-msgstr ""
+msgstr "Исправлять метаданные"
 
-#: ../headphones/config/definitions/quality.py:150
+#: ../headphones/config/definitions/quality.py:134
 msgid "Split single file albums into multiple tracks"
 msgstr "Разделять 'однофайловый' альбом на несколько треков"
 
-#: ../headphones/config/definitions/quality.py:151
+#: ../headphones/config/definitions/quality.py:136
 msgid ""
 "Use associated .cue sheet to split single file albums into multiple tracks. "
 "Requires shntool with flac or xld cli (OS X) to be installed."
 msgstr ""
 
-#: ../headphones/config/definitions/quality.py:157
+#: ../headphones/config/definitions/quality.py:141
 msgid "Delete leftover files"
-msgstr ""
+msgstr "Удалять оставшиеся файлы"
 
-#: ../headphones/config/definitions/quality.py:158
+#: ../headphones/config/definitions/quality.py:143
 msgid "(.m3u, .nfo, .sfv, .nzb, etc.)"
 msgstr "(.m3u, .nfo, .sfv, .nzb, и др.)"
 
-#: ../headphones/config/definitions/quality.py:162
+#: ../headphones/config/definitions/quality.py:146
 msgid "Keep original nfo"
 msgstr "Сохранять оригинальный nfo-файл"
 
-#: ../headphones/config/definitions/quality.py:163
+#: ../headphones/config/definitions/quality.py:148
 msgid "(extension changed to .orig.nfo)"
 msgstr "(расширение будет изменено на '.orig.nfo')"
 
-#: ../headphones/config/definitions/quality.py:167
+#: ../headphones/config/definitions/quality.py:151
 msgid "Add album art jpeg to album folder"
-msgstr "Добавлять обложку альбома в папку с альбомом"
+msgstr "Добавлять обложку в папку альбома"
 
-#: ../headphones/config/definitions/quality.py:170
+#: ../headphones/config/definitions/quality.py:155
 msgid "Name of album art file"
-msgstr ""
+msgstr "Название для файла-обложки альбома"
 
-#: ../headphones/config/definitions/quality.py:171
+#: ../headphones/config/definitions/quality.py:156
 msgid "will be suffixed with \".jpg\""
-msgstr ""
+msgstr "будет дополнено суффиксом \".jpg\""
 
-#: ../headphones/config/definitions/quality.py:177
+#: ../headphones/config/definitions/quality.py:161
 msgid ""
 "Use $Artist/$artist, $Album/$album, $Year/$year, put optional variables in "
 "square brackets, use single-quote marks to escape square brackets literally "
 "('[', ']')."
 msgstr ""
 
-#: ../headphones/config/definitions/quality.py:186
+#: ../headphones/config/definitions/quality.py:169
 msgid "Embed album art in each file"
 msgstr ""
 
-#: ../headphones/config/definitions/quality.py:190
+#: ../headphones/config/definitions/quality.py:173
 msgid "Embed lyrics"
-msgstr ""
+msgstr "Встраивать текст"
+
+#: ../headphones/config/definitions/quality.py:177
+msgid "Rename unprocesed"
+msgstr "Переименовывать необработанные"
+
+# Do not forget about "Destination Folder"
+#: ../headphones/config/definitions/quality.py:181
+msgid "Move downloads to Destination Folder"
+msgstr "Перемещать загрузки в \"Папку Назначения\""
+
+#: ../headphones/config/definitions/quality.py:186
+msgid "Replace existing folders?"
+msgstr "Заменять существующие папки?"
+
+#: ../headphones/config/definitions/quality.py:190
+msgid "Keep original folder (i.e. copy)"
+msgstr "Сохранять папку (т.е. копировать, а не перемещать)"
+
+#: ../headphones/config/definitions/quality.py:193
+msgid "Destination Directory"
+msgstr "Папка назначения"
 
 #: ../headphones/config/definitions/quality.py:194
-msgid "Destination Directory"
-msgstr ""
-
-#: ../headphones/config/definitions/quality.py:195
 msgid ""
 "The directory where Headphones will move file to after post processing, e."
 "g. /Volumes/share/music."
 msgstr ""
 
-#: ../headphones/config/definitions/quality.py:200
+#: ../headphones/config/definitions/quality.py:199
 msgid "Lossless Destination Directory"
-msgstr ""
+msgstr "Папка назначения для Lossless"
 
-#: ../headphones/config/definitions/quality.py:201
+#: ../headphones/config/definitions/quality.py:200
 msgid "Optional. Set this if you have a separate directory for lossless music."
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:14
-msgid "zzALBUM_COMPLETION_PCTzz"
+#: ../headphones/config/definitions/search.py:24
+msgid "Headphones Indexer"
+msgstr "Headphones Indexer"
+
+#: ../headphones/config/definitions/search.py:30
+msgid "Headphones VIP Server username"
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:22
-msgid "zzAUTO_ADD_ARTISTSzz"
+#: ../headphones/config/definitions/search.py:36
+msgid "Headphones VIP Server password"
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:29
-msgid "zzCUE_SPLIT_FLAC_PATHzz"
-msgstr ""
+#: ../headphones/config/definitions/search.py:40
+msgid "Don't have an account? Sign up!"
+msgstr "Нет аккаунта? Зарегистрируйтесь!"
 
-#: ../headphones/config/definitions/search.py:34
-msgid "zzCUE_SPLIT_SHNTOOL_PATHzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:39
+#: ../headphones/config/definitions/search.py:50
 msgid "zzEXTRA_NEWZNABSzz"
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:44
-msgid "zzEXTRA_TORZNABSzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:49
-msgid "zzHEADPHONES_INDEXERzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:54
-msgid "zzIGNORED_FILESzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:59
-msgid "zzIGNORED_FOLDERSzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:64
-msgid "zzJOURNAL_MODEzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:70
-msgid "zzKATzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:77
-msgid "zzKAT_PROXY_URLzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:83
-msgid "zzKAT_RATIOzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:91
-msgid "zzLASTFM_USERNAMEzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:97
-msgid "zzLIBRARYSCANzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:104
-msgid "zzMININOVAzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:111
-msgid "zzMININOVA_RATIOzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:117
-msgid "zzMUSIC_DIRzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:122
+#: ../headphones/config/definitions/search.py:55
 msgid "zzNEWZNABzz"
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:129
+#: ../headphones/config/definitions/search.py:62
 msgid "zzNEWZNAB_APIKEYzz"
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:135
+#: ../headphones/config/definitions/search.py:68
 msgid "zzNEWZNAB_ENABLEDzz"
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:142
+#: ../headphones/config/definitions/search.py:75
 msgid "zzNEWZNAB_HOSTzz"
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:148
-msgid "zzNZBSORGzz"
+#: ../headphones/config/definitions/search.py:85
+msgid "NZBs.org"
+msgstr "NZBs.org"
+
+#: ../headphones/config/definitions/search.py:90
+msgid "NZBs.org API Key"
+msgstr "API-ключ NZBs.org"
+
+#: ../headphones/config/definitions/search.py:101
+msgid "omgwtfnzbs"
+msgstr "omgwtfnzbs"
+
+#: ../headphones/config/definitions/search.py:106
+msgid "omgwtfnzbs UID"
+msgstr "omgwtfnzbs UID"
+
+#: ../headphones/config/definitions/search.py:110
+msgid "omgwtfnzbs API Key"
+msgstr "omgwtfnzbs API-ключ"
+
+#: ../headphones/config/definitions/search.py:123
+msgid "The Pirate Bay"
+msgstr "The Pirate Bay"
+
+#: ../headphones/config/definitions/search.py:128
+#: ../headphones/config/definitions/search.py:153
+msgid "Proxy URL"
+msgstr "Адрес прокси"
+
+#: ../headphones/config/definitions/search.py:129
+#: ../headphones/config/definitions/search.py:154
+msgid "Optional. Leave empty for default."
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:155
-msgid "zzNZBSORG_HASHzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:161
-msgid "zzNZBSORG_UIDzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:167
-msgid "zzOLDPIRATEBAYzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:174
-msgid "zzOLDPIRATEBAY_RATIOzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:180
-msgid "zzOLDPIRATEBAY_URLzz"
-msgstr ""
-
+#: ../headphones/config/definitions/search.py:132
+#: ../headphones/config/definitions/search.py:157
 #: ../headphones/config/definitions/search.py:186
-msgid "zzOMGWTFNZBSzz"
+#: ../headphones/config/definitions/search.py:215
+#: ../headphones/config/definitions/search.py:243
+#: ../headphones/config/definitions/search.py:263
+#: ../headphones/config/definitions/search.py:322
+#: ../headphones/config/definitions/search.py:342
+msgid "Seed Ratio"
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:193
-msgid "zzOMGWTFNZBS_APIKEYzz"
+#: ../headphones/config/definitions/search.py:133
+msgid ""
+"Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove "
+"torrent when post processed and finished seeding."
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:199
-msgid "zzOMGWTFNZBS_UIDzz"
+#: ../headphones/config/definitions/search.py:148
+msgid "Kick Ass Torrents"
+msgstr "Kick Ass Torrents"
+
+#: ../headphones/config/definitions/search.py:158
+#: ../headphones/config/definitions/search.py:187
+#: ../headphones/config/definitions/search.py:216
+#: ../headphones/config/definitions/search.py:244
+#: ../headphones/config/definitions/search.py:264
+#: ../headphones/config/definitions/search.py:323
+#: ../headphones/config/definitions/search.py:343
+msgid ""
+"Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove "
+"torrent when post processed and finished seeding"
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:205
-msgid "zzPIRATEBAYzz"
+#: ../headphones/config/definitions/search.py:173
+msgid "Waffles.fm"
+msgstr "Waffles.fm"
+
+#: ../headphones/config/definitions/search.py:178
+msgid "UID Number"
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:212
-msgid "zzPIRATEBAY_PROXY_URLzz"
+#: ../headphones/config/definitions/search.py:182
+msgid "Passkey"
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:218
-msgid "zzPIRATEBAY_RATIOzz"
+#: ../headphones/config/definitions/search.py:202
+msgid "rutracker.org"
+msgstr "rutracker.org"
+
+#: ../headphones/config/definitions/search.py:230
+msgid "What.cd"
+msgstr "What.cd"
+
+#: ../headphones/config/definitions/search.py:258
+msgid "Strike Search"
+msgstr "Strike Search"
+
+#: ../headphones/config/definitions/search.py:278
+msgid "zzEXTRA_TORZNABSzz"
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:224
-msgid "zzRENAME_FROZENzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:229
-msgid "zzRENAME_UNPROCESSEDzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:235
-msgid "zzRUTRACKERzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:242
-msgid "zzRUTRACKER_PASSWORDzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:248
-msgid "zzRUTRACKER_RATIOzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:254
-msgid "zzRUTRACKER_USERzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:260
-msgid "zzSTRIKEzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:267
-msgid "zzSTRIKE_RATIOzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:273
-msgid "zzTORRENT_REMOVAL_INTERVALzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:280
+#: ../headphones/config/definitions/search.py:283
 msgid "zzTORZNABzz"
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:287
+#: ../headphones/config/definitions/search.py:290
 msgid "zzTORZNAB_APIKEYzz"
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:293
+#: ../headphones/config/definitions/search.py:296
 msgid "zzTORZNAB_ENABLEDzz"
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:300
+#: ../headphones/config/definitions/search.py:303
 msgid "zzTORZNAB_HOSTzz"
 msgstr ""
 
-#: ../headphones/config/definitions/search.py:306
-msgid "zzVERIFY_SSL_CERTzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:311
-msgid "zzWAFFLESzz"
-msgstr ""
+#: ../headphones/config/definitions/search.py:313
+msgid "Old Pirate Bay"
+msgstr "Old Pirate Bay"
 
 #: ../headphones/config/definitions/search.py:318
-msgid "zzWAFFLES_PASSKEYzz"
-msgstr ""
+msgid "URL"
+msgstr "URL"
 
-#: ../headphones/config/definitions/search.py:324
-msgid "zzWAFFLES_RATIOzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:330
-msgid "zzWAFFLES_UIDzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:336
-msgid "zzWHATCDzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:343
-msgid "zzWHATCD_PASSWORDzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:349
-msgid "zzWHATCD_RATIOzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:355
-msgid "zzWHATCD_USERNAMEzz"
-msgstr ""
+#: ../headphones/config/definitions/search.py:337
+msgid "Mininova"
+msgstr "Mininova"
 
 #: ../headphones/config/definitions/webui.py:16
 msgid "Basic"
@@ -1746,7 +1738,7 @@ msgstr ""
 
 #: ../headphones/config/definitions/webui.py:39
 msgid "Launch Browser on Startup"
-msgstr "Открывать браузер при запуске HeadPhones"
+msgstr "Открывать браузер"
 
 #: ../headphones/config/definitions/webui.py:40
 msgid "Launch browser pointed to Headphones, on startup."
@@ -1794,7 +1786,7 @@ msgstr "Интервалы"
 
 #: ../headphones/config/definitions/webui.py:83
 msgid "An interval of 0 will disable a task."
-msgstr ""
+msgstr "Интервал \"0\" отключает задание"
 
 #: ../headphones/config/definitions/webui.py:87
 msgid "Search Interval"
@@ -1808,46 +1800,51 @@ msgstr "в минутах, минимум - 360 минут"
 msgid "Time between two searches for new downloads."
 msgstr ""
 
-#: ../headphones/config/definitions/webui.py:93
+#: ../headphones/config/definitions/webui.py:94
 msgid "Download Scan Interval"
 msgstr "Интервал Сканирования Загрузок"
 
-#: ../headphones/config/definitions/webui.py:95
+#: ../headphones/config/definitions/webui.py:96
 msgid "Time between scans for downloaded files."
 msgstr ""
 
-#: ../headphones/config/definitions/webui.py:99
+#: ../headphones/config/definitions/webui.py:101
 msgid "Library Scan Interval"
-msgstr ""
+msgstr "Интервал сканирования библиотеки"
 
-#: ../headphones/config/definitions/webui.py:100
-#: ../headphones/config/definitions/webui.py:106
+#: ../headphones/config/definitions/webui.py:102
+#: ../headphones/config/definitions/webui.py:109
 msgid "in hours"
 msgstr "в часах"
 
-#: ../headphones/config/definitions/webui.py:101
+#: ../headphones/config/definitions/webui.py:103
 msgid "Time between two library update scans."
 msgstr "Период между сканированиями библиотеки."
 
-#: ../headphones/config/definitions/webui.py:105
+#: ../headphones/config/definitions/webui.py:108
 msgid "MusicBrainz Update Interval"
 msgstr "Интервал проверки MusicBrainz"
 
-#: ../headphones/config/definitions/webui.py:107
+#: ../headphones/config/definitions/webui.py:110
 msgid "Time between two MusicBrainz updates."
 msgstr "Интервал времени между двумя проверками обновлений на MusicBrainz."
 
-#: ../headphones/config/definitions/webui.py:111
+#: ../headphones/config/definitions/webui.py:115
 msgid "Ignore Album Updates"
-msgstr "Игнорировать Обновления Альбома"
+msgstr "Игнорировать обновления альбома"
 
-#: ../headphones/config/definitions/webui.py:112
+#: ../headphones/config/definitions/webui.py:116
 msgid "in days"
 msgstr "в днях"
 
-#: ../headphones/config/definitions/webui.py:113
+#: ../headphones/config/definitions/webui.py:117
 msgid "Ignore MusicBrainz album updates older then certain number of days."
 msgstr ""
 
-#~ msgid "All"
-#~ msgstr "Все"
+#: ../headphones/config/definitions/webui.py:122
+msgid "Torrent Removal Interval"
+msgstr ""
+
+#: ../headphones/config/definitions/webui.py:124
+msgid "Remove Torrent + data if Post Processed and finished Seeding"
+msgstr ""

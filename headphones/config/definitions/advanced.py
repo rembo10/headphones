@@ -67,8 +67,6 @@ def reg(_extend_cb):
 
             OptionSwitch('ENCODER_MULTICORE', 'General', False,
                 label=_('Enable multi-core'),
-                caption=_(''),
-                tooltip=_(''),
                 options=_extend_cb(
                     OptionNumber('ENCODER_MULTICORE_COUNT', 'General', 0,
                         label=_('Multi-core count'),
@@ -369,7 +367,7 @@ def reg(_extend_cb):
                     # !!!!!
                     OptionDropdownSelector.Item(value='headphones', label=_('headphones'), options=_extend_cb(
                         MessageExtension(message=_('You could set settings of the this mirror on the block'
-                                                   ' <code>Settins > Search Providers > Headphones Indexer</code>'
+                                                   ' <code>Settings > Search Providers > Headphones Indexer</code>'
                             ),
                             icon='<i class="fa fa-comments-o"></i>',
                         ),

@@ -233,14 +233,10 @@ def reg(extend_cb):
                 options=extend_cb(
                     OptionString('WHATCD_USERNAME', 'What.cd', '',
                         label=_('Username'),
-                        caption=_(''),
-                        tooltip=_(''),
                         maxlength=64
                     ),
                     OptionPassword('WHATCD_PASSWORD', 'What.cd', '',
                         label=_('Password'),
-                        caption=_(''),
-                        tooltip=_(''),
                         maxlength=None
                     ),
                     OptionFloat('WHATCD_RATIO', 'What.cd', None,
@@ -320,8 +316,6 @@ def reg(extend_cb):
                 options=extend_cb(
                     OptionUrl('OLDPIRATEBAY_URL', 'Old Piratebay', '',
                         label=_('URL'),
-                        caption=_(''),
-                        tooltip=_(''),
                         maxlength=None
                     ),
                     OptionFloat('OLDPIRATEBAY_RATIO', 'Old Piratebay', None,

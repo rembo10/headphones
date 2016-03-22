@@ -1,19 +1,16 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR ORGANIZATION
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2016-03-22 08:22+YEKT\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Project-Id-Version: headphones\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Koryukov Maksim <maxkoryukov@gmail.com>\n"
+"Language-Team: headphones\n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
-"Content-Transfer-Encoding: ENCODING\n"
-"Generated-By: pygettext.py 1.5\n"
-
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
+"X-Poedit-SourceCharset: en\n"
 
 #: ../headphones/config/__init__.py:66
 msgid "Web Interface"
@@ -26,7 +23,9 @@ msgid "Save Changes"
 msgstr ""
 
 #: ../headphones/config/__init__.py:67
-msgid "<i class=\"fa fa-info-circle\"></i> Web Interface changes require a restart to take effect. Saving settings will restart intervals if changed."
+msgid ""
+"<i class=\"fa fa-info-circle\"></i> Web Interface changes require a restart "
+"to take effect. Saving settings will restart intervals if changed."
 msgstr ""
 
 #: ../headphones/config/__init__.py:72
@@ -58,7 +57,13 @@ msgid "Folder Format"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:24
-msgid "Use: $Artist/$artist, $SortArtist/$sortartist, $Album/$album, $Year/$year, $Type/$type (release type) and $First/$first (first letter in artist name), $OriginalFolder/$originalfolder (downloaded directory name). Put optional variables in square brackets, use single-quote marks to escape square brackets literally ('[', ']').<br>E.g.: $Type/$First/$artist/$album '['$year']' = Album/G/girl talk/all day [2010]"
+msgid ""
+"Use: $Artist/$artist, $SortArtist/$sortartist, $Album/$album, $Year/$year, "
+"$Type/$type (release type) and $First/$first (first letter in artist name), "
+"$OriginalFolder/$originalfolder (downloaded directory name). Put optional "
+"variables in square brackets, use single-quote marks to escape square "
+"brackets literally ('[', ']').<br>E.g.: $Type/$First/$artist/$album "
+"'['$year']' = Album/G/girl talk/all day [2010]"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:33
@@ -66,7 +71,11 @@ msgid "File Format"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:34
-msgid "Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title, $Artist/$artist, $Album/$album and $Year/$year. Put optional variables in square brackets, use single-quote marks to escape square brackets literally ('[', ']')."
+msgid ""
+"Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title, $Artist/"
+"$artist, $Album/$album and $Year/$year. Put optional variables in square "
+"brackets, use single-quote marks to escape square brackets literally ('[', "
+"']')."
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:41
@@ -110,7 +119,9 @@ msgid "Encoder"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:82
-msgid "Name of encoder to use. Lame, FFmpeg and libav are available for most Linux distributions. On Ubuntu, libav replaces FFmpeg. xld is OS X-only."
+msgid ""
+"Name of encoder to use. Lame, FFmpeg and libav are available for most Linux "
+"distributions. On Ubuntu, libav replaces FFmpeg. xld is OS X-only."
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:86
@@ -130,7 +141,8 @@ msgid "Format"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:92
-msgid "Use one of \"mp3\", \"ogg\", \"m4a\", or <strong>any custom</strong> format"
+msgid ""
+"Use one of \"mp3\", \"ogg\", \"m4a\", or <strong>any custom</strong> format"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:100
@@ -231,7 +243,8 @@ msgid "Arguments"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:145
-msgid "<i class=\"fa fa-exclamation-circle\"></i> Ignores all of the above options"
+msgid ""
+"<i class=\"fa fa-exclamation-circle\"></i> Ignores all of the above options"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:146
@@ -349,7 +362,10 @@ msgid "Don't add new artists when post-processing albums"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:229
-msgid "Freeze the database, so new artists won't be added automatically. Use this if Headphones adds artists because due to wrong snatches. This check is skipped when the folder name is appended with release group ID."
+msgid ""
+"Freeze the database, so new artists won't be added automatically. Use this "
+"if Headphones adds artists because due to wrong snatches. This check is "
+"skipped when the folder name is appended with release group ID."
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:236
@@ -436,7 +452,10 @@ msgid "Metro Area ID"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:312
-msgid "Enter the Metro Area ID, e.g. the ID for London is 24426, this can be found by clicking the link and searching/selecting the city, e.g. London should find http://www.songkick.com/metro_areas/24426-uk-london"
+msgid ""
+"Enter the Metro Area ID, e.g. the ID for London is 24426, this can be found "
+"by clicking the link and searching/selecting the city, e.g. London should "
+"find http://www.songkick.com/metro_areas/24426-uk-london"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:318
@@ -505,7 +524,9 @@ msgid "headphones"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:369
-msgid "You could set settings of the this mirror on the block <code>Settings > Search Providers > Headphones Indexer</code>"
+msgid ""
+"You could set settings of the this mirror on the block <code>Settings > "
+"Search Providers > Headphones Indexer</code>"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:393
@@ -518,7 +539,9 @@ msgid "Enable verification of SSL certificates"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:396
-msgid "Note: disabling could pose a <strong>security issue!</strong>. Could be truly disabled only with python &gt; 2.7.9"
+msgid ""
+"Note: disabling could pose a <strong>security issue!</strong>. Could be "
+"truly disabled only with python &gt; 2.7.9"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:399
@@ -566,7 +589,10 @@ msgid "Strange hidden options"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:437
-msgid "This is a block of forgotten settings. Previously, they did not have any visible representation in UI, but they are used by app's modules. <strong>Help them to find an appropriate place on the settings page"
+msgid ""
+"This is a block of forgotten settings. Previously, they did not have any "
+"visible representation in UI, but they are used by app's modules. "
+"<strong>Help them to find an appropriate place on the settings page"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:446
@@ -574,7 +600,9 @@ msgid "Album completion"
 msgstr ""
 
 #: ../headphones/config/definitions/advanced.py:447
-msgid "This is used to see how many tracks you have from an album - to mark it as downloaded. Default is 80%"
+msgid ""
+"This is used to see how many tracks you have from an album - to mark it as "
+"downloaded. Default is 80%"
 msgstr ""
 
 #: ../headphones/config/definitions/download.py:17
@@ -743,7 +771,9 @@ msgid "Music Download Directory"
 msgstr ""
 
 #: ../headphones/config/definitions/download.py:109
-msgid "Full path where SAB or NZBget downloads your music, e.g. <code>/Users/name/Downloads/music</code>"
+msgid ""
+"Full path where SAB or NZBget downloads your music, e.g. <code>/Users/name/"
+"Downloads/music</code>"
 msgstr ""
 
 #: ../headphones/config/definitions/download.py:110
@@ -780,7 +810,9 @@ msgid "Magnet links"
 msgstr ""
 
 #: ../headphones/config/definitions/download.py:142
-msgid "Note: Opening magnet URLs is not suitable for headless/console/terminal servers.<br />Embed only works for rTorrent."
+msgid ""
+"Note: Opening magnet URLs is not suitable for headless/console/terminal "
+"servers.<br />Embed only works for rTorrent."
 msgstr ""
 
 #: ../headphones/config/definitions/download.py:144
@@ -819,7 +851,9 @@ msgid "Transmission Password"
 msgstr ""
 
 #: ../headphones/config/definitions/download.py:173
-msgid "Note: With Transmission, you can specify a different download directory for downloads sent from Headphones. Set it in the Music Download Directory below"
+msgid ""
+"Note: With Transmission, you can specify a different download directory for "
+"downloads sent from Headphones. Set it in the Music Download Directory below"
 msgstr ""
 
 #: ../headphones/config/definitions/download.py:180
@@ -827,7 +861,10 @@ msgid "uTorrent (Beta)"
 msgstr ""
 
 #: ../headphones/config/definitions/download.py:184
-msgid "Note: uTorrent may keep files read only when completed. Check <code>Preferences -> Advanced -> bt.read_only_on_complete</code> in case of problems."
+msgid ""
+"Note: uTorrent may keep files read only when completed. Check "
+"<code>Preferences -> Advanced -> bt.read_only_on_complete</code> in case of "
+"problems."
 msgstr ""
 
 #: ../headphones/config/definitions/download.py:191
@@ -863,7 +900,9 @@ msgid "Deluge Password"
 msgstr ""
 
 #: ../headphones/config/definitions/download.py:222
-msgid "Note: With Deluge, you can specify a different download directory for downloads sent from Headphones. Set it in the Music Download Directory below"
+msgid ""
+"Note: With Deluge, you can specify a different download directory for "
+"downloads sent from Headphones. Set it in the Music Download Directory below"
 msgstr ""
 
 #: ../headphones/config/definitions/download.py:228
@@ -900,7 +939,9 @@ msgid "Number of minimum seeders a torrent must have to be accepted"
 msgstr ""
 
 #: ../headphones/config/definitions/download.py:259
-msgid "Full path where your torrent client downloads your music e.g. /Users/name/Downloads/music."
+msgid ""
+"Full path where your torrent client downloads your music e.g. /Users/name/"
+"Downloads/music."
 msgstr ""
 
 #: ../headphones/config/definitions/download.py:260
@@ -961,11 +1002,11 @@ msgstr ""
 
 #: ../headphones/config/definitions/notifications.py:45
 msgid "Email From"
-msgstr ""
+msgstr "From"
 
 #: ../headphones/config/definitions/notifications.py:49
 msgid "Email To"
-msgstr ""
+msgstr "To"
 
 #: ../headphones/config/definitions/notifications.py:53
 msgid "SMTP Server"
@@ -1075,7 +1116,9 @@ msgid "Register Notify App"
 msgstr ""
 
 #: ../headphones/config/definitions/notifications.py:210
-msgid "Enter the path/application name to be registered with the Notification Center, default is /Applications/Headphones"
+msgid ""
+"Enter the path/application name to be registered with the Notification "
+"Center, default is /Applications/Headphones"
 msgstr ""
 
 #: ../headphones/config/definitions/notifications.py:215
@@ -1232,7 +1275,9 @@ msgid "Bot Token"
 msgstr ""
 
 #: ../headphones/config/definitions/notifications.py:452
-msgid "Contact <a href=\"http://telegram.me/BotFather\">@BotFather</a> to create a bot and get its token"
+msgid ""
+"Contact <a href=\"http://telegram.me/BotFather\">@BotFather</a> to create a "
+"bot and get its token"
 msgstr ""
 
 #: ../headphones/config/definitions/notifications.py:457
@@ -1240,7 +1285,9 @@ msgid "User ID"
 msgstr ""
 
 #: ../headphones/config/definitions/notifications.py:458
-msgid "Contact <a href=\"http://telegram.me/myidbot\">@myidbot</a> to get your user ID"
+msgid ""
+"Contact <a href=\"http://telegram.me/myidbot\">@myidbot</a> to get your user "
+"ID"
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:16
@@ -1275,7 +1322,9 @@ msgid "in kbps"
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:31
-msgid "e.g. if album length = 40 mins, from = 350 kbps, then min target size = 102.5 mb, anything less will be rejected"
+msgid ""
+"e.g. if album length = 40 mins, from = 350 kbps, then min target size = "
+"102.5 mb, anything less will be rejected"
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:38
@@ -1283,7 +1332,9 @@ msgid "To"
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:40
-msgid "e.g. if album length = 40 mins, to = 2000 kbps, then max target size = 586 mb, anything greater will be rejected"
+msgid ""
+"e.g. if album length = 40 mins, to = 2000 kbps, then max target size = 586 "
+"mb, anything greater will be rejected"
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:49
@@ -1340,7 +1391,9 @@ msgid "Preferred Words"
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:102
-msgid "Results with these words in the title will be preferred over results without them (search provider names can also be entered)"
+msgid ""
+"Results with these words in the title will be preferred over results without "
+"them (search provider names can also be entered)"
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:107
@@ -1348,7 +1401,9 @@ msgid "Required Words"
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:108
-msgid "Results without these words in the title will be filtered out. You can use OR: \"flac OR lossless OR alac, vinyl\""
+msgid ""
+"Results without these words in the title will be filtered out. You can use "
+"OR: \"flac OR lossless OR alac, vinyl\""
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:114
@@ -1356,7 +1411,9 @@ msgid "Ignore clean/censored releases"
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:115
-msgid "Filter out releases that contain the words \"clean\",\"edited\" or \"censored\", as long as those words aren't in the search term"
+msgid ""
+"Filter out releases that contain the words \"clean\",\"edited\" or \"censored"
+"\", as long as those words aren't in the search term"
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:124
@@ -1376,7 +1433,9 @@ msgid "Split single file albums into multiple tracks"
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:136
-msgid "Use associated .cue sheet to split single file albums into multiple tracks. Requires shntool with flac or xld cli (OS X) to be installed."
+msgid ""
+"Use associated .cue sheet to split single file albums into multiple tracks. "
+"Requires shntool with flac or xld cli (OS X) to be installed."
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:141
@@ -1408,7 +1467,10 @@ msgid "will be suffixed with \".jpg\""
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:161
-msgid "Use $Artist/$artist, $Album/$album, $Year/$year, put optional variables in square brackets, use single-quote marks to escape square brackets literally ('[', ']')."
+msgid ""
+"Use $Artist/$artist, $Album/$album, $Year/$year, put optional variables in "
+"square brackets, use single-quote marks to escape square brackets literally "
+"('[', ']')."
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:169
@@ -1440,7 +1502,9 @@ msgid "Destination Directory"
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:194
-msgid "The directory where Headphones will move file to after post processing, e.g. /Volumes/share/music."
+msgid ""
+"The directory where Headphones will move file to after post processing, e."
+"g. /Volumes/share/music."
 msgstr ""
 
 #: ../headphones/config/definitions/quality.py:199
@@ -1469,29 +1533,6 @@ msgstr ""
 
 #: ../headphones/config/definitions/search.py:50
 msgid "zzEXTRA_NEWZNABSzz"
-msgstr ""
-
-#: ../headphones/config/definitions/search.py:51
-#: ../headphones/config/definitions/search.py:52
-#: ../headphones/config/definitions/search.py:56
-#: ../headphones/config/definitions/search.py:57
-#: ../headphones/config/definitions/search.py:63
-#: ../headphones/config/definitions/search.py:64
-#: ../headphones/config/definitions/search.py:69
-#: ../headphones/config/definitions/search.py:70
-#: ../headphones/config/definitions/search.py:76
-#: ../headphones/config/definitions/search.py:77
-#: ../headphones/config/definitions/search.py:279
-#: ../headphones/config/definitions/search.py:280
-#: ../headphones/config/definitions/search.py:284
-#: ../headphones/config/definitions/search.py:285
-#: ../headphones/config/definitions/search.py:291
-#: ../headphones/config/definitions/search.py:292
-#: ../headphones/config/definitions/search.py:297
-#: ../headphones/config/definitions/search.py:298
-#: ../headphones/config/definitions/search.py:304
-#: ../headphones/config/definitions/search.py:305
-msgid ""
 msgstr ""
 
 #: ../headphones/config/definitions/search.py:55
@@ -1556,7 +1597,9 @@ msgid "Seed Ratio"
 msgstr ""
 
 #: ../headphones/config/definitions/search.py:133
-msgid "Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding."
+msgid ""
+"Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove "
+"torrent when post processed and finished seeding."
 msgstr ""
 
 #: ../headphones/config/definitions/search.py:148
@@ -1570,7 +1613,9 @@ msgstr ""
 #: ../headphones/config/definitions/search.py:264
 #: ../headphones/config/definitions/search.py:323
 #: ../headphones/config/definitions/search.py:343
-msgid "Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding"
+msgid ""
+"Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove "
+"torrent when post processed and finished seeding"
 msgstr ""
 
 #: ../headphones/config/definitions/search.py:173
@@ -1650,7 +1695,9 @@ msgid "HTTP Port"
 msgstr ""
 
 #: ../headphones/config/definitions/webui.py:26
-msgid "Port to bind web server to. Note that ports below 1024 may require root. Default : 8181"
+msgid ""
+"Port to bind web server to. Note that ports below 1024 may require root. "
+"Default : 8181"
 msgstr ""
 
 #: ../headphones/config/definitions/webui.py:30
@@ -1781,4 +1828,3 @@ msgstr ""
 #: ../headphones/config/definitions/webui.py:124
 msgid "Remove Torrent + data if Post Processed and finished Seeding"
 msgstr ""
-

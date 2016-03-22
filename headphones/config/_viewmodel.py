@@ -151,10 +151,9 @@ class Tab(Renderable, CssClassable):
                 self.add(i)
 
     def __repr__(self):
-        return "<%s id='%s', caption='%s', with %d blocks>" % (
+        return "<%s id='%s', with %d blocks>" % (
             self.__class__.__name__,
             self.id,
-            self.caption,
             len(self._map)
         )
 
@@ -739,10 +738,9 @@ class BlockExtension(Renderable, CssClassable):
         return self._id
 
     def __repr__(self):
-        return "<%s id=%s, caption=%s, with %d options>" % (
+        return "<%s id=%s, with %d options>" % (
             self.__class__.__name__,
             self.id,
-            self.caption,
             len(self._options)
         )
 

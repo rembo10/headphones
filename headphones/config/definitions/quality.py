@@ -46,7 +46,7 @@ def reg(_extend_cb):
 
                         )
                     ),
-                    (2, _('Preferred Bitrate'),    # TODO: title = Prefer certain bitrate range, including lossless fallback. Use this option if you have a lot of wrong snatches.
+                    (2, _('Custom Bitrate'),    # TODO: title = Prefer certain bitrate range, including lossless fallback. Use this option if you have a lot of wrong snatches.
                         _extend_cb(
                             OptionNumber('PREFERRED_BITRATE', 'General', 0,
                                 label=_('Target bitrate'),
@@ -112,7 +112,6 @@ def reg(_extend_cb):
             OptionBool('IGNORE_CLEAN_RELEASES', 'General', False,
                 alignleft=True,
                 label=_('Ignore clean/censored releases'),
-                caption=_(''),
                 tooltip=_('Filter out releases that contain the words "clean","edited" or'
                            ' "censored", as long as those words aren\'t in the search term'
                 ),
@@ -123,20 +122,6 @@ def reg(_extend_cb):
     # =======================================================================================
     opts.extend([
         BlockExtension('post_processing', caption=_("Post-Processing"), options=_extend_cb(
-            OptionSwitch('MOVE_FILES', 'General', False,
-                label=_('Move downloads to Destination Folder'),
-                alignleft=True,
-                options=_extend_cb(
-                    OptionBool('REPLACE_EXISTING_FOLDERS', 'General', False,
-                        alignleft=True,
-                        label=_('Replace existing folders?'),
-                    ),
-                    OptionBool('KEEP_ORIGINAL_FOLDER', 'General', False,
-                        alignleft=True,
-                        label=_('Keep original folder (i.e. copy)'),
-                    ),
-                )
-            ),
             OptionBool('RENAME_FILES', 'General', False,
                 label=_('Rename files'),
                 alignleft=True,
@@ -169,7 +154,6 @@ def reg(_extend_cb):
                     OptionString('ALBUM_ART_FORMAT', 'General', 'folder',
                         label=_('Name of album art file'),
                         caption=_('will be suffixed with ".jpg"'),
-                        tooltip=_(''),
                     ),
                     MessageExtension(
                         cssclasses=['small'],
@@ -193,16 +177,29 @@ def reg(_extend_cb):
                 label=_('Rename unprocesed'),
                 alignleft=True,
             ),
-
-            OptionPath('DESTINATION_DIR', 'General', '',
-                label=_('Destination Directory'),
-                caption=_('The directory where Headphones will move file to after post processing, e.g.'
-                           ' /Volumes/share/music.'
-                ),
-            ),
-            OptionPath('LOSSLESS_DESTINATION_DIR', 'General', '',
-                label=_('Lossless Destination Directory'),
-                caption=_('Optional. Set this if you have a separate directory for lossless music.'),
+            OptionSwitch('MOVE_FILES', 'General', False,
+                label=_('Move downloads to Destination Folder'),
+                alignleft=True,
+                options=_extend_cb(
+                    OptionBool('REPLACE_EXISTING_FOLDERS', 'General', False,
+                        alignleft=True,
+                        label=_('Replace existing folders?'),
+                    ),
+                    OptionBool('KEEP_ORIGINAL_FOLDER', 'General', False,
+                        alignleft=True,
+                        label=_('Keep original folder (i.e. copy)'),
+                    ),
+                    OptionPath('DESTINATION_DIR', 'General', '',
+                        label=_('Destination Directory'),
+                        caption=_('The directory where Headphones will move file to after post processing, e.g.'
+                                   ' /Volumes/share/music.'
+                        ),
+                    ),
+                    OptionPath('LOSSLESS_DESTINATION_DIR', 'General', '',
+                        label=_('Lossless Destination Directory'),
+                        caption=_('Optional. Set this if you have a separate directory for lossless music.'),
+                    ),
+                )
             ),
         ))
     ])
