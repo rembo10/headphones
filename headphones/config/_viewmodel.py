@@ -8,7 +8,7 @@ import headphones
 from headphones import logger
 from headphones.exceptions import ConfigError
 
-from headphones.config.typeconv import path, boolext
+from headphones.config.typeconv import path, boolext, intnullable, floatnullable
 from _datamodel import OptionModel
 
 """ ViewModel-classes of configuration
@@ -21,6 +21,7 @@ But the most classes have its own template (they are inherited from Renderable)
 # Internal helpers
 # ===============================================
 
+# TODO : convert to base/abstract class
 def _get_iterator_over_visible(items):
     return ifilter(lambda t: not hasattr(t, 'visible') or t.visible, items)
 
@@ -260,7 +261,10 @@ class OptionBase(Renderable):
 
     def uiValue(self):
         """ UI-friendly value of the option """
-        return self.model.get()
+        v = self.model.get()
+        if v is None:
+            v = ''
+        return v
 
     def uiValue2DataValue(self, value):
         """
@@ -390,7 +394,7 @@ class OptionEmail(OptionString):
 class OptionNumber(OptionBase, CssClassable):
 
     def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, cssclasses=None, minvalue=None, maxvalue=None):
-        super(OptionNumber, self).__init__(appkey, section, default, initype=int, options=None)
+        super(OptionNumber, self).__init__(appkey, section, default, initype=intnullable, options=None)
 
         self.label = label
         self.caption = caption
@@ -404,6 +408,26 @@ class OptionNumber(OptionBase, CssClassable):
 
 class OptionPercent(OptionNumber):
     pass
+
+
+class OptionFloat(OptionBase, CssClassable):
+
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, cssclasses=None, minvalue=None, maxvalue=None):
+        super(OptionFloat, self).__init__(appkey, section, default, initype=floatnullable, options=None)
+
+        self.label = label
+        self.caption = caption
+        self.tooltip = tooltip
+
+        self.cssclasses = cssclasses
+
+        self.minvalue = minvalue
+        self.maxvalue = maxvalue
+
+    @property
+    def templateName(self):
+        # float uses the same template as number
+        return "OptionNumber"
 
 
 class OptionBool(OptionBase, CssClassable):
@@ -421,11 +445,14 @@ class OptionBool(OptionBase, CssClassable):
 
     def uiValue2DataValue(self, value):
         # override
+        if value:
+            value = str(value).strip()
+
         if value == '1':
             return True
         if value == '0':
             return False
-        raise ValueError('Unexpected bool value accepted: {0}'.format(value))
+        raise ValueError('Unexpected value accepted: {0}. Expected "1" or "0"'.format(value))
 
 # TODO : think about inheritance from Block
 
@@ -504,19 +531,18 @@ class OptionCheckboxList(OptionBase):
         # so, when we receive just ONE item - it is our fictive input-hidden, and when
         # we got the list - then we should parse all values, excepting the first (hidden)
         if isinstance(value, list):
-            print 'list'
             ret = map(self._itemtype, value[1:])
         else:
-            print 'not list'
             ret = []
         # logger.debug('VALUE converted: ({1}) {0}'.format(ret, type(ret)))
         return ret
 
-# TODO : remove this class... It is a crutch
-
 
 class OptionCheckboxListExtrasCrutch(OptionCheckboxList):
-    """ The same as parent, but uses STRING-type for internal value """
+    """ The same as parent, but uses STRING-type for internal value
+
+    TODO : remove this class... It is a crutch
+    """
 
     def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, alignleft=False, items=None):
         super(OptionCheckboxListExtrasCrutch, self).__init__(appkey, section, default,
@@ -729,17 +755,18 @@ class BlockExtension(Renderable, CssClassable):
         return super(BlockExtension, self).render(me=self, parent=parent)
 
 
-class LabelExtension(Renderable, CssClassable):
-    """ Render simple text on the same level, as other options """
+class MessageExtension(Renderable, CssClassable):
+    """ Render message on the same level, as other options """
 
-    def __init__(self, label=None, cssclasses=None, fullwidth=False):
-        super(LabelExtension, self).__init__()
-        self.label = label
+    def __init__(self, message=None, icon=None, cssclasses=None, fullwidth=False):
+        super(MessageExtension, self).__init__()
+        self.message = message
+        self.icon = icon
         self.fullwidth = fullwidth
         self.cssclasses = cssclasses
 
     def render(self, parent=None):
-        return super(LabelExtension, self).render(me=self, parent=parent)
+        return super(MessageExtension, self).render(me=self, parent=parent)
 
 # ===============================================
 # Option extensions
@@ -797,6 +824,7 @@ class PostDataParser(object):
         d = values_as_dict
 
         diffcount = 0
+
         for (k, v) in d.items():
             if k not in self._vault:
                 logger.debug('This form-key [{0}] is unknown for config, skip'.format(k))
@@ -815,7 +843,7 @@ class PostDataParser(object):
 
             if ov != nv:
                 opt.model.set(nv)
-                logger.debug('The value of [{0}][{1}] changed [{2}] => [{3}]'.format(opt.model.section, opt.model.appkey, ov, nv))
+                logger.info('The value of [{0}][{1}] changed [{2}] => [{3}]'.format(opt.model.section, opt.model.appkey, ov, nv))
                 diffcount += 1
 
         return diffcount

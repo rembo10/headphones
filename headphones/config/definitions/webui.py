@@ -2,7 +2,7 @@
 # Options from "Web Interface" Tab
 # =======================================================================================
 
-from .._viewmodel import BlockExtension, LabelExtension
+from .._viewmodel import BlockExtension, MessageExtension
 from .._viewmodel import OptionString, OptionNumber, OptionSwitch, OptionPassword, OptionBool, OptionPath, OptionUrl
 from .._viewmodel import TemplaterExtension
 
@@ -79,40 +79,52 @@ def reg(_extend_cb):
     # =======================================================================================
     opts.extend([
         BlockExtension('interval', caption=_("Interval"), options=_extend_cb(
-            LabelExtension(
-                label=_('An interval of 0 will disable a task.'),
-                cssclasses=['small']
+            MessageExtension(
+                message=_('An interval of 0 will disable a task.'),
+                icon='<i class="fa fa-info-circle"></i>',
             ),
             OptionNumber('SEARCH_INTERVAL', 'General', 1440,
                 label=_('Search Interval'),
                 caption=_('in minutes, minimum is 360 minutes'),
                 tooltip=_('Time between two searches for new downloads.'),
                 minvalue=0,
-                maxvalue=9999),
+                maxvalue=999999
+            ),
             OptionNumber('DOWNLOAD_SCAN_INTERVAL', 'General', 5,
                 label=_('Download Scan Interval'),
                 caption=_('in minutes'),
                 tooltip=_('Time between scans for downloaded files.'),
                 minvalue=0,
-                maxvalue=9999),
+                maxvalue=999999
+            ),
             OptionNumber('LIBRARYSCAN_INTERVAL', 'General', 24,
                 label=_('Library Scan Interval'),
                 caption=_('in hours'),
                 tooltip=_('Time between two library update scans.'),
                 minvalue=0,
-                maxvalue=9999),
+                maxvalue=999999
+            ),
             OptionNumber('UPDATE_DB_INTERVAL', 'General', 24,
                 label=_('MusicBrainz Update Interval'),
                 caption=_('in hours'),
                 tooltip=_('Time between two MusicBrainz updates.'),
                 minvalue=0,
-                maxvalue=9999),
+                maxvalue=999999
+            ),
             OptionNumber('MB_IGNORE_AGE', 'General', 365,
                 label=_('Ignore Album Updates'),
                 caption=_('in days'),
                 tooltip=_('Ignore MusicBrainz album updates older then certain number of days.'),
                 minvalue=0,
-                maxvalue=9999),
+                maxvalue=999999
+            ),
+            OptionNumber('TORRENT_REMOVAL_INTERVAL', 'General', 720,
+                label=_('Torrent Removal Interval'),
+                caption=_('in minutes'),
+                tooltip=_('Remove Torrent + data if Post Processed and finished Seeding'),
+                minvalue=0,
+                maxvalue=999999,
+            ),
         ))
     ])
 

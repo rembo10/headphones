@@ -1,366 +1,360 @@
-# =======================================================================================
-# Options from "Search Providers" Tab
-# =======================================================================================
+from .._viewmodel import BlockExtension
+from .._viewmodel import OptionString, OptionSwitch, OptionUrl, OptionList
+from .._viewmodel import OptionNumber, OptionFloat, OptionPassword
+from .._viewmodel import TemplaterExtension
 
-# from .._viewmodel import BlockExtension
-from .._viewmodel import OptionString, OptionNumber, OptionPassword, OptionBool, OptionPath, OptionList
 from ..loc import _
 
-def reg(_extend_cb):
+# =======================================================================================
+"""
+Options from "Search Providers" Tab
+"""
+# =======================================================================================
 
-    opts = [
+def reg(extend_cb):
 
-            OptionNumber('ALBUM_COMPLETION_PCT', 'Advanced', 80,
-                label=_('zzALBUM_COMPLETION_PCTzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-
-            OptionNumber('AUTO_ADD_ARTISTS', 'General', 1,
-                label=_('zzAUTO_ADD_ARTISTSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionPath('CUE_SPLIT_FLAC_PATH', 'General', '',
-                label=_('zzCUE_SPLIT_FLAC_PATHzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
-            OptionPath('CUE_SPLIT_SHNTOOL_PATH', 'General', '',
-                label=_('zzCUE_SPLIT_SHNTOOL_PATHzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
-            OptionList('EXTRA_NEWZNABS', 'Newznab', '',
-                label=_('zzEXTRA_NEWZNABSzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
-            OptionList('EXTRA_TORZNABS', 'Torznab', [],
-                label=_('zzEXTRA_TORZNABSzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
-            OptionBool('HEADPHONES_INDEXER', 'General', False,
-                label=_('zzHEADPHONES_INDEXERzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
-            OptionList('IGNORED_FILES', 'Advanced', [],
-                label=_('zzIGNORED_FILESzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
-            OptionList('IGNORED_FOLDERS', 'Advanced', [],
-                label=_('zzIGNORED_FOLDERSzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
-            OptionString('JOURNAL_MODE', 'Advanced', 'wal',
-                label=_('zzJOURNAL_MODEzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('KAT', 'Kat', 0,
-                label=_('zzKATzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('KAT_PROXY_URL', 'Kat', '',
-                label=_('zzKAT_PROXY_URLzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('KAT_RATIO', 'Kat', '',
-                label=_('zzKAT_RATIOzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-
-
-            OptionString('LASTFM_USERNAME', 'General', '',
-                label=_('zzLASTFM_USERNAMEzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('LIBRARYSCAN', 'General', 1,
-                label=_('zzLIBRARYSCANzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('MININOVA', 'Mininova', 0,
-                label=_('zzMININOVAzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('MININOVA_RATIO', 'Mininova', '',
-                label=_('zzMININOVA_RATIOzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionPath('MUSIC_DIR', 'General', '',
-                label=_('zzMUSIC_DIRzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
-            OptionNumber('NEWZNAB', 'Newznab', 0,
-                label=_('zzNEWZNABzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('NEWZNAB_APIKEY', 'Newznab', '',
-                label=_('zzNEWZNAB_APIKEYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('NEWZNAB_ENABLED', 'Newznab', 1,
-                label=_('zzNEWZNAB_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('NEWZNAB_HOST', 'Newznab', '',
-                label=_('zzNEWZNAB_HOSTzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('NZBSORG', 'NZBsorg', 0,
-                label=_('zzNZBSORGzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('NZBSORG_HASH', 'NZBsorg', '',
-                label=_('zzNZBSORG_HASHzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('NZBSORG_UID', 'NZBsorg', '',
-                label=_('zzNZBSORG_UIDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('OLDPIRATEBAY', 'Old Piratebay', 0,
-                label=_('zzOLDPIRATEBAYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('OLDPIRATEBAY_RATIO', 'Old Piratebay', '',
-                label=_('zzOLDPIRATEBAY_RATIOzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('OLDPIRATEBAY_URL', 'Old Piratebay', '',
-                label=_('zzOLDPIRATEBAY_URLzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('OMGWTFNZBS', 'omgwtfnzbs', 0,
-                label=_('zzOMGWTFNZBSzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('OMGWTFNZBS_APIKEY', 'omgwtfnzbs', '',
-                label=_('zzOMGWTFNZBS_APIKEYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('OMGWTFNZBS_UID', 'omgwtfnzbs', '',
-                label=_('zzOMGWTFNZBS_UIDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('PIRATEBAY', 'Piratebay', 0,
-                label=_('zzPIRATEBAYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('PIRATEBAY_PROXY_URL', 'Piratebay', '',
-                label=_('zzPIRATEBAY_PROXY_URLzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('PIRATEBAY_RATIO', 'Piratebay', '',
-                label=_('zzPIRATEBAY_RATIOzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionBool('RENAME_FROZEN', 'General', True,
-                label=_('zzRENAME_FROZENzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
-            OptionBool('RENAME_UNPROCESSED', 'General', True,
-                label=_('zzRENAME_UNPROCESSEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
-
-            OptionNumber('RUTRACKER', 'Rutracker', 0,
-                label=_('zzRUTRACKERzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('RUTRACKER_PASSWORD', 'Rutracker', '',
-                label=_('zzRUTRACKER_PASSWORDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('RUTRACKER_RATIO', 'Rutracker', '',
-                label=_('zzRUTRACKER_RATIOzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('RUTRACKER_USER', 'Rutracker', '',
-                label=_('zzRUTRACKER_USERzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('STRIKE', 'Strike', 0,
-                label=_('zzSTRIKEzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('STRIKE_RATIO', 'Strike', '',
-                label=_('zzSTRIKE_RATIOzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('TORRENT_REMOVAL_INTERVAL', 'General', 720,
-                label=_('zzTORRENT_REMOVAL_INTERVALzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionNumber('TORZNAB', 'Torznab', 0,
-                label=_('zzTORZNABzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('TORZNAB_APIKEY', 'Torznab', '',
-                label=_('zzTORZNAB_APIKEYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('TORZNAB_ENABLED', 'Torznab', 1,
-                label=_('zzTORZNAB_ENABLEDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('TORZNAB_HOST', 'Torznab', '',
-                label=_('zzTORZNAB_HOSTzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionBool('VERIFY_SSL_CERT', 'Advanced', True,
-                label=_('zzVERIFY_SSL_CERTzz'),
-                caption=_(''),
-                tooltip=_(''),
-            ),
-            OptionNumber('WAFFLES', 'Waffles', 0,
-                label=_('zzWAFFLESzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionString('WAFFLES_PASSKEY', 'Waffles', '',
-                label=_('zzWAFFLES_PASSKEYzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('WAFFLES_RATIO', 'Waffles', '',
-                label=_('zzWAFFLES_RATIOzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('WAFFLES_UID', 'Waffles', '',
-                label=_('zzWAFFLES_UIDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionNumber('WHATCD', 'What.cd', 0,
-                label=_('zzWHATCDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                minvalue=None,
-                maxvalue=None
-            ),
-            OptionPassword('WHATCD_PASSWORD', 'What.cd', '',
-                label=_('zzWHATCD_PASSWORDzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('WHATCD_RATIO', 'What.cd', '',
-                label=_('zzWHATCD_RATIOzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
-            OptionString('WHATCD_USERNAME', 'What.cd', '',
-                label=_('zzWHATCD_USERNAMEzz'),
-                caption=_(''),
-                tooltip=_(''),
-                maxlength=None
-            ),
+    opts = []
 
     # =======================================================================================
+    # NZB
     # =======================================================================================
-    # =======================================================================================
-    ]
+    opts.append(
+        BlockExtension('search_headphones', caption=None, options=extend_cb(
+            OptionSwitch('HEADPHONES_INDEXER', 'General', False,
+                label=_('Headphones Indexer'),
+                cssclasses=['heading'],
+                alignleft=True,
+                options=extend_cb(
+                    OptionString('HPUSER', 'General', '',
+                        label=_('Username'),
+                        caption=_('Headphones VIP Server username'),
+                        cssclasses=['-hp-hp-user'],
+                        maxlength=128
+                    ),
+                    OptionPassword('HPPASS', 'General', '',
+                        label=_('Password'),
+                        caption=_('Headphones VIP Server password'),
+                        cssclasses=['-hp-hp-pass'],
+                        maxlength=128,
+                    ),
+                    TemplaterExtension(template_name='CodeshyRegExtension', strings={'caption': _('Don\'t have an account? Sign up!')}),
+                )
+            ),
+        ))
+    )
 
+    # =======================================================================================
+    # TODO : #13 newznab
+    extend_cb(
+        OptionList('EXTRA_NEWZNABS', 'Newznab', '',
+            label=_('zzEXTRA_NEWZNABSzz'),
+            caption=_(''),
+            tooltip=_(''),
+        ),
+        OptionNumber('NEWZNAB', 'Newznab', 0,
+            label=_('zzNEWZNABzz'),
+            caption=_(''),
+            tooltip=_(''),
+            minvalue=None,
+            maxvalue=None
+        ),
+        OptionString('NEWZNAB_APIKEY', 'Newznab', '',
+            label=_('zzNEWZNAB_APIKEYzz'),
+            caption=_(''),
+            tooltip=_(''),
+            maxlength=None
+        ),
+        OptionNumber('NEWZNAB_ENABLED', 'Newznab', 1,
+            label=_('zzNEWZNAB_ENABLEDzz'),
+            caption=_(''),
+            tooltip=_(''),
+            minvalue=None,
+            maxvalue=None
+        ),
+        OptionString('NEWZNAB_HOST', 'Newznab', '',
+            label=_('zzNEWZNAB_HOSTzz'),
+            caption=_(''),
+            tooltip=_(''),
+            maxlength=None
+        ),
+    )
+    # =======================================================================================
+    opts.append(
+        BlockExtension('search_nzbsorg', caption=None, options=extend_cb(
+            OptionSwitch('NZBSORG', 'NZBsorg', False,
+                label=_('NZBs.org'),
+                cssclasses=['heading'],
+                alignleft=True,
+                options=extend_cb(
+                    OptionString('NZBSORG_HASH', 'NZBsorg', '',
+                        label=_('NZBs.org API Key'),
+                    ),
+                )
+            ),
+        ))
+    )
+
+    # =======================================================================================
+    opts.append(
+        BlockExtension('search_omgwtfnzbs', caption=None, options=extend_cb(
+            OptionSwitch('OMGWTFNZBS', 'omgwtfnzbs', False,
+                label=_('omgwtfnzbs'),
+                cssclasses=['heading'],
+                alignleft=True,
+                options=extend_cb(
+                    OptionString('OMGWTFNZBS_UID', 'omgwtfnzbs', '',
+                        label=_('omgwtfnzbs UID'),
+                        maxlength=32
+                    ),
+                    OptionString('OMGWTFNZBS_APIKEY', 'omgwtfnzbs', '',
+                        label=_('omgwtfnzbs API Key'),
+                    ),
+                )
+            ),
+        ))
+    )
+
+    # =======================================================================================
+    # Torrents
+    # =======================================================================================
+    opts.append(
+        BlockExtension('search_piratebay', caption=None, options=extend_cb(
+            OptionSwitch('PIRATEBAY', 'Piratebay', False,
+                label=_('The Pirate Bay'),
+                cssclasses=['heading'],
+                alignleft=True,
+                options=extend_cb(
+                    OptionUrl('PIRATEBAY_PROXY_URL', 'Piratebay', '',
+                        label=_('Proxy URL'),
+                        caption=_('Optional. Leave empty for default.'),
+                    ),
+                    OptionFloat('PIRATEBAY_RATIO', 'Piratebay', None,
+                        label=_('Seed Ratio'),
+                        caption=_('Stop seeding when ratio met, 0 = unlimited. Scheduled job will'
+                                  ' remove torrent when post processed and finished seeding.'
+                        ),
+                        minvalue=0,
+                        maxvalue=999999,
+                    ),
+                )
+            ),
+        ))
+    )
+
+    # =======================================================================================
+    opts.append(
+        BlockExtension('search_kat', caption=None, options=extend_cb(
+            OptionSwitch('KAT', 'Kat', False,
+                label=_('Kick Ass Torrents'),
+                cssclasses=['heading'],
+                alignleft=True,
+                options=extend_cb(
+                    OptionUrl('KAT_PROXY_URL', 'Kat', '',
+                        label=_('Proxy URL'),
+                        caption=_('Optional. Leave empty for default.'),
+                    ),
+                    OptionFloat('KAT_RATIO', 'Kat', None,
+                        label=_('Seed Ratio'),
+                        caption=_('Stop seeding when ratio met, 0 = unlimited. Scheduled job'
+                                  ' will remove torrent when post processed and finished seeding'
+                        ),
+                        minvalue=0,
+                        maxvalue=999999,
+                    ),
+                )
+            ),
+        ))
+    )
+
+    # =======================================================================================
+    opts.append(
+        BlockExtension('search_waffles', caption=None, options=extend_cb(
+            OptionSwitch('WAFFLES', 'Waffles', False,
+                label=_('Waffles.fm'),
+                cssclasses=['heading'],
+                alignleft=True,
+                options=extend_cb(
+                    OptionString('WAFFLES_UID', 'Waffles', '',
+                        label=_('UID Number'),
+                        maxlength=64
+                    ),
+                    OptionPassword('WAFFLES_PASSKEY', 'Waffles', '',
+                        label=_('Passkey'),
+                        maxlength=64
+                    ),
+                    OptionFloat('WAFFLES_RATIO', 'Waffles', None,
+                        label=_('Seed Ratio'),
+                        caption=_('Stop seeding when ratio met, 0 = unlimited. Scheduled job will'
+                                  ' remove torrent when post processed and finished seeding'
+                        ),
+                        minvalue=0,
+                        maxvalue=999999,
+                    ),
+                )
+            ),
+        ))
+    )
+
+    # =======================================================================================
+    opts.append(
+        BlockExtension('search_rutracker', caption=None, options=extend_cb(
+            OptionSwitch('RUTRACKER', 'Rutracker', False,
+                label=_('rutracker.org'),
+                cssclasses=['heading'],
+                alignleft=True,
+                options=extend_cb(
+                    OptionString('RUTRACKER_USER', 'Rutracker', '',
+                        label=_('Username'),
+                        maxlength=64
+                    ),
+                    OptionPassword('RUTRACKER_PASSWORD', 'Rutracker', '',
+                        label=_('Password'),
+                        maxlength=64
+                    ),
+                    OptionFloat('RUTRACKER_RATIO', 'Rutracker', None,
+                        label=_('Seed Ratio'),
+                        caption=_('Stop seeding when ratio met, 0 = unlimited. Scheduled job will'
+                                  ' remove torrent when post processed and finished seeding'),
+                        minvalue=0,
+                        maxvalue=999999,
+                    ),
+                )
+            ),
+        ))
+    )
+
+    # =======================================================================================
+    opts.append(
+        BlockExtension('search_what_cd', caption=None, options=extend_cb(
+            OptionSwitch('WHATCD', 'What.cd', False,
+                label=_('What.cd'),
+                cssclasses=['heading'],
+                alignleft=True,
+                options=extend_cb(
+                    OptionString('WHATCD_USERNAME', 'What.cd', '',
+                        label=_('Username'),
+                        caption=_(''),
+                        tooltip=_(''),
+                        maxlength=64
+                    ),
+                    OptionPassword('WHATCD_PASSWORD', 'What.cd', '',
+                        label=_('Password'),
+                        caption=_(''),
+                        tooltip=_(''),
+                        maxlength=None
+                    ),
+                    OptionFloat('WHATCD_RATIO', 'What.cd', None,
+                        label=_('Seed Ratio'),
+                        caption=_('Stop seeding when ratio met, 0 = unlimited. Scheduled job will'
+                                  ' remove torrent when post processed and finished seeding'),
+                        minvalue=0,
+                        maxvalue=999999,
+                    ),
+                )
+            ),
+        ))
+    )
+
+    # =======================================================================================
+    opts.append(
+        BlockExtension('search_strike', caption=None, options=extend_cb(
+            OptionSwitch('STRIKE', 'Strike', False,
+                label=_('Strike Search'),
+                cssclasses=['heading'],
+                alignleft=True,
+                options=extend_cb(
+                    OptionFloat('STRIKE_RATIO', 'Strike', None,
+                        label=_('Seed Ratio'),
+                        caption=_('Stop seeding when ratio met, 0 = unlimited. Scheduled job will'
+                                  ' remove torrent when post processed and finished seeding'),
+                        minvalue=0,
+                        maxvalue=999999,
+                    ),
+                )
+            ),
+        ))
+    )
+
+    # =======================================================================================
+    # TODO : #13 torznabs
+    extend_cb(
+        OptionList('EXTRA_TORZNABS', 'Torznab', [],
+            label=_('zzEXTRA_TORZNABSzz'),
+            caption=_(''),
+            tooltip=_(''),
+        ),
+        OptionNumber('TORZNAB', 'Torznab', 0,
+            label=_('zzTORZNABzz'),
+            caption=_(''),
+            tooltip=_(''),
+            minvalue=None,
+            maxvalue=None
+        ),
+        OptionString('TORZNAB_APIKEY', 'Torznab', '',
+            label=_('zzTORZNAB_APIKEYzz'),
+            caption=_(''),
+            tooltip=_(''),
+            maxlength=None
+        ),
+        OptionNumber('TORZNAB_ENABLED', 'Torznab', 1,
+            label=_('zzTORZNAB_ENABLEDzz'),
+            caption=_(''),
+            tooltip=_(''),
+            minvalue=None,
+            maxvalue=None
+        ),
+        OptionString('TORZNAB_HOST', 'Torznab', '',
+            label=_('zzTORZNAB_HOSTzz'),
+            caption=_(''),
+            tooltip=_(''),
+            maxlength=None
+        ),
+    )
+    # =======================================================================================
+    opts.append(
+        BlockExtension('search_oldpiratebay', caption=None, options=extend_cb(
+            OptionSwitch('OLDPIRATEBAY', 'Old Piratebay', False,
+                label=_('Old Pirate Bay'),
+                cssclasses=['heading'],
+                alignleft=True,
+                options=extend_cb(
+                    OptionUrl('OLDPIRATEBAY_URL', 'Old Piratebay', '',
+                        label=_('URL'),
+                        caption=_(''),
+                        tooltip=_(''),
+                        maxlength=None
+                    ),
+                    OptionFloat('OLDPIRATEBAY_RATIO', 'Old Piratebay', None,
+                        label=_('Seed Ratio'),
+                        caption=_('Stop seeding when ratio met, 0 = unlimited. Scheduled job will'
+                                  ' remove torrent when post processed and finished seeding'),
+                        minvalue=0,
+                        maxvalue=999999,
+                    ),
+                )
+            ),
+        ))
+    )
+
+    # =======================================================================================
+    opts.append(
+        BlockExtension('search_mininova', caption=None, options=extend_cb(
+            OptionSwitch('MININOVA', 'Mininova', False,
+                label=_('Mininova'),
+                cssclasses=['heading'],
+                alignleft=True,
+                options=extend_cb(
+                    OptionFloat('MININOVA_RATIO', 'Mininova', None,
+                        label=_('Seed Ratio'),
+                        caption=_('Stop seeding when ratio met, 0 = unlimited. Scheduled job will'
+                                  ' remove torrent when post processed and finished seeding'),
+                        minvalue=0,
+                        maxvalue=999999,
+                    ),
+                )
+            ),
+        ))
+    )
+
+    # =======================================================================================
     return opts

@@ -20,16 +20,35 @@ def reg(_extend_cb):
         OptionInternal('HTTP_PROXY', 'General', False, initype=boolext),
         OptionInternal('HTTP_ROOT', 'General', '/', initype=str),
 
+        # From "# > Manage > Scan Music Library"
+        OptionInternal('AUTO_ADD_ARTISTS', 'General', True, initype=boolext),
+        OptionInternal('LIBRARYSCAN', 'General', True, initype=boolext),
+        # TODO : move to settings!! (this will make SoftChroot implementation much beautiful)
+        OptionInternal('MUSIC_DIR', 'General', '', initype=path),
 
+        # TODO: test, that config.ini contains line:
+        # ignored_files = ,
+        OptionInternal('IGNORED_FILES', 'Advanced', [], initype=list),
+        OptionInternal('IGNORED_FOLDERS', 'Advanced', [], initype=list),
+
+        OptionInternal('CUE_SPLIT_FLAC_PATH', 'General', '', initype=path),
+        OptionInternal('CUE_SPLIT_SHNTOOL_PATH', 'General', '', initype=path),
+
+        OptionInternal('JOURNAL_MODE', 'Advanced', 'wal', initype=str),
+
+        # From "# > Manage > Imports > Import Last.FM Artists"
+        OptionInternal('LASTFM_USERNAME', 'General', '', initype=str),
         # ==============================================================================
         # DEPRECATED BLOCK
         #
-        # This options are required to be able to read an old version of the config file and
-        # upgrade it
+        # This options are REQUIRED to upgrade any old versions of the config.ini
 
         OptionDeprecated('BLACKHOLE', 'General', False, initype=boolext),
         OptionDeprecated('OPEN_MAGNET_LINKS', 'General', False, initype=boolext),
         OptionDeprecated('ENCODERFOLDER', 'General', '', initype=path),
+
+        # from SEARCH PROVIDERS tab
+        OptionDeprecated('NZBSORG_UID', 'NZBsorg', '', initype=str),
     ]
 
     return opts
