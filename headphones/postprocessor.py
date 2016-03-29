@@ -46,7 +46,7 @@ def checkFolder():
                 if album['Kind'] == 'nzb':
                     download_dir = headphones.CONFIG.DOWNLOAD_DIR
                 else:
-                    if headphones.CONFIG.DELUGE_DONE_DIRECTORY:
+                    if headphones.CONFIG.DELUGE_DONE_DIRECTORY and headphones.CONFIG.TORRENT_DOWNLOADER == 3:
                         download_dir = headphones.CONFIG.DELUGE_DONE_DIRECTORY
                     else:
                         download_dir = headphones.CONFIG.DOWNLOAD_TORRENT_DIR

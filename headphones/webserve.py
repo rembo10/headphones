@@ -1157,6 +1157,7 @@ class WebInterface(object):
             "transmission_username": headphones.CONFIG.TRANSMISSION_USERNAME,
             "transmission_password": headphones.CONFIG.TRANSMISSION_PASSWORD,
             "deluge_host": headphones.CONFIG.DELUGE_HOST,
+            "deluge_cert": headphones.CONFIG.DELUGE_CERT,
             "deluge_password": headphones.CONFIG.DELUGE_PASSWORD,
             "deluge_label": headphones.CONFIG.DELUGE_LABEL,
             "deluge_done_directory": headphones.CONFIG.DELUGE_DONE_DIRECTORY,
