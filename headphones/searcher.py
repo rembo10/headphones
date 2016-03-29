@@ -917,10 +917,10 @@ def send_to_downloader(data, bestqual, album):
                     deluge.setSeedRatio({'hash': torrentid, 'ratio': seed_ratio})
 
                 # Set move-to directory
-                if headphones.CONFIG.DELUGE_DONE_DIRECTORY:
+                if headphones.CONFIG.DELUGE_DONE_DIRECTORY or headphones.CONFIG.DOWNLOAD_TORRENT_DIR:
                     deluge.setTorrentPath({'hash': torrentid})
 
-                # I only just realized this function is useless...
+                # Get folder name from Deluge, it's usually the torrent name
                 folder_name = deluge.getTorrentFolder({'hash': torrentid})
                 if folder_name:
                     logger.info('Torrent folder name: %s' % folder_name)
