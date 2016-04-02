@@ -84,7 +84,14 @@ class TestCase(TC):
 
         def __exit__(self, tp, value, traceback):
             tst = tp is self.exc
-            self.test_case.assertTrue(tst, msg=self.msg)
+            if not tst:
+                # python 2.6 does not handle it correctly, lets write something here:
+                print 'expected {0} but got {1}'.format(self.exc, tp)
+
+            if self.msg:
+                self.test_case.assertTrue(tst, msg=self.msg)
+            else:
+                self.test_case.assertTrue(tst)
             self.exception = value
 
             # TODO: implement self.regex checking
