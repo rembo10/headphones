@@ -25,6 +25,8 @@
 version.lock
 logs/*
 cache/*
+# mako generated templates:
+/auto/
 
 # HTTPS Cert/Key #
 ##################

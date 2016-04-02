@@ -49,7 +49,7 @@ class SoftChroot(object):
         if path.startswith(self.chroot):
             p = os.path.sep + path[len(self.chroot):]
         else:
-            p = os.path.sep
+            p = os.path.join(self.chroot, os.path.sep, path)
 
         return p
 

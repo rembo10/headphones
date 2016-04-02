@@ -1,0 +1,1340 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: headphones\n"
+"POT-Creation-Date: 2016-04-02 04:10+YEKT\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Koryukov Maksim <maxkoryukov@gmail.com>\n"
+"Language-Team: headphones\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
+"X-Poedit-SourceCharset: en\n"
+
+msgid "Web Interface"
+msgstr ""
+
+msgid "Save Changes"
+msgstr ""
+
+msgid ""
+"<i class=\"fa fa-info-circle\"></i> Web Interface changes require a restart "
+"to take effect. Saving settings will restart intervals if changed."
+msgstr ""
+
+msgid "Download settings"
+msgstr ""
+
+msgid "Search Providers"
+msgstr ""
+
+msgid "Quality &amp; Post Processing"
+msgstr ""
+
+msgid "Notifications"
+msgstr ""
+
+msgid "Advanced Settings"
+msgstr ""
+
+msgid "Renaming options"
+msgstr ""
+
+msgid "Folder Format"
+msgstr ""
+
+msgid ""
+"Use: $Artist/$artist, $SortArtist/$sortartist, $Album/$album, $Year/$year, "
+"$Type/$type (release type) and $First/$first (first letter in artist name), "
+"$OriginalFolder/$originalfolder (downloaded directory name). Put optional "
+"variables in square brackets, use single-quote marks to escape square "
+"brackets literally ('[', ']').<br>E.g.: $Type/$First/$artist/$album "
+"'['$year']' = Album/G/girl talk/all day [2010]"
+msgstr ""
+
+msgid "File Format"
+msgstr ""
+
+msgid ""
+"Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title, $Artist/"
+"$artist, $Album/$album and $Year/$year. Put optional variables in square "
+"brackets, use single-quote marks to escape square brackets literally ('[', "
+"']')."
+msgstr ""
+
+msgid "Use underscores instead of spaces"
+msgstr ""
+
+msgid "Re-Encoding Options"
+msgstr ""
+
+msgid "Note: this option requires the lame, ffmpeg or xld encoder"
+msgstr ""
+
+msgid "Re-encode downloads during postprocessing"
+msgstr ""
+
+msgid "Only re-encode lossless files (.flac)"
+msgstr ""
+
+msgid "Delete original lossless files after encoding"
+msgstr ""
+
+msgid "Enable multi-core"
+msgstr ""
+
+msgid "Multi-core count"
+msgstr ""
+
+msgid "Set equal to the number of cores, or 0 for auto"
+msgstr ""
+
+msgid "Encoder"
+msgstr ""
+
+msgid ""
+"Name of encoder to use. Lame, FFmpeg and libav are available for most Linux "
+"distributions. On Ubuntu, libav replaces FFmpeg. xld is OS X-only."
+msgstr ""
+
+msgid "lame"
+msgstr ""
+
+msgid "ffmpeg"
+msgstr ""
+
+msgid "libav"
+msgstr ""
+
+msgid "Format"
+msgstr ""
+
+msgid ""
+"Use one of \"mp3\", \"ogg\", \"m4a\", or <strong>any custom</strong> format"
+msgstr ""
+
+msgid "VBR/CBR"
+msgstr ""
+
+msgid "cbr"
+msgstr ""
+
+msgid "Bitrate"
+msgstr ""
+
+msgid "64"
+msgstr ""
+
+msgid "128"
+msgstr ""
+
+msgid "192"
+msgstr ""
+
+msgid "256"
+msgstr ""
+
+msgid "320"
+msgstr ""
+
+msgid "vbr"
+msgstr ""
+
+msgid "Quality"
+msgstr ""
+
+msgid "0"
+msgstr ""
+
+msgid "1"
+msgstr ""
+
+msgid "2"
+msgstr ""
+
+msgid "3"
+msgstr ""
+
+msgid "4"
+msgstr ""
+
+msgid "5"
+msgstr ""
+
+msgid "6"
+msgstr ""
+
+msgid "7"
+msgstr ""
+
+msgid "8"
+msgstr ""
+
+msgid "9"
+msgstr ""
+
+msgid "Sampling"
+msgstr ""
+
+msgid "44.1 kHz"
+msgstr ""
+
+msgid "48.0 kHz"
+msgstr ""
+
+msgid "Arguments"
+msgstr ""
+
+msgid ""
+"<i class=\"fa fa-exclamation-circle\"></i> Ignores all of the above options"
+msgstr ""
+
+msgid "Advanced Encoding Options"
+msgstr ""
+
+msgid "xld"
+msgstr ""
+
+msgid "XLD Profile"
+msgstr ""
+
+msgid "Path to Encoder"
+msgstr ""
+
+msgid "Miscellaneous"
+msgstr ""
+
+msgid "Automatically include extras when adding an artist"
+msgstr ""
+
+msgid "Choose Which Extras to Include"
+msgstr ""
+
+msgid "single"
+msgstr ""
+
+msgid "ep"
+msgstr ""
+
+msgid "compilation"
+msgstr ""
+
+msgid "soundtrack"
+msgstr ""
+
+msgid "live"
+msgstr ""
+
+msgid "remix"
+msgstr ""
+
+msgid "spokenword"
+msgstr ""
+
+msgid "audiobook"
+msgstr ""
+
+msgid "other"
+msgstr ""
+
+msgid "dj-mix"
+msgstr ""
+
+msgid "mixtape/street"
+msgstr ""
+
+msgid "broadcast"
+msgstr ""
+
+msgid "interview"
+msgstr ""
+
+msgid "demo"
+msgstr ""
+
+msgid "Only include 'official' extras (i.e. no bootlegs, promos, etc.)"
+msgstr ""
+
+msgid "Automatically mark upcoming albums as wanted"
+msgstr ""
+
+msgid "Automatically mark all albums as wanted"
+msgstr ""
+
+msgid "Automatically mark manually added albums as wanted"
+msgstr ""
+
+msgid "Automatically mark manually added albums from search results as wanted"
+msgstr ""
+
+msgid "Wait until an album's release date before searching"
+msgstr ""
+
+msgid "Don't add new artists when post-processing albums"
+msgstr ""
+
+msgid ""
+"Freeze the database, so new artists won't be added automatically. Use this "
+"if Headphones adds artists because due to wrong snatches. This check is "
+"skipped when the folder name is appended with release group ID."
+msgstr ""
+
+msgid "Stop post-processing if no good metadata match found"
+msgstr ""
+
+msgid "Tag using ID3v2.3 instead of ID3v2.4"
+msgstr ""
+
+msgid "Directories"
+msgstr ""
+
+msgid "Log Directory"
+msgstr ""
+
+msgid "Cache Directory"
+msgstr ""
+
+msgid "Cache Size"
+msgstr ""
+
+msgid "in MB"
+msgstr ""
+
+msgid "File Permissions Enabled"
+msgstr ""
+
+msgid "Change file permissions during post-processing"
+msgstr ""
+
+msgid "File Permissions"
+msgstr ""
+
+msgid "Desired file permissions"
+msgstr ""
+
+msgid "Folder Permissions Enabled"
+msgstr ""
+
+msgid "Change folder permissions during post-processing"
+msgstr ""
+
+msgid "Folder Permissions"
+msgstr ""
+
+msgid "Desired folder permissions"
+msgstr ""
+
+msgid "Songkick"
+msgstr ""
+
+msgid "Show concert info"
+msgstr ""
+
+msgid "API Key"
+msgstr ""
+
+msgid "Filter by Metro Area"
+msgstr ""
+
+msgid "Metro Area ID"
+msgstr ""
+
+msgid ""
+"Enter the Metro Area ID, e.g. the ID for London is 24426, this can be found "
+"by clicking the link and searching/selecting the city, e.g. London should "
+"find http://www.songkick.com/metro_areas/24426-uk-london"
+msgstr ""
+
+msgid "Find Area ID"
+msgstr ""
+
+msgid "Musicbrainz"
+msgstr ""
+
+msgid "Musicbrainz Mirror"
+msgstr ""
+
+msgid "musicbrainz.org"
+msgstr ""
+
+msgid "custom"
+msgstr ""
+
+msgid "Host"
+msgstr ""
+
+msgid "Port"
+msgstr ""
+
+msgid "Requires Authentication"
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "Password"
+msgstr ""
+
+msgid "Sleep Interval"
+msgstr ""
+
+msgid "in minutes"
+msgstr ""
+
+msgid "headphones"
+msgstr ""
+
+msgid ""
+"You could set settings of the this mirror on the block <code>Settings > "
+"Search Providers > Headphones Indexer</code>"
+msgstr ""
+
+msgid "SSL"
+msgstr ""
+
+msgid "Enable verification of SSL certificates"
+msgstr ""
+
+msgid ""
+"Note: disabling could pose a <strong>security issue!</strong>. Could be "
+"truly disabled only with python &gt; 2.7.9"
+msgstr ""
+
+msgid "This patch for systems with broken SSL (like QNAP)"
+msgstr ""
+
+msgid "GitHub"
+msgstr ""
+
+msgid "GitHub Updater Enabled"
+msgstr ""
+
+msgid "Enable autoupdates for Headphones through GitHub "
+msgstr ""
+
+msgid "GitHub Username"
+msgstr ""
+
+msgid "Username, used to check updates on GitHub.com"
+msgstr ""
+
+msgid "Check interval"
+msgstr ""
+
+msgid "Interval between checks for updates"
+msgstr ""
+
+msgid "Check on startup"
+msgstr ""
+
+msgid "Perform check for updates on startup"
+msgstr ""
+
+msgid "Strange hidden options"
+msgstr ""
+
+msgid ""
+"This is a block of forgotten settings. Previously, they did not have any "
+"visible representation in UI, but they are used by app's modules. "
+"<strong>Help them to find an appropriate place on the settings page</strong>"
+msgstr ""
+
+msgid "Album completion"
+msgstr ""
+
+msgid ""
+"This is used to see how many tracks you have from an album - to mark it as "
+"downloaded. Default is 80%"
+msgstr ""
+
+msgid "Prefered Usenet"
+msgstr ""
+
+msgid "Usenet downloader"
+msgstr ""
+
+msgid "Method for downloading usenet files."
+msgstr ""
+
+msgid "Sabnzbd"
+msgstr ""
+
+msgid "SABnzbd Host"
+msgstr ""
+
+msgid "usually {0}"
+msgstr ""
+
+msgid "SABnzbd host and port."
+msgstr ""
+
+msgid "SABnzbd Username"
+msgstr ""
+
+msgid "SABnzbd username. Leave empty if not applicable."
+msgstr ""
+
+msgid "SABnzbd Password"
+msgstr ""
+
+msgid "SABnzbd password. Leave empty if not applicable."
+msgstr ""
+
+msgid "SABnzbd API key"
+msgstr ""
+
+msgid "SABnzbd API key. Can be found in SABnzbd settings."
+msgstr ""
+
+msgid "SABnzbd Category"
+msgstr ""
+
+msgid "Name of SABnzbd category to add downloads to."
+msgstr ""
+
+msgid "NZBget"
+msgstr ""
+
+msgid "NZBget Host"
+msgstr ""
+
+msgid "NZBget host and port."
+msgstr ""
+
+msgid "NZBget Username"
+msgstr ""
+
+msgid "NZBGet username. Leave empty if not applicable"
+msgstr ""
+
+msgid "NZBget Password"
+msgstr ""
+
+msgid "NZBGet password. Leave empty if not applicable"
+msgstr ""
+
+msgid "NZBget Category"
+msgstr ""
+
+msgid "Name of NZBget category to add downloads to."
+msgstr ""
+
+msgid "NZBget Priority"
+msgstr ""
+
+msgid "Very Low"
+msgstr ""
+
+msgid "Low"
+msgstr ""
+
+msgid "Normal"
+msgstr ""
+
+msgid "High"
+msgstr ""
+
+msgid "Very High"
+msgstr ""
+
+msgid "Force"
+msgstr ""
+
+msgid "Black Hole"
+msgstr ""
+
+msgid "Black Hole Directory"
+msgstr ""
+
+msgid "Folder your Download program watches for NZBs"
+msgstr ""
+
+msgid "Path to folder to put NZB files in, for downloading."
+msgstr ""
+
+msgid "Usenet Common Settings"
+msgstr ""
+
+msgid "Music Download Directory"
+msgstr ""
+
+msgid ""
+"Full path where SAB or NZBget downloads your music, e.g. <code>/Users/name/"
+"Downloads/music</code>"
+msgstr ""
+
+msgid "Path to folder where Headphones can find the downloads."
+msgstr ""
+
+msgid "Usenet Retention"
+msgstr ""
+
+msgid "Number of days of retention your usenet provider provides."
+msgstr ""
+
+msgid "Prefered Torrent"
+msgstr ""
+
+msgid "Torrent downloader"
+msgstr ""
+
+msgid "Preferred torrent downloader"
+msgstr ""
+
+msgid "Folder your Download program watches for Torrents"
+msgstr ""
+
+msgid "Magnet links"
+msgstr ""
+
+msgid ""
+"Note: Opening magnet URLs is not suitable for headless/console/terminal "
+"servers.<br />Embed only works for rTorrent."
+msgstr ""
+
+msgid "Ignore"
+msgstr ""
+
+msgid "Open"
+msgstr ""
+
+msgid "Convert"
+msgstr ""
+
+msgid "Embed"
+msgstr ""
+
+msgid "Transmission"
+msgstr ""
+
+msgid "Transmission Host"
+msgstr ""
+
+msgid "Transmission Username"
+msgstr ""
+
+msgid "Transmission Password"
+msgstr ""
+
+msgid ""
+"Note: With Transmission, you can specify a different download directory for "
+"downloads sent from Headphones. Set it in the Music Download Directory below"
+msgstr ""
+
+msgid "uTorrent (Beta)"
+msgstr ""
+
+msgid ""
+"Note: uTorrent may keep files read only when completed. Check "
+"<code>Preferences -> Advanced -> bt.read_only_on_complete</code> in case of "
+"problems."
+msgstr ""
+
+msgid "uTorrent Host"
+msgstr ""
+
+msgid "uTorrent Username"
+msgstr ""
+
+msgid "uTorrent Password"
+msgstr ""
+
+msgid "uTorrent Label"
+msgstr ""
+
+msgid "Deluge (Beta)"
+msgstr ""
+
+msgid "Deluge WebUI Host and Port"
+msgstr ""
+
+msgid "Usually http://localhost:8112 (requires WebUI plugin)"
+msgstr ""
+
+msgid "Deluge Password"
+msgstr ""
+
+msgid ""
+"Note: With Deluge, you can specify a different download directory for "
+"downloads sent from Headphones. Set it in the Music Download Directory below"
+msgstr ""
+
+msgid "Deluge Label"
+msgstr ""
+
+msgid "Labels shouldn't contain spaces (requires Label plugin)"
+msgstr ""
+
+msgid "Move When Completed"
+msgstr ""
+
+msgid "Directory where Deluge should move completed downloads"
+msgstr ""
+
+msgid "Add Torrent Paused"
+msgstr ""
+
+msgid "Torrent Common Settings"
+msgstr ""
+
+msgid "Minimum seeders"
+msgstr ""
+
+msgid "Number of minimum seeders a torrent must have to be accepted"
+msgstr ""
+
+msgid ""
+"Full path where your torrent client downloads your music e.g. /Users/name/"
+"Downloads/music."
+msgstr ""
+
+msgid "Full path where your torrent client downloads your music"
+msgstr ""
+
+msgid "Keep Files for Seeding"
+msgstr ""
+
+msgid "Prefer"
+msgstr ""
+
+msgid "Prefered way"
+msgstr ""
+
+msgid "NZBs"
+msgstr ""
+
+msgid "Torrents"
+msgstr ""
+
+msgid "No Preference"
+msgstr ""
+
+msgid "Boxcar 2"
+msgstr ""
+
+msgid "Access Token"
+msgstr ""
+
+msgid "Notify on snatch?"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "Email From"
+msgstr "From"
+
+msgid "Email To"
+msgstr "To"
+
+msgid "SMTP Server"
+msgstr ""
+
+msgid "SMTP User"
+msgstr ""
+
+msgid "SMTP Password"
+msgstr ""
+
+msgid "SMTP Port"
+msgstr ""
+
+msgid "TLS"
+msgstr ""
+
+msgid "Growl"
+msgstr ""
+
+msgid "Growl Host:Port"
+msgstr ""
+
+msgid "Input host and <strong>port</strong> for Growl connection"
+msgstr ""
+
+msgid "Growl Password"
+msgstr ""
+
+msgid "Kodi / XBMC"
+msgstr ""
+
+msgid "Host(s)"
+msgstr ""
+
+msgid "e.g. http://localhost:8080. Separate hosts with commas"
+msgstr ""
+
+msgid "Update Library"
+msgstr ""
+
+msgid "Send Notifications"
+msgstr ""
+
+msgid "Logitech Media Server"
+msgstr ""
+
+msgid "LMS Host:Port"
+msgstr ""
+
+msgid "e.g. http://localhost:9000. Seperate hosts with commas"
+msgstr ""
+
+msgid "MPC"
+msgstr ""
+
+msgid "NotifyMyAndroid"
+msgstr ""
+
+msgid "Separate multiple api keys with commas"
+msgstr ""
+
+msgid "Priority"
+msgstr ""
+
+msgid "Moderate"
+msgstr ""
+
+msgid "Emergency"
+msgstr ""
+
+msgid "OS X"
+msgstr ""
+
+msgid "Register Notify App"
+msgstr ""
+
+msgid ""
+"Enter the path/application name to be registered with the Notification "
+"Center, default is /Applications/Headphones"
+msgstr ""
+
+msgid "Register"
+msgstr ""
+
+msgid "Plex"
+msgstr ""
+
+msgid "Plex Server Host:Port"
+msgstr ""
+
+msgid "Host running Plex Media Server (eg. http://192.168.1.100:32400)"
+msgstr ""
+
+msgid "Plex Client Host:Port"
+msgstr ""
+
+msgid "Host running Plex Client (eg. http://192.168.1.100:3005)"
+msgstr ""
+
+msgid "Plex Username"
+msgstr ""
+
+msgid "Username of your Plex client API (blank for none)"
+msgstr ""
+
+msgid "Plex Password"
+msgstr ""
+
+msgid "Password of your Plex client API (blank for none)"
+msgstr ""
+
+msgid "Plex Token"
+msgstr ""
+
+msgid "Plex Token (for use with Plex Home)"
+msgstr ""
+
+msgid "Update Plex Library"
+msgstr ""
+
+msgid "Send Notifications to Plex"
+msgstr ""
+
+msgid "Prowl"
+msgstr ""
+
+msgid "API key"
+msgstr ""
+
+msgid "Pushalot"
+msgstr ""
+
+msgid "Pushalot API Key"
+msgstr ""
+
+msgid "Separate multiple API keys with commas"
+msgstr ""
+
+msgid "Pushbullet"
+msgstr ""
+
+msgid "Device ID"
+msgstr ""
+
+msgid "Leave blank to send to all devices"
+msgstr ""
+
+msgid "Pushover"
+msgstr ""
+
+msgid "User Key"
+msgstr ""
+
+msgid "API Token"
+msgstr ""
+
+msgid "Leave blank to use Headphones default"
+msgstr ""
+
+msgid "Subsonic"
+msgstr ""
+
+msgid "Subsonic URL"
+msgstr ""
+
+msgid "Synology NAS"
+msgstr ""
+
+msgid "Twitter"
+msgstr ""
+
+msgid "Prefix for tweets"
+msgstr ""
+
+msgid "Step 1: Request Authorization"
+msgstr ""
+
+msgid "Confirm Authorization. Check pop-up blocker if no response."
+msgstr ""
+
+msgid "Step 2: Verify Key"
+msgstr ""
+
+msgid "Input Authorization Key"
+msgstr ""
+
+msgid "Test Twitter"
+msgstr ""
+
+msgid "Telegram"
+msgstr ""
+
+msgid "Bot Token"
+msgstr ""
+
+msgid ""
+"Contact <a href=\"http://telegram.me/BotFather\">@BotFather</a> to create a "
+"bot and get its token"
+msgstr ""
+
+msgid "User ID"
+msgstr ""
+
+msgid ""
+"Contact <a href=\"http://telegram.me/myidbot\">@myidbot</a> to get your user "
+"ID"
+msgstr ""
+
+msgid "Preferred quality"
+msgstr ""
+
+msgid "Highest Quality excluding Lossless"
+msgstr ""
+
+msgid "Highest Quality including Lossless"
+msgstr ""
+
+msgid "Lossless Only"
+msgstr ""
+
+msgid "Reject if target size is not in bitrate range:"
+msgstr ""
+
+msgid "From"
+msgstr ""
+
+msgid "in kbps"
+msgstr ""
+
+msgid ""
+"e.g. if album length = 40 mins, from = 350 kbps, then min target size = "
+"102.5 mb, anything less will be rejected"
+msgstr ""
+
+msgid "To"
+msgstr ""
+
+msgid ""
+"e.g. if album length = 40 mins, to = 2000 kbps, then max target size = 586 "
+"mb, anything greater will be rejected"
+msgstr ""
+
+msgid "Custom Bitrate"
+msgstr ""
+
+msgid "Target bitrate"
+msgstr ""
+
+msgid "Reject if <strong>less than</strong>"
+msgstr ""
+
+msgid "(leave blank for no limit)"
+msgstr ""
+
+msgid "or <strong>more than</strong>"
+msgstr ""
+
+msgid "of the target size "
+msgstr ""
+
+msgid "Allow lossless if no good lossy match found"
+msgstr ""
+
+msgid "Auto-Detect Preferred Bitrate"
+msgstr ""
+
+msgid "Search Words"
+msgstr ""
+
+msgid "Separate words with a comma, e.g. \"word1,word2,word3\"."
+msgstr ""
+
+msgid "Ignored Words"
+msgstr ""
+
+msgid "Results with any of these words in the title will be filtered out"
+msgstr ""
+
+msgid "Preferred Words"
+msgstr ""
+
+msgid ""
+"Results with these words in the title will be preferred over results without "
+"them (search provider names can also be entered)"
+msgstr ""
+
+msgid "Required Words"
+msgstr ""
+
+msgid ""
+"Results without these words in the title will be filtered out. You can use "
+"OR: \"flac OR lossless OR alac, vinyl\""
+msgstr ""
+
+msgid "Ignore clean/censored releases"
+msgstr ""
+
+msgid ""
+"Filter out releases that contain the words 'clean','edited' or 'censored', "
+"as long as those words aren't in the search term"
+msgstr ""
+
+msgid "Post-Processing"
+msgstr ""
+
+msgid "Rename files"
+msgstr ""
+
+msgid "Correct metadata"
+msgstr ""
+
+msgid "Split single file albums into multiple tracks"
+msgstr ""
+
+msgid ""
+"Use associated .cue sheet to split single file albums into multiple tracks. "
+"Requires shntool with flac or xld cli (OS X) to be installed."
+msgstr ""
+
+msgid "Delete leftover files"
+msgstr ""
+
+msgid "(.m3u, .nfo, .sfv, .nzb, etc.)"
+msgstr ""
+
+msgid "Keep original nfo"
+msgstr ""
+
+msgid "(extension changed to .orig.nfo)"
+msgstr ""
+
+msgid "Add album art jpeg to album folder"
+msgstr ""
+
+msgid "Name of album art file"
+msgstr ""
+
+msgid "will be suffixed with \".jpg\""
+msgstr ""
+
+msgid ""
+"Use $Artist/$artist, $Album/$album, $Year/$year, put optional variables in "
+"square brackets, use single-quote marks to escape square brackets literally "
+"('[', ']')."
+msgstr ""
+
+msgid "Embed album art in each file"
+msgstr ""
+
+msgid "Embed lyrics"
+msgstr ""
+
+msgid "Rename unprocesed"
+msgstr ""
+
+msgid "Move downloads to Destination Folder"
+msgstr ""
+
+msgid "Replace existing folders?"
+msgstr ""
+
+msgid "Keep original folder (i.e. copy)"
+msgstr ""
+
+msgid "Destination Directory"
+msgstr ""
+
+msgid ""
+"The directory where Headphones will move file to after post processing, e."
+"g. /Volumes/share/music."
+msgstr ""
+
+msgid "Lossless Destination Directory"
+msgstr ""
+
+msgid "Optional. Set this if you have a separate directory for lossless music."
+msgstr ""
+
+msgid "Headphones Indexer"
+msgstr ""
+
+msgid "Headphones VIP Server username"
+msgstr ""
+
+msgid "Headphones VIP Server password"
+msgstr ""
+
+msgid "Don't have an account? Sign up!"
+msgstr ""
+
+msgid "Custom Newznab Providers"
+msgstr ""
+
+msgid "Newznab Host"
+msgstr ""
+
+msgid "e.g. http://nzb.su"
+msgstr ""
+
+msgid "Newznab API"
+msgstr ""
+
+msgid "Enabled"
+msgstr ""
+
+msgid "Extra Newznab"
+msgstr ""
+
+msgid "Add"
+msgstr ""
+
+msgid "Remove this item"
+msgstr ""
+
+msgid "NZBs.org"
+msgstr ""
+
+msgid "NZBs.org API Key"
+msgstr ""
+
+msgid "omgwtfnzbs"
+msgstr ""
+
+msgid "omgwtfnzbs UID"
+msgstr ""
+
+msgid "omgwtfnzbs API Key"
+msgstr ""
+
+msgid "The Pirate Bay"
+msgstr ""
+
+msgid "Proxy URL"
+msgstr ""
+
+msgid "Optional. Leave empty for default."
+msgstr ""
+
+msgid "Seed Ratio"
+msgstr ""
+
+msgid ""
+"Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove "
+"torrent when post processed and finished seeding."
+msgstr ""
+
+msgid "Kick Ass Torrents"
+msgstr ""
+
+msgid ""
+"Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove "
+"torrent when post processed and finished seeding"
+msgstr ""
+
+msgid "Waffles.fm"
+msgstr ""
+
+msgid "UID Number"
+msgstr ""
+
+msgid "Passkey"
+msgstr ""
+
+msgid "rutracker.org"
+msgstr ""
+
+msgid "What.cd"
+msgstr ""
+
+msgid "Strike Search"
+msgstr ""
+
+msgid "Jackett / Torznab Providers"
+msgstr ""
+
+msgid "Torznab Host"
+msgstr ""
+
+msgid "e.g. http://localhost:9117/torznab/iptorrents"
+msgstr ""
+
+msgid "Torznab API"
+msgstr ""
+
+msgid "Extra Torznab"
+msgstr ""
+
+msgid "Old Pirate Bay"
+msgstr ""
+
+msgid "URL"
+msgstr ""
+
+msgid "Mininova"
+msgstr ""
+
+msgid "Basic"
+msgstr ""
+
+msgid "HTTP Host"
+msgstr ""
+
+msgid "Use 0.0.0.0 to allow outside connections"
+msgstr ""
+
+msgid "Host to bind web server to"
+msgstr ""
+
+msgid "HTTP Port"
+msgstr ""
+
+msgid ""
+"Port to bind web server to. Note that ports below 1024 may require root. "
+"Default : 8181"
+msgstr ""
+
+msgid "HTTP Username"
+msgstr ""
+
+msgid "Username for web server authentication. Leave empty to disable."
+msgstr ""
+
+msgid "HTTP Password"
+msgstr ""
+
+msgid "Password for web server authentication. Leave empty to disable."
+msgstr ""
+
+msgid "Launch Browser on Startup"
+msgstr ""
+
+msgid "Launch browser pointed to Headphones, on startup."
+msgstr ""
+
+msgid "Enable HTTPS"
+msgstr ""
+
+msgid "Enable HTTPS for web server for encrypted communication"
+msgstr ""
+
+msgid "HTTPS Cert"
+msgstr ""
+
+msgid "HTTPS Key"
+msgstr ""
+
+msgid "API"
+msgstr ""
+
+msgid "Enable API"
+msgstr ""
+
+msgid "Allow remote applications to interface with Headphones"
+msgstr ""
+
+msgid "Current API key: "
+msgstr ""
+
+msgid "Generate"
+msgstr ""
+
+msgid "Interval"
+msgstr ""
+
+msgid "An interval of 0 will disable a task."
+msgstr ""
+
+msgid "Search Interval"
+msgstr ""
+
+msgid "in minutes, minimum is 360 minutes"
+msgstr ""
+
+msgid "Time between two searches for new downloads."
+msgstr ""
+
+msgid "Download Scan Interval"
+msgstr ""
+
+msgid "Time between scans for downloaded files."
+msgstr ""
+
+msgid "Library Scan Interval"
+msgstr ""
+
+msgid "in hours"
+msgstr ""
+
+msgid "Time between two library update scans."
+msgstr ""
+
+msgid "MusicBrainz Update Interval"
+msgstr ""
+
+msgid "Time between two MusicBrainz updates."
+msgstr ""
+
+msgid "Ignore Album Updates"
+msgstr ""
+
+msgid "in days"
+msgstr ""
+
+msgid "Ignore MusicBrainz album updates older then certain number of days."
+msgstr ""
+
+msgid "Torrent Removal Interval"
+msgstr ""
+
+msgid "Remove Torrent + data if Post Processed and finished Seeding"
+msgstr ""

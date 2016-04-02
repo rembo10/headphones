@@ -1,0 +1,705 @@
+##
+## Here defined all templates, required for CONFIG page of the app
+##
+
+## ===============================================
+## TEMPLATES for TABS
+## ===============================================
+
+<%def name="Tab(me, parent=None)">
+    ## ID for TAB here is required, it is used to choose appropriate tab
+    ## usign url in address bar (#bookmarks)
+    ## Do not delete ID!
+    <div id="${me.id}" class="tab tab-${me.id} ${me.uiCssClasses()}">
+        % if me.message:
+            <div class="message">
+                ${me.message}
+            </div>
+        % endif
+
+        % for item in me:
+            ${item.render(parent=me)}
+        % endfor
+
+        <div class="button-panel">
+            <input type="button" class="configsubmit" value="${me.savecaption}" data-success="Changes saved successfully" />
+        </div>
+    </div>
+</%def>
+
+## ===============================================
+## TEMPLATES for common set of OPTIONS
+## ===============================================
+
+<%def name="OptionString(me, parent=None)">
+<%
+    uiname = me.uiName()
+    val = me.uiValue()
+
+    size_attr = '' if me.maxlength is None else ' maxlength="%d"' % me.maxlength
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+%>
+    <div class="option ${me.uiCssClasses()}">
+        %if me.label is not None:
+            <label class="label" ${tooltip_attr} for="${uiname}">
+                ${me.label}
+            </label>
+        %endif
+
+        <div class="input-wrapper">
+            <input type="text" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${size_attr} />
+
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+        </div>
+    </div>
+
+    % if 0 < len(me):
+        <div class="embed-option-block">
+            % for option in me:
+                ${option.render(parent=me)}
+            % endfor    # for option in block
+        </div>
+    % endif
+</%def>
+
+
+<%def name="OptionCombobox(me, parent=None)">
+<%
+    uiname = me.uiName()
+    datalist_id = uiname + '_hp_datalist'
+    val = me.uiValue()
+
+    size_attr = '' if me.maxlength is None else ' maxlength="%d"' % me.maxlength
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+%>
+    <div class="option">
+        %if me.label is not None:
+            <label class="label" ${tooltip_attr} for="${uiname}">
+                ${me.label}
+            </label>
+        %endif
+
+        <div class="input-wrapper">
+            <input type="text" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${size_attr} list="${datalist_id}" />
+
+            % if not me.readonly:
+                <datalist id="${datalist_id}">
+                % for di in me.items:
+                    <option value="${di}">${di}</option>
+                % endfor
+                </datalist>
+            % endif
+
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+        </div>
+    </div>
+
+    % if 0 < len(me):
+        <div class="embed-option-block">
+            % for option in me:
+                ${option.render(parent=me)}
+            % endfor    # for option in block
+        </div>
+    % endif
+</%def>
+
+
+<%def name="OptionPassword(me, parent=None)">
+<%
+    uiname = me.uiName()
+    val = me.uiValue()
+
+    size_attr = '' if me.maxlength is None else ' maxlength="%d"' % me.maxlength
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+%>
+    <div class="option ${me.uiCssClasses()}">
+        %if me.label is not None:
+            <label class="label" ${tooltip_attr} for="${uiname}">
+                ${me.label}
+            </label>
+        %endif
+
+        <div class="input-wrapper">
+            <input type="password" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${size_attr} />
+
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+        </div>
+    </div>
+    % if 0 < len(me):
+        <div class="embed-option-block">
+            % for option in me:
+                ${option.render(me)}
+            % endfor    # for option in block
+        </div>
+    % endif
+</%def>
+
+
+<%def name="OptionNumber(me, parent=None)">
+<%
+    uiname = me.uiName()
+    val = me.uiValue()
+
+    min_attr = '' if me.minvalue is None else ' min="%d"' % me.minvalue
+    max_attr = '' if me.maxvalue is None else ' max="%d"' % me.maxvalue
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+%>
+    <div class="option ${me.uiCssClasses()}">
+        %if me.label is not None:
+            <label class="label" ${tooltip_attr} for="${uiname}">
+                ${me.label}
+            </label>
+        %endif
+
+        <div class="input-wrapper">
+            <input type="number" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${min_attr} ${max_attr} />
+
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+        </div>
+    </div>
+    % if 0 < len(me):
+        <div class="embed-option-block">
+            % for option in me:
+                ${option.render(me)}
+            % endfor    # for option in block
+        </div>
+    % endif
+</%def>
+
+
+<%def name="OptionPercent(me, parent=None)">
+<%
+    uiname = me.uiName()
+    embed_id = uiname + '_embed'
+    val = me.uiValue()
+
+    min_attr = '' if me.minvalue is None else ' min="%d"' % me.minvalue
+    max_attr = '' if me.maxvalue is None else ' max="%d"' % me.maxvalue
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+%>
+    <div class="option ${me.uiCssClasses()}">
+        %if me.label is not None:
+            <label class="label" ${tooltip_attr} for="${uiname}">
+                ${me.label}
+            </label>
+        %endif
+
+        <div class="input-wrapper">
+            <input type="number" id="${uiname}" name="${uiname}" value="${val}" ${'readonly disabled' if me.readonly else ''} ${min_attr} ${max_attr} /><span> <i class="fa fa-percent"></i></span>
+
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+        </div>
+    </div>
+    % if 0 < len(me):
+        <div id="${embed_id}" class="embed-option-block">
+            % for option in me:
+                ${option.render(me)}
+            % endfor    # for option in block
+        </div>
+    % endif
+</%def>
+
+
+<%def name="OptionBool(me, parent=None)">
+<%
+    ## TODO: try to simplify this template
+    ## SORRY, there is enouth complicated layout in this template. The `alignleft` make it dirty....
+    ## When checkbox is left aligned - input is inside of the label. In other case - outside...
+
+    uiname = me.uiName()
+    checkbox_id = uiname
+    embed_id = uiname + '_embed'
+    val = me.uiValue()
+
+    need_label = me.label is not None
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+    checked_attr = 'checked' if val else ''
+    hidden_value = '1' if val else '0'
+%>
+    <div class="option ${me.uiCssClasses()}" ${tooltip_attr}>
+
+        ## ENTIRE LABEL or OPEN LABEL (when left aligned)
+        %if need_label:
+
+            % if me.alignleft:
+                <label for="${checkbox_id}">
+            % else:
+                <label class="label" for="${checkbox_id}"><span class="label-text">${me.label}</span></label>
+            % endif
+        %endif
+
+        % if not me.alignleft:
+        <div class="input-wrapper">
+        % endif
+
+            ## IMPORTANT for web ui:
+            ## HIDDEN MUST be next sibling of CHECKBOX, jquery uses .next() to find it
+            <input type="checkbox" class="-hp-checkbox-with-hidden" id="${checkbox_id}" ${checked_attr} ${'readonly disabled' if me.readonly else ''} />
+            <input type="hidden" name="${uiname}" value="${hidden_value}" ${'readonly disabled' if me.readonly else ''} />
+
+        % if not me.alignleft:
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+        </div>
+        % endif
+
+        ## CLOSE LABEL (when left aligned)
+        %if need_label:
+
+            % if me.alignleft:
+                <span class="label-text">${me.label}</span></label>
+            % endif
+        %endif
+
+        % if me.alignleft:
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+        % endif
+
+    </div>
+    % if 0 < len(me):
+        <div id="${embed_id}" class="embed-option-block">
+            % for option in me:
+                ${option.render(me)}
+            % endfor    # for option in block
+        </div>
+    % endif
+</%def>
+
+
+<%def name="OptionSwitch(me, parent=None)">
+<%
+    ## TODO: try to simplify this template
+    ## SORRY, there is enouth complicated layout in this template. The `alignleft` make it dirty....
+    ## When checkbox is left aligned - input is inside of the label. In other case - outside...
+
+    uiname = me.uiName()
+    checkbox_id = uiname
+    embed_id = uiname + '_embed'
+    val = me.uiValue()
+
+    need_label = me.label is not None
+    checked_attr = 'checked' if val else ''
+    embed_hidden_style_attr = '' if val else 'style="display:none"'
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+    hidden_value = '1' if val else '0'
+%>
+    <div class="option ${me.uiCssClasses()}" ${tooltip_attr}>
+
+        ## ENTIRE LABEL or OPEN LABEL (when left aligned)
+        %if need_label:
+
+            % if me.alignleft:
+                <label for="${checkbox_id}">
+            % else:
+                <label class="label" for="${checkbox_id}"><span class="label-text">${me.label}</span></label>
+            % endif
+        %endif
+
+        % if not me.alignleft:
+        <div class="input-wrapper">
+        % endif
+
+            ## IMPORTANT for web ui:
+            ## HIDDEN MUST be next sibling of CHECKBOX, jquery uses .next() to find it
+            <input class="hp-option-switch -hp-checkbox-with-hidden" type="checkbox" id="${checkbox_id}" data-embed-div="#${embed_id}" ${checked_attr} ${'readonly disabled' if me.readonly else ''} />
+            <input type="hidden" name="${uiname}" value="${hidden_value}" ${'readonly disabled' if me.readonly else ''} />
+
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+
+        % if not me.alignleft:
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+        </div>
+        % endif
+
+        ## CLOSE LABEL (when left aligned)
+        %if need_label:
+
+            % if me.alignleft:
+                <span class="label-text">${me.label}</span></label>
+            % endif
+        %endif
+
+        % if me.alignleft:
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+        % endif
+    </div>
+
+    % if 0 < len(me):
+        <div id="${embed_id}" class="embed-option-block" ${embed_hidden_style_attr}>
+            % for option in me:
+                ${option.render()}
+            % endfor    # for option in block
+        </div>
+    % endif
+</%def>
+
+
+<%def name="OptionCheckboxList(me, parent=None)">
+<%
+    uiname = me.uiName()
+
+    cssclass_cb_prefix = '-item-'
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+%>
+    <div class="option">
+
+        ## COULD NO APPLY THIS: <div class="input-wrapper">, but this block actually is `input-wrapper`
+        ## because it is tight linked with two columns layout...
+
+        <div ${tooltip_attr}>
+            ## Fictive value, which will guarantee posting of at least one value
+            <input type="hidden" name="${uiname}" value="" />
+            % for i in me.items:
+                ## TODO : add an appropriate class for next div:
+                <div>
+                    <label>
+                        <input type="checkbox" id="${uiname + '-' + i.csssuffix}" class="${cssclass_cb_prefix + i.csssuffix}" name="${uiname}" value="${i.value}" ${'checked' if i.checked else ''} ${'readonly disabled' if me.readonly else ''} />
+
+                        <span>${'&nbsp;' if i.label is None else i.label}</span>
+                    </label>
+                </div>
+            % endfor
+        </div>
+
+        %if me.caption is not None:
+            <div class="small caption">${me.caption}</div>
+        %endif
+    </div>
+    % if 0 < len(me):
+        <div class="embed-option-block">
+            % for option in me:
+                ${option.render(me)}
+            % endfor    # for option in block
+        </div>
+    % endif
+</%def>
+
+
+<%def name="OptionDropdown(me, parent=None)">
+<%
+    uiname = me.uiName()
+    val = me.uiValue()
+
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+%>
+    <div class="option">
+        %if me.label is not None:
+            <label class="label" ${tooltip_attr} for="${uiname}">
+                ${me.label}
+            </label>
+        %endif
+
+        <div ${tooltip_attr} class="input-wrapper">
+            <select id="${uiname}" name="${uiname}" size="1" ${'readonly disabled' if me.readonly else ''}>
+            % for i in me.items:
+                <option value="${i.value}" ${"selected" if i.value==val else ""}>${i.label}</option>
+            % endfor
+            </select>
+
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+        </div>
+    </div>
+
+    % if 0 < len(me):
+        <div class="embed-option-block">
+            % for option in me:
+                ${option.render(parent=me)}
+            % endfor    # for option in block
+        </div>
+    % endif
+</%def>
+
+
+<%def name="OptionDropdownSelector(me, parent=None)">
+<%
+    uiname = me.uiName()
+    val = me.uiValue()
+
+    cssclass_items_common = 'hp-option-selector-items-' + uiname
+    cssclass_item_prefix = '-item-'
+
+    raw_hidden_style_attr = 'style="display:none"'
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+%>
+    <div class="option">
+        %if me.label is not None:
+            <label class="label" ${tooltip_attr} for="${uiname}">
+                ${me.label}
+            </label>
+        %endif
+
+        <div ${tooltip_attr} class="input-wrapper">
+            <select class="hp-option-selector" id="${uiname}" name="${uiname}" size="1" data-linked-div-sel=".${cssclass_items_common}" ${'readonly disabled' if me.readonly else ''} >
+            % for item in me.items:
+                <option value="${item.value}" ${"selected" if item.value==val else ""} class="${cssclass_item_prefix + item.csssuffix}" data-linked-div-sel="div.${cssclass_items_common}.${cssclass_item_prefix + item.csssuffix}">${item.label}</option>
+            % endfor
+            </select>
+
+            %if me.caption is not None:
+                <div class="small caption">${me.caption}</div>
+            %endif
+        </div>
+    </div>
+
+    <!-- 1. select-embed items -->
+    % if 0 < len(me):
+        <div class="embed-option-block">
+            % for option in me:
+                ${option.render(parent=me)}
+            % endfor    # for option in block
+        </div>
+    % endif
+
+    <!-- 2. select's OPTION-child options -->
+    % for item in me.items:
+        % if len(item)>0:
+            <div ${"" if item.isSelectorSectionVisible() else raw_hidden_style_attr} class="${cssclass_items_common + ' ' + cssclass_item_prefix + item.csssuffix}">
+            % for option in item:
+                ${option.render(parent=me)}
+            % endfor
+            </div>
+        % endif
+    % endfor
+</%def>
+
+
+<%def name="OptionExtra(me, parent=None)">
+<%
+    uiname = me.uiName()
+    val = me.uiValue()
+    uniqclass = '-hp-' + uiname + '-class'
+
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+%>
+   <%def name="OptionExtraInternalTemplate(istemplate=True, val_host='', val_apikey='', val_enabled=True)">
+        <div class="-hp-option-extra-one-root">
+            <div class="option ${me.uiCssClasses()}" ${tooltip_attr}>
+                %if me.labelHost is not None:
+                    <label class="label" for="${uiname}-not-defined-host-but-you-could-fix-it">
+                        ${me.labelHost}
+                    </label>
+                %endif
+
+                <div class="input-wrapper">
+                    <input type="url" class="-hp-option-extra-disablablablablable" name="${uiname}_host[]" value="${val_host}" ${'readonly disabled' if istemplate else ''} />
+
+                    %if me.captionHost is not None:
+                        <div class="small caption">${me.captionHost}</div>
+                    %endif
+                </div>
+            </div>
+            <div class="option ${me.uiCssClasses()}" ${tooltip_attr}>
+                %if me.labelApiKey is not None:
+                    <label class="label" for="${uiname}-not-defined-apikey-but-you-could-fix-it">
+                        ${me.labelApiKey}
+                    </label>
+                %endif
+
+                <div class="input-wrapper">
+                    <input type="text" class="-hp-option-extra-disablablablablable" name="${uiname}_apikey[]" value="${val_apikey}" ${'readonly disabled' if istemplate else ''} />
+
+                    %if me.captionApiKey is not None:
+                        <div class="small caption">${me.captionApiKey}</div>
+                    %endif
+                </div>
+            </div>
+            <div class="option ${me.uiCssClasses()}" ${tooltip_attr}>
+                %if me.labelEnabled is not None:
+                    <label class="label" for="${uiname}-not-defined-enabled-but-you-could-fix-it">
+                        ${me.labelEnabled}
+                    </label>
+                %endif
+
+                <div class="input-wrapper">
+                    ## IMPORTANT for web ui:
+                    ## HIDDEN MUST be next sibling of CHECKBOX, jquery uses .next() to find it
+                    <input type="checkbox" class="-hp-option-extra-disablablablablable -hp-checkbox-with-hidden" ${'checked' if val_enabled else ''} ${'readonly disabled' if istemplate else ''} />
+                    <input type="hidden" class="-hp-option-extra-disablablablablable" name="${uiname}_enabled[]" value="${'1' if val_enabled else '0'}" ${'readonly disabled' if istemplate else ''} />
+
+                    %if me.captionEnabled is not None:
+                        <div class="small caption">${me.captionEnabled}</div>
+                    %endif
+                </div>
+            </div>
+
+            % if not me.readonly:
+                <div class="extension ${uniqclass}">
+                    <button type="button" class="-hp-option-extra-remove ${uniqclass}">${me.captionDelButton}</button>
+                </div>
+            %endif
+        </div>
+    </%def>
+
+    <section class="hidden-template ${uniqclass}" data-readonly="${'1' if me.readonly else ''}" style="display:none">
+        ${OptionExtraInternalTemplate(True, '', '', True)}
+    </section>
+
+    <section class="extra-root ${uniqclass}">
+        ## val = [{"host": "http://snab.ru", "apikey": "yyyy", "enabled": true}, {"host": "http://ya.ru", "apikey": "xxx", "enabled": true}]
+
+        % for i in val:
+            ${OptionExtraInternalTemplate(me.readonly, i['host'], i['apikey'], i['enabled'])}
+        % endfor
+    </section>
+
+    % if not me.readonly:
+        <div class="extension ${uniqclass}">
+            <button type="button" class="-hp-option-extra-add ${uniqclass}" data-uniq-class=".${uniqclass}">${me.captionAddButton}</button>
+        </div>
+    %endif
+
+    % if 0 < len(me):
+        <div class="embed-option-block">
+            % for option in me:
+                ${option.render(parent=me)}
+            % endfor    # for option in block
+        </div>
+    % endif
+</%def>
+
+## ===============================================
+## PLACEHOLDERS and STATIC templates
+## ===============================================
+
+<%def name="BlockExtension(me, parent=None)">
+    <fieldset class="block ${me.uiCssClasses()}">
+        % if me.caption is not None:
+            <legend>${me.caption}</legend>
+        % endif
+
+        % for option in me:
+            ${option.render(parent=me)}
+        % endfor    # for option in block
+    </fieldset>
+</%def>
+
+## ===============================================
+
+<%def name="MessageExtension(me, parent=None)">
+<%
+    cls = list(me.cssclasses) # important - it should be new list!!
+    if not me.fullwidth:
+        cls.append('input-wrapper')
+%>
+<div class="extension ${' '.join(cls)}">
+    <div class="message">${me.icon + " " if me.icon else ''}${me.message}</div>
+</div>
+</%def>
+
+## ===============================================
+
+<%def name="DividerExtension(me, parent=None)">
+<div class="extension">
+    <hr />
+</div>
+</%def>
+
+
+## ===============================================
+## TEMPLATES for
+##
+## TemplaterExtension
+##
+## Minimum of python code, just HTML and templates
+##
+## USE THESE AS RARE AS POSSIBLE
+##
+## ===============================================
+
+<%def name="ApiKeyExtension(me, parent=None)">
+<%
+    val = parent.uiValue()
+    uiname = parent.uiName()
+%>
+<div class="extension">
+    <label>
+        <button type="button" data-input-sel=".option input[name=${uiname}]" class="-hp-api-key">${me.strings['button']}</button>
+    </label>
+    <div>
+        <div class="small caption">${me.strings['caption']}<strong>${val}</strong></div>
+    </div>
+</div>
+</%def>
+
+## ===============================================
+
+<%def name="SongkickAreaIdExtension(me, parent=None)">
+<div class="extension">
+    <div class="input-wrapper">
+        <a target="_blank" href="http://www.songkick.com/developer/location-search">${me.strings['caption']} <i class="fa fa-external-link"></i></a>
+    </div>
+</div>
+</%def>
+
+## ===============================================
+
+<%def name="CodeshyRegExtension(me, parent=None)">
+<div class="extension">
+    <div class="input-wrapper">
+        <a target="_blank" href="https://headphones.codeshy.com/vip" id="vipserver">${me.strings['caption']} <i class="fa fa-external-link"></i></a>
+    </div>
+</div>
+</%def>
+
+## ===============================================
+
+<%def name="OsxAppRegisterExtension(me, parent=None)">
+<div class="extension">
+    <div class="input-wrapper">
+        <button type="button" class="-hp-notify-osx-register">${me.strings['caption']}</button>
+    </div>
+</div>
+</%def>
+
+## ===============================================
+
+<%def name="TwitterNotifyExtension(me, parent=None)">
+<!-- TODO : check layout of this template.
+            First note: one extension should produce just one DIV
+            Second: it looks ugly
+-->
+<div class="extension">
+    <div>
+        <button type="button" class="-hp-twitter-step-1" data-request-message="${me.strings['request-message']}">${me.strings['request-button-caption']}</button>
+    </div>
+</div>
+
+<div class="extension">
+    <label>
+        <button type="button" class="-hp-twitter-step-2">${me.strings['verify-button-caption']}</button>
+    </label>
+    <div class="input-wrapper">
+        <input type="text" class="-hp-twitter-step-2" value="" size="35" placeholder="${me.strings['verify-placeholder']}" />
+    </div>
+</div>
+
+<div class="extension">
+    <div>
+        <button type="button" class="-hp-twitter-test">${me.strings['test-button-caption']}</button>
+    </div>
+</div>
+
+</%def>
+
+## ===============================================

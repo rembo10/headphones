@@ -1,0 +1,1365 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: headphones.config\n"
+"POT-Creation-Date: 2016-04-02 04:10+YEKT\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Koryukov Maksim <maxkoryukov@gmail.com>\n"
+"Language-Team: Koryukov Maksim <maxkoryukov@gmail.com>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-Basepath: ../\n"
+"X-Poedit-SearchPath-0: headphones/config\n"
+
+msgid "Web Interface"
+msgstr "Веб Интерфейс"
+
+msgid "Save Changes"
+msgstr "Сохранить"
+
+msgid ""
+"<i class=\"fa fa-info-circle\"></i> Web Interface changes require a restart "
+"to take effect. Saving settings will restart intervals if changed."
+msgstr ""
+"<i class=\"fa fa-info-circle\"></i> Изменения на этой вкладке вступят в силу "
+"после перезапуска. Сохранение настроек приведет к сбросу отсчета интервалов "
+"(если они изменились)."
+
+msgid "Download settings"
+msgstr "Настройки Загрузки"
+
+msgid "Search Providers"
+msgstr "Поисковики"
+
+msgid "Quality &amp; Post Processing"
+msgstr "Качество и Доп. Обработка"
+
+msgid "Notifications"
+msgstr "Уведомления"
+
+msgid "Advanced Settings"
+msgstr "Дополнительно"
+
+msgid "Renaming options"
+msgstr ""
+
+msgid "Folder Format"
+msgstr "Формат имени папок"
+
+msgid ""
+"Use: $Artist/$artist, $SortArtist/$sortartist, $Album/$album, $Year/$year, "
+"$Type/$type (release type) and $First/$first (first letter in artist name), "
+"$OriginalFolder/$originalfolder (downloaded directory name). Put optional "
+"variables in square brackets, use single-quote marks to escape square "
+"brackets literally ('[', ']').<br>E.g.: $Type/$First/$artist/$album "
+"'['$year']' = Album/G/girl talk/all day [2010]"
+msgstr ""
+
+msgid "File Format"
+msgstr "Формат Файла"
+
+msgid ""
+"Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title, $Artist/"
+"$artist, $Album/$album and $Year/$year. Put optional variables in square "
+"brackets, use single-quote marks to escape square brackets literally ('[', "
+"']')."
+msgstr ""
+
+msgid "Use underscores instead of spaces"
+msgstr ""
+
+msgid "Re-Encoding Options"
+msgstr ""
+
+msgid "Note: this option requires the lame, ffmpeg or xld encoder"
+msgstr ""
+
+msgid "Re-encode downloads during postprocessing"
+msgstr ""
+
+msgid "Only re-encode lossless files (.flac)"
+msgstr ""
+
+msgid "Delete original lossless files after encoding"
+msgstr ""
+
+msgid "Enable multi-core"
+msgstr "Использовать многоядерность"
+
+msgid "Multi-core count"
+msgstr ""
+
+msgid "Set equal to the number of cores, or 0 for auto"
+msgstr ""
+
+msgid "Encoder"
+msgstr ""
+
+msgid ""
+"Name of encoder to use. Lame, FFmpeg and libav are available for most Linux "
+"distributions. On Ubuntu, libav replaces FFmpeg. xld is OS X-only."
+msgstr ""
+
+msgid "lame"
+msgstr "lame"
+
+msgid "ffmpeg"
+msgstr "ffmpeg"
+
+msgid "libav"
+msgstr "libav"
+
+msgid "Format"
+msgstr ""
+
+msgid ""
+"Use one of \"mp3\", \"ogg\", \"m4a\", or <strong>any custom</strong> format"
+msgstr ""
+
+msgid "VBR/CBR"
+msgstr "VBR/CBR"
+
+msgid "cbr"
+msgstr "cbr"
+
+msgid "Bitrate"
+msgstr "Битрейт"
+
+msgid "64"
+msgstr "64"
+
+msgid "128"
+msgstr "128"
+
+msgid "192"
+msgstr "192"
+
+msgid "256"
+msgstr "256"
+
+msgid "320"
+msgstr "320"
+
+msgid "vbr"
+msgstr "vbr"
+
+msgid "Quality"
+msgstr "Качество"
+
+msgid "0"
+msgstr "0"
+
+msgid "1"
+msgstr "1"
+
+msgid "2"
+msgstr "2"
+
+msgid "3"
+msgstr "3"
+
+msgid "4"
+msgstr "4"
+
+msgid "5"
+msgstr "5"
+
+msgid "6"
+msgstr "6"
+
+msgid "7"
+msgstr "7"
+
+msgid "8"
+msgstr "8"
+
+msgid "9"
+msgstr "9"
+
+msgid "Sampling"
+msgstr ""
+
+msgid "44.1 kHz"
+msgstr "44.1 кГц"
+
+msgid "48.0 kHz"
+msgstr "48.0 кГц"
+
+msgid "Arguments"
+msgstr "Аргументы"
+
+msgid ""
+"<i class=\"fa fa-exclamation-circle\"></i> Ignores all of the above options"
+msgstr ""
+"<i class=\"fa fa-exclamation-circle\"></i> Игнорировать все настройки выше"
+
+msgid "Advanced Encoding Options"
+msgstr ""
+
+msgid "xld"
+msgstr "xld"
+
+msgid "XLD Profile"
+msgstr ""
+
+msgid "Path to Encoder"
+msgstr ""
+
+msgid "Miscellaneous"
+msgstr ""
+
+msgid "Automatically include extras when adding an artist"
+msgstr ""
+
+msgid "Choose Which Extras to Include"
+msgstr ""
+
+msgid "single"
+msgstr "single"
+
+msgid "ep"
+msgstr "ep"
+
+msgid "compilation"
+msgstr "compilation"
+
+msgid "soundtrack"
+msgstr "soundtrack"
+
+msgid "live"
+msgstr "live"
+
+msgid "remix"
+msgstr "remix"
+
+msgid "spokenword"
+msgstr "spokenword"
+
+msgid "audiobook"
+msgstr "audiobook"
+
+msgid "other"
+msgstr "other"
+
+msgid "dj-mix"
+msgstr "dj-mix"
+
+msgid "mixtape/street"
+msgstr "mixtape/street"
+
+msgid "broadcast"
+msgstr "broadcast"
+
+msgid "interview"
+msgstr "interview"
+
+msgid "demo"
+msgstr "demo"
+
+msgid "Only include 'official' extras (i.e. no bootlegs, promos, etc.)"
+msgstr ""
+
+msgid "Automatically mark upcoming albums as wanted"
+msgstr ""
+
+msgid "Automatically mark all albums as wanted"
+msgstr ""
+
+msgid "Automatically mark manually added albums as wanted"
+msgstr ""
+
+msgid "Automatically mark manually added albums from search results as wanted"
+msgstr ""
+
+msgid "Wait until an album's release date before searching"
+msgstr ""
+
+msgid "Don't add new artists when post-processing albums"
+msgstr ""
+
+msgid ""
+"Freeze the database, so new artists won't be added automatically. Use this "
+"if Headphones adds artists because due to wrong snatches. This check is "
+"skipped when the folder name is appended with release group ID."
+msgstr ""
+
+msgid "Stop post-processing if no good metadata match found"
+msgstr ""
+
+msgid "Tag using ID3v2.3 instead of ID3v2.4"
+msgstr "Использовать тэги ID3v2.3, а не ID3v2.4"
+
+msgid "Directories"
+msgstr "Каталоги"
+
+msgid "Log Directory"
+msgstr "Папка журналов"
+
+msgid "Cache Directory"
+msgstr "Папка кэша"
+
+msgid "Cache Size"
+msgstr "Размер кэша"
+
+msgid "in MB"
+msgstr "в МБ"
+
+msgid "File Permissions Enabled"
+msgstr ""
+
+msgid "Change file permissions during post-processing"
+msgstr ""
+
+msgid "File Permissions"
+msgstr ""
+
+msgid "Desired file permissions"
+msgstr ""
+
+msgid "Folder Permissions Enabled"
+msgstr "Включить разрешения для папок"
+
+msgid "Change folder permissions during post-processing"
+msgstr ""
+
+msgid "Folder Permissions"
+msgstr "Разрешения для папок"
+
+msgid "Desired folder permissions"
+msgstr ""
+
+msgid "Songkick"
+msgstr "Songkick"
+
+msgid "Show concert info"
+msgstr ""
+
+msgid "API Key"
+msgstr "API-ключ"
+
+msgid "Filter by Metro Area"
+msgstr ""
+
+msgid "Metro Area ID"
+msgstr ""
+
+msgid ""
+"Enter the Metro Area ID, e.g. the ID for London is 24426, this can be found "
+"by clicking the link and searching/selecting the city, e.g. London should "
+"find http://www.songkick.com/metro_areas/24426-uk-london"
+msgstr ""
+
+msgid "Find Area ID"
+msgstr ""
+
+msgid "Musicbrainz"
+msgstr "Musicbrainz"
+
+msgid "Musicbrainz Mirror"
+msgstr "Зеркало Musicbrainz"
+
+msgid "musicbrainz.org"
+msgstr "musicbrainz.org"
+
+msgid "custom"
+msgstr ""
+
+msgid "Host"
+msgstr "Хост"
+
+msgid "Port"
+msgstr "Порт"
+
+msgid "Requires Authentication"
+msgstr "Требуется Аутентификация"
+
+msgid "Username"
+msgstr "Имя пользователя"
+
+msgid "Password"
+msgstr "Пароль"
+
+msgid "Sleep Interval"
+msgstr ""
+
+msgid "in minutes"
+msgstr "в минутах"
+
+msgid "headphones"
+msgstr "headphones"
+
+msgid ""
+"You could set settings of the this mirror on the block <code>Settings > "
+"Search Providers > Headphones Indexer</code>"
+msgstr ""
+"Вы можете задать настройки для этого зеркала на вкладке <code>Настройки > "
+"Поисковики > Headphones Indexer</code>"
+
+msgid "SSL"
+msgstr "SSL"
+
+msgid "Enable verification of SSL certificates"
+msgstr ""
+
+msgid ""
+"Note: disabling could pose a <strong>security issue!</strong>. Could be "
+"truly disabled only with python &gt; 2.7.9"
+msgstr ""
+"На заметку: отключение может стать причиной <strong>проблем с безопасностью</"
+"strong>. Опция может быть действительно отключена только при использовании "
+"python версии &gt; 2.7.9"
+
+msgid "This patch for systems with broken SSL (like QNAP)"
+msgstr ""
+
+msgid "GitHub"
+msgstr "GitHub"
+
+msgid "GitHub Updater Enabled"
+msgstr "Включить обновления через GitHub"
+
+msgid "Enable autoupdates for Headphones through GitHub "
+msgstr "Включить автопроверку обновлений для Headphones через GitHub"
+
+msgid "GitHub Username"
+msgstr "GitHub Имя пользователя"
+
+msgid "Username, used to check updates on GitHub.com"
+msgstr ""
+
+msgid "Check interval"
+msgstr ""
+
+msgid "Interval between checks for updates"
+msgstr ""
+
+msgid "Check on startup"
+msgstr ""
+
+msgid "Perform check for updates on startup"
+msgstr "Проверять обновления при запуске"
+
+msgid "Strange hidden options"
+msgstr ""
+
+msgid ""
+"This is a block of forgotten settings. Previously, they did not have any "
+"visible representation in UI, but they are used by app's modules. "
+"<strong>Help them to find an appropriate place on the settings page</strong>"
+msgstr ""
+
+msgid "Album completion"
+msgstr "Завершенность скачивания альбома"
+
+msgid ""
+"This is used to see how many tracks you have from an album - to mark it as "
+"downloaded. Default is 80%"
+msgstr ""
+
+msgid "Prefered Usenet"
+msgstr ""
+
+msgid "Usenet downloader"
+msgstr "Чем скачивать из Usenet"
+
+msgid "Method for downloading usenet files."
+msgstr ""
+
+msgid "Sabnzbd"
+msgstr "Sabnzbd"
+
+msgid "SABnzbd Host"
+msgstr ""
+
+msgid "usually {0}"
+msgstr "Обычно {0}"
+
+msgid "SABnzbd host and port."
+msgstr ""
+
+msgid "SABnzbd Username"
+msgstr ""
+
+msgid "SABnzbd username. Leave empty if not applicable."
+msgstr ""
+
+msgid "SABnzbd Password"
+msgstr ""
+
+msgid "SABnzbd password. Leave empty if not applicable."
+msgstr ""
+
+msgid "SABnzbd API key"
+msgstr ""
+
+msgid "SABnzbd API key. Can be found in SABnzbd settings."
+msgstr ""
+
+msgid "SABnzbd Category"
+msgstr ""
+
+msgid "Name of SABnzbd category to add downloads to."
+msgstr ""
+
+msgid "NZBget"
+msgstr "NZBget"
+
+msgid "NZBget Host"
+msgstr ""
+
+msgid "NZBget host and port."
+msgstr ""
+
+msgid "NZBget Username"
+msgstr ""
+
+msgid "NZBGet username. Leave empty if not applicable"
+msgstr ""
+
+msgid "NZBget Password"
+msgstr ""
+
+msgid "NZBGet password. Leave empty if not applicable"
+msgstr ""
+
+msgid "NZBget Category"
+msgstr ""
+
+msgid "Name of NZBget category to add downloads to."
+msgstr ""
+
+msgid "NZBget Priority"
+msgstr ""
+
+msgid "Very Low"
+msgstr "Очень низкий"
+
+msgid "Low"
+msgstr "Низкий"
+
+msgid "Normal"
+msgstr "Нормальный"
+
+msgid "High"
+msgstr "Высокий"
+
+msgid "Very High"
+msgstr "Очень высокий"
+
+msgid "Force"
+msgstr "Принудительно"
+
+msgid "Black Hole"
+msgstr ""
+
+msgid "Black Hole Directory"
+msgstr ""
+
+msgid "Folder your Download program watches for NZBs"
+msgstr ""
+
+msgid "Path to folder to put NZB files in, for downloading."
+msgstr ""
+
+msgid "Usenet Common Settings"
+msgstr ""
+
+msgid "Music Download Directory"
+msgstr "Папка для скачивания музыки"
+
+msgid ""
+"Full path where SAB or NZBget downloads your music, e.g. <code>/Users/name/"
+"Downloads/music</code>"
+msgstr ""
+
+msgid "Path to folder where Headphones can find the downloads."
+msgstr ""
+
+msgid "Usenet Retention"
+msgstr ""
+
+msgid "Number of days of retention your usenet provider provides."
+msgstr ""
+
+msgid "Prefered Torrent"
+msgstr ""
+
+msgid "Torrent downloader"
+msgstr "Чем скачивать торренты"
+
+msgid "Preferred torrent downloader"
+msgstr ""
+
+msgid "Folder your Download program watches for Torrents"
+msgstr ""
+
+msgid "Magnet links"
+msgstr ""
+
+msgid ""
+"Note: Opening magnet URLs is not suitable for headless/console/terminal "
+"servers.<br />Embed only works for rTorrent."
+msgstr ""
+
+msgid "Ignore"
+msgstr "Игнорировать"
+
+msgid "Open"
+msgstr "Открыть"
+
+msgid "Convert"
+msgstr ""
+
+msgid "Embed"
+msgstr "Встроенный"
+
+msgid "Transmission"
+msgstr "Transmission"
+
+msgid "Transmission Host"
+msgstr "Хост"
+
+msgid "Transmission Username"
+msgstr "Имя пользователя"
+
+msgid "Transmission Password"
+msgstr "Пароль"
+
+msgid ""
+"Note: With Transmission, you can specify a different download directory for "
+"downloads sent from Headphones. Set it in the Music Download Directory below"
+msgstr ""
+"На заметку: с Transmission, вы можете использовать отдельную папку для "
+"загрузок из Headphones. Её можно указать ниже, в поле \"Папка для скачивания "
+"музыки\""
+
+msgid "uTorrent (Beta)"
+msgstr "uTorrent (Beta)"
+
+msgid ""
+"Note: uTorrent may keep files read only when completed. Check "
+"<code>Preferences -> Advanced -> bt.read_only_on_complete</code> in case of "
+"problems."
+msgstr ""
+
+msgid "uTorrent Host"
+msgstr "Хост"
+
+msgid "uTorrent Username"
+msgstr "Имя пользователя"
+
+msgid "uTorrent Password"
+msgstr "Пароль"
+
+msgid "uTorrent Label"
+msgstr "Метка загрузок"
+
+msgid "Deluge (Beta)"
+msgstr "Deluge (бета)"
+
+msgid "Deluge WebUI Host and Port"
+msgstr "Хост и порт Deluge WebUI"
+
+msgid "Usually http://localhost:8112 (requires WebUI plugin)"
+msgstr "Обычно http://localhost:8112 (требуется наличие плагина WebUI)"
+
+msgid "Deluge Password"
+msgstr "Пароль"
+
+msgid ""
+"Note: With Deluge, you can specify a different download directory for "
+"downloads sent from Headphones. Set it in the Music Download Directory below"
+msgstr ""
+"На заметку: с Deluge, вы можете использовать отдельную папку для загрузок из "
+"Headphones. Её можно указать ниже, в поле \"Папка для скачивания музыки\""
+
+msgid "Deluge Label"
+msgstr "Метка"
+
+msgid "Labels shouldn't contain spaces (requires Label plugin)"
+msgstr ""
+"Метки не должны содержать пробелов (необходим плагин <strong>Label</strong>)"
+
+msgid "Move When Completed"
+msgstr "Переместить по завершению"
+
+msgid "Directory where Deluge should move completed downloads"
+msgstr "Папка, в которую Deluge следует переместить завершенные загрузки"
+
+msgid "Add Torrent Paused"
+msgstr "Добавлять торрент остановленным"
+
+msgid "Torrent Common Settings"
+msgstr "Общие настройки торрентов"
+
+msgid "Minimum seeders"
+msgstr ""
+
+msgid "Number of minimum seeders a torrent must have to be accepted"
+msgstr ""
+
+msgid ""
+"Full path where your torrent client downloads your music e.g. /Users/name/"
+"Downloads/music."
+msgstr ""
+
+msgid "Full path where your torrent client downloads your music"
+msgstr ""
+
+msgid "Keep Files for Seeding"
+msgstr "Сохранять файлы для раздачи"
+
+msgid "Prefer"
+msgstr ""
+
+msgid "Prefered way"
+msgstr "Предпочтительный способ"
+
+msgid "NZBs"
+msgstr "NZBs"
+
+msgid "Torrents"
+msgstr "Торренты"
+
+msgid "No Preference"
+msgstr "Без Предпочтений"
+
+msgid "Boxcar 2"
+msgstr "Boxcar 2"
+
+msgid "Access Token"
+msgstr ""
+
+msgid "Notify on snatch?"
+msgstr ""
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Email From"
+msgstr "От кого"
+
+msgid "Email To"
+msgstr "Кому"
+
+msgid "SMTP Server"
+msgstr "SMTP Сервер"
+
+msgid "SMTP User"
+msgstr "SMTP Пользователь"
+
+msgid "SMTP Password"
+msgstr "Пароль SMTP"
+
+msgid "SMTP Port"
+msgstr "Порт SMTP"
+
+msgid "TLS"
+msgstr "TLS"
+
+msgid "Growl"
+msgstr "Growl"
+
+msgid "Growl Host:Port"
+msgstr ""
+
+msgid "Input host and <strong>port</strong> for Growl connection"
+msgstr ""
+
+msgid "Growl Password"
+msgstr "Пароль"
+
+msgid "Kodi / XBMC"
+msgstr "Kodi / XBMC"
+
+msgid "Host(s)"
+msgstr "Хост(ы)"
+
+msgid "e.g. http://localhost:8080. Separate hosts with commas"
+msgstr "напр.: http://localhost:8080. Разделитель хостов - запятая"
+
+msgid "Update Library"
+msgstr ""
+
+msgid "Send Notifications"
+msgstr "Отправлять уведомления"
+
+msgid "Logitech Media Server"
+msgstr "Logitech Media Server"
+
+msgid "LMS Host:Port"
+msgstr ""
+
+msgid "e.g. http://localhost:9000. Seperate hosts with commas"
+msgstr "напр.: http://localhost:9000. Разделитель хостов - запятая"
+
+msgid "MPC"
+msgstr "MPC"
+
+msgid "NotifyMyAndroid"
+msgstr "NotifyMyAndroid"
+
+msgid "Separate multiple api keys with commas"
+msgstr "Если ключей много, то их можно записать через запятую"
+
+msgid "Priority"
+msgstr "Приоритет"
+
+msgid "Moderate"
+msgstr "Средний"
+
+msgid "Emergency"
+msgstr "Аварийный"
+
+msgid "OS X"
+msgstr "OS X"
+
+msgid "Register Notify App"
+msgstr ""
+
+msgid ""
+"Enter the path/application name to be registered with the Notification "
+"Center, default is /Applications/Headphones"
+msgstr ""
+
+msgid "Register"
+msgstr ""
+
+msgid "Plex"
+msgstr "Plex"
+
+msgid "Plex Server Host:Port"
+msgstr ""
+
+msgid "Host running Plex Media Server (eg. http://192.168.1.100:32400)"
+msgstr ""
+
+msgid "Plex Client Host:Port"
+msgstr ""
+
+msgid "Host running Plex Client (eg. http://192.168.1.100:3005)"
+msgstr ""
+
+msgid "Plex Username"
+msgstr "Имя пользователя Plex"
+
+msgid "Username of your Plex client API (blank for none)"
+msgstr ""
+
+msgid "Plex Password"
+msgstr "Пароль Plex"
+
+msgid "Password of your Plex client API (blank for none)"
+msgstr ""
+
+msgid "Plex Token"
+msgstr ""
+
+msgid "Plex Token (for use with Plex Home)"
+msgstr ""
+
+msgid "Update Plex Library"
+msgstr ""
+
+msgid "Send Notifications to Plex"
+msgstr "Отправлять уведомления через Plex"
+
+msgid "Prowl"
+msgstr "Prowl"
+
+msgid "API key"
+msgstr "API-ключ"
+
+msgid "Pushalot"
+msgstr "Pushalot"
+
+msgid "Pushalot API Key"
+msgstr "API-ключ Pushalot"
+
+msgid "Separate multiple API keys with commas"
+msgstr ""
+
+msgid "Pushbullet"
+msgstr "Pushbullet"
+
+msgid "Device ID"
+msgstr "Идентификатор устройства"
+
+msgid "Leave blank to send to all devices"
+msgstr "Оставьте пустым, чтобы отправлять уведомления на все устройства"
+
+msgid "Pushover"
+msgstr "Pushover"
+
+msgid "User Key"
+msgstr "Ключ пользователя"
+
+msgid "API Token"
+msgstr "API-ключ"
+
+msgid "Leave blank to use Headphones default"
+msgstr ""
+
+msgid "Subsonic"
+msgstr "Subsonic"
+
+msgid "Subsonic URL"
+msgstr ""
+
+msgid "Synology NAS"
+msgstr "Synology NAS"
+
+msgid "Twitter"
+msgstr "Twitter"
+
+msgid "Prefix for tweets"
+msgstr ""
+
+msgid "Step 1: Request Authorization"
+msgstr "Шаг 1: Запрос авторизации"
+
+msgid "Confirm Authorization. Check pop-up blocker if no response."
+msgstr ""
+"Подтвердить авторизацию. Проверьте блокировщик всплывающих окон, если ответ "
+"не приходит."
+
+msgid "Step 2: Verify Key"
+msgstr "Шаг 2: Проверка ключа"
+
+msgid "Input Authorization Key"
+msgstr ""
+
+msgid "Test Twitter"
+msgstr "Проверить Twitter"
+
+msgid "Telegram"
+msgstr "Telegram"
+
+msgid "Bot Token"
+msgstr ""
+
+msgid ""
+"Contact <a href=\"http://telegram.me/BotFather\">@BotFather</a> to create a "
+"bot and get its token"
+msgstr ""
+
+msgid "User ID"
+msgstr "Идентификатор пользователя"
+
+msgid ""
+"Contact <a href=\"http://telegram.me/myidbot\">@myidbot</a> to get your user "
+"ID"
+msgstr ""
+
+msgid "Preferred quality"
+msgstr "Предпочтительное качество"
+
+msgid "Highest Quality excluding Lossless"
+msgstr ""
+
+msgid "Highest Quality including Lossless"
+msgstr ""
+
+msgid "Lossless Only"
+msgstr ""
+
+msgid "Reject if target size is not in bitrate range:"
+msgstr "Отбросить, если битрейт за пределами интервала: "
+
+msgid "From"
+msgstr "От"
+
+msgid "in kbps"
+msgstr "в кб/сек"
+
+msgid ""
+"e.g. if album length = 40 mins, from = 350 kbps, then min target size = "
+"102.5 mb, anything less will be rejected"
+msgstr ""
+
+msgid "To"
+msgstr "До"
+
+msgid ""
+"e.g. if album length = 40 mins, to = 2000 kbps, then max target size = 586 "
+"mb, anything greater will be rejected"
+msgstr ""
+
+msgid "Custom Bitrate"
+msgstr "Указать битрейт"
+
+msgid "Target bitrate"
+msgstr "Целевой битрейт"
+
+msgid "Reject if <strong>less than</strong>"
+msgstr ""
+
+msgid "(leave blank for no limit)"
+msgstr "(оставьте пустым, чтобы не ограничивать)"
+
+msgid "or <strong>more than</strong>"
+msgstr ""
+
+msgid "of the target size "
+msgstr ""
+
+msgid "Allow lossless if no good lossy match found"
+msgstr ""
+
+msgid "Auto-Detect Preferred Bitrate"
+msgstr ""
+
+msgid "Search Words"
+msgstr ""
+
+msgid "Separate words with a comma, e.g. \"word1,word2,word3\"."
+msgstr ""
+
+msgid "Ignored Words"
+msgstr ""
+
+msgid "Results with any of these words in the title will be filtered out"
+msgstr ""
+
+msgid "Preferred Words"
+msgstr ""
+
+msgid ""
+"Results with these words in the title will be preferred over results without "
+"them (search provider names can also be entered)"
+msgstr ""
+
+msgid "Required Words"
+msgstr ""
+
+msgid ""
+"Results without these words in the title will be filtered out. You can use "
+"OR: \"flac OR lossless OR alac, vinyl\""
+msgstr ""
+
+msgid "Ignore clean/censored releases"
+msgstr ""
+
+msgid ""
+"Filter out releases that contain the words 'clean','edited' or 'censored', "
+"as long as those words aren't in the search term"
+msgstr ""
+
+msgid "Post-Processing"
+msgstr "Доп. Обработка"
+
+msgid "Rename files"
+msgstr "Переименовывать файлы"
+
+msgid "Correct metadata"
+msgstr "Исправлять метаданные"
+
+msgid "Split single file albums into multiple tracks"
+msgstr "Разделять 'однофайловый' альбом на несколько треков"
+
+msgid ""
+"Use associated .cue sheet to split single file albums into multiple tracks. "
+"Requires shntool with flac or xld cli (OS X) to be installed."
+msgstr ""
+
+msgid "Delete leftover files"
+msgstr "Удалять оставшиеся файлы"
+
+msgid "(.m3u, .nfo, .sfv, .nzb, etc.)"
+msgstr "(.m3u, .nfo, .sfv, .nzb, и др.)"
+
+msgid "Keep original nfo"
+msgstr "Сохранять оригинальный nfo-файл"
+
+msgid "(extension changed to .orig.nfo)"
+msgstr "(расширение будет изменено на '.orig.nfo')"
+
+msgid "Add album art jpeg to album folder"
+msgstr "Добавлять обложку в папку альбома"
+
+msgid "Name of album art file"
+msgstr "Название для файла-обложки альбома"
+
+msgid "will be suffixed with \".jpg\""
+msgstr "будет дополнено суффиксом \".jpg\""
+
+msgid ""
+"Use $Artist/$artist, $Album/$album, $Year/$year, put optional variables in "
+"square brackets, use single-quote marks to escape square brackets literally "
+"('[', ']')."
+msgstr ""
+
+msgid "Embed album art in each file"
+msgstr ""
+
+msgid "Embed lyrics"
+msgstr "Встраивать текст"
+
+msgid "Rename unprocesed"
+msgstr "Переименовывать необработанные"
+
+# Do not forget about "Destination Folder"
+msgid "Move downloads to Destination Folder"
+msgstr "Перемещать загрузки в \"Папку Назначения\""
+
+msgid "Replace existing folders?"
+msgstr "Заменять существующие папки?"
+
+msgid "Keep original folder (i.e. copy)"
+msgstr "Сохранять папку (т.е. копировать, а не перемещать)"
+
+msgid "Destination Directory"
+msgstr "Папка назначения"
+
+msgid ""
+"The directory where Headphones will move file to after post processing, e."
+"g. /Volumes/share/music."
+msgstr ""
+
+msgid "Lossless Destination Directory"
+msgstr "Папка назначения для Lossless"
+
+msgid "Optional. Set this if you have a separate directory for lossless music."
+msgstr ""
+
+msgid "Headphones Indexer"
+msgstr "Headphones Indexer"
+
+msgid "Headphones VIP Server username"
+msgstr ""
+
+msgid "Headphones VIP Server password"
+msgstr ""
+
+msgid "Don't have an account? Sign up!"
+msgstr "Нет аккаунта? Зарегистрируйтесь!"
+
+#, fuzzy
+msgid "Custom Newznab Providers"
+msgstr "Поисковики"
+
+msgid "Newznab Host"
+msgstr ""
+
+msgid "e.g. http://nzb.su"
+msgstr ""
+
+#, fuzzy
+msgid "Newznab API"
+msgstr "Разрешить API"
+
+#, fuzzy
+msgid "Enabled"
+msgstr "Разрешить API"
+
+msgid "Extra Newznab"
+msgstr ""
+
+msgid "Add"
+msgstr "Добавить"
+
+msgid "Remove this item"
+msgstr "Удалить эту запись"
+
+msgid "NZBs.org"
+msgstr "NZBs.org"
+
+msgid "NZBs.org API Key"
+msgstr "API-ключ NZBs.org"
+
+msgid "omgwtfnzbs"
+msgstr "omgwtfnzbs"
+
+msgid "omgwtfnzbs UID"
+msgstr "omgwtfnzbs UID"
+
+msgid "omgwtfnzbs API Key"
+msgstr "omgwtfnzbs API-ключ"
+
+msgid "The Pirate Bay"
+msgstr "The Pirate Bay"
+
+msgid "Proxy URL"
+msgstr "Адрес прокси"
+
+msgid "Optional. Leave empty for default."
+msgstr ""
+
+msgid "Seed Ratio"
+msgstr ""
+
+msgid ""
+"Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove "
+"torrent when post processed and finished seeding."
+msgstr ""
+
+msgid "Kick Ass Torrents"
+msgstr "Kick Ass Torrents"
+
+msgid ""
+"Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove "
+"torrent when post processed and finished seeding"
+msgstr ""
+
+msgid "Waffles.fm"
+msgstr "Waffles.fm"
+
+msgid "UID Number"
+msgstr ""
+
+msgid "Passkey"
+msgstr ""
+
+msgid "rutracker.org"
+msgstr "rutracker.org"
+
+msgid "What.cd"
+msgstr "What.cd"
+
+msgid "Strike Search"
+msgstr "Strike Search"
+
+msgid "Jackett / Torznab Providers"
+msgstr ""
+
+#, fuzzy
+msgid "Torznab Host"
+msgstr "Хост"
+
+msgid "e.g. http://localhost:9117/torznab/iptorrents"
+msgstr ""
+
+#, fuzzy
+msgid "Torznab API"
+msgstr "Разрешить API"
+
+msgid "Extra Torznab"
+msgstr ""
+
+msgid "Old Pirate Bay"
+msgstr "Old Pirate Bay"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "Mininova"
+msgstr "Mininova"
+
+msgid "Basic"
+msgstr "Основные"
+
+msgid "HTTP Host"
+msgstr "Адрес веб-интерфейса"
+
+msgid "Use 0.0.0.0 to allow outside connections"
+msgstr "Введите 0.0.0.0 , чтобы разрешить внешние соединения"
+
+msgid "Host to bind web server to"
+msgstr ""
+
+msgid "HTTP Port"
+msgstr "Порт веб-интефейса"
+
+msgid ""
+"Port to bind web server to. Note that ports below 1024 may require root. "
+"Default : 8181"
+msgstr ""
+
+msgid "HTTP Username"
+msgstr "Имя пользователя"
+
+msgid "Username for web server authentication. Leave empty to disable."
+msgstr ""
+
+msgid "HTTP Password"
+msgstr "Пароль веб-интефейса"
+
+msgid "Password for web server authentication. Leave empty to disable."
+msgstr ""
+
+msgid "Launch Browser on Startup"
+msgstr "Открывать браузер"
+
+msgid "Launch browser pointed to Headphones, on startup."
+msgstr "При запуске открывать страницу Headphones в браузере."
+
+msgid "Enable HTTPS"
+msgstr "Включить HTTPS"
+
+msgid "Enable HTTPS for web server for encrypted communication"
+msgstr ""
+
+msgid "HTTPS Cert"
+msgstr "Путь к сертификату HTTPS"
+
+msgid "HTTPS Key"
+msgstr "Путь к ключу HTTPS"
+
+msgid "API"
+msgstr "API"
+
+msgid "Enable API"
+msgstr "Разрешить API"
+
+msgid "Allow remote applications to interface with Headphones"
+msgstr ""
+
+msgid "Current API key: "
+msgstr "Текущий API-ключ:"
+
+msgid "Generate"
+msgstr "Генерировать"
+
+msgid "Interval"
+msgstr "Интервалы"
+
+msgid "An interval of 0 will disable a task."
+msgstr "Интервал \"0\" отключает задание"
+
+msgid "Search Interval"
+msgstr "Интервал Поиска"
+
+msgid "in minutes, minimum is 360 minutes"
+msgstr "в минутах, минимум - 360 минут"
+
+msgid "Time between two searches for new downloads."
+msgstr ""
+
+msgid "Download Scan Interval"
+msgstr "Интервал Сканирования Загрузок"
+
+msgid "Time between scans for downloaded files."
+msgstr ""
+
+msgid "Library Scan Interval"
+msgstr "Интервал сканирования библиотеки"
+
+msgid "in hours"
+msgstr "в часах"
+
+msgid "Time between two library update scans."
+msgstr "Период между сканированиями библиотеки."
+
+msgid "MusicBrainz Update Interval"
+msgstr "Интервал проверки MusicBrainz"
+
+msgid "Time between two MusicBrainz updates."
+msgstr "Интервал времени между двумя проверками обновлений на MusicBrainz."
+
+msgid "Ignore Album Updates"
+msgstr "Игнорировать обновления альбома"
+
+msgid "in days"
+msgstr "в днях"
+
+msgid "Ignore MusicBrainz album updates older then certain number of days."
+msgstr ""
+
+msgid "Torrent Removal Interval"
+msgstr ""
+
+msgid "Remove Torrent + data if Post Processed and finished Seeding"
+msgstr ""
