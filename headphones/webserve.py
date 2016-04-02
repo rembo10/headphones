@@ -1189,51 +1189,6 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("config")
 
     @cherrypy.expose
-    def configUpdate2(self, **kwargs):
-        # Handle the variable config options. Note - keys with False values aren't getting passed
-
-        extra_newznabs = []
-        for kwarg in [x for x in kwargs if x.startswith('newznab_host')]:
-            newznab_host_key = kwarg
-            newznab_number = kwarg[12:]
-            if len(newznab_number):
-                newznab_api_key = 'newznab_api' + newznab_number
-                newznab_enabled_key = 'newznab_enabled' + newznab_number
-                newznab_host = kwargs.get(newznab_host_key, '')
-                newznab_api = kwargs.get(newznab_api_key, '')
-                newznab_enabled = int(kwargs.get(newznab_enabled_key, 0))
-                for key in [newznab_host_key, newznab_api_key, newznab_enabled_key]:
-                    if key in kwargs:
-                        del kwargs[key]
-                extra_newznabs.append((newznab_host, newznab_api, newznab_enabled))
-
-        extra_torznabs = []
-        for kwarg in [x for x in kwargs if x.startswith('torznab_host')]:
-            torznab_host_key = kwarg
-            torznab_number = kwarg[12:]
-            if len(torznab_number):
-                torznab_api_key = 'torznab_api' + torznab_number
-                torznab_enabled_key = 'torznab_enabled' + torznab_number
-                torznab_host = kwargs.get(torznab_host_key, '')
-                torznab_api = kwargs.get(torznab_api_key, '')
-                torznab_enabled = int(kwargs.get(torznab_enabled_key, 0))
-                for key in [torznab_host_key, torznab_api_key, torznab_enabled_key]:
-                    if key in kwargs:
-                        del kwargs[key]
-                extra_torznabs.append((torznab_host, torznab_api, torznab_enabled))
-
-        headphones.CONFIG.clear_extra_newznabs()
-        headphones.CONFIG.clear_extra_torznabs()
-
-        for extra_newznab in extra_newznabs:
-            headphones.CONFIG.add_extra_newznab(extra_newznab)
-
-        for extra_torznab in extra_torznabs:
-            headphones.CONFIG.add_extra_torznab(extra_torznab)
-
-        raise cherrypy.HTTPRedirect("config2")
-
-    @cherrypy.expose
     def do_state_change(self, signal, title, timer):
         headphones.SIGNAL = signal
         message = title + '...'

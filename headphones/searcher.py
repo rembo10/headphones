@@ -561,7 +561,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None,
                                   headphones.CONFIG.NEWZNAB_ENABLED))
 
         for newznab_host in headphones.CONFIG.get_extra_newznabs():
-            if newznab_host[2] == '1' or newznab_host[2] == 1:
+            if newznab_host[2]:
                 newznab_hosts.append(newznab_host)
 
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
@@ -1201,7 +1201,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                                   headphones.CONFIG.TORZNAB_ENABLED))
 
         for torznab_host in headphones.CONFIG.get_extra_torznabs():
-            if torznab_host[2] == '1' or torznab_host[2] == 1:
+            if torznab_host[2]:
                 torznab_hosts.append(torznab_host)
 
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:

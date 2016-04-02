@@ -8,7 +8,7 @@ import headphones
 from headphones import logger
 from headphones.exceptions import ConfigError
 
-from headphones.config.typeconv import path, boolext, intnullable, floatnullable
+from headphones.config.typeconv import path, boolext, intnullable, floatnullable, extracredentials
 from _datamodel import OptionModel
 
 """ ViewModel-classes of configuration
@@ -752,14 +752,14 @@ class OptionDropdownSelector(OptionDropdown):
 class OptionExtra(OptionBase, CssClassable):
 
     def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, cssclasses=None,
-        labelhost=None,
-        labelapikey=None,
-        labelenabled=None,
+                 labelhost=None,
+                 labelapikey=None,
+                 labelenabled=None,
 
-        captionadd=None,
-        captionremove=None,
-    ):
-        super(OptionExtra, self).__init__(appkey, section, default, initype=list, options=options)
+                 captionadd=None,
+                 captionremove=None,
+                 ):
+        super(OptionExtra, self).__init__(appkey, section, default, initype=extracredentials, options=options)
 
         self.label = label
         self.caption = caption
@@ -777,51 +777,69 @@ class OptionExtra(OptionBase, CssClassable):
         self.captionAddButton = captionadd
         self.captionDelButton = captionremove
 
-        uinm = self.uiName();
+        uinm = self.uiName()
         self._uinames = [uinm,
-            uinm + '_host[]',
-            uinm + '_apikey[]',
-            uinm + '_enabled[]',
-        ]
+                         uinm + '_host[]',
+                         uinm + '_apikey[]',
+                         uinm + '_enabled[]',
+                         ]
 
     def uiValue(self):
         # override
 
         v = super(OptionExtra, self).uiValue()
 
+        # going to convert:
+        # v = [ host1, apikey1, enabled1, host2, apikey2, enabed2, ..... ]
+        # =>
+        # d = [
+        #          {"host": str(host1), "apikey": str(apikey1), "enabled": boolext(enabled1)},
+        #          {"host": str(host2), "apikey": str(apikey2), "enabled": boolext(enabled2)}
+        #     ]
+        #
         i = 0
         d = []
         if v:
             ll = len(v)
-            while i+2<ll:
+            while i + 2 < ll:
                 h = str(v[i])
-                a = str(v[i+1])
-                e = boolext(v[i+2])
+                a = str(v[i + 1])
+                e = boolext(v[i + 2])
 
-                d.append({"host":h, "apikey":a, "enabled": e})
+                d.append({"host": h, "apikey": a, "enabled": e})
                 i += 3
 
-        # d:
-        # [{"host": "http://snab.ru", "apikey": "yyyy", "enabled": true}, {"host": "http://ya.ru", "apikey": "xxx", "enabled": true}]
         return d
 
     def uiValue2DataValue(self, valuedict):
         # override
-        uinm = self.uiName();
+        uinm = self.uiName()
         keyhost = uinm + '_host[]'
         keyapi = uinm + '_apikey[]'
         keyenabled = uinm + '_enabled[]'
 
         res = []
-        ll = len(valuedict[keyhost])
-        for i in xrange(ll):
-            hst = str(valuedict[keyhost][i])
-            api = str(valuedict[keyapi][i])
-            enb = boolext(valuedict[keyenabled][i])
+
+        if isinstance(valuedict[keyhost], basestring):
+            # there is just one set of extra options, in this case, they are saved as plain data,
+            # not arrays.
+            hst = str(valuedict[keyhost])
+            api = str(valuedict[keyapi])
+            enb = boolext(valuedict[keyenabled])
 
             res.append(hst)
             res.append(api)
             res.append(enb)
+        else:
+            ll = len(valuedict[keyhost])
+            for i in xrange(ll):
+                hst = str(valuedict[keyhost][i])
+                api = str(valuedict[keyapi][i])
+                enb = boolext(valuedict[keyenabled][i])
+
+                res.append(hst)
+                res.append(api)
+                res.append(enb)
 
         return res
 

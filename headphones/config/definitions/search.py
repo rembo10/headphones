@@ -1,6 +1,6 @@
 from .._viewmodel import BlockExtension
 from .._viewmodel import OptionString, OptionSwitch, OptionUrl, OptionBool
-from .._viewmodel import OptionNumber, OptionFloat, OptionPassword, OptionExtra
+from .._viewmodel import OptionFloat, OptionPassword, OptionExtra
 from .._viewmodel import TemplaterExtension
 
 from ..loc import _

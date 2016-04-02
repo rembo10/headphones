@@ -1,4 +1,5 @@
 from headphones import logger
+from headphones.exceptions import ConfigError
 
 from _viewmodel import OptionBase
 
@@ -7,6 +8,7 @@ from _viewmodel import OptionBase
 This module is closely related with `_viewmodel`, and helps to parse submited data,
 from UI
 """
+
 
 class ViewParser(object):
     """
@@ -48,8 +50,8 @@ class ViewParser(object):
             if opt.readonly:
                 logger.info('This option [{0}][{1}] is readonly, but it was submited. Contact the'
                             ' maintainers of `config` package! SKIP'
-                                .format(opt.model.section, ak)
-                )
+                            .format(opt.model.section, ak)
+                            )
                 continue
 
             if ak not in aggregated:

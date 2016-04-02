@@ -52,3 +52,29 @@ class path(str):
 
     def __repr__(self):
         return 'headphones.config.types.path(%s)' % self
+
+
+class extracredentials(list):
+    """ (host, apikey, enabled)-triplets, flattened to list
+
+    Describes the extra data for torznabs and newznabs.
+    """
+
+    #@staticmethod
+    # def __call__(val):
+    #    return extracredentials(val)
+
+    def __init__(self, values=None):
+
+        list.__init__(self)
+        if values:
+            ll = len(values)
+            for i in xrange(ll):
+                if i % 3 == 2:
+                    self.append(boolext(values[i]))
+                else:
+                    self.append(values[i])
+
+    def __repr__(self):
+        x = super(extracredentials, self).__repr__()
+        return '<headphones.config.types.extracredentials>' + x

@@ -211,16 +211,16 @@ class ConfigApiTest(TestCase):
 
     @TestArgs(
         ('', []),
-        ('ABCDEF', [('A', 'B', 'C'), ('D', 'E', 'F')]),
+        ('ABCDEA', [('A', 'B', True), ('D', 'E', True)]),
         (['ABC', 'DEF'], []),
         ([1], []),
         ([1, 2], []),
-        ([1, 2, 3], [(1, 2, 3)]),
+        ([1, 2, 3], [(1, 2, True)]),
 
-        ([1, 2, 3, 'Aaa'], [(1, 2, 3)]),
-        ([1, 2, 3, 'Aaa', 'Bbba'], [(1, 2, 3)]),
-        ([1, 2, 3, 'Aaa', 'Bbba', 'Ccccc'], [(1, 2, 3), ('Aaa', 'Bbba', 'Ccccc')]),
-        ([1, 2, 3, 'Aaa', 'Bbba', 'Ccccc', 'Ddddda'], [(1, 2, 3), ('Aaa', 'Bbba', 'Ccccc')]),
+        ([1, 2, 3, 'Aaa'], [(1, 2, True)]),
+        ([1, 2, 3, 'Aaa', 'Bbba'], [(1, 2, True)]),
+        ([1, 2, 3, 'Aaa', 'Bbba', 'Ccccc'], [(1, 2, True), ('Aaa', 'Bbba', True)]),
+        ([1, 2, 3, 'Aaa', 'Bbba', 'Ccccc', 'Ddddda'], [(1, 2, True), ('Aaa', 'Bbba', True)]),
     )
     def test_get_extra_newznabs(self, conf_value, expected):
         """ Config: get_extra_newznabs """
@@ -244,16 +244,16 @@ class ConfigApiTest(TestCase):
     #
     @TestArgs(
         ('', []),
-        ('ABCDEF', [('A', 'B', 'C'), ('D', 'E', 'F')]),
+        ('ABCDEX', [('A', 'B', True), ('D', 'E', True)]),
         (['ABC', 'DEF'], []),
         ([1], []),
         ([1, 2], []),
-        ([1, 2, 3], [(1, 2, 3)]),
+        ([1, 2, 3], [(1, 2, True)]),
 
-        ([1, 2, 3, 'Aaa'], [(1, 2, 3)]),
-        ([1, 2, 3, 'Aaa', 'Bbba'], [(1, 2, 3)]),
-        ([1, 2, 3, 'Aaa', 'Bbba', 'Ccccc'], [(1, 2, 3), ('Aaa', 'Bbba', 'Ccccc')]),
-        ([1, 2, 3, 'Aaa', 'Bbba', 'Ccccc', 'Ddddda'], [(1, 2, 3), ('Aaa', 'Bbba', 'Ccccc')]),
+        ([1, 2, 3, 'Aaa'], [(1, 2, True)]),
+        ([1, 2, 3, 'Aaa', 'Bbba'], [(1, 2, True)]),
+        ([1, 2, 3, 'Aaa', 'Bbba', 'Ccccc'], [(1, 2, True), ('Aaa', 'Bbba', True)]),
+        ([1, 2, 3, 'Aaa', 'Bbba', 'Ccccc', 'Ddddda'], [(1, 2, True), ('Aaa', 'Bbba', True)]),
     )
     def test_get_extra_torznabs(self, conf_value, expected):
         """ Config: get_extra_torznabs """

@@ -3,6 +3,7 @@ from unittestcompat import TestCase, TestArgs
 from typeconv import path, boolext
 from typeconv import floatnullable
 from typeconv import intnullable
+from typeconv import extracredentials
 
 
 class PathTest(TestCase):
@@ -162,3 +163,47 @@ class intnullableTest(TestCase):
     def test_intnullable_raises(self, raw):
         with self.assertRaises(Exception):
             intnullable(raw)
+
+
+class extracredentialsTest(TestCase):
+
+    def test_extracredentials(self):
+        p = extracredentials()
+
+        self.assertIsNotNone(p)
+        self.assertIsInstance(p, extracredentials)
+
+    def test_extracredentials_is_list(self):
+        p = extracredentials(['host', 'api', True])
+        self.assertIsInstance(p, list)
+
+    def test_extracredentials_static(self):
+        p = extracredentials.__call__()
+        self.assertEqual(p, [])
+        self.assertIsInstance(p, extracredentials)
+
+    def test_path_repr(self):
+        p1 = extracredentials()
+        self.assertIn('headphones.config.types.extracredentials', p1.__repr__())
+
+    @TestArgs(
+        ([1, 2, 3], [1, 2, True]),
+        ([u'torznab22', u'kkeeeyy2222', u'True'], ['torznab22', 'kkeeeyy2222', True]),
+        (['http://nzb.ru', '411', 1], ['http://nzb.ru', '411', True]),
+        (['http://nzb.ru', '411', '1'], ['http://nzb.ru', '411', True]),
+
+        ([u'torznab22', u'kkeeeyy2222', u'False'], ['torznab22', 'kkeeeyy2222', False]),
+        (['http://nzb.ru', '411', 0], ['http://nzb.ru', '411', False]),
+        (['http://nzb.ru', '411', '0'], ['http://nzb.ru', '411', False]),
+
+        (['http://nzb.ru', '411', '0',
+            'http://nzb.ru', '411', '1',
+            u'thelast', u'33333333', u'True'],
+          ['http://nzb.ru', '411', False,
+              'http://nzb.ru', '411', True,
+              'thelast', '33333333', True]
+        ),
+    )
+    def test_extracredentials_innertypes(self, raw, exp):
+        p = extracredentials(raw)
+        self.assertEqual(p, exp)
