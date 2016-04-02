@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: headphones.config\n"
-"POT-Creation-Date: \n"
+"POT-Creation-Date: 2016-04-02 04:10+YEKT\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Koryukov Maksim <maxkoryukov@gmail.com>\n"
 "Language-Team: Koryukov Maksim <maxkoryukov@gmail.com>\n"
@@ -1137,20 +1137,32 @@ msgstr ""
 msgid "Don't have an account? Sign up!"
 msgstr "Нет аккаунта? Зарегистрируйтесь!"
 
-msgid "zzEXTRA_NEWZNABSzz"
+#, fuzzy
+msgid "Custom Newznab Providers"
+msgstr "Поисковики"
+
+msgid "Newznab Host"
 msgstr ""
 
-msgid "zzNEWZNABzz"
+msgid "e.g. http://nzb.su"
 msgstr ""
 
-msgid "zzNEWZNAB_APIKEYzz"
+#, fuzzy
+msgid "Newznab API"
+msgstr "Разрешить API"
+
+#, fuzzy
+msgid "Enabled"
+msgstr "Разрешить API"
+
+msgid "Extra Newznab"
 msgstr ""
 
-msgid "zzNEWZNAB_ENABLEDzz"
-msgstr ""
+msgid "Add"
+msgstr "Добавить"
 
-msgid "zzNEWZNAB_HOSTzz"
-msgstr ""
+msgid "Remove this item"
+msgstr "Удалить эту запись"
 
 msgid "NZBs.org"
 msgstr "NZBs.org"
@@ -1210,19 +1222,21 @@ msgstr "What.cd"
 msgid "Strike Search"
 msgstr "Strike Search"
 
-msgid "zzEXTRA_TORZNABSzz"
+msgid "Jackett / Torznab Providers"
 msgstr ""
 
-msgid "zzTORZNABzz"
+#, fuzzy
+msgid "Torznab Host"
+msgstr "Хост"
+
+msgid "e.g. http://localhost:9117/torznab/iptorrents"
 msgstr ""
 
-msgid "zzTORZNAB_APIKEYzz"
-msgstr ""
+#, fuzzy
+msgid "Torznab API"
+msgstr "Разрешить API"
 
-msgid "zzTORZNAB_ENABLEDzz"
-msgstr ""
-
-msgid "zzTORZNAB_HOSTzz"
+msgid "Extra Torznab"
 msgstr ""
 
 msgid "Old Pirate Bay"

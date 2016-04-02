@@ -238,6 +238,8 @@ class OptionBase(Renderable):
         self._options = options or []  # should not be None
         self._initype = initype
 
+        self._uinames = ['hp_ui_' + self.model.appkey.lower()]
+
         self.visible = True
         self.readonly = False
 
@@ -273,29 +275,39 @@ class OptionBase(Renderable):
             v = ''
         return v
 
-    def uiValue2DataValue(self, value):
+    def uiValue2DataValue(self, valuedict):
         """
         Parses the value of an options, received from UI.
         Returned value MUST BE compatible with datamodel's value
+
+        Args:
+
+            @valuedict
+                dict. Keys are from self.uiNamesList(), values - from submitted form (from UI).
+
         """
+        value = valuedict[self.uiName()]
         return self._initype(value)
 
     def uiName(self):
-        "This is an identifier of option, when data are sended/received to/from UI"
-        return 'hp_ui_' + self.model.appkey.lower()
+        """This is a main identifier of the option in the UI.
+
+        This identifier will be used:
+        1. for generating identifiers (and names) for UI-input-elements
+        2. for handling results, received from UI (on submit form)
+
+        Also, extended options, with more than one input box (like `OptionExtra`), uses this
+        method during generating names for child-options.
+        """
+        return self._uinames[0]
+
+    def uiNamesList(self):
+        """ MUST return list with all NAMEs, used in UI """
+        return self._uinames
 
 # ===============================================
 # API-usable options
 # ===============================================
-
-# class Option_SCAFFOLD_(OptionBase):
-
-#     def __init__(self, appkey, section, default=None, label="", caption = None, tooltip=None):
-#         super(Option_SCAFFOLD_, self).__init__(appkey, section, default)
-
-#         self.label = label
-#         self.caption = caption
-#         self.tooltip = tooltip
 
 
 class OptionInternal(OptionBase):
@@ -391,8 +403,9 @@ class OptionPath(OptionBase, CssClassable):
 
         return v
 
-    def uiValue2DataValue(self, value):
+    def uiValue2DataValue(self, valuedict):
         # override
+        value = valuedict[self.uiName()]
 
         v = self._initype(value)
 
@@ -476,8 +489,10 @@ class OptionBool(OptionBase, CssClassable):
         self.alignleft = alignleft
         self.cssclasses = cssclasses
 
-    def uiValue2DataValue(self, value):
+    def uiValue2DataValue(self, valuedict):
         # override
+        value = valuedict[self.uiName()]
+
         if value:
             value = str(value).strip()
 
@@ -553,8 +568,9 @@ class OptionCheckboxList(OptionBase):
             return True
         return False
 
-    def uiValue2DataValue(self, value):
+    def uiValue2DataValue(self, valuedict):
         # override
+        value = valuedict[self.uiName()]
 
         # logger.debug('VALUE accepted: ({1}) {0}'.format(value, type(value)))
         ret = None
@@ -595,12 +611,12 @@ class OptionCheckboxListExtrasCrutch(OptionCheckboxList):
             return True
         return False
 
-    def uiValue2DataValue(self, value):
+    def uiValue2DataValue(self, valuedict):
         # override
 
         # logger.debug('VALUE accepted: ({1}) {0}'.format(value, type(value)))
 
-        ret = super(OptionCheckboxListExtrasCrutch, self).uiValue2DataValue(value)
+        ret = super(OptionCheckboxListExtrasCrutch, self).uiValue2DataValue(valuedict)
 
         if ret:
             ret = ",".join(ret)
@@ -649,8 +665,9 @@ class OptionDropdown(OptionBase):
 
                 self.items.append(ii)
 
-    def uiValue2DataValue(self, value):
+    def uiValue2DataValue(self, valuedict):
         # override
+        value = valuedict[self.uiName()]
         return self._uitype(value)
 
 
@@ -732,25 +749,81 @@ class OptionDropdownSelector(OptionDropdown):
         return css == csssuffix
 
 
-class OptionList(OptionBase, CssClassable):
+class OptionExtra(OptionBase, CssClassable):
 
-    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, cssclasses=None):
-        super(OptionList, self).__init__(appkey, section, default, initype=list, options=None)
+    def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, cssclasses=None,
+        labelhost=None,
+        labelapikey=None,
+        labelenabled=None,
+
+        captionadd=None,
+        captionremove=None,
+    ):
+        super(OptionExtra, self).__init__(appkey, section, default, initype=list, options=options)
 
         self.label = label
         self.caption = caption
         self.tooltip = tooltip
-
-        self.maxlength = None
         self.cssclasses = cssclasses
 
-    @property
-    def templateName(self):
-        return "OptionString"
+        self.labelHost = labelhost
+        self.labelApiKey = labelapikey
+        self.labelEnabled = labelenabled
 
-    def uiValue2DataValue(self, value):
+        self.captionHost = None
+        self.captionApiKey = None
+        self.captionEnabled = None
+
+        self.captionAddButton = captionadd
+        self.captionDelButton = captionremove
+
+        uinm = self.uiName();
+        self._uinames = [uinm,
+            uinm + '_host[]',
+            uinm + '_apikey[]',
+            uinm + '_enabled[]',
+        ]
+
+    def uiValue(self):
         # override
-        return [value]
+
+        v = super(OptionExtra, self).uiValue()
+
+        i = 0
+        d = []
+        if v:
+            ll = len(v)
+            while i+2<ll:
+                h = str(v[i])
+                a = str(v[i+1])
+                e = boolext(v[i+2])
+
+                d.append({"host":h, "apikey":a, "enabled": e})
+                i += 3
+
+        # d:
+        # [{"host": "http://snab.ru", "apikey": "yyyy", "enabled": true}, {"host": "http://ya.ru", "apikey": "xxx", "enabled": true}]
+        return d
+
+    def uiValue2DataValue(self, valuedict):
+        # override
+        uinm = self.uiName();
+        keyhost = uinm + '_host[]'
+        keyapi = uinm + '_apikey[]'
+        keyenabled = uinm + '_enabled[]'
+
+        res = []
+        ll = len(valuedict[keyhost])
+        for i in xrange(ll):
+            hst = str(valuedict[keyhost][i])
+            api = str(valuedict[keyapi][i])
+            enb = boolext(valuedict[keyenabled][i])
+
+            res.append(hst)
+            res.append(api)
+            res.append(enb)
+
+        return res
 
 # ===============================================
 # PLACEHOLDERS and STATIC templates
@@ -827,58 +900,3 @@ class TemplaterExtension(Renderable):
             self.__class__.__name__,
             self._template_name
         )
-
-# ===============================================
-# ===============================================
-# ViewModel Parser
-# ===============================================
-# ===============================================
-
-
-class PostDataParser(object):
-    """ Knows how to parse options, POSTed from UI """
-
-    def __init__(self):
-        self._vault = {}
-
-    def register(self, option):
-        if not isinstance(option, OptionBase):
-            raise TypeError('Could not register this option, because it '
-                            'should be child of {0}.{1}'.format(OptionBase.__module__, OptionBase.__name__))
-
-        k = option.uiName()
-        if k in self._vault:
-            raise ConfigError('Duplicate ui-key [{0}] for option [{1}]'.format(k, option.appkey))
-
-        self._vault[k] = option
-
-    def accept(self, values_as_dict):
-        if not isinstance(values_as_dict, dict):
-            raise TypeError('dict expected')
-
-        d = values_as_dict
-
-        diffcount = 0
-
-        for (k, v) in d.items():
-            if k not in self._vault:
-                logger.debug('This form-key [{0}] is unknown for config, skip'.format(k))
-                continue
-
-            opt = self._vault[k]
-
-            if opt.readonly:
-                logger.info('This option [{0}][{1}] is readonly, but it was confirmed! SKIP'.format(opt.model.section, opt.model.appkey))
-                continue
-
-            # new value
-            nv = opt.uiValue2DataValue(v)
-            # old value
-            ov = opt.model.get()
-
-            if ov != nv:
-                opt.model.set(nv)
-                logger.info('The value of [{0}][{1}] changed [{2}] => [{3}]'.format(opt.model.section, opt.model.appkey, ov, nv))
-                diffcount += 1
-
-        return diffcount

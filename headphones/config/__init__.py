@@ -7,7 +7,7 @@ from loc import _
 
 from _viewmodel import Tab, Tabs, OptionBase
 
-from _viewmodel import PostDataParser
+from _viewparser import ViewParser
 
 from headphones.config.definitions.internal import reg as reg_internal
 from headphones.config.definitions.webui import reg as reg_webui
@@ -44,7 +44,7 @@ class Config(object):
         self._section_name_spell_check_dic = {}
 
         self._options = {}
-        self._uiresolver = PostDataParser()
+        self._uiparser = ViewParser()
 
         # -------------------------------------------------------------
         # register options from definition's files:
@@ -117,7 +117,7 @@ class Config(object):
 
         Each option will be registered:
             1. in `self._options` - it is a map {OPTKEY -> datamodel},
-            2. and in the `self._uiresolver`, which stores mapping {UINAME -> viewmodel}.
+            2. and in the `self._uiparser`, which stores mapping {UINAME -> viewmodel}.
         """
 
         for o in options:
@@ -134,7 +134,7 @@ class Config(object):
                 self._options[o.appkey] = o.model
 
                 # register UI
-                self._uiresolver.register(o)
+                self._uiparser.register(o)
 
                 # set meta options:
                 self._meta_config.apply(o)
@@ -146,7 +146,7 @@ class Config(object):
 
     def accept(self, uidata):
         """ Not the best name for the method, which accepts data from UI, and apply them to running config """
-        self._uiresolver.accept(uidata)
+        self._uiparser.accept(uidata)
 
     def write(self):
         """ Make a copy of the stored config and write it to the configured file """

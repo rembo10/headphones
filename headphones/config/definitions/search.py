@@ -1,6 +1,6 @@
 from .._viewmodel import BlockExtension
-from .._viewmodel import OptionString, OptionSwitch, OptionUrl, OptionList
-from .._viewmodel import OptionNumber, OptionFloat, OptionPassword
+from .._viewmodel import OptionString, OptionSwitch, OptionUrl, OptionBool
+from .._viewmodel import OptionNumber, OptionFloat, OptionPassword, OptionExtra
 from .._viewmodel import TemplaterExtension
 
 from ..loc import _
@@ -45,39 +45,39 @@ def reg(extend_cb):
     )
 
     # =======================================================================================
-    # TODO : #13 newznab
-    extend_cb(
-        OptionList('EXTRA_NEWZNABS', 'Newznab', '',
-            label=_('zzEXTRA_NEWZNABSzz'),
-            caption=_(''),
-            tooltip=_(''),
-        ),
-        OptionNumber('NEWZNAB', 'Newznab', 0,
-            label=_('zzNEWZNABzz'),
-            caption=_(''),
-            tooltip=_(''),
-            minvalue=None,
-            maxvalue=None
-        ),
-        OptionString('NEWZNAB_APIKEY', 'Newznab', '',
-            label=_('zzNEWZNAB_APIKEYzz'),
-            caption=_(''),
-            tooltip=_(''),
-            maxlength=None
-        ),
-        OptionNumber('NEWZNAB_ENABLED', 'Newznab', 1,
-            label=_('zzNEWZNAB_ENABLEDzz'),
-            caption=_(''),
-            tooltip=_(''),
-            minvalue=None,
-            maxvalue=None
-        ),
-        OptionString('NEWZNAB_HOST', 'Newznab', '',
-            label=_('zzNEWZNAB_HOSTzz'),
-            caption=_(''),
-            tooltip=_(''),
-            maxlength=None
-        ),
+    # DONE : #13 newznab
+    opts.append(
+        BlockExtension('search_newznab', caption=None, options=extend_cb(
+            OptionSwitch('NEWZNAB', 'Newznab', False,
+                label=_('Custom Newznab Providers'),
+                cssclasses=['heading'],
+                alignleft=True,
+                options=extend_cb(
+                    OptionUrl('NEWZNAB_HOST', 'Newznab', '',
+                        label=_('Newznab Host'),
+                        caption=_('e.g. http://nzb.su'),
+                    ),
+                    OptionString('NEWZNAB_APIKEY', 'Newznab', '',
+                        label=_('Newznab API'),
+                        maxlength=None
+                    ),
+                    OptionBool('NEWZNAB_ENABLED', 'Newznab', True,
+                        label=_('Enabled'),
+                    ),
+
+
+                    OptionExtra('EXTRA_NEWZNABS', 'Newznab', [],
+                        label=_('Extra Newznab'),
+                        labelhost=_('Newznab Host'),
+                        labelapikey=_('Newznab API'),
+                        labelenabled=_('Enabled'),
+
+                        captionadd=_('Add'),
+                        captionremove=_('Remove this item'),
+                    ),
+                )
+            ),
+        ))
     )
     # =======================================================================================
     opts.append(
@@ -273,40 +273,41 @@ def reg(extend_cb):
     )
 
     # =======================================================================================
-    # TODO : #13 torznabs
-    extend_cb(
-        OptionList('EXTRA_TORZNABS', 'Torznab', [],
-            label=_('zzEXTRA_TORZNABSzz'),
-            caption=_(''),
-            tooltip=_(''),
-        ),
-        OptionNumber('TORZNAB', 'Torznab', 0,
-            label=_('zzTORZNABzz'),
-            caption=_(''),
-            tooltip=_(''),
-            minvalue=None,
-            maxvalue=None
-        ),
-        OptionString('TORZNAB_APIKEY', 'Torznab', '',
-            label=_('zzTORZNAB_APIKEYzz'),
-            caption=_(''),
-            tooltip=_(''),
-            maxlength=None
-        ),
-        OptionNumber('TORZNAB_ENABLED', 'Torznab', 1,
-            label=_('zzTORZNAB_ENABLEDzz'),
-            caption=_(''),
-            tooltip=_(''),
-            minvalue=None,
-            maxvalue=None
-        ),
-        OptionString('TORZNAB_HOST', 'Torznab', '',
-            label=_('zzTORZNAB_HOSTzz'),
-            caption=_(''),
-            tooltip=_(''),
-            maxlength=None
-        ),
+    # DONE : #13 torznabs
+    opts.append(
+        BlockExtension('search_torznab', caption=None, options=extend_cb(
+            OptionSwitch('TORZNAB', 'Torznab', False,
+                label=_('Jackett / Torznab Providers'),
+                cssclasses=['heading'],
+                alignleft=True,
+                options=extend_cb(
+                    OptionUrl('TORZNAB_HOST', 'Torznab', '',
+                        label=_('Torznab Host'),
+                        caption=_('e.g. http://localhost:9117/torznab/iptorrents'),
+                    ),
+                    OptionString('TORZNAB_APIKEY', 'Torznab', '',
+                        label=_('Torznab API'),
+                        maxlength=None
+                    ),
+                    OptionBool('TORZNAB_ENABLED', 'Torznab', True,
+                        label=_('Enabled'),
+                    ),
+
+
+                    OptionExtra('EXTRA_TORZNABS', 'Torznab', [],
+                        label=_('Extra Torznab'),
+                        labelhost=_('Torznab Host'),
+                        labelapikey=_('Torznab API'),
+                        labelenabled=_('Enabled'),
+
+                        captionadd=_('Add'),
+                        captionremove=_('Remove this item'),
+                    ),
+                )
+            ),
+        ))
     )
+
     # =======================================================================================
     opts.append(
         BlockExtension('search_oldpiratebay', caption=None, options=extend_cb(

@@ -218,7 +218,6 @@
 
     uiname = me.uiName()
     checkbox_id = uiname
-    hidden_id = uiname + '_hidden_storage'
     embed_id = uiname + '_embed'
     val = me.uiValue()
 
@@ -243,8 +242,10 @@
         <div class="input-wrapper">
         % endif
 
-            <input type="checkbox" class="checkbox-with-hidden" data-hidden-sel="#${hidden_id}" id="${checkbox_id}" ${checked_attr} ${'readonly disabled' if me.readonly else ''} />
-            <input type="hidden" id="${hidden_id}" name="${uiname}" value="${hidden_value}" ${'readonly disabled' if me.readonly else ''} />
+            ## IMPORTANT for web ui:
+            ## HIDDEN MUST be next sibling of CHECKBOX, jquery uses .next() to find it
+            <input type="checkbox" class="-hp-checkbox-with-hidden" id="${checkbox_id}" ${checked_attr} ${'readonly disabled' if me.readonly else ''} />
+            <input type="hidden" name="${uiname}" value="${hidden_value}" ${'readonly disabled' if me.readonly else ''} />
 
         % if not me.alignleft:
             %if me.caption is not None:
@@ -286,7 +287,6 @@
 
     uiname = me.uiName()
     checkbox_id = uiname
-    hidden_id = uiname + '_hidden_storage'
     embed_id = uiname + '_embed'
     val = me.uiValue()
 
@@ -312,8 +312,10 @@
         <div class="input-wrapper">
         % endif
 
-            <input class="hp-option-switch checkbox-with-hidden" type="checkbox" id="${checkbox_id}" data-hidden-sel="#${hidden_id}" data-embed-div="#${embed_id}" ${checked_attr} ${'readonly disabled' if me.readonly else ''} />
-            <input type="hidden" id="${hidden_id}" name="${uiname}" value="${hidden_value}" ${'readonly disabled' if me.readonly else ''} />
+            ## IMPORTANT for web ui:
+            ## HIDDEN MUST be next sibling of CHECKBOX, jquery uses .next() to find it
+            <input class="hp-option-switch -hp-checkbox-with-hidden" type="checkbox" id="${checkbox_id}" data-embed-div="#${embed_id}" ${checked_attr} ${'readonly disabled' if me.readonly else ''} />
+            <input type="hidden" name="${uiname}" value="${hidden_value}" ${'readonly disabled' if me.readonly else ''} />
 
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -479,6 +481,101 @@
             </div>
         % endif
     % endfor
+</%def>
+
+
+<%def name="OptionExtra(me, parent=None)">
+<%
+    uiname = me.uiName()
+    val = me.uiValue()
+    uniqclass = '-hp-' + uiname + '-class'
+
+    tooltip_attr = '' if me.tooltip is None else ' title="%s"' % me.tooltip
+%>
+   <%def name="OptionExtraInternalTemplate(istemplate=True, val_host='', val_apikey='', val_enabled=True)">
+        <div class="-hp-option-extra-one-root">
+            <div class="option ${me.uiCssClasses()}" ${tooltip_attr}>
+                %if me.labelHost is not None:
+                    <label class="label" for="${uiname}-not-defined-host-but-you-could-fix-it">
+                        ${me.labelHost}
+                    </label>
+                %endif
+
+                <div class="input-wrapper">
+                    <input type="url" class="-hp-option-extra-disablablablablable" name="${uiname}_host[]" value="${val_host}" ${'readonly disabled' if istemplate else ''} />
+
+                    %if me.captionHost is not None:
+                        <div class="small caption">${me.captionHost}</div>
+                    %endif
+                </div>
+            </div>
+            <div class="option ${me.uiCssClasses()}" ${tooltip_attr}>
+                %if me.labelApiKey is not None:
+                    <label class="label" for="${uiname}-not-defined-apikey-but-you-could-fix-it">
+                        ${me.labelApiKey}
+                    </label>
+                %endif
+
+                <div class="input-wrapper">
+                    <input type="text" class="-hp-option-extra-disablablablablable" name="${uiname}_apikey[]" value="${val_apikey}" ${'readonly disabled' if istemplate else ''} />
+
+                    %if me.captionApiKey is not None:
+                        <div class="small caption">${me.captionApiKey}</div>
+                    %endif
+                </div>
+            </div>
+            <div class="option ${me.uiCssClasses()}" ${tooltip_attr}>
+                %if me.labelEnabled is not None:
+                    <label class="label" for="${uiname}-not-defined-enabled-but-you-could-fix-it">
+                        ${me.labelEnabled}
+                    </label>
+                %endif
+
+                <div class="input-wrapper">
+                    ## IMPORTANT for web ui:
+                    ## HIDDEN MUST be next sibling of CHECKBOX, jquery uses .next() to find it
+                    <input type="checkbox" class="-hp-option-extra-disablablablablable -hp-checkbox-with-hidden" ${'checked' if val_enabled else ''} ${'readonly disabled' if istemplate else ''} />
+                    <input type="hidden" class="-hp-option-extra-disablablablablable" name="${uiname}_enabled[]" value="${'1' if val_enabled else '0'}" ${'readonly disabled' if istemplate else ''} />
+
+                    %if me.captionEnabled is not None:
+                        <div class="small caption">${me.captionEnabled}</div>
+                    %endif
+                </div>
+            </div>
+
+            % if not me.readonly:
+                <div class="extension ${uniqclass}">
+                    <button type="button" class="-hp-option-extra-remove ${uniqclass}">${me.captionDelButton}</button>
+                </div>
+            %endif
+        </div>
+    </%def>
+
+    <section class="hidden-template ${uniqclass}" data-readonly="${'1' if me.readonly else ''}" style="display:none">
+        ${OptionExtraInternalTemplate(True, '', '', True)}
+    </section>
+
+    <section class="extra-root ${uniqclass}">
+        ## val = [{"host": "http://snab.ru", "apikey": "yyyy", "enabled": true}, {"host": "http://ya.ru", "apikey": "xxx", "enabled": true}]
+
+        % for i in val:
+            ${OptionExtraInternalTemplate(me.readonly, i['host'], i['apikey'], i['enabled'])}
+        % endfor
+    </section>
+
+    % if not me.readonly:
+        <div class="extension ${uniqclass}">
+            <button type="button" class="-hp-option-extra-add ${uniqclass}" data-uniq-class=".${uniqclass}">${me.captionAddButton}</button>
+        </div>
+    %endif
+
+    % if 0 < len(me):
+        <div class="embed-option-block">
+            % for option in me:
+                ${option.render(parent=me)}
+            % endfor    # for option in block
+        </div>
+    % endif
 </%def>
 
 ## ===============================================

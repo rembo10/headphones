@@ -92,18 +92,15 @@
             });
 
             // ## ============================================
-            // ## This is part of 'OptionBool' and 'OptionSwitch' Templates
+            // ## This is part of 'OptionBool', 'OptionSwitch', 'OptionExtra' Templates
             // REQUIRED ONCE
-            $('.config').on('click', '.checkbox-with-hidden', function(){
+            $('.config').on('click', '.-hp-checkbox-with-hidden', function(){
                 var $el = $(this);
-                var hisel = $el.data('hidden-sel');
-                if (hisel){
-                    var $h = $(hisel);
-                    if ($el.is(":checked")){
-                        $h.val('1');
-                    } else {
-                        $h.val('0');
-                    }
+                var $h = $el.next('input[type=hidden]');
+                if ($el.is(":checked")){
+                    $h.val('1');
+                } else {
+                    $h.val('0');
                 }
             });
 
@@ -212,64 +209,41 @@
                 });
             });
 
+            // ## ============================================
+            // ## This is part of 'OptionExtra' Template
+            // REQUIRED only for one tpl-extension
+            $('.config').on('click', 'button.-hp-option-extra-add', function(){
+                var $this = $(this);
+
+                var clssel = $this.data('uniq-class');
+                if (clssel){
+                    var $top = $('.extra-root' + clssel);
+                    var $tpl = $('.hidden-template' + clssel);
+
+                    var ro = !! $tpl.data('readonly');
+                    $top.append($tpl.html());
+                    if (!ro){
+                        $top.find('.-hp-option-extra-disablablablablable').prop('disabled', false).prop('readonly', false);
+                    }
+                };
+            });
+
+            $('.config').on('click', 'button.-hp-option-extra-remove', function(){
+                var $this = $(this);
+                $this.parents('.-hp-option-extra-one-root').remove();
+            });
             // ## ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
         });
-    </script>
 
 
-
-    <script>
         function initThisPage(opts)
         {
-            var deletedNewznabs = 0;
-
-            $(".remove").click(function() {
-                $(this).parent().parent().remove();
-                deletedNewznabs = deletedNewznabs + 1;
-            });
-
-            var deletedTorznabs = 0;
-
-            $(".remove_torznab").click(function() {
-                $(this).parent().parent().remove();
-                deletedTorznabs = deletedTorznabs + 1;
-            });
-
-            $("#add_newznab").click(function() {
-                var intId = $("#newznab_providers > div").size() + deletedNewznabs + 1;
-                var formfields = $("<div class=\"config\" id=\"newznab" + intId + "\"><div class=\"row\"><label>Newznab Host</label><input type=\"text\" name=\"newznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Newznab API</label><input type=\"text\" name=\"newznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"newznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
-                var removeButton = $("<div class=\"row\"><input type=\"button\" class=\"remove\" value=\"Remove\" /></div>");
-                removeButton.click(function() {
-                    $(this).parent().remove();
-                    deletedNewznabs = deletedNewznabs + 1;
-
-                });
-                formfields.append(removeButton);
-                formfields.append("</div>");
-                $("#add_newznab").before(formfields);
-            });
-
-            $("#add_torznab").click(function() {
-                var intId = $("#torznab_providers > div").size() + deletedTorznabs + 1;
-                var formfields = $("<div class=\"config\" id=\"torznab" + intId + "\"><div class=\"row\"><label>Torznab Host</label><input type=\"text\" name=\"torznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Torznab API</label><input type=\"text\" name=\"torznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"torznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
-                var removeTorznabButton = $("<div class=\"row\"><input type=\"button\" class=\"remove_torznab\" value=\"Remove\" /></div>");
-                removeTorznabButton.click(function() {
-                    $(this).parent().remove();
-                    deletedTorznabs = deletedTorznabs + 1;
-
-                });
-                formfields.append(removeTorznabButton);
-                formfields.append("</div>");
-                $("#add_torznab").before(formfields);
-            });
-
             $(function() {
                 var tab_options = (opts && opts.tabs) || {};
                 $( ".tabs" ).tabs(tab_options);
             });
             initActions();
-
         }
 
         $(document).ready(function() {

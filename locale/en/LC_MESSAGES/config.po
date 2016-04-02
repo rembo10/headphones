@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: headphones\n"
-"POT-Creation-Date: \n"
+"POT-Creation-Date: 2016-04-02 04:10+YEKT\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Koryukov Maksim <maxkoryukov@gmail.com>\n"
 "Language-Team: headphones\n"
@@ -1117,19 +1117,28 @@ msgstr ""
 msgid "Don't have an account? Sign up!"
 msgstr ""
 
-msgid "zzEXTRA_NEWZNABSzz"
+msgid "Custom Newznab Providers"
 msgstr ""
 
-msgid "zzNEWZNABzz"
+msgid "Newznab Host"
 msgstr ""
 
-msgid "zzNEWZNAB_APIKEYzz"
+msgid "e.g. http://nzb.su"
 msgstr ""
 
-msgid "zzNEWZNAB_ENABLEDzz"
+msgid "Newznab API"
 msgstr ""
 
-msgid "zzNEWZNAB_HOSTzz"
+msgid "Enabled"
+msgstr ""
+
+msgid "Extra Newznab"
+msgstr ""
+
+msgid "Add"
+msgstr ""
+
+msgid "Remove this item"
 msgstr ""
 
 msgid "NZBs.org"
@@ -1190,19 +1199,19 @@ msgstr ""
 msgid "Strike Search"
 msgstr ""
 
-msgid "zzEXTRA_TORZNABSzz"
+msgid "Jackett / Torznab Providers"
 msgstr ""
 
-msgid "zzTORZNABzz"
+msgid "Torznab Host"
 msgstr ""
 
-msgid "zzTORZNAB_APIKEYzz"
+msgid "e.g. http://localhost:9117/torznab/iptorrents"
 msgstr ""
 
-msgid "zzTORZNAB_ENABLEDzz"
+msgid "Torznab API"
 msgstr ""
 
-msgid "zzTORZNAB_HOSTzz"
+msgid "Extra Torznab"
 msgstr ""
 
 msgid "Old Pirate Bay"

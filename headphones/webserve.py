@@ -1141,12 +1141,14 @@ class WebInterface(object):
     @cherrypy.expose
     def configMetaUi(self):
         # TODO : load config
+        #      : it is handler for configuring meta-ui through UI
         config = None
         return serve_template(templatename="config-meta-ui.html", title="Meta UI Settings", config=config)
 
     @cherrypy.expose
     def configMetaUiUpdate(self, **kwargs):
         # TODO : save config
+        #      : it is handler for saving meta-ui received from UI
         print('configMetaUiUpdate', kwargs)
         raise cherrypy.HTTPRedirect("configMetaUi")
 
@@ -1159,7 +1161,11 @@ class WebInterface(object):
 
     @cherrypy.expose
     def configUpdate(self, **kwargs):
-        headphones.CONFIG.accept(kwargs)
+        try:
+            headphones.CONFIG.accept(kwargs)
+        except Exception as exc:
+            logger.error("{0}: {1}".format(type(exc), exc))
+            raise
 
         # TODO : implement VALIDATION in options!!
         # Sanity checking
@@ -1168,7 +1174,11 @@ class WebInterface(object):
             headphones.CONFIG.SEARCH_INTERVAL = 360
 
         # write config to the file
-        headphones.CONFIG.write()
+        try:
+            headphones.CONFIG.write()
+        except Exception as exc:
+            logger.error("{0}: {1}".format(type(exc), exc))
+            raise
 
         # Reconfigure scheduler
         headphones.initialize_scheduler()
