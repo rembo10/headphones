@@ -83,7 +83,8 @@ class TestCase(TC):
             return self
 
         def __exit__(self, tp, value, traceback):
-            tst = tp is self.exc
+            tst = isinstance(tp, type(self.exc))
+
             if not tst:
                 # python 2.6 does not handle it correctly, lets write something here:
                 print 'expected {0} but got {1}'.format(self.exc, tp)
