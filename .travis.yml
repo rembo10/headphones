@@ -6,8 +6,9 @@ sudo: false
 
 cache:
   pip: true
-  directories:
-  - lib
+# seems, like 'drop cache' does not work today on travis-ci
+#  directories:
+#  - lib
 
 # Available Python versions:
 # http://about.travis-ci.org/docs/user/ci-environment/#Python-VM-images
