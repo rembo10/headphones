@@ -108,8 +108,8 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
                 [release_dict['artist_id'], release_dict['artist_name']])
 
             if not artist:
-                logger.warn("Continuing would add new artist '%s' (ID %s), " \
-                            "but database is frozen. Will skip postprocessing for " \
+                logger.warn("Continuing would add new artist '%s' (ID %s), "
+                            "but database is frozen. Will skip postprocessing for "
                             "album with rgid: %s", release_dict['artist_name'],
                             release_dict['artist_id'], albumid)
 
@@ -348,7 +348,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                 # this test is just to keep pyflakes from complaining about an unused variable
                 return
         except (FileTypeError, UnreadableFileError):
-            logger.error("Track file is not a valid media file: %s. Not " \
+            logger.error("Track file is not a valid media file: %s. Not "
                          "continuing.", downloaded_track.decode(
                 headphones.SYS_ENCODING, "replace"))
             return
@@ -371,7 +371,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                     fp.seek(0)
             except IOError as e:
                 logger.debug("Write check exact error: %s", e)
-                logger.error("Track file is not writable. This is required " \
+                logger.error("Track file is not writable. This is required "
                              "for some post processing steps: %s. Not continuing.",
                              downloaded_track.decode(headphones.SYS_ENCODING, "replace"))
                 if new_folder:
@@ -1436,7 +1436,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
                     logger.info('No match found on MusicBrainz for: %s - %s', name, album)
 
         # Fail here
-        logger.info("Couldn't parse '%s' into any valid format. If adding " \
-                    "albums from another source, they must be in an 'Artist - Album " \
+        logger.info("Couldn't parse '%s' into any valid format. If adding "
+                    "albums from another source, they must be in an 'Artist - Album "
                     "[Year]' format, or end with the musicbrainz release group id.",
                     folder_basename)

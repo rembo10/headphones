@@ -119,10 +119,10 @@ def read_torrent_name(torrent_file, default_name=None):
             return torrent_info["info"]["name"]
         except KeyError:
             if default_name:
-                logger.warning("Couldn't get name from torrent file: %s. " \
+                logger.warning("Couldn't get name from torrent file: %s. "
                                "Defaulting to '%s'", e, default_name)
             else:
-                logger.warning("Couldn't get name from torrent file: %s. No " \
+                logger.warning("Couldn't get name from torrent file: %s. No "
                                "default given", e)
 
     # Return default
@@ -143,7 +143,7 @@ def calculate_torrent_hash(link, data=None):
         info = bdecode(data)["info"]
         torrent_hash = sha1(bencode(info)).hexdigest()
     else:
-        raise ValueError("Cannot calculate torrent hash without magnet link " \
+        raise ValueError("Cannot calculate torrent hash without magnet link "
                          "or data")
 
     return torrent_hash.upper()
@@ -842,16 +842,16 @@ def send_to_downloader(data, bestqual, album):
                             break
                     else:
                         # No service succeeded
-                        logger.warning("Unable to convert magnet with hash " \
+                        logger.warning("Unable to convert magnet with hash "
                                        "'%s' into a torrent file.", torrent_hash)
                         return
                 elif headphones.CONFIG.MAGNET_LINKS == 3:
                     torrent_to_file(download_path, data)
                     return
                 else:
-                    logger.error("Cannot save magnet link in blackhole. " \
-                                 "Please switch your torrent downloader to " \
-                                 "Transmission, uTorrent or Deluge, or allow Headphones " \
+                    logger.error("Cannot save magnet link in blackhole. "
+                                 "Please switch your torrent downloader to "
+                                 "Transmission, uTorrent or Deluge, or allow Headphones "
                                  "to open or convert magnet links")
                     return
             else:
