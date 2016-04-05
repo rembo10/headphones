@@ -538,8 +538,8 @@ def preserve_torrent_directory(albumpath):
         shutil.copytree(albumpath, new_folder)
         return new_folder
     except Exception as e:
-        logger.warn("Cannot copy/move files to temp folder: " + \
-                    new_folder.decode(headphones.SYS_ENCODING, 'replace') + \
+        logger.warn("Cannot copy/move files to temp folder: " +
+                    new_folder.decode(headphones.SYS_ENCODING, 'replace') +
                     ". Not continuing. Error: " + str(e))
         return None
 
@@ -684,7 +684,7 @@ def walk_directory(basedir, followlinks=True):
                 real_path = os.path.abspath(os.readlink(path))
 
                 if real_path in traversed:
-                    logger.debug("Skipping '%s' since it is a symlink to " \
+                    logger.debug("Skipping '%s' since it is a symlink to "
                                  "'%s', which is already visited.", path, real_path)
                 else:
                     traversed.append(real_path)
