@@ -30,7 +30,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from headphones import versioncheck, logger
 import headphones.config
 from headphones.softchroot import SoftChroot
-from headphones import exceptions
+import headphones.exceptions
 
 # (append new extras to the end)
 POSSIBLE_EXTRAS = [

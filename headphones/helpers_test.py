@@ -16,7 +16,7 @@ class HelpersTest(TestCase):
             u'Obsessió (Cerebral Apoplexy remix)': 'obsessio cerebral '
                                                     'apoplexy remix',
             u'Doktór Hałabała i siedmiu zbojów': 'doktor halabala i siedmiu '
-                                                 'zbojow',
+                                                    'zbojow',
             u'Arbetets Söner och Döttrar': 'arbetets soner och dottrar',
             u'Björk Guðmundsdóttir': 'bjork gudmundsdottir',
             u'L\'Arc~en~Ciel': 'larc en ciel',
