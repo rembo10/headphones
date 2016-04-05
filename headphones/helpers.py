@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #  This file is part of Headphones.
 #
 #  Headphones is free software: you can redistribute it and/or modify
@@ -219,12 +220,104 @@ def replace_illegal_chars(string, type="file"):
     return string
 
 
-def cleanName(string):
-    pass1 = latinToAscii(string).lower()
-    out_string = re.sub('[\.\-\/\!\@\#\$\%\^\&\*\(\)\+\-\"\'\,\;\:\[\]\{\}\<\>\=\_]', '',
-                        pass1).encode('utf-8')
+_CN_RE1 = re.compile(ur'[^\w]+', re.UNICODE)
+_CN_RE2 = re.compile(ur'[\s_]+', re.UNICODE)
 
-    return out_string
+
+_XLATE_GRAPHICAL_AND_DIACRITICAL = {
+    # Translation table.
+    # Covers the following letters, for which NFD fails because of lack of
+    # combining character:
+    # ©ª«®²³¹»¼½¾ÆÐØÞßæðøþĐđĦħıĲĳĸĿŀŁłŒœŦŧǄǅǆǇǈǉǊǋǌǤǥǱǲǳȤȥ. This
+    # includes also some graphical symbols which can be easily replaced and
+    # usually are written by people who don't have appropriate keyboard layout.
+    u'©': '(C)', u'ª': 'a.', u'«': '<<', u'®': '(R)', u'²': '2', u'³': '3',
+    u'¹': '1', u'»': '>>', u'¼': ' 1/4 ', u'½': ' 1/2 ', u'¾': ' 3/4 ',
+    u'Æ': 'AE', u'Ð': 'D', u'Ø': 'O', u'Þ': 'Th', u'ß': 'ss', u'æ': 'ae',
+    u'ð': 'd', u'ø': 'o', u'þ': 'th', u'Đ': 'D', u'đ': 'd', u'Ħ': 'H',
+    u'ħ': 'h', u'ı': 'i', u'Ĳ': 'IJ', u'ĳ': 'ij', u'ĸ': 'q', u'Ŀ': 'L',
+    u'ŀ': 'l', u'Ł': 'L', u'ł': 'l', u'Œ': 'OE', u'œ': 'oe', u'Ŧ': 'T',
+    u'ŧ': 't', u'Ǆ': 'DZ', u'ǅ': 'Dz', u'Ǉ': 'LJ', u'ǈ': 'Lj',
+    u'ǉ': 'lj', u'Ǌ': 'NJ', u'ǋ': 'Nj', u'ǌ': 'nj',
+    u'Ǥ': 'G', u'ǥ': 'g', u'Ǳ': 'DZ', u'ǲ': 'Dz', u'ǳ': 'dz',
+    u'Ȥ': 'Z', u'ȥ': 'z', u'№': 'No.',
+    u'º': 'o.',        # normalize Nº abbrev (popular w/ classical music),
+                       # this is 'masculine ordering indicator', not degree
+}
+
+_XLATE_SPECIAL = {
+    # Translation table.
+    # Cover additional special characters processing normalization.
+    u"'": '',         # replace apostrophe with nothing
+    u'&': ' and ',     # expand & to ' and '
+}
+
+
+def _translate(s, dictionary):
+    # type: (basestring,Mapping[basestring,basestring])->basestring
+    return ''.join(dictionary.get(x, x) for x in s)
+
+
+_COMBINING_RANGES = (
+    (0x0300, 0x036f),   # Combining Diacritical Marks
+    (0x1ab0, 0x1aff),   # Combining Diacritical Marks Extended
+    (0x20d0, 0x20ff),   # Combining Diacritical Marks for Symbols
+    (0x1dc0, 0x1dff)    # Combining Diacritical Marks Supplement
+)
+
+
+def _is_unicode_combining(u):
+    # type: (unicode)->bool
+    """
+    Check if input unicode is combining diacritical mark.
+    """
+    i = ord(u)
+    for r in _COMBINING_RANGES:
+        if r[0] <= i <= r[1]:
+            return True
+    return False
+
+
+def _transliterate(u, xlate):
+    # type: (unicode)->unicode
+    """
+    Perform transliteration using the specified dictionary
+    """
+    u = unicodedata.normalize('NFD', u)
+    u = u''.join([u'' if _is_unicode_combining(x) else x for x in u])
+    u = _translate(u, xlate)
+    # at this point output is either unicode, or plain ascii
+    return unicode(u)
+
+
+def clean_name(s):
+    # type: (basestring)->unicode
+    """Remove non-alphanumeric characters from the string, perform
+    normalization and substitution of some special characters; coalesce spaces.
+    :param s: string to clean up, possibly unicode one.
+    :return: cleaned-up version of input string.
+    """
+    if not isinstance(s, unicode):
+        # ignore extended chars if someone was dumb enough to pass non-ascii
+        # narrow string here, use only unicode for meaningful texts
+        u = unicode(s, 'ascii', 'replace')
+    else:
+        u = s
+    # 1. don't bother doing normalization NFKC, rather transliterate
+    # using special translation table
+    u = _transliterate(u, _XLATE_GRAPHICAL_AND_DIACRITICAL)
+    # 2. normalize NFKC the result
+    u = unicodedata.normalize('NFKC', u)
+    # 3. translate spacials
+    u = _translate(u, _XLATE_SPECIAL)
+    # 4. replace any non-alphanumeric character sequences by spaces
+    u = _CN_RE1.sub(u' ', u)
+    # 5. coalesce interleaved space/underscore sequences
+    u = _CN_RE2.sub(u' ', u)
+    # 6. trim
+    u = u.strip()
+    # 7. lowercase
+    return u
 
 
 def cleanTitle(title):
