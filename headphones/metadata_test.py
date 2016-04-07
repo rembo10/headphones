@@ -16,7 +16,9 @@
 """
 Test module for metadata.
 """
+import headphones as _h
 import headphones.metadata as _md
+import headphones.helpers as _hp
 from headphones.metadata import MetadataDict
 import datetime
 
@@ -146,3 +148,28 @@ class MetadataTest(TestCase):
             '$Variation': '5'
         }
         self.assertItemsEqual(expected, md, "check _row_to_dict() valid")
+
+    def test_album_metadata_with_None(self):
+        """metadata: check handling of None metadata values"""
+        row = _MockDatabaseRow({
+            'ArtistName': 'artist',
+            'AlbumTitle': 'Album',
+            'Type': None,
+            'ReleaseDate': None,
+        })
+        mb = _md.AlbumMetadataBuilder()
+        f1 = _MockMediaFile('artist', None, None, None, None, None)
+        mb.add_media_file(f1)
+        f2 = _MockMediaFile('artist', None, None, 2, 'track2', None)
+        mb.add_media_file(f2)
+        md = _md.album_metadata("/music/Artist - Album [2002]", row, mb.build())
+
+        # tests don't undergo normal Headphones init, SYS_ENCODING is not set
+        if not _h.SYS_ENCODING:
+            _h.SYS_ENCODING = 'UTF-8'
+
+        res = _hp.replace_all(
+            "/music/$First/$Artist/$Artist - $Album{ [$Year]}", md, True)
+
+        self.assertEqual(res, u"/music/A/artist/artist - Album",
+                         "check correct rendering of None via replace_all()")

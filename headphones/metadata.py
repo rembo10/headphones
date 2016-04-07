@@ -114,6 +114,7 @@ def _as_str(val):
 
 
 def _media_file_to_dict(mf, d):
+    # type: (MediaFile, MutableMapping[basestring,basestring])->None
     """
     Populate dict with tags read from media file.
     """
@@ -156,6 +157,18 @@ def _date_year(release):
     else:
         year = ''
     return date, year
+
+
+def _lower(s):
+    # type: basestring->basestring
+    """
+    Return s.lower() if not None
+    :param s:
+    :return:
+    """
+    if s:
+        return s.lower()
+    return None
 
 
 def file_metadata(path, release):
@@ -208,7 +221,7 @@ def file_metadata(path, release):
     else:
         artist_name = release['ArtistName']
 
-    if artist_name.startswith('The '):
+    if artist_name and artist_name.startswith('The '):
         sort_name = artist_name[4:] + ", The"
     else:
         sort_name = artist_name
@@ -224,10 +237,10 @@ def file_metadata(path, release):
         Vars.YEAR: year,
         Vars.DATE: date,
         Vars.EXTENSION: ext,
-        Vars.TITLE_LOWER: title.lower(),
-        Vars.ARTIST_LOWER: artist_name.lower(),
-        Vars.SORT_ARTIST_LOWER: sort_name.lower(),
-        Vars.ALBUM_LOWER: album_title.lower(),
+        Vars.TITLE_LOWER: _lower(title),
+        Vars.ARTIST_LOWER: _lower(artist_name),
+        Vars.SORT_ARTIST_LOWER: _lower(sort_name),
+        Vars.ALBUM_LOWER: _lower(album_title),
     }
     res.add_items(override_values.iteritems())
     return res, from_metadata
@@ -255,26 +268,34 @@ def album_metadata(path, release, common_tags):
     :return: metadata dictionary with substitution variables for rendering path.
     """
     date, year = _date_year(release)
-    artist = release['ArtistName'].replace('/', '_')
-    album = release['AlbumTitle'].replace('/', '_')
-    release_type = release['Type'].replace('/', '_')
+    artist = release['ArtistName']
+    if artist:
+        artist = artist.replace('/', '_')
+    album = release['AlbumTitle']
+    if album:
+        album = album.replace('/', '_')
+    release_type = release['Type']
+    if release_type:
+        release_type = release_type.replace('/', '_')
 
-    if release['ArtistName'].startswith('The '):
-        sort_name = release['ArtistName'][4:] + ", The"
+    if artist and artist.startswith('The '):
+        sort_name = artist[4:] + ", The"
     else:
-        sort_name = release['ArtistName']
+        sort_name = artist
 
-    if sort_name[0].isdigit():
+    if not sort_name or sort_name[0].isdigit():
         first_char = u'0-9'
     else:
         first_char = sort_name[0]
 
+    orig_folder = u''
     for r, d, f in os.walk(path):
         try:
             orig_folder = os.path.basename(
                 os.path.normpath(r).decode(headphones.SYS_ENCODING, 'replace'))
+            break
         except:
-            orig_folder = u''
+            pass
 
     override_values = {
         Vars.ARTIST: artist,
@@ -285,12 +306,12 @@ def album_metadata(path, release, common_tags):
         Vars.TYPE: release_type,
         Vars.ORIGINAL_FOLDER: orig_folder,
         Vars.FIRST_LETTER: first_char.upper(),
-        Vars.ARTIST_LOWER: artist.lower(),
-        Vars.SORT_ARTIST_LOWER: sort_name.lower(),
-        Vars.ALBUM_LOWER: album.lower(),
-        Vars.TYPE_LOWER: release_type.lower(),
-        Vars.FIRST_LETTER_LOWER: first_char.lower(),
-        Vars.ORIGINAL_FOLDER_LOWER: orig_folder.lower()
+        Vars.ARTIST_LOWER: _lower(artist),
+        Vars.SORT_ARTIST_LOWER: _lower(sort_name),
+        Vars.ALBUM_LOWER: _lower(album),
+        Vars.TYPE_LOWER: _lower(release_type),
+        Vars.FIRST_LETTER_LOWER: _lower(first_char),
+        Vars.ORIGINAL_FOLDER_LOWER: _lower(orig_folder)
     }
     res = MetadataDict(common_tags)
     res.add_items(override_values.iteritems())
@@ -306,13 +327,16 @@ def albumart_metadata(release, common_tags):
     :return: metadata dictionary with substitution variables for rendering path.
     """
     date, year = _date_year(release)
+    artist = release['ArtistName']
+    album = release['AlbumTitle']
+
     override_values = {
-        Vars.ARTIST: release['ArtistName'],
-        Vars.ALBUM: release['AlbumTitle'],
+        Vars.ARTIST: artist,
+        Vars.ALBUM: album,
         Vars.YEAR: year,
         Vars.DATE: date,
-        Vars.ARTIST_LOWER: release['ArtistName'].lower(),
-        Vars.ALBUM_LOWER: release['AlbumTitle'].lower()
+        Vars.ARTIST_LOWER: _lower(artist),
+        Vars.ALBUM_LOWER: _lower(album)
     }
     res = MetadataDict(common_tags)
     res.add_items(override_values.iteritems())
