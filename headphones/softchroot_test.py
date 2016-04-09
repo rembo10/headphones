@@ -1,7 +1,6 @@
 import os
 import mock
 from headphones.unittestcompat import TestCase, TestArgs
-#from mock import MagicMock
 
 from headphones.softchroot import SoftChroot
 from headphones.exceptions import SoftChrootError
