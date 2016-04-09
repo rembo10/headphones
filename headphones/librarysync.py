@@ -170,7 +170,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                     new_song_count += 1
                 else:
                     if check_exist_song['ArtistName'] != f_artist or check_exist_song[
-                        'AlbumTitle'] != f.album or check_exist_song['TrackTitle'] != f.title:
+                            'AlbumTitle'] != f.album or check_exist_song['TrackTitle'] != f.title:
                         # Important track metadata has been modified, need to run matcher again
                         if f_artist and f_artist != check_exist_song['ArtistName']:
                             new_artists.append(f_artist)

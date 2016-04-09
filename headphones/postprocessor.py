@@ -1176,7 +1176,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
 
         if snatched:
             if headphones.CONFIG.KEEP_TORRENT_FILES and snatched['Kind'] == 'torrent' and snatched[
-                'Status'] == 'Processed':
+                    'Status'] == 'Processed':
                 logger.info(
                     '%s is a torrent folder being preserved for seeding and has already been processed. Skipping.',
                     folder_basename)
