@@ -209,7 +209,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
     # Sort the song_list by most vague (e.g. no trackid or releaseid) to most specific (both trackid & releaseid)
     # When we insert into the database, the tracks with the most specific information will overwrite the more general matches
 
-    ##############song_list = helpers.multikeysort(song_list, ['ReleaseID', 'TrackID'])
+    # song_list = helpers.multikeysort(song_list, ['ReleaseID', 'TrackID'])
     song_list = helpers.multikeysort(song_list, ['ArtistName', 'AlbumTitle'])
 
     # We'll use this to give a % completion, just because the track matching might take a while
@@ -317,7 +317,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
             newValueDict2 = {'Matched': "Failed"}
             myDB.upsert("have", newValueDict2, controlValueDict2)
 
-            #######myDB.action('INSERT INTO have (ArtistName, AlbumTitle, TrackNumber, TrackTitle, TrackLength, BitRate, Genre, Date, TrackID, Location, CleanName, Format) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [song['ArtistName'], song['AlbumTitle'], song['TrackNumber'], song['TrackTitle'], song['TrackLength'], song['BitRate'], song['Genre'], song['Date'], song['TrackID'], song['Location'], CleanName, song['Format']])
+            # myDB.action('INSERT INTO have (ArtistName, AlbumTitle, TrackNumber, TrackTitle, TrackLength, BitRate, Genre, Date, TrackID, Location, CleanName, Format) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [song['ArtistName'], song['AlbumTitle'], song['TrackNumber'], song['TrackTitle'], song['TrackLength'], song['BitRate'], song['Genre'], song['Date'], song['TrackID'], song['Location'], CleanName, song['Format']])
 
     logger.info('Completed matching tracks from directory: %s' % dir.decode(headphones.SYS_ENCODING,
                                                                             'replace'))

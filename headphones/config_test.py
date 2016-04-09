@@ -283,7 +283,7 @@ class ConfigApiTest(TestCase):
         """ Config: get_extra_newznabs """
         path = '/tmp/notexist'
 
-        #itertools.izip(*[itertools.islice('', i, None, 3) for i in range(3)])
+        # itertools.izip(*[itertools.islice('', i, None, 3) for i in range(3)])
         # set up mocks:
         # 'EXTRA_NEWZNABS': (list, 'Newznab', ''),
         # 'EXTRA_TORZNABS': (list, 'Torznab', ''),
@@ -372,7 +372,7 @@ class ConfigApiTest(TestCase):
         """ Config: get_extra_torznabs """
         path = '/tmp/notexist'
 
-        #itertools.izip(*[itertools.islice('', i, None, 3) for i in range(3)])
+        # itertools.izip(*[itertools.islice('', i, None, 3) for i in range(3)])
         # set up mocks:
         # 'EXTRA_TORZNABS': (list, '', ''),
         self.config_mock["Torznab"] = {"extra_torznabs": conf_value}
