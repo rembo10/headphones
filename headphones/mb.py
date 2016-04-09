@@ -482,7 +482,7 @@ def getRelease(releaseid, include_artist_info=True):
                 release['rg_type'] = unicode(results['release-group']['type'])
 
                 if release['rg_type'] == 'Album' and 'secondary-type-list' in results[
-                    'release-group']:
+                        'release-group']:
                     secondary_type = unicode(results['release-group']['secondary-type-list'][0])
                     if secondary_type != release['rg_type']:
                         release['rg_type'] = secondary_type
