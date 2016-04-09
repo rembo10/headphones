@@ -126,9 +126,11 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                 if f.bitrate:
                     bitrates.append(f.bitrate)
 
-                # Use the album artist over the artist if available
+                # Use the album artist over the artist if available. Hard set 'Various Artists' if no albumartist but compilation tag set (iTunes)
                 if f.albumartist:
                     f_artist = f.albumartist
+                elif f.comp:
+                    f_artist = 'Various Artists'
                 elif f.artist:
                     f_artist = f.artist
                 else:
