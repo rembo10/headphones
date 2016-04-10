@@ -281,8 +281,7 @@ class WebInterface(object):
     def scanArtist(self, ArtistID):
 
         myDB = db.DBConnection()
-        artist_name = \
-        myDB.select('SELECT DISTINCT ArtistName FROM artists WHERE ArtistID=?', [ArtistID])[0][0]
+        artist_name = myDB.select('SELECT DISTINCT ArtistName FROM artists WHERE ArtistID=?', [ArtistID])[0][0]
 
         logger.info(u"Scanning artist: %s", artist_name)
 
@@ -292,8 +291,7 @@ class WebInterface(object):
         acceptable_formats = ["$artist", "$sortartist", "$first/$artist", "$first/$sortartist"]
 
         if not folder_format.lower() in acceptable_formats:
-            logger.info(
-                "Can't determine the artist folder from the configured folder_format. Not scanning")
+            logger.info("Can't determine the artist folder from the configured folder_format. Not scanning")
             return
 
         # Format the folder to match the settings
@@ -388,8 +386,7 @@ class WebInterface(object):
             if ArtistID:
                 ArtistIDT = ArtistID
             else:
-                ArtistIDT = \
-                myDB.action('SELECT ArtistID FROM albums WHERE AlbumID=?', [mbid]).fetchone()[0]
+                ArtistIDT = myDB.action('SELECT ArtistID FROM albums WHERE AlbumID=?', [mbid]).fetchone()[0]
             myDB.action(
                 'UPDATE artists SET TotalTracks=(SELECT COUNT(*) FROM tracks WHERE ArtistID = ? AND AlbumTitle IN (SELECT AlbumTitle FROM albums WHERE Status != "Ignored")) WHERE ArtistID = ?',
                 [ArtistIDT, ArtistIDT])
@@ -661,8 +658,7 @@ class WebInterface(object):
                             # This was throwing errors and I don't know why, but it seems to be working fine.
                             # else:
                             # logger.info("There was an error modifying Artist %s. This should not have happened" % existing_artist)
-                logger.info("Manual matching yielded %s new matches for Artist: %s" % (
-                update_count, new_artist))
+                logger.info("Manual matching yielded %s new matches for Artist: %s" % (update_count, new_artist))
                 if update_count > 0:
                     librarysync.update_album_status()
             else:
@@ -714,13 +710,13 @@ class WebInterface(object):
                             # else:
                             # logger.info("There was an error modifying Artist %s / Album %s with clean name %s" % (existing_artist, existing_album, existing_clean_string))
                 logger.info("Manual matching yielded %s new matches for Artist: %s / Album: %s" % (
-                update_count, new_artist, new_album))
+                    update_count, new_artist, new_album))
                 if update_count > 0:
                     librarysync.update_album_status(album_id)
             else:
                 logger.info(
                     "Artist %s / Album %s already named appropriately; nothing to modify" % (
-                    existing_artist, existing_album))
+                        existing_artist, existing_album))
 
     @cherrypy.expose
     def manageManual(self):
@@ -992,14 +988,14 @@ class WebInterface(object):
             totalcount = len(filtered)
         else:
             query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch + '%"' + 'ORDER BY %s COLLATE NOCASE %s' % (
-            sortcolumn, sSortDir_0)
+                sortcolumn, sSortDir_0)
             filtered = myDB.select(query)
             totalcount = myDB.select('SELECT COUNT(*) from artists')[0][0]
 
         if sortbyhavepercent:
             filtered.sort(key=lambda x: (
-            float(x['HaveTracks']) / x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0,
-            x['HaveTracks'] if x['HaveTracks'] else 0.0), reverse=sSortDir_0 == "asc")
+                float(x['HaveTracks']) / x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0,
+                x['HaveTracks'] if x['HaveTracks'] else 0.0), reverse=sSortDir_0 == "asc")
 
         # can't figure out how to change the datatables default sorting order when its using an ajax datasource so ill
         # just reverse it here and the first click on the "Latest Album" header will sort by descending release date

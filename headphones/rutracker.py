@@ -3,10 +3,11 @@
 import urllib
 import time
 from urlparse import urlparse
-
 import re
+
 import requests as requests
 from bs4 import BeautifulSoup
+
 import headphones
 from headphones import logger
 
@@ -69,7 +70,6 @@ class Rutracker(object):
         """
         Return the search url
         """
-
         # Build search url
         searchterm = ''
         if artist != 'Various Artists':
@@ -91,22 +91,17 @@ class Rutracker(object):
 
         # sort by size, descending.
         sort = '&o=7&s=2'
-
         searchurl = "%s?nm=%s%s%s" % (self.search_referer, urllib.quote(searchterm), format, sort)
-
         logger.info("Searching rutracker using term: %s", searchterm)
-
         return searchurl
 
     def search(self, searchurl):
         """
         Parse the search results and return valid torrent list
         """
-
         try:
             headers = {'Referer': self.search_referer}
             r = self.session.get(url=searchurl, headers=headers, timeout=self.timeout)
-
             soup = BeautifulSoup(r.content, 'html5lib')
 
             # Debug
@@ -155,9 +150,8 @@ class Rutracker(object):
                     topicurl = 'http://rutracker.org/forum/viewtopic.php?t=' + torrent_id
                     rulist.append((title, size, topicurl, 'rutracker.org', 'torrent', True))
                 else:
-                    logger.info(
-                        "%s is larger than the maxsize or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %i)" % (
-                        title, size, int(seeds)))
+                    logger.info("%s is larger than the maxsize or has too little seeders for this category, "
+                                "skipping. (Size: %i bytes, Seeders: %i)" % (title, size, int(seeds)))
 
             if not rulist:
                 logger.info("No valid results found from rutracker")
@@ -172,7 +166,6 @@ class Rutracker(object):
         """
         return the .torrent data
         """
-
         torrent_id = dict([part.split('=') for part in urlparse(url)[4].split('&')])['t']
         downloadurl = 'http://dl.rutracker.org/forum/dl.php?t=' + torrent_id
         cookie = {'bb_dl': torrent_id}
@@ -187,7 +180,6 @@ class Rutracker(object):
 
     # TODO get this working in utorrent.py
     def utorrent_add_file(self, data):
-
         host = headphones.CONFIG.UTORRENT_HOST
         if not host.startswith('http'):
             host = 'http://' + host
@@ -197,10 +189,8 @@ class Rutracker(object):
             host = host[:-4]
 
         base_url = host
-
         url = base_url + '/gui/'
-        self.session.auth = (
-        headphones.CONFIG.UTORRENT_USERNAME, headphones.CONFIG.UTORRENT_PASSWORD)
+        self.session.auth = (headphones.CONFIG.UTORRENT_USERNAME, headphones.CONFIG.UTORRENT_PASSWORD)
 
         try:
             r = self.session.get(url + 'token.html')
