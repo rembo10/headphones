@@ -1154,10 +1154,13 @@ class WebInterface(object):
 
     @cherrypy.expose
     def config(self):
+        logger.debug("config requested")
 
         model = headphones.CONFIG.getViewModel()
+        response = serve_template(templatename="config.html", title=_("Settings"), model=model)
 
-        return serve_template(templatename="config.html", title=_("Settings"), model=model)
+        logger.debug("config request handled")
+        return response
 
     @cherrypy.expose
     def configUpdate(self, **kwargs):
