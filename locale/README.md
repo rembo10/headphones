@@ -31,11 +31,11 @@ HP uses `gettext`, and precisely it defines, which language will be used by Head
 **In short**: to specify the required culture/language, you could run the HP using following command (linux-systems):
 
 ```bash
-$ LC_LANG=fr python Headphones.py
+$ LANG=fr python Headphones.py
 
 # or:
 
-$ LC_LANG=en-US python Headphones.py
+$ LANG=en-US python Headphones.py
 ```
 
 <a id="update-catalog"/>
