@@ -7,8 +7,8 @@ sudo: false
 
 cache:
   pip: true
-  directories:
-    - lib
+#  directories:
+#    - lib
 
 python:
   - "2.6"
