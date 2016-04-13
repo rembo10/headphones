@@ -138,7 +138,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                 # TODO: skip adding songs without the minimum requisite information (just a matter of putting together the right if statements)
 
                 if f_artist and f.album and f.title:
-                    CleanName = helpers.cleanName(f_artist + ' ' + f.album + ' ' + f.title)
+                    CleanName = helpers.clean_name(f_artist + ' ' + f.album + ' ' + f.title)
                 else:
                     CleanName = None
 
@@ -332,15 +332,15 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
         # There was a bug where artists with special characters (-,') would show up in new artists.
         artist_list = [
             x for x in unique_artists
-            if helpers.cleanName(x).lower() not in [
-                helpers.cleanName(y[0]).lower()
+            if helpers.clean_name(x).lower() not in [
+                helpers.clean_name(y[0]).lower()
                 for y in current_artists
                 ]
             ]
         artists_checked = [
             x for x in unique_artists
-            if helpers.cleanName(x).lower() in [
-                helpers.cleanName(y[0]).lower()
+            if helpers.clean_name(x).lower() in [
+                helpers.clean_name(y[0]).lower()
                 for y in current_artists
                 ]
             ]

@@ -29,7 +29,7 @@ import urllib2
 import os
 import re
 from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers, notifiers
-from headphones.helpers import checked, radio, today, cleanName
+from headphones.helpers import checked, radio, today, clean_name
 from mako.lookup import TemplateLookup
 from mako import exceptions
 import headphones
@@ -577,7 +577,7 @@ class WebInterface(object):
         for albums in have_albums:
             # Have to skip over manually matched tracks
             if albums['ArtistName'] and albums['AlbumTitle'] and albums['TrackTitle']:
-                original_clean = helpers.cleanName(
+                original_clean = helpers.clean_name(
                     albums['ArtistName'] + " " + albums['AlbumTitle'] + " " + albums['TrackTitle'])
                 # else:
                 #     original_clean = None
@@ -595,10 +595,12 @@ class WebInterface(object):
         # unmatchedalbums = [f for f in have_album_dictionary if f not in [x for x in headphones_album_dictionary]]
 
         check = set(
-            [(cleanName(d['ArtistName']).lower(), cleanName(d['AlbumTitle']).lower()) for d in
+            [(clean_name(d['ArtistName']).lower(),
+              clean_name(d['AlbumTitle']).lower()) for d in
              headphones_album_dictionary])
         unmatchedalbums = [d for d in have_album_dictionary if (
-        cleanName(d['ArtistName']).lower(), cleanName(d['AlbumTitle']).lower()) not in check]
+            clean_name(d['ArtistName']).lower(),
+            clean_name(d['AlbumTitle']).lower()) not in check]
 
         return serve_template(templatename="manageunmatched.html", title="Manage Unmatched Items",
                               unmatchedalbums=unmatchedalbums)
@@ -622,8 +624,8 @@ class WebInterface(object):
                 (artist, album))
 
         elif action == "matchArtist":
-            existing_artist_clean = helpers.cleanName(existing_artist).lower()
-            new_artist_clean = helpers.cleanName(new_artist).lower()
+            existing_artist_clean = helpers.clean_name(existing_artist).lower()
+            new_artist_clean = helpers.clean_name(new_artist).lower()
             if new_artist_clean != existing_artist_clean:
                 have_tracks = myDB.action(
                     'SELECT Matched, CleanName, Location, BitRate, Format FROM have WHERE ArtistName=?',
@@ -668,10 +670,10 @@ class WebInterface(object):
                     "Artist %s already named appropriately; nothing to modify" % existing_artist)
 
         elif action == "matchAlbum":
-            existing_artist_clean = helpers.cleanName(existing_artist).lower()
-            new_artist_clean = helpers.cleanName(new_artist).lower()
-            existing_album_clean = helpers.cleanName(existing_album).lower()
-            new_album_clean = helpers.cleanName(new_album).lower()
+            existing_artist_clean = helpers.clean_name(existing_artist).lower()
+            new_artist_clean = helpers.clean_name(new_artist).lower()
+            existing_album_clean = helpers.clean_name(existing_album).lower()
+            new_album_clean = helpers.clean_name(new_album).lower()
             existing_clean_string = existing_artist_clean + " " + existing_album_clean
             new_clean_string = new_artist_clean + " " + new_album_clean
             if existing_clean_string != new_clean_string:
@@ -728,7 +730,7 @@ class WebInterface(object):
             'SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched from have')
         for albums in manualalbums:
             if albums['ArtistName'] and albums['AlbumTitle'] and albums['TrackTitle']:
-                original_clean = helpers.cleanName(
+                original_clean = helpers.clean_name(
                     albums['ArtistName'] + " " + albums['AlbumTitle'] + " " + albums['TrackTitle'])
                 if albums['Matched'] == "Ignored" or albums['Matched'] == "Manual" or albums[
                     'CleanName'] != original_clean:
@@ -769,7 +771,7 @@ class WebInterface(object):
                 [artist])
             update_count = 0
             for tracks in update_clean:
-                original_clean = helpers.cleanName(
+                original_clean = helpers.clean_name(
                     tracks['ArtistName'] + " " + tracks['AlbumTitle'] + " " + tracks[
                         'TrackTitle']).lower()
                 album = tracks['AlbumTitle']
@@ -797,7 +799,7 @@ class WebInterface(object):
                 (artist, album))
             update_count = 0
             for tracks in update_clean:
-                original_clean = helpers.cleanName(
+                original_clean = helpers.clean_name(
                     tracks['ArtistName'] + " " + tracks['AlbumTitle'] + " " + tracks[
                         'TrackTitle']).lower()
                 track_title = tracks['TrackTitle']
@@ -1157,6 +1159,7 @@ class WebInterface(object):
             "transmission_username": headphones.CONFIG.TRANSMISSION_USERNAME,
             "transmission_password": headphones.CONFIG.TRANSMISSION_PASSWORD,
             "deluge_host": headphones.CONFIG.DELUGE_HOST,
+            "deluge_cert": headphones.CONFIG.DELUGE_CERT,
             "deluge_password": headphones.CONFIG.DELUGE_PASSWORD,
             "deluge_label": headphones.CONFIG.DELUGE_LABEL,
             "deluge_done_directory": headphones.CONFIG.DELUGE_DONE_DIRECTORY,

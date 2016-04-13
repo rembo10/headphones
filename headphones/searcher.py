@@ -119,10 +119,10 @@ def read_torrent_name(torrent_file, default_name=None):
             return torrent_info["info"]["name"]
         except KeyError:
             if default_name:
-                logger.warning("Couldn't get name from torrent file: %s. " \
+                logger.warning("Couldn't get name from torrent file: %s. "
                                "Defaulting to '%s'", e, default_name)
             else:
-                logger.warning("Couldn't get name from torrent file: %s. No " \
+                logger.warning("Couldn't get name from torrent file: %s. No "
                                "default given", e)
 
     # Return default
@@ -143,7 +143,7 @@ def calculate_torrent_hash(link, data=None):
         info = bdecode(data)["info"]
         torrent_hash = sha1(bencode(info)).hexdigest()
     else:
-        raise ValueError("Cannot calculate torrent hash without magnet link " \
+        raise ValueError("Cannot calculate torrent hash without magnet link "
                          "or data")
 
     return torrent_hash.upper()
@@ -842,16 +842,16 @@ def send_to_downloader(data, bestqual, album):
                             break
                     else:
                         # No service succeeded
-                        logger.warning("Unable to convert magnet with hash " \
+                        logger.warning("Unable to convert magnet with hash "
                                        "'%s' into a torrent file.", torrent_hash)
                         return
                 elif headphones.CONFIG.MAGNET_LINKS == 3:
                     torrent_to_file(download_path, data)
                     return
                 else:
-                    logger.error("Cannot save magnet link in blackhole. " \
-                                 "Please switch your torrent downloader to " \
-                                 "Transmission, uTorrent or Deluge, or allow Headphones " \
+                    logger.error("Cannot save magnet link in blackhole. "
+                                 "Please switch your torrent downloader to "
+                                 "Transmission, uTorrent or Deluge, or allow Headphones "
                                  "to open or convert magnet links")
                     return
             else:
@@ -889,7 +889,7 @@ def send_to_downloader(data, bestqual, album):
             if seed_ratio is not None:
                 transmission.setSeedRatio(torrentid, seed_ratio)
 
-        elif headphones.CONFIG.TORRENT_DOWNLOADER == 3: # Deluge
+        elif headphones.CONFIG.TORRENT_DOWNLOADER == 3:  # Deluge
             logger.info("Sending torrent to Deluge")
 
             try:
@@ -917,10 +917,10 @@ def send_to_downloader(data, bestqual, album):
                     deluge.setSeedRatio({'hash': torrentid, 'ratio': seed_ratio})
 
                 # Set move-to directory
-                if headphones.CONFIG.DELUGE_DONE_DIRECTORY:
+                if headphones.CONFIG.DELUGE_DONE_DIRECTORY or headphones.CONFIG.DOWNLOAD_TORRENT_DIR:
                     deluge.setTorrentPath({'hash': torrentid})
 
-                # I only just realized this function is useless...
+                # Get folder name from Deluge, it's usually the torrent name
                 folder_name = deluge.getTorrentFolder({'hash': torrentid})
                 if folder_name:
                     logger.info('Torrent folder name: %s' % folder_name)
@@ -1779,7 +1779,7 @@ def preprocess(resultlist):
                 return ruobj.get_torrent_data(result[2]), result
 
             # Get out of here if we're using Transmission
-            if headphones.CONFIG.TORRENT_DOWNLOADER == 1:  ## if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
+            if headphones.CONFIG.TORRENT_DOWNLOADER == 1:  # if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
                 return True, result
             # Get out of here if it's a magnet link
             if result[2].lower().startswith("magnet:"):

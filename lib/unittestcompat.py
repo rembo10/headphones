@@ -45,6 +45,10 @@ class TestCase(TC):
     def assertRegexpMatches(self, *args, **kw):
         return super(TestCase, self).assertRegexpMatches(*args, **kw)
 
+    @_d
+    def assertItemsEqual(self, *args, **kw):
+        return super(TestCase, self).assertItemsEqual(*args, **kw)
+
     # -----------------------------------------------------------
     # NOT DUMMY ASSERTIONS
     # -----------------------------------------------------------
