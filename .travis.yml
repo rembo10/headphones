@@ -2,37 +2,25 @@
 # http://about.travis-ci.org/docs/
 
 language: python
+
 sudo: false
 
 cache:
   pip: true
-# seems, like 'drop cache' does not work today on travis-ci
-#  directories:
-#  - lib
+  directories:
+    - lib
 
-# Available Python versions:
-# http://about.travis-ci.org/docs/user/ci-environment/#Python-VM-images
 python:
   - "2.6"
-matrix:
-  include:
-    - python: "2.7"
-      env: SENDCOVERAGE=1
+  - "2.7"
 
-# pylint 1.4 does not run under python 2.6
 install:
-  - pip install pyOpenSSL
-  - pip install pylint==1.3.1
-  - pip install pyflakes
-  - pip install pep8
-  # coverage stuff:
-  - pip install coveralls
-  - pip install coverage
+  - pip install -r requirements-dev.txt
+
 script:
   - pep8 headphones
   - pyflakes headphones
   - nosetests
 
 after_success:
-  # coverage stuff:
-  - if [ $SENDCOVERAGE ]; then coveralls; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == "2.7" ]]; then coveralls; fi

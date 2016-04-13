@@ -637,7 +637,7 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
 
             for track in release['Tracks']:
 
-                cleanname = helpers.cleanName(
+                cleanname = helpers.clean_name(
                     release['ArtistName'] + ' ' + release['AlbumTitle'] + ' ' + track['title'])
 
                 controlValueDict = {"TrackID": track['id'],

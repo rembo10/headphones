@@ -90,7 +90,7 @@ def reg(_extend_cb):
     opts.extend([
        BlockExtension('search_words', caption=_("Search Words"), options=_extend_cb(
             MessageExtension(
-                cssclasses=None, # ['small'],
+                cssclasses=None,  # ['small'],
                 fullwidth=True,
                 message=_('Separate words with a comma, e.g. "word1,word2,word3".')
             ),

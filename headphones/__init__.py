@@ -130,7 +130,7 @@ def initialize(config_file):
                 CONFIG.LOG_DIR = None
 
                 if not QUIET:
-                    sys.stderr.write("Unable to create the log directory. " \
+                    sys.stderr.write("Unable to create the log directory. "
                                      "Logging to screen only.\n")
 
         # Start the logger, disable console if needed

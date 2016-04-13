@@ -15,7 +15,7 @@ def reg(_extend_cb):
         # TODO : move git to advanced tab (if necessary) and make it visible
         OptionInternal('GIT_BRANCH', 'General', 'master', initype=str),
         # TODO : this is list of paths!
-        OptionInternal('GIT_PATH', 'General', '', initype=str), # full path to `git` binary.
+        OptionInternal('GIT_PATH', 'General', '', initype=str),  # full path to `git` binary.
         OptionInternal('DO_NOT_OVERRIDE_GIT_BRANCH', 'General', False, initype=boolext),
 
         OptionInternal('HTTP_PROXY', 'General', False, initype=boolext),
