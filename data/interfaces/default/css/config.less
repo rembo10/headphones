@@ -71,8 +71,7 @@
 	background-image: linear-gradient(@gradientFrom, @gradientTo) !important;
 	background-image: -webkit-linear-gradient(@gradientFrom, @gradientTo) !important;
 	background-image: -o-linear-gradient(@gradientFrom, @gradientTo) !important;
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=@gradientFrom, endColorstr=@gradientTo) !important;
-	-ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=@gradientFrom, endColorstr=@gradientTo) !important;
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=@gradientFrom, endColorstr=@gradientTo)" !important;
 }
 .opacity(@opacity_percent:85) {
 	filter: ~"alpha(opacity=85)";
