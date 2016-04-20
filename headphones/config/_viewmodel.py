@@ -639,6 +639,7 @@ class OptionDropdown(OptionBase):
         def __init__(self, value, label=""):
             self.value = value
             self.label = label
+            self.visible = True
 
     def __init__(self, appkey, section, default=None, label="", caption=None, tooltip=None, options=None, initype=str, items=None):
         super(OptionDropdown, self).__init__(appkey, section, default, initype=initype, options=options)
@@ -649,7 +650,7 @@ class OptionDropdown(OptionBase):
 
         self._uitype = initype
 
-        self.items = []
+        self._items = []
         counter = 0
         if items:
             for i in items:
@@ -663,12 +664,24 @@ class OptionDropdown(OptionBase):
                 else:
                     raise TypeError('Unexpected type of item {0} in items: {1}'.format(counter, type(i)))
 
-                self.items.append(ii)
+                self._items.append(ii)
 
     def uiValue2DataValue(self, valuedict):
         # override
         value = valuedict[self.uiName()]
         return self._uitype(value)
+
+    @property
+    def items(self):
+        """ Iterates over visible suboptions """
+        # preferred way:
+        # return _get_iterator_over_visible(self._items)
+
+        # TODO: it is a temporary solution, above - correct solution
+        return ifilter(lambda t: not hasattr(t, 'visible') or t.visible or (t.value == self.value), self._items)
+
+    # def __len__(self):
+    #     return len(self._options)
 
 
 class OptionDropdownSelector(OptionDropdown):
@@ -682,6 +695,8 @@ class OptionDropdownSelector(OptionDropdown):
         def __init__(self, value, label, options=None, csssuffix=None):
             self.value = value
             self.label = label
+            self.visible = True
+
             self.csssuffix = csssuffix
             self._options = options or []
             self.csssuffix = csssuffix
@@ -716,7 +731,7 @@ class OptionDropdownSelector(OptionDropdown):
         )
 
         # just one difference (from parent) - items handling
-        self.items = []
+        self._items = []
         self.value2csssuffix = {}
 
         counter = 0
@@ -739,7 +754,7 @@ class OptionDropdownSelector(OptionDropdown):
                 self.value2csssuffix[ii.value] = ii.csssuffix
                 ii._section_visible_cb = self._item_section_visible
 
-                self.items.append(ii)
+                self._items.append(ii)
 
     def _item_section_visible(self, csssuffix):
         val = self.model.get()

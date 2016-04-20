@@ -18,9 +18,6 @@ def reg(_extend_cb):
         OptionInternal('GIT_PATH', 'General', '', initype=str),  # full path to `git` binary.
         OptionInternal('DO_NOT_OVERRIDE_GIT_BRANCH', 'General', False, initype=boolext),
 
-        OptionInternal('HTTP_PROXY', 'General', False, initype=boolext),
-        OptionInternal('HTTP_ROOT', 'General', '/', initype=str),
-
         # From "# > Manage > Scan Music Library"
         OptionInternal('AUTO_ADD_ARTISTS', 'General', True, initype=boolext),
         OptionInternal('LIBRARYSCAN', 'General', True, initype=boolext),

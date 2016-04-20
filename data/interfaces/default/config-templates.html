@@ -317,10 +317,6 @@
             <input class="hp-option-switch -hp-checkbox-with-hidden" type="checkbox" id="${checkbox_id}" data-embed-div="#${embed_id}" ${checked_attr} ${'readonly disabled' if me.readonly else ''} />
             <input type="hidden" name="${uiname}" value="${hidden_value}" ${'readonly disabled' if me.readonly else ''} />
 
-            %if me.caption is not None:
-                <div class="small caption">${me.caption}</div>
-            %endif
-
         % if not me.alignleft:
             %if me.caption is not None:
                 <div class="small caption">${me.caption}</div>
@@ -411,7 +407,9 @@
         <div ${tooltip_attr} class="input-wrapper">
             <select id="${uiname}" name="${uiname}" size="1" ${'readonly disabled' if me.readonly else ''}>
             % for i in me.items:
-                <option value="${i.value}" ${"selected" if i.value==val else ""}>${i.label}</option>
+                <% item_selected = i.value==val %>
+
+                <option value="${i.value}" ${"selected" if item_selected else ""}>${i.label}</option>
             % endfor
             </select>
 

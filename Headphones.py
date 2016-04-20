@@ -186,6 +186,7 @@ def main():
         'http_host': headphones.CONFIG.HTTP_HOST,
         'http_root': headphones.CONFIG.HTTP_ROOT,
         'http_proxy': headphones.CONFIG.HTTP_PROXY,
+        'http_proxy_header_host': headphones.CONFIG.HTTP_PROXY_HEADER_HOST,
         'enable_https': headphones.CONFIG.ENABLE_HTTPS,
         'https_cert': headphones.CONFIG.HTTPS_CERT,
         'https_key': headphones.CONFIG.HTTPS_KEY,

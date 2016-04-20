@@ -53,9 +53,31 @@ class MetaConfigTest(TestCase):
         self.assertEqual(option.visible, exp_visible)
 
     @TestArgs(
+        ('ro,,go, mo', True, True),
+    )
+    def test_apply_on_empty_meta_values(self, meta_value, exp_visible, exp_readonly):
+        self.config_module_mock.return_value = {'section': {'key': meta_value}}
+
+        option = MagicMock()
+        option.model.section = 'section'
+        option.model.inikey = 'key'
+
+        mc = MetaConfig(self.path)
+
+        mock_log = MagicMock()
+        with mock.patch('headphones.config._meta.logger', mock_log):
+            mc.apply(option)
+
+        self.assertTrue(mock_log.warn.called)
+        mock_log.warn.assert_any_call('Syntax error in meta-option definition, [section][key] = []')
+
+        self.assertEqual(option.readonly, exp_readonly)
+        self.assertEqual(option.visible, exp_visible)
+
+    @TestArgs(
         ('go', 'go', True, False),
         ('ro,go, mo', 'go', True, True),
-        ('ro,,go, mo', '', True, True),
+        ('ro,11111,go, mo', '11111', True, True),
     )
     def test_apply_on_unknown_meta_values(self, meta_value, err_meta, exp_visible, exp_readonly):
         self.config_module_mock.return_value = {'section': {'key': meta_value}}
