@@ -581,15 +581,17 @@
 ## ===============================================
 
 <%def name="BlockExtension(me, parent=None)">
-    <fieldset class="block ${me.uiCssClasses()}">
-        % if me.caption is not None:
-            <legend>${me.caption}</legend>
-        % endif
+    % if 0 < len(me):
+        <fieldset class="block ${me.uiCssClasses()}">
+            % if me.caption is not None:
+                <legend>${me.caption}</legend>
+            % endif
 
-        % for option in me:
-            ${option.render(parent=me)}
-        % endfor    # for option in block
-    </fieldset>
+            % for option in me:
+                ${option.render(parent=me)}
+            % endfor    # for option in block
+        </fieldset>
+    % endif
 </%def>
 
 ## ===============================================

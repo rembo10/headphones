@@ -890,6 +890,12 @@ class BlockExtension(Renderable, CssClassable):
         # TODO : omit invisible options blocks
         return _get_iterator_over_visible(self._options)
 
+    def __len__(self):
+        # TODO : it is very bad approach!
+        # TODO : fix counting length
+        _xxx = list(self.__iter__())
+        return len(_xxx)
+
     def render(self, parent=None):
         return super(BlockExtension, self).render(me=self, parent=parent)
 
