@@ -18,6 +18,7 @@ class SoftChroot(object):
 
         path = path.strip()
         if not path:
+            #disabled
             return
 
         if (not os.path.exists(path) or

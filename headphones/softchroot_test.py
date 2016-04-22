@@ -64,6 +64,14 @@ class SoftChrootTest(TestCase):
         (None, None),
         ('', ''),
         ('      ', '      '),
+    )
+    def test_apply_to_empty(self, p, e):
+        """ softchroot: apply to empty """
+        sc = SoftChroot('/tmp/')
+        a = sc.apply(p)
+        self.assertEqual(a, e)
+
+    @TestArgs(
         ('/tmp/', '/'),
         ('/tmp/asdf', '/asdf'),
     )
@@ -123,3 +131,27 @@ class SoftChrootTest(TestCase):
 
         r = sc.revoke(p)
         self.assertEqual(r, p)
+
+    @TestArgs(
+        (None),
+        (''),
+        ('     '),
+    )
+    def test_init_disabled(self, rt):
+        """ softchroot: test_init_disabled """
+        sc = SoftChroot(rt)
+        enabled = sc.isEnabled()
+        self.assertFalse(enabled)
+
+    @TestArgs(
+        ('/tmp', '/tmp/'),
+        ('/tmp/', '/tmp/'),
+    )
+    def test_init_enabled(self, rt, exp_chroot):
+        """ softchroot: test_init_enabled """
+        sc = SoftChroot(rt)
+        enabled = sc.isEnabled()
+        path = sc.getRoot()
+
+        self.assertTrue(enabled)
+        self.assertEqual(exp_chroot, path)
