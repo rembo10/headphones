@@ -17,6 +17,12 @@ caps = {
     "version" : "45.0",
 }
 
+caps = {
+    "browserName": "safari",
+    "platform": "OS X 10.11",
+    "version": "9.0",
+}
+
 caps["recordVideo"] = False
 caps["recordScreenshots"] = True
 caps["screenResolution"] = "1024x768"
