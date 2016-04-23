@@ -23,6 +23,8 @@ install:
   - pip install -r requirements-dev.txt
 
 before_script:
+  # Creatind dumb config, which allows to run HP, listening on all interfaces
+  - printf '[General]\nhttp_host=0.0.0.0\n' > config.ini
   - python Headphones.py -v -d
   - sleep 7 # give Web server some time to bind to sockets, etc
 
