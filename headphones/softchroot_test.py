@@ -7,29 +7,42 @@ from headphones.exceptions import SoftChrootError
 
 
 class SoftChrootTest(TestCase):
-    def test_create(self):
-        """ create headphones.SoftChroot """
 
-        cf = SoftChroot('/tmp/')
-        self.assertIsInstance(cf, SoftChroot)
-        self.assertTrue(cf.isEnabled())
-        self.assertEqual(cf.getRoot(), '/tmp/')
+    #
+    # INIT TESTS
+    #
+
+    @TestArgs(
+        ('/tmp', '/tmp/'),
+        ('/tmp/', '/tmp/'),
+    )
+    def test_init_enabled(self, rt, exp_chroot):
+        """ softchroot: test_init_enabled """
+        sc = SoftChroot(rt)
+
+        enabled = sc.isEnabled()
+        path = sc.getRoot()
+        self.assertIsInstance(sc, SoftChroot)
+        self.assertTrue(enabled)
+        self.assertEqual(exp_chroot, path)
 
     @TestArgs(
         (None),
         (''),
-        ('      '),
+        ('     '),
     )
-    def test_create_disabled(self, empty_path):
-        """ create DISABLED SoftChroot """
+    def test_init_disabled(self, rt):
+        """ softchroot: test_init_disabled """
+        sc = SoftChroot(rt)
 
-        cf = SoftChroot(empty_path)
-        self.assertIsInstance(cf, SoftChroot)
-        self.assertFalse(cf.isEnabled())
-        self.assertIsNone(cf.getRoot())
+        enabled = sc.isEnabled()
+        path = sc.getRoot()
+        self.assertIsInstance(sc, SoftChroot)
+        self.assertFalse(enabled)
+        self.assertIsNone(path)
 
     def test_create_on_not_exists_dir(self):
-        """ create SoftChroot on non existent dir """
+        """ softchroot: init on non existent dir SHOULD RAISE """
 
         path = os.path.join('/tmp', 'notexist', 'asdf', '11', '12', 'np', 'itsssss')
 
@@ -43,7 +56,7 @@ class SoftChrootTest(TestCase):
 
     @mock.patch('headphones.softchroot.os', wrap=os, name='OsMock')
     def test_create_on_file(self, os_mock):
-        """ create SoftChroot on file, not a directory """
+        """ softchroot: init on file, not a directory SHOULD RAISE """
 
         path = os.path.join('/tmp', 'notexist', 'asdf', '11', '12', 'np', 'itsssss')
 
@@ -59,6 +72,30 @@ class SoftChrootTest(TestCase):
 
         self.assertRegexpMatches(str(exc.exception), r'No such directory')
         self.assertRegexpMatches(str(exc.exception), path)
+
+    # ==========================================
+    # APPLY
+    #
+
+    @TestArgs(
+        (None),
+        (''),
+        ('     '),
+        ('/tmp'),
+        ('/tmp/'),
+        ('/tmp/asdf'),
+        ('/tmp/localdir/adf'),
+        ('localdir/adf'),
+        ('localdir/adf/'),
+    )
+    def test_actions_on_disabled(self, p):
+        """ softchroot: disabled SC, apply and revoke should not change args """
+        sc = SoftChroot(None)
+        a = sc.apply(p)
+        self.assertEqual(a, p)
+
+        r = sc.revoke(p)
+        self.assertEqual(r, p)
 
     @TestArgs(
         (None, None),
@@ -76,7 +113,7 @@ class SoftChrootTest(TestCase):
         ('/tmp/asdf', '/asdf'),
     )
     def test_apply(self, p, e):
-        """ apply SoftChroot """
+        """ softchroot: apply """
         sc = SoftChroot('/tmp/')
         a = sc.apply(p)
         self.assertEqual(a, e)
@@ -87,7 +124,7 @@ class SoftChrootTest(TestCase):
         ('tmp/asdf', '/tmp/asdf'),
     )
     def test_apply_out_of_root(self, p, e):
-        """ apply SoftChroot to paths outside of the chroot """
+        """ softchroot: apply to paths outside of the chroot """
         chroot = '/tmp/'
         sc = SoftChroot(chroot)
         a = sc.apply(p)
@@ -97,9 +134,30 @@ class SoftChrootTest(TestCase):
         self.assertEqual(a, e)
 
     @TestArgs(
-        (None, None),
-        ('', ''),
-        ('      ', '      '),
+        ('/tmp', '/tmp', '/'),
+        ('/tmp/', '/tmp', '/'),
+    )
+    def test_apply_to_chroot_without_slash(self, chroot_root, path, exp):
+        """ softchroot: apply to the chroot path without trailing slash """
+        sc = SoftChroot(chroot_root)
+        a = sc.apply(path)
+        self.assertEqual(a, exp)
+
+    # ==========================================
+    # REVOKE
+    #
+    @TestArgs(
+        (None, '/tmp/'),
+        ('', '/tmp/'),
+        ('      ', '/tmp/'),
+    )
+    def test_revoke_empty(self, p, e):
+        """ softchroot: revoke on empty """
+        sc = SoftChroot('/tmp/')
+        a = sc.revoke(p)
+        self.assertEqual(a, e)
+
+    @TestArgs(
         ('/', '/tmp/'),
         ('/asdf', '/tmp/asdf'),
         ('/asdf/', '/tmp/asdf/'),
@@ -107,51 +165,7 @@ class SoftChrootTest(TestCase):
         ('localdir/adf/', '/tmp/localdir/adf/'),
     )
     def test_revoke(self, p, e):
-        """ revoke SoftChroot """
+        """ softchroot: revoke """
         sc = SoftChroot('/tmp/')
         a = sc.revoke(p)
         self.assertEqual(a, e)
-
-    @TestArgs(
-        (None),
-        (''),
-        ('     '),
-        ('/tmp'),
-        ('/tmp/'),
-        ('/tmp/asdf'),
-        ('/tmp/localdir/adf'),
-        ('localdir/adf'),
-        ('localdir/adf/'),
-    )
-    def test_actions_on_disabled(self, p):
-        """ disabled SoftChroot should not change args on apply and revoke """
-        sc = SoftChroot(None)
-        a = sc.apply(p)
-        self.assertEqual(a, p)
-
-        r = sc.revoke(p)
-        self.assertEqual(r, p)
-
-    @TestArgs(
-        (None),
-        (''),
-        ('     '),
-    )
-    def test_init_disabled(self, rt):
-        """ softchroot: test_init_disabled """
-        sc = SoftChroot(rt)
-        enabled = sc.isEnabled()
-        self.assertFalse(enabled)
-
-    @TestArgs(
-        ('/tmp', '/tmp/'),
-        ('/tmp/', '/tmp/'),
-    )
-    def test_init_enabled(self, rt, exp_chroot):
-        """ softchroot: test_init_enabled """
-        sc = SoftChroot(rt)
-        enabled = sc.isEnabled()
-        path = sc.getRoot()
-
-        self.assertTrue(enabled)
-        self.assertEqual(exp_chroot, path)

@@ -39,3 +39,32 @@ Provides old-style access to option's value.
 ### typeconv
 
 Types and typeconversion classes for options, for example: `path`, this type is designed for local paths on FS.
+
+
+## Soft Chroot module
+
+Configuration module uses features of `softchroot` module. Current implementation could be described in following rules:
+
+**Disabled softchroot**
+
+*ANYPATH => ANYPATH (no changes)
+	* '/' => '/'
+	* '/xdsf/' => '/xdsf/'
+
+**Enabled softchroot**
+
+Description:
+CONFIG-VALUE => VALUE VISIBLE IN UI => CONFIG-VALUE
+
+Lets assume, that `soft_chroot` is set to `/sc/`
+
+* Any path out of chroot env will be redirected to chroot env:
+	* '/' => '/' => '/sc/'
+	* '/asdf/path/file' => '/asdf/path/file' => '/sc/asdf/path/file'
+* Any path in chroot env will be shortened and longed back:
+	* '/sc/' => '/' => '/sc/'
+	* '/sc/logs/' => '/logs/' => '/sc/logs/'
+	* '/sc/security/cert.file' => '/security/cert.file' => '/sc/security/cert.file'
+* Empty paths will be converted to root
+	* '' => '' => '/sc/'
+	* '      ' => '' => '/sc/'

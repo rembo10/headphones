@@ -47,8 +47,11 @@ class SoftChroot(object):
         if not p:
             return path
 
+        unslashed_chroot = self.chroot[:-1]
         if path.startswith(self.chroot):
             p = os.path.sep + path[len(self.chroot):]
+        elif path.startswith(unslashed_chroot):
+            p = os.path.sep + path[len(unslashed_chroot):]
         else:
             p = os.path.join(self.chroot, os.path.sep, path)
 
@@ -59,11 +62,11 @@ class SoftChroot(object):
             return path
 
         if not path:
-            return path
+            return self.getRoot()
 
         p = path.strip()
         if not p:
-            return path
+            return self.getRoot()
 
         if os.path.sep == p[0]:
             p = p[1:]
