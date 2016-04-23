@@ -30,6 +30,7 @@ script:
   - pep8 headphones
   - pyflakes headphones
   - nosetests
+
 after_success:
   - if [[ $TRAVIS_PYTHON_VERSION == "2.7" ]]; then coveralls; fi
 
