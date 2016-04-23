@@ -85,8 +85,8 @@ def reg(_extend_cb):
                                              ),
                                    items=(
                                        OptionDropdownSelector.Item('lame', _('lame'), csssuffix='encoder-lame-ffmpeg-libav-embed'),
-                                       OptionDropdownSelector.Item('ffmpeg', _('ffmpeg'), csssuffix='encoder-lame-ffmpeg-libav-embed'),
-                                       OptionDropdownSelector.Item('libav', _('libav'), csssuffix='encoder-lame-ffmpeg-libav-embed', options=_extend_cb(
+                                       OptionDropdownSelector.Item('libav', _('libav'), csssuffix='encoder-lame-ffmpeg-libav-embed'),
+                                       OptionDropdownSelector.Item('ffmpeg', _('ffmpeg'), csssuffix='encoder-lame-ffmpeg-libav-embed', options=_extend_cb(
                                            # DONE : I want add CUSTOM values here!!!!
                                            OptionCombobox('ENCODEROUTPUTFORMAT', 'General', 'mp3',  # initype=str,
                                                           label=_('Format'),
