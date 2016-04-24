@@ -16,8 +16,10 @@ python:
 
 env:
   global:
+    # Soucelabs
     - secure: "QJqlXGFBbMBCIJYJky3LXXvuk132O9cUqxAw4WI5kmNgbE8oRdyN9jYPbRKJ2XmWHX2mvDuo7M45IJyvsukYvYJO8jgFGygY5GVhcYt6Id3HMapmZfU+VYvNXKmNJJGSTzU6omYO+9qy7QOL2Kyvzt6+/hmloymPHr3poPR0qpxLobNR7izIrZmkuJ5QRINE+ryScbVgLMsMC+ktiXI79Q9/k7BW0gYOTo60XiAqOk1edHYK7SkJ+OHYR8JQA90u5JwOkwWz3cjcqeJJjp8okW0cjV2s5KEumfxEpj/wXAho6lh6dQfeE7ii2DtrUwWs8qYAVVb9dXfV4bvMTTOqGqPi7HlouU10Ai2OU5tWMmqhWJ99nyHL9jeCxxAs2RnwlLL5X4h2bzabpvouMr5v64Q1Lfz0GpX4fLQD+MUsusNI1GTos1t9VkF/yvVn/Ka58a3+pOd5Do/yKPcD7Cfho4pAkvdtqKpNfbocJtxVky4ECbX26fFVhTPKU6/YF94MmpIXzskMMfzRvOx/PApZtyA7siYCgT3LjDrRWgqfKOd22D+e2rI3G1ufAe1QZx4MQD+baLYPrILgmBWJ62ouBTrw368h7PBOCCXWpjMlIED42fw1kz8qOMzAp6bpB4Zk81NduKTohWo+vX6RRWbv4ESBWTpvmpuoXeBoLPs+o0A="
     - secure: "e0zp9XZbgY80LKZINTBLnYjdUON7zkC96vK7PyJXRnmrdyrBkF/kmp+wHAu8I/9frrG0oVVL3Okev5XdTzbCG3HQ52Ys63oa/bjqyQ15GBKD0bogvUQ5+f2TFTbOe+xvMKTA1NLnMxBnX9Ta7zPGh1K36zZtGURQY+l/XqLbOf0MT5ExA1JMwXPSxcgHQwoR5T2KqX65gOExdA/CF11EEKcWc3iIqRitFQkuGSeXKYrwH7IaZQqOc+PkX2rwykWse2dFHlm19oJDxS2uaddtfXu6NOVDDNiw3bN7xsd0bSzKb5N0D1tUZcAIDtv3mOqsSv9Ffs1JgcoHKkDnEsC/0I5qLRmld8cpCwONnp6Kx+RdCZs5h6NxdaXCRT51oB/OriRiDZGRrygJOXMG8Gepkk6ydhrE5UCwKaOqehHRL4m3koWbwTXVKpVGjvimzCXE31/+R5G+DKEc93q54IFxAPHEAcdMFbYfYO12R/cT189hY16SXG6KyNl8ZTMImuEbEACkjHmzY2i8BZoITPi6U7SXHoFqcL7Z7QVO2Tr1a2ZgSRyEHrVqhupu+XG7vSKhG9GCa43R7Om1i6FebzvX2IxIEJiYAdBV7ssR6F+pgBAKe1dXZetCC8bToGSqc4WXCkq5DAJmfEmAy204D7/Y2IuxzyBfGbeFOBvF7k50nuI="
+    - SOUCELABS=false # set "true" to enable Soucelabs integration
 
 install:
   - pip install -r requirements-dev.txt
@@ -29,6 +31,11 @@ before_script:
   - sleep 7 # give Web server some time to bind to sockets, etc
 
 script:
+  # required for running browser
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+
   - pep8 headphones
   - pyflakes headphones
   - nosetests

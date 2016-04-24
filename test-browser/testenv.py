@@ -6,21 +6,19 @@ DRIVER = None
 timestamp_str = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
 tunnel_name = 'custom'
 
-ci_travis = ("TRAVIS" in os.environ) and (os.environ["TRAVIS"] == "true")
-
-use_sauce = ci_travis
-use_sauce = True
-
-caps = {
-    "browserName": "firefox",
-    "platform" : "Linux",
-    "version" : "45.0",
-}
+use_travis_ci = ("TRAVIS" in os.environ) and (os.environ["TRAVIS"] == "true")
+use_sauce_labs = ("SOUCELABS" in os.environ) and (os.environ["SOUCELABS"] == "true")
 
 caps = {
     "browserName": "safari",
     "platform": "OS X 10.11",
     "version": "9.0",
+}
+
+caps = {
+    "browserName": "firefox",
+    "platform" : "Linux",
+    "version" : "45.0",
 }
 
 caps["recordVideo"] = False
@@ -32,13 +30,13 @@ caps["name"] = tunnel_name + '-name-' + timestamp_str
 caps["build"] = tunnel_name + '-build-' + timestamp_str
 caps["tags"] = tunnel_name + '-tags-' + timestamp_str
 
-if ci_travis:
+if use_travis_ci:
     caps["tunnel-identifier"] = os.environ["TRAVIS_JOB_NUMBER"]
     caps["name"] = os.environ["TRAVIS_BRANCH"] + "-" + os.environ["TRAVIS_BUILD_NUMBER"]
     caps["build"] = os.environ["TRAVIS_BUILD_NUMBER"]
     caps["tags"] = [os.environ["TRAVIS_PYTHON_VERSION"], "CI"]
 
-if use_sauce:
+if use_sauce_labs:
     username = os.environ["SAUCE_USERNAME"]
     access_key = os.environ["SAUCE_ACCESS_KEY"]
 
