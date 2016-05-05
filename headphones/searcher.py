@@ -401,7 +401,7 @@ def sort_search_results(resultlist, album, new, albumlength):
 
     resultlist = temp_list
 
-    if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE:
+    if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE and result[3] != 'What.cd':
 
         try:
             targetsize = albumlength / 1000 * int(headphones.CONFIG.PREFERRED_BITRATE) * 128
@@ -447,6 +447,10 @@ def sort_search_results(resultlist, album, new, albumlength):
     else:
 
         finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
+        
+        # keep number of seeders order for what.cd 
+        if result[3] == 'What.cd':
+            finallist = resultlist
 
     if not len(finallist):
         logger.info('No appropriate matches found for %s - %s', album['ArtistName'],
@@ -1522,13 +1526,11 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             elif len(match_torrents) > 1:
                 logger.info(u"Found %d matching releases from %s for %s - %s after filtering" %
                             (len(match_torrents), provider, artistterm, albumterm))
-                logger.info(
-                    "Sorting torrents by times snatched and preferred bitrate %s..." % bitrate_string)
-                match_torrents.sort(key=lambda x: int(x.snatched), reverse=True)
+                logger.info('Sorting torrents by number of seeders...')
+                match_torrents.sort(key=lambda x: int(x.seeders), reverse=True)
                 if gazelleformat.MP3 in search_formats:
-                    # sort by size after rounding to nearest 10MB...hacky, but will favor highest quality
-                    match_torrents.sort(key=lambda x: int(10 * round(x.size / 1024. / 1024. / 10.)),
-                                        reverse=True)
+                    logger.info('Sorting torrents by seeders...')
+                    match_torrents.sort(key=lambda x: int(x.seeders), reverse=True)
                 if search_formats and None not in search_formats:
                     match_torrents.sort(
                         key=lambda x: int(search_formats.index(x.format)))  # prefer lossless
@@ -1537,7 +1539,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                 #                    match_torrents.sort(key=lambda x: str(bitrate) in x.getTorrentFolderName(), reverse=True)
                 logger.info(
                     u"New order: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
-
+                
             for torrent in match_torrents:
                 if not torrent.file_path:
                     torrent.group.update_group_data()  # will load the file_path for the individual torrents
@@ -1546,6 +1548,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                                    gazelle.generate_torrent_link(torrent.id),
                                    provider,
                                    'torrent', True))
+                                   
 
     # Pirate Bay
     if headphones.CONFIG.PIRATEBAY:
@@ -1790,7 +1793,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                verifyresult(result[0], artistterm, term, losslessOnly)]
 
     # Additional filtering for size etc
-    if results and not choose_specific_download:
+    if results and not choose_specific_download and result[3] != 'What.cd':
         results = more_filtering(results, album, albumlength, new)
 
     return results
