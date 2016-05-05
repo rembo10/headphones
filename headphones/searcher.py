@@ -1436,17 +1436,17 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             bitrate = headphones.CONFIG.PREFERRED_BITRATE
             if bitrate:
                 if 225 <= int(bitrate) < 256:
-                    bitrate = 'V0'
-                elif 200 <= int(bitrate) < 225:
-                    bitrate = 'V1'
-                elif 175 <= int(bitrate) < 200:
-                    bitrate = 'V2'
-                for encoding_string in gazelleencoding.ALL_ENCODINGS:
-                    if re.search(bitrate, encoding_string, flags=re.I):
-                        bitrate_string = encoding_string
-                if bitrate_string not in gazelleencoding.ALL_ENCODINGS:
+                    bitrate = [gazelleencoding.V0]
                     logger.info(
-                        u"Your preferred bitrate is not one of the available What.cd filters, so not using it as a search parameter.")
+                        u"Your preferred bitrate matches V0 encoding type.")
+                elif 200 <= int(bitrate) < 225:
+                    bitrate = [gazelleencoding.V1]
+                    logger.info(
+                        u"Your preferred bitrate matches V1 encoding type.")
+                elif 175 <= int(bitrate) < 200:
+                    bitrate = [gazelleencoding.V2]
+                    logger.info(
+                        u"Your preferred bitrate matches V2 encoding type.")
             maxsize = 10000000000
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:  # Highest quality including lossless
             search_formats = [gazelleformat.FLAC, gazelleformat.MP3]
@@ -1501,12 +1501,12 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                 if usersearchterm:
                     all_torrents.extend(
                         gazelle.search_torrents(searchstr=usersearchterm, format=search_format,
-                                                encoding=bitrate_string, releasetype=album_type)['results'])
+                                                encoding=bitrate, releasetype=album_type)['results'])
                 else:
                     all_torrents.extend(gazelle.search_torrents(artistname=semi_clean_artist_term,
                                                                 groupname=semi_clean_album_term,
                                                                 format=search_format,
-                                                                encoding=bitrate_string, releasetype=album_type)['results'])
+                                                                encoding=bitrate, releasetype=album_type)['results'])
                     
             # filter on format, size, and num seeders
             logger.info(u"Filtering torrents by format, maximum size, and minimum seeders...")
