@@ -30,6 +30,7 @@ import re
 from pygazelle import api as gazelleapi
 from pygazelle import encoding as gazelleencoding
 from pygazelle import format as gazelleformat
+from pygazelle import release_type as gazellerelease_type
 import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
@@ -1468,17 +1469,45 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
         if gazelle and gazelle.logged_in():
             logger.info(u"Searching %s..." % provider)
             all_torrents = []
+            
+            # Specify release types to filter by
+            if album['Type'] == 'Album':
+                album_type = [gazellerelease_type.ALBUM]
+            if album['Type'] == 'Soundtrack':
+                album_type = [gazellerelease_type.SOUNDTRACK]
+            if album['Type'] == 'EP':
+                album_type = [gazellerelease_type.EP]
+            # No musicbrainz match for this type
+            #if album['Type'] == 'Anthology':
+            #   album_type = [gazellerelease_type.ANTHOLOGY]
+            if album['Type'] == 'Compilation':
+                album_type = [gazellerelease_type.COMPILATION]
+            if album['Type'] == 'DJ-mix':
+                album_type = [gazellerelease_type.DJ_MIX]
+            if album['Type'] == 'Single':
+                album_type = [gazellerelease_type.SINGLE]
+            if album['Type'] == 'Live':
+                album_type = [gazellerelease_type.LIVE_ALBUM]
+            if album['Type'] == 'Remix':
+                album_type = [gazellerelease_type.REMIX]
+            if album['Type'] == 'Bootleg':
+                album_type = [gazellerelease_type.BOOTLEG]
+            if album['Type'] == 'Interview':
+                album_type = [gazellerelease_type.INTERVIEW]
+            if album['Type'] == 'Mixtape/Street':
+                album_type = [gazellerelease_type.MIXTAPE]
+                
             for search_format in search_formats:
                 if usersearchterm:
                     all_torrents.extend(
                         gazelle.search_torrents(searchstr=usersearchterm, format=search_format,
-                                                encoding=bitrate_string)['results'])
+                                                encoding=bitrate_string, releasetype=album_type)['results'])
                 else:
                     all_torrents.extend(gazelle.search_torrents(artistname=semi_clean_artist_term,
                                                                 groupname=semi_clean_album_term,
                                                                 format=search_format,
-                                                                encoding=bitrate_string)['results'])
-
+                                                                encoding=bitrate_string, releasetype=album_type)['results'])
+                    
             # filter on format, size, and num seeders
             logger.info(u"Filtering torrents by format, maximum size, and minimum seeders...")
             match_torrents = [t for t in all_torrents if
