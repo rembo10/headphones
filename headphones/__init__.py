@@ -87,7 +87,7 @@ LATEST_VERSION = None
 COMMITS_BEHIND = None
 
 LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a", "asf", "wma"]
-LOSSLESS_MEDIA_FORMATS = ["flac","aiff","aif"]
+LOSSLESS_MEDIA_FORMATS = ["flac", "aiff"]
 MEDIA_FORMATS = LOSSY_MEDIA_FORMATS + LOSSLESS_MEDIA_FORMATS
 
 MIRRORLIST = ["musicbrainz.org", "headphones", "custom"]
