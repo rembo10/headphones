@@ -168,17 +168,9 @@ class Config(object):
         )
         return extra_newznabs
 
-    # def clear_extra_newznabs(self):
-    #     """ Forget about the configured extra newznabs """
-    #     self.EXTRA_NEWZNABS = []
 
-    # def add_extra_newznab(self, newznab):
-    #     """ Add a new extra newznab """
-    #     extra_newznabs = self.EXTRA_NEWZNABS
-    #     for item in newznab:
-    #         extra_newznabs.append(item)
-    #     self.EXTRA_NEWZNABS = extra_newznabs
-
+    # OBSOLETE
+    # TODO: remove this method and all references!
     def get_extra_torznabs(self):
         """ Return the extra torznab tuples """
         logger.debug("DEPRECATED: config.get_extra_torznabs")
@@ -188,17 +180,6 @@ class Config(object):
                              for i in range(3)])
         )
         return extra_torznabs
-
-    # def clear_extra_torznabs(self):
-    #     """ Forget about the configured extra torznabs """
-    #     self.EXTRA_TORZNABS = []
-
-    # def add_extra_torznab(self, torznab):
-    #     """ Add a new extra torznab """
-    #     extra_torznabs = self.EXTRA_TORZNABS
-    #     for item in torznab:
-    #         extra_torznabs.append(item)
-    #     self.EXTRA_TORZNABS = extra_torznabs
 
     def __getattr__(self, name):
         """
@@ -223,10 +204,6 @@ class Config(object):
             m = self._options[name]
             m.set(value)
             return m.get()
-# TODO : remove on finish config-improvements
-#            key, definition_type, section, ini_key, default = self._define(name)
-#            self._config[section][ini_key] = definition_type(value)
-#            return self._config[section][ini_key]
 
     def _upgrade(self):
         """ Update folder formats in the config & bump up config version """
