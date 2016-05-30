@@ -168,7 +168,6 @@ class Config(object):
         )
         return extra_newznabs
 
-
     # OBSOLETE
     # TODO: remove this method and all references!
     def get_extra_torznabs(self):
