@@ -1,5 +1,5 @@
 function getThumb(imgElem,id,type) {
-	
+
 	if ( type == 'artist' ) {
 		var thumbURL = "getThumb?ArtistID=" + id;
 		// var imgURL = "getArtwork?ArtistID=" + id;
@@ -7,7 +7,7 @@ function getThumb(imgElem,id,type) {
 		var thumbURL = "getThumb?AlbumID=" + id;
 		// var imgURL = "getArtwork?AlbumID=" + id;
 	}
-	// Get Data from the cache by Artist ID 	
+	// Get Data from the cache by Artist ID
 	$.ajax({
 		url: thumbURL,
 		cache: true,
@@ -25,13 +25,13 @@ function getThumb(imgElem,id,type) {
 }
 
 function getArtwork(imgElem,id,name,type) {
-	
+
 	if ( type == 'artist' ) {
 		var artworkURL = "getArtwork?ArtistID=" + id;
 	} else {
 		var artworkURL = "getArtwork?AlbumID=" + id;
 	}
-	// Get Data from the cache by Artist ID 	
+	// Get Data from the cache by Artist ID
 	$.ajax({
 		url: artworkURL,
 		cache: true,
@@ -49,13 +49,13 @@ function getArtwork(imgElem,id,name,type) {
 }
 
 function getInfo(elem,id,type) {
-	
+
 	if ( type == 'artist' ) {
 		var infoURL = "getInfo?ArtistID=" + id;
 	} else {
 		var infoURL = "getInfo?AlbumID=" + id;
 	}
-	// Get Data from the cache by ID 	
+	// Get Data from the cache by ID
 	$.ajax({
 		url: infoURL,
 		cache: true,
@@ -134,25 +134,8 @@ function initHeader() {
 			inside = false;
 		}
 	});
-	
 }
 
-function initConfigCheckbox(elem) {
-	var config = $(elem).parent().next();	
-	if ( $(elem).is(":checked") ) {
-		config.show();
-	} else {
-		config.hide();
-	}
-	$(elem).click(function(){
-		var config = $(this).parent().next();	
-		if ( $(this).is(":checked") ) {
-			config.slideDown();
-		} else {
-			config.slideUp();
-		}
-	});
-}     
 function initActions() {
 	$("#subhead_menu #menu_link_refresh").button();
 	$("#subhead_menu #menu_link_edit").button();
@@ -201,7 +184,7 @@ function refreshLoadArtist() {
 						refreshLoadArtist();
 					},3000);
 				}
-			});	
+			});
 		});
 	}
 }
@@ -209,6 +192,7 @@ function refreshLoadArtist() {
 function refreshTab() {
 	var url =  $(location).attr('href');
 	var tabId = $('.ui-tabs-panel:visible').attr("id");
+
 	$('.ui-tabs-panel:visible').load(url + " #"+ tabId, function() {
 		initThisPage();
 	});
@@ -234,10 +218,10 @@ function showMsg(msg,loader,timeout,ms) {
 		setTimeout(function(){
 			message.fadeOut(function(){
 				$(this).remove();
-				feedback.fadeOut();					
+				feedback.fadeOut();
 			});
 		},ms);
-	} 
+	}
 }
 
 function showArtistMsg(msg) {
@@ -257,7 +241,7 @@ function showArtistMsg(msg) {
 
 function doAjaxCall(url,elem,reload,form) {
 	// Set Message
-	feedback = $("#ajaxMsg");
+	feedback = $(".ajaxMsg");
 	update = $("#updatebar");
 	if ( update.is(":visible") ) {
 		var height = update.height() + 35;
@@ -265,7 +249,7 @@ function doAjaxCall(url,elem,reload,form) {
 	} else {
 		feedback.removeAttr("style");
 	}
-	
+
 	feedback.fadeIn();
 	// Get Form data
 	var formID = "#"+url;
@@ -279,17 +263,17 @@ function doAjaxCall(url,elem,reload,form) {
 	if (typeof dataSucces === "undefined") {
 		// Standard Message when variable is not set
 		var dataSucces = "Success!";
-	} 
+	}
 	// Data Errror Message
 	var dataError = $(elem).data('error');
 	if (typeof dataError === "undefined") {
 		// Standard Message when variable is not set
 		var dataError = "There was an error";
-	} 	
+	}
 	// Get Success & Error message from inline data, else use standard message
 	var succesMsg = $("<div class='msg'><i class='fa fa-check'></i> " + dataSucces + "</div>");
 	var errorMsg = $("<div class='msg'><i class='fa fa-exclamation-triangle'></i> " + dataError + "</div>");
-	
+
 	// Check if checkbox is selected
 	if ( form ) {
 		if ( $('td#select input[type=checkbox]').length > 0 && !$('td#select input[type=checkbox]').is(':checked') || $('#importLastFM #username:visible').length > 0 && $("#importLastFM #username" ).val().length === 0 ) {
@@ -300,14 +284,14 @@ function doAjaxCall(url,elem,reload,form) {
 					$(this).remove();
 					feedback.fadeOut(function(){
 						feedback.removeClass('error');
-					});					
+					});
 				})
 				$(formID + " select").children('option[disabled=disabled]').attr('selected','selected');
 			},2000);
 			return false;
-		} 
-	} 
-	
+		}
+	}
+
 	// Ajax Call
 	$.ajax({
 	  url: url,
@@ -324,29 +308,34 @@ function doAjaxCall(url,elem,reload,form) {
 	  			$(this).remove();
 	  			feedback.fadeOut(function(){
 	  				feedback.removeClass('error')
-	  			});	  			
+	  			});
 	  		})
 	  	},2000);
 	  },
 	  success: function(data,jqXHR) {
 	  	feedback.prepend(succesMsg);
-	  	feedback.addClass('success')
+	  	feedback.addClass('success');
+
 	  	setTimeout(function(e){
 	  		succesMsg.fadeOut(function(){
 	  			$(this).remove();
 	  			feedback.fadeOut(function(){
 	  				feedback.removeClass('success');
 	  			});
-	  			if ( reload == true ) 	refreshSubmenu();
-	  			if ( reload == "table") {
-	  				console.log('refresh'); refreshTable();
+
+	  			if ( reload === true ) 	refreshSubmenu();
+	  			if ( reload === "table") {
+	  				refreshTable();
 	  			}
-	  			if ( reload == "tabs") 	refreshTab();
-	  			if ( reload == "page") 	location.reload();
-	  			if ( reload == "submenu&table") {
+	  			if ( reload === "tabs") 	refreshTab();
+	  			if ( reload === "page") 	location.reload();
+
+	  			if ( reload === "submenu&table") {
 	  				refreshSubmenu();
 	  				refreshTable();
 	  			}
+	  			if ( $.isFunction(reload) ) reload(data);
+
 	  			if ( form ) {
 	  				// Change the option to 'choose...'
 	  				$(formID + " select").children('option[disabled=disabled]').attr('selected','selected');

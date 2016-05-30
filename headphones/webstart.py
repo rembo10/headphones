@@ -111,6 +111,13 @@ def initialize(options):
         })
         conf['/api'] = {'tools.auth_basic.on': False}
 
+    if options['http_proxy'] and options['http_proxy_header_host']:
+        logger.info("Work behind proxy enabled, and usage of specific HTTP-header"
+                    " is forced: '%s'", options['http_proxy_header_host'])
+        conf['/'].update({
+            'tools.proxy.local': options['http_proxy_header_host'],
+        })
+
     # Prevent time-outs
     cherrypy.engine.timeout_monitor.unsubscribe()
     cherrypy.tree.mount(WebInterface(), str(options['http_root']), config=conf)
