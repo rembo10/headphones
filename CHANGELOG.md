@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.5.14
+Released 02 June 2016
+
+Highlights:
+* Fixed: File/folder format on new installs
+* Fixed: Pep8 errors
+* Improved: Updated fontawesome
+* Improved: Reverted back to less
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.13...v0.5.14).
+
 ## v0.5.13
 Released 25 February 2016
 
