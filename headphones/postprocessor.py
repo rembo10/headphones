@@ -655,14 +655,15 @@ def renameNFO(albumpath):
     for r, d, f in os.walk(albumpath):
         for file in f:
             if file.lower().endswith('.nfo'):
-                logger.debug('Renaming: "%s" to "%s"' % (
-                    file.decode(headphones.SYS_ENCODING, 'replace'),
-                    file.decode(headphones.SYS_ENCODING, 'replace') + '-orig'))
-                try:
-                    new_file_name = os.path.join(r, file)[:-3] + 'orig.nfo'
-                    os.rename(os.path.join(r, file), new_file_name)
-                except Exception as e:
-                    logger.error(u'Could not rename file: %s. Error: %s' % (
+                if not file.lower().endswith('.orig.nfo'):
+                    logger.debug('Renaming: "%s" to "%s"' % (
+                        file.decode(headphones.SYS_ENCODING, 'replace'),
+                        file.decode(headphones.SYS_ENCODING, 'replace') + '-orig'))
+                    try:
+                        new_file_name = os.path.join(r, file)[:-3] + 'orig.nfo'
+                        os.rename(os.path.join(r, file), new_file_name)
+                    except Exception as e:
+                        logger.error(u'Could not rename file: %s. Error: %s' % (
                         os.path.join(r, file).decode(headphones.SYS_ENCODING, 'replace'), e))
 
 
