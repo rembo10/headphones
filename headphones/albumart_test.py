@@ -1,11 +1,8 @@
-#import unittest
-#import mock
 from headphones.unittestcompat import TestCase
 
 import headphones.albumart
 
 
-# no tests...
 class AlbumArtTest(TestCase):
     def test_nothing(self):
         x = 100 - 2 * 50

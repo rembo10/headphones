@@ -35,7 +35,6 @@
 from __future__ import unicode_literals
 
 from headphones import logger
-#from headphones import request
 
 import time
 import re
@@ -66,8 +65,8 @@ def _scrubber(text):
             if text.lower().startswith('c:\\users\\'):
                 k = text.split('\\')
                 text = '\\'.join([k[0], k[1], '.....', k[-1]])
-            #partial_link = re.sub('(auth.*?)=.*&','\g<1>=SECRETZ&', link)
-            #partial_link = re.sub('(\w)=[0-9a-zA-Z]*&*','\g<1>=REMOVED&', link)
+            # partial_link = re.sub('(auth.*?)=.*&','\g<1>=SECRETZ&', link)
+            # partial_link = re.sub('(\w)=[0-9a-zA-Z]*&*','\g<1>=REMOVED&', link)
         except Exception as e:
             logger.debug('Deluge: Scrubber failed: %s' % str(e))
     return text
@@ -99,10 +98,10 @@ def addTorrent(link, data=None, name=None):
                 logger.debug('Deluge: Using different User-Agent for this site')
                 user_agent = 'Headphones'
                 # This method will make Deluge download the file
-                #logger.debug('Deluge: Letting Deluge download this')
-                #local_torrent_path = _add_torrent_url({'url': link})
-                #logger.debug('Deluge: Returned this local path: %s' % _scrubber(local_torrent_path))
-                #return addTorrent(local_torrent_path)
+                # logger.debug('Deluge: Letting Deluge download this')
+                # local_torrent_path = _add_torrent_url({'url': link})
+                # logger.debug('Deluge: Returned this local path: %s' % _scrubber(local_torrent_path))
+                # return addTorrent(local_torrent_path)
             else:
                 user_agent = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
             headers = {'User-Agent': user_agent}

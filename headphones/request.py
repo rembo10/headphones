@@ -55,7 +55,7 @@ def request_response(url, method="get", auto_raise=True,
     # pose a security issue!
     kwargs["verify"] = bool(headphones.CONFIG.VERIFY_SSL_CERT)
 
-    #This fix is put in place for systems with broken SSL (like QNAP)
+    # This fix is put in place for systems with broken SSL (like QNAP)
     if not headphones.CONFIG.VERIFY_SSL_CERT and sys.version_info >= (2, 7, 9):
         try:
             import ssl
