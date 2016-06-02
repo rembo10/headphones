@@ -1465,7 +1465,6 @@ class WebInterface(object):
                 continue
             conftype = _conf[1]
 
-            #print '===>', conftype
             if conftype is headphones.config.path:
                 nv = headphones.SOFT_CHROOT.revoke(v)
                 if nv != v:
