@@ -79,7 +79,7 @@ def switch(AlbumID, ReleaseID):
         'SELECT * from tracks WHERE AlbumID=? AND Location IS NOT NULL', [AlbumID]))
 
     if oldalbumdata['Status'] == 'Skipped' and ((have_track_count / float(total_track_count)) >= (
-        headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0)):
+            headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0)):
         myDB.action(
             'UPDATE albums SET Status=? WHERE AlbumID=?', ['Downloaded', AlbumID])
 

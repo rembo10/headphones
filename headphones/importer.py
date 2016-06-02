@@ -80,9 +80,8 @@ def artistlist_to_mbids(artistlist, forced=False):
             bl_artist = myDB.action('SELECT * FROM blacklist WHERE ArtistID=?',
                                     [artistid]).fetchone()
             if bl_artist or artistid in blacklisted_special_artists:
-                logger.info(
-                    "Artist ID for '%s' is either blacklisted or Various Artists. To add artist, you must do it manually (Artist ID: %s)" % (
-                    artist, artistid))
+                logger.info("Artist ID for '%s' is either blacklisted or Various Artists. To add artist, you must "
+                            "do it manually (Artist ID: %s)" % (artist, artistid))
                 continue
 
         # Add to database if it doesn't exist
@@ -225,9 +224,8 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                 myDB.action("DELETE FROM tracks WHERE AlbumID=?", [items['AlbumID']])
                 myDB.action("DELETE FROM alltracks WHERE AlbumID=?", [items['AlbumID']])
                 myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [items['AlbumID']])
-                logger.info(
-                    "[%s] Removing all references to release group %s to reflect MusicBrainz refresh" % (
-                    artist['artist_name'], items['AlbumID']))
+                logger.info("[%s] Removing all references to release group %s to reflect MusicBrainz refresh" % (
+                            artist['artist_name'], items['AlbumID']))
                 if not extrasonly:
                     force_repackage = 1
     else:
@@ -259,14 +257,12 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                 new_release_group = True
 
             if new_release_group:
-                logger.info("[%s] Now adding: %s (New Release Group)" % (
-                artist['artist_name'], rg['title']))
+                logger.info("[%s] Now adding: %s (New Release Group)" % (artist['artist_name'], rg['title']))
                 new_releases = mb.get_new_releases(rgid, includeExtras)
 
             else:
                 if check_release_date is None or check_release_date == u"None":
-                    logger.info("[%s] Now updating: %s (No Release Date)" % (
-                    artist['artist_name'], rg['title']))
+                    logger.info("[%s] Now updating: %s (No Release Date)" % (artist['artist_name'], rg['title']))
                     new_releases = mb.get_new_releases(rgid, includeExtras, True)
                 else:
                     if len(check_release_date) == 10:
@@ -314,8 +310,8 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
 
             # Build the dictionary for the fullreleaselist
             for items in find_hybrid_releases:
-                if items['ReleaseID'] != rg[
-                    'id']:  # don't include hybrid information, since that's what we're replacing
+                # don't include hybrid information, since that's what we're replacing
+                if items['ReleaseID'] != rg['id']:
                     hybrid_release_id = items['ReleaseID']
                     newValueDict = {"ArtistID": items['ArtistID'],
                                     "ArtistName": items['ArtistName'],
@@ -349,11 +345,11 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
             try:
                 hybridrelease = getHybridRelease(fullreleaselist)
                 logger.info('[%s] Packaging %s releases into hybrid title' % (
-                artist['artist_name'], rg['title']))
+                            artist['artist_name'], rg['title']))
             except Exception as e:
                 errors = True
                 logger.warn('[%s] Unable to get hybrid release information for %s: %s' % (
-                artist['artist_name'], rg['title'], e))
+                            artist['artist_name'], rg['title'], e))
                 continue
 
             # Use the ReleaseGroupID as the ReleaseID for the hybrid release to differentiate it
@@ -374,8 +370,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
 
             for track in hybridrelease['Tracks']:
 
-                cleanname = helpers.cleanName(
-                    artist['artist_name'] + ' ' + rg['title'] + ' ' + track['title'])
+                cleanname = helpers.clean_name(artist['artist_name'] + ' ' + rg['title'] + ' ' + track['title'])
 
                 controlValueDict = {"TrackID": track['id'],
                                     "ReleaseID": rg['id']}
@@ -504,13 +499,13 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
             if rg_exists:
                 if rg_exists['Status'] == 'Skipped' and (
                     (have_track_count / float(total_track_count)) >= (
-                    headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0)):
+                        headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0)):
                     myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?',
                                 ['Downloaded', rg['id']])
                     marked_as_downloaded = True
             else:
                 if (have_track_count / float(total_track_count)) >= (
-                    headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0):
+                        headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0):
                     myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?',
                                 ['Downloaded', rg['id']])
                     marked_as_downloaded = True
@@ -527,7 +522,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
         else:
             if skip_log == 0:
                 logger.info(u"[%s] No new releases, so no changes made to %s" % (
-                artist['artist_name'], rg['title']))
+                            artist['artist_name'], rg['title']))
 
     time.sleep(3)
     finalize_update(artistid, artist['artist_name'], errors)
@@ -541,7 +536,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
     if errors:
         logger.info(
             "[%s] Finished updating artist: %s but with errors, so not marking it as updated in the database" % (
-            artist['artist_name'], artist['artist_name']))
+                artist['artist_name'], artist['artist_name']))
     else:
         myDB.action('DELETE FROM newartists WHERE ArtistName = ?', [artist['artist_name']])
         logger.info(u"Updating complete for: %s" % artist['artist_name'])
@@ -710,7 +705,7 @@ def addReleaseById(rid, rgid=None):
         myDB.action('INSERT INTO releases VALUES( ?, ?)', [rid, release_dict['rgid']])
 
         for track in release_dict['tracks']:
-            cleanname = helpers.cleanName(
+            cleanname = helpers.clean_name(
                 release_dict['artist_name'] + ' ' + release_dict['rg_title'] + ' ' + track['title'])
 
             controlValueDict = {"TrackID": track['id'],

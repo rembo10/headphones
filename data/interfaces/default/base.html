@@ -82,6 +82,9 @@
 			<div id="info">
 				<small>
 				<a href="https://github.com/rembo10/headphones"><i class="fa fa-headphones"></i> Website</a> |
+				%if headphones.CONFIG.GIT_USER != 'rembo10':
+					<a href="https://github.com/${headphones.CONFIG.GIT_USER}/headphones" title="Open this fork on github"><i class="fa fa-github"></i> GitHub</a> |
+				%endif
 				<a href="https://github.com/rembo10/headphones/wiki/TroubleShooting"><i class="fa fa-ambulance"></i> Help</a>
 				</small>
 			</div>

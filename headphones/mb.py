@@ -287,7 +287,7 @@ def getArtist(artistid, extrasonly=False):
     except musicbrainzngs.WebServiceError as e:
         logger.warn(
             'Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (
-            artistid, str(e)))
+                artistid, str(e)))
         mb_lock.snooze(5)
     except Exception as e:
         pass
@@ -354,7 +354,7 @@ def getArtist(artistid, extrasonly=False):
             except musicbrainzngs.WebServiceError as e:
                 logger.warn(
                     'Attempt to retrieve artist information from MusicBrainz failed for artistid: %s (%s)' % (
-                    artistid, str(e)))
+                        artistid, str(e)))
                 mb_lock.snooze(5)
 
             for rg in mb_extras_list:
@@ -384,9 +384,9 @@ def getSeries(seriesid):
     except musicbrainzngs.WebServiceError as e:
         logger.warn(
             'Attempt to retrieve series information from MusicBrainz failed for seriesid: %s (%s)' % (
-            seriesid, str(e)))
+                seriesid, str(e)))
         mb_lock.snooze(5)
-    except Exception as e:
+    except Exception:
         pass
 
     if not series:
@@ -425,7 +425,7 @@ def getReleaseGroup(rgid):
     except musicbrainzngs.WebServiceError as e:
         logger.warn(
             'Attempt to retrieve information from MusicBrainz for release group "%s" failed (%s)' % (
-            rgid, str(e)))
+                rgid, str(e)))
         mb_lock.snooze(5)
 
     if not releaseGroup:
@@ -453,7 +453,7 @@ def getRelease(releaseid, include_artist_info=True):
     except musicbrainzngs.WebServiceError as e:
         logger.warn(
             'Attempt to retrieve information from MusicBrainz for release "%s" failed (%s)' % (
-            releaseid, str(e)))
+                releaseid, str(e)))
         mb_lock.snooze(5)
 
     if not results:
@@ -482,7 +482,7 @@ def getRelease(releaseid, include_artist_info=True):
                 release['rg_type'] = unicode(results['release-group']['type'])
 
                 if release['rg_type'] == 'Album' and 'secondary-type-list' in results[
-                    'release-group']:
+                        'release-group']:
                     secondary_type = unicode(results['release-group']['secondary-type-list'][0])
                     if secondary_type != release['rg_type']:
                         release['rg_type'] = secondary_type
@@ -528,7 +528,7 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
     except musicbrainzngs.WebServiceError as e:
         logger.warn(
             'Attempt to retrieve information from MusicBrainz for release group "%s" failed (%s)' % (
-            rgid, str(e)))
+                rgid, str(e)))
         mb_lock.snooze(5)
         return False
 
@@ -637,7 +637,7 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
 
             for track in release['Tracks']:
 
-                cleanname = helpers.cleanName(
+                cleanname = helpers.clean_name(
                     release['ArtistName'] + ' ' + release['AlbumTitle'] + ' ' + track['title'])
 
                 controlValueDict = {"TrackID": track['id'],
@@ -675,14 +675,14 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
             num_new_releases = num_new_releases + 1
             if album_checker:
                 logger.info('[%s] Existing release %s (%s) updated' % (
-                release['ArtistName'], release['AlbumTitle'], rel_id_check))
+                    release['ArtistName'], release['AlbumTitle'], rel_id_check))
             else:
                 logger.info('[%s] New release %s (%s) added' % (
-                release['ArtistName'], release['AlbumTitle'], rel_id_check))
+                    release['ArtistName'], release['AlbumTitle'], rel_id_check))
         if force_repackage1 == 1:
             num_new_releases = -1
             logger.info('[%s] Forcing repackage of %s, since dB releases have been removed' % (
-            release['ArtistName'], release_title))
+                release['ArtistName'], release_title))
         else:
             num_new_releases = num_new_releases
 

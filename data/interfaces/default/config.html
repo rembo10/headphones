@@ -393,6 +393,12 @@
                                     <small>Usually http://localhost:8112 (requires WebUI plugin)</small>
                                 </div>
                                 <div class="row">
+                                    <label>Deluge SSL Certificate</label>
+                                    <input type="text" name="deluge_cert" value="${config['deluge_cert']}" size="30">
+                                    <small>Path to the certificate file. Make sure to use a valid certificate ("Issued To" field must match 
+                                        hostname) which is <em>not</em> the case with the default certificate. Path is usually <span style="font-family: monospace;">%appdata%\deluge\ssl</span> on Windows, <span style="font-family: monospace;">~/.config/deluge/ssl/</span> on Linux. Leave this blank if you are using a self-signed certificate.</small>
+                                </div>
+                                <div class="row">
                                     <label>Deluge Password</label>
                                     <input type="password" name="deluge_password" value="${config['deluge_password']}" size="30">
                                 </div>
@@ -888,7 +894,7 @@
                                     <div class="row">
                                         as <input type="text" class="override-float" name="album_art_format" value="${config['album_art_format']}" size="10">.jpg
                                     </div>
-                                    <small>Use $Artist/$artist, $Album/$album, $Year/$year, put optional variables in square brackets, use single-quote marks to escape square brackets literally ('[', ']').</small>
+                                    <small>Use $Artist/$artist, $Album/$album, $Year/$year, put optional variables in curly braces, use single-quote marks to escape curly braces literally ('{', '}').</small>
                                 </div>
                                 <div class="row checkbox left clearfix nopad">
                                     <label>
@@ -1283,13 +1289,13 @@
                             <div class="row">
                                 <label>Folder Format</label>
                                 <input type="text" name="folder_format" value="${config['folder_format']}" size="43">
-                                <small>Use: $Artist/$artist, $SortArtist/$sortartist, $Album/$album, $Year/$year, $Type/$type (release type) and $First/$first (first letter in artist name), $OriginalFolder/$originalfolder (downloaded directory name). Put optional variables in square brackets, use single-quote marks to escape square brackets literally ('[', ']').<br>E.g.: $Type/$First/$artist/$album '['$year']' = Album/G/girl talk/all day [2010]</small>
+                                <small>Use: $Artist/$artist, $SortArtist/$sortartist, $Album/$album, $Year/$year, $Type/$type (release type) and $First/$first (first letter in artist name), $OriginalFolder/$originalfolder (downloaded directory name). Put optional variables in curly braces, use single-quote marks to escape curly braces literally ('{', '}').<br>E.g.: $Type/$First/$artist/$album{ '['$year']'} = Album/G/girl talk/all day [2010]</small>
 
                             </div>
                             <div class="row">
                                 <label>File Format</label>
                                 <input type="text" name="file_format" value="${config['file_format']}" size="43">
-                                <small>Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title, $Artist/$artist, $Album/$album and $Year/$year. Put optional variables in square brackets, use single-quote marks to escape square brackets literally ('[', ']').</small>
+                                <small>Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title, $Artist/$artist, $Album/$album and $Year/$year. Put optional variables in curly braces, use single-quote marks to escape curly braces literally ('{', '}').</small>
                             </div>
                             <div class="checkbox row clearfix">
                                 <input type="checkbox" name="file_underscores" id="file_underscores" value="1" ${config['file_underscores']}/><label>Use underscores instead of spaces</label>
@@ -1592,7 +1598,7 @@
                             <fieldset>
                                 <legend>Musicbrainz</legend>
                                 <div class="row">
-                                    <label>Muscbrainz Mirror</label>
+                                    <label>Musicbrainz Mirror</label>
                                     <select name="mirror" id="mirror">
                                     %for mirror in config['mirrorlist']:
                                         <%

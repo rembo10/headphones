@@ -54,6 +54,7 @@ class GROWL(object):
         # Split host and port
         if self.host == "":
             host, port = "localhost", 23053
+
         if ":" in self.host:
             host, port = self.host.split(':', 1)
             port = int(port)
@@ -245,9 +246,8 @@ class XBMC(object):
         for host in hosts:
             logger.info('Sending notification command to XMBC @ ' + host)
             try:
-                version = \
-                self._sendjson(host, 'Application.GetProperties', {'properties': ['version']})[
-                    'version']['major']
+                version = self._sendjson(host, 'Application.GetProperties',
+                                         {'properties': ['version']})['version']['major']
 
                 if version < 12:  # Eden
                     notification = header + "," + message + "," + time + "," + albumartpath
@@ -383,9 +383,8 @@ class Plex(object):
         for host in hosts:
             logger.info('Sending notification command to Plex client @ ' + host)
             try:
-                version = \
-                self._sendjson(host, 'Application.GetProperties', {'properties': ['version']})[
-                    'version']['major']
+                version = self._sendjson(host, 'Application.GetProperties',
+                                         {'properties': ['version']})['version']['major']
 
                 if version < 12:  # Eden
                     notification = header + "," + message + "," + time + "," + albumartpath

@@ -13,22 +13,23 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
-'''Path pattern substitution module, see details below for syntax.
+"""
+Path pattern substitution module, see details below for syntax.
 
-   The pattern matching is loosely based on foobar2000 pattern syntax,
-   i.e. the notion of escaping characters with \' and optional elements
-   enclosed in square brackets [] is taken from there while the
-   substitution variable names are Perl-ish or sh-ish. The following
-   syntax elements are supported:
-    * escaped literal strings, that is everything that is enclosed
-      within single quotes (like \'this\');
-    * substitution variables, which start with dollar sign ($) and
-      extend until next non-alphanumeric+underscore character
-      (like $This and $5_that).
-    * optional elements enclosed in curly braces, which render
-      nonempty value only if any variable or optional inside returned
-      nonempty value, ignoring literals (like {\'[\'$That\']\'}).
-'''
+The pattern matching is loosely based on foobar2000 pattern syntax,
+i.e. the notion of escaping characters with \' and optional elements
+enclosed in square brackets [] is taken from there while the
+substitution variable names are Perl-ish or sh-ish. The following
+syntax elements are supported:
+* escaped literal strings, that is everything that is enclosed
+  within single quotes (like 'this');
+* substitution variables, which start with dollar sign ($) and
+  extend until next non-alphanumeric+underscore character
+  (like $This and $5_that).
+* optional elements enclosed in curly braces, which render
+  nonempty value only if any variable or optional inside returned
+  nonempty value, ignoring literals (like {'{'$That'}'}).
+"""
 from __future__ import print_function
 from enum import Enum
 
@@ -41,6 +42,9 @@ class _PatternElement(object):
         # type: (Mapping[str,str]) -> str
         '''Format this _PatternElement into string using provided substitution dictionary.'''
         raise NotImplementedError()
+
+    def __ne__(self, other):
+        return not self == other
 
 
 class _Generator(_PatternElement):
@@ -57,10 +61,22 @@ class _Replacement(_Generator):
 
     def render(self, replacement):
         # type: (Mapping[str,str]) -> str
-        return replacement.get(self._pattern, self._pattern)
+        res = replacement.get(self._pattern, self._pattern)
+        if res is None:
+            return ''
+        else:
+            return res
 
     def __str__(self):
         return self._pattern
+
+    @property
+    def pattern(self):
+        return self._pattern
+
+    def __eq__(self, other):
+        return isinstance(other, _Replacement) and \
+            self._pattern == other.pattern
 
 
 class _LiteralText(_PatternElement):
@@ -76,6 +92,13 @@ class _LiteralText(_PatternElement):
     def __str__(self):
         return self._text
 
+    @property
+    def text(self):
+        return self._text
+
+    def __eq__(self, other):
+        return isinstance(other, _LiteralText) and self._text == other.text
+
 
 class _OptionalBlock(_Generator):
     '''Optional block will render its contents only if any _Generator in its scope did return non-empty result.'''
@@ -87,10 +110,16 @@ class _OptionalBlock(_Generator):
     def render(self, replacement):
         # type: (Mapping[str,str]) -> str
         res = [(isinstance(x, _Generator), x.render(replacement)) for x in self._scope]
-        if any((t[0] and len(t[1]) != 0) for t in res):
+        if any((t[0] and t[1] is not None and len(t[1]) != 0) for t in res):
             return u"".join(t[1] for t in res)
         else:
             return u""
+
+    def __eq__(self, other):
+        """
+        :type other: _OptionalBlock
+        """
+        return isinstance(other, _OptionalBlock) and self._scope == other._scope
 
 
 _OPTIONAL_START = u'{'
@@ -230,8 +259,9 @@ def render(pattern, replacement):
     p = Pattern(pattern)
     return p(replacement), p.warnings
 
+
 if __name__ == "__main__":
     # primitive test ;)
-    p = Pattern(u"[$Disc.]$Track - $Artist - $Title[ '['$Year']'")
+    p = Pattern(u"{$Disc.}$Track - $Artist - $Title{ [$Year]}")
     d = {'$Disc': '', '$Track': '05', '$Artist': u'Grzegżółka', '$Title': u'Błona kapłona', '$Year': '2019'}
-    print(p(d).encode('utf8'), p.warnings)
+    assert p(d) == u"05 - Grzegżółka - Błona kapłona [2019]"

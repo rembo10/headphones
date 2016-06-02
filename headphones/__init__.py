@@ -87,7 +87,7 @@ LATEST_VERSION = None
 COMMITS_BEHIND = None
 
 LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a", "asf", "wma"]
-LOSSLESS_MEDIA_FORMATS = ["flac"]
+LOSSLESS_MEDIA_FORMATS = ["flac", "aiff"]
 MEDIA_FORMATS = LOSSY_MEDIA_FORMATS + LOSSLESS_MEDIA_FORMATS
 
 MIRRORLIST = ["musicbrainz.org", "headphones", "custom"]
@@ -132,7 +132,7 @@ def initialize(config_file):
                 CONFIG.LOG_DIR = None
 
                 if not QUIET:
-                    sys.stderr.write("Unable to create the log directory. " \
+                    sys.stderr.write("Unable to create the log directory. "
                                      "Logging to screen only.\n")
 
         # Start the logger, disable console if needed
@@ -143,7 +143,7 @@ def initialize(config_file):
             SOFT_CHROOT = SoftChroot(str(CONFIG.SOFT_CHROOT))
             if SOFT_CHROOT.isEnabled():
                 logger.info("Soft-chroot enabled for dir: %s", str(CONFIG.SOFT_CHROOT))
-        except exceptions.SoftChrootError as e:
+        except headphones.exceptions.SoftChrootError as e:
             logger.error("SoftChroot error: %s", e)
             raise e
 
