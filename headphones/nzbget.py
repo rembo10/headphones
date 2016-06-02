@@ -49,11 +49,11 @@ def sendNZB(nzb):
     nzbGetRPC = xmlrpclib.ServerProxy(url)
     try:
         if nzbGetRPC.writelog("INFO", "headphones connected to drop of %s any moment now." % (
-            nzb.name + ".nzb")):
+                nzb.name + ".nzb")):
             logger.debug(u"Successfully connected to NZBget")
         else:
             logger.info(u"Successfully connected to NZBget, but unable to send a message" % (
-            nzb.name + ".nzb"))
+                nzb.name + ".nzb"))
 
     except httplib.socket.error:
         logger.error(

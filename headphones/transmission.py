@@ -164,7 +164,7 @@ def torrentAction(method, arguments):
                                             whitelist_status_code=[401, 409])
         if response.status_code == 401:
             if auth:
-                logger.error("Username and/or password not accepted by " \
+                logger.error("Username and/or password not accepted by "
                             "Transmission")
             else:
                 logger.error("Transmission authorization required")

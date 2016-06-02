@@ -29,7 +29,7 @@ import urllib2
 import os
 import re
 from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers, notifiers
-from headphones.helpers import checked, radio, today, cleanName
+from headphones.helpers import checked, radio, today, clean_name
 from mako.lookup import TemplateLookup
 from mako import exceptions
 import headphones
@@ -281,8 +281,7 @@ class WebInterface(object):
     def scanArtist(self, ArtistID):
 
         myDB = db.DBConnection()
-        artist_name = \
-        myDB.select('SELECT DISTINCT ArtistName FROM artists WHERE ArtistID=?', [ArtistID])[0][0]
+        artist_name = myDB.select('SELECT DISTINCT ArtistName FROM artists WHERE ArtistID=?', [ArtistID])[0][0]
 
         logger.info(u"Scanning artist: %s", artist_name)
 
@@ -292,8 +291,7 @@ class WebInterface(object):
         acceptable_formats = ["$artist", "$sortartist", "$first/$artist", "$first/$sortartist"]
 
         if not folder_format.lower() in acceptable_formats:
-            logger.info(
-                "Can't determine the artist folder from the configured folder_format. Not scanning")
+            logger.info("Can't determine the artist folder from the configured folder_format. Not scanning")
             return
 
         # Format the folder to match the settings
@@ -388,8 +386,7 @@ class WebInterface(object):
             if ArtistID:
                 ArtistIDT = ArtistID
             else:
-                ArtistIDT = \
-                myDB.action('SELECT ArtistID FROM albums WHERE AlbumID=?', [mbid]).fetchone()[0]
+                ArtistIDT = myDB.action('SELECT ArtistID FROM albums WHERE AlbumID=?', [mbid]).fetchone()[0]
             myDB.action(
                 'UPDATE artists SET TotalTracks=(SELECT COUNT(*) FROM tracks WHERE ArtistID = ? AND AlbumTitle IN (SELECT AlbumTitle FROM albums WHERE Status != "Ignored")) WHERE ArtistID = ?',
                 [ArtistIDT, ArtistIDT])
@@ -577,7 +574,7 @@ class WebInterface(object):
         for albums in have_albums:
             # Have to skip over manually matched tracks
             if albums['ArtistName'] and albums['AlbumTitle'] and albums['TrackTitle']:
-                original_clean = helpers.cleanName(
+                original_clean = helpers.clean_name(
                     albums['ArtistName'] + " " + albums['AlbumTitle'] + " " + albums['TrackTitle'])
                 # else:
                 #     original_clean = None
@@ -595,10 +592,12 @@ class WebInterface(object):
         # unmatchedalbums = [f for f in have_album_dictionary if f not in [x for x in headphones_album_dictionary]]
 
         check = set(
-            [(cleanName(d['ArtistName']).lower(), cleanName(d['AlbumTitle']).lower()) for d in
+            [(clean_name(d['ArtistName']).lower(),
+              clean_name(d['AlbumTitle']).lower()) for d in
              headphones_album_dictionary])
         unmatchedalbums = [d for d in have_album_dictionary if (
-        cleanName(d['ArtistName']).lower(), cleanName(d['AlbumTitle']).lower()) not in check]
+            clean_name(d['ArtistName']).lower(),
+            clean_name(d['AlbumTitle']).lower()) not in check]
 
         return serve_template(templatename="manageunmatched.html", title="Manage Unmatched Items",
                               unmatchedalbums=unmatchedalbums)
@@ -622,8 +621,8 @@ class WebInterface(object):
                 (artist, album))
 
         elif action == "matchArtist":
-            existing_artist_clean = helpers.cleanName(existing_artist).lower()
-            new_artist_clean = helpers.cleanName(new_artist).lower()
+            existing_artist_clean = helpers.clean_name(existing_artist).lower()
+            new_artist_clean = helpers.clean_name(new_artist).lower()
             if new_artist_clean != existing_artist_clean:
                 have_tracks = myDB.action(
                     'SELECT Matched, CleanName, Location, BitRate, Format FROM have WHERE ArtistName=?',
@@ -659,8 +658,7 @@ class WebInterface(object):
                             # This was throwing errors and I don't know why, but it seems to be working fine.
                             # else:
                             # logger.info("There was an error modifying Artist %s. This should not have happened" % existing_artist)
-                logger.info("Manual matching yielded %s new matches for Artist: %s" % (
-                update_count, new_artist))
+                logger.info("Manual matching yielded %s new matches for Artist: %s" % (update_count, new_artist))
                 if update_count > 0:
                     librarysync.update_album_status()
             else:
@@ -668,10 +666,10 @@ class WebInterface(object):
                     "Artist %s already named appropriately; nothing to modify" % existing_artist)
 
         elif action == "matchAlbum":
-            existing_artist_clean = helpers.cleanName(existing_artist).lower()
-            new_artist_clean = helpers.cleanName(new_artist).lower()
-            existing_album_clean = helpers.cleanName(existing_album).lower()
-            new_album_clean = helpers.cleanName(new_album).lower()
+            existing_artist_clean = helpers.clean_name(existing_artist).lower()
+            new_artist_clean = helpers.clean_name(new_artist).lower()
+            existing_album_clean = helpers.clean_name(existing_album).lower()
+            new_album_clean = helpers.clean_name(new_album).lower()
             existing_clean_string = existing_artist_clean + " " + existing_album_clean
             new_clean_string = new_artist_clean + " " + new_album_clean
             if existing_clean_string != new_clean_string:
@@ -712,13 +710,13 @@ class WebInterface(object):
                             # else:
                             # logger.info("There was an error modifying Artist %s / Album %s with clean name %s" % (existing_artist, existing_album, existing_clean_string))
                 logger.info("Manual matching yielded %s new matches for Artist: %s / Album: %s" % (
-                update_count, new_artist, new_album))
+                    update_count, new_artist, new_album))
                 if update_count > 0:
                     librarysync.update_album_status(album_id)
             else:
                 logger.info(
                     "Artist %s / Album %s already named appropriately; nothing to modify" % (
-                    existing_artist, existing_album))
+                        existing_artist, existing_album))
 
     @cherrypy.expose
     def manageManual(self):
@@ -728,10 +726,10 @@ class WebInterface(object):
             'SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched from have')
         for albums in manualalbums:
             if albums['ArtistName'] and albums['AlbumTitle'] and albums['TrackTitle']:
-                original_clean = helpers.cleanName(
+                original_clean = helpers.clean_name(
                     albums['ArtistName'] + " " + albums['AlbumTitle'] + " " + albums['TrackTitle'])
                 if albums['Matched'] == "Ignored" or albums['Matched'] == "Manual" or albums[
-                    'CleanName'] != original_clean:
+                        'CleanName'] != original_clean:
                     if albums['Matched'] == "Ignored":
                         album_status = "Ignored"
                     elif albums['Matched'] == "Manual" or albums['CleanName'] != original_clean:
@@ -769,7 +767,7 @@ class WebInterface(object):
                 [artist])
             update_count = 0
             for tracks in update_clean:
-                original_clean = helpers.cleanName(
+                original_clean = helpers.clean_name(
                     tracks['ArtistName'] + " " + tracks['AlbumTitle'] + " " + tracks[
                         'TrackTitle']).lower()
                 album = tracks['AlbumTitle']
@@ -797,7 +795,7 @@ class WebInterface(object):
                 (artist, album))
             update_count = 0
             for tracks in update_clean:
-                original_clean = helpers.cleanName(
+                original_clean = helpers.clean_name(
                     tracks['ArtistName'] + " " + tracks['AlbumTitle'] + " " + tracks[
                         'TrackTitle']).lower()
                 track_title = tracks['TrackTitle']
@@ -990,14 +988,14 @@ class WebInterface(object):
             totalcount = len(filtered)
         else:
             query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch + '%"' + 'ORDER BY %s COLLATE NOCASE %s' % (
-            sortcolumn, sSortDir_0)
+                sortcolumn, sSortDir_0)
             filtered = myDB.select(query)
             totalcount = myDB.select('SELECT COUNT(*) from artists')[0][0]
 
         if sortbyhavepercent:
             filtered.sort(key=lambda x: (
-            float(x['HaveTracks']) / x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0,
-            x['HaveTracks'] if x['HaveTracks'] else 0.0), reverse=sSortDir_0 == "asc")
+                float(x['HaveTracks']) / x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0,
+                x['HaveTracks'] if x['HaveTracks'] else 0.0), reverse=sSortDir_0 == "asc")
 
         # can't figure out how to change the datatables default sorting order when its using an ajax datasource so ill
         # just reverse it here and the first click on the "Latest Album" header will sort by descending release date
@@ -1157,6 +1155,7 @@ class WebInterface(object):
             "transmission_username": headphones.CONFIG.TRANSMISSION_USERNAME,
             "transmission_password": headphones.CONFIG.TRANSMISSION_PASSWORD,
             "deluge_host": headphones.CONFIG.DELUGE_HOST,
+            "deluge_cert": headphones.CONFIG.DELUGE_CERT,
             "deluge_password": headphones.CONFIG.DELUGE_PASSWORD,
             "deluge_label": headphones.CONFIG.DELUGE_LABEL,
             "deluge_done_directory": headphones.CONFIG.DELUGE_DONE_DIRECTORY,
@@ -1462,7 +1461,6 @@ class WebInterface(object):
                 continue
             conftype = _conf[1]
 
-            #print '===>', conftype
             if conftype is headphones.config.path:
                 nv = headphones.SOFT_CHROOT.revoke(v)
                 if nv != v:

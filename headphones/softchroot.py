@@ -1,4 +1,5 @@
 import os
+
 from headphones.exceptions import SoftChrootError
 
 
@@ -13,7 +14,7 @@ class SoftChroot(object):
 
     def __init__(self, path):
         if not path:
-            #disabled
+            # disabled
             return
 
         path = path.strip()

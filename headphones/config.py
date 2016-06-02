@@ -55,7 +55,7 @@ _CONFIG_DEFINITIONS = {
     'CHECK_GITHUB_INTERVAL': (int, 'General', 360),
     'CHECK_GITHUB_ON_STARTUP': (int, 'General', 1),
     'CLEANUP_FILES': (int, 'General', 0),
-    'CONFIG_VERSION': (str, 'General', '0'),
+    'CONFIG_VERSION': (str, 'General', '2'),
     'CORRECT_METADATA': (int, 'General', 0),
     'CUE_SPLIT': (int, 'General', 1),
     'CUE_SPLIT_FLAC_PATH': (path, 'General', ''),
@@ -68,6 +68,7 @@ _CONFIG_DEFINITIONS = {
     'CUSTOMUSER': (str, 'General', ''),
     'DELETE_LOSSLESS_FILES': (int, 'General', 1),
     'DELUGE_HOST': (str, 'Deluge', ''),
+    'DELUGE_CERT': (str, 'Deluge', ''),
     'DELUGE_PASSWORD': (str, 'Deluge', ''),
     'DELUGE_LABEL': (str, 'Deluge', ''),
     'DELUGE_DONE_DIRECTORY': (str, 'Deluge', ''),
@@ -104,11 +105,11 @@ _CONFIG_DEFINITIONS = {
     'EXTRAS': (str, 'General', ''),
     'EXTRA_NEWZNABS': (list, 'Newznab', ''),
     'EXTRA_TORZNABS': (list, 'Torznab', ''),
-    'FILE_FORMAT': (str, 'General', 'Track Artist - Album [Year] - Title'),
+    'FILE_FORMAT': (str, 'General', '$Track $Artist - $Album [$Year] - $Title'),
     'FILE_PERMISSIONS': (str, 'General', '0644'),
     'FILE_PERMISSIONS_ENABLED': (bool_int, 'General', True),
     'FILE_UNDERSCORES': (int, 'General', 0),
-    'FOLDER_FORMAT': (str, 'General', 'Artist/Album [Year]'),
+    'FOLDER_FORMAT': (str, 'General', '$Artist/$Album [$Year]'),
     'FOLDER_PERMISSIONS_ENABLED': (bool_int, 'General', True),
     'FOLDER_PERMISSIONS': (str, 'General', '0755'),
     'FREEZE_DB': (int, 'General', 0),
@@ -441,59 +442,9 @@ class Config(object):
             self._config[section][ini_key] = definition_type(value)
 
     def _upgrade(self):
-        """ Update folder formats in the config & bump up config version """
-        if self.CONFIG_VERSION == '0':
-            from headphones.helpers import replace_all
-            file_values = {
-                'tracknumber': 'Track',
-                'title': 'Title',
-                'artist': 'Artist',
-                'album': 'Album',
-                'year': 'Year'
-            }
-            folder_values = {
-                'artist': 'Artist',
-                'album': 'Album',
-                'year': 'Year',
-                'releasetype': 'Type',
-                'first': 'First',
-                'lowerfirst': 'first'
-            }
-            self.FILE_FORMAT = replace_all(self.FILE_FORMAT, file_values)
-            self.FOLDER_FORMAT = replace_all(self.FOLDER_FORMAT, folder_values)
-
-            self.CONFIG_VERSION = '1'
-
-        if self.CONFIG_VERSION == '1':
-            from headphones.helpers import replace_all
-            file_values = {
-                'Track': '$Track',
-                'Title': '$Title',
-                'Artist': '$Artist',
-                'Album': '$Album',
-                'Year': '$Year',
-                'track': '$track',
-                'title': '$title',
-                'artist': '$artist',
-                'album': '$album',
-                'year': '$year'
-            }
-            folder_values = {
-                'Artist': '$Artist',
-                'Album': '$Album',
-                'Year': '$Year',
-                'Type': '$Type',
-                'First': '$First',
-                'artist': '$artist',
-                'album': '$album',
-                'year': '$year',
-                'type': '$type',
-                'first': '$first'
-            }
-            self.FILE_FORMAT = replace_all(self.FILE_FORMAT, file_values)
-            self.FOLDER_FORMAT = replace_all(self.FOLDER_FORMAT, folder_values)
-            self.CONFIG_VERSION = '2'
-
+        """
+        Bring old configs up to date
+        """
         if self.CONFIG_VERSION == '2':
             # Update the config to use direct path to the encoder rather than the encoder folder
             if self.ENCODERFOLDER:

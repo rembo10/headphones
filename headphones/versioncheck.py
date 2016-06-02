@@ -124,7 +124,7 @@ def checkGithub():
     # Get the latest version available from github
     logger.info('Retrieving latest version information from GitHub')
     url = 'https://api.github.com/repos/%s/headphones/commits/%s' % (
-    headphones.CONFIG.GIT_USER, headphones.CONFIG.GIT_BRANCH)
+        headphones.CONFIG.GIT_USER, headphones.CONFIG.GIT_BRANCH)
     version = request.request_json(url, timeout=20, validator=lambda x: type(x) == dict)
 
     if version is None:
@@ -147,7 +147,7 @@ def checkGithub():
 
     logger.info('Comparing currently installed version with latest GitHub version')
     url = 'https://api.github.com/repos/%s/headphones/compare/%s...%s' % (
-    headphones.CONFIG.GIT_USER, headphones.LATEST_VERSION, headphones.CURRENT_VERSION)
+        headphones.CONFIG.GIT_USER, headphones.LATEST_VERSION, headphones.CURRENT_VERSION)
     commits = request.request_json(url, timeout=20, whitelist_status_code=404,
                                    validator=lambda x: type(x) == dict)
 
@@ -192,7 +192,7 @@ def update():
 
     else:
         tar_download_url = 'https://github.com/%s/headphones/tarball/%s' % (
-        headphones.CONFIG.GIT_USER, headphones.CONFIG.GIT_BRANCH)
+            headphones.CONFIG.GIT_USER, headphones.CONFIG.GIT_BRANCH)
         update_dir = os.path.join(headphones.PROG_DIR, 'update')
         version_path = os.path.join(headphones.PROG_DIR, 'version.txt')
 
