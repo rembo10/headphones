@@ -664,7 +664,7 @@ def renameNFO(albumpath):
                         os.rename(os.path.join(r, file), new_file_name)
                     except Exception as e:
                         logger.error(u'Could not rename file: %s. Error: %s' % (
-                        os.path.join(r, file).decode(headphones.SYS_ENCODING, 'replace'), e))
+                            os.path.join(r, file).decode(headphones.SYS_ENCODING, 'replace'), e))
 
 
 def moveFiles(albumpath, release, metadata_dict):
