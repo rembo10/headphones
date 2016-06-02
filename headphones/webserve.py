@@ -733,7 +733,7 @@ class WebInterface(object):
                 original_clean = helpers.clean_name(
                     albums['ArtistName'] + " " + albums['AlbumTitle'] + " " + albums['TrackTitle'])
                 if albums['Matched'] == "Ignored" or albums['Matched'] == "Manual" or albums[
-                    'CleanName'] != original_clean:
+                        'CleanName'] != original_clean:
                     if albums['Matched'] == "Ignored":
                         album_status = "Ignored"
                     elif albums['Matched'] == "Manual" or albums['CleanName'] != original_clean:

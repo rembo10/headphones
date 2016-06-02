@@ -129,7 +129,7 @@ def encode(albumPath):
                             os.path.splitext(music)[1], music)
             else:
                 if music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.mp3') and (
-                    int(infoMusic.bitrate / 1000) <= headphones.CONFIG.BITRATE):
+                        int(infoMusic.bitrate / 1000) <= headphones.CONFIG.BITRATE):
                     logger.info('%s has bitrate <= %skb, will not be re-encoded', music,
                                 headphones.CONFIG.BITRATE)
                 else:
