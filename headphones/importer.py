@@ -314,8 +314,8 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
 
             # Build the dictionary for the fullreleaselist
             for items in find_hybrid_releases:
-                if items['ReleaseID'] != rg[
-                    'id']:  # don't include hybrid information, since that's what we're replacing
+                # don't include hybrid information, since that's what we're replacing
+                if items['ReleaseID'] != rg['id']:
                     hybrid_release_id = items['ReleaseID']
                     newValueDict = {"ArtistID": items['ArtistID'],
                                     "ArtistName": items['ArtistName'],
@@ -503,14 +503,14 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
 
             if rg_exists:
                 if rg_exists['Status'] == 'Skipped' and (
-                    (have_track_count / float(total_track_count)) >= (
-                    headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0)):
+                        (have_track_count / float(total_track_count)) >= (
+                        headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0)):
                     myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?',
                                 ['Downloaded', rg['id']])
                     marked_as_downloaded = True
             else:
                 if (have_track_count / float(total_track_count)) >= (
-                    headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0):
+                        headphones.CONFIG.ALBUM_COMPLETION_PCT / 100.0):
                     myDB.action('UPDATE albums SET Status=? WHERE AlbumID=?',
                                 ['Downloaded', rg['id']])
                     marked_as_downloaded = True

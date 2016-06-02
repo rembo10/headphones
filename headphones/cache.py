@@ -421,7 +421,7 @@ class Cache(object):
         # Grab the thumbnail as well if we're getting the full artwork (as long
         # as it's missing/outdated.
         if thumb_url and self.query_type in ['thumb', 'artwork'] and not (
-            self.thumb_files and self._is_current(self.thumb_files[0])):
+                self.thumb_files and self._is_current(self.thumb_files[0])):
             artwork = request.request_content(thumb_url, timeout=20)
 
             if artwork:

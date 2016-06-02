@@ -317,7 +317,7 @@ def more_filtering(results, album, albumlength, new):
 
     # Lossless - ignore results if target size outside bitrate range
     if headphones.CONFIG.PREFERRED_QUALITY == 3 and albumlength and (
-        headphones.CONFIG.LOSSLESS_BITRATE_FROM or headphones.CONFIG.LOSSLESS_BITRATE_TO):
+            headphones.CONFIG.LOSSLESS_BITRATE_FROM or headphones.CONFIG.LOSSLESS_BITRATE_TO):
         if headphones.CONFIG.LOSSLESS_BITRATE_FROM:
             low_size_limit = albumlength / 1000 * int(headphones.CONFIG.LOSSLESS_BITRATE_FROM) * 128
         if headphones.CONFIG.LOSSLESS_BITRATE_TO:
@@ -1066,7 +1066,7 @@ def verifyresult(title, artistterm, term, lossless):
 
     # Filter out FLAC if we're not specifically looking for it
     if headphones.CONFIG.PREFERRED_QUALITY == (
-        0 or '0') and 'flac' in title.lower() and not lossless:
+            0 or '0') and 'flac' in title.lower() and not lossless:
         logger.info(
             "Removed %s from results because it's a lossless album and we're not looking for a lossless album right now.",
             title)
