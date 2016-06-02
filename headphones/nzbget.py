@@ -53,7 +53,7 @@ def sendNZB(nzb):
             logger.debug(u"Successfully connected to NZBget")
         else:
             logger.info(u"Successfully connected to NZBget, but unable to send a message" % (
-            nzb.name + ".nzb"))
+                nzb.name + ".nzb"))
 
     except httplib.socket.error:
         logger.error(

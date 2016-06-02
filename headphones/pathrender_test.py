@@ -57,11 +57,7 @@ class PathRenderTest(TestCase):
         pattern = Pattern(u"{$Disc.}$Track - $Artist - $Title{ [$Year]")
         self.assertEqual(set([Warnings.UNCLOSED_OPTIONAL]), pattern.warnings)
         pattern = Pattern(u"{$Disc.}$Track - $Artist - $Title{ [$Year]'}")
-        self.assertEqual(set([
-                Warnings.UNCLOSED_ESCAPE,
-                Warnings.UNCLOSED_OPTIONAL
-            ]),
-            pattern.warnings)
+        self.assertEqual(set([Warnings.UNCLOSED_ESCAPE, Warnings.UNCLOSED_OPTIONAL]), pattern.warnings)
 
     def test_replacement(self):
         """pathrender: _Replacement variable substitution"""

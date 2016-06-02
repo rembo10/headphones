@@ -353,8 +353,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                 len(myDB.select(
                     'SELECT TrackTitle from tracks WHERE ArtistName like ? AND Location IS NOT NULL',
                     [artist])) + len(myDB.select(
-                    'SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"',
-                    [artist]))
+                        'SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"',
+                        [artist]))
             )
             # Note: some people complain about having "artist have tracks" > # of tracks total in artist official releases
             # (can fix by getting rid of second len statement)
@@ -382,8 +382,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
         havetracks = len(
             myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL',
                         [ArtistID])) + len(myDB.select(
-            'SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"',
-            [ArtistName]))
+                            'SELECT TrackTitle from have WHERE ArtistName like ? AND Matched = "Failed"',
+                            [ArtistName]))
         myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, ArtistID])
 
     if not append:
