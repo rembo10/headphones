@@ -348,9 +348,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
             f = MediaFile(downloaded_track)
             builder.add_media_file(f)
         except (FileTypeError, UnreadableFileError):
-            logger.error("Track file is not a valid media file: %s. Not "
-                         "continuing.", downloaded_track.decode(
-                headphones.SYS_ENCODING, "replace"))
+            logger.error("Track file is not a valid media file: %s. Not continuing.",
+                         downloaded_track.decode(headphones.SYS_ENCODING, "replace"))
             return
         except IOError:
             logger.error("Unable to find media file: %s. Not continuing.")
@@ -455,7 +454,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
             hash = seed_snatched['FolderName']
             torrent_removed = False
             logger.info(u'%s - %s. Checking if torrent has finished seeding and can be removed' % (
-            release['ArtistName'], release['AlbumTitle']))
+                release['ArtistName'], release['AlbumTitle']))
             if headphones.CONFIG.TORRENT_DOWNLOADER == 1:
                 torrent_removed = transmission.removeTorrent(hash, True)
             elif headphones.CONFIG.TORRENT_DOWNLOADER == 3:  # Deluge
@@ -603,7 +602,7 @@ def embedAlbumArt(artwork, downloaded_track_list):
             f.save()
         except Exception as e:
             logger.error(u'Error embedding album art to: %s. Error: %s' % (
-            downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), str(e)))
+                downloaded_track.decode(headphones.SYS_ENCODING, 'replace'), str(e)))
             continue
 
 
@@ -647,7 +646,7 @@ def cleanupFiles(albumpath):
                     os.remove(os.path.join(r, files))
                 except Exception as e:
                     logger.error(u'Could not remove file: %s. Error: %s' % (
-                    files.decode(headphones.SYS_ENCODING, 'replace'), e))
+                        files.decode(headphones.SYS_ENCODING, 'replace'), e))
 
 
 def renameNFO(albumpath):
@@ -657,14 +656,14 @@ def renameNFO(albumpath):
         for file in f:
             if file.lower().endswith('.nfo'):
                 logger.debug('Renaming: "%s" to "%s"' % (
-                file.decode(headphones.SYS_ENCODING, 'replace'),
-                file.decode(headphones.SYS_ENCODING, 'replace') + '-orig'))
+                    file.decode(headphones.SYS_ENCODING, 'replace'),
+                    file.decode(headphones.SYS_ENCODING, 'replace') + '-orig'))
                 try:
                     new_file_name = os.path.join(r, file)[:-3] + 'orig.nfo'
                     os.rename(os.path.join(r, file), new_file_name)
                 except Exception as e:
                     logger.error(u'Could not rename file: %s. Error: %s' % (
-                    os.path.join(r, file).decode(headphones.SYS_ENCODING, 'replace'), e))
+                        os.path.join(r, file).decode(headphones.SYS_ENCODING, 'replace'), e))
 
 
 def moveFiles(albumpath, release, metadata_dict):
@@ -736,7 +735,7 @@ def moveFiles(albumpath, release, metadata_dict):
                 except Exception as e:
                     logger.error(
                         "Error deleting existing folder: %s. Creating duplicate folder. Error: %s" % (
-                        lossless_destination_path.decode(headphones.SYS_ENCODING, 'replace'), e))
+                            lossless_destination_path.decode(headphones.SYS_ENCODING, 'replace'), e))
                     create_duplicate_folder = True
 
             if not headphones.CONFIG.REPLACE_EXISTING_FOLDERS or create_duplicate_folder:
@@ -759,7 +758,7 @@ def moveFiles(albumpath, release, metadata_dict):
                 os.makedirs(lossless_destination_path)
             except Exception as e:
                 logger.error('Could not create lossless folder for %s. (Error: %s)' % (
-                release['AlbumTitle'], e))
+                    release['AlbumTitle'], e))
                 if not make_lossy_folder:
                     return [albumpath]
 
@@ -774,7 +773,7 @@ def moveFiles(albumpath, release, metadata_dict):
                 except Exception as e:
                     logger.error(
                         "Error deleting existing folder: %s. Creating duplicate folder. Error: %s" % (
-                        lossy_destination_path.decode(headphones.SYS_ENCODING, 'replace'), e))
+                            lossy_destination_path.decode(headphones.SYS_ENCODING, 'replace'), e))
                     create_duplicate_folder = True
 
             if not headphones.CONFIG.REPLACE_EXISTING_FOLDERS or create_duplicate_folder:
