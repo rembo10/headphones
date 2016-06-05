@@ -165,7 +165,7 @@ def get_seed_ratio(provider):
         seed_ratio = headphones.CONFIG.PIRATEBAY_RATIO
     elif provider == 'Old Pirate Bay':
         seed_ratio = headphones.CONFIG.OLDPIRATEBAY_RATIO
-    elif provider == 'Waffles.fm':
+    elif provider == 'Waffles.ch':
         seed_ratio = headphones.CONFIG.WAFFLES_RATIO
     elif provider == 'Mininova':
         seed_ratio = headphones.CONFIG.MININOVA_RATIO
@@ -1332,8 +1332,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                         logger.exception("Unhandled exception in the KAT parser")
 
     if headphones.CONFIG.WAFFLES:
-        provider = "Waffles.fm"
-        providerurl = fix_url("https://www.waffles.fm/browse.php")
+        provider = "Waffles.ch"
+        providerurl = fix_url("https://www.waffles.ch/browse.php")
 
         bitrate = None
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
@@ -1362,7 +1362,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             query_items.append('bitrate:"%s"' % bitrate)
 
         # Requesting content
-        logger.info('Parsing results from Waffles.fm')
+        logger.info('Parsing results from Waffles.ch')
 
         params = {
             "uid": headphones.CONFIG.WAFFLES_UID,
@@ -1395,7 +1395,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                         logger.info('Found %s. Size: %s', title, helpers.bytes_to_mb(size))
                     except Exception as e:
                         logger.error(
-                            u"An error occurred while trying to parse the response from Waffles.fm: %s",
+                            u"An error occurred while trying to parse the response from Waffles.ch: %s",
                             e)
 
     # rutracker.org
