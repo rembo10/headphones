@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.5.15
+Released 07 June 2016
+
+Hotfix update
+
+Highlights:
+* Fixed: Update vip mirror url to point to new server
+* Fixed: Update waffles url to .ch
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.14...v0.5.15).
+
 ## v0.5.14
 Released 02 June 2016
 
