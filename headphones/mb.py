@@ -51,8 +51,8 @@ def startmb():
         mbpass = headphones.CONFIG.CUSTOMPASS
         sleepytime = int(headphones.CONFIG.CUSTOMSLEEP)
     elif headphones.CONFIG.MIRROR == "headphones":
-        mbhost = "codeshy.com"
-        mbport = 8181
+        mbhost = "musicbrainz.codeshy.com"
+        mbport = 80
         mbuser = headphones.CONFIG.HPUSER
         mbpass = headphones.CONFIG.HPPASS
         sleepytime = 0
