@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.5.16
+Released 10 June 2016
+
+Hotfix update
+
+Highlights:
+* Fixed: Waffles url
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.15...v0.5.16).
+
 ## v0.5.15
 Released 07 June 2016
 
