@@ -1333,7 +1333,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
     if headphones.CONFIG.WAFFLES:
         provider = "Waffles.ch"
-        providerurl = fix_url("https://www.waffles.ch/browse.php")
+        providerurl = fix_url("https://waffles.ch/browse.php")
 
         bitrate = None
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
