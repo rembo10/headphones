@@ -13,9 +13,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
-import json
 import base64
+import json
+import time
 import urlparse
 
 from headphones import logger, request
@@ -156,16 +156,16 @@ def torrentAction(method, arguments):
     for retry in range(2):
         if _session_id is not None:
             headers = {'x-transmission-session-id': _session_id}
-            response = request.request_response(host, method="POST",
-                data=data_json, headers=headers, auth=auth,
+            response = request.request_response(
+                host, method="POST", data=data_json, headers=headers, auth=auth,
                 whitelist_status_code=[200, 401, 409])
         else:
-            response = request.request_response(host, auth=auth,
-                                            whitelist_status_code=[401, 409])
+            response = request.request_response(
+                host, auth=auth, whitelist_status_code=[401, 409])
         if response.status_code == 401:
             if auth:
-                logger.error("Username and/or password not accepted by "
-                            "Transmission")
+                logger.error(
+                    "Username and/or password not accepted by Transmission")
             else:
                 logger.error("Transmission authorization required")
             return

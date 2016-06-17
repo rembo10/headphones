@@ -14,19 +14,19 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from operator import itemgetter
-import unicodedata
 import datetime
+import fnmatch
+from operator import itemgetter
+import os
+import re
+import sys
 import shutil
 import time
-import sys
+import unicodedata
 
-import fnmatch
-import re
-import os
 from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
-import headphones
 
+import headphones
 
 # Modified from https://github.com/Verrus/beets-plugin-featInTitle
 RE_FEATURING = re.compile(r"[fF]t\.|[fF]eaturing|[fF]eat\.|\b[wW]ith\b|&|vs\.")
@@ -206,8 +206,8 @@ def replace_all(text, dic, normalize=False):
                     else:
                         j = unicodedata.normalize('NFC', j)
                 except TypeError:
-                    j = unicodedata.normalize('NFC',
-                        j.decode(headphones.SYS_ENCODING, 'replace'))
+                    j = unicodedata.normalize(
+                        'NFC', j.decode(headphones.SYS_ENCODING, 'replace'))
             new_dic[i] = j
         dic = new_dic
     return pathrender.render(text, dic)[0]
