@@ -13,25 +13,26 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from urllib import urlencode
-import urllib
-import subprocess
-import json
 from email.mime.text import MIMEText
-import smtplib
 import email.utils
 from httplib import HTTPSConnection
-from urlparse import parse_qsl
-import urllib2
-
+import json
 import os.path
-from headphones import logger, helpers, common, request
-from pynma import pynma
+import smtplib
+import subprocess
+import urllib
+import urllib2
+from urllib import urlencode
+from urlparse import parse_qsl
+
 import cherrypy
-import headphones
+from pynma import pynma
 import gntp.notifier
 import oauth2 as oauth
 import pythontwitter as twitter
+
+import headphones
+from headphones import logger, helpers, common, request
 
 
 class GROWL(object):
@@ -618,8 +619,9 @@ class TwitterNotifier(object):
 
     def notify_download(self, title):
         if headphones.CONFIG.TWITTER_ENABLED:
-            self._notifyTwitter(common.notifyStrings[
-                                    common.NOTIFY_DOWNLOAD] + ': ' + title + ' at ' + helpers.now())
+            self._notifyTwitter('{}: {} at {}'.format(
+                common.notifyStrings[common.NOTIFY_DOWNLOAD], title,
+                helpers.now()))
 
     def test_notify(self):
         return self._notifyTwitter(

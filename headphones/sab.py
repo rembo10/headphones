@@ -29,8 +29,7 @@ def sab_api_call(request_type=None, params={}, **kwargs):
         headphones.CONFIG.SAB_HOST = 'http://' + headphones.CONFIG.SAB_HOST
 
     if headphones.CONFIG.SAB_HOST.endswith('/'):
-        headphones.CONFIG.SAB_HOST = headphones.CONFIG.SAB_HOST[
-                                     0:len(headphones.CONFIG.SAB_HOST) - 1]
+        headphones.CONFIG.SAB_HOST = headphones.CONFIG.SAB_HOST[0:len(headphones.CONFIG.SAB_HOST) - 1]
 
     url = headphones.CONFIG.SAB_HOST + "/" + "api?"
 
