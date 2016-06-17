@@ -331,19 +331,15 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
 
         # There was a bug where artists with special characters (-,') would show up in new artists.
         artist_list = [
-            x for x in unique_artists
-            if helpers.clean_name(x).lower() not in [
-                helpers.clean_name(y[0]).lower()
-                for y in current_artists
-                ]
+            x for x in unique_artists if helpers.clean_name(x).lower() not in [
+                helpers.clean_name(y[0]).lower() for y in current_artists
             ]
+        ]
         artists_checked = [
-            x for x in unique_artists
-            if helpers.clean_name(x).lower() in [
-                helpers.clean_name(y[0]).lower()
-                for y in current_artists
-                ]
+            x for x in unique_artists if helpers.clean_name(x).lower() in [
+                helpers.clean_name(y[0]).lower() for y in current_artists
             ]
+        ]
 
         # Update track counts
         for artist in artists_checked:
