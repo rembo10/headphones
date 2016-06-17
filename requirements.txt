@@ -3,6 +3,7 @@ CherryPy==6.0.1
 enum==0.4.6
 logutils==0.3.3
 Mako==1.0.4
+oauth2==1.9.0.post1
 ordereddict==1.1
 pytz==2016.4
 PyYAML==3.11
