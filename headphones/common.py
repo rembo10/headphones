@@ -13,27 +13,29 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-'''
+"""
 Created on Aug 1, 2011
 
 @author: Michael
-'''
-import platform
-import operator
+"""
 
+import operator
 import os
+import platform
 import re
+
 from headphones import version
 
 
 # Identify Our Application
-USER_AGENT = 'Headphones/-' + version.HEADPHONES_VERSION + ' (' + platform.system() + ' ' + platform.release() + ')'
+USER_AGENT = 'Headphones/-{} ({} {})'.format(
+    version.HEADPHONES_VERSION, platform.system(), platform.release())
 
 # Notification Types
 NOTIFY_SNATCH = 1
 NOTIFY_DOWNLOAD = 2
 
-notifyStrings = {}
+notifyStrings = dict()
 notifyStrings[NOTIFY_SNATCH] = "Started Download"
 notifyStrings[NOTIFY_DOWNLOAD] = "Download Finished"
 
@@ -75,8 +77,8 @@ class Quality:
     def _getStatusStrings(status):
         toReturn = {}
         for x in Quality.qualityStrings.keys():
-            toReturn[Quality.compositeStatus(status, x)] = Quality.statusPrefixes[status] + " (" + \
-                                                           Quality.qualityStrings[x] + ")"
+            toReturn[Quality.compositeStatus(status, x)] = "{} ({})".format(
+                Quality.statusPrefixes[status], Quality.qualityStrings[x])
         return toReturn
 
     @staticmethod

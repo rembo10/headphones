@@ -16,26 +16,26 @@
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
 
 from base64 import b16encode, b32decode
-from hashlib import sha1
-import string
-import random
-import urllib
 import datetime
+from hashlib import sha1
+import os
+import random
+import re
+import string
 import subprocess
 import unicodedata
+import urllib
 import urlparse
 
-import os
-import re
 from pygazelle import api as gazelleapi
 from pygazelle import encoding as gazelleencoding
 from pygazelle import format as gazelleformat
+from bencode import bencode, bdecode
+
 import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
 from headphones import utorrent, transmission, notifiers, rutracker, deluge
-from bencode import bencode, bdecode
-
 
 # Magnet to torrent services, for Black hole. Stolen from CouchPotato.
 TORRENT_TO_MAGNET_SERVICES = [
@@ -1625,8 +1625,9 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'}
-        provider_url = fix_url(headphones.CONFIG.OLDPIRATEBAY_URL) + \
-                       "/search.php?" + urllib.urlencode({"q": tpb_term, "iht": 6})
+        provider_url = '{}/search.php?{}'.format(
+            fix_url(headphones.CONFIG.OLDPIRATEBAY_URL),
+            urllib.urlencode({"q": tpb_term, "iht": 6}))
 
         data = request.request_soup(url=provider_url, headers=headers)
 

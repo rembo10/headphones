@@ -15,12 +15,15 @@
 
 import time
 
-from headphones import logger, helpers, db, mb, lastfm, metacritic
 from beets.mediafile import MediaFile
+
 import headphones
+from headphones import logger, helpers, db, mb, lastfm, metacritic
 
 blacklisted_special_artist_names = ['[anonymous]', '[data]', '[no artist]',
-                                    '[traditional]', '[unknown]', 'Various Artists']
+                                    '[traditional]', '[unknown]',
+                                    'Various Artists']
+
 blacklisted_special_artists = ['f731ccc4-e22a-43af-a747-64213329e088',
                                '33cf029c-63b0-41a0-9855-be2a3665fb3b',
                                '314e1c25-dde7-4e4d-b2f4-0a7b9f7c56dc',
@@ -38,8 +41,9 @@ def is_exists(artistid):
                              [artistid])
 
     if any(artistid in x for x in artistlist):
-        logger.info(artistlist[0][
-                        1] + u" is already in the database. Updating 'have tracks', but not artist information")
+        logger.info(
+            "{} is already in the database. Updating 'have tracks', but not artist information".format(
+                artistlist[0][1]))
         return True
     else:
         return False

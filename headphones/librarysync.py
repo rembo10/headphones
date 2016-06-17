@@ -13,11 +13,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import math
+import os
+
+from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 
 import headphones
-from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 from headphones import db, logger, helpers, importer, lastfm
 
 
@@ -98,8 +99,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                     logger.info("[%s] Now scanning subdirectory %s" % (
                         dir.decode(headphones.SYS_ENCODING, 'replace'),
                         subdirectory.decode(headphones.SYS_ENCODING, 'replace')))
-                elif latest_subdirectory[file_count] != latest_subdirectory[
-                            file_count - 1] and file_count != 0:
+                elif latest_subdirectory[file_count] != latest_subdirectory[file_count - 1]\
+                        and file_count != 0:
                     logger.info("[%s] Now scanning subdirectory %s" % (
                         dir.decode(headphones.SYS_ENCODING, 'replace'),
                         subdirectory.decode(headphones.SYS_ENCODING, 'replace')))
@@ -175,7 +176,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                         if f_artist and f_artist != check_exist_song['ArtistName']:
                             new_artists.append(f_artist)
                         elif f_artist and f_artist == check_exist_song['ArtistName'] and \
-                                        check_exist_song['Matched'] != "Ignored":
+                                check_exist_song['Matched'] != "Ignored":
                             new_artists.append(f_artist)
                         else:
                             continue
