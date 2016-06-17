@@ -1,4 +1,5 @@
 beautifulsoup4==4.4.1
+biplist==1.0.1
 CherryPy==6.0.1
 enum==0.4.6
 gntp==1.0.3
