@@ -317,10 +317,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
             newValueDict2 = {'Matched': "Failed"}
             myDB.upsert("have", newValueDict2, controlValueDict2)
 
-            # myDB.action('INSERT INTO have (ArtistName, AlbumTitle, TrackNumber, TrackTitle, TrackLength, BitRate, Genre, Date, TrackID, Location, CleanName, Format) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [song['ArtistName'], song['AlbumTitle'], song['TrackNumber'], song['TrackTitle'], song['TrackLength'], song['BitRate'], song['Genre'], song['Date'], song['TrackID'], song['Location'], CleanName, song['Format']])
-
-    logger.info('Completed matching tracks from directory: %s' % dir.decode(headphones.SYS_ENCODING,
-                                                                            'replace'))
+    logger.info('Completed matching tracks from directory: %s' % dir.decode(headphones.SYS_ENCODING, 'replace'))
 
     if not append or artistScan:
         logger.info('Updating scanned artist track counts')

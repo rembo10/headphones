@@ -406,7 +406,8 @@ def expand_subfolders(f):
 
     if difference > 0:
         logger.info(
-            "Found %d media folders, but depth difference between lowest and deepest media folder is %d (expected zero). If this is a discography or a collection of albums, make sure albums are per folder.",
+            "Found %d media folders, but depth difference between lowest and deepest media folder is %d (expected zero). "
+            "If this is a discography or a collection of albums, make sure albums are per folder.",
             len(media_folders), difference)
 
         # While already failed, advice the user what he could try. We assume the

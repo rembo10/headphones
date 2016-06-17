@@ -222,10 +222,9 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
         try:
             f = MediaFile(downloaded_track)
         except Exception as e:
-            logger.info(
-                u"Exception from MediaFile for: " + downloaded_track.decode(headphones.SYS_ENCODING,
-                                                                            'replace') + u" : " + unicode(
-                    e))
+            logger.info("Exception from MediaFile for: {} : {}".format(
+                downloaded_track.decode(headphones.SYS_ENCODING, 'replace'),
+                unicode(e)))
             continue
 
         if not f.artist:
@@ -317,7 +316,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
     new_folder = None
     # Check to see if we're preserving the torrent dir
-    if (headphones.CONFIG.KEEP_TORRENT_FILES and Kind == "torrent" and 'headphones-modified' not in albumpath) or headphones.CONFIG.KEEP_ORIGINAL_FOLDER or keep_original_folder:
+    if (headphones.CONFIG.KEEP_TORRENT_FILES and Kind == "torrent" and 'headphones-modified' not in albumpath) or \
+            headphones.CONFIG.KEEP_ORIGINAL_FOLDER or keep_original_folder:
         new_folder = tempfile.mkdtemp(prefix="headphones_")
         subdir = os.path.join(new_folder, "headphones")
         logger.info("Copying files to " + subdir.decode(headphones.SYS_ENCODING, 'replace') + " subfolder to preserve downloaded files for seeding")
@@ -326,7 +326,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
             # Update the album path with the new location
             albumpath = subdir
         except Exception as e:
-            logger.warn("Cannot copy/move files to temp folder: " + new_folder.decode(headphones.SYS_ENCODING, 'replace') + ". Not continuing. Error: " + str(e))
+            logger.warn("Cannot copy/move files to temp folder: {}. Not continuing. Error: {}".format(
+                new_folder.decode(headphones.SYS_ENCODING, 'replace'), e))
             shutil.rmtree(new_folder)
             return
 

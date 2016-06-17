@@ -509,7 +509,10 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None,
     artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8')
 
     # If Preferred Bitrate and High Limit and Allow Lossless then get both lossy and lossless
-    if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE and headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER and headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
+    if headphones.CONFIG.PREFERRED_QUALITY == 2 and \
+            headphones.CONFIG.PREFERRED_BITRATE and \
+            headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER and \
+            headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
         allow_lossless = True
     else:
         allow_lossless = False
@@ -1188,7 +1191,10 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
     albumterm = re.sub('[\.\-\/]', ' ', cleanalbum).encode('utf-8', 'replace')
 
     # If Preferred Bitrate and High Limit and Allow Lossless then get both lossy and lossless
-    if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE and headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER and headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
+    if headphones.CONFIG.PREFERRED_QUALITY == 2 and \
+            headphones.CONFIG.PREFERRED_BITRATE and \
+            headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER and \
+            headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
         allow_lossless = True
     else:
         allow_lossless = False
@@ -1697,9 +1703,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                         resultlist.append((title, size, url, provider, 'torrent', True))
                         logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
                     else:
-                        logger.info(
-                            '%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d)',
-                            title, size, int(seeders))
+                        _s = '{} is larger than the maxsize, the wrong format or has too little seeders for this category, skipping.'
+                        logger.info((_s + '(Size: {} bytes, Seeders: {})').format(title, size, int(seeders)))
                 except Exception as e:
                     logger.exception("Unhandled exception in the Strike parser")
 
