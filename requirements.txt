@@ -9,6 +9,7 @@ Mako==1.0.4
 mutagen==1.32
 oauth2==1.9.0.post1
 ordereddict==1.1
+PyNMA==1.0
 pytz==2016.4
 PyYAML==3.11
 requests==2.10.0
