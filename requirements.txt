@@ -3,6 +3,7 @@ beets==1.3.18
 bencode==1.0
 biplist==1.0.1
 CherryPy==6.0.1
+configobj==5.0.6
 enum==0.4.6
 feedparser==5.2.1
 gntp==1.0.3
