@@ -1,3 +1,4 @@
+beautifulsoup4==4.4.1
 enum==0.4.6
 Mako==1.0.4
 PyYAML==3.11

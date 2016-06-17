@@ -1,6 +1,8 @@
+PACKAGE = headphones
+
 check:
-	pep8 headphones
-	pyflakes headphones
+	pep8 $PACKAGE
+	pyflakes $PACKAGE
 	nosetests
 
 install_dependencies:
