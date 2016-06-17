@@ -3,5 +3,6 @@ CherryPy==6.0.1
 enum==0.4.6
 Mako==1.0.4
 ordereddict==1.1
+pytz==2016.4
 PyYAML==3.11
 requests==2.10.0
