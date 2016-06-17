@@ -15,7 +15,7 @@ python:
   - "2.7"
 
 install:
-  - make install_dependencies install_dev_dependencies
+  - make install_deps install_dev_deps
 
 script:
   - make check
