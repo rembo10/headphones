@@ -388,7 +388,8 @@ class WebInterface(object):
             else:
                 ArtistIDT = myDB.action('SELECT ArtistID FROM albums WHERE AlbumID=?', [mbid]).fetchone()[0]
             myDB.action(
-                'UPDATE artists SET TotalTracks=(SELECT COUNT(*) FROM tracks WHERE ArtistID = ? AND AlbumTitle IN (SELECT AlbumTitle FROM albums WHERE Status != "Ignored")) WHERE ArtistID = ?',
+                'UPDATE artists SET TotalTracks=(SELECT COUNT(*) FROM tracks WHERE ArtistID = ? AND AlbumTitle IN '
+                '(SELECT AlbumTitle FROM albums WHERE Status != "Ignored")) WHERE ArtistID = ?',
                 [ArtistIDT, ArtistIDT])
         if ArtistID:
             raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
@@ -706,9 +707,6 @@ class WebInterface(object):
                                         [new_clean_filename])
                             album_id = match_tracks['AlbumID']
                             update_count += 1
-                            # This was throwing errors and I don't know why, but it seems to be working fine.
-                            # else:
-                            # logger.info("There was an error modifying Artist %s / Album %s with clean name %s" % (existing_artist, existing_album, existing_clean_string))
                 logger.info("Manual matching yielded %s new matches for Artist: %s / Album: %s" % (
                     update_count, new_artist, new_album))
                 if update_count > 0:
@@ -913,7 +911,8 @@ class WebInterface(object):
     def history(self):
         myDB = db.DBConnection()
         history = myDB.select(
-            '''SELECT AlbumID, Title, Size, URL, DateAdded, Status, Kind, ifnull(FolderName, '?') FolderName FROM snatched WHERE Status NOT LIKE "Seed%" ORDER BY DateAdded DESC''')
+            '''SELECT AlbumID, Title, Size, URL, DateAdded, Status, Kind, ifnull(FolderName, '?') FolderName FROM snatched
+WHERE Status NOT LIKE "Seed%" ORDER BY DateAdded DESC''')
         return serve_template(templatename="history.html", title="History", history=history)
 
     @cherrypy.expose
@@ -987,8 +986,8 @@ class WebInterface(object):
             filtered = myDB.select(query)
             totalcount = len(filtered)
         else:
-            query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch + '%"' + 'ORDER BY %s COLLATE NOCASE %s' % (
-                sortcolumn, sSortDir_0)
+            query = 'SELECT * from artists WHERE ArtistSortName LIKE '
+            query += '"%{}%" OR LatestAlbum LIKE "%{}%" ORDER BY {} COLLATE NOCASE {}'.format(sSearch, sSearch, sortcolumn, sSortDir_0)
             filtered = myDB.select(query)
             totalcount = myDB.select('SELECT COUNT(*) from artists')[0][0]
 

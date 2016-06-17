@@ -2,6 +2,5 @@
 # E126 continuation line over-indented for hanging indent
 # E127 continuation line over-indented for visual indent
 # E128 continuation line under-indented for visual indent
-# E501 line too long (312 > 160 characters)
-ignore = E123,E126,E127,E128,E501
+ignore = E123,E126,E127,E128
 max-line-length = 160
