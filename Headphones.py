@@ -14,8 +14,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
+import argparse
 import os
 import sys
+import time
 
 # Ensure lib added to path, before any other imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib/'))
@@ -23,9 +25,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib/'))
 from headphones import webstart, logger
 
 import locale
-import time
 import signal
-import argparse
 import headphones
 
 # Register signals, such as CTRL + C
@@ -221,6 +221,6 @@ def main():
 
             headphones.SIGNAL = None
 
-# Call main()
+
 if __name__ == "__main__":
     main()
