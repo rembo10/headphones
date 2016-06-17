@@ -247,7 +247,7 @@ def removeTorrent(torrentid, remove_data=False):
                                 "params": [
                                     torrentid,
                                     remove_data
-                                    ],
+                                ],
                                 "id": 25})
         response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
             verify=deluge_verify_cert)
