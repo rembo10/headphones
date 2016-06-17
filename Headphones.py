@@ -15,17 +15,15 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
+import locale
 import os
+import signal
 import sys
 import time
 
 # Ensure lib added to path, before any other imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib/'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib'))
 
-from headphones import webstart, logger
-
-import locale
-import signal
 import headphones
 
 # Register signals, such as CTRL + C
@@ -90,7 +88,7 @@ def main():
         headphones.QUIET = True
 
     # Do an intial setup of the logger.
-    logger.initLogger(console=not headphones.QUIET, log_dir=False,
+    headphones.logger.initLogger(console=not headphones.QUIET, log_dir=False,
         verbose=headphones.VERBOSE)
 
     if args.daemon:
@@ -121,8 +119,8 @@ def main():
             except IOError as e:
                 raise SystemExit("Unable to write PID file: %s", e)
         else:
-            logger.warn("Not running in daemon mode. PID file creation " \
-                "disabled.")
+            headphones.logger.warn(
+                "Not running in daemon mode. PID file creation disabled.")
 
     # Determine which data directory and config file to use
     if args.datadir:
@@ -166,7 +164,7 @@ def main():
     # Force the http port if neccessary
     if args.port:
         http_port = args.port
-        logger.info('Using forced web server port: %i', http_port)
+        headphones.logger.info('Using forced web server port: %i', http_port)
     else:
         http_port = int(headphones.CONFIG.HTTP_PORT)
 
@@ -176,7 +174,8 @@ def main():
         try:
             import OpenSSL
         except ImportError:
-            logger.warn("The pyOpenSSL module is missing. Install this " \
+            headphones.logger.warn(
+                "The pyOpenSSL module is missing. Install this "
                 "module to enable HTTPS. HTTPS will be disabled.")
             headphones.CONFIG.ENABLE_HTTPS = False
 
@@ -192,7 +191,7 @@ def main():
         'http_username': headphones.CONFIG.HTTP_USERNAME,
         'http_password': headphones.CONFIG.HTTP_PASSWORD,
     }
-    webstart.initialize(web_config)
+    headphones.webstart.initialize(web_config)
 
     # Start the background threads
     headphones.start()
@@ -210,7 +209,7 @@ def main():
             except KeyboardInterrupt:
                 headphones.SIGNAL = 'shutdown'
         else:
-            logger.info('Received signal: %s', headphones.SIGNAL)
+            headphones.logger.info('Received signal: %s', headphones.SIGNAL)
 
             if headphones.SIGNAL == 'shutdown':
                 headphones.shutdown()
