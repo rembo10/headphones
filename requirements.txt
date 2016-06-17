@@ -1,6 +1,7 @@
 beautifulsoup4==4.4.1
 CherryPy==6.0.1
 enum==0.4.6
+gntp==1.0.3
 html5lib==0.9999999
 logutils==0.3.3
 Mako==1.0.4
