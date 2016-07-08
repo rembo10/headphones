@@ -105,7 +105,12 @@ load_settings() {
             PORT_OPTS=" --port=${HP_PORT} "
         }
 
-        DAEMON_OPTS=" Headphones.py --quiet --daemon --nolaunch --pidfile=${PID_FILE} --datadir=${DATA_DIR} ${PORT_OPTS}${EXTRA_DAEMON_OPTS}"
+        # Host config
+        [ -n "$HP_HOST" ] && {
+            HOST_OPTS=" --host=${HP_HOST} "
+        }
+
+        DAEMON_OPTS=" Headphones.py --quiet --daemon --nolaunch --pidfile=${PID_FILE} --datadir=${DATA_DIR} ${PORT_OPTS} ${HOST_OPTS} ${EXTRA_DAEMON_OPTS}"
 
         SETTINGS_LOADED=TRUE
     fi
