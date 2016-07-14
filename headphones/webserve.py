@@ -28,7 +28,7 @@ import urllib2
 
 import os
 import re
-from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers, notifiers
+from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers, notifiers, crier
 from headphones.helpers import checked, radio, today, clean_name
 from mako.lookup import TemplateLookup
 from mako import exceptions
@@ -68,6 +68,11 @@ class WebInterface(object):
         myDB = db.DBConnection()
         artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
         return serve_template(templatename="index.html", title="Home", artists=artists)
+
+    @cherrypy.expose
+    def threads(self):
+        crier.cry()
+        raise cherrypy.HTTPRedirect("home")
 
     @cherrypy.expose
     def artistPage(self, ArtistID):
