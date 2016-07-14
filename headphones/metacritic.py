@@ -47,7 +47,7 @@ def update(artistid, artist_name, release_groups):
         logger.info("Unable to get metacritic scores for: %s" % artist_name)
 
     myDB = db.DBConnection()
-    artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [artistid]).fetchone()
+    artist = myDB.action('SELECT * FROM artists WHERE ArtistID=%s', [artistid]).fetchone()
 
     score_list = []
 

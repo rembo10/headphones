@@ -30,7 +30,7 @@ def checkTorrentFinished():
 
     with postprocessor_lock:
         myDB = db.DBConnection()
-        results = myDB.select('SELECT * from snatched WHERE Status="Seed_Processed"')
+        results = myDB.select('SELECT * from snatched WHERE Status=%s', ['Seed_Processed'])
 
         for album in results:
             hash = album['FolderName']
@@ -42,7 +42,8 @@ def checkTorrentFinished():
                 torrent_removed = utorrent.removeTorrent(hash, True)
 
             if torrent_removed:
-                myDB.action('DELETE from snatched WHERE status = "Seed_Processed" and AlbumID=?',
-                            [albumid])
+                myDB.action('DELETE from snatched WHERE status = %s and AlbumID=%s',
+                            ['Seed_Processed', albumid])
 
+    myDB.commit()
     logger.info("Checking finished torrents completed")

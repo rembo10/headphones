@@ -19,7 +19,7 @@ from headphones import request, db, logger
 def getAlbumArt(albumid):
     myDB = db.DBConnection()
     asin = myDB.action(
-        'SELECT AlbumASIN from albums WHERE AlbumID=?', [albumid]).fetchone()[0]
+        'SELECT AlbumASIN from albums WHERE AlbumID=%s', [albumid]).fetchone()['AlbumASIN']
 
     if asin:
         return 'http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg' % asin

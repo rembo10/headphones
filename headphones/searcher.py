@@ -190,7 +190,8 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False,
 
     if not albumid:
         results = myDB.select(
-            'SELECT * from albums WHERE Status="Wanted" OR Status="Wanted Lossless"')
+            'SELECT * from albums WHERE Status=%s OR Status=%s',
+            ['Wanted','Wanted Lossless'])
 
         for album in results:
 
@@ -221,13 +222,13 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False,
             do_sorted_search(album, new, losslessOnly)
 
     elif albumid and choose_specific_download:
-        album = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
+        album = myDB.action('SELECT * from albums WHERE AlbumID=%s', [albumid]).fetchone()
         logger.info('Searching for "%s - %s"' % (album['ArtistName'], album['AlbumTitle']))
         results = do_sorted_search(album, new, losslessOnly, choose_specific_download=True)
         return results
 
     else:
-        album = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
+        album = myDB.action('SELECT * from albums WHERE AlbumID=%s', [albumid]).fetchone()
         logger.info('Searching for "%s - %s" since it was marked as wanted' % (
             album['ArtistName'], album['AlbumTitle']))
         do_sorted_search(album, new, losslessOnly)
@@ -257,8 +258,8 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
 
     results = []
     myDB = db.DBConnection()
-    albumlength = myDB.select('SELECT sum(TrackDuration) from tracks WHERE AlbumID=?',
-                              [album['AlbumID']])[0][0]
+    albumlength = myDB.select('SELECT sum(TrackDuration) as tsum from tracks WHERE AlbumID=%s',
+                              [album['AlbumID']])[0]['tsum']
 
     if headphones.CONFIG.PREFER_TORRENTS == 0 and not choose_specific_download:
 
@@ -372,7 +373,7 @@ def more_filtering(results, album, albumlength, new):
                 continue
 
         if new:
-            alreadydownloaded = myDB.select('SELECT * from snatched WHERE URL=?', [result[2]])
+            alreadydownloaded = myDB.select('SELECT * from snatched WHERE URL=%s', [result[2]])
 
             if len(alreadydownloaded):
                 logger.info(
@@ -976,16 +977,16 @@ def send_to_downloader(data, bestqual, album):
                 utorrent.setSeedRatio(torrentid, seed_ratio)
 
     myDB = db.DBConnection()
-    myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [album['AlbumID']])
-    myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)',
-                [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], "Snatched", folder_name,
+    myDB.action('UPDATE albums SET status = %s WHERE AlbumID=%s', [album['Snatched' ,'AlbumID']])
+    myDB.action('INSERT INTO snatched VALUES( %s, %s, %s, %s, now(), %s, %s, %s)',
+                [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], 'Snatched', folder_name,
                  kind])
 
     # Store the torrent id so we can check later if it's finished seeding and can be removed
     if seed_ratio is not None and seed_ratio != 0 and torrentid:
         myDB.action(
-            'INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)',
-            [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], "Seed_Snatched", torrentid,
+            'INSERT INTO snatched VALUES( %s, %s, %s, %s, now(), %s, %s, %s)',
+            [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], 'Seed_Snatched', torrentid,
              kind])
 
     # notify
@@ -1050,6 +1051,8 @@ def send_to_downloader(data, bestqual, album):
         email = notifiers.Email()
         message = 'Snatched from ' + provider + '. ' + name
         email.notify("Snatched: " + title, message)
+
+    myDB.commit()
 
 
 def verifyresult(title, artistterm, term, lossless):

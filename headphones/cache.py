@@ -183,13 +183,13 @@ class Cache(object):
             self.id = ArtistID
             self.id_type = 'artist'
             db_info = myDB.action(
-                'SELECT Summary, Content, LastUpdated FROM descriptions WHERE ArtistID=?',
+                'SELECT Summary, Content, LastUpdated FROM descriptions WHERE ArtistID=%s',
                 [self.id]).fetchone()
         else:
             self.id = AlbumID
             self.id_type = 'album'
             db_info = myDB.action(
-                'SELECT Summary, Content, LastUpdated FROM descriptions WHERE ReleaseGroupID=?',
+                'SELECT Summary, Content, LastUpdated FROM descriptions WHERE ReleaseGroupID=%s',
                 [self.id]).fetchone()
 
         if not db_info or not db_info['LastUpdated'] or not self._is_current(
@@ -315,7 +315,7 @@ class Cache(object):
 
         else:
             dbalbum = myDB.action(
-                'SELECT ArtistName, AlbumTitle, ReleaseID FROM albums WHERE AlbumID=?',
+                'SELECT ArtistName, AlbumTitle, ReleaseID FROM albums WHERE AlbumID=%s',
                 [self.id]).fetchone()
             if dbalbum['ReleaseID'] != self.id:
                 data = lastfm.request_lastfm("album.getinfo", mbid=dbalbum['ReleaseID'],
@@ -355,9 +355,9 @@ class Cache(object):
         # Save the content & summary to the database no matter what if we've
         # opened up the url
         if self.id_type == 'artist':
-            controlValueDict = {"ArtistID": self.id}
+            controlValueDict = {"ArtistID": self.id, "ReleaseGroupID": None}
         else:
-            controlValueDict = {"ReleaseGroupID": self.id}
+            controlValueDict = {"ReleaseGroupID": self.id, "ArtistID": None}
 
         newValueDict = {"Summary": self.info_summary,
                         "Content": self.info_content,
@@ -368,17 +368,17 @@ class Cache(object):
         # Save the image URL to the database
         if image_url:
             if self.id_type == 'artist':
-                myDB.action('UPDATE artists SET ArtworkURL=? WHERE ArtistID=?',
+                myDB.action('UPDATE artists SET ArtworkURL=%s WHERE ArtistID=%s',
                             [image_url, self.id])
             else:
-                myDB.action('UPDATE albums SET ArtworkURL=? WHERE AlbumID=?', [image_url, self.id])
+                myDB.action('UPDATE albums SET ArtworkURL=%s WHERE AlbumID=%s', [image_url, self.id])
 
         # Save the thumb URL to the database
         if thumb_url:
             if self.id_type == 'artist':
-                myDB.action('UPDATE artists SET ThumbURL=? WHERE ArtistID=?', [thumb_url, self.id])
+                myDB.action('UPDATE artists SET ThumbURL=%s WHERE ArtistID=%s', [thumb_url, self.id])
             else:
-                myDB.action('UPDATE albums SET ThumbURL=? WHERE AlbumID=?', [thumb_url, self.id])
+                myDB.action('UPDATE albums SET ThumbURL=%s WHERE AlbumID=%s', [thumb_url, self.id])
 
         # Should we grab the artwork here if we're just grabbing thumbs or
         # info? Probably not since the files can be quite big

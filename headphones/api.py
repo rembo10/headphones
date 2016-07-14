@@ -98,10 +98,10 @@ class Api(object):
         else:
             return self.data
 
-    def _dic_from_query(self, query):
+    def _dic_from_query(self, query, args=None):
 
         myDB = db.DBConnection()
-        rows = myDB.select(query)
+        rows = myDB.select(query, args)
 
         rows_as_dic = []
 
@@ -114,7 +114,7 @@ class Api(object):
     def _getIndex(self, **kwargs):
 
         self.data = self._dic_from_query(
-            'SELECT * from artists order by ArtistSortName COLLATE NOCASE')
+                'SELECT * from artists order by lower(ArtistSortName)')
         return
 
     def _getArtist(self, **kwargs):
@@ -126,11 +126,11 @@ class Api(object):
             self.id = kwargs['id']
 
         artist = self._dic_from_query(
-            'SELECT * from artists WHERE ArtistID="' + self.id + '"')
+            'SELECT * from artists WHERE ArtistID=%s', [self.id])
         albums = self._dic_from_query(
-            'SELECT * from albums WHERE ArtistID="' + self.id + '" order by ReleaseDate DESC')
+            'SELECT * from albums WHERE ArtistID=%s order by ReleaseDate DESC', [self.id])
         description = self._dic_from_query(
-            'SELECT * from descriptions WHERE ArtistID="' + self.id + '"')
+            'SELECT * from descriptions WHERE ArtistID=%s', [self.id])
 
         self.data = {
             'artist': artist, 'albums': albums, 'description': description}
@@ -145,11 +145,11 @@ class Api(object):
             self.id = kwargs['id']
 
         album = self._dic_from_query(
-            'SELECT * from albums WHERE AlbumID="' + self.id + '"')
+            'SELECT * from albums WHERE AlbumID=%s', [self.id])
         tracks = self._dic_from_query(
-            'SELECT * from tracks WHERE AlbumID="' + self.id + '"')
+            'SELECT * from tracks WHERE AlbumID=%s', [self.id])
         description = self._dic_from_query(
-            'SELECT * from descriptions WHERE ReleaseGroupID="' + self.id + '"')
+            'SELECT * from descriptions WHERE ReleaseGroupID=%s', [self.id])
 
         self.data = {
             'album': album, 'tracks': tracks, 'description': description}
@@ -157,7 +157,7 @@ class Api(object):
 
     def _getHistory(self, **kwargs):
         self.data = self._dic_from_query(
-            'SELECT * from snatched WHERE status NOT LIKE "Seed%" order by DateAdded DESC')
+            'SELECT * from snatched WHERE status NOT LIKE %s order by DateAdded DESC', ['Seed%'])
         return
 
     def _getUpcoming(self, **kwargs):
@@ -167,12 +167,12 @@ class Api(object):
 
     def _getWanted(self, **kwargs):
         self.data = self._dic_from_query(
-            "SELECT * from albums WHERE Status='Wanted'")
+            "SELECT * from albums WHERE Status=%s", ['Wanted'])
         return
 
     def _getSnatched(self, **kwargs):
         self.data = self._dic_from_query(
-            "SELECT * from albums WHERE Status='Snatched'")
+            "SELECT * from albums WHERE Status=%s", ['Snatched'])
         return
 
     def _getSimilar(self, **kwargs):
@@ -232,9 +232,10 @@ class Api(object):
             self.id = kwargs['id']
 
         myDB = db.DBConnection()
-        myDB.action('DELETE from artists WHERE ArtistID="' + self.id + '"')
-        myDB.action('DELETE from albums WHERE ArtistID="' + self.id + '"')
-        myDB.action('DELETE from tracks WHERE ArtistID="' + self.id + '"')
+        myDB.action('DELETE from artists WHERE ArtistID=%s', [self.id])
+        myDB.action('DELETE from albums WHERE ArtistID=%s', [self.id])
+        myDB.action('DELETE from tracks WHERE ArtistID=%s', [self.id])
+        myDB.commit()
 
     def _pauseArtist(self, **kwargs):
         if 'id' not in kwargs:
@@ -490,5 +491,5 @@ class Api(object):
         if data and bestqual:
             myDB = db.DBConnection()
             album = myDB.action(
-                'SELECT * from albums WHERE AlbumID=?', [id]).fetchone()
+                'SELECT * from albums WHERE AlbumID=%s', [id]).fetchone()
             searcher.send_to_downloader(data, bestqual, album)

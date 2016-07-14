@@ -40,7 +40,7 @@ def checkFolder():
 
     with postprocessor_lock:
         myDB = db.DBConnection()
-        snatched = myDB.select('SELECT * from snatched WHERE Status="Snatched"')
+        snatched = myDB.select('SELECT * from snatched WHERE Status=%s', ['Snatched'])
 
         for album in snatched:
             if album['FolderName']:
@@ -68,8 +68,8 @@ def checkFolder():
 
 def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=False):
     myDB = db.DBConnection()
-    release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
-    tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
+    release = myDB.action('SELECT * from albums WHERE AlbumID=%s', [albumid]).fetchone()
+    tracks = myDB.select('SELECT * from tracks WHERE AlbumID=%s', [albumid])
 
     if not release or not tracks:
         release_list = None
@@ -105,7 +105,7 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
         # this check is skipped, since it is assumed the user wants this.
         if headphones.CONFIG.FREEZE_DB and not forced:
             artist = myDB.select(
-                "SELECT ArtistName, ArtistID FROM artists WHERE ArtistId=? OR ArtistName=?",
+                "SELECT ArtistName, ArtistID FROM artists WHERE ArtistId=%s OR ArtistName=%s",
                 [release_dict['artist_id'], release_dict['artist_name']])
 
             if not artist:
@@ -115,8 +115,8 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
                             release_dict['artist_id'], albumid)
 
                 myDB.action(
-                    'UPDATE snatched SET status = "Frozen" WHERE status NOT LIKE "Seed%" and AlbumID=?',
-                    [albumid])
+                    'UPDATE snatched SET status = "Frozen" WHERE status NOT LIKE %s and AlbumID=%s',
+                    ['Seed%', albumid])
                 frozen = re.search(r' \(Frozen\)(?:\[\d+\])?', albumpath)
                 if not frozen:
                     if headphones.CONFIG.RENAME_FROZEN:
@@ -124,6 +124,7 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
                     else:
                         logger.warn(u"Won't rename %s to mark as 'Frozen', because it is disabled.",
                                     albumpath.decode(headphones.SYS_ENCODING, 'replace'))
+                myDB.commit()
                 return
 
         logger.info(u"Now adding/updating artist: " + release_dict['artist_name'])
@@ -165,7 +166,7 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
         myDB.upsert("albums", newValueDict, controlValueDict)
 
         # Delete existing tracks associated with this AlbumID since we're going to replace them and don't want any extras
-        myDB.action('DELETE from tracks WHERE AlbumID=?', [albumid])
+        myDB.action('DELETE from tracks WHERE AlbumID=%s', [albumid])
         for track in release_dict['tracks']:
             controlValueDict = {"TrackID": track['id'],
                                 "AlbumID": albumid}
@@ -188,8 +189,8 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
         logger.info(u"Addition complete for: " + release_dict['title'] + " - " + release_dict[
             'artist_name'])
 
-        release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
-        tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
+        release = myDB.action('SELECT * from albums WHERE AlbumID=%s', [albumid]).fetchone()
+        tracks = myDB.select('SELECT * from tracks WHERE AlbumID=%s', [albumid])
 
     downloaded_track_list = []
     downloaded_cuecount = 0
@@ -301,9 +302,10 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
     logger.warn(u'Could not identify album: %s. It may not be the intended album.',
                 albumpath.decode(headphones.SYS_ENCODING, 'replace'))
     myDB.action(
-        'UPDATE snatched SET status = "Unprocessed" WHERE status NOT LIKE "Seed%" and AlbumID=?',
-        [albumid])
+        'UPDATE snatched SET status = %s WHERE status NOT LIKE %s and AlbumID=%s',
+        ['Unprocessed', 'Seed%', albumid])
     processed = re.search(r' \(Unprocessed\)(?:\[\d+\])?', albumpath)
+    myDB.commit()
     if not processed:
         if headphones.CONFIG.RENAME_UNPROCESSED:
             renameUnprocessedFolder(albumpath, tag="Unprocessed")
@@ -440,16 +442,16 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     updateFilePermissions(albumpaths)
 
     myDB = db.DBConnection()
-    myDB.action('UPDATE albums SET status = "Downloaded" WHERE AlbumID=?', [albumid])
+    myDB.action('UPDATE albums SET status = %s WHERE AlbumID=%s', ['Downloaded', albumid])
     myDB.action(
-        'UPDATE snatched SET status = "Processed" WHERE Status NOT LIKE "Seed%" and AlbumID=?',
-        [albumid])
+        'UPDATE snatched SET status = %s WHERE Status NOT LIKE %s and AlbumID=%s',
+        ['Processed', 'Seed%', albumid])
 
     # Check if torrent has finished seeding
     if headphones.CONFIG.TORRENT_DOWNLOADER == 1 or headphones.CONFIG.TORRENT_DOWNLOADER == 2:
         seed_snatched = myDB.action(
-            'SELECT * from snatched WHERE Status="Seed_Snatched" and AlbumID=?',
-            [albumid]).fetchone()
+            'SELECT * from snatched WHERE Status=%s and AlbumID=%s',
+            ['Seed_Snatched', albumid]).fetchone()
         if seed_snatched:
             hash = seed_snatched['FolderName']
             torrent_removed = False
@@ -464,12 +466,12 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
 
             # Torrent removed, delete the snatched record, else update Status for scheduled job to check
             if torrent_removed:
-                myDB.action('DELETE from snatched WHERE status = "Seed_Snatched" and AlbumID=?',
-                            [albumid])
+                myDB.action('DELETE from snatched WHERE status = %s and AlbumID=%s',
+                            ['Seed_Snatched', albumid])
             else:
                 myDB.action(
-                    'UPDATE snatched SET status = "Seed_Processed" WHERE status = "Seed_Snatched" and AlbumID=?',
-                    [albumid])
+                    'UPDATE snatched SET status = %s WHERE status = %s and AlbumID=%s',
+                    ['Seed_Processed', 'Seed_Snatched', albumid])
 
     # Update the have tracks for all created dirs:
     for albumpath in albumpaths:
@@ -582,6 +584,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
 
     if new_folder:
         shutil.rmtree(new_folder)
+
+    myDB.commit()
 
 
 def embedAlbumArt(artwork, downloaded_track_list):
@@ -1171,7 +1175,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
         # spaces/underscores came from sab replacing values
         logger.debug('Attempting to find album in the snatched table')
         snatched = myDB.action(
-            'SELECT AlbumID, Title, Kind, Status from snatched WHERE FolderName LIKE ?',
+            'SELECT AlbumID, Title, Kind, Status from snatched WHERE FolderName LIKE %s',
             [folder_basename]).fetchone()
 
         if snatched:
@@ -1201,7 +1205,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
         if rgid:
             rgid = possible_rgid
             release = myDB.action(
-                'SELECT ArtistName, AlbumTitle, AlbumID from albums WHERE AlbumID=?',
+                'SELECT ArtistName, AlbumTitle, AlbumID from albums WHERE AlbumID=%s',
                 [rgid]).fetchone()
             if release:
                 logger.info(
@@ -1226,7 +1230,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
 
         if name and album:
             release = myDB.action(
-                'SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?',
+                'SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE %s and AlbumTitle LIKE %s',
                 [name, album]).fetchone()
             if release:
                 logger.info(
@@ -1266,7 +1270,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
 
         if name and album:
             release = myDB.action(
-                'SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE ? and AlbumTitle LIKE ?',
+                'SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE ArtistName LIKE %s and AlbumTitle LIKE %s',
                 [name, album]).fetchone()
             if release:
                 logger.info(
@@ -1295,7 +1299,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
 
         if '-' not in folder_basename:
             release = myDB.action(
-                'SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE AlbumTitle LIKE ?',
+                'SELECT AlbumID, ArtistName, AlbumTitle from albums WHERE AlbumTitle LIKE %s',
                 [folder_basename]).fetchone()
             if release:
                 logger.info(
@@ -1323,3 +1327,5 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
                     "albums from another source, they must be in an 'Artist - Album "
                     "[Year]' format, or end with the musicbrainz release group id.",
                     folder_basename)
+
+    myDB.commit()
