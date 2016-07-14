@@ -59,8 +59,8 @@
 					grade = 'A'
 
 				myDB = db.DBConnection()					
-				totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=?', [album['AlbumID']]))
-				havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=? AND Location IS NOT NULL', [album['AlbumID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle LIKE ? AND Matched = "Failed"', [album['ArtistName'], album['AlbumTitle']]))
+				totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=%s', [album['AlbumID']]))
+				havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=%s AND Location IS NOT NULL', [album['AlbumID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like %s AND AlbumTitle LIKE %s AND Matched = %s', [album['ArtistName'], album['AlbumTitle'], 'Failed']))
 				
 				try:
 					percent = (havetracks*100.0)/totaltracks
@@ -70,15 +70,15 @@
 					percent = 0
 					totaltracks = '?'
 					
-				avgbitrate = myDB.action("SELECT AVG(BitRate) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
+				avgbitrate = myDB.action("SELECT AVG(BitRate) FROM tracks WHERE AlbumID=%s", [album['AlbumID']]).fetchone()[0]
 				if avgbitrate:
 					bitrate = str(int(avgbitrate)/1000) + ' kbps'
 				else:
 					bitrate = ''
 
-				albumformatcount = myDB.action("SELECT COUNT(DISTINCT Format) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
+				albumformatcount = myDB.action("SELECT COUNT(DISTINCT Format) FROM tracks WHERE AlbumID=%s", [album['AlbumID']]).fetchone()[0]
 				if albumformatcount == 1:
-					albumformat = myDB.action("SELECT DISTINCT Format FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
+					albumformat = myDB.action("SELECT DISTINCT Format FROM tracks WHERE AlbumID=%s", [album['AlbumID']]).fetchone()[0]
 				elif albumformatcount > 1:
 					albumformat = 'Mixed'
 				else:
