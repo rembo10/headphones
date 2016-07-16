@@ -934,6 +934,6 @@ def init_postgres_compat():
         psycopg2cffi.compat.register()
 
     import psycopg2  # pylint: disable=import-error
-    import psycopg2extensions  # pylint: disable=import-error
+    import psycopg2.extensions  # pylint: disable=import-error
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
