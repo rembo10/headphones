@@ -262,7 +262,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
 
             else:
                 if check_release_date is None or check_release_date == u"None":
-                  if mb_ignore_age_missing is not 1:
+                  if headphones.CONFIG.MB_IGNORE_AGE_MISSING is not 1:
                     logger.info("[%s] Now updating: %s (No Release Date)" % (artist['artist_name'], rg['title']))
                     new_releases = mb.get_new_releases(rgid, includeExtras, True)
                   else:
