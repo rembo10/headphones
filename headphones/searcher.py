@@ -977,7 +977,7 @@ def send_to_downloader(data, bestqual, album):
                 utorrent.setSeedRatio(torrentid, seed_ratio)
 
     myDB = db.DBConnection()
-    myDB.action('UPDATE albums SET status = %s WHERE AlbumID=%s', [album['Snatched' ,'AlbumID']])
+    myDB.action('UPDATE albums SET status = %s WHERE AlbumID=%s', [album['Snatched'], album['AlbumID']])
     myDB.action('INSERT INTO snatched VALUES( %s, %s, %s, %s, now(), %s, %s, %s)',
                 [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], 'Snatched', folder_name,
                  kind])
