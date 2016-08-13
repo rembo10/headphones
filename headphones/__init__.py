@@ -127,9 +127,6 @@ def initialize(config_file):
         if not CONFIG.LOG_DIR:
             CONFIG.LOG_DIR = os.path.join(DATA_DIR, 'logs')
 
-        if CONFIG.USE_POSTGRES:
-            init_postgres_compat()
-
         if not os.path.exists(CONFIG.LOG_DIR):
             try:
                 os.makedirs(CONFIG.LOG_DIR)
@@ -170,6 +167,7 @@ def initialize(config_file):
         logger.info('Checking to see if the database has all tables....')
         try:
             if CONFIG.USE_POSTGRES:
+                init_postgres_compat()
                 dbcheck_pgsql()
             else:
                 dbcheck()
@@ -367,6 +365,7 @@ def sig_handler(signum=None, frame=None):
 
 
 def dbcheck_pgsql():
+    import psycopg2
     # conn = psycopg2.connect(database='headphones', user='headphones', password='headphones', host='127.0.0.1', port='32770')
     conn = psycopg2.connect(CONFIG.POSTGRES_DSN)  # dbname=headphones user=headphones password=headphones host=127.0.0.1 port=32770
     c = conn.cursor()
@@ -929,6 +928,7 @@ def shutdown(restart=False, update=False):
 
 
 def init_postgres_compat():
+    logger.info('setting psycopg2 settings')
     if 'PyPy' in sys.subversion:
         import psycopg2cffi.compat
         psycopg2cffi.compat.register()
