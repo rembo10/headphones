@@ -44,22 +44,18 @@ class Rutracker(object):
         logger.info("Attempting to log in to rutracker...")
 
         try:
-            r = self.session.post(loginpage, data=post_params, timeout=self.timeout)
+            r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False)
             # try again
             if 'bb_data' not in r.cookies.keys():
                 time.sleep(10)
-                r = self.session.post(loginpage, data=post_params, timeout=self.timeout)
-            if r.status_code != 200:
-                logger.error("rutracker login returned status code %s" % r.status_code)
-                self.loggedin = False
+                r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False)
+            if 'bb_data' in r.cookies.keys():
+                self.loggedin = True
+                logger.info("Successfully logged in to rutracker")
             else:
-                if 'bb_data' in r.cookies.keys():
-                    self.loggedin = True
-                    logger.info("Successfully logged in to rutracker")
-                else:
-                    logger.error(
-                        "Could not login to rutracker, credentials maybe incorrect, site is down or too many attempts. Try again later")
-                    self.loggedin = False
+                logger.error(
+                    "Could not login to rutracker, credentials maybe incorrect, site is down or too many attempts. Try again later")
+                self.loggedin = False
             return self.loggedin
         except Exception as e:
             logger.error("Unknown error logging in to rutracker: %s" % e)
