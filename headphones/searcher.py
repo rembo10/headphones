@@ -993,7 +993,10 @@ def send_to_downloader(data, bestqual, album):
     artist = album[1]
     albumname = album[2]
     rgid = album[6]
-    title = artist + ' - ' + albumname
+    try: # deal with null return selftitle artists
+        title = artist + ' - ' + albumname
+    except TypeError:
+        title = albumname
     provider = bestqual[3]
     if provider.startswith(("http://", "https://")):
         provider = provider.split("//")[1]
