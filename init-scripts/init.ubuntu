@@ -33,6 +33,7 @@
 ## PYTHON_BIN=      #$DAEMON, the location of the python binary, the default is /usr/bin/python
 ## HP_OPTS=         #$EXTRA_DAEMON_OPTS, extra cli option for headphones, i.e. " --config=/home/headphones/config.ini"
 ## HP_PORT=         #$PORT_OPTS, hardcoded port for the webserver, overrides value in config.ini
+## HP_HOST=         #$HOST_OPTS, host for the webserver, overrides value in config.ini
 ##
 ## EXAMPLE if want to run as different user
 ## add HP_USER=username to /etc/default/headphones
@@ -105,7 +106,12 @@ load_settings() {
             PORT_OPTS=" --port=${HP_PORT} "
         }
 
-        DAEMON_OPTS=" Headphones.py --quiet --daemon --nolaunch --pidfile=${PID_FILE} --datadir=${DATA_DIR} ${PORT_OPTS}${EXTRA_DAEMON_OPTS}"
+        # Host config
+        [ -n "$HP_HOST" ] && {
+            HOST_OPTS=" --host=${HP_HOST} "
+        }
+
+        DAEMON_OPTS=" Headphones.py --quiet --daemon --nolaunch --pidfile=${PID_FILE} --datadir=${DATA_DIR} ${PORT_OPTS} ${HOST_OPTS} ${EXTRA_DAEMON_OPTS}"
 
         SETTINGS_LOADED=TRUE
     fi
