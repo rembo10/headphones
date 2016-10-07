@@ -14,6 +14,7 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
+# t411 support added by a1ex, @likeitneverwentaway on github for maintenance
 
 from operator import itemgetter
 import threading
