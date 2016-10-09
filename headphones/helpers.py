@@ -251,6 +251,7 @@ _XLATE_SPECIAL = {
     # Translation table.
     # Cover additional special characters processing normalization.
     u"'": '',         # replace apostrophe with nothing
+    u"’": '',         # replace musicbrainz style apostrophe with nothing
     u'&': ' and ',     # expand & to ' and '
 }
 
