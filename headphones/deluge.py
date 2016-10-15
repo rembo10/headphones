@@ -269,7 +269,8 @@ def _get_auth():
     delugeweb_host = headphones.CONFIG.DELUGE_HOST
     delugeweb_cert = headphones.CONFIG.DELUGE_CERT
     delugeweb_password = headphones.CONFIG.DELUGE_PASSWORD
-    logger.debug('Deluge: Using password %s******%s' % (delugeweb_password[0], delugeweb_password[-1]))
+    if len(delugeweb_password) > 0:
+        logger.debug('Deluge: Using password %s******%s' % (delugeweb_password[0], delugeweb_password[-1]))
 
     if not delugeweb_host.startswith('http'):
         delugeweb_host = 'http://%s' % delugeweb_host
