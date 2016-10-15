@@ -1803,7 +1803,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
         # Quality
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
-            providerurl = "&term[16][]=529&term[16][]=1184"
+            providerurl = fix_url(SEARCH_URL + "&term[16][]=529&term[16][]=1184")
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
             providerurl = fix_url(SEARCH_URL + "&term[16][]=685&term[16][]=527&term[16][]=1070&term[16][]=528&term[16][]=1167&term[16][]=1166&term[16][]=530&term[16][]=529&term[16][]=1184&term[16][]=532&term[16][]=533&term[16][]=1085&term[16][]=534&term[16][]=535&term[16][]=1069&term[16][]=537&term[16][]=538")
         elif headphones.CONFIG.PREFERRED_QUALITY == 0:
