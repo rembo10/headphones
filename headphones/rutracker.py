@@ -46,10 +46,10 @@ class Rutracker(object):
         try:
             r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False)
             # try again
-            if 'bb_data' not in r.cookies.keys():
+            if not self.has_bb_data_cookie(r):
                 time.sleep(10)
                 r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False)
-            if 'bb_data' in r.cookies.keys():
+            if self.has_bb_data_cookie(r):
                 self.loggedin = True
                 logger.info("Successfully logged in to rutracker")
             else:
@@ -61,6 +61,12 @@ class Rutracker(object):
             logger.error("Unknown error logging in to rutracker: %s" % e)
             self.loggedin = False
             return self.loggedin
+
+    def has_bb_data_cookie(self, response):
+        if 'bb_data' in response.cookies.keys():
+            return True
+        # Rutracker randomly send a 302 redirect code, cookie may be present in response history
+        return next(('bb_data' in r.cookies.keys() for r in response.history), False)
 
     def searchurl(self, artist, album, year, format):
         """
