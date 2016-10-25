@@ -201,14 +201,13 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False,
                 continue
 
             if headphones.CONFIG.WAIT_UNTIL_RELEASE_DATE and album['ReleaseDate']:
-                try:
-                    release_date = datetime.datetime.strptime(album['ReleaseDate'], "%Y-%m-%d")
-                except:
-                    logger.warn(
-                        "No valid date for: %s. Skipping automatic search" % album['AlbumTitle'])
+                release_date = strptime_musicbrainz(album['ReleaseDate'])
+                if not release_date:
+                    logger.warn("No valid date for: %s. Skipping automatic search" %
+                                album['AlbumTitle'])
                     continue
 
-                if release_date > datetime.datetime.today():
+                elif release_date > datetime.datetime.today():
                     logger.info("Skipping: %s. Waiting for release date of: %s" % (
                         album['AlbumTitle'], album['ReleaseDate']))
                     continue
@@ -235,6 +234,26 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False,
         do_sorted_search(album, new, losslessOnly)
 
     logger.info('Search for wanted albums complete')
+
+
+def strptime_musicbrainz(date_str):
+    """
+    Release date as returned by Musicbrainz may contain the full date (Year-Month-Day)
+    but it may as well be just Year-Month or even just the year.
+
+    Args:
+        date_str: the date as a string (ex: "2003-05-01", "2003-03", "2003")
+
+    Returns:
+        The more accurate datetime object we can create or None if parse failed
+    """
+    acceptable_formats = ('%Y-%m-%d', '%Y-%m', '%Y')
+    for date_format in acceptable_formats:
+        try:
+            return datetime.datetime.strptime(date_str, date_format)
+        except:
+            pass
+    return None
 
 
 def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
