@@ -743,6 +743,22 @@
                                         </div>
                                     </div>
                                 </fieldset>
+								
+                                <fieldset>
+                                    <div class="row checkbox left">
+                                        <input id="use_tquattrecentonze" type="checkbox" class="bigcheck" name="use_tquattrecentonze" value="1" ${config['use_tquattrecentonze']} /><label for="use_tquattrecentonze"><span class="option">t411</span></label>
+                                    </div>
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>Username</label>
+                                            <input type="text" name="tquattrecentonze_user" value="${config['tquattrecentonze_user']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Password</label>
+                                            <input type="password" name="tquattrecentonze_password" value="${config['tquattrecentonze_password']}" size="36">
+                                        </div>
+                                    </div>
+                                </fieldset>
 
                             </fieldset>
                         </td>
@@ -2400,6 +2416,7 @@
                 initConfigCheckbox("#api_enabled");
                 initConfigCheckbox("#enable_https");
                 initConfigCheckbox("#customauth");
+                initConfigCheckbox("#use_tquattrecentonze");
 
 
                 $('#twitterStep1').click(function () {

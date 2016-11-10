@@ -81,6 +81,8 @@ def main():
                         help='Prevent browser from launching on startup')
     parser.add_argument(
         '--pidfile', help='Create a pid file (only relevant when running as a daemon)')
+    parser.add_argument(
+        '--host', help='Specify a host (default - localhost)')
 
     args = parser.parse_args()
 
@@ -170,6 +172,13 @@ def main():
     else:
         http_port = int(headphones.CONFIG.HTTP_PORT)
 
+    # Force the http host if neccessary
+    if args.host:
+        http_host = args.host
+        logger.info('Using forced web server host: %s', http_host)
+    else:
+        http_host = headphones.CONFIG.HTTP_HOST
+
     # Check if pyOpenSSL is installed. It is required for certificate generation
     # and for CherryPy.
     if headphones.CONFIG.ENABLE_HTTPS:
@@ -183,7 +192,7 @@ def main():
     # Try to start the server. Will exit here is address is already in use.
     web_config = {
         'http_port': http_port,
-        'http_host': headphones.CONFIG.HTTP_HOST,
+        'http_host': http_host,
         'http_root': headphones.CONFIG.HTTP_ROOT,
         'http_proxy': headphones.CONFIG.HTTP_PROXY,
         'enable_https': headphones.CONFIG.ENABLE_HTTPS,

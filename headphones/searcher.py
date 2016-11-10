@@ -14,6 +14,7 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
+# t411 support added by a1ex, @likeitneverwentaway on github for maintenance
 
 from base64 import b16encode, b32decode
 from hashlib import sha1
@@ -24,6 +25,7 @@ import datetime
 import subprocess
 import unicodedata
 import urlparse
+from json import loads
 
 import os
 import re
@@ -812,6 +814,19 @@ def send_to_downloader(data, bestqual, album):
             # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
             torrent_name = helpers.replace_illegal_chars(folder_name) + '.torrent'
             download_path = os.path.join(headphones.CONFIG.TORRENTBLACKHOLE_DIR, torrent_name)
+
+            # Blackhole for t411
+            if bestqual[2].lower().startswith("http://api.t411"):
+                if headphones.CONFIG.MAGNET_LINKS == 2:
+                    try:
+                        url = bestqual[2].split('TOKEN')[0]
+                        token = bestqual[2].split('TOKEN')[1]
+                        data = request.request_content(url, headers={'Authorization': token})
+                        torrent_to_file(download_path, data)
+                        logger.info('Successfully converted magnet to torrent file')
+                    except Exception as e:
+                        logger.error("Error converting magnet link: %s" % str(e))
+                        return
 
             if bestqual[2].lower().startswith("magnet:"):
                 if headphones.CONFIG.MAGNET_LINKS == 1:
@@ -1763,6 +1778,77 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                         resultlist.append((title, size, url, provider, 'torrent', match))
                     except Exception as e:
                         logger.exception("Unhandled exception in Mininova Parser")
+    # t411
+    if headphones.CONFIG.TQUATTRECENTONZE:
+        username = headphones.CONFIG.TQUATTRECENTONZE_USER
+        password = headphones.CONFIG.TQUATTRECENTONZE_PASSWORD
+        API_URL = "http://api.t411.ch"
+        AUTH_URL = API_URL + '/auth'
+        DL_URL = API_URL + '/torrents/download/'
+        provider = "t411"
+        t411_term = term.replace(" ", "%20")
+        SEARCH_URL = API_URL + '/torrents/search/' + t411_term + "?limit=15&cid=395&subcat=623"
+        headers_login = {'username': username, 'password': password}
+
+        # Requesting content
+        logger.info('Parsing results from t411 using search term: %s' % term)
+        req = request.request_content(AUTH_URL, method='post', data=headers_login)
+
+        if len(req.split('"')) == 9:
+            token = req.split('"')[7]
+            headers_auth = {'Authorization': token}
+            logger.info('t411 - User %s logged in' % username)
+        else:
+            logger.info('t411 - Login error : %s' % req.split('"')[3])
+
+        # Quality
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
+            providerurl = fix_url(SEARCH_URL + "&term[16][]=529&term[16][]=1184")
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
+            providerurl = fix_url(SEARCH_URL + "&term[16][]=685&term[16][]=527&term[16][]=1070&term[16][]=528&term[16][]=1167&term[16][]=1166&term[16][]=530&term[16][]=529&term[16][]=1184&term[16][]=532&term[16][]=533&term[16][]=1085&term[16][]=534&term[16][]=535&term[16][]=1069&term[16][]=537&term[16][]=538")
+        elif headphones.CONFIG.PREFERRED_QUALITY == 0:
+            providerurl = fix_url(SEARCH_URL + "&term[16][]=685&term[16][]=527&term[16][]=1070&term[16][]=528&term[16][]=1167&term[16][]=1166&term[16][]=530&term[16][]=532&term[16][]=533&term[16][]=1085&term[16][]=534&term[16][]=535&term[16][]=1069&term[16][]=537&term[16][]=538")
+        else:
+            providerurl = fix_url(SEARCH_URL)
+
+        # Tracker search
+        req = request.request_content(providerurl, headers=headers_auth)
+        req = loads(req)
+        total = req['total']
+
+        # Process feed
+        if total == '0':
+            logger.info("No results found from t411 for %s" % term)
+        else:
+            logger.info('Found %s results from t411' % total)
+            torrents = req['torrents']
+            for torrent in torrents:
+                try:
+                    title = torrent['name']
+                    if torrent['seeders'] < minimumseeders:
+                        logger.info('Skipping torrent %s : seeders below minimum set' % title)
+                        continue
+                    id = torrent['id']
+                    size = int(torrent['size'])
+                    data = request.request_content(DL_URL + id, headers=headers_auth)
+
+                    # Blackhole
+                    if headphones.CONFIG.TORRENT_DOWNLOADER == 0 and headphones.CONFIG.MAGNET_LINKS == 2:
+                        url = DL_URL + id + 'TOKEN' + token
+                        resultlist.append((title, size, url, provider, 'torrent', True))
+
+                    # Build magnet
+                    else:
+                        metadata = bdecode(data)
+                        hashcontents = bencode(metadata['info'])
+                        digest = sha1(hashcontents).hexdigest()
+                        trackers = [metadata["announce"]][0]
+                        url = 'magnet:?xt=urn:btih:%s&tr=%s' % (digest, trackers)
+                        resultlist.append((title, size, url, provider, 'torrent', True))
+
+                except Exception as e:
+                    logger.error("Error converting magnet link: %s" % str(e))
+                    return
 
     # attempt to verify that this isn't a substring result
     # when looking for "Foo - Foo" we don't want "Foobar"

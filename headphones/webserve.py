@@ -14,6 +14,7 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
+# t411 support added by a1ex, @likeitneverwentaway on github for maintenance
 
 from operator import itemgetter
 import threading
@@ -28,7 +29,7 @@ import urllib2
 
 import os
 import re
-from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers, notifiers
+from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers, notifiers, crier
 from headphones.helpers import checked, radio, today, clean_name
 from mako.lookup import TemplateLookup
 from mako import exceptions
@@ -68,6 +69,11 @@ class WebInterface(object):
         myDB = db.DBConnection()
         artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
         return serve_template(templatename="index.html", title="Home", artists=artists)
+
+    @cherrypy.expose
+    def threads(self):
+        crier.cry()
+        raise cherrypy.HTTPRedirect("home")
 
     @cherrypy.expose
     def artistPage(self, ArtistID):
@@ -1224,6 +1230,9 @@ class WebInterface(object):
             "whatcd_ratio": headphones.CONFIG.WHATCD_RATIO,
             "use_strike": checked(headphones.CONFIG.STRIKE),
             "strike_ratio": headphones.CONFIG.STRIKE_RATIO,
+            "use_tquattrecentonze": checked(headphones.CONFIG.TQUATTRECENTONZE),
+            "tquattrecentonze_user": headphones.CONFIG.TQUATTRECENTONZE_USER,
+            "tquattrecentonze_password": headphones.CONFIG.TQUATTRECENTONZE_PASSWORD,
             "pref_qual_0": radio(headphones.CONFIG.PREFERRED_QUALITY, 0),
             "pref_qual_1": radio(headphones.CONFIG.PREFERRED_QUALITY, 1),
             "pref_qual_2": radio(headphones.CONFIG.PREFERRED_QUALITY, 2),
@@ -1420,7 +1429,7 @@ class WebInterface(object):
             "use_newznab", "newznab_enabled", "use_torznab", "torznab_enabled",
             "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay",
             "use_mininova", "use_waffles", "use_rutracker",
-            "use_whatcd", "use_strike", "preferred_bitrate_allow_lossless", "detect_bitrate",
+            "use_whatcd", "use_strike", "use_tquattrecentonze", "preferred_bitrate_allow_lossless", "detect_bitrate",
             "ignore_clean_releases", "freeze_db", "cue_split", "move_files",
             "rename_files", "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art",
             "embed_album_art", "embed_lyrics",
