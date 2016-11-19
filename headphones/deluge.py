@@ -135,7 +135,10 @@ def addTorrent(link, data=None, name=None):
                     # remove '.torrent' suffix
                     if name[-len('.torrent'):] == '.torrent':
                         name = name[:-len('.torrent')]
-            logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name, str(torrentfile)[:40]))
+            try:
+                logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name, str(torrentfile)[:40]))
+            except:
+                logger.debug('Deluge: Sending Deluge torrent with problematic name and some content')
             result = {'type': 'torrent',
                         'name': name,
                         'content': torrentfile}
@@ -445,6 +448,7 @@ def _add_torrent_file(result):
         try:
             # content is torrent file contents that needs to be encoded to base64
             # this time let's try leaving the encoding as is
+            logger.debug('Deluge: There was a decoding issue, let\'s try again')
             post_data = json.dumps({"method": "core.add_torrent_file",
                                     "params": [result['name'] + '.torrent', b64encode(result['content']), {}],
                                     "id": 22})
