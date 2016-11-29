@@ -645,8 +645,36 @@
                                             <input type="password" name="whatcd_password" value="${config['whatcd_password']}" size="36">
                                         </div>
                                         <div class="row">
+                                            <label>URL</label>
+                                            <input type="text" name="whatcd_url" value="${config['whatcd_url']}" size="36">
+                                        </div>
+                                        <div class="row">
                                             <label>Seed Ratio</label>
                                             <input type="text" class="override-float" name="whatcd_ratio" value="${config['whatcd_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset>
+                                    <div class="row checkbox left">
+                                        <input id="use_pth" type="checkbox" class="bigcheck" name="use_pth" value="1" ${config['use_pth']} /><label for="use_pth"><span class="option">PassTheHeadphones.me</span></label>
+                                    </div>
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>Username</label>
+                                            <input type="text" name="pth_username" value="${config['pth_username']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Password</label>
+                                            <input type="password" name="pth_password" value="${config['pth_password']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>URL</label>
+                                            <input type="text" name="pth_url" value="${config['pth_url']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Seed Ratio</label>
+                                            <input type="text" class="override-float" name="pth_ratio" value="${config['pth_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
                                         </div>
                                     </div>
                                 </fieldset>
@@ -2412,6 +2440,7 @@
                 initConfigCheckbox("#use_waffles");
                 initConfigCheckbox("#use_rutracker");
                 initConfigCheckbox("#use_whatcd");
+                initConfigCheckbox("#use_pth");
                 initConfigCheckbox("#use_strike");
                 initConfigCheckbox("#api_enabled");
                 initConfigCheckbox("#enable_https");
