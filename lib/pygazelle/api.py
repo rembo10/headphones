@@ -122,7 +122,7 @@ class GazelleAPI(object):
         Pass an action and relevant arguments for that action.
         """
         def make_request(action, **kwargs):
-            ajaxpage = '/ajax.php'
+            ajaxpage = 'ajax.php'
             content = self.unparsed_request(ajaxpage, action, **kwargs)
             try:
                 if not isinstance(content, text_type):
