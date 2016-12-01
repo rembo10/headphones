@@ -42,7 +42,7 @@ class GazelleAPI(object):
         'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3'}
 
 
-    def __init__(self, username=None, password=None):
+    def __init__(self, username=None, password=None, url=None):
         self.session = requests.session()
         self.session.headers = self.default_headers
         self.username = username
@@ -59,7 +59,7 @@ class GazelleAPI(object):
         self.cached_torrents = {}
         self.cached_requests = {}
         self.cached_categories = {}
-        self.site = "https://what.cd/"
+        self.site = url + "/"
         self.past_request_timestamps = []
 
     def wait_for_rate_limit(self):
@@ -95,7 +95,7 @@ class GazelleAPI(object):
 
         self.wait_for_rate_limit()
 
-        loginpage = 'https://what.cd/login.php'
+        loginpage = self.site + 'login.php'
         data = {'username': self.username,
                 'password': self.password,
                 'keeplogged': '1'}

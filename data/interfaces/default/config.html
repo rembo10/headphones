@@ -56,7 +56,7 @@
                                     <label title="Password for web server authentication. Leave empty to disable.">
                                         HTTP Password
                                     </label>
-                                    <input type="password" name="http_password" value="${config['http_password']}" size="30">
+                                    <input type="password" name="http_password" value="${config['http_password'] | h}" size="30">
                                 </div>
                                 <div class="row checkbox">
                                     <input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} />
@@ -173,7 +173,7 @@
                                     <label title="SABnzbd password. Leave empty if not applicable.">
                                         SABnzbd Password
                                     </label>
-                                    <input type="password" name="sab_password" value="${config['sab_password']}" size="20">
+                                    <input type="password" name="sab_password" value="${config['sab_password'] | h}" size="20">
                                 </div>
                                 <div class="row">
                                     <label title="SABnzbd API key. Can be found in SABnzbd settings.">
@@ -207,7 +207,7 @@
                                     <label title="NZBGet password. Leave empty if not applicable">
                                         NZBget Password
                                     </label>
-                                    <input type="password" name="nzbget_password" value="${config['nzbget_password']}" size="20">
+                                    <input type="password" name="nzbget_password" value="${config['nzbget_password'] | h}" size="20">
                                 </div>
                                 <div class="row">
                                     <label title="Name of NZBget category to add downloads to.">
@@ -359,7 +359,7 @@
                                 </div>
                                 <div class="row">
                                     <label>Transmission Password</label>
-                                    <input type="password" name="transmission_password" value="${config['transmission_password']}" size="30">
+                                    <input type="password" name="transmission_password" value="${config['transmission_password'] | h}" size="30">
                                 </div>
                                 <div class="row">
                                     <small>Note: With Transmission, you can specify a different download directory for downloads sent from Headphones.
@@ -379,7 +379,7 @@
                                 </div>
                                 <div class="row">
                                     <label>uTorrent Password</label>
-                                    <input type="password" name="utorrent_password" value="${config['utorrent_password']}" size="30">
+                                    <input type="password" name="utorrent_password" value="${config['utorrent_password'] | h}" size="30">
                                 </div>
                                 <div class="row">
                                     <label>uTorrent Label</label>
@@ -400,7 +400,7 @@
                                 </div>
                                 <div class="row">
                                     <label>Deluge Password</label>
-                                    <input type="password" name="deluge_password" value="${config['deluge_password']}" size="30">
+                                    <input type="password" name="deluge_password" value="${config['deluge_password'] | h}" size="30">
                                 </div>
                                 <div class="row">
                                     <small>Note: With Deluge, you can specify a different download directory for downloads sent from Headphones.
@@ -466,7 +466,7 @@
                                     </div>
                                     <div class="row">
                                         <label>Password</label>
-                                        <input class="hppass" type="password" value="${config['hppass']}" size="20">
+                                        <input class="hppass" type="password" value="${config['hppass'] | h}" size="20">
                                     </div>
                                     <div class="row">
                                         <a href="https://headphones.codeshy.com/vip" id="vipserver" target="_blank">Don't have an account? Sign up!</a>
@@ -622,7 +622,7 @@
                                         </div>
                                         <div class="row">
                                             <label>Password</label>
-                                            <input type="password" name="rutracker_password" value="${config['rutracker_password']}" size="36">
+                                            <input type="password" name="rutracker_password" value="${config['rutracker_password'] | h}" size="36">
                                         </div>
                                         <div class="row">
                                             <label>Seed Ratio</label>
@@ -642,11 +642,39 @@
                                         </div>
                                         <div class="row">
                                             <label>Password</label>
-                                            <input type="password" name="whatcd_password" value="${config['whatcd_password']}" size="36">
+                                            <input type="password" name="whatcd_password" value="${config['whatcd_password'] | h}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>URL</label>
+                                            <input type="text" name="whatcd_url" value="${config['whatcd_url']}" size="36">
                                         </div>
                                         <div class="row">
                                             <label>Seed Ratio</label>
                                             <input type="text" class="override-float" name="whatcd_ratio" value="${config['whatcd_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset>
+                                    <div class="row checkbox left">
+                                        <input id="use_pth" type="checkbox" class="bigcheck" name="use_pth" value="1" ${config['use_pth']} /><label for="use_pth"><span class="option">PassTheHeadphones.me</span></label>
+                                    </div>
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>Username</label>
+                                            <input type="text" name="pth_username" value="${config['pth_username']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Password</label>
+                                            <input type="password" name="pth_password" value="${config['pth_password']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>URL</label>
+                                            <input type="text" name="pth_url" value="${config['pth_url']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Seed Ratio</label>
+                                            <input type="text" class="override-float" name="pth_ratio" value="${config['pth_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
                                         </div>
                                     </div>
                                 </fieldset>
@@ -755,7 +783,7 @@
                                         </div>
                                         <div class="row">
                                             <label>Password</label>
-                                            <input type="password" name="tquattrecentonze_password" value="${config['tquattrecentonze_password']}" size="36">
+                                            <input type="password" name="tquattrecentonze_password" value="${config['tquattrecentonze_password'] | h}" size="36">
                                         </div>
                                     </div>
                                 </fieldset>
@@ -980,7 +1008,7 @@
                                         <label>SMTP User</label><input type="text" name="email_smtp_user" value="${config['email_smtp_user']}" size="254">
                                     </div>
                                     <div class="row">
-                                        <label>SMTP Password</label><input type="password" name="email_smtp_password" value="${config['email_smtp_password']}" size="50">
+                                        <label>SMTP Password</label><input type="password" name="email_smtp_password" value="${config['email_smtp_password'] | h}" size="50">
                                     </div>
                                     <div class="row checkbox">
                                         <input type="text" class="override-float" name="email_smtp_port" value="${config['email_smtp_port']}" size="4"><label>SMTP Port</label>
@@ -1006,7 +1034,7 @@
                                         <label>Growl Host:Port</label><input type="text" name="growl_host" value="${config['growl_host']}" size="30">
                                     </div>
                                     <div class="row">
-                                        <label>Growl Password</label><input type="password" name="growl_password" value="${config['growl_password']}" size="30">
+                                        <label>Growl Password</label><input type="password" name="growl_password" value="${config['growl_password'] | h}" size="30">
                                     </div>
                                     <div class="row checkbox">
                                         <input type="checkbox" name="growl_onsnatch" value="1" ${config['growl_onsnatch']} /><label>Notify on snatch?</label>
@@ -1028,7 +1056,7 @@
                                         <label>Username</label><input type="text" name="xbmc_username" value="${config['xbmc_username']}" size="30">
                                     </div>
                                     <div class="row">
-                                        <label>Password</label><input type="password" name="xbmc_password" value="${config['xbmc_password']}" size="30">
+                                        <label>Password</label><input type="password" name="xbmc_password" value="${config['xbmc_password'] | h}" size="30">
                                     </div>
                                     <div class="checkbox row">
                                         <input type="checkbox" name="xbmc_update" value="1" ${config['xbmc_update']} /><label>Update Library</label>
@@ -1142,7 +1170,7 @@
                                         <small>Username of your Plex client API (blank for none)</small>
                                     </div>
                                     <div class="row">
-                                        <label>Plex Password</label><input type="password" name="plex_password" value="${config['plex_password']}" size="30">
+                                        <label>Plex Password</label><input type="password" name="plex_password" value="${config['plex_password'] | h}" size="30">
                                         <small>Password of your Plex client API (blank for none)</small>
                                     </div>
                                     <div class="row">
@@ -1242,7 +1270,7 @@
                                         <label>Subsonic Username</label><input type="text" name="subsonic_username" value="${config['subsonic_username']}" size="30">
                                     </div>
                                     <div class="row">
-                                        <label>Subsonic Password</label><input type="password" name="subsonic_password" value="${config['subsonic_password']}" size="30">
+                                        <label>Subsonic Password</label><input type="password" name="subsonic_password" value="${config['subsonic_password'] | h}" size="30">
                                     </div>
                                 </div>
                             </fieldset>
@@ -1642,7 +1670,7 @@
                                             <label>Username</label><input type="text" class="customuser" name="customuser" value="${config['customuser']}" size="20">
                                         </div>
                                         <div class="row">
-                                            <label>Password</label><input type="password" class="custompass" name="custompass" value="${config['custompass']}" size="15"><br>
+                                            <label>Password</label><input type="password" class="custompass" name="custompass" value="${config['custompass'] | h}" size="15"><br>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -1655,7 +1683,7 @@
                                         <label>Username</label><input type="text" class="hpuser" name="hpuser" value="${config['hpuser']}" size="20">
                                     </div>
                                     <div class="row">
-                                        <label>Password</label><input type="password" class="hppass" name="hppass" value="${config['hppass']}" size="20"><br>
+                                        <label>Password</label><input type="password" class="hppass" name="hppass" value="${config['hppass'] | h}" size="20"><br>
                                         <a href="https://headphones.codeshy.com/vip" id="vipserver" target="_blank">Get an Account!</a>
                                     </div>
                                 </div>
@@ -2412,6 +2440,7 @@
                 initConfigCheckbox("#use_waffles");
                 initConfigCheckbox("#use_rutracker");
                 initConfigCheckbox("#use_whatcd");
+                initConfigCheckbox("#use_pth");
                 initConfigCheckbox("#use_strike");
                 initConfigCheckbox("#api_enabled");
                 initConfigCheckbox("#enable_https");
