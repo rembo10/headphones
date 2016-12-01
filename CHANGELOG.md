@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.5.18
+Released 01 December 2016
+
+Highlights:
+* Added: PassTheHeadphones support
+* Fixed: Special characters in password fields breaking on config page
+* Improved: Updated t411 url
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.17...v0.5.18).
+
+
 ## v0.5.17
 Released 10 November 2016
 
