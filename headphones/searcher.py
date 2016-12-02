@@ -45,7 +45,7 @@ TORRENT_TO_MAGNET_SERVICES = [
     'https://torcache.net/torrent/%s.torrent',
 ]
 
-# Persistent What.cd API object
+# Persistent Apollo.rip API object
 gazelle = None
 ruobj = None
 
@@ -160,8 +160,8 @@ def get_seed_ratio(provider):
         seed_ratio = headphones.CONFIG.RUTRACKER_RATIO
     elif provider == 'Kick Ass Torrents':
         seed_ratio = headphones.CONFIG.KAT_RATIO
-    elif provider == 'What.cd':
-        seed_ratio = headphones.CONFIG.WHATCD_RATIO
+    elif provider == 'Apollo.rip':
+        seed_ratio = headphones.CONFIG.APOLLO_RATIO
     elif provider == 'PassTheHeadphones.Me':
         seed_ratio = headphones.CONFIG.PTH_RATIO
     elif provider == 'The Pirate Bay':
@@ -274,7 +274,7 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
                          headphones.CONFIG.MININOVA or
                          headphones.CONFIG.WAFFLES or
                          headphones.CONFIG.RUTRACKER or
-                         headphones.CONFIG.WHATCD or
+                         headphones.CONFIG.APOLLO or
                          headphones.CONFIG.PTH or
                          headphones.CONFIG.STRIKE)
 
@@ -1176,7 +1176,7 @@ def verifyresult(title, artistterm, term, lossless):
 
 def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                   choose_specific_download=False):
-    global gazelle  # persistent what.cd api object to reduce number of login attempts
+    global gazelle  # persistent apollo.rip api object to reduce number of login attempts
     global ruobj  # and rutracker
 
     reldate = album['ReleaseDate']
@@ -1468,9 +1468,9 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                 if rulist:
                     resultlist.extend(rulist)
 
-    if headphones.CONFIG.WHATCD:
-        provider = "What.cd"
-        providerurl = "http://what.cd/"
+    if headphones.CONFIG.APOLLO:
+        provider = "Apollo.rip"
+        providerurl = "http://apollo.rip/"
 
         bitrate = None
         bitrate_string = bitrate
@@ -1493,7 +1493,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                         bitrate_string = encoding_string
                 if bitrate_string not in gazelleencoding.ALL_ENCODINGS:
                     logger.info(
-                        u"Your preferred bitrate is not one of the available What.cd filters, so not using it as a search parameter.")
+                        u"Your preferred bitrate is not one of the available Apollo.rip filters, so not using it as a search parameter.")
             maxsize = 10000000000
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:  # Highest quality including lossless
             search_formats = [gazelleformat.FLAC, gazelleformat.MP3]
@@ -1504,14 +1504,14 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
         if not gazelle or not gazelle.logged_in():
             try:
-                logger.info(u"Attempting to log in to What.cd...")
-                gazelle = gazelleapi.GazelleAPI(headphones.CONFIG.WHATCD_USERNAME,
-                                                headphones.CONFIG.WHATCD_PASSWORD,
-                                                headphones.CONFIG.WHATCD_URL)
+                logger.info(u"Attempting to log in to Apollo.rip...")
+                gazelle = gazelleapi.GazelleAPI(headphones.CONFIG.APOLLO_USERNAME,
+                                                headphones.CONFIG.APOLLO_PASSWORD,
+                                                headphones.CONFIG.APOLLO_URL)
                 gazelle._login()
             except Exception as e:
                 gazelle = None
-                logger.error(u"What.cd credentials incorrect or site is down. Error: %s %s" % (
+                logger.error(u"Apollo.rip credentials incorrect or site is down. Error: %s %s" % (
                     e.__class__.__name__, str(e)))
 
         if gazelle and gazelle.logged_in():
@@ -1593,7 +1593,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                         bitrate_string = encoding_string
                 if bitrate_string not in gazelleencoding.ALL_ENCODINGS:
                     logger.info(
-                        u"Your preferred bitrate is not one of the available What.cd filters, so not using it as a search parameter.")
+                        u"Your preferred bitrate is not one of the available PTH filters, so not using it as a search parameter.")
             maxsize = 10000000000
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:  # Highest quality including lossless
             search_formats = [gazelleformat.FLAC, gazelleformat.MP3]
@@ -2008,7 +2008,7 @@ def preprocess(resultlist):
             if result[3] == 'Kick Ass Torrents':
                 headers['Referer'] = 'https://torcache.net/'
                 headers['User-Agent'] = USER_AGENT
-            elif result[3] == 'What.cd':
+            elif result[3] == 'Apollo.rip':
                 headers['User-Agent'] = 'Headphones'
             elif result[3] == 'PassTheHeadphones.me':
                 headers['User-Agent'] = 'Headphones'
