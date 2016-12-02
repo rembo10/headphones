@@ -46,8 +46,10 @@ TORRENT_TO_MAGNET_SERVICES = [
 ]
 
 # Persistent Apollo.rip API object
-gazelle = None
+apolloobj = None
+# Persistent PTH API object
 ruobj = None
+pthobj = None
 
 
 def fix_url(s, charset="utf-8"):
@@ -1176,7 +1178,8 @@ def verifyresult(title, artistterm, term, lossless):
 
 def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                   choose_specific_download=False):
-    global gazelle  # persistent apollo.rip api object to reduce number of login attempts
+    global apolloobj  # persistent apollo.rip api object to reduce number of login attempts
+    global pthobj  # persistent pth api object to reduce number of login attempts
     global ruobj  # and rutracker
 
     reldate = album['ReleaseDate']
@@ -1502,28 +1505,28 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             search_formats = [gazelleformat.MP3]
             maxsize = 300000000
 
-        if not gazelle or not gazelle.logged_in():
+        if not apolloobj or not apolloobj.logged_in():
             try:
                 logger.info(u"Attempting to log in to Apollo.rip...")
-                gazelle = gazelleapi.GazelleAPI(headphones.CONFIG.APOLLO_USERNAME,
+                apolloobj = gazelleapi.GazelleAPI(headphones.CONFIG.APOLLO_USERNAME,
                                                 headphones.CONFIG.APOLLO_PASSWORD,
                                                 headphones.CONFIG.APOLLO_URL)
-                gazelle._login()
+                apolloobj._login()
             except Exception as e:
-                gazelle = None
+                apolloobj = None
                 logger.error(u"Apollo.rip credentials incorrect or site is down. Error: %s %s" % (
                     e.__class__.__name__, str(e)))
 
-        if gazelle and gazelle.logged_in():
+        if apolloobj and apolloobj.logged_in():
             logger.info(u"Searching %s..." % provider)
             all_torrents = []
             for search_format in search_formats:
                 if usersearchterm:
                     all_torrents.extend(
-                        gazelle.search_torrents(searchstr=usersearchterm, format=search_format,
+                        apolloobj.search_torrents(searchstr=usersearchterm, format=search_format,
                                                 encoding=bitrate_string)['results'])
                 else:
-                    all_torrents.extend(gazelle.search_torrents(artistname=semi_clean_artist_term,
+                    all_torrents.extend(apolloobj.search_torrents(artistname=semi_clean_artist_term,
                                                                 groupname=semi_clean_album_term,
                                                                 format=search_format,
                                                                 encoding=bitrate_string)['results'])
@@ -1563,7 +1566,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                     torrent.group.update_group_data()  # will load the file_path for the individual torrents
                 resultlist.append((torrent.file_path,
                                    torrent.size,
-                                   gazelle.generate_torrent_link(torrent.id),
+                                   apolloobj.generate_torrent_link(torrent.id),
                                    provider,
                                    'torrent', True))
 
@@ -1602,28 +1605,28 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             search_formats = [gazelleformat.MP3]
             maxsize = 300000000
 
-        if not gazelle or not gazelle.logged_in():
+        if not pthobj or not pthobj.logged_in():
             try:
                 logger.info(u"Attempting to log in to PassTheHeadphones.me...")
-                gazelle = gazelleapi.GazelleAPI(headphones.CONFIG.PTH_USERNAME,
+                pthobj = gazelleapi.GazelleAPI(headphones.CONFIG.PTH_USERNAME,
                                                 headphones.CONFIG.PTH_PASSWORD,
                                                 headphones.CONFIG.PTH_URL)
-                gazelle._login()
+                pthobj._login()
             except Exception as e:
-                gazelle = None
+                pthobj = None
                 logger.error(u"PassTheHeadphones credentials incorrect or site is down. Error: %s %s" % (
                     e.__class__.__name__, str(e)))
 
-        if gazelle and gazelle.logged_in():
+        if pthobj and pthobj.logged_in():
             logger.info(u"Searching %s..." % provider)
             all_torrents = []
             for search_format in search_formats:
                 if usersearchterm:
                     all_torrents.extend(
-                        gazelle.search_torrents(searchstr=usersearchterm, format=search_format,
+                        pthobj.search_torrents(searchstr=usersearchterm, format=search_format,
                                                 encoding=bitrate_string)['results'])
                 else:
-                    all_torrents.extend(gazelle.search_torrents(artistname=semi_clean_artist_term,
+                    all_torrents.extend(pthobj.search_torrents(artistname=semi_clean_artist_term,
                                                                 groupname=semi_clean_album_term,
                                                                 format=search_format,
                                                                 encoding=bitrate_string)['results'])
@@ -1663,7 +1666,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                     torrent.group.update_group_data()  # will load the file_path for the individual torrents
                 resultlist.append((torrent.file_path,
                                    torrent.size,
-                                   gazelle.generate_torrent_link(torrent.id),
+                                   pthobj.generate_torrent_link(torrent.id),
                                    provider,
                                    'torrent', True))
 
