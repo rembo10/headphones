@@ -639,14 +639,15 @@ def preserve_torrent_directory(albumpath):
 
     # Copy to temp dir
     subdir = os.path.join(new_folder, "headphones")
-    logger.info("Copying files to " + subdir.decode(headphones.SYS_ENCODING, 'replace')
-                + " subfolder to preserve downloaded files for seeding")
+    logger.info("Copying files to " + subdir.decode(headphones.SYS_ENCODING,
+                                                    'replace') + " subfolder to preserve downloaded files for seeding")
 
     # Attempt to stop multiple temp dirs being created for the same albumpath
     tempdir = os.path.join(tempdir, prefix)
-    if len (glob.glob(tempdir + '*/')) >= 3:
-        logger.error("Looks like a temp subfolder has previously been created for this albumpath, not continuing "
-                     + tempdir.decode(headphones.SYS_ENCODING, 'replace'))
+    if len(glob.glob(tempdir + '*/')) >= 3:
+        logger.error(
+            "Looks like a temp subfolder has previously been created for this albumpath, not continuing " + tempdir.decode(
+                headphones.SYS_ENCODING, 'replace'))
         return None
 
     try:
@@ -659,7 +660,8 @@ def preserve_torrent_directory(albumpath):
         shutil.rmtree(new_folder)
         return None
 
-def cue_split(albumpath,keep_original_folder=False):
+
+def cue_split(albumpath, keep_original_folder=False):
     """
      Attempts to check and split audio files by a cue for the given directory.
      """

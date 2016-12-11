@@ -1266,7 +1266,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
         # Not found from meta data, check if there's a cue to split and try meta data again
         kind = None
         if headphones.CONFIG.CUE_SPLIT and not name and not album:
-            cue_folder = helpers.cue_split(folder,keep_original_folder=keep_original_folder)
+            cue_folder = helpers.cue_split(folder, keep_original_folder=keep_original_folder)
             if cue_folder:
                 try:
                     name, album, year = helpers.extract_metadata(cue_folder)
