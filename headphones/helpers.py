@@ -655,8 +655,9 @@ def preserve_torrent_directory(albumpath):
         # Update the album path with the new location
         return subdir
     except Exception as e:
-        logger.warn("Cannot copy/move files to temp folder: "
-                    + new_folder.decode(headphones.SYS_ENCODING, 'replace') + ". Not continuing. Error: " + str(e))
+        logger.warn("Cannot copy/move files to temp folder: " + new_folder.decode(headphones.SYS_ENCODING,
+                                                                                  'replace') + ". Not continuing. Error: " + str(
+            e))
         shutil.rmtree(new_folder)
         return None
 
