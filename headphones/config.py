@@ -144,6 +144,7 @@ _CONFIG_DEFINITIONS = {
     'KAT_RATIO': (str, 'Kat', ''),
     'KEEP_NFO': (int, 'General', 0),
     'KEEP_TORRENT_FILES': (int, 'General', 0),
+    'KEEP_TORRENT_FILES_DIR': (path, 'General', ''),
     'LASTFM_USERNAME': (str, 'General', ''),
     'LAUNCH_BROWSER': (int, 'General', 1),
     'LIBRARYSCAN': (int, 'General', 1),

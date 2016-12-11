@@ -20,6 +20,8 @@ import datetime
 import shutil
 import time
 import sys
+import tempfile
+import glob
 
 import fnmatch
 import re
@@ -623,24 +625,41 @@ def get_downloaded_track_list(albumpath):
 
 def preserve_torrent_directory(albumpath):
     """
-    Copy torrent directory to headphones-modified to keep files for seeding.
+    Copy torrent directory to temp headphones_ directory to keep files for seeding.
     """
     from headphones import logger
-    new_folder = os.path.join(albumpath,
-                              'headphones-modified'.encode(headphones.SYS_ENCODING, 'replace'))
-    logger.info(
-        "Copying files to 'headphones-modified' subfolder to preserve downloaded files for seeding")
-    try:
-        shutil.copytree(albumpath, new_folder)
-        return new_folder
-    except Exception as e:
-        logger.warn("Cannot copy/move files to temp folder: " +
-                    new_folder.decode(headphones.SYS_ENCODING, 'replace') +
-                    ". Not continuing. Error: " + str(e))
+
+    # Create temp dir
+    if headphones.CONFIG.KEEP_TORRENT_FILES_DIR:
+        tempdir = headphones.CONFIG.KEEP_TORRENT_FILES_DIR
+    else:
+        tempdir = tempfile.gettempdir()
+    prefix = "headphones_" + os.path.basename(os.path.normpath(albumpath)) + "_"
+    new_folder = tempfile.mkdtemp(prefix=prefix, dir=tempdir)
+
+    # Copy to temp dir
+    subdir = os.path.join(new_folder, "headphones")
+    logger.info("Copying files to " + subdir.decode(headphones.SYS_ENCODING, 'replace')
+                + " subfolder to preserve downloaded files for seeding")
+
+    # Attempt to stop multiple temp dirs being created for the same albumpath
+    tempdir = os.path.join(tempdir, prefix)
+    if len (glob.glob(tempdir + '*/')) >= 3:
+        logger.error("Looks like a temp subfolder has previously been created for this albumpath, not continuing "
+                     + tempdir.decode(headphones.SYS_ENCODING, 'replace'))
         return None
 
+    try:
+        shutil.copytree(albumpath, subdir)
+        # Update the album path with the new location
+        return subdir
+    except Exception as e:
+        logger.warn("Cannot copy/move files to temp folder: "
+                    + new_folder.decode(headphones.SYS_ENCODING, 'replace') + ". Not continuing. Error: " + str(e))
+        shutil.rmtree(new_folder)
+        return None
 
-def cue_split(albumpath):
+def cue_split(albumpath,keep_original_folder=False):
     """
      Attempts to check and split audio files by a cue for the given directory.
      """
@@ -662,6 +681,15 @@ def cue_split(albumpath):
     # Split cue
     if cue_count and cue_count >= count and cue_dirs:
 
+        # Copy to temp directory
+        if keep_original_folder:
+            temppath = preserve_torrent_directory(albumpath)
+            if temppath:
+                cue_dirs = [cue_dir.replace(albumpath, temppath) for cue_dir in cue_dirs]
+                albumpath = temppath
+            else:
+                return None
+
         from headphones import logger, cuesplit
         logger.info("Attempting to split audio files by cue")
 
@@ -672,12 +700,12 @@ def cue_split(albumpath):
             except Exception as e:
                 os.chdir(cwd)
                 logger.warn("Cue not split: " + str(e))
-                return False
+                return None
 
         os.chdir(cwd)
-        return True
+        return albumpath
 
-    return False
+    return None
 
 
 def extract_logline(s):

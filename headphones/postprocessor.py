@@ -17,7 +17,6 @@ import shutil
 import uuid
 import threading
 import itertools
-import tempfile
 
 import os
 import re
@@ -207,13 +206,23 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
                                                                        'replace') + " isn't complete yet. Will try again on the next run")
                 return
 
-    # Split cue
+    # Check to see if we're preserving the torrent dir
+    if (headphones.CONFIG.KEEP_TORRENT_FILES and Kind == "torrent") or headphones.CONFIG.KEEP_ORIGINAL_FOLDER:
+        keep_original_folder = True
+
+    # Split cue before metadata check
     if headphones.CONFIG.CUE_SPLIT and downloaded_cuecount and downloaded_cuecount >= len(
             downloaded_track_list):
-        if headphones.CONFIG.KEEP_TORRENT_FILES and Kind == "torrent":
+        if keep_original_folder:
+            keep_original_folder = False
             albumpath = helpers.preserve_torrent_directory(albumpath)
-        if albumpath and helpers.cue_split(albumpath):
-            downloaded_track_list = helpers.get_downloaded_track_list(albumpath)
+            if not albumpath:
+                return
+            Kind = "cue_split"
+        albumpath = helpers.cue_split(albumpath)
+        if not albumpath:
+            return
+        downloaded_track_list = helpers.get_downloaded_track_list(albumpath)
 
     # test #1: metadata - usually works
     logger.debug('Verifying metadata...')
@@ -316,19 +325,16 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                      keep_original_folder=False):
     logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
     new_folder = None
-    # Check to see if we're preserving the torrent dir
-    if (headphones.CONFIG.KEEP_TORRENT_FILES and Kind == "torrent" and 'headphones-modified' not in albumpath) or headphones.CONFIG.KEEP_ORIGINAL_FOLDER or keep_original_folder:
-        new_folder = tempfile.mkdtemp(prefix="headphones_")
-        subdir = os.path.join(new_folder, "headphones")
-        logger.info("Copying files to " + subdir.decode(headphones.SYS_ENCODING, 'replace') + " subfolder to preserve downloaded files for seeding")
-        try:
-            shutil.copytree(albumpath, subdir)
-            # Update the album path with the new location
-            albumpath = subdir
-        except Exception as e:
-            logger.warn("Cannot copy/move files to temp folder: " + new_folder.decode(headphones.SYS_ENCODING, 'replace') + ". Not continuing. Error: " + str(e))
-            shutil.rmtree(new_folder)
+
+    # Preserve the torrent dir
+    if keep_original_folder:
+        albumpath = helpers.preserve_torrent_directory(albumpath)
+        if not albumpath:
             return
+        else:
+            new_folder = os.path.split(albumpath)[0]
+    elif Kind == "cue_split":
+        new_folder = os.path.split(albumpath)[0]
 
         # Need to update the downloaded track list with the new location.
         # Could probably just throw in the "headphones-modified" folder,
@@ -1257,12 +1263,23 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
         except Exception:
             name = album = None
 
-        # Check if there's a cue to split
-        if headphones.CONFIG.CUE_SPLIT and not name and not album and helpers.cue_split(folder):
-            try:
-                name, album, year = helpers.extract_metadata(folder)
-            except Exception:
-                name = album = None
+        # Not found from meta data, check if there's a cue to split and try meta data again
+        kind = None
+        if headphones.CONFIG.CUE_SPLIT and not name and not album:
+            cue_folder = helpers.cue_split(folder,keep_original_folder=keep_original_folder)
+            if cue_folder:
+                try:
+                    name, album, year = helpers.extract_metadata(cue_folder)
+                except Exception:
+                    name = album = None
+                if name:
+                    folder = cue_folder
+                    if keep_original_folder:
+                        keep_original_folder = False
+                        kind = "cue_split"
+                elif folder != cue_folder:
+                    cue_folder = os.path.split(cue_folder)[0]
+                    shutil.rmtree(cue_folder)
 
         if name and album:
             release = myDB.action(
@@ -1272,7 +1289,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
                 logger.info(
                     'Found a match in the database: %s - %s. Verifying to make sure it is the correct album',
                     release['ArtistName'], release['AlbumTitle'])
-                verify(release['AlbumID'], folder, keep_original_folder=keep_original_folder)
+                verify(release['AlbumID'], folder, Kind=kind, keep_original_folder=keep_original_folder)
                 continue
             else:
                 logger.info('Querying MusicBrainz for the release group id for: %s - %s', name,
@@ -1284,7 +1301,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
                     rgid = None
 
                 if rgid:
-                    verify(rgid, folder, keep_original_folder=keep_original_folder)
+                    verify(rgid, folder, Kind=kind, keep_original_folder=keep_original_folder)
                     continue
                 else:
                     logger.info('No match found on MusicBrainz for: %s - %s', name, album)
