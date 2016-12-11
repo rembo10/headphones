@@ -80,7 +80,7 @@ def addTorrent(link, data=None, name=None):
 
         result = {}
         retid = False
-        url_what = ['https://what.cd/', 'http://what.cd/']
+        url_apollo = ['https://apollo.rip/', 'http://apollo.rip/']
         url_waffles = ['https://waffles.ch/', 'http://waffles.ch/']
 
         if link.lower().startswith('magnet:'):
@@ -94,7 +94,7 @@ def addTorrent(link, data=None, name=None):
             if link.lower().startswith(tuple(url_waffles)):
                 if 'rss=' not in link:
                     link = link + '&rss=1'
-            if link.lower().startswith(tuple(url_what)):
+            if link.lower().startswith(tuple(url_apollo)):
                 logger.debug('Deluge: Using different User-Agent for this site')
                 user_agent = 'Headphones'
                 # This method will make Deluge download the file
@@ -135,7 +135,10 @@ def addTorrent(link, data=None, name=None):
                     # remove '.torrent' suffix
                     if name[-len('.torrent'):] == '.torrent':
                         name = name[:-len('.torrent')]
-            logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name, str(torrentfile)[:40]))
+            try:
+                logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name, str(torrentfile)[:40]))
+            except:
+                logger.debug('Deluge: Sending Deluge torrent with problematic name and some content')
             result = {'type': 'torrent',
                         'name': name,
                         'content': torrentfile}
@@ -445,6 +448,7 @@ def _add_torrent_file(result):
         try:
             # content is torrent file contents that needs to be encoded to base64
             # this time let's try leaving the encoding as is
+            logger.debug('Deluge: There was a decoding issue, let\'s try again')
             post_data = json.dumps({"method": "core.add_torrent_file",
                                     "params": [result['name'] + '.torrent', b64encode(result['content']), {}],
                                     "id": 22})
