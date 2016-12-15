@@ -217,7 +217,7 @@ class Cache(object):
                 return
 
             try:
-                image_url = data['artist']['image'][-1]['#text']
+                image_url = data['artist']['image'][-2]['#text']
             except (KeyError, IndexError):
                 logger.debug('No artist image found')
                 image_url = None
@@ -235,7 +235,7 @@ class Cache(object):
                 return
 
             try:
-                image_url = data['album']['image'][-1]['#text']
+                image_url = data['album']['image'][-2]['#text']
             except (KeyError, IndexError):
                 logger.debug('No album image found on last.fm')
                 image_url = None
@@ -304,7 +304,7 @@ class Cache(object):
                 logger.debug('No artist bio found')
                 self.info_content = None
             try:
-                image_url = data['artist']['image'][-1]['#text']
+                image_url = data['artist']['image'][-2]['#text']
             except KeyError:
                 logger.debug('No artist image found')
                 image_url = None
@@ -342,7 +342,7 @@ class Cache(object):
                 logger.debug('No album infomation found')
                 self.info_content = None
             try:
-                image_url = data['album']['image'][-1]['#text']
+                image_url = data['album']['image'][-2]['#text']
             except KeyError:
                 logger.debug('No album image link found')
                 image_url = None
