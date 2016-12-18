@@ -1304,6 +1304,26 @@
 
                             <fieldset>
                                 <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="slack_enabled" id="slack" value="1" ${config['slack_enabled']} /><label for="slack"><span class="option">Slack</span></label>
+                                </div>
+                                <div id="slackoptions">
+                                    <div class="row">
+                                        <label>Slack Webhook</label><input type="text" name="slack_url" value="${config['slack_url']}" size="50">
+                                    </div>
+                                    <div class="row">
+                                        <label>Channel</label><input type="text" name="slack_channel" value="${config['slack_channel']}" size="50">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <label>Emoji</label><input type="text" name="slack_emoji" value="${config['slack_emoji']}" size="50">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="slack_onsnatch" value="1" ${config['slack_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <div class="row checkbox left">
                                     <input type="checkbox" class="bigcheck" name="telegram_enabled" id="telegram" value="1" ${config['telegram_enabled']} /><label for="telegram"><span class="option">Telegram</span></label>
                                 </div>
                                 <div id="telegramoptions">
@@ -2098,6 +2118,27 @@
                             $("#twitteroptions").slideUp();
                         }
                 });
+
+                if ($("#slack").is(":checked"))
+                        {
+                            $("#slackoptions").show();
+                        }
+                else
+                        {
+                            $("#slackoptions").hide();
+                        }
+
+                $("#slack").click(function(){
+                        if ($("#slack").is(":checked"))
+                        {
+                            $("#slackoptions").slideDown();
+                        }
+                        else
+                        {
+                            $("#slackoptions").slideUp();
+                        }
+                });
+
 
                 if ($("#telegram").is(":checked"))
                         {

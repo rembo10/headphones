@@ -1388,7 +1388,12 @@ class WebInterface(object):
             "email_ssl": checked(headphones.CONFIG.EMAIL_SSL),
             "email_tls": checked(headphones.CONFIG.EMAIL_TLS),
             "email_onsnatch": checked(headphones.CONFIG.EMAIL_ONSNATCH),
-            "idtag": checked(headphones.CONFIG.IDTAG)
+            "idtag": checked(headphones.CONFIG.IDTAG),
+            "slack_enabled": checked(headphones.CONFIG.SLACK_ENABLED),
+            "slack_url": headphones.CONFIG.SLACK_URL,
+            "slack_channel": headphones.CONFIG.SLACK_CHANNEL,
+            "slack_emoji": headphones.CONFIG.SLACK_EMOJI,
+            "slack_onsnatch": checked(headphones.CONFIG.SLACK_ONSNATCH)
         }
 
         for k, v in config.iteritems():
