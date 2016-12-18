@@ -889,6 +889,7 @@ class TELEGRAM(object):
         logger.info(u"Telegram notifications sent.")
         return sent_successfuly
 
+
 class SLACK(object):
 
     def notify(self, message, status):
@@ -901,7 +902,7 @@ class SLACK(object):
         channel = headphones.CONFIG.SLACK_CHANNEL
         emoji = headphones.CONFIG.SLACK_EMOJI
 
-        payload = { 'channel': channel, 'text': status + ': ' + message, 'icon_emoji': emoji}
+        payload = {'channel': channel, 'text': status + ': ' + message, 'icon_emoji': emoji}
 
         try:
             response = requests.post(SLACK_URL, json=payload)
