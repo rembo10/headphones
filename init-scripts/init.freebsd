@@ -23,6 +23,7 @@
 
 name="headphones"
 rcvar=${name}_enable
+load_rc_config ${name}
 
 : "${headphones_enable:="NO"}"
 : "${headphones_user:="_sabnzbd"}"
