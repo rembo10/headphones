@@ -138,11 +138,11 @@ class qbittorrentclient(object):
 
     def getfiles(self, hash):
         logger.debug('qb.getfiles(%s)' % hash)
-        return self._command('query/propertiesFiles/'+hash)
+        return self._command('query/propertiesFiles/' + hash)
 
     def getprops(self, hash):
         logger.debug('qb.getprops(%s)' % hash)
-        return self._command('query/propertiesGeneral/'+hash)
+        return self._command('query/propertiesGeneral/' + hash)
 
     def setprio(self, hash, priority):
         logger.debug('qb.setprio(%s,%d)' % (hash, priority))
