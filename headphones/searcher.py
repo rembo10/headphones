@@ -1012,7 +1012,7 @@ def send_to_downloader(data, bestqual, album):
             seed_ratio = get_seed_ratio(bestqual[3])
             if seed_ratio is not None:
                 utorrent.setSeedRatio(torrentid, seed_ratio)
-        else: # if headphones.CONFIG.TORRENT_DOWNLOADER == 4:
+        else:  # if headphones.CONFIG.TORRENT_DOWNLOADER == 4:
             logger.info("Sending torrent to QBiTorrent")
 
             # Add torrent

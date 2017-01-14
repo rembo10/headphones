@@ -63,7 +63,7 @@ class qbittorrentclient(object):
         # login so we can capture SID cookie
         login_data = urllib.urlencode({'username': username, 'password': password})
         try:
-            self.opener.open(base_url+'/login', login_data)
+            self.opener.open(base_url + '/login', login_data)
         except urllib2.URLError as err:
             logger.debug('Error getting SID. qBittorrent responded with error: ' + str(err.reason))
             return
@@ -79,15 +79,15 @@ class qbittorrentclient(object):
         data = None
         headers = dict()
         if content_type == 'multipart/form-data':
-            data, headers = encode_multipart( args, files )
+            data, headers = encode_multipart(args, files)
         else:
             if args:
                 data = urllib.urlencode(args)
             if content_type:
                 headers['Content-Type'] = content_type
 
-        logger.debug('%s' % json.dumps( headers, indent = 4 ))
-	logger.debug('%s' % data)
+        logger.debug('%s' % json.dumps(headers, indent=4))
+        logger.debug('%s' % data)
 
         request = urllib2.Request(url, data, headers)
         try:
@@ -99,10 +99,10 @@ class qbittorrentclient(object):
                         resp = ''
                         for line in response:
                             resp = resp + line
-	                logger.debug('response code: %s' % str(response.code) )
-			logger.debug('response: %s' % resp)
+                        logger.debug('response code: %s' % str(response.code))
+                        logger.debug('response: %s' % resp)
                         return response.code, json.loads(resp)
-	    logger.debug('response code: %s' % str(response.code) )
+            logger.debug('response code: %s' % str(response.code))
             return response.code, None
         except urllib2.URLError as err:
             logger.debug('Failed URL: %s' % url)
@@ -134,7 +134,7 @@ class qbittorrentclient(object):
     def pause(self, hash):
         logger.debug('qb.pause(%s)' % hash)
         args = {'hash': hash}
-        return self._command('command/pause', args,'application/x-www-form-urlencoded')
+        return self._command('command/pause', args, 'application/x-www-form-urlencoded')
 
     def getfiles(self, hash):
         logger.debug('qb.getfiles(%s)' % hash)
@@ -147,7 +147,7 @@ class qbittorrentclient(object):
     def setprio(self, hash, priority):
         logger.debug('qb.setprio(%s,%d)' % (hash, priority))
         args = {'hash': hash, 'priority': priority}
-        return self._command('command/setFilePrio', args,'application/x-www-form-urlencoded')
+        return self._command('command/setFilePrio', args, 'application/x-www-form-urlencoded')
 
     def remove(self, hash, remove_data=False):
         logger.debug('qb.remove(%s,%s)' % (hash, remove_data))
@@ -159,7 +159,9 @@ class qbittorrentclient(object):
             command = 'command/delete'
         return self._command(command, args, 'application/x-www-form-urlencoded')
 
+
 def removeTorrent(hash, remove_data=False):
+
     logger.debug('removeTorrent(%s,%s)' % (hash, remove_data))
 
     qbclient = qbittorrentclient()
@@ -175,6 +177,7 @@ def removeTorrent(hash, remove_data=False):
                 return False
     return False
 
+
 def addTorrent(link):
     logger.debug('addTorrent(%s)' % link)
 
@@ -182,14 +185,18 @@ def addTorrent(link):
     args = {'urls': link, 'savepath': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}
     if headphones.CONFIG.QBITTORRENT_LABEL:
         args['category'] = headphones.CONFIG.QBITTORRENT_LABEL
-    return qbclient._command('command/download', args, 'multipart/form-data' )
+
+    return qbclient._command('command/download', args, 'multipart/form-data')
+
 
 def addFile(data):
     logger.debug('addFile(data)')
 
     qbclient = qbittorrentclient()
     files = {'torrents': {'filename': '', 'content': data}}
+
     return qbclient._command('command/upload', filelist=files)
+
 
 def getFolder(hash):
     logger.debug('getFolder(%s)' % hash)
@@ -223,7 +230,9 @@ def getFolder(hash):
             torrent_folder = torrent_folder.replace('\\', '/')
         return os.path.basename(os.path.normpath(torrent_folder))
 
+
 _BOUNDARY_CHARS = string.digits + string.ascii_letters
+
 
 # Taken from http://code.activestate.com/recipes/578668-encode-multipart-form-data-for-uploading-files-via/
 # "MIT License" which is compatible with GPL
@@ -245,7 +254,7 @@ def encode_multipart(args, files, boundary=None):
                 '',
                 str(value),
             ))
-    logger.debug(''.join( lines ))
+    logger.debug(''.join(lines))
 
     if files:
         for name, value in files.items():
