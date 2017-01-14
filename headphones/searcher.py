@@ -35,7 +35,7 @@ from pygazelle import format as gazelleformat
 import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
-from headphones import utorrent, transmission, notifiers, rutracker, deluge
+from headphones import utorrent, transmission, notifiers, rutracker, deluge, qbittorrent
 from bencode import bencode, bdecode
 
 # Magnet to torrent services, for Black hole. Stolen from CouchPotato.
@@ -981,7 +981,7 @@ def send_to_downloader(data, bestqual, album):
             except Exception as e:
                 logger.error('Error sending torrent to Deluge: %s' % str(e))
 
-        else:  # if headphones.CONFIG.TORRENT_DOWNLOADER == 2:
+        elif headphones.CONFIG.TORRENT_DOWNLOADER == 2:
             logger.info("Sending torrent to uTorrent")
 
             # Add torrent
@@ -1012,6 +1012,28 @@ def send_to_downloader(data, bestqual, album):
             seed_ratio = get_seed_ratio(bestqual[3])
             if seed_ratio is not None:
                 utorrent.setSeedRatio(torrentid, seed_ratio)
+        else: # if headphones.CONFIG.TORRENT_DOWNLOADER == 4:
+            logger.info("Sending torrent to QBiTorrent")
+
+            # Add torrent
+            if bestqual[3] == 'rutracker.org':
+                qbittorrent.addFile(data)
+            else:
+                qbittorrent.addTorrent(bestqual[2])
+
+            # Get hash
+            torrentid = calculate_torrent_hash(bestqual[2], data)
+            if not torrentid:
+                logger.error('Torrent id could not be determined')
+                return
+
+            # Get folder
+            folder_name = qbittorrent.getFolder(torrentid)
+            if folder_name:
+                logger.info('Torrent folder name: %s' % folder_name)
+            else:
+                logger.error('Torrent folder name could not be determined')
+                return
 
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [album['AlbumID']])
