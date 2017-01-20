@@ -740,7 +740,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None,
         }
 
         data = request.request_json(
-            url='http://api.omgwtfnzbs.org/json/',
+            url='http://api.omgwtfnzbs.me/json/',
             params=params, headers=headers
         )
 
