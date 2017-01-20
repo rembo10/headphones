@@ -888,3 +888,31 @@ class TELEGRAM(object):
 
         logger.info(u"Telegram notifications sent.")
         return sent_successfuly
+
+
+class SLACK(object):
+
+    def notify(self, message, status):
+        if not headphones.CONFIG.SLACK_ENABLED:
+            return
+
+        import requests
+
+        SLACK_URL = headphones.CONFIG.SLACK_URL
+        channel = headphones.CONFIG.SLACK_CHANNEL
+        emoji = headphones.CONFIG.SLACK_EMOJI
+
+        payload = {'channel': channel, 'text': status + ': ' + message, 'icon_emoji': emoji}
+
+        try:
+            response = requests.post(SLACK_URL, json=payload)
+        except Exception, e:
+            logger.info(u'Slack notify failed: ' + str(e))
+
+        sent_successfuly = True
+        if not response.status_code == 200:
+            logger.info(u'Could not send notification to Slack. Response: [%s]', (response.text))
+            sent_successfuly = False
+
+        logger.info(u"Slack notifications sent.")
+        return sent_successfuly

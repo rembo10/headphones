@@ -1075,6 +1075,10 @@ def send_to_downloader(data, bestqual, album):
         logger.info(u"Sending PushBullet notification")
         pushbullet = notifiers.PUSHBULLET()
         pushbullet.notify(name, "Download started")
+    if headphones.CONFIG.SLACK_ENABLED and headphones.CONFIG.SLACK_ONSNATCH:
+        logger.info(u"Sending Slack notification")
+        slack = notifiers.SLACK()
+        slack.notify(name, "Download started")
     if headphones.CONFIG.TELEGRAM_ENABLED and headphones.CONFIG.TELEGRAM_ONSNATCH:
         logger.info(u"Sending Telegram notification")
         telegram = notifiers.TELEGRAM()
