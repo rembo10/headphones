@@ -24,7 +24,7 @@ class Rutracker(object):
         return self.loggedin
 
     def still_logged_in(self, html):
-        if not html or "action=\"http://login.rutracker.org/forum/login.php\">" in html:
+        if not html or "action=\"http://rutracker.org/forum/login.php\">" in html:
             return False
         else:
             return True
@@ -34,7 +34,7 @@ class Rutracker(object):
         Logs in user
         """
 
-        loginpage = 'http://login.rutracker.org/forum/login.php'
+        loginpage = 'http://rutracker.org/forum/login.php'
         post_params = {
             'login_username': headphones.CONFIG.RUTRACKER_USER,
             'login_password': headphones.CONFIG.RUTRACKER_PASSWORD,
@@ -46,10 +46,10 @@ class Rutracker(object):
         try:
             r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False)
             # try again
-            if not self.has_bb_data_cookie(r):
+            if not self.has_bb_session_cookie(r):
                 time.sleep(10)
                 r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False)
-            if self.has_bb_data_cookie(r):
+            if self.has_bb_session_cookie(r):
                 self.loggedin = True
                 logger.info("Successfully logged in to rutracker")
             else:
@@ -62,11 +62,11 @@ class Rutracker(object):
             self.loggedin = False
             return self.loggedin
 
-    def has_bb_data_cookie(self, response):
-        if 'bb_data' in response.cookies.keys():
+    def has_bb_session_cookie(self, response):
+        if 'bb_session' in response.cookies.keys():
             return True
         # Rutracker randomly send a 302 redirect code, cookie may be present in response history
-        return next(('bb_data' in r.cookies.keys() for r in response.history), False)
+        return next(('bb_session' in r.cookies.keys() for r in response.history), False)
 
     def searchurl(self, artist, album, year, format):
         """
@@ -169,7 +169,7 @@ class Rutracker(object):
         return the .torrent data
         """
         torrent_id = dict([part.split('=') for part in urlparse(url)[4].split('&')])['t']
-        downloadurl = 'http://dl.rutracker.org/forum/dl.php?t=' + torrent_id
+        downloadurl = 'http://rutracker.org/forum/dl.php?t=' + torrent_id
         cookie = {'bb_dl': torrent_id}
         try:
             headers = {'Referer': url}
