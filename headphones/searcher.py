@@ -1287,9 +1287,9 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
             categories = "3040"
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
-            categories = "3040,3010"
+            categories = "3040,3010,3050"
         else:
-            categories = "3010"
+            categories = "3010,3050"
 
         if album['Type'] == 'Other':
             categories = "3030"
@@ -1325,7 +1325,22 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                         try:
                             url = item.link
                             title = item.title
-                            size = int(item.links[1]['length'])
+
+                            # Torrentech hack - size currently not returned, make it up
+                            if 'torrentech' in torznab_host[0]:
+                                if albumlength:
+                                    if 'Lossless' in title:
+                                        size = albumlength / 1000 * 800 * 128
+                                    elif 'MP3' in title:
+                                        size = albumlength / 1000 * 320 * 128
+                                    else:
+                                        size = albumlength / 1000 * 256 * 128
+                                else:
+                                    logger.info('Skipping %s, could not determine size' % title)
+                                    continue
+                            else:
+                                size = int(item.links[1]['length'])
+
                             if all(word.lower() in title.lower() for word in term.split()):
                                 logger.info(
                                     'Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
