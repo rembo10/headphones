@@ -213,16 +213,27 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
     # Split cue before metadata check
     if headphones.CONFIG.CUE_SPLIT and downloaded_cuecount and downloaded_cuecount >= len(
             downloaded_track_list):
+        new_folder = None
+        new_albumpath = albumpath
         if keep_original_folder:
-            keep_original_folder = False
-            albumpath = helpers.preserve_torrent_directory(albumpath)
-            if not albumpath:
+            temp_path = helpers.preserve_torrent_directory(new_albumpath)
+            if not temp_path:
+                markAsUnprocessed(albumid, new_albumpath, keep_original_folder)
                 return
-            Kind = "cue_split"
-        albumpath = helpers.cue_split(albumpath)
-        if not albumpath:
+            else:
+                new_albumpath = temp_path
+                new_folder = os.path.split(new_albumpath)[0]
+                Kind = "cue_split"
+        cuepath = helpers.cue_split(new_albumpath)
+        if not cuepath:
+            if new_folder:
+                shutil.rmtree(new_folder)
+            markAsUnprocessed(albumid, albumpath, keep_original_folder)
             return
-        downloaded_track_list = helpers.get_downloaded_track_list(albumpath)
+        else:
+            albumpath = cuepath
+            downloaded_track_list = helpers.get_downloaded_track_list(albumpath)
+            keep_original_folder = False
 
     # test #1: metadata - usually works
     logger.debug('Verifying metadata...')
@@ -309,15 +320,19 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
 
     logger.warn(u'Could not identify album: %s. It may not be the intended album.',
                 albumpath.decode(headphones.SYS_ENCODING, 'replace'))
+    markAsUnprocessed(albumid, albumpath, keep_original_folder)
+
+
+def markAsUnprocessed(albumid, albumpath, keep_original_folder=False):
+    myDB = db.DBConnection()
     myDB.action(
-        'UPDATE snatched SET status = "Unprocessed" WHERE status NOT LIKE "Seed%" and AlbumID=?',
-        [albumid])
+        'UPDATE snatched SET status = "Unprocessed" WHERE status NOT LIKE "Seed%" and AlbumID=?', [albumid])
     processed = re.search(r' \(Unprocessed\)(?:\[\d+\])?', albumpath)
     if not processed:
-        if headphones.CONFIG.RENAME_UNPROCESSED:
+        if headphones.CONFIG.RENAME_UNPROCESSED and not keep_original_folder:
             renameUnprocessedFolder(albumpath, tag="Unprocessed")
         else:
-            logger.warn(u"Won't rename %s to mark as 'Unprocessed', because it is disabled.",
+            logger.warn(u"Won't rename %s to mark as 'Unprocessed', because it is disabled or folder is being kept.",
                         albumpath.decode(headphones.SYS_ENCODING, 'replace'))
 
 
@@ -328,10 +343,12 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
 
     # Preserve the torrent dir
     if keep_original_folder:
-        albumpath = helpers.preserve_torrent_directory(albumpath)
-        if not albumpath:
+        temp_path = helpers.preserve_torrent_directory(albumpath)
+        if not temp_path:
+            markAsUnprocessed(albumid, albumpath, keep_original_folder)
             return
         else:
+            albumpath = temp_path
             new_folder = os.path.split(albumpath)[0]
     elif Kind == "cue_split":
         new_folder = os.path.split(albumpath)[0]

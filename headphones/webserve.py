@@ -1293,6 +1293,7 @@ class WebInterface(object):
             "magnet_links_3": radio(headphones.CONFIG.MAGNET_LINKS, 3),
             "log_dir": headphones.CONFIG.LOG_DIR,
             "cache_dir": headphones.CONFIG.CACHE_DIR,
+            "keep_torrent_files_dir": headphones.CONFIG.KEEP_TORRENT_FILES_DIR,
             "interface_list": interface_list,
             "music_encoder": checked(headphones.CONFIG.MUSIC_ENCODER),
             "encoder": headphones.CONFIG.ENCODER,
