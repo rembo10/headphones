@@ -1715,7 +1715,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
     # Pirate Bay
     if headphones.CONFIG.PIRATEBAY:
         provider = "The Pirate Bay"
-        tpb_term = term.replace("!", "")
+        tpb_term = term.replace("!", "").replace("'", " ")
 
         # Use proxy if specified
         if headphones.CONFIG.PIRATEBAY_PROXY_URL:
