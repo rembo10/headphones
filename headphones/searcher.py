@@ -32,6 +32,7 @@ import re
 from pygazelle import api as gazelleapi
 from pygazelle import encoding as gazelleencoding
 from pygazelle import format as gazelleformat
+from pygazelle import release_type as gazellerelease_type
 import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
@@ -435,7 +436,7 @@ def sort_search_results(resultlist, album, new, albumlength):
 
     resultlist = temp_list
 
-    if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE:
+    if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE and result[3] != 'What.cd':
 
         try:
             targetsize = albumlength / 1000 * int(headphones.CONFIG.PREFERRED_BITRATE) * 128
@@ -481,6 +482,10 @@ def sort_search_results(resultlist, album, new, albumlength):
     else:
 
         finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
+        
+        # keep number of seeders order for what.cd 
+        if result[3] == 'What.cd':
+            finallist = resultlist
 
     if not len(finallist):
         logger.info('No appropriate matches found for %s - %s', album['ArtistName'],
@@ -1483,17 +1488,17 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             bitrate = headphones.CONFIG.PREFERRED_BITRATE
             if bitrate:
                 if 225 <= int(bitrate) < 256:
-                    bitrate = 'V0'
-                elif 200 <= int(bitrate) < 225:
-                    bitrate = 'V1'
-                elif 175 <= int(bitrate) < 200:
-                    bitrate = 'V2'
-                for encoding_string in gazelleencoding.ALL_ENCODINGS:
-                    if re.search(bitrate, encoding_string, flags=re.I):
-                        bitrate_string = encoding_string
-                if bitrate_string not in gazelleencoding.ALL_ENCODINGS:
+                    bitrate = [gazelleencoding.V0]
                     logger.info(
-                        u"Your preferred bitrate is not one of the available What.cd filters, so not using it as a search parameter.")
+                        u"Your preferred bitrate matches V0 encoding type.")
+                elif 200 <= int(bitrate) < 225:
+                    bitrate = [gazelleencoding.V1]
+                    logger.info(
+                        u"Your preferred bitrate matches V1 encoding type.")
+                elif 175 <= int(bitrate) < 200:
+                    bitrate = [gazelleencoding.V2]
+                    logger.info(
+                        u"Your preferred bitrate matches V2 encoding type.")
             maxsize = 10000000000
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:  # Highest quality including lossless
             search_formats = [gazelleformat.FLAC, gazelleformat.MP3]
@@ -1617,17 +1622,45 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
         if gazelle and gazelle.logged_in():
             logger.info(u"Searching %s..." % provider)
             all_torrents = []
+            
+            # Specify release types to filter by
+            if album['Type'] == 'Album':
+                album_type = [gazellerelease_type.ALBUM]
+            if album['Type'] == 'Soundtrack':
+                album_type = [gazellerelease_type.SOUNDTRACK]
+            if album['Type'] == 'EP':
+                album_type = [gazellerelease_type.EP]
+            # No musicbrainz match for this type
+            #if album['Type'] == 'Anthology':
+            #   album_type = [gazellerelease_type.ANTHOLOGY]
+            if album['Type'] == 'Compilation':
+                album_type = [gazellerelease_type.COMPILATION]
+            if album['Type'] == 'DJ-mix':
+                album_type = [gazellerelease_type.DJ_MIX]
+            if album['Type'] == 'Single':
+                album_type = [gazellerelease_type.SINGLE]
+            if album['Type'] == 'Live':
+                album_type = [gazellerelease_type.LIVE_ALBUM]
+            if album['Type'] == 'Remix':
+                album_type = [gazellerelease_type.REMIX]
+            if album['Type'] == 'Bootleg':
+                album_type = [gazellerelease_type.BOOTLEG]
+            if album['Type'] == 'Interview':
+                album_type = [gazellerelease_type.INTERVIEW]
+            if album['Type'] == 'Mixtape/Street':
+                album_type = [gazellerelease_type.MIXTAPE]
+                
             for search_format in search_formats:
                 if usersearchterm:
                     all_torrents.extend(
                         gazelle.search_torrents(searchstr=usersearchterm, format=search_format,
-                                                encoding=bitrate_string)['results'])
+                                                encoding=bitrate, releasetype=album_type)['results'])
                 else:
                     all_torrents.extend(gazelle.search_torrents(artistname=semi_clean_artist_term,
                                                                 groupname=semi_clean_album_term,
                                                                 format=search_format,
-                                                                encoding=bitrate_string)['results'])
-
+                                                                encoding=bitrate, releasetype=album_type)['results'])
+                    
             # filter on format, size, and num seeders
             logger.info(u"Filtering torrents by format, maximum size, and minimum seeders...")
             match_torrents = [t for t in all_torrents if
@@ -1642,13 +1675,11 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             elif len(match_torrents) > 1:
                 logger.info(u"Found %d matching releases from %s for %s - %s after filtering" %
                             (len(match_torrents), provider, artistterm, albumterm))
-                logger.info(
-                    "Sorting torrents by times snatched and preferred bitrate %s..." % bitrate_string)
-                match_torrents.sort(key=lambda x: int(x.snatched), reverse=True)
+                logger.info('Sorting torrents by number of seeders...')
+                match_torrents.sort(key=lambda x: int(x.seeders), reverse=True)
                 if gazelleformat.MP3 in search_formats:
-                    # sort by size after rounding to nearest 10MB...hacky, but will favor highest quality
-                    match_torrents.sort(key=lambda x: int(10 * round(x.size / 1024. / 1024. / 10.)),
-                                        reverse=True)
+                    logger.info('Sorting torrents by seeders...')
+                    match_torrents.sort(key=lambda x: int(x.seeders), reverse=True)
                 if search_formats and None not in search_formats:
                     match_torrents.sort(
                         key=lambda x: int(search_formats.index(x.format)))  # prefer lossless
@@ -1657,7 +1688,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                 #                    match_torrents.sort(key=lambda x: str(bitrate) in x.getTorrentFolderName(), reverse=True)
                 logger.info(
                     u"New order: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
-
+                
             for torrent in match_torrents:
                 if not torrent.file_path:
                     torrent.group.update_group_data()  # will load the file_path for the individual torrents
@@ -1666,6 +1697,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                                    gazelle.generate_torrent_link(torrent.id),
                                    provider,
                                    'torrent', True))
+                                   
 
     # Pirate Bay
     if headphones.CONFIG.PIRATEBAY:
@@ -1978,7 +2010,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
     results = [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
 
     # Additional filtering for size etc
-    if results and not choose_specific_download:
+    if results and not choose_specific_download and result[3] != 'What.cd':
         results = more_filtering(results, album, albumlength, new)
 
     return results
