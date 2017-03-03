@@ -31,7 +31,7 @@ load_rc_config ${name}
 : "${headphones_conf:="/usr/local/headphones/config.ini"}"
 
 command="${headphones_dir}/Headphones.py"
-command_interpreter="/usr/bin/python"
+command_interpreter="/usr/local/bin/python"
 pidfile="/var/run/headphones/headphones.pid"
 start_precmd="headphones_start_precmd"
 headphones_flags="--daemon --nolaunch --pidfile $pidfile --config $headphones_conf $headphones_flags"
