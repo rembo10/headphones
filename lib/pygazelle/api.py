@@ -32,7 +32,7 @@ class GazelleAPI(object):
     default_headers = {
         'Connection': 'keep-alive',
         'Cache-Control': 'max-age=0',
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_3)'\
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_3) '\
                       'AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.79'\
                       'Safari/535.11',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9'\
