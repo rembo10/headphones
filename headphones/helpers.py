@@ -634,28 +634,40 @@ def preserve_torrent_directory(albumpath):
         tempdir = headphones.CONFIG.KEEP_TORRENT_FILES_DIR
     else:
         tempdir = tempfile.gettempdir()
-    prefix = "headphones_" + os.path.basename(os.path.normpath(albumpath)) + "_"
-    new_folder = tempfile.mkdtemp(prefix=prefix, dir=tempdir)
 
-    # Copy to temp dir
-    subdir = os.path.join(new_folder, "headphones")
-    logger.info("Copying files to " + subdir.decode(headphones.SYS_ENCODING,
-                                                    'replace') + " subfolder to preserve downloaded files for seeding")
-
-    # Attempt to stop multiple temp dirs being created for the same albumpath
-    tempdir = os.path.join(tempdir, prefix)
-    if len(glob.glob(tempdir + '*/')) >= 3:
-        logger.error(
-            "Looks like a temp subfolder has previously been created for this albumpath, not continuing " + tempdir.decode(
-                headphones.SYS_ENCODING, 'replace'))
-        return None
+    logger.info("Preparing to copy to a temporary directory for post processing: " + albumpath.decode(
+            headphones.SYS_ENCODING, 'replace'))
 
     try:
+        prefix = "headphones_" + os.path.basename(os.path.normpath(albumpath)) + "_"
+        new_folder = tempfile.mkdtemp(prefix=prefix, dir=tempdir)
+    except Exception as e:
+        logger.error("Cannot create temp directory: " + tempdir.decode(
+            headphones.SYS_ENCODING, 'replace') + ". Error: " + str(e))
+        return None
+
+    # Attempt to stop multiple temp dirs being created for the same albumpath
+    try:
+        workdir = os.path.join(tempdir, prefix)
+        workdir = re.sub(r'\[', '[[]', workdir)
+        workdir = re.sub(r'(?<!\[)\]', '[]]', workdir)
+        if len(glob.glob(workdir + '*/')) >= 3:
+            logger.error(
+                "Looks like a temp directory has previously been created for this albumpath, not continuing " + workdir.decode(
+                    headphones.SYS_ENCODING, 'replace'))
+            return None
+    except Exception as e:
+        logger.warn("Cannot determine if already copied/processed, will copy anyway: Warning: " + str(e))
+
+    # Copy to temp dir
+    try:
+        subdir = os.path.join(new_folder, "headphones")
+        logger.info("Copying files to " + subdir.decode(headphones.SYS_ENCODING, 'replace'))
         shutil.copytree(albumpath, subdir)
         # Update the album path with the new location
         return subdir
     except Exception as e:
-        logger.warn("Cannot copy/move files to temp folder: " + new_folder.decode(headphones.SYS_ENCODING,
+        logger.warn("Cannot copy/move files to temp directory: " + new_folder.decode(headphones.SYS_ENCODING,
                                                                                   'replace') + ". Not continuing. Error: " + str(
             e))
         shutil.rmtree(new_folder)
