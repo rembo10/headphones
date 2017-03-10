@@ -410,21 +410,15 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                 shutil.rmtree(new_folder)
             return
 
+    # get artwork and path
+    album_art_path = None
     artwork = None
-    album_art_path = albumart.getAlbumArt(albumid)
-    if headphones.CONFIG.EMBED_ALBUM_ART or headphones.CONFIG.ADD_ALBUM_ART:
+    if headphones.CONFIG.EMBED_ALBUM_ART or headphones.CONFIG.ADD_ALBUM_ART or \
+        (headphones.CONFIG.PLEX_ENABLED and headphones.CONFIG.PLEX_NOTIFY) or \
+        (headphones.CONFIG.XBMC_ENABLED and CONFIG.XBMC_NOTIFY):
 
-        if album_art_path:
-            artwork = request.request_content(album_art_path)
-        else:
-            artwork = None
-
-        if not album_art_path or not artwork or len(artwork) < 100:
-            logger.info("No suitable album art found from Amazon. Checking Last.FM....")
-            artwork = albumart.getCachedArt(albumid)
-            if not artwork or len(artwork) < 100:
-                artwork = False
-                logger.info("No suitable album art found from Last.FM. Not adding album art")
+        logger.info('Searching for artwork')
+        album_art_path, artwork = albumart.getAlbumArt(albumid)
 
     if headphones.CONFIG.EMBED_ALBUM_ART and artwork:
         embedAlbumArt(artwork, downloaded_track_list)

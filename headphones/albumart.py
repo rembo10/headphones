@@ -17,12 +17,64 @@ from headphones import request, db, logger
 
 
 def getAlbumArt(albumid):
+
+    artwork_path = None
+    artwork = None
+
+    # CAA
+    artwork_path = 'http://coverartarchive.org/release-group/%s/front' % albumid
+    artwork = request.request_content(artwork_path, timeout=20)
+    if artwork and len(artwork) >= 100:
+        logger.info("Artwork found at CAA")
+        return artwork_path, artwork
+
+    # Amazon
     myDB = db.DBConnection()
     asin = myDB.action(
         'SELECT AlbumASIN from albums WHERE AlbumID=?', [albumid]).fetchone()[0]
-
     if asin:
-        return 'http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg' % asin
+        artwork_path = 'http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg' % asin
+        artwork = request.request_content(artwork_path, timeout=20)
+        if artwork and len(artwork) >= 100:
+            logger.info("Artwork found at Amazon")
+            return artwork_path, artwork
+
+    # last.fm
+    from headphones import lastfm
+
+    myDB = db.DBConnection()
+    dbalbum = myDB.action(
+        'SELECT ArtistName, AlbumTitle, ReleaseID FROM albums WHERE AlbumID=?',
+        [albumid]).fetchone()
+    if dbalbum['ReleaseID'] != albumid:
+        data = lastfm.request_lastfm("album.getinfo", mbid=dbalbum['ReleaseID'])
+        if not data:
+            data = lastfm.request_lastfm("album.getinfo", artist=dbalbum['ArtistName'],
+                                         album=dbalbum['AlbumTitle'])
+    else:
+        data = lastfm.request_lastfm("album.getinfo", artist=dbalbum['ArtistName'],
+                                     album=dbalbum['AlbumTitle'])
+
+    if data:
+        try:
+            images = data['album']['image']
+            for image in images:
+                if image['size'] == 'extralarge':
+                    artwork_path = image['#text']
+                elif image['size'] == 'mega':
+                    artwork_path = image['#text']
+                    break
+        except KeyError:
+            artwork_path = None
+
+        if artwork_path:
+            artwork = request.request_content(artwork_path, timeout=20)
+            if artwork and len(artwork) >= 100:
+                logger.info("Artwork found at last.fm")
+                return artwork_path, artwork
+
+    logger.info("No suitable album art found.")
+    return None, None
 
 
 def getCachedArt(albumid):
