@@ -623,7 +623,7 @@ def get_downloaded_track_list(albumpath):
     return downloaded_track_list
 
 
-def preserve_torrent_directory(albumpath):
+def preserve_torrent_directory(albumpath, forced=False):
     """
     Copy torrent directory to temp headphones_ directory to keep files for seeding.
     """
@@ -647,17 +647,19 @@ def preserve_torrent_directory(albumpath):
         return None
 
     # Attempt to stop multiple temp dirs being created for the same albumpath
-    try:
-        workdir = os.path.join(tempdir, prefix)
-        workdir = re.sub(r'\[', '[[]', workdir)
-        workdir = re.sub(r'(?<!\[)\]', '[]]', workdir)
-        if len(glob.glob(workdir + '*/')) >= 3:
-            logger.error(
-                "Looks like a temp directory has previously been created for this albumpath, not continuing " + workdir.decode(
-                    headphones.SYS_ENCODING, 'replace'))
-            return None
-    except Exception as e:
-        logger.warn("Cannot determine if already copied/processed, will copy anyway: Warning: " + str(e))
+    if not forced:
+        try:
+            workdir = os.path.join(tempdir, prefix)
+            workdir = re.sub(r'\[', '[[]', workdir)
+            workdir = re.sub(r'(?<!\[)\]', '[]]', workdir)
+            if len(glob.glob(workdir + '*/')) >= 3:
+                logger.error(
+                    "Looks like a temp directory has previously been created for this albumpath, not continuing " + workdir.decode(
+                        headphones.SYS_ENCODING, 'replace'))
+                shutil.rmtree(new_folder)
+                return None
+        except Exception as e:
+            logger.warn("Cannot determine if already copied/processed, will copy anyway: Warning: " + str(e))
 
     # Copy to temp dir
     try:
