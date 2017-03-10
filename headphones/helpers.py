@@ -656,6 +656,7 @@ def preserve_torrent_directory(albumpath, forced=False):
                 logger.error(
                     "Looks like a temp directory has previously been created for this albumpath, not continuing " + workdir.decode(
                         headphones.SYS_ENCODING, 'replace'))
+                shutil.rmtree(new_folder)
                 return None
         except Exception as e:
             logger.warn("Cannot determine if already copied/processed, will copy anyway: Warning: " + str(e))
