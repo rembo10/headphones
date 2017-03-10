@@ -28,7 +28,7 @@ from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 from beetsplug import lyrics as beetslyrics
 from headphones import notifiers, utorrent, transmission, deluge, qbittorrent
 from headphones import db, albumart, librarysync
-from headphones import logger, helpers, request, mb, music_encoder
+from headphones import logger, helpers, mb, music_encoder
 from headphones import metadata
 
 postprocessor_lock = threading.Lock()
@@ -415,7 +415,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     artwork = None
     if headphones.CONFIG.EMBED_ALBUM_ART or headphones.CONFIG.ADD_ALBUM_ART or \
             (headphones.CONFIG.PLEX_ENABLED and headphones.CONFIG.PLEX_NOTIFY) or \
-            (headphones.CONFIG.XBMC_ENABLED and CONFIG.XBMC_NOTIFY):
+            (headphones.CONFIG.XBMC_ENABLED and headphones.CONFIG.XBMC_NOTIFY):
         logger.info('Searching for artwork')
         album_art_path, artwork = albumart.getAlbumArt(albumid)
 
