@@ -951,28 +951,40 @@
                                 </div>
                                 <div class="row checkbox left clearfix nopad">
                                     <label>
+                                        Embed lyrics
+                                        <input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}>
+                                    </label>
+                                </div>
+
+
+                                <div class="row checkbox left clearfix nopad">
+                                    <label>
+                                        Embed album art in each file
+                                        <input type="checkbox" name="embed_album_art" id="embed_album_art" value="1" ${config['embed_album_art']}>
+                                    </label>
+                                </div>
+
+                                <div class="row checkbox left clearfix nopad">
+                                    <label>
                                         Add album art jpeg to album folder
                                         <input type="checkbox" name="add_album_art" id="add_album_art" value="1" ${config['add_album_art']}>
                                     </label>
                                 </div>
+
                                 <div id="album_art_options" style="padding-left: 20px">
                                     <div class="row">
                                         as <input type="text" class="override-float" name="album_art_format" value="${config['album_art_format']}" size="10">.jpg
                                     </div>
                                     <small>Use $Artist/$artist, $Album/$album, $Year/$year, put optional variables in curly braces, use single-quote marks to escape curly braces literally ('{', '}').</small>
                                 </div>
-                                <div class="row checkbox left clearfix nopad">
-                                    <label>
-                                        Embed album art in each file
-                                        <input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}>
-                                    </label>
+
+                                <div id="album_art_size_options" style="padding-left: 20px">
+                                    <div class="row">
+                                        Album art min width <input type="text" class="override-float" name="album_art_min_width" value="${config['album_art_min_width']}" size="4" title="Only images with a pixel width greater or equal are considered as valid album art candidates. Default: 0.">\
+                                        Album art max width <input type="text" class="override-float" name="album_art_max_width" value="${config['album_art_max_width']}" size="4" title="A maximum image width to downscale fetched images if they are too big.">
+                                    </div>
                                 </div>
-                                <div class="row checkbox left clearfix nopad">
-                                    <label>
-                                        Embed lyrics
-                                        <input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}>
-                                    </label>
-                                </div>
+
                                 <div class="row">
                                     <label>
                                         Destination Directory:
@@ -1903,9 +1915,36 @@
                         }
                 });
 
+                if ($("#embed_album_art").is(":checked"))
+                        {
+                            $("#album_art_size_options").show();
+                        }
+                        else
+                        {
+                            if (!$("#add_album_art").is(":checked"))
+                            {
+                                $("#album_art_size_options").hide();
+                              }
+                        }
+
+                $("#embed_album_art").click(function(){
+                        if ($("#embed_album_art").is(":checked"))
+                        {
+                            $("#album_art_size_options").slideDown();
+                        }
+                        else
+                        {
+                            if (!$("#add_album_art").is(":checked"))
+                            {
+                                $("#album_art_size_options").slideUp();
+                            }
+                        }
+                });
+
                 if ($("#add_album_art").is(":checked"))
                         {
                             $("#album_art_options").show();
+                            $("#album_art_size_options").show();
                         }
                 else
                         {
@@ -1916,10 +1955,15 @@
                         if ($("#add_album_art").is(":checked"))
                         {
                             $("#album_art_options").slideDown();
+                            $("#album_art_size_options").slideDown();
                         }
                         else
                         {
                             $("#album_art_options").slideUp();
+                            if (!$("#embed_album_art").is(":checked"))
+                            {
+                                $("#album_art_size_options").slideUp();
+                            }
                         }
                 });
 

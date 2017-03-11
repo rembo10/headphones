@@ -1267,6 +1267,8 @@ class WebInterface(object):
             "keep_nfo": checked(headphones.CONFIG.KEEP_NFO),
             "add_album_art": checked(headphones.CONFIG.ADD_ALBUM_ART),
             "album_art_format": headphones.CONFIG.ALBUM_ART_FORMAT,
+            "album_art_min_width": headphones.CONFIG.ALBUM_ART_MIN_WIDTH,
+            "album_art_max_width": headphones.CONFIG.ALBUM_ART_MAX_WIDTH,
             "embed_album_art": checked(headphones.CONFIG.EMBED_ALBUM_ART),
             "embed_lyrics": checked(headphones.CONFIG.EMBED_LYRICS),
             "replace_existing_folders": checked(headphones.CONFIG.REPLACE_EXISTING_FOLDERS),
