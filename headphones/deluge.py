@@ -249,7 +249,7 @@ def removeTorrent(torrentid, remove_data=False):
         logger.debug('Deluge: Checking if torrent %s finished seeding' % str(torrentid))
         post_data = json.dumps({"method": "web.get_torrent_status",
                                 "params": [
-                                    result['hash'],
+                                    torrentid,
                                     [
                                         "name",
                                         "ratio",
