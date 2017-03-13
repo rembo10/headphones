@@ -246,18 +246,41 @@ def removeTorrent(torrentid, remove_data=False):
         _get_auth()
 
     try:
-        result = False
-        post_data = json.dumps({"method": "core.remove_torrent",
+        logger.debug('Deluge: Checking if torrent %s finished seeding' % str(torrentid))
+        post_data = json.dumps({"method": "web.get_torrent_status",
                                 "params": [
-                                    torrentid,
-                                    remove_data
-                                    ],
-                                "id": 25})
+                                    result['hash'],
+                                    [
+                                        "name",
+                                        "ratio",
+                                        "state"
+                                    ]
+                                ],
+                                "id": 26})
+
         response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
             verify=deluge_verify_cert, headers=headers)
-        result = json.loads(response.text)['result']
 
-        return result
+        state = json.loads(response.text)['result']['state']
+
+        not_finished = ["queued", "seeding", "downloading", "checking", "error"]
+        result = False
+        if state.lower() in not_finished:
+            logger.debug('Deluge: Torrent %s is either queued or seeding, not removing yet' % str(torrentid))
+            return False
+        else:
+            logger.debug('Deluge: Removing torrent %s' % str(torrentid))
+            post_data = json.dumps({"method": "core.remove_torrent",
+                                    "params": [
+                                        torrentid,
+                                        remove_data
+                                        ],
+                                    "id": 25})
+            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
+                verify=deluge_verify_cert, headers=headers)
+            result = json.loads(response.text)['result']
+
+            return result
     except Exception as e:
         logger.error('Deluge: Removing torrent failed: %s' % str(e))
         formatted_lines = traceback.format_exc().splitlines()
