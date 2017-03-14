@@ -353,11 +353,11 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     elif Kind == "cue_split":
         new_folder = os.path.split(albumpath)[0]
 
-        # Need to update the downloaded track list with the new location.
-        # Could probably just throw in the "headphones-modified" folder,
-        # but this is good to make sure we're not counting files that may have failed to move
+    # Need to update the downloaded track list with the new location.
+    # Could probably just throw in the "headphones-modified" folder,
+    # but this is good to make sure we're not counting files that may have failed to move
+    if new_folder:
         downloaded_track_list = []
-
         for r, d, f in os.walk(albumpath):
             for files in f:
                 if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
