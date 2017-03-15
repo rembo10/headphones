@@ -128,27 +128,30 @@ def getartwork(artwork_path):
 
         # Check image and size
         if artwork:
-            img_type, img_width, img_height = getImageInfo(artwork)
 
-            if not img_type or minwidth and img_width < minwidth:
-                logger.info("Artwork is not suitable or too small. Type: %s. Width: %s. Height: %s",
-                            img_type, img_width, img_height)
-                artwork = None
-            elif maxwidth and img_width > maxwidth:
-                useproxy = True
-            else:
-                # Get rest of artwork
-                for chunk in data:
-                    artwork += chunk
+
+            #TODO not working well
+            #img_type, img_width, img_height = getImageInfo(artwork)
+
+            #if not img_type or minwidth and img_width < minwidth:
+            #    logger.info("Artwork is not suitable or too small. Type: %s. Width: %s. Height: %s",
+            #                img_type, img_width, img_height)
+            #    artwork = None
+            #elif maxwidth and img_width > maxwidth:
+            #    useproxy = True
+            #else:
+            # Get rest of artwork
+            for chunk in data:
+                artwork += chunk
 
     # Downsize using proxy service to max width
-    if useproxy:
-        logger.info("Artwork is greater than the maximum width, downsizing using proxy service")
-        artwork_path = '{0}?{1}'.format('http://images.weserv.nl/', urlencode({
-            'url': artwork_path.replace('http://', ''),
-            'w': maxwidth,
-        }))
-        artwork = request.request_content(artwork_path, timeout=20)
+    # if useproxy:
+    #     logger.info("Artwork is greater than the maximum width, downsizing using proxy service")
+    #     artwork_path = '{0}?{1}'.format('http://images.weserv.nl/', urlencode({
+    #         'url': artwork_path.replace('http://', ''),
+    #         'w': maxwidth,
+    #     }))
+    #     artwork = request.request_content(artwork_path, timeout=20)
 
     return artwork
 
