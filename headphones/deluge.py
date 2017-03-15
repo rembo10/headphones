@@ -261,7 +261,11 @@ def removeTorrent(torrentid, remove_data=False):
         response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
             verify=deluge_verify_cert, headers=headers)
 
-        state = json.loads(response.text)['result']['state']
+        try:
+            state = json.loads(response.text)['result']['state']
+        except KeyError as e:
+            logger.debug('Deluge: "state" KeyError when trying to remove torrent %s' % str(torrentid))
+            return False
 
         not_finished = ["queued", "seeding", "downloading", "checking", "error"]
         result = False
