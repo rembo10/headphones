@@ -34,8 +34,8 @@ _CONFIG_DEFINITIONS = {
     'ADD_ALBUM_ART': (int, 'General', 0),
     'ADVANCEDENCODER': (str, 'General', ''),
     'ALBUM_ART_FORMAT': (str, 'General', 'folder'),
-    'ALBUM_ART_MIN_WIDTH': (int, 'General', 0),
-    'ALBUM_ART_MAX_WIDTH': (int, 'General', 0),
+    'ALBUM_ART_MIN_WIDTH': (str, 'General', ''),
+    'ALBUM_ART_MAX_WIDTH': (str, 'General', ''),
     # This is used in importer.py to determine how complete an album needs to
     # be - to be considered "downloaded". Percentage from 0-100
     'ALBUM_COMPLETION_PCT': (int, 'Advanced', 80),
