@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-
 # Copyright (C) 2006  Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
-# it under the terms of version 2 of the GNU General Public License as
-# published by the Free Software Foundation.
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
 
 """Easier access to ID3 tags.
 
@@ -16,7 +16,7 @@ import mutagen.id3
 
 from ._compat import iteritems, text_type, PY2
 from mutagen import Metadata
-from mutagen._util import DictMixin, dict_match
+from mutagen._util import DictMixin, dict_match, loadfile
 from mutagen.id3 import ID3, error, delete, ID3FileType
 
 
@@ -32,7 +32,9 @@ class EasyID3KeyError(KeyError, ValueError, error):
 
 
 class EasyID3(DictMixin, Metadata):
-    """A file with an ID3 tag.
+    """EasyID3(filething=None)
+
+    A file with an ID3 tag.
 
     Like Vorbis comments, EasyID3 keys are case-insensitive ASCII
     strings. Only a subset of ID3 frames are supported by default. Use
@@ -148,19 +150,14 @@ class EasyID3(DictMixin, Metadata):
             return list(id3[frameid])
 
         def setter(id3, key, value):
-            try:
-                frame = id3[frameid]
-            except KeyError:
-                enc = 0
-                # Store 8859-1 if we can, per MusicBrainz spec.
-                for v in value:
-                    if v and max(v) > u'\x7f':
-                        enc = 3
-                        break
+            enc = 0
+            # Store 8859-1 if we can, per MusicBrainz spec.
+            for v in value:
+                if v and max(v) > u'\x7f':
+                    enc = 3
+                    break
 
-                id3.add(mutagen.id3.TXXX(encoding=enc, text=value, desc=desc))
-            else:
-                frame.text = value
+            id3.add(mutagen.id3.TXXX(encoding=enc, text=value, desc=desc))
 
         def deleter(id3, key):
             del(id3[frameid])
@@ -175,10 +172,30 @@ class EasyID3(DictMixin, Metadata):
     load = property(lambda s: s.__id3.load,
                     lambda s, v: setattr(s.__id3, 'load', v))
 
-    def save(self, *args, **kwargs):
-        # ignore v2_version until we support 2.3 here
-        kwargs.pop("v2_version", None)
-        self.__id3.save(*args, **kwargs)
+    @loadfile(writable=True, create=True)
+    def save(self, filething, v1=1, v2_version=4, v23_sep='/', padding=None):
+        """save(filething=None, v1=1, v2_version=4, v23_sep='/', padding=None)
+
+        Save changes to a file.
+        See :meth:`mutagen.id3.ID3.save` for more info.
+        """
+
+        if v2_version == 3:
+            # EasyID3 only works with v2.4 frames, so update_to_v23() would
+            # break things. We have to save a shallow copy of all tags
+            # and restore it after saving. Due to CHAP/CTOC copying has
+            # to be done recursively implemented in ID3Tags.
+            backup = self.__id3._copy()
+            try:
+                self.__id3.update_to_v23()
+                self.__id3.save(
+                    filething, v1=v1, v2_version=v2_version, v23_sep=v23_sep,
+                    padding=padding)
+            finally:
+                self.__id3._restore(backup)
+        else:
+            self.__id3.save(filething, v1=v1, v2_version=v2_version,
+                            v23_sep=v23_sep, padding=padding)
 
     delete = property(lambda s: s.__id3.delete,
                       lambda s, v: setattr(s.__id3, 'delete', v))
@@ -190,30 +207,27 @@ class EasyID3(DictMixin, Metadata):
                     lambda s, fn: setattr(s.__id3, 'size', s))
 
     def __getitem__(self, key):
-        key = key.lower()
-        func = dict_match(self.Get, key, self.GetFallback)
+        func = dict_match(self.Get, key.lower(), self.GetFallback)
         if func is not None:
             return func(self.__id3, key)
         else:
             raise EasyID3KeyError("%r is not a valid key" % key)
 
     def __setitem__(self, key, value):
-        key = key.lower()
         if PY2:
             if isinstance(value, basestring):
                 value = [value]
         else:
             if isinstance(value, text_type):
                 value = [value]
-        func = dict_match(self.Set, key, self.SetFallback)
+        func = dict_match(self.Set, key.lower(), self.SetFallback)
         if func is not None:
             return func(self.__id3, key, value)
         else:
             raise EasyID3KeyError("%r is not a valid key" % key)
 
     def __delitem__(self, key):
-        key = key.lower()
-        func = dict_match(self.Delete, key, self.DeleteFallback)
+        func = dict_match(self.Delete, key.lower(), self.DeleteFallback)
         if func is not None:
             return func(self.__id3, key)
         else:
@@ -469,7 +483,7 @@ for frameid, key in iteritems({
     "TIT2": "title",
     "TIT3": "version",
     "TPE1": "artist",
-    "TPE2": "performer",
+    "TPE2": "albumartist",
     "TPE3": "conductor",
     "TPE4": "arranger",
     "TPOS": "discnumber",
@@ -518,6 +532,7 @@ for desc, key in iteritems({
     u"MusicBrainz Disc Id": "musicbrainz_discid",
     u"ASIN": "asin",
     u"ALBUMARTISTSORT": "albumartistsort",
+    u"PERFORMER": "performer",
     u"BARCODE": "barcode",
     u"CATALOGNUMBER": "catalognumber",
     u"MusicBrainz Release Track Id": "musicbrainz_releasetrackid",
@@ -530,5 +545,15 @@ for desc, key in iteritems({
 
 
 class EasyID3FileType(ID3FileType):
-    """Like ID3FileType, but uses EasyID3 for tags."""
+    """EasyID3FileType(filething=None)
+
+    Like ID3FileType, but uses EasyID3 for tags.
+
+    Arguments:
+        filething (filething)
+
+    Attributes:
+        tags (`EasyID3`)
+    """
+
     ID3 = EasyID3

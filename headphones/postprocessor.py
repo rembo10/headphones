@@ -936,11 +936,13 @@ def correctMetadata(albumid, release, downloaded_track_list):
             continue
 
         try:
-            cur_artist, cur_album, candidates, rec = autotag.tag_album(items,
-                                                                       search_artist=helpers.latinToAscii(
-                                                                           release['ArtistName']),
-                                                                       search_album=helpers.latinToAscii(
-                                                                           release['AlbumTitle']))
+            cur_artist, cur_album, prop = autotag.tag_album(items,
+                                                            search_artist=helpers.latinToAscii(
+                                                                release['ArtistName']),
+                                                            search_album=helpers.latinToAscii(
+                                                                release['AlbumTitle']))
+            candidates = prop.candidates
+            rec = prop.recommendation
         except Exception as e:
             logger.error('Error getting recommendation: %s. Not writing metadata', e)
             return False

@@ -6,6 +6,7 @@ import:
     copy: yes
     move: no
     link: no
+    hardlink: no
     delete: no
     resume: ask
     incremental: no
@@ -22,9 +23,13 @@ import:
     flat: no
     group_albums: no
     pretend: false
+    search_ids: []
+    duplicate_action: ask
 
 clutter: ["Thumbs.DB", ".DS_Store"]
-ignore: [".*", "*~", "System Volume Information"]
+ignore: [".*", "*~", "System Volume Information", "lost+found"]
+ignore_hidden: yes
+
 replace:
     '[\\/]': _
     '^\.': _
@@ -41,24 +46,35 @@ max_filename_length: 0
 plugins: []
 pluginpath: []
 threaded: yes
-color: yes
 timeout: 5.0
 per_disc_numbering: no
-verbose: no
-terminal_encoding: utf8
+verbose: 0
+terminal_encoding:
 original_date: no
 id3v23: no
+va_name: "Various Artists"
 
 ui:
     terminal_width: 80
     length_diff_thresh: 10.0
+    color: yes
+    colors:
+        text_success: green
+        text_warning: yellow
+        text_error: red
+        text_highlight: red
+        text_highlight_minor: lightgray
+        action_default: turquoise
+        action: blue
 
-list_format_item: $artist - $album - $title
-list_format_album: $albumartist - $album
+format_item: $artist - $album - $title
+format_album: $albumartist - $album
 time_format: '%Y-%m-%d %H:%M:%S'
+format_raw_length: no
 
 sort_album: albumartist+ album+
 sort_item: artist+ album+ disc+ track+
+sort_case_insensitive: yes
 
 paths:
     default: $albumartist/$album%aunique{}/$track $title
@@ -71,6 +87,7 @@ musicbrainz:
     host: musicbrainz.org
     ratelimit: 1
     ratelimit_interval: 1.0
+    searchlimit: 5
 
 match:
     strong_rec_thresh: 0.04

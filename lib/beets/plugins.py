@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 # This file is part of beets.
-# Copyright 2013, Adrian Sampson.
+# Copyright 2016, Adrian Sampson.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -14,15 +15,19 @@
 
 """Support for beets plugins."""
 
-import logging
-import traceback
+from __future__ import division, absolute_import, print_function
+
 import inspect
+import traceback
 import re
 from collections import defaultdict
+from functools import wraps
 
 
 import beets
+from beets import logging
 from beets import mediafile
+import six
 
 PLUGIN_NAMESPACE = 'beetsplug'
 
@@ -41,6 +46,23 @@ class PluginConflictException(Exception):
     """
 
 
+class PluginLogFilter(logging.Filter):
+    """A logging filter that identifies the plugin that emitted a log
+    message.
+    """
+    def __init__(self, plugin):
+        self.prefix = u'{0}: '.format(plugin.name)
+
+    def filter(self, record):
+        if hasattr(record.msg, 'msg') and isinstance(record.msg.msg,
+                                                     six.string_types):
+            # A _LogMessage from our hacked-up Logging replacement.
+            record.msg.msg = self.prefix + record.msg.msg
+        elif isinstance(record.msg, six.string_types):
+            record.msg = self.prefix + record.msg
+        return True
+
+
 # Managing the plugins themselves.
 
 class BeetsPlugin(object):
@@ -51,7 +73,6 @@ class BeetsPlugin(object):
     def __init__(self, name=None):
         """Perform one-time plugin setup.
         """
-        self.import_stages = []
         self.name = name or self.__module__.split('.')[-1]
         self.config = beets.config[self.name]
         if not self.template_funcs:
@@ -60,12 +81,58 @@ class BeetsPlugin(object):
             self.template_fields = {}
         if not self.album_template_fields:
             self.album_template_fields = {}
+        self.import_stages = []
+
+        self._log = log.getChild(self.name)
+        self._log.setLevel(logging.NOTSET)  # Use `beets` logger level.
+        if not any(isinstance(f, PluginLogFilter) for f in self._log.filters):
+            self._log.addFilter(PluginLogFilter(self))
 
     def commands(self):
         """Should return a list of beets.ui.Subcommand objects for
         commands that should be added to beets' CLI.
         """
         return ()
+
+    def get_import_stages(self):
+        """Return a list of functions that should be called as importer
+        pipelines stages.
+
+        The callables are wrapped versions of the functions in
+        `self.import_stages`. Wrapping provides some bookkeeping for the
+        plugin: specifically, the logging level is adjusted to WARNING.
+        """
+        return [self._set_log_level_and_params(logging.WARNING, import_stage)
+                for import_stage in self.import_stages]
+
+    def _set_log_level_and_params(self, base_log_level, func):
+        """Wrap `func` to temporarily set this plugin's logger level to
+        `base_log_level` + config options (and restore it to its previous
+        value after the function returns). Also determines which params may not
+        be sent for backwards-compatibility.
+        """
+        argspec = inspect.getargspec(func)
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            assert self._log.level == logging.NOTSET
+            verbosity = beets.config['verbose'].get(int)
+            log_level = max(logging.DEBUG, base_log_level - 10 * verbosity)
+            self._log.setLevel(log_level)
+            try:
+                try:
+                    return func(*args, **kwargs)
+                except TypeError as exc:
+                    if exc.args[0].startswith(func.__name__):
+                        # caused by 'func' and not stuff internal to 'func'
+                        kwargs = dict((arg, val) for arg, val in kwargs.items()
+                                      if arg in argspec.args)
+                        return func(*args, **kwargs)
+                    else:
+                        raise
+            finally:
+                self._log.setLevel(logging.NOTSET)
+        return wrapper
 
     def queries(self):
         """Should return a dict mapping prefixes to Query subclasses.
@@ -123,37 +190,21 @@ class BeetsPlugin(object):
         mediafile.MediaFile.add_field(name, descriptor)
         library.Item._media_fields.add(name)
 
+    _raw_listeners = None
     listeners = None
 
-    @classmethod
-    def register_listener(cls, event, func):
-        """Add a function as a listener for the specified event. (An
-        imperative alternative to the @listen decorator.)
+    def register_listener(self, event, func):
+        """Add a function as a listener for the specified event.
         """
-        if cls.listeners is None:
+        wrapped_func = self._set_log_level_and_params(logging.WARNING, func)
+
+        cls = self.__class__
+        if cls.listeners is None or cls._raw_listeners is None:
+            cls._raw_listeners = defaultdict(list)
             cls.listeners = defaultdict(list)
-        cls.listeners[event].append(func)
-
-    @classmethod
-    def listen(cls, event):
-        """Decorator that adds a function as an event handler for the
-        specified event (as a string). The parameters passed to function
-        will vary depending on what event occurred.
-
-        The function should respond to named parameters.
-        function(**kwargs) will trap all arguments in a dictionary.
-        Example:
-
-            >>> @MyPlugin.listen("imported")
-            >>> def importListener(**kwargs):
-            ...     pass
-        """
-        def helper(func):
-            if cls.listeners is None:
-                cls.listeners = defaultdict(list)
-            cls.listeners[event].append(func)
-            return func
-        return helper
+        if func not in cls._raw_listeners[event]:
+            cls._raw_listeners[event].append(func)
+            cls.listeners[event].append(wrapped_func)
 
     template_funcs = None
     template_fields = None
@@ -197,14 +248,14 @@ def load_plugins(names=()):
     BeetsPlugin subclasses desired.
     """
     for name in names:
-        modname = '%s.%s' % (PLUGIN_NAMESPACE, name)
+        modname = '{0}.{1}'.format(PLUGIN_NAMESPACE, name)
         try:
             try:
                 namespace = __import__(modname, None, None)
             except ImportError as exc:
                 # Again, this is hacky:
                 if exc.args[0].endswith(' ' + name):
-                    log.warn(u'** plugin {0} not found'.format(name))
+                    log.warning(u'** plugin {0} not found', name)
                 else:
                     raise
             else:
@@ -214,8 +265,11 @@ def load_plugins(names=()):
                         _classes.add(obj)
 
         except:
-            log.warn(u'** error loading plugin {0}'.format(name))
-            log.warn(traceback.format_exc())
+            log.warning(
+                u'** error loading plugin {}:\n{}',
+                name,
+                traceback.format_exc(),
+            )
 
 
 _instances = {}
@@ -267,8 +321,8 @@ def types(model_cls):
             if field in types and plugin_types[field] != types[field]:
                 raise PluginConflictException(
                     u'Plugin {0} defines flexible field {1} '
-                    'which has already been defined with '
-                    'another type.'.format(plugin.name, field)
+                    u'which has already been defined with '
+                    u'another type.'.format(plugin.name, field)
                 )
         types.update(plugin_types)
     return types
@@ -297,41 +351,35 @@ def album_distance(items, album_info, mapping):
 def candidates(items, artist, album, va_likely):
     """Gets MusicBrainz candidates for an album from each plugin.
     """
-    out = []
     for plugin in find_plugins():
-        out.extend(plugin.candidates(items, artist, album, va_likely))
-    return out
+        for candidate in plugin.candidates(items, artist, album, va_likely):
+            yield candidate
 
 
 def item_candidates(item, artist, title):
     """Gets MusicBrainz candidates for an item from the plugins.
     """
-    out = []
     for plugin in find_plugins():
-        out.extend(plugin.item_candidates(item, artist, title))
-    return out
+        for item_candidate in plugin.item_candidates(item, artist, title):
+            yield item_candidate
 
 
 def album_for_id(album_id):
     """Get AlbumInfo objects for a given ID string.
     """
-    out = []
     for plugin in find_plugins():
-        res = plugin.album_for_id(album_id)
-        if res:
-            out.append(res)
-    return out
+        album = plugin.album_for_id(album_id)
+        if album:
+            yield album
 
 
 def track_for_id(track_id):
     """Get TrackInfo objects for a given ID string.
     """
-    out = []
     for plugin in find_plugins():
-        res = plugin.track_for_id(track_id)
-        if res:
-            out.append(res)
-    return out
+        track = plugin.track_for_id(track_id)
+        if track:
+            yield track
 
 
 def template_funcs():
@@ -349,8 +397,7 @@ def import_stages():
     """Get a list of import stage functions defined by plugins."""
     stages = []
     for plugin in find_plugins():
-        if hasattr(plugin, 'import_stages'):
-            stages += plugin.import_stages
+        stages += plugin.get_import_stages()
     return stages
 
 
@@ -392,18 +439,20 @@ def event_handlers():
 
 
 def send(event, **arguments):
-    """Sends an event to all assigned event listeners. Event is the
-    name of  the event to send, all other named arguments go to the
-    event handler(s).
+    """Send an event to all assigned event listeners.
 
-    Returns a list of return values from the handlers.
+    `event` is the name of  the event to send, all other named arguments
+    are passed along to the handlers.
+
+    Return a list of non-None values returned from the handlers.
     """
-    log.debug(u'Sending event: {0}'.format(event))
+    log.debug(u'Sending event: {0}', event)
+    results = []
     for handler in event_handlers()[event]:
-        # Don't break legacy plugins if we want to pass more arguments
-        argspec = inspect.getargspec(handler).args
-        args = dict((k, v) for k, v in arguments.items() if k in argspec)
-        handler(**args)
+        result = handler(**arguments)
+        if result is not None:
+            results.append(result)
+    return results
 
 
 def feat_tokens(for_artist=True):
@@ -433,3 +482,19 @@ def sanitize_choices(choices, choices_all):
             if not (s in seen or seen.add(s)):
                 res.extend(list(others) if s == '*' else [s])
     return res
+
+
+def notify_info_yielded(event):
+    """Makes a generator send the event 'event' every time it yields.
+    This decorator is supposed to decorate a generator, but any function
+    returning an iterable should work.
+    Each yielded value is passed to plugins using the 'info' parameter of
+    'send'.
+    """
+    def decorator(generator):
+        def decorated(*args, **kwargs):
+            for v in generator(*args, **kwargs):
+                send(event, info=v)
+                yield v
+        return decorated
+    return decorator
