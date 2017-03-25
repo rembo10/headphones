@@ -203,32 +203,18 @@ def getFolder(hash):
 
     qbclient = qbittorrentclient()
 
-    # Get Active Directory from settings
-    settings = qbclient._get_settings()
-    active_dir = settings['temp_path']
+    tries = 1
+    while tries <= 10:
+        status, torrentList = qbclient._get_list()
+        for torrent in torrentList:
+            if torrent['hash'].upper() == hash.upper():
+                if torrent['state'] == 'metaDL':
+                    tries += 1
+                    time.sleep(6)
+                else:
+                    return torrent['name']
 
-    if not active_dir:
-        logger.error('Could not get "Keep incomplete torrents in:" directory from QBitTorrent settings, please ensure it is set')
-        return None
-
-    # Get Torrent Folder Name
-    torrent_folder = qbclient.get_savepath(hash)
-
-    # If there's no folder yet then it's probably a magnet, try until folder is populated
-    if torrent_folder == active_dir or not torrent_folder:
-        tries = 1
-        while (torrent_folder == active_dir or torrent_folder is None) and tries <= 10:
-            tries += 1
-            time.sleep(6)
-            torrent_folder = qbclient.get_savepath(hash)
-
-    if torrent_folder == active_dir or not torrent_folder:
-        torrent_folder = qbclient.get_savepath(hash)
-        return torrent_folder
-    else:
-        if headphones.SYS_PLATFORM != "win32":
-            torrent_folder = torrent_folder.replace('\\', '/')
-        return os.path.basename(os.path.normpath(torrent_folder))
+    return None
 
 
 _BOUNDARY_CHARS = string.digits + string.ascii_letters
