@@ -152,7 +152,6 @@ def getartwork(artwork_path):
                     break
                 elif maxwidth and img_width > maxwidth:
                     # Downsize using proxy service to max width
-                    logger.info("Artwork is greater than the maximum width, downsizing using proxy service")
                     artwork_path = '{0}?{1}'.format('http://images.weserv.nl/', urlencode({
                         'url': artwork_path.replace('http://', ''),
                         'w': maxwidth,
@@ -163,6 +162,7 @@ def getartwork(artwork_path):
                         for chunk in r.iter_content(chunk_size=1024):
                             artwork += chunk
                         r.close()
+                        logger.info("Artwork is greater than the maximum width, downsized using proxy service")
                     break
         resp.close()
 

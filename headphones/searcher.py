@@ -1437,8 +1437,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
         query_items.extend(['format:(%s)' % format,
                             'size:[0 TO %d]' % maxsize])
-                            # (25/03/2017 Waffles back up after 5 months, all torrents have no seeders, remove for now)
-                            #'-seeders:0'])  # cut out dead torrents
+        # (25/03/2017 Waffles back up after 5 months, all torrents currently have no seeders, remove for now)
+        # '-seeders:0'])  cut out dead torrents
 
         if bitrate:
             query_items.append('bitrate:"%s"' % bitrate)

@@ -17,7 +17,6 @@ import urllib
 import urllib2
 import cookielib
 import json
-import os
 import time
 import mimetypes
 import random
