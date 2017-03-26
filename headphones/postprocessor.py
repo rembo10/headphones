@@ -375,7 +375,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                          downloaded_track.decode(headphones.SYS_ENCODING, "replace"))
             return
         except IOError:
-            logger.error("Unable to find media file: %s. Not continuing.")
+            logger.error("Unable to find media file: %s. Not continuing.", downloaded_track.decode(
+                headphones.SYS_ENCODING, "replace"))
             if new_folder:
                 shutil.rmtree(new_folder)
             return
