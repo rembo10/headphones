@@ -1,4 +1,4 @@
-##![Headphones Logo](https://github.com/rembo10/headphones/raw/master/data/images/headphoneslogo.png) Headphones
+## ![Headphones Logo](https://github.com/rembo10/headphones/raw/master/data/images/headphoneslogo.png) Headphones
 
 [![Build Status](https://travis-ci.org/rembo10/headphones.svg?branch=master)](https://travis-ci.org/rembo10/headphones)
 [![Build Status](https://img.shields.io/travis/rembo10/headphones/develop.svg?label=develop%20branch%20build)](https://travis-ci.org/rembo10/headphones)
