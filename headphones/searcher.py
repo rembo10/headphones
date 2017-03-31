@@ -47,9 +47,9 @@ TORRENT_TO_MAGNET_SERVICES = [
 
 # Persistent Apollo.rip API object
 apolloobj = None
-# Persistent PTH API object
 ruobj = None
-pthobj = None
+# Persistent RED API object
+redobj = None
 
 
 def fix_url(s, charset="utf-8"):
@@ -164,8 +164,8 @@ def get_seed_ratio(provider):
         seed_ratio = headphones.CONFIG.KAT_RATIO
     elif provider == 'Apollo.rip':
         seed_ratio = headphones.CONFIG.APOLLO_RATIO
-    elif provider == 'PassTheHeadphones.Me':
-        seed_ratio = headphones.CONFIG.PTH_RATIO
+    elif provider == 'Redacted':
+        seed_ratio = headphones.CONFIG.REDACTED_RATIO
     elif provider == 'The Pirate Bay':
         seed_ratio = headphones.CONFIG.PIRATEBAY_RATIO
     elif provider == 'Old Pirate Bay':
@@ -277,7 +277,7 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
                          headphones.CONFIG.WAFFLES or
                          headphones.CONFIG.RUTRACKER or
                          headphones.CONFIG.APOLLO or
-                         headphones.CONFIG.PTH or
+                         headphones.CONFIG.REDACTED or
                          headphones.CONFIG.STRIKE or
                          headphones.CONFIG.TQUATTRECENTONZE)
 
@@ -1206,7 +1206,7 @@ def verifyresult(title, artistterm, term, lossless):
 def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                   choose_specific_download=False):
     global apolloobj  # persistent apollo.rip api object to reduce number of login attempts
-    global pthobj  # persistent pth api object to reduce number of login attempts
+    global redobj  # persistent redacted api object to reduce number of login attempts
     global ruobj  # and rutracker
 
     reldate = album['ReleaseDate']
@@ -1613,10 +1613,10 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                                    provider,
                                    'torrent', True))
 
-    # PassTheHeadphones.me - Using same logic as What.CD as it's also Gazelle, so should really make this into something reusable
-    if headphones.CONFIG.PTH:
-        provider = "PassTheHeadphones.me"
-        providerurl = "https://passtheheadphones.me/"
+    # Redacted - Using same logic as What.CD as it's also Gazelle, so should really make this into something reusable
+    if headphones.CONFIG.REDACTED:
+        provider = "Redacted"
+        providerurl = "https://redacted.ch"
 
         bitrate = None
         bitrate_string = bitrate
@@ -1639,7 +1639,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                         bitrate_string = encoding_string
                 if bitrate_string not in gazelleencoding.ALL_ENCODINGS:
                     logger.info(
-                        u"Your preferred bitrate is not one of the available PTH filters, so not using it as a search parameter.")
+                        u"Your preferred bitrate is not one of the available RED filters, so not using it as a search parameter.")
             maxsize = 10000000000
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:  # Highest quality including lossless
             search_formats = [gazelleformat.FLAC, gazelleformat.MP3]
@@ -1648,28 +1648,28 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             search_formats = [gazelleformat.MP3]
             maxsize = 300000000
 
-        if not pthobj or not pthobj.logged_in():
+        if not redobj or not redobj.logged_in():
             try:
-                logger.info(u"Attempting to log in to PassTheHeadphones.me...")
-                pthobj = gazelleapi.GazelleAPI(headphones.CONFIG.PTH_USERNAME,
-                                                headphones.CONFIG.PTH_PASSWORD,
-                                                headphones.CONFIG.PTH_URL)
-                pthobj._login()
+                logger.info(u"Attempting to log in to Redacted...")
+                redobj = gazelleapi.GazelleAPI(headphones.CONFIG.REDACTED_USERNAME,
+                                                headphones.CONFIG.REDACTED_PASSWORD,
+                                                providerurl)
+                redobj._login()
             except Exception as e:
-                pthobj = None
-                logger.error(u"PassTheHeadphones credentials incorrect or site is down. Error: %s %s" % (
+                redobj = None
+                logger.error(u"Redacted credentials incorrect or site is down. Error: %s %s" % (
                     e.__class__.__name__, str(e)))
 
-        if pthobj and pthobj.logged_in():
+        if redobj and redobj.logged_in():
             logger.info(u"Searching %s..." % provider)
             all_torrents = []
             for search_format in search_formats:
                 if usersearchterm:
                     all_torrents.extend(
-                        pthobj.search_torrents(searchstr=usersearchterm, format=search_format,
+                        redobj.search_torrents(searchstr=usersearchterm, format=search_format,
                                                 encoding=bitrate_string)['results'])
                 else:
-                    all_torrents.extend(pthobj.search_torrents(artistname=semi_clean_artist_term,
+                    all_torrents.extend(redobj.search_torrents(artistname=semi_clean_artist_term,
                                                                 groupname=semi_clean_album_term,
                                                                 format=search_format,
                                                                 encoding=bitrate_string)['results'])
@@ -1709,7 +1709,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                     torrent.group.update_group_data()  # will load the file_path for the individual torrents
                 resultlist.append((torrent.file_path,
                                    torrent.size,
-                                   pthobj.generate_torrent_link(torrent.id),
+                                   redobj.generate_torrent_link(torrent.id),
                                    provider,
                                    'torrent', True))
 
@@ -2056,7 +2056,7 @@ def preprocess(resultlist):
                 headers['User-Agent'] = USER_AGENT
             elif result[3] == 'Apollo.rip':
                 headers['User-Agent'] = 'Headphones'
-            elif result[3] == 'PassTheHeadphones.me':
+            elif result[3] == 'Redacted':
                 headers['User-Agent'] = 'Headphones'
             elif result[3] == "The Pirate Bay" or result[3] == "Old Pirate Bay":
                 headers[
