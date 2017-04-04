@@ -43,6 +43,8 @@ def checkFolder():
 
         for album in snatched:
             if album['FolderName']:
+                folder_name = album['FolderName']
+                single = False
                 if album['Kind'] == 'nzb':
                     download_dir = headphones.CONFIG.DOWNLOAD_DIR
                 else:
@@ -51,21 +53,29 @@ def checkFolder():
                     else:
                         download_dir = headphones.CONFIG.DOWNLOAD_TORRENT_DIR
 
-                album_path = os.path.join(download_dir, album['FolderName']).encode(
-                    headphones.SYS_ENCODING, 'replace')
-                logger.debug("Checking if %s exists" % album_path)
+                    # Qbittorrent - get folder from torrent hash
+                    if album['TorrentHash']:
+                        if headphones.CONFIG.TORRENT_DOWNLOADER == 4:
+                            folder_name, single = qbittorrent.getFolder(album['TorrentHash'])
+                            if not folder_name:
+                                logger.debug("Could not get folder name from torrent hash for " + album['Title'])
 
-                if os.path.exists(album_path):
-                    logger.info('Found "' + album['FolderName'] + '" in ' + album[
-                        'Kind'] + ' download folder. Verifying....')
-                    verify(album['AlbumID'], album_path, album['Kind'])
+                if folder_name:
+                    album_path = os.path.join(download_dir, folder_name).encode(
+                        headphones.SYS_ENCODING, 'replace')
+                    logger.debug("Checking if %s exists" % album_path)
+
+                    if os.path.exists(album_path):
+                        logger.info('Found "' + folder_name + '" in ' + album[
+                            'Kind'] + ' download folder. Verifying....')
+                        verify(album['AlbumID'], album_path, album['Kind'],single=single)
             else:
                 logger.info("No folder name found for " + album['Title'])
 
     logger.debug("Checking download folder finished.")
 
 
-def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=False):
+def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=False, single=False):
     myDB = db.DBConnection()
     release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
     tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
@@ -206,6 +216,10 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
                                                                        'replace') + " isn't complete yet. Will try again on the next run")
                 return
 
+    # Force single file through
+    if single and not downloaded_track_list:
+        downloaded_track_list.append(albumpath)
+
     # Check to see if we're preserving the torrent dir
     if (headphones.CONFIG.KEEP_TORRENT_FILES and Kind == "torrent") or headphones.CONFIG.KEEP_ORIGINAL_FOLDER:
         keep_original_folder = True
@@ -263,7 +277,7 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
 
         if metaartist == dbartist and metaalbum == dbalbum:
             doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind,
-                             keep_original_folder, forced)
+                             keep_original_folder, forced, single)
             return
 
     # test #2: filenames
@@ -282,7 +296,7 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
 
             if dbtrack in filetrack:
                 doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind,
-                                 keep_original_folder, forced)
+                                 keep_original_folder, forced, single)
                 return
 
     # test #3: number of songs and duration
@@ -315,7 +329,7 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
             delta = abs(downloaded_track_duration - db_track_duration)
             if delta < 240:
                 doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind,
-                                 keep_original_folder, forced)
+                                 keep_original_folder, forced, single)
                 return
 
     logger.warn(u'Could not identify album: %s. It may not be the intended album.',
@@ -337,13 +351,13 @@ def markAsUnprocessed(albumid, albumpath, keep_original_folder=False):
 
 
 def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind=None,
-                     keep_original_folder=False, forced=False):
+                     keep_original_folder=False, forced=False, single=False):
     logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
     new_folder = None
 
     # Preserve the torrent dir
-    if keep_original_folder:
-        temp_path = helpers.preserve_torrent_directory(albumpath, forced)
+    if keep_original_folder or single:
+        temp_path = helpers.preserve_torrent_directory(albumpath, forced, single)
         if not temp_path:
             markAsUnprocessed(albumid, albumpath, keep_original_folder)
             return
@@ -467,7 +481,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
             'SELECT * from snatched WHERE Status="Seed_Snatched" and AlbumID=?',
             [albumid]).fetchone()
         if seed_snatched:
-            hash = seed_snatched['FolderName']
+            hash = seed_snatched['TorrentHash']
             torrent_removed = False
             logger.info(u'%s - %s. Checking if torrent has finished seeding and can be removed' % (
                 release['ArtistName'], release['AlbumTitle']))

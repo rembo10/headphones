@@ -1018,36 +1018,37 @@ def send_to_downloader(data, bestqual, album):
 
             # Add torrent
             if bestqual[3] == 'rutracker.org':
-                qbittorrent.addFile(data)
+                ruobj.qbittorrent_add_file(data)
             else:
                 qbittorrent.addTorrent(bestqual[2])
 
             # Get hash
             torrentid = calculate_torrent_hash(bestqual[2], data)
+            torrentid = torrentid.lower()
             if not torrentid:
                 logger.error('Torrent id could not be determined')
                 return
 
-            # Get folder
-            folder_name = qbittorrent.getFolder(torrentid)
+            # Get name
+            folder_name = qbittorrent.getName(torrentid)
             if folder_name:
-                logger.info('Torrent folder name: %s' % folder_name)
+                logger.info('Torrent name: %s' % folder_name)
             else:
-                logger.error('Torrent folder name could not be determined')
+                logger.error('Torrent name could not be determined')
                 return
 
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [album['AlbumID']])
-    myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)',
+    myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?, ?)',
                 [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], "Snatched", folder_name,
-                 kind])
+                 kind, torrentid])
 
     # Store the torrent id so we can check later if it's finished seeding and can be removed
     if seed_ratio is not None and seed_ratio != 0 and torrentid:
         myDB.action(
-            'INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)',
-            [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], "Seed_Snatched", torrentid,
-             kind])
+            'INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?, ?)',
+            [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], "Seed_Snatched", folder_name,
+             kind, torrentid])
 
     # notify
     artist = album[1]

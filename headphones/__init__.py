@@ -306,9 +306,10 @@ def initialize_scheduler():
                          minutes=minutes)
 
         # Remove Torrent + data if Post Processed and finished Seeding
-        minutes = CONFIG.TORRENT_REMOVAL_INTERVAL
-        schedule_job(torrentfinished.checkTorrentFinished, 'Torrent removal check', hours=0,
-                     minutes=minutes)
+        if headphones.CONFIG.TORRENT_DOWNLOADER != 0:
+            minutes = CONFIG.TORRENT_REMOVAL_INTERVAL
+            schedule_job(torrentfinished.checkTorrentFinished, 'Torrent removal check', hours=0,
+                         minutes=minutes)
 
         # Start scheduler
         if start_jobs and len(SCHED.get_jobs()):
@@ -376,7 +377,7 @@ def dbcheck():
     c.execute(
         'CREATE TABLE IF NOT EXISTS alltracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT, Format TEXT, ReleaseID TEXT)')
     c.execute(
-        'CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT, FolderName TEXT, Kind TEXT)')
+        'CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT, FolderName TEXT, Kind TEXT, TorrentHash TEXT)')
     # Matched is a temporary value used to see if there was a match found in
     # alltracks
     c.execute(
@@ -612,6 +613,12 @@ def dbcheck():
         c.execute('SELECT MetaCritic from artists')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE artists ADD COLUMN MetaCritic TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT TorrentHash from snatched')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE snatched ADD COLUMN TorrentHash TEXT')
+        c.execute('UPDATE snatched SET TorrentHash = FolderName WHERE Status LIKE "Seed_%"')
 
     conn.commit()
     c.close()

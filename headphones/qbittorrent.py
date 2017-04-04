@@ -21,6 +21,7 @@ import time
 import mimetypes
 import random
 import string
+import os
 
 import headphones
 
@@ -197,23 +198,45 @@ def addFile(data):
     return qbclient._command('command/upload', filelist=files)
 
 
-def getFolder(hash):
-    logger.debug('getFolder(%s)' % hash)
+def getName(hash):
+    logger.debug('getName(%s)' % hash)
 
     qbclient = qbittorrentclient()
 
     tries = 1
-    while tries <= 10:
-        status, torrentList = qbclient._get_list()
-        for torrent in torrentList:
-            if torrent['hash'].upper() == hash.upper():
-                if torrent['state'] == 'metaDL':
-                    tries += 1
-                    time.sleep(6)
-                else:
-                    return torrent['name']
+    while tries <= 5:
+        status, torrentlist = qbclient._get_list()
+        for torrent in torrentlist:
+            if torrent['hash'].lower() == hash.lower():
+                return torrent['name']
+        tries += 1
+        time.sleep(1)
 
     return None
+
+
+def getFolder(hash):
+    logger.debug('getFolder(%s)' % hash)
+
+    torrent_folder = None
+    single_file = False
+
+    qbclient = qbittorrentclient()
+
+    try:
+        status, torrent_files = qbclient.getfiles(hash.lower())
+        if torrent_files:
+            if len(torrent_files) == 1:
+                torrent_folder = torrent_files[0]['name']
+                single_file = True
+            else:
+                torrent_folder = os.path.split(torrent_files[0]['name'])[0]
+                single_file = False
+    except:
+        torrent_folder = None
+        single_file = False
+
+    return torrent_folder, single_file
 
 
 _BOUNDARY_CHARS = string.digits + string.ascii_letters

@@ -623,7 +623,7 @@ def get_downloaded_track_list(albumpath):
     return downloaded_track_list
 
 
-def preserve_torrent_directory(albumpath, forced=False):
+def preserve_torrent_directory(albumpath, forced=False, single=False):
     """
     Copy torrent directory to temp headphones_ directory to keep files for seeding.
     """
@@ -639,7 +639,11 @@ def preserve_torrent_directory(albumpath, forced=False):
             headphones.SYS_ENCODING, 'replace'))
 
     try:
-        prefix = "headphones_" + os.path.basename(os.path.normpath(albumpath)) + "_"
+        file_name = os.path.basename(os.path.normpath(albumpath))
+        if not single:
+            prefix = "headphones_" + file_name + "_"
+        else:
+            prefix = "headphones_" + os.path.splitext(file_name)[0] + "_"
         new_folder = tempfile.mkdtemp(prefix=prefix, dir=tempdir)
     except Exception as e:
         logger.error("Cannot create temp directory: " + tempdir.decode(
@@ -665,7 +669,11 @@ def preserve_torrent_directory(albumpath, forced=False):
     try:
         subdir = os.path.join(new_folder, "headphones")
         logger.info("Copying files to " + subdir.decode(headphones.SYS_ENCODING, 'replace'))
-        shutil.copytree(albumpath, subdir)
+        if not single:
+            shutil.copytree(albumpath, subdir)
+        else:
+            os.makedirs(subdir)
+            shutil.copy(albumpath, subdir)
         # Update the album path with the new location
         return subdir
     except Exception as e:
