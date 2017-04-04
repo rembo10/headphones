@@ -6,7 +6,7 @@ from urlparse import urlparse
 import re
 
 import requests as requests
-#from requests.auth import HTTPDigestAuth
+# from requests.auth import HTTPDigestAuth
 from bs4 import BeautifulSoup
 
 import headphones
@@ -230,11 +230,15 @@ class Rutracker(object):
             host = host[:-4]
         base_url = host
 
-        #self.session.auth = HTTPDigestAuth(headphones.CONFIG.QBITTORRENT_USERNAME, headphones.CONFIG.QBITTORRENT_PASSWORD)
+        # self.session.auth = HTTPDigestAuth(headphones.CONFIG.QBITTORRENT_USERNAME, headphones.CONFIG.QBITTORRENT_PASSWORD)
 
         url = base_url + '/login'
-        r = self.session.post(url, data={'username': headphones.CONFIG.QBITTORRENT_USERNAME,
+        try:
+            self.session.post(url, data={'username': headphones.CONFIG.QBITTORRENT_USERNAME,
                                          'password': headphones.CONFIG.QBITTORRENT_PASSWORD})
+        except Exception as e:
+            logger.exception('Error adding file to qbittorrent %s', e)
+            return
 
         url = base_url + '/command/upload'
 

@@ -132,8 +132,12 @@ def get_image_data(bites):
 
 def getartwork(artwork_path):
     artwork = bytes()
-    minwidth = int(headphones.CONFIG.ALBUM_ART_MIN_WIDTH)
-    maxwidth = int(headphones.CONFIG.ALBUM_ART_MAX_WIDTH)
+    minwidth = 0
+    maxwidth = 0
+    if headphones.CONFIG.ALBUM_ART_MIN_WIDTH:
+        minwidth = int(headphones.CONFIG.ALBUM_ART_MIN_WIDTH)
+    if headphones.CONFIG.ALBUM_ART_MAX_WIDTH:
+        maxwidth = int(headphones.CONFIG.ALBUM_ART_MAX_WIDTH)
 
     resp = request.request_response(artwork_path, timeout=20, stream=True, whitelist_status_code=404)
 
