@@ -218,7 +218,6 @@ class Rutracker(object):
         except Exception as e:
             logger.exception('Error adding file to utorrent %s', e)
 
-
     # TODO get this working in qbittorrent.py
     def qbittorrent_add_file(self, data):
         host = headphones.CONFIG.QBITTORRENT_HOST
