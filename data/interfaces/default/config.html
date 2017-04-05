@@ -678,24 +678,20 @@
 
                                 <fieldset>
                                     <div class="row checkbox left">
-                                        <input id="use_pth" type="checkbox" class="bigcheck" name="use_pth" value="1" ${config['use_pth']} /><label for="use_pth"><span class="option">PassTheHeadphones.me</span></label>
+                                        <input id="use_redacted" type="checkbox" class="bigcheck" name="use_redacted" value="1" ${config['use_redacted']} /><label for="use_redacted"><span class="option">Redacted</span></label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
                                             <label>Username</label>
-                                            <input type="text" name="pth_username" value="${config['pth_username']}" size="36">
+                                            <input type="text" name="redacted_username" value="${config['redacted_username']}" size="36">
                                         </div>
                                         <div class="row">
                                             <label>Password</label>
-                                            <input type="password" name="pth_password" value="${config['pth_password'] | h}" size="36">
-                                        </div>
-                                        <div class="row">
-                                            <label>URL</label>
-                                            <input type="text" name="pth_url" value="${config['pth_url']}" size="36">
+                                            <input type="password" name="redacted_password" value="${config['redacted_password'] | h}" size="36">
                                         </div>
                                         <div class="row">
                                             <label>Seed Ratio</label>
-                                            <input type="text" class="override-float" name="pth_ratio" value="${config['pth_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
+                                            <input type="text" class="override-float" name="redacted_ratio" value="${config['redacted_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
                                         </div>
                                     </div>
                                 </fieldset>
@@ -951,28 +947,40 @@
                                 </div>
                                 <div class="row checkbox left clearfix nopad">
                                     <label>
+                                        Embed lyrics
+                                        <input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}>
+                                    </label>
+                                </div>
+
+
+                                <div class="row checkbox left clearfix nopad">
+                                    <label>
+                                        Embed album art in each file
+                                        <input type="checkbox" name="embed_album_art" id="embed_album_art" value="1" ${config['embed_album_art']}>
+                                    </label>
+                                </div>
+
+                                <div class="row checkbox left clearfix nopad">
+                                    <label>
                                         Add album art jpeg to album folder
                                         <input type="checkbox" name="add_album_art" id="add_album_art" value="1" ${config['add_album_art']}>
                                     </label>
                                 </div>
+
                                 <div id="album_art_options" style="padding-left: 20px">
                                     <div class="row">
                                         as <input type="text" class="override-float" name="album_art_format" value="${config['album_art_format']}" size="10">.jpg
                                     </div>
                                     <small>Use $Artist/$artist, $Album/$album, $Year/$year, put optional variables in curly braces, use single-quote marks to escape curly braces literally ('{', '}').</small>
                                 </div>
-                                <div class="row checkbox left clearfix nopad">
-                                    <label>
-                                        Embed album art in each file
-                                        <input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}>
-                                    </label>
+
+                                <div id="album_art_size_options" style="padding-left: 20px">
+                                    <div class="row">
+                                        Album art min width <input type="text" class="override-float" name="album_art_min_width" value="${config['album_art_min_width']}" size="4" title="Only images with a pixel width greater or equal are considered as valid album art candidates. Default: 0.">\
+                                        Album art max width <input type="text" class="override-float" name="album_art_max_width" value="${config['album_art_max_width']}" size="4" title="A maximum image width to downscale fetched images if they are too big.">
+                                    </div>
                                 </div>
-                                <div class="row checkbox left clearfix nopad">
-                                    <label>
-                                        Embed lyrics
-                                        <input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}>
-                                    </label>
-                                </div>
+
                                 <div class="row">
                                     <label>
                                         Destination Directory:
@@ -1903,9 +1911,36 @@
                         }
                 });
 
+                if ($("#embed_album_art").is(":checked"))
+                        {
+                            $("#album_art_size_options").show();
+                        }
+                        else
+                        {
+                            if (!$("#add_album_art").is(":checked"))
+                            {
+                                $("#album_art_size_options").hide();
+                              }
+                        }
+
+                $("#embed_album_art").click(function(){
+                        if ($("#embed_album_art").is(":checked"))
+                        {
+                            $("#album_art_size_options").slideDown();
+                        }
+                        else
+                        {
+                            if (!$("#add_album_art").is(":checked"))
+                            {
+                                $("#album_art_size_options").slideUp();
+                            }
+                        }
+                });
+
                 if ($("#add_album_art").is(":checked"))
                         {
                             $("#album_art_options").show();
+                            $("#album_art_size_options").show();
                         }
                 else
                         {
@@ -1916,10 +1951,15 @@
                         if ($("#add_album_art").is(":checked"))
                         {
                             $("#album_art_options").slideDown();
+                            $("#album_art_size_options").slideDown();
                         }
                         else
                         {
                             $("#album_art_options").slideUp();
+                            if (!$("#embed_album_art").is(":checked"))
+                            {
+                                $("#album_art_size_options").slideUp();
+                            }
                         }
                 });
 
@@ -2361,7 +2401,7 @@
                         }
                 if ($("#torrent_downloader_deluge").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#transmission_options,#utorrent_options,#qbittorent_options").hide();
+                            $("#torrent_blackhole_options,#transmission_options,#utorrent_options,#qbittorrent_options").hide();
                             $("#deluge_options").show();
                         }
 
@@ -2514,7 +2554,7 @@
                 initConfigCheckbox("#use_waffles");
                 initConfigCheckbox("#use_rutracker");
                 initConfigCheckbox("#use_apollo");
-                initConfigCheckbox("#use_pth");
+                initConfigCheckbox("#use_redacted");
                 initConfigCheckbox("#use_strike");
                 initConfigCheckbox("#api_enabled");
                 initConfigCheckbox("#enable_https");

@@ -28,7 +28,7 @@ from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 from beetsplug import lyrics as beetslyrics
 from headphones import notifiers, utorrent, transmission, deluge, qbittorrent
 from headphones import db, albumart, librarysync
-from headphones import logger, helpers, request, mb, music_encoder
+from headphones import logger, helpers, mb, music_encoder
 from headphones import metadata
 
 postprocessor_lock = threading.Lock()
@@ -43,6 +43,8 @@ def checkFolder():
 
         for album in snatched:
             if album['FolderName']:
+                folder_name = album['FolderName']
+                single = False
                 if album['Kind'] == 'nzb':
                     download_dir = headphones.CONFIG.DOWNLOAD_DIR
                 else:
@@ -51,21 +53,29 @@ def checkFolder():
                     else:
                         download_dir = headphones.CONFIG.DOWNLOAD_TORRENT_DIR
 
-                album_path = os.path.join(download_dir, album['FolderName']).encode(
-                    headphones.SYS_ENCODING, 'replace')
-                logger.debug("Checking if %s exists" % album_path)
+                    # Qbittorrent - get folder from torrent hash
+                    if album['TorrentHash']:
+                        if headphones.CONFIG.TORRENT_DOWNLOADER == 4:
+                            torrent_folder_name, single = qbittorrent.getFolder(album['TorrentHash'])
+                            if torrent_folder_name:
+                                folder_name = torrent_folder_name
 
-                if os.path.exists(album_path):
-                    logger.info('Found "' + album['FolderName'] + '" in ' + album[
-                        'Kind'] + ' download folder. Verifying....')
-                    verify(album['AlbumID'], album_path, album['Kind'])
+                if folder_name:
+                    album_path = os.path.join(download_dir, folder_name).encode(
+                        headphones.SYS_ENCODING, 'replace')
+                    logger.debug("Checking if %s exists" % album_path)
+
+                    if os.path.exists(album_path):
+                        logger.info('Found "' + folder_name + '" in ' + album[
+                            'Kind'] + ' download folder. Verifying....')
+                        verify(album['AlbumID'], album_path, album['Kind'], single=single)
             else:
                 logger.info("No folder name found for " + album['Title'])
 
     logger.debug("Checking download folder finished.")
 
 
-def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=False):
+def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=False, single=False):
     myDB = db.DBConnection()
     release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
     tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])
@@ -206,6 +216,10 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
                                                                        'replace') + " isn't complete yet. Will try again on the next run")
                 return
 
+    # Force single file through
+    if single and not downloaded_track_list:
+        downloaded_track_list.append(albumpath)
+
     # Check to see if we're preserving the torrent dir
     if (headphones.CONFIG.KEEP_TORRENT_FILES and Kind == "torrent") or headphones.CONFIG.KEEP_ORIGINAL_FOLDER:
         keep_original_folder = True
@@ -263,7 +277,7 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
 
         if metaartist == dbartist and metaalbum == dbalbum:
             doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind,
-                             keep_original_folder, forced)
+                             keep_original_folder, forced, single)
             return
 
     # test #2: filenames
@@ -282,7 +296,7 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
 
             if dbtrack in filetrack:
                 doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind,
-                                 keep_original_folder, forced)
+                                 keep_original_folder, forced, single)
                 return
 
     # test #3: number of songs and duration
@@ -315,7 +329,7 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
             delta = abs(downloaded_track_duration - db_track_duration)
             if delta < 240:
                 doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind,
-                                 keep_original_folder, forced)
+                                 keep_original_folder, forced, single)
                 return
 
     logger.warn(u'Could not identify album: %s. It may not be the intended album.',
@@ -337,13 +351,13 @@ def markAsUnprocessed(albumid, albumpath, keep_original_folder=False):
 
 
 def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list, Kind=None,
-                     keep_original_folder=False, forced=False):
+                     keep_original_folder=False, forced=False, single=False):
     logger.info('Starting post-processing for: %s - %s' % (release['ArtistName'], release['AlbumTitle']))
     new_folder = None
 
     # Preserve the torrent dir
-    if keep_original_folder:
-        temp_path = helpers.preserve_torrent_directory(albumpath, forced)
+    if keep_original_folder or single:
+        temp_path = helpers.preserve_torrent_directory(albumpath, forced, single)
         if not temp_path:
             markAsUnprocessed(albumid, albumpath, keep_original_folder)
             return
@@ -375,7 +389,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                          downloaded_track.decode(headphones.SYS_ENCODING, "replace"))
             return
         except IOError:
-            logger.error("Unable to find media file: %s. Not continuing.")
+            logger.error("Unable to find media file: %s. Not continuing.", downloaded_track.decode(
+                headphones.SYS_ENCODING, "replace"))
             if new_folder:
                 shutil.rmtree(new_folder)
             return
@@ -410,21 +425,13 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                 shutil.rmtree(new_folder)
             return
 
+    # get artwork and path
+    album_art_path = None
     artwork = None
-    album_art_path = albumart.getAlbumArt(albumid)
-    if headphones.CONFIG.EMBED_ALBUM_ART or headphones.CONFIG.ADD_ALBUM_ART:
-
-        if album_art_path:
-            artwork = request.request_content(album_art_path)
-        else:
-            artwork = None
-
-        if not album_art_path or not artwork or len(artwork) < 100:
-            logger.info("No suitable album art found from Amazon. Checking Last.FM....")
-            artwork = albumart.getCachedArt(albumid)
-            if not artwork or len(artwork) < 100:
-                artwork = False
-                logger.info("No suitable album art found from Last.FM. Not adding album art")
+    if headphones.CONFIG.EMBED_ALBUM_ART or headphones.CONFIG.ADD_ALBUM_ART or \
+            (headphones.CONFIG.PLEX_ENABLED and headphones.CONFIG.PLEX_NOTIFY) or \
+            (headphones.CONFIG.XBMC_ENABLED and headphones.CONFIG.XBMC_NOTIFY):
+        album_art_path, artwork = albumart.getAlbumArt(albumid)
 
     if headphones.CONFIG.EMBED_ALBUM_ART and artwork:
         embedAlbumArt(artwork, downloaded_track_list)
@@ -474,7 +481,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
             'SELECT * from snatched WHERE Status="Seed_Snatched" and AlbumID=?',
             [albumid]).fetchone()
         if seed_snatched:
-            hash = seed_snatched['FolderName']
+            hash = seed_snatched['TorrentHash']
             torrent_removed = False
             logger.info(u'%s - %s. Checking if torrent has finished seeding and can be removed' % (
                 release['ArtistName'], release['AlbumTitle']))
@@ -944,11 +951,13 @@ def correctMetadata(albumid, release, downloaded_track_list):
             continue
 
         try:
-            cur_artist, cur_album, candidates, rec = autotag.tag_album(items,
-                                                                       search_artist=helpers.latinToAscii(
-                                                                           release['ArtistName']),
-                                                                       search_album=helpers.latinToAscii(
-                                                                           release['AlbumTitle']))
+            cur_artist, cur_album, prop = autotag.tag_album(items,
+                                                            search_artist=helpers.latinToAscii(
+                                                                release['ArtistName']),
+                                                            search_album=helpers.latinToAscii(
+                                                                release['AlbumTitle']))
+            candidates = prop.candidates
+            rec = prop.recommendation
         except Exception as e:
             logger.error('Error getting recommendation: %s. Not writing metadata', e)
             return False

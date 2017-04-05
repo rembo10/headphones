@@ -17,11 +17,11 @@ import urllib
 import urllib2
 import cookielib
 import json
-import os
 import time
 import mimetypes
 import random
 import string
+import os
 
 import headphones
 
@@ -198,37 +198,45 @@ def addFile(data):
     return qbclient._command('command/upload', filelist=files)
 
 
-def getFolder(hash):
-    logger.debug('getFolder(%s)' % hash)
+def getName(hash):
+    logger.debug('getName(%s)' % hash)
 
     qbclient = qbittorrentclient()
 
-    # Get Active Directory from settings
-    settings = qbclient._get_settings()
-    active_dir = settings['temp_path']
+    tries = 1
+    while tries <= 6:
+        time.sleep(10)
+        status, torrentlist = qbclient._get_list()
+        for torrent in torrentlist:
+            if torrent['hash'].lower() == hash.lower():
+                return torrent['name']
+        tries += 1
 
-    if not active_dir:
-        logger.error('Could not get "Keep incomplete torrents in:" directory from QBitTorrent settings, please ensure it is set')
-        return None
+    return None
 
-    # Get Torrent Folder Name
-    torrent_folder = qbclient.get_savepath(hash)
 
-    # If there's no folder yet then it's probably a magnet, try until folder is populated
-    if torrent_folder == active_dir or not torrent_folder:
-        tries = 1
-        while (torrent_folder == active_dir or torrent_folder is None) and tries <= 10:
-            tries += 1
-            time.sleep(6)
-            torrent_folder = qbclient.get_savepath(hash)
+def getFolder(hash):
+    logger.debug('getFolder(%s)' % hash)
 
-    if torrent_folder == active_dir or not torrent_folder:
-        torrent_folder = qbclient.get_savepath(hash)
-        return torrent_folder
-    else:
-        if headphones.SYS_PLATFORM != "win32":
-            torrent_folder = torrent_folder.replace('\\', '/')
-        return os.path.basename(os.path.normpath(torrent_folder))
+    torrent_folder = None
+    single_file = False
+
+    qbclient = qbittorrentclient()
+
+    try:
+        status, torrent_files = qbclient.getfiles(hash.lower())
+        if torrent_files:
+            if len(torrent_files) == 1:
+                torrent_folder = torrent_files[0]['name']
+                single_file = True
+            else:
+                torrent_folder = os.path.split(torrent_files[0]['name'])[0]
+                single_file = False
+    except:
+        torrent_folder = None
+        single_file = False
+
+    return torrent_folder, single_file
 
 
 _BOUNDARY_CHARS = string.digits + string.ascii_letters

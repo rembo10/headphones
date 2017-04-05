@@ -13,16 +13,164 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from headphones import request, db, logger
+import struct
+from six.moves.urllib.parse import urlencode
+from io import BytesIO
+
+import headphones
+from headphones import db, request, logger
 
 
 def getAlbumArt(albumid):
-    myDB = db.DBConnection()
-    asin = myDB.action(
-        'SELECT AlbumASIN from albums WHERE AlbumID=?', [albumid]).fetchone()[0]
 
-    if asin:
-        return 'http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg' % asin
+    artwork_path = None
+    artwork = None
+
+    # CAA
+    logger.info("Searching for artwork at CAA")
+    artwork_path = 'http://coverartarchive.org/release-group/%s/front' % albumid
+    artwork = getartwork(artwork_path)
+    if artwork:
+        logger.info("Artwork found at CAA")
+        return artwork_path, artwork
+
+    # Amazon
+    logger.info("Searching for artwork at Amazon")
+    myDB = db.DBConnection()
+    dbalbum = myDB.action(
+        'SELECT ArtistName, AlbumTitle, ReleaseID, AlbumASIN FROM albums WHERE AlbumID=?',
+        [albumid]).fetchone()
+    if dbalbum['AlbumASIN']:
+        artwork_path = 'http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg' % dbalbum['AlbumASIN']
+        artwork = getartwork(artwork_path)
+        if artwork:
+            logger.info("Artwork found at Amazon")
+            return artwork_path, artwork
+
+    # last.fm
+    from headphones import lastfm
+    logger.info("Searching for artwork at last.fm")
+    if dbalbum['ReleaseID'] != albumid:
+        data = lastfm.request_lastfm("album.getinfo", mbid=dbalbum['ReleaseID'])
+        if not data:
+            data = lastfm.request_lastfm("album.getinfo", artist=dbalbum['ArtistName'],
+                                         album=dbalbum['AlbumTitle'])
+    else:
+        data = lastfm.request_lastfm("album.getinfo", artist=dbalbum['ArtistName'],
+                                     album=dbalbum['AlbumTitle'])
+
+    if data:
+        try:
+            images = data['album']['image']
+            for image in images:
+                if image['size'] == 'extralarge':
+                    artwork_path = image['#text']
+                elif image['size'] == 'mega':
+                    artwork_path = image['#text']
+                    break
+        except KeyError:
+            artwork_path = None
+
+        if artwork_path:
+            artwork = getartwork(artwork_path)
+            if artwork:
+                logger.info("Artwork found at last.fm")
+                return artwork_path, artwork
+
+    logger.info("No suitable album art found.")
+    return None, None
+
+
+def jpeg(bites):
+    fhandle = BytesIO(bites)
+    try:
+        fhandle.seek(0)
+        size = 2
+        ftype = 0
+        while not 0xc0 <= ftype <= 0xcf:
+            fhandle.seek(size, 1)
+            byte = fhandle.read(1)
+            while ord(byte) == 0xff:
+                byte = fhandle.read(1)
+            ftype = ord(byte)
+            size = struct.unpack('>H', fhandle.read(2))[0] - 2
+        fhandle.seek(1, 1)
+        height, width = struct.unpack('>HH', fhandle.read(4))
+        return width, height
+    except struct.error:
+        return None, None
+    except TypeError:
+        return None, None
+
+
+def png(bites):
+    try:
+        check = struct.unpack('>i', bites[4:8])[0]
+        if check != 0x0d0a1a0a:
+            return None, None
+        return struct.unpack('>ii', bites[16:24])
+    except struct.error:
+        return None, None
+
+
+def get_image_data(bites):
+    type = None
+    width = None
+    height = None
+    if len(bites) < 24:
+        return None, None, None
+
+    peek = bites[0:2]
+    if peek == b'\xff\xd8':
+        width, height = jpeg(bites)
+        type = 'jpg'
+    elif peek == b'\x89P':
+        width, height = png(bites)
+        type = 'png'
+    return type, width, height
+
+
+def getartwork(artwork_path):
+    artwork = bytes()
+    minwidth = 0
+    maxwidth = 0
+    if headphones.CONFIG.ALBUM_ART_MIN_WIDTH:
+        minwidth = int(headphones.CONFIG.ALBUM_ART_MIN_WIDTH)
+    if headphones.CONFIG.ALBUM_ART_MAX_WIDTH:
+        maxwidth = int(headphones.CONFIG.ALBUM_ART_MAX_WIDTH)
+
+    resp = request.request_response(artwork_path, timeout=20, stream=True, whitelist_status_code=404)
+
+    if resp:
+        img_width = None
+        for chunk in resp.iter_content(chunk_size=1024):
+            artwork += chunk
+            if not img_width and (minwidth or maxwidth):
+                img_type, img_width, img_height = get_image_data(artwork)
+            # Check min/max
+            if img_width and (minwidth or maxwidth):
+                if minwidth and img_width < minwidth:
+                    logger.info("Artwork is too small. Type: %s. Width: %s. Height: %s",
+                                img_type, img_width, img_height)
+                    artwork = None
+                    break
+                elif maxwidth and img_width > maxwidth:
+                    # Downsize using proxy service to max width
+                    artwork_path = '{0}?{1}'.format('http://images.weserv.nl/', urlencode({
+                        'url': artwork_path.replace('http://', ''),
+                        'w': maxwidth,
+                    }))
+                    artwork = bytes()
+                    r = request.request_response(artwork_path, timeout=20, stream=True, whitelist_status_code=404)
+                    if r:
+                        for chunk in r.iter_content(chunk_size=1024):
+                            artwork += chunk
+                        r.close()
+                        logger.info("Artwork is greater than the maximum width, downsized using proxy service")
+                    break
+        resp.close()
+
+    return artwork
 
 
 def getCachedArt(albumid):

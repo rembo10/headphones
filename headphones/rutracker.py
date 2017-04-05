@@ -6,6 +6,7 @@ from urlparse import urlparse
 import re
 
 import requests as requests
+# from requests.auth import HTTPDigestAuth
 from bs4 import BeautifulSoup
 
 import headphones
@@ -216,3 +217,37 @@ class Rutracker(object):
             self.session.post(url, params={'action': 'add-file'}, files=files)
         except Exception as e:
             logger.exception('Error adding file to utorrent %s', e)
+
+    # TODO get this working in qbittorrent.py
+    def qbittorrent_add_file(self, data):
+        host = headphones.CONFIG.QBITTORRENT_HOST
+        if not host.startswith('http'):
+            host = 'http://' + host
+        if host.endswith('/'):
+            host = host[:-1]
+        if host.endswith('/gui'):
+            host = host[:-4]
+        base_url = host
+
+        # self.session.auth = HTTPDigestAuth(headphones.CONFIG.QBITTORRENT_USERNAME, headphones.CONFIG.QBITTORRENT_PASSWORD)
+
+        url = base_url + '/login'
+        try:
+            self.session.post(url, data={'username': headphones.CONFIG.QBITTORRENT_USERNAME,
+                                         'password': headphones.CONFIG.QBITTORRENT_PASSWORD})
+        except Exception as e:
+            logger.exception('Error adding file to qbittorrent %s', e)
+            return
+
+        url = base_url + '/command/upload'
+
+        args = {'savepath': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}
+        if headphones.CONFIG.QBITTORRENT_LABEL:
+            args['category'] = headphones.CONFIG.QBITTORRENT_LABEL
+
+        torrent_files = {'torrents': data}
+
+        try:
+            self.session.post(url, data=args, files=torrent_files)
+        except Exception as e:
+            logger.exception('Error adding file to qbittorrent %s', e)

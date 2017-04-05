@@ -11,6 +11,7 @@ import sys
 import json
 import time
 import requests as requests
+import headphones
 
 from .user import User
 from .artist import Artist
@@ -32,9 +33,7 @@ class GazelleAPI(object):
     default_headers = {
         'Connection': 'keep-alive',
         'Cache-Control': 'max-age=0',
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_3)'\
-                      'AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.79'\
-                      'Safari/535.11',
+        'User-Agent': 'Headphones/%s' % headphones.CURRENT_VERSION,
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9'\
                   ',*/*;q=0.8',
         'Accept-Encoding': 'gzip,deflate,sdch',
