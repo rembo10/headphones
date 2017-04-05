@@ -204,13 +204,13 @@ def getName(hash):
     qbclient = qbittorrentclient()
 
     tries = 1
-    while tries <= 5:
+    while tries <= 6:
+        time.sleep(10)
         status, torrentlist = qbclient._get_list()
         for torrent in torrentlist:
             if torrent['hash'].lower() == hash.lower():
                 return torrent['name']
         tries += 1
-        time.sleep(1)
 
     return None
 

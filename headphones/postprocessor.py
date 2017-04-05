@@ -56,9 +56,9 @@ def checkFolder():
                     # Qbittorrent - get folder from torrent hash
                     if album['TorrentHash']:
                         if headphones.CONFIG.TORRENT_DOWNLOADER == 4:
-                            folder_name, single = qbittorrent.getFolder(album['TorrentHash'])
-                            if not folder_name:
-                                logger.debug("Could not get folder name from torrent hash for " + album['Title'])
+                            torrent_folder_name, single = qbittorrent.getFolder(album['TorrentHash'])
+                            if torrent_folder_name:
+                                folder_name = torrent_folder_name
 
                 if folder_name:
                     album_path = os.path.join(download_dir, folder_name).encode(
