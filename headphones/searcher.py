@@ -1723,7 +1723,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
         if headphones.CONFIG.PIRATEBAY_PROXY_URL:
             providerurl = fix_url(set_proxy(headphones.CONFIG.PIRATEBAY_PROXY_URL))
         else:
-            providerurl = fix_url("https://thepiratebay.se")
+            providerurl = fix_url("https://thepiratebay.org")
 
         # Build URL
         providerurl = providerurl + "/search/" + tpb_term + "/0/7/"  # 7 is sort by seeders
@@ -1951,7 +1951,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
     if headphones.CONFIG.TQUATTRECENTONZE:
         username = headphones.CONFIG.TQUATTRECENTONZE_USER
         password = headphones.CONFIG.TQUATTRECENTONZE_PASSWORD
-        API_URL = "http://api.t411.li"
+        API_URL = "http://api.t411.ai"
         AUTH_URL = API_URL + '/auth'
         DL_URL = API_URL + '/torrents/download/'
         provider = "t411"
