@@ -928,11 +928,11 @@ def send_to_downloader(data, bestqual, album):
                 logger.error("Error sending torrent to Transmission. Are you sure it's running?")
                 return
 
-            folder_name = transmission.getTorrentFolder(torrentid)
+            folder_name = transmission.getName(torrentid)
             if folder_name:
-                logger.info('Torrent folder name: %s' % folder_name)
+                logger.info('Torrent name: %s' % folder_name)
             else:
-                logger.error('Torrent folder name could not be determined')
+                logger.error('Torrent name could not be determined')
                 return
 
             # Set Seed Ratio
