@@ -55,6 +55,7 @@ def checkFolder():
 
                     # Get folder from torrent hash
                     if album['TorrentHash'] and headphones.CONFIG.TORRENT_DOWNLOADER:
+                        torrent_folder_name = None
                         if headphones.CONFIG.TORRENT_DOWNLOADER == 1:
                             torrent_folder_name, single = transmission.getFolder(album['TorrentHash'])
                         elif headphones.CONFIG.TORRENT_DOWNLOADER == 4:
