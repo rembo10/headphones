@@ -36,6 +36,7 @@ import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
 from headphones import utorrent, transmission, notifiers, rutracker, deluge, qbittorrent
+from headphones import deezloader, aria2
 from bencode import bencode, bdecode
 
 # Magnet to torrent services, for Black hole. Stolen from CouchPotato.
@@ -51,6 +52,24 @@ ruobj = None
 # Persistent RED API object
 redobj = None
 
+# Persistent Aria2 RPC object
+__aria2rpc_obj = None
+
+def getAria2RPC():
+    global __aria2rpc_obj
+    if not __aria2rpc_obj:
+        __aria2rpc_obj = aria2.Aria2JsonRpc(
+            ID='headphones',
+            uri=headphones.CONFIG.ARIA_HOST,
+            token=headphones.CONFIG.ARIA_TOKEN if headphones.CONFIG.ARIA_TOKEN else None,
+            http_user=headphones.CONFIG.ARIA_USERNAME if headphones.CONFIG.ARIA_USERNAME else None,
+            http_passwd=headphones.CONFIG.ARIA_PASSWORD if headphones.CONFIG.ARIA_PASSWORD else None
+        )
+    return __aria2rpc_obj
+
+def reconfigure():
+    global __aria2rpc_obj
+    __aria2rpc_obj = None
 
 def fix_url(s, charset="utf-8"):
     """
@@ -281,32 +300,53 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
                          headphones.CONFIG.STRIKE or
                          headphones.CONFIG.TQUATTRECENTONZE)
 
-    results = []
+    DDL_PROVIDERS = (headphones.CONFIG.DEEZLOADER)
+
     myDB = db.DBConnection()
     albumlength = myDB.select('SELECT sum(TrackDuration) from tracks WHERE AlbumID=?',
                               [album['AlbumID']])[0][0]
 
+    nzb_results = None
+    torrent_results = None
+    ddl_results = None
+
     if headphones.CONFIG.PREFER_TORRENTS == 0 and not choose_specific_download:
 
         if NZB_PROVIDERS and NZB_DOWNLOADERS:
-            results = searchNZB(album, new, losslessOnly, albumlength)
+            nzb_results = searchNZB(album, new, losslessOnly, albumlength)
 
-        if not results and TORRENT_PROVIDERS:
-            results = searchTorrent(album, new, losslessOnly, albumlength)
+        if not nzb_results:
+            if DDL_PROVIDERS:
+                ddl_results = searchDdl(album, new, losslessOnly, albumlength)
+
+            if TORRENT_PROVIDERS:
+                torrent_results = searchTorrent(album, new, losslessOnly, albumlength)
 
     elif headphones.CONFIG.PREFER_TORRENTS == 1 and not choose_specific_download:
 
         if TORRENT_PROVIDERS:
-            results = searchTorrent(album, new, losslessOnly, albumlength)
+            torrent_results = searchTorrent(album, new, losslessOnly, albumlength)
 
-        if not results and NZB_PROVIDERS and NZB_DOWNLOADERS:
-            results = searchNZB(album, new, losslessOnly, albumlength)
+        if not torrent_results:
+            if DDL_PROVIDERS:
+                ddl_results = searchDdl(album, new, losslessOnly, albumlength)
+
+            if NZB_PROVIDERS and NZB_DOWNLOADERS:
+                nzb_results = searchNZB(album, new, losslessOnly, albumlength)
+
+    elif headphones.CONFIG.PREFER_TORRENTS == 3 and not choose_specific_download:
+
+        if DDL_PROVIDERS:
+            ddl_results = searchDdl(album, new, losslessOnly, albumlength)
+
+        if not ddl_results:
+            if TORRENT_PROVIDERS:
+                torrent_results = searchTorrent(album, new, losslessOnly, albumlength)
+
+            if NZB_PROVIDERS and NZB_DOWNLOADERS:
+                nzb_results = searchNZB(album, new, losslessOnly, albumlength)
 
     else:
-
-        nzb_results = None
-        torrent_results = None
-
         if NZB_PROVIDERS and NZB_DOWNLOADERS:
             nzb_results = searchNZB(album, new, losslessOnly, albumlength, choose_specific_download)
 
@@ -314,13 +354,19 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
             torrent_results = searchTorrent(album, new, losslessOnly, albumlength,
                                             choose_specific_download)
 
-        if not nzb_results:
-            nzb_results = []
+        if DDL_PROVIDERS:
+            ddl_results = searchDdl(album, new, losslessOnly, albumlength, choose_specific_download)
 
-        if not torrent_results:
-            torrent_results = []
+    if not nzb_results:
+        nzb_results = []
 
-        results = nzb_results + torrent_results
+    if not torrent_results:
+        torrent_results = []
+
+    if not ddl_results:
+        ddl_results = []
+
+    results = nzb_results + torrent_results + ddl_results
 
     if choose_specific_download:
         return results
@@ -826,6 +872,31 @@ def send_to_downloader(data, bestqual, album):
             except Exception as e:
                 logger.error('Couldn\'t write NZB file: %s', e)
                 return
+
+    elif kind == 'ddl':
+        folder_name = '%s - %s [%s]' % (
+            helpers.latinToAscii(album['ArtistName']).encode('UTF-8').replace('/', '_'),
+            helpers.latinToAscii(album['AlbumTitle']).encode('UTF-8').replace('/', '_'),
+            get_year_from_release_date(album['ReleaseDate']))
+
+        # Aria2 downloader
+        if headphones.CONFIG.DDL_DOWNLOADER == 0:
+            logger.info("Sending download to Aria2")
+
+            try:
+                deezer_album = deezloader.getAlbumByLink(bestqual[2])
+
+                for album_track in deezer_album['tracks']['data']:
+                    track = deezloader.getTrack(album_track['id'])
+                    if track:
+                        filename = track['SNG_ID'] + '.dzr'
+                        logger.debug(u'Sending song "%s" to Aria' % track['SNG_TITLE'])
+                        getAria2RPC().addUri([track['downloadUrl']], {'out': filename, 'auto-file-renaming': 'false', 'continue': 'true', 'dir': folder_name})
+
+            except Exception as e:
+                logger.error(u'Error sending torrent to Aria2. Are you sure it\'s running? (%s)' % e)
+                return
+                
     else:
         folder_name = '%s - %s [%s]' % (
             helpers.latinToAscii(album['ArtistName']).encode('UTF-8').replace('/', '_'),
@@ -1202,6 +1273,61 @@ def verifyresult(title, artistterm, term, lossless):
                     return False
 
     return True
+
+def searchDdl(album, new=False, losslessOnly=False, albumlength=None,
+                  choose_specific_download=False):
+    reldate = album['ReleaseDate']
+    year = get_year_from_release_date(reldate)
+
+    # MERGE THIS WITH THE TERM CLEANUP FROM searchNZB
+    dic = {'...': '', ' & ': ' ', ' = ': ' ', '?': '', '$': 's', ' + ': ' ', '"': '', ',': ' ',
+           '*': ''}
+
+    semi_cleanalbum = helpers.replace_all(album['AlbumTitle'], dic)
+    cleanalbum = helpers.latinToAscii(semi_cleanalbum)
+    semi_cleanartist = helpers.replace_all(album['ArtistName'], dic)
+    cleanartist = helpers.latinToAscii(semi_cleanartist)
+
+    # Use provided term if available, otherwise build our own (this code needs to be cleaned up since a lot
+    # of these torrent providers are just using cleanartist/cleanalbum terms
+    if album['SearchTerm']:
+        term = album['SearchTerm']
+    elif album['Type'] == 'part of':
+        term = cleanalbum + " " + year
+    else:
+        # FLAC usually doesn't have a year for some reason so I'll leave it out
+        # Various Artist albums might be listed as VA, so I'll leave that out too
+        # Only use the year if the term could return a bunch of different albums, i.e. self-titled albums
+        if album['ArtistName'] in album['AlbumTitle'] or len(album['ArtistName']) < 4 or len(
+                album['AlbumTitle']) < 4:
+            term = cleanartist + ' ' + cleanalbum + ' ' + year
+        elif album['ArtistName'] == 'Various Artists':
+            term = cleanalbum + ' ' + year
+        else:
+            term = cleanartist + ' ' + cleanalbum
+
+    # Replace bad characters in the term and unicode it
+    term = re.sub('[\.\-\/]', ' ', term).encode('utf-8')
+    artistterm = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8', 'replace')
+
+    logger.debug(u'Using search term: "%s"' % helpers.latinToAscii(term))
+
+    resultlist = []
+    
+    # Deezer only provides lossy
+    if headphones.CONFIG.DEEZLOADER and not losslessOnly:
+        resultlist += deezloader.searchAlbum(album['ArtistName'], album['AlbumTitle'], album['SearchTerm'], int(albumlength / 1000))
+
+    # attempt to verify that this isn't a substring result
+    # when looking for "Foo - Foo" we don't want "Foobar"
+    # this should be less of an issue when it isn't a self-titled album so we'll only check vs artist
+    results = [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
+
+    # Additional filtering for size etc
+    if results and not choose_specific_download:
+        results = more_filtering(results, album, albumlength, new)
+
+    return results
 
 
 def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
@@ -2036,7 +2162,10 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
 def preprocess(resultlist):
     for result in resultlist:
-        if result[4] == 'torrent':
+        if result[3] == deezloader.PROVIDER_NAME:
+            return True, result
+
+        elif result[4] == 'torrent':
 
             # rutracker always needs the torrent data
             if result[3] == 'rutracker.org':
