@@ -1587,7 +1587,7 @@ class WebInterface(object):
 
         # Reconfigure musicbrainz database connection with the new values
         mb.startmb()
-        
+
         # Reconfigure Aria2
         searcher.reconfigure()
 

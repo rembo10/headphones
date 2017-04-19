@@ -55,6 +55,7 @@ redobj = None
 # Persistent Aria2 RPC object
 __aria2rpc_obj = None
 
+
 def getAria2RPC():
     global __aria2rpc_obj
     if not __aria2rpc_obj:
@@ -67,9 +68,11 @@ def getAria2RPC():
         )
     return __aria2rpc_obj
 
+
 def reconfigure():
     global __aria2rpc_obj
     __aria2rpc_obj = None
+
 
 def fix_url(s, charset="utf-8"):
     """
@@ -896,7 +899,7 @@ def send_to_downloader(data, bestqual, album):
             except Exception as e:
                 logger.error(u'Error sending torrent to Aria2. Are you sure it\'s running? (%s)' % e)
                 return
-                
+
     else:
         folder_name = '%s - %s [%s]' % (
             helpers.latinToAscii(album['ArtistName']).encode('UTF-8').replace('/', '_'),
@@ -1274,6 +1277,7 @@ def verifyresult(title, artistterm, term, lossless):
 
     return True
 
+
 def searchDdl(album, new=False, losslessOnly=False, albumlength=None,
                   choose_specific_download=False):
     reldate = album['ReleaseDate']
@@ -1313,7 +1317,7 @@ def searchDdl(album, new=False, losslessOnly=False, albumlength=None,
     logger.debug(u'Using search term: "%s"' % helpers.latinToAscii(term))
 
     resultlist = []
-    
+
     # Deezer only provides lossy
     if headphones.CONFIG.DEEZLOADER and not losslessOnly:
         resultlist += deezloader.searchAlbum(album['ArtistName'], album['AlbumTitle'], album['SearchTerm'], int(albumlength / 1000))

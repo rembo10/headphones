@@ -261,7 +261,7 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
     if downloaded_deezer_list:
         logger.info('Decrypting deezer tracks')
         decrypted_deezer_list = deezloader.decryptTracks(downloaded_deezer_list)
-        
+
         # Check if album is complete based on album duration only
         # (total track numbers is not determinant enough due to hidden tracks for eg)
         db_track_duration = 0
@@ -271,7 +271,7 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
                 db_track_duration += track['TrackDuration'] / 1000
         except:
             downloaded_track_duration = False
-        
+
         try:
             for disk_number in decrypted_deezer_list[albumpath]:
                 for track in decrypted_deezer_list[albumpath][disk_number].values():
@@ -279,14 +279,14 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
                     downloaded_track_duration += int(track['DURATION'])
         except:
             downloaded_track_duration = False
-        
+
         if not downloaded_track_duration or not db_track_duration or abs(downloaded_track_duration - db_track_duration) > 240:
-            logger.info("Looks like " + 
+            logger.info("Looks like " +
                         os.path.basename(albumpath).decode(headphones.SYS_ENCODING, 'replace') +
                         " isn't complete yet (duration mismatch). Will try again on the next run")
             return
 
-        downloaded_track_list = list(set(downloaded_track_list)) # Remove duplicates
+        downloaded_track_list = list(set(downloaded_track_list))  # Remove duplicates
 
     # test #1: metadata - usually works
     logger.debug('Verifying metadata...')
