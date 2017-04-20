@@ -793,4 +793,3 @@ def getArtistForReleaseGroup(rgid):
         return False
     else:
         return releaseGroup['artist-credit'][0]['artist']['name']
-

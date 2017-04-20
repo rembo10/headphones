@@ -264,6 +264,7 @@ _XLATE_MUSICBRAINZ = {
     u"‐": "-",       # EN DASH (U+2013)
 }
 
+
 def _translate(s, dictionary):
     # type: (basestring,Mapping[basestring,basestring])->basestring
     return ''.join(dictionary.get(x, x) for x in s)
