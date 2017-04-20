@@ -257,6 +257,13 @@ _XLATE_SPECIAL = {
     u'&': ' and ',     # expand & to ' and '
 }
 
+_XLATE_MUSICBRAINZ = {
+    # Translation table for Musicbrainz.
+    u"…": '...',     # HORIZONTAL ELLIPSIS (U+2026)
+    u"’": "'",       # APOSTROPHE (U+0027)
+    u"‐": "-",       # EN DASH (U+2013)
+}
+
 
 def _translate(s, dictionary):
     # type: (basestring,Mapping[basestring,basestring])->basestring
@@ -323,6 +330,23 @@ def clean_name(s):
     u = u.strip()
     # 7. lowercase
     return u
+
+
+def clean_musicbrainz_name(s, return_as_string=True):
+    # type: (basestring)->unicode
+    """Substitute special Musicbrainz characters.
+    :param s: string to clean up, probably unicode.
+    :return: cleaned-up version of input string.
+    """
+    if not isinstance(s, unicode):
+        u = unicode(s, 'ascii', 'replace')
+    else:
+        u = s
+    u = _translate(u, _XLATE_MUSICBRAINZ)
+    if return_as_string:
+        return u.encode('utf-8')
+    else:
+        return u
 
 
 def cleanTitle(title):
