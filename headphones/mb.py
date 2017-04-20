@@ -770,3 +770,27 @@ def findAlbumID(artist=None, album=None):
         return False
     rgid = unicode(results[0]['id'])
     return rgid
+
+
+def getArtistForReleaseGroup(rgid):
+    """
+    Returns artist name for a release group
+    Used for series where we store the series instead of the artist
+    """
+    releaseGroup = None
+    try:
+        with mb_lock:
+            releaseGroup = musicbrainzngs.get_release_group_by_id(
+                rgid, ["artists"])
+            releaseGroup = releaseGroup['release-group']
+    except musicbrainzngs.WebServiceError as e:
+        logger.warn(
+            'Attempt to retrieve information from MusicBrainz for release group "%s" failed (%s)' % (
+                rgid, str(e)))
+        mb_lock.snooze(5)
+
+    if not releaseGroup:
+        return False
+    else:
+        return releaseGroup['artist-credit'][0]['artist']['name']
+
