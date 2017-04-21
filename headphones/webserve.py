@@ -1174,10 +1174,6 @@ class WebInterface(object):
             "utorrent_username": headphones.CONFIG.UTORRENT_USERNAME,
             "utorrent_password": headphones.CONFIG.UTORRENT_PASSWORD,
             "utorrent_label": headphones.CONFIG.UTORRENT_LABEL,
-            "aria_host": headphones.CONFIG.ARIA_HOST,
-            "aria_password": headphones.CONFIG.ARIA_PASSWORD,
-            "aria_token": headphones.CONFIG.ARIA_TOKEN,
-            "aria_username": headphones.CONFIG.ARIA_USERNAME,
             "nzb_downloader_sabnzbd": radio(headphones.CONFIG.NZB_DOWNLOADER, 0),
             "nzb_downloader_nzbget": radio(headphones.CONFIG.NZB_DOWNLOADER, 1),
             "nzb_downloader_blackhole": radio(headphones.CONFIG.NZB_DOWNLOADER, 2),
@@ -1186,7 +1182,6 @@ class WebInterface(object):
             "torrent_downloader_utorrent": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 2),
             "torrent_downloader_deluge": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 3),
             "torrent_downloader_qbittorrent": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 4),
-            "ddl_downloader_aria": radio(headphones.CONFIG.DDL_DOWNLOADER, 0),
             "download_dir": headphones.CONFIG.DOWNLOAD_DIR,
             "use_blackhole": checked(headphones.CONFIG.BLACKHOLE),
             "blackhole_dir": headphones.CONFIG.BLACKHOLE_DIR,
@@ -1248,8 +1243,6 @@ class WebInterface(object):
             "use_tquattrecentonze": checked(headphones.CONFIG.TQUATTRECENTONZE),
             "tquattrecentonze_user": headphones.CONFIG.TQUATTRECENTONZE_USER,
             "tquattrecentonze_password": headphones.CONFIG.TQUATTRECENTONZE_PASSWORD,
-            "download_ddl_dir": headphones.CONFIG.DOWNLOAD_DDL_DIR,
-            "use_deezloader": checked(headphones.CONFIG.DEEZLOADER),
             "pref_qual_0": radio(headphones.CONFIG.PREFERRED_QUALITY, 0),
             "pref_qual_1": radio(headphones.CONFIG.PREFERRED_QUALITY, 1),
             "pref_qual_2": radio(headphones.CONFIG.PREFERRED_QUALITY, 2),
@@ -1295,7 +1288,6 @@ class WebInterface(object):
             "prefer_torrents_0": radio(headphones.CONFIG.PREFER_TORRENTS, 0),
             "prefer_torrents_1": radio(headphones.CONFIG.PREFER_TORRENTS, 1),
             "prefer_torrents_2": radio(headphones.CONFIG.PREFER_TORRENTS, 2),
-            "prefer_torrents_3": radio(headphones.CONFIG.PREFER_TORRENTS, 3),
             "magnet_links_0": radio(headphones.CONFIG.MAGNET_LINKS, 0),
             "magnet_links_1": radio(headphones.CONFIG.MAGNET_LINKS, 1),
             "magnet_links_2": radio(headphones.CONFIG.MAGNET_LINKS, 2),
@@ -1454,7 +1446,7 @@ class WebInterface(object):
             "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer",
             "use_newznab", "newznab_enabled", "use_torznab", "torznab_enabled",
             "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay",
-            "use_mininova", "use_waffles", "use_rutracker", "use_deezloader",
+            "use_mininova", "use_waffles", "use_rutracker",
             "use_apollo", "use_redacted", "use_strike", "use_tquattrecentonze", "preferred_bitrate_allow_lossless",
             "detect_bitrate", "ignore_clean_releases", "freeze_db", "cue_split", "move_files",
             "rename_files", "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art",
@@ -1587,9 +1579,6 @@ class WebInterface(object):
 
         # Reconfigure musicbrainz database connection with the new values
         mb.startmb()
-
-        # Reconfigure Aria2
-        searcher.reconfigure()
 
         raise cherrypy.HTTPRedirect("config")
 
