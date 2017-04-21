@@ -304,6 +304,45 @@
                                     <input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5">
                                 </div>
                             </fieldset>
+
+                            <fieldset title="Method for downloading direct download files.">
+                                <legend>Direct Download</legend>
+                                <input type="radio" name="ddl_downloader" id="ddl_downloader_aria" value="0" ${config['ddl_downloader_aria']}> Aria2
+                           </fieldset>
+                           <fieldset id="ddl_aria_options">
+                                <div class="row">
+                                    <label title="Aria2 RPC host, port and path.">
+                                        Aria2 Host
+                                    </label>
+                                    <input type="text" name="aria_host" value="${config['aria_host']}" size="30">
+                                    <small>usually http://localhost:6800/jsonrpc</small>
+                                </div>
+                                <div class="row">
+                                    <label title="Aria2 RPC username. Leave empty if not applicable.">
+                                        Aria2 Username
+                                    </label>
+                                    <input type="text" name="aria_username" value="${config['aria_username']}" size="20">
+                                </div>
+                                <div class="row">
+                                    <label title="Aria2 RPC password. Leave empty if not applicable.">
+                                        Aria2 Password
+                                    </label>
+                                    <input type="password" name="aria_password" value="${config['aria_password'] | h}" size="20">
+                                </div>
+                                <div class="row">
+                                    <label title="Aria2 RPC secret key. Leave empty if not applicable.">
+                                        Aria2 secret token
+                                    </label>
+                                    <input type="text" name="aria_token" value="${config['aria_token']}" size="36">
+                                </div>
+                                <div class="row">
+                                    <label title="Path to folder where Headphones can find the downloads.">
+                                        Music Download Directory:
+                                    </label>
+                                    <input type="text" name="download_ddl_dir" value="${config['download_ddl_dir']}" size="50">
+                                    <small>Full path where ddl client downloads your music, e.g. /Users/name/Downloads/music</small>
+                                </div>
+                            </fieldset>
                         </td>
                         <td>
                             <fieldset title="Method for downloading torrent files.">
@@ -461,6 +500,7 @@
                                     <label>Prefer</label>
                                     <input type="radio" name="prefer_torrents" id="prefer_torrents_0" value="0" ${config['prefer_torrents_0']}>NZBs
                                     <input type="radio" name="prefer_torrents" id="prefer_torrents_1" value="1" ${config['prefer_torrents_1']}>Torrents
+                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_3" value="3" ${config['prefer_torrents_3']}>Direct Download
                                     <input type="radio" name="prefer_torrents" id="prefer_torrents_2" value="2" ${config['prefer_torrents_2']}>No Preference
                                 </div>
                             </fieldset>
@@ -572,6 +612,17 @@
                                         <input type="text" name="omgwtfnzbs_apikey" value="${config['omgwtfnzbs_apikey']}" size="30">
                                     </div>
                                 </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <legend>Direct Download</legend>
+
+                                <fieldset>
+                                    <div class="row checkbox left">
+                                        <input id="use_deezloader" type="checkbox" class="bigcheck" name="use_deezloader" value="1" ${config['use_deezloader']} /><label for="use_deezloader"><span class="option">DeezLoader</span></label>
+                                    </div>
+                                </fieldset>
+
                             </fieldset>
                         </td>
                         <td>
@@ -804,7 +855,6 @@
                                         </div>
                                     </div>
                                 </fieldset>
-
                             </fieldset>
                         </td>
                     </tr>
@@ -2405,6 +2455,11 @@
                             $("#deluge_options").show();
                         }
 
+                if ($("#ddl_downloader_aria").is(":checked"))
+                {
+                    $("#ddl_aria_options").show();
+                }
+
                 $('input[type=radio]').change(function(){
                         if ($("#preferred_bitrate").is(":checked"))
                         {
@@ -2457,6 +2512,9 @@
                         if ($("#torrent_downloader_deluge").is(":checked"))
                         {
                             $("#torrent_blackhole_options,#utorrent_options,#transmission_options,#qbittorrent_options").fadeOut("fast", function() { $("#deluge_options").fadeIn() });
+                        }
+                        if ($("#ddl_downloader_aria").is(":checked"))
+                        {
                         }
                 });
 
@@ -2560,6 +2618,7 @@
                 initConfigCheckbox("#enable_https");
                 initConfigCheckbox("#customauth");
                 initConfigCheckbox("#use_tquattrecentonze");
+                initConfigCheckbox("#use_deezloader");
 
 
                 $('#twitterStep1').click(function () {
