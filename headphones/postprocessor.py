@@ -955,10 +955,8 @@ def correctMetadata(albumid, release, downloaded_track_list):
 
         try:
             cur_artist, cur_album, prop = autotag.tag_album(items,
-                                                            search_artist=helpers.latinToAscii(
-                                                                release['ArtistName']),
-                                                            search_album=helpers.latinToAscii(
-                                                                release['AlbumTitle']))
+                                                            search_artist=release['ArtistName'],
+                                                            search_album=release['AlbumTitle'])
             candidates = prop.candidates
             rec = prop.recommendation
         except Exception as e:
