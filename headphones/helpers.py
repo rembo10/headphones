@@ -23,6 +23,10 @@ import sys
 import tempfile
 import glob
 
+from beets import logging as beetslogging
+import six
+from contextlib import contextmanager
+
 import fnmatch
 import re
 import os
@@ -975,3 +979,24 @@ def create_https_certificates(ssl_cert, ssl_key):
         return False
 
     return True
+
+
+class BeetsLogCapture(beetslogging.Handler):
+
+    def __init__(self):
+        beetslogging.Handler.__init__(self)
+        self.messages = []
+
+    def emit(self, record):
+        self.messages.append(six.text_type(record.msg))
+
+
+@contextmanager
+def capture_beets_log(logger='beets'):
+    capture = BeetsLogCapture()
+    log = beetslogging.getLogger(logger)
+    log.addHandler(capture)
+    try:
+        yield capture.messages
+    finally:
+        log.removeHandler(capture)

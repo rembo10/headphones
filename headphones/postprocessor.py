@@ -24,6 +24,7 @@ import beets
 import headphones
 from beets import autotag
 from beets import config as beetsconfig
+from beets import logging as beetslogging
 from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 from beetsplug import lyrics as beetslyrics
 from headphones import notifiers, utorrent, transmission, deluge, qbittorrent
@@ -954,11 +955,19 @@ def correctMetadata(albumid, release, downloaded_track_list):
             continue
 
         try:
-            cur_artist, cur_album, prop = autotag.tag_album(items,
-                                                            search_artist=release['ArtistName'],
-                                                            search_album=release['AlbumTitle'])
-            candidates = prop.candidates
-            rec = prop.recommendation
+            logger.debug('Getting recommendation from beets. Artist: %s. Album: %s. Tracks: %s', release['ArtistName'],
+                         release['AlbumTitle'], len(items))
+            beetslog = beetslogging.getLogger('beets')
+            beetslog.set_global_level(beetslogging.DEBUG)
+            with helpers.capture_beets_log() as logs:
+                cur_artist, cur_album, prop = autotag.tag_album(items,
+                                                                search_artist=release['ArtistName'],
+                                                                search_album=release['AlbumTitle'])
+                candidates = prop.candidates
+                rec = prop.recommendation
+                for log in logs:
+                    logger.debug('Beets: %s', log)
+            beetslog.set_global_level(beetslogging.NOTSET)
         except Exception as e:
             logger.error('Error getting recommendation: %s. Not writing metadata', e)
             return False
