@@ -958,7 +958,8 @@ def correctMetadata(albumid, release, downloaded_track_list):
             logger.debug('Getting recommendation from beets. Artist: %s. Album: %s. Tracks: %s', release['ArtistName'],
                          release['AlbumTitle'], len(items))
             beetslog = beetslogging.getLogger('beets')
-            beetslog.set_global_level(beetslogging.DEBUG)
+            beetslog.set_global_level(beetslogging.DEBUG) if headphones.VERBOSE else beetslog.set_global_level(
+                beetslogging.CRITICAL)
             with helpers.capture_beets_log() as logs:
                 cur_artist, cur_album, prop = autotag.tag_album(items,
                                                                 search_artist=release['ArtistName'],
