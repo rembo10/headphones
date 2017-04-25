@@ -871,11 +871,19 @@ class WebInterface(object):
     def musicScan(self, path, scan=0, redirect=None, autoadd=0, libraryscan=0):
         headphones.CONFIG.LIBRARYSCAN = libraryscan
         headphones.CONFIG.AUTO_ADD_ARTISTS = autoadd
-        headphones.CONFIG.MUSIC_DIR = path
-        headphones.CONFIG.write()
+
+        try:
+            params = {}
+            headphones.CONFIG.MUSIC_DIR = path
+            headphones.CONFIG.write()
+        except Exception as e:
+            logger.warn("Cannot save scan directory to config: %s", e)
+            if scan:
+                params = {"dir": path}
+
         if scan:
             try:
-                threading.Thread(target=librarysync.libraryScan).start()
+                threading.Thread(target=librarysync.libraryScan, kwargs=params).start()
             except Exception as e:
                 logger.error('Unable to complete the scan: %s' % e)
         if redirect:
