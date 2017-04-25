@@ -21,6 +21,7 @@
 import urllib
 
 from common import USER_AGENT
+from collections import OrderedDict
 
 
 class HeadphonesURLopener(urllib.FancyURLopener):
@@ -135,3 +136,33 @@ class Proper:
     def __str__(self):
         return str(self.date) + " " + self.name + " " + str(self.season) + "x" + str(
             self.episode) + " of " + str(self.tvdbid)
+
+
+class OptionalImport(object):
+    '''
+    Dummy class for optional import (imports needed for optional features).
+    '''
+    def __init__(self, name):
+        self.__name = name
+
+    def __getattr__(self, attr):
+        raise ImportError('The following package is required to use this feature: {0}'.format(self.__name))
+
+
+class CacheDict(OrderedDict):
+    '''
+    Ordered dictionary with fixed size, designed for caching.
+    '''
+    def __init__(self, *args, **kwds):
+        self.size_limit = kwds.pop("size_limit", None)
+        OrderedDict.__init__(self, *args, **kwds)
+        self._check_size_limit()
+
+    def __setitem__(self, key, value):
+        OrderedDict.__setitem__(self, key, value)
+        self._check_size_limit()
+
+    def _check_size_limit(self):
+        if self.size_limit is not None:
+            while len(self) > self.size_limit:
+                self.popitem(last=False)
