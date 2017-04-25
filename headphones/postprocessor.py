@@ -954,16 +954,24 @@ def correctMetadata(albumid, release, downloaded_track_list):
         if not items:
             continue
 
+        search_ids = []
+        logger.debug('Getting recommendation from beets. Artist: %s. Album: %s. Tracks: %s', release['ArtistName'],
+                     release['AlbumTitle'], len(items))
+
+        # Try with specific release, e.g. alternate release selected from albumPage
+        if release['ReleaseID'] != release['AlbumID']:
+            logger.debug('trying beets with specific Release ID: %s', release['ReleaseID'])
+            search_ids = [release['ReleaseID']]
+
         try:
-            logger.debug('Getting recommendation from beets. Artist: %s. Album: %s. Tracks: %s', release['ArtistName'],
-                         release['AlbumTitle'], len(items))
             beetslog = beetslogging.getLogger('beets')
             beetslog.set_global_level(beetslogging.DEBUG) if headphones.VERBOSE else beetslog.set_global_level(
                 beetslogging.CRITICAL)
             with helpers.capture_beets_log() as logs:
                 cur_artist, cur_album, prop = autotag.tag_album(items,
                                                                 search_artist=release['ArtistName'],
-                                                                search_album=release['AlbumTitle'])
+                                                                search_album=release['AlbumTitle'],
+                                                                search_ids=search_ids)
                 candidates = prop.candidates
                 rec = prop.recommendation
                 for log in logs:
