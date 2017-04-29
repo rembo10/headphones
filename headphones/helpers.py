@@ -333,6 +333,7 @@ def clean_name(s):
     # 6. trim
     u = u.strip()
     # 7. lowercase
+    u = u.lower()
     return u
 
 
