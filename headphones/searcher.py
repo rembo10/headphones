@@ -894,7 +894,10 @@ def send_to_downloader(data, bestqual, album):
                     if track:
                         filename = track['SNG_ID'] + '.dzr'
                         logger.debug(u'Sending song "%s" to Aria' % track['SNG_TITLE'])
-                        getAria2RPC().addUri([track['downloadUrl']], {'out': filename, 'auto-file-renaming': 'false', 'continue': 'true', 'dir': folder_name})
+                        getAria2RPC().addUri(
+                            [track['downloadUrl']],
+                            {'out': filename, 'auto-file-renaming': 'false', 'continue': 'true',
+                             'dir': os.path.join(headphones.CONFIG.DOWNLOAD_DDL_DIR, folder_name)})
 
             except Exception as e:
                 logger.error(u'Error sending torrent to Aria2. Are you sure it\'s running? (%s)' % e)
