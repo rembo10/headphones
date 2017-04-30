@@ -253,7 +253,7 @@ class WebInterface(object):
         for name in namecheck:
             artistname = name['ArtistName']
         try:
-		    logger.info(u"Deleting all traces of artist: " + artistname)
+            logger.info(u"Deleting all traces of artist: " + artistname)
         except TypeError:
             logger.info(u"Deleting all traces of artist: null")
         myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
