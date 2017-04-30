@@ -252,7 +252,10 @@ class WebInterface(object):
         namecheck = myDB.select('SELECT ArtistName from artists where ArtistID=?', [ArtistID])
         for name in namecheck:
             artistname = name['ArtistName']
-        logger.info(u"Deleting all traces of artist: " + artistname)
+        try:
+		    logger.info(u"Deleting all traces of artist: " + artistname)
+        except TypeError:
+            logger.info(u"Deleting all traces of artist: null")
         myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
 
         from headphones import cache
