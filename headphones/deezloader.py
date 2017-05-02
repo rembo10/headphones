@@ -350,7 +350,6 @@ def decryptTracks(paths):
                     decrypted_tracks[album_folder][disk_number] = {}
 
                 decrypted_tracks[album_folder][disk_number][track_number] = track
-                decrypted_tracks[album_folder][disk_number][track_number]['path'] = path
 
         except Exception as e:
             logger.error(u'Unable to load deezer track infos "%s": %s' % (path, e))
@@ -372,7 +371,7 @@ def decryptTracks(paths):
                     # Decrypt track if not already done
                     if not os.path.exists(dest):
                         try:
-                            __decryptDownload(track['path'], track['SNG_ID'], dest)
+                            __decryptDownload(path, sng_id, dest)
                             __tagTrack(dest, track)
                         except Exception as e:
                             logger.error(u'Unable to decrypt deezer track "%s": %s' % (path, e))
