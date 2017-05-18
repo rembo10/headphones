@@ -49,7 +49,10 @@ class Rutracker(object):
             # try again
             if not self.has_bb_session_cookie(r):
                 time.sleep(10)
-                r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False)
+                if headphones.CONFIG.RUTRACKER_COOKIE:
+                    r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False, cookies={'bb_session':headphones.CONFIG.RUTRACKER_COOKIE})
+                else:
+                    r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False)
             if self.has_bb_session_cookie(r):
                 self.loggedin = True
                 logger.info("Successfully logged in to rutracker")
