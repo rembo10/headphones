@@ -51,7 +51,7 @@ class Rutracker(object):
                 time.sleep(10)
                 if headphones.CONFIG.RUTRACKER_COOKIE:
                     logger.info("Attempting to log in using predefined cookie...")
-                    r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False, cookies={'bb_session':headphones.CONFIG.RUTRACKER_COOKIE})
+                    r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False, cookies={'bb_session': headphones.CONFIG.RUTRACKER_COOKIE})
                 else:
                     r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False)
             if self.has_bb_session_cookie(r):
