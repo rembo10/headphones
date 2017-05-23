@@ -1288,9 +1288,9 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
             categories = "3040"
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
-            categories = "3040,3010,3050"
+            categories = "3040,3010,3050,3000"
         else:
-            categories = "3010,3050"
+            categories = "3010,3050,3000"
 
         if album['Type'] == 'Other':
             categories = "3030"
