@@ -1240,6 +1240,7 @@ class WebInterface(object):
             "rutracker_user": headphones.CONFIG.RUTRACKER_USER,
             "rutracker_password": headphones.CONFIG.RUTRACKER_PASSWORD,
             "rutracker_ratio": headphones.CONFIG.RUTRACKER_RATIO,
+            "rutracker_cookie": headphones.CONFIG.RUTRACKER_COOKIE,
             "use_apollo": checked(headphones.CONFIG.APOLLO),
             "apollo_username": headphones.CONFIG.APOLLO_USERNAME,
             "apollo_password": headphones.CONFIG.APOLLO_PASSWORD,

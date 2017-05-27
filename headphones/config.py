@@ -248,6 +248,7 @@ _CONFIG_DEFINITIONS = {
     'RUTRACKER_PASSWORD': (str, 'Rutracker', ''),
     'RUTRACKER_RATIO': (str, 'Rutracker', ''),
     'RUTRACKER_USER': (str, 'Rutracker', ''),
+    'RUTRACKER_COOKIE': (str, 'Rutracker', ''),
     'SAB_APIKEY': (str, 'SABnzbd', ''),
     'SAB_CATEGORY': (str, 'SABnzbd', ''),
     'SAB_HOST': (str, 'SABnzbd', ''),
